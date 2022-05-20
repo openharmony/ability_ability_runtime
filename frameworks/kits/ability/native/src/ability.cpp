@@ -3721,7 +3721,10 @@ void Ability::OnChange(Rosen::DisplayId displayId)
     HILOG_INFO("changeKeyV size :%{public}u", size);
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
-        OnConfigurationUpdated(*configuration);
+        auto task = [ability = shared_from_this(), configuration = *configuration]() {
+            ability->OnConfigurationUpdated(configuration);
+        };
+        handler_->PostTask(task);
     }
 
     HILOG_INFO("%{public}s end", __func__);
@@ -3771,7 +3774,10 @@ void Ability::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
     HILOG_INFO("changeKeyV size :%{public}u", size);
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
-        OnConfigurationUpdated(*configuration);
+        auto task = [ability = shared_from_this(), configuration = *configuration]() {
+            ability->OnConfigurationUpdated(configuration);
+        };
+        handler_->PostTask(task);
     }
 }
 
