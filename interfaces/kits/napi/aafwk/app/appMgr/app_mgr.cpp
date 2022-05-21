@@ -123,7 +123,12 @@ napi_value NAPI_KillProcessesByBundleName(napi_env env, napi_callback_info info)
             (void *)async_callback_info,
             &async_callback_info->asyncWork);
 
-        NAPI_CALL(env, napi_queue_async_work(env, async_callback_info->asyncWork));
+        napi_queue_async_work(env, async_callback_info->asyncWork);
+        if (async_callback_info->asyncWork == nullptr) {
+            HILOG_DEBUG("%{public}s. asyncWork is nullptr, to delete async_callback_info.", __func__);
+            delete async_callback_info;
+            async_callback_info = nullptr;
+        }
         return NULL;
     } else {
         napi_value resourceName;
@@ -131,7 +136,12 @@ napi_value NAPI_KillProcessesByBundleName(napi_env env, napi_callback_info info)
 
         napi_deferred deferred;
         napi_value promise;
-        NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+        if (napi_create_promise(env, &deferred, &promise) != 0) {
+            delete async_callback_info;
+            async_callback_info = nullptr;
+            HILOG_DEBUG("%{public}s. Fialed to create promise.", __func__);
+            return nullptr;
+        }
         async_callback_info->deferred = deferred;
         async_callback_info->bundleName = bundleName;
 
@@ -159,6 +169,11 @@ napi_value NAPI_KillProcessesByBundleName(napi_env env, napi_callback_info info)
             (void *)async_callback_info,
             &async_callback_info->asyncWork);
         napi_queue_async_work(env, async_callback_info->asyncWork);
+        if (async_callback_info->asyncWork == nullptr) {
+            HILOG_DEBUG("%{public}s. asyncWork is nullptr, to delete async_callback_info.", __func__);
+            delete async_callback_info;
+            async_callback_info = nullptr;
+        }
         return promise;
     }
 }
