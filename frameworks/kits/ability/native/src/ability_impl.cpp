@@ -816,7 +816,7 @@ void AbilityImpl::WindowLifeCycleImpl::ForegroundFailed()
         return;
     }
 
-    HILOG_INFO("Stage mode ability, window after foreground failed, notify ability manager service.");
+    HILOG_INFO("The ability is stage mode, schedule foreground failed.");
     PacMap restoreData;
     AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
         AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_FAILED, restoreData);

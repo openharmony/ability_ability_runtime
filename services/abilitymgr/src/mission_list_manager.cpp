@@ -809,10 +809,10 @@ int MissionListManager::DispatchState(const std::shared_ptr<AbilityRecord> &abil
             return DispatchBackground(abilityRecord);
         }
         case AbilityState::FOREGROUND: {
-            return DispatchForegroundNew(abilityRecord, true);
+            return DispatchForeground(abilityRecord, true);
         }
         case AbilityState::FOREGROUND_FAILED: {
-            return DispatchForegroundNew(abilityRecord, false);
+            return DispatchForeground(abilityRecord, false);
         }
         default: {
             HILOG_WARN("Don't support transiting state: %{public}d", state);
@@ -821,14 +821,14 @@ int MissionListManager::DispatchState(const std::shared_ptr<AbilityRecord> &abil
     }
 }
 
-int MissionListManager::DispatchForegroundNew(const std::shared_ptr<AbilityRecord> &abilityRecord, bool success)
+int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> &abilityRecord, bool success)
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(handler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
-        HILOG_ERROR("DispatchForegroundNew Ability transition life state error. expect %{public}d, actual %{public}d",
+        HILOG_ERROR("DispatchForeground Ability transition life state error. expect %{public}d, actual %{public}d",
             AbilityState::FOREGROUNDING,
             abilityRecord->GetAbilityState());
         return ERR_INVALID_VALUE;
@@ -837,17 +837,17 @@ int MissionListManager::DispatchForegroundNew(const std::shared_ptr<AbilityRecor
     handler->RemoveEvent(AbilityManagerService::FOREGROUNDNEW_TIMEOUT_MSG, abilityRecord->GetEventId());
     auto self(shared_from_this());
     if (success) {
-        auto task = [self, abilityRecord]() { self->CompleteForegroundNew(abilityRecord); };
+        auto task = [self, abilityRecord]() { self->CompleteForegroundSuccess(abilityRecord); };
         handler->PostTask(task);
     } else {
-        auto task = [self, abilityRecord]() { self->HandleForegroundFailed(abilityRecord); };
+        auto task = [self, abilityRecord]() { self->CompleteForegroundFailed(abilityRecord); };
         handler->PostTask(task);
     }
 
     return ERR_OK;
 }
 
-void MissionListManager::CompleteForegroundNew(const std::shared_ptr<AbilityRecord> &abilityRecord)
+void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
@@ -1494,12 +1494,12 @@ void MissionListManager::HandleForgroundNewTimeout(const std::shared_ptr<Ability
     HandleTimeoutAndResumeAbility(ability);
 }
 
-void MissionListManager::HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &abilityRecord)
+void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    HILOG_DEBUG("HandleForegroundFailed come.");
+    HILOG_DEBUG("CompleteForegroundFailed come.");
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (abilityRecord == nullptr) {
-        HILOG_ERROR("HandleForegroundFailed, ability is nullptr.");
+        HILOG_ERROR("CompleteForegroundFailed, ability is nullptr.");
         return;
     }
 
