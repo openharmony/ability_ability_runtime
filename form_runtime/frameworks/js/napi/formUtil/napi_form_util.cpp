@@ -398,7 +398,7 @@ AsyncErrMsgCallbackInfo *InitErrMsg(napi_env env, int32_t code, int32_t type, na
  *
  * @return void
  */
-void ParseFormInfoIntoNapi(napi_env env, const OHOS::AppExecFwk::FormInfo &formInfo, napi_value &result)
+static void ParseFormInfoIntoNapi(napi_env env, const FormInfo &formInfo, napi_value &result)
 {
     // bundleName
     napi_value bundleName;
@@ -467,6 +467,25 @@ void ParseFormInfoIntoNapi(napi_env env, const OHOS::AppExecFwk::FormInfo &formI
     napi_create_int32(env, (int32_t)formInfo.updateEnabled, &updateEnabled);
     HILOG_DEBUG("%{public}s, updateEnabled=%{public}d.", __func__, formInfo.updateEnabled);
     napi_set_named_property(env, result, "updateEnabled", updateEnabled);
+
+    // isStatic
+    napi_value isStatic;
+    napi_get_boolean(env, formInfo.isStatic, &isStatic);
+    HILOG_DEBUG("%{public}s, isStatic=%{public}d.", __func__, formInfo.isStatic);
+    napi_set_named_property(env, result, "isStatic", isStatic);
+
+    // window
+    napi_value formWindowObject = nullptr;
+    napi_create_object(env, &formWindowObject);
+    napi_value autoDesignWidth;
+    napi_get_boolean(env, formInfo.window.autoDesignWidth, &autoDesignWidth);
+    HILOG_DEBUG("%{public}s, window.autoDesignWidth=%{public}d.", __func__, formInfo.window.autoDesignWidth);
+    napi_set_named_property(env, formWindowObject, "autoDesignWidth", autoDesignWidth);
+    napi_value designWidth;
+    napi_create_int32(env, formInfo.window.designWidth, &designWidth);
+    HILOG_DEBUG("%{public}s, window.designWidth=%{public}d.", __func__, formInfo.window.designWidth);
+    napi_set_named_property(env, formWindowObject, "designWidth", designWidth);
+    napi_set_named_property(env, result, "window", formWindowObject);
 
     // formVisibleNotify
     napi_value formVisibleNotify;
