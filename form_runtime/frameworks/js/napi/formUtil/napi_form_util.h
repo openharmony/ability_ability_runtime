@@ -17,6 +17,7 @@
 #define NAPI_FORM_UTIL_H_
 
 #include "ability.h"
+#include "napi_common_util.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"

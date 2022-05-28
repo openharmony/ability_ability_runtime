@@ -800,10 +800,12 @@ int32_t FormMgrStub::HandleGetFormsInfoByModule(MessageParcel &data, MessageParc
 int32_t FormMgrStub::HandleGetFormsInfo(MessageParcel &data, MessageParcel &reply)
 {
     HILOG_INFO("%{public}s called.", __func__);
+    // read moduleName from data.
+    std::string moduleName = data.ReadString();
     // write result of calling FMS into reply.
     std::vector<FormInfo> infos;
     // call FormMgrService to get formInfos into infos.
-    int32_t result = GetFormsInfo(infos);
+    int32_t result = GetFormsInfo(moduleName, infos);
     reply.WriteInt32(result);
     if (result == ERR_OK) {
         // write fetched formInfos into reply.
