@@ -457,6 +457,7 @@ private:
     void BackToCaller(const std::shared_ptr<AbilityRecord> &callerAbility);
 
     // new version for call inner function.
+    void HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &abilityRecord);
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest);
     std::shared_ptr<AbilityRecord> GetAbilityRecordByName(const AppExecFwk::ElementName &element);
     int CallAbilityLocked(const AbilityRequest &abilityRequest);

@@ -840,7 +840,7 @@ int MissionListManager::DispatchForegroundNew(const std::shared_ptr<AbilityRecor
         auto task = [self, abilityRecord]() { self->CompleteForegroundNew(abilityRecord); };
         handler->PostTask(task);
     } else {
-        auto task = [self, abilityRecord]() { self->HandleForgroundNewTimeout(abilityRecord); };
+        auto task = [self, abilityRecord]() { self->HandleForegroundFailed(abilityRecord); };
         handler->PostTask(task);
     }
 
@@ -1492,6 +1492,24 @@ void MissionListManager::HandleForgroundNewTimeout(const std::shared_ptr<Ability
 
     // other
     HandleTimeoutAndResumeAbility(ability);
+}
+
+void MissionListManager::HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    HILOG_DEBUG("HandleForegroundFailed come.");
+    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("HandleForegroundFailed, ability is nullptr.");
+        return;
+    }
+
+#ifdef SUPPORT_GRAPHICS
+    if (abilityRecord->IsStartingWindow()) {
+        CancelStartingWindow(abilityRecord->GetToken(), false);
+    }
+#endif
+
+    HandleForgroundNewTimeout(abilityRecord);
 }
 
 void MissionListManager::HandleTimeoutAndResumeAbility(const std::shared_ptr<AbilityRecord> &timeOutAbilityRecord)
