@@ -833,7 +833,7 @@ int AbilityManagerService::MinimizeAbility(const sptr<IRemoteObject> &token, boo
 #ifdef SUPPORT_GRAPHICS
     auto missionListManager = GetListManagerByUserId(abilityRecord->GetOwnerMissionUserId());
     if (!missionListManager) {
-        HILOG_ERROR("missionListManager is Null. userId=%{public}d", userId);
+        HILOG_ERROR("minimize missionListManager is Null.");
         return ERR_INVALID_VALUE;
     }
     return missionListManager->MinimizeAbility(token, fromUser);
