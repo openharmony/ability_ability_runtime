@@ -685,10 +685,11 @@ int FormMgrService::GetFormsInfoByModule(std::string &bundleName, std::string &m
 /**
 * @brief This function is called by formProvider and gets forms info by the bundle name of the calling ability.
 *        The bundle name will be retrieved here.
+* @param moduleName the module that the formInfos have to belong to.
 * @param formInfos Return the forms' information of the calling bundle name
 * @return Returns ERR_OK on success, others on failure.
 */
-int FormMgrService::GetFormsInfo(std::vector<FormInfo> &formInfos)
+int FormMgrService::GetFormsInfo(std::string moduleName, std::vector<FormInfo> &formInfos)
 {
     HILOG_INFO("%{public}s called.", __func__);
     sptr<IBundleMgr> bundleMgr = FormBmsHelper::GetInstance().GetBundleMgr();
@@ -703,8 +704,13 @@ int FormMgrService::GetFormsInfo(std::vector<FormInfo> &formInfos)
         HILOG_ERROR("GetFormsInfoByModule, failed to get form config info.");
         return ERR_APPEXECFWK_FORM_GET_INFO_FAILED;
     }
-    // fulfill formInfos, the process should be the same as GetFormsInfoByApp.
-    return FormMgrAdapter::GetInstance().GetFormsInfoByApp(callerBundleName, formInfos);
+    if (moduleName.empty()) {
+        // fulfill formInfos, the process should be the same as GetFormsInfoByApp.
+        return FormMgrAdapter::GetInstance().GetFormsInfoByApp(callerBundleName, formInfos);
+    } else {
+        return FormMgrAdapter::GetInstance().GetFormsInfoByModule(callerBundleName, moduleName, formInfos);
+    }
+
 }
 
 /**
