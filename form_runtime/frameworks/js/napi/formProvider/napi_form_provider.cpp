@@ -1262,15 +1262,16 @@ napi_value NAPI_RemoveFormInfo(napi_env env, napi_callback_info info)
 }
 
 // Internal of GetFormsInfo.
-void InnerGetFormsInfo(napi_env env, AsyncGetFormsInfoCallbackInfo *const asyncCallbackInfo)
+static void InnerGetFormsInfo(napi_env env, AsyncGetFormsInfoCallbackInfo *const asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s starts.", __func__);
-    asyncCallbackInfo->result = FormMgr::GetInstance().GetFormsInfo(asyncCallbackInfo->moduleName, asyncCallbackInfo->formInfos);
+    asyncCallbackInfo->result = FormMgr::GetInstance().GetFormsInfo(asyncCallbackInfo->moduleName,
+                                                                    asyncCallbackInfo->formInfos);
     HILOG_INFO("%{public}s ends.", __func__);
 }
 
 // Internal of GetFormsInfo when Promise is used.
-napi_value GetFormsInfoPromise(napi_env env, AsyncGetFormsInfoCallbackInfo *const asyncCallbackInfo)
+static napi_value GetFormsInfoPromise(napi_env env, AsyncGetFormsInfoCallbackInfo *const asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s calls.", __func__);
     napi_deferred deferred;
@@ -1331,7 +1332,7 @@ napi_value GetFormsInfoPromise(napi_env env, AsyncGetFormsInfoCallbackInfo *cons
 }
 
 // Internal of GetFormsInfo when CallBack is used.
-napi_value GetFormsInfoCallBack(napi_env env, napi_value argv, AsyncGetFormsInfoCallbackInfo * asyncCallbackInfo)
+static napi_value GetFormsInfoCallBack(napi_env env, napi_value argv, AsyncGetFormsInfoCallbackInfo * asyncCallbackInfo)
 {
     HILOG_INFO("%{public}s starts.", __func__);
     // Check the type of the argv, expect to be a callback function.
@@ -1399,8 +1400,6 @@ napi_value GetFormsInfoCallBack(napi_env env, napi_value argv, AsyncGetFormsInfo
     return NapiGetResut(env, 1);
 }
 
-
-
 /**
  * @brief  A helper function that parses formInfoFilter for getFormsInfo
  *
@@ -1410,27 +1409,18 @@ napi_value GetFormsInfoCallBack(napi_env env, napi_value argv, AsyncGetFormsInfo
  *
  * @return This is an opaque pointer that is used to represent a JavaScript value
  */
-ErrCode FormsInfoOptionParser(napi_env env, napi_value filter, AsyncGetFormsInfoCallbackInfo *asyncCallbackInfo)
+static ErrCode FormsInfoOptionParser(napi_env env, napi_value filter, AsyncGetFormsInfoCallbackInfo *asyncCallbackInfo)
 {
-
-    napi_value moduleName = GetPropertyValueByPropertyName(env, filter, (FormInfoFilter::MODULE_NAME).c_str(), napi_string);
-    if (moduleName != nullptr) {
-        asyncCallbackInfo->moduleName = GetStringFromNAPI(env, moduleName);
-        return ERR_OK;
+    HILOG_INFO("FormsInfoOptionParser starts");
+    napi_value napi_moduleName = GetPropertyValueByPropertyName(env, filter,
+                                                (FormInfoFilter::MODULE_NAME).c_str(), napi_string);
+    // parse and update moduleName.
+    if (napi_moduleName != nullptr) {
+        std::string moduleName = GetStringFromNAPI(env, napi_moduleName);
+        HILOG_INFO("FormsInfoOptionParser: parsed moduleName: %{public}s", moduleName.c_str());
+        asyncCallbackInfo->moduleName = moduleName;
     }
-    // bool result;
-    // napi_value key;
-    // napi_valueType valueType;
-    // //TODO: FormInfoOptions
-    // NAPI_CALL(env, napi_create_string_latin1(env, FormInfoOptions::MODULE_NAME, NAPI_AUTO_LENGTH, &key));
-    // NAPI_CALL(env, napi_has_named_property(env, opt, key, &result));
-    // if (result) {
-    //     napi_value value;
-    //     NAPI_CALL(env, napi_get_named_property(env, filter, key, &value));
-    //     NAPI_CALL(env, napi_typeof(env, value, &valueType));
-
-    // }
-    // napi_create_string_latin1(env, FormInfoOptions::FORM_INFO_TYPE, NAPI_AUTO_LENGTH, &key);
+    // for future options write here.
     return ERR_OK;
 }
 
@@ -1454,17 +1444,19 @@ napi_value NAPI_GetFormsInfo(napi_env env, napi_callback_info info)
         return nullptr;
     }
     HILOG_INFO("%{public}s, argc = [%{public}zu]", __func__, argc);
-
+    // initialize a struct that will store all the info through out the whole procedure.
     AsyncGetFormsInfoCallbackInfo *asyncCallbackInfo = new
     AsyncGetFormsInfoCallbackInfo {
         .env = env,
         .asyncWork = nullptr,
         .deferred = nullptr,
         .callback = nullptr,
-        .moduleName = "",
+        .moduleName = "", // moduleName is initialized as an empty string.
         .formInfos = std::vector<OHOS::AppExecFwk::FormInfo>(), // return value.
         .result = 0,
     };
+    // use argc and agrv type to parse the caller function.
+    // promise without option.
     if (argc == ARGS_SIZE_ZERO) {
         return GetFormsInfoPromise(env, asyncCallbackInfo);
     }
@@ -1472,7 +1464,8 @@ napi_value NAPI_GetFormsInfo(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_typeof(env, argv[ARGS_SIZE_ZERO], &valueType));
     if (argc == ARGS_SIZE_ONE) {
         // promise with option
-    if (valueType == napi_object)  {
+        if (valueType == napi_object)  {
+            // parse options of filter and may or may not update the corresponding asyncCallbackInfo property.
             ErrCode parse_result = FormsInfoOptionParser(env, argv[ARGS_SIZE_ZERO], asyncCallbackInfo);
             if (parse_result != ERR_OK) {
                 return RetErrMsg(InitErrMsg(env, parse_result, PROMISE_FLG, nullptr));
