@@ -309,7 +309,7 @@ public:
     * @param formInfos Return the forms' information of the calling bundle name
     * @return Returns ERR_OK on success, others on failure.
     */
-    int GetFormsInfo(std::string moduleName, vector<FormInfo> &formInfos) override;
+    int GetFormsInfo(std::string moduleName, std::vector<FormInfo> &formInfos) override;
 
     /**
      * @brief Update action string for router event.
