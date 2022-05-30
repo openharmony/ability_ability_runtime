@@ -62,7 +62,7 @@ void OHOSApplication::DispatchAbilitySavedState(const PacMap &outState)
  */
 void OHOSApplication::OnForeground()
 {
-    runtime_->NotifyApplicationStatus(false);
+    runtime_->NotifyApplicationState(false);
 }
 
 /**
@@ -72,7 +72,7 @@ void OHOSApplication::OnForeground()
  */
 void OHOSApplication::OnBackground()
 {
-    runtime_->NotifyApplicationStatus(true);
+    runtime_->NotifyApplicationState(true);
 }
 
 void OHOSApplication::DumpApplication()
