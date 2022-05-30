@@ -105,14 +105,6 @@ START_ABILITY:
   MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
 
-DO_FOREGROUND_ABILITY:
-  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: foreground ability}
-  SCENE_FLAG: {type: STRING, desc: scene flag}
-
-DO_BACKGROUND_ABILITY:
-  __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: background ability}
-  SCENE_FLAG: {type: STRING, desc: scene flag}
-
 CLOSE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: close ability}
 

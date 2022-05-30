@@ -27,7 +27,6 @@ const std::string EVENT_KEY_PID = "PID";
 const std::string EVENT_KEY_USERID = "USER_ID";
 const std::string EVENT_KEY_FORM_ID = "FORM_ID";
 const std::string EVENT_KEY_ERROR_CODE = "ERROR_CODE";
-const std::string EVENT_KEY_SCENE_FLAG = "SCENE_FLAG";
 const std::string EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
 const std::string EVENT_KEY_MODULE_NAME = "MODULE_NAME";
 const std::string EVENT_KEY_ABILITY_NAME = "ABILITY_NAME";
