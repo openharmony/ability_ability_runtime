@@ -84,7 +84,7 @@ struct AsyncGetFormsInfoCallbackInfo {
     napi_async_work asyncWork;
     napi_deferred deferred;
     napi_ref callback;
-    napi_value moduleName;
+    std::string moduleName;
     std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
     int result;
 };

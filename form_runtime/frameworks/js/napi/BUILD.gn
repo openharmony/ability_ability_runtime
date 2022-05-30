@@ -262,8 +262,6 @@ ohos_shared_library("formutil_napi") {
 
   deps = [ "${ability_runtime_path}/frameworks/kits/appkit:appkit_native" ]
 
-  public_deps = [ "${ability_runtime_napi_common_path}: napi_common" ]
-
   external_deps = [
     "ability_base:base",
     "ability_runtime:ability_manager",

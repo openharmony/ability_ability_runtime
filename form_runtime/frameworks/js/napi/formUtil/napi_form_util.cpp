@@ -398,7 +398,7 @@ AsyncErrMsgCallbackInfo *InitErrMsg(napi_env env, int32_t code, int32_t type, na
  *
  * @return void
  */
-static void ParseFormInfoIntoNapi(napi_env env, const FormInfo &formInfo, napi_value &result)
+void ParseFormInfoIntoNapi(napi_env env, const FormInfo &formInfo, napi_value &result)
 {
     // bundleName
     napi_value bundleName;

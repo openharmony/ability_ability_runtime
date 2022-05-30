@@ -1149,7 +1149,7 @@ int FormMgrProxy::GetFormsInfo(std::string moduleName, std::vector<FormInfo> &fo
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
-    if (!data.WriteStirng(moduleName)) {
+    if (!data.WriteString(moduleName)) {
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
