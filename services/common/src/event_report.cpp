@@ -23,7 +23,7 @@ namespace AAFWK {
 namespace {
 // event params
 const std::string TYPE = "TYPE";
-const std::string EVENT_KEY_PID = "PID";
+const std::string EVENT_KEY_APP_PID = "APP_PID";
 const std::string EVENT_KEY_USERID = "USER_ID";
 const std::string EVENT_KEY_FORM_ID = "FORM_ID";
 const std::string EVENT_KEY_ERROR_CODE = "ERROR_CODE";
@@ -43,7 +43,7 @@ void EventReport::SendAppEvent(const std::string &eventName, HiSysEventType type
         HiSysEvent::Domain::AAFWK,
         eventName,
         type,
-        EVENT_KEY_PID, eventInfo.pid,
+        EVENT_KEY_APP_PID, eventInfo.pid,
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_VERSION_NAME, eventInfo.versionName,
         EVENT_KEY_VERSION_CODE, eventInfo.versionCode,
