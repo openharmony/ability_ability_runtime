@@ -44,6 +44,10 @@ namespace {
     OHOS::AppExecFwk::Ability* g_ability = nullptr;
 }
 
+namespace FormInfoFilter {
+    const std::string MODULE_NAME = "moduleName";
+}
+
 /**
  * @brief GetGlobalAbility
  *
@@ -1409,9 +1413,9 @@ napi_value GetFormsInfoCallBack(napi_env env, napi_value argv, AsyncGetFormsInfo
 ErrCode FormsInfoOptionParser(napi_env env, napi_value filter, AsyncGetFormsInfoCallbackInfo *asyncCallbackInfo)
 {
 
-    napi_value moduleName = GetPropertyValueByPropertyName(env, filter, FormInfoOptions::MODULE_NAME, napi_string);
+    napi_value moduleName = GetPropertyValueByPropertyName(env, filter, (FormInfoFilter::MODULE_NAME).c_str(), napi_string);
     if (moduleName != nullptr) {
-        asyncCallbackInfo->moduleName = moduleName;
+        asyncCallbackInfo->moduleName = GetStringFromNAPI(env, moduleName);
         return ERR_OK;
     }
     // bool result;
@@ -1426,7 +1430,7 @@ ErrCode FormsInfoOptionParser(napi_env env, napi_value filter, AsyncGetFormsInfo
     //     NAPI_CALL(env, napi_typeof(env, value, &valueType));
 
     // }
-    napi_create_string_latin1(env, FormInfoOptions::FORM_INFO_TYPE, NAPI_AUTO_LENGTH, &key);
+    // napi_create_string_latin1(env, FormInfoOptions::FORM_INFO_TYPE, NAPI_AUTO_LENGTH, &key);
     return ERR_OK;
 }
 
@@ -1468,7 +1472,7 @@ napi_value NAPI_GetFormsInfo(napi_env env, napi_callback_info info)
     NAPI_CALL(env, napi_typeof(env, argv[ARGS_SIZE_ZERO], &valueType));
     if (argc == ARGS_SIZE_ONE) {
         // promise with option
-        if (valueType == napi_object)  {
+    if (valueType == napi_object)  {
             ErrCode parse_result = FormsInfoOptionParser(env, argv[ARGS_SIZE_ZERO], asyncCallbackInfo);
             if (parse_result != ERR_OK) {
                 return RetErrMsg(InitErrMsg(env, parse_result, PROMISE_FLG, nullptr));
