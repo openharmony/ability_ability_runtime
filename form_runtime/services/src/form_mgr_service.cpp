@@ -710,7 +710,6 @@ int FormMgrService::GetFormsInfo(std::string moduleName, std::vector<FormInfo> &
     } else {
         return FormMgrAdapter::GetInstance().GetFormsInfoByModule(callerBundleName, moduleName, formInfos);
     }
-
 }
 
 /**
