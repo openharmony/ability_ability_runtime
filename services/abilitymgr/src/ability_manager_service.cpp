@@ -4202,7 +4202,7 @@ int AbilityManagerService::DoAbilityForeground(const sptr<IRemoteObject> &token,
         return ERR_WOULD_BLOCK;
     }
 
-    abilityRecord->ProcessForegroundAbility(flag);
+    abilityRecord->ProcessForegroundAbility(nullptr, flag);
     return ERR_OK;
 }
 
