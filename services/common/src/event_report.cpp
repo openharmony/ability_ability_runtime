@@ -24,7 +24,7 @@ namespace {
 // event params
 const std::string TYPE = "TYPE";
 const std::string EVENT_KEY_PID = "PID";
-const std::string EVENT_KEY_USERID = "USERID";
+const std::string EVENT_KEY_USERID = "USER_ID";
 const std::string EVENT_KEY_FORM_ID = "FORM_ID";
 const std::string EVENT_KEY_ERROR_CODE = "ERROR_CODE";
 const std::string EVENT_KEY_SCENE_FLAG = "SCENE_FLAG";
@@ -44,6 +44,7 @@ void EventReport::SendAppEvent(const std::string &eventName, HiSysEventType type
         HiSysEvent::Domain::AAFWK,
         eventName,
         type,
+        EVENT_KEY_PID, eventInfo.pid,
         EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
         EVENT_KEY_VERSION_NAME, eventInfo.versionName,
         EVENT_KEY_VERSION_CODE, eventInfo.versionCode,
@@ -64,7 +65,7 @@ void EventReport::SendAbilityEvent(const std::string &eventName, HiSysEventType 
             EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
             EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
             EVENT_KEY_ERROR_CODE, eventInfo.errCode);
-    } else if (eventName == START_ABILITY_ERROR) {
+    } else if (eventName == START_ABILITY) {
         HiSysEvent::Write(
             HiSysEvent::Domain::AAFWK,
             eventName,
