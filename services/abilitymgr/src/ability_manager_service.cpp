@@ -4203,10 +4203,6 @@ int AbilityManagerService::DoAbilityForeground(const sptr<IRemoteObject> &token,
     }
 
     abilityRecord->ProcessForegroundAbility(flag);
-    AAFWK::EventInfo eventInfo;
-    eventInfo.sceneFlag = flag;
-    AAFWK::EventReport::SendAbilityEvent(AAFWK::DO_FOREGROUND_ABILITY,
-        HiSysEventType::BEHAVIOR, eventInfo);
     return ERR_OK;
 }
 
@@ -4221,10 +4217,6 @@ int AbilityManagerService::DoAbilityBackground(const sptr<IRemoteObject> &token,
     abilityRecord->lifeCycleStateInfo_.sceneFlag = flag;
     int ret = MinimizeAbility(token);
     abilityRecord->lifeCycleStateInfo_.sceneFlag = SCENE_FLAG_NORMAL;
-    AAFWK::EventInfo eventInfo;
-    eventInfo.sceneFlag = flag;
-    AAFWK::EventReport::SendAbilityEvent(AAFWK::DO_FOREGROUND_ABILITY,
-        HiSysEventType::BEHAVIOR, eventInfo);
     return ret;
 }
 

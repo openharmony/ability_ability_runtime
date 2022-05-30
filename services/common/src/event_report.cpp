@@ -74,12 +74,6 @@ void EventReport::SendAbilityEvent(const std::string &eventName, HiSysEventType 
             EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
             EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
             EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
-    } else if (eventName == DO_FOREGROUND_ABILITY || eventName == DO_BACKGROUND_ABILITY) {
-        HiSysEvent::Write(
-            HiSysEvent::Domain::AAFWK,
-            eventName,
-            type,
-            EVENT_KEY_SCENE_FLAG, eventInfo.sceneFlag);
     } else if (eventName == TERMINATE_ABILITY || eventName == CLOSE_ABILITY) {
         HiSysEvent::Write(
             HiSysEvent::Domain::AAFWK,
