@@ -1293,7 +1293,8 @@ int AbilityManagerService::DisconnectAbility(const sptr<IAbilityConnection> &con
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
 
-    if(ERR_OK != DisconnectRemoteAbility(connect->AsObject()) && ERR_OK != DisconnectRemoteAbility(connect->AsObject())) {
+    if (ERR_OK != DisconnectRemoteAbility(connect->AsObject()) &&
+        ERR_OK != DisconnectRemoteAbility(connect->AsObject())) {
         eventInfo.errCode = INNER_ERR;
         AAFWK::EventReport::SendExtensionEvent(AAFWK::DISCONNECT_SERVICE_ERROR,
             HiSysEventType::FAULT, eventInfo);
