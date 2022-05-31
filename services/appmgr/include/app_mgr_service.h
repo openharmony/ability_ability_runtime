@@ -217,6 +217,15 @@ public:
 
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status) override;
 
+    virtual int32_t GetConfiguration(Configuration& config) override;
+
+    virtual int32_t UpdateConfiguration(const Configuration &config) override;
+
+    virtual int32_t RegisterConfigurationObserver(const int32_t id,
+        const sptr<IConfigurationObserver> &observer) override;
+
+    virtual int32_t UnregisterConfigurationObserver(const int32_t id) override;
+
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * Block app service.

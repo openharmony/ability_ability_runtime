@@ -29,6 +29,7 @@
 #include "running_process_info.h"
 #include "system_memory_attr.h"
 #include "iapplication_state_observer.h"
+#include "iconfiguration_observer.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -230,6 +231,15 @@ public:
      */
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status) = 0;
 
+    virtual int32_t GetConfiguration(Configuration& config) = 0;
+
+    virtual int32_t UpdateConfiguration(const Configuration &config) = 0;
+
+    virtual int32_t RegisterConfigurationObserver(const int32_t id,
+        const sptr<IConfigurationObserver> &observer) = 0;
+
+    virtual int32_t UnregisterConfigurationObserver(const int32_t id) = 0;
+
     enum class Message {
         APP_ATTACH_APPLICATION = 0,
         APP_APPLICATION_FOREGROUNDED,
@@ -255,6 +265,10 @@ public:
         START_RENDER_PROCESS,
         ATTACH_RENDER_PROCESS,
         GET_RENDER_PROCESS_TERMINATION_STATUS,
+        GET_CONFIGURATION,
+        UPDATE_CONFIGURATION,
+        REGISTER_CONFIGURATION_OBSERVER,
+        UNREGISTER_CONFIGURATION_OBSERVER,
     };
 };
 }  // namespace AppExecFwk
