@@ -1259,16 +1259,20 @@ int AbilityManagerService::ConnectAbility(
     if (CheckIfOperateRemote(abilityWant)) {
         HILOG_INFO("AbilityManagerService::ConnectAbility. try to ConnectRemoteAbility");
         eventInfo.errCode = ConnectRemoteAbility(abilityWant, connect->AsObject());
-        AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
-            HiSysEventType::FAULT, eventInfo);
+        if (eventInfo.errCode != ERR_OK) {
+            AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
+                HiSysEventType::FAULT, eventInfo);
+        }
         return eventInfo.errCode;
     }
 
     if (callerToken != nullptr && callerToken->GetObjectDescriptor() != u"ohos.aafwk.AbilityToken") {
         HILOG_INFO("%{public}s invalid Token.", __func__);
         eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, nullptr);
-        AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
-            HiSysEventType::FAULT, eventInfo);
+        if (eventInfo.errCode != ERR_OK) {
+            AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
+                HiSysEventType::FAULT, eventInfo);
+        }
         return eventInfo.errCode;
     }
     eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken);
@@ -1290,12 +1294,12 @@ int AbilityManagerService::DisconnectAbility(const sptr<IAbilityConnection> &con
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
 
     eventInfo.errCode = DisconnectLocalAbility(connect);
-    eventInfo.errCode |= DisconnectRemoteAbility(connect->AsObject());
+    eventInfo.errCode &= DisconnectRemoteAbility(connect->AsObject());
     if (eventInfo.errCode != ERR_OK) {
         AAFWK::EventReport::SendExtensionEvent(AAFWK::DISCONNECT_SERVICE_ERROR,
             HiSysEventType::FAULT, eventInfo);
     }
-    return eventInfo.errCode;
+    return ERR_OK;
 }
 
 int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
