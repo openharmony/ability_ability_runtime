@@ -77,20 +77,17 @@ private:
         }
         HILOG_INFO("%{public}s create observer", __func__);
         AsyncTask::CompleteCallback complete =
-            [&observerId, observer](NativeEngine& engine, AsyncTask& task, int32_t status) {
-                HILOG_INFO("RegisterApplicationStateObserver callback begin");
+            [observerId, observer](NativeEngine& engine, AsyncTask& task, int32_t status) {
+                HILOG_INFO("Register errorObserver callback begin");
                 if (!DelayedSingleton<AppExecFwk::AppDataManager>::GetInstance()->AddErrorObservers(
                     observerId, observer)) {
-                    observerId = -1;
+                    HILOG_ERROR("Register errorObserver failed.");
                 }
             };
 
         NativeValue* result = nullptr;
         AsyncTask::Schedule(
             engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
-        if (observerId == -1) {
-            return engine.CreateUndefined();
-        }
         return engine.CreateNumber(observerId);
     }
 
