@@ -17,6 +17,7 @@
 
 #include <new>
 #include <regex>
+#include <unistd.h>
 
 #include "ability_constants.h"
 #include "ability_delegator.h"
@@ -72,6 +73,7 @@ constexpr int32_t DISTRIBUTE_TIME = 100;
 constexpr int32_t UNSPECIFIED_USERID = -2;
 constexpr int SIGNAL_JS_HEAP = 37;
 constexpr int SIGNAL_JS_HEAP_PRIV = 38;
+constexpr int ALIVE_AFTER_CRASH = 3000000;
 
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_VERSION[] = "VERSION";
@@ -936,6 +938,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             // if app's callback has been registered, let app decide whether exit or not.
             HILOG_ERROR("\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
                 bundleName.c_str(), errorName.c_str(), summary.c_str());
+            usleep(ALIVE_AFTER_CRASH);
             appThread->ScheduleProcessSecurityExit();
         };
         jsEngine.RegisterUncaughtExceptionHandler(uncaughtTask);
