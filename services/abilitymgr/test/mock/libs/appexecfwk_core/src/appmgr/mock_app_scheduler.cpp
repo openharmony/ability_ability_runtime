@@ -180,9 +180,5 @@ int AppScheduler::StartUserTest(
     return 0;
 }
 
-int AppScheduler::UpdateConfiguration(const AppExecFwk::Configuration &)
-{
-    return 0;
-}
 }  // namespace AAFwk
 }  // namespace OHOS
