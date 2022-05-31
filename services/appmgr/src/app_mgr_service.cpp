@@ -452,6 +452,45 @@ int32_t AppMgrService::GetRenderProcessTerminationStatus(pid_t renderPid, int &s
     return appMgrServiceInner_->GetRenderProcessTerminationStatus(renderPid, status);
 }
 
+int32_t AppMgrService::GetConfiguration(Configuration& config)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("GetConfiguration failed, AppMgrService not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    config = *(appMgrServiceInner_->GetConfiguration());
+    return ERR_OK;
+}
+
+int32_t AppMgrService::UpdateConfiguration(const Configuration& config)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("UpdateConfiguration failed, AppMgrService not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    appMgrServiceInner_->UpdateConfiguration(config);
+    return ERR_OK;
+}
+
+int32_t AppMgrService::RegisterConfigurationObserver(const int32_t id,
+    const sptr<IConfigurationObserver> &observer)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("RegisterConfigurationObserver failed, AppMgrService not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->RegisterConfigurationObserver(id, observer);
+}
+
+int32_t AppMgrService::UnregisterConfigurationObserver(const int32_t id)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("UnregisterConfigurationObserver failed, AppMgrService not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->UnregisterConfigurationObserver(id);
+}
+
 #ifdef ABILITY_COMMAND_FOR_TEST
 int AppMgrService::BlockAppService()
 {

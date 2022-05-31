@@ -20,6 +20,7 @@
 #include <map>
 #include <vector>
 #include <regex>
+#include <unordered_map>
 
 #include "iremote_object.h"
 #include "refbase.h"
@@ -35,6 +36,7 @@
 #include "app_task_info.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
+#include "iconfiguration_observer.h"
 #include "app_process_manager.h"
 #include "remote_client_manager.h"
 #include "app_running_manager.h"
@@ -430,6 +432,11 @@ public:
     void UpdateConfiguration(const Configuration &config);
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration();
+
+    int32_t RegisterConfigurationObserver(const int32_t id, const sptr<IConfigurationObserver>& observer);
+
+    int32_t UnregisterConfigurationObserver(const int32_t id);
+
     /**
      * Start empty process
      */
@@ -736,6 +743,8 @@ private:
     std::shared_ptr<Configuration> configuration_;
     std::mutex userTestLock_;
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
+    std::recursive_mutex confiurtaionObserverLock_;
+    std::unordered_map<int32_t, sptr<IConfigurationObserver>> confiurtaionObserverMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

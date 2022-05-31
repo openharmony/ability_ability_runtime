@@ -78,6 +78,14 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleAttachRenderProcess;
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_RENDER_PROCESS_TERMINATION_STATUS)] =
         &AppMgrStub::HandleGetRenderProcessTerminationStatus;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_CONFIGURATION)] =
+        &AppMgrStub::HandleGetConfiguration;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::UPDATE_CONFIGURATION)] =
+        &AppMgrStub::HandleUpdateConfiguration;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::REGISTER_CONFIGURATION_OBSERVER)] =
+        &AppMgrStub::HandleRegisterConfigurationObserver;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::UNREGISTER_CONFIGURATION_OBSERVER)] =
+        &AppMgrStub::HandleUnregisterConfigurationObserver;
 #ifdef ABILITY_COMMAND_FOR_TEST
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::BLOCK_APP_SERVICE)] =
         &AppMgrStub::HandleBlockAppServiceDone;
@@ -406,6 +414,48 @@ int32_t AppMgrStub::HandleGetRenderProcessTerminationStatus(MessageParcel &data,
         return ERR_INVALID_VALUE;
     }
     return result;
+}
+
+int32_t AppMgrStub::HandleGetConfiguration(MessageParcel &data, MessageParcel &reply)
+{
+    Configuration config;
+    int ret = GetConfiguration(config);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("AppMgrStub GetConfiguration error");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteParcelable(&config)) {
+        HILOG_ERROR("AppMgrStub GetConfiguration error");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
+    if (config) {
+        UpdateConfiguration(*config);
+        return NO_ERROR;
+    }
+    return UNKNOWN_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterConfigurationObserver(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t id = data.ReadInt32();
+    auto observer = iface_cast<AppExecFwk::IConfigurationObserver>(data.ReadRemoteObject());
+    int32_t result = RegisterConfigurationObserver(id, observer);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterConfigurationObserver(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t id = data.ReadInt32();
+    int32_t result = UnregisterConfigurationObserver(id);
+    reply.WriteInt32(result);
+    return NO_ERROR;
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

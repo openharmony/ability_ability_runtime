@@ -481,6 +481,33 @@ AppMgrResultCode AppMgrClient::UpdateConfiguration(const Configuration &config)
     return AppMgrResultCode::RESULT_OK;
 }
 
+AppMgrResultCode AppMgrClient::RegisterConfigurationObserver(const int32_t id,
+    const sptr<IConfigurationObserver> &observer)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->RegisterConfigurationObserver(id, observer);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::UnregisterConfigurationObserver(const int32_t id)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->UnregisterConfigurationObserver(id);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
 int AppMgrClient::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
