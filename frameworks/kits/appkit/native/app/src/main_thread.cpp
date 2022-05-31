@@ -23,6 +23,7 @@
 #include "ability_delegator_registry.h"
 #include "ability_loader.h"
 #include "ability_thread.h"
+#include "app_data_manager.h"
 #include "app_loader.h"
 #include "application_env_impl.h"
 #include "hitrace_meter.h"
@@ -904,6 +905,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
             std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
             std::string summary = "Error message:" + errorMsg + "\nStacktrace:\n" + errorStack;
+            DelayedSingleton<AppDataManager>::GetInstance()->NotifyObserversUnhandledException(summary);
             time_t timet;
             struct tm localUTC;
             struct timeval gtime;
