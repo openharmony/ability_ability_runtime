@@ -2050,7 +2050,7 @@ void AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         // all app
         appRunningManager_->UpdateConfiguration(config);
         // notify
-        for (auto observer : confiurtaionObserverMap_) {
+        for (auto &observer : confiurtaionObserverMap_) {
             if (observer.second != nullptr) {
                 observer.second->OnConfigurationUpdated(config);
             }
@@ -2070,7 +2070,9 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const int32_t id,
 
     std::lock_guard<std::recursive_mutex> registerLock(confiurtaionObserverLock_);
     if (confiurtaionObserverMap_.find(id) != confiurtaionObserverMap_.end()) {
-        confiurtaionObserverMap_[id] = observer;
+        HILOG_INFO("AppMgrServiceInner ConfigurationObserver has been registered");
+    } else {
+        confiurtaionObserverMap_[id] = observer;       
     }
     return NO_ERROR;
 }
@@ -2078,8 +2080,13 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const int32_t id,
 int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const int32_t id)
 {
     HILOG_INFO("AppMgrServiceInner::UnregisterConfigurationObserver: called");
-    std::lock_guard<std::recursive_mutex> registerLock(confiurtaionObserverLock_);
-    confiurtaionObserverMap_.erase(id);
+    std::lock_guard<std::recursive_mutex> unregisterLock(confiurtaionObserverLock_);
+    
+    if (confiurtaionObserverMap_.find(id) != confiurtaionObserverMap_.end()) {
+        confiurtaionObserverMap_.erase(id);
+    } else {
+        HILOG_INFO("AppMgrServiceInner ConfigurationObserver not register");    
+    }
     return NO_ERROR;
 }
 
