@@ -1329,7 +1329,7 @@ static napi_value GetFormsInfoPromise(napi_env env, AsyncGetFormsInfoCallbackInf
         (void *)asyncCallbackInfo,
         &asyncCallbackInfo->asyncWork);
     // execute work.
-    if(napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+    if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_value error;
         InnerCreatePromiseRetMsg(env, ERR_APPEXECFWK_FORM_COMMON_CODE, &error);
         napi_reject_deferred(
@@ -1413,7 +1413,7 @@ static napi_value GetFormsInfoCallBack(napi_env env, napi_value argv, AsyncGetFo
         (void *)asyncCallbackInfo,
         &asyncCallbackInfo->asyncWork);
      // execute work.
-    if(napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+    if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_value callbackValues[ARGS_SIZE_TWO] = {0};
         // store GetFormsInfoCallBack return-message to callbackValues[0].
         InnerCreateCallbackRetMsg(env, ERR_APPEXECFWK_FORM_COMMON_CODE, callbackValues);
