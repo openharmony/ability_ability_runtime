@@ -468,8 +468,7 @@ int32_t AppMgrService::UpdateConfiguration(const Configuration& config)
         HILOG_ERROR("UpdateConfiguration failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
     }
-    appMgrServiceInner_->UpdateConfiguration(config);
-    return ERR_OK;
+    return appMgrServiceInner_->UpdateConfiguration(config);
 }
 
 int32_t AppMgrService::RegisterConfigurationObserver(const int32_t id,

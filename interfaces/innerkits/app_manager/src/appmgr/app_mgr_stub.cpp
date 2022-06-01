@@ -428,17 +428,24 @@ int32_t AppMgrStub::HandleGetConfiguration(MessageParcel &data, MessageParcel &r
         HILOG_ERROR("AppMgrStub GetConfiguration error");
         return ERR_INVALID_VALUE;
     }
+    if (!reply.WriteInt32(ret)) {
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 
 int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
-    if (config) {
-        UpdateConfiguration(*config);
-        return NO_ERROR;
+    if (!config) {
+        HILOG_ERROR("AppMgrStub read configuration error");
+        return ERR_INVALID_VALUE;
     }
-    return UNKNOWN_ERROR;
+    int32_t ret = UpdateConfiguration(*config);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
 }
 
 int32_t AppMgrStub::HandleRegisterConfigurationObserver(MessageParcel &data, MessageParcel &reply)

@@ -251,6 +251,5 @@ void AmsMgrScheduler::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpe
     auto task = [=]() { amsMgrServiceInner_->RegisterStartSpecifiedAbilityResponse(response); };
     amsHandler_->PostTask(task);
 }
-
 }  // namespace AppExecFwk
 }  // namespace OHOS

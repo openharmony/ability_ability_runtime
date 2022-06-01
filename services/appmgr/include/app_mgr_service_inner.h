@@ -428,8 +428,9 @@ public:
      * UpdateConfiguration, ANotify application update system environment changes.
      *
      * @param config, System environment change parameters.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    void UpdateConfiguration(const Configuration &config);
+    int32_t UpdateConfiguration(const Configuration &config);
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration();
 

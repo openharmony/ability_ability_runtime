@@ -52,6 +52,5 @@ void AmsMgrProxyTest::SetUp()
 
 void AmsMgrProxyTest::TearDown()
 {}
-
 }  // namespace AppExecFwk
 }  // namespace OHOS
