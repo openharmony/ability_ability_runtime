@@ -1150,7 +1150,7 @@ int32_t FormMgrProxy::GetFormsInfo(const std::string &moduleName, std::vector<Fo
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     if (!data.WriteString(moduleName)) {
-        HILOG_ERROR("%{public}s, failed to write moduleName [%{public}s]", __func__, moduleName);
+        HILOG_ERROR("%{public}s, failed to write moduleName [%{public}s]", __func__, moduleName.c_str());
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     // call private GetFormsInfo with Message which will send request to tell stub which handle function to be used.
