@@ -25,7 +25,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AppExecFwk {
-
 class AmsMgrSchedulerDumpTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -45,6 +44,5 @@ void AmsMgrSchedulerDumpTest::SetUp()
 
 void AmsMgrSchedulerDumpTest::TearDown()
 {}
-
 }  // namespace AppExecFwk
 }  // namespace OHOS

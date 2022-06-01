@@ -668,7 +668,7 @@ int AppMgrProxy::GetRenderProcessTerminationStatus(pid_t renderPid, int &status)
 
 int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config)
 {
-    HILOG_INFO("UpdateConfiguration start");
+    HILOG_INFO("AppMgrProxy UpdateConfiguration");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -688,15 +688,14 @@ int32_t AppMgrProxy::UpdateConfiguration(const Configuration &config)
         remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::UPDATE_CONFIGURATION), data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
-        return ERR_INVALID_DATA;
+        return ret;
     }
-    HILOG_INFO("UpdateConfiguration end");
-    return NO_ERROR;
+    return reply.ReadInt32();
 }
 
 int32_t AppMgrProxy::GetConfiguration(Configuration &config)
 {
-    HILOG_INFO("GetConfiguration start");
+    HILOG_INFO("AppMgrProxy GetConfiguration");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
@@ -713,7 +712,7 @@ int32_t AppMgrProxy::GetConfiguration(Configuration &config)
         remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::GET_CONFIGURATION), data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
-        return ERR_INVALID_DATA;
+        return ret;
     }
 
     std::unique_ptr<Configuration> info(reply.ReadParcelable<Configuration>());
@@ -722,8 +721,7 @@ int32_t AppMgrProxy::GetConfiguration(Configuration &config)
         return ERR_UNKNOWN_OBJECT;
     }
     config = *info;
-    HILOG_INFO("GetConfiguration end");
-    return NO_ERROR;
+    return reply.ReadInt32();
 }
 
 int32_t AppMgrProxy::RegisterConfigurationObserver(const int32_t id,

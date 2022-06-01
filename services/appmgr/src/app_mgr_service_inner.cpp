@@ -2034,11 +2034,11 @@ void AppMgrServiceInner::HandleStartSpecifiedAbilityTimeOut(const int64_t eventI
     KillApplicationByRecord(appRecord);
 }
 
-void AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
+int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
 {
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is null");
-        return;
+        return ERR_INVALID_VALUE;
     }
 
     std::vector<std::string> changeKeyV;
@@ -2048,13 +2048,21 @@ void AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
     if (!changeKeyV.empty()) {
         configuration_->Merge(changeKeyV, config);
         // all app
-        appRunningManager_->UpdateConfiguration(config);
-        // notify
-        for (auto &observer : confiurtaionObserverMap_) {
-            if (observer.second != nullptr) {
-                observer.second->OnConfigurationUpdated(config);
+        int32_t result = appRunningManager_->UpdateConfiguration(config);
+        if (result == ERR_OK) {
+            // notify
+            for (auto &observer : confiurtaionObserverMap_) {
+                if (observer.second != nullptr) {
+                    observer.second->OnConfigurationUpdated(config);
+                }
             }
+        } else {
+            HILOG_ERROR("update error, not notify");
         }
+        return result;
+    } else {
+        HILOG_ERROR("changeKeyV is empty");
+        return ERR_INVALID_VALUE;
     }
 }
 
@@ -2072,7 +2080,7 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const int32_t id,
     if (confiurtaionObserverMap_.find(id) != confiurtaionObserverMap_.end()) {
         HILOG_INFO("AppMgrServiceInner ConfigurationObserver has been registered");
     } else {
-        confiurtaionObserverMap_[id] = observer;       
+        confiurtaionObserverMap_[id] = observer;
     }
     return NO_ERROR;
 }
@@ -2085,7 +2093,7 @@ int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const int32_t id)
     if (confiurtaionObserverMap_.find(id) != confiurtaionObserverMap_.end()) {
         confiurtaionObserverMap_.erase(id);
     } else {
-        HILOG_INFO("AppMgrServiceInner ConfigurationObserver not register");    
+        HILOG_INFO("AppMgrServiceInner ConfigurationObserver not register");
     }
     return NO_ERROR;
 }
