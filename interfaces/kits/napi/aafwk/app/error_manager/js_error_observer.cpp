@@ -32,8 +32,10 @@ JsErrorObserver::~JsErrorObserver() = default;
 void JsErrorObserver::OnUnhandledException(std::string errMsg)
 {
     HILOG_DEBUG("OnUnhandledException come.");
+    std::weak_ptr<JsErrorObserver> thisWeakPtr(shared_from_this());
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
-        ([jsObserver = this, errMsg](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        ([thisWeakPtr, errMsg](NativeEngine &engine, AsyncTask &task, int32_t status) {
+            std::shared_ptr<JsErrorObserver> jsObserver = thisWeakPtr.lock();
             if (jsObserver) {
                 jsObserver->HandleOnUnhandledException(errMsg);
             }
@@ -47,18 +49,17 @@ void JsErrorObserver::OnUnhandledException(std::string errMsg)
 void JsErrorObserver::HandleOnUnhandledException(const std::string &errMsg)
 {
     HILOG_DEBUG("HandleOnUnhandledException come.");
-    NativeValue* argv[] = { CreateJsValue(engine_, errMsg) };
-    CallJsFunction("onUnhandledException", argv, ARGC_ONE);
+    auto tmpMap = jsObserverObjectMap_;
+    for (auto &item : tmpMap) {
+        NativeValue* value = (item.second)->Get();
+        NativeValue* argv[] = { CreateJsValue(engine_, errMsg) };
+        CallJsFunction(value, "onUnhandledException", argv, ARGC_ONE);
+    }
 }
 
-void JsErrorObserver::CallJsFunction(const char* methodName, NativeValue* const* argv, size_t argc)
+void JsErrorObserver::CallJsFunction(NativeValue* value, const char* methodName, NativeValue* const* argv, size_t argc)
 {
     HILOG_INFO("CallJsFunction begin, method:%{public}s", methodName);
-    if (jsObserverObject_ == nullptr) {
-        HILOG_ERROR("jsObserverObject_ is nullptr");
-        return;
-    }
-    NativeValue* value = jsObserverObject_->Get();
     NativeObject* obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
         HILOG_ERROR("Failed to get object");
@@ -74,9 +75,15 @@ void JsErrorObserver::CallJsFunction(const char* methodName, NativeValue* const*
     engine_.CallFunction(value, method, argv, argc);
 }
 
-void JsErrorObserver::SetJsObserverObject(NativeValue* jsObserverObject)
+void JsErrorObserver::AddJsObserverObject(int32_t observerId, NativeValue* jsObserverObject)
 {
-    jsObserverObject_ = std::unique_ptr<NativeReference>(engine_.CreateReference(jsObserverObject, 1));
+    jsObserverObjectMap_.emplace(
+        observerId, std::shared_ptr<NativeReference>(engine_.CreateReference(jsObserverObject, 1)));
+}
+
+bool JsErrorObserver::RemoveJsObserverObject(int32_t observerId)
+{
+    return jsObserverObjectMap_.erase(observerId) == 1;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <map>
 
 #include "ierror_observer.h"
 #include "native_engine/native_engine.h"
@@ -21,18 +22,22 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class JsErrorObserver : public AppExecFwk::IErrorObserver {
+class JsErrorObserver : public AppExecFwk::IErrorObserver,
+                        public std::enable_shared_from_this<JsErrorObserver> {
 public:
     explicit JsErrorObserver(NativeEngine& engine);
     ~JsErrorObserver();
     void OnUnhandledException(std::string errMsg) override;
+    void AddJsObserverObject(int32_t observerId, NativeValue* jsObserverObject);
+    bool RemoveJsObserverObject(int32_t observerId);
+
+private:
+    void CallJsFunction(NativeValue* value, const char* methodName, NativeValue* const* argv, size_t argc);
     void HandleOnUnhandledException(const std::string &errMsg);
-    void SetJsObserverObject(NativeValue* jsObserverObject);
-    void CallJsFunction(const char* methodName, NativeValue* const* argv, size_t argc);
 
 private:
     NativeEngine& engine_;
-    std::unique_ptr<NativeReference> jsObserverObject_ = nullptr;
+    std::map<int32_t, std::shared_ptr<NativeReference>> jsObserverObjectMap_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

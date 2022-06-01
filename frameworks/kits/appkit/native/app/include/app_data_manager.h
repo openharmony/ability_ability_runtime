@@ -16,10 +16,7 @@
 #ifndef OHOS_APPEXECFWK_APP_DATA_MANAGER_H
 #define OHOS_APPEXECFWK_APP_DATA_MANAGER_H
 
-#include <list>
-#include <mutex>
 #include <string>
-#include <unordered_map>
 
 #include "ierror_observer.h"
 #include "singleton.h"
@@ -29,16 +26,11 @@ namespace AppExecFwk {
 class AppDataManager : public std::enable_shared_from_this<AppDataManager> {
     DECLARE_DELAYED_SINGLETON(AppDataManager)
 public:
-    bool AddErrorObservers(int64_t observerId, const std::shared_ptr<IErrorObserver> &observer);
-    bool RemoveErrorObservers(int64_t observerId);
-    void NotifyObserversUnhandledException(const std::string &errMsg);
+    void AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer);
+    void NotifyObserverUnhandledException(const std::string &errMsg);
 
 private:
-    bool ContainsObserver(const std::shared_ptr<IErrorObserver> &observer);
-
-private:
-    std::unordered_map<int64_t, std::shared_ptr<IErrorObserver>> errorObservers_;
-    mutable std::recursive_mutex observerMutex_;
+    std::weak_ptr<IErrorObserver> errorObserver_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

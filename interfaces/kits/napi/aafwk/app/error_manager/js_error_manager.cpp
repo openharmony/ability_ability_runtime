@@ -66,28 +66,19 @@ private:
             return engine.CreateUndefined();
         }
 
-        // unwarp observer
-        std::shared_ptr<JsErrorObserver> observer = std::make_shared<JsErrorObserver>(engine);
-        observer->SetJsObserverObject(info.argv[0]);
-        int64_t observerId = serialNumber_;
-        if (serialNumber_ < INT64_MAX) {
+        int32_t observerId = serialNumber_;
+        if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
         } else {
             serialNumber_ = 0;
         }
-        HILOG_INFO("%{public}s create observer", __func__);
-        AsyncTask::CompleteCallback complete =
-            [observerId, observer](NativeEngine& engine, AsyncTask& task, int32_t status) {
-                HILOG_INFO("Register errorObserver callback begin");
-                if (!DelayedSingleton<AppExecFwk::AppDataManager>::GetInstance()->AddErrorObservers(
-                    observerId, observer)) {
-                    HILOG_ERROR("Register errorObserver failed.");
-                }
-            };
 
-        NativeValue* result = nullptr;
-        AsyncTask::Schedule(
-            engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
+        if (observer_ == nullptr) {
+            // create observer
+            observer_ = std::make_shared<JsErrorObserver>(engine);
+            DelayedSingleton<AppExecFwk::AppDataManager>::GetInstance()->AddErrorObserver(observer_);
+        }
+        observer_->AddJsObserverObject(observerId, info.argv[0]);
         return engine.CreateNumber(observerId);
     }
 
@@ -105,11 +96,13 @@ private:
             reinterpret_cast<napi_value>(info.argv[INDEX_ZERO]), &observerId);
         HILOG_INFO("unregister errorObserver called, observer:%{public}d", (int32_t)observerId);
 
+        std::weak_ptr<JsErrorObserver> observerWptr(observer_);
         AsyncTask::CompleteCallback complete =
-            [observerId](
+            [observerWptr, observerId](
                 NativeEngine& engine, AsyncTask& task, int32_t status) {
                 HILOG_INFO("Unregister errorObserver called.");
-                if (DelayedSingleton<AppExecFwk::AppDataManager>::GetInstance()->RemoveErrorObservers(observerId)) {
+                auto observer = observerWptr.lock();
+                if (observer && observer->RemoveJsObserverObject(observerId)) {
                     task.Resolve(engine, engine.CreateUndefined());
                 } else {
                     task.Reject(engine, CreateJsError(engine, ERROR_CODE, "observer is not exist!"));
@@ -123,7 +116,8 @@ private:
         return result;
     }
 
-    int64_t serialNumber_ = 0;
+    int32_t serialNumber_ = 0;
+    std::shared_ptr<JsErrorObserver> observer_;
 };
 } // namespace
 
