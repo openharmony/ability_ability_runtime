@@ -33,6 +33,7 @@ public:
     std::shared_ptr<AppDataManager> appDataManagerTest_ = nullptr;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
+    static bool Flag;
     void SetUp();
     void TearDown();
 };
@@ -40,6 +41,8 @@ public:
 class MyObserver : public IErrorObserver {
     void OnUnhandledException(std::string errMsg) override;
 };
+
+bool AppDataManagerTest::Flag = false;
 
 void AppDataManagerTest::SetUpTestCase(void)
 {}
@@ -58,6 +61,7 @@ void AppDataManagerTest::TearDown(void)
 void MyObserver::OnUnhandledException(std::string errMsg)
 {
     GTEST_LOG_(INFO) << "OnUnhandledException come, errMsg is" << errMsg;
+    AppDataManagerTest::Flag = true;
 }
 
 /**
@@ -72,62 +76,11 @@ HWTEST_F(AppDataManagerTest, AppExecFwk_AppDataManager_AddErrorObservers_001, Fu
     EXPECT_NE(appDataManagerTest_, nullptr);
     std::shared_ptr<MyObserver> observer = std::make_shared<MyObserver>();
     if (appDataManagerTest_ != nullptr) {
-        EXPECT_EQ(true, appDataManagerTest_->AddErrorObservers(0, observer));
-        EXPECT_EQ(false, appDataManagerTest_->AddErrorObservers(0, observer));
+        appDataManagerTest_->AddErrorObserver(observer);
+        appDataManagerTest_->NotifyObserverUnhandledException("test");
+        EXPECT_EQ(true, AppDataManagerTest::Flag);
     }
     GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_AddErrorObservers_001 end";
-}
-
-/**
- * @tc.number: AppExecFwk_AppDataManager_RemoveErrorObservers_001
- * @tc.name: RegisterAbilityLifecycleCallbacks
- * @tc.desc: Test whether registerabilitylifecyclecallbacks and are called normally.
- */
-HWTEST_F(AppDataManagerTest, AppExecFwk_AppDataManager_RemoveErrorObservers_001, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_RemoveErrorObservers_001 start";
-
-    EXPECT_NE(appDataManagerTest_, nullptr);
-    if (appDataManagerTest_ != nullptr) {
-        EXPECT_EQ(false, appDataManagerTest_->RemoveErrorObservers(0));
-    }
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_RemoveErrorObservers_001 end";
-}
-
-/**
- * @tc.number: AppExecFwk_AppDataManager_RemoveErrorObservers_002
- * @tc.name: RegisterAbilityLifecycleCallbacks
- * @tc.desc: Test whether registerabilitylifecyclecallbacks and are called normally.
- */
-HWTEST_F(AppDataManagerTest, AppExecFwk_AppDataManager_RemoveErrorObservers_002, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_RemoveErrorObservers_002 start";
-
-    EXPECT_NE(appDataManagerTest_, nullptr);
-    std::shared_ptr<MyObserver> observer = std::make_shared<MyObserver>();
-    if (appDataManagerTest_ != nullptr) {
-        EXPECT_EQ(true, appDataManagerTest_->AddErrorObservers(0, observer));
-        EXPECT_EQ(true, appDataManagerTest_->RemoveErrorObservers(0));
-    }
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_RemoveErrorObservers_002 end";
-}
-
-/**
- * @tc.number: AppExecFwk_AppDataManager_NotifyObservers_001
- * @tc.name: RegisterAbilityLifecycleCallbacks
- * @tc.desc: Test whether registerabilitylifecyclecallbacks and are called normally.
- */
-HWTEST_F(AppDataManagerTest, AppExecFwk_AppDataManager_NotifyObservers_001, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_NotifyObservers_001 start";
-
-    EXPECT_NE(appDataManagerTest_, nullptr);
-    std::shared_ptr<MyObserver> observer = std::make_shared<MyObserver>();
-    if (appDataManagerTest_ != nullptr) {
-        EXPECT_EQ(true, appDataManagerTest_->AddErrorObservers(0, observer));
-        appDataManagerTest_->NotifyObserversUnhandledException(0);
-    }
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_NotifyObservers_001 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
