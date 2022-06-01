@@ -706,8 +706,10 @@ int32_t FormMgrService::GetFormsInfo(const std::string &moduleName, std::vector<
     }
     if (moduleName.empty()) {
         // fulfill formInfos, the process should be the same as GetFormsInfoByApp.
+        HILOG_INFO("GetFormsInfo flows to GetFormsInfoByAPP");
         return FormMgrAdapter::GetInstance().GetFormsInfoByApp(callerBundleName, formInfos);
     } else {
+        HILOG_INFO("GetFormsInfo flows to GetFormsInfoByModule");
         return FormMgrAdapter::GetInstance().GetFormsInfoByModule(callerBundleName, moduleName, formInfos);
     }
 }
