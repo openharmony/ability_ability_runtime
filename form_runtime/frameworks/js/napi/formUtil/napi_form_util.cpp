@@ -144,13 +144,13 @@ int32_t QueryRetCode(int32_t innerErrorCode)
 }
 
 /**
- * @brief NapiGetResut
+ * @brief NapiGetResult
  *
  * @param[in] env The environment that the Node-API call is invoked under
  *
  * @return napi_value
  */
-napi_value NapiGetResut(napi_env env, int iResult)
+napi_value NapiGetResult(napi_env env, int iResult)
 {
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, iResult, &result));
@@ -344,7 +344,7 @@ napi_value RetErrMsg(AsyncErrMsgCallbackInfo* asyncCallbackInfo)
             (void *)asyncCallbackInfo,
             &asyncCallbackInfo->asyncWork);
         NAPI_CALL(env, napi_queue_async_work(env, asyncCallbackInfo->asyncWork));
-        return NapiGetResut(env, 1);
+        return NapiGetResult(env, 1);
     } else {
         HILOG_INFO("%{public}s, promise.", __func__);
         napi_deferred deferred;
@@ -520,8 +520,8 @@ void ParseFormInfoIntoNapi(napi_env env, const FormInfo &formInfo, napi_value &r
     // supportDimensions
     napi_value supportDimensions;
     napi_create_array(env, &supportDimensions);
-    int iDimensionsCount = 0;
-    for (auto  dimension : formInfo.supportDimensions) {
+    int32_t iDimensionsCount = 0;
+    for (auto dimension : formInfo.supportDimensions) {
         HILOG_DEBUG("%{public}s, dimension=%{public}d.", __func__, dimension);
         napi_value dimensionInfo;
         napi_create_int32(env, (int32_t)dimension, &dimensionInfo);
@@ -539,7 +539,7 @@ void ParseFormInfoIntoNapi(napi_env env, const FormInfo &formInfo, napi_value &r
     napi_value customizeDatas;
     napi_create_array(env, &customizeDatas);
     int iCustomizeDatasCount = 0;
-    for (auto  customizeData : formInfo.customizeDatas) {
+    for (auto customizeData : formInfo.customizeDatas) {
         napi_value customizeDataOnject = nullptr;
         napi_create_object(env, &customizeDataOnject);
 
