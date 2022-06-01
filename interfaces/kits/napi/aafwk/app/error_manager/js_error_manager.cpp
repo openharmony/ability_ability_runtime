@@ -91,10 +91,10 @@ private:
         }
 
         // unwrap connectId
-        int64_t observerId = -1;
-        napi_get_value_int64(reinterpret_cast<napi_env>(&engine),
+        int32_t observerId = -1;
+        napi_get_value_int32(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[INDEX_ZERO]), &observerId);
-        HILOG_INFO("unregister errorObserver called, observer:%{public}d", (int32_t)observerId);
+        HILOG_INFO("unregister errorObserver called, observer:%{public}d", observerId);
 
         std::weak_ptr<JsErrorObserver> observerWptr(observer_);
         AsyncTask::CompleteCallback complete =
