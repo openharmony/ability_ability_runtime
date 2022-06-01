@@ -283,7 +283,7 @@ public:
     * @param formInfos Return the forms' information of the calling bundle name
     * @return Returns ERR_OK on success, others on failure.
     */
-    virtual int GetFormsInfo(std::string moduleName, std::vector<FormInfo> &formInfos) override;
+    int32_t GetFormsInfo(const std::string &moduleName, std::vector<FormInfo> &formInfos) override;
 
     /**
      * @brief Update action string for router event.
@@ -300,7 +300,7 @@ private:
     int GetParcelableInfo(IFormMgr::Message code, MessageParcel &data, T &parcelableInfo);
     int SendTransactCmd(IFormMgr::Message code, MessageParcel &data, MessageParcel &reply);
     int GetStringInfo(IFormMgr::Message code, MessageParcel &data, std::string &stringInfo);
-    int GetFormsInfo(IFormMgr::Message code, MessageParcel &data, std::vector<FormInfo> &formInfos);
+    int32_t GetFormsInfo(IFormMgr::Message code, MessageParcel &data, std::vector<FormInfo> &formInfos);
 private:
     static inline BrokerDelegator<FormMgrProxy> delegator_;
 };

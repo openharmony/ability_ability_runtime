@@ -32,7 +32,7 @@ struct AsyncNextRefreshTimeFormCallbackInfo {
     napi_ref callback;
     int64_t formId;
     int32_t time;
-    int result;
+    int32_t result;
 };
 
 struct AsyncUpdateFormCallbackInfo {
@@ -43,7 +43,7 @@ struct AsyncUpdateFormCallbackInfo {
     napi_ref callback;
     int64_t formId;
     std::shared_ptr<OHOS::AppExecFwk::FormProviderData> formProviderData;
-    int result;
+    int32_t result;
 };
 
 struct AsyncRequestPublishFormCallbackInfo {
@@ -86,7 +86,7 @@ struct AsyncGetFormsInfoCallbackInfo {
     napi_ref callback;
     std::string moduleName;
     std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
-    int result;
+    int32_t result = OHOS::ERR_OK;
 };
 
 napi_value NAPI_SetFormNextRefreshTime(napi_env env, napi_callback_info info);
@@ -94,5 +94,13 @@ napi_value NAPI_UpdateForm(napi_env env, napi_callback_info info);
 napi_value NAPI_RequestPublishForm(napi_env env, napi_callback_info info);
 napi_value NAPI_AddFormInfo(napi_env env, napi_callback_info info);
 napi_value NAPI_RemoveFormInfo(napi_env env, napi_callback_info info);
+/**
+ * @brief  The implementation of Node-API interface: GetFormsInfo
+ *
+ * @param[in] env The environment that the Node-API call is invoked under
+ * @param[out] info An opaque datatype that is passed to a callback function
+ *
+ * @return This is an opaque pointer that is used to represent a JavaScript value
+ */
 napi_value NAPI_GetFormsInfo(napi_env env, napi_callback_info info);
 #endif /* NAPI_FORM_PROVIDER_H_ */

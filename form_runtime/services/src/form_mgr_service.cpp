@@ -689,7 +689,7 @@ int FormMgrService::GetFormsInfoByModule(std::string &bundleName, std::string &m
 * @param formInfos Return the forms' information of the calling bundle name
 * @return Returns ERR_OK on success, others on failure.
 */
-int FormMgrService::GetFormsInfo(std::string moduleName, std::vector<FormInfo> &formInfos)
+int32_t FormMgrService::GetFormsInfo(const std::string &moduleName, std::vector<FormInfo> &formInfos)
 {
     HILOG_INFO("%{public}s called.", __func__);
     sptr<IBundleMgr> bundleMgr = FormBmsHelper::GetInstance().GetBundleMgr();

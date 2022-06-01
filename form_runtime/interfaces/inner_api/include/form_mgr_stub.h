@@ -253,7 +253,7 @@ private:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t HandleGetFormsInfoByModule(MessageParcel &data, MessageParcel &reply);
-     /**
+    /**
      * @brief Handle GetFormsInfo message.
      * @param data input param.
      * @param reply output param.
