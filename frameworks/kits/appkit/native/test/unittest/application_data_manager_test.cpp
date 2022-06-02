@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "app_data_manager.h"
+#include "application_data_manager.h"
 #include "ierror_observer.h"
 
 using namespace testing::ext;
@@ -24,13 +24,13 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AppExecFwk {
-class AppDataManagerTest : public testing::Test {
+class ApplicationDataManagerTest : public testing::Test {
 public:
-    AppDataManagerTest()
+    ApplicationDataManagerTest()
     {}
-    ~AppDataManagerTest()
+    ~ApplicationDataManagerTest()
     {}
-    std::shared_ptr<AppDataManager> appDataManagerTest_ = nullptr;
+    std::shared_ptr<ApplicationDataManager> appDataManagerTest_ = nullptr;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     static bool Flag;
@@ -42,45 +42,45 @@ class MyObserver : public IErrorObserver {
     void OnUnhandledException(std::string errMsg) override;
 };
 
-bool AppDataManagerTest::Flag = false;
+bool ApplicationDataManagerTest::Flag = false;
 
-void AppDataManagerTest::SetUpTestCase(void)
+void ApplicationDataManagerTest::SetUpTestCase(void)
 {}
 
-void AppDataManagerTest::TearDownTestCase(void)
+void ApplicationDataManagerTest::TearDownTestCase(void)
 {}
 
-void AppDataManagerTest::SetUp(void)
+void ApplicationDataManagerTest::SetUp(void)
 {
-    appDataManagerTest_ = DelayedSingleton<AppExecFwk::AppDataManager>::GetInstance();
+    appDataManagerTest_ = DelayedSingleton<AppExecFwk::ApplicationDataManager>::GetInstance();
 }
 
-void AppDataManagerTest::TearDown(void)
+void ApplicationDataManagerTest::TearDown(void)
 {}
 
 void MyObserver::OnUnhandledException(std::string errMsg)
 {
     GTEST_LOG_(INFO) << "OnUnhandledException come, errMsg is" << errMsg;
-    AppDataManagerTest::Flag = true;
+    ApplicationDataManagerTest::Flag = true;
 }
 
 /**
- * @tc.number: AppExecFwk_AppDataManager_AddErrorObservers_001
+ * @tc.number: AppExecFwk_ApplicationDataManager_AddErrorObservers_001
  * @tc.name: RegisterAbilityLifecycleCallbacks
  * @tc.desc: Test whether registerabilitylifecyclecallbacks and are called normally.
  */
-HWTEST_F(AppDataManagerTest, AppExecFwk_AppDataManager_AddErrorObservers_001, Function | MediumTest | Level1)
+HWTEST_F(ApplicationDataManagerTest, AppExecFwk_ApplicationDataManager_AddErrorObservers_001, Function | MediumTest | Level1)
 {
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_AddErrorObservers_001 start";
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationDataManager_AddErrorObservers_001 start";
 
     EXPECT_NE(appDataManagerTest_, nullptr);
     std::shared_ptr<MyObserver> observer = std::make_shared<MyObserver>();
     if (appDataManagerTest_ != nullptr) {
         appDataManagerTest_->AddErrorObserver(observer);
-        appDataManagerTest_->NotifyObserverUnhandledException("test");
-        EXPECT_EQ(true, AppDataManagerTest::Flag);
+        appDataManagerTest_->NotifyUnhandledException("test");
+        EXPECT_EQ(true, ApplicationDataManagerTest::Flag);
     }
-    GTEST_LOG_(INFO) << "AppExecFwk_AppDataManager_AddErrorObservers_001 end";
+    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationDataManager_AddErrorObservers_001 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

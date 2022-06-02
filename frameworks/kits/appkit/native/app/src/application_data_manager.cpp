@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#include "app_data_manager.h"
+#include "application_data_manager.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-AppDataManager::AppDataManager() {}
+ApplicationDataManager::ApplicationDataManager() {}
 
-AppDataManager::~AppDataManager() {}
+ApplicationDataManager::~ApplicationDataManager() {}
 
-void AppDataManager::AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer)
+void ApplicationDataManager::AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer)
 {
     HILOG_DEBUG("Add error observer come.");
     errorObserver_ = observer;
 }
 
-void AppDataManager::NotifyObserverUnhandledException(const std::string &errMsg)
+void ApplicationDataManager::NotifyUnhandledException(const std::string &errMsg)
 {
     HILOG_DEBUG("Notify error observer come.");
     std::shared_ptr<IErrorObserver> observer = errorObserver_.lock();
