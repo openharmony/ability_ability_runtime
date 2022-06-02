@@ -13,34 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_PERMISSION_VERIFICATION_H
-#define OHOS_AAFWK_PERMISSION_VERIFICATION_H
+#ifndef OHOS_APPEXECFWK_APP_DATA_MANAGER_H
+#define OHOS_APPEXECFWK_APP_DATA_MANAGER_H
 
-#include <string.h>
+#include <string>
 
+#include "ierror_observer.h"
 #include "singleton.h"
 
 namespace OHOS {
-namespace AAFwk {
-class PermissionVerification : public DelayedSingleton<PermissionVerification> {
+namespace AppExecFwk {
+class ApplicationDataManager : public std::enable_shared_from_this<ApplicationDataManager> {
+    DECLARE_DELAYED_SINGLETON(ApplicationDataManager)
 public:
-    PermissionVerification() = default;
-    ~PermissionVerification() = default;
-
-    bool VerifyCallingPermission(const std::string &permissionName);
-
-    bool IsSACall();
-
-    bool CheckSpecificSystemAbilityAccessPermission();
-
-    bool VerifyRunningInfoPerm();
-
-    bool VerifyControllerPerm();
+    void AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer);
+    void NotifyUnhandledException(const std::string &errMsg);
 
 private:
-    DISALLOW_COPY_AND_MOVE(PermissionVerification);
-    unsigned int GetCallingTokenID();
+    std::weak_ptr<IErrorObserver> errorObserver_;
 };
-}  // namespace AAFwk
+}  // namespace AppExecFwk
 }  // namespace OHOS
-#endif // OHOS_AAFWK_PERMISSION_VERIFICATION_H
+#endif  // OHOS_APPEXECFWK_APP_DATA_MANAGER_H
