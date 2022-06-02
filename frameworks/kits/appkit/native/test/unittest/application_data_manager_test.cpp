@@ -65,13 +65,13 @@ void MyObserver::OnUnhandledException(std::string errMsg)
 }
 
 /**
- * @tc.number: AppExecFwk_ApplicationDataManager_AddErrorObservers_001
+ * @tc.number: ApplicationDataManager_AddErrorObservers_001
  * @tc.name: RegisterAbilityLifecycleCallbacks
  * @tc.desc: Test whether registerabilitylifecyclecallbacks and are called normally.
  */
-HWTEST_F(ApplicationDataManagerTest, AppExecFwk_ApplicationDataManager_AddErrorObservers_001, Function | MediumTest | Level1)
+HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_AddErrorObservers_001, Function | MediumTest | Level1)
 {
-    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationDataManager_AddErrorObservers_001 start";
+    GTEST_LOG_(INFO) << "ApplicationDataManager_AddErrorObservers_001 start";
 
     EXPECT_NE(appDataManagerTest_, nullptr);
     std::shared_ptr<MyObserver> observer = std::make_shared<MyObserver>();
@@ -80,7 +80,7 @@ HWTEST_F(ApplicationDataManagerTest, AppExecFwk_ApplicationDataManager_AddErrorO
         appDataManagerTest_->NotifyUnhandledException("test");
         EXPECT_EQ(true, ApplicationDataManagerTest::Flag);
     }
-    GTEST_LOG_(INFO) << "AppExecFwk_ApplicationDataManager_AddErrorObservers_001 end";
+    GTEST_LOG_(INFO) << "ApplicationDataManager_AddErrorObservers_001 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
