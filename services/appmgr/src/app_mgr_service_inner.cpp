@@ -2051,9 +2051,9 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         int32_t result = appRunningManager_->UpdateConfiguration(config);
         if (result == ERR_OK) {
             // notify
-            for (auto &observer : confiurtaionObserverMap_) {
-                if (observer.second != nullptr) {
-                    observer.second->OnConfigurationUpdated(config);
+            for (auto &observer : confiurtaionObservers_) {
+                if (observer != nullptr) {
+                    observer->OnConfigurationUpdated(config);
                 }
             }
         } else {
@@ -2066,8 +2066,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
     }
 }
 
-int32_t AppMgrServiceInner::RegisterConfigurationObserver(const int32_t id,
-    const sptr<IConfigurationObserver>& observer)
+int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)
 {
     HILOG_INFO("AppMgrServiceInner::RegisterConfigurationObserver: called");
 
@@ -2075,27 +2074,39 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const int32_t id,
         HILOG_ERROR("AppMgrServiceInner::Register error: observer is null");
         return ERR_INVALID_VALUE;
     }
-
     std::lock_guard<std::recursive_mutex> registerLock(confiurtaionObserverLock_);
-    if (confiurtaionObserverMap_.find(id) != confiurtaionObserverMap_.end()) {
-        HILOG_INFO("AppMgrServiceInner ConfigurationObserver has been registered");
-    } else {
-        confiurtaionObserverMap_[id] = observer;
+    auto it = std::find_if(confiurtaionObservers_.begin(), confiurtaionObservers_.end(),
+        [&observer](const sptr<IConfigurationObserver> &item) {
+            return (item && item->AsObject() == observer->AsObject());
+        }
+    );
+    if (it != confiurtaionObservers_.end()) {
+        HILOG_ERROR("AppMgrServiceInner::Register error: observer exist");
+        return ERR_INVALID_VALUE;
     }
+    confiurtaionObservers_.push_back(observer);
     return NO_ERROR;
 }
 
-int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const int32_t id)
+int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)
 {
     HILOG_INFO("AppMgrServiceInner::UnregisterConfigurationObserver: called");
-    std::lock_guard<std::recursive_mutex> unregisterLock(confiurtaionObserverLock_);
-    
-    if (confiurtaionObserverMap_.find(id) != confiurtaionObserverMap_.end()) {
-        confiurtaionObserverMap_.erase(id);
-    } else {
-        HILOG_INFO("AppMgrServiceInner ConfigurationObserver not register");
+    if (observer == nullptr) {
+        HILOG_ERROR("AppMgrServiceInner::Register error: observer is null");
+        return ERR_INVALID_VALUE;
     }
-    return NO_ERROR;
+    std::lock_guard<std::recursive_mutex> unregisterLock(confiurtaionObserverLock_);
+    auto it = std::find_if(confiurtaionObservers_.begin(), confiurtaionObservers_.end(),
+        [&observer](const sptr<IConfigurationObserver> &item) {
+            return (item && item->AsObject() == observer->AsObject());
+        }
+    );
+    if (it != confiurtaionObservers_.end()) {
+        confiurtaionObservers_.erase(it);
+        return NO_ERROR;
+    }
+    HILOG_INFO("AppMgrServiceInner ConfigurationObserver not register");
+    return ERR_INVALID_VALUE;
 }
 
 void AppMgrServiceInner::GetGlobalConfiguration()

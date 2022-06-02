@@ -724,8 +724,7 @@ int32_t AppMgrProxy::GetConfiguration(Configuration &config)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::RegisterConfigurationObserver(const int32_t id,
-    const sptr<IConfigurationObserver> &observer)
+int32_t AppMgrProxy::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
 {
     if (!observer) {
         HILOG_ERROR("observer null");
@@ -736,11 +735,6 @@ int32_t AppMgrProxy::RegisterConfigurationObserver(const int32_t id,
     MessageParcel reply;
     MessageOption option;
     if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-
-    if (!data.WriteInt32(id)) {
-        HILOG_ERROR("id write failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -758,7 +752,7 @@ int32_t AppMgrProxy::RegisterConfigurationObserver(const int32_t id,
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::UnregisterConfigurationObserver(const int32_t id)
+int32_t AppMgrProxy::UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
 {
     HILOG_DEBUG("UnregisterConfigurationObserver start");
     MessageParcel data;
@@ -768,8 +762,8 @@ int32_t AppMgrProxy::UnregisterConfigurationObserver(const int32_t id)
         return ERR_FLATTEN_OBJECT;
     }
 
-    if (!data.WriteInt32(id)) {
-        HILOG_ERROR("id write failed.");
+    if (!data.WriteRemoteObject(observer->AsObject())) {
+        HILOG_ERROR("observer write failed.");
         return ERR_FLATTEN_OBJECT;
     }
 

@@ -229,10 +229,9 @@ public:
 
     virtual int32_t UpdateConfiguration(const Configuration &config) override;
 
-    virtual int32_t RegisterConfigurationObserver(const int32_t id,
-        const sptr<IConfigurationObserver> &observer) override;
+    virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
-    virtual int32_t UnregisterConfigurationObserver(const int32_t id) override;
+    virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
 private:
     bool SendTransactCmd(IAppMgr::Message code, MessageParcel &data, MessageParcel &reply);

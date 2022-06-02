@@ -235,10 +235,9 @@ public:
 
     virtual int32_t UpdateConfiguration(const Configuration &config) = 0;
 
-    virtual int32_t RegisterConfigurationObserver(const int32_t id,
-        const sptr<IConfigurationObserver> &observer) = 0;
+    virtual int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) = 0;
 
-    virtual int32_t UnregisterConfigurationObserver(const int32_t id) = 0;
+    virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) = 0;
 
     enum class Message {
         APP_ATTACH_APPLICATION = 0,
