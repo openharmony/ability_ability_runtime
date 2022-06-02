@@ -302,39 +302,9 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
 
     HILOG_INFO("%{public}s", __func__);
 
-    if ((flags & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
-        HILOG_INFO("StartAbility with free install flags");
-        Want fiWant = want;
-        std::string freeInstallType = "StartAbility";
-        fiWant.SetParam(FREE_INSTALL_TYPE, freeInstallType);
-        int32_t validUserId = GetValidUserId(userId);
-        auto manager = std::make_shared<FreeInstallManager>(weak_from_this());
-        eventInfo.errCode = manager->FreeInstall(fiWant, validUserId, requestCode, callerToken,
-            CheckIfOperateRemote(want));
-        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
-            HiSysEventType::FAULT, eventInfo);
-        return eventInfo.errCode;
-    }
-
     HILOG_INFO("Start ability come, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
-    if (CheckIfOperateRemote(want)) {
-        if (requestCode == DEFAULT_REQUEST_CODE) {
-            HILOG_INFO("AbilityManagerService::StartAbility. try to StartRemoteAbility");
-            eventInfo.errCode = StartRemoteAbility(want, requestCode);
-            AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
-                HiSysEventType::FAULT, eventInfo);
-            return eventInfo.errCode;
-        }
-        int32_t missionId = GetMissionIdByAbilityToken(callerToken);
-        Want newWant = want;
-        newWant.SetParam(DMS_MISSION_ID, missionId);
-        HILOG_INFO("AbilityManagerService::StartAbility. try to StartAbilityForResult");
-        eventInfo.errCode = StartRemoteAbility(newWant, requestCode);
-        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
-            HiSysEventType::FAULT, eventInfo);
-        return eventInfo.errCode;
-    }
+
     int32_t ret = StartAbilityInner(want, callerToken, requestCode, -1, userId);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
@@ -355,16 +325,34 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
-        auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID());
-        if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE ||
-            iface_cast<ISystemAbilityTokenCallback>(callerToken) == nullptr) {
+        auto isSpecificSA = AAFwk::PermissionVerification::GetInstance()->
+            CheckSpecificSystemAbilityAccessPermission();
+        if (!isSpecificSA) {
             HILOG_ERROR("%{public}s VerificationAllToken failed.", __func__);
             return ERR_INVALID_VALUE;
         }
-        HILOG_INFO("%{public}s: Caller is system ability.", __func__);
+        HILOG_INFO("%{public}s: Caller is specific system ability.", __func__);
     }
     int32_t oriValidUserId = GetValidUserId(userId);
     int32_t validUserId = oriValidUserId;
+    int ret = IsStartFreeInstall(want, callerToken, requestCode, validUserId);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (callerToken != nullptr) {
+        if (CheckIfOperateRemote(want)) {
+            if (requestCode == DEFAULT_REQUEST_CODE) {
+                HILOG_INFO("AbilityManagerService::StartAbility. try to StartRemoteAbility");
+                return StartRemoteAbility(want, requestCode);
+            }
+            int32_t missionId = GetMissionIdByAbilityToken(callerToken);
+            Want newWant = want;
+            newWant.SetParam(DMS_MISSION_ID, missionId);
+            HILOG_INFO("AbilityManagerService::StartAbility. try to StartAbilityForResult");
+            return StartRemoteAbility(newWant, requestCode);
+        }
+    }
+
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
         return ERR_INVALID_VALUE;
@@ -460,6 +448,10 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     }
     int32_t oriValidUserId = GetValidUserId(userId);
     int32_t validUserId = oriValidUserId;
+    int ret = IsStartFreeInstall(want, callerToken, requestCode, validUserId);
+    if (ret != ERR_OK) {
+        return ret;
+    }
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
         eventInfo.errCode = ERR_INVALID_VALUE;
@@ -543,7 +535,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-    int32_t ret = missionListManager->StartAbility(abilityRequest);
+    ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
@@ -581,6 +573,10 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     }
     int32_t oriValidUserId = GetValidUserId(userId);
     int32_t validUserId = oriValidUserId;
+    int ret = IsStartFreeInstall(want, callerToken, requestCode, validUserId);
+    if (ret != ERR_OK) {
+        return ret;
+    }
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
         eventInfo.errCode = ERR_INVALID_VALUE;
@@ -658,13 +654,25 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
             HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-    int32_t ret = missionListManager->StartAbility(abilityRequest);
+    ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
             HiSysEventType::FAULT, eventInfo);
     }
     return ret;
+}
+
+int AbilityManagerService::IsStartFreeInstall(
+    const Want &want, const sptr<IRemoteObject> &callerToken, int requestCode, int32_t userId)
+{
+    auto flags = want.GetFlags();
+    if ((flags & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
+        HILOG_INFO("StartAbility with free install flags");
+        auto manager = std::make_shared<FreeInstallManager>(weak_from_this());
+        return manager->IsStartFreeInstall(want, userId, callerToken, requestCode, CheckIfOperateRemote(want));
+    }
+    return ERR_OK;
 }
 
 int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
@@ -1259,16 +1267,20 @@ int AbilityManagerService::ConnectAbility(
     if (CheckIfOperateRemote(abilityWant)) {
         HILOG_INFO("AbilityManagerService::ConnectAbility. try to ConnectRemoteAbility");
         eventInfo.errCode = ConnectRemoteAbility(abilityWant, connect->AsObject());
-        AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
-            HiSysEventType::FAULT, eventInfo);
+        if (eventInfo.errCode != ERR_OK) {
+            AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
+                HiSysEventType::FAULT, eventInfo);
+        }
         return eventInfo.errCode;
     }
 
     if (callerToken != nullptr && callerToken->GetObjectDescriptor() != u"ohos.aafwk.AbilityToken") {
         HILOG_INFO("%{public}s invalid Token.", __func__);
         eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, nullptr);
-        AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
-            HiSysEventType::FAULT, eventInfo);
+        if (eventInfo.errCode != ERR_OK) {
+            AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
+                HiSysEventType::FAULT, eventInfo);
+        }
         return eventInfo.errCode;
     }
     eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken);
@@ -1289,13 +1301,13 @@ int AbilityManagerService::DisconnectAbility(const sptr<IAbilityConnection> &con
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
 
-    eventInfo.errCode = DisconnectLocalAbility(connect);
-    eventInfo.errCode |= DisconnectRemoteAbility(connect->AsObject());
-    if (eventInfo.errCode != ERR_OK) {
+    if (ERR_OK != DisconnectRemoteAbility(connect->AsObject()) &&
+        ERR_OK != DisconnectRemoteAbility(connect->AsObject())) {
+        eventInfo.errCode = INNER_ERR;
         AAFWK::EventReport::SendExtensionEvent(AAFWK::DISCONNECT_SERVICE_ERROR,
             HiSysEventType::FAULT, eventInfo);
     }
-    return eventInfo.errCode;
+    return ERR_OK;
 }
 
 int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,

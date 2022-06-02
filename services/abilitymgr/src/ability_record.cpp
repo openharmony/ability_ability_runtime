@@ -31,7 +31,6 @@
 #include "os_account_manager.h"
 #endif // OS_ACCOUNT_PART_ENABLED
 #include "system_ability_token_callback.h"
-#include "system_ability_token_callback_proxy.h"
 #include "uri_permission_manager_client.h"
 
 namespace OHOS {
@@ -42,6 +41,7 @@ const std::string DMS_PROCESS_NAME = "distributedsched";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
+const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbilityTokenCallback";
 int64_t AbilityRecord::abilityRecordId = 0;
 int64_t AbilityRecord::g_abilityRecordEventId_ = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -684,12 +684,22 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode, int r
         HILOG_ERROR("CallerToken is nullptr");
         return;
     }
-    auto object = iface_cast<ISystemAbilityTokenCallback>(callerToken);
-    if (object == nullptr) {
-        HILOG_ERROR("Remote object is nullptr");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SYSTEM_ABILITY_TOKEN_CALLBACK)) {
+        HILOG_ERROR("SendResultToSystemAbility Write interface token failed.");
         return;
     }
-    int result = object->SendResult(resultWant, callerUid, requestCode, accessToken, resultCode);
+    if (!data.WriteParcelable(&resultWant)) {
+        HILOG_ERROR("fail to WriteParcelable");
+        return;
+    }
+    data.WriteInt32(callerUid);
+    data.WriteInt32(requestCode);
+    data.WriteUint32(accessToken);
+    data.WriteInt32(resultCode);
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    int result = callerToken->SendRequest(ISystemAbilityTokenCallback::SEND_RESULT, data, reply, option);
     if (result != ERR_OK) {
         HILOG_ERROR("SendResultToSystemAbility error = %{public}d", result);
     }
@@ -724,11 +734,11 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Add caller record.");
-    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (requestCode != DEFAULT_REQUEST_CODE && callerToken != nullptr && abilityRecord == nullptr) {
+    if (requestCode != DEFAULT_REQUEST_CODE && IsSystemAbilityCall(callerToken)) {
         AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
         return;
     }
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER(abilityRecord);
 
     auto isExist = [&abilityRecord](const std::shared_ptr<CallerRecord> &callerRecord) {
@@ -751,27 +761,48 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
         abilityRecord->GetAbilityInfo().name.c_str());
 }
 
+bool AbilityRecord::IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken)
+{
+    if (callerToken == nullptr) {
+        return false;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord != nullptr) {
+        return false;
+    }
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID());
+    bool isNativeCall = tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE;
+    if (!isNativeCall) {
+        HILOG_INFO("Is not native call.");
+        return false;
+    }
+    AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(),
+        nativeTokenInfo);
+    if (result == ERR_OK && nativeTokenInfo.processName == DMS_PROCESS_NAME) {
+        HILOG_INFO("Is system ability call.");
+        return true;
+    }
+    return false;
+}
+
 void AbilityRecord::AddSystemAbilityCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode,
     std::string srcAbilityId)
 {
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID());
-    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE &&
-        iface_cast<ISystemAbilityTokenCallback>(callerToken) != nullptr) {
-        HILOG_INFO("Add system ability caller record.");
-        std::shared_ptr<SystemAbilityCallerRecord> systemAbilityRecord =
-            std::make_shared<SystemAbilityCallerRecord>(srcAbilityId, callerToken);
-        auto isExist = [&srcAbilityId](const std::shared_ptr<CallerRecord> &callerRecord) {
-            std::shared_ptr<SystemAbilityCallerRecord> saCaller = callerRecord->GetSaCaller();
-            return (saCaller != nullptr && saCaller->GetSrcAbilityId() == srcAbilityId);
-        };
-        auto record = std::find_if(callerList_.begin(), callerList_.end(), isExist);
-        if (record != callerList_.end()) {
-            HILOG_INFO("Find same system ability caller record.");
-            callerList_.erase(record);
-        }
-        callerList_.emplace_back(std::make_shared<CallerRecord>(requestCode, systemAbilityRecord));
-        HILOG_INFO("Add system ability record end.");
+    HILOG_INFO("Add system ability caller record.");
+    std::shared_ptr<SystemAbilityCallerRecord> systemAbilityRecord =
+        std::make_shared<SystemAbilityCallerRecord>(srcAbilityId, callerToken);
+    auto isExist = [&srcAbilityId](const std::shared_ptr<CallerRecord> &callerRecord) {
+        std::shared_ptr<SystemAbilityCallerRecord> saCaller = callerRecord->GetSaCaller();
+        return (saCaller != nullptr && saCaller->GetSrcAbilityId() == srcAbilityId);
+    };
+    auto record = std::find_if(callerList_.begin(), callerList_.end(), isExist);
+    if (record != callerList_.end()) {
+        HILOG_INFO("Find same system ability caller record.");
+        callerList_.erase(record);
     }
+    callerList_.emplace_back(std::make_shared<CallerRecord>(requestCode, systemAbilityRecord));
+    HILOG_INFO("Add system ability record end.");
 }
 
 std::list<std::shared_ptr<CallerRecord>> AbilityRecord::GetCallerRecordList() const
