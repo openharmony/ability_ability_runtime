@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#include "app_data_manager.h"
+#include "application_data_manager.h"
 #include "hilog_wrapper.h"
 #include "js_error_observer.h"
 #include "js_runtime.h"
@@ -30,6 +30,7 @@ namespace {
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr int32_t ERROR_CODE = -1;
+constexpr int32_t INVALID_PARAM = -2;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 
@@ -76,7 +77,7 @@ private:
         if (observer_ == nullptr) {
             // create observer
             observer_ = std::make_shared<JsErrorObserver>(engine);
-            DelayedSingleton<AppExecFwk::AppDataManager>::GetInstance()->AddErrorObserver(observer_);
+            DelayedSingleton<AppExecFwk::ApplicationDataManager>::GetInstance()->AddErrorObserver(observer_);
         }
         observer_->AddJsObserverObject(observerId, info.argv[0]);
         return engine.CreateNumber(observerId);
@@ -84,23 +85,25 @@ private:
 
     NativeValue* OnUnregisterErrorObserver(NativeEngine& engine, NativeCallbackInfo& info)
     {
+        int32_t observerId = -1;
         // only support one or two params
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
             HILOG_ERROR("unregister errorObserver error, not enough params.");
-            return engine.CreateUndefined();
+        } else {
+            napi_get_value_int32(reinterpret_cast<napi_env>(&engine),
+                reinterpret_cast<napi_value>(info.argv[INDEX_ZERO]), &observerId);
+            HILOG_INFO("unregister errorObserver called, observer:%{public}d", observerId);
         }
-
-        // unwrap connectId
-        int32_t observerId = -1;
-        napi_get_value_int32(reinterpret_cast<napi_env>(&engine),
-            reinterpret_cast<napi_value>(info.argv[INDEX_ZERO]), &observerId);
-        HILOG_INFO("unregister errorObserver called, observer:%{public}d", observerId);
 
         std::weak_ptr<JsErrorObserver> observerWptr(observer_);
         AsyncTask::CompleteCallback complete =
             [observerWptr, observerId](
                 NativeEngine& engine, AsyncTask& task, int32_t status) {
                 HILOG_INFO("Unregister errorObserver called.");
+                if (observerId == -1) {
+                    task.Reject(engine, CreateJsError(engine, INVALID_PARAM, "param is invalid!"));
+                    return;
+                }
                 auto observer = observerWptr.lock();
                 if (observer && observer->RemoveJsObserverObject(observerId)) {
                     task.Resolve(engine, engine.CreateUndefined());

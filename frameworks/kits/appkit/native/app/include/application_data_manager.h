@@ -23,11 +23,11 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-class AppDataManager : public std::enable_shared_from_this<AppDataManager> {
-    DECLARE_DELAYED_SINGLETON(AppDataManager)
+class ApplicationDataManager : public std::enable_shared_from_this<ApplicationDataManager> {
+    DECLARE_DELAYED_SINGLETON(ApplicationDataManager)
 public:
     void AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer);
-    void NotifyObserverUnhandledException(const std::string &errMsg);
+    void NotifyUnhandledException(const std::string &errMsg);
 
 private:
     std::weak_ptr<IErrorObserver> errorObserver_;

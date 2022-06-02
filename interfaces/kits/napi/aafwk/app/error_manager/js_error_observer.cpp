@@ -71,7 +71,6 @@ void JsErrorObserver::CallJsFunction(NativeValue* value, const char* methodName,
         HILOG_ERROR("Failed to get method");
         return;
     }
-    HILOG_INFO("CallJsFunction success");
     engine_.CallFunction(value, method, argv, argc);
 }
 

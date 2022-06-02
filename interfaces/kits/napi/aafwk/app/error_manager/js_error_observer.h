@@ -17,8 +17,8 @@
 #include "ierror_observer.h"
 #include "native_engine/native_engine.h"
 
-#ifndef OHOS_APPEXECFWK_RUNTIME_JS_ERROR_OBSERVER_H
-#define OHOS_APPEXECFWK_RUNTIME_JS_ERROR_OBSERVER_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_ERROR_OBSERVER_H
+#define OHOS_ABILITY_RUNTIME_JS_ERROR_OBSERVER_H
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -41,4 +41,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // OHOS_APPEXECFWK_RUNTIME_JS_ERROR_OBSERVER_H
+#endif // OHOS_ABILITY_RUNTIME_JS_ERROR_OBSERVER_H
