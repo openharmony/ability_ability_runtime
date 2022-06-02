@@ -474,12 +474,11 @@ AppMgrResultCode AppMgrClient::UpdateConfiguration(const Configuration &config)
     return AppMgrResultCode::RESULT_OK;
 }
 
-AppMgrResultCode AppMgrClient::RegisterConfigurationObserver(const int32_t id,
-    const sptr<IConfigurationObserver> &observer)
+AppMgrResultCode AppMgrClient::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        int32_t result = service->RegisterConfigurationObserver(id, observer);
+        int32_t result = service->RegisterConfigurationObserver(observer);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }
@@ -488,11 +487,11 @@ AppMgrResultCode AppMgrClient::RegisterConfigurationObserver(const int32_t id,
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::UnregisterConfigurationObserver(const int32_t id)
+AppMgrResultCode AppMgrClient::UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
-        int32_t result = service->UnregisterConfigurationObserver(id);
+        int32_t result = service->UnregisterConfigurationObserver(observer);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }

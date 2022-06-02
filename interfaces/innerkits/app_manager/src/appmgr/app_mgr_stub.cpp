@@ -450,17 +450,16 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
 
 int32_t AppMgrStub::HandleRegisterConfigurationObserver(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t id = data.ReadInt32();
     auto observer = iface_cast<AppExecFwk::IConfigurationObserver>(data.ReadRemoteObject());
-    int32_t result = RegisterConfigurationObserver(id, observer);
+    int32_t result = RegisterConfigurationObserver(observer);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
 
 int32_t AppMgrStub::HandleUnregisterConfigurationObserver(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t id = data.ReadInt32();
-    int32_t result = UnregisterConfigurationObserver(id);
+    auto observer = iface_cast<AppExecFwk::IConfigurationObserver>(data.ReadRemoteObject());
+    int32_t result = UnregisterConfigurationObserver(observer);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

@@ -202,10 +202,9 @@ public:
      */
     virtual AppMgrResultCode UpdateConfiguration(const Configuration &config);
 
-    virtual AppMgrResultCode RegisterConfigurationObserver(const int32_t id,
-        const sptr<IConfigurationObserver> &observer);
+    virtual AppMgrResultCode RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer);
 
-    virtual AppMgrResultCode UnregisterConfigurationObserver(const int32_t id);
+    virtual AppMgrResultCode UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**

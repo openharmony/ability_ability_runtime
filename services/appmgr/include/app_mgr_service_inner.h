@@ -434,9 +434,9 @@ public:
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration();
 
-    int32_t RegisterConfigurationObserver(const int32_t id, const sptr<IConfigurationObserver>& observer);
+    int32_t RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer);
 
-    int32_t UnregisterConfigurationObserver(const int32_t id);
+    int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver>& observer);
 
     /**
      * Start empty process
@@ -745,7 +745,7 @@ private:
     std::mutex userTestLock_;
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     std::recursive_mutex confiurtaionObserverLock_;
-    std::unordered_map<int32_t, sptr<IConfigurationObserver>> confiurtaionObserverMap_;
+    std::vector<sptr<IConfigurationObserver>> confiurtaionObservers_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

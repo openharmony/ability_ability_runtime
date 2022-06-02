@@ -471,23 +471,22 @@ int32_t AppMgrService::UpdateConfiguration(const Configuration& config)
     return appMgrServiceInner_->UpdateConfiguration(config);
 }
 
-int32_t AppMgrService::RegisterConfigurationObserver(const int32_t id,
-    const sptr<IConfigurationObserver> &observer)
+int32_t AppMgrService::RegisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
 {
     if (!IsReady()) {
         HILOG_ERROR("RegisterConfigurationObserver failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->RegisterConfigurationObserver(id, observer);
+    return appMgrServiceInner_->RegisterConfigurationObserver(observer);
 }
 
-int32_t AppMgrService::UnregisterConfigurationObserver(const int32_t id)
+int32_t AppMgrService::UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer)
 {
     if (!IsReady()) {
         HILOG_ERROR("UnregisterConfigurationObserver failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->UnregisterConfigurationObserver(id);
+    return appMgrServiceInner_->UnregisterConfigurationObserver(observer);
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
