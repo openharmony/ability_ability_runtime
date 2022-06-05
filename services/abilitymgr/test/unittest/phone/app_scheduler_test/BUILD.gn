@@ -12,8 +12,9 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/aafwk/standard/aafwk.gni")
-import("//foundation/aafwk/standard/services/abilitymgr/abilitymgr.gni")
+import("//foundation/ability/ability_runtime/aafwk.gni")
+import(
+    "//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
 
 module_output_path = "ability_runtime/abilitymgr"
 
@@ -28,7 +29,6 @@ ohos_unittest("app_scheduler_test") {
 
   sources = [
     "${aafwk_path}/services/abilitymgr/src/app_scheduler.cpp",
-    "${aafwk_path}/services/abilitymgr/src/system_ability_token_callback_proxy.cpp",
     "app_scheduler_test.cpp",
   ]
 

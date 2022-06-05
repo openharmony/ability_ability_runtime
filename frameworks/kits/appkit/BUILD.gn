@@ -13,7 +13,7 @@
 
 import("//ark/ts2abc/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
-import("//foundation/aafwk/standard/aafwk.gni")
+import("//foundation/ability/ability_runtime/aafwk.gni")
 
 ts2abc_gen_abc("gen_delegator_mgmt_abc") {
   src_js = rebase_path(
@@ -96,6 +96,7 @@ ohos_shared_library("appkit_native") {
     "native/app/src/ability_record_mgr.cpp",
     "native/app/src/app_context.cpp",
     "native/app/src/app_loader.cpp",
+    "native/app/src/application_data_manager.cpp",
     "native/app/src/application_env.cpp",
     "native/app/src/application_env_impl.cpp",
     "native/app/src/application_impl.cpp",
