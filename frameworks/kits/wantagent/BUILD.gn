@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/aafwk/standard/aafwk.gni")
+import("//foundation/ability/ability_runtime/aafwk.gni")
 
 group("native_wantagent") {
   deps = [ ":wantagent_innerkits" ]
@@ -58,6 +58,7 @@ ohos_shared_library("wantagent_innerkits") {
   deps = [ "${kits_path}/appkit:app_context" ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_runtime:ability_manager",
     "bundle_framework:appexecfwk_base",
