@@ -44,7 +44,7 @@ namespace OHOS::AppExecFwk {
         return true;
     }
 }
-namespace{
+namespace {
 class FormMgrProxyTest : public testing::Test {
 public:
     void SetUp() override

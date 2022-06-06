@@ -47,7 +47,7 @@ namespace OHOS::AppExecFwk {
     }
 }
 
-namespace{
+namespace {
 class FormMgrStubTest : public testing::Test {
 public:
     void SetUp() override

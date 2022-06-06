@@ -13,49 +13,48 @@
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/aafwk.gni")
 
-
 config("form_mgr_proxy_test_config") {
   include_dirs = [
     "${form_runtime_path}/interfaces/kits/native/include",
     "${form_runtime_path}/test/mock/include",
-    ]
+  ]
 }
 
 ohos_unittest("form_mgr_proxy_test") {
-    module_out_path = "form_runtime/form_mgr_service"
+  module_out_path = "form_runtime/form_mgr_service"
 
-    configs = [ ":form_mgr_proxy_test_config" ]
+  configs = [ ":form_mgr_proxy_test_config" ]
 
-    sources = [ "form_mgr_proxy_test.cpp" ]
+  sources = [ "form_mgr_proxy_test.cpp" ]
 
-    deps = [
-        "${form_runtime_path}:form_manager",
-        "//third_party/googletest:gmock_main",
-    ]
+  deps = [
+    "${form_runtime_path}:form_manager",
+    "//third_party/googletest:gmock_main",
+  ]
 
-    external_deps = [
-      "ability_base:base",
-      "ability_base:want",
-      "ability_base:zuri",
-      "ability_runtime:ability_manager",
-      "ability_runtime:app_manager",
-      "ability_runtime:wantagent_innerkits",
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
-      "common_event_service:cesfwk_core",
-      "common_event_service:cesfwk_innerkits",
-      "device_usage_statistics:usagestatsinner",
-      "distributeddatamgr:distributeddata_inner",
-      "eventhandler:libeventhandler",
-      "form_runtime:form_manager",
-      "hisysevent_native:libhisysevent",
-      "hiviewdfx_hilog_native:libhilog",
-      "ipc:ipc_core",
-      "safwk:system_ability_fwk",
-      "samgr_standard:samgr_proxy",
-      "time_native:time_service",
-      "utils_base:utils",
-    ]
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "ability_runtime:ability_manager",
+    "ability_runtime:app_manager",
+    "ability_runtime:wantagent_innerkits",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "common_event_service:cesfwk_core",
+    "common_event_service:cesfwk_innerkits",
+    "device_usage_statistics:usagestatsinner",
+    "distributeddatamgr:distributeddata_inner",
+    "eventhandler:libeventhandler",
+    "form_runtime:form_manager",
+    "hisysevent_native:libhisysevent",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr_standard:samgr_proxy",
+    "time_native:time_service",
+    "utils_base:utils",
+  ]
 }
 
 group("unittest") {
