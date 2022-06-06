@@ -64,6 +64,8 @@ void OHOSApplication::OnForeground()
 {
     if (runtime_ != NULL) {
         runtime_->NotifyApplicationState(false);
+    } else {
+        HILOG_INFO("NotifyApplicationState, runtime_ is NULL");
     }
 }
 
@@ -76,6 +78,8 @@ void OHOSApplication::OnBackground()
 {
     if (runtime_ != NULL) {
         runtime_->NotifyApplicationState(true);
+    } else {
+        HILOG_INFO("NotifyApplicationState, runtime_ is NULL");
     }
 }
 
