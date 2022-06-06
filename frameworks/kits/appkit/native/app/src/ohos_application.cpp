@@ -62,10 +62,10 @@ void OHOSApplication::DispatchAbilitySavedState(const PacMap &outState)
  */
 void OHOSApplication::OnForeground()
 {
-    if (runtime_ != NULL) {
+    if (runtime_ != nullptr) {
         runtime_->NotifyApplicationState(false);
     } else {
-        HILOG_INFO("NotifyApplicationState, runtime_ is NULL");
+        HILOG_INFO("NotifyApplicationState, runtime_ is nullptr");
     }
 }
 
@@ -76,10 +76,10 @@ void OHOSApplication::OnForeground()
  */
 void OHOSApplication::OnBackground()
 {
-    if (runtime_ != NULL) {
+    if (runtime_ != nullptr) {
         runtime_->NotifyApplicationState(true);
     } else {
-        HILOG_INFO("NotifyApplicationState, runtime_ is NULL");
+        HILOG_INFO("NotifyApplicationState, runtime_ is nullptr");
     }
 }
 
