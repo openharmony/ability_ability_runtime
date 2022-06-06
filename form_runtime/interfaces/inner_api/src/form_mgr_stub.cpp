@@ -791,12 +791,6 @@ int32_t FormMgrStub::HandleGetFormsInfoByModule(MessageParcel &data, MessageParc
     return result;
 }
 
-/**
-* @brief Handle GetFormsInfo message.
-* @param data input param.
-* @param reply output param.
-* @return Returns ERR_OK on success, others on failure.
-*/
 int32_t FormMgrStub::HandleGetFormsInfo(MessageParcel &data, MessageParcel &reply)
 {
     HILOG_INFO("%{public}s called.", __func__);
