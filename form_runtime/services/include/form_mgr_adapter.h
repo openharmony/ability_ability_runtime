@@ -309,7 +309,8 @@ public:
      * @param formInfos Return the forms' information of the specify bundle name and module name.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int GetFormsInfoByModule(const std::string &bundleName, const std::string &moduleName, std::vector<FormInfo> &formInfos);
+    int GetFormsInfoByModule(const std::string &bundleName, const std::string &moduleName,
+        std::vector<FormInfo> &formInfos);
 
     /**
      * @brief Update action string for router event.
