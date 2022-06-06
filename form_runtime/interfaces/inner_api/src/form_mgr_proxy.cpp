@@ -1133,13 +1133,6 @@ int FormMgrProxy::GetFormsInfoByModule(std::string &bundleName, std::string &mod
     return error;
 }
 
-/**
-* @brief This function is called by formProvider and gets forms info by the bundle name of the calling ability.
-*        The bundle time will be retrieved by form service manager.
-* @param moduleName the module that the formInfos have to belong to.
-* @param formInfos Return the forms' information of the calling bundle name
-* @return Returns ERR_OK on success, others on failure.
-*/
 int32_t FormMgrProxy::GetFormsInfo(const std::string &moduleName, std::vector<FormInfo> &formInfos)
 {
     HILOG_INFO("%{public}s start.", __func__);

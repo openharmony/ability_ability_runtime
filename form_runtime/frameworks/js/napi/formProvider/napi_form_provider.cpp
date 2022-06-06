@@ -1433,11 +1433,11 @@ static napi_value GetFormsInfoCallBack(napi_env env, napi_value argv, AsyncGetFo
 static ErrCode ParseFormInfoFilter(napi_env env, napi_value filter, AsyncGetFormsInfoCallbackInfo *asyncCallbackInfo)
 {
     HILOG_INFO("ParseFormInfoFilter starts");
-    napi_value napi_moduleName = GetPropertyValueByPropertyName(env, filter,
+    napi_value napiModuleName = GetPropertyValueByPropertyName(env, filter,
         (MODULE_NAME).c_str(), napi_string);
     // parse and update moduleName.
-    if (napi_moduleName != nullptr) {
-        std::string moduleName = GetStringFromNAPI(env, napi_moduleName);
+    if (napiModuleName != nullptr) {
+        std::string moduleName = GetStringFromNAPI(env, napiModuleName);
         HILOG_INFO("ParseFormInfoFilter: parsed moduleName: %{public}s", moduleName.c_str());
         asyncCallbackInfo->moduleName = moduleName;
     }
