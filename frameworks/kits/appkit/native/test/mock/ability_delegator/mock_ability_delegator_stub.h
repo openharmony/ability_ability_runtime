@@ -60,7 +60,6 @@ public:
     MOCK_METHOD2(TerminateAbilityResult, int(const sptr<IRemoteObject> &token, int startId));
     virtual int StopServiceAbility(const Want &want, int32_t userId = DEFAULT_INVAL_VALUE) override;
     MOCK_METHOD2(TerminateAbilityByCaller, int(const sptr<IRemoteObject> &callerToken, int requestCode));
-    MOCK_METHOD2(GetMissionSnapshot, int(const int32_t missionId, MissionPixelMap &missionPixelMap));
     MOCK_METHOD1(MoveMissionToTop, int(int32_t missionId));
     MOCK_METHOD1(RemoveMission, int(int id));
     MOCK_METHOD1(RemoveStack, int(int id));
@@ -84,7 +83,6 @@ public:
     MOCK_METHOD1(LockMission, int(int));
     MOCK_METHOD1(UnlockMission, int(int));
     MOCK_METHOD0(GetMissionLockModeState, int());
-    MOCK_METHOD1(UpdateConfiguration, int(const AppExecFwk::Configuration &));
     MOCK_METHOD2(
         ChangeFocusAbility, int(const sptr<IRemoteObject> &lostFocusToken, const sptr<IRemoteObject> &getFocusToken));
     MOCK_METHOD1(MinimizeMultiWindow, int(int missionId));
@@ -197,7 +195,6 @@ public:
     MOCK_METHOD2(TerminateAbilityResult, int(const sptr<IRemoteObject> &token, int startId));
     virtual int StopServiceAbility(const Want &want, int32_t userId = DEFAULT_INVAL_VALUE) override;
     MOCK_METHOD2(TerminateAbilityByCaller, int(const sptr<IRemoteObject> &callerToken, int requestCode));
-    MOCK_METHOD2(GetMissionSnapshot, int(const int32_t missionId, MissionPixelMap &missionPixelMap));
     MOCK_METHOD1(MoveMissionToTop, int(int32_t missionId));
     MOCK_METHOD1(RemoveMission, int(int id));
     MOCK_METHOD1(RemoveStack, int(int id));
@@ -221,7 +218,6 @@ public:
     MOCK_METHOD1(LockMission, int(int));
     MOCK_METHOD1(UnlockMission, int(int));
     MOCK_METHOD0(GetMissionLockModeState, int());
-    MOCK_METHOD1(UpdateConfiguration, int(const AppExecFwk::Configuration &));
     MOCK_METHOD2(
         ChangeFocusAbility, int(const sptr<IRemoteObject> &lostFocusToken, const sptr<IRemoteObject> &getFocusToken));
     MOCK_METHOD1(MinimizeMultiWindow, int(int missionId));
