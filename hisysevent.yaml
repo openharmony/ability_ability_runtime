@@ -113,10 +113,14 @@ TERMINATE_ABILITY:
 
 ABILITY_ONFOREGROUND:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: start ability}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
 
 ABILITY_ONBACKGROUND:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: ability, desc: start ability}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
   ABILITY_NAME: {type: STRING, desc: ability name}
 
 # serviceExtensionAbility behavior event

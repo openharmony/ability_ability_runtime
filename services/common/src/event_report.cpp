@@ -82,6 +82,8 @@ void EventReport::SendAbilityEvent(const std::string &eventName, HiSysEventType 
             HiSysEvent::Domain::AAFWK,
             eventName,
             type,
+            EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+            EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
             EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
     }
 }
