@@ -1243,7 +1243,6 @@ napi_value NAPI_SetFormNextRefreshTime(napi_env env, napi_callback_info info)
         return RetErrMsg(asyncErrorInfo);
     }
 
-
     int32_t time;
     napi_get_value_int32(env, argv[1], &time);
 

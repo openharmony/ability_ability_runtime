@@ -663,6 +663,5 @@ String String::Format(const char* format, ...)
     va_end(argsCopy);
     return string;
 }
-
 }
 }
