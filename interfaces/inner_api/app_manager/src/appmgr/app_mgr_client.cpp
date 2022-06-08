@@ -145,7 +145,7 @@ AppMgrResultCode AppMgrClient::TerminateAbility(const sptr<IRemoteObject> &token
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            amsService->TerminateAbility(token);
+            amsService->TerminateAbility(token, clearMissionFlag);
             return AppMgrResultCode::RESULT_OK;
         }
     }

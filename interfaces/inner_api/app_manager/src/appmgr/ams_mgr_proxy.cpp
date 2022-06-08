@@ -107,6 +107,10 @@ void AmsMgrProxy::TerminateAbility(const sptr<IRemoteObject> &token)
         HILOG_ERROR("Failed to write token");
         return;
     }
+    if (!data.WriteBool(clearMissionFlag)) {
+        HILOG_ERROR("Failed to write clearMissionFlag");
+        return;
+    }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("Remote() is NULL");
