@@ -19,8 +19,7 @@ module_output_path = "ability_runtime/mstappmgrservice"
 ohos_moduletest("AmsIpcAppmgrModuleTest") {
   module_out_path = module_output_path
 
-  include_dirs = [
-  ]
+  include_dirs = []
 
   sources = [ "ams_ipc_app_mgr_module_test.cpp" ]
 

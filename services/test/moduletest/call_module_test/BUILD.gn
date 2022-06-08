@@ -30,7 +30,6 @@ ohos_moduletest("call_ability_service_module_test") {
     # add mock file
     "${aafwk_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "call_ability_service_module_test.cpp",
-    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/src/background_task_subscriber.cpp",
   ]
 
   configs = [ "${services_path}/abilitymgr:abilityms_config" ]
