@@ -33,7 +33,6 @@ ohos_unittest("mission_list_test") {
   sources = [
     "${aafwk_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "mission_list_test.cpp",  # add mock file
-    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/src/background_task_subscriber.cpp",
   ]
 
   configs = [
@@ -74,7 +73,6 @@ ohos_unittest("mission_list_test_call") {
 
   sources = [
     "mission_list_test_call.cpp",  # add mock file
-    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/src/background_task_subscriber.cpp",
   ]
 
   cflags = []
