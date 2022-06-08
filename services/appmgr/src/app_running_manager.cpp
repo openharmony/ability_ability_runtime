@@ -370,7 +370,6 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token)
 void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag,
     std::shared_ptr<AppMgrServiceInner> appMgrServiceInner)
 {
-    HILOG_INFO("TerminateAbility come.");
     if (!token) {
         HILOG_ERROR("token is nullptr.");
         return;

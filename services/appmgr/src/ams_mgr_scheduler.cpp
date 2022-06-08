@@ -94,7 +94,6 @@ void AmsMgrScheduler::UpdateExtensionState(const sptr<IRemoteObject> &token, con
 
 void AmsMgrScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
-    HILOG_ERROR("AmsMgrScheduler::TerminateAbility come, clearMissionFlag:%{public}d", clearMissionFlag);
     if (!IsReady()) {
         return;
     }

@@ -33,9 +33,9 @@
 #include "ability_info.h"
 #include "ability_manager_errors.h"
 #include "ability_util.h"
+#include "background_task_mgr_helper.h"
 #include "hitrace_meter.h"
 #include "bundle_mgr_client.h"
-#include "background_task_mgr_helper.h"
 #include "distributed_client.h"
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -247,10 +247,10 @@ bool AbilityManagerService::Init()
     auto startSystemTask = [aams = shared_from_this()]() { aams->StartSystemApplication(); };
     handler_->PostTask(startSystemTask, "StartSystemApplication");
 
-    /* bgtaskObserver_ = std::make_shared<BgTaskObserver>();
-    if (ERR_OK != bgtaskObserver_->SubscribeBackgroundTask()) {
+    bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
+    if (ERR_OK != BackgroundTaskMgr::BackgroundTaskMgrHelper::SubscribeBackgroundTask(*bgtaskObserver_)) {
         HILOG_ERROR("register bgtaskObserver fail");
-    } */
+    }
 
     HILOG_INFO("Init success.");
     return true;
