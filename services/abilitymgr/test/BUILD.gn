@@ -75,11 +75,11 @@ ohos_source_set("abilityms_test_source") {
     "//base/account/os_account/frameworks/common/database/include",
     "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
     "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include/xcollie",
-    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
-    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
     "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
     "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
     "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   external_dependent_files = [
