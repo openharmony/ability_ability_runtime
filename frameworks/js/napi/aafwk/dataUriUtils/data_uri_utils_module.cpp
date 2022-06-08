@@ -21,7 +21,7 @@ extern const char _binary_data_uri_utils_abc_start[];
 extern const char _binary_data_uri_utils_abc_end[];
 
 extern "C" __attribute__((constructor))
-void NAPI_application_dataUriUtils_AutoRegister()
+void NAPI_ability_dataUriUtils_AutoRegister()
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
@@ -33,7 +33,7 @@ void NAPI_application_dataUriUtils_AutoRegister()
 }
 
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_dataUriUtils_GetJSCode(const char **buf, int *bufLen)
+void NAPI_ability_dataUriUtils_GetJSCode(const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_data_uri_utils_js_start;
@@ -46,7 +46,7 @@ void NAPI_application_dataUriUtils_GetJSCode(const char **buf, int *bufLen)
 
 // dataUriUtils js register
 extern "C" __attribute__((visibility("default")))
-void NAPI_application_dataUriUtils_GetABCCode(const char **buf, int *buflen)
+void NAPI_ability_dataUriUtils_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_data_uri_utils_abc_start;
