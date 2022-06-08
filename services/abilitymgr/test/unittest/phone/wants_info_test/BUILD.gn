@@ -23,6 +23,7 @@ ohos_unittest("wants_info_test") {
     "${services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
   ]
 
   sources = [
