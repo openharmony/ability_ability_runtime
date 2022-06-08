@@ -27,6 +27,12 @@ ohos_unittest("data_ability_record_test") {
     "${aafwk_path}/interfaces/inner_api/ability_manager/include",
     "${aafwk_path}/frameworks/kits/ability/native/include",
     "${aafwk_path}/services/common/include",
+    "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
+    "//foundation/ability/ability_runtime/services/abilitymgr/include",
+    "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   sources = [
@@ -64,6 +70,7 @@ ohos_unittest("data_ability_record_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]

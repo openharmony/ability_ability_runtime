@@ -23,6 +23,12 @@ ohos_unittest("lifecycle_deal_test") {
     "${services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${aafwk_path}/services/abilitymgr/test/mock/libs/ability_scheduler_mock",
+    "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
+    "//foundation/ability/ability_runtime/services/abilitymgr/include",
+    "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   sources = [
@@ -59,6 +65,7 @@ ohos_unittest("lifecycle_deal_test") {
     "ability_base:zuri",
     "ability_runtime:app_manager",
     "access_token:libaccesstoken_sdk",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

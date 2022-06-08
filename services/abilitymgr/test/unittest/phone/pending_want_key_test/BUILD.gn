@@ -22,6 +22,12 @@ ohos_unittest("pending_want_key_test") {
   include_dirs = [
     "${aafwk_path}/services/abilitymgr/include",
     "${ability_base_innerapi_path}/want/include",
+    "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
+    "//foundation/ability/ability_runtime/services/abilitymgr/include",
+    "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   sources = [
@@ -51,6 +57,7 @@ ohos_unittest("pending_want_key_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]

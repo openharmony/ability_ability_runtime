@@ -31,6 +31,7 @@ ohos_moduletest("ability_manager_service_dump_test") {
   sources = [
     "${aafwk_path}/services/test/mock/src/mock_app_mgr_client.cpp",
     "ability_manager_service_dump_test.cpp",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/src/background_task_subscriber.cpp",
   ]
 
   configs = [ "${services_path}/abilitymgr:abilityms_config" ]
@@ -64,6 +65,7 @@ ohos_moduletest("ability_manager_service_dump_test") {
     "dsoftbus_standard:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "background_task_mgr:bgtaskmgr_innerkits",
   ]
 }
 

@@ -891,8 +891,12 @@ bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
     }
 
     auto moduleRecordList = GetAllModuleRecord();
+    HILOG_INFO("moduleRecordList size:%{public}d", moduleRecordList.size());
     if (moduleRecordList.size() == 1) {
-        return moduleRecord->IsLastAbilityRecord(token);
+        HILOG_INFO("moduleRecordList IsLastAbilityRecord enter");
+        bool result = moduleRecord->IsLastAbilityRecord(token);
+        HILOG_INFO("moduleRecordList IsLastAbilityRecord:%{public}d", result);
+        return result;
     }
 
     return false;

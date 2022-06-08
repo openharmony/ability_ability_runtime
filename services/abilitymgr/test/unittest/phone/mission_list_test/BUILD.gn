@@ -22,11 +22,18 @@ ohos_unittest("mission_list_test") {
   include_dirs = [
     "${services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
+    "//foundation/ability/ability_runtime/services/abilitymgr/include",
+    "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   sources = [
     "${aafwk_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "mission_list_test.cpp",  # add mock file
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/src/background_task_subscriber.cpp",
   ]
 
   configs = [
@@ -56,6 +63,7 @@ ohos_unittest("mission_list_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
@@ -66,6 +74,7 @@ ohos_unittest("mission_list_test_call") {
 
   sources = [
     "mission_list_test_call.cpp",  # add mock file
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/src/background_task_subscriber.cpp",
   ]
 
   cflags = []
@@ -86,6 +95,7 @@ ohos_unittest("mission_list_test_call") {
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "hiviewdfx_hilog_native:libhilog",
   ]
 }

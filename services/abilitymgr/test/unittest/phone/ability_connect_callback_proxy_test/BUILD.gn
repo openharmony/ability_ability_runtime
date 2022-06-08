@@ -22,6 +22,12 @@ ohos_unittest("ability_connect_callback_proxy_test") {
   include_dirs = [
     "${services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
+    "//foundation/ability/ability_runtime/services/abilitymgr/include",
+    "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   sources = [
@@ -57,6 +63,7 @@ ohos_unittest("ability_connect_callback_proxy_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "dataability:native_dataability",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
