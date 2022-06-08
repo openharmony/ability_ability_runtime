@@ -94,7 +94,7 @@ void AmsMgrProxy::LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemo
     HILOG_DEBUG("end");
 }
 
-void AmsMgrProxy::TerminateAbility(const sptr<IRemoteObject> &token)
+void AmsMgrProxy::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
     HILOG_DEBUG("start");
     MessageParcel data;
