@@ -26,6 +26,7 @@ ohos_unittest("wants_info_test") {
     "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
     "//foundation/ability/ability_runtime/services/abilitymgr/include",
     "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
     "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
     "//foundation/resourceschedule/background_task_mgr/frameworks/include",
