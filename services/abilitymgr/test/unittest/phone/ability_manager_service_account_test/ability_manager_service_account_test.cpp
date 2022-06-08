@@ -127,7 +127,6 @@ HWTEST_F(AbilityManagerServiceAccountTest, Account_StartAbility_001, TestSize.Le
 {
     GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_001 start";
     abilityMs_->StartUser(USER_ID_U100);
-    GTEST_LOG_(INFO) << "AbilityManagerServiceAccountTest Account_StartAbility_001 StartUser end";
     auto topAbility = abilityMs_->GetListManagerByUserId(USER_ID_U100)->GetCurrentTopAbilityLocked();
     if (topAbility) {
         topAbility->SetAbilityState(AAFwk::AbilityState::FOREGROUND);
