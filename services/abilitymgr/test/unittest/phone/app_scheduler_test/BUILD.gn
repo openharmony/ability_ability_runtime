@@ -25,12 +25,6 @@ ohos_unittest("app_scheduler_test") {
     "${services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${services_path}/abilitymgr/include",
-    "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
-    "//foundation/ability/ability_runtime/services/abilitymgr/include",
-    "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
-    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
-    "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
-    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   sources = [
