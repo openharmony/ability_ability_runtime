@@ -27,7 +27,7 @@ ohos_moduletest("start_option_module_test") {
     "${aafwk_path}/frameworks/kits/ability/native/test/mock/include",
   ]
 
-  sources = [ "start_option_display_id_test.cpp" ]
+  sources = [ "start_option_display_id_test.cpp"]
 
   configs = [ "${services_path}/abilitymgr:abilityms_config" ]
   cflags = []
@@ -59,6 +59,7 @@ ohos_moduletest("start_option_module_test") {
     "dsoftbus_standard:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "background_task_mgr:bgtaskmgr_innerkits",
   ]
 }
 

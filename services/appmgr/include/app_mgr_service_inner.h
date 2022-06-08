@@ -81,7 +81,7 @@ public:
      *
      * @return
      */
-    virtual void TerminateAbility(const sptr<IRemoteObject> &token);
+    virtual void TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag);
 
     /**
      * UpdateAbilityState, update the ability status.
@@ -518,6 +518,16 @@ public:
     int VerifyAccountPermission(const std::string &permissionName, const int userId);
 
     void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
+
+    /**
+     * Notify application status.
+     *
+     * @param bundleName Indicates the name of the bundle.
+     * @param eventData Indicates the event defined by CommonEventSupport
+     *
+     * @return
+     */
+    void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
 private:
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount);
@@ -694,6 +704,7 @@ private:
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid);
 
     void OnRenderRemoteDied(const wptr<IRemoteObject> &remote);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.
@@ -711,15 +722,6 @@ private:
     uint32_t BuildStartFlags(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
 
 private:
-    /**
-     * Notify application status.
-     *
-     * @param bundleName Indicates the name of the bundle.
-     * @param eventData Indicates the event defined by CommonEventSupport
-     *
-     * @return
-     */
-    void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
     /**
      * Notify application status.
      *

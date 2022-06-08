@@ -35,6 +35,7 @@
 #include "ability_util.h"
 #include "hitrace_meter.h"
 #include "bundle_mgr_client.h"
+#include "background_task_mgr_helper.h"
 #include "distributed_client.h"
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
@@ -245,6 +246,12 @@ bool AbilityManagerService::Init()
 
     auto startSystemTask = [aams = shared_from_this()]() { aams->StartSystemApplication(); };
     handler_->PostTask(startSystemTask, "StartSystemApplication");
+
+    /* bgtaskObserver_ = std::make_shared<BgTaskObserver>();
+    if (ERR_OK != bgtaskObserver_->SubscribeBackgroundTask()) {
+        HILOG_ERROR("register bgtaskObserver fail");
+    } */
+
     HILOG_INFO("Init success.");
     return true;
 }
@@ -693,6 +700,16 @@ bool AbilityManagerService::IsStartFreeInstall(const Want &want)
 {
     auto flags = want.GetFlags();
     if ((flags & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
+        return true;
+    }
+    return false;
+}
+
+bool AbilityManagerService::IsBgTaskUid(const int uid)
+{
+    std::list<int> bgTaskUids = bgtaskObserver_->GetBgTaskUids();
+    auto iter = find(bgTaskUids.begin(), bgTaskUids.end(), uid);
+    if (iter != bgTaskUids.end()) {
         return true;
     }
     return false;

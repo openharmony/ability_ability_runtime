@@ -87,6 +87,7 @@ ohos_shared_library("libappms") {
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",
+    "background_task_mgr:bgtaskmgr_innerkits",
   ]
 
   if (os_account_part_enabled) {

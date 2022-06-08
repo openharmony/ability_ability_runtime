@@ -24,6 +24,12 @@ ohos_unittest("call_container_test") {
     "${aafwk_path}/services/abilitymgr/test/mock/libs/ability_scheduler_mock",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/ability/ability_runtime/interfaces/innerkits/wantagent/include",
+    "//foundation/ability/ability_runtime/services/abilitymgr/include",
+    "//foundation/ability/ability_runtime/frameworks/kits/appkit/native/ability_runtime",
+    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/common/include",
+    "//foundation/resourceschedule/background_task_mgr/frameworks/include",
   ]
 
   sources = [
@@ -53,6 +59,7 @@ ohos_unittest("call_container_test") {
     "ability_base:want",
     "ability_base:zuri",
     "common_event_service:cesfwk_innerkits",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
