@@ -32,7 +32,6 @@ ohos_moduletest("mission_dump_test") {
     "${aafwk_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "${aafwk_path}/services/common/src/permission_verification.cpp",
     "//foundation/distributedhardware/devicemanager/test/unittest/mock/parameter.cpp",
-    "//foundation/resourceschedule/background_task_mgr/interfaces/innerkits/src/background_task_subscriber.cpp",
   ]
 
   configs = [ "${services_path}/abilitymgr:abilityms_config" ]
@@ -61,11 +60,11 @@ ohos_moduletest("mission_dump_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "common_event_service:cesfwk_innerkits",
     "dsoftbus_standard:softbus_client",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "background_task_mgr:bgtaskmgr_innerkits",
   ]
 }
 
