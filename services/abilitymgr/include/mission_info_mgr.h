@@ -137,10 +137,11 @@ public:
      * @param missionId mission id
      * @param abilityToken abilityToken to get current mission snapshot
      * @param missionSnapshot result of snapshot
+     * @param isLittle low resolution snapshot.
      * @return return true if update mission snapshot success, else false
      */
     bool UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-        MissionSnapshot& missionSnapshot) const;
+        MissionSnapshot& missionSnapshot, bool isLittle = false) const;
 
 #ifdef SUPPORT_GRAPHICS
     /**
@@ -156,11 +157,12 @@ public:
      * @param missionId mission id
      * @param abilityToken abilityToken to get current mission snapshot
      * @param missionSnapshot result of snapshot
+     # @param isLittle low resolution.
      * @param force force get snapshot from window manager service.
      * @return true return true if get mission snapshot success, else false
      */
     bool GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-        MissionSnapshot& missionSnapshot, bool force = false) const;
+        MissionSnapshot& missionSnapshot, bool isLittle, bool force = false) const;
 
     /**
      * @brief register snapshotHandler

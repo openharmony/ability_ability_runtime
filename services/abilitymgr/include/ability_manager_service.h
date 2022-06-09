@@ -552,6 +552,11 @@ public:
         int callerUid = DEFAULT_INVAL_VALUE,
         int32_t userId = DEFAULT_INVAL_VALUE);
 
+<<<<<<< HEAD
+=======
+    bool IsStartFreeInstall(const Want &want);
+    int StartFreeInstall(const Want &want, const sptr<IRemoteObject> &callerToken, int requestCode, int32_t userId);
+>>>>>>> caochunlei1@huawei.com
     int CheckPermission(const std::string &bundleName, const std::string &permission);
 
     void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag);
@@ -625,7 +630,7 @@ public:
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
 
     virtual int32_t GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
-        MissionSnapshot& snapshot) override;
+        MissionSnapshot& snapshot, bool isLowResolution) override;
 
     /**
      * Set ability controller.

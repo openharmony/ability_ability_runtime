@@ -2443,7 +2443,7 @@ void MissionListManager::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& h
 }
 
 bool MissionListManager::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot)
+    MissionSnapshot& missionSnapshot, bool isLittle)
 {
     HILOG_INFO("snapshot: Start get mission snapshot.");
     bool forceSnapshot = false;
@@ -2455,7 +2455,7 @@ bool MissionListManager::GetMissionSnapshot(int32_t missionId, const sptr<IRemot
         }
     }
     return DelayedSingleton<MissionInfoMgr>::GetInstance()->GetMissionSnapshot(
-        missionId, abilityToken, missionSnapshot, forceSnapshot);
+        missionId, abilityToken, missionSnapshot, isLittle, forceSnapshot);
 }
 
 void MissionListManager::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm)

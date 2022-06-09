@@ -142,7 +142,18 @@ bool MissionDataStorage::CheckFileNameValid(const std::string &fileName)
 
 void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const MissionSnapshot& missionSnapshot)
 {
-    std::string filePath = GetMissionSnapshotPath(missionId);
+    SaveSnapshotFile(missionId, missionSnapshot.snapshot, missionSnapshot.isPrivate, false);
+    SaveSnapshotFile(missionId, GetReducedPixelMap(missionSnapshot.snapshot), missionSnapshot.isPrivate, true);
+}
+
+void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap>& snapshot,
+    bool isPrivate, bool isLittle)
+{
+    if (!snapshot) {
+        return;
+    }
+
+    std::string filePath = GetMissionSnapshotPath(missionId, isLittle);
     std::string dirPath = OHOS::HiviewDFX::FileUtil::ExtractFilePath(filePath);
     if (!OHOS::HiviewDFX::FileUtil::FileExists(dirPath)) {
         bool createDir = OHOS::HiviewDFX::FileUtil::ForceCreateDirectory(dirPath);
@@ -153,24 +164,36 @@ void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const MissionSnapsh
     }
 #ifdef SUPPORT_GRAPHICS
     bool saveMissionFile = false;
-    if (missionSnapshot.isPrivate) {
-        ssize_t dataLength = missionSnapshot.snapshot->GetWidth() * missionSnapshot.snapshot->GetHeight() * BPP;
+    if (isPrivate) {
+        ssize_t dataLength = snapshot->GetWidth() * snapshot->GetHeight() * BPP;
         uint8_t* data = (uint8_t*) malloc(dataLength);
         if (memset_s(data, dataLength, 0xff, dataLength) == EOK) {
-            saveMissionFile = WriteToPng(filePath.c_str(), missionSnapshot.snapshot->GetWidth(),
-                missionSnapshot.snapshot->GetHeight(), data);
+            saveMissionFile = WriteToPng(filePath.c_str(), snapshot->GetWidth(), snapshot->GetHeight(), data);
         }
         free(data);
     } else {
-        const uint8_t* data = missionSnapshot.snapshot->GetPixels();
-        saveMissionFile = WriteToPng(filePath.c_str(), missionSnapshot.snapshot->GetWidth(),
-            missionSnapshot.snapshot->GetHeight(), data);
+        const uint8_t* data = snapshot->GetPixels();
+        saveMissionFile = WriteToPng(filePath.c_str(), snapshot->GetWidth(), snapshot->GetHeight(), data);
     }
 
     if (!saveMissionFile) {
         HILOG_ERROR("snapshot: save mission snapshot failed, path = %{public}s.", filePath.c_str());
     }
 #endif
+}
+
+std::shared_ptr<OHOS::Media::PixelMap> MissionDataStorage::GetReducedPixelMap(
+    const std::shared_ptr<OHOS::Media::PixelMap>& snapshot)
+{
+    if (!snapshot) {
+        return nullptr;
+    }
+
+    OHOS::Media::InitializationOptions options;
+    options.size.width = snapshot->GetWidth() / SCALE;
+    options.size.height = snapshot->GetHeight() / SCALE;
+    std::unique_ptr<OHOS::Media::PixelMap> reducedPixelMap = OHOS::Media::PixelMap::Create(*snapshot, options);
+    return std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
 }
 
 void MissionDataStorage::SaveMissionSnapshot(int32_t missionId, const MissionSnapshot& missionSnapshot)
@@ -223,7 +246,13 @@ bool MissionDataStorage::DeleteCachedSnapshot(int32_t missionId)
 
 void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId)
 {
-    std::string filePath = GetMissionSnapshotPath(missionId);
+    DeleteMissionSnapshot(missionId, false);
+    DeleteMissionSnapshot(missionId, true);
+}
+
+void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLittle)
+{
+    std::string filePath = GetMissionSnapshotPath(missionId, isLittle);
     std::string dirPath = OHOS::HiviewDFX::FileUtil::ExtractFilePath(filePath);
     if (!OHOS::HiviewDFX::FileUtil::FileExists(filePath)) {
         HILOG_WARN("snapshot: remove snapshot file %{public}s failed, file not exists", filePath.c_str());
@@ -236,9 +265,9 @@ void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId)
 }
 
 #ifdef SUPPORT_GRAPHICS
-sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId) const
+sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, bool isLittle) const
 {
-    auto pixelMapPtr = GetPixelMap(missionId);
+    auto pixelMapPtr = GetPixelMap(missionId, isLittle);
     if (!pixelMapPtr) {
         HILOG_ERROR("%{public}s: GetPixelMap failed.", __func__);
         return nullptr;
@@ -246,9 +275,9 @@ sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId) const
     return sptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
-std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId) const
+std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId, bool isLittle) const
 {
-    std::string filePath = GetMissionSnapshotPath(missionId);
+    std::string filePath = GetMissionSnapshotPath(missionId, isLittle);
     if (!OHOS::HiviewDFX::FileUtil::FileExists(filePath)) {
         HILOG_INFO("snapshot: storage snapshot not exists, missionId = %{public}d", missionId);
         return nullptr;
@@ -270,15 +299,18 @@ std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId) 
 }
 #endif
 
-bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot)
+bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLittle)
 {
 #ifdef SUPPORT_GRAPHICS
     if (GetCachedSnapshot(missionId, missionSnapshot)) {
+        if (isLittle) {
+            missionSnapshot.snapshot = GetReducedPixelMap(missionSnapshot.snapshot);
+        }
         HILOG_INFO("snapshot: GetMissionSnapshot from cache, missionId = %{public}d", missionId);
         return true;
     }
 
-    auto pixelMap = GetPixelMap(missionId);
+    auto pixelMap = GetPixelMap(missionId, isLittle);
     if (!pixelMap) {
         HILOG_ERROR("%{public}s: GetPixelMap failed.", __func__);
         return false;
@@ -288,10 +320,15 @@ bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& 
     return true;
 }
 
-std::string MissionDataStorage::GetMissionSnapshotPath(int32_t missionId) const
+std::string MissionDataStorage::GetMissionSnapshotPath(int32_t missionId, bool isLittle) const
 {
-    return GetMissionDataDirPath() + "/"
-        + MISSION_JSON_FILE_PREFIX + "_" + std::to_string(missionId) + PNG_FILE_SUFFIX;
+    std::string filePath = GetMissionDataDirPath() + FILE_SEPARATOR + MISSION_JSON_FILE_PREFIX +
+        UNDERLINE_SEPARATOR + std::to_string(missionId);
+    if (isLittle) {
+        filePath = filePath + UNDERLINE_SEPARATOR + LITTLE_FLAG;
+    }
+    filePath = filePath + PNG_FILE_SUFFIX;
+    return filePath;
 }
 
 bool MissionDataStorage::WriteToPng(const char* fileName, uint32_t width, uint32_t height, const uint8_t* data)
