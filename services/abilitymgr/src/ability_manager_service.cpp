@@ -2194,7 +2194,7 @@ void AbilityManagerService::DumpSysMissionListInner(
     } else if (argList.size() < MIN_DUMP_ARGUMENT_NUM) {
         targetManager->DumpMissionList(info, isClient);
     } else {
-        info.emplace_back("error: invalid argument, please see 'aa dump -h'.");
+        info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
     }
 }
 void AbilityManagerService::DumpSysAbilityInner(
@@ -2223,9 +2223,15 @@ void AbilityManagerService::DumpSysAbilityInner(
     if (argList.size() >= MIN_DUMP_ARGUMENT_NUM) {
         HILOG_INFO("argList = %{public}s", argList[1].c_str());
         std::vector<std::string> params(argList.begin() + MIN_DUMP_ARGUMENT_NUM, argList.end());
-        targetManager->DumpMissionListByRecordId(info, isClient, std::stoi(argList[1]), params);
+        try {
+            auto abilityId = static_cast<int32_t>(std::stoi(argList[1]));
+            targetManager->DumpMissionListByRecordId(info, isClient, abilityId, params);
+        } catch (...) {
+            HILOG_WARN("stoi(%{public}s) failed", argList[1].c_str());
+            info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
+        }
     } else {
-        info.emplace_back("error: invalid argument, please see 'aa dump -h'.");
+        info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
     }
 }
 
@@ -2295,7 +2301,7 @@ void AbilityManagerService::DumpSysPendingInner(
     } else if (argList.size() < MIN_DUMP_ARGUMENT_NUM) {
         targetManager->Dump(info);
     } else {
-        info.emplace_back("error: invalid argument, please see 'aa dump -h'.");
+        info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
     }
 }
 
@@ -2372,7 +2378,7 @@ void AbilityManagerService::DataDumpSysStateInner(
     } else if (argList.size() < MIN_DUMP_ARGUMENT_NUM) {
         targetManager->DumpSysState(info, isClient);
     } else {
-        info.emplace_back("error: invalid argument, please see 'aa dump -h'.");
+        info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
     }
 }
 
@@ -2719,7 +2725,9 @@ void AbilityManagerService::InitMissionListManager(int userId, bool switchUser)
 int AbilityManagerService::GetUserId()
 {
     if (userController_) {
-        return userController_->GetCurrentUserId();
+        auto userId = userController_->GetCurrentUserId();
+        HILOG_INFO("%{public}s, userId is %{public}d", __func__, userId);
+        return userId;
     }
     return U0_USER_ID;
 }
@@ -4029,7 +4037,7 @@ int32_t AbilityManagerService::GetValidUserId(const int32_t userId)
 
     if (DEFAULT_INVAL_VALUE == userId) {
         validUserId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-        HILOG_DEBUG("%{public}s, validUserId = %{public}d, CallingUid = %{public}d.", __func__, validUserId,
+        HILOG_INFO("%{public}s, validUserId = %{public}d, CallingUid = %{public}d.", __func__, validUserId,
             IPCSkeleton::GetCallingUid());
         if (validUserId == U0_USER_ID) {
             validUserId = GetUserId();
