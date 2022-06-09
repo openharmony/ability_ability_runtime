@@ -1067,9 +1067,9 @@ private:
 
     static sptr<AbilityManagerService> instance_;
 
-    #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
-    #endif
+#endif
 
 #ifdef SUPPORT_GRAPHICS
     int32_t ShowPickerDialog(const Want& want, int32_t userId);
