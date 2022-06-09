@@ -1343,8 +1343,8 @@ void MissionListManager::ClearAllMissionsLocked(std::list<std::shared_ptr<Missio
         }
 
         auto abilityMs_ = OHOS::DelayedSingleton<AbilityManagerService>::GetInstance();
-        if (abilityMs_->IsBgTaskUid(mission->GetAbilityRecord()->GetUid())) {
-            HILOG_INFO("the mission is bgtask, do not need clear");
+        if (abilityMs_->IsBackgroundTaskUid(mission->GetAbilityRecord()->GetUid())) {
+            HILOG_INFO("the mission is background task, do not need clear");
             continue;
         }
 

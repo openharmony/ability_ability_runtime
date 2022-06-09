@@ -26,7 +26,7 @@ class BackgroundTaskObserver : public BackgroundTaskMgr::BackgroundTaskSubscribe
 public:
     BackgroundTaskObserver();
     virtual ~BackgroundTaskObserver();
-    std::list<int> GetBgTaskUids();
+    bool IsBackgroundTaskUid(const int uid);
 
 private:
     void OnContinuousTaskStart(const std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>

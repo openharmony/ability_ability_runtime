@@ -707,15 +707,10 @@ bool AbilityManagerService::IsStartFreeInstall(const Want &want)
     return false;
 }
 
-bool AbilityManagerService::IsBgTaskUid(const int uid)
+bool AbilityManagerService::IsBackgroundTaskUid(const int uid)
 {
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
-    std::list<int> bgTaskUids = bgtaskObserver_->GetBgTaskUids();
-    auto iter = find(bgTaskUids.begin(), bgTaskUids.end(), uid);
-    if (iter != bgTaskUids.end()) {
-        return true;
-    }
-    return false;
+    return bgtaskObserver_->IsBackgroundTaskUid(uid);
 #else
     return false;
 #endif

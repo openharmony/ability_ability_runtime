@@ -780,7 +780,7 @@ public:
      * @param uid userId.
      * @return Returns whether the uid is background task uid.
      */
-    bool IsBgTaskUid(const int uid);
+    bool IsBackgroundTaskUid(const int uid);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
