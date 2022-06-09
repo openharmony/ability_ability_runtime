@@ -43,10 +43,15 @@ ohos_moduletest("IpcAbilityConnectModuleTest") {
   }
 
   external_deps = [
-    "background_task_mgr:bgtaskmgr_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
+
+  defines = []
+  if (background_task_mgr_continuous_task_enable) {
+    external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
+    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
 }
 
 group("moduletest") {
