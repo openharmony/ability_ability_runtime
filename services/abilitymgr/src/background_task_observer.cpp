@@ -37,9 +37,13 @@ void BackgroundTaskObserver::OnContinuousTaskStop(const std::shared_ptr<Backgrou
     bgTaskUids_.remove(continuousTaskCallbackInfo->GetCreatorUid());
 }
 
-std::list<int> BackgroundTaskObserver::GetBgTaskUids()
+bool BackgroundTaskObserver::IsBackgroundTaskUid(const int uid)
 {
-    return bgTaskUids_;
+    auto iter = find(bgTaskUids_.begin(), bgTaskUids_.end(), uid);
+    if (iter != bgTaskUids_.end()) {
+        return true;
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
