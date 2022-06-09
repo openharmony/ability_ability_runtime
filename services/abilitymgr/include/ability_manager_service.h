@@ -783,15 +783,14 @@ public:
     static constexpr uint32_t LOAD_TIMEOUT = 3000;            // ms
     static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
     static constexpr uint32_t INACTIVE_TIMEOUT = 500;         // ms
-    static constexpr uint32_t BACKGROUND_TIMEOUT = 10000;     // ms
     static constexpr uint32_t TERMINATE_TIMEOUT = 10000;      // ms
     static constexpr uint32_t CONNECT_TIMEOUT = 3000;         // ms
     static constexpr uint32_t DISCONNECT_TIMEOUT = 500;       // ms
     static constexpr uint32_t COMMAND_TIMEOUT = 5000;         // ms
     static constexpr uint32_t RESTART_TIMEOUT = 5000;         // ms
     static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 500;  // ms
-    static constexpr uint32_t FOREGROUNDNEW_TIMEOUT = 5000;   // ms
-    static constexpr uint32_t BACKGROUNDNEW_TIMEOUT = 3000;   // ms
+    static constexpr uint32_t FOREGROUND_TIMEOUT = 5000;   // ms
+    static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
     static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
