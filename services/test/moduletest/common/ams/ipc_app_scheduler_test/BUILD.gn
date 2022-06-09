@@ -29,10 +29,15 @@ ohos_moduletest("AmsIpcAppSchedulerModuleTest") {
 
   external_deps = [
     "ability_base:configuration",
-    "background_task_mgr:bgtaskmgr_innerkits",
     "hicollie_native:libhicollie",
     "ipc:ipc_core",
   ]
+
+  defines = []
+  if (background_task_mgr_continuous_task_enable) {
+    external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
+    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
 }
 
 group("moduletest") {
