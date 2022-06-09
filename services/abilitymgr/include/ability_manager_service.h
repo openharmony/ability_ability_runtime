@@ -539,8 +539,8 @@ public:
     void HandleLoadTimeOut(int64_t eventId);
     void HandleActiveTimeOut(int64_t eventId);
     void HandleInactiveTimeOut(int64_t eventId);
-    void HandleForegroundNewTimeOut(int64_t eventId);
-    void HandleBackgroundNewTimeOut(int64_t eventId);
+    void HandleForegroundTimeOut(int64_t eventId);
+    void HandleBackgroundTimeOut(int64_t eventId);
 
     void NotifyBmsAbilityLifeStatus(
         const std::string &bundleName, const std::string &abilityName, const int64_t launchTime, const int uid);
@@ -775,10 +775,9 @@ public:
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
     static constexpr uint32_t INACTIVE_TIMEOUT_MSG = 2;
-    static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 3;
     static constexpr uint32_t TERMINATE_TIMEOUT_MSG = 4;
-    static constexpr uint32_t FOREGROUNDNEW_TIMEOUT_MSG = 5;
-    static constexpr uint32_t BACKGROUNDNEW_TIMEOUT_MSG = 6;
+    static constexpr uint32_t FOREGROUND_TIMEOUT_MSG = 5;
+    static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
 
     static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 10000; // ms
     static constexpr uint32_t LOAD_TIMEOUT = 3000;            // ms
