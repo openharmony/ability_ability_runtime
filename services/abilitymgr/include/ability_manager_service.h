@@ -28,7 +28,9 @@
 #include "ability_event_handler.h"
 #include "ability_manager_stub.h"
 #include "app_scheduler.h"
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #include "background_task_observer.h"
+#endif
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundle_constants.h"
 #include "data_ability_manager.h"
@@ -1065,7 +1067,9 @@ private:
 
     static sptr<AbilityManagerService> instance_;
 
+    #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
+    #endif
 
 #ifdef SUPPORT_GRAPHICS
     int32_t ShowPickerDialog(const Want& want, int32_t userId);
