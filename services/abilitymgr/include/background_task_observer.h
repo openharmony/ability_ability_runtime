@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #ifndef OHOS_AAFWK_BACKGROUND_TASK_OBSERVER_H
 #define OHOS_AAFWK_BACKGROUND_TASK_OBSERVER_H
 
@@ -41,3 +41,4 @@ private:
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif  // OHOS_AAFWK_BACKGROUND_TASK_OBSERVER_H
+#endif

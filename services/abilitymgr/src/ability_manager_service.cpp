@@ -247,10 +247,13 @@ bool AbilityManagerService::Init()
     auto startSystemTask = [aams = shared_from_this()]() { aams->StartSystemApplication(); };
     handler_->PostTask(startSystemTask, "StartSystemApplication");
 
-    bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
-    if (ERR_OK != BackgroundTaskMgr::BackgroundTaskMgrHelper::SubscribeBackgroundTask(*bgtaskObserver_)) {
-        HILOG_ERROR("register bgtaskObserver fail");
-    }
+    #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+        bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
+        if (ERR_OK !=
+                BackgroundTaskMgr::BackgroundTaskMgrHelper::SubscribeBackgroundTask(*bgtaskObserver_)) {
+            HILOG_ERROR("register bgtaskObserver fail");
+        }
+    #endif
 
     HILOG_INFO("Init success.");
     return true;
@@ -707,12 +710,16 @@ bool AbilityManagerService::IsStartFreeInstall(const Want &want)
 
 bool AbilityManagerService::IsBgTaskUid(const int uid)
 {
-    std::list<int> bgTaskUids = bgtaskObserver_->GetBgTaskUids();
-    auto iter = find(bgTaskUids.begin(), bgTaskUids.end(), uid);
-    if (iter != bgTaskUids.end()) {
-        return true;
-    }
-    return false;
+    #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+        std::list<int> bgTaskUids = bgtaskObserver_->GetBgTaskUids();
+        auto iter = find(bgTaskUids.begin(), bgTaskUids.end(), uid);
+        if (iter != bgTaskUids.end()) {
+            return true;
+        }
+        return false;
+    #else
+        return false;
+    #endif
 }
 
 int AbilityManagerService::StartFreeInstall(

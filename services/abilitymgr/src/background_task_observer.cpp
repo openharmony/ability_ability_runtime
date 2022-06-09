@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #include "background_task_observer.h"
 
 namespace OHOS {
@@ -43,3 +43,4 @@ std::list<int> BackgroundTaskObserver::GetBgTaskUids()
 }
 }  // namespace AAFwk
 }  // namespace OHOS
+#endif
