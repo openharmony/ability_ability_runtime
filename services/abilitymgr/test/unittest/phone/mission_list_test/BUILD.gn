@@ -60,10 +60,8 @@ ohos_unittest("mission_list_test") {
     "ipc:ipc_core",
   ]
 
-  defines = []
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
-    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 }
 
@@ -95,10 +93,8 @@ ohos_unittest("mission_list_test_call") {
     "hiviewdfx_hilog_native:libhilog",
   ]
 
-  defines = []
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
-    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 }
 

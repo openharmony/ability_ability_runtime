@@ -63,10 +63,8 @@ ohos_unittest("mission_list_manager_ut_test") {
     "relational_store:native_rdb",
   ]
 
-  defines = []
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
-    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 }
 

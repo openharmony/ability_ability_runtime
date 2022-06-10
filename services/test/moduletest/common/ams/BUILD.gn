@@ -113,7 +113,6 @@ ohos_source_set("appmgr_mst_source") {
 
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
-    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 }
 
