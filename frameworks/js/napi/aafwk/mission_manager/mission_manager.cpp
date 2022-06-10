@@ -521,7 +521,8 @@ NativeValue* JsMissionManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "getMissionInfos", JsMissionManager::GetMissionInfos);
     BindNativeFunction(*engine, *object, "getMissionInfo", JsMissionManager::GetMissionInfo);
     BindNativeFunction(*engine, *object, "getMissionSnapShot", JsMissionManager::GetMissionSnapShot);
-    BindNativeFunction(*engine, *object, "getLowResolutionMissionSnapShot", JsMissionManager::GetLowResolutionMissionSnapShot);
+    BindNativeFunction(*engine, *object, "getLowResolutionMissionSnapShot",
+        JsMissionManager::GetLowResolutionMissionSnapShot);
     BindNativeFunction(*engine, *object, "lockMission", JsMissionManager::LockMission);
     BindNativeFunction(*engine, *object, "unlockMission", JsMissionManager::UnlockMission);
     BindNativeFunction(*engine, *object, "clearMission", JsMissionManager::ClearMission);

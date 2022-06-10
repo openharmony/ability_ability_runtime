@@ -438,7 +438,9 @@ bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemote
     missionSnapshot.topAbility = it->missionInfo.want.GetElement();
 
     MissionSnapshot savedSnapshot = missionSnapshot;
+#ifdef SUPPORT_GRAPHICS
     savedSnapshot.snapshot = snapshot.GetPixelMap();
+#endif
     if (!taskDataPersistenceMgr_->SaveMissionSnapshot(missionId, savedSnapshot)) {
         HILOG_ERROR("snapshot: save mission snapshot failed");
         return false;

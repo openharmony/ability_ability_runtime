@@ -103,6 +103,46 @@ void MissionDataStorage::DeleteMissionInfo(int missionId)
     DeleteMissionSnapshot(missionId);
 }
 
+void MissionDataStorage::SaveMissionSnapshot(int32_t missionId, const MissionSnapshot& missionSnapshot)
+{
+#ifdef SUPPORT_GRAPHICS
+    HILOG_INFO("snapshot: save snapshot from cache, missionId = %{public}d", missionId);
+    SaveCachedSnapshot(missionId, missionSnapshot);
+    SaveSnapshotFile(missionId, missionSnapshot);
+    HILOG_INFO("snapshot: delete snapshot from cache, missionId = %{public}d", missionId);
+    DeleteCachedSnapshot(missionId);
+#endif
+}
+
+void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId)
+{
+#ifdef SUPPORT_GRAPHICS
+    DeleteMissionSnapshot(missionId, false);
+    DeleteMissionSnapshot(missionId, true);
+#endif
+}
+
+bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLittle)
+{
+#ifdef SUPPORT_GRAPHICS
+    if (GetCachedSnapshot(missionId, missionSnapshot)) {
+        if (isLittle) {
+            missionSnapshot.snapshot = GetReducedPixelMap(missionSnapshot.snapshot);
+        }
+        HILOG_INFO("snapshot: GetMissionSnapshot from cache, missionId = %{public}d", missionId);
+        return true;
+    }
+
+    auto pixelMap = GetPixelMap(missionId, isLittle);
+    if (!pixelMap) {
+        HILOG_ERROR("%{public}s: GetPixelMap failed.", __func__);
+        return false;
+    }
+    missionSnapshot.snapshot = std::move(pixelMap);
+#endif
+    return true;
+}
+
 std::string MissionDataStorage::GetMissionDataDirPath() const
 {
     return TASK_DATA_FILE_BASE_PATH + "/" + std::to_string(userId_) + "/" + MISSION_DATA_FILE_PATH;
@@ -112,6 +152,17 @@ std::string MissionDataStorage::GetMissionDataFilePath(int missionId)
 {
     return GetMissionDataDirPath() + "/"
         + MISSION_JSON_FILE_PREFIX + "_" + std::to_string(missionId) + JSON_FILE_SUFFIX;
+}
+
+std::string MissionDataStorage::GetMissionSnapshotPath(int32_t missionId, bool isLittle) const
+{
+    std::string filePath = GetMissionDataDirPath() + FILE_SEPARATOR + MISSION_JSON_FILE_PREFIX +
+        UNDERLINE_SEPARATOR + std::to_string(missionId);
+    if (isLittle) {
+        filePath = filePath + UNDERLINE_SEPARATOR + LITTLE_FLAG;
+    }
+    filePath = filePath + PNG_FILE_SUFFIX;
+    return filePath;
 }
 
 bool MissionDataStorage::CheckFileNameValid(const std::string &fileName)
@@ -140,6 +191,7 @@ bool MissionDataStorage::CheckFileNameValid(const std::string &fileName)
     return true;
 }
 
+#ifdef SUPPORT_GRAPHICS
 void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const MissionSnapshot& missionSnapshot)
 {
     SaveSnapshotFile(missionId, missionSnapshot.snapshot, missionSnapshot.isPrivate, false);
@@ -162,7 +214,7 @@ void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const std::shared_p
             return;
         }
     }
-#ifdef SUPPORT_GRAPHICS
+
     bool saveMissionFile = false;
     if (isPrivate) {
         ssize_t dataLength = snapshot->GetWidth() * snapshot->GetHeight() * BPP;
@@ -179,7 +231,6 @@ void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const std::shared_p
     if (!saveMissionFile) {
         HILOG_ERROR("snapshot: save mission snapshot failed, path = %{public}s.", filePath.c_str());
     }
-#endif
 }
 
 std::shared_ptr<OHOS::Media::PixelMap> MissionDataStorage::GetReducedPixelMap(
@@ -196,58 +247,37 @@ std::shared_ptr<OHOS::Media::PixelMap> MissionDataStorage::GetReducedPixelMap(
     return std::shared_ptr<OHOS::Media::PixelMap>(reducedPixelMap.release());
 }
 
-void MissionDataStorage::SaveMissionSnapshot(int32_t missionId, const MissionSnapshot& missionSnapshot)
-{
-    HILOG_INFO("snapshot: save snapshot from cache, missionId = %{public}d", missionId);
-    SaveCachedSnapshot(missionId, missionSnapshot);
-    SaveSnapshotFile(missionId, missionSnapshot);
-    HILOG_INFO("snapshot: delete snapshot from cache, missionId = %{public}d", missionId);
-    DeleteCachedSnapshot(missionId);
-}
-
 bool MissionDataStorage::GetCachedSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot)
 {
-#ifdef SUPPORT_GRAPHICS
     std::lock_guard<std::mutex> lock(cachedPixelMapMutex_);
     auto pixelMap = cachedPixelMap_.find(missionId);
     if (pixelMap != cachedPixelMap_.end()) {
         missionSnapshot.snapshot = pixelMap->second;
         return true;
     }
-#endif
     return false;
 }
 
 bool MissionDataStorage::SaveCachedSnapshot(int32_t missionId, const MissionSnapshot& missionSnapshot)
 {
-#ifdef SUPPORT_GRAPHICS
     std::lock_guard<std::mutex> lock(cachedPixelMapMutex_);
     auto result = cachedPixelMap_.insert_or_assign(missionId, missionSnapshot.snapshot);
     if (!result.second) {
         HILOG_ERROR("snapshot: save snapshot cache failed, missionId = %{public}d", missionId);
         return false;
     }
-#endif
     return true;
 }
 
 bool MissionDataStorage::DeleteCachedSnapshot(int32_t missionId)
 {
-#ifdef SUPPORT_GRAPHICS
     std::lock_guard<std::mutex> lock(cachedPixelMapMutex_);
     auto result = cachedPixelMap_.erase(missionId);
     if (result != 1) {
         HILOG_ERROR("snapshot: delete snapshot cache failed, missionId = %{public}d", missionId);
         return false;
     }
-#endif
     return true;
-}
-
-void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId)
-{
-    DeleteMissionSnapshot(missionId, false);
-    DeleteMissionSnapshot(missionId, true);
 }
 
 void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLittle)
@@ -264,7 +294,6 @@ void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLittle)
     }
 }
 
-#ifdef SUPPORT_GRAPHICS
 sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, bool isLittle) const
 {
     auto pixelMapPtr = GetPixelMap(missionId, isLittle);
@@ -297,43 +326,9 @@ std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId, 
     }
     return pixelMapPtr;
 }
-#endif
-
-bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLittle)
-{
-#ifdef SUPPORT_GRAPHICS
-    if (GetCachedSnapshot(missionId, missionSnapshot)) {
-        if (isLittle) {
-            missionSnapshot.snapshot = GetReducedPixelMap(missionSnapshot.snapshot);
-        }
-        HILOG_INFO("snapshot: GetMissionSnapshot from cache, missionId = %{public}d", missionId);
-        return true;
-    }
-
-    auto pixelMap = GetPixelMap(missionId, isLittle);
-    if (!pixelMap) {
-        HILOG_ERROR("%{public}s: GetPixelMap failed.", __func__);
-        return false;
-    }
-    missionSnapshot.snapshot = std::move(pixelMap);
-#endif
-    return true;
-}
-
-std::string MissionDataStorage::GetMissionSnapshotPath(int32_t missionId, bool isLittle) const
-{
-    std::string filePath = GetMissionDataDirPath() + FILE_SEPARATOR + MISSION_JSON_FILE_PREFIX +
-        UNDERLINE_SEPARATOR + std::to_string(missionId);
-    if (isLittle) {
-        filePath = filePath + UNDERLINE_SEPARATOR + LITTLE_FLAG;
-    }
-    filePath = filePath + PNG_FILE_SUFFIX;
-    return filePath;
-}
 
 bool MissionDataStorage::WriteToPng(const char* fileName, uint32_t width, uint32_t height, const uint8_t* data)
 {
-#ifdef SUPPORT_GRAPHICS
     if (data == nullptr) {
         HILOG_ERROR("snapshot: data error, nullptr!\n");
         return false;
@@ -384,8 +379,9 @@ bool MissionDataStorage::WriteToPng(const char* fileName, uint32_t width, uint32
     // free memory
     png_destroy_write_struct(&png_ptr, &info_ptr);
     (void)fclose(fp);
-#endif
+
     return true;
 }
+#endif
 }  // namespace AAFwk
 }  // namespace OHOS
