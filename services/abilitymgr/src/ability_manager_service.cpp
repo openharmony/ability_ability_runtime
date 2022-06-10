@@ -250,7 +250,7 @@ bool AbilityManagerService::Init()
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
-    auto subscribeBackgroundTask = [aams = shared_from_this()]() { 
+    auto subscribeBackgroundTask = [aams = shared_from_this()]() {
         if (ERR_OK != BackgroundTaskMgrHelper::SubscribeBackgroundTask(*(aams->bgtaskObserver_))) {
             HILOG_ERROR("subscribeBackgroundTask fail");
         }
