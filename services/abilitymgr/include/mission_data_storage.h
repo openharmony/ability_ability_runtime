@@ -42,15 +42,6 @@ public:
     MissionDataStorage(int userId);
     virtual ~MissionDataStorage();
 
-    /**
-     * Get low resoultion pixelmap of source.
-     *
-     * @param source source pixelmap.
-     * @return return reduced pixel map.
-     */
-    static std::shared_ptr<OHOS::Media::PixelMap> GetReducedPixelMap(
-        const std::shared_ptr<OHOS::Media::PixelMap>& source);
-
     void SetEventHandler(const std::shared_ptr<AppExecFwk::EventHandler> &handler);
 
     /**
@@ -94,7 +85,15 @@ public:
     bool GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLittle);
 
 #ifdef SUPPORT_GRAPHICS
-public:
+    /**
+     * Get low resoultion pixelmap of source.
+     *
+     * @param source source pixelmap.
+     * @return return reduced pixel map.
+     */
+    static std::shared_ptr<OHOS::Media::PixelMap> GetReducedPixelMap(
+        const std::shared_ptr<OHOS::Media::PixelMap>& source);
+
     /**
      * @brief Get the Snapshot object
      * @param missionId Indicates this mission id.
@@ -103,9 +102,6 @@ public:
     sptr<Media::PixelMap> GetSnapshot(int missionId, bool isLittle = false) const;
 
     std::unique_ptr<Media::PixelMap> GetPixelMap(int missionId, bool isLittle) const;
-
-private:
-    std::map<int32_t, std::shared_ptr<Media::PixelMap>> cachedPixelMap_;
 #endif
 
 private:
@@ -117,6 +113,7 @@ private:
 
     bool CheckFileNameValid(const std::string &fileName);
 
+#ifdef SUPPORT_GRAPHICS
     bool WriteToPng(const char* fileName, uint32_t width, uint32_t height, const uint8_t* data);
 
     bool GetCachedSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot);
@@ -127,8 +124,12 @@ private:
     void DeleteMissionSnapshot(int32_t missionId, bool isLittle);
 
     void SaveSnapshotFile(int32_t missionId, const MissionSnapshot& missionSnapshot);
+
     void SaveSnapshotFile(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap>& snapshot,
         bool isPrivate, bool isLittle);
+
+    std::map<int32_t, std::shared_ptr<Media::PixelMap>> cachedPixelMap_;
+#endif
 
     int userId_ = 0;
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
