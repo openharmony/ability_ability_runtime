@@ -60,10 +60,8 @@ ohos_unittest("ability_token_stub_test") {
     "ipc:ipc_core",
   ]
 
-  defines = []
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
-    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 }
 
