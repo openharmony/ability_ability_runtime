@@ -90,6 +90,7 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
+using namespace BackgroundTaskMgr;
 const bool CONCURRENCY_MODE_FALSE = false;
 const int32_t MAIN_USER_ID = 100;
 const int32_t U0_USER_ID = 0;
@@ -249,9 +250,12 @@ bool AbilityManagerService::Init()
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
-    if (ERR_OK != BackgroundTaskMgr::BackgroundTaskMgrHelper::SubscribeBackgroundTask(*bgtaskObserver_)) {
-        HILOG_ERROR("register bgtaskObserver fail");
-    }
+    auto subscribeBackgroundTask = [aams = shared_from_this()]() { 
+        if (ERR_OK != BackgroundTaskMgrHelper::SubscribeBackgroundTask(*(aams->bgtaskObserver_))) {
+            HILOG_ERROR("subscribeBackgroundTask fail");
+        }
+    };
+    handler_->PostTask(subscribeBackgroundTask, "SubscribeBackgroundTask");
 #endif
 
     HILOG_INFO("Init success.");

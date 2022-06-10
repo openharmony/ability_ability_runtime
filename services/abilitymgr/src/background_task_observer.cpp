@@ -39,6 +39,7 @@ void BackgroundTaskObserver::OnContinuousTaskStop(const std::shared_ptr<Backgrou
 
 bool BackgroundTaskObserver::IsBackgroundTaskUid(const int uid)
 {
+    std::lock_guard<std::mutex> lock(bgTaskMutex_);
     auto iter = find(bgTaskUids_.begin(), bgTaskUids_.end(), uid);
     if (iter != bgTaskUids_.end()) {
         return true;
