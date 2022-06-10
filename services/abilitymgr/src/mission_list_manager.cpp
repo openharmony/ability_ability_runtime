@@ -1029,6 +1029,7 @@ int MissionListManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &a
         return ERR_OK;
     }
 
+    abilityRecord->SetTerminatingState();
     // save result to caller AbilityRecord
     if (resultWant != nullptr) {
         abilityRecord->SaveResultToCallers(resultCode, resultWant);
