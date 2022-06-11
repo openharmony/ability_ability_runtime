@@ -34,8 +34,10 @@ struct ConnectionInfo {
     // connection
     sptr<AbilityConnection> abilityConnection;
 
-    ConnectionInfo(sptr<IRemoteObject> connectCaller, AppExecFwk::ElementName connectReceiver,
-        sptr<AbilityConnection> abilityConnection):connectCaller(connectCaller), connectReceiver(connectReceiver),
+    ConnectionInfo(const sptr<IRemoteObject> &connectCaller, AppExecFwk::ElementName connectReceiver,
+        const sptr<AbilityConnection> &abilityConnection) :
+        connectCaller(connectCaller),
+        connectReceiver(connectReceiver),
         abilityConnection(abilityConnection)
     {
     }
@@ -147,6 +149,6 @@ private:
     ErrCode ConnectAbilityInner(const sptr<IRemoteObject> &connectCaller,
         const AAFwk::Want &want, int accountId, const sptr<AbilityConnectCallback> &connectCallback);
 };
-}  // namespace AbilityRuntime
-}  // namespace OHOS
-#endif  // ABILITY_RUNTIME_CONNECTION_MANAGER_H
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // ABILITY_RUNTIME_CONNECTION_MANAGER_H
