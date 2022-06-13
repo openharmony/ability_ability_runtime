@@ -1593,8 +1593,8 @@ void MainThread::Start()
     sigAct.sa_flags = 0;
     sigAct.sa_handler = &MainThread::HandleSignal;
     sigaction(SIGUSR1, &sigAct, NULL);
-    sigaction(SIGNAL_JS_HEAP, &sigAct, NULL);
-    sigaction(SIGNAL_JS_HEAP_PRIV, &sigAct, NULL);
+    sigaction(MUSL_SIGNAL_JSHEAP, &sigAct, NULL);
+    sigaction(MUSL_SIGNAL_JSHEAP_PRIV, &sigAct, NULL);
 
     thread->Init(runner, runnerWatchDog);
 
