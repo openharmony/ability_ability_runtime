@@ -101,6 +101,7 @@ constexpr int32_t NON_ANONYMIZE_LENGTH = 6;
 constexpr uint32_t SCENE_FLAG_NORMAL = 0;
 const int32_t MAX_NUMBER_OF_DISTRIBUTED_MISSIONS = 20;
 const int32_t SWITCH_ACCOUNT_TRY = 3;
+const int32_t SUBSCRIBE_BACKGROUND_TASK_TRY = 5;
 #ifdef ABILITY_COMMAND_FOR_TEST
 const int32_t BLOCK_AMS_SERVICE_TIME = 65;
 #endif
@@ -251,8 +252,14 @@ bool AbilityManagerService::Init()
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
     auto subscribeBackgroundTask = [aams = shared_from_this()]() {
-        if (ERR_OK != BackgroundTaskMgrHelper::SubscribeBackgroundTask(*(aams->bgtaskObserver_))) {
-            HILOG_ERROR("subscribeBackgroundTask fail");
+        int attemptNums = 0;
+        while (!IN_PROCESS_CALL(BackgroundTaskMgrHelper::SubscribeBackgroundTask(
+                *(aams->bgtaskObserver_)))) {
+            if (!++attemptNums > SUBSCRIBE_BACKGROUND_TASK_TRY) {
+                HILOG_ERROR("subscribeBackgroundTask fail");
+                return;
+            }
+            usleep(REPOLL_TIME_MICRO_SECONDS);
         }
     };
     handler_->PostTask(subscribeBackgroundTask, "SubscribeBackgroundTask");
