@@ -254,8 +254,8 @@ bool AbilityManagerService::Init()
     auto subscribeBackgroundTask = [aams = shared_from_this()]() {
         int attemptNums = 0;
         while (!IN_PROCESS_CALL(BackgroundTaskMgrHelper::SubscribeBackgroundTask(
-                *(aams->bgtaskObserver_)))) {
-            if (!++attemptNums > SUBSCRIBE_BACKGROUND_TASK_TRY) {
+            *(aams->bgtaskObserver_)))) {
+            if (!(++attemptNums > SUBSCRIBE_BACKGROUND_TASK_TRY)) {
                 HILOG_ERROR("subscribeBackgroundTask fail");
                 return;
             }
