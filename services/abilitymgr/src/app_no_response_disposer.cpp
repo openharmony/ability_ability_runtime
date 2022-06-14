@@ -90,7 +90,7 @@ int AppNoResponseDisposer::PostTimeoutTask(int pid, std::string bundleName) cons
         return ERR_INVALID_VALUE;
     }
 
-    // if callback process, check the process must be the same bundle name. 
+    // if callback process, check the process must be the same bundle name.
     if (!bundleName.empty() && appInfo.bundleName != bundleName) {
         HILOG_ERROR("this application is not exist.");
         return ERR_INVALID_VALUE;

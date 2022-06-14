@@ -54,7 +54,7 @@ void SystemDialogScheduler::ScheduleShowDialog(const std::string &name, const Di
     }
 
     HILOG_INFO("Show Dialog:[%{public}s], \
-        Dialog position:[%{public}d, %{public}d, %{public}d, %{public}d], str: %{public}s",
+        Dialog position : [%{public}d, %{public}d, %{public}d, %{public}d], str : %{public}s",
         name.data(), position.offsetX, position.offsetY, position.width, position.height, params.data());
 
     Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
@@ -87,7 +87,7 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
         if (params == EVENT_WAITING_CODE) {
             HILOG_WARN("user choose to wait no response app.");
             return;
-        } 
+        }
         if (params == EVENT_CLOSE_CODE) {
             HILOG_WARN("user choose to kill no response app.");
             anrCallBack();
