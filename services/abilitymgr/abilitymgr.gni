@@ -86,7 +86,5 @@ abilityms_files = [
 ]
 
 if (ability_runtime_graphics) {
-  abilityms_files += [
-    "src/system_dialog_scheduler.cpp",
-  ]
+  abilityms_files += [ "src/system_dialog_scheduler.cpp" ]
 }
