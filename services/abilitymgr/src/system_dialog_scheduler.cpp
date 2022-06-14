@@ -53,8 +53,7 @@ void SystemDialogScheduler::ScheduleShowDialog(const std::string &name, const Di
         return;
     }
 
-    HILOG_INFO("Show Dialog:[%{public}s], \
-        Dialog position: [%{public}d, %{public}d, %{public}d, %{public}d], str: %{public}s",
+    HILOG_INFO("Show Dialog:[%{public}s],Dialog position:[%{public}d,%{public}d,%{public}d,%{public}d],str:%{public}s",
         name.data(), position.offsetX, position.offsetY, position.width, position.height, params.data());
 
     Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
