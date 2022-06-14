@@ -259,6 +259,5 @@ int AmsMgrScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Ap
     }
     return amsMgrServiceInner_->GetApplicationInfoByProcessID(pid, application);
 }
-
 }  // namespace AppExecFwk
 }  // namespace OHOS

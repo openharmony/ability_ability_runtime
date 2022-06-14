@@ -37,7 +37,7 @@ struct DialogPosition {
     int32_t offsetX = 0;
     int32_t offsetY = 0;
     int32_t width = 0;
-    int32_t height = 0; 
+    int32_t height = 0;
     int32_t width_narrow = 0;
     int32_t height_narrow = 0;
     bool wideScreen = true;
