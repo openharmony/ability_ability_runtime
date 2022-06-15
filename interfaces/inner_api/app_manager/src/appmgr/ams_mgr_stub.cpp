@@ -296,12 +296,12 @@ int32_t AmsMgrStub::HandleGetApplicationInfoByProcessID(MessageParcel &data, Mes
     HITRACE_METER(HITRACE_TAG_APP);
     int32_t pid = data.ReadInt32();
     AppExecFwk::ApplicationInfo application;
-    bool result = GetApplicationInfoByProcessID(pid, application);
-    if (!reply.WriteBool(result)) {
+    int32_t result = GetApplicationInfoByProcessID(pid, application);
+    if (!reply.WriteInt32(result)) {
         HILOG_ERROR("write result error.");
         return ERR_INVALID_VALUE;
     }
-    if (result && !reply.WriteParcelable(&application)) {
+    if (!reply.WriteParcelable(&application)) {
         HILOG_ERROR("write application info failed");
         return ERR_INVALID_VALUE;
     }

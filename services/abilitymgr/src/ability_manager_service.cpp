@@ -4088,8 +4088,8 @@ int AbilityManagerService::SendANRProcessID(int pid)
         }
     };
 #ifdef SUPPORT_GRAPHICS
-    auto showDialogTask = [sysDialog = sysDialogScheduler_, pid, userId = GetUserId()](int timeout,
-        int32_t labelId, const std::string &bundle, const Closure &callBack) {
+    auto showDialogTask = [sysDialog = sysDialogScheduler_, pid, userId = GetUserId()](int32_t labelId,
+        const std::string &bundle, const Closure &callBack) {
         std::string appName {""};
         if (!sysDialog) {
             HILOG_ERROR("sysDialogScheduler_ is nullptr.");

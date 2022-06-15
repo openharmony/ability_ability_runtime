@@ -27,8 +27,8 @@
 #include "ability_connect_manager.h"
 #include "ability_event_handler.h"
 #include "ability_manager_stub.h"
-#include "app_scheduler.h"
 #include "app_no_response_disposer.h"
+#include "app_scheduler.h"
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #include "background_task_observer.h"
 #endif

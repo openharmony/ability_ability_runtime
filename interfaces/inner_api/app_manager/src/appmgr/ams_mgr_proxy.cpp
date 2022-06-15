@@ -563,6 +563,7 @@ int AmsMgrProxy::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Applic
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("token write error.");
         return ERR_FLATTEN_OBJECT;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -574,20 +575,22 @@ int AmsMgrProxy::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Applic
     int32_t ret = remote->SendRequest(
         static_cast<uint32_t>(IAmsMgr::Message::GET_APPLICATION_INFO_BY_PROCESS_ID), data, reply, option);
     if (ret != NO_ERROR) {
-        return ERR_NULL_OBJECT;
+        HILOG_ERROR("send request fail.");
+        return ret;
     }
-    if (!reply.ReadBool()) {
+    auto result = reply.ReadInt32();
+    if (result != NO_ERROR) {
         HILOG_ERROR("reply result false");
-        return ERR_NULL_OBJECT;
+        return result;
     }
     std::unique_ptr<AppExecFwk::ApplicationInfo> info(reply.ReadParcelable<AppExecFwk::ApplicationInfo>());
     if (!info) {
         HILOG_ERROR("readParcelableInfo failed");
-        return ERR_NULL_OBJECT;
+        return ERR_NAME_NOT_FOUND;
     }
     application = *info;
     HILOG_DEBUG("get parcelable info success");
-    return 0;
+    return NO_ERROR;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
