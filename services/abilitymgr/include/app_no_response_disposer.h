@@ -30,8 +30,7 @@ class AppNoResponseDisposer : public std::enable_shared_from_this<AppNoResponseD
 public:
     using Closure = std::function<void()>;
     using SetMissionClosure = std::function<void(const std::vector<sptr<IRemoteObject>> &tokens)>;
-    using ShowDialogClosure = std::function<void(int timeout,
-        int32_t labelId, const std::string &bundle, const Closure &callBack)>;
+    using ShowDialogClosure = std::function<void(int32_t labelId, const std::string &bundle, const Closure &callBack)>;
 
     explicit AppNoResponseDisposer(const int timeout);
     virtual ~AppNoResponseDisposer() = default;

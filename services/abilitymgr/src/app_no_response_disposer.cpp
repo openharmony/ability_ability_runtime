@@ -17,8 +17,8 @@
 #include <csignal>
 
 #include "ability_manager_service.h"
-#include "app_scheduler.h"
 #include "ability_util.h"
+#include "app_scheduler.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
 
@@ -53,7 +53,7 @@ int AppNoResponseDisposer::DisposeAppNoRespose(int pid,
         HILOG_WARN("user choose to kill no response app.");
     };
 
-    showDialogTask(timeout_, appInfo.labelId, appInfo.bundleName, callback);
+    showDialogTask(appInfo.labelId, appInfo.bundleName, callback);
 
     HILOG_INFO("DisposeAppNoRespose success.");
     return ERR_OK;

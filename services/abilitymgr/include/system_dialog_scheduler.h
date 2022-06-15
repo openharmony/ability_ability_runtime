@@ -21,12 +21,12 @@
 
 namespace OHOS {
 namespace AAFwk {
-enum DialogType {
+enum class DialogType {
     DIALOG_ANR = 0,
     DIALOG_TIPS,
     DIALOG_SELECTOR,
 };
-enum DialogAlign {
+enum class DialogAlign {
     TOP = 0,
     CENTER,
     BOTTOM,
