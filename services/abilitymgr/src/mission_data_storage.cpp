@@ -122,18 +122,18 @@ void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId)
 #endif
 }
 
-bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLittle)
+bool MissionDataStorage::GetMissionSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot, bool isLowResolution)
 {
 #ifdef SUPPORT_GRAPHICS
     if (GetCachedSnapshot(missionId, missionSnapshot)) {
-        if (isLittle) {
+        if (isLowResolution) {
             missionSnapshot.snapshot = GetReducedPixelMap(missionSnapshot.snapshot);
         }
         HILOG_INFO("snapshot: GetMissionSnapshot from cache, missionId = %{public}d", missionId);
         return true;
     }
 
-    auto pixelMap = GetPixelMap(missionId, isLittle);
+    auto pixelMap = GetPixelMap(missionId, isLowResolution);
     if (!pixelMap) {
         HILOG_ERROR("%{public}s: GetPixelMap failed.", __func__);
         return false;
@@ -154,12 +154,12 @@ std::string MissionDataStorage::GetMissionDataFilePath(int missionId)
         + MISSION_JSON_FILE_PREFIX + "_" + std::to_string(missionId) + JSON_FILE_SUFFIX;
 }
 
-std::string MissionDataStorage::GetMissionSnapshotPath(int32_t missionId, bool isLittle) const
+std::string MissionDataStorage::GetMissionSnapshotPath(int32_t missionId, bool isLowResolution) const
 {
     std::string filePath = GetMissionDataDirPath() + FILE_SEPARATOR + MISSION_JSON_FILE_PREFIX +
         UNDERLINE_SEPARATOR + std::to_string(missionId);
-    if (isLittle) {
-        filePath = filePath + UNDERLINE_SEPARATOR + LITTLE_FLAG;
+    if (isLowResolution) {
+        filePath = filePath + UNDERLINE_SEPARATOR + LOW_RESOLUTION_FLAG;
     }
     filePath = filePath + PNG_FILE_SUFFIX;
     return filePath;
@@ -199,13 +199,13 @@ void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const MissionSnapsh
 }
 
 void MissionDataStorage::SaveSnapshotFile(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap>& snapshot,
-    bool isPrivate, bool isLittle)
+    bool isPrivate, bool isLowResolution)
 {
     if (!snapshot) {
         return;
     }
 
-    std::string filePath = GetMissionSnapshotPath(missionId, isLittle);
+    std::string filePath = GetMissionSnapshotPath(missionId, isLowResolution);
     std::string dirPath = OHOS::HiviewDFX::FileUtil::ExtractFilePath(filePath);
     if (!OHOS::HiviewDFX::FileUtil::FileExists(dirPath)) {
         bool createDir = OHOS::HiviewDFX::FileUtil::ForceCreateDirectory(dirPath);
@@ -280,9 +280,9 @@ bool MissionDataStorage::DeleteCachedSnapshot(int32_t missionId)
     return true;
 }
 
-void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLittle)
+void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLowResolution)
 {
-    std::string filePath = GetMissionSnapshotPath(missionId, isLittle);
+    std::string filePath = GetMissionSnapshotPath(missionId, isLowResolution);
     std::string dirPath = OHOS::HiviewDFX::FileUtil::ExtractFilePath(filePath);
     if (!OHOS::HiviewDFX::FileUtil::FileExists(filePath)) {
         HILOG_WARN("snapshot: remove snapshot file %{public}s failed, file not exists", filePath.c_str());
@@ -294,9 +294,9 @@ void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLittle)
     }
 }
 
-sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, bool isLittle) const
+sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, bool isLowResolution) const
 {
-    auto pixelMapPtr = GetPixelMap(missionId, isLittle);
+    auto pixelMapPtr = GetPixelMap(missionId, isLowResolution);
     if (!pixelMapPtr) {
         HILOG_ERROR("%{public}s: GetPixelMap failed.", __func__);
         return nullptr;
@@ -304,9 +304,9 @@ sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, bool isLitt
     return sptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
-std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId, bool isLittle) const
+std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId, bool isLowResolution) const
 {
-    std::string filePath = GetMissionSnapshotPath(missionId, isLittle);
+    std::string filePath = GetMissionSnapshotPath(missionId, isLowResolution);
     if (!OHOS::HiviewDFX::FileUtil::FileExists(filePath)) {
         HILOG_INFO("snapshot: storage snapshot not exists, missionId = %{public}d", missionId);
         return nullptr;
