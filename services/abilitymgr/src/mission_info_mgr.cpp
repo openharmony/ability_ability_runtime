@@ -405,7 +405,7 @@ void MissionInfoMgr::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handl
 }
 
 bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot, bool isLittle) const
+    MissionSnapshot& missionSnapshot, bool isLowResolution) const
 {
     HILOG_INFO("Update mission snapshot, missionId:%{public}d.", missionId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -432,7 +432,7 @@ bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemote
     }
 
 #ifdef SUPPORT_GRAPHICS
-    missionSnapshot.snapshot = isLittle ?
+    missionSnapshot.snapshot = isLowResolution ?
         MissionDataStorage::GetReducedPixelMap(snapshot.GetPixelMap()) : snapshot.GetPixelMap();
 #endif
     missionSnapshot.topAbility = it->missionInfo.want.GetElement();
@@ -470,7 +470,7 @@ sptr<Media::PixelMap> MissionInfoMgr::GetSnapshot(int32_t missionId) const
 #endif
 
 bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot, bool isLittle, bool force) const
+    MissionSnapshot& missionSnapshot, bool isLowResolution, bool force) const
 {
     HILOG_INFO("mission_list_info GetMissionSnapshot, missionId:%{public}d, force:%{public}d", missionId, force);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -488,16 +488,16 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
 
     if (force) {
         HILOG_INFO("force to get snapshot");
-        return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot, isLittle);
+        return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot, isLowResolution);
     }
 
-    if (taskDataPersistenceMgr_->GetMissionSnapshot(missionId, missionSnapshot, isLittle)) {
+    if (taskDataPersistenceMgr_->GetMissionSnapshot(missionId, missionSnapshot, isLowResolution)) {
         missionSnapshot.topAbility = it->missionInfo.want.GetElement();
         HILOG_ERROR("mission_list_info GetMissionSnapshot, find snapshot OK, missionId:%{public}d", missionId);
         return true;
     }
     HILOG_INFO("snapshot: storage mission snapshot not exists, create new snapshot");
-    return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot, isLittle);
+    return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot, isLowResolution);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

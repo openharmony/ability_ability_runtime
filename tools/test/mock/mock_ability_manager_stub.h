@@ -159,7 +159,7 @@ public:
     }
 
     virtual int GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
-        MissionSnapshot& snapshot, bool isLittle)
+        MissionSnapshot& snapshot, bool isLowResolution)
     {
         return 0;
     }
