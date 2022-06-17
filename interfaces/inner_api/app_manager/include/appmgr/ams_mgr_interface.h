@@ -50,9 +50,10 @@ public:
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.
      *
      * @param token, token, he unique identification to terminate the ability.
+     * @param clearMissionFlag, indicates whether terminate the ability when clearMision.
      * @return
      */
-    virtual void TerminateAbility(const sptr<IRemoteObject> &token) = 0;
+    virtual void TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag) = 0;
 
     /**
      * UpdateAbilityState, call UpdateAbilityState() through the proxy object, update the ability status.
@@ -150,6 +151,8 @@ public:
 
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) = 0;
 
+    virtual int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application) = 0;
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -169,6 +172,7 @@ public:
         REGISTER_START_SPECIFIED_ABILITY_RESPONSE,
         UPDATE_CONFIGURATION,
         GET_CONFIGURATION,
+        GET_APPLICATION_INFO_BY_PROCESS_ID,
     };
 };
 }  // namespace AppExecFwk

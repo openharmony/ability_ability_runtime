@@ -814,7 +814,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(con
     return appRecord;
 }
 
-void AppMgrServiceInner::TerminateAbility(const sptr<IRemoteObject> &token)
+void AppMgrServiceInner::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Terminate ability come.");
@@ -829,7 +829,8 @@ void AppMgrServiceInner::TerminateAbility(const sptr<IRemoteObject> &token)
     }
 
     if (appRunningManager_) {
-        appRunningManager_->TerminateAbility(token);
+        std::shared_ptr<AppMgrServiceInner> appMgrServiceInner = shared_from_this();
+        appRunningManager_->TerminateAbility(token, clearMissionFlag, appMgrServiceInner);
     }
 }
 
@@ -2229,6 +2230,29 @@ int AppMgrServiceInner::GetAbilityRecordsByProcessID(const int pid, std::vector<
     }
     for (auto &item : appRecord->GetAbilities()) {
         tokens.emplace_back(item.first);
+    }
+    return ERR_OK;
+}
+
+int AppMgrServiceInner::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application)
+{
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        HILOG_ERROR("no permissions.");
+        return ERR_PERMISSION_DENIED;
+    }
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord");
+        return ERR_NAME_NOT_FOUND;
+    }
+
+    auto info = appRecord->GetApplicationInfo();
+    if (info) {
+        application = *info;
+    } else {
+        HILOG_ERROR("ApplicationInfo is nullptr !");
+        return ERR_NO_INIT;
     }
     return ERR_OK;
 }

@@ -224,10 +224,10 @@ void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
     HILOG_INFO("Start to foreground ability, name is %{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
 
-    SendEvent(AbilityManagerService::FOREGROUNDNEW_TIMEOUT_MSG, AbilityManagerService::FOREGROUNDNEW_TIMEOUT);
+    SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, AbilityManagerService::FOREGROUND_TIMEOUT);
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     if (handler && task) {
-        handler->PostTask(task, "CancelStartingWindow", AbilityManagerService::FOREGROUNDNEW_TIMEOUT);
+        handler->PostTask(task, "CancelStartingWindow", AbilityManagerService::FOREGROUND_TIMEOUT);
     }
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
@@ -328,31 +328,12 @@ void AbilityRecord::AnimationTask(bool isRecent, const AbilityRequest &abilityRe
         return;
     }
 
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
-    if (!handler) {
-        HILOG_ERROR("Fail to get AbilityEventHandler.");
-        return;
-    }
-
-    auto self(weak_from_this());
     if (isRecent) {
         auto want = GetWantFromMission();
-        auto task = [self, startOptions, want] {
-            auto ability = self.lock();
-            if (ability) {
-                ability->NotifyAnimationFromRecentTask(startOptions, want);
-            }
-        };
-        handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        NotifyAnimationFromRecentTask(startOptions, want);
     } else {
         if (!IsForeground()) {
-            auto task = [self, callerAbility, abilityRequest] {
-                auto ability = self.lock();
-                if (ability) {
-                    ability->NotifyAnimationFromStartingAbility(callerAbility, abilityRequest);
-                }
-            };
-            handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+            NotifyAnimationFromStartingAbility(callerAbility, abilityRequest);
         }
     }
 }
@@ -422,41 +403,20 @@ void AbilityRecord::StartingWindowTask(bool isRecent, bool isCold, const Ability
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("%{public}s was called.", __func__);
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
-    if (!handler) {
-        HILOG_ERROR("Fail to get AbilityEventHandler.");
-        return;
-    }
-
-    auto self(weak_from_this());
     if (isRecent) {
         auto want = GetWantFromMission();
-        auto task = [self, startOptions, want, isCold] {
-            auto ability = self.lock();
-            if (ability) {
-                AbilityRequest abilityRequest;
-                if (isCold) {
-                    ability->StartingWindowCold(startOptions, want, abilityRequest);
-                } else {
-                    ability->StartingWindowHot(startOptions, want, abilityRequest);
-                }
-            }
-        };
-        handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        if (isCold) {
+            StartingWindowCold(startOptions, want, abilityRequest);
+        } else {
+            StartingWindowHot(startOptions, want, abilityRequest);
+        }
     } else {
-        auto task = [self, abilityRequest, isCold] {
-            auto ability = self.lock();
-            if (ability) {
-                std::shared_ptr<StartOptions> startOptions = nullptr;
-                std::shared_ptr<Want> want = nullptr;
-                if (isCold) {
-                    ability->StartingWindowCold(startOptions, want, abilityRequest);
-                } else {
-                    ability->StartingWindowHot(startOptions, want, abilityRequest);
-                }
-            }
-        };
-        handler->PostTask(task, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        std::shared_ptr<Want> want = nullptr;
+        if (isCold) {
+            StartingWindowCold(startOptions, want, abilityRequest);
+        } else {
+            StartingWindowHot(startOptions, want, abilityRequest);
+        }
     }
 }
 
@@ -484,7 +444,7 @@ void AbilityRecord::CancelStartingWindowHotTask()
             abilityRecord->SetStartingWindow(false);
         }
     };
-    handler->PostTask(delayTask, "CancelStartingWindowHot", AbilityManagerService::FOREGROUNDNEW_TIMEOUT);
+    handler->PostTask(delayTask, "CancelStartingWindowHot", AbilityManagerService::FOREGROUND_TIMEOUT);
 }
 
 void AbilityRecord::CancelStartingWindowColdTask()
@@ -512,7 +472,7 @@ void AbilityRecord::CancelStartingWindowColdTask()
             abilityRecord->SetStartingWindow(false);
         }
     };
-    handler->PostTask(delayTask, "CancelStartingWindowCold", AbilityManagerService::FOREGROUNDNEW_TIMEOUT);
+    handler->PostTask(delayTask, "CancelStartingWindowCold", AbilityManagerService::FOREGROUND_TIMEOUT);
 }
 
 sptr<IWindowManagerServiceHandler> AbilityRecord::GetWMSHandler() const
@@ -716,7 +676,7 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
             g_abilityRecordEventId_++;
             eventId_ = g_abilityRecordEventId_;
             // eventId_ is a unique id of the task.
-            handler->PostTask(task, std::to_string(eventId_), AbilityManagerService::BACKGROUNDNEW_TIMEOUT);
+            handler->PostTask(task, std::to_string(eventId_), AbilityManagerService::BACKGROUND_TIMEOUT);
         } else {
             HILOG_INFO("Is debug mode, no need to handle time out.");
         }
@@ -737,7 +697,7 @@ int AbilityRecord::TerminateAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Schedule terminate ability to AppMs, ability:%{public}s.", abilityInfo_.name.c_str());
-    return DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_);
+    return DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
 }
 
 const AppExecFwk::AbilityInfo &AbilityRecord::GetAbilityInfo() const
@@ -1697,6 +1657,16 @@ bool AbilityRecord::IsDlp() const
 bool AbilityRecord::IsMinimizeFromUser() const
 {
     return minimizeReason_;
+}
+
+void AbilityRecord::SetClearMissionFlag(bool clearMissionFlag)
+{
+    clearMissionFlag_= clearMissionFlag;
+}
+
+bool AbilityRecord::IsClearMissionFlag()
+{
+    return clearMissionFlag_;
 }
 
 std::shared_ptr<Mission> AbilityRecord::GetMission() const

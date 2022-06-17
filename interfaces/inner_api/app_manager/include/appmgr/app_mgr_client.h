@@ -48,10 +48,10 @@ public:
      * Terminate ability.
      *
      * @param token Ability identify.
-     *
+     * @param clearMissionFlag, indicates whether terminate the ability when clearMision.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode TerminateAbility(const sptr<IRemoteObject> &token);
+    virtual AppMgrResultCode TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag);
 
     /**
      * Update ability state.
@@ -273,6 +273,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status);
+
+    int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

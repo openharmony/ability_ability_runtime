@@ -47,7 +47,7 @@ ohos_unittest("ability_connect_callback_stub_test") {
     "${services_path}/common:perm_verification",
 
     # "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "${bundlefwk_innerkits_path}/libeventhandler:libeventhandler",
+    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/libpng:libpng",
@@ -65,6 +65,10 @@ ohos_unittest("ability_connect_callback_stub_test") {
     "relational_store:native_appdatafwk",
     "relational_store:native_rdb",
   ]
+
+  if (background_task_mgr_continuous_task_enable) {
+    external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
+  }
 }
 
 group("unittest") {

@@ -21,7 +21,7 @@
 #include <memory>
 
 #include "ability_running_info.h"
-#include "foundation/distributedhardware/devicemanager/interfaces/inner_kits/native_cpp/include/device_manager.h"
+#include "foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include/device_manager.h"
 #include "mission_list.h"
 #include "mission_listener_controller.h"
 #include "mission_info.h"
@@ -339,6 +339,8 @@ public:
     void PauseManager();
     void ResumeManager();
 
+    void SetMissionANRStateByTokens(const std::vector<sptr<IRemoteObject>> &tokens);
+
 #ifdef SUPPORT_GRAPHICS
 public:
     /**
@@ -418,7 +420,7 @@ private:
 
     // handle timeout event
     void HandleLoadTimeout(const std::shared_ptr<AbilityRecord> &ability);
-    void HandleForgroundNewTimeout(const std::shared_ptr<AbilityRecord> &ability);
+    void HandleForgroundTimeout(const std::shared_ptr<AbilityRecord> &ability);
     void HandleTimeoutAndResumeAbility(const std::shared_ptr<AbilityRecord> &ability);
     void MoveToTerminateList(const std::shared_ptr<AbilityRecord> &ability);
     void DelayedResumeTimeout(const std::shared_ptr<AbilityRecord> &callerAbility);

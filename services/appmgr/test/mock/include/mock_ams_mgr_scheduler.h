@@ -30,7 +30,7 @@ public:
     MOCK_METHOD5(AbilityBehaviorAnalysis,
         void(const sptr<OHOS::IRemoteObject> &token, const sptr<OHOS::IRemoteObject> &preToken,
             const int32_t visibility, const int32_t perceptibility, const int32_t connectionState));
-    MOCK_METHOD1(TerminateAbility, void(const sptr<IRemoteObject> &token));
+    MOCK_METHOD2(TerminateAbility, void(const sptr<IRemoteObject> &token, bool clearMissionFlag));
     MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject> &token, const AbilityState state));
     MOCK_METHOD0(Reset, void());
     MOCK_METHOD1(KillProcessByAbilityToken, void(const sptr<IRemoteObject> &token));
@@ -45,6 +45,7 @@ public:
         void(const sptr<IRemoteObject> &token, OHOS::AppExecFwk::RunningProcessInfo &info));
     MOCK_METHOD2(StartSpecifiedAbility, void(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo));
     MOCK_METHOD1(RegisterStartSpecifiedAbilityResponse, void(const sptr<IStartSpecifiedAbilityResponse> &response));
+    MOCK_METHOD2(GetApplicationInfoByProcessID, int(const int pid, AppExecFwk::ApplicationInfo &application));
 
     MockAmsMgrScheduler() : AmsMgrStub() {};
     virtual ~MockAmsMgrScheduler() {};

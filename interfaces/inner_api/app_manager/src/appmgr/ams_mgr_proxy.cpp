@@ -94,7 +94,7 @@ void AmsMgrProxy::LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemo
     HILOG_DEBUG("end");
 }
 
-void AmsMgrProxy::TerminateAbility(const sptr<IRemoteObject> &token)
+void AmsMgrProxy::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
     HILOG_DEBUG("start");
     MessageParcel data;
@@ -105,6 +105,10 @@ void AmsMgrProxy::TerminateAbility(const sptr<IRemoteObject> &token)
     }
     if (!data.WriteRemoteObject(token.GetRefPtr())) {
         HILOG_ERROR("Failed to write token");
+        return;
+    }
+    if (!data.WriteBool(clearMissionFlag)) {
+        HILOG_ERROR("Failed to write clearMissionFlag");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -551,6 +555,42 @@ void AmsMgrProxy::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifi
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
     }
+}
+
+int AmsMgrProxy::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("token write error.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+    data.WriteInt32(pid);
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(IAmsMgr::Message::GET_APPLICATION_INFO_BY_PROCESS_ID), data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_ERROR("send request fail.");
+        return ret;
+    }
+    auto result = reply.ReadInt32();
+    if (result != NO_ERROR) {
+        HILOG_ERROR("reply result false");
+        return result;
+    }
+    std::unique_ptr<AppExecFwk::ApplicationInfo> info(reply.ReadParcelable<AppExecFwk::ApplicationInfo>());
+    if (!info) {
+        HILOG_ERROR("readParcelableInfo failed");
+        return ERR_NAME_NOT_FOUND;
+    }
+    application = *info;
+    HILOG_DEBUG("get parcelable info success");
+    return NO_ERROR;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
