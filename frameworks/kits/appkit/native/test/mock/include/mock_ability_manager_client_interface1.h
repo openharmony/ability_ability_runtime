@@ -66,8 +66,8 @@ namespace OHOS {
 namespace AppExecFwk {
 class MockIBundleMgr : public IRemoteStub<IBundleMgr> {
 public:
-    MockIBundleMgr(){};
-    virtual ~MockIBundleMgr(){};
+    MockIBundleMgr() {};
+    virtual ~MockIBundleMgr() {};
 
     virtual bool GetApplicationInfo(
         const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
@@ -246,15 +246,6 @@ public:
     {
         return true;
     }
-    bool GetModuleUsageRecords(const int32_t number, std::vector<ModuleUsageRecord> &moduleUsageRecords)
-    {
-        return true;
-    }
-    bool NotifyAbilityLifeStatus(
-        const std::string &bundleName, const std::string &abilityName, const int64_t launchTime)
-    {
-        return true;
-    }
     virtual sptr<IBundleUserMgr> GetBundleUserMgr() override
     {
         return nullptr;
@@ -263,8 +254,8 @@ public:
 
 class MockAbilityContextDeal : public ContextDeal {
 public:
-    MockAbilityContextDeal(){};
-    virtual ~MockAbilityContextDeal(){};
+    MockAbilityContextDeal() {};
+    virtual ~MockAbilityContextDeal() {};
 
     sptr<IBundleMgr> GetBundleManager() const override
     {

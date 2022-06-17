@@ -43,7 +43,8 @@ std::string GetCurrentTime()
 {
     struct timespec tn;
     clock_gettime(CLOCK_REALTIME, &tn);
-    uint64_t uTime = static_cast<uint64_t>(tn.tv_sec) * NANO_SECOND_PER_SEC + tn.tv_nsec;
+    uint64_t uTime = static_cast<uint64_t>(tn.tv_sec) * NANO_SECOND_PER_SEC +
+        static_cast<uint64_t>(tn.tv_nsec);
     return std::to_string(uTime);
 }
 } // namespace
@@ -846,7 +847,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
         return ERR_INVALID_VALUE;
     }
 
-    handler->RemoveEvent(AbilityManagerService::FOREGROUNDNEW_TIMEOUT_MSG, abilityRecord->GetEventId());
+    handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetEventId());
     auto self(shared_from_this());
     if (success) {
 #ifdef SUPPORT_GRAPHICS
@@ -875,11 +876,6 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
 
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
 
-    DelayedSingleton<AbilityManagerService>::GetInstance()->NotifyBmsAbilityLifeStatus(
-        abilityRecord->GetAbilityInfo().bundleName,
-        abilityRecord->GetAbilityInfo().name,
-        AbilityUtil::UTCTimeSeconds(),
-        abilityRecord->GetApplicationInfo().uid);
 #if BINDER_IPC_32BIT
     HILOG_INFO("notify bms ability life status, bundle name:%{public}s, ability name:%{public}s, time:%{public}lld",
         abilityRecord->GetAbilityInfo().bundleName.c_str(),
@@ -1138,11 +1134,10 @@ void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityR
 
     // 4. the ability should find the next ability to foreground
     std::shared_ptr<AbilityRecord> needTopAbility;
-    if (missionList->IsEmpty()) {
-        HILOG_DEBUG("MissionList is empty, next is launcher.");
-        needTopAbility = GetCurrentTopAbilityLocked();
-    } else {
+    if (!missionList->IsEmpty()) {
         needTopAbility = missionList->GetTopAbility();
+    } else {
+        HILOG_DEBUG("mission list is empty, no next ability.");
     }
 
     if (!needTopAbility) {
@@ -1302,6 +1297,7 @@ int MissionListManager::ClearMissionLocked(int missionId, std::shared_ptr<Missio
     }
 
     abilityRecord->SetTerminatingState();
+    abilityRecord->SetClearMissionFlag(true);
     auto ret = TerminateAbilityLocked(abilityRecord, false);
     if (ret != ERR_OK) {
         HILOG_ERROR("clear mission error: %{public}d.", ret);
@@ -1339,6 +1335,12 @@ void MissionListManager::ClearAllMissionsLocked(std::list<std::shared_ptr<Missio
         auto mission = (*listIter);
         listIter++;
         if (!mission || mission->IsLockedState()) {
+            continue;
+        }
+
+        auto abilityMs_ = OHOS::DelayedSingleton<AbilityManagerService>::GetInstance();
+        if (abilityMs_->IsBackgroundTaskUid(mission->GetAbilityRecord()->GetUid())) {
+            HILOG_INFO("the mission is background task, do not need clear");
             continue;
         }
 
@@ -1387,7 +1389,7 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
     UpdateMissionSnapshot(abilityRecord);
     auto task = [abilityRecord, self]() {
         HILOG_ERROR("Mission list manager move to background timeout.");
-        self->PrintTimeOutLog(abilityRecord, AbilityManagerService::BACKGROUNDNEW_TIMEOUT_MSG);
+        self->PrintTimeOutLog(abilityRecord, AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
         self->CompleteBackground(abilityRecord);
     };
     abilityRecord->BackgroundAbility(task);
@@ -1402,25 +1404,25 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
 
     AppExecFwk::RunningProcessInfo processInfo = {};
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(ability->GetToken(), processInfo);
-    std::string msgContent;
+    std::string msgContent = "ability:" + ability->GetAbilityInfo().name + " ";
     switch (msgId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG:
-            msgContent = "ability load timeout";
+            msgContent += "load timeout";
             break;
         case AbilityManagerService::ACTIVE_TIMEOUT_MSG:
-            msgContent = "ability active timeout";
+            msgContent += "active timeout";
             break;
         case AbilityManagerService::INACTIVE_TIMEOUT_MSG:
-            msgContent = "ability inactive timeout";
+            msgContent += "inactive timeout";
             break;
-        case AbilityManagerService::FOREGROUNDNEW_TIMEOUT_MSG:
-            msgContent = "ability foregroundnew timeout";
+        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG:
+            msgContent += "foreground timeout";
             break;
-        case AbilityManagerService::BACKGROUNDNEW_TIMEOUT_MSG:
-            msgContent = "ability backgroundnew timeout";
+        case AbilityManagerService::BACKGROUND_TIMEOUT_MSG:
+            msgContent += "background timeout";
             break;
         case AbilityManagerService::TERMINATE_TIMEOUT_MSG:
-            msgContent = "ability terminate timeout";
+            msgContent += "terminate timeout";
             break;
         default:
             return;
@@ -1479,8 +1481,8 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t eventId)
         case AbilityManagerService::ACTIVE_TIMEOUT_MSG:
             break;
         case AbilityManagerService::INACTIVE_TIMEOUT_MSG:
-        case AbilityManagerService::FOREGROUNDNEW_TIMEOUT_MSG:
-            HandleForgroundNewTimeout(abilityRecord);
+        case AbilityManagerService::FOREGROUND_TIMEOUT_MSG:
+            HandleForgroundTimeout(abilityRecord);
             break;
         default:
             break;
@@ -1506,7 +1508,7 @@ void MissionListManager::HandleLoadTimeout(const std::shared_ptr<AbilityRecord> 
     HandleTimeoutAndResumeAbility(ability);
 }
 
-void MissionListManager::HandleForgroundNewTimeout(const std::shared_ptr<AbilityRecord> &ability)
+void MissionListManager::HandleForgroundTimeout(const std::shared_ptr<AbilityRecord> &ability)
 {
     if (ability == nullptr) {
         HILOG_ERROR("MissionListManager on time out event: ability record is nullptr.");
@@ -1549,7 +1551,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     }
 #endif
 
-    HandleForgroundNewTimeout(abilityRecord);
+    HandleForgroundTimeout(abilityRecord);
     TerminatePreviousAbility(abilityRecord);
 }
 
@@ -2670,5 +2672,23 @@ int MissionListManager::BlockAbility(int32_t abilityRecordId)
     return ret;
 }
 #endif
+
+void MissionListManager::SetMissionANRStateByTokens(const std::vector<sptr<IRemoteObject>> &tokens)
+{
+    HILOG_INFO("%{public}s", __func__);
+    for (auto &item : tokens) {
+        auto abilityRecord = GetAbilityRecordByToken(item);
+        if (abilityRecord == nullptr) {
+            HILOG_WARN("abilityRecord is nullptr.");
+            continue;
+        }
+        auto mission = abilityRecord->GetMission();
+        if (mission == nullptr) {
+            HILOG_WARN("mission is nullptr.");
+            continue;
+        }
+        mission->SetANRState(true);
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS

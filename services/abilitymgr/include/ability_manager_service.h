@@ -27,7 +27,11 @@
 #include "ability_connect_manager.h"
 #include "ability_event_handler.h"
 #include "ability_manager_stub.h"
+#include "app_no_response_disposer.h"
 #include "app_scheduler.h"
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+#include "background_task_observer.h"
+#endif
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundle_constants.h"
 #include "data_ability_manager.h"
@@ -41,13 +45,15 @@
 #include "pending_want_manager.h"
 #include "ams_configuration_parameter.h"
 #include "user_controller.h"
+#ifdef SUPPORT_GRAPHICS
+#include "system_dialog_scheduler.h"
+#endif
 
 namespace OHOS {
 namespace AAFwk {
 enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 const int32_t BASE_USER_RANGE = 200000;
 using OHOS::AppExecFwk::IAbilityController;
-
 class PendingWantManager;
 /**
  * @class AbilityManagerService
@@ -539,11 +545,8 @@ public:
     void HandleLoadTimeOut(int64_t eventId);
     void HandleActiveTimeOut(int64_t eventId);
     void HandleInactiveTimeOut(int64_t eventId);
-    void HandleForegroundNewTimeOut(int64_t eventId);
-    void HandleBackgroundNewTimeOut(int64_t eventId);
-
-    void NotifyBmsAbilityLifeStatus(
-        const std::string &bundleName, const std::string &abilityName, const int64_t launchTime, const int uid);
+    void HandleForegroundTimeOut(int64_t eventId);
+    void HandleBackgroundTimeOut(int64_t eventId);
 
     int StartAbilityInner(
         const Want &want,
@@ -551,9 +554,7 @@ public:
         int requestCode,
         int callerUid = DEFAULT_INVAL_VALUE,
         int32_t userId = DEFAULT_INVAL_VALUE);
-        
-    bool IsStartFreeInstall(const Want &want);
-    int StartFreeInstall(const Want &want, const sptr<IRemoteObject> &callerToken, int requestCode, int32_t userId);
+
     int CheckPermission(const std::string &bundleName, const std::string &permission);
 
     void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag);
@@ -771,28 +772,34 @@ public:
     virtual int FreeInstallAbilityFromRemote(const Want &want, const sptr<IRemoteObject> &callback,
         int32_t userId, int requestCode = DEFAULT_INVAL_VALUE) override;
 
+    /**
+     * Check the uid is background task uid.
+     *
+     * @param uid userId.
+     * @return Returns whether the uid is background task uid.
+     */
+    bool IsBackgroundTaskUid(const int uid);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
     static constexpr uint32_t INACTIVE_TIMEOUT_MSG = 2;
-    static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 3;
     static constexpr uint32_t TERMINATE_TIMEOUT_MSG = 4;
-    static constexpr uint32_t FOREGROUNDNEW_TIMEOUT_MSG = 5;
-    static constexpr uint32_t BACKGROUNDNEW_TIMEOUT_MSG = 6;
+    static constexpr uint32_t FOREGROUND_TIMEOUT_MSG = 5;
+    static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
 
     static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 10000; // ms
     static constexpr uint32_t LOAD_TIMEOUT = 3000;            // ms
     static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
     static constexpr uint32_t INACTIVE_TIMEOUT = 500;         // ms
-    static constexpr uint32_t BACKGROUND_TIMEOUT = 10000;     // ms
     static constexpr uint32_t TERMINATE_TIMEOUT = 10000;      // ms
     static constexpr uint32_t CONNECT_TIMEOUT = 3000;         // ms
     static constexpr uint32_t DISCONNECT_TIMEOUT = 500;       // ms
     static constexpr uint32_t COMMAND_TIMEOUT = 5000;         // ms
     static constexpr uint32_t RESTART_TIMEOUT = 5000;         // ms
     static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 500;  // ms
-    static constexpr uint32_t FOREGROUNDNEW_TIMEOUT = 5000;   // ms
-    static constexpr uint32_t BACKGROUNDNEW_TIMEOUT = 3000;   // ms
+    static constexpr uint32_t FOREGROUND_TIMEOUT = 5000;   // ms
+    static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
     static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
@@ -923,7 +930,6 @@ private:
     bool IsExistFile(const std::string &path);
 
     int CheckCallPermissions(const AbilityRequest &abilityRequest);
-
     bool JudgeMultiUserConcurrency(const int32_t userId);
     /**
      * dumpsys info
@@ -1003,15 +1009,10 @@ private:
     void GrantUriPermission(const Want &want, int32_t validUserId);
     bool VerifyUriPermission(const AbilityRequest &abilityRequest, const Want &want);
 
-    bool SetANRMissionByProcessID(int pid);
-
     void StartMainElement(int userId, std::vector<AppExecFwk::BundleInfo> &bundleInfos);
 
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
-    int StartFreeInstall(const Want &want, int32_t userId, int requestCode,
-        const sptr<IRemoteObject> &callerToken);
-    bool CheckIsFreeInstall(const Want &want);
     bool CheckTargetBundleList(const Want &want, int32_t userId, const sptr<IRemoteObject> &callerToken);
     void HandleFreeInstallErrorCode(int &resultCode);
     int NotifyDmsCallback(const Want &want, int resultCode);
@@ -1056,11 +1057,16 @@ private:
 
     static sptr<AbilityManagerService> instance_;
 
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+    std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
+#endif
+
 #ifdef SUPPORT_GRAPHICS
     int32_t ShowPickerDialog(const Want& want, int32_t userId);
-
+    std::shared_ptr<SystemDialogScheduler> sysDialogScheduler_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif
+    std::shared_ptr<AppNoResponseDisposer> anrDisposer_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

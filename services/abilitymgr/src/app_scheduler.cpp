@@ -89,14 +89,14 @@ int AppScheduler::LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemo
     return ERR_OK;
 }
 
-int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token)
+int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Terminate ability.");
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
-    int ret = static_cast<int>(appMgrClient_->TerminateAbility(token));
+    int ret = static_cast<int>(appMgrClient_->TerminateAbility(token, clearMissionFlag));
     if (ret != ERR_OK) {
         HILOG_ERROR("AppScheduler fail to TerminateAbility. ret %d", ret);
         return INNER_ERR;
@@ -361,6 +361,18 @@ int AppScheduler::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<I
     if (ret != ERR_OK) {
         HILOG_ERROR("GetAbilityRecordsByProcessID failed.");
         return INNER_ERR;
+    }
+
+    return ERR_OK;
+}
+
+int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application)
+{
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    auto ret = static_cast<int>(appMgrClient_->GetApplicationInfoByProcessID(pid, application));
+    if (ret != ERR_OK) {
+        HILOG_ERROR("GetApplicationInfoByProcessID failed.");
+        return ret;
     }
 
     return ERR_OK;

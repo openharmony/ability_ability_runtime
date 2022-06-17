@@ -92,13 +92,13 @@ void AmsMgrScheduler::UpdateExtensionState(const sptr<IRemoteObject> &token, con
     amsHandler_->PostTask(updateExtensionStateFunc, TASK_UPDATE_EXTENSION_STATE);
 }
 
-void AmsMgrScheduler::TerminateAbility(const sptr<IRemoteObject> &token)
+void AmsMgrScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
     if (!IsReady()) {
         return;
     }
     std::function<void()> terminateAbilityFunc =
-        std::bind(&AppMgrServiceInner::TerminateAbility, amsMgrServiceInner_, token);
+        std::bind(&AppMgrServiceInner::TerminateAbility, amsMgrServiceInner_, token, clearMissionFlag);
     amsHandler_->PostTask(terminateAbilityFunc, TASK_TERMINATE_ABILITY);
 }
 
@@ -250,6 +250,14 @@ void AmsMgrScheduler::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpe
     }
     auto task = [=]() { amsMgrServiceInner_->RegisterStartSpecifiedAbilityResponse(response); };
     amsHandler_->PostTask(task);
+}
+
+int AmsMgrScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return amsMgrServiceInner_->GetApplicationInfoByProcessID(pid, application);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

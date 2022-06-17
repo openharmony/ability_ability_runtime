@@ -1820,7 +1820,7 @@ std::string Want::Decode(const std::string &str)
         if (str[i] != '\\') {
             decode += str[i];
             i++;
-            break;
+            continue;
         }
         if (++i >= str.length()) {
             decode += "\\";
@@ -2052,6 +2052,11 @@ Want &Want::SetDeviceId(const std::string &deviceId)
 {
     operation_.SetDeviceId(deviceId);
     return *this;
+}
+
+std::string Want::GetDeviceId() const
+{
+    return operation_.GetDeviceId();
 }
 
 Want& Want::SetModuleName(const std::string &moduleName)

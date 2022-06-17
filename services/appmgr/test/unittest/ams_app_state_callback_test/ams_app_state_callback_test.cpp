@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "app_state_callback_host.h"
 #include <gtest/gtest.h>
+#include "app_state_callback_host.h"
 #include "app_mgr_constants.h"
 #include "iapp_state_callback.h"
 #include "app_process_data.h"
@@ -80,7 +80,7 @@ HWTEST_F(AmsAppStateCallBackTest, OnRemoteRequest_002, TestSize.Level1)
     sptr<AppStateCallbackHost> host(new AppStateCallbackHost());
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option{MessageOption::TF_ASYNC};
+    MessageOption option {MessageOption::TF_ASYNC};
     sptr<IRemoteObject> token = new MockAbilityToken();
 
     data.WriteParcelable(token.GetRefPtr());

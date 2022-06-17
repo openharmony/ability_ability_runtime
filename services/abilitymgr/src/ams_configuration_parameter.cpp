@@ -62,6 +62,11 @@ int AmsConfigurationParameter::GetMaxRestartNum() const
     return maxRestartNum_;
 }
 
+std::string AmsConfigurationParameter::GetDeviceType() const
+{
+    return deviceType_;
+}
+
 int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
 {
     HILOG_DEBUG("%{public}s", __func__);
@@ -119,6 +124,7 @@ int AmsConfigurationParameter::LoadAppConfigurationForStartUpService(nlohmann::j
         amsTime_ =
             Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::AMS_TIMEOUT_TIME).get<int>();
         maxRestartNum_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::ROOT_LAUNCHER_RESTART_MAX).get<int>();
+        deviceType_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::DEVICE_TYPE).get<std::string>();
         HILOG_INFO("get ams service config succes!");
         ret = 0;
     }
@@ -165,7 +171,12 @@ int AmsConfigurationParameter::GetMemThreshold(const std::string &key)
         return EXPERIENCE_MEM_THRESHOLD;
     }
 
-    return std::stoi(threshold->second);
+    try {
+        return std::stoi(threshold->second);
+    } catch (...) {
+        HILOG_WARN("stoi(%{public}s) failed", threshold->second.c_str());
+        return EXPERIENCE_MEM_THRESHOLD;
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
