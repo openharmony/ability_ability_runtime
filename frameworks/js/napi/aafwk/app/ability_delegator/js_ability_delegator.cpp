@@ -323,13 +323,13 @@ NativeValue *JSAbilityDelegator::OnPrintSync(NativeEngine &engine, NativeCallbac
     std::string msg;
     if (!ParsePrintPara(engine, info, msg)) {
         HILOG_ERROR("Parse print parameters failed");
-        return engine.CreateNull();
+        return engine.CreateUndefined();
     }
 
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (!delegator) {
         HILOG_ERROR("Invalid delegator");
-        return engine.CreateNull();
+        return engine.CreateUndefined();
     }
 
     delegator->Print(msg);
