@@ -97,7 +97,7 @@ private:
     static std::shared_ptr<WatchDog> currentHandler_;
 };
 
-class MainHandlerDump : public Dumper {
+class MainHandlerDumper : public Dumper {
 public:
     virtual void Dump(const std::string &message) override;
     virtual std::string GetTag() override;
