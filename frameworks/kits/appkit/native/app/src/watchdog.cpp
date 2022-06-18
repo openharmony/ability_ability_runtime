@@ -113,9 +113,9 @@ bool WatchDog::Timer()
                 appMainThreadIsAlive_ = false;
                 std::string eventType = "THREAD_BLOCK_3S";
                 std::string msgContent = "App main thread is not response!";
-                MainHandlerDump handlerDump;
-                appMainHandler_->Dump(handlerDump);
-                msgContent += handlerDump.GetDumpInfo();
+                MainHandlerDumper handlerDumper;
+                appMainHandler_->Dump(handlerDumper);
+                msgContent += handlerDumper.GetDumpInfo();
                 if (applicationInfo_ != nullptr) {
                     OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, eventType,
                         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -142,18 +142,18 @@ bool WatchDog::Timer()
     return true;
 }
 
-void MainHandlerDump::Dump(const std::string &message)
+void MainHandlerDumper::Dump(const std::string &message)
 {
     HILOG_INFO("message is %{public}s", message.c_str());
     dumpInfo += message;
 }
 
-std::string MainHandlerDump::GetTag()
+std::string MainHandlerDumper::GetTag()
 {
     return "";
 }
 
-std::string MainHandlerDump::GetDumpInfo()
+std::string MainHandlerDumper::GetDumpInfo()
 {
     return dumpInfo;
 }
