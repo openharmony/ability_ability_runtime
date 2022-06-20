@@ -58,7 +58,7 @@ NativeValue* CreateJsExtensionAbilityInfo(NativeEngine& engine, const AppExecFwk
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
         HILOG_ERROR("CreateJsExtensionAbilityInfo error, object is nullptr.");
-        return nullptr;
+        return objValue;
     }
     object->SetProperty("bundleName", CreateJsValue(engine, info.bundleName));
     object->SetProperty("moduleName", CreateJsValue(engine, info.moduleName));
@@ -89,15 +89,15 @@ NativeValue* CreateJsExtensionContext(NativeEngine& engine, const std::shared_pt
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo)
 {
     HILOG_INFO("CreateJsExtensionContext begin");
+    NativeValue* objValue = CreateJsBaseContext(engine, context);
     if (context == nullptr) {
         HILOG_ERROR("Failed to CreateJsExtensionContext, context is nullptr.");
-        return nullptr;
+        return objValue;
     }
-    NativeValue* objValue = CreateJsBaseContext(engine, context);
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
         HILOG_ERROR("Failed to CreateJsExtensionContext, object is nullptr.");
-        return nullptr;
+        return objValue;
     }
     auto configuration = context->GetConfiguration();
     if (configuration != nullptr) {
