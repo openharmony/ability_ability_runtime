@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/mstappmgrservice"
 
@@ -23,7 +23,7 @@ ohos_moduletest("AmsAppMgrServiceModuleTest") {
     "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
   ]
   sources = [
-    "${aafwk_path}/services/appmgr/src/system_environment_information.cpp",
+    "${ability_runtime_path}/services/appmgr/src/system_environment_information.cpp",
     "ams_app_mgr_service_module_test.cpp",
   ]
 

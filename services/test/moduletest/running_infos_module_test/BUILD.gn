@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/mstabilitymgrservice"
 
@@ -22,58 +22,58 @@ ohos_moduletest("running_infos_module_test") {
   include_dirs = [
     "${services_path}/test/mock/include",
     "//third_party/jsoncpp/include",
-    "${aafwk_path}/frameworks/kits/ability/native/include/distributed_ability_runtime",
-    "${aafwk_path}/interfaces/inner_api/dataobs_manager/include",
+    "${ability_runtime_path}/frameworks/kits/ability/native/include/distributed_ability_runtime",
+    "${ability_runtime_path}/interfaces/inner_api/dataobs_manager/include",
   ]
 
   sources = [ "running_infos_module_test.cpp" ]
   sources += [
-    "${aafwk_path}/services/abilitymgr/src/ability_connect_callback_stub.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_connect_manager.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_event_handler.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_manager_proxy.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_manager_service.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_manager_stub.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_record.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_scheduler_proxy.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_scheduler_stub.cpp",
-    "${aafwk_path}/services/abilitymgr/src/ability_token_stub.cpp",
-    "${aafwk_path}/services/abilitymgr/src/caller_info.cpp",
-    "${aafwk_path}/services/abilitymgr/src/connection_record.cpp",
-    "${aafwk_path}/services/abilitymgr/src/data_ability_manager.cpp",
-    "${aafwk_path}/services/abilitymgr/src/data_ability_record.cpp",
-    "${aafwk_path}/services/abilitymgr/src/launch_param.cpp",
-    "${aafwk_path}/services/abilitymgr/src/lifecycle_deal.cpp",
-    "${aafwk_path}/services/abilitymgr/src/lifecycle_state_info.cpp",
-    "${aafwk_path}/services/abilitymgr/src/mission_snapshot.cpp",
-    "${aafwk_path}/services/abilitymgr/src/pending_want_key.cpp",
-    "${aafwk_path}/services/abilitymgr/src/pending_want_manager.cpp",
-    "${aafwk_path}/services/abilitymgr/src/pending_want_record.cpp",
-    "${aafwk_path}/services/abilitymgr/src/sender_info.cpp",
-    "${aafwk_path}/services/abilitymgr/src/want_receiver_stub.cpp",
-    "${aafwk_path}/services/abilitymgr/src/want_sender_info.cpp",
-    "${aafwk_path}/services/abilitymgr/src/want_sender_stub.cpp",
-    "${aafwk_path}/services/abilitymgr/src/wants_info.cpp",
-    "${aafwk_path}/services/abilitymgr/test/mock/libs/sa_mgr/src/sa_mgr_client_mock.cpp",
-    "${aafwk_path}/services/test/mock/src/mock_app_mgr_client.cpp",
-    "${aafwk_path}/services/test/mock/src/mock_bundle_mgr.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_connect_callback_stub.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_connect_manager.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_event_handler.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_manager_proxy.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_manager_service.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_manager_stub.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_record.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_scheduler_proxy.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_scheduler_stub.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/ability_token_stub.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/caller_info.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/connection_record.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/data_ability_manager.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/data_ability_record.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/launch_param.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/lifecycle_deal.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/lifecycle_state_info.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/mission_snapshot.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/pending_want_key.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/pending_want_manager.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/pending_want_record.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/sender_info.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/want_receiver_stub.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/want_sender_info.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/want_sender_stub.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/wants_info.cpp",
+    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/sa_mgr/src/sa_mgr_client_mock.cpp",
+    "${ability_runtime_path}/services/test/mock/src/mock_app_mgr_client.cpp",
+    "${ability_runtime_path}/services/test/mock/src/mock_bundle_mgr.cpp",
   ]
 
   configs = [
     "${services_path}/test:aafwk_module_test_config",
-    "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager_public_config",
-    "${aafwk_path}/services/abilitymgr/test/mock/libs/sa_mgr:sa_mgr_mock_config",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager_public_config",
+    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/sa_mgr:sa_mgr_mock_config",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base_sdk_config",
-    "${aafwk_path}/interfaces/inner_api/app_manager:appmgr_sdk_config",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:appmgr_sdk_config",
   ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
-    "${aafwk_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_path}/services/abilitymgr:abilityms",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${bundlefwk_inner_api_path}/appexecfwk_core:appexecfwk_core",
     "${distributedschedule_path}/safwk/interfaces/innerkits/safwk:system_ability_fwk",

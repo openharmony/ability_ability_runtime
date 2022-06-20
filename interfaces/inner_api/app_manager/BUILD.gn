@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("appmgr_sdk_config") {
   include_dirs = [
@@ -35,8 +35,8 @@ config("appmgr_core_config") {
 ohos_shared_library("app_manager") {
   include_dirs = [
     "//third_party/json/include",
-    "${aafwk_path}/services/appmgr/include",
-    "${aafwk_path}/services/common/include",
+    "${ability_runtime_path}/services/appmgr/include",
+    "${ability_runtime_path}/services/common/include",
   ]
 
   sources = [
