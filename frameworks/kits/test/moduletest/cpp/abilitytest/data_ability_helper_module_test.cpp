@@ -235,6 +235,8 @@ HWTEST_F(DataAbilityHelperTest, AaFwk_DataAbilityHelper_OpenFile_Test_0100, Func
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context, uri);
 
     Uri urivalue("dataability://device_id/com.domainname.dataability.persondata/person/10?test/te.txt");
+    system("mount -o rw,remount /");
+    system("touch /dataability_openfile_test.txt");
     std::string mode("r");
     int fd = dataAbilityHelper->OpenFile(urivalue, mode);
     EXPECT_NE(fd, -1);
@@ -277,6 +279,8 @@ HWTEST_F(DataAbilityHelperTest, AaFwk_DataAbilityHelper_OpenFile_Test_0200, Func
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
 
     Uri urivalue("dataability://device_id/com.domainname.dataability.persondata/person/10?test/te.txt");
+    system("mount -o rw,remount /");
+    system("touch /dataability_openfile_test.txt");
     std::string mode("r");
     int fd = dataAbilityHelper->OpenFile(urivalue, mode);
     EXPECT_NE(fd, -1);

@@ -121,9 +121,9 @@ struct AsyncTriggerCallbackInfo {
 };
 
 struct CallbackInfo {
-    std::shared_ptr<WantAgent> wantAgent;
+    std::shared_ptr<WantAgent> wantAgent = nullptr;
     napi_env env;
-    napi_ref ref;
+    napi_ref ref = 0;
 };
 
 struct TriggerReceiveDataWorker {
