@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import(
     "//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
 
@@ -28,7 +28,7 @@ ohos_unittest("app_scheduler_test") {
   ]
 
   sources = [
-    "${aafwk_path}/services/abilitymgr/src/app_scheduler.cpp",
+    "${ability_runtime_path}/services/abilitymgr/src/app_scheduler.cpp",
     "app_scheduler_test.cpp",
   ]
 
@@ -41,7 +41,7 @@ ohos_unittest("app_scheduler_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${innerkits_path}/ability_manager:ability_manager",
     "${services_path}/abilitymgr/test:abilityms_test_source",

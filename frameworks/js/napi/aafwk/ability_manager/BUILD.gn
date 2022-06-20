@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("abilitymanager_napi") {
   sources = [
@@ -29,7 +29,7 @@ ohos_shared_library("abilitymanager_napi") {
   ]
 
   deps = [
-    "${aafwk_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
     "${services_path}/abilitymgr:abilityms",
   ]
 

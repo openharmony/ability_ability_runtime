@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("appmgr_config") {
   include_dirs = [
@@ -20,7 +20,7 @@ config("appmgr_config") {
     "${ability_base_innerapi_path}/configuration/include",
     "${services_path}/common/include",
     "//base/startup/appspawn/interfaces/innerkits/include",
-    "${aafwk_path}/tools/aa/include",
+    "${ability_runtime_path}/tools/aa/include",
   ]
 }
 

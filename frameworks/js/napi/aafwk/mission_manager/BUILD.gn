@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("missionmanager_napi") {
   sources = [
@@ -27,7 +27,7 @@ ohos_shared_library("missionmanager_napi") {
   include_dirs = [ "${kits_path}/ability/native/include/continuation/kits" ]
 
   deps = [
-    "${aafwk_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
     "${services_path}/abilitymgr:abilityms",
   ]
 
@@ -79,7 +79,7 @@ ohos_shared_library("distributedmissionmanager") {
   ]
 
   deps =
-      [ "${aafwk_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common" ]
+      [ "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common" ]
 
   external_deps = [
     "ability_base:want",

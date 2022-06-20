@@ -20,14 +20,14 @@ config("amsAbilityVisibleTestPageAConfig") {
     "//base/notification/eventhandler/interfaces/inner_api",
     "${SUBDEMOSYSTEM_DIR}/include",
     "${bundlefwk_path}/kits/appkit/native/app",
-    "${aafwk_path}/frameworks/kits/appkit/native/ability_runtime",
-    "${aafwk_path}/frameworks/kits/appkit/native/app",
+    "${ability_runtime_path}/frameworks/kits/appkit/native/ability_runtime",
+    "${ability_runtime_path}/frameworks/kits/appkit/native/app",
     "${ability_base_innerapi_path}/want/include",
-    "${aafwk_path}/interfaces/inner_api/ability_manager/include",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_base_innerapi_path}/uri/include",
     "${bundlefwk_path}/services/bundlemgr/include",
-    "${aafwk_path}/services/abilitymgr/include",
-    "${aafwk_path}/services/common/include",
+    "${ability_runtime_path}/services/abilitymgr/include",
+    "${ability_runtime_path}/services/common/include",
     "${SUBST_TOOLS_DIR}/include",
   ]
   defines = [
@@ -45,12 +45,12 @@ ohos_shared_library("amsAbilityVisibleTestPageA") {
   ]
   configs = [ ":amsAbilityVisibleTestPageAConfig" ]
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:app_context",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
-    "${aafwk_path}/frameworks/kits/wantagent:wantagent_innerkits",
-    "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
+    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
+    "${ability_runtime_path}/frameworks/kits/wantagent:wantagent_innerkits",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${bundlefwk_path}/services/bundlemgr:libbms",
     "${distributeddatamgr_path}/appdatamgr/interfaces/inner_api/native/dataability:native_dataability",

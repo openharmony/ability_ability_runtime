@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/moduletest/application_test/"
 
@@ -20,14 +20,14 @@ module_output_path = "ability_runtime/moduletest/application_test/"
 config("module_private_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "${aafwk_path}/interfaces/inner_api/app_manager/include/appmgr",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/include/appmgr",
     "${ability_base_innerapi_path}/uri/include",
     "${ability_base_innerapi_path}/want/include/ohos/aafwk_L2/content",
-    "${aafwk_path}/frameworks/kits/appkit/native/test/mock/include",
+    "${ability_runtime_path}/frameworks/kits/appkit/native/test/mock/include",
 
-    #"${aafwk_path}/frameworks/kits/ability/native/test/mock/include",
-    "${aafwk_path}/frameworks/kits/appkit/test/Mock/include",
-    "${aafwk_path}/frameworks/kits/appkit/native/app/include",
+    #"${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include",
+    "${ability_runtime_path}/frameworks/kits/appkit/test/Mock/include",
+    "${ability_runtime_path}/frameworks/kits/appkit/native/app/include",
 
     #"//foundation/communication/utils/include",
     #"//foundation/communication/ipc/ipc/native/src/core/include",
@@ -43,7 +43,7 @@ config("module_private_config") {
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
   module_out_path = module_output_path
   sources = [
-    "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
@@ -56,10 +56,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
-    "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
@@ -81,7 +81,7 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
   module_out_path = module_output_path
   sources = [
-    "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
@@ -94,10 +94,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
-    "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
@@ -119,7 +119,7 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
   module_out_path = module_output_path
   sources = [
-    "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
@@ -132,10 +132,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
-    "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
@@ -157,7 +157,7 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
   module_out_path = module_output_path
   sources = [
-    "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
@@ -170,10 +170,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
-    "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",

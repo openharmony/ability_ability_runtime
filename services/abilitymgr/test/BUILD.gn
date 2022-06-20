@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import(
     "//foundation/ability/ability_runtime/services/abilitymgr/abilitymgr.gni")
 
@@ -73,9 +73,9 @@ ohos_source_set("abilityms_test_source") {
     "${services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${services_path}/abilitymgr/test/mock/libs/appexecfwk_core",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
-    "${aafwk_path}/interfaces/inner_api/app_manager/include/appmgr",
-    "${aafwk_path}/frameworks/kits/ability/native/include/distributed_ability_runtime",
-    "${aafwk_path}/interfaces/inner_api/dataobs_manager/include",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager/include/appmgr",
+    "${ability_runtime_path}/frameworks/kits/ability/native/include/distributed_ability_runtime",
+    "${ability_runtime_path}/interfaces/inner_api/dataobs_manager/include",
     "//base/account/os_account/frameworks/common/account_error/include",
     "//base/account/os_account/frameworks/common/database/include",
     "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
@@ -83,9 +83,9 @@ ohos_source_set("abilityms_test_source") {
   ]
 
   external_dependent_files = [
-    "${aafwk_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/app_state_callback_host.cpp",
-    "${aafwk_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/app_mgr_client.cpp",
-    "${aafwk_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/app_state_callback_proxy.cpp",
+    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/app_state_callback_host.cpp",
+    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/app_mgr_client.cpp",
+    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/app_state_callback_proxy.cpp",
   ]
 
   sources += external_dependent_files
@@ -99,7 +99,7 @@ ohos_source_set("abilityms_test_source") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${innerkits_path}/uri_permission:uri_permission_mgr",
     "${services_path}/abilitymgr/test/mock/libs/sa_mgr:sa_mgr_mock",
