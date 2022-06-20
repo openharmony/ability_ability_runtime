@@ -1220,8 +1220,9 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
         if (it == abilityRecord) {
             terminateAbilityList_.remove(it);
             // update inner mission info time
-            if (abilityRecord->IsDlp() || abilityRecord->GetAbilityInfo().removeMissionAfterTerminate) {
-                RemoveMissionLocked(abilityRecord->GetMissionId());
+            if (abilityRecord->IsDlp() || abilityRecord->GetAbilityInfo().removeMissionAfterTerminate ||
+                abilityRecord->GetAbilityInfo().excludeFromMissions) {
+                RemoveMissionLocked(abilityRecord->GetMissionId(), abilityRecord->GetAbilityInfo().excludeFromMissions);
                 return;
             }
             InnerMissionInfo innerMissionInfo;
@@ -1367,7 +1368,7 @@ int MissionListManager::SetMissionLockedState(int missionId, bool lockedState)
         return MISSION_NOT_FOUND;
     }
 
-    auto abilityRecord = misson->GetAbilityRecord();
+    auto abilityRecord = mission->GetAbilityRecord();
     if (abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions) {
         HILOG_ERROR("excludeFromMissions is true, missionId:%{public}d", missionId);
         return MISSION_NOT_FOUND;
@@ -2668,7 +2669,7 @@ bool MissionListManager::IsExcludeFromMissions(std::shared_ptr<Mission> &mission
         return false;
     }
 
-    auto abilityRecord = misson->GetAbilityRecord();
+    auto abilityRecord = mission->GetAbilityRecord();
     return abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions;
 }
 
