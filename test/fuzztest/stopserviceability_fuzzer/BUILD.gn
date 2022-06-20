@@ -22,7 +22,8 @@ module_output_path = "ability_runtime/abilitymgr"
 ohos_fuzztest("StopServiceAbilityFuzzTest") {
   module_out_path = module_output_path
 
-  fuzz_config_file = "${ability_runtime_path}/test/fuzztest/stopserviceability_fuzzer"
+  fuzz_config_file =
+      "${ability_runtime_path}/test/fuzztest/stopserviceability_fuzzer"
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",

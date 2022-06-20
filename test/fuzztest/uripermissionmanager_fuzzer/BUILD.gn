@@ -22,7 +22,8 @@ module_output_path = "ability_runtime/uripermmgr"
 ohos_fuzztest("UriPermissionManagerFuzzTest") {
   module_out_path = module_output_path
 
-  fuzz_config_file = "${ability_runtime_path}/test/fuzztest/uripermissionmanager_fuzzer"
+  fuzz_config_file =
+      "${ability_runtime_path}/test/fuzztest/uripermissionmanager_fuzzer"
   include_dirs = [ "${ability_runtime_path}/services/uripermmgr/include" ]
   cflags = [
     "-g",

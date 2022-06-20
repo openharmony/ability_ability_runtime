@@ -25,8 +25,7 @@ config("module_private_config") {
 ohos_unittest("ability_context_impl_ut_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
+  include_dirs = [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
 
   sources = [
     "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS/mock_ability_manager_client.cpp",
@@ -61,8 +60,7 @@ ohos_unittest("caller_call_back_ut_test") {
 ohos_unittest("local_call_container_ut_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
+  include_dirs = [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
 
   sources = [
     "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS/mock_ability_manager_client.cpp",
@@ -86,8 +84,7 @@ ohos_unittest("local_call_container_ut_test") {
 ohos_unittest("local_call_record_ut_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
+  include_dirs = [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
 
   sources = [
     "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS/mock_ability_manager_client.cpp",

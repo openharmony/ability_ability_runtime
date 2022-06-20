@@ -859,7 +859,8 @@ ohos_unittest("ability_thread_dataability_test") {
 
 config("data_uri_utils_test_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "${ability_runtime_path}/frameworks/kits/ability/native/include/" ]
+  include_dirs =
+      [ "${ability_runtime_path}/frameworks/kits/ability/native/include/" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

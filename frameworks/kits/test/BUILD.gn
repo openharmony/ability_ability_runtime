@@ -45,6 +45,7 @@ config("module_private_config") {
 ohos_moduletest("ability_moduletest") {
   module_out_path = module_output_path
   sources = [
+    "${ability_base_path}/frameworks/native/configuration/src/configuration.cpp",
     "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include/mock_bundle_manager.cpp",
     "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include/sys_mgr_client_mock.cpp",
     "${ability_runtime_path}/frameworks/kits/test/mock/AMS/mock_ability_manager_client.cpp",
@@ -69,7 +70,6 @@ ohos_moduletest("ability_moduletest") {
     "${ability_runtime_path}/services/abilitymgr/src/sender_info.cpp",
     "${ability_runtime_path}/services/abilitymgr/src/want_sender_info.cpp",
     "${ability_runtime_path}/services/abilitymgr/src/wants_info.cpp",
-    "${ability_base_path}/frameworks/native/configuration/src/configuration.cpp",
     "moduletest/cpp/abilitytest/ability_test.cpp",
   ]
 
