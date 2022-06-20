@@ -1273,10 +1273,9 @@ int MissionListManager::ClearMission(int missionId)
     return ClearMissionLocked(missionId, mission);
 }
 
-int MissionListManager::ClearMissionLocked(int missionId, std::shared_ptr<Mission> mission)
+int MissionListManager::ClearMissionLocked(int missionId, std::shared_ptr<Mission> &mission)
 {
-    auto abilityRecord = mission->GetAbilityRecord();
-    if (abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions) {
+    if (IsExcludeFromMissions(mission)) {
         HILOG_WARN("excludeFromMissions is true.");
         return ERR_INVALID_VALUE;
     }
@@ -1292,6 +1291,7 @@ int MissionListManager::ClearMissionLocked(int missionId, std::shared_ptr<Missio
         return ERR_OK;
     }
 
+    auto abilityRecord = mission->GetAbilityRecord();
     if (abilityRecord == nullptr || abilityRecord->IsTerminating()) {
         HILOG_WARN("Ability record is not exist or is on terminating.");
         return ERR_OK;
@@ -2660,6 +2660,16 @@ void MissionListManager::RemoveMissionLocked(int32_t missionId, bool excludeFrom
     if (listenerController_ && !excludeFromMissions) {
         listenerController_->NotifyMissionDestroyed(missionId);
     }
+}
+
+bool MissionListManager::IsExcludeFromMissions(std::shared_ptr<Mission> &mission)
+{
+    if (!mission) {
+        return false;
+    }
+
+    auto abilityRecord = misson->GetAbilityRecord();
+    return abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions;
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
