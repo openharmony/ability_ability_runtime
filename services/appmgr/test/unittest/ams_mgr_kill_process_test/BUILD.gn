@@ -16,8 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/appmgrservice"
 
-mock_sources =
-    [ "${ability_runtime_path}/services/appmgr/test/mock/src/mock_bundle_manager.cpp" ]
+mock_sources = [ "${ability_runtime_path}/services/appmgr/test/mock/src/mock_bundle_manager.cpp" ]
 
 ohos_unittest("AmsMgrKillProcessTest") {
   module_out_path = module_output_path

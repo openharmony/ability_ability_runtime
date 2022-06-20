@@ -22,8 +22,7 @@ config("module_private_config") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  include_dirs =
-      [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
+  include_dirs = [ "${ability_runtime_path}/frameworks/kits/ability/ability_runtime/test/mock/AMS" ]
 }
 
 ohos_moduletest("ability_caller_fw_module_test") {

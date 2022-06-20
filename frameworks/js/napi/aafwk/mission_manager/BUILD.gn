@@ -78,8 +78,7 @@ ohos_shared_library("distributedmissionmanager") {
     "mission_continue_stub.cpp",
   ]
 
-  deps =
-      [ "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common" ]
+  deps = [ "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common" ]
 
   external_deps = [
     "ability_base:want",

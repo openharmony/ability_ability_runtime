@@ -37,8 +37,7 @@ ohos_unittest("AmsAppMgrClientTest") {
     "//base/account/os_account/frameworks/common/account_error/include",
   ]
 
-  configs =
-      [ "${ability_runtime_path}/interfaces/inner_api/app_manager:appmgr_sdk_config" ]
+  configs = [ "${ability_runtime_path}/interfaces/inner_api/app_manager:appmgr_sdk_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
