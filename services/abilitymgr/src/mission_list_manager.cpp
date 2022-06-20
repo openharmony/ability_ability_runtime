@@ -1274,7 +1274,7 @@ int MissionListManager::ClearMission(int missionId)
     return ClearMissionLocked(missionId, mission);
 }
 
-int MissionListManager::ClearMissionLocked(int missionId, std::shared_ptr<Mission> &mission)
+int MissionListManager::ClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission)
 {
     if (IsExcludeFromMissions(mission)) {
         HILOG_WARN("excludeFromMissions is true.");
@@ -2663,7 +2663,7 @@ void MissionListManager::RemoveMissionLocked(int32_t missionId, bool excludeFrom
     }
 }
 
-bool MissionListManager::IsExcludeFromMissions(std::shared_ptr<Mission> &mission)
+bool MissionListManager::IsExcludeFromMissions(const std::shared_ptr<Mission> &mission)
 {
     if (!mission) {
         return false;
