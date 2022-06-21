@@ -140,7 +140,7 @@ std::string AbilityThread::CreateAbilityName(const std::shared_ptr<AbilityLocalR
         if (abilityInfo->extensionAbilityType == ExtensionAbilityType::WALLPAPER) {
             abilityName = WALLPAPER_EXTENSION;
         }
-        if (abilityInfo->extensionAbilityType == ExtensionAbilityType::FILEACCESS) {
+        if (abilityInfo->extensionAbilityType == ExtensionAbilityType::FILEACCESS_EXTENSION) {
             abilityName = FILE_EXT_ABILITY;
         }
         HILOG_INFO("CreateAbilityName extension type, abilityName:%{public}s", abilityName.c_str());
