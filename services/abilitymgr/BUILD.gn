@@ -135,7 +135,6 @@ ohos_shared_library("abilityms") {
     ]
     public_deps = [
       "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
-      "${graphic_path}:libwmservice",
     ]
     external_deps += [
       "i18n:intl_util",
