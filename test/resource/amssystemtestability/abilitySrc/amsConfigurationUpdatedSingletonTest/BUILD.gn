@@ -22,7 +22,7 @@ config("amsConfigurationUpdatedSingletonTestConfig") {
     "${ability_base_innerapi_path}/want/include",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_base_innerapi_path}/uri/include",
-    "${services_path}/bundlemgr/include",
+    "${ability_runtime_services_path}/bundlemgr/include",
     "${ability_runtime_path}/services/abilitymgr/include",
     "${common_path}/log/include",
     "${SUBST_TOOLS_DIR}/include",
@@ -48,7 +48,7 @@ ohos_shared_library("amsConfigurationUpdatedSingletonTest") {
     "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${ability_runtime_path}/services/abilitymgr:abilityms",
     "${inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "${services_path}/bundlemgr:libbms",
+    "${ability_runtime_services_path}/bundlemgr:libbms",
     "//utils/native/base:utilsbase",
   ]
   external_deps = [

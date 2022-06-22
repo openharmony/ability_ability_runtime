@@ -61,7 +61,7 @@ ohos_source_set("appexecfwk_bundlemgr_mock") {
   testonly = true
   configs = [
     ":appexecfwk_core_mock_config",
-    "${services_path}/common:common_config",
+    "${ability_runtime_services_path}/common:common_config",
   ]
   cflags = []
   if (target_cpu == "arm") {

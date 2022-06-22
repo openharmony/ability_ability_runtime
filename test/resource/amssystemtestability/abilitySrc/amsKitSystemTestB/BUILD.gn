@@ -22,7 +22,7 @@ config("amsKitSystemTestBConfig") {
     "${ability_base_innerapi_path}/want/include",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_base_innerapi_path}/uri/include",
-    "${services_path}/bundlemgr/include",
+    "${ability_runtime_services_path}/bundlemgr/include",
     "${ability_runtime_path}/services/abilitymgr/include",
     "${common_path}/log/include",
     "${SUBST_TOOLS_DIR}/include",
@@ -49,7 +49,7 @@ ohos_shared_library("amsKitSystemTestB") {
     "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
     "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "${services_path}/bundlemgr:libbms",
+    "${ability_runtime_services_path}/bundlemgr:libbms",
     "//third_party/jsoncpp:jsoncpp",
     "//utils/native/base:utilsbase",
   ]

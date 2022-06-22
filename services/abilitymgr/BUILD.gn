@@ -27,21 +27,21 @@ group("abilityms_target") {
 config("abilityms_config") {
   include_dirs = [
     "include/",
-    "${innerkits_path}/ability_manager/include",
-    "${innerkits_path}/app_manager/include",
+    "${ability_runtime_innerkits_path}/ability_manager/include",
+    "${ability_runtime_innerkits_path}/app_manager/include",
     "${ability_base_innerapi_path}/base/include",
     "${ability_base_innerapi_path}/uri/include",
     "${ability_base_innerapi_path}/want/include",
-    "${services_path}/common/include",
+    "${ability_runtime_services_path}/common/include",
     "//utils/native/base/include",
     "//prebuilts/jdk/jdk8/linux-x86/include",
     "//prebuilts/jdk/jdk8/linux-x86/include/linux",
     "//third_party/json/include",
-    "${kits_path}/ability/native/include",
+    "${ability_runtime_kits_path}/ability/native/include",
     "${distributeddatamgr_path}/appdatamgr/interfaces/inner_api/native/rdb/include",
     "${distributeddatamgr_path}/appdatamgr/interfaces/inner_api/native/appdatafwk/include",
     "${distributeddatamgr_path}/appdatamgr/interfaces/inner_api/native/dataability/include",
-    "${innerkits_path}/dataobs_manager/include",
+    "${ability_runtime_innerkits_path}/dataobs_manager/include",
     "${ability_runtime_path}/tools/aa/include",
     "//base/hiviewdfx/hiview/adapter/utility/include",
     "//base/account/os_account/frameworks/common/account_error/include",
@@ -85,10 +85,10 @@ ohos_shared_library("abilityms") {
   cflags_cc = []
   configs = [ ":abilityms_config" ]
   deps = [
-    "${innerkits_path}/uri_permission:uri_permission_mgr",
-    "${services_path}/common:event_report",
-    "${services_path}/common:perm_verification",
-    "${services_path}/dialog_ui/dialog_anr/js:dialog_anr_js_files_etc",
+    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/common:perm_verification",
+    "${ability_runtime_services_path}/dialog_ui/dialog_anr/js:dialog_anr_js_files_etc",
     "//base/hiviewdfx/hiview/adapter/utility:hiview_adapter_utility",
     "//third_party/icu/icu4c:shared_icuuc",
   ]

@@ -22,13 +22,13 @@ ohos_shared_library("missionmanager_napi") {
     "native_module.cpp",
   ]
 
-  configs = [ "${services_path}/common:common_config" ]
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
-  include_dirs = [ "${kits_path}/ability/native/include/continuation/kits" ]
+  include_dirs = [ "${ability_runtime_kits_path}/ability/native/include/continuation/kits" ]
 
   deps = [
     "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
-    "${services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
 
   external_deps = [
@@ -66,7 +66,7 @@ ohos_shared_library("distributedmissionmanager") {
     "//third_party/node/src",
   ]
 
-  configs = [ "${services_path}/common:common_config" ]
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   cflags = [
     "-fPIC",

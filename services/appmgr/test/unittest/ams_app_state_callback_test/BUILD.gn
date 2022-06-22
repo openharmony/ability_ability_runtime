@@ -33,7 +33,7 @@ ohos_unittest("AmsAppStateCallbackTest") {
 
   configs = [
     "//utils/native/base:utils_config",
-    "${services_path}/appmgr/test:appmgr_test_config",
+    "${ability_runtime_services_path}/appmgr/test:appmgr_test_config",
   ]
   cflags = []
   if (target_cpu == "arm") {

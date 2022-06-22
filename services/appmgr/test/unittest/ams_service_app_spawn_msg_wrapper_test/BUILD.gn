@@ -27,8 +27,8 @@ ohos_unittest("AmsServiceAppSpawnMsgWrapperTest") {
   defines = [ "usleep(time) = MockSleep(time)" ]
 
   sources = [
-    "${services_path}/appmgr/src/app_spawn_msg_wrapper.cpp",
-    "${services_path}/appmgr/src/app_spawn_socket.cpp",
+    "${ability_runtime_services_path}/appmgr/src/app_spawn_msg_wrapper.cpp",
+    "${ability_runtime_services_path}/appmgr/src/app_spawn_socket.cpp",
   ]
 
   sources += [ "ams_service_app_spawn_msg_wrapper_test.cpp" ]
@@ -38,7 +38,7 @@ ohos_unittest("AmsServiceAppSpawnMsgWrapperTest") {
   }
   configs = []
 
-  deps = [ "${services_path}/appmgr/test:appmgr_test_source" ]
+  deps = [ "${ability_runtime_services_path}/appmgr/test:appmgr_test_source" ]
 
   if (os_account_part_enabled) {
     cflags_cc += [ "-DOS_ACCOUNT_PART_ENABLED" ]

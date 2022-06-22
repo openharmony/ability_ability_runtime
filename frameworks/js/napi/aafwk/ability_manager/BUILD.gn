@@ -21,7 +21,7 @@ ohos_shared_library("abilitymanager_napi") {
     "js_ability_manager_utils.cpp",
   ]
 
-  configs = [ "${services_path}/common:common_config" ]
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   include_dirs = [
     "./",
@@ -30,7 +30,7 @@ ohos_shared_library("abilitymanager_napi") {
 
   deps = [
     "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
-    "${services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
 
   external_deps = [

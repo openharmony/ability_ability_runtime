@@ -23,7 +23,7 @@ ohos_shared_library("featureability_napi") {
     "js_feature_ability.cpp",
   ]
 
-  configs = [ "${services_path}/common:common_config" ]
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [ "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common" ]
 

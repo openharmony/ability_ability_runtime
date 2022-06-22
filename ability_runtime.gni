@@ -12,13 +12,13 @@
 # limitations under the License.
 
 ability_runtime_path = "//foundation/ability/ability_runtime"
-aafwk_napi_path = "${ability_runtime_path}/frameworks/js/napi/aafwk"
+ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi/aafwk"
 ability_base_path = "//foundation/ability/ability_base"
 form_fwk_path = "//foundation/ability/form_fwk"
-innerkits_path = "${ability_runtime_path}/interfaces/inner_api"
-kits_path = "${ability_runtime_path}/frameworks/kits"
-services_path = "${ability_runtime_path}/services"
-system_test_app_path =
+ability_runtime_innerkits_path = "${ability_runtime_path}/interfaces/inner_api"
+ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
+ability_runtime_services_path = "${ability_runtime_path}/services"
+ability_runtime_system_test_app_path =
     "${ability_runtime_path}/test/resource/amssystemtestability/abilitySrc"
 
 bundlefwk_path = "//foundation/bundlemanager/bundle_framework"
