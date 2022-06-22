@@ -1271,16 +1271,17 @@ int MissionListManager::ClearMission(int missionId)
         HILOG_ERROR("Mission id is launcher, can not clear.");
         return ERR_INVALID_VALUE;
     }
+
+    if (IsExcludeFromMissions(mission)) {
+        HILOG_WARN("excludeFromMissions is true, not clear by id.");
+        return ERR_INVALID_VALUE;
+    }
+
     return ClearMissionLocked(missionId, mission);
 }
 
 int MissionListManager::ClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission)
 {
-    if (IsExcludeFromMissions(mission)) {
-        HILOG_WARN("excludeFromMissions is true.");
-        return ERR_INVALID_VALUE;
-    }
-
     if (missionId != -1) {
         DelayedSingleton<MissionInfoMgr>::GetInstance()->DeleteMissionInfo(missionId);
         if (listenerController_) {
