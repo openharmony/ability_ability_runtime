@@ -58,7 +58,7 @@ constexpr static char DATA_SHARE_EXT_ABILITY[] = "DataShareExtAbility";
 constexpr static char WORK_SCHEDULER_EXTENSION[] = "WorkSchedulerExtension";
 constexpr static char ACCESSIBILITY_EXTENSION[] = "AccessibilityExtension";
 constexpr static char WALLPAPER_EXTENSION[] = "WallpaperExtension";
-constexpr static char FILE_EXT_ABILITY[] = "FileExtAbility";
+constexpr static char FILE_EXT_ABILITY[] = "FileAccessExtension";
 
 /**
  * @brief Default constructor used to create a AbilityThread instance.
