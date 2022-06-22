@@ -17,7 +17,7 @@ ohos_shared_library("particleability") {
   include_dirs = [
     "//third_party/node/src",
     "${ability_runtime_path}/frameworks/js/napi/aafwk/featureAbility",
-    "${services_path}/common/include",
+    "${ability_runtime_services_path}/common/include",
     "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/rdb/include",
     "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/common/include",
     "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/dataability/include",
@@ -38,8 +38,8 @@ ohos_shared_library("particleability") {
 
   deps = [
     "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
-    "${innerkits_path}/dataobs_manager:dataobs_manager",
-    "${kits_path}/appkit:appkit_native",
+    "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
     "//third_party/jsoncpp:jsoncpp",
     "//third_party/libuv:uv_static",
   ]

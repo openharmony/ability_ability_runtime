@@ -18,8 +18,8 @@ config("ability_context_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include",
-    "${kits_path}/appkit/native/ability_runtime",
-    "${kits_path}/appkit/native/ability_runtime/context",
+    "${ability_runtime_kits_path}/appkit/native/ability_runtime",
+    "${ability_runtime_kits_path}/appkit/native/ability_runtime/context",
   ]
 
   cflags = []
@@ -44,8 +44,8 @@ ohos_shared_library("ability_context_native") {
   ]
 
   deps = [
-    "${kits_path}/appkit:app_context",
-    "${kits_path}/appkit:app_context_utils",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:app_context_utils",
   ]
 
   external_deps = [

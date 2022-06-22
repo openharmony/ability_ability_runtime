@@ -17,10 +17,10 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 ohos_shared_library("wantagent") {
   include_dirs = [
     "//third_party/node/src",
-    "${services_path}/common/include",
+    "${ability_runtime_services_path}/common/include",
     "//third_party/libuv/include",
-    "${kits_path}/appkit/native/ability_runtime",
-    "${services_path}/abilitymgr/include",
+    "${ability_runtime_kits_path}/appkit/native/ability_runtime",
+    "${ability_runtime_services_path}/abilitymgr/include",
     "./",
   ]
 
@@ -31,8 +31,8 @@ ohos_shared_library("wantagent") {
 
   deps = [
     "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
-    "${kits_path}/appkit:app_context",
-    "${kits_path}/appkit:appkit_native",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
   ]
 
   external_deps = [

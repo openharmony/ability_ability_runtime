@@ -27,7 +27,7 @@ ohos_unittest("dataobs_mgr_client_test") {
 
   sources = [ "dataobs_mgr_client_test.cpp" ]
 
-  configs = [ "${services_path}/dataobsmgr:dataobsms_config" ]
+  configs = [ "${ability_runtime_services_path}/dataobsmgr:dataobsms_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

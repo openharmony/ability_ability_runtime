@@ -13,7 +13,7 @@
 
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-subdemosystem_path = "${system_test_app_path}/amsKitSystemTestService"
+subdemosystem_path = "${ability_runtime_system_test_app_path}/amsKitSystemTestService"
 config("amsKitSystemTestServiceconfig") {
   visibility = [ ":*" ]
   include_dirs = [

@@ -24,8 +24,8 @@ ohos_moduletest("AmsIpcAppmgrModuleTest") {
   sources = [ "ams_ipc_app_mgr_module_test.cpp" ]
 
   deps = [
-    "${services_path}/common:perm_verification",
-    "${services_path}/test/moduletest/common/ams:appmgr_mst_source",
+    "${ability_runtime_services_path}/common:perm_verification",
+    "${ability_runtime_services_path}/test/moduletest/common/ams:appmgr_mst_source",
   ]
 
   external_deps = [

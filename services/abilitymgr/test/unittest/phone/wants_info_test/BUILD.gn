@@ -20,7 +20,7 @@ ohos_unittest("wants_info_test") {
   module_out_path = module_output_path
 
   include_dirs = [
-    "${services_path}/abilitymgr/test/mock/libs/system_ability_mock",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
     "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
@@ -31,7 +31,7 @@ ohos_unittest("wants_info_test") {
     "wants_info_test.cpp",
   ]
 
-  configs = [ "${services_path}/abilitymgr:abilityms_config" ]
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -40,11 +40,11 @@ ohos_unittest("wants_info_test") {
     "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
     "${ability_runtime_path}/services/abilitymgr:abilityms",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "${services_path}/abilitymgr/test:abilityms_test_source",
-    "${services_path}/abilitymgr/test/mock/libs/aakit:aakit_mock",
-    "${services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_appmgr_mock",
-    "${services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
-    "${services_path}/common:perm_verification",
+    "${ability_runtime_services_path}/abilitymgr/test:abilityms_test_source",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/aakit:aakit_mock",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_appmgr_mock",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
+    "${ability_runtime_services_path}/common:perm_verification",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",

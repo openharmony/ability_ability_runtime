@@ -20,13 +20,13 @@ ohos_shared_library("uripermissionmanager_napi") {
     "native_module.cpp",
   ]
 
-  configs = [ "${services_path}/common:common_config" ]
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   include_dirs = []
 
   deps = [
     "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
-    "${innerkits_path}/uri_permission:uri_permission_mgr",
+    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
   ]
 
   external_deps = [

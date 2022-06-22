@@ -33,12 +33,12 @@ ohos_fuzztest("UriPermissionManagerFuzzTest") {
   ]
   sources = [ "uripermissionmanager_fuzzer.cpp" ]
 
-  configs = [ "${services_path}/common:common_config" ]
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
     "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${innerkits_path}/uri_permission:uri_permission_mgr",
-    "${services_path}/uripermmgr:libupms",
+    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    "${ability_runtime_services_path}/uripermmgr:libupms",
   ]
 
   external_deps = [

@@ -26,8 +26,8 @@ ohos_unittest("ability_connect_manage_test") {
   ]
 
   configs = [
-    "${services_path}/abilitymgr:abilityms_config",
-    "${services_path}/abilitymgr/test/mock:aafwk_mock_config",
+    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
+    "${ability_runtime_services_path}/abilitymgr/test/mock:aafwk_mock_config",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -39,10 +39,10 @@ ohos_unittest("ability_connect_manage_test") {
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "${services_path}/abilitymgr/test:abilityms_test_source",
-    "${services_path}/abilitymgr/test/mock/libs/aakit:aakit_mock",
-    "${services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_appmgr_mock",
-    "${services_path}/common:perm_verification",
+    "${ability_runtime_services_path}/abilitymgr/test:abilityms_test_source",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/aakit:aakit_mock",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_appmgr_mock",
+    "${ability_runtime_services_path}/common:perm_verification",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gtest_main",
     "//third_party/libpng:libpng",

@@ -20,7 +20,7 @@ ohos_moduletest("specified_ability_service_test") {
   module_out_path = module_output_path
   cflags_cc = []
   include_dirs = [
-    "${services_path}/test/mock/include",
+    "${ability_runtime_services_path}/test/mock/include",
     "//third_party/jsoncpp/include",
     "${ability_runtime_path}/frameworks/kits/ability/native/include/distributed_ability_runtime",
     "${ability_runtime_path}/interfaces/inner_api/dataobs_manager/include",
@@ -40,7 +40,7 @@ ohos_moduletest("specified_ability_service_test") {
   ]
 
   configs = [
-    "${services_path}/test:aafwk_module_test_config",
+    "${ability_runtime_services_path}/test:aafwk_module_test_config",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager_public_config",
     "${ability_runtime_path}/services/abilitymgr/test/mock/libs/sa_mgr:sa_mgr_mock_config",
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base_sdk_config",
@@ -58,7 +58,7 @@ ohos_moduletest("specified_ability_service_test") {
     "${bundlefwk_inner_api_path}/appexecfwk_core:appexecfwk_core",
     "${distributedschedule_path}/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "${innerkits_path}/uri_permission:uri_permission_mgr",
+    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
