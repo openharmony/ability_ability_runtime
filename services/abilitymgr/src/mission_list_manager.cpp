@@ -1220,9 +1220,10 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
         if (it == abilityRecord) {
             terminateAbilityList_.remove(it);
             // update inner mission info time
+            bool excludeFromMissions = abilityRecord->GetAbilityInfo().excludeFromMissions;
             if (abilityRecord->IsDlp() || abilityRecord->GetAbilityInfo().removeMissionAfterTerminate ||
-                abilityRecord->GetAbilityInfo().excludeFromMissions) {
-                RemoveMissionLocked(abilityRecord->GetMissionId(), abilityRecord->GetAbilityInfo().excludeFromMissions);
+                excludeFromMissions) {
+                RemoveMissionLocked(abilityRecord->GetMissionId(), excludeFromMissions);
                 return;
             }
             InnerMissionInfo innerMissionInfo;
