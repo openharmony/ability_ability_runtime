@@ -40,12 +40,12 @@ ohos_unittest("mission_test") {
   deps = [
     "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
     "${ability_runtime_path}/services/abilitymgr:abilityms",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${ability_runtime_services_path}/abilitymgr/test:abilityms_test_source",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/aakit:aakit_mock",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
     "${ability_runtime_services_path}/common:perm_verification",
+    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gtest_main",
     "//third_party/libpng:libpng",

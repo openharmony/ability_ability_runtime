@@ -13,7 +13,8 @@
 
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-subdemosystem_path = "${ability_runtime_system_test_app_path}/amsSystemTestServiceH"
+subdemosystem_path =
+    "${ability_runtime_system_test_app_path}/amsSystemTestServiceH"
 config("amsSystemTestCConfig") {
   visibility = [ ":*" ]
   include_dirs = [

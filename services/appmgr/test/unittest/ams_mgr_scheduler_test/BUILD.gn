@@ -30,11 +30,13 @@ ohos_unittest("AmsMgrSchedulerTest") {
     "${ability_base_innerapi_path}/want/include",
   ]
 
-  sources = [ "${ability_runtime_services_path}/appmgr/src/ams_mgr_scheduler.cpp" ]
+  sources =
+      [ "${ability_runtime_services_path}/appmgr/src/ams_mgr_scheduler.cpp" ]
 
   sources += [ "ams_mgr_scheduler_test.cpp" ]
 
-  configs = [ "${ability_runtime_services_path}/appmgr/test:appmgr_test_config" ]
+  configs =
+      [ "${ability_runtime_services_path}/appmgr/test:appmgr_test_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]

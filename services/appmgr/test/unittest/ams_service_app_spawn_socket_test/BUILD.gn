@@ -27,7 +27,8 @@ ohos_unittest("AmsServiceAppSpawnSocketTest") {
 
   defines = [ "usleep(time) = MockSleep(time)" ]
 
-  sources = [ "${ability_runtime_services_path}/appmgr/src/app_spawn_socket.cpp" ]
+  sources =
+      [ "${ability_runtime_services_path}/appmgr/src/app_spawn_socket.cpp" ]
 
   sources += [ "ams_service_app_spawn_socket_test.cpp" ]
 
