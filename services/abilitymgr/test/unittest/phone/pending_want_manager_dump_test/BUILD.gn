@@ -21,11 +21,11 @@ ohos_unittest("pending_want_manager_dump_test") {
 
   sources = [ "pending_want_manager_dump_test.cpp" ]
 
-  configs = [ "${ability_runtime_path}/services/abilitymgr:abilityms_config" ]
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
   deps = [
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/googletest:gtest_main",
   ]
 

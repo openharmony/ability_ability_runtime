@@ -21,10 +21,10 @@ ohos_unittest("app_mgr_service_dump_test") {
 
   sources = [ "app_mgr_service_dump_test.cpp" ]
 
-  configs = [ "${ability_runtime_path}/services/appmgr:appmgr_config" ]
+  configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]
 
   deps = [
-    "${ability_runtime_path}/services/appmgr:libappms",
+    "${ability_runtime_services_path}/appmgr:libappms",
     "//third_party/googletest:gtest_main",
   ]
 

@@ -20,14 +20,14 @@ ohos_unittest("AmsMgrStubTest") {
   module_out_path = module_output_path
 
   include_dirs = [
-    "${ability_runtime_path}/services/appmgr/include",
-    "${ability_runtime_path}/services/appmgr/test/mock/include",
+    "${ability_runtime_services_path}/appmgr/include",
+    "${ability_runtime_services_path}/appmgr/test/mock/include",
   ]
 
   sources = [ "ams_mgr_stub_test.cpp" ]
 
   deps = [
-    "${ability_runtime_path}/services/appmgr:libappms",
+    "${ability_runtime_services_path}/appmgr:libappms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

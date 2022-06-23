@@ -27,9 +27,9 @@ ohos_shared_library("appmanager_napi") {
     "js_app_manager_utils.cpp",
   ]
 
-  configs = [ "${ability_runtime_path}/services/common:common_config" ]
+  configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
-  deps = [ "${ability_runtime_path}/services/abilitymgr:abilityms" ]
+  deps = [ "${ability_runtime_services_path}/abilitymgr:abilityms" ]
 
   external_deps = [
     "ability_base:base",

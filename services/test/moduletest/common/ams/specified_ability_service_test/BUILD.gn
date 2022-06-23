@@ -22,44 +22,39 @@ ohos_moduletest("specified_ability_service_test") {
   include_dirs = [
     "${ability_runtime_services_path}/test/mock/include",
     "//third_party/jsoncpp/include",
-    "${ability_runtime_path}/frameworks/kits/ability/native/include/distributed_ability_runtime",
-    "${ability_runtime_path}/interfaces/inner_api/dataobs_manager/include",
-    "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include/xcollie",
+    "${ability_runtime_kits_path}/ability/native/include/distributed_ability_runtime",
+    "${ability_runtime_innerkits_path}/dataobs_manager/include",
   ]
 
   sources = [ "specified_ability_service_test.cpp" ]
   sources += [
-    "${ability_runtime_path}/services/abilitymgr/src/ability_manager_proxy.cpp",
-    "${ability_runtime_path}/services/abilitymgr/src/ability_manager_service.cpp",
-    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/sa_mgr/src/sa_mgr_client_mock.cpp",
-    "${ability_runtime_path}/services/common/src/event_report.cpp",
-    "${ability_runtime_path}/services/common/src/permission_verification.cpp",
-    "${ability_runtime_path}/services/test/mock/src/mock_app_mgr_client.cpp",
-    "${ability_runtime_path}/services/test/mock/src/mock_bundle_mgr.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_proxy.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/sa_mgr/src/sa_mgr_client_mock.cpp",
+    "${ability_runtime_services_path}/common/src/event_report.cpp",
+    "${ability_runtime_services_path}/common/src/permission_verification.cpp",
+    "${ability_runtime_services_path}/test/mock/src/mock_app_mgr_client.cpp",
+    "${ability_runtime_services_path}/test/mock/src/mock_bundle_mgr.cpp",
     "//foundation/distributedhardware/device_manager/test/unittest/mock/parameter.cpp",
   ]
 
   configs = [
     "${ability_runtime_services_path}/test:aafwk_module_test_config",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager_public_config",
-    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/sa_mgr:sa_mgr_mock_config",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base_sdk_config",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:appmgr_sdk_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager_public_config",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/sa_mgr:sa_mgr_mock_config",
+    "${ability_runtime_innerkits_path}/app_manager:appmgr_sdk_config",
   ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "${bundlefwk_inner_api_path}/appexecfwk_core:appexecfwk_core",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${distributedschedule_path}/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/icu/icu4c:shared_icuuc",
@@ -85,10 +80,13 @@ ohos_moduletest("specified_ability_service_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "dataability:native_dataability",
     "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
     "hicollie_native:libhicollie",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",

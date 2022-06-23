@@ -26,8 +26,8 @@ ohos_benchmarktest("BenchmarkTestForMissionManager") {
   }
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
     "//third_party/benchmark:benchmark",
     "//third_party/googletest:gtest_main",
   ]
@@ -38,6 +38,8 @@ ohos_benchmarktest("BenchmarkTestForMissionManager") {
     "ipc:ipc_core",
     "utils_base:utils",
   ]
+  resource_config_file =
+      "${form_fwk_path}/test/resource/benchmark/ohos_test.xml"
 }
 
 group("benchmarktest") {

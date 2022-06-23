@@ -29,7 +29,7 @@ ohos_shared_library("missionmanager_napi") {
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
 
@@ -44,7 +44,6 @@ ohos_shared_library("missionmanager_napi") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "ipc_js:rpc",
-    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",
@@ -80,7 +79,7 @@ ohos_shared_library("distributedmissionmanager") {
     "mission_continue_stub.cpp",
   ]
 
-  deps = [ "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common" ]
+  deps = [ "${ability_runtime_napi_path}/inner/napi_common:napi_common" ]
 
   external_deps = [
     "ability_base:want",

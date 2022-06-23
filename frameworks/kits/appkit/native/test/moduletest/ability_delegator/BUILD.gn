@@ -16,9 +16,9 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 module_output_path = "ability_delegator/"
 
 ability_delegator_mock_sources = [
-  "${ability_runtime_path}/frameworks/kits/appkit/native/test/mock/ability_delegator/mock_ability_delegator_stub.cpp",
-  "${ability_runtime_path}/frameworks/kits/appkit/native/test/mock/ability_delegator/mock_iability_monitor.cpp",
-  "${ability_runtime_path}/frameworks/kits/appkit/native/test/mock/ability_delegator/mock_test_observer_stub.cpp",
+  "${ability_runtime_kits_path}/appkit/native/test/mock/ability_delegator/mock_ability_delegator_stub.cpp",
+  "${ability_runtime_kits_path}/appkit/native/test/mock/ability_delegator/mock_iability_monitor.cpp",
+  "${ability_runtime_kits_path}/appkit/native/test/mock/ability_delegator/mock_test_observer_stub.cpp",
   "${ability_runtime_path}/tools/aa/src/test_observer.cpp",
   "${ability_runtime_path}/tools/aa/src/test_observer_stub.cpp",
 ]
@@ -27,16 +27,16 @@ ability_delegator_mock_sources = [
 config("moduletest_include_dir") {
   visibility = [ ":*" ]
   include_dirs = [
-    "${ability_runtime_path}/frameworks/kits/appkit/native/ability_delegator/include/",
+    "${ability_runtime_kits_path}/appkit/native/ability_delegator/include/",
     "${ability_runtime_path}/tools/aa/include",
-    "${ability_runtime_path}/frameworks/kits/appkit/native/test/mock/ability_delegator",
-    "${ability_runtime_path}/frameworks/kits/appkit/native/ability_delegator/include/runner_runtime/",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
+    "${ability_runtime_kits_path}/appkit/native/test/mock/ability_delegator",
+    "${ability_runtime_kits_path}/appkit/native/ability_delegator/include/runner_runtime/",
+    "${ability_runtime_innerkits_path}/ability_manager/include",
     "//third_party/googletest/googlemock/include",
-    "${ability_runtime_path}/services/abilitymgr/include",
-    "${ability_runtime_path}/frameworks/kits/appkit/native/",
-    "${ability_runtime_path}/frameworks/kits/appkit/native/ability_runtime/context/",
-    "${ability_runtime_path}/frameworks/kits/appkit/native/ability_runtime/app/",
+    "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_kits_path}/appkit/native/",
+    "${ability_runtime_kits_path}/appkit/native/ability_runtime/context/",
+    "${ability_runtime_kits_path}/appkit/native/ability_runtime/app/",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -53,10 +53,10 @@ ohos_moduletest("shell_cmd_result_moduletest") {
   sources = [ "shell_cmd_result_module_test.cpp" ]
 
   configs = [ ":moduletest_include_dir" ]
-  configs += [ "${ability_runtime_path}/services/common:common_config" ]
+  configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_delegator",
+    "${ability_runtime_kits_path}/appkit:appkit_delegator",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
@@ -70,10 +70,10 @@ ohos_moduletest("ability_delegator_args_moduletest") {
   sources = [ "ability_delegator_args_module_test.cpp" ]
 
   configs = [ ":moduletest_include_dir" ]
-  configs += [ "${ability_runtime_path}/services/common:common_config" ]
+  configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_delegator",
+    "${ability_runtime_kits_path}/appkit:appkit_delegator",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -90,10 +90,10 @@ ohos_moduletest("delegator_thread_moduletest") {
   sources = [ "delegator_thread_module_test.cpp" ]
 
   configs = [ ":moduletest_include_dir" ]
-  configs += [ "${ability_runtime_path}/services/common:common_config" ]
+  configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_delegator",
+    "${ability_runtime_kits_path}/appkit:appkit_delegator",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -112,15 +112,15 @@ ohos_moduletest("ability_delegator_registry_moduletest") {
   sources += ability_delegator_mock_sources
 
   configs = [ ":moduletest_include_dir" ]
-  configs += [ "${ability_runtime_path}/services/common:common_config" ]
+  configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_delegator",
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:appkit_delegator",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -140,11 +140,11 @@ ohos_moduletest("iability_monitor_moduletest") {
   sources += ability_delegator_mock_sources
 
   configs = [ ":moduletest_include_dir" ]
-  configs += [ "${ability_runtime_path}/services/common:common_config" ]
+  configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_delegator",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_kits_path}/appkit:appkit_delegator",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -164,14 +164,14 @@ ohos_moduletest("ability_delegator_moduletest") {
   sources += ability_delegator_mock_sources
 
   configs = [ ":moduletest_include_dir" ]
-  configs += [ "${ability_runtime_path}/services/common:common_config" ]
+  configs += [ "${ability_runtime_services_path}/common:common_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_delegator",
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:appkit_delegator",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
@@ -192,17 +192,17 @@ ohos_moduletest("js_test_runner_moduletest") {
 
   configs = [ ":moduletest_include_dir" ]
   configs += [
-    "${ability_runtime_path}/services/common:common_config",
+    "${ability_runtime_services_path}/common:common_config",
     "//ark/js_runtime:ark_jsruntime_public_config",
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_delegator",
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:appkit_delegator",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//ark/js_runtime:libark_jsruntime",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",

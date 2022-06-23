@@ -19,7 +19,7 @@ module_output_path = "ability_runtime/appmgrservice"
 ohos_unittest("AppMgrProxyTest") {
   module_out_path = module_output_path
 
-  include_dirs = [ "${ability_runtime_path}/services/appmgr/test/mock/include" ]
+  include_dirs = [ "${ability_runtime_services_path}/appmgr/test/mock/include" ]
 
   sources = [ "app_mgr_proxy_test.cpp" ]
 

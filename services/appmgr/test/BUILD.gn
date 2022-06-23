@@ -17,10 +17,8 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 config("appmgr_test_config") {
   configs = [
     "${ability_runtime_services_path}/appmgr:appmgr_config",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:appmgr_sdk_config",
-    "${ability_runtime_path}/services/test:services_mock_ams_config",
-    "${bundlefwk_inner_api_path}/appexecfwk_core:bundlemgr_sdk_config",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base_sdk_config",
+    "${ability_runtime_innerkits_path}/app_manager:appmgr_sdk_config",
+    "${ability_runtime_services_path}/test:services_mock_ams_config",
   ]
 
   defines = [
@@ -30,9 +28,7 @@ config("appmgr_test_config") {
 
   include_dirs = [
     "${ability_runtime_services_path}/appmgr/test/mock/include",
-    "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
     "${global_path}/i18n/frameworks/intl/include",
-    "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
   ]
 }
 
@@ -40,21 +36,21 @@ ohos_source_set("appmgr_test_source") {
   testonly = true
 
   sources = [
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_launch_data.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_proxy.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_process_data.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_record_id.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_scheduler_host.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_scheduler_proxy.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_state_callback_host.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_state_callback_proxy.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/app_task_info.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/process_info.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/profile.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/render_scheduler_host.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/render_scheduler_proxy.cpp",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/src/appmgr/running_process_info.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_launch_data.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_proxy.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_process_data.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_record_id.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_scheduler_host.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_scheduler_proxy.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_state_callback_host.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_state_callback_proxy.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_task_info.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/process_info.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/profile.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/render_scheduler_host.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/render_scheduler_proxy.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/running_process_info.cpp",
   ]
 
   include_dirs = [ "//third_party/json/include" ]
@@ -74,10 +70,7 @@ ohos_source_set("appmgr_test_source") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_runtime_services_path}/common:event_report",
-    "${ability_runtime_services_path}/common:perm_verification",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
 

@@ -24,7 +24,7 @@ ohos_fuzztest("UriPermissionManagerFuzzTest") {
 
   fuzz_config_file =
       "${ability_runtime_path}/test/fuzztest/uripermissionmanager_fuzzer"
-  include_dirs = [ "${ability_runtime_path}/services/uripermmgr/include" ]
+  include_dirs = [ "${ability_runtime_services_path}/uripermmgr/include" ]
   cflags = [
     "-g",
     "-O0",
@@ -37,7 +37,7 @@ ohos_fuzztest("UriPermissionManagerFuzzTest") {
 
   deps = [
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
     "${ability_runtime_services_path}/uripermmgr:libupms",
   ]
 

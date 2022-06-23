@@ -25,7 +25,7 @@ ohos_shared_library("featureability_napi") {
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
-  deps = [ "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common" ]
+  deps = [ "${ability_runtime_napi_path}/inner/napi_common:napi_common" ]
 
   external_deps = [
     "ability_base:want",
