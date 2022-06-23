@@ -21,10 +21,10 @@ ohos_unittest("ams_mgr_scheduler_dump_test") {
 
   sources = [ "ams_mgr_scheduler_dump_test.cpp" ]
 
-  configs = [ "${ability_runtime_path}/services/appmgr:appmgr_config" ]
+  configs = [ "${ability_runtime_services_path}/appmgr:appmgr_config" ]
 
   deps = [
-    "${ability_runtime_path}/services/appmgr:libappms",
+    "${ability_runtime_services_path}/appmgr:libappms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

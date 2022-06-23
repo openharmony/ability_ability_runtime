@@ -24,8 +24,7 @@ ohos_fuzztest("AbilityManagerFuzzTest") {
 
   fuzz_config_file =
       "${ability_runtime_path}/test/fuzztest/abilitymanager_fuzzer"
-  include_dirs =
-      [ "${ability_runtime_path}/interfaces/inner_api/ability_manager/include" ]
+  include_dirs = [ "${ability_runtime_innerkits_path}/ability_manager/include" ]
   cflags = [
     "-g",
     "-O0",
@@ -34,12 +33,12 @@ ohos_fuzztest("AbilityManagerFuzzTest") {
   ]
   sources = [ "abilitymanager_fuzzer.cpp" ]
 
-  configs = [ "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager_public_config" ]
+  configs = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager_public_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
 
   external_deps = [

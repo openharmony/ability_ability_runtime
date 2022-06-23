@@ -22,12 +22,12 @@ ohos_unittest("configuration_test") {
   include_dirs = [
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
-    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/ability_scheduler_mock",
-    "${ability_runtime_path}/services/abilitymgr/test/mock/include",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/ability_scheduler_mock",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/include",
   ]
 
   sources = [
-    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "configuration_test.cpp",  # add mock file
   ]
 
@@ -40,15 +40,13 @@ ohos_unittest("configuration_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr/test:abilityms_test_source",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/aakit:aakit_mock",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_appmgr_mock",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_bundlemgr_mock",
     "${ability_runtime_services_path}/common:perm_verification",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/libpng:libpng",
@@ -61,6 +59,7 @@ ohos_unittest("configuration_test") {
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
     "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]

@@ -16,17 +16,15 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("aakit_mock_config") {
   include_dirs = [
-    "${ability_runtime_path}/services/abilitymgr/test/mock/libs/aakit/include",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
+    "${ability_runtime_services_path}/abilitymgr/test/mock/libs/aakit/include",
+    "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_base_innerapi_path}/uri/include",
-    "${ability_runtime_path}/services/abilitymgr/include",
-    "${bundlefwk_inner_api_path}/appexecfwk_base/include",
-    "${bundlefwk_inner_api_path}/appexecfwk_core/include",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/include",
-    "${ability_runtime_path}/frameworks/kits/ability/native/include/",
+    "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_innerkits_path}/app_manager/include",
+    "${ability_runtime_kits_path}/ability/native/include/",
     "include/",
     "//third_party/jsoncpp/include",
-    "${ability_runtime_path}/services/common/include/",
+    "${ability_runtime_services_path}/common/include/",
   ]
 }
 
@@ -42,18 +40,18 @@ ohos_source_set("aakit_mock") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${distributedschedule_path}/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/jsoncpp:jsoncpp",
     "//utils/native/base:utils",
   ]
   external_deps = [
+    "ability_base:base",
     "ability_base:configuration",
-    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]

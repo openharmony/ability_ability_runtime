@@ -19,14 +19,14 @@ module_output_path = "ability_runtime/mstabilitymgrservice"
 ohos_moduletest("app_mgr_client_test") {
   module_out_path = module_output_path
 
-  include_dirs = [ "${ability_runtime_path}/services/test/mock/include" ]
+  include_dirs = [ "${ability_runtime_services_path}/test/mock/include" ]
 
   sources = [ "app_mgr_client_test.cpp" ]
 
-  configs = [ "${ability_runtime_path}/services/abilitymgr:abilityms_config" ]
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
   deps = [
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/googletest:gtest_main",
   ]
 

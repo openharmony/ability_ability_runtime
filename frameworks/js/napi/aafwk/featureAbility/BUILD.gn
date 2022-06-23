@@ -36,7 +36,7 @@ ohos_shared_library("featureability") {
   deps = [
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_kits_path}/appkit:appkit_native",
-    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "//third_party/libuv:uv_static",
   ]
 
@@ -56,7 +56,6 @@ ohos_shared_library("featureability") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "relational_store:native_appdatafwk",
     "relational_store:native_rdb",
     "relational_store:rdb_data_share_adapter",
     "utils_base:utils",

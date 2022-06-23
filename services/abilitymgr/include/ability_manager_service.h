@@ -628,7 +628,7 @@ public:
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
 
     virtual int32_t GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
-        MissionSnapshot& snapshot) override;
+        MissionSnapshot& snapshot, bool isLowResolution) override;
 
     /**
      * Set ability controller.
@@ -952,7 +952,7 @@ private:
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     ErrCode ProcessMultiParam(std::vector<std::string> &argsStr, std::string &result);
     void ShowHelp(std::string &result);
-    void ShowIllealInfomation(std::string &result);
+    void ShowIllegalInfomation(std::string &result);
 
     void InitConnectManager(int32_t userId, bool switchUser);
     void InitDataAbilityManager(int32_t userId, bool switchUser);

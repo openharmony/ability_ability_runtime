@@ -25,8 +25,7 @@ ohos_fuzztest("UpdateConfigurationFuzzTest") {
   fuzz_config_file =
       "${ability_runtime_path}/test/fuzztest/updateconfiguration_fuzzer"
 
-  include_dirs =
-      [ "${ability_runtime_path}/interfaces/inner_api/ability_manager/include" ]
+  include_dirs = [ "${ability_runtime_innerkits_path}/ability_manager/include" ]
 
   cflags = [
     "-g",
@@ -37,11 +36,11 @@ ohos_fuzztest("UpdateConfigurationFuzzTest") {
 
   sources = [ "updateconfiguration_fuzzer.cpp" ]
 
-  configs = [ "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager_public_config" ]
+  configs = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager_public_config" ]
 
   deps = [
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
   ]
 
   external_deps = [

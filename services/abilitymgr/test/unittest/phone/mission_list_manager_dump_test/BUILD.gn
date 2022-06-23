@@ -21,10 +21,10 @@ ohos_unittest("mission_list_manager_dump_test") {
 
   sources = [ "mission_list_manager_dump_test.cpp" ]
 
-  configs = [ "${ability_runtime_path}/services/abilitymgr:abilityms_config" ]
+  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
   deps = [
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/googletest:gtest_main",
   ]
 

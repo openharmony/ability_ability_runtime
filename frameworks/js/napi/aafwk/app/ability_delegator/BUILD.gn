@@ -35,7 +35,7 @@ ohos_shared_library("abilitydelegatorregistry") {
     "${ability_runtime_kits_path}/appkit:app_context",
     "${ability_runtime_kits_path}/appkit:app_context_utils",
     "${ability_runtime_kits_path}/appkit:appkit_delegator",
-    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
   ]
 
   external_deps = [

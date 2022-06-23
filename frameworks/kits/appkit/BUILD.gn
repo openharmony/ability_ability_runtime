@@ -46,7 +46,7 @@ config("appkit_config") {
   }
 
   include_dirs = [
-    "${ability_runtime_path}/frameworks/kits/ability/native/include",
+    "${ability_runtime_kits_path}/ability/native/include",
     "//third_party/json/include",
   ]
 }
@@ -78,10 +78,10 @@ ohos_shared_library("appkit_native") {
     "native/ability_runtime/context",
     "native/app/include",
     "native/app/include/task",
-    "${ability_runtime_path}/services/common/include",
-    "${ability_runtime_path}/frameworks/kits/ability/native/include",
-    "${ability_runtime_path}/services/abilitymgr/include",
-    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common",
+    "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_kits_path}/ability/native/include",
+    "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_napi_path}/inner/napi_common",
   ]
 
   configs = [ ":appkit_config" ]
@@ -115,8 +115,8 @@ ohos_shared_library("appkit_native") {
   deps = [
     ":appkit_delegator",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
-    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
-    "${ability_runtime_path}/frameworks/kits/appkit:app_context_utils",
+    "${ability_runtime_kits_path}/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:app_context_utils",
   ]
 
   public_deps =
@@ -246,7 +246,7 @@ ohos_shared_library("app_context_utils") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:app_context",
     "//base/hiviewdfx/hiview/adapter/utility:hiview_adapter_utility",
   ]
 
@@ -296,8 +296,8 @@ ohos_shared_library("appkit_delegator") {
     "native/ability_runtime/app",
     "native/ability_runtime/context",
     "native/ability_delegator/include",
-    "${ability_runtime_path}/services/common/include",
-    "${ability_runtime_path}/frameworks/kits/ability/native/include",
+    "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_kits_path}/ability/native/include",
   ]
 
   configs = [ ":appkit_config" ]
@@ -325,7 +325,7 @@ ohos_shared_library("appkit_delegator") {
   deps = [
     ":delegator_mgmt_abc",
     ":delegator_mgmt_js",
-    "${ability_runtime_path}/frameworks/kits/appkit:app_context",
+    "${ability_runtime_kits_path}/appkit:app_context",
   ]
 
   external_deps = [

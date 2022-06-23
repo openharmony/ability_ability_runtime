@@ -19,7 +19,7 @@ module_output_path = "ability_runtime/appmgrservice"
 ohos_unittest("AppMgrStubTest") {
   module_out_path = module_output_path
 
-  include_dirs = [ "${ability_runtime_path}/services/appmgr/test/mock/include" ]
+  include_dirs = [ "${ability_runtime_services_path}/appmgr/test/mock/include" ]
 
   sources = [ "app_mgr_stub_test.cpp" ]
 
@@ -32,6 +32,7 @@ ohos_unittest("AppMgrStubTest") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:app_manager",
+    "bundle_framework:appexecfwk_base",
     "ipc:ipc_core",
     "utils_base:utils",
   ]

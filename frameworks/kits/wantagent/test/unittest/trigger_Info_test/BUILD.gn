@@ -19,7 +19,7 @@ module_output_path = "ans_standard/wantagent"
 
 ohos_unittest("trigger_Info_test") {
   module_out_path = module_output_path
-  include_dirs = [ "${ability_runtime_path}/services/abilitymgr/include" ]
+  include_dirs = [ "${ability_runtime_services_path}/abilitymgr/include" ]
 
   sources = [ "trigger_Info_test.cpp" ]
 
@@ -29,9 +29,9 @@ ohos_unittest("trigger_Info_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
-    "${ability_runtime_path}/frameworks/kits/wantagent:wantagent_innerkits",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
+    "${ability_runtime_kits_path}/wantagent:wantagent_innerkits",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

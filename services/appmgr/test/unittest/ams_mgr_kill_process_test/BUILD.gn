@@ -16,19 +16,19 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/appmgrservice"
 
-mock_sources = [ "${ability_runtime_path}/services/appmgr/test/mock/src/mock_bundle_manager.cpp" ]
+mock_sources = [ "${ability_runtime_services_path}/appmgr/test/mock/src/mock_bundle_manager.cpp" ]
 
 ohos_unittest("AmsMgrKillProcessTest") {
   module_out_path = module_output_path
 
-  include_dirs = [ "${ability_runtime_path}/services/appmgr/test/mock/include" ]
+  include_dirs = [ "${ability_runtime_services_path}/appmgr/test/mock/include" ]
 
   sources = [ "ams_mgr_kill_process_test.cpp" ]
   sources += mock_sources
 
   configs = [
-    "${ability_runtime_path}/frameworks/kits/ability/native:ability_config",
-    "${ability_runtime_path}/services/appmgr:appmgr_config",
+    "${ability_runtime_kits_path}/ability/native:ability_config",
+    "${ability_runtime_services_path}/appmgr:appmgr_config",
   ]
 
   cflags = []
@@ -37,9 +37,9 @@ ohos_unittest("AmsMgrKillProcessTest") {
   }
 
   deps = [
-    "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_runtime_path}/services/appmgr:libappms",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_kits_path}/appkit:appkit_native",
+    "${ability_runtime_services_path}/appmgr:libappms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

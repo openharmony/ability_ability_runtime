@@ -35,8 +35,8 @@ config("appmgr_core_config") {
 ohos_shared_library("app_manager") {
   include_dirs = [
     "//third_party/json/include",
-    "${ability_runtime_path}/services/appmgr/include",
-    "${ability_runtime_path}/services/common/include",
+    "${ability_runtime_services_path}/appmgr/include",
+    "${ability_runtime_services_path}/common/include",
   ]
 
   sources = [
@@ -94,8 +94,6 @@ ohos_shared_library("app_manager") {
     "ability_base:configuration",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
-    "common_event_service:cesfwk_core",
-    "common_event_service:cesfwk_innerkits",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
