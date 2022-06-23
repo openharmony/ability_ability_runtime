@@ -43,16 +43,17 @@ ohos_unittest("AmsAbilityRunningRecordTest") {
 
   sources += [ "ams_ability_running_record_test.cpp" ]
 
-  configs = [ "${ability_runtime_services_path}/appmgr/test:appmgr_test_config" ]
+  configs =
+      [ "${ability_runtime_services_path}/appmgr/test:appmgr_test_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
     "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
     "${ability_runtime_path}/services/appmgr:libappms",
-    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_services_path}/appmgr/test:appmgr_test_source",
     "${ability_runtime_services_path}/common:perm_verification",
   ]

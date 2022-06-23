@@ -51,10 +51,10 @@ ohos_shared_library("amsDataSystemTestA") {
     "${ability_runtime_path}/frameworks/kits/ability/native:abilitykit_native",
     "${ability_runtime_path}/frameworks/kits/appkit:appkit_native",
     "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_services_path}/bundlemgr:libbms",
     "${distributeddatamgr_path}/appdatamgr/interfaces/inner_api/native/dataability:native_dataability",
     "${distributeddatamgr_path}/appdatamgr/interfaces/inner_api/native/rdb:native_rdb",
     "${inner_api_path}/appexecfwk_base:appexecfwk_base",
-    "${ability_runtime_services_path}/bundlemgr:libbms",
     "//third_party/jsoncpp:jsoncpp",
     "//utils/native/base:utilsbase",
   ]
