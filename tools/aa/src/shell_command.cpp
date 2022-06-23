@@ -32,7 +32,7 @@ ShellCommand::ShellCommand(int argc, char *argv[], std::string name)
         return;
     }
     cmd_ = argv[1];
-    for (int i = 2; i < argc; i++) {
+    if (argc < MIN_ARGUMENT_NUMBER || argc > MAX_ARGUMENT_NUMBER) {
         argList_.push_back(argv[i]);
     }
 }
