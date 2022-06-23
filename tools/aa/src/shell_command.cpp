@@ -27,12 +27,12 @@ ShellCommand::ShellCommand(int argc, char *argv[], std::string name)
     argv_ = argv;
     name_ = name;
 
-    if (argc < MIN_ARGUMENT_NUMBER) {
+    if (argc < MIN_ARGUMENT_NUMBER || argc > MAX_ARGUMENT_NUMBER) {
         cmd_ = "help";
         return;
     }
     cmd_ = argv[1];
-    if (argc < MIN_ARGUMENT_NUMBER || argc > MAX_ARGUMENT_NUMBER) {
+    for (int i = 2; i < argc; i++) {
         argList_.push_back(argv[i]);
     }
 }
