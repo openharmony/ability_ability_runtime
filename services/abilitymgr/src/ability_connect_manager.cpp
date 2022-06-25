@@ -699,9 +699,9 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         HILOG_DEBUG("Load time out , remove target service record from services map.");
         RemoveServiceAbility(abilityRecord);
     }
+    DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
     if (abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
         // terminate the timeout root launcher.
-        DelayedSingleton<AppScheduler>::GetInstance()->AttachTimeOut(abilityRecord->GetToken());
         if (resultCode == LOAD_ABILITY_TIMEOUT) {
             StartRootLauncher(abilityRecord);
         }
