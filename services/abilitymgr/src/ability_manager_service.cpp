@@ -4845,9 +4845,6 @@ int AbilityManagerService::SetMissionIcon(const sptr<IRemoteObject> &token,
         return -1;
     }
 
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    auto recordUid = abilityRecord->GetUid();
-
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
     if (callingTokenId != tokenID) {
