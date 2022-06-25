@@ -4818,10 +4818,10 @@ int AbilityManagerService::SetMissionLabel(const sptr<IRemoteObject> &token, con
         return -1;
     }
 
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    auto recordUid = abilityRecord->GetUid();
-    if (callingUid != recordUid) {
-        HILOG_ERROR("SetMissionLabel not self, callingUid:%{public}d, recordUid:%{public}d", callingUid, recordUid);
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
+    if (callingTokenId != tokenID) {
+        HILOG_ERROR("SetMissionLabel not self, not enabled");
         return -1;
     }
 
@@ -4847,8 +4847,11 @@ int AbilityManagerService::SetMissionIcon(const sptr<IRemoteObject> &token,
 
     auto callingUid = IPCSkeleton::GetCallingUid();
     auto recordUid = abilityRecord->GetUid();
-    if (callingUid != recordUid) {
-        HILOG_ERROR("not self, callingUid:%{public}d, recordUid:%{public}d", callingUid, recordUid);
+
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
+    if (callingTokenId != tokenID) {
+        HILOG_ERROR("not self, not enable to set mission icon");
         return -1;
     }
 
