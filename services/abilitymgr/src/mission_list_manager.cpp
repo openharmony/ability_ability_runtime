@@ -402,7 +402,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         targetRecord->SetSpecifiedFlag(abilityRequest.specifiedFlag);
     }
 
-    if (abilityRequest.abilityInfo.applicationInfo.isLauncherApp) {
+    if (abilityRequest.abilityInfo.applicationInfo.isLauncherApp || abilityRequest.abilityInfo.excludeFromMissions) {
         return;
     }
 
@@ -410,9 +410,6 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(info);
     } else {
         DelayedSingleton<MissionInfoMgr>::GetInstance()->AddMissionInfo(info);
-        if (listenerController_) {
-            listenerController_->NotifyMissionCreated(info.missionInfo.id);
-        }
     }
 }
 
@@ -900,7 +897,7 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
 
     if (mission && mission->IsMovingState()) {
         mission->SetMovingState(false);
-        if (listenerController_) {
+        if (listenerController_ && !(abilityRecord->GetAbilityInfo().excludeFromMissions)) {
             listenerController_->NotifyMissionMovedToFront(mission->GetMissionId());
         }
     }
@@ -1223,8 +1220,10 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
         if (it == abilityRecord) {
             terminateAbilityList_.remove(it);
             // update inner mission info time
-            if (abilityRecord->IsDlp() || abilityRecord->GetAbilityInfo().removeMissionAfterTerminate) {
-                RemoveMissionLocked(abilityRecord->GetMissionId());
+            bool excludeFromMissions = abilityRecord->GetAbilityInfo().excludeFromMissions;
+            if (abilityRecord->IsDlp() || abilityRecord->GetAbilityInfo().removeMissionAfterTerminate ||
+                excludeFromMissions) {
+                RemoveMissionLocked(abilityRecord->GetMissionId(), excludeFromMissions);
                 return;
             }
             InnerMissionInfo innerMissionInfo;
@@ -1273,10 +1272,16 @@ int MissionListManager::ClearMission(int missionId)
         HILOG_ERROR("Mission id is launcher, can not clear.");
         return ERR_INVALID_VALUE;
     }
+
+    if (IsExcludeFromMissions(mission)) {
+        HILOG_WARN("excludeFromMissions is true, not clear by id.");
+        return ERR_INVALID_VALUE;
+    }
+
     return ClearMissionLocked(missionId, mission);
 }
 
-int MissionListManager::ClearMissionLocked(int missionId, std::shared_ptr<Mission> mission)
+int MissionListManager::ClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission)
 {
     if (missionId != -1) {
         DelayedSingleton<MissionInfoMgr>::GetInstance()->DeleteMissionInfo(missionId);
@@ -1358,10 +1363,19 @@ int MissionListManager::SetMissionLockedState(int missionId, bool lockedState)
         HILOG_ERROR("param is invalid");
         return MISSION_NOT_FOUND;
     }
+
     std::shared_ptr<Mission> mission = GetMissionById(missionId);
-    if (mission) {
-        mission->SetLockedState(lockedState);
+    if (!mission) {
+        HILOG_ERROR("find mission failed, missionId:%{public}d", missionId);
+        return MISSION_NOT_FOUND;
     }
+
+    auto abilityRecord = mission->GetAbilityRecord();
+    if (abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions) {
+        HILOG_ERROR("excludeFromMissions is true, missionId:%{public}d", missionId);
+        return MISSION_NOT_FOUND;
+    }
+    mission->SetLockedState(lockedState);
 
     // update inner mission info time
     InnerMissionInfo innerMissionInfo;
@@ -1384,14 +1398,27 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
     }
     HILOG_INFO("Move the ability to background, ability:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
     abilityRecord->SetIsNewWant(false);
-    auto self(shared_from_this());
+    NotifyMissionCreated(abilityRecord);
     UpdateMissionSnapshot(abilityRecord);
+
+    auto self(shared_from_this());
     auto task = [abilityRecord, self]() {
         HILOG_ERROR("Mission list manager move to background timeout.");
         self->PrintTimeOutLog(abilityRecord, AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
         self->CompleteBackground(abilityRecord);
     };
     abilityRecord->BackgroundAbility(task);
+}
+
+void  MissionListManager::NotifyMissionCreated(const std::shared_ptr<AbilityRecord> &abilityRecord) const
+{
+    CHECK_POINTER(abilityRecord);
+    auto mission = abilityRecord->GetMission();
+    if (mission && mission->NeedNotify() && listenerController_ &&
+        !(abilityRecord->GetAbilityInfo().excludeFromMissions)) {
+        listenerController_->NotifyMissionCreated(abilityRecord->GetMissionId());
+        mission->SetNotifyLabel(false);
+    }
 }
 
 void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId)
@@ -1445,6 +1472,10 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
 void MissionListManager::UpdateMissionSnapshot(const std::shared_ptr<AbilityRecord>& abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
+    if (abilityRecord->GetAbilityInfo().excludeFromMissions) {
+        HILOG_DEBUG("excludeFromMissions is true, no need to update mission snapshot.");
+        return;
+    }
     int32_t missionId = abilityRecord->GetMissionId();
     MissionSnapshot snapshot;
     snapshot.isPrivate = abilityRecord->IsDlp();
@@ -1787,7 +1818,6 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
     abilityRecord->SetMission(mission);
     abilityRecord->SetOwnerMissionUserId(userId_);
     std::shared_ptr<MissionList> newMissionList = std::make_shared<MissionList>();
-    listenerController_->NotifyMissionCreated(innerMissionInfo.missionInfo.id);
     return newMissionList;
 }
 
@@ -1916,8 +1946,9 @@ void MissionListManager::HandleAbilityDiedByDefault(std::shared_ptr<AbilityRecor
 
     // update running state.
     if (!ability->IsUninstallAbility()) {
-        if (ability->IsDlp() || ability->GetAbilityInfo().removeMissionAfterTerminate) {
-            RemoveMissionLocked(mission->GetMissionId());
+        if (ability->IsDlp() || ability->GetAbilityInfo().removeMissionAfterTerminate ||
+            ability->GetAbilityInfo().excludeFromMissions) {
+            RemoveMissionLocked(mission->GetMissionId(), ability->GetAbilityInfo().excludeFromMissions);
         } else {
             InnerMissionInfo info;
             if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
@@ -2010,11 +2041,16 @@ int MissionListManager::SetMissionIcon(const sptr<IRemoteObject> &token, const s
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     auto missionId = GetMissionIdByAbilityToken(token);
     if (missionId <= 0) {
-        HILOG_INFO("SetMissionIcon find mission failed.");
+        HILOG_ERROR("SetMissionIcon find mission failed.");
+        return -1;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (!abilityRecord) {
+        HILOG_ERROR("SetMissionIcon find ability failed.");
         return -1;
     }
 
-    if (listenerController_) {
+    if (listenerController_ && !(abilityRecord->GetAbilityInfo().excludeFromMissions)) {
         listenerController_->NotifyMissionIconChanged(missionId, icon);
     }
 
@@ -2034,9 +2070,7 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
         HILOG_WARN("%{public}s get AbilityRecord by token failed.", __func__);
         return;
     }
-    if (listenerController_) {
-        listenerController_->NotifyMissionCreated(abilityRecord->GetMissionId());
-    }
+    NotifyMissionCreated(abilityRecord);
 }
 
 Closure MissionListManager::GetCancelStartingWindow(const std::shared_ptr<AbilityRecord> &abilityRecord) const
@@ -2619,16 +2653,26 @@ void MissionListManager::GetForegroundAbilities(const std::shared_ptr<MissionLis
     }
 }
 
-void MissionListManager::RemoveMissionLocked(int32_t missionId)
+void MissionListManager::RemoveMissionLocked(int32_t missionId, bool excludeFromMissions)
 {
     if (missionId <= 0) {
         return;
     }
 
     DelayedSingleton<MissionInfoMgr>::GetInstance()->DeleteMissionInfo(missionId);
-    if (listenerController_) {
+    if (listenerController_ && !excludeFromMissions) {
         listenerController_->NotifyMissionDestroyed(missionId);
     }
+}
+
+bool MissionListManager::IsExcludeFromMissions(const std::shared_ptr<Mission> &mission)
+{
+    if (!mission) {
+        return false;
+    }
+
+    auto abilityRecord = mission->GetAbilityRecord();
+    return abilityRecord && abilityRecord->GetAbilityInfo().excludeFromMissions;
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

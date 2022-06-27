@@ -20,9 +20,9 @@ module_output_path = "ans_standard/wantagent"
 ohos_unittest("want_agent_helper_test") {
   module_out_path = module_output_path
   include_dirs = [
-    "${ability_runtime_kits_path}/appkit/native/ability_runtime/context/",
-    "${ability_runtime_kits_path}/appkit/native/ability_runtime",
-    "${ability_runtime_services_path}/abilitymgr/include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context/",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
+    "${ability_runtime_path}/services/abilitymgr/include",
   ]
 
   sources = [ "want_agent_helper_test.cpp" ]
@@ -33,10 +33,10 @@ ohos_unittest("want_agent_helper_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${ability_runtime_kits_path}/appkit:app_context",
-    "${ability_runtime_kits_path}/appkit:appkit_native",
-    "${ability_runtime_kits_path}/wantagent:wantagent_innerkits",
-    "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_path}/frameworks/kits/wantagent:wantagent_innerkits",
+    "${ability_runtime_path}/frameworks/native/appkit:app_context",
+    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
+    "${ability_runtime_path}/services/abilitymgr:abilityms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",

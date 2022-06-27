@@ -18,9 +18,9 @@ ohos_shared_library("particleability") {
     "//third_party/node/src",
     "${ability_runtime_napi_path}/featureAbility",
     "${ability_runtime_services_path}/common/include",
-    "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/rdb/include",
-    "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/common/include",
-    "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/dataability/include",
+    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/rdb/include",
+    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/common/include",
+    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/dataability/include",
     "//third_party/jsoncpp",
     "//third_party/jsoncpp/include/json",
   ]
@@ -29,17 +29,17 @@ ohos_shared_library("particleability") {
     "${ability_runtime_napi_path}/featureAbility/napi_context.cpp",
     "${ability_runtime_napi_path}/featureAbility/napi_data_ability_helper.cpp",
     "${ability_runtime_napi_path}/featureAbility/napi_data_ability_operation.cpp",
-    "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/common/src/js_utils.cpp",
-    "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/dataability/src/napi_data_ability_predicates.cpp",
-    "${distributeddatamgr_path}/appdatamgr/frameworks/js/napi/rdb/src/napi_result_set.cpp",
+    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/common/src/js_utils.cpp",
+    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/dataability/src/napi_data_ability_predicates.cpp",
+    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/rdb/src/napi_result_set.cpp",
     "native_module.cpp",
     "particle_ability.cpp",
   ]
 
   deps = [
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
-    "${ability_runtime_kits_path}/appkit:appkit_native",
-    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
     "//third_party/jsoncpp:jsoncpp",
     "//third_party/libuv:uv_static",
   ]
@@ -51,6 +51,7 @@ ohos_shared_library("particleability") {
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_manager",
+    "ability_runtime:data_ability_helper",
     "ability_runtime:napi_base_context",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
