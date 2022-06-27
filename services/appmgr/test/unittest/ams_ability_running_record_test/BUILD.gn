@@ -52,6 +52,7 @@ ohos_unittest("AmsAbilityRunningRecordTest") {
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_services_path}/appmgr:libappms",
     "${ability_runtime_services_path}/appmgr/test:appmgr_test_source",
+    "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:perm_verification",
   ]
 
