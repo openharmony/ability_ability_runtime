@@ -67,6 +67,8 @@ ohos_source_set("appmgr_mst_source") {
     "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${bundlefwk_inner_api_path}/appexecfwk_core:appexecfwk_core",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    "${ability_runtime_services_path}/common:perm_verification",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/icu/icu4c:shared_icuuc",
