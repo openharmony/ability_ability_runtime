@@ -38,9 +38,9 @@ ohos_moduletest("ability_caller_fw_module_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
-    "${ability_runtime_kits_path}/ability/ability_runtime:ability_context_native",
-    "${ability_runtime_kits_path}/ability/native:abilitykit_native",
+    "${ability_runtime_path}/frameworks/native/ability:ability_context_native",
+    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
+    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -49,6 +49,8 @@ ohos_moduletest("ability_caller_fw_module_test") {
   external_deps = [
     "ability_base:want",
     "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+    "utils_base:utils",
   ]
 }
 
