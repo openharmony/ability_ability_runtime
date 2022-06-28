@@ -694,6 +694,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         abilityRequest.Voluation(want, requestCode, callerToken);
         abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
         abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
+        abilityRequest.callType = AbilityCallType::START_OPTIONS_TYPE;
         auto result = ImplicitStartAbility(abilityRequest, validUserId);
         if (result != ERR_OK) {
             HILOG_ERROR("implicit start ability error.");
