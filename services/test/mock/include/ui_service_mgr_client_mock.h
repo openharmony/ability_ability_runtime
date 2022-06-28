@@ -63,17 +63,20 @@ public:
     ErrCode ShowAppPickerDialog(
         const AAFwk::Want& want, const std::vector<AppExecFwk::AbilityInfo>& abilityInfos, int32_t userId);
     
-    void SetDialogCheckState(const std::string& code) {
+    void SetDialogCheckState(const std::string& code) 
+    {
         code_ = code;
         isCallBack_ = false;
         params_ = "";
     }
 
-    std::string GetParams() {
+    std::string GetParams() 
+    {
         return params_;
     }
 
-    bool IsCallBack() {
+    bool IsCallBack() 
+    {
         return isCallBack_;
     }
 

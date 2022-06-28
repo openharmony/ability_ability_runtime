@@ -17,17 +17,15 @@
 
 #include <csignal>
 
+#include "ability_manager_client.h"
 #include "dialog_callback_stub.h"
+#include "display_manager.h"
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
-
-// external dependence
-#include "ability_manager_client.h"
-#include "display_manager.h"
 
 namespace OHOS {
 namespace Ace {

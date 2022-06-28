@@ -964,7 +964,7 @@ private:
 
     int32_t InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo &extensionInfo,
         AppExecFwk::AbilityInfo &abilityInfo);
-
+    
     // multi user
     void StartFreezingScreen();
     void StopFreezingScreen();
@@ -1027,7 +1027,8 @@ private:
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
         int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType);
 #ifdef SUPPORT_GRAPHICS
-    int GenerateAbilityRequestByAction(int32_t userId, AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos);
+    int GenerateAbilityRequestByAction(
+        int32_t userId, AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos);
     int ImplicitStartAbility(AbilityRequest &request, int32_t userId);
 #endif
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
@@ -1053,7 +1054,7 @@ private:
     std::shared_ptr<MissionListManager> currentMissionListManager_;
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
-
+    
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;

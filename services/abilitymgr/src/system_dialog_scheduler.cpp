@@ -35,10 +35,10 @@ const int32_t UI_SELECTOR_DIALOG_PHONE_H1 = 240 * 2;
 const int32_t UI_SELECTOR_DIALOG_PHONE_H2 = 340 * 2;
 const int32_t UI_SELECTOR_DIALOG_PHONE_H3 = 350 * 2;
 const int32_t UI_SELECTOR_DIALOG_PC_H0 = 1;
-const int32_t UI_SELECTOR_DIALOG_PC_H2 = 70 * 2 + 85 + 2;
-const int32_t UI_SELECTOR_DIALOG_PC_H3 = 70 * 3 + 85 + 2;
-const int32_t UI_SELECTOR_DIALOG_PC_H4 = 70 * 4 + 85 + 2;
-const int32_t UI_SELECTOR_DIALOG_PC_H5 = 70 * 4 + 85 + 38;
+const int32_t UI_SELECTOR_DIALOG_PC_H2 = (70 * 2 + 85 + 2) * 2;
+const int32_t UI_SELECTOR_DIALOG_PC_H3 = (70 * 3 + 85 + 2) * 2;
+const int32_t UI_SELECTOR_DIALOG_PC_H4 = (70 * 4 + 85 + 2) * 2;
+const int32_t UI_SELECTOR_DIALOG_PC_H5 = (70 * 4 + 85 + 38) * 2;
 
 const int32_t UI_TIPS_DIALOG_WIDTH = 328 * 2;
 const int32_t UI_TIPS_DIALOG_HEIGHT = 135 * 2;
@@ -65,6 +65,12 @@ const std::string STR_PC = "pc";
 const std::string DIALOG_NAME_ANR = "dialog_anr_service";
 const std::string DIALOG_NAME_TIPS = "dialog_tips_service";
 const std::string DIALOG_SELECTOR_NAME = "dialog_selector_service";
+
+const int32_t LINE_NUMS_ZERO = 0;
+const int32_t LINE_NUMS_TWO = 2;
+const int32_t LINE_NUMS_THREE = 3;
+const int32_t LINE_NUMS_FOUR = 4;
+const int32_t LINE_NUMS_EIGHT = 8;
 
 SystemDialogScheduler::SystemDialogScheduler(const std::string &deviceType): deviceType_(deviceType) {}
 
@@ -148,7 +154,8 @@ int32_t SystemDialogScheduler::ShowTipsDialog()
     return ERR_OK;
 }
 
-int32_t SystemDialogScheduler::ShowSelectorDialog(const std::vector<DialogAppInfo> &infos, const SelectorClosure &startAbilityCallBack)
+int32_t SystemDialogScheduler::ShowSelectorDialog(
+    const std::vector<DialogAppInfo> &infos, const SelectorClosure &startAbilityCallBack)
 {
     HILOG_DEBUG("ShowSelectorDialog start");
     if (infos.empty()) {
@@ -253,21 +260,21 @@ void SystemDialogScheduler::InitDialogPosition(DialogType type, DialogPosition &
 void SystemDialogScheduler::DialogPositionAdaptive(DialogPosition &position, int lineNums) const
 {
     if (position.wideScreen) {
-        if (lineNums == 2) {
-            position.height = UI_SELECTOR_DIALOG_PC_H2 * 2;
-        } else if (lineNums == 3) {
-            position.height = UI_SELECTOR_DIALOG_PC_H3 * 2;
-        } else if (lineNums == 4) {
-            position.height = UI_SELECTOR_DIALOG_PC_H4 * 2;
-        } else if (lineNums > 4) {
-            position.height = UI_SELECTOR_DIALOG_PC_H5 * 2;
+        if (lineNums == LINE_NUMS_TWO) {
+            position.height = UI_SELECTOR_DIALOG_PC_H2;
+        } else if (lineNums == LINE_NUMS_THREE) {
+            position.height = UI_SELECTOR_DIALOG_PC_H3;
+        } else if (lineNums == LINE_NUMS_FOUR) {
+            position.height = UI_SELECTOR_DIALOG_PC_H4;
+        } else if (lineNums > LINE_NUMS_FOUR) {
+            position.height = UI_SELECTOR_DIALOG_PC_H5;
         } else {
             position.height = UI_SELECTOR_DIALOG_PC_H0;
         }
     } else {
-        position.height = (lineNums > 8) ? UI_SELECTOR_DIALOG_PHONE_H3 :
-            (lineNums > 3 ? UI_SELECTOR_DIALOG_PHONE_H2 : 
-            (lineNums > 0 ? UI_SELECTOR_DIALOG_PHONE_H1 : position.height));
+        position.height = (lineNums > LINE_NUMS_EIGHT) ? UI_SELECTOR_DIALOG_PHONE_H3 :
+            (lineNums > LINE_NUMS_THREE ? UI_SELECTOR_DIALOG_PHONE_H2 : 
+            (lineNums > LINE_NUMS_ZERO ? UI_SELECTOR_DIALOG_PHONE_H1 : position.height));
     }
 }
 
