@@ -348,7 +348,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
 
-    auto uid = IPCSkeleton::GetCallingUid();
 
     if (VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
@@ -536,7 +535,8 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
     if (want.GetAction().compare(ACTION_VIEW) == 0) {
-        abilityRequest.Voluation(want, requestCode, callerToken, std::make_shared<AbilityStartSetting>(abilityStartSetting));
+        abilityRequest.Voluation(
+            want, requestCode, callerToken, std::make_shared<AbilityStartSetting>(abilityStartSetting));
         abilityRequest.callType = AbilityCallType::START_SETTINGS_TYPE;
         auto result = ImplicitStartAbility(abilityRequest, validUserId);
         if (result != ERR_OK) {
@@ -2940,7 +2940,7 @@ int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
 {
     HILOG_DEBUG("%{public}s", __func__);
     auto isNotAction = request.want.GetAction().compare(ACTION_VIEW) != 0;
-    CHECK_TRUE_RETURN_RET(isNotAction, ERR_IMPLICIT_START_ABILITY_FAIL, "action is error."); 
+    CHECK_TRUE_RETURN_RET(isNotAction, ERR_IMPLICIT_START_ABILITY_FAIL, "action is error.");
     CHECK_TRUE_RETURN_RET(request.want.GetType().empty(), ERR_WANT_NO_TYPE, "need to set type into want.");
    
     // get abilityinfos from bms
@@ -2952,16 +2952,21 @@ int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
     IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, abilityInfos, extensionInfos));
 
-    if (request.callType != AbilityCallType::START_EXTENSION_TYPE &&
-        request.callType != AbilityCallType::CONNECT_ABILITY_TYPE) {
-        for (auto &info : abilityInfos) {
-            DialogAppInfo dialogAppInfo;
-            dialogAppInfo.abilityName = info.name;
-            dialogAppInfo.bundleName = info.bundleName;
-            dialogAppInfo.iconId = info.iconId;
-            dialogAppInfo.labelId = info.labelId;
-            dialogAppInfos.emplace_back(dialogAppInfo);
+    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}d, extensionInfos size: %{public}d", abilityInfos.size(), extensionInfos.size());
+
+    auto isExtension = (request.callType == AbilityCallType::START_EXTENSION_TYPE ||
+        request.callType == AbilityCallType::CONNECT_ABILITY_TYPE);
+    
+    for (auto &info : abilityInfos) {
+        if (isExtension && info.type != AbilityType::EXTENSION) {
+            continue;
         }
+        DialogAppInfo dialogAppInfo;
+        dialogAppInfo.abilityName = info.name;
+        dialogAppInfo.bundleName = info.bundleName;
+        dialogAppInfo.iconId = info.iconId;
+        dialogAppInfo.labelId = info.labelId;
+        dialogAppInfos.emplace_back(dialogAppInfo);
     }
     
     for (auto &info : extensionInfos) {
@@ -2978,6 +2983,7 @@ int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
 int AbilityManagerService::ImplicitStartAbility(AbilityRequest &request, int32_t userId)
 {
     HILOG_DEBUG("%{public}s", __func__);
+    HILOG_INFO("implicit start ability by type: %{public}d", request.callType);
 
     std::vector<DialogAppInfo> dialogAppInfos;
     auto ret = GenerateAbilityRequestByAction(userId, request, dialogAppInfos);
@@ -3006,7 +3012,8 @@ int AbilityManagerService::ImplicitStartAbility(AbilityRequest &request, int32_t
                 return aams->StartAbility(targetWant, startOptions, request.callerToken, userId, request.requestCode);
             }
             if (request.callType == AbilityCallType::START_SETTINGS_TYPE) {
-                return aams->StartAbility(targetWant, *request.startSetting, request.callerToken, userId, request.requestCode);
+                return aams->StartAbility(
+                    targetWant, *request.startSetting, request.callerToken, userId, request.requestCode);
             }
             if (request.callType == AbilityCallType::START_EXTENSION_TYPE) {
                 return aams->StartExtensionAbility(targetWant, request.callerToken, userId, request.extensionType);
@@ -3015,7 +3022,7 @@ int AbilityManagerService::ImplicitStartAbility(AbilityRequest &request, int32_t
                 return aams->ConnectLocalAbility(targetWant, userId, request.connect, request.callerToken);
             }
             return aams->StartAbilityInner(targetWant,
-                        request.callerToken, request.requestCode, request.callerUid, userId);
+                request.callerToken, request.requestCode, request.callerUid, userId);
         };
         return aams->CallStartAbilityInner(userId, targetWant, callback, request.callType);
     };
@@ -3046,7 +3053,7 @@ int AbilityManagerService::CallStartAbilityInner(int32_t userId, const Want &wan
         AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
     }
 
-    HILOG_INFO("ability:%{public}s, bundle:%{public}s", eventInfo.bundleName.c_str(), eventInfo.abilityName.c_str());
+    HILOG_INFO("ability:%{public}s, bundle:%{public}s", eventInfo.abilityName.c_str(), eventInfo.bundleName.c_str());
 
     auto ret = callback();
     if (ret != ERR_OK) {

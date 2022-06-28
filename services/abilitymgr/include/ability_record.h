@@ -237,7 +237,8 @@ struct AbilityRequest {
 
     void Voluation(const Want &srcWant, int srcRequestCode,
         const sptr<IRemoteObject> &srcCallerToken, const std::shared_ptr<AbilityStartSetting> srcStartSetting = nullptr,
-        int srcCallerUid = -1) {
+        int srcCallerUid = -1)
+    {
         want = srcWant;
         requestCode = srcRequestCode;
         callerToken = srcCallerToken;
