@@ -2953,7 +2953,7 @@ int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
         request.want, abilityInfoFlag, userId, abilityInfos, extensionInfos));
 
     HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}d, extensionInfos size: %{public}d",
-                        static_cast<int>(abilityInfos.size()), static_cast<int>(extensionInfos.size()));
+        abilityInfos.size(), extensionInfos.size());
 
     auto isExtension = (request.callType == AbilityCallType::START_EXTENSION_TYPE ||
         request.callType == AbilityCallType::CONNECT_ABILITY_TYPE);
@@ -2971,6 +2971,10 @@ int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
     }
     
     for (auto &info : extensionInfos) {
+        if (request.callType == AbilityCallType::START_OPTIONS_TYPE ||
+            request.callType == AbilityCallType::START_SETTINGS_TYPE) {
+            continue;
+        }
         DialogAppInfo dialogAppInfo;
         dialogAppInfo.abilityName = info.name;
         dialogAppInfo.bundleName = info.bundleName;
