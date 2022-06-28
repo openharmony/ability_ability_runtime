@@ -554,6 +554,10 @@ public:
         int requestCode,
         int callerUid = DEFAULT_INVAL_VALUE,
         int32_t userId = DEFAULT_INVAL_VALUE);
+        
+    using StartAbilityClosure = std::function<int32_t()>;
+    int CallStartAbilityInner(
+        int32_t userId, const Want &want, const StartAbilityClosure &callback, const AbilityCallType &callType);
 
     int CheckPermission(const std::string &bundleName, const std::string &permission);
 
@@ -960,7 +964,7 @@ private:
 
     int32_t InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo &extensionInfo,
         AppExecFwk::AbilityInfo &abilityInfo);
-
+    
     // multi user
     void StartFreezingScreen();
     void StopFreezingScreen();
@@ -1022,7 +1026,10 @@ private:
         const sptr<IRemoteObject> &callerToken, int32_t userId);
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
         int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType);
-
+#ifdef SUPPORT_GRAPHICS
+    int GenerateAbilityRequestByAction(int32_t userId, AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos);
+    int ImplicitStartAbility(AbilityRequest &request, int32_t userId);
+#endif
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
@@ -1046,7 +1053,7 @@ private:
     std::shared_ptr<MissionListManager> currentMissionListManager_;
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
-
+    
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
