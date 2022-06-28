@@ -1635,11 +1635,11 @@ int Ability::StartBackgroundRunning(const AbilityRuntime::WantAgent::WantAgent &
     auto bundleMgr = GetBundleMgr();
     if (bundleMgr == nullptr) {
         HILOG_ERROR("Ability::GetBundleMgr failed");
-        return ERR_APPEXECFWK_FORM_GET_BMS_FAILED;
+        return ERR_NULL_OBJECT;
     }
     if (abilityInfo_ == nullptr) {
         HILOG_ERROR("ability info is null");
-        return ERR_APPEXECFWK_FORM_INVALID_PARAM;
+        return ERR_INVALID_VALUE;
     }
     Want want;
     want.SetAction("action.system.home");
