@@ -349,7 +349,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
 
     auto uid = IPCSkeleton::GetCallingUid();
-    HILOG_INFO("%{public}s: =====CallingUid:%{public}d==OldCallingUid:%{public}d==.", __func__, uid, callerUid);
 
     if (VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
@@ -2973,16 +2972,6 @@ int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
         dialogAppInfo.labelId = info.labelId;
         dialogAppInfos.emplace_back(dialogAppInfo);
     }
-
-    // Mock Data ======start=====
-    auto num = request.want.GetIntParam("num", 0);
-    for (int i=0 ; i < num ; i++) {
-        DialogAppInfo dialogAppInfo;
-        dialogAppInfo.abilityName = "com.example.myapplication.MainAbility";;
-        dialogAppInfo.bundleName = "com.example.myapplication";
-        dialogAppInfos.emplace_back(dialogAppInfo);
-    }
-    // Mock Data ======end=====
 
     return ERR_OK;
 }
