@@ -348,7 +348,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
 
-
     if (VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
         return CHECK_PERMISSION_FAILED;
@@ -2953,7 +2952,8 @@ int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
     IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, abilityInfos, extensionInfos));
 
-    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}d, extensionInfos size: %{public}d", abilityInfos.size(), extensionInfos.size());
+    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}d, extensionInfos size: %{public}d",
+        abilityInfos.size(), extensionInfos.size());
 
     auto isExtension = (request.callType == AbilityCallType::START_EXTENSION_TYPE ||
         request.callType == AbilityCallType::CONNECT_ABILITY_TYPE);

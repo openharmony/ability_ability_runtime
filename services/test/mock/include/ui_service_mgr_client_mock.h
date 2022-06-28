@@ -70,12 +70,12 @@ public:
         params_ = "";
     }
 
-    std::string GetParams() 
+    std::string GetParams()
     {
         return params_;
     }
 
-    bool IsCallBack() 
+    bool IsCallBack()
     {
         return isCallBack_;
     }
