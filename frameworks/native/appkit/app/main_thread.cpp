@@ -410,7 +410,7 @@ void MainThread::PostProcessSecurityExitTask(bool delay)
         result = mainHandler_->PostTask(task);
     }
     if (!result) {
-        HILOG_ERROR("MainThread::ScheduleProcessSecurityExit PostTask task failed");
+        HILOG_ERROR("PostProcessSecurityExitTask post task failed");
     }
     HILOG_INFO("PostProcessSecurityExitTask called end");
 }
