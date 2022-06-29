@@ -184,7 +184,7 @@ int32_t SystemDialogScheduler::ShowSelectorDialog(
             if (pos != std::string::npos) {
                 bundleName = params.substr(0, pos);
                 abilityName = params.substr(pos + 1, params.length() - (pos + 1));
-                HILOG_INFO("dialog callback, ability:%{public}s, bundle:%{public}s",
+                HILOG_INFO("dialog callback, bundle:%{public}s, ability:%{public}s",
                     bundleName.c_str(), abilityName.c_str());
             }
             if (!bundleName.empty() && !abilityName.empty()) {
