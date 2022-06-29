@@ -18,7 +18,7 @@ import resourceManager from '@ohos.resourceManager';
 export default {
     data: {
         btn: {
-            color: "#00FFFF",
+            color: "#FFFFFF",
         }
     },
     onInit() {
