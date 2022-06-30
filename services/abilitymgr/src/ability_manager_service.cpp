@@ -114,7 +114,6 @@ const int32_t SIZE_10 = 10;
 const std::string BUNDLE_NAME_KEY = "bundleName";
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
 const std::string ACTION_CHOOSE = "ohos.want.action.select";
-const std::string ACTION_VIEW = "ohos.want.action.viewData";
 const std::string HIGHEST_PRIORITY_ABILITY_ENTITY = "flag.home.intent.from.system";
 const std::string FREE_INSTALL_TYPE_KEY = "freeInstallType";
 const std::string DMS_PROCESS_NAME = "distributedsched";
@@ -248,7 +247,8 @@ bool AbilityManagerService::Init()
         HILOG_ERROR("HiviewDFX::Watchdog::GetInstance AddThread Fail");
     }
 #ifdef SUPPORT_GRAPHICS
-    sysDialogScheduler_ = std::make_shared<SystemDialogScheduler>(amsConfigResolver_->GetDeviceType());
+    DelayedSingleton<SystemDialogScheduler>::GetInstance()->SetDeviceType(amsConfigResolver_->GetDeviceType());
+    implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
 #endif
     anrDisposer_ = std::make_shared<AppNoResponseDisposer>(amsConfigResolver_->GetANRTimeOutTime());
 
@@ -408,9 +408,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
-    if (want.GetAction().compare(ACTION_VIEW) == 0) {
+    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, requestCode, callerToken);
-        return ImplicitStartAbility(abilityRequest, validUserId);
+        CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
+        return implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId);
     }
 #endif
     auto result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
@@ -533,11 +534,12 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
 
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
-    if (want.GetAction().compare(ACTION_VIEW) == 0) {
+    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(
             want, requestCode, callerToken, std::make_shared<AbilityStartSetting>(abilityStartSetting));
         abilityRequest.callType = AbilityCallType::START_SETTINGS_TYPE;
-        auto result = ImplicitStartAbility(abilityRequest, validUserId);
+        CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
+        auto result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId);
         if (result != ERR_OK) {
             HILOG_ERROR("implicit start ability error.");
             eventInfo.errCode = result;
@@ -689,12 +691,13 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
 
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
-    if (want.GetAction().compare(ACTION_VIEW) == 0) {
+    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, requestCode, callerToken);
         abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
         abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
         abilityRequest.callType = AbilityCallType::START_OPTIONS_TYPE;
-        auto result = ImplicitStartAbility(abilityRequest, validUserId);
+        CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
+        auto result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId);
         if (result != ERR_OK) {
             HILOG_ERROR("implicit start ability error.");
             eventInfo.errCode = result;
@@ -862,11 +865,12 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
 
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
-    if (want.GetAction().compare(ACTION_VIEW) == 0) {
+    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, DEFAULT_INVAL_VALUE, callerToken);
         abilityRequest.callType = AbilityCallType::START_EXTENSION_TYPE;
         abilityRequest.extensionType = extensionType;
-        auto result = ImplicitStartAbility(abilityRequest, validUserId);
+        CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
+        auto result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId);
         if (result != ERR_OK) {
             HILOG_ERROR("implicit start ability error.");
             eventInfo.errCode = result;
@@ -1447,12 +1451,13 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
 
     AbilityRequest abilityRequest;
 #ifdef SUPPORT_GRAPHICS
-    if (want.GetAction().compare(ACTION_VIEW) == 0) {
+    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, DEFAULT_INVAL_VALUE, callerToken);
         abilityRequest.callType = AbilityCallType::CONNECT_ABILITY_TYPE;
         abilityRequest.connect = connect;
         abilityRequest.extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
-        return ImplicitStartAbility(abilityRequest, userId);
+        CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
+        return implicitStartProcessor_->ImplicitStartAbility(abilityRequest, userId);
     }
 #endif
     ErrCode result = GenerateAbilityRequest(want, DEFAULT_INVAL_VALUE, abilityRequest, callerToken, userId);
@@ -2935,143 +2940,39 @@ int AbilityManagerService::GenerateAbilityRequest(
 }
 
 #ifdef SUPPORT_GRAPHICS
-int AbilityManagerService::GenerateAbilityRequestByAction(int32_t userId,
-    AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos)
+int32_t AbilityManagerService::ImplicitStartAbilityInner(const Want &targetWant, const AbilityRequest &request, int32_t userId)
 {
-    HILOG_DEBUG("%{public}s", __func__);
-    auto isNotAction = request.want.GetAction().compare(ACTION_VIEW) != 0;
-    CHECK_TRUE_RETURN_RET(isNotAction, ERR_IMPLICIT_START_ABILITY_FAIL, "action is error.");
-    CHECK_TRUE_RETURN_RET(request.want.GetType().empty(), ERR_WANT_NO_TYPE, "need to set type into want.");
-   
-    // get abilityinfos from bms
-    auto bms = GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
-    auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT;
-    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
-    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
-    IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
-        request.want, abilityInfoFlag, userId, abilityInfos, extensionInfos));
-
-    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}d, extensionInfos size: %{public}d",
-        static_cast<int>(abilityInfos.size()), static_cast<int>(extensionInfos.size()));
-
-    auto isExtension = (request.callType == AbilityCallType::START_EXTENSION_TYPE ||
-        request.callType == AbilityCallType::CONNECT_ABILITY_TYPE);
-    
-    for (auto &info : abilityInfos) {
-        if (isExtension && info.type != AbilityType::EXTENSION) {
-            continue;
+    int32_t result = ERR_OK;
+    switch (request.callType) {
+        case AbilityCallType::START_OPTIONS_TYPE: {
+            StartOptions startOptions;
+            auto displayId = targetWant.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, 0);
+            auto windowMode = targetWant.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0);
+            startOptions.SetDisplayID(static_cast<int32_t>(displayId));
+            startOptions.SetWindowMode(static_cast<int32_t>(windowMode));
+            result = StartAbility(targetWant, startOptions, request.callerToken, userId, request.requestCode);
+            break;
         }
-        DialogAppInfo dialogAppInfo;
-        dialogAppInfo.abilityName = info.name;
-        dialogAppInfo.bundleName = info.bundleName;
-        dialogAppInfo.iconId = info.iconId;
-        dialogAppInfo.labelId = info.labelId;
-        dialogAppInfos.emplace_back(dialogAppInfo);
-    }
-    
-    for (auto &info : extensionInfos) {
-        if (request.callType == AbilityCallType::START_OPTIONS_TYPE ||
-            request.callType == AbilityCallType::START_SETTINGS_TYPE) {
-            continue;
+        case AbilityCallType::START_SETTINGS_TYPE: {
+            CHECK_POINTER_AND_RETURN(request.startSetting, ERR_INVALID_VALUE);
+            result = StartAbility(
+                targetWant, *request.startSetting, request.callerToken, userId, request.requestCode);
+            break;
         }
-        DialogAppInfo dialogAppInfo;
-        dialogAppInfo.abilityName = info.name;
-        dialogAppInfo.bundleName = info.bundleName;
-        dialogAppInfo.iconId = info.iconId;
-        dialogAppInfo.labelId = info.labelId;
-        dialogAppInfos.emplace_back(dialogAppInfo);
+        case AbilityCallType::START_EXTENSION_TYPE:
+            result = StartExtensionAbility(targetWant, request.callerToken, userId, request.extensionType);
+            break;
+        case AbilityCallType::CONNECT_ABILITY_TYPE:
+            result = ConnectLocalAbility(targetWant, userId, request.connect, request.callerToken);
+            break;
+        default:
+            result = StartAbilityInner(targetWant, request.callerToken, request.requestCode, request.callerUid, userId);
+            break;
     }
 
-    return ERR_OK;
-}
-int AbilityManagerService::ImplicitStartAbility(AbilityRequest &request, int32_t userId)
-{
-    HILOG_DEBUG("%{public}s", __func__);
-    HILOG_INFO("implicit start ability by type: %{public}d", request.callType);
-
-    std::vector<DialogAppInfo> dialogAppInfos;
-    auto ret = GenerateAbilityRequestByAction(userId, request, dialogAppInfos);
-    if (ret != ERR_OK) {
-        HILOG_ERROR("generate ability request by action failed.");
-        return ret;
-    }
-    if (dialogAppInfos.size() == 0) {
-        HILOG_WARN("implicit query ability infos failed, show tips dialog.");
-        return sysDialogScheduler_->ShowTipsDialog();
-    }
-
-    auto startAbilityTask = [aams = shared_from_this(), request, userId](const std::string& bundle,
-            const std::string& abilityName) {
-        HILOG_INFO("implicit start ability call back.");
-        AAFwk::Want targetWant = request.want;
-        targetWant.SetAction("");
-        targetWant.SetElementName(bundle, abilityName);
-        auto callback = [aams, targetWant, request, userId]() {
-            if (request.callType == AbilityCallType::START_OPTIONS_TYPE) {
-                StartOptions startOptions;
-                auto displayId = targetWant.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, 0);
-                auto windowMode = targetWant.GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0);
-                startOptions.SetDisplayID(static_cast<int32_t>(displayId));
-                startOptions.SetWindowMode(static_cast<int32_t>(windowMode));
-                return aams->StartAbility(targetWant, startOptions, request.callerToken, userId, request.requestCode);
-            }
-            if (request.callType == AbilityCallType::START_SETTINGS_TYPE) {
-                return aams->StartAbility(
-                    targetWant, *request.startSetting, request.callerToken, userId, request.requestCode);
-            }
-            if (request.callType == AbilityCallType::START_EXTENSION_TYPE) {
-                return aams->StartExtensionAbility(targetWant, request.callerToken, userId, request.extensionType);
-            }
-            if (request.callType == AbilityCallType::CONNECT_ABILITY_TYPE) {
-                return aams->ConnectLocalAbility(targetWant, userId, request.connect, request.callerToken);
-            }
-            return aams->StartAbilityInner(targetWant,
-                request.callerToken, request.requestCode, request.callerUid, userId);
-        };
-        return aams->CallStartAbilityInner(userId, targetWant, callback, request.callType);
-    };
-
-    if (dialogAppInfos.size() == 1) {
-        auto info = dialogAppInfos.front();
-        HILOG_INFO("ImplicitQueryInfos success, target ability: %{public}s", info.abilityName.data());
-        return startAbilityTask(info.bundleName, info.abilityName);
-    }
-    HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose.");
-    return sysDialogScheduler_->ShowSelectorDialog(dialogAppInfos, startAbilityTask);
+    return result;
 }
 #endif
-
-int AbilityManagerService::CallStartAbilityInner(int32_t userId, const Want &want, const StartAbilityClosure &callback,
-    const AbilityCallType &callType)
-{
-    AAFWK::EventInfo eventInfo;
-    eventInfo.userId = userId;
-    eventInfo.bundleName = want.GetElement().GetBundleName();
-    eventInfo.moduleName = want.GetElement().GetModuleName();
-    eventInfo.abilityName = want.GetElement().GetAbilityName();
-
-    if (callType == AbilityCallType::INVALID_TYPE) {
-        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-    }
-    if (callType == AbilityCallType::CONNECT_ABILITY_TYPE) {
-        AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
-    }
-
-    HILOG_INFO("ability:%{public}s, bundle:%{public}s", eventInfo.abilityName.c_str(), eventInfo.bundleName.c_str());
-
-    auto ret = callback();
-    if (ret != ERR_OK) {
-        eventInfo.errCode = ret;
-        if (callType == AbilityCallType::INVALID_TYPE) {
-            AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-        }
-        if (callType == AbilityCallType::CONNECT_ABILITY_TYPE) {
-            AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
-        }
-    }
-    return ret;
-}
 
 int AbilityManagerService::GenerateExtensionAbilityRequest(
     const Want &want, AbilityRequest &request, const sptr<IRemoteObject> &callerToken, int32_t userId)
@@ -4302,19 +4203,20 @@ int AbilityManagerService::SendANRProcessID(int pid)
         }
     };
 #ifdef SUPPORT_GRAPHICS
-    auto showDialogTask = [sysDialog = sysDialogScheduler_, pid, userId = GetUserId()](int32_t labelId,
+    auto showDialogTask = [pid, userId = GetUserId()](int32_t labelId,
         const std::string &bundle, const Closure &callBack) {
         std::string appName {""};
+        auto sysDialog = DelayedSingleton<SystemDialogScheduler>::GetInstance();
         if (!sysDialog) {
-            HILOG_ERROR("sysDialogScheduler_ is nullptr.");
+            HILOG_ERROR("SystemDialogScheduler is nullptr.");
             return;
         }
         sysDialog->GetAppNameFromResource(labelId, bundle, userId, appName);
         sysDialog->ShowANRDialog(appName, callBack);
     };
-    auto ret = anrDisposer_->DisposeAppNoRespose(pid, setMissionTask, showDialogTask);
+    auto ret = anrDisposer_->DisposeAppNoResponse(pid, setMissionTask, showDialogTask);
 #else
-    auto ret = anrDisposer_->DisposeAppNoRespose(pid, setMissionTask);
+    auto ret = anrDisposer_->DisposeAppNoResponse(pid, setMissionTask);
 #endif
     if (ret != ERR_OK) {
         HILOG_ERROR("dispose app no respose failed.");

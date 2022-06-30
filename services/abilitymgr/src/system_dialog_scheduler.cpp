@@ -72,8 +72,6 @@ const int32_t LINE_NUMS_THREE = 3;
 const int32_t LINE_NUMS_FOUR = 4;
 const int32_t LINE_NUMS_EIGHT = 8;
 
-SystemDialogScheduler::SystemDialogScheduler(const std::string &deviceType): deviceType_(deviceType) {}
-
 void SystemDialogScheduler::ScheduleShowDialog(const std::string &name, const DialogPosition &position,
     const std::string &params, DialogCallback callback) const
 {
