@@ -287,7 +287,7 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_002, TestSize.Level
     size_t infoCount {0};
     auto res = service_->GetAllRunningProcesses(info);
     EXPECT_TRUE (res == ERR_OK);
-    EXPECT_TRUE(info.size() == infoCount);
+    EXPECT_TRUE(info.size() > infoCount);
 }
 
 /*
@@ -364,7 +364,7 @@ HWTEST_F(AppRunningProcessesInfoModuleTest, ApplicationStart_003, TestSize.Level
     size_t infoCount {0};
     auto res = service_->GetAllRunningProcesses(info);
     EXPECT_TRUE (res == ERR_OK);
-    EXPECT_TRUE(info.size() == infoCount);
+    EXPECT_TRUE(info.size() > infoCount);
 }
 
 /*
