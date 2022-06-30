@@ -377,7 +377,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         if (CheckIfOperateRemote(want)) {
             if (AbilityUtil::IsStartFreeInstall(want)) {
                 return freeInstallManager_ == nullptr ? ERR_INVALID_VALUE :
-                    freeInstallManager_->StartRemoteFreeInstall(info, true, getpid());
+                    freeInstallManager_->StartRemoteFreeInstall(want, requestCode,
+                        validUserId, callerToken, true);
             }
             if (requestCode == DEFAULT_REQUEST_CODE) {
                 HILOG_INFO("%{public}s: try to StartAbility", __func__);
@@ -394,7 +395,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
     if (AbilityUtil::IsStartFreeInstall(want) && freeInstallManager_ != nullptr) {
-        int ret = freeInstallManager_->StartFreeInstall(info, CheckIfOperateRemote(want), getpid());
+        int ret = freeInstallManager_->StartFreeInstall(
+            want, validUserId, requestCode, callerToken, CheckIfOperateRemote(want));
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -509,15 +511,8 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        auto promise = std::make_shared<std::promise<int32_t>>();
-        FreeInstallInfo info = {
-            .want = want,
-            .userId = validUserId,
-            .requestCode = requestCode,
-            .callerToken = callerToken,
-            .promise = promise
-        };
-        int ret = freeInstallManager_->StartFreeInstall(info, CheckIfOperateRemote(want), getpid());
+        int ret = freeInstallManager_->StartFreeInstall(
+            want, validUserId, requestCode, callerToken, CheckIfOperateRemote(want));
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -667,15 +662,8 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        auto promise = std::make_shared<std::promise<int32_t>>();
-        FreeInstallInfo info = {
-            .want = want,
-            .userId = validUserId,
-            .requestCode = requestCode,
-            .callerToken = callerToken,
-            .promise = promise
-        };
-        int ret = freeInstallManager_->StartFreeInstall(info, CheckIfOperateRemote(want), getpid());
+        int ret = freeInstallManager_->StartFreeInstall(
+            want, validUserId, requestCode, callerToken, CheckIfOperateRemote(want));
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -4781,7 +4769,7 @@ int AbilityManagerService::FreeInstallAbilityFromRemote(const Want &want, const 
         HILOG_ERROR("freeInstallManager_ is nullptr");
         return ERR_INVALID_VALUE;
     }
-    return freeInstallManager_->FreeInstallAbilityFromRemote(want, callback, validUserId, requestCode, getpid());
+    return freeInstallManager_->FreeInstallAbilityFromRemote(want, callback, validUserId, requestCode);
 }
 
 AppExecFwk::ElementName AbilityManagerService::GetTopAbility()
