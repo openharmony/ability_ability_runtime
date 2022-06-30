@@ -51,7 +51,7 @@ public:
 
     static void Finalizer(NativeEngine* engine, void* data, void* hint)
     {
-        HILOG_INFO("JsAbilityContext::Finalizer is called");
+        HILOG_DEBUG("JsAbilityContext::Finalizer is called");
         std::unique_ptr<JsAppManager>(static_cast<JsAppManager*>(data));
     }
 
@@ -120,7 +120,7 @@ private:
 
     NativeValue* OnRegisterApplicationStateObserver(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         // only support 1 params
         if (info.argc != ARGC_ONE) {
             HILOG_ERROR("Not enough params");
@@ -135,7 +135,7 @@ private:
         observer->SetJsObserverObject(info.argv[0]);
         int32_t ret = appManager_->RegisterApplicationStateObserver(observer);
         if (ret == 0) {
-            HILOG_INFO("RegisterApplicationStateObserver success.");
+            HILOG_DEBUG("RegisterApplicationStateObserver success.");
             int64_t observerId = serialNumber_;
             observerIds_.emplace(observerId, observer);
             if (serialNumber_ < INT64_MAX) {
@@ -152,7 +152,7 @@ private:
 
     NativeValue* OnUnregisterApplicationStateObserver(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
         int64_t observerId = -1;
         sptr<JSApplicationStateObserver> observer = nullptr;
@@ -165,14 +165,13 @@ private:
             // unwrap connectId
             napi_get_value_int64(reinterpret_cast<napi_env>(&engine),
                 reinterpret_cast<napi_value>(info.argv[INDEX_ZERO]), &observerId);
-            HILOG_INFO("OnUnregisterApplicationStateObserver observer:%{public}d", (int32_t)observerId);
             auto item = observerIds_.find(observerId);
             if (item != observerIds_.end()) {
                 // match id
                 observer = item->second;
-                HILOG_INFO("%{public}s find observer exist", __func__);
+                HILOG_INFO("%{public}s find observer exist observer:%{public}d", __func__, (int32_t)observerId);
             } else {
-                HILOG_INFO("%{public}s not find observer exist.", __func__);
+                HILOG_INFO("%{public}s not find observer exist observer:%{public}d", __func__, (int32_t)observerId);
                 errCode = ERR_NOT_OK;
             }
         }
@@ -189,12 +188,11 @@ private:
                     task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "observer or appManager nullptr"));
                     return;
                 }
-                HILOG_INFO("observer->UnregisterApplicationStateObserver");
                 int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
                 if (ret == 0) {
                     task.Resolve(engine, engine.CreateUndefined());
                     observerIds_.erase(observerId);
-                    HILOG_INFO("UnregisterApplicationStateObserver success size:%{public}zu", observerIds_.size());
+                    HILOG_DEBUG("UnregisterApplicationStateObserver success size:%{public}zu", observerIds_.size());
                 } else {
                     HILOG_ERROR("UnregisterApplicationStateObserver failed error:%{public}d", ret);
                     task.Reject(engine, CreateJsError(engine, ret, "UnregisterApplicationStateObserver failed"));
@@ -210,7 +208,7 @@ private:
 
     NativeValue* OnGetForegroundApplications(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
 
         // only support 0 or 1 params
@@ -232,7 +230,7 @@ private:
                 std::vector<AppExecFwk::AppStateData> list;
                 int32_t ret = appManager->GetForegroundApplications(list);
                 if (ret == 0) {
-                    HILOG_INFO("OnGetForegroundApplications success.");
+                    HILOG_DEBUG("OnGetForegroundApplications success.");
                     task.Resolve(engine, CreateJsAppStateDataArray(engine, list));
                 } else {
                     HILOG_ERROR("OnGetForegroundApplications failed error:%{public}d", ret);
@@ -249,7 +247,7 @@ private:
 
     NativeValue* OnGetProcessRunningInfos(NativeEngine &engine, NativeCallbackInfo &info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
 
         // only support 0 or 1 params
@@ -281,7 +279,7 @@ private:
 
     NativeValue* OnIsRunningInStabilityTest(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
 
         // only support 0 or 1 params
@@ -296,13 +294,12 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    HILOG_WARN("abilityManager nullptr");
+                    HILOG_ERROR("abilityManager nullptr");
                     task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }
-                HILOG_INFO("IsRunningInStabilityTest begin");
                 bool ret = abilityManager->IsRunningInStabilityTest();
-                HILOG_INFO("IsRunningInStabilityTest result:%{public}d", ret);
+                HILOG_DEBUG("IsRunningInStabilityTest result:%{public}d", ret);
                 task.Resolve(engine, CreateJsValue(engine, ret));
             };
 
@@ -315,7 +312,7 @@ private:
 
     NativeValue* OnkillProcessByBundleName(NativeEngine &engine, NativeCallbackInfo &info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
         std::string bundleName;
 
@@ -330,7 +327,7 @@ private:
             }
         }
 
-        HILOG_INFO("kill process [%{public}s]", bundleName.c_str());
+        HILOG_DEBUG("kill process [%{public}s]", bundleName.c_str());
         AsyncTask::CompleteCallback complete =
             [bundleName, abilityManager = abilityManager_, errCode](NativeEngine& engine, AsyncTask& task,
                 int32_t status) {
@@ -339,7 +336,7 @@ private:
                 return;
             }
             if (abilityManager == nullptr) {
-                HILOG_WARN("abilityManager nullptr");
+                HILOG_ERROR("abilityManager nullptr");
                 task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "abilityManager nullptr"));
                 return;
             }
@@ -360,7 +357,7 @@ private:
 
     NativeValue* OnClearUpApplicationData(NativeEngine &engine, NativeCallbackInfo &info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
         std::string bundleName;
 
@@ -373,7 +370,7 @@ private:
                 HILOG_ERROR("get bundleName failed!");
                 errCode = ERR_NOT_OK;
             } else {
-                HILOG_INFO("kill process [%{public}s]", bundleName.c_str());
+                HILOG_DEBUG("kill process [%{public}s]", bundleName.c_str());
             }
         }
 
@@ -385,7 +382,7 @@ private:
                 return;
             }
             if (abilityManager == nullptr) {
-                HILOG_WARN("abilityManager nullptr");
+                HILOG_ERROR("abilityManager nullptr");
                 task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "abilityManager nullptr"));
                 return;
             }
@@ -406,7 +403,7 @@ private:
 
     NativeValue* OnKillProcessWithAccount(NativeEngine &engine, NativeCallbackInfo &info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
         int accountId = -1;
         std::string bundleName;
@@ -464,13 +461,12 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    HILOG_WARN("abilityManager nullptr");
+                    HILOG_ERROR("abilityManager nullptr");
                     task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }
-                HILOG_INFO("GetAppMemorySize begin");
                 int memorySize = abilityManager->GetAppMemorySize();
-                HILOG_INFO("GetAppMemorySize memorySize:%{public}d", memorySize);
+                HILOG_DEBUG("GetAppMemorySize memorySize:%{public}d", memorySize);
                 task.Resolve(engine, CreateJsValue(engine, memorySize));
             };
 
@@ -497,13 +493,12 @@ private:
                     return;
                 }
                 if (abilityManager == nullptr) {
-                    HILOG_WARN("abilityManager nullptr");
+                    HILOG_ERROR("abilityManager nullptr");
                     task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "abilityManager nullptr"));
                     return;
                 }
-                HILOG_INFO("IsRamConstrainedDevice begin");
                 bool ret = abilityManager->IsRamConstrainedDevice();
-                HILOG_INFO("IsRamConstrainedDevice result:%{public}d", ret);
+                HILOG_DEBUG("IsRamConstrainedDevice result:%{public}d", ret);
                 task.Resolve(engine, CreateJsValue(engine, ret));
             };
 
@@ -535,16 +530,16 @@ OHOS::sptr<OHOS::AAFwk::IAbilityManager> GetAbilityManagerInstance()
 
 NativeValue* JsAppManagerInit(NativeEngine* engine, NativeValue* exportObj)
 {
-    HILOG_INFO("JsAppManagerInit is called");
+    HILOG_DEBUG("JsAppManagerInit is called");
 
     if (engine == nullptr || exportObj == nullptr) {
-        HILOG_INFO("engine or exportObj null");
+        HILOG_ERROR("engine or exportObj null");
         return nullptr;
     }
 
     NativeObject* object = ConvertNativeValueTo<NativeObject>(exportObj);
     if (object == nullptr) {
-        HILOG_INFO("object null");
+        HILOG_ERROR("object null");
         return nullptr;
     }
 
@@ -555,7 +550,7 @@ NativeValue* JsAppManagerInit(NativeEngine* engine, NativeValue* exportObj)
     // make handler
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
-    HILOG_INFO("JsAppManagerInit BindNativeFunction called");
+    HILOG_DEBUG("JsAppManagerInit BindNativeFunction called");
     BindNativeFunction(*engine, *object, "registerApplicationStateObserver",
         JsAppManager::RegisterApplicationStateObserver);
     BindNativeFunction(*engine, *object, "unregisterApplicationStateObserver",
@@ -576,7 +571,7 @@ NativeValue* JsAppManagerInit(NativeEngine* engine, NativeValue* exportObj)
         JsAppManager::GetAppMemorySize);
     BindNativeFunction(*engine, *object, "isRamConstrainedDevice",
         JsAppManager::IsRamConstrainedDevice);
-    HILOG_INFO("JsAppManagerInit end");
+    HILOG_DEBUG("JsAppManagerInit end");
     return engine->CreateUndefined();
 }
 
@@ -593,7 +588,7 @@ void JSApplicationStateObserver::OnForegroundApplicationChanged(const AppStateDa
         ([jsObserver, appStateData](NativeEngine &engine, AsyncTask &task, int32_t status) {
             sptr<JSApplicationStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                HILOG_INFO("jsObserverSptr nullptr");
+                HILOG_ERROR("jsObserverSptr nullptr");
                 return;
             }
             jsObserverSptr->HandleOnForegroundApplicationChanged(appStateData);
@@ -614,13 +609,13 @@ void JSApplicationStateObserver::HandleOnForegroundApplicationChanged(const AppS
 
 void JSApplicationStateObserver::OnAbilityStateChanged(const AbilityStateData &abilityStateData)
 {
-    HILOG_INFO("OnAbilityStateChanged begin");
+    HILOG_DEBUG("OnAbilityStateChanged begin");
     wptr<JSApplicationStateObserver> jsObserver = this;
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
         ([jsObserver, abilityStateData](NativeEngine &engine, AsyncTask &task, int32_t status) {
             sptr<JSApplicationStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                HILOG_INFO("jsObserverSptr nullptr");
+                HILOG_ERROR("jsObserverSptr nullptr");
                 return;
             }
             jsObserverSptr->HandleOnAbilityStateChanged(abilityStateData);
@@ -633,20 +628,20 @@ void JSApplicationStateObserver::OnAbilityStateChanged(const AbilityStateData &a
 
 void JSApplicationStateObserver::HandleOnAbilityStateChanged(const AbilityStateData &abilityStateData)
 {
-    HILOG_INFO("HandleOnAbilityStateChanged begin");
+    HILOG_DEBUG("HandleOnAbilityStateChanged begin");
     NativeValue* argv[] = {CreateJsAbilityStateData(engine_, abilityStateData)};
     CallJsFunction("onAbilityStateChanged", argv, ARGC_ONE);
 }
 
 void JSApplicationStateObserver::OnExtensionStateChanged(const AbilityStateData &abilityStateData)
 {
-    HILOG_INFO("OnExtensionStateChanged begin");
+    HILOG_DEBUG("OnExtensionStateChanged begin");
     wptr<JSApplicationStateObserver> jsObserver = this;
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
         ([jsObserver, abilityStateData](NativeEngine &engine, AsyncTask &task, int32_t status) {
             sptr<JSApplicationStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                HILOG_INFO("jsObserverSptr nullptr");
+                HILOG_ERROR("jsObserverSptr nullptr");
                 return;
             }
             jsObserverSptr->HandleOnExtensionStateChanged(abilityStateData);
@@ -659,20 +654,20 @@ void JSApplicationStateObserver::OnExtensionStateChanged(const AbilityStateData 
 
 void JSApplicationStateObserver::HandleOnExtensionStateChanged(const AbilityStateData &abilityStateData)
 {
-    HILOG_INFO("HandleOnExtensionStateChanged begin");
+    HILOG_DEBUG("HandleOnExtensionStateChanged begin");
     NativeValue* argv[] = {CreateJsAbilityStateData(engine_, abilityStateData)};
     CallJsFunction("onAbilityStateChanged", argv, ARGC_ONE);
 }
 
 void JSApplicationStateObserver::OnProcessCreated(const ProcessData &processData)
 {
-    HILOG_INFO("OnProcessCreated begin");
+    HILOG_DEBUG("OnProcessCreated begin");
     wptr<JSApplicationStateObserver> jsObserver = this;
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
         ([jsObserver, processData](NativeEngine &engine, AsyncTask &task, int32_t status) {
             sptr<JSApplicationStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                HILOG_INFO("jsObserverSptr nullptr");
+                HILOG_ERROR("jsObserverSptr nullptr");
                 return;
             }
             jsObserverSptr->HandleOnProcessCreated(processData);
@@ -685,20 +680,20 @@ void JSApplicationStateObserver::OnProcessCreated(const ProcessData &processData
 
 void JSApplicationStateObserver::HandleOnProcessCreated(const ProcessData &processData)
 {
-    HILOG_INFO("HandleOnProcessCreated begin");
+    HILOG_DEBUG("HandleOnProcessCreated begin");
     NativeValue* argv[] = {CreateJsProcessData(engine_, processData)};
     CallJsFunction("onProcessCreated", argv, ARGC_ONE);
 }
 
 void JSApplicationStateObserver::OnProcessDied(const ProcessData &processData)
 {
-    HILOG_INFO("OnProcessDied begin");
+    HILOG_DEBUG("OnProcessDied begin");
     wptr<JSApplicationStateObserver> jsObserver = this;
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
         ([jsObserver, processData](NativeEngine &engine, AsyncTask &task, int32_t status) {
             sptr<JSApplicationStateObserver> jsObserverSptr = jsObserver.promote();
             if (!jsObserverSptr) {
-                HILOG_INFO("jsObserverSptr nullptr");
+                HILOG_ERROR("jsObserverSptr nullptr");
                 return;
             }
             jsObserverSptr->HandleOnProcessDied(processData);
@@ -711,14 +706,14 @@ void JSApplicationStateObserver::OnProcessDied(const ProcessData &processData)
 
 void JSApplicationStateObserver::HandleOnProcessDied(const ProcessData &processData)
 {
-    HILOG_INFO("HandleOnProcessDied begin");
+    HILOG_DEBUG("HandleOnProcessDied begin");
     NativeValue* argv[] = {CreateJsProcessData(engine_, processData)};
     CallJsFunction("onProcessDied", argv, ARGC_ONE);
 }
 
 void JSApplicationStateObserver::CallJsFunction(const char* methodName, NativeValue* const* argv, size_t argc)
 {
-    HILOG_INFO("CallJsFunction begin, method:%{public}s", methodName);
+    HILOG_DEBUG("CallJsFunction begin, method:%{public}s", methodName);
     if (jsObserverObject_ == nullptr) {
         HILOG_ERROR("jsObserverObject_ nullptr");
         return;
@@ -735,9 +730,8 @@ void JSApplicationStateObserver::CallJsFunction(const char* methodName, NativeVa
         HILOG_ERROR("Failed to get from object");
         return;
     }
-    HILOG_INFO("CallJsFunction CallFunction success");
     engine_.CallFunction(value, method, argv, argc);
-    HILOG_INFO("CallJsFunction end");
+    HILOG_DEBUG("CallJsFunction end");
 }
 
 void JSApplicationStateObserver::SetJsObserverObject(NativeValue* jsObserverObject)
