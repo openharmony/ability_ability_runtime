@@ -22,16 +22,11 @@ config("module_private_config") {
   include_dirs = [
     "${aafwk_path}/interfaces/inner_api/app_manager/include/appmgr",
     "${ability_base_innerapi_path}/uri/include",
-    "${ability_base_innerapi_path}/want/include/ohos/aafwk_L2/content",
     "${aafwk_path}/frameworks/kits/appkit/native/test/mock/include",
 
     #"${aafwk_path}/frameworks/kits/ability/native/test/mock/include",
     "${aafwk_path}/frameworks/kits/appkit/test/Mock/include",
-    "${aafwk_path}/frameworks/kits/appkit/native/app/include",
-
-    #"//foundation/communication/utils/include",
-    #"//foundation/communication/ipc/ipc/native/src/core/include",
-    #"//foundation/communication/ipc/utils/include",
+    "${aafwk_path}/interfaces/kits/native/appkit/app",
   ]
 
   defines = [
@@ -46,8 +41,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
     "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
-
-    #"Mock/include/mock_ipc_object_stub.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
     "moduletest/appexecfwk_appkit_native_app_module_test_first.cpp",
   ]
@@ -58,23 +51,22 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/appkit:appkit_native",
     "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
     "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_base_path}:base",
-    "${ability_base_path}:configuration",
-    "${ability_base_path}:want",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
@@ -87,8 +79,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
     "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
-
-    #"Mock/include/mock_ipc_object_stub.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
     "moduletest/appexecfwk_appkit_native_app_module_test_second.cpp",
   ]
@@ -99,23 +89,22 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/appkit:appkit_native",
     "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
     "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_base_path}:base",
-    "${ability_base_path}:configuration",
-    "${ability_base_path}:want",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
@@ -128,8 +117,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
     "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
-
-    #"Mock/include/mock_ipc_object_stub.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
     "moduletest/appexecfwk_appkit_native_app_module_test_third.cpp",
   ]
@@ -140,23 +127,22 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/appkit:appkit_native",
     "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
     "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_base_path}:base",
-    "${ability_base_path}:configuration",
-    "${ability_base_path}:want",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
@@ -169,8 +155,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
     "${aafwk_path}/interfaces/inner_api/app_manager/src/appmgr/app_mgr_stub.cpp",
     "Mock/include/mock_app_thread.cpp",
     "Mock/include/mock_application.cpp",
-
-    #"Mock/include/mock_ipc_object_stub.cpp",
     "Mock/include/sys_mgr_client_mock.cpp",
     "moduletest/appexecfwk_appkit_native_app_module_test_fourth.cpp",
   ]
@@ -181,23 +165,22 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/appkit:appkit_native",
     "${aafwk_path}/interfaces/inner_api/ability_manager:ability_manager",
     "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
-    "${ability_base_path}:base",
-    "${ability_base_path}:configuration",
-    "${ability_base_path}:want",
-    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
 
   external_deps = [
+    "ability_base:configuration",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

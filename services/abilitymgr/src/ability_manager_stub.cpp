@@ -1188,8 +1188,9 @@ int AbilityManagerStub::GetMissionSnapshotInfoInner(MessageParcel &data, Message
 {
     std::string deviceId = data.ReadString();
     int32_t missionId = data.ReadInt32();
+    bool isLowResolution = data.ReadBool();
     MissionSnapshot missionSnapshot;
-    int32_t result = GetMissionSnapshot(deviceId, missionId, missionSnapshot);
+    int32_t result = GetMissionSnapshot(deviceId, missionId, missionSnapshot, isLowResolution);
     HILOG_INFO("snapshot: AbilityManagerStub get snapshot result = %{public}d", result);
     if (!reply.WriteParcelable(&missionSnapshot)) {
         HILOG_ERROR("GetMissionSnapshot error");
@@ -1339,8 +1340,8 @@ int AbilityManagerStub::ForceTimeoutForTestInner(MessageParcel &data, MessagePar
 
 int AbilityManagerStub::BlockAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t abilityReocrdId = data.ReadInt32();
-    int32_t result = BlockAbility(abilityReocrdId);
+    int32_t abilityRecordId = data.ReadInt32();
+    int32_t result = BlockAbility(abilityRecordId);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("reply write failed.");
         return ERR_INVALID_VALUE;

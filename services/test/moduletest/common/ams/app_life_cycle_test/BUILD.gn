@@ -19,20 +19,19 @@ module_output_path = "ability_runtime/mstappmgrservice"
 ohos_moduletest("AmsAppLifeCycleModuleTest") {
   module_out_path = module_output_path
 
-  include_dirs = [
-    "//base/hiviewdfx/hilog/interfaces/native/kits/include/hilog/",
-    "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
-  ]
+  include_dirs = []
   sources = [ "ams_app_life_cycle_module_test.cpp" ]
 
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
     "${services_path}/common:perm_verification",
     "${services_path}/test/moduletest/common/ams:appmgr_mst_source",
   ]
 
   external_deps = [
     "ability_base:configuration",
+    "bundle_framework:appexecfwk_base",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr_standard:samgr_proxy",
   ]

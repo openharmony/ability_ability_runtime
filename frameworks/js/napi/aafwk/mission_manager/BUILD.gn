@@ -24,7 +24,9 @@ ohos_shared_library("missionmanager_napi") {
 
   configs = [ "${services_path}/common:common_config" ]
 
-  include_dirs = [ "${kits_path}/ability/native/include/continuation/kits" ]
+  include_dirs = [
+    "${aafwk_path}/interfaces/kits/native/ability/native/continuation/kits",
+  ]
 
   deps = [
     "${aafwk_path}/frameworks/js/napi/aafwk/inner/napi_common:napi_common",
@@ -42,7 +44,6 @@ ohos_shared_library("missionmanager_napi") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "ipc_js:rpc",
-    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
     "utils_base:utils",

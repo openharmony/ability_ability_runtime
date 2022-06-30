@@ -57,7 +57,7 @@ public:
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.
      *
      * @param token, token, he unique identification to terminate the ability.
-     * @param clearMissionFlag, indicates whether terminate the ability when clearMision.
+     * @param clearMissionFlag, indicates whether terminate the ability when clearMission.
      * @return
      */
     virtual void TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag) override;
@@ -145,6 +145,8 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid) override;
+
+    int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application) override;
 
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) override;
 

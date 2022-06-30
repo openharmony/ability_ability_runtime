@@ -104,7 +104,7 @@ int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearM
     return ERR_OK;
 }
 
-void AppScheduler::MoveToForground(const sptr<IRemoteObject> &token)
+void AppScheduler::MoveToForeground(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Start to move the ability to foreground.");
@@ -361,6 +361,18 @@ int AppScheduler::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<I
     if (ret != ERR_OK) {
         HILOG_ERROR("GetAbilityRecordsByProcessID failed.");
         return INNER_ERR;
+    }
+
+    return ERR_OK;
+}
+
+int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application)
+{
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    auto ret = static_cast<int>(appMgrClient_->GetApplicationInfoByProcessID(pid, application));
+    if (ret != ERR_OK) {
+        HILOG_ERROR("GetApplicationInfoByProcessID failed.");
+        return ret;
     }
 
     return ERR_OK;

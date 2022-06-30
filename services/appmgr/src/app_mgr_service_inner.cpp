@@ -2175,8 +2175,8 @@ void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_
     }
 
     std::string eventName = EVENT_NAME_LIFECYCLE_TIMEOUT;
-    std::string pidStr = std::to_string(appRecord->GetPriorityObject()->GetPid());
-    std::string uidStr = std::to_string(appRecord->GetUid());
+    int32_t pid = appRecord->GetPriorityObject()->GetPid();
+    int32_t uid = appRecord->GetUid();
     std::string packageName = appRecord->GetBundleName();
     std::string processName = appRecord->GetProcessName();
     std::string msg;
@@ -2201,11 +2201,11 @@ void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_
             break;
     }
 
-    HILOG_DEBUG("SendHiSysEvent, eventName = %{public}s, uidStr = %{public}s, pidStr = %{public}s, \
+    HILOG_DEBUG("SendHiSysEvent, eventName = %{public}s, uid = %{public}d, pid = %{public}d, \
         packageName = %{public}s, processName = %{public}s, msg = %{public}s",
         eventName.c_str(),
-        uidStr.c_str(),
-        pidStr.c_str(),
+        uid,
+        pid,
         packageName.c_str(),
         processName.c_str(),
         msg.c_str());
@@ -2214,8 +2214,8 @@ void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_
         OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
         eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-        EVENT_KEY_PID, pidStr,
-        EVENT_KEY_UID, uidStr,
+        EVENT_KEY_PID, pid,
+        EVENT_KEY_UID, uid,
         EVENT_KEY_PACKAGE_NAME, packageName,
         EVENT_KEY_PROCESS_NAME, processName,
         EVENT_KEY_MESSAGE, msg);
@@ -2230,6 +2230,29 @@ int AppMgrServiceInner::GetAbilityRecordsByProcessID(const int pid, std::vector<
     }
     for (auto &item : appRecord->GetAbilities()) {
         tokens.emplace_back(item.first);
+    }
+    return ERR_OK;
+}
+
+int AppMgrServiceInner::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application)
+{
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        HILOG_ERROR("no permissions.");
+        return ERR_PERMISSION_DENIED;
+    }
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord");
+        return ERR_NAME_NOT_FOUND;
+    }
+
+    auto info = appRecord->GetApplicationInfo();
+    if (info) {
+        application = *info;
+    } else {
+        HILOG_ERROR("ApplicationInfo is nullptr !");
+        return ERR_NO_INIT;
     }
     return ERR_OK;
 }
@@ -2448,6 +2471,10 @@ uint32_t AppMgrServiceInner::BuildStartFlags(const AAFwk::Want &want, const Abil
     uint32_t startFlags = 0x0;
     if (want.GetBoolParam("coldStart", false)) {
         startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::COLD_START);
+    }
+
+    if (want.GetIntParam("ohos.dlp.params.index", 0) != 0) {
+        startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::DLP_MANAGER);
     }
 
     if (abilityInfo.extensionAbilityType == ExtensionAbilityType::BACKUP) {
