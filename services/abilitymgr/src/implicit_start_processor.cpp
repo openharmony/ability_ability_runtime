@@ -106,7 +106,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         request.want, abilityInfoFlag, userId, abilityInfos, extensionInfos));
 
     HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}d, extensionInfos size: %{public}d",
-        static_cast<int>(abilityInfos.size()), static_cast<int>(extensionInfos.size());
+        static_cast<int>(abilityInfos.size()), static_cast<int>(extensionInfos.size()));
 
     auto isExtension = (request.callType == AbilityCallType::START_EXTENSION_TYPE ||
         request.callType == AbilityCallType::CONNECT_ABILITY_TYPE);
