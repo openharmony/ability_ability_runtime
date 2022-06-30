@@ -327,7 +327,7 @@ private:
             }
         }
 
-        HILOG_DEBUG("kill process [%{public}s]", bundleName.c_str());
+        HILOG_INFO("kill process [%{public}s]", bundleName.c_str());
         AsyncTask::CompleteCallback complete =
             [bundleName, abilityManager = abilityManager_, errCode](NativeEngine& engine, AsyncTask& task,
                 int32_t status) {
@@ -370,7 +370,7 @@ private:
                 HILOG_ERROR("get bundleName failed!");
                 errCode = ERR_NOT_OK;
             } else {
-                HILOG_DEBUG("kill process [%{public}s]", bundleName.c_str());
+                HILOG_INFO("kill process [%{public}s]", bundleName.c_str());
             }
         }
 
