@@ -2940,7 +2940,8 @@ int AbilityManagerService::GenerateAbilityRequest(
 }
 
 #ifdef SUPPORT_GRAPHICS
-int32_t AbilityManagerService::ImplicitStartAbilityInner(const Want &targetWant, const AbilityRequest &request, int32_t userId)
+int32_t AbilityManagerService::ImplicitStartAbilityInner(const Want &targetWant,
+    const AbilityRequest &request, int32_t userId)
 {
     int32_t result = ERR_OK;
     switch (request.callType) {
