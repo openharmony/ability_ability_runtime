@@ -177,6 +177,7 @@ ohos_shared_library("app_context") {
     "${aafwk_path}/frameworks/native/appkit/ability_runtime/context/ability_lifecycle_callback.cpp",
     "${aafwk_path}/frameworks/native/appkit/ability_runtime/context/application_context.cpp",
     "${aafwk_path}/frameworks/native/appkit/ability_runtime/context/context_impl.cpp",
+    "${aafwk_path}/frameworks/native/appkit/ability_runtime/context/environment_callback.cpp",
     "${aafwk_path}/frameworks/native/appkit/app/sys_mgr_client.cpp",
   ]
   cflags = []
