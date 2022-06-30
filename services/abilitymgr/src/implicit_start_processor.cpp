@@ -72,7 +72,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
             CHECK_POINTER_AND_RETURN(abilityMgr, ERR_INVALID_VALUE);
             return abilityMgr->ImplicitStartAbilityInner(targetWant, request, userId);
         };
-        return imp->CallStartAbilityInner(userId, targetWant, callBack, request.callType);;
+        return imp->CallStartAbilityInner(userId, targetWant, callBack, request.callType);
     };
 
     if (dialogAppInfos.size() == 0) {
