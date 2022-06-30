@@ -32,15 +32,15 @@ MissionInfoMgr::~MissionInfoMgr()
 bool MissionInfoMgr::GenerateMissionId(int32_t &missionId)
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
-    if (currentMisionId_ == MAX_MISSION_ID) {
-        currentMisionId_ = MIN_MISSION_ID;
+    if (currentMissionId_ == MAX_MISSION_ID) {
+        currentMissionId_ = MIN_MISSION_ID;
     }
 
-    for (int32_t index = currentMisionId_; index < MAX_MISSION_ID; index++) {
+    for (int32_t index = currentMissionId_; index < MAX_MISSION_ID; index++) {
         if (missionIdMap_.find(index) == missionIdMap_.end()) {
             missionId = index;
             missionIdMap_[missionId] = false;
-            currentMisionId_ = missionId + 1;
+            currentMissionId_ = missionId + 1;
             return true;
         }
     }
@@ -144,7 +144,7 @@ bool MissionInfoMgr::DeleteMissionInfo(int missionId)
     }
 
     if (!missionIdMap_[missionId]) {
-        HILOG_WARN("missionId %{public}d distriubted but not saved, no need delete", missionId);
+        HILOG_WARN("missionId %{public}d distributed but not saved, no need delete", missionId);
         missionIdMap_.erase(missionId);
         return true;
     }
@@ -405,7 +405,7 @@ void MissionInfoMgr::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handl
 }
 
 bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot) const
+    MissionSnapshot& missionSnapshot, bool isLowResolution) const
 {
     HILOG_INFO("Update mission snapshot, missionId:%{public}d.", missionId);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -430,11 +430,18 @@ bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemote
         HILOG_ERROR("snapshot: taskDataPersistenceMgr_ is nullptr");
         return false;
     }
+
 #ifdef SUPPORT_GRAPHICS
-    missionSnapshot.snapshot = snapshot.GetPixelMap();
+    missionSnapshot.snapshot = isLowResolution ?
+        MissionDataStorage::GetReducedPixelMap(snapshot.GetPixelMap()) : snapshot.GetPixelMap();
 #endif
     missionSnapshot.topAbility = it->missionInfo.want.GetElement();
-    if (!taskDataPersistenceMgr_->SaveMissionSnapshot(missionId, missionSnapshot)) {
+
+    MissionSnapshot savedSnapshot = missionSnapshot;
+#ifdef SUPPORT_GRAPHICS
+    savedSnapshot.snapshot = snapshot.GetPixelMap();
+#endif
+    if (!taskDataPersistenceMgr_->SaveMissionSnapshot(missionId, savedSnapshot)) {
         HILOG_ERROR("snapshot: save mission snapshot failed");
         return false;
     }
@@ -463,7 +470,7 @@ sptr<Media::PixelMap> MissionInfoMgr::GetSnapshot(int32_t missionId) const
 #endif
 
 bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot, bool force) const
+    MissionSnapshot& missionSnapshot, bool isLowResolution, bool force) const
 {
     HILOG_INFO("mission_list_info GetMissionSnapshot, missionId:%{public}d, force:%{public}d", missionId, force);
     std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -481,16 +488,16 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
 
     if (force) {
         HILOG_INFO("force to get snapshot");
-        return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot);
+        return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot, isLowResolution);
     }
 
-    if (taskDataPersistenceMgr_->GetMissionSnapshot(missionId, missionSnapshot)) {
+    if (taskDataPersistenceMgr_->GetMissionSnapshot(missionId, missionSnapshot, isLowResolution)) {
         missionSnapshot.topAbility = it->missionInfo.want.GetElement();
         HILOG_ERROR("mission_list_info GetMissionSnapshot, find snapshot OK, missionId:%{public}d", missionId);
         return true;
     }
     HILOG_INFO("snapshot: storage mission snapshot not exists, create new snapshot");
-    return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot);
+    return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot, isLowResolution);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -124,17 +124,17 @@ public:
      * terminate ability with token.
      *
      * @param token, the token of ability.
-     * @param clearMissionFlag, indicates whether terminate the ability when clearMision.
+     * @param clearMissionFlag, indicates whether terminate the ability when clearMission.
      * @return true on success ,false on failure.
      */
     int TerminateAbility(const sptr<IRemoteObject> &token, bool clearMissionFlag);
 
     /**
-     * move ability to forground.
+     * move ability to foreground.
      *
      * @param token, the token of ability.
      */
-    void MoveToForground(const sptr<IRemoteObject> &token);
+    void MoveToForeground(const sptr<IRemoteObject> &token);
 
     /**
      * move ability to background.
@@ -279,9 +279,18 @@ public:
      *
      * @param pid The process id.
      * @param tokens The token of ability records.
-     * @return Returns true on success, others on failure.
+     * @return Returns ERR_OK on success, others on failure.
      */
     int GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens);
+
+    /**
+     *  Get the application info by process ID.
+     *
+     * @param pid The process id.
+     * @param application The application info.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**

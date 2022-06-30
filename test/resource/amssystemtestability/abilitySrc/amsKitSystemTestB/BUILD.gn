@@ -26,7 +26,6 @@ config("amsKitSystemTestBConfig") {
     "${aafwk_path}/services/abilitymgr/include",
     "${common_path}/log/include",
     "${SUBST_TOOLS_DIR}/include",
-    "//base/notification/eventhandler/interfaces/inner_api",
     "//third_party/jsoncpp/include",
   ]
   defines = [
@@ -45,8 +44,8 @@ ohos_shared_library("amsKitSystemTestB") {
   ]
   configs = [ ":amsKitSystemTestBConfig" ]
   deps = [
-    "${aafwk_path}/frameworks/kits/ability/native:abilitykit_native",
-    "${aafwk_path}/frameworks/kits/appkit:appkit_native",
+    "${aafwk_path}/frameworks/native/ability/native:abilitykit_native",
+    "${aafwk_path}/frameworks/native/appkit:appkit_native",
     "${aafwk_path}/interfaces/inner_api/app_manager:app_manager",
     "${inner_api_path}/appexecfwk_base:appexecfwk_base",
     "${services_path}/bundlemgr:libbms",
@@ -58,6 +57,7 @@ ohos_shared_library("amsKitSystemTestB") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
+    "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
