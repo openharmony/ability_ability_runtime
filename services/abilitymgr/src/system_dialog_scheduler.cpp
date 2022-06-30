@@ -89,7 +89,7 @@ void SystemDialogScheduler::ScheduleShowDialog(const std::string &name, const Di
         OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
         position.offsetX, position.offsetY, position.width, position.height,
         callback);
-    
+
     HILOG_INFO("Show UI Dialog finished.");
 }
 
@@ -99,7 +99,7 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
 
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_ANR, position);
-    
+
     nlohmann::json jsonObj;
     jsonObj[APP_NAME] = appName;
     const std::string params = jsonObj.dump();
@@ -121,7 +121,7 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
     };
 
     ScheduleShowDialog(DIALOG_NAME_ANR, position, params, callback);
-   
+
     HILOG_DEBUG("ShowAnrDialog end");
     return ERR_OK;
 }

@@ -1316,9 +1316,9 @@ void SaveAbilityInfo(AbilityInfo_ &abilityInfo, const AbilityInfo &abilityInfoOr
     abilityInfo.label = abilityInfoOrg.label;
     abilityInfo.description = abilityInfoOrg.description;
     abilityInfo.icon = abilityInfoOrg.iconPath;
-    abilityInfo.labelId = abilityInfoOrg.applicationInfo.labelId;
-    abilityInfo.descriptionId = abilityInfoOrg.applicationInfo.descriptionId;
-    abilityInfo.iconId = abilityInfoOrg.applicationInfo.iconId;
+    abilityInfo.labelId = abilityInfoOrg.labelId;
+    abilityInfo.descriptionId = abilityInfoOrg.descriptionId;
+    abilityInfo.iconId = abilityInfoOrg.iconId;
     abilityInfo.moduleName = abilityInfoOrg.moduleName;
     abilityInfo.process = abilityInfoOrg.process;
     abilityInfo.isVisible = abilityInfoOrg.visible;
@@ -4293,12 +4293,7 @@ void NAPIAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementNam
 napi_value NAPI_AcquireDataAbilityHelperCommon(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
     HILOG_INFO("%{public}s,called", __func__);
-    DataAbilityHelperCB *dataAbilityHelperCB = new (std::nothrow) DataAbilityHelperCB;
-    if (dataAbilityHelperCB == nullptr) {
-        HILOG_ERROR("%{public}s, dataAbilityHelperCB == nullptr", __func__);
-        return WrapVoidToJS(env);
-    }
-
+    DataAbilityHelperCB *dataAbilityHelperCB = new DataAbilityHelperCB;
     dataAbilityHelperCB->cbBase.cbInfo.env = env;
     dataAbilityHelperCB->cbBase.ability = nullptr; // temporary value assignment
     dataAbilityHelperCB->cbBase.errCode = NAPI_ERR_NO_ERROR;

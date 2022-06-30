@@ -821,7 +821,7 @@ private:
      */
     void AddSystemAbilityCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode,
         std::string srcAbilityId);
-    
+
     bool IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken);
 
 #ifdef SUPPORT_GRAPHICS
