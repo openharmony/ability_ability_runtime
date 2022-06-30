@@ -1,3 +1,18 @@
+/*
+    Copyright (c) 2022 Huawei Device Co., Ltd.
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+*/
+
 import resourceManager from '@ohos.resourceManager';
 
 export default {
@@ -22,7 +37,7 @@ export default {
         phoneDisplay: 'none',
     },
     onInit() {
-        console.log("dialog service =======onInit");
+        console.log("dialog service selector onInit");
 
         if (this.deviceType === "phone") {
             this.phoneDisplay = 'flex';
@@ -123,10 +138,10 @@ export default {
                 console.log("dialog service bundle:" + this.hapList[i].bundle + "---lableId:" + lableId);
                 mgr.getString(lableId).then(value => {
                     console.log("dialog service get label(" + lableId + ") value:" + value);
-                    this.updateHapName(this.hapList[i].ability, value);
+                    this.updateHapName(this.hapList[i].ability, this.hapList[i].bundle, value);
                 }).catch(error => {
                     console.log("dialog service resource getString error:" + error);
-                    this.updateHapName(this.hapList[i].ability, this.hapList[i].bundle);
+                    this.updateHapName(this.hapList[i].ability, this.hapList[i].bundle, this.hapList[i].bundle);
                 })
             }).catch(error => {
                 console.log("dialog service getResourceManager error:" + error);
@@ -138,25 +153,25 @@ export default {
                 console.log("dialog service bundle:" + this.hapList[i].bundle + "---iconId:" + iconId);
                 mgr.getMediaBase64(iconId).then(value => {
                     console.log("dialog service get icon(" + iconId + ") value:" + value);
-                    this.updateHapIcon(this.hapList[i].ability, value);
+                    this.updateHapIcon(this.hapList[i].ability, this.hapList[i].bundle, value);
                 }).catch(error => {
                     console.log("dialog service resource getString error:" + error);
-                    this.updateHapIcon(this.hapList[i].ability, this.selector.backIcon);
+                    this.updateHapIcon(this.hapList[i].ability, this.hapList[i].bundle, this.selector.backIcon);
                 })
             }).catch(error => {
                 console.log("dialog service getResourceManager error:" + error);
-                this.updateHapIcon(this.hapList[i].ability, this.selector.backIcon);
+                this.updateHapIcon(this.hapList[i].ability, this.hapList[i].bundle, this.selector.backIcon);
             });
         }
     },
-    updateHapName(ability, hapLabel) {
+    updateHapName(ability, bundle, hapLabel) {
         for (let i = 0; i < this.selectorHapList.length; i++) {
             if (this.deviceType == "phone") {
                 if (this.selectorHapList[i] != null) {
                     for (let j = 0; j < this.selectorHapList[i].length; j++) {
-                        if (this.selectorHapList[i][j].ability == ability) {
+                        if (this.selectorHapList[i][j].ability == ability && this.selectorHapList[i][j].bundle == bundle) {
                             this.selectorHapList[i][j].name = hapLabel;
-                            console.log("dialog service update ability:" + ability + " to lable:" + hapLabel);
+                            console.log("dialog service update ability:" + ability + " bundle:" + bundle + " to lable:" + hapLabel);
                         }
                     }
                 }
@@ -165,21 +180,21 @@ export default {
                     return;
                 }
     
-                if (this.selectorHapList[i].ability == ability) {
+                if (this.selectorHapList[i].ability == ability && this.selectorHapList[i][j].bundle == bundle) {
                     this.selectorHapList[i].name = hapLabel;
-                    console.log("dialog service update ability:" + ability + " to lable:" + hapLabel);
+                    console.log("dialog service update ability:" + ability + " bundle:" + bundle + " to lable:" + hapLabel);
                 }
             }
         }
     },
-    updateHapIcon(ability, hapIcon) {
+    updateHapIcon(ability, bundle, hapIcon) {
         for (let i = 0; i < this.selectorHapList.length; i++) {
             if (this.deviceType == "phone") {
                 if (this.selectorHapList[i] != null) {
                     for (let j = 0; j < this.selectorHapList[i].length; j++) {
-                        if (this.selectorHapList[i][j].ability == ability) {
+                        if (this.selectorHapList[i][j].ability == ability && this.selectorHapList[i][j].bundle == bundle) {
                             this.selectorHapList[i][j].icon = hapIcon;
-                            console.log("dialog service update ability:" + ability + " to icon:" + hapIcon);
+                            console.log("dialog service update ability:" + ability + " bundle:" + bundle + " to icon:" + hapIcon);
                         }
                     }
                 }
@@ -188,9 +203,9 @@ export default {
                     return;
                 }
     
-                if (this.selectorHapList[i].ability == ability) {
+                if (this.selectorHapList[i].ability == ability && this.selectorHapList[i][j].bundle == bundle) {
                     this.selectorHapList[i].icon = hapIcon;
-                    console.log("dialog service update ability:" + ability + " to icon:" + hapIcon);
+                    console.log("dialog service update ability:" + ability + " bundle:" + bundle + " to icon:" + hapIcon);
                 }
             }
         }

@@ -107,7 +107,7 @@ void StartAbilityImplicitModuleTest::OnStartAms()
         abilityMs_->iBundleManager_ = new BundleMgrService();
         EXPECT_TRUE(abilityMs_->iBundleManager_);
 
-        abilityMs_->sysDialogScheduler_ = std::make_shared<SystemDialogScheduler>("phone");
+        DelayedSingleton<SystemDialogScheduler>::GetInstance()->SetDeviceType("phone");
         abilityMs_->InitMissionListManager(userId, true);
         abilityMs_->SwitchManagers(0, false);
         abilityMs_->userController_->SetCurrentUserId(MOCK_MAIN_USER_ID);
