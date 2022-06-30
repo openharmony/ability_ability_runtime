@@ -230,7 +230,7 @@ private:
                 std::vector<AppExecFwk::AppStateData> list;
                 int32_t ret = appManager->GetForegroundApplications(list);
                 if (ret == 0) {
-                    HILOG_DEBUG("OnGetForegroundApplications success.");
+                    HILOG_INFO("OnGetForegroundApplications success.");
                     task.Resolve(engine, CreateJsAppStateDataArray(engine, list));
                 } else {
                     HILOG_ERROR("OnGetForegroundApplications failed error:%{public}d", ret);
