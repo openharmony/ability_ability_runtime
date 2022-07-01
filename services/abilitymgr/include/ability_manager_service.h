@@ -780,6 +780,8 @@ public:
      */
     bool IsBackgroundTaskUid(const int uid);
 
+    bool GetLocalDeviceId(std::string& localDeviceId);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -905,7 +907,6 @@ private:
     void UpdateCallerInfo(Want& want);
 
     bool CheckIfOperateRemote(const Want &want);
-    bool GetLocalDeviceId(std::string& localDeviceId);
     std::string AnonymizeDeviceId(const std::string& deviceId);
     bool VerificationToken(const sptr<IRemoteObject> &token);
     void RequestPermission(const Want *resultWant);
