@@ -533,7 +533,8 @@ NativeValue *JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
             auto env_callback = env_callbackWptr.lock();
             if (applicationContext == nullptr || env_callback == nullptr) {
                 HILOG_ERROR("applicationContext or env_callback nullptr");
-                task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "applicationContext or env_callback nullptr"));
+                task.Reject(engine,
+                    CreateJsError(engine, ERROR_CODE_ONE, "applicationContext or env_callback nullptr"));
                 return;
             }
 
@@ -549,7 +550,7 @@ NativeValue *JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
 
             task.Resolve(engine, engine.CreateUndefined());
         };
-    NativeValue *lastParam = (info.argc == ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
+    NativeValue *lastParam = (info.argc <= ARGC_ONE) ? nullptr : info.argv[INDEX_ONE];
     NativeValue *result = nullptr;
     AsyncTask::Schedule("JsApplicationContextUtils::OnUnregisterEnvironmentCallback", engine,
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
