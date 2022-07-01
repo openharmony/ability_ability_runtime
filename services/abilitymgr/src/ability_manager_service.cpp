@@ -1611,19 +1611,19 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
 
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int userId = wantSenderInfo.userId;
-    bool query = true;
+    bool remote = false;
     if (wantSenderInfo.allWants.size() > 0) {
         std::string deviceId = wantSenderInfo.allWants[0].want.GetDeviceId();
         std::string localDeviceId;
         if (GetLocalDeviceId(localDeviceId) &&
             (!deviceId.empty() && localDeviceId != deviceId)) {
-            query = false;
+            remote = true;
         }
-        HILOG_INFO("query = %{public}d, localDeviceId = %{public}s, deviceId = %{public}s", query, localDeviceId.c_str(), deviceId.c_str());
+        HILOG_INFO("remote = %{public}d, localDeviceId = %{public}s, deviceId = %{public}s", remote, localDeviceId.c_str(), deviceId.c_str());
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    if (!wantSenderInfo.bundleName.empty() && query) {
+    if (!wantSenderInfo.bundleName.empty() && !remote) {
         bool bundleMgrResult = false;
         if (wantSenderInfo.userId < 0) {
 #ifdef OS_ACCOUNT_PART_ENABLED
