@@ -166,7 +166,7 @@ ohos_shared_library("app_context") {
   cflags_cc = []
   include_dirs = [
     "${aafwk_path}/interfaces/kits/native/appkit/ability_runtime/context",
-    "${aafwk_path}/interfaces/kits/native/appkit//app",
+    "${aafwk_path}/interfaces/kits/native/appkit/app",
   ]
 
   configs = [ ":appkit_config" ]
