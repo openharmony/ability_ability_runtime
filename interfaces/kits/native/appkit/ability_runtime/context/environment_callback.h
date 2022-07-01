@@ -43,7 +43,7 @@ public:
 };
 
 class JsEnvironmentCallback : public EnvironmentCallback,
-                                   public std::enable_shared_from_this<JsEnvironmentCallback> {
+    public std::enable_shared_from_this<JsEnvironmentCallback> {
 public:
     explicit JsEnvironmentCallback(NativeEngine* engine);
     void OnConfigurationUpdated(const AppExecFwk::Configuration &config) override;

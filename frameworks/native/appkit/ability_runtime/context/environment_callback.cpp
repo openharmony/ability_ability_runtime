@@ -59,12 +59,12 @@ void JsEnvironmentCallback::CallJsMethod(
     const std::string &methodName, const AppExecFwk::Configuration &config)
 {
     HILOG_DEBUG("CallJsMethod methodName = %{public}s", methodName.c_str());
-    // js callback should run in js thread
+    std::weak_ptr<JsEnvironmentCallback> thisWeakPtr(shared_from_this());
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>(
-        [JsEnvironmentCallback = this, methodName, config](
-            NativeEngine &engine, AsyncTask &task, int32_t status) {
-            if (JsEnvironmentCallback) {
-                JsEnvironmentCallback->CallJsMethodInner(methodName, config);
+        [thisWeakPtr, methodName, config](NativeEngine &engine, AsyncTask &task, int32_t status) {
+            std::shared_ptr<JsEnvironmentCallback> jsEnvCallback = thisWeakPtr.lock();
+            if (jsEnvCallback) {
+                jsEnvCallback->CallJsMethodInner(methodName, config);
             }
         });
     NativeReference *callback = nullptr;
