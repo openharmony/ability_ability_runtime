@@ -494,6 +494,7 @@ NativeValue *JsApplicationContextUtils::OnRegisterEnvironmentCallback(
         return engine.CreateUndefined();
     }
     if (env_callback_ != nullptr) {
+        HILOG_DEBUG("env_callback_ is not nullptr.");
         return engine.CreateNumber(env_callback_->Register(info.argv[0]));
     }
     env_callback_ = std::make_shared<JsEnvironmentCallback>(&engine);
@@ -512,37 +513,38 @@ NativeValue *JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
         HILOG_ERROR("ApplicationContext is nullptr.");
         errCode = ERROR_CODE_ONE;
     }
+    int32_t callbackId = -1;
     if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
         HILOG_ERROR("Not enough params");
         errCode = ERROR_CODE_ONE;
+    } else {
+        napi_get_value_int32(
+            reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[INDEX_ZERO]), &callbackId);
+        HILOG_DEBUG("callbackId is %{public}d.", (int32_t)callbackId);
     }
-    int64_t callbackId = -1;
-    if (!errCode && !ConvertFromJsValue(engine, info.argv[0], callbackId)) {
-        HILOG_ERROR("Parse callbackId failed");
-        errCode = ERROR_CODE_ONE;
-    }
-    HILOG_DEBUG("OnUnregisterEnvironmentCallback callbackId is %{public}d.", (int32_t)callbackId);
+    std::weak_ptr<JsEnvironmentCallback> env_callbackWptr(env_callback_);
     AsyncTask::CompleteCallback complete =
-        [&applicationContext = keepApplicationContext_, &env_callback_ = env_callback_, callbackId, errCode](
+        [&applicationContext = keepApplicationContext_, env_callbackWptr, callbackId, errCode](
             NativeEngine &engine, AsyncTask &task, int32_t status) {
-            HILOG_DEBUG("OnUnregisterEnvironmentCallback begin");
             if (errCode != 0) {
                 task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
                 return;
             }
-            if (applicationContext == nullptr) {
-                HILOG_ERROR("applicationContext is nullptr");
-                task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "applicationContext is nullptr"));
+            auto env_callback = env_callbackWptr.lock();
+            if (applicationContext == nullptr || env_callback == nullptr) {
+                HILOG_ERROR("applicationContext or env_callback nullptr");
+                task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "applicationContext or env_callback nullptr"));
                 return;
             }
 
-            if (env_callback_ != nullptr) {
-                env_callback_->UnRegister(callbackId);
-                if (env_callback_->IsEmpty()) {
-                    applicationContext->UnregisterEnvironmentCallback(env_callback_);
-                }
-            } else {
-                HILOG_DEBUG("nothing is registered.");
+            HILOG_INFO("OnUnregisterEnvironmentCallback begin");
+            if (!env_callback->UnRegister(callbackId)) {
+                HILOG_ERROR("call UnRegister failed!");
+                task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "call UnRegister failed!"));
+                return;
+            }
+            if (env_callback->IsEmpty()) {
+                applicationContext->UnregisterEnvironmentCallback(env_callback);
             }
 
             task.Resolve(engine, engine.CreateUndefined());

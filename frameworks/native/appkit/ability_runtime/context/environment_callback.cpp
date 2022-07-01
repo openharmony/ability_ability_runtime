@@ -88,16 +88,22 @@ int32_t JsEnvironmentCallback::Register(NativeValue *jsCallback)
         serialNumber_++;
     } else {
         serialNumber_ = 0;
-        callbackId = -1;
-        return callbackId;
+        return -1;
     }
     callbacks_.emplace(callbackId, std::shared_ptr<NativeReference>(engine_->CreateReference(jsCallback, 1)));
     return callbackId;
 }
 
-void JsEnvironmentCallback::UnRegister(int32_t callbackId)
+bool JsEnvironmentCallback::UnRegister(int32_t callbackId)
 {
-    callbacks_.erase(callbackId);
+    HILOG_DEBUG("UnRegister called, env callbackId : %{public}d", callbackId);
+    auto it = callbacks_.find(callbackId);
+    if (it == callbacks_.end()) {
+        HILOG_ERROR("UnRegister env callbackId: %{publid}d is not in callbacks_", callbackId);
+        return false;
+    }
+    HILOG_DEBUG("callbacks_.callbackId : %{public}d", it->first);
+    return callbacks_.erase(callbackId) == 1;
 }
 
 bool JsEnvironmentCallback::IsEmpty()
