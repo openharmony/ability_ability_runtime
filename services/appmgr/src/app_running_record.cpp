@@ -1056,12 +1056,12 @@ void AppRunningRecord::SetDebugApp(bool isDebugApp)
     isDebugApp_ = isDebugApp;
 }
 
-void AppRunningRecord::SetAppIndex(int32_t appIndex)
+void AppRunningRecord::SetAppIndex(const int32_t appIndex)
 {
     appIndex_ = appIndex;
 }
 
-int32_t AppRunningRecord::GetAppIndex()
+int32_t AppRunningRecord::GetAppIndex() const
 {
     return appIndex_;
 }

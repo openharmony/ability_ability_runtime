@@ -866,10 +866,18 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     BundleInfo bundleInfo;
+    bool queryResult;
     if (appLaunchData.GetAppIndex() != 0) {
-        bundleMgr->GetSandboxBundleInfo(appInfo.bundleName, appLaunchData.GetAppIndex(), UNSPECIFIED_USERID, bundleInfo);
+        queryResult = (bundleMgr->GetSandboxBundleInfo(appInfo.bundleName,
+            appLaunchData.GetAppIndex(), UNSPECIFIED_USERID, bundleInfo) == 0);
     } else {
-        bundleMgr->GetBundleInfo(appInfo.bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, UNSPECIFIED_USERID);
+        queryResult = bundleMgr->GetBundleInfo(appInfo.bundleName, BundleFlag::GET_BUNDLE_DEFAULT,
+            bundleInfo, UNSPECIFIED_USERID);
+    }
+
+    if (!queryResult) {
+        HILOG_ERROR("HandleLaunchApplication GetBundleInfo failed!");
+        return;
     }
 
     bool moduelJson = false;
@@ -877,11 +885,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (!bundleInfo.hapModuleInfos.empty()) {
         moduelJson = bundleInfo.hapModuleInfos.back().isModuleJson;
         isStageBased = bundleInfo.hapModuleInfos.back().isStageBasedModel;
-    }
-
-    if (appLaunchData.GetAppIndex() != 0) {
-        moduelJson = true;
-        isStageBased = true;
     }
 
     HILOG_INFO("stageBased:%{public}d moduleJson:%{public}d size:%{public}d",
