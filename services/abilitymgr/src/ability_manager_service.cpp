@@ -1619,7 +1619,8 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
             (!deviceId.empty() && localDeviceId != deviceId)) {
             remote = true;
         }
-        HILOG_INFO("remote = %{public}d, localDeviceId = %{public}s, deviceId = %{public}s", remote, localDeviceId.c_str(), deviceId.c_str());
+        HILOG_INFO("remote = %{public}d, localDeviceId = %{public}s, deviceId = %{public}s",
+            remote, localDeviceId.c_str(), deviceId.c_str());
     }
 
     AppExecFwk::BundleInfo bundleInfo;
