@@ -493,8 +493,8 @@ public:
 
     void SetKilling();
     bool IsKilling() const;
-    void SetAppIndex(int32_t appIndex);
-    int32_t GetAppIndex();
+    void SetAppIndex(const int32_t appIndex);
+    int32_t GetAppIndex() const;
 
 private:
     /**
