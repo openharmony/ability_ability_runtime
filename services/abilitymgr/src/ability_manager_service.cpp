@@ -1612,14 +1612,14 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int userId = wantSenderInfo.userId;
     bool remote = false;
-    if (wantSenderInfo.allWants.size() > 0) {
+    if (!wantSenderInfo.allWants.empty()) {
         std::string deviceId = wantSenderInfo.allWants[0].want.GetDeviceId();
         std::string localDeviceId;
         if (GetLocalDeviceId(localDeviceId) &&
             (!deviceId.empty() && localDeviceId != deviceId)) {
             remote = true;
         }
-        HILOG_INFO("remote = %{public}d, localDeviceId = %{public}s, deviceId = %{public}s",
+        HILOG_INFO("remote = %{public}d, localDeviceId = %{private}s, deviceId = %{private}s",
             remote, localDeviceId.c_str(), deviceId.c_str());
     }
 
