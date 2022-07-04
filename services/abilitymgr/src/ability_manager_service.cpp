@@ -3001,7 +3001,7 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
         IN_PROCESS_CALL_WITHOUT_RET(bms->QueryExtensionAbilityInfos(want, abilityInfoFlag, userId, extensionInfos));
     } else {
         IN_PROCESS_CALL_WITHOUT_RET(bms->GetSandboxExtAbilityInfos(want, appIndex,
-                abilityInfoFlag, userId, extensionInfos));
+            abilityInfoFlag, userId, extensionInfos));
     }
     if (extensionInfos.size() <= 0) {
         HILOG_ERROR("GenerateAbilityRequest error. Get extension info failed.");
