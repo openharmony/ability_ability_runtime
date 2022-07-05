@@ -148,7 +148,8 @@ std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(
         return nullptr;
     }
 
-    if (!IsUriValid(uri)) {
+    if (!CheckUri(uri)) {
+        HILOG_WARN("uri is invalid.");
         return nullptr;
     }
 
@@ -188,7 +189,8 @@ std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(
         return nullptr;
     }
 
-    if (!IsUriValid(uri)) {
+    if (!CheckUri(uri)) {
+        HILOG_WARN("uri is invalid.");
         return nullptr;
     }
 
@@ -249,7 +251,8 @@ std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(
         return nullptr;
     }
 
-    if (!IsUriValid(uri)) {
+    if (!CheckUri(uri)) {
+        HILOG_WARN("uri is invalid.");
         return nullptr;
     }
 
@@ -305,11 +308,6 @@ bool DataAbilityHelperImpl::Release()
 std::vector<std::string> DataAbilityHelperImpl::GetFileTypes(Uri &uri, const std::string &mimeTypeFilter)
 {
     std::vector<std::string> matchedMIMEs;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return matchedMIMEs;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -338,8 +336,9 @@ int DataAbilityHelperImpl::OpenFile(Uri &uri, const std::string &mode)
 {
     HILOG_INFO("DataAbilityHelperImpl::OpenFile start.");
     int fd = -1;
-    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = nullptr;
-    if (!CheckUri(uri, dataAbilityProxy)) {
+    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
+    if (dataAbilityProxy == nullptr) {
+        HILOG_ERROR("Get data ability proxy failed.");
         return fd;
     }
 
@@ -365,8 +364,9 @@ int DataAbilityHelperImpl::OpenFile(Uri &uri, const std::string &mode)
 int DataAbilityHelperImpl::OpenRawFile(Uri &uri, const std::string &mode)
 {
     int fd = -1;
-    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = nullptr;
-    if (!CheckUri(uri, dataAbilityProxy)) {
+    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
+    if (dataAbilityProxy == nullptr) {
+        HILOG_ERROR("Get data ability proxy failed.");
         return fd;
     }
 
@@ -388,8 +388,9 @@ int DataAbilityHelperImpl::OpenRawFile(Uri &uri, const std::string &mode)
 int DataAbilityHelperImpl::Insert(Uri &uri, const NativeRdb::ValuesBucket &value)
 {
     int index = -1;
-    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = nullptr;
-    if (!CheckUri(uri, dataAbilityProxy)) {
+    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
+    if (dataAbilityProxy == nullptr) {
+        HILOG_ERROR("Get data ability proxy failed.");
         return index;
     }
 
@@ -404,11 +405,6 @@ std::shared_ptr<AppExecFwk::PacMap> DataAbilityHelperImpl::Call(
     const Uri &uri, const std::string &method, const std::string &arg, const AppExecFwk::PacMap &pacMap)
 {
     std::shared_ptr<AppExecFwk::PacMap> result = nullptr;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return result;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -434,11 +430,6 @@ int DataAbilityHelperImpl::Update(
     Uri &uri, const NativeRdb::ValuesBucket &value, const NativeRdb::DataAbilityPredicates &predicates)
 {
     int index = -1;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return index;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -463,8 +454,9 @@ int DataAbilityHelperImpl::Update(
 int DataAbilityHelperImpl::Delete(Uri &uri, const NativeRdb::DataAbilityPredicates &predicates)
 {
     int index = -1;
-    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = nullptr;
-    if (!CheckUri(uri, dataAbilityProxy)) {
+    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
+    if (dataAbilityProxy == nullptr) {
+        HILOG_ERROR("Get data ability proxy failed.");
         return index;
     }
 
@@ -488,11 +480,6 @@ std::shared_ptr<NativeRdb::AbsSharedResultSet> DataAbilityHelperImpl::Query(
     Uri &uri, std::vector<std::string> &columns, const NativeRdb::DataAbilityPredicates &predicates)
 {
     std::shared_ptr<NativeRdb::AbsSharedResultSet> resultset = nullptr;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return resultset;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -517,11 +504,6 @@ std::shared_ptr<NativeRdb::AbsSharedResultSet> DataAbilityHelperImpl::Query(
 std::string DataAbilityHelperImpl::GetType(Uri &uri)
 {
     std::string type;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return type;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -548,11 +530,6 @@ std::string DataAbilityHelperImpl::GetType(Uri &uri)
 bool DataAbilityHelperImpl::Reload(Uri &uri, const PacMap &extras)
 {
     bool ret = false;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return ret;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -577,11 +554,6 @@ bool DataAbilityHelperImpl::Reload(Uri &uri, const PacMap &extras)
 int DataAbilityHelperImpl::BatchInsert(Uri &uri, const std::vector<NativeRdb::ValuesBucket> &values)
 {
     int ret = -1;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return ret;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -746,11 +718,6 @@ void DataAbilityHelperImpl::UnregisterObserver(const Uri &uri, const sptr<AAFwk:
  */
 void DataAbilityHelperImpl::NotifyChange(const Uri &uri)
 {
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -776,8 +743,9 @@ void DataAbilityHelperImpl::NotifyChange(const Uri &uri)
 Uri DataAbilityHelperImpl::NormalizeUri(Uri &uri)
 {
     Uri urivalue("");
-    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = nullptr;
-    if (!CheckUri(uri, dataAbilityProxy)) {
+    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
+    if (dataAbilityProxy == nullptr) {
+        HILOG_ERROR("Get data ability proxy failed.");
         return urivalue;
     }
 
@@ -801,8 +769,9 @@ Uri DataAbilityHelperImpl::NormalizeUri(Uri &uri)
 Uri DataAbilityHelperImpl::DenormalizeUri(Uri &uri)
 {
     Uri urivalue("");
-    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = nullptr;
-    if (!CheckUri(uri, dataAbilityProxy)) {
+    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
+    if (dataAbilityProxy == nullptr) {
+        HILOG_ERROR("Get data ability proxy failed.");
         return urivalue;
     }
 
@@ -817,11 +786,6 @@ std::vector<std::shared_ptr<DataAbilityResult>> DataAbilityHelperImpl::ExecuteBa
     const Uri &uri, const std::vector<std::shared_ptr<DataAbilityOperation>> &operations)
 {
     std::vector<std::shared_ptr<DataAbilityResult>> results;
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return results;
-    }
-
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri, false);
     if (dataAbilityProxy == nullptr) {
         HILOG_ERROR("Get data ability proxy failed.");
@@ -837,6 +801,10 @@ std::vector<std::shared_ptr<DataAbilityResult>> DataAbilityHelperImpl::ExecuteBa
 
 sptr<AAFwk::IAbilityScheduler> DataAbilityHelperImpl::GetDataAbilityProxy(const Uri &uri, bool addDeathRecipient)
 {
+    if (!CheckUriParam(uri)) {
+        HILOG_ERROR("Check uri param failed.");
+        return nullptr;
+    }
     // if uri_ is nullptr, it indicates the operation(such as insert, delete and so on) is temporary,
     // so, we need acquire the dataability before the operation.
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = dataAbilityProxy_;
@@ -867,7 +835,7 @@ void DataAbilityHelperImpl::ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler> da
     HILOG_INFO("ReleaseDataAbility end.");
 }
 
-bool DataAbilityHelperImpl::IsUriValid(const std::shared_ptr<Uri> &uri)
+bool DataAbilityHelperImpl::CheckUri(const std::shared_ptr<Uri> &uri)
 {
     if (uri == nullptr) {
         HILOG_ERROR("Input param invalid, uri is nullptr.");
@@ -876,22 +844,6 @@ bool DataAbilityHelperImpl::IsUriValid(const std::shared_ptr<Uri> &uri)
 
     if (uri->GetScheme() != SchemeOhos) {
         HILOG_ERROR("Input param invalid, the uri is not dataability, Scheme: %{public}s.", uri->GetScheme().c_str());
-        return false;
-    }
-
-    return true;
-}
-
-bool DataAbilityHelperImpl::CheckUri(Uri &uri, sptr<AAFwk::IAbilityScheduler> dataAbilityProxy)
-{
-    if (!CheckUriParam(uri)) {
-        HILOG_ERROR("Check uri param failed.");
-        return false;
-    }
-
-    dataAbilityProxy = GetDataAbilityProxy(uri);
-    if (dataAbilityProxy == nullptr) {
-        HILOG_ERROR("Get data ability proxy failed.");
         return false;
     }
 
