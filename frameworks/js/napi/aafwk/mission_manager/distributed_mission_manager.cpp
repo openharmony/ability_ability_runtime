@@ -519,7 +519,7 @@ napi_value RegisterMissionWrap(napi_env env, napi_callback_info info, RegisterMi
     bool isDeviceId = false;
     napi_has_named_property(env, args[0], "deviceId", &isDeviceId);
     napi_typeof(env, args[0], &valueType);
-    if (isDeviceId && valueType == napi_object) {
+    if (!isDeviceId || valueType != napi_object) {
         HILOG_ERROR("%{public}s, Wrong argument name for deviceId.", __func__);
         return nullptr;
     }
