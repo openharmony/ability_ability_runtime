@@ -109,7 +109,7 @@ ApplicationInfo SpecifiedAbilityServiceTest::CreateAppInfo(const std::string &ap
     return appInfo;
 }
 
-bool SpecifiedAbilityServiceTest::MockAppClient()
+bool SpecifiedAbilityServiceTest::MockAppClient() const
 {
     if (!mockAppMgrClient_) {
         GTEST_LOG_(INFO) << "MockAppClient::1";
