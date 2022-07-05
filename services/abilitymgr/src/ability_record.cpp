@@ -48,6 +48,7 @@ const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbilityTokenCallback";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
+const std::string DLP_INDEX = "ohos.dlp.params.index";
 int64_t AbilityRecord::abilityRecordId = 0;
 int64_t AbilityRecord::g_abilityRecordEventId_ = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -1651,14 +1652,14 @@ void AbilityRecord::SetMinimizeReason(bool fromUser)
     minimizeReason_ = fromUser;
 }
 
-void AbilityRecord::SetDlp(bool isDlp)
+void AbilityRecord::SetAppIndex(const int32_t appIndex)
 {
-    isDlp_ = isDlp;
+    appIndex_ = appIndex;
 }
 
-bool AbilityRecord::IsDlp() const
+int32_t AbilityRecord::GetAppIndex() const
 {
-    return isDlp_;
+    return appIndex_;
 }
 
 bool AbilityRecord::IsMinimizeFromUser() const
