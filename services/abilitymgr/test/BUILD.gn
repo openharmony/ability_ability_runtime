@@ -158,6 +158,9 @@ ohos_source_set("abilityms_test_source") {
   if (ability_runtime_graphics) {
     external_deps += [ "window_manager:libdm" ]
   }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
 }
 
 group("unittest") {
