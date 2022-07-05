@@ -21,10 +21,7 @@ config("module_private_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
-    "${ability_base_innerapi_path}/uri/include",
     "${ability_runtime_kits_path}/appkit/native/test/mock/include",
-
-    #"${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include",
     "${ability_runtime_path}/frameworks/kits/appkit/test/Mock/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
   ]
