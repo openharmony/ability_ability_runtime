@@ -296,11 +296,7 @@ private:
         const sptr<AAFwk::IAbilityScheduler> &dataAbilityProxy);
     DataAbilityHelperImpl(const sptr<IRemoteObject> &token);
 
-<<<<<<< Updated upstream
-    static bool IsUriValid(const std::shared_ptr<Uri> &uri);
-=======
     static bool CheckUri(const std::shared_ptr<Uri> &uri);
->>>>>>> Stashed changes
 
     void AddDataAbilityDeathRecipient(const sptr<IRemoteObject> &token);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
@@ -312,11 +308,6 @@ private:
 
     void ReleaseDataAbility(sptr<AAFwk::IAbilityScheduler> dataAbilityProxy);
 
-<<<<<<< Updated upstream
-    bool CheckUri(Uri &uri, sptr<AAFwk::IAbilityScheduler> dataAbilityProxy);
-
-=======
->>>>>>> Stashed changes
     bool CheckUriAndDataObserver(const Uri &uri,
         const sptr<AAFwk::IDataAbilityObserver> &dataObserver);
 
