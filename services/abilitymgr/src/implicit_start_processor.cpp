@@ -88,7 +88,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     if (dialogAppInfos.size() == 1) {
         auto info = dialogAppInfos.front();
         HILOG_INFO("ImplicitQueryInfos success, target ability: %{public}s", info.abilityName.data());
-        return startAbilityTask(info.bundleName, info.abilityName);
+        return IN_PROCESS_CALL(startAbilityTask(info.bundleName, info.abilityName));
     }
 
     HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose.");
