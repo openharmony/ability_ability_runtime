@@ -330,8 +330,6 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
         return ERR_INVALID_VALUE;
     }
 
-    HILOG_INFO("%{public}s", __func__);
-
     HILOG_INFO("Start ability come, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
 
@@ -359,6 +357,11 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+        if (abilityRecord && abilityRecord->GetAppIndex() != 0 &&
+            abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
+            (const_cast<Want &>(want)).SetParam(DLP_INDEX, abilityRecord->GetAppIndex());
+        }
         auto isSpecificSA = AAFwk::PermissionVerification::GetInstance()->
             CheckSpecificSystemAbilityAccessPermission();
         if (!isSpecificSA) {
@@ -822,7 +825,6 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
 int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
-    AbilityUtil::HandleDlpApp(const_cast<Want &>(want));
     HILOG_INFO("Start extension ability come, bundlename: %{public}s, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
     AAFWK::EventInfo eventInfo;
