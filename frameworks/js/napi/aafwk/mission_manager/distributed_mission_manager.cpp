@@ -524,7 +524,6 @@ napi_value RegisterMissionWrap(napi_env env, napi_callback_info info, RegisterMi
         return nullptr;
     }
     napi_get_named_property(env, args[0], "deviceId", &firstNApi);
-
     if (firstNApi == nullptr) {
         return nullptr;
     }
