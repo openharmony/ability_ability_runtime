@@ -42,6 +42,9 @@ std::shared_ptr<C> ExtensionBase<C>::CreateAndInitContext(const std::shared_ptr<
     auto appContext = Context::GetApplicationContext();
     context->SetApplicationInfo(appContext->GetApplicationInfo());
     context->SetResourceManager(appContext->GetResourceManager());
+    if (application) {
+        context->SetParentContext(application->GetAppContext());
+    }
     if (record == nullptr) {
         HILOG_ERROR("ServiceExtension::CreateAndInitContext record is nullptr");
         return context;
