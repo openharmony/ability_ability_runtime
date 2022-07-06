@@ -319,12 +319,4 @@ group("unittest") {
 
   deps += [ "unittest/ability_delegator:unittest" ]
 }
-
-group("moduletest") {
-  testonly = true
-
-  deps = []
-
-  deps += [ "moduletest/ability_delegator:moduletest" ]
-}
 ###############################################################################

@@ -39,10 +39,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "Mock/include/mock_app_thread.cpp",
-    "Mock/include/mock_application.cpp",
-    "Mock/include/sys_mgr_client_mock.cpp",
-    "moduletest/appexecfwk_appkit_native_app_module_test_first.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "appexecfwk_appkit_native_app_module_test_first.cpp",
   ]
 
   configs = [ ":module_private_config" ]
@@ -77,10 +77,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "Mock/include/mock_app_thread.cpp",
-    "Mock/include/mock_application.cpp",
-    "Mock/include/sys_mgr_client_mock.cpp",
-    "moduletest/appexecfwk_appkit_native_app_module_test_second.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "appexecfwk_appkit_native_app_module_test_second.cpp",
   ]
 
   configs = [ ":module_private_config" ]
@@ -115,10 +115,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "Mock/include/mock_app_thread.cpp",
-    "Mock/include/mock_application.cpp",
-    "Mock/include/sys_mgr_client_mock.cpp",
-    "moduletest/appexecfwk_appkit_native_app_module_test_third.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "appexecfwk_appkit_native_app_module_test_third.cpp",
   ]
 
   configs = [ ":module_private_config" ]
@@ -153,10 +153,10 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "Mock/include/mock_app_thread.cpp",
-    "Mock/include/mock_application.cpp",
-    "Mock/include/sys_mgr_client_mock.cpp",
-    "moduletest/appexecfwk_appkit_native_app_module_test_fourth.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
+    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "appexecfwk_appkit_native_app_module_test_fourth.cpp",
   ]
 
   configs = [ ":module_private_config" ]
