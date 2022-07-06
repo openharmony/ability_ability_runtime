@@ -67,7 +67,7 @@ ohos_moduletest("ability_moduletest") {
     "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/wants_info.cpp",
-    "moduletest/cpp/abilitytest/ability_test.cpp",
+    "ability_test.cpp",
   ]
 
   configs = [
@@ -126,7 +126,7 @@ ohos_moduletest("ability_conetxt_test") {
     "${ability_runtime_services_path}/abilitymgr/src/caller_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
-    "moduletest/cpp/abilitytest/ability_context_test.cpp",
+    "ability_context_test.cpp",
   ]
 
   configs = [
@@ -169,7 +169,7 @@ ohos_moduletest("ability_conetxt_test") {
 ohos_moduletest("ability_thread_call_request_module_test") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_kits_path}/test/moduletest/cpp/abilitytest/ability_thread_call_request_module_test.cpp",
+    "${ability_runtime_path}/test/moduletest/ability_test/ability_thread_call_request_module_test.cpp",
     "${ability_runtime_native_path}/appkit/app/context_container.cpp",
   ]
 
@@ -222,7 +222,7 @@ ohos_moduletest("data_ability_operation_moduletest") {
     "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/wants_info.cpp",
-    "moduletest/cpp/abilitytest/data_ability_operation_module_test.cpp",
+    "data_ability_operation_module_test.cpp",
   ]
 
   configs = [
@@ -275,7 +275,7 @@ ohos_moduletest("data_ability_helper_module_test") {
     "${distributedschedule_path}/samgr/services/samgr/native/include",
   ]
 
-  sources = [ "${ability_runtime_kits_path}/test/moduletest/cpp/abilitytest/data_ability_helper_module_test.cpp" ]
+  sources = [ "${ability_runtime_path}/test/moduletest/ability_test/data_ability_helper_module_test.cpp" ]
 
   configs = [
     ":module_private_config",
