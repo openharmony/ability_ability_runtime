@@ -22,10 +22,8 @@ config("module_private_config") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_base_innerapi_path}/uri/include",
-    "${ability_runtime_kits_path}/appkit/native/test/mock/include",
-
-    #"${ability_runtime_kits_path}/ability/native/test/mock/include",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
   ]
 
@@ -39,9 +37,9 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
     "appexecfwk_appkit_native_app_module_test_first.cpp",
   ]
 
@@ -77,9 +75,9 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
     "appexecfwk_appkit_native_app_module_test_second.cpp",
   ]
 
@@ -115,9 +113,9 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
     "appexecfwk_appkit_native_app_module_test_third.cpp",
   ]
 
@@ -153,9 +151,9 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
   module_out_path = module_output_path
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_app_thread.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/mock_application.cpp",
-    "${ability_runtime_kits_path}/appkit/test/Mock/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
     "appexecfwk_appkit_native_app_module_test_fourth.cpp",
   ]
 
