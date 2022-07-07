@@ -25,20 +25,19 @@ config("module_private_config") {
 ohos_unittest("ability_context_impl_ut_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS" ]
+  include_dirs = [ "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS" ]
 
   sources = [
-    "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS/mock_ability_manager_client.cpp",
-    "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS/mock_serviceability_manager_service.cpp",
-    "${ability_runtime_kits_path}/ability/native/test/mock/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS/mock_ability_manager_client.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS/mock_serviceability_manager_service.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "ability_context_impl_ut_test.cpp",
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability:ability_context_native",
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -58,8 +57,8 @@ ohos_unittest("caller_call_back_ut_test") {
   sources = [ "caller_call_back_ut_test.cpp" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability:ability_context_native",
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -69,20 +68,19 @@ ohos_unittest("caller_call_back_ut_test") {
 ohos_unittest("local_call_container_ut_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS" ]
+  include_dirs = [ "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS" ]
 
   sources = [
-    "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS/mock_ability_manager_client.cpp",
-    "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS/mock_serviceability_manager_service.cpp",
-    "${ability_runtime_kits_path}/ability/native/test/mock/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS/mock_ability_manager_client.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS/mock_serviceability_manager_service.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "local_call_container_ut_test.cpp",
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability:ability_context_native",
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -100,20 +98,19 @@ ohos_unittest("local_call_container_ut_test") {
 ohos_unittest("local_call_record_ut_test") {
   module_out_path = module_out_path
 
-  include_dirs =
-      [ "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS" ]
+  include_dirs = [ "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS" ]
 
   sources = [
-    "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS/mock_ability_manager_client.cpp",
-    "${ability_runtime_kits_path}/ability/ability_runtime/test/mock/AMS/mock_serviceability_manager_service.cpp",
-    "${ability_runtime_kits_path}/ability/native/test/mock/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS/mock_ability_manager_client.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_ability_runtime_test/AMS/mock_serviceability_manager_service.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "local_call_record_ut_test.cpp",
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability:ability_context_native",
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",

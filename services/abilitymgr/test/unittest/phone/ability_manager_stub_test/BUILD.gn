@@ -23,7 +23,7 @@ ohos_unittest("ability_manager_stub_test") {
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/system_ability_mock",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/utils/native/include/",
-    "${ability_runtime_kits_path}/ability/native/test/mock/include",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
   ]
 
   sources = [
@@ -41,8 +41,8 @@ ohos_unittest("ability_manager_stub_test") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/abilitymgr/test:abilityms_test_source",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/aakit:aakit_mock",
     "${ability_runtime_services_path}/abilitymgr/test/mock/libs/appexecfwk_core:appexecfwk_appmgr_mock",

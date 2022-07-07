@@ -22,9 +22,9 @@ config("module_private_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager/include/appmgr",
-    "${ability_runtime_path}/frameworks/kits/appkit/native/test/mock/include",
-    "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include",
+    "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app/task",
   ]
@@ -42,8 +42,8 @@ config("module_context_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
-    "${ability_runtime_path}/frameworks/kits/appkit/native/test/mock/include",
-    "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app/task",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
   ]
@@ -60,17 +60,17 @@ config("module_context_config") {
 ohos_unittest("context_deal_interface_test") {
   module_out_path = module_output_path
   sources = [
-    "mock/include/mock_ability_manager_client_interface1.cpp",
-    "mock/include/mock_resourceManager_interface1.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include/mock_ability_manager_client_interface1.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include/mock_resourceManager_interface1.cpp",
     "unittest/context_deal_interface1_test.cpp",
   ]
 
   configs = [ ":module_private_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
     "//third_party/googletest:gmock_main",
@@ -93,9 +93,9 @@ ohos_unittest("context_deal_interface_test") {
 ohos_unittest("application_test") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_path}/frameworks/native/appkit/app/app_context.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/app_loader.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/ohos_application.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_context.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
+    "${ability_runtime_native_path}/appkit/app/ohos_application.cpp",
     "unittest/ability_stage_test.cpp",
     "unittest/application_data_manager_test.cpp",
     "unittest/application_test.cpp",
@@ -105,11 +105,11 @@ ohos_unittest("application_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
@@ -131,20 +131,20 @@ ohos_unittest("application_test") {
 ohos_unittest("context_container_test") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include/mock_bundle_manager.cpp",
-    "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include/sys_mgr_client_mock.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/app_loader.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/ohos_application.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
+    "${ability_runtime_native_path}/appkit/app/ohos_application.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_bundle_manager.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "unittest/context_container_test.cpp",
   ]
 
   configs = [ ":module_context_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
@@ -164,21 +164,21 @@ ohos_unittest("context_container_test") {
 ohos_unittest("context_deal_test") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include/mock_bundle_manager.cpp",
-    "${ability_runtime_path}/frameworks/kits/ability/native/test/mock/include/sys_mgr_client_mock.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/app_loader.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/ohos_application.cpp",
-    "mock/include/mock_ability_manager_client.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
+    "${ability_runtime_native_path}/appkit/app/ohos_application.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_bundle_manager.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include/mock_ability_manager_client.cpp",
     "unittest/context_deal_test.cpp",
   ]
 
   configs = [ ":module_context_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -199,10 +199,10 @@ ohos_unittest("context_deal_test") {
 ohos_unittest("application_impl_test") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_path}/frameworks/native/appkit/app/app_context.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/app_loader.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/application_impl.cpp",
-    "${ability_runtime_path}/frameworks/native/appkit/app/ohos_application.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_context.cpp",
+    "${ability_runtime_native_path}/appkit/app/app_loader.cpp",
+    "${ability_runtime_native_path}/appkit/app/application_impl.cpp",
+    "${ability_runtime_native_path}/appkit/app/ohos_application.cpp",
     "unittest/application_impl_test.cpp",
   ]
 
@@ -210,11 +210,11 @@ ohos_unittest("application_impl_test") {
 
   deps = [
     "${ABILITY_INNERKITS_PATH}/uri_permission:uri_permission_mgr",
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/frameworks/native/appkit:app_context",
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${ability_runtime_path}/interfaces/inner_api/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
@@ -255,7 +255,7 @@ ohos_unittest("ability_start_setting_test") {
   ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
     "//utils/native/base:utilsbase",
@@ -280,7 +280,7 @@ ohos_unittest("watchdog_test") {
   sources = [ "unittest/watchdog_test.cpp" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/appkit:appkit_native",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
     "//utils/native/base:utilsbase",
@@ -312,13 +312,5 @@ group("unittest") {
   ]
 
   deps += [ "unittest/ability_delegator:unittest" ]
-}
-
-group("moduletest") {
-  testonly = true
-
-  deps = []
-
-  deps += [ "moduletest/ability_delegator:moduletest" ]
 }
 ###############################################################################
