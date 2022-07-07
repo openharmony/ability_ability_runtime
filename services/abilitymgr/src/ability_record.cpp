@@ -48,6 +48,7 @@ const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbilityTokenCallback";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
+const std::string DLP_INDEX = "ohos.dlp.params.index";
 int64_t AbilityRecord::abilityRecordId = 0;
 int64_t AbilityRecord::g_abilityRecordEventId_ = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -118,6 +119,7 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
         abilityMgr->GetMaxRestartNum(restartMax_);
     }
     restartCount_ = restartMax_;
+    appIndex_ = want.GetIntParam(DLP_INDEX, 0);
 }
 
 AbilityRecord::~AbilityRecord()
@@ -136,6 +138,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
         abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
     CHECK_POINTER_AND_RETURN(abilityRecord, nullptr);
     abilityRecord->SetUid(abilityRequest.uid);
+    abilityRecord->SetAppIndex(abilityRequest.want.GetIntParam(DLP_INDEX, 0));
     if (!abilityRecord->Init()) {
         HILOG_ERROR("failed to init new ability record");
         return nullptr;
@@ -499,6 +502,7 @@ void AbilityRecord::SetWindowModeAndDisplayId(sptr<AbilityTransitionInfo> &info,
     auto mode = want->GetIntParam(Want::PARAM_RESV_WINDOW_MODE, -1);
     auto displayId = want->GetIntParam(Want::PARAM_RESV_DISPLAY_ID, -1);
     if (mode != -1) {
+        HILOG_INFO("%{public}s: origin window mode is %{public}d.", __func__, mode);
         info->mode_ = static_cast<uint32_t>(mode);
     }
     if (displayId != -1) {
@@ -512,6 +516,7 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const spt
     sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
     if (startOptions != nullptr) {
         info->mode_ = static_cast<uint32_t>(startOptions->GetWindowMode());
+        HILOG_INFO("%{public}s: window mode is %{public}d.", __func__, info->mode_);
         info->displayId_ = static_cast<uint64_t>(startOptions->GetDisplayID());
     } else {
         SetWindowModeAndDisplayId(info, want);
@@ -526,13 +531,15 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
     sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
     auto abilityStartSetting = abilityRequest.startSetting;
     if (abilityStartSetting) {
-        int base = 10; // Numerical base (radix) that determines the valid characters and their interpretation.
-        auto mode =
-            strtol(abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_MODE_KEY).c_str(), nullptr, base);
-        info->mode_ = static_cast<uint32_t>(mode);
-        auto displayId =
-            strtol(abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_DISPLAY_ID_KEY).c_str(), nullptr, base);
-        info->displayId_ = static_cast<uint64_t>(displayId);
+        auto windowMode = abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_MODE_KEY);
+        auto displayId = abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
+        try {
+            info->mode_ = static_cast<uint32_t>(std::stoi(windowMode));
+            info->displayId_ = static_cast<uint64_t>(std::stoi(displayId));
+        } catch (...) {
+            HILOG_WARN("windowMode: stoi(%{public}s) failed", windowMode.c_str());
+            HILOG_WARN("displayId: stoi(%{public}s) failed", displayId.c_str());
+        }
     } else {
         SetWindowModeAndDisplayId(info, std::make_shared<Want>(abilityRequest.want));
     }
@@ -1650,14 +1657,14 @@ void AbilityRecord::SetMinimizeReason(bool fromUser)
     minimizeReason_ = fromUser;
 }
 
-void AbilityRecord::SetDlp(bool isDlp)
+void AbilityRecord::SetAppIndex(const int32_t appIndex)
 {
-    isDlp_ = isDlp;
+    appIndex_ = appIndex;
 }
 
-bool AbilityRecord::IsDlp() const
+int32_t AbilityRecord::GetAppIndex() const
 {
-    return isDlp_;
+    return appIndex_;
 }
 
 bool AbilityRecord::IsMinimizeFromUser() const

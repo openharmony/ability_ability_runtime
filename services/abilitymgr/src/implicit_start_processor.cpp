@@ -61,9 +61,14 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         return ret;
     }
 
-    auto startAbilityTask = [imp = shared_from_this(), request, userId](const std::string& bundle,
-            const std::string& abilityName) {
+    auto startAbilityTask = [imp = shared_from_this(), request, userId,
+        identity = IPCSkeleton::ResetCallingIdentity()](const std::string& bundle, const std::string& abilityName) {
         HILOG_INFO("implicit start ability call back.");
+
+        auto oldIdentity = identity;
+        // reset calling indentity
+        IPCSkeleton::SetCallingIdentity(oldIdentity);
+
         AAFwk::Want targetWant = request.want;
         targetWant.SetAction("");
         targetWant.SetElementName(bundle, abilityName);
@@ -83,7 +88,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     if (dialogAppInfos.size() == 1) {
         auto info = dialogAppInfos.front();
         HILOG_INFO("ImplicitQueryInfos success, target ability: %{public}s", info.abilityName.data());
-        return startAbilityTask(info.bundleName, info.abilityName);
+        return IN_PROCESS_CALL(startAbilityTask(info.bundleName, info.abilityName));
     }
 
     HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose.");
@@ -94,8 +99,6 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos)
 {
     HILOG_DEBUG("%{public}s", __func__);
-    CHECK_TRUE_RETURN_RET(request.want.GetType().empty(), ERR_WANT_NO_TYPE, "need to set type into want.");
-   
     // get abilityinfos from bms
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);

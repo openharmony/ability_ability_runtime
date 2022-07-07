@@ -39,6 +39,7 @@ constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const int DEFAULT_DMS_MISSION_ID = -1;
+const std::string DLP_INDEX = "ohos.dlp.params.index";
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -349,8 +350,10 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
 
     // no reused mission, create a new one.
     bool isSingleton = abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON;
+    int32_t appIndex = abilityRequest.want.GetIntParam(DLP_INDEX, 0);
     std::string missionName = isSingleton ? AbilityUtil::ConvertBundleNameSingleton(
-        abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName) :
+        abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name,
+        abilityRequest.abilityInfo.moduleName, appIndex) :
         abilityRequest.abilityInfo.bundleName;
 
     // try reuse mission info
@@ -490,8 +493,9 @@ std::shared_ptr<Mission> MissionListManager::GetReusedMission(const AbilityReque
     }
 
     std::shared_ptr<Mission> reUsedMission = nullptr;
+    int32_t appIndex = abilityRequest.want.GetIntParam(DLP_INDEX, 0);
     std::string missionName = AbilityUtil::ConvertBundleNameSingleton(abilityRequest.abilityInfo.bundleName,
-        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
+        abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName, appIndex);
 
     // find launcher first.
     if (abilityRequest.abilityInfo.applicationInfo.isLauncherApp) {
@@ -1231,7 +1235,7 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
             terminateAbilityList_.remove(it);
             // update inner mission info time
             bool excludeFromMissions = abilityRecord->GetAbilityInfo().excludeFromMissions;
-            if (abilityRecord->IsDlp() || abilityRecord->GetAbilityInfo().removeMissionAfterTerminate ||
+            if ((abilityRecord->GetAppIndex() != 0) || abilityRecord->GetAbilityInfo().removeMissionAfterTerminate ||
                 excludeFromMissions) {
                 RemoveMissionLocked(abilityRecord->GetMissionId(), excludeFromMissions);
                 return;
@@ -1488,7 +1492,7 @@ void MissionListManager::UpdateMissionSnapshot(const std::shared_ptr<AbilityReco
     }
     int32_t missionId = abilityRecord->GetMissionId();
     MissionSnapshot snapshot;
-    snapshot.isPrivate = abilityRecord->IsDlp();
+    snapshot.isPrivate = (abilityRecord->GetAppIndex() != 0);
     DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionSnapshot(missionId, abilityRecord->GetToken(),
         snapshot);
     if (listenerController_) {
@@ -1960,7 +1964,7 @@ void MissionListManager::HandleAbilityDiedByDefault(std::shared_ptr<AbilityRecor
 
     // update running state.
     if (!ability->IsUninstallAbility()) {
-        if (ability->IsDlp() || ability->GetAbilityInfo().removeMissionAfterTerminate ||
+        if ((ability->GetAppIndex() != 0) || ability->GetAbilityInfo().removeMissionAfterTerminate ||
             ability->GetAbilityInfo().excludeFromMissions) {
             RemoveMissionLocked(mission->GetMissionId(), ability->GetAbilityInfo().excludeFromMissions);
         } else {

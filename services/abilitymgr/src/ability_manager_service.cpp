@@ -330,8 +330,6 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
         return ERR_INVALID_VALUE;
     }
 
-    HILOG_INFO("%{public}s", __func__);
-
     HILOG_INFO("Start ability come, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
 
@@ -822,7 +820,6 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
 int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
-    AbilityUtil::HandleDlpApp(const_cast<Want &>(want));
     HILOG_INFO("Start extension ability come, bundlename: %{public}s, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
     AAFWK::EventInfo eventInfo;
@@ -2887,6 +2884,11 @@ int AbilityManagerService::GenerateAbilityRequest(
     const Want &want, int requestCode, AbilityRequest &request, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord && abilityRecord->GetAppIndex() != 0 &&
+        abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
+        (const_cast<Want &>(want)).SetParam(DLP_INDEX, abilityRecord->GetAppIndex());
+    }
     request.want = want;
     request.requestCode = requestCode;
     request.callerToken = callerToken;
@@ -2995,6 +2997,11 @@ int32_t AbilityManagerService::ImplicitStartAbilityInner(const Want &targetWant,
 int AbilityManagerService::GenerateExtensionAbilityRequest(
     const Want &want, AbilityRequest &request, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord && abilityRecord->GetAppIndex() != 0 &&
+        abilityRecord->GetApplicationInfo().bundleName == want.GetElement().GetBundleName()) {
+        (const_cast<Want &>(want)).SetParam(DLP_INDEX, abilityRecord->GetAppIndex());
+    }
     request.want = want;
     request.callerToken = callerToken;
     request.startSetting = nullptr;
