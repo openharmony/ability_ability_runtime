@@ -66,8 +66,8 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    void OnStartAms();
-    void OnStopAms();
+    void OnStartAms() const;
+    void OnStopAms() const;
     static constexpr int TEST_WAIT_TIME = 100000;
 
 public:
@@ -76,7 +76,7 @@ public:
     std::shared_ptr<AbilityManagerService> abilityMs_ = DelayedSingleton<AbilityManagerService>::GetInstance();
 };
 
-void StartAbilityImplicitModuleTest::OnStartAms()
+void StartAbilityImplicitModuleTest::OnStartAms() const
 {
     if (abilityMs_) {
         if (abilityMs_->state_ == ServiceRunningState::STATE_RUNNING) {
@@ -118,7 +118,7 @@ void StartAbilityImplicitModuleTest::OnStartAms()
     GTEST_LOG_(INFO) << "OnStart fail";
 }
 
-void StartAbilityImplicitModuleTest::OnStopAms()
+void StartAbilityImplicitModuleTest::OnStopAms() const
 {
     abilityMs_->currentMissionListManager_->launcherList_->missions_.clear();
     abilityMs_->currentMissionListManager_->defaultStandardList_->missions_.clear();
