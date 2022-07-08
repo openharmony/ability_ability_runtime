@@ -1668,20 +1668,9 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
 
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int userId = wantSenderInfo.userId;
-    bool remote = false;
-    if (!wantSenderInfo.allWants.empty()) {
-        std::string deviceId = wantSenderInfo.allWants[0].want.GetDeviceId();
-        std::string localDeviceId;
-        if (GetLocalDeviceId(localDeviceId) &&
-            (!deviceId.empty() && localDeviceId != deviceId)) {
-            remote = true;
-        }
-        HILOG_INFO("remote = %{public}d, localDeviceId = %{private}s, deviceId = %{private}s",
-            remote, localDeviceId.c_str(), deviceId.c_str());
-    }
-
+    std::string apl;
     AppExecFwk::BundleInfo bundleInfo;
-    if (!wantSenderInfo.bundleName.empty() && !remote) {
+    if (!wantSenderInfo.bundleName.empty()) {
         bool bundleMgrResult = false;
         if (wantSenderInfo.userId < 0) {
 #ifdef OS_ACCOUNT_PART_ENABLED
@@ -1695,14 +1684,12 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
         }
         bundleMgrResult = IN_PROCESS_CALL(bms->GetBundleInfo(wantSenderInfo.bundleName,
             AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
-        if (!bundleMgrResult) {
-            HILOG_ERROR("GetBundleInfo is fail.");
-            return nullptr;
+        if (bundleMgrResult) {
+            apl = bundleInfo.applicationInfo.appPrivilegeLevel;
         }
     }
 
     HILOG_INFO("AbilityManagerService::GetWantSender: bundleName = %{public}s", wantSenderInfo.bundleName.c_str());
-    auto apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     return pendingWantManager_->GetWantSender(callerUid, bundleInfo.uid, apl, wantSenderInfo, callerToken);
 }
 
@@ -3796,25 +3783,31 @@ int AbilityManagerService::CheckCallPermissions(const AbilityRequest &abilityReq
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
 
+    std::string bundleName;
+    bool result = IN_PROCESS_CALL(bms->GetBundleNameForUid(callerUid, bundleName));
+    if (!result) {
+        HILOG_ERROR("GetBundleNameForUid from bms fail.");
+        return RESOLVE_CALL_NO_PERMISSIONS;
+    }
+    AppExecFwk::ApplicationInfo callerAppInfo;
+    result = IN_PROCESS_CALL(
+        bms->GetApplicationInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, GetUserId(), callerAppInfo));
+    if (!result) {
+        HILOG_ERROR("GetApplicationInfo from bms fail.");
+        return RESOLVE_CALL_NO_PERMISSIONS;
+    }
+
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    auto apl = abilityRequest.appInfo.appPrivilegeLevel;
+    auto apl = callerAppInfo.appPrivilegeLevel;
     if (!isSaCall && apl != AbilityUtil::SYSTEM_BASIC && apl != AbilityUtil::SYSTEM_CORE) {
-        HILOG_DEBUG("caller is common app.");
-        std::string bundleName;
-        bool result = IN_PROCESS_CALL(bms->GetBundleNameForUid(callerUid, bundleName));
-        if (!result) {
-            HILOG_ERROR("GetBundleNameForUid from bms fail.");
-            return RESOLVE_CALL_NO_PERMISSIONS;
-        }
+        HILOG_DEBUG("caller is normal app.");
         if (bundleName != abilityInfo.bundleName && callerUid != targetUid) {
-            HILOG_ERROR("the bundlename of caller is different from target one, caller: %{public}s "
+            HILOG_ERROR("the bundle name of caller is different from target one, caller: %{public}s "
                         "target: %{public}s",
                 bundleName.c_str(),
                 abilityInfo.bundleName.c_str());
             return RESOLVE_CALL_NO_PERMISSIONS;
         }
-    } else {
-        HILOG_DEBUG("caller is systemapp or system ability.");
     }
     HILOG_DEBUG("the caller has permission to resolve the callproxy of common ability.");
     // check whether the target ability is singleton mode and page type.
