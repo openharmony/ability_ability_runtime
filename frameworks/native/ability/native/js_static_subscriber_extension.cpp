@@ -35,7 +35,7 @@ constexpr size_t ARGC_ONE = 1;
 
 using namespace OHOS::AppExecFwk;
 
-void* DetachStaticSubscriberExtensionContext(NativeEngine* engine, void* value, void*)
+void* DetachStaticSubscriberExtensionContext(NativeEngine*, void* value, void*)
 {
     HILOG_INFO("DetachStaticSubscriberExtensionContext");
     return value;

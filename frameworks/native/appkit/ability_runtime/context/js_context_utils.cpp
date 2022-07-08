@@ -28,7 +28,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr char BASE_CONTEXT_NAME[] = "__base_context_ptr__";
 
-void* DetachBaseContext(NativeEngine* engine, void* value, void*)
+void* DetachBaseContext(NativeEngine*, void* value, void*)
 {
     HILOG_INFO("DetachBaseContext");
     return value;
@@ -44,7 +44,7 @@ NativeValue* AttachBaseContext(NativeEngine* engine, void* value, void*)
     return JsRuntime::LoadSystemModuleByEngine(engine, "application.Context", &object, 1)->Get();
 }
 
-void* DetachApplicationContext(NativeEngine* engine, void* value, void*)
+void* DetachApplicationContext(NativeEngine*, void* value, void*)
 {
     HILOG_INFO("DetachApplicationContext");
     return value;

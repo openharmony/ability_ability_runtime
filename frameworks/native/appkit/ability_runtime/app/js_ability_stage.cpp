@@ -26,7 +26,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-void* DetachAbilityStageContext(NativeEngine* engine, void* value, void*)
+void* DetachAbilityStageContext(NativeEngine*, void* value, void*)
 {
     HILOG_INFO("DetachAbilityStageContext");
     return value;
