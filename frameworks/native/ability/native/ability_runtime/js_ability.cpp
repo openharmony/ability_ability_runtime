@@ -42,7 +42,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-void *DetachJsAbilityContext(NativeEngine * engine, void *value, void *)
+void *DetachJsAbilityContext(NativeEngine *, void *value, void *)
 {
     HILOG_INFO("DetachJsAbilityContext");
     return value;
