@@ -35,7 +35,7 @@ constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr int32_t ERROR_CODE_ONE = 1;
 
-void* DetachBaseContext(NativeEngine* engine, void* value, void*)
+void* DetachBaseContext(NativeEngine*, void* value, void*)
 {
     HILOG_INFO("DetachBaseContext");
     return value;
