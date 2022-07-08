@@ -42,13 +42,13 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-void *DetachJsAbilityContext(NativeEngine * engine, void *value, void *hint)
+void *DetachJsAbilityContext(NativeEngine * engine, void *value, void *)
 {
     HILOG_INFO("DetachJsAbilityContext");
     return value;
 }
 
-NativeValue *AttachJsAbilityContext(NativeEngine *engine, void *value, void *hint)
+NativeValue *AttachJsAbilityContext(NativeEngine *engine, void *value, void *)
 {
     HILOG_INFO("AttachJsAbilityContext");
     std::shared_ptr<AbilityContext> context(reinterpret_cast<AbilityContext *>(value));
