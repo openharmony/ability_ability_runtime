@@ -30,7 +30,6 @@ public:
     {}
     ~ApplicationDataManagerTest()
     {}
-    ApplicationDataManager appDataManagerTest_ = nullptr;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     static bool Flag;
@@ -52,7 +51,6 @@ void ApplicationDataManagerTest::TearDownTestCase(void)
 
 void ApplicationDataManagerTest::SetUp(void)
 {
-    appDataManagerTest_ = AppExecFwk::ApplicationDataManager::GetInstance();
 }
 
 void ApplicationDataManagerTest::TearDown(void)
@@ -73,10 +71,9 @@ HWTEST_F(ApplicationDataManagerTest, ApplicationDataManager_AddErrorObservers_00
 {
     GTEST_LOG_(INFO) << "ApplicationDataManager_AddErrorObservers_001 start";
 
-    EXPECT_NE(appDataManagerTest_, nullptr);
     std::shared_ptr<MyObserver> observer = std::make_shared<MyObserver>();
-    appDataManagerTest_.AddErrorObserver(observer);
-    appDataManagerTest_.NotifyUnhandledException("test");
+    ApplicationDataManager::GetInstance().AddErrorObserver(observer);
+    ApplicationDataManager::GetInstance().NotifyUnhandledException("test");
     EXPECT_EQ(true, ApplicationDataManagerTest::Flag);
     GTEST_LOG_(INFO) << "ApplicationDataManager_AddErrorObservers_001 end";
 }
