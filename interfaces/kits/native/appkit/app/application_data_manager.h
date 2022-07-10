@@ -31,7 +31,7 @@ public:
 
 private:
     ApplicationDataManager();
-    virtual ~ApplicationDataManager();
+    ~ApplicationDataManager();
     DISALLOW_COPY_AND_MOVE(ApplicationDataManager);
     std::weak_ptr<IErrorObserver> errorObserver_;
 };
