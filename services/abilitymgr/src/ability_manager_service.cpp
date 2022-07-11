@@ -459,6 +459,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             return result;
         }
     }
+
 #ifdef SUSPEND_MANAGER_ENABLE
     auto bms = AbilityUtil::GetBundleManager();
     if (bms) {
