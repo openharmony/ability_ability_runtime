@@ -460,17 +460,16 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
 
-#ifdef SUSPEND_MANAGER_ENABLE
-    auto bms = AbilityUtil::GetBundleManager();
-    if (bms) {
-        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-            bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
-            abilityInfo.bundleName, "THAW_BY_START_ABILITY");
-    }
-#endif // SUSPEND_MANAGER_ENABLE
-
     UpdateCallerInfo(abilityRequest.want);
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
+#ifdef SUSPEND_MANAGER_ENABLE
+        auto bms = AbilityUtil::GetBundleManager();
+        if (bms) {
+            SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
+                bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
+                abilityInfo.bundleName, "THAW_BY_START_NOT_PAGE_ABILITY");
+        }
+#endif // SUSPEND_MANAGER_ENABLE
         auto connectManager = GetConnectManagerByUserId(validUserId);
         if (!connectManager) {
             HILOG_ERROR("connectManager is nullptr. userId=%{public}d", validUserId);
@@ -489,6 +488,14 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_ERROR("missionListManager is nullptr. userId=%{public}d", validUserId);
         return ERR_INVALID_VALUE;
     }
+#ifdef SUSPEND_MANAGER_ENABLE
+    auto bms = AbilityUtil::GetBundleManager();
+    if (bms) {
+        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
+            bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
+            abilityInfo.bundleName, "THAW_BY_START_PAGE_ABILITY");
+    }
+#endif // SUSPEND_MANAGER_ENABLE
     HILOG_DEBUG("Start ability, name is %{public}s.", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
 }
