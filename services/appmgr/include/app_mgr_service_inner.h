@@ -529,6 +529,13 @@ public:
      * @return
      */
     void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
+
+    /**
+     * KillApplicationByAppRunningRecord
+     *
+     * @param appRecord, the app information.
+     */
+    void KillApplicationByAppRunningRecord(const std::shared_ptr<AppRunningRecord> &appRecord);
 private:
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount);
