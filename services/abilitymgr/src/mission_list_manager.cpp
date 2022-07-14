@@ -1094,7 +1094,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
         auto self(shared_from_this());
         auto task = [abilityRecord, self]() {
             HILOG_WARN("Disconnect ability terminate timeout.");
-            self->DelayCompleteTerminate(terminateAbility);
+            self->DelayCompleteTerminate(abilityRecord);
         };
         abilityRecord->Terminate(task);
     }
@@ -1461,7 +1461,8 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
     AppExecFwk::RunningProcessInfo processInfo = {};
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByToken(ability->GetToken(), processInfo);
     if (processInfo.pid_ == 0) {
-        HILOG_ERROR("error: the ability[%{public}s], app may fork fail or not running.", ability->GetAbilityInfo().name.data());
+        HILOG_ERROR("error: the ability[%{public}s], app may fork fail or not running.",
+            ability->GetAbilityInfo().name.data());
         return;
     }
     std::string msgContent = "ability:" + ability->GetAbilityInfo().name + " ";
