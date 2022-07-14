@@ -2187,7 +2187,6 @@ void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunnin
 void AppMgrServiceInner::KillApplicationByAppRunningRecord(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     HILOG_DEBUG("Kill application by appRunningRecord.");
-
     if (!appRecord) {
         HILOG_DEBUG("appRecord is nullptr.");
         return;
