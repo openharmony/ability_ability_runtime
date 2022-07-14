@@ -2184,6 +2184,22 @@ void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunnin
     }
 }
 
+void AppMgrServiceInner::KillApplicationByAppRunningRecord(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HILOG_DEBUG("Kill application by appRunningRecord.");
+
+    if (!appRecord) {
+        HILOG_DEBUG("appRecord is nullptr.");
+        return;
+    }
+
+    auto pid = appRecord->GetPriorityObject()->GetPid();
+    auto result = KillProcessByPid(pid);
+    if (result < 0) {
+        HILOG_WARN("Kill application by appRunningRecord, pid: %{public}d", pid);
+    }
+}
+
 void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_t eventId)
 {
     HILOG_DEBUG("called AppMgrServiceInner SendHiSysEvent!");
