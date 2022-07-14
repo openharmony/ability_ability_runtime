@@ -120,7 +120,6 @@ const std::string DMS_PROCESS_NAME = "distributedsched";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 const int DEFAULT_DMS_MISSION_ID = -1;
-const int DEFAULT_REQUEST_CODE = -1;
 const std::map<std::string, AbilityManagerService::DumpKey> AbilityManagerService::dumpMap = {
     std::map<std::string, AbilityManagerService::DumpKey>::value_type("--all", KEY_DUMP_ALL),
     std::map<std::string, AbilityManagerService::DumpKey>::value_type("-a", KEY_DUMP_ALL),
@@ -367,23 +366,14 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
     int32_t oriValidUserId = GetValidUserId(userId);
     int32_t validUserId = oriValidUserId;
-    auto promise = std::make_shared<std::promise<int32_t>>();
-    FreeInstallInfo info = {
-        .want = want,
-        .userId = validUserId,
-        .requestCode = requestCode,
-        .callerToken = callerToken,
-        .promise = promise
-    };
 
     if (callerToken != nullptr) {
         if (CheckIfOperateRemote(want)) {
             if (AbilityUtil::IsStartFreeInstall(want)) {
                 return freeInstallManager_ == nullptr ? ERR_INVALID_VALUE :
-                    freeInstallManager_->StartRemoteFreeInstall(want, requestCode,
-                        validUserId, callerToken, true);
+                    freeInstallManager_->StartRemoteFreeInstall(want, requestCode, validUserId, callerToken);
             }
-            if (requestCode == DEFAULT_REQUEST_CODE) {
+            if (!want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
                 HILOG_INFO("%{public}s: try to StartAbility", __func__);
                 return StartRemoteAbility(want, requestCode);
             }
@@ -391,15 +381,18 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             if (missionId < 0) {
                 return ERR_INVALID_VALUE;
             }
-            Want* newWant = const_cast<Want*>(&want);
-            newWant->SetParam(DMS_MISSION_ID, missionId);
+            Want remoteWant = want;
+            remoteWant.SetParam(DMS_MISSION_ID, missionId);
             HILOG_INFO("%{public}s: try to StartAbilityForResult", __func__);
-            return StartRemoteAbility(*newWant, requestCode);
+            return StartRemoteAbility(remoteWant, requestCode);
         }
     }
     if (AbilityUtil::IsStartFreeInstall(want) && freeInstallManager_ != nullptr) {
-        int ret = freeInstallManager_->StartFreeInstall(
-            want, validUserId, requestCode, callerToken, CheckIfOperateRemote(want));
+        Want localWant = want;
+        if (!localWant.GetDeviceId().empty()) {
+            localWant.SetDeviceId("");
+        }
+        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken);
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -514,8 +507,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        int ret = freeInstallManager_->StartFreeInstall(
-            want, validUserId, requestCode, callerToken, CheckIfOperateRemote(want));
+        int32_t ret = freeInstallManager_->StartFreeInstall(want, validUserId, requestCode, callerToken);
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -665,8 +657,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        int ret = freeInstallManager_->StartFreeInstall(
-            want, validUserId, requestCode, callerToken, CheckIfOperateRemote(want));
+        int32_t ret = freeInstallManager_->StartFreeInstall(want, validUserId, requestCode, callerToken);
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -1356,7 +1347,7 @@ int AbilityManagerService::ConnectAbility(
     }
 
     if (AbilityUtil::IsStartFreeInstall(want) && freeInstallManager_ != nullptr) {
-        int result = freeInstallManager_->ConnectFreeInstall(want, validUserId, callerToken, localDeviceId, getpid());
+        int result = freeInstallManager_->ConnectFreeInstall(want, validUserId, callerToken, localDeviceId);
         if (result != ERR_OK) {
             eventInfo.errCode = result;
             AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
