@@ -783,6 +783,8 @@ public:
 
     bool GetLocalDeviceId(std::string& localDeviceId);
 
+    int JudgeAbilityVisibleControl(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid = -1);
+
 #ifdef SUPPORT_GRAPHICS
     int32_t ImplicitStartAbilityInner(const Want &targetWant, const AbilityRequest &request, int32_t userId);
 #endif
@@ -1002,6 +1004,8 @@ private:
     int VerifyMissionPermission();
 
     int VerifyAccountPermission(int32_t userId);
+
+    bool CheckCallerEligibility(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid);
 
     using DumpFuncType = void (AbilityManagerService::*)(const std::string &args, std::vector<std::string> &info);
     std::map<uint32_t, DumpFuncType> dumpFuncMap_;
