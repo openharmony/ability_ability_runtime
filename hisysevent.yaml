@@ -22,7 +22,7 @@ LIFECYCLE_TIMEOUT:
   MSG: {type: STRING, desc: application event message}
 
 APP_LIFECYCLE_TIMEOUT:
-  __BASE: {type: FAULT, level: CRITICAL, tag: STABILITY, desc: ability timeout}
+  __BASE: {type: FAULT, level: CRITICAL, tag: STABILITY, desc: application timeout}
   PID: {type: INT32, desc: pid}
   UID: {type: INT32, desc: uid}
   PACKAGE_NAME: {type: STRING, desc: package name}
