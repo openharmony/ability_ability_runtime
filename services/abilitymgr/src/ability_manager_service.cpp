@@ -1432,7 +1432,7 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     }
 
     AbilityRequest abilityRequest;
-#ifdef SUPPORT_GRAPHICS
+#if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_IMPLICIT_CONNECT)
     if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
         abilityRequest.Voluation(want, DEFAULT_INVAL_VALUE, callerToken);
         abilityRequest.callType = AbilityCallType::CONNECT_ABILITY_TYPE;
