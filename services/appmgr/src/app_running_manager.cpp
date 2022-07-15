@@ -401,7 +401,6 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             }
             appMgrServiceInner->NotifyAppStatus(appRecord->GetBundleName(),
                 EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-
         }
     }
 }
