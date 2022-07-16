@@ -462,6 +462,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     UpdateCallerInfo(abilityRequest.want);
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
+        auto connectManager = GetConnectManagerByUserId(validUserId);
+        if (!connectManager) {
+            HILOG_ERROR("connectManager is nullptr. userId=%{public}d", validUserId);
+            return ERR_INVALID_VALUE;
+        }
+        HILOG_DEBUG("Start service or extension, name is %{public}s.", abilityInfo.name.c_str());
 #ifdef SUSPEND_MANAGER_ENABLE
         auto bms = AbilityUtil::GetBundleManager();
         if (bms) {
@@ -470,12 +476,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
                 abilityInfo.bundleName, "THAW_BY_START_NOT_PAGE_ABILITY");
         }
 #endif // SUSPEND_MANAGER_ENABLE
-        auto connectManager = GetConnectManagerByUserId(validUserId);
-        if (!connectManager) {
-            HILOG_ERROR("connectManager is nullptr. userId=%{public}d", validUserId);
-            return ERR_INVALID_VALUE;
-        }
-        HILOG_DEBUG("Start service or extension, name is %{public}s.", abilityInfo.name.c_str());
         return connectManager->StartAbility(abilityRequest);
     }
 
