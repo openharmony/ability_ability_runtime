@@ -529,6 +529,15 @@ public:
      * @return
      */
     void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
+
+    /**
+     * KillProcessByPid, Kill process by PID.
+     *
+     * @param pid_t, the app record pid.
+     *
+     * @return ERR_OK, return back success，others fail.
+     */
+    int32_t KillProcessByPid(const pid_t pid) const;
 private:
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount);
@@ -540,10 +549,12 @@ private:
 
     bool GetBundleInfo(const std::string &bundleName, BundleInfo &bundleInfo);
 
-    void MakeProcessName(std::string &processName, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        const std::shared_ptr<ApplicationInfo> &appInfo, HapModuleInfo &hapModuleInfo, int32_t appIndex);
+    void MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo,
+        const HapModuleInfo &hapModuleInfo, int32_t appIndex, std::string &processName);
+
     void MakeProcessName(
-        std::string &processName, const std::shared_ptr<ApplicationInfo> &appInfo, HapModuleInfo &hapModuleInfo);
+        const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo, std::string &processName);
     /**
      * StartAbility, load the ability that needed to be started(Start on the basis of the original process).
      *  Start on a new boot process
@@ -622,15 +633,6 @@ private:
      * @return ERR_OK, return back success, others fail.
      */
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, const int userId);
-
-    /**
-     * KillProcessByPid, Kill process by PID.
-     *
-     * @param pid_t, the app record pid.
-     *
-     * @return ERR_OK, return back success，others fail.
-     */
-    int32_t KillProcessByPid(const pid_t pid) const;
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
