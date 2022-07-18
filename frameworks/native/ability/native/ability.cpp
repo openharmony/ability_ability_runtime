@@ -727,7 +727,7 @@ void Ability::OnConfigurationUpdatedNotify(const Configuration &changeConfigurat
     HILOG_INFO("%{public}s Notify Ability Subclass.", __func__);
 }
 
-void Ability::InitConfigurationProperties(const Configuration& changeConfiguration, std::string& language, 
+void Ability::InitConfigurationProperties(const Configuration& changeConfiguration, std::string& language,
     std::string& colormode, std::string& hasPointerDevice)
 {
     if (setting_) {
