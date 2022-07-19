@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_APPLICATION_ANR_LISTENER_H
-#define OHOS_AAFWK_APPLICATION_ANR_LISTENER_H
+#ifndef OHOS_ABILITY_RUNTIME_APPLICATION_ANR_LISTENER_H
+#define OHOS_ABILITY_RUNTIME_APPLICATION_ANR_LISTENER_H
 
 #include <sys/types.h>
 
@@ -34,4 +34,4 @@ public:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif
+#endif  // OHOS_ABILITY_RUNTIME_APPLICATION_ANR_LISTENER_H
