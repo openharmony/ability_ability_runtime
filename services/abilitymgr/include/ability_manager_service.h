@@ -783,6 +783,8 @@ public:
 
     bool GetLocalDeviceId(std::string& localDeviceId);
 
+    int JudgeAbilityVisibleControl(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid = -1);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -804,6 +806,7 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT = 5000;   // ms
     static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
     static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
+    static constexpr uint32_t KILL_TIMEOUT = 3000;           // ms
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
@@ -932,6 +935,7 @@ private:
     bool IsExistFile(const std::string &path);
 
     int CheckCallPermissions(const AbilityRequest &abilityRequest);
+    bool CheckCallerEligibility(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid);
     bool JudgeMultiUserConcurrency(const int32_t userId);
     /**
      * dumpsys info
