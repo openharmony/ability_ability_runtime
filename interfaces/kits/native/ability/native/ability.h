@@ -1702,7 +1702,7 @@ private:
     void SetLaunchParam(const AAFwk::LaunchParam &launchParam);
 
     void InitConfigurationProperties(const Configuration& changeConfiguration, std::string& language,
-        std::string& colormode, std::string& hasPointerDevice);
+        std::string& colormode);
 
     std::shared_ptr<ContinuationHandler> continuationHandler_ = nullptr;
     std::shared_ptr<ContinuationManager> continuationManager_ = nullptr;
