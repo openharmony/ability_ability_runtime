@@ -343,7 +343,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
 
-    if (!PermissionVerificationUtils::VerifyDlpPermission(const_cast<Want &>(want)) ||
+    if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
         return CHECK_PERMISSION_FAILED;
@@ -500,7 +500,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY,
         HiSysEventType::BEHAVIOR, eventInfo);
 
-    if (!PermissionVerificationUtils::VerifyDlpPermission(const_cast<Want &>(want)) ||
+    if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
@@ -651,7 +651,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY,
         HiSysEventType::BEHAVIOR, eventInfo);
 
-    if (!PermissionVerificationUtils::VerifyDlpPermission(const_cast<Want &>(want)) ||
+    if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
@@ -838,7 +838,7 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
     eventInfo.extensionType = (int32_t)extensionType;
     AAFWK::EventReport::SendExtensionEvent(AAFWK::START_SERVICE,
         HiSysEventType::BEHAVIOR, eventInfo);
-    if (!PermissionVerificationUtils::VerifyDlpPermission(const_cast<Want &>(want)) ||
+    if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
@@ -932,7 +932,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     eventInfo.extensionType = (int32_t)extensionType;
     AAFWK::EventReport::SendExtensionEvent(AAFWK::STOP_SERVICE,
         HiSysEventType::BEHAVIOR, eventInfo);
-    if (!PermissionVerificationUtils::VerifyDlpPermission(const_cast<Want &>(want)) ||
+    if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
@@ -1348,7 +1348,7 @@ int AbilityManagerService::ConnectAbility(
     AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE, HiSysEventType::BEHAVIOR,
         eventInfo);
 
-    if (!PermissionVerificationUtils::VerifyDlpPermission(const_cast<Want &>(want)) ||
+    if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
