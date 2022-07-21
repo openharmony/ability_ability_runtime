@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_FREE_INSTALL_MANAGER_H
-#define OHOS_AAFWK_FREE_INSTALL_MANAGER_H
+#ifndef OHOS_ABILITY_RUNTIME_FREE_INSTALL_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_FREE_INSTALL_MANAGER_H
 
 #include <future>
 
@@ -134,7 +134,9 @@ private:
     int NotifyDmsCallback(const Want &want, int resultCode);
     bool IsTopAbility(const sptr<IRemoteObject> &callerToken);
     void NotifyFreeInstallResult(const Want &want, int resultCode);
+    FreeInstallInfo BuildFreeInstallInfo(const Want &want, int32_t userId, int requestCode,
+        const sptr<IRemoteObject> &callerToken);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_FREE_INSTALL_MANAGER_H
+#endif  // OHOS_ABILITY_RUNTIME_FREE_INSTALL_MANAGER_H
