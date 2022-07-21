@@ -22,6 +22,7 @@
 #include <iremote_stub.h>
 
 #include "hilog_wrapper.h"
+#include "iconnection_observer.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -53,6 +54,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int DoAbilityBackground(const sptr<IRemoteObject> &token, uint32_t flag) override;
+
+    virtual int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
+
+    virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
 
 private:
     void FirstStepInit();
