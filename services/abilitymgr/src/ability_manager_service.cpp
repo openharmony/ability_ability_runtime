@@ -2932,6 +2932,10 @@ int AbilityManagerService::GenerateAbilityRequest(
 
     HILOG_INFO("GenerateAbilityRequest, moduleName: %{public}s.", request.abilityInfo.moduleName.c_str());
     request.want.SetModuleName(request.abilityInfo.moduleName);
+    auto element = request.want.GetElement();
+    if (element.GetBundleName().empty() || element.GetAbilityName().empty()) {
+        request.want.SetElementName(request.abilityInfo.bundleName, request.abilityInfo.name);
+    }
 
     return ERR_OK;
 }
