@@ -38,6 +38,10 @@ public:
 
     bool VerifyDlpPermission(Want &want);
 
+    int VerifyAccountPermission();
+
+    int VerifyMissionPermission();
+
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
     unsigned int GetCallingTokenID();
