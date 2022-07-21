@@ -36,7 +36,7 @@ public:
 
     bool VerifyControllerPerm();
 
-    bool VerifyDlpPermission(Want &want) const;
+    bool VerifyDlpPermission(Want &want);
 
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);

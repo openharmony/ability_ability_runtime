@@ -96,7 +96,7 @@ bool PermissionVerification::VerifyControllerPerm()
     return false;
 }
 
-bool PermissionVerification::VerifyDlpPermission(Want &want) const
+bool PermissionVerification::VerifyDlpPermission(Want &want)
 {
     if (want.GetIntParam(DLP_PARAMS_INDEX, 0) == 0) {
         want.RemoveParam(DLP_PARAMS_SECURITY_FLAG);
