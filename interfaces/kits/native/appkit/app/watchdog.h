@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_WATCH_DOG_H
-#define FOUNDATION_APPEXECFWK_WATCH_DOG_H
+#ifndef OHOS_ABILITY_RUNTIME_WATCHDOG_H
+#define OHOS_ABILITY_RUNTIME_WATCHDOG_H
 
 #include <string>
 #include <mutex>
@@ -60,6 +60,13 @@ public:
 
     /**
      *
+     * @brief Get StopWatchDog flag.
+     *
+     */
+    bool IsStopWatchDog();
+
+    /**
+     *
      * @brief Get the eventHandler of watchdog thread.
      *
      * @return Returns the eventHandler of watchdog thread.
@@ -86,12 +93,15 @@ protected:
 
 private:
     bool Timer();
+    bool WaitForDuration(uint32_t duration);
 
     std::atomic_bool stopWatchDog_ = false;
     std::atomic<bool> timeOut_ = false;
     std::shared_ptr<ApplicationInfo> applicationInfo_ = nullptr;
     std::shared_ptr<std::thread> watchDogThread_ = nullptr;
     std::shared_ptr<EventRunner> watchDogRunner_ = nullptr;
+    std::mutex cvMutex_;
+    std::condition_variable cvWatchDog_;
     static bool appMainThreadIsAlive_;
     static std::shared_ptr<EventHandler> appMainHandler_;
     static std::shared_ptr<WatchDog> currentHandler_;
@@ -107,4 +117,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_WATCH_DOG_H
+#endif  // OHOS_ABILITY_RUNTIME_WATCHDOG_H
