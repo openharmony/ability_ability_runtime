@@ -40,7 +40,7 @@ public:
 
     int VerifyAccountPermission();
 
-    int VerifyMissionPermission();
+    bool VerifyMissionPermission();
 
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);

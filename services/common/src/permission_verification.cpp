@@ -126,17 +126,17 @@ int PermissionVerification::VerifyAccountPermission()
     return CHECK_PERMISSION_FAILED;
 }
 
-int PermissionVerification::VerifyMissionPermission()
+bool PermissionVerification::VerifyMissionPermission()
 {
     if (IsSACall()) {
-        return ERR_OK;
+        return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
         HILOG_DEBUG("%{public}s: Permission verification succeeded.", __func__);
-        return ERR_OK;
+        return true;
     }
     HILOG_ERROR("%{public}s: Permission verification failed", __func__);
-    return CHECK_PERMISSION_FAILED;
+    return false;
 }
 
 unsigned int PermissionVerification::GetCallingTokenID()
