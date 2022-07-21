@@ -15,6 +15,7 @@
 
 #include "permission_verification.h"
 
+#include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
@@ -111,6 +112,31 @@ bool PermissionVerification::VerifyDlpPermission(Want &want)
     }
     HILOG_ERROR("%{public}s: Permission verification failed", __func__);
     return false;
+}
+
+int PermissionVerification::VerifyAccountPermission()
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)) {
+        return ERR_OK;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return CHECK_PERMISSION_FAILED;
+}
+
+int PermissionVerification::VerifyMissionPermission()
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        HILOG_DEBUG("%{public}s: Permission verification succeeded.", __func__);
+        return ERR_OK;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return CHECK_PERMISSION_FAILED;
 }
 
 unsigned int PermissionVerification::GetCallingTokenID()
