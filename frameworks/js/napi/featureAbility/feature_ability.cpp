@@ -22,7 +22,9 @@
 #include "ability_process.h"
 #include "element_name.h"
 #include "hilog_wrapper.h"
+#ifdef SUPPORT_GRAPHICS
 #include "js_window.h"
+#endif
 #include "napi_context.h"
 #include "napi_data_ability_helper.h"
 #include "securec.h"
@@ -1034,6 +1036,7 @@ napi_value UnwrapAbilityResult(CallAbilityParam &param, napi_env env, napi_value
     return result;
 }
 
+#ifdef SUPPORT_GRAPHICS
 napi_value GetWindowWrapAsync(
     napi_env env, napi_value *args, const size_t argCallback, AsyncCallbackInfo *asyncCallbackInfo)
 {
@@ -1210,6 +1213,44 @@ napi_value NAPI_GetWindow(napi_env env, napi_callback_info info)
     }
     return ret;
 }
+#else
+napi_value GetWindowWrapAsync(
+    napi_env env, napi_value *args, const size_t argCallback, AsyncCallbackInfo *asyncCallbackInfo)
+{
+    return nullptr;
+}
+
+napi_value GetWindowWrapPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)
+{
+    return nullptr;
+}
+
+/**
+ * @brief GetWindowWrap processing function.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param asyncCallbackInfo Process data asynchronously.
+ *
+ * @return Return JS data successfully, otherwise return nullptr.
+ */
+napi_value GetWindowWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo *asyncCallbackInfo)
+{
+    return nullptr;
+}
+
+/**
+ * @brief Get window.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param info The callback info passed into the callback function.
+ *
+ * @return The return value from NAPI C++ to JS for the module.
+ */
+napi_value NAPI_GetWindow(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+#endif
 
 /**
  * @brief GetWantSyncWrap processing function.
