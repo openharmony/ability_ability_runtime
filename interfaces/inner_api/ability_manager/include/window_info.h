@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_WINDOW_TRANSITION_INFO_H
-#define OHOS_AAFWK_WINDOW_TRANSITION_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_WINDOW_INFO_H
+#define OHOS_ABILITY_RUNTIME_WINDOW_INFO_H
 
 #ifdef SUPPORT_GRAPHICS
 #include <typeinfo>
@@ -37,6 +37,12 @@ struct AbilityTransitionInfo : public Parcelable {
     uint64_t displayId_ = 0;
     bool isShowWhenLocked_ = false;
     bool isRecent_ = false;
+    double maxWindowRatio_;
+    double minWindowRatio_;
+    uint32_t maxWindowWidth_;
+    uint32_t minWindowWidth_;
+    uint32_t maxWindowHeight_;
+    uint32_t minWindowHeight_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -65,15 +71,7 @@ struct AbilityTransitionInfo : public Parcelable {
             }
         }
 
-        if (!parcel.WriteUint64(displayId_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(isShowWhenLocked_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(isRecent_)) {
+        if (!(parcel.WriteUint64(displayId_) && parcel.WriteBool(isShowWhenLocked_) && parcel.WriteBool(isRecent_))) {
             return false;
         }
 
@@ -91,6 +89,12 @@ struct AbilityTransitionInfo : public Parcelable {
             if (!parcel.WriteUint32(0)) {
                 return false;
             }
+        }
+
+        if (!(parcel.WriteDouble(maxWindowRatio_) && parcel.WriteDouble(minWindowRatio_) &&
+            parcel.WriteUint32(maxWindowWidth_) && parcel.WriteUint32(minWindowWidth_) &&
+            parcel.WriteUint32(maxWindowHeight_) && parcel.WriteUint32(minWindowHeight_))) {
+            return false;
         }
 
         return true;
@@ -114,10 +118,16 @@ struct AbilityTransitionInfo : public Parcelable {
                 info->windowModes_.push_back(static_cast<AppExecFwk::SupportWindowMode>(parcel.ReadUint32()));
             }
         }
+        info->maxWindowRatio_ = parcel.ReadDouble();
+        info->minWindowRatio_ = parcel.ReadDouble();
+        info->maxWindowWidth_ = parcel.ReadUint32();
+        info->minWindowWidth_ = parcel.ReadUint32();
+        info->maxWindowHeight_ = parcel.ReadUint32();
+        info->minWindowHeight_ = parcel.ReadUint32();
         return info;
     }
 };
 } // namespace AAFwk
 } // namespace OHOS
 #endif
-#endif // OHOS_AAFWK_WINDOW_TRANSITION_INFO_H
+#endif // OHOS_ABILITY_RUNTIME_WINDOW_INFO_H

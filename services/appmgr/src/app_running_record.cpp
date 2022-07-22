@@ -862,6 +862,15 @@ void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
     eventHandler_->SendEvent(msg, appEventId_, timeOut);
 }
 
+void AppRunningRecord::PostTask(std::string msg, int64_t timeOut, const Closure &task)
+{
+    if (!eventHandler_) {
+        HILOG_ERROR("eventHandler_ is nullptr");
+        return;
+    }
+    eventHandler_->PostTask(task, msg, timeOut);
+}
+
 int64_t AppRunningRecord::GetEventId() const
 {
     return eventId_;
@@ -874,11 +883,6 @@ void AppRunningRecord::SetEventHandler(const std::shared_ptr<AMSEventHandler> &h
 
 bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 {
-    if (!token) {
-        HILOG_ERROR("token is nullptr");
-        return false;
-    }
-
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
         HILOG_ERROR("can not find module record");
@@ -895,11 +899,6 @@ bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
 
 bool AppRunningRecord::IsLastPageAbilityRecord(const sptr<IRemoteObject> &token)
 {
-    if (!token) {
-        HILOG_ERROR("token is nullptr");
-        return false;
-    }
-
     auto moduleRecord = GetModuleRunningRecordByToken(token);
     if (!moduleRecord) {
         HILOG_ERROR("can not find module record");
@@ -1089,6 +1088,16 @@ void AppRunningRecord::SetAppIndex(const int32_t appIndex)
 int32_t AppRunningRecord::GetAppIndex() const
 {
     return appIndex_;
+}
+
+void AppRunningRecord::SetSecurityFlag(bool securityFlag)
+{
+    securityFlag_ = securityFlag;
+}
+
+bool AppRunningRecord::GetSecurityFlag() const
+{
+    return securityFlag_;
 }
 
 void AppRunningRecord::SetKilling()
