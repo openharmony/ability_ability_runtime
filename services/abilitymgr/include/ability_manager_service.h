@@ -1023,6 +1023,9 @@ private:
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
         int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType);
 
+    int StartAbilityByMissionListManager(AbilityRequest &abilityRequest, int32_t oriValidUserId,
+        AAFWK::EventInfo &eventInfo);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 

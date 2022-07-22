@@ -611,21 +611,8 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             HiSysEventType::FAULT, eventInfo);
         return ERR_WOULD_BLOCK;
     }
-    auto missionListManager = GetListManagerByUserId(oriValidUserId);
-    if (missionListManager == nullptr) {
-        HILOG_ERROR("missionListManager is Null. userId=%{public}d", validUserId);
-        eventInfo.errCode = ERR_INVALID_VALUE;
-        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
-            HiSysEventType::FAULT, eventInfo);
-        return ERR_INVALID_VALUE;
-    }
-    auto ret = missionListManager->StartAbility(abilityRequest);
-    if (ret != ERR_OK) {
-        eventInfo.errCode = ret;
-        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
-            HiSysEventType::FAULT, eventInfo);
-    }
-    return ret;
+
+    return StartAbilityByMissionListManager(abilityRequest, oriValidUserId, eventInfo);
 }
 
 int AbilityManagerService::StartAbility(const Want &want, const StartOptions &startOptions,
@@ -756,21 +743,8 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     GrantUriPermission(want, validUserId);
     abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
     abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
-    auto missionListManager = GetListManagerByUserId(oriValidUserId);
-    if (missionListManager == nullptr) {
-        HILOG_ERROR("missionListManager is Null. userId=%{public}d", oriValidUserId);
-        eventInfo.errCode = ERR_INVALID_VALUE;
-        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
-            HiSysEventType::FAULT, eventInfo);
-        return ERR_INVALID_VALUE;
-    }
-    auto ret = missionListManager->StartAbility(abilityRequest);
-    if (ret != ERR_OK) {
-        eventInfo.errCode = ret;
-        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
-            HiSysEventType::FAULT, eventInfo);
-    }
-    return ret;
+
+    return StartAbilityByMissionListManager(abilityRequest, oriValidUserId, eventInfo);
 }
 
 bool AbilityManagerService::IsBackgroundTaskUid(const int uid)
@@ -813,6 +787,26 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
 
     UpdateCallerInfo(abilityRequest.want);
     return ERR_OK;
+}
+
+int AbilityManagerService::StartAbilityByMissionListManager(AbilityRequest &abilityRequest, int32_t oriValidUserId,
+    AAFWK::EventInfo &eventInfo)
+{
+    auto missionListManager = GetListManagerByUserId(oriValidUserId);
+    if (missionListManager == nullptr) {
+        HILOG_ERROR("missionListManager is Null. userId=%{public}d", oriValidUserId);
+        eventInfo.errCode = ERR_INVALID_VALUE;
+        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
+            HiSysEventType::FAULT, eventInfo);
+        return ERR_INVALID_VALUE;
+    }
+    auto ret = missionListManager->StartAbility(abilityRequest);
+    if (ret != ERR_OK) {
+        eventInfo.errCode = ret;
+        AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
+            HiSysEventType::FAULT, eventInfo);
+    }
+    return ret;
 }
 
 int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
