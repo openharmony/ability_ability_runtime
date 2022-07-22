@@ -49,7 +49,6 @@
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #endif
-#include "event_report.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -1023,9 +1022,6 @@ private:
         const sptr<IRemoteObject> &callerToken, int32_t userId);
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
         int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType);
-
-    int StartAbilityByMissionListManager(AbilityRequest &abilityRequest, int32_t oriValidUserId,
-        AAFWK::EventInfo &eventInfo);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
