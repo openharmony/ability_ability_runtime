@@ -84,11 +84,6 @@ ohos_moduletest("running_infos_module_test") {
     "//utils/native/base:utils",
   ]
 
-  if (os_account_part_enabled) {
-    cflags_cc += [ "-DOS_ACCOUNT_PART_ENABLED" ]
-    deps += [ "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits" ]
-  }
-
   if (efficiency_manager) {
      cflags_cc += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
      deps += [ "//foundation/resourceschedule/efficiency_manager/interfaces/innerkits/suspend_manager:suspend_manager_client" ]
