@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_UTIL_H
-#define OHOS_AAFWK_ABILITY_UTIL_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
 
 #include <string>
 
@@ -30,14 +30,14 @@
 namespace OHOS {
 namespace AAFwk {
 namespace AbilityUtil {
-const std::string SYSTEM_BASIC = "system_basic";
-const std::string SYSTEM_CORE = "system_core";
-const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
-const std::string DLP_ABILITY_NAME = "ViewAbility";
-const std::string DLP_PARAMS_SANDBOX = "ohos.dlp.params.sandbox";
-const std::string DLP_PARAMS_BUNDLE_NAME = "ohos.dlp.params.bundleName";
-const std::string DLP_PARAMS_MODULE_NAME = "ohos.dlp.params.moduleName";
-const std::string DLP_PARAMS_ABILITY_NAME = "ohos.dlp.params.abilityName";
+constexpr const char* SYSTEM_BASIC = "system_basic";
+constexpr const char* SYSTEM_CORE = "system_core";
+constexpr const char* DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
+constexpr const char* DLP_ABILITY_NAME = "ViewAbility";
+constexpr const char* DLP_PARAMS_SANDBOX = "ohos.dlp.params.sandbox";
+constexpr const char* DLP_PARAMS_BUNDLE_NAME = "ohos.dlp.params.bundleName";
+constexpr const char* DLP_PARAMS_MODULE_NAME = "ohos.dlp.params.moduleName";
+constexpr const char* DLP_PARAMS_ABILITY_NAME = "ohos.dlp.params.abilityName";
 
 static constexpr unsigned int CHANGE_CONFIG_ALL_CHANGED = 0xFFFFFFFF;
 static constexpr unsigned int CHANGE_CONFIG_NONE = 0x00000000;
@@ -161,7 +161,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     return false;
 }
 
-static sptr<AppExecFwk::IBundleMgr> GetBundleManager()
+[[maybe_unused]] static sptr<AppExecFwk::IBundleMgr> GetBundleManager()
 {
     auto bundleObj =
         OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
@@ -170,40 +170,6 @@ static sptr<AppExecFwk::IBundleMgr> GetBundleManager()
         return nullptr;
     }
     return iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
-}
-
-[[maybe_unused]] static int JudgeAbilityVisibleControl(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid = -1)
-{
-    HILOG_DEBUG("Judge ability visible begin.");
-    if (!abilityInfo.visible) {
-        HILOG_INFO("Ability visible is false.");
-        if (callerUid == -1) {
-            callerUid = IPCSkeleton::GetCallingUid();
-        }
-        auto bms = GetBundleManager();
-        CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
-
-        auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-        auto apl = abilityInfo.applicationInfo.appPrivilegeLevel;
-        if (!isSaCall && apl != SYSTEM_BASIC && apl != SYSTEM_CORE) {
-            HILOG_INFO("Caller is not systemAp or system.");
-            std::string bundleName;
-            bool result = bms->GetBundleNameForUid(callerUid, bundleName);
-            if (!result) {
-                HILOG_ERROR("GetBundleNameForUid fail");
-                return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
-            }
-            if (bundleName != abilityInfo.bundleName) {
-                HILOG_ERROR("Judge ability visible error, caller bundleName:%{public}s not equal callee "
-                            "bundleName: %{public}s",
-                    bundleName.c_str(),
-                    abilityInfo.bundleName.c_str());
-                return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
-            }
-        }
-    }
-    HILOG_DEBUG("Judge ability visible success.");
-    return ERR_OK;
 }
 
 [[maybe_unused]] static bool HandleDlpApp(Want &want)
@@ -225,4 +191,4 @@ static sptr<AppExecFwk::IBundleMgr> GetBundleManager()
 }  // namespace AAFwk
 }  // namespace OHOS
 
-#endif  // OHOS_AAFWK_ABILITY_UTIL_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
