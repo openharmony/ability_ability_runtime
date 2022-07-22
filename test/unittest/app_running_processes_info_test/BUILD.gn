@@ -20,10 +20,8 @@ ohos_unittest("AppRunningProcessesInfoTest") {
   module_out_path = module_output_path
   cflags_cc = []
   include_dirs = [
-    "${ability_base_innerapi_path}/want/include",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${distributedschedule_path}/samgr/adapter/interfaces/innerkits/include/",
-    "${ability_base_innerapi_path}/want/include",
   ]
 
   sources = [
@@ -53,11 +51,6 @@ ohos_unittest("AppRunningProcessesInfoTest") {
     "${ability_runtime_test_path}/unittest:appmgr_test_source",
   ]
 
-  if (os_account_part_enabled) {
-    cflags_cc += [ "-DOS_ACCOUNT_PART_ENABLED" ]
-    deps += [ "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits" ]
-  }
-
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "appspawn:appspawn_socket_client",
@@ -68,6 +61,7 @@ ohos_unittest("AppRunningProcessesInfoTest") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "startup_l2:syspara_watchagent",
   ]
 }
 

@@ -415,6 +415,7 @@ NativeValue* JsAbilityContext::OnStartAbilityForResult(NativeEngine& engine, Nat
         HILOG_WARN("context is released");
         asyncTask->Reject(engine, CreateJsError(engine, 1, "context is released!"));
     } else {
+        want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
         curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
         (unwrapArgc == 1) ? context->StartAbilityForResult(want, curRequestCode_, std::move(task)) :
             context->StartAbilityForResult(want, startOptions, curRequestCode_, std::move(task));
@@ -726,7 +727,7 @@ NativeValue* JsAbilityContext::OnConnectAbility(NativeEngine& engine, NativeCall
     key.id = g_serialNumber;
     key.want = want;
     abilityConnects_.emplace(key, connection);
-    if (g_serialNumber < INT64_MAX) {
+    if (g_serialNumber < INT32_MAX) {
         g_serialNumber++;
     } else {
         g_serialNumber = 0;
@@ -785,7 +786,7 @@ NativeValue* JsAbilityContext::OnConnectAbilityWithAccount(NativeEngine& engine,
     key.id = g_serialNumber;
     key.want = want;
     abilityConnects_.emplace(key, connection);
-    if (g_serialNumber < INT64_MAX) {
+    if (g_serialNumber < INT32_MAX) {
         g_serialNumber++;
     } else {
         g_serialNumber = 0;

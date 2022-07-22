@@ -37,7 +37,7 @@ using OHOS::Ace::ContainerScope;
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-std::atomic<uint32_t> g_callbackId(0);
+std::atomic<uint32_t> g_callbackId(1);
 
 class TraceIdScope final {
 public:
@@ -73,7 +73,7 @@ public:
 
     ~JsTimer() = default;
 
-    void operator()()
+    void operator()() const
     {
         if (interval_ > 0) {
             jsRuntime_.PostTask(*this, name_, interval_);

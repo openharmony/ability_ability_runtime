@@ -47,6 +47,7 @@
 #include "system_ability_definition.h"
 #include "task_handler_client.h"
 #include "values_bucket.h"
+#include "event_report.h"
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #include "background_task_mgr_helper.h"
@@ -83,6 +84,7 @@ const std::string LAUNCHER_BUNDLE_NAME = "com.ohos.launcher";
 const std::string LAUNCHER_ABILITY_NAME = "com.ohos.launcher.MainAbility";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
+const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 
 #ifdef DISTRIBUTED_DATA_OBJECT_ENABLE
 constexpr int32_t DISTRIBUTED_OBJECT_TIMEOUT = 10000;
@@ -103,7 +105,7 @@ Ability* Ability::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime
     }
 }
 
-void Ability::Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<OHOSApplication> &application,
+void Ability::Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<OHOSApplication> application,
     std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token)
 {
     HILOG_INFO("%{public}s begin.", __func__);
@@ -196,6 +198,8 @@ void Ability::OnStart(const Want &want)
 
     appIndex_ = want.GetIntParam(DLP_INDEX, 0);
     (const_cast<Want &>(want)).RemoveParam(DLP_INDEX);
+    securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
+    (const_cast<Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
 
     HILOG_INFO("%{public}s begin, ability is %{public}s.", __func__, abilityInfo_->name.c_str());
 #ifdef SUPPORT_GRAPHICS
@@ -678,18 +682,8 @@ void Ability::OnConfigurationUpdatedNotify(const Configuration &changeConfigurat
 
     std::string language;
     std::string colormode;
-    if (setting_) {
-        auto displayId = std::atoi(setting_->GetProperty(AbilityStartSetting::WINDOW_DISPLAY_ID_KEY).c_str());
-        language = changeConfiguration.GetItem(displayId, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-        colormode = changeConfiguration.GetItem(displayId, AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        HILOG_INFO("displayId: [%{public}d], language: [%{public}s], colormode: [%{public}s]",
-            displayId, language.c_str(), colormode.c_str());
-    } else {
-        language = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-        colormode = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-        HILOG_INFO("language: [%{public}s], colormode: [%{public}s]", language.c_str(), colormode.c_str());
-    }
-
+    std::string hasPointerDevice;
+    InitConfigurationProperties(changeConfiguration, language, colormode, hasPointerDevice);
     // Notify ResourceManager
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
@@ -709,9 +703,15 @@ void Ability::OnConfigurationUpdatedNotify(const Configuration &changeConfigurat
             }
         }
 #endif
-        resConfig->SetColorMode(ConvertColorMode(colormode));
+        if (!colormode.empty()) {
+            resConfig->SetColorMode(ConvertColorMode(colormode));
+        }
+        if (!hasPointerDevice.empty()) {
+            resConfig->SetInputDevice(ConvertHasPointerDevice(hasPointerDevice));
+        }
         resourceManager->UpdateResConfig(*resConfig);
-        HILOG_INFO("Notify ResourceManager, colorMode: %{public}d.", resConfig->GetColorMode());
+        HILOG_INFO("Notify ResourceManager, current colorMode: %{public}d, hasPointerDevice: %{publis}d.",
+            resConfig->GetColorMode(), resConfig->GetInputDevice());
     }
 
 #ifdef SUPPORT_GRAPHICS
@@ -728,6 +728,25 @@ void Ability::OnConfigurationUpdatedNotify(const Configuration &changeConfigurat
     // Notify Ability Subclass
     OnConfigurationUpdated(changeConfiguration);
     HILOG_INFO("%{public}s Notify Ability Subclass.", __func__);
+}
+
+void Ability::InitConfigurationProperties(const Configuration& changeConfiguration, std::string& language,
+    std::string& colormode, std::string& hasPointerDevice)
+{
+    if (setting_) {
+        auto displayId = std::atoi(setting_->GetProperty(AbilityStartSetting::WINDOW_DISPLAY_ID_KEY).c_str());
+        language = changeConfiguration.GetItem(displayId, AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+        colormode = changeConfiguration.GetItem(displayId, AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        hasPointerDevice = changeConfiguration.GetItem(displayId, AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+        HILOG_INFO("displayId: [%{public}d], language: [%{public}s], colormode: [%{public}s], "
+            "hasPointerDevice: [%{public}s]", displayId, language.c_str(), colormode.c_str(), hasPointerDevice.c_str());
+    } else {
+        language = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+        colormode = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        hasPointerDevice = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+        HILOG_INFO("language: [%{public}s], colormode: [%{public}s], hasPointerDevice: [%{public}s]",
+            language.c_str(), colormode.c_str(), hasPointerDevice.c_str());
+    }
 }
 
 /**
@@ -2181,6 +2200,12 @@ void Ability::OnForeground(const Want &want)
     DoOnForeground(want);
     DispatchLifecycleOnForeground(want);
     HILOG_INFO("%{public}s end.", __func__);
+    AAFWK::EventInfo eventInfo;
+    eventInfo.bundleName = want.GetElement().GetBundleName();
+    eventInfo.moduleName = want.GetElement().GetModuleName();
+    eventInfo.abilityName = want.GetElement().GetAbilityName();
+    AAFWK::EventReport::SendAbilityEvent(AAFWK::ABILITY_ONFOREGROUND,
+        HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 /**
@@ -2229,6 +2254,12 @@ void Ability::OnBackground()
     }
     lifecycle_->DispatchLifecycle(LifeCycle::Event::ON_BACKGROUND);
     HILOG_INFO("%{public}s end", __func__);
+    AAFWK::EventInfo eventInfo;
+    eventInfo.bundleName = abilityInfo_->bundleName;
+    eventInfo.moduleName = abilityInfo_->moduleName;
+    eventInfo.abilityName = abilityInfo_->name;
+    AAFWK::EventReport::SendAbilityEvent(AAFWK::ABILITY_ONBACKGROUND,
+        HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 /**
@@ -2331,7 +2362,7 @@ void Ability::InitWindow(Rosen::WindowType winType, int32_t displayId, sptr<Rose
         HILOG_ERROR("Ability::InitWindow abilityWindow_ is nullptr");
         return;
     }
-    abilityWindow_->InitWindow(winType, abilityContext_, sceneListener_, displayId, option, appIndex_ != 0);
+    abilityWindow_->InitWindow(winType, abilityContext_, sceneListener_, displayId, option, securityFlag_);
 }
 
 /**
@@ -3658,13 +3689,18 @@ void Ability::OnChange(Rosen::DisplayId displayId)
     newConfig.AddItem(displayId, ConfigurationInner::APPLICATION_DIRECTION, GetDirectionStr(height, width));
     newConfig.AddItem(displayId, ConfigurationInner::APPLICATION_DENSITYDPI, GetDensityStr(density));
 
-    std::vector<std::string> changeKeyV;
+    if (application_ == nullptr) {
+        HILOG_ERROR("application_ is nullptr.");
+        return;
+    }
+
     auto configuration = application_->GetConfiguration();
     if (!configuration) {
         HILOG_ERROR("configuration is nullptr.");
         return;
     }
 
+    std::vector<std::string> changeKeyV;
     configuration->CompareDifferent(changeKeyV, newConfig);
     uint32_t size = changeKeyV.size();
     HILOG_INFO("changeKeyV size :%{public}u", size);
@@ -3730,7 +3766,7 @@ void Ability::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
     }
 }
 
-void Ability::RequsetFocus(const Want &want)
+void Ability::RequestFocus(const Want &want)
 {
     HILOG_INFO("%{public}s called.", __func__);
     if (abilityWindow_ == nullptr) {

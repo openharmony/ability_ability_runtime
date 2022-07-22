@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_SERVICE_H
-#define OHOS_AAFWK_ABILITY_MANAGER_SERVICE_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
 #include <future>
 #include <memory>
@@ -29,6 +29,7 @@
 #include "ability_manager_stub.h"
 #include "app_no_response_disposer.h"
 #include "app_scheduler.h"
+#include "application_anr_listener.h"
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #include "background_task_observer.h"
 #endif
@@ -45,6 +46,7 @@
 #include "pending_want_manager.h"
 #include "ams_configuration_parameter.h"
 #include "user_controller.h"
+#include "resident_process_manager.h"
 #ifdef SUPPORT_GRAPHICS
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
@@ -783,9 +785,14 @@ public:
 
     bool GetLocalDeviceId(std::string& localDeviceId);
 
-#ifdef SUPPORT_GRAPHICS
-    int32_t ImplicitStartAbilityInner(const Want &targetWant, const AbilityRequest &request, int32_t userId);
-#endif
+    int JudgeAbilityVisibleControl(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid = -1);
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     */
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -807,6 +814,7 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT = 5000;   // ms
     static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
     static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
+    static constexpr uint32_t KILL_TIMEOUT = 3000;           // ms
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
@@ -862,35 +870,22 @@ private:
      * start highest priority ability.
      *
      */
-    void StartHighestPriorityAbility(bool isBoot);
-    /**
-     * starting settings data ability.
-     *
-     */
-    void StartingSettingsDataAbility();
-
+    void StartHighestPriorityAbility(int32_t userId, bool isBoot);
     /**
      * connet bms.
      *
      */
     void ConnectBmsService();
-
     /**
      * get the user id.
      *
      */
     int GetUserId();
-
     /**
      * Determine whether it is a system APP
      *
      */
     bool IsSystemUiApp(const AppExecFwk::AbilityInfo &info) const;
-    /**
-     * Select to start the application according to the configuration file of AMS
-     *
-     */
-    void StartSystemApplication();
     /**
      * Get parameters from the global
      *
@@ -965,7 +960,7 @@ private:
 
     int32_t InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo &extensionInfo,
         AppExecFwk::AbilityInfo &abilityInfo);
-    
+
     // multi user
     void StartFreezingScreen();
     void StopFreezingScreen();
@@ -975,7 +970,6 @@ private:
     void SwitchToUser(int32_t oldUserId, int32_t userId);
     void SwitchManagers(int32_t userId, bool switchUser = true);
     void StartUserApps(int32_t userId, bool isBoot);
-    void StartSystemAbilityByUser(int32_t userId, bool isBoot);
     void PauseOldUser(int32_t userId);
     void PauseOldMissionListManager(int32_t userId);
     void PauseOldConnectManager(int32_t userId);
@@ -997,11 +991,11 @@ private:
 
     bool IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const;
 
-    void StartupResidentProcess(int userId);
-
-    int VerifyMissionPermission();
+    void StartResidentApps();
 
     int VerifyAccountPermission(int32_t userId);
+
+    bool CheckCallerEligibility(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid);
 
     using DumpFuncType = void (AbilityManagerService::*)(const std::string &args, std::vector<std::string> &info);
     std::map<uint32_t, DumpFuncType> dumpFuncMap_;
@@ -1013,8 +1007,6 @@ private:
     int CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abilityInfo);
     void GrantUriPermission(const Want &want, int32_t validUserId);
     bool VerifyUriPermission(const AbilityRequest &abilityRequest, const Want &want);
-
-    void StartMainElement(int userId, std::vector<AppExecFwk::BundleInfo> &bundleInfos);
 
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
@@ -1046,7 +1038,7 @@ private:
     std::shared_ptr<MissionListManager> currentMissionListManager_;
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
-    
+
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
@@ -1067,7 +1059,8 @@ private:
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif
     std::shared_ptr<AppNoResponseDisposer> anrDisposer_;
+    std::shared_ptr<ApplicationAnrListener> anrListener_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_SERVICE_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
