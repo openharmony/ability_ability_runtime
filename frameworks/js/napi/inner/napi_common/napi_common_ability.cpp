@@ -307,7 +307,6 @@ napi_value WrapAppInfo(napi_env env, const AppInfo_ &appInfo)
         NAPI_CALL(env, napi_set_element(env, jsArrayModuleInfo, i, jsModuleInfoObject));
     }
     NAPI_CALL(env, napi_set_named_property(env, result, "moduleInfos", jsArrayModuleInfo));
-
     NAPI_CALL(env, napi_create_string_utf8(env, appInfo.entryDir.c_str(), NAPI_AUTO_LENGTH, &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "entryDir", proValue));
     HILOG_INFO("%{public}s end.", __func__);
