@@ -37,22 +37,30 @@ constexpr size_t ARGC_TWO = 2;
 
 using namespace OHOS::AppExecFwk;
 
-void* DetachServiceExtensionContext(NativeEngine* engine, void* value, void* hint)
-{
-    HILOG_INFO("DetachServiceExtensionContext");
-    return value;
-}
-
-NativeValue* AttachServiceExtensionContext(NativeEngine* engine, void* value, void* hint)
+NativeValue *AttachServiceExtensionContext(NativeEngine *engine, void *value, void *)
 {
     HILOG_INFO("AttachServiceExtensionContext");
-    std::shared_ptr<ServiceExtensionContext> context(reinterpret_cast<ServiceExtensionContext *>(value));
-    NativeValue* object = CreateJsServiceExtensionContext(*engine, context, nullptr, nullptr);
+    if (value == nullptr) {
+        HILOG_WARN("invalid parameter.");
+        return nullptr;
+    }
+    auto ptr = reinterpret_cast<std::weak_ptr<ServiceExtensionContext> *>(value)->lock();
+    if (ptr == nullptr) {
+        HILOG_WARN("invalid context.");
+        return nullptr;
+    }
+    NativeValue *object = CreateJsServiceExtensionContext(*engine, ptr, nullptr, nullptr);
     auto contextObj = JsRuntime::LoadSystemModuleByEngine(engine,
         "application.ServiceExtensionContext", &object, 1)->Get();
     NativeObject *nObject = ConvertNativeValueTo<NativeObject>(contextObj);
-    nObject->ConvertToNativeBindingObject(engine, DetachServiceExtensionContext, AttachServiceExtensionContext,
-        context.get(), nullptr);
+    nObject->ConvertToNativeBindingObject(engine, DetachCallbackFunc, AttachServiceExtensionContext,
+        value, nullptr);
+    auto workContext = new (std::nothrow) std::weak_ptr<ServiceExtensionContext>(ptr);
+    nObject->SetNativePointer(workContext,
+        [](NativeEngine *, void *data, void *) {
+            HILOG_INFO("Finalizer for weak_ptr service extension context is called");
+            delete static_cast<std::weak_ptr<ServiceExtensionContext> *>(data);
+        }, nullptr);
     return contextObj;
 }
 
@@ -107,28 +115,27 @@ void JsServiceExtension::BindContext(NativeEngine& engine, NativeObject* obj)
     }
     HILOG_INFO("JsServiceExtension::Init CreateJsServiceExtensionContext.");
     NativeValue* contextObj = CreateJsServiceExtensionContext(engine, context, nullptr, nullptr);
-    shellContextRef_ = jsRuntime_.LoadSystemModule("application.ServiceExtensionContext", &contextObj, ARGC_ONE);
+    shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(&engine, "application.ServiceExtensionContext",
+        &contextObj, ARGC_ONE);
     contextObj = shellContextRef_->Get();
-    NativeObject *nObject = ConvertNativeValueTo<NativeObject>(contextObj);
-    nObject->ConvertToNativeBindingObject(&engine, DetachServiceExtensionContext, AttachServiceExtensionContext,
-        context.get(), nullptr);
+    NativeObject *nativeObj = ConvertNativeValueTo<NativeObject>(contextObj);
+    if (nativeObj == nullptr) {
+        HILOG_ERROR("Failed to get context native object");
+        return;
+    }
+    auto workContext = new (std::nothrow) std::weak_ptr<ServiceExtensionContext>(context);
+    nativeObj->ConvertToNativeBindingObject(&engine, DetachCallbackFunc, AttachServiceExtensionContext,
+        workContext, nullptr);
     HILOG_INFO("JsServiceExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef_.get());
     HILOG_INFO("JsServiceExtension::SetProperty.");
     obj->SetProperty("context", contextObj);
-
-    auto nativeObj = ConvertNativeValueTo<NativeObject>(contextObj);
-    if (nativeObj == nullptr) {
-        HILOG_ERROR("Failed to get service extension native object");
-        return;
-    }
-
     HILOG_INFO("Set service extension context");
 
-    nativeObj->SetNativePointer(new std::weak_ptr<AbilityRuntime::Context>(context),
+    nativeObj->SetNativePointer(workContext,
         [](NativeEngine*, void* data, void*) {
             HILOG_INFO("Finalizer for weak_ptr service extension context is called");
-            delete static_cast<std::weak_ptr<AbilityRuntime::Context>*>(data);
+            delete static_cast<std::weak_ptr<ServiceExtensionContext>*>(data);
         }, nullptr);
 
     HILOG_INFO("JsServiceExtension::Init end.");

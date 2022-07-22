@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_ABILITY_PROCESS_H
-#define FOUNDATION_APPEXECFWK_OHOS_ABILITY_PROCESS_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_PROCESS_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_PROCESS_H
 
 #include <mutex>
 #include "feature_ability.h"
@@ -34,6 +34,7 @@ public:
 
     ErrCode StartAbility(Ability *ability, CallAbilityParam param, CallbackInfo callbackInfo);
     void OnAbilityResult(Ability *ability, int requestCode, int resultCode, const Want &resultData);
+    void AddAbilityResultCallback(Ability *ability, CallAbilityParam &param, int32_t errCode, CallbackInfo &callback);
 
     void RequestPermissionsFromUser(Ability *ability, CallAbilityPermissionParam &param, CallbackInfo callbackInfo);
     void OnRequestPermissionsFromUserResult(Ability *ability, int requestCode,
@@ -51,4 +52,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_ABILITY_PROCESS_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_PROCESS_H

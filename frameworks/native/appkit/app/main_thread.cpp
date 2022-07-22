@@ -54,8 +54,6 @@
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
 
-#include "hdc_register.h"
-
 #if defined(ABILITY_LIBRARY_LOADER) || defined(APPLICATION_LIBRARY_LOADER)
 #include <dirent.h>
 #include <dlfcn.h>
@@ -82,7 +80,7 @@ constexpr char EVENT_KEY_REASON[] = "REASON";
 constexpr char EVENT_KEY_JSVM[] = "JSVM";
 constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 
-const std::string JSCRASH_TYPE = "3";
+const int32_t JSCRASH_TYPE = 3;
 const std::string JSVM_TYPE = "ARK";
 const std::string  DFX_THREAD_NAME = "DfxThreadName";
 constexpr char EXTENSION_PARAMS_TYPE[] = "type";
@@ -502,7 +500,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
  */
 void MainThread::ScheduleCleanAbility(const sptr<IRemoteObject> &token)
 {
-    HILOG_INFO("Schedule clean ability called, app is %{public}s.", applicationInfo_->name.c_str());
+    HILOG_INFO("Schedule clean ability called.");
     wptr<MainThread> weak = this;
     auto task = [weak, token]() {
         auto appThread = weak.promote();
@@ -774,6 +772,10 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     std::string colormode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     HILOG_INFO("colormode is %{public}s.", colormode.c_str());
     resConfig->SetColorMode(ConvertColorMode(colormode));
+
+    std::string hasPointerDevice = config.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    HILOG_INFO("hasPointerDevice is %{public}s.", hasPointerDevice.c_str());
+    resConfig->SetInputDevice(ConvertHasPointerDevice(hasPointerDevice));
 #endif
     resourceManager->UpdateResConfig(*resConfig);
     return true;
@@ -939,26 +941,15 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
             std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
             std::string summary = "Error message:" + errorMsg + "\nStacktrace:\n" + errorStack;
-            DelayedSingleton<ApplicationDataManager>::GetInstance()->NotifyUnhandledException(summary);
+            ApplicationDataManager::GetInstance().NotifyUnhandledException(summary);
             time_t timet;
-            struct tm localUTC;
-            struct timeval gtime;
             time(&timet);
-            gmtime_r(&timet, &localUTC);
-            gettimeofday(&gtime, NULL);
-            std::string loacalUTCTime = std::to_string(localUTC.tm_year + 1900)
-                + "/" + std::to_string(localUTC.tm_mon + 1)
-                + "/" + std::to_string(localUTC.tm_mday)
-                + " " + std::to_string(localUTC.tm_hour)
-                + "-" + std::to_string(localUTC.tm_min)
-                + "-" + std::to_string(localUTC.tm_sec)
-                + "." + std::to_string(gtime.tv_usec/1000);
             OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
                 OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
                 EVENT_KEY_PACKAGE_NAME, bundleName,
                 EVENT_KEY_VERSION, std::to_string(versionCode),
                 EVENT_KEY_TYPE, JSCRASH_TYPE,
-                EVENT_KEY_HAPPEN_TIME, loacalUTCTime,
+                EVENT_KEY_HAPPEN_TIME, timet,
                 EVENT_KEY_REASON, errorName,
                 EVENT_KEY_JSVM, JSVM_TYPE,
                 EVENT_KEY_SUMMARY, summary);
@@ -1090,9 +1081,10 @@ void MainThread::ChangeToLocalPath(const std::string &bundleName,
         if (item.empty()) {
             continue;
         }
-        std::regex pattern(ABS_CODE_PATH + FILE_SEPARATOR + bundleName + FILE_SEPARATOR);
+        std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName
+            + std::string(FILE_SEPARATOR));
         localPath.emplace_back(
-            std::regex_replace(item, pattern, LOCAL_CODE_PATH + FILE_SEPARATOR));
+            std::regex_replace(item, pattern, std::string(LOCAL_CODE_PATH) + std::string(FILE_SEPARATOR)));
     }
 }
 
@@ -1277,7 +1269,6 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     auto appInfo = application_->GetApplicationInfo();
     auto want = abilityRecord->GetWant();
     if (runtime && appInfo && want && appInfo->debug) {
-        HdcRegister::Get().StartHdcRegister(appInfo->bundleName);
         runtime->StartDebugMode(want->GetBoolParam("debugApp", false));
     }
 
@@ -1451,8 +1442,7 @@ void MainThread::HandleTerminateApplication()
     }
 
     if (!applicationImpl_->PerformTerminate()) {
-        HILOG_ERROR("MainThread::handleForegroundApplication error!, applicationImpl_->PerformTerminate() failed");
-        return;
+        HILOG_WARN("%{public}s: applicationImpl_->PerformTerminate() failed.", __func__);
     }
 
     std::shared_ptr<EventRunner> dfxRunner = dfxHandler_->GetEventRunner();
