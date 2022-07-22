@@ -220,7 +220,8 @@ napi_value InsertWrap(napi_env env, napi_callback_info info, DAHelperInsertCB *i
 {
     HILOG_INFO("%{public}s,called", __func__);
     size_t argcAsync = ARGS_THREE;
-    const size_t argCountWithAsync = ARGS_TWO + ARGS_ASYNC_COUNT;
+    const size_t argcPromise = ARGS_TWO;
+    const size_t argCountWithAsync = argcPromise + ARGS_ASYNC_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value ret = 0;
     napi_value thisVar = nullptr;
