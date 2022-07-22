@@ -175,6 +175,11 @@ ohos_source_set("abilityms_test_source") {
     deps += [ "//base/account/os_account/frameworks/osaccount/native:os_account_innerkits" ]
   }
 
+  if (efficiency_manager) {
+     cflags_cc += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+     deps += [ "//foundation/resourceschedule/efficiency_manager/interfaces/innerkits/suspend_manager:suspend_manager_client" ]
+  }
+
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
