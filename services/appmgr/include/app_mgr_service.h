@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_H
 
 #include <list>
 #include <string>
@@ -160,12 +160,6 @@ public:
     virtual sptr<IAmsMgr> GetAmsMgr() override;
 
     /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    virtual void GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig) override;
-
-    /**
      * Notify that the ability stage has been updated
      * @param recordId, the app record.
      */
@@ -307,4 +301,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_CLIENT_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_PROXY_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_PROXY_H
 
 #include "iremote_proxy.h"
 #include "want.h"
@@ -115,12 +115,6 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId) override;
-
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    virtual void GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig) override;
 
     /**
      * Notify that the ability stage has been updated
@@ -242,4 +236,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_CLIENT_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_PROXY_H

@@ -22,22 +22,11 @@
 #include "appexecfwk_errors.h"
 #include "common_event_support.h"
 #include "hilog_wrapper.h"
-#ifdef OS_ACCOUNT_PART_ENABLED
-#include "os_account_manager.h"
-#endif // OS_ACCOUNT_PART_ENABLED
+#include "os_account_manager_wrapper.h"
 #include "perf_profile.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-#ifndef OS_ACCOUNT_PART_ENABLED
-namespace {
-constexpr static int UID_TRANSFORM_DIVISOR = 200000;
-static void GetOsAccountIdFromUid(int uid, int &osAccountId)
-{
-    osAccountId = uid / UID_TRANSFORM_DIVISOR;
-}
-}
-#endif // OS_ACCOUNT_PART_ENABLED
 AppRunningManager::AppRunningManager()
 {}
 AppRunningManager::~AppRunningManager()
@@ -174,13 +163,8 @@ bool AppRunningManager::GetPidsByUserId(int32_t userId, std::list<pid_t> &pids)
         const auto &appRecord = item.second;
         if (appRecord) {
             int32_t id = -1;
-#ifdef OS_ACCOUNT_PART_ENABLED
-            if ((AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(appRecord->GetUid(), id) == 0) &&
-                (id == userId)) {
-#else // OS_ACCOUNT_PART_ENABLED
-            GetOsAccountIdFromUid(appRecord->GetUid(), id);
-            if (id == userId) {
-#endif // OS_ACCOUNT_PART_ENABLED
+            if ((DelayedSingleton<OsAccountManagerWrapper>::GetInstance()->
+                GetOsAccountLocalIdFromUid(appRecord->GetUid(), id) == 0) && (id == userId)) {
                 pid_t pid = appRecord->GetPriorityObject()->GetPid();
                 if (pid > 0) {
                     pids.push_back(pid);
@@ -345,7 +329,12 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         appRecord->SetTerminating();
     }
 
-    appRecord->TerminateAbility(token, true);
+    auto timeoutTask = [appRecord, token]() {
+        if (appRecord) {
+            appRecord->TerminateAbility(token, true);
+        }
+    };
+    appRecord->PostTask("DELAY_KILL_ABILITY", AMSEventHandler::KILL_PROCESS_TIMEOUT, timeoutTask);
 }
 
 void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token)
@@ -380,14 +369,23 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         HILOG_ERROR("appRecord is nullptr.");
         return;
     }
+    bool isLastAbilityRecord = appRecord->IsLastAbilityRecord(token);
+    bool isClearMission = (clearMissionFlag && appMgrServiceInner != nullptr);
+    if (isClearMission) {
+        isLastAbilityRecord = appRecord->IsLastPageAbilityRecord(token);
+    }
     appRecord->TerminateAbility(token, false);
 
-    if (appRecord->IsLastAbilityRecord(token) && !appRecord->IsKeepAliveApp()) {
-        HILOG_INFO("The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
+    if (isLastAbilityRecord && !appRecord->IsKeepAliveApp()) {
+        HILOG_DEBUG("The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
-        if (clearMissionFlag && appMgrServiceInner != nullptr) {
-            HILOG_INFO("The ability is the last, KillApplication");
-            appMgrServiceInner->KillApplicationByUid(appRecord->GetBundleName(), appRecord->GetUid());
+        if (isClearMission) {
+            HILOG_DEBUG("The ability is the last, kill application");
+            auto pid = appRecord->GetPriorityObject()->GetPid();
+            auto result = appMgrServiceInner->KillProcessByPid(pid);
+            if (result < 0) {
+                HILOG_WARN("Kill application directly failed, pid: %{public}d", pid);
+            }
             appMgrServiceInner->NotifyAppStatus(appRecord->GetBundleName(),
                 EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
         }

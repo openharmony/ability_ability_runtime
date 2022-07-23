@@ -23,7 +23,7 @@ ohos_fuzztest("AbilityManagerFuzzTest") {
   module_out_path = module_output_path
 
   fuzz_config_file =
-      "${ability_runtime_path}/test/fuzztest/abilitymanager_fuzzer"
+      "${ability_runtime_test_path}/fuzztest/abilitymanager_fuzzer"
   include_dirs = [ "${ability_runtime_innerkits_path}/ability_manager/include" ]
   cflags = [
     "-g",
@@ -36,9 +36,9 @@ ohos_fuzztest("AbilityManagerFuzzTest") {
   configs = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager_public_config" ]
 
   deps = [
-    "${ability_runtime_path}/frameworks/native/ability/native:abilitykit_native",
-    "${ability_runtime_path}/interfaces/inner_api/ability_manager:ability_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
   ]
 
   external_deps = [
@@ -47,6 +47,7 @@ ohos_fuzztest("AbilityManagerFuzzTest") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_innerkits",
+    "input:libmmi-client",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",

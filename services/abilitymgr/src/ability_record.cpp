@@ -27,9 +27,7 @@
 #include "hitrace_meter.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
-#ifdef OS_ACCOUNT_PART_ENABLED
-#include "os_account_manager.h"
-#endif // OS_ACCOUNT_PART_ENABLED
+#include "os_account_manager_wrapper.h"
 #include "system_ability_token_callback.h"
 #include "uri_permission_manager_client.h"
 #ifdef SUPPORT_GRAPHICS
@@ -37,6 +35,10 @@
 #include "locale_config.h"
 #include "mission_info_mgr.h"
 #endif
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "suspend_manager_client.h"
+#endif // EFFICIENCY_MANAGER_ENABLE
+
 
 namespace OHOS {
 namespace AAFwk {
@@ -48,11 +50,11 @@ const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbilityTokenCallback";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
+const std::string DLP_INDEX = "ohos.dlp.params.index";
 int64_t AbilityRecord::abilityRecordId = 0;
 int64_t AbilityRecord::g_abilityRecordEventId_ = 0;
 const int32_t DEFAULT_USER_ID = 0;
 const int32_t SEND_RESULT_CANCELED = -1;
-const int DEFAULT_REQUEST_CODE = -1;
 const int VECTOR_SIZE = 2;
 const std::map<AbilityState, std::string> AbilityRecord::stateToStrMap = {
     std::map<AbilityState, std::string>::value_type(INITIAL, "INITIAL"),
@@ -66,6 +68,7 @@ const std::map<AbilityState, std::string> AbilityRecord::stateToStrMap = {
     std::map<AbilityState, std::string>::value_type(FOREGROUNDING, "FOREGROUNDING"),
     std::map<AbilityState, std::string>::value_type(BACKGROUNDING, "BACKGROUNDING"),
     std::map<AbilityState, std::string>::value_type(FOREGROUND_FAILED, "FOREGROUND_FAILED"),
+    std::map<AbilityState, std::string>::value_type(FOREGROUND_INVALID_MODE, "FOREGROUND_INVALID_MODE"),
 };
 const std::map<AppState, std::string> AbilityRecord::appStateToStrMap_ = {
     std::map<AppState, std::string>::value_type(AppState::BEGIN, "BEGIN"),
@@ -83,10 +86,9 @@ const std::map<AbilityLifeCycleState, AbilityState> AbilityRecord::convertStateM
     std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_FOREGROUND_NEW, FOREGROUND),
     std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_BACKGROUND_NEW, BACKGROUND),
     std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_FOREGROUND_FAILED, FOREGROUND_FAILED),
+    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_INVALID_WINDOW_MODE,
+        FOREGROUND_INVALID_MODE),
 };
-#ifndef OS_ACCOUNT_PART_ENABLED
-const int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif // OS_ACCOUNT_PART_ENABLED
 
 Token::Token(std::weak_ptr<AbilityRecord> abilityRecord) : abilityRecord_(abilityRecord)
 {}
@@ -115,6 +117,7 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
         abilityMgr->GetMaxRestartNum(restartMax_);
     }
     restartCount_ = restartMax_;
+    appIndex_ = want.GetIntParam(DLP_INDEX, 0);
 }
 
 AbilityRecord::~AbilityRecord()
@@ -133,6 +136,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
         abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
     CHECK_POINTER_AND_RETURN(abilityRecord, nullptr);
     abilityRecord->SetUid(abilityRequest.uid);
+    abilityRecord->SetAppIndex(abilityRequest.want.GetIntParam(DLP_INDEX, 0));
     if (!abilityRecord->Init()) {
         HILOG_ERROR("failed to init new ability record");
         return nullptr;
@@ -259,6 +263,12 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
             // background to active state
             HILOG_DEBUG("MoveToForeground, %{public}s", element.c_str());
             lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
+#ifdef EFFICIENCY_MANAGER_ENABLE
+            std::string bundleName = GetAbilityInfo().bundleName;
+            int32_t uid = GetUid();
+            SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
+                uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
+#endif // EFFICIENCY_MANAGER_ENABLE
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
         } else {
             HILOG_DEBUG("Activate %{public}s", element.c_str());
@@ -355,6 +365,7 @@ void AbilityRecord::SetAbilityTransitionInfo(const AppExecFwk::AbilityInfo &abil
 {
     info->abilityName_ = abilityInfo.name;
     info->bundleName_ = abilityInfo.bundleName;
+    info->windowModes_ = abilityInfo.windowModes;
     SetShowWhenLocked(abilityInfo, info);
 }
 
@@ -495,6 +506,7 @@ void AbilityRecord::SetWindowModeAndDisplayId(sptr<AbilityTransitionInfo> &info,
     auto mode = want->GetIntParam(Want::PARAM_RESV_WINDOW_MODE, -1);
     auto displayId = want->GetIntParam(Want::PARAM_RESV_DISPLAY_ID, -1);
     if (mode != -1) {
+        HILOG_INFO("%{public}s: origin window mode is %{public}d.", __func__, mode);
         info->mode_ = static_cast<uint32_t>(mode);
     }
     if (displayId != -1) {
@@ -508,6 +520,7 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const spt
     sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
     if (startOptions != nullptr) {
         info->mode_ = static_cast<uint32_t>(startOptions->GetWindowMode());
+        HILOG_INFO("%{public}s: window mode is %{public}d.", __func__, info->mode_);
         info->displayId_ = static_cast<uint64_t>(startOptions->GetDisplayID());
     } else {
         SetWindowModeAndDisplayId(info, want);
@@ -522,13 +535,15 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
     sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
     auto abilityStartSetting = abilityRequest.startSetting;
     if (abilityStartSetting) {
-        int base = 10; // Numerical base (radix) that determines the valid characters and their interpretation.
-        auto mode =
-            strtol(abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_MODE_KEY).c_str(), nullptr, base);
-        info->mode_ = static_cast<uint32_t>(mode);
-        auto displayId =
-            strtol(abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_DISPLAY_ID_KEY).c_str(), nullptr, base);
-        info->displayId_ = static_cast<uint64_t>(displayId);
+        auto windowMode = abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_MODE_KEY);
+        auto displayId = abilityStartSetting->GetProperty(AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
+        try {
+            info->mode_ = static_cast<uint32_t>(std::stoi(windowMode));
+            info->displayId_ = static_cast<uint64_t>(std::stoi(displayId));
+        } catch (...) {
+            HILOG_WARN("windowMode: stoi(%{public}s) failed", windowMode.c_str());
+            HILOG_WARN("displayId: stoi(%{public}s) failed", displayId.c_str());
+        }
     } else {
         SetWindowModeAndDisplayId(info, std::make_shared<Want>(abilityRequest.want));
     }
@@ -581,6 +596,28 @@ sptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
     return sptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
+sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(
+    const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
+    const AbilityRequest &abilityRequest)
+{
+    sptr<AbilityTransitionInfo> info;
+    if (startOptions) {
+        info = CreateAbilityTransitionInfo(token_, startOptions, want);
+    } else {
+        info = CreateAbilityTransitionInfo(abilityRequest, token_);
+    }
+    info->windowModes_ = abilityInfo_.windowModes;
+    info->maxWindowRatio_ = abilityInfo_.maxWindowRatio;
+    info->minWindowRatio_ = abilityInfo_.minWindowRatio;
+    info->maxWindowWidth_ = abilityInfo_.maxWindowWidth;
+    info->minWindowWidth_ = abilityInfo_.minWindowWidth;
+    info->maxWindowHeight_ = abilityInfo_.maxWindowHeight;
+    info->minWindowHeight_ = abilityInfo_.minWindowHeight;
+
+    SetStartingWindow(true);
+    return info;
+}
+
 void AbilityRecord::StartingWindowHot(const std::shared_ptr<StartOptions> &startOptions,
     const std::shared_ptr<Want> &want, const AbilityRequest &abilityRequest)
 {
@@ -604,14 +641,7 @@ void AbilityRecord::StartingWindowHot(const std::shared_ptr<StartOptions> &start
         return;
     }
 
-    sptr<AbilityTransitionInfo> info;
-    if (startOptions) {
-        info = CreateAbilityTransitionInfo(token_, startOptions, want);
-    } else {
-        info = CreateAbilityTransitionInfo(abilityRequest, token_);
-    }
-
-    SetStartingWindow(true);
+    auto info = CreateAbilityTransitionInfo(startOptions, want, abilityRequest);
     windowHandler->StartingWindow(info, pixelMap);
 }
 
@@ -650,14 +680,7 @@ void AbilityRecord::StartingWindowCold(const std::shared_ptr<StartOptions> &star
     }
     HILOG_DEBUG("%{public}s colorId is %{public}u, bgColor is %{public}u.", __func__, colorId, bgColor);
 
-    sptr<AbilityTransitionInfo> info;
-    if (startOptions) {
-        info = CreateAbilityTransitionInfo(token_, startOptions, want);
-    } else {
-        info = CreateAbilityTransitionInfo(abilityRequest, token_);
-    }
-
-    SetStartingWindow(true);
+    auto info = CreateAbilityTransitionInfo(startOptions, want, abilityRequest);
     windowHandler->StartingWindow(info, pixelMap, bgColor);
 }
 #endif
@@ -1135,7 +1158,7 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Add caller record.");
-    if (requestCode != DEFAULT_REQUEST_CODE && IsSystemAbilityCall(callerToken)) {
+    if (!srcAbilityId.empty() && IsSystemAbilityCall(callerToken)) {
         AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
         return;
     }
@@ -1644,14 +1667,14 @@ void AbilityRecord::SetMinimizeReason(bool fromUser)
     minimizeReason_ = fromUser;
 }
 
-void AbilityRecord::SetDlp(bool isDlp)
+void AbilityRecord::SetAppIndex(const int32_t appIndex)
 {
-    isDlp_ = isDlp;
+    appIndex_ = appIndex;
 }
 
-bool AbilityRecord::IsDlp() const
+int32_t AbilityRecord::GetAppIndex() const
 {
-    return isDlp_;
+    return appIndex_;
 }
 
 bool AbilityRecord::IsMinimizeFromUser() const
@@ -1936,17 +1959,12 @@ void AbilityRecord::GrantUriPermission(const Want &want)
 int AbilityRecord::GetCurrentAccountId()
 {
     std::vector<int32_t> osActiveAccountIds;
-#ifdef OS_ACCOUNT_PART_ENABLED
-    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(osActiveAccountIds);
+    ErrCode ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
+            QueryActiveOsAccountIds(osActiveAccountIds);
     if (ret != ERR_OK) {
         HILOG_ERROR("QueryActiveOsAccountIds failed.");
         return DEFAULT_USER_ID;
     }
-#else // OS_ACCOUNT_PART_ENABLED
-    osActiveAccountIds.push_back(DEFAULT_OS_ACCOUNT_ID);
-    HILOG_DEBUG("AbilityRecord::GetCurrentAccountId, do not have os account part, use default id.");
-#endif // OS_ACCOUNT_PART_ENABLED
-
     if (osActiveAccountIds.empty()) {
         HILOG_ERROR("QueryActiveOsAccountIds is empty, no accounts.");
         return DEFAULT_USER_ID;

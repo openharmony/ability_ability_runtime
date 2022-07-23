@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_STUB_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_STUB_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_STUB_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_STUB_H
 
 #include <map>
 
@@ -65,7 +65,6 @@ private:
     int32_t HandleClearUpApplicationData(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRunningProcesses(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInfosByUserId(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleGetSystemMemoryAttr(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAddAbilityStageDone(MessageParcel &data, MessageParcel &reply);
     int32_t HandleStartupResidentProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterApplicationStateObserver(MessageParcel &data, MessageParcel &reply);
@@ -93,4 +92,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_STUB_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_STUB_H

@@ -12,22 +12,23 @@
 # limitations under the License.
 
 ability_runtime_path = "//foundation/ability/ability_runtime"
-ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi/aafwk"
+ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 ability_base_path = "//foundation/ability/ability_base"
 form_fwk_path = "//foundation/ability/form_fwk"
 ability_runtime_innerkits_path = "${ability_runtime_path}/interfaces/inner_api"
-ability_runtime_kits_path = "${ability_runtime_path}/frameworks/kits"
 ability_runtime_native_path = "${ability_runtime_path}/frameworks/native"
 ability_runtime_services_path = "${ability_runtime_path}/services"
+ability_runtime_test_path = "${ability_runtime_path}/test"
 ability_runtime_system_test_app_path =
     "${ability_runtime_path}/test/resource/amssystemtestability/abilitySrc"
+ace_engine_path = "//foundation/arkui/ace_engine"
 
 bundlefwk_path = "//foundation/bundlemanager/bundle_framework"
 bundlefwk_inner_api_path = "${bundlefwk_path}/interfaces/inner_api"
 
 multimedia_path = "//foundation/multimedia/image_standard"
 multimodalinput_path = "//foundation/multimodalinput/input"
-windowmanager_path = "//foundation/windowmanager"
+windowmanager_path = "//foundation/window/window_manager"
 graphic_path = "//foundation/graphic/graphic_2d"
 global_path = "//base/global"
 distributedschedule_path = "//foundation/distributedschedule"
@@ -36,9 +37,10 @@ ans_core_path =
     "${notification_path}/distributed_notification_service/frameworks/core"
 distributeddatamgr_path = "//foundation/distributeddatamgr"
 form_fwk_napi_path = "${form_fwk_path}/frameworks/js/napi"
-ability_base_innerapi_path = "${ability_base_path}/interfaces/inner_api"
+ability_base_kits_path = "${ability_base_path}/interfaces/kits/native"
 ability_base_native_path = "${ability_base_path}/frameworks/native"
 appspawn_path = "//base/startup/appspawn"
+init_path = "//base/startup/init_lite"
 
 declare_args() {
   background_task_mgr_continuous_task_enable = true
@@ -49,6 +51,7 @@ declare_args() {
   ability_runtime_ces = true
   ability_runtime_resource = true
   ability_runtime_appspawn = true
+  efficiency_manager = true
 
   if (!defined(global_parts_info) ||
       defined(global_parts_info.account_os_account)) {
@@ -60,6 +63,11 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_background_task_mgr)) {
     background_task_mgr_continuous_task_enable = false
+  }
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.resourceschedule_efficiency_manager)) {
+    efficiency_manager = false
   }
 
   if (defined(global_parts_info) &&
@@ -85,5 +93,12 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.startup_appspawn)) {
     ability_runtime_appspawn = false
+  }
+
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.security_dlp_permission_service)) {
+    os_dlp_part_enabled = true
+  } else {
+    os_dlp_part_enabled = false
   }
 }

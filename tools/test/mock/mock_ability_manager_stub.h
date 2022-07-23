@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_AAFWK_STANDARD_TOOLS_TEST_MOCK_MOCK_ABILITY_MANAGER_STUB_H
-#define FOUNDATION_AAFWK_STANDARD_TOOLS_TEST_MOCK_MOCK_ABILITY_MANAGER_STUB_H
+#ifndef OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_STUB_H
+#define OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_STUB_H
 
 #include "gmock/gmock.h"
 
@@ -81,7 +81,6 @@ public:
         const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode));
     MOCK_METHOD1(GetMissionIdByToken, int32_t(const sptr<IRemoteObject> &token));
     MOCK_METHOD1(GetPendinTerminateAbilityTestgRequestWant, void(int id));
-    MOCK_METHOD1(GetSystemMemoryAttr, void(AppExecFwk::SystemMemoryAttr &memoryInfo));
     MOCK_METHOD3(StartContinuation, int(const Want &want, const sptr<IRemoteObject> &abilityToken, int32_t status));
     MOCK_METHOD2(NotifyContinuationResult, int(int32_t missionId, int32_t result));
     MOCK_METHOD5(ContinueMission, int(const std::string &srcDeviceId, const std::string &dstDeviceId,
@@ -163,6 +162,12 @@ public:
     {
         return 0;
     }
+
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token)
+    {
+        return;
+    }
+
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler)
     {
         return 0;
@@ -247,4 +252,4 @@ public:
 }  // namespace AAFwk
 }  // namespace OHOS
 
-#endif  // FOUNDATION_AAFWK_STANDARD_TOOLS_TEST_MOCK_MOCK_ABILITY_MANAGER_STUB_H
+#endif  // OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_STUB_H

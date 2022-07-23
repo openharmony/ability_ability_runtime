@@ -24,6 +24,7 @@
 #include "hitrace_meter.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
+#include "parameter.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -61,7 +62,9 @@ int AbilityConnectManager::TerminateAbility(const std::shared_ptr<AbilityRecord>
                 if (it->GetCaller() == caller && it->GetRequestCode() == requestCode) {
                     targetAbility = service.second;
                     if (targetAbility) {
-                        result = AbilityUtil::JudgeAbilityVisibleControl(targetAbility->GetAbilityInfo());
+                        auto abilityMs = DelayedSingleton<AbilityManagerService>::GetInstance();
+                        CHECK_POINTER(abilityMs);
+                        result = abilityMs->JudgeAbilityVisibleControl(targetAbility->GetAbilityInfo());
                     }
                     break;
                 }
@@ -314,7 +317,9 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             auto abilityRecord = connectRecord->GetAbilityRecord();
             CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
             HILOG_INFO("Disconnect ability, caller:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
-            int result = AbilityUtil::JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
+            auto abilityMs = DelayedSingleton<AbilityManagerService>::GetInstance();
+            CHECK_POINTER_AND_RETURN(abilityMs, GET_ABILITY_SERVICE_FAILED);
+            int result = abilityMs->JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
             if (result != ERR_OK) {
                 HILOG_ERROR("Judge ability visible error.");
                 return result;
@@ -669,6 +674,16 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
         taskName = std::string("ConnectTimeout_") + std::to_string(recordId);
         resultCode = CONNECTION_TIMEOUT;
         delayTime = AbilityManagerService::CONNECT_TIMEOUT;
+    }
+
+    // check libc.hook_mode
+    const int bufferLen = 128;
+    char paramOutBuf[bufferLen] = {0};
+    const char *hook_mode = "startup:";
+    int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen - 1);
+    if (ret > 0 && strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0) {
+        HILOG_DEBUG("Hook_mode: no timeoutTask");
+        return;
     }
 
     auto timeoutTask = [abilityRecord, connectManager = shared_from_this(), resultCode]() {
@@ -1032,11 +1047,12 @@ bool AbilityConnectManager::IsAbilityNeedRestart(const std::shared_ptr<AbilityRe
         return false;
     }
 
-    auto GetKeepAliveAbilities = [&bundleInfos](std::vector<std::string> &keepAliveAbilities) -> void {
+    auto GetKeepAliveAbilities = [&bundleInfos](std::vector<std::pair<std::string, std::string>> &keepAliveAbilities) {
         for (size_t i = 0; i < bundleInfos.size(); i++) {
             if (!bundleInfos[i].isKeepAlive) {
                 continue;
             }
+            std::string bundleName = bundleInfos[i].name;
             for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
                 std::string mainElement;
                 if (!hapModuleInfo.isModuleJson) {
@@ -1047,19 +1063,20 @@ bool AbilityConnectManager::IsAbilityNeedRestart(const std::shared_ptr<AbilityRe
                     mainElement = hapModuleInfo.mainElementName;
                 }
                 if (!mainElement.empty()) {
-                    keepAliveAbilities.push_back(mainElement);
+                    keepAliveAbilities.push_back(std::make_pair(bundleName, mainElement));
                 }
             }
         }
     };
 
-    auto findKeepAliveAbility = [abilityRecord](const std::string &mainElement) {
-        return (abilityRecord->GetAbilityInfo().name == mainElement ||
+    auto findKeepAliveAbility = [abilityRecord](const std::pair<std::string, std::string> &keepAlivePair) {
+        return ((abilityRecord->GetAbilityInfo().bundleName == keepAlivePair.first &&
+                abilityRecord->GetAbilityInfo().name == keepAlivePair.second) ||
                 abilityRecord->GetAbilityInfo().name == AbilityConfig::SYSTEM_UI_ABILITY_NAME ||
                 abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME);
     };
 
-    std::vector<std::string> keepAliveAbilities;
+    std::vector<std::pair<std::string, std::string>> keepAliveAbilities;
     GetKeepAliveAbilities(keepAliveAbilities);
     auto findIter = find_if(keepAliveAbilities.begin(), keepAliveAbilities.end(), findKeepAliveAbility);
     return (findIter != keepAliveAbilities.end());

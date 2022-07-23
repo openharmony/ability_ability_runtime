@@ -294,7 +294,7 @@ private:
         key.id = serialNumber_;
         key.want = want;
         connects_.emplace(key, connection);
-        if (serialNumber_ < INT64_MAX) {
+        if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
         } else {
             serialNumber_ = 0;
@@ -354,7 +354,7 @@ private:
         key.id = serialNumber_;
         key.want = want;
         connects_.emplace(key, connection);
-        if (serialNumber_ < INT64_MAX) {
+        if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
         } else {
             serialNumber_ = 0;
@@ -642,14 +642,15 @@ NativeValue* CreateJsMetadataArray(NativeEngine& engine, const std::vector<AppEx
     return arrayValue;
 }
 
-NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_ptr<ServiceExtensionContext> context)
+NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_ptr<ServiceExtensionContext> context,
+                                             DetachCallback detach, AttachCallback attach)
 {
     HILOG_INFO("CreateJsServiceExtensionContext begin");
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     if (context) {
         abilityInfo = context->GetAbilityInfo();
     }
-    NativeValue* objValue = CreateJsExtensionContext(engine, context, abilityInfo);
+    NativeValue* objValue = CreateJsExtensionContext(engine, context, abilityInfo, detach, attach);
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
 
     std::unique_ptr<JsServiceExtensionContext> jsContext = std::make_unique<JsServiceExtensionContext>(context);

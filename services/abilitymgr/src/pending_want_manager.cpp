@@ -68,10 +68,6 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
     bool needCancel = ((uint32_t)wantSenderInfo.flags & (uint32_t)Flags::CANCEL_PRESENT_FLAG) != 0;
     bool needUpdate = ((uint32_t)wantSenderInfo.flags & (uint32_t)Flags::UPDATE_PRESENT_FLAG) != 0;
 
-    wantSenderInfo.flags =
-        ((uint32_t)wantSenderInfo.flags & (~((uint32_t)Flags::NO_BUILD_FLAG | (uint32_t)Flags::CANCEL_PRESENT_FLAG |
-                                              (uint32_t)Flags::UPDATE_PRESENT_FLAG)));
-
     std::lock_guard<std::recursive_mutex> locker(mutex_);
     std::shared_ptr<PendingWantKey> pendingKey = std::make_shared<PendingWantKey>();
     pendingKey->SetBundleName(wantSenderInfo.bundleName);
@@ -223,7 +219,9 @@ int32_t PendingWantManager::DeviceIdDetermine(
     const Want &want, const sptr<IRemoteObject> &callerToken, int32_t requestCode, const int32_t callerUid)
 {
     int32_t result = ERR_OK;
-    if (want.GetElement().GetDeviceID() == "") {
+    std::string localDeviceId;
+    DelayedSingleton<AbilityManagerService>::GetInstance()->GetLocalDeviceId(localDeviceId);
+    if (want.GetElement().GetDeviceID() == "" || want.GetElement().GetDeviceID() == localDeviceId) {
         result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(
             want, callerToken, requestCode, callerUid);
         if (result != ERR_OK && result != START_ABILITY_WAITING) {
@@ -241,7 +239,8 @@ int32_t PendingWantManager::DeviceIdDetermine(
     }
     DistributedClient dmsClient;
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    result = dmsClient.StartRemoteAbility(want, callerUid, requestCode, accessToken);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    result = dmsClient.StartRemoteAbility(want, callingUid, requestCode, accessToken);
     if (result != ERR_OK) {
         HILOG_ERROR("%{public}s: StartRemoteAbility Error! result = %{public}d", __func__, result);
     }

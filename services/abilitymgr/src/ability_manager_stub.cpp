@@ -92,7 +92,6 @@ void AbilityManagerStub::SecondStepInit()
     requestFuncMap_[UNREGISTER_CANCEL_LISTENER] = &AbilityManagerStub::UnregisterCancelListenerInner;
     requestFuncMap_[GET_PENDING_REQUEST_WANT] = &AbilityManagerStub::GetPendingRequestWantInner;
     requestFuncMap_[GET_PENDING_WANT_SENDER_INFO] = &AbilityManagerStub::GetPendingRequestWantInner;
-    requestFuncMap_[GET_SYSTEM_MEMORY_ATTR] = &AbilityManagerStub::GetSystemMemoryAttrInner;
     requestFuncMap_[GET_APP_MEMORY_SIZE] = &AbilityManagerStub::GetAppMemorySizeInner;
     requestFuncMap_[IS_RAM_CONSTRAINED_DEVICE] = &AbilityManagerStub::IsRamConstrainedDeviceInner;
     requestFuncMap_[CLEAR_UP_APPLICATION_DATA] = &AbilityManagerStub::ClearUpApplicationDataInner;
@@ -138,6 +137,7 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[DUMP_ABILITY_INFO_DONE] = &AbilityManagerStub::DumpAbilityInfoDoneInner;
     requestFuncMap_[START_EXTENSION_ABILITY] = &AbilityManagerStub::StartExtensionAbilityInner;
     requestFuncMap_[STOP_EXTENSION_ABILITY] = &AbilityManagerStub::StopExtensionAbilityInner;
+    requestFuncMap_[UPDATE_MISSION_SNAPSHOT] = &AbilityManagerStub::UpdateMissionSnapShotInner;
 #ifdef SUPPORT_GRAPHICS
     requestFuncMap_[SET_MISSION_LABEL] = &AbilityManagerStub::SetMissionLabelInner;
     requestFuncMap_[SET_MISSION_ICON] = &AbilityManagerStub::SetMissionIconInner;
@@ -746,14 +746,6 @@ int AbilityManagerStub::GetWantSenderInfoInner(MessageParcel &data, MessageParce
         return ERR_INVALID_VALUE;
     }
     reply.WriteParcelable(info.get());
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::GetSystemMemoryAttrInner(MessageParcel &data, MessageParcel &reply)
-{
-    AppExecFwk::SystemMemoryAttr memoryInfo;
-    GetSystemMemoryAttr(memoryInfo);
-    reply.WriteParcelable(&memoryInfo);
     return NO_ERROR;
 }
 
@@ -1405,6 +1397,17 @@ int AbilityManagerStub::DumpAbilityInfoDoneInner(MessageParcel &data, MessagePar
         HILOG_ERROR("reply write failed.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        HILOG_ERROR("UpdateMissionSnapShot read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+    UpdateMissionSnapShot(token);
     return NO_ERROR;
 }
 
