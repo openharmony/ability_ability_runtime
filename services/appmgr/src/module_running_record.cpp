@@ -96,6 +96,20 @@ bool ModuleRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
     return ((abilities_.size() == 1) && (abilities_.find(token) != abilities_.end()));
 }
 
+int32_t ModuleRunningRecord::GetPageAbilitySize()
+{
+    int pageAbilitySize = 0;
+    for (auto it : abilities_) {
+        std::shared_ptr<AbilityRunningRecord> abilityRunningRecord = it.second;
+        std::shared_ptr<AbilityInfo> abilityInfo = abilityRunningRecord->GetAbilityInfo();
+        if (abilityInfo->type == AbilityType::PAGE) {
+            pageAbilitySize++;
+        }
+    }
+
+    return pageAbilitySize;
+}
+
 const std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> &ModuleRunningRecord::GetAbilities()
     const
 {
@@ -200,6 +214,8 @@ void ModuleRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningReco
         HILOG_INFO("Schedule launch ability, name is %{public}s.", ability->GetName().c_str());
         appLifeCycleDeal_->LaunchAbility(ability);
         ability->SetState(AbilityState::ABILITY_STATE_READY);
+    } else {
+        HILOG_ERROR("Can not find ability or get appThread.");
     }
 }
 

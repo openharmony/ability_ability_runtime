@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_CLIENT_H
-#define OHOS_AAFWK_ABILITY_MANAGER_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H
 
 #include <mutex>
 
@@ -362,12 +362,6 @@ public:
     ErrCode GetPendingRequestWant(const sptr<IWantSender> &target, std::shared_ptr<Want> &want);
 
     ErrCode GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info);
-
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    void GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo);
 
     ErrCode GetAppMemorySize();
 
@@ -767,6 +761,11 @@ public:
      */
     ErrCode DumpAbilityInfoDone(std::vector<std::string> &infos, const sptr<IRemoteObject> &callerToken);
 
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     */
+    void UpdateMissionSnapShot(const sptr<IRemoteObject>& token);
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -779,6 +778,7 @@ private:
 
     sptr<IAbilityManager> GetAbilityManager();
     void ResetProxy(const wptr<IRemoteObject>& remote);
+    void HandleDlpApp(Want &want);
 
     static std::recursive_mutex mutex_;
     static std::shared_ptr<AbilityManagerClient> instance_;
@@ -787,4 +787,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H

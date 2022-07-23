@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APP_MGR_CLIENT_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APP_MGR_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H
 
 #include "iremote_object.h"
 #include "refbase.h"
@@ -175,13 +175,6 @@ public:
 
     virtual void PrepareTerminate(const sptr<IRemoteObject> &token);
 
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     * @param strConfig, params string.
-     */
-    virtual void GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig);
-
     virtual void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
     /**
      * Notify that the ability stage has been updated
@@ -290,4 +283,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APP_MGR_CLIENT_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H

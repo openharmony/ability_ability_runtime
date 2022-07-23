@@ -23,9 +23,9 @@ ohos_fuzztest("WantAgentHelperStringFuzzTest") {
   module_out_path = module_output_path
 
   fuzz_config_file =
-      "${ability_runtime_path}/test/fuzztest/wantagenthelperstring_fuzzer"
+      "${ability_runtime_test_path}/fuzztest/wantagenthelperstring_fuzzer"
 
-  include_dirs = [ "${ability_base_innerapi_path}/wantagent/include" ]
+  include_dirs = [ "${ability_runtime_innerkits_path}/wantagent/include" ]
 
   cflags = [
     "-g",
@@ -36,11 +36,10 @@ ohos_fuzztest("WantAgentHelperStringFuzzTest") {
 
   sources = [ "wantagenthelperstring_fuzzer.cpp" ]
 
-  deps = [ "${ability_runtime_kits_path}/wantagent:wantagent_innerkits" ]
-
   external_deps = [
     "ability_base:base",
     "ability_base:want",
+    "ability_runtime:wantagent_innerkits",
     "ipc:ipc_core",
     "utils_base:utils",
   ]
