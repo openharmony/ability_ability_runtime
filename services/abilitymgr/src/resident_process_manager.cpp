@@ -42,7 +42,7 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
         }
         for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
             std::string mainElement;
-            if (!CheckMainElement(hapModuleInfo, mainElement, needEraseIndexSet)) {
+            if (!CheckMainElement(hapModuleInfo, mainElement, needEraseIndexSet, i)) {
                 continue;
             }
 
