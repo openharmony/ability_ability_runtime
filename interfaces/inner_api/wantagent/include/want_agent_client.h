@@ -18,12 +18,8 @@
 
 #include <mutex>
 
-#include "ability_connect_callback_interface.h"
-#include "ability_manager_errors.h"
 #include "ability_manager_interface.h"
-#include "ability_scheduler_interface.h"
 #include "iremote_object.h"
-#include "system_memory_attr.h"
 #include "want.h"
 
 namespace OHOS {
