@@ -153,6 +153,13 @@ void ApplicationContext::DispatchConfigurationUpdated(const AppExecFwk::Configur
     }
 }
 
+void ApplicationContext::DispatchMemoryLevel(const int level)
+{
+    for (auto envCallback : envCallbacks_) {
+        envCallback->OnMemoryLevel(level);
+    }
+}
+
 std::string ApplicationContext::GetBundleName() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetBundleName() : "";

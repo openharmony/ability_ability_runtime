@@ -440,6 +440,8 @@ void OHOSApplication::OnMemoryLevel(int level)
             callback->OnMemoryLevel(level);
         }
     }
+
+    abilityRuntimeContext_->DispatchMemoryLevel(level);
 }
 
 /**
