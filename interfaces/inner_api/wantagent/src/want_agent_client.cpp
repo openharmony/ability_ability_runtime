@@ -38,7 +38,7 @@ sptr<IWantSender> WantAgentClient::GetWantSender(
 {
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return nullptr;
     }
     return abms->GetWantSender(wantSenderInfo, callerToken);
@@ -48,7 +48,7 @@ ErrCode WantAgentClient::SendWantSender(const sptr<IWantSender> &target, const S
 {
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     return abms->SendWantSender(target, senderInfo);
@@ -58,7 +58,7 @@ void WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender)
 {
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return;
     }
     abms->CancelWantSender(sender);
@@ -72,7 +72,7 @@ ErrCode WantAgentClient::GetPendingWantUid(const sptr<IWantSender> &target, int3
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     uid = abms->GetPendingWantUid(target);
@@ -87,7 +87,7 @@ ErrCode WantAgentClient::GetPendingWantUserId(const sptr<IWantSender> &target, i
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     userId = abms->GetPendingWantUserId(target);
@@ -102,7 +102,7 @@ ErrCode WantAgentClient::GetPendingWantBundleName(const sptr<IWantSender> &targe
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     bundleName = abms->GetPendingWantBundleName(target);
@@ -117,7 +117,7 @@ ErrCode WantAgentClient::GetPendingWantCode(const sptr<IWantSender> &target, int
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     code = abms->GetPendingWantCode(target);
@@ -132,7 +132,7 @@ ErrCode WantAgentClient::GetPendingWantType(const sptr<IWantSender> &target, int
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     type = abms->GetPendingWantType(target);
@@ -152,7 +152,7 @@ void WantAgentClient::RegisterCancelListener(const sptr<IWantSender> &sender, co
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return;
     }
     abms->RegisterCancelListener(sender, recevier);
@@ -171,7 +171,7 @@ void WantAgentClient::UnregisterCancelListener(
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return;
     }
     abms->UnregisterCancelListener(sender, recevier);
@@ -189,7 +189,7 @@ ErrCode WantAgentClient::GetPendingRequestWant(const sptr<IWantSender> &target, 
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     return abms->GetPendingRequestWant(target, want);
@@ -207,7 +207,7 @@ ErrCode WantAgentClient::GetWantSenderInfo(const sptr<IWantSender> &target, std:
     }
     auto abms = GetAbilityManager();
     if (!abms) {
-        HILOG_ERROR("ability proxy is nullptr."); 
+        HILOG_ERROR("ability proxy is nullptr.");
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
     return abms->GetWantSenderInfo(target, info);
