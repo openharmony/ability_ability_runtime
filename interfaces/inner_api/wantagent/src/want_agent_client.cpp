@@ -15,10 +15,9 @@
 
 #include "want_agent_client.h"
 
-#include "ability_manager_interface.h"
+#include "ability_manager_errors.h"
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
-#include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -26,15 +25,13 @@ namespace OHOS {
 namespace AAFwk {
 WantAgentClient &WantAgentClient::GetInstance()
 {
-    static WantAgentClient manager;
-    return manager;
+    static WantAgentClient client;
+    return client;
 }
 
-WantAgentClient::WantAgentClient()
-{}
+WantAgentClient::WantAgentClient() {}
 
-WantAgentClient::~WantAgentClient()
-{}
+WantAgentClient::~WantAgentClient() {}
 
 sptr<IWantSender> WantAgentClient::GetWantSender(
     const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken)
@@ -71,7 +68,7 @@ ErrCode WantAgentClient::GetPendingWantUid(const sptr<IWantSender> &target, int3
 {
     if (target == nullptr) {
         HILOG_ERROR("target is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     auto abms = GetAbilityManager();
     if (!abms) {
@@ -86,7 +83,7 @@ ErrCode WantAgentClient::GetPendingWantUserId(const sptr<IWantSender> &target, i
 {
     if (target == nullptr) {
         HILOG_ERROR("target is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     auto abms = GetAbilityManager();
     if (!abms) {
@@ -101,7 +98,7 @@ ErrCode WantAgentClient::GetPendingWantBundleName(const sptr<IWantSender> &targe
 {
     if (target == nullptr) {
         HILOG_ERROR("target is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     auto abms = GetAbilityManager();
     if (!abms) {
@@ -116,7 +113,7 @@ ErrCode WantAgentClient::GetPendingWantCode(const sptr<IWantSender> &target, int
 {
     if (target == nullptr) {
         HILOG_ERROR("target is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     auto abms = GetAbilityManager();
     if (!abms) {
@@ -131,7 +128,7 @@ ErrCode WantAgentClient::GetPendingWantType(const sptr<IWantSender> &target, int
 {
     if (target == nullptr) {
         HILOG_ERROR("target is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     auto abms = GetAbilityManager();
     if (!abms) {
@@ -184,11 +181,11 @@ ErrCode WantAgentClient::GetPendingRequestWant(const sptr<IWantSender> &target, 
 {
     if (target == nullptr) {
         HILOG_ERROR("target is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     auto abms = GetAbilityManager();
     if (!abms) {
@@ -202,11 +199,11 @@ ErrCode WantAgentClient::GetWantSenderInfo(const sptr<IWantSender> &target, std:
 {
     if (target == nullptr) {
         HILOG_ERROR("target is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     if (info == nullptr) {
         HILOG_ERROR("info is nullptr.");
-        return ABILITY_SERVICE_NOT_CONNECTED;
+        return INVALID_PARAMETERS_ERR;
     }
     auto abms = GetAbilityManager();
     if (!abms) {
@@ -231,7 +228,7 @@ sptr<IAbilityManager> WantAgentClient::GetAbilityManager()
             return nullptr;
         }
 
-        deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new AbilityMgrDeathRecipient());
+        deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) AbilityMgrDeathRecipient());
         if (deathRecipient_ == nullptr) {
             HILOG_ERROR("%{public}s :Failed to create AbilityMgrDeathRecipient!", __func__);
             return nullptr;
