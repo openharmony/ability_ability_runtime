@@ -14,11 +14,24 @@
  */
 
 #include "mission_info_mgr.h"
+
+#ifdef SUPPORT_GRAPHICS
+#include <cstdio>
+#endif
+
 #include "hilog_wrapper.h"
+#ifdef SUPPORT_GRAPHICS
+#include "image_source.h"
+#include "media_errors.h"
+#endif
 #include "nlohmann/json.hpp"
+#ifdef SUPPORT_GRAPHICS
+#include "securec.h"
+#endif
 
 namespace OHOS {
 namespace AAFwk {
+constexpr int32_t BPP = 4; // bytes per pixel
 MissionInfoMgr::MissionInfoMgr()
 {
     HILOG_INFO("MissionInfoMgr instance is created");
@@ -432,6 +445,9 @@ bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemote
     }
 
 #ifdef SUPPORT_GRAPHICS
+    if (missionSnapshot.isPrivate) {
+        CreateWhitePixelMap(snapshot);
+    }
     missionSnapshot.snapshot = isLowResolution ?
         MissionDataStorage::GetReducedPixelMap(snapshot.GetPixelMap()) : snapshot.GetPixelMap();
 #endif
@@ -499,5 +515,39 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
     HILOG_INFO("snapshot: storage mission snapshot not exists, create new snapshot");
     return UpdateMissionSnapshot(missionId, abilityToken, missionSnapshot, isLowResolution);
 }
+
+#ifdef SUPPORT_GRAPHICS
+void MissionInfoMgr::CreateWhitePixelMap(Snapshot &snapshot) const
+{
+    if (snapshot.GetPixelMap() == nullptr) {
+        return;
+    }
+
+    ssize_t dataLength = snapshot.GetPixelMap()->GetWidth() * snapshot.GetPixelMap()->GetHeight() * BPP;
+    uint8_t* data = (uint8_t*) malloc(dataLength);
+    if (memset_s(data, dataLength, 0xff, dataLength) != EOK) {
+        free(data);
+        return;
+    }
+
+    uint32_t errCode = 0;
+    Media::SourceOptions sourceOptions;
+    auto imageSource = Media::ImageSource::CreateImageSource(data, dataLength, sourceOptions, errCode);
+    if (errCode != OHOS::Media::SUCCESS) {
+        HILOG_ERROR("snapshot: CreateWhitePixelMap failed, errCode = %{public}d", errCode);
+        free(data);
+        return;
+    }
+    Media::DecodeOptions decodeOptions;
+    auto pixelMap = imageSource->CreatePixelMap(decodeOptions, errCode);
+    if (errCode != OHOS::Media::SUCCESS) {
+        HILOG_ERROR("snapshot: CreatePixelMap failed, errCode = %{public}d", errCode);
+        free(data);
+        return;
+    }
+    snapshot.SetPixelMap(std::move(pixelMap));
+    free(data);
+}
+#endif
 }  // namespace AAFwk
 }  // namespace OHOS
