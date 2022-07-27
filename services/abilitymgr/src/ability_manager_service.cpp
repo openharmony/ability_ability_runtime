@@ -1517,7 +1517,6 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         HILOG_ERROR("Generate ability request error.");
         return result;
     }
-
     auto abilityInfo = abilityRequest.abilityInfo;
     int32_t validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : userId;
     HILOG_DEBUG("validUserId : %{public}d, singleton is : %{public}d",
@@ -1562,7 +1561,6 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
 int AbilityManagerService::ConnectRemoteAbility(const Want &want, const sptr<IRemoteObject> &connect)
 {
     HILOG_INFO("%{public}s begin ConnectAbilityRemote", __func__);
-
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
