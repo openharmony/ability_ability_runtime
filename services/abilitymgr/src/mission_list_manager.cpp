@@ -2532,7 +2532,7 @@ std::shared_ptr<Mission> MissionListManager::GetMissionBySpecifiedFlag(
     return defaultStandardList_->GetMissionBySpecifiedFlag(want, flag);
 }
 
-bool MissionListManager::IsReachToLimitLocked(const AbilityRequest &abilityRequest) const
+bool MissionListManager::IsReachToLimitLocked(const AbilityRequest &abilityRequest)
 {
     auto reUsedMission = GetReusedMission(abilityRequest);
     if (reUsedMission) {

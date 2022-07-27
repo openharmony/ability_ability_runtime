@@ -191,7 +191,7 @@ public:
     int BlockAbilityByRecordId(int32_t abilityRecordId);
     #endif
 
-    int32_t GetMissionCountByUid(int32_t targetUid) const
+    int32_t GetMissionCountByUid(int32_t targetUid) const;
 
 private:
     std::string GetTypeName();
