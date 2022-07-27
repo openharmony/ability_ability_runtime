@@ -58,13 +58,13 @@ public:
 
     ErrCode GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info);
 private:
-    class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
+    class WantAgentDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
-        AbilityMgrDeathRecipient() = default;
-        ~AbilityMgrDeathRecipient() = default;
+        WantAgentDeathRecipient() = default;
+        ~WantAgentDeathRecipient() = default;
         void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
     private:
-        DISALLOW_COPY_AND_MOVE(AbilityMgrDeathRecipient);
+        DISALLOW_COPY_AND_MOVE(WantAgentDeathRecipient);
     };
     WantAgentClient();
     virtual ~WantAgentClient();
