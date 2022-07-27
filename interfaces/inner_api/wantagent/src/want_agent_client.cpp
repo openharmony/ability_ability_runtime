@@ -483,7 +483,7 @@ void WantAgentClient::ResetProxy(const wptr<IRemoteObject>& remote)
     if (!proxy_) {
         return;
     }
-    if(proxy_ == remote.promote()) {
+    if (proxy_ == remote.promote()) {
         proxy_->RemoveDeathRecipient(deathRecipient_);
     }
     proxy_ = nullptr;
