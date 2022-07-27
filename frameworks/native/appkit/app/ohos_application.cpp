@@ -462,24 +462,6 @@ void OHOSApplication::OnMemoryLevel(int level)
 
 /**
  *
- * @brief Called when the system has determined to trim the memory, for example,
- * when the ability is running in the background and there is no enough memory for
- * running as many background processes as possible.
- *
- * @param level Indicates the memory trim level, which shows the current memory usage status.
- */
-void OHOSApplication::OnMemoryLevel(int level)
-{
-    HILOG_INFO("OHOSApplication::OnMemoryLevel: called");
-    for (auto callback : elementsCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnMemoryLevel(level);
-        }
-    }
-}
-
-/**
- *
  * @brief Will be called the application starts
  *
  */

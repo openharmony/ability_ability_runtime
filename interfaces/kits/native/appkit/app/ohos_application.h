@@ -189,16 +189,6 @@ public:
 
     /**
      *
-     * @brief Called when the system has determined to trim the memory, for example,
-     * when the ability is running in the background and there is no enough memory for
-     * running as many background processes as possible.
-     *
-     * @param level Indicates the memory trim level, which shows the current memory usage status.
-     */
-    virtual void OnMemoryLevel(int level);
-
-    /**
-     *
      * @brief Will be called the application foregrounds
      *
      */
