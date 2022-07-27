@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_APPLICATION_CONTROLL_UTILS_H
 #define OHOS_ABILITY_RUNTIME_APPLICATION_CONTROLL_UTILS_H
 
+#include <chrono>
 #include <string>
 
 #include "ability_manager_service.h"
@@ -31,20 +32,22 @@ namespace OHOS {
 namespace AAFwk {
 namespace ApplicationControllUtils {
 using Want = OHOS::AAFwk::Want;
-const std::string CROWDTEST_EXPEIRD_IMPLICIT_ACTION_NAME = "ohos.action.crowdtestDead";
+const std::string CROWDTEST_EXPEIRD_IMPLICIT_ACTION_NAME = "ohos.want.action.crowdtest";
 const std::string CROWDTEST_EXPEIRD_IMPLICIT_BUNDLE_NAME = "com.demo.crowdtest";
 const int32_t CROWDTEST_EXPEIRD_IMPLICIT_START_FAILED = 1;
 const int32_t CROWDTEST_EXPEIRD_REFUSED = -1;
 
-static bool IsCrowdtestExpired(const Want &want)
+static bool IsCrowdtestExpired(const Want &want, int32_t userId)
 {
     auto bms = AbilityUtil::GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
+    if (!bms) {
+        HILOG_ERROR("%{public}s fail to get bundle manager.", __func__);
+    }
     std::string bundleName = want.GetBundle();
     AppExecFwk::ApplicationInfo callerAppInfo;
     bool result = IN_PROCESS_CALL(
         bms->GetApplicationInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
-            0, callerAppInfo)
+            userId, callerAppInfo)
     );
     if (!result) {
         HILOG_ERROR("%{public}s GetApplicaionInfo from bms failed.", __func__);
@@ -53,26 +56,27 @@ static bool IsCrowdtestExpired(const Want &want)
 
     auto appDistributionType = callerAppInfo.appDistributionType;
     auto appCrowdtestDeadline = callerAppInfo.crowdtestDeadline;
+    int64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     if (appDistributionType == AppExecFwk::Constants::APP_DISTRIBUTION_TYPE_CROWDTESTING &&
-        appCrowdtestDeadline <= 0) {
+        appCrowdtestDeadline <= now) {
         return true;
     }
     return false;
 }
 
-static int CheckCrowdtestForeground(Want &want)
+static int CheckCrowdtestForeground(Want &want, int32_t userId)
 {
-    if (IsCrowdtestExpired(want)) {
-        want.SetElementName(CROWDTEST_EXPEIRD_IMPLICIT_BUNDLE_NAME, NULL);
+    if (IsCrowdtestExpired(want, userId)) {
+        want.SetElementName(CROWDTEST_EXPEIRD_IMPLICIT_BUNDLE_NAME, "");
         want.SetAction(CROWDTEST_EXPEIRD_IMPLICIT_ACTION_NAME);
         return CROWDTEST_EXPEIRD_REFUSED;
     }
     return ERR_OK;
 }
 
-static int CheckCrowdtestBackground(const Want &want)
+static int CheckCrowdtestBackground(const Want &want, int32_t userId)
 {
-    if (IsCrowdtestExpired(want)) {
+    if (IsCrowdtestExpired(want, userId)) {
         return CROWDTEST_EXPEIRD_REFUSED;
     }
     return ERR_OK;
