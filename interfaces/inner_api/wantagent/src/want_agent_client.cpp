@@ -147,7 +147,7 @@ ErrCode WantAgentClient::GetPendingWantUid(const sptr<IWantSender> &target, int3
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
+    if (!data.WriteRemoteObject(target->AsObject())) {
         HILOG_ERROR("target write failed.");
         return ERR_INVALID_VALUE;
     }
@@ -177,7 +177,7 @@ ErrCode WantAgentClient::GetPendingWantUserId(const sptr<IWantSender> &target, i
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
+    if (!data.WriteRemoteObject(target->AsObject())) {
         HILOG_ERROR("target write failed.");
         return ERR_INVALID_VALUE;
     }
@@ -237,7 +237,7 @@ ErrCode WantAgentClient::GetPendingWantCode(const sptr<IWantSender> &target, int
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
+    if (!data.WriteRemoteObject(target->AsObject())) {
         HILOG_ERROR("target write failed.");
         return ERR_INVALID_VALUE;
     }
@@ -267,7 +267,7 @@ ErrCode WantAgentClient::GetPendingWantType(const sptr<IWantSender> &target, int
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
+    if (!data.WriteRemoteObject(target->AsObject())) {
         HILOG_ERROR("target write failed.");
         return ERR_INVALID_VALUE;
     }
@@ -302,11 +302,11 @@ void WantAgentClient::RegisterCancelListener(const sptr<IWantSender> &sender, co
     if (!WriteInterfaceToken(data)) {
         return;
     }
-    if (sender == nullptr || !data.WriteRemoteObject(sender->AsObject())) {
+    if (!data.WriteRemoteObject(sender->AsObject())) {
         HILOG_ERROR("sender write failed.");
         return;
     }
-    if (receiver == nullptr || !data.WriteRemoteObject(receiver->AsObject())) {
+    if (!data.WriteRemoteObject(receiver->AsObject())) {
         HILOG_ERROR("receiver write failed.");
         return;
     }
@@ -375,11 +375,11 @@ ErrCode WantAgentClient::GetPendingRequestWant(const sptr<IWantSender> &target, 
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
+    if (!data.WriteRemoteObject(target->AsObject())) {
         HILOG_ERROR("target write failed.");
         return INNER_ERR;
     }
-    if (want == nullptr || !data.WriteParcelable(want.get())) {
+    if (!data.WriteParcelable(want.get())) {
         HILOG_ERROR("want write failed.");
         return INNER_ERR;
     }
@@ -419,11 +419,11 @@ ErrCode WantAgentClient::GetWantSenderInfo(const sptr<IWantSender> &target, std:
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    if (target == nullptr || !data.WriteRemoteObject(target->AsObject())) {
+    if (!data.WriteRemoteObject(target->AsObject())) {
         HILOG_ERROR("target write failed.");
         return INNER_ERR;
     }
-    if (info == nullptr || !data.WriteParcelable(info.get())) {
+    if (!data.WriteParcelable(info.get())) {
         HILOG_ERROR("info write failed.");
         return INNER_ERR;
     }
@@ -457,14 +457,13 @@ sptr<IRemoteObject> WantAgentClient::GetAbilityManager()
             return nullptr;
         }
 
-        deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) AbilityMgrDeathRecipient());
+        deathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new (std::nothrow) WantAgentDeathRecipient());
         if (deathRecipient_ == nullptr) {
-            HILOG_ERROR("%{public}s :Failed to create AbilityMgrDeathRecipient!", __func__);
+            HILOG_ERROR("%{public}s :Failed to create WantAgentDeathRecipient!", __func__);
             return nullptr;
         }
         if (!remoteObj->AddDeathRecipient(deathRecipient_)) {
-            HILOG_ERROR("%{public}s :Add death recipient to AbilityManagerService failed.", __func__);
-            return nullptr;
+            HILOG_INFO("%{public}s :Add death recipient to failed, maybe already add.", __func__);
         }
         proxy_ = remoteObj;
     }
@@ -472,9 +471,9 @@ sptr<IRemoteObject> WantAgentClient::GetAbilityManager()
     return proxy_;
 }
 
-void WantAgentClient::AbilityMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+void WantAgentClient::WantAgentDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOG_INFO("AbilityMgrDeathRecipient handle remote died.");
+    HILOG_INFO("WantAgentDeathRecipient handle remote died.");
     WantAgentClient::GetInstance().ResetProxy(remote);
 }
 
@@ -484,8 +483,9 @@ void WantAgentClient::ResetProxy(const wptr<IRemoteObject>& remote)
     if (!proxy_) {
         return;
     }
-
-    proxy_->RemoveDeathRecipient(deathRecipient_);
+    if(proxy_ == remote.promote()) {
+        proxy_->RemoveDeathRecipient(deathRecipient_);
+    }
     proxy_ = nullptr;
 }
 
