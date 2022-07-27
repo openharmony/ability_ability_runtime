@@ -98,7 +98,7 @@ void AbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& confi
     HILOG_INFO("%{public}s called.", __func__);
 }
 
-void AbilityStage::OnMemoryLevel(const int level)
+void AbilityStage::OnMemoryLevel(int level)
 {
     HILOG_INFO("%{public}s called.", __func__);
 }

@@ -74,7 +74,7 @@ public:
      *
      * @param level Current memory level.
      */
-    void NotifyMemoryLevel(const int level);
+    void NotifyMemoryLevel(int level);
 
     /**
      * @brief Connect the Extension. and Calling information back to Extension.

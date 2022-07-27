@@ -1526,7 +1526,7 @@ void MainThread::HandleShrinkMemory(const int level)
 
 /**
  *
- * @brief Notify the memory level.
+ * @brief Handle NotifyMemoryLevel.
  *
  * @param level Indicates the memory trim level, which shows the current memory usage status.
  *

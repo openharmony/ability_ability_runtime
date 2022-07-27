@@ -30,6 +30,7 @@
 #include "system_memory_attr.h"
 #include "istart_specified_ability_response.h"
 #include "iconfiguration_observer.h"
+#include "app_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -170,7 +171,7 @@ public:
      * @param level, the current memory level
      * @return ERR_OK ,return back success，others fail.
      */
-    virtual AppMgrResultCode NotifyMemoryLevel(int32_t level);
+    virtual AppMgrResultCode NotifyMemoryLevel(MemoryLevel level);
     
     /**
      * GetConfiguration
