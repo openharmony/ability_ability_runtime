@@ -435,6 +435,42 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
 void OHOSApplication::OnMemoryLevel(int level)
 {
     HILOG_INFO("OHOSApplication::OnMemoryLevel: called");
+
+    HILOG_INFO("Number of ability to be notified : [%{public}d]",
+        static_cast<int>(abilityRecordMgr_->GetRecordCount()));
+    for (const auto &abilityToken : abilityRecordMgr_->GetAllTokens()) {
+        auto abilityRecord = abilityRecordMgr_->GetAbilityItem(abilityToken);
+        if (abilityRecord && abilityRecord->GetAbilityThread()) {
+            abilityRecord->GetAbilityThread()->NotifyMemoryLevel(level);
+        }
+    }
+
+    HILOG_INFO("Number of abilityStage to be notified : [%{public}zu]", abilityStages_.size());
+    for (auto it = abilityStages_.begin(); it != abilityStages_.end(); it++) {
+        auto abilityStage = it->second;
+        if (abilityStage) {
+            abilityStage->OnMemoryLevel(level);
+        }
+    }
+
+    for (auto callback : elementsCallbacks_) {
+        if (callback != nullptr) {
+            callback->OnMemoryLevel(level);
+        }
+    }
+}
+
+/**
+ *
+ * @brief Called when the system has determined to trim the memory, for example,
+ * when the ability is running in the background and there is no enough memory for
+ * running as many background processes as possible.
+ *
+ * @param level Indicates the memory trim level, which shows the current memory usage status.
+ */
+void OHOSApplication::OnMemoryLevel(int level)
+{
+    HILOG_INFO("OHOSApplication::OnMemoryLevel: called");
     for (auto callback : elementsCallbacks_) {
         if (callback != nullptr) {
             callback->OnMemoryLevel(level);

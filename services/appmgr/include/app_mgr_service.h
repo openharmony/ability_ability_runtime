@@ -42,6 +42,12 @@ namespace OHOS {
 namespace AppExecFwk {
 enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 
+enum SystemMemoryLevel {
+    MEMORY_LEVEL_MODERATE = 0,
+    MEMORY_LEVEL_LOW = 1,
+    MEMORY_LEVEL_CRITICAL = 2,
+};
+
 struct AppMgrServiceState {
     ServiceRunningState serviceRunningState = ServiceRunningState::STATE_NOT_START;
     SpawnConnectionState connectionState = SpawnConnectionState::STATE_NOT_CONNECT;
@@ -134,6 +140,15 @@ public:
      */
     virtual int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId) override;
 
+    /**
+     * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify applications background the current memory level.
+     *
+     * @param level, current memory level.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t NotifyMemoryLevel(int32_t level) override;
+    
     // the function about system
     /**
      * CheckPermission, call CheckPermission() through proxy object, check the permission.
