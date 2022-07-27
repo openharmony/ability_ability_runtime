@@ -74,7 +74,7 @@ int MissionListManager::StartAbility(const AbilityRequest &abilityRequest)
 {
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (IsReachToLimitLocked(abilityRequest)) {
-        HILOG_ERROR("already reach limit instance, can not start more ability. limit is : %{public}d", MAX_INSTANCE_COUNT);
+        HILOG_ERROR("already reach limit instance. limit is : %{public}d", MAX_INSTANCE_COUNT);
         return ERR_REACH_UPPER_LIMIT;
     }
 
