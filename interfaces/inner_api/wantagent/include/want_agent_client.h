@@ -18,9 +18,11 @@
 
 #include <mutex>
 
-#include "ability_manager_interface.h"
 #include "iremote_object.h"
 #include "want.h"
+#include "want_receiver_interface.h"
+#include "want_sender_info.h"
+#include "want_sender_interface.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -68,11 +70,12 @@ private:
     virtual ~WantAgentClient();
     DISALLOW_COPY_AND_MOVE(WantAgentClient);
 
-    sptr<IAbilityManager> GetAbilityManager();
+    sptr<IRemoteObject> GetAbilityManager();
     void ResetProxy(const wptr<IRemoteObject>& remote);
+    bool WriteInterfaceToken(MessageParcel &data);
 
     std::recursive_mutex mutex_;
-    sptr<IAbilityManager> proxy_;
+    sptr<IRemoteObject> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
 };
 }  // namespace AAFwk
