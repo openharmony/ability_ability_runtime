@@ -40,9 +40,7 @@ const int32_t CROWDTEST_EXPEIRD_REFUSED = -1;
 static bool IsCrowdtestExpired(const Want &want, int32_t userId)
 {
     auto bms = AbilityUtil::GetBundleManager();
-    if (!bms) {
-        HILOG_ERROR("%{public}s fail to get bundle manager.", __func__);
-    }
+    CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
     std::string bundleName = want.GetBundle();
     AppExecFwk::ApplicationInfo callerAppInfo;
     bool result = IN_PROCESS_CALL(
@@ -56,7 +54,8 @@ static bool IsCrowdtestExpired(const Want &want, int32_t userId)
 
     auto appDistributionType = callerAppInfo.appDistributionType;
     auto appCrowdtestDeadline = callerAppInfo.crowdtestDeadline;
-    int64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    int64_t now = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
     if (appDistributionType == AppExecFwk::Constants::APP_DISTRIBUTION_TYPE_CROWDTESTING &&
         appCrowdtestDeadline <= now) {
         return true;
