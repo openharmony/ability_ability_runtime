@@ -42,12 +42,6 @@ namespace OHOS {
 namespace AppExecFwk {
 enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 
-enum SystemMemoryLevel {
-    MEMORY_LEVEL_MODERATE = 0,
-    MEMORY_LEVEL_LOW = 1,
-    MEMORY_LEVEL_CRITICAL = 2,
-};
-
 struct AppMgrServiceState {
     ServiceRunningState serviceRunningState = ServiceRunningState::STATE_NOT_START;
     SpawnConnectionState connectionState = SpawnConnectionState::STATE_NOT_CONNECT;

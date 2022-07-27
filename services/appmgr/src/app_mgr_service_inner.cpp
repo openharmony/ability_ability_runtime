@@ -50,6 +50,7 @@
 #include "uri_permission_manager_client.h"
 #include "event_report.h"
 #include "hisysevent.h"
+#include "app_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -693,9 +694,15 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
 int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
 {
     HILOG_INFO("AppMgrServiceInner start");
-    if (!(level == OHOS::AppExecFwk::SystemMemoryLevel::MEMORY_LEVEL_MODERATE ||
-        level == OHOS::AppExecFwk::SystemMemoryLevel::MEMORY_LEVEL_CRITICAL ||
-        level == OHOS::AppExecFwk::SystemMemoryLevel::MEMORY_LEVEL_LOW)) {
+
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        HILOG_INFO("callerToken not SA %{public}s", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    if (!(level == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_MODERATE ||
+        level == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_CRITICAL ||
+        level == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_LOW)) {
         HILOG_ERROR("Level value error!");
         return ERR_INVALID_VALUE;
     }

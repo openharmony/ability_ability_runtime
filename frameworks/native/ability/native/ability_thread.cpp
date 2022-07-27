@@ -1186,12 +1186,11 @@ void AbilityThread::NotifyMemoryLevel(int32_t level)
             return;
         }
         extensionImpl_->NotifyMemoryLevel(level);
-    }
-    else {
+    } else {
         HILOG_INFO("AbilityThread is an ability");
         if (abilityImpl_ == nullptr) {
-        HILOG_ERROR("AbilityThread::NotifyMemoryLevel abilityImpl_ is nullptr");
-        return;
+            HILOG_ERROR("AbilityThread::NotifyMemoryLevel abilityImpl_ is nullptr");
+            return;
         }
         abilityImpl_->NotifyMemoryLevel(level);
     }

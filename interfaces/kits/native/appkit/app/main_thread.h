@@ -147,7 +147,7 @@ public:
      *
      * @param level Indicates the memory trim level, which shows the current memory usage status.
      */
-    void ScheduleMemoryLevel(const int level) override;
+    void ScheduleMemoryLevel(int level) override;
 
     /**
      *
@@ -317,7 +317,7 @@ private:
      * @param level Indicates the memory trim level, which shows the current memory usage status.
      *
      */
-    void HandleMemoryLevel(const int level);
+    void HandleMemoryLevel(int level);
 
     /**
      *
