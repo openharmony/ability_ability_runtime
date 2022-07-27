@@ -699,7 +699,7 @@ int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
         HILOG_ERROR("Level value error!");
         return ERR_INVALID_VALUE;
     }
-    if (!appRunningManager_ ) {
+    if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager nullptr!");
         return ERR_INVALID_VALUE;
     }
