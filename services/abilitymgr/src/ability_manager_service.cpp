@@ -352,11 +352,13 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
+#ifdef SUPPORT_GRAPHICS
         int ret = StartAppgallery(requestCode, userId);
         if (ret != ERR_OK) {
             HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
             return ret;
         }
+#endif
         return CROWDTEST_EXPIRED_REFUSED;
     }
 
@@ -516,11 +518,13 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
 
     if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
+#ifdef SUPPORT_GRAPHICS
         int ret = StartAppgallery(requestCode, userId);
         if (ret != ERR_OK) {
             HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
             return ret;
         }
+#endif
         return CROWDTEST_EXPIRED_REFUSED;
     }
 
@@ -678,11 +682,13 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     
     if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
+#ifdef SUPPORT_GRAPHICS
         int ret = StartAppgallery(requestCode, userId);
         if (ret != ERR_OK) {
             HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
             return ret;
         }
+#endif
         return CROWDTEST_EXPIRED_REFUSED;
     }
 
