@@ -33,7 +33,7 @@
 #include "ability_info.h"
 #include "ability_manager_errors.h"
 #include "ability_util.h"
-#include "application_controll_utils.h"
+#include "application_util.h"
 #include "background_task_mgr_helper.h"
 #include "hitrace_meter.h"
 #include "bundle_mgr_client.h"
@@ -105,6 +105,9 @@ const int32_t APP_MEMORY_SIZE = 512;
 const int32_t GET_PARAMETER_INCORRECT = -9;
 const int32_t GET_PARAMETER_OTHER = -1;
 const int32_t SIZE_10 = 10;
+const int32_t CROWDTEST_EXPIRED_REFUSED = -1;
+const std::string ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTest";
+const std::string MARKET_BUNDLE_NAME = "com.huawei.hmos.appgallery";
 const std::string BUNDLE_NAME_KEY = "bundleName";
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
 const std::string ACTION_CHOOSE = "ohos.want.action.select";
@@ -347,17 +350,14 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_INFO("%{public}s: Caller is specific system ability.", __func__);
     }
 
-    Want crowdtestWant = want;
-    int ret = AAFwk::ApplicationControllUtils::CheckCrowdtestForeground(crowdtestWant, GetUserId());
-    if (ret != ERR_OK) {
+    if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
-#ifdef SUPPORT_GRAPHICS
-        if (ret == AAFwk::ApplicationControllUtils::CROWDTEST_EXPEIRD_REFUSED) {
-            return StartAbilityInner(crowdtestWant, nullptr, requestCode, -1, userId);
+        int ret = StartAppgallery(requestCode, userId);
+        if (ret != ERR_OK) {
+            HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
+            return ret;
         }
-        HILOG_ERROR("%{public}s: CheckCrowdtestForeground faild", __func__);
-#endif
-        return ret;
+        return CROWDTEST_EXPIRED_REFUSED;
     }
 
     int32_t oriValidUserId = GetValidUserId(userId);
@@ -388,7 +388,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         if (!localWant.GetDeviceId().empty()) {
             localWant.SetDeviceId("");
         }
-        ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken);
+        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken);
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -514,17 +514,14 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         return ERR_INVALID_VALUE;
     }
 
-    Want crowdtestWant = want;
-    int ret = AAFwk::ApplicationControllUtils::CheckCrowdtestForeground(crowdtestWant, GetUserId());
-    if (ret != ERR_OK) {
+    if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
-#ifdef SUPPORT_GRAPHICS
-        if (ret == AAFwk::ApplicationControllUtils::CROWDTEST_EXPEIRD_REFUSED) {
-            return StartAbilityInner(crowdtestWant, nullptr, requestCode, -1, userId);
+        int ret = StartAppgallery(requestCode, userId);
+        if (ret != ERR_OK) {
+            HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
+            return ret;
         }
-        HILOG_ERROR("%{public}s: CheckCrowdtestForeground faild", __func__);
-#endif
-        return ret;
+        return CROWDTEST_EXPIRED_REFUSED;
     }
 
     int32_t oriValidUserId = GetValidUserId(userId);
@@ -535,7 +532,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        ret = freeInstallManager_->StartFreeInstall(want, validUserId, requestCode, callerToken);
+        int32_t ret = freeInstallManager_->StartFreeInstall(want, validUserId, requestCode, callerToken);
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -641,7 +638,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-    ret = missionListManager->StartAbility(abilityRequest);
+    auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
@@ -679,17 +676,14 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         return ERR_INVALID_VALUE;
     }
     
-    Want crowdtestWant = want;
-    int ret = AAFwk::ApplicationControllUtils::CheckCrowdtestForeground(crowdtestWant, GetUserId());
-    if (ret != ERR_OK) {
+    if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
-#ifdef SUPPORT_GRAPHICS
-        if (ret == AAFwk::ApplicationControllUtils::CROWDTEST_EXPEIRD_REFUSED) {
-            return StartAbilityInner(crowdtestWant, nullptr, requestCode, -1, userId);
+        int ret = StartAppgallery(requestCode, userId);
+        if (ret != ERR_OK) {
+            HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
+            return ret;
         }
-        HILOG_ERROR("%{public}s: CheckCrowdtestForeground faild", __func__);
-#endif
-        return ret;
+        return CROWDTEST_EXPIRED_REFUSED;
     }
 
     int32_t oriValidUserId = GetValidUserId(userId);
@@ -800,7 +794,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
             HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-    ret = missionListManager->StartAbility(abilityRequest);
+    auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
@@ -901,10 +895,9 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
         return ERR_INVALID_VALUE;
     }
 
-    int ret = AAFwk::ApplicationControllUtils::CheckCrowdtestBackground(want, GetUserId());
-    if (ret != ERR_OK) {
+    if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
-        return ret;
+        return CROWDTEST_EXPIRED_REFUSED;
     }
 
     int32_t validUserId = GetValidUserId(userId);
@@ -1410,10 +1403,9 @@ int AbilityManagerService::ConnectAbility(
         return CHECK_PERMISSION_FAILED;
     }
 
-    int ret = AAFwk::ApplicationControllUtils::CheckCrowdtestBackground(want, GetUserId());
-    if (ret != ERR_OK) {
+    if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
-        return ret;
+        return CROWDTEST_EXPIRED_REFUSED;
     }
 
     int32_t validUserId = GetValidUserId(userId);
@@ -3686,10 +3678,9 @@ int AbilityManagerService::StartAbilityByCall(
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
 
-    int ret = AAFwk::ApplicationControllUtils::CheckCrowdtestBackground(want, GetUserId());
-    if (ret != ERR_OK) {
-        HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
-        return ret;
+    if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
+        HILOG_ERROR("%{public}s: CrowdTest expired", __func__);
+        return CROWDTEST_EXPIRED_REFUSED;
     }
 
     if (CheckIfOperateRemote(want)) {
@@ -4946,6 +4937,14 @@ int32_t AbilityManagerService::ShowPickerDialog(const Want& want, int32_t userId
             want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfos)
     );
     return Ace::UIServiceMgrClient::GetInstance()->ShowAppPickerDialog(want, abilityInfos, userId);
+}
+
+int AbilityManagerService::StartAppgallery(int requestCode, int32_t userId)
+{
+    Want want;
+    want.SetElementName(MARKET_BUNDLE_NAME, "");
+    want.SetAction(ACTION_MARKET_CROWDTEST);
+    return StartAbilityInner(want, nullptr, requestCode, -1, userId);
 }
 #endif
 }  // namespace AAFwk
