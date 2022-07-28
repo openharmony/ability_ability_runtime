@@ -54,8 +54,8 @@ static bool IsCrowdtestExpired(const Want &want, int32_t userId)
         system_clock::now().time_since_epoch()).count();
     if (appDistributionType == AppExecFwk::Constants::APP_DISTRIBUTION_TYPE_CROWDTESTING &&
         appCrowdtestDeadline < now) {
-        HILOG_INFO("%{public}s The application is expired, expired time is %{public}lld",
-            __func__, appCrowdtestDeadline);
+        HILOG_INFO("%{public}s The application is expired, expired time is %{public}s",
+            __func__, std::to_string(appCrowdtestDeadline).c_str());
         return true;
     }
     return false;
