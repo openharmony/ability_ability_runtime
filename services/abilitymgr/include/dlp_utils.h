@@ -16,17 +16,22 @@
 #ifndef OHOS_ABILITY_RUNTIME_DLP_UTILS_H
 #define OHOS_ABILITY_RUNTIME_DLP_UTILS_H
 
+#ifdef WITH_DLP
 #include "ability_record.h"
-// #include "dlp_permission_kit.h"
+#include "dlp_permission_kit.h"
+#endif // WITH_DLP
 #include "iremote_object.h"
 #include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
 namespace DlpUtils {
-// using Dlp = Security::DlpPermission;
+#ifdef WITH_DLP
+using Dlp = Security::DlpPermission;
+#endif // WITH_DLP
 static bool DlpAccessOtherAppsCheck(const sptr<IRemoteObject> &callerToken, const Want &want)
 {
+#ifdef WITH_DLP
     if (callerToken == nullptr) {
         return true;
     }
@@ -42,12 +47,13 @@ static bool DlpAccessOtherAppsCheck(const sptr<IRemoteObject> &callerToken, cons
         return true;
     }
     int32_t uid = abilityRecord->GetApplicationInfo().uid;
-    //Dlp::SandBoxExternalAuthorType result = Dlp::GetSandBoxExternalAuthorization(uid, want);
-    //if (result == Dlp::SandBoxExternalAuthorType::ALLOW_START_ABILITY) {
-    //    return true;
-    //}
-    HILOG_ERROR("Ability has already been destroyed %{public}d.", uid);
-    return false;
+    Dlp::SandBoxExternalAuthorType result = Dlp::GetSandBoxExternalAuthorization(uid, want);
+    if (result != Dlp::SandBoxExternalAuthorType::ALLOW_START_ABILITY) {
+        HILOG_ERROR("Ability has already been destroyed %{public}d.", uid);
+        return false;
+    }
+#endif // WITH_DLP
+    return true;
 }
 }  // namespace DlpUtils
 }  // namespace AAFwk
