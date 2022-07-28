@@ -37,6 +37,7 @@
 #include "hitrace_meter.h"
 #include "bundle_mgr_client.h"
 #include "distributed_client.h"
+#include "dlp_utils.h"
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "in_process_call_wrapper.h"
@@ -327,7 +328,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
 
     if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
+        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
         return CHECK_PERMISSION_FAILED;
     }
@@ -484,7 +486,8 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         HiSysEventType::BEHAVIOR, eventInfo);
 
     if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
+        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
@@ -635,7 +638,8 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         HiSysEventType::BEHAVIOR, eventInfo);
 
     if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
+        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR,
@@ -842,7 +846,8 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
     AAFWK::EventReport::SendExtensionEvent(AAFWK::START_SERVICE,
         HiSysEventType::BEHAVIOR, eventInfo);
     if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
+        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         AAFWK::EventReport::SendExtensionEvent(AAFWK::START_EXTENSION_ERROR,
@@ -936,7 +941,8 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     AAFWK::EventReport::SendExtensionEvent(AAFWK::STOP_SERVICE,
         HiSysEventType::BEHAVIOR, eventInfo);
     if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
+        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
         HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         AAFWK::EventReport::SendExtensionEvent(AAFWK::STOP_EXTENSION_ERROR,
@@ -1352,7 +1358,8 @@ int AbilityManagerService::ConnectAbility(
         eventInfo);
 
     if (!PermissionVerification::GetInstance()->VerifyDlpPermission(const_cast<Want &>(want)) ||
-        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED) {
+        VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
+        !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         eventInfo.errCode = CHECK_PERMISSION_FAILED;
         AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
