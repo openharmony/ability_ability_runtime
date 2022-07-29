@@ -350,7 +350,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_INFO("%{public}s: Caller is specific system ability.", __func__);
     }
 
-    auto result = CheckCrowdtestForeground(want, requestCode, userId)
+    auto result = CheckCrowdtestForeground(want, requestCode, userId);
     if (result != ERR_OK) {
         return result;
     }
@@ -509,7 +509,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         return ERR_INVALID_VALUE;
     }
 
-    auto result = CheckCrowdtestForeground(want, requestCode, userId)
+    auto result = CheckCrowdtestForeground(want, requestCode, userId);
     if (result != ERR_OK) {
         return result;
     }
@@ -666,7 +666,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         return ERR_INVALID_VALUE;
     }
     
-    auto result = CheckCrowdtestForeground(want, requestCode, userId)
+    auto result = CheckCrowdtestForeground(want, requestCode, userId);
     if (result != ERR_OK) {
         return result;
     }
