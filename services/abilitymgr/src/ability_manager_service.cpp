@@ -353,7 +353,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
 #ifdef SUPPORT_GRAPHICS
-        int ret = StartAppgallery(requestCode, userId);
+        Want crowdtestWant = want;
+        crowdtestWant.SetElementName(MARKET_BUNDLE_NAME, "");
+        crowdtestWant.SetAction(ACTION_MARKET_CROWDTEST);
+        int ret = StartAbilityInner(crowdtestWant, nullptr, requestCode, -1, userId);
         if (ret != ERR_OK) {
             HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
             return ret;
@@ -519,7 +522,10 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
 #ifdef SUPPORT_GRAPHICS
-        int ret = StartAppgallery(requestCode, userId);
+        Want crowdtestWant = want;
+        crowdtestWant.SetElementName(MARKET_BUNDLE_NAME, "");
+        crowdtestWant.SetAction(ACTION_MARKET_CROWDTEST);
+        int ret = StartAbilityInner(crowdtestWant, nullptr, requestCode, -1, userId);
         if (ret != ERR_OK) {
             HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
             return ret;
@@ -683,7 +689,10 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_ERROR("%{public}s: Crowdtest expired", __func__);
 #ifdef SUPPORT_GRAPHICS
-        int ret = StartAppgallery(requestCode, userId);
+        Want crowdtestWant = want;
+        crowdtestWant.SetElementName(MARKET_BUNDLE_NAME, "");
+        crowdtestWant.SetAction(ACTION_MARKET_CROWDTEST);
+        int ret = StartAbilityInner(crowdtestWant, nullptr, requestCode, -1, userId);
         if (ret != ERR_OK) {
             HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
             return ret;
@@ -4943,14 +4952,6 @@ int32_t AbilityManagerService::ShowPickerDialog(const Want& want, int32_t userId
             want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfos)
     );
     return Ace::UIServiceMgrClient::GetInstance()->ShowAppPickerDialog(want, abilityInfos, userId);
-}
-
-int AbilityManagerService::StartAppgallery(int requestCode, int32_t userId)
-{
-    Want want;
-    want.SetElementName(MARKET_BUNDLE_NAME, "");
-    want.SetAction(ACTION_MARKET_CROWDTEST);
-    return StartAbilityInner(want, nullptr, requestCode, -1, userId);
 }
 #endif
 }  // namespace AAFwk
