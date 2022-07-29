@@ -36,7 +36,10 @@ using Want = OHOS::AAFwk::Want;
 static bool IsCrowdtestExpired(const Want &want, int32_t userId)
 {
     auto bms = AbilityUtil::GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
+    if (!bms) {
+        HILOG_ERROR("%{public}s GetBundleManager failed", __func__);
+        return false;
+    }
     std::string bundleName = want.GetBundle();
     AppExecFwk::ApplicationInfo callerAppInfo;
     bool result = IN_PROCESS_CALL(
