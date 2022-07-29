@@ -4925,7 +4925,7 @@ int32_t AbilityManagerService::ShowPickerDialog(const Want& want, int32_t userId
 }
 #endif
 
-int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId)
+int AbilityManagerService::CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId)
 {
     if (AAFwk::ApplicationUtil::IsCrowdtestExpired(want, GetUserId())) {
         HILOG_INFO("%{public}s: Crowdtest expired", __func__);
