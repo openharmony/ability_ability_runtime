@@ -63,5 +63,4 @@ static bool DlpAccessOtherAppsCheck(const sptr<IRemoteObject> &callerToken, cons
 }  // namespace DlpUtils
 }  // namespace AAFwk
 }  // namespace OHOS
-
 #endif  // OHOS_ABILITY_RUNTIME_DLP_UTILS_H
