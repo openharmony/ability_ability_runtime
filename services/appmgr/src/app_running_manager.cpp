@@ -489,9 +489,9 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
 {
-    HILOG_INFO("call %{public}s", __func__);
+    HILOG_INFO("call %{public}s, current app size %{public}d", __func__,
+        static_cast<int>(appRunningRecordMap_.size()));
     std::lock_guard<std::recursive_mutex> guard(lock_);
-    HILOG_INFO("current app size %{public}d", static_cast<int>(appRunningRecordMap_.size()));
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord->GetState() == ApplicationState::APP_STATE_BACKGROUND) {
