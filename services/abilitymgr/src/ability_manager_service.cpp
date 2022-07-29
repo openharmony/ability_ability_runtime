@@ -4933,6 +4933,7 @@ int AbilityManagerService::CheckCrowdtestForeground(const Want &want, int reques
         int ret = StartAppgallery(requestCode, userId, ACTION_MARKET_CROWDTEST);
         if (ret != ERR_OK) {
             HILOG_ERROR("%{public}s: Crowdtest implicit start appgallery failed", __func__);
+            return ret;
         }
 #endif
         return CROWDTEST_EXPIRED_REFUSED;
