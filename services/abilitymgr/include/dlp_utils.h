@@ -27,7 +27,7 @@ namespace OHOS {
 namespace AAFwk {
 namespace DlpUtils {
 #ifdef WITH_DLP
-using Dlp = Security::DlpPermission;
+using Dlp = Security::DlpPermission::DlpPermissionKit;
 #endif // WITH_DLP
 static bool DlpAccessOtherAppsCheck(const sptr<IRemoteObject> &callerToken, const Want &want)
 {
@@ -47,8 +47,13 @@ static bool DlpAccessOtherAppsCheck(const sptr<IRemoteObject> &callerToken, cons
         return true;
     }
     int32_t uid = abilityRecord->GetApplicationInfo().uid;
-    Dlp::SandBoxExternalAuthorType result = Dlp::GetSandBoxExternalAuthorization(uid, want);
-    if (result != Dlp::SandBoxExternalAuthorType::ALLOW_START_ABILITY) {
+    Security::DlpPermission::SandBoxExternalAuthorType authResult;
+    int result = Dlp::GetSandboxExternalAuthorization(uid, want, authResult);
+    if (result != ERR_OK) {
+        HILOG_ERROR("GetSandboxExternalAuthorization failed %{public}d.", result);
+        return false;
+    }
+    if (authResult != Security::DlpPermission::SandBoxExternalAuthorType::ALLOW_START_ABILITY) {
         HILOG_ERROR("Ability has already been destroyed %{public}d.", uid);
         return false;
     }
