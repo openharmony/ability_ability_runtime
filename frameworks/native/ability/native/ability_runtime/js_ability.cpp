@@ -553,8 +553,6 @@ void JsAbility::OnMemoryLevel(int level)
         jslevel,
     };
     CallObjectMethod("onMemoryLevel", argv, ArraySize(argv));
-
-    HILOG_INFO("%{public}s end.", __func__);
 }
 
 void JsAbility::UpdateContextConfiguration()
