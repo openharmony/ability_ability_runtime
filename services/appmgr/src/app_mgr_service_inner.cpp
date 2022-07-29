@@ -697,7 +697,7 @@ int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
 
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (!isSaCall) {
-        HILOG_INFO("callerToken not SA %{public}s", __func__);
+        HILOG_ERROR("callerToken not SA %{public}s", __func__);
         return ERR_INVALID_VALUE;
     }
     if (!(level == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_MODERATE ||
