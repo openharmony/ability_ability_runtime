@@ -39,7 +39,6 @@ constexpr int32_t ERROR_CODE_ONE = 1;
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
-constexpr size_t ARGC_THREE = 3;
 constexpr int32_t ERR_NOT_OK = -1;
 
 class JsAppManager final {
