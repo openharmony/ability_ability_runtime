@@ -34,6 +34,7 @@ constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
+constexpr int32_t MAX_INSTANCE_COUNT = 128;
 constexpr uint32_t NEXTABILITY_TIMEOUT = 1000;         // ms
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
@@ -72,6 +73,11 @@ void MissionListManager::Init()
 int MissionListManager::StartAbility(const AbilityRequest &abilityRequest)
 {
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    if (IsReachToLimitLocked(abilityRequest)) {
+        HILOG_ERROR("already reach limit instance. limit is : %{public}d", MAX_INSTANCE_COUNT);
+        return ERR_REACH_UPPER_LIMIT;
+    }
+
     auto currentTopAbility = GetCurrentTopAbilityLocked();
     if (currentTopAbility) {
         std::string element = currentTopAbility->GetWant().GetElement().GetURI();
@@ -341,9 +347,16 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
             targetRecord->SetWant(abilityRequest.want);
             targetRecord->SetIsNewWant(true);
         }
-
+        /* No need to update condition:
+         *      1. not start by call
+         *      2. start by call, but call to background again
+         * Need to update condition:
+         *      1. start by call, but this time is not start by call
+         *      2. start by call, and call to foreground again
+         */
         if (!(targetMission->IsStartByCall()
-            && !CallTypeFilter(startMethod))) {
+            && (!CallTypeFilter(startMethod) ||
+                abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)))) {
             HILOG_DEBUG("mission exists. No update required");
             return;
         }
@@ -653,9 +666,13 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     abilityRecord->SetScheduler(scheduler);
 
     if (abilityRecord->IsStartedByCall()) {
-        // started by callability, directly move to background.
-        abilityRecord->SetStartToBackground(true);
-        MoveToBackgroundTask(abilityRecord);
+        if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
+            abilityRecord->SetStartToForeground(true);
+            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
+        } else {
+            abilityRecord->SetStartToBackground(true);
+            MoveToBackgroundTask(abilityRecord);
+        }
         return ERR_OK;
     }
 
@@ -931,6 +948,13 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     /* PostTask to trigger start Ability from waiting queue */
     handler->PostTask(startWaitingAbilityTask, "startWaitingAbility", NEXTABILITY_TIMEOUT);
     TerminatePreviousAbility(abilityRecord);
+
+    // new version. started by caller, scheduler call request
+    if (abilityRecord->IsStartedByCall() && abilityRecord->IsStartToForeground() && abilityRecord->IsReady()) {
+        HILOG_DEBUG("call request after completing foreground state");
+        abilityRecord->CallRequest();
+        abilityRecord->SetStartToForeground(false);
+    }
 }
 
 void MissionListManager::TerminatePreviousAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -1518,12 +1542,8 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
         EVENT_KEY_MESSAGE, msgContent);
 
     HILOG_WARN("LIFECYCLE_TIMEOUT: uid: %{public}d, pid: %{public}d, abilityName: %{public}s, abilityName: %{public}s,"
-        "msg: %{public}s",
-        processInfo.uid_,
-        processInfo.pid_,
-        ability->GetAbilityInfo().bundleName.c_str(),
-        ability->GetAbilityInfo().name.c_str(),
-        msgContent.c_str());
+        "msg: %{public}s", processInfo.uid_, processInfo.pid_, ability->GetAbilityInfo().bundleName.c_str(),
+        ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
 }
 
 void MissionListManager::UpdateMissionSnapshot(const std::shared_ptr<AbilityRecord>& abilityRecord)
@@ -2355,6 +2375,10 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
     if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
         HILOG_DEBUG("target ability has been resolved.");
+        if (targetAbilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
+            HILOG_DEBUG("target ability needs to be switched to foreground.");
+            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(targetAbilityRecord->GetToken());
+        }
         return ERR_OK;
     } else if (ret == ResolveResultType::NG_INNER_ERROR) {
         HILOG_ERROR("resolve failed, error: %{public}d.", RESOLVE_CALL_ABILITY_INNER_ERR);
@@ -2526,6 +2550,34 @@ std::shared_ptr<Mission> MissionListManager::GetMissionBySpecifiedFlag(
     }
 
     return defaultStandardList_->GetMissionBySpecifiedFlag(want, flag);
+}
+
+bool MissionListManager::IsReachToLimitLocked(const AbilityRequest &abilityRequest)
+{
+    auto reUsedMission = GetReusedMission(abilityRequest);
+    if (reUsedMission) {
+        return false;
+    }
+
+    int32_t totalCount = 0;
+    for (const auto& missionList : currentMissionLists_) {
+        if (!missionList) {
+            continue;
+        }
+
+        totalCount += missionList->GetMissionCountByUid(abilityRequest.uid);
+        if (totalCount >= MAX_INSTANCE_COUNT) {
+            return true;
+        }
+    }
+
+    totalCount += defaultStandardList_->GetMissionCountByUid(abilityRequest.uid);
+    if (totalCount >= MAX_INSTANCE_COUNT) {
+        return true;
+    }
+
+    totalCount += defaultSingleList_->GetMissionCountByUid(abilityRequest.uid);
+    return totalCount >= MAX_INSTANCE_COUNT;
 }
 
 bool MissionListManager::MissionDmInitCallback::isInit_ = false;
