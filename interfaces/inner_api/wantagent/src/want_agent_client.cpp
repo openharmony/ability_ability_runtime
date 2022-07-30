@@ -106,7 +106,7 @@ void WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender)
     CHECK_POINTER_LOG(sender, "sender is nullptr");
     auto abms = GetAbilityManager();
     CHECK_POINTER_LOG(abms, "ability proxy is nullptr.");
-    int error;
+    ErrCode error;
     MessageParcel reply;
     if (!SendRequest(IAbilityManager::CANCEL_PENDING_WANT_SENDER, abms, sender->AsObject(), reply, error)) {
         return;
@@ -118,7 +118,7 @@ ErrCode WantAgentClient::GetPendingWantUid(const sptr<IWantSender> &target, int3
     CHECK_POINTER_AND_RETURN(target, INVALID_PARAMETERS_ERR);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ABILITY_SERVICE_NOT_CONNECTED);
-    int error;
+    ErrCode error;
     MessageParcel reply;
     if (!SendRequest(IAbilityManager::GET_PENDING_WANT_UID, abms, target->AsObject(), reply, error)) {
         return error;
@@ -132,7 +132,7 @@ ErrCode WantAgentClient::GetPendingWantUserId(const sptr<IWantSender> &target, i
     CHECK_POINTER_AND_RETURN(target, INVALID_PARAMETERS_ERR);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ABILITY_SERVICE_NOT_CONNECTED);
-    int error;
+    ErrCode error;
     MessageParcel reply;
     if (!SendRequest(IAbilityManager::GET_PENDING_WANT_USERID, abms, target->AsObject(), reply, error)) {
         return error;
@@ -146,7 +146,7 @@ ErrCode WantAgentClient::GetPendingWantBundleName(const sptr<IWantSender> &targe
     CHECK_POINTER_AND_RETURN(target, INVALID_PARAMETERS_ERR);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ABILITY_SERVICE_NOT_CONNECTED);
-    int error;
+    ErrCode error;
     MessageParcel reply;
     if (!SendRequest(IAbilityManager::GET_PENDING_WANT_BUNDLENAME, abms, target->AsObject(), reply, error)) {
         return error;
@@ -160,7 +160,7 @@ ErrCode WantAgentClient::GetPendingWantCode(const sptr<IWantSender> &target, int
     CHECK_POINTER_AND_RETURN(target, INVALID_PARAMETERS_ERR);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ABILITY_SERVICE_NOT_CONNECTED);
-    int error;
+    ErrCode error;
     MessageParcel reply;
     if (!SendRequest(IAbilityManager::GET_PENDING_WANT_CODE, abms, target->AsObject(), reply, error)) {
         return error;
@@ -174,7 +174,7 @@ ErrCode WantAgentClient::GetPendingWantType(const sptr<IWantSender> &target, int
     CHECK_POINTER_AND_RETURN(target, INVALID_PARAMETERS_ERR);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ABILITY_SERVICE_NOT_CONNECTED);
-    int error;
+    ErrCode error;
     MessageParcel reply;
     if (!SendRequest(IAbilityManager::GET_PENDING_WANT_TYPE, abms, target->AsObject(), reply, error)) {
         return error;
@@ -387,8 +387,8 @@ bool WantAgentClient::CheckSenderAndRecevier(const sptr<IWantSender> &sender, co
     return true;
 }
 
-bool WantAgentClient::SendRequest(int32_t operation, sptr<IRemoteObject> abms, sptr<IRemoteObject> remoteObject,
-    MessageParcel &reply, int &error)
+bool WantAgentClient::SendRequest(int32_t operation, const sptr<IRemoteObject> &abms, 
+    const sptr<IRemoteObject> &remoteObject, MessageParcel &reply, ErrCode &error)
 {
     MessageParcel data;
     MessageOption option;
