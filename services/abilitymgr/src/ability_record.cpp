@@ -555,7 +555,13 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     const AppExecFwk::AbilityInfo &abilityInfo) const
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
-    if (!resourceMgr->AddResource(abilityInfo.resourcePath.c_str())) {
+    std::string loadPath;
+    if (!abilityInfo.hapPath.empty()) {
+        loadPath = abilityInfo.hapPath;
+    } else {
+        loadPath = abilityInfo.resourcePath;
+    }
+    if (loadPath.empty() || !resourceMgr->AddResource(loadPath.c_str())) {
         HILOG_WARN("%{public}s AddResource failed.", __func__);
     }
 

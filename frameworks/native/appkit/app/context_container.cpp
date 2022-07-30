@@ -611,25 +611,22 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         return;
     }
 
-    HILOG_INFO(
-        "ContextContainer::InitResourceManager moduleResPaths count: %{public}zu", bundleInfo.moduleResPaths.size());
-    std::vector<std::string> moduleResPaths;
+    HILOG_DEBUG(
+        "ContextContainer::InitResourceManager hapModuleInfos count: %{public}zu", bundleInfo.hapModuleInfos.size());
     std::regex pattern(AbilityRuntime::Constants::ABS_CODE_PATH);
-    for (auto item : bundleInfo.moduleResPaths) {
-        if (item.empty()) {
+    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+        std::string loadPath;
+        if (!hapModuleInfo.hapPath.empty()) {
+            loadPath = hapModuleInfo.hapPath;
+        } else {
+            loadPath = hapModuleInfo.resourcePath;
+        }
+        if (loadPath.empty()) {
             continue;
         }
-        moduleResPaths.emplace_back(std::regex_replace(item, pattern, AbilityRuntime::Constants::LOCAL_BUNDLES));
-    }
-
-    for (auto moduleResPath : moduleResPaths) {
-        if (!moduleResPath.empty()) {
-            HILOG_INFO("ContextContainer::InitResourceManager length: %{public}zu, moduleResPath : %{public}s",
-                moduleResPath.length(),
-                moduleResPath.c_str());
-            if (!resourceManager->AddResource(moduleResPath.c_str())) {
-                HILOG_ERROR("ContextContainer::InitResourceManager AddResource failed");
-            }
+        loadPath = std::regex_replace(loadPath, pattern, AbilityRuntime::Constants::LOCAL_BUNDLES);
+        if (!resourceManager->AddResource(loadPath.c_str())) {
+            HILOG_ERROR("ContextContainer::InitResourceManager AddResource failed");
         }
     }
 

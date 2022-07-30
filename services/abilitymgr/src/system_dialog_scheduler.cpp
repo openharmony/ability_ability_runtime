@@ -342,11 +342,17 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
     resConfig->SetLocaleInfo(locale);
     resourceManager->UpdateResConfig(*resConfig);
 
-    for (auto resPath = bundleInfo.moduleResPaths.begin(); resPath != bundleInfo.moduleResPaths.end(); resPath++) {
-        if (resPath->empty()) {
+    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+        std::string loadPath;
+        if (!hapModuleInfo.hapPath.empty()) {
+            loadPath = hapModuleInfo.hapPath;
+        } else {
+            loadPath = hapModuleInfo.resourcePath;
+        }
+        if (loadPath.empty()) {
             continue;
         }
-        if (!resourceManager->AddResource(resPath->c_str())) {
+        if (!resourceManager->AddResource(loadPath.c_str())) {
             HILOG_INFO("resourceManager add %{public}s resource path failed!", bundleInfo.name.c_str());
         }
     }
