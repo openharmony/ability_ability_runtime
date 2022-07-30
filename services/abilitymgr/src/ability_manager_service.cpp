@@ -58,6 +58,7 @@
 #include "parameter.h"
 #include "event_report.h"
 #include "hisysevent.h"
+#include "connection_state_manager.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "display_manager.h"
@@ -226,6 +227,8 @@ bool AbilityManagerService::Init()
 
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
+
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
 
     // init user controller.
     userController_ = std::make_shared<UserController>();
@@ -1681,6 +1684,16 @@ int AbilityManagerService::StopSyncRemoteMissions(const std::string& devId)
     }
     DistributedClient dmsClient;
     return dmsClient.StopSyncRemoteMissions(devId);
+}
+
+int AbilityManagerService::RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
+{
+    return DelayedSingleton<ConnectionStateManager>::GetInstance()->RegisterObserver(observer);
+}
+
+int AbilityManagerService::UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
+{
+    return DelayedSingleton<ConnectionStateManager>::GetInstance()->UnregisterObserver(observer);
 }
 
 int AbilityManagerService::RegisterMissionListener(const std::string &deviceId,

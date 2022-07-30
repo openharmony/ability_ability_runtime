@@ -25,7 +25,7 @@ void ConnectionObserverProxy::OnExtensionConnected(const ConnectionData& connect
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     HILOG_INFO("ConnectionObserverProxy OnExtensionConnected.");
     if (!data.WriteInterfaceToken(IConnectionObserver::GetDescriptor())) {
@@ -49,7 +49,7 @@ void ConnectionObserverProxy::OnExtensionDisconnected(const ConnectionData& conn
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     HILOG_INFO("ConnectionObserverProxy OnExtensionDisconnected.");
     if (!data.WriteInterfaceToken(IConnectionObserver::GetDescriptor())) {
@@ -73,7 +73,7 @@ void ConnectionObserverProxy::OnDlpAbilityOpened(const DlpStateData& dlpData)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     HILOG_INFO("ConnectionObserverProxy OnDlpAbilityOpened.");
     if (!data.WriteInterfaceToken(IConnectionObserver::GetDescriptor())) {
@@ -97,7 +97,7 @@ void ConnectionObserverProxy::OnDlpAbilityClosed(const DlpStateData& dlpData)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     HILOG_INFO("ConnectionObserverProxy OnDlpAbilityClosed.");
     if (!data.WriteInterfaceToken(IConnectionObserver::GetDescriptor())) {

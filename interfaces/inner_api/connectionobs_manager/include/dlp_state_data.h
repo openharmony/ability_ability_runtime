@@ -34,14 +34,14 @@ struct DlpStateData : public Parcelable {
      *
      * @param outParcel Indicates the Parcel object to which the Sequenceable object will be marshaled.
      */
-    virtual bool Marshalling(Parcel &parcel) const override;
+    virtual bool Marshalling(Parcel &outParcel) const override;
 
     /**
      * @brief Unmarshals this Sequenceable object from a Parcel.
      *
      * @param inParcel Indicates the Parcel object into which the Sequenceable object has been marshaled.
      */
-    static DlpStateData *Unmarshalling(Parcel &parcel);
+    static DlpStateData *Unmarshalling(Parcel &inParcel);
 
     int32_t targetPid = -1;
     int32_t targetUid = 0;

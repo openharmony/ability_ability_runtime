@@ -45,7 +45,7 @@ public:
      *
      * @param observer the observer callback.
      */
-    void RemoveMissionListener(const sptr<AbilityRuntime::IConnectionObserver> &observer);
+    void RemoveObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
 
     /**
      * notify observers that extension was connected.

@@ -15,13 +15,31 @@
 
 #include "connection_record.h"
 
+#include <sstream>
+#include <fstream>
+
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "connection_state_manager.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+static const int MAX_PROCESS_LEN = 256;
+std::string GetNameByPid(int32_t pid)
+{
+    char path[MAX_PROCESS_LEN] = { 0 };
+    if (snprintf_s(path, MAX_PROCESS_LEN, MAX_PROCESS_LEN - 1, "/proc/%d/cmdline", pid) <= 0) {
+        return "";
+    }
+    std::ifstream file(path);
+    std::string name = "";
+    getline(file, name);
+    return name;
+}
+}
 int64_t ConnectionRecord::connectRecordId = 0;
 
 ConnectionRecord::ConnectionRecord(const sptr<IRemoteObject> &callerToken,
@@ -126,6 +144,7 @@ void ConnectionRecord::CompleteConnect(int resultCode)
     if (connCallback_) {
         connCallback_->OnAbilityConnectDone(element, remoteObject, resultCode);
     }
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->AddConnection(shared_from_this());
     HILOG_INFO("result: %{public}d. connectstate:%{public}d.", resultCode, state_);
 }
 
@@ -141,6 +160,7 @@ void ConnectionRecord::CompleteDisconnect(int resultCode, bool isDied)
     if (connCallback_) {
         connCallback_->OnAbilityDisconnectDone(element, isDied ? (resultCode - 1) : resultCode);
     }
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveConnection(shared_from_this(), isDied);
     HILOG_INFO("result: %{public}d. connectstate:%{public}d.", resultCode, state_);
 }
 
@@ -210,6 +230,61 @@ void ConnectionRecord::Dump(std::vector<std::string> &info) const
     info.emplace_back("       > " + GetAbilityRecord()->GetAbilityInfo().bundleName + "/" +
                       GetAbilityRecord()->GetAbilityInfo().name + "   connectionState #" +
                       ConvertConnectionState(GetConnectState()));
+}
+
+void ConnectionRecord::AttachCallerInfo()
+{
+    auto targetRecord = Token::GetAbilityRecordByToken(callerToken_);
+    if (targetRecord) {
+        callerUid_ = targetRecord->GetUid();
+        callerPid_ = targetRecord->GetPid();
+        callerName_ = targetRecord->GetAbilityInfo().bundleName;
+        return;
+    }
+
+    callerUid_ = static_cast<int32_t>(IPCSkeleton::GetCallingUid());
+    callerPid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
+    callerName_ = GetNameByPid(callerPid_);
+}
+
+int32_t ConnectionRecord::GetCallerUid() const
+{
+    return callerUid_;
+}
+
+int32_t ConnectionRecord::GetCallerPid() const
+{
+    return callerPid_;
+}
+
+std::string ConnectionRecord::GetCallerName() const
+{
+    return callerName_;
+}
+
+sptr<IRemoteObject> ConnectionRecord::GetTargetToken() const
+{
+    auto targetService = targetService_;
+    if (!targetService) {
+        return nullptr;
+    }
+
+    auto token = targetService->GetToken();
+    if (!token) {
+        return nullptr;
+    }
+
+    return token->AsObject();
+}
+
+sptr<IRemoteObject> ConnectionRecord::GetConnection() const
+{
+    auto callback = connCallback_;
+    if (!callback) {
+        return nullptr;
+    }
+
+    return callback->AsObject();
 }
 }  // namespace AAFwk
 }  // namespace OHOS
