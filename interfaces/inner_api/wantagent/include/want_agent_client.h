@@ -74,6 +74,8 @@ private:
     void ResetProxy(const wptr<IRemoteObject>& remote);
     bool WriteInterfaceToken(MessageParcel &data);
     bool CheckSenderAndRecevier(const sptr<IWantSender> &sender, const sptr<IWantReceiver> &receiver);
+    bool SendRequest(int32_t operation, sptr<IRemoteObject> abms, sptr<IRemoteObject> remoteObject,
+        MessageParcel &reply, int &error);
 
     std::recursive_mutex mutex_;
     sptr<IRemoteObject> proxy_;
