@@ -66,6 +66,8 @@ public:
      */
     virtual void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
+    std::shared_ptr<NativeReference> GetJsAbility();
+
 #ifdef SUPPORT_GRAPHICS
 public:
     void OnSceneCreated() override;
@@ -75,6 +77,8 @@ public:
     void OnForeground(const Want &want) override;
     void OnBackground() override;
 
+    std::shared_ptr<NativeReference> GetJsWindowStage();
+
 protected:
     void DoOnForeground(const Want &want) override;
     void RequestFocus(const Want &want) override;
@@ -82,6 +86,7 @@ protected:
 
 private:
     void GetPageStackFromWant(const Want &want, std::string &pageStack);
+    std::shared_ptr<NativeReference> jsWindowStageObj_;
 #endif
 
 private:
