@@ -754,16 +754,22 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    std::vector<std::string> resPaths;
-    ChangeToLocalPath(bundleInfo.name, bundleInfo.moduleResPaths, resPaths);
-    for (auto moduleResPath : resPaths) {
-        if (!moduleResPath.empty()) {
-            HILOG_DEBUG("MainThread::handleLaunchApplication length: %{public}zu, moduleResPath: %{public}s",
-                moduleResPath.length(),
-                moduleResPath.c_str());
-            if (!resourceManager->AddResource(moduleResPath.c_str())) {
-                HILOG_ERROR("MainThread::handleLaunchApplication AddResource failed");
-            }
+    std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name
+        + std::string(FILE_SEPARATOR));
+    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+        std::string loadPath;
+        if (!hapModuleInfo.hapPath.empty()) {
+            loadPath = hapModuleInfo.hapPath;
+        } else {
+            loadPath = hapModuleInfo.resourcePath;
+        }
+        if (loadPath.empty()) {
+            continue;
+        }
+        HILOG_DEBUG("MainThread::InitResourceManager moduleResPath: %{public}s", loadPath.c_str());
+        loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH) + std::string(FILE_SEPARATOR));
+        if (!resourceManager->AddResource(loadPath.c_str())) {
+            HILOG_ERROR("MainThread::InitResourceManager AddResource failed");
         }
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -773,12 +779,12 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     resConfig->SetLocaleInfo(locale);
     const icu::Locale *localeInfo = resConfig->GetLocaleInfo();
     if (localeInfo != nullptr) {
-        HILOG_INFO("MainThread::handleLaunchApplication language: %{public}s, script: %{public}s, region: %{public}s,",
+        HILOG_INFO("MainThread::InitResourceManager language: %{public}s, script: %{public}s, region: %{public}s,",
             localeInfo->getLanguage(),
             localeInfo->getScript(),
             localeInfo->getCountry());
     } else {
-        HILOG_INFO("MainThread::handleLaunchApplication localeInfo is nullptr.");
+        HILOG_INFO("MainThread::InitResourceManager localeInfo is nullptr.");
     }
 
     std::string colormode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);

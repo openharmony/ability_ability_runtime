@@ -338,28 +338,27 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
     }
 
     HILOG_DEBUG(
-        "ContextImpl::InitResourceManager moduleResPaths count: %{public}zu", bundleInfo.moduleResPaths.size());
-    std::vector<std::string> moduleResPaths;
+        "ContextImpl::InitResourceManager hapModuleInfos count: %{public}zu", bundleInfo.hapModuleInfos.size());
     std::string inner(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + GetBundleName());
     std::string outer(ABS_CODE_PATH);
-    for (auto item : bundleInfo.moduleResPaths) {
-        if (item.empty()) {
+    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+        std::string loadPath;
+        if (!hapModuleInfo.hapPath.empty()) {
+            loadPath = hapModuleInfo.hapPath;
+        } else {
+            loadPath = hapModuleInfo.resourcePath;
+        }
+        if (loadPath.empty()) {
             continue;
         }
         if (currentBundle) {
-            item.replace(0, inner.size(), LOCAL_CODE_PATH);
+            loadPath.replace(0, inner.size(), LOCAL_CODE_PATH);
         } else {
-            item.replace(0, outer.size(), LOCAL_BUNDLES);
+            loadPath.replace(0, outer.size(), LOCAL_BUNDLES);
         }
-        moduleResPaths.emplace_back(item);
-    }
-
-    for (auto moduleResPath : moduleResPaths) {
-        if (!moduleResPath.empty()) {
-            if (!resourceManager->AddResource(moduleResPath.c_str())) {
-                HILOG_ERROR("ContextImpl::InitResourceManager AddResource fail, moduleResPath: %{public}s",
-                    moduleResPath.c_str());
-            }
+        if (!resourceManager->AddResource(loadPath.c_str())) {
+            HILOG_ERROR("ContextImpl::InitResourceManager AddResource fail, moduleResPath: %{public}s",
+                loadPath.c_str());
         }
     }
 
