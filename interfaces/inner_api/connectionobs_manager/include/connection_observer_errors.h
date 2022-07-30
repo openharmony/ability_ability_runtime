@@ -60,6 +60,11 @@ enum {
      * Result(2228229) for no proxy.
      */
     ERR_REGISTER_FAILED,
+
+    /**
+     * Result(2228230) for service not init.
+     */
+    ERR_SERVICE_NOT_INIT,
 };
 
 }  // namespace AbilityRuntime

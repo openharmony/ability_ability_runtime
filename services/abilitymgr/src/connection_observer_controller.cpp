@@ -15,6 +15,7 @@
 
 #include "connection_observer_controller.h"
 
+#include "connection_observer_errors.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
@@ -23,7 +24,7 @@ int ConnectionObserverController::AddObserver(const sptr<AbilityRuntime::IConnec
 {
     if (!observer) {
         HILOG_ERROR("observer is invalid");
-        return -1;
+        return AbilityRuntime::ERR_INVALID_OBSERVER;
     }
 
     std::lock_guard<std::recursive_mutex> guard(observerLock_);
@@ -56,7 +57,7 @@ int ConnectionObserverController::AddObserver(const sptr<AbilityRuntime::IConnec
     return 0;
 }
 
-void ConnectionObserverController::RemoveMissionListener(const sptr<AbilityRuntime::IConnectionObserver> &observer)
+void ConnectionObserverController::RemoveObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
 {
     if (!observer) {
         HILOG_ERROR("observer is invalid");
