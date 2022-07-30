@@ -387,7 +387,7 @@ bool WantAgentClient::CheckSenderAndRecevier(const sptr<IWantSender> &sender, co
     return true;
 }
 
-bool WantAgentClient::SendRequest(int32_t operation, const sptr<IRemoteObject> &abms, 
+bool WantAgentClient::SendRequest(int32_t operation, const sptr<IRemoteObject> &abms,
     const sptr<IRemoteObject> &remoteObject, MessageParcel &reply, ErrCode &error)
 {
     MessageParcel data;
