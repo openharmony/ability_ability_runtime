@@ -54,7 +54,7 @@ static bool DlpAccessOtherAppsCheck(const sptr<IRemoteObject> &callerToken, cons
         return false;
     }
     if (authResult != Security::DlpPermission::SandBoxExternalAuthorType::ALLOW_START_ABILITY) {
-        HILOG_ERROR("Ability has already been destroyed %{public}d.", uid);
+        HILOG_ERROR("Auth failed, not allow start %{public}d.", uid);
         return false;
     }
 #endif // WITH_DLP
