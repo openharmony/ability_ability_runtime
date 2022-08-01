@@ -46,8 +46,10 @@
 #include "iservice_registry.h"
 #include "itest_observer.h"
 #include "mission_info_mgr.h"
+#include "parameter.h"
 #include "permission_verification.h"
 #include "sa_mgr_client.h"
+#include "service_watcher.h"
 #include "system_ability_token_callback.h"
 #include "softbus_bus_center.h"
 #include "string_ex.h"
@@ -116,6 +118,8 @@ const std::string HIGHEST_PRIORITY_ABILITY_ENTITY = "flag.home.intent.from.syste
 const std::string DMS_PROCESS_NAME = "distributedsched";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
+const std::string BOOTEVENT_APPFWK_READY = "bootevent.appfwk.ready";
+const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const int DEFAULT_DMS_MISSION_ID = -1;
 const std::map<std::string, AbilityManagerService::DumpKey> AbilityManagerService::dumpMap = {
     std::map<std::string, AbilityManagerService::DumpKey>::value_type("--all", KEY_DUMP_ALL),
@@ -207,6 +211,9 @@ void AbilityManagerService::OnStart()
         HILOG_ERROR("Publish AMS failed!");
         return;
     }
+
+    SetParameter(BOOTEVENT_APPFWK_READY, "true");
+    WatchParameter(BOOTEVENT_BOOT_COMPLETED, &AbilityUtil::AppFwkBootEvent, nullptr);
 
     HILOG_INFO("AMS start success.");
 }
