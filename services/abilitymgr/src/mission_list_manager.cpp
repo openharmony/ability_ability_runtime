@@ -426,8 +426,8 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
     }
 }
 
-void MissionListManager::BuildInnerMissionInfo(InnerMissionInfo &info, const std::string &missionName, const bool isSingleton,
-    const int32_t startMethod, const AbilityRequest &abilityRequest)
+void MissionListManager::BuildInnerMissionInfo(InnerMissionInfo &info, const std::string &missionName,
+    const bool isSingleton, const int32_t startMethod, const AbilityRequest &abilityRequest)
 {
     info.missionName = missionName;
     info.isSingletonMode = isSingleton;
