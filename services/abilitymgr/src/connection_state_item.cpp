@@ -150,7 +150,6 @@ public:
                 return info && info->GetCallerToken() == caller.callerToken;
             }
         });
-
         if (it == callers_.end()) {
             callers_.emplace_back(std::make_shared<CallerInfo>(caller.isSaCall, caller.callerPid, caller.callerToken));
         }
@@ -171,7 +170,6 @@ public:
                 return info && info->GetCallerToken() == caller.callerToken;
             }
         });
-
         if (it != callers_.end()) {
             callers_.erase(it);
         }

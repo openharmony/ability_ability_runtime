@@ -71,7 +71,6 @@ int32_t ServiceProxyAdapter::UnregisterObserver(const sptr<IConnectionObserver> 
         return ERR_NO_PROXY;
     }
 
-
     int error;
     MessageParcel data;
     MessageParcel reply;

@@ -38,7 +38,6 @@ public:
 
     virtual void OnDlpAbilityClosed(const DlpStateData &data) = 0;
 
-
     enum ConnectionObserverCmd {
         // ipc id for OnExtensionConnected
         ON_EXTENSION_CONNECTED = 0,

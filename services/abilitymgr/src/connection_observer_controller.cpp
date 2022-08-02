@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace AAFwk {
+using namespace OHOS::AbilityRuntime;
 int ConnectionObserverController::AddObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
 {
     if (!observer) {
@@ -28,11 +29,9 @@ int ConnectionObserverController::AddObserver(const sptr<AbilityRuntime::IConnec
     }
 
     std::lock_guard<std::recursive_mutex> guard(observerLock_);
-    auto it = std::find_if(observers_.begin(), observers_.end(),
-        [&observer](const sptr<AbilityRuntime::IConnectionObserver> &item) {
-            return (item && item->AsObject() == observer->AsObject());
-        }
-    );
+    auto it = std::find_if(observers_.begin(), observers_.end(), [&observer](const sptr<IConnectionObserver> &item) {
+        return (item && item->AsObject() == observer->AsObject());
+    });
     if (it != observers_.end()) {
         HILOG_WARN("observer was already added, do not add again");
         return 0;
@@ -65,11 +64,9 @@ void ConnectionObserverController::RemoveObserver(const sptr<AbilityRuntime::ICo
     }
 
     std::lock_guard<std::recursive_mutex> guard(observerLock_);
-    auto it = std::find_if(observers_.begin(), observers_.end(),
-        [&observer](const sptr<AbilityRuntime::IConnectionObserver> item) {
-            return (item && item->AsObject() == observer->AsObject());
-        }
-    );
+    auto it = std::find_if(observers_.begin(), observers_.end(), [&observer](const sptr<IConnectionObserver> item) {
+        return (item && item->AsObject() == observer->AsObject());
+    });
     if (it != observers_.end()) {
         observers_.erase(it);
     }
@@ -112,11 +109,9 @@ void ConnectionObserverController::HandleRemoteDied(const wptr<IRemoteObject> &r
     remoteObj->RemoveDeathRecipient(observerDeathRecipient_);
 
     std::lock_guard<std::recursive_mutex> guard(observerLock_);
-    auto it = std::find_if(observers_.begin(), observers_.end(),
-        [&remoteObj](const sptr<AbilityRuntime::IConnectionObserver> item) {
-            return (item && item->AsObject() == remoteObj);
-        }
-    );
+    auto it = std::find_if(observers_.begin(), observers_.end(), [&remoteObj](const sptr<IConnectionObserver> item) {
+        return (item && item->AsObject() == remoteObj);
+    });
     if (it != observers_.end()) {
         observers_.erase(it);
     }

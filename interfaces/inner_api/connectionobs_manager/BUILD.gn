@@ -31,18 +31,16 @@ config("connection_obs_manager_public_config") {
 ohos_shared_library("connection_obs_manager") {
   sources = [
     "src/connection_data.cpp",
-    "src/connection_observer_client_impl.cpp",
     "src/connection_observer_client.cpp",
+    "src/connection_observer_client_impl.cpp",
     "src/connection_observer_proxy.cpp",
-    "src/connection_observer_stub_impl.cpp",
     "src/connection_observer_stub.cpp",
+    "src/connection_observer_stub_impl.cpp",
     "src/dlp_state_data.cpp",
     "src/service_proxy_adapter.cpp",
   ]
 
-  public_configs = [
-    ":connection_obs_manager_public_config",
-  ]
+  public_configs = [ ":connection_obs_manager_public_config" ]
 
   deps = []
 

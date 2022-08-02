@@ -66,7 +66,6 @@ enum {
      */
     ERR_SERVICE_NOT_INIT,
 };
-
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_ABILITYRUNTIME_CONNECTION_OBSERVER_ERRORS_H
