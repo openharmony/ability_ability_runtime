@@ -23,7 +23,7 @@ namespace AAFwk {
  * @class ConnectedExtension
  * ConnectedExtension,This class is used to record a connected extension.
  */
-class ConnectedExtension : public std::enable_shared_from_this<ConnectedExtension>{
+class ConnectedExtension : public std::enable_shared_from_this<ConnectedExtension> {
 public:
     static std::shared_ptr<ConnectedExtension> CreateConnectedExtension(const std::shared_ptr<ConnectionRecord> &record)
     {
@@ -32,19 +32,18 @@ public:
         }
 
         auto targetExtension = record->GetAbilityRecord();
-        auto targetToken = record->GetTargetToken();
-        if (!targetExtension || !targetToken) {
+        if (!targetExtension) {
             return nullptr;
         }
 
-        return std::make_shared<ConnectedExtension>(targetExtension, targetToken);
+        return std::make_shared<ConnectedExtension>(targetExtension);
     }
 
     ConnectedExtension() {}
 
-    ConnectedExtension(const std::shared_ptr<AbilityRecord> &target, const sptr<IRemoteObject> &targetToken)
+    explicit ConnectedExtension(const std::shared_ptr<AbilityRecord> &target)
     {
-        if (!target || !targetToken) {
+        if (!target) {
             return;
         }
         extensionPid_ = target->GetPid();
@@ -53,7 +52,6 @@ public:
         extensionModuleName_ = target->GetAbilityInfo().moduleName;
         extensionName_ = target->GetAbilityInfo().name;
         extensionType_ = target->GetAbilityInfo().extensionAbilityType;
-        extensionToken_ = targetToken;
     }
 
     virtual ~ConnectedExtension() = default;
@@ -97,8 +95,133 @@ private:
     std::string extensionModuleName_;
     std::string extensionName_;
     AppExecFwk::ExtensionAbilityType extensionType_;
-    sptr<IRemoteObject> extensionToken_; // ability token of this extension.
     std::set<sptr<IRemoteObject>> connections_; // remote object of IAbilityConnection
+};
+
+/**
+ * @class ConnectedDataAbility
+ * ConnectedDataAbility,This class is used to record a connected data ability.
+ */
+class ConnectedDataAbility : public std::enable_shared_from_this<ConnectedDataAbility> {
+public:
+    static std::shared_ptr<ConnectedDataAbility> CreateConnectedDataAbility(
+        const std::shared_ptr<DataAbilityRecord> &record)
+    {
+        if (!record) {
+            return nullptr;
+        }
+
+        auto targetAbility = record->GetAbilityRecord();
+        if (!targetAbility) {
+            return nullptr;
+        }
+
+        return std::make_shared<ConnectedDataAbility>(targetAbility);
+    }
+
+    ConnectedDataAbility() {}
+
+    explicit ConnectedDataAbility(const std::shared_ptr<AbilityRecord> &target)
+    {
+        if (!target) {
+            return;
+        }
+
+        dataAbilityPid_ = target->GetPid();
+        dataAbilityUid_ = target->GetUid();
+        bundleName_ = target->GetAbilityInfo().bundleName;
+        moduleName_ = target->GetAbilityInfo().moduleName;
+        abilityName_ = target->GetAbilityInfo().name;
+    }
+
+    virtual ~ConnectedDataAbility() = default;
+
+    bool AddCaller(const DataAbilityCaller &caller)
+    {
+        if (!caller.isSaCall && !caller.callerToken) {
+            return false;
+        }
+
+        bool needNotify = callers_.empty();
+        auto it = find_if(callers_.begin(), callers_.end(), [&caller](const std::shared_ptr<CallerInfo> &info) {
+            if (caller.isSaCall) {
+                return info && info->IsSACall() && info->GetCallerPid() == caller.callerPid;
+            } else {
+                return info && info->GetCallerToken() == caller.callerToken;
+            }
+        });
+
+        if (it == callers_.end()) {
+            callers_.emplace_back(std::make_shared<CallerInfo>(caller.isSaCall, caller.callerPid, caller.callerToken));
+        }
+
+        return needNotify;
+    }
+
+    bool RemoveCaller(const DataAbilityCaller &caller)
+    {
+        if (!caller.isSaCall && !caller.callerToken) {
+            return false;
+        }
+
+        auto it = find_if(callers_.begin(), callers_.end(), [&caller](const std::shared_ptr<CallerInfo> &info) {
+            if (caller.isSaCall) {
+                return info && info->IsSACall() && info->GetCallerPid() == caller.callerPid;
+            } else {
+                return info && info->GetCallerToken() == caller.callerToken;
+            }
+        });
+
+        if (it != callers_.end()) {
+            callers_.erase(it);
+        }
+
+        return callers_.empty();
+    }
+
+    void GenerateExtensionInfo(AbilityRuntime::ConnectionData &data)
+    {
+        data.extensionPid = dataAbilityPid_;
+        data.extensionUid = dataAbilityUid_;
+        data.extensionBundleName = bundleName_;
+        data.extensionModuleName = moduleName_;
+        data.extensionName = abilityName_;
+        data.extensionType = AppExecFwk::ExtensionAbilityType::DATASHARE;
+    }
+
+private:
+    class CallerInfo : public std::enable_shared_from_this<CallerInfo> {
+    public:
+        CallerInfo(bool isSaCall, int32_t callerPid, const sptr<IRemoteObject> &callerToken)
+            : isSaCall_(isSaCall), callerPid_(callerPid), callerToken_(callerToken) {}
+
+        bool IsSACall() const
+        {
+            return isSaCall_;
+        }
+
+        int32_t GetCallerPid() const
+        {
+            return callerPid_;
+        }
+
+        sptr<IRemoteObject> GetCallerToken() const
+        {
+            return callerToken_;
+        }
+
+    private:
+        bool isSaCall_ = false;
+        int32_t callerPid_ = 0;
+        sptr<IRemoteObject> callerToken_ = nullptr;
+    };
+
+    int32_t dataAbilityPid_ = 0;
+    int32_t dataAbilityUid_ = 0;
+    std::string bundleName_;
+    std::string moduleName_;
+    std::string abilityName_;
+    std::list<std::shared_ptr<CallerInfo>> callers_; // caller infos of this data ability.
 };
 
 ConnectionStateItem::ConnectionStateItem(int32_t callerUid, int32_t callerPid, const std::string &callerName)
@@ -118,6 +241,13 @@ std::shared_ptr<ConnectionStateItem> ConnectionStateItem::CreateConnectionStateI
 
     return std::make_shared<ConnectionStateItem>(record->GetCallerUid(),
         record->GetCallerPid(), record->GetCallerName());
+}
+
+std::shared_ptr<ConnectionStateItem> ConnectionStateItem::CreateConnectionStateItem(
+    const DataAbilityCaller &dataCaller)
+{
+    return std::make_shared<ConnectionStateItem>(dataCaller.callerUid,
+        dataCaller.callerPid, dataCaller.callerName);
 }
 
 bool ConnectionStateItem::AddConnection(const std::shared_ptr<ConnectionRecord> &record,
@@ -205,10 +335,117 @@ bool ConnectionStateItem::RemoveConnection(const std::shared_ptr<ConnectionRecor
     return needNotify;
 }
 
+bool ConnectionStateItem::AddDataAbilityConnection(const DataAbilityCaller &caller,
+    const std::shared_ptr<DataAbilityRecord> &dataAbility, AbilityRuntime::ConnectionData &data)
+{
+    if (!dataAbility) {
+        HILOG_ERROR("invalid dataAbility.");
+        return false;
+    }
+
+    auto token = dataAbility->GetToken();
+    if (!token) {
+        HILOG_ERROR("invalid dataAbility token.");
+        return false;
+    }
+
+    std::shared_ptr<ConnectedDataAbility> connectedAbility = nullptr;
+    auto it = dataAbilityMap_.find(token);
+    if (it == dataAbilityMap_.end()) {
+        connectedAbility = ConnectedDataAbility::CreateConnectedDataAbility(dataAbility);
+        if (connectedAbility) {
+            dataAbilityMap_[token] = connectedAbility;
+        }
+    } else {
+        connectedAbility = it->second;
+    }
+
+    if (!connectedAbility) {
+        HILOG_ERROR("connectedAbility is invalid");
+        return false;
+    }
+
+    bool needNotify = connectedAbility->AddCaller(caller);
+    if (needNotify) {
+        GenerateConnectionData(connectedAbility, data);
+    }
+
+    return needNotify;
+}
+
+bool ConnectionStateItem::RemoveDataAbilityConnection(const DataAbilityCaller &caller,
+    const std::shared_ptr<DataAbilityRecord> &dataAbility, AbilityRuntime::ConnectionData &data)
+{
+    if (!dataAbility) {
+        HILOG_ERROR("invalid data ability record.");
+        return false;
+    }
+
+    auto token = dataAbility->GetToken();
+    if (!token) {
+        HILOG_ERROR("invalid data ability token.");
+        return false;
+    }
+
+    auto it = dataAbilityMap_.find(token);
+    if (it == dataAbilityMap_.end()) {
+        HILOG_ERROR("no such connected data ability.");
+        return false;
+    }
+
+    auto connectedDataAbility = it->second;
+    if (!connectedDataAbility) {
+        HILOG_ERROR("can not find such connectedDataAbility");
+        return false;
+    }
+
+    bool needNotify = connectedDataAbility->RemoveCaller(caller);
+    if (needNotify) {
+        dataAbilityMap_.erase(it);
+        GenerateConnectionData(connectedDataAbility, data);
+    }
+
+    return needNotify;
+}
+
+bool ConnectionStateItem::HandleDataAbilityDied(const sptr<IRemoteObject> &token,
+    AbilityRuntime::ConnectionData &data)
+{
+    if (!token) {
+        return false;
+    }
+
+    auto it = dataAbilityMap_.find(token);
+    if (it == dataAbilityMap_.end()) {
+        HILOG_ERROR("no such connected data ability.");
+        return false;
+    }
+
+    auto connectedDataAbility = it->second;
+    if (!connectedDataAbility) {
+        HILOG_ERROR("can not find such connectedDataAbility");
+        return false;
+    }
+
+    dataAbilityMap_.erase(it);
+    GenerateConnectionData(connectedDataAbility, data);
+    return true;
+}
+
+bool ConnectionStateItem::IsEmpty() const
+{
+    return connectionMap_.empty() && dataAbilityMap_.empty();
+}
+
 void ConnectionStateItem::GenerateAllConnectionData(std::vector<AbilityRuntime::ConnectionData> &datas)
 {
     AbilityRuntime::ConnectionData data;
     for (auto it = connectionMap_.begin(); it != connectionMap_.end(); ++it) {
+        GenerateConnectionData(it->second, data);
+        datas.emplace_back(data);
+    }
+
+    for (auto it = dataAbilityMap_.begin(); it != dataAbilityMap_.end(); ++it) {
         GenerateConnectionData(it->second, data);
         datas.emplace_back(data);
     }
@@ -219,6 +456,17 @@ void ConnectionStateItem::GenerateConnectionData(
 {
     if (connectedExtension) {
         connectedExtension->GenerateExtensionInfo(data);
+    }
+    data.callerUid = callerUid_;
+    data.callerPid = callerPid_;
+    data.callerName = callerName_;
+}
+
+void ConnectionStateItem::GenerateConnectionData(const std::shared_ptr<ConnectedDataAbility> &connectedDataAbility,
+    AbilityRuntime::ConnectionData &data)
+{
+    if (connectedDataAbility) {
+        connectedDataAbility->GenerateExtensionInfo(data);
     }
     data.callerUid = callerUid_;
     data.callerPid = callerPid_;
