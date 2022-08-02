@@ -32,11 +32,18 @@ namespace AAFwk {
 class ConnectionStateManager : public std::enable_shared_from_this<ConnectionStateManager> {
     DECLARE_DELAYED_SINGLETON(ConnectionStateManager)
 public:
+    static std::string GetProcessNameByPid(int32_t pid);
     void Init();
     int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
     int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
     void AddConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord);
     void RemoveConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord, bool isCallerDied);
+    void AddDataAbilityConnection(const DataAbilityCaller &caller,
+        const std::shared_ptr<DataAbilityRecord> &record);
+    void RemoveDataAbilityConnection(const DataAbilityCaller &caller,
+        const std::shared_ptr<DataAbilityRecord> &record);
+    void HandleDataAbilityDied(const std::shared_ptr<DataAbilityRecord> &record);
+    void HandleDataAbilityCallerDied(int32_t callerPid);
     void AddDlpManager(const std::shared_ptr<AbilityRecord> &dlpManger);
     void RemoveDlpManager(const std::shared_ptr<AbilityRecord> &dlpManger);
     void AddDlpAbility(const std::shared_ptr<AbilityRecord> &dlpAbility);
@@ -47,8 +54,14 @@ private:
         AbilityRuntime::ConnectionData &data);
     bool RemoveConnectionInner(const std::shared_ptr<ConnectionRecord> &connectionRecord,
         AbilityRuntime::ConnectionData &data);
-    void HandleCallerDied(const std::shared_ptr<ConnectionRecord> &connectionRecord);
+    bool AddDataAbilityConnectionInner(const DataAbilityCaller &caller,
+        const std::shared_ptr<DataAbilityRecord> &record, AbilityRuntime::ConnectionData &data);
+    bool RemoveDataAbilityConnectionInner(const DataAbilityCaller &caller,
+        const std::shared_ptr<DataAbilityRecord> &record, AbilityRuntime::ConnectionData &data);
+    void HandleCallerDied(int32_t callerPid);
     std::shared_ptr<ConnectionStateItem> RemoveDiedCaller(int32_t callerPid);
+    void HandleDataAbilityDiedInner(const sptr<IRemoteObject> &abilityToken,
+        std::vector<AbilityRuntime::ConnectionData> &allData);
     bool HandleDlpAbilityInner(const std::shared_ptr<AbilityRecord> &dlpAbility,
         bool isAdd, AbilityRuntime::DlpStateData &dlpData);
 

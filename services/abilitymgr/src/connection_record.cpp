@@ -15,9 +15,6 @@
 
 #include "connection_record.h"
 
-#include <sstream>
-#include <fstream>
-
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_util.h"
@@ -26,20 +23,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-namespace {
-static const int MAX_PROCESS_LEN = 256;
-std::string GetNameByPid(int32_t pid)
-{
-    char path[MAX_PROCESS_LEN] = { 0 };
-    if (snprintf_s(path, MAX_PROCESS_LEN, MAX_PROCESS_LEN - 1, "/proc/%d/cmdline", pid) <= 0) {
-        return "";
-    }
-    std::ifstream file(path);
-    std::string name = "";
-    getline(file, name);
-    return name;
-}
-}
 int64_t ConnectionRecord::connectRecordId = 0;
 
 ConnectionRecord::ConnectionRecord(const sptr<IRemoteObject> &callerToken,
@@ -244,7 +227,7 @@ void ConnectionRecord::AttachCallerInfo()
 
     callerUid_ = static_cast<int32_t>(IPCSkeleton::GetCallingUid());
     callerPid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
-    callerName_ = GetNameByPid(callerPid_);
+    callerName_ = ConnectionStateManager::GetProcessNameByPid(callerPid_);
 }
 
 int32_t ConnectionRecord::GetCallerUid() const

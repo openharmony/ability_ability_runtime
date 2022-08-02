@@ -15,15 +15,34 @@
 
 #include "connection_state_manager.h"
 
+#include <sstream>
+#include <fstream>
+
 #include "connection_observer_errors.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+static const int MAX_PROCESS_LEN = 256;
+}
 using namespace OHOS::AbilityRuntime;
+
 ConnectionStateManager::ConnectionStateManager() {}
 
 ConnectionStateManager::~ConnectionStateManager() {}
+
+std::string ConnectionStateManager::GetProcessNameByPid(int32_t pid)
+{
+    char path[MAX_PROCESS_LEN] = { 0 };
+    if (snprintf_s(path, MAX_PROCESS_LEN, MAX_PROCESS_LEN - 1, "/proc/%d/cmdline", pid) <= 0) {
+        return "";
+    }
+    std::ifstream file(path);
+    std::string name = "";
+    getline(file, name);
+    return name;
+}
 
 void ConnectionStateManager::Init()
 {
@@ -70,7 +89,8 @@ void ConnectionStateManager::AddConnection(const std::shared_ptr<ConnectionRecor
     }
 }
 
-void ConnectionStateManager::RemoveConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord, bool isCallerDied)
+void ConnectionStateManager::RemoveConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord,
+    bool isCallerDied)
 {
     if (!connectionRecord) {
         HILOG_ERROR("connection record is invalid when remove connection");
@@ -79,7 +99,7 @@ void ConnectionStateManager::RemoveConnection(const std::shared_ptr<ConnectionRe
 
     // if caller died, notify at once.
     if (isCallerDied) {
-        HandleCallerDied(connectionRecord);
+        HandleCallerDied(connectionRecord->GetCallerPid());
         return;
     }
 
@@ -93,6 +113,96 @@ void ConnectionStateManager::RemoveConnection(const std::shared_ptr<ConnectionRe
     if (controller) {
         controller->NotifyExtensionDisconnected(connectionData);
     }
+}
+
+void ConnectionStateManager::AddDataAbilityConnection(const DataAbilityCaller &caller,
+    const std::shared_ptr<DataAbilityRecord> &record)
+{
+    if (!record) {
+        HILOG_ERROR("data ability record is invalid");
+        return;
+    }
+
+    if (caller.callerPid == 0) {
+        HILOG_ERROR("data ability, invalid callerInfo");
+        return;
+    }
+
+    ConnectionData connectionData;
+    if (!AddDataAbilityConnectionInner(caller, record, connectionData)) {
+        HILOG_WARN("add data ability onnection, no need to notify observers");
+        return;
+    }
+
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (controller) {
+        controller->NotifyExtensionConnected(connectionData);
+    }
+}
+
+void ConnectionStateManager::RemoveDataAbilityConnection(const DataAbilityCaller &caller,
+    const std::shared_ptr<DataAbilityRecord> &record)
+{
+    if (!record) {
+        HILOG_ERROR("data ability record is invalid");
+        return;
+    }
+
+    if (caller.callerPid == 0) {
+        HILOG_ERROR("data ability, invalid caller pid");
+        return;
+    }
+
+    ConnectionData connectionData;
+    if (!RemoveDataAbilityConnectionInner(caller, record, connectionData)) {
+        HILOG_WARN("remove data ability, no need to notify observers");
+        return;
+    }
+
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (controller) {
+        controller->NotifyExtensionDisconnected(connectionData);
+    }
+}
+
+void ConnectionStateManager::HandleDataAbilityDied(const std::shared_ptr<DataAbilityRecord> &record)
+{
+    if (!record) {
+        HILOG_ERROR("invalid data ability.");
+        return;
+    }
+
+    auto token = record->GetToken();
+    if (!token) {
+        HILOG_ERROR("invalid data ability token.");
+        return;
+    }
+
+    std::vector<AbilityRuntime::ConnectionData> allData;
+    HandleDataAbilityDiedInner(token, allData);
+    if (allData.empty()) {
+        HILOG_WARN("allConnectionData is empty.");
+        return;
+    }
+
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
+    for (auto& item : allData) {
+        controller->NotifyExtensionDisconnected(item);
+    }
+}
+
+void ConnectionStateManager::HandleDataAbilityCallerDied(int32_t callerPid)
+{
+    if (callerPid <= 0) {
+        HILOG_WARN("invalid data ability caller pid.");
+        return;
+    }
+
+    HandleCallerDied(callerPid);
 }
 
 void ConnectionStateManager::AddDlpManager(const std::shared_ptr<AbilityRecord> &dlpManger)
@@ -188,12 +298,16 @@ bool ConnectionStateManager::RemoveConnectionInner(const std::shared_ptr<Connect
         return false;
     }
 
-    return targetItem->RemoveConnection(connectionRecord, data);
+    bool result = targetItem->RemoveConnection(connectionRecord, data);
+    if (result && targetItem->IsEmpty()) {
+        connectionStates_.erase(it);
+    }
+    return result;
 }
 
-void ConnectionStateManager::HandleCallerDied(const std::shared_ptr<ConnectionRecord> &connectionRecord)
+void ConnectionStateManager::HandleCallerDied(int32_t callerPid)
 {
-    auto connectionStateItem = RemoveDiedCaller(connectionRecord->GetCallerPid());
+    auto connectionStateItem = RemoveDiedCaller(callerPid);
     if (!connectionStateItem) {
         HILOG_WARN("no connectionStateItem, may already handled.");
         return;
@@ -228,6 +342,76 @@ std::shared_ptr<ConnectionStateItem> ConnectionStateManager::RemoveDiedCaller(in
     (void)connectionStates_.erase(it);
 
     return stateItem;
+}
+
+bool ConnectionStateManager::AddDataAbilityConnectionInner(const DataAbilityCaller &caller,
+    const std::shared_ptr<DataAbilityRecord> &record, ConnectionData &data)
+{
+    std::shared_ptr<ConnectionStateItem> targetItem = nullptr;
+    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    auto it = connectionStates_.find(caller.callerPid);
+    if (it == connectionStates_.end()) {
+        targetItem = ConnectionStateItem::CreateConnectionStateItem(caller);
+        if (targetItem) {
+            connectionStates_[caller.callerPid] = targetItem;
+        }
+    } else {
+        targetItem = it->second;
+    }
+
+    if (!targetItem) {
+        HILOG_ERROR("failed to find target connection state item.");
+        return false;
+    }
+
+    return targetItem->AddDataAbilityConnection(caller, record, data);
+}
+
+bool ConnectionStateManager::RemoveDataAbilityConnectionInner(const DataAbilityCaller &caller,
+    const std::shared_ptr<DataAbilityRecord> &record, AbilityRuntime::ConnectionData &data)
+{
+    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    auto it = connectionStates_.find(caller.callerPid);
+    if (it == connectionStates_.end()) {
+        HILOG_WARN("can not find target item, connection caller pid:%{public}d.", caller.callerPid);
+        return false;
+    }
+
+    auto targetItem = it->second;
+    if (!targetItem) {
+        HILOG_ERROR("failed to find target data ability state item.");
+        return false;
+    }
+
+    bool result = targetItem->RemoveDataAbilityConnection(caller, record, data);
+    if (result && targetItem->IsEmpty()) {
+        connectionStates_.erase(it);
+    }
+    return result;
+}
+
+void ConnectionStateManager::HandleDataAbilityDiedInner(const sptr<IRemoteObject> &abilityToken,
+    std::vector<AbilityRuntime::ConnectionData> &allData)
+{
+    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    for (auto it = connectionStates_.begin(); it != connectionStates_.end();) {
+        auto item = it->second;
+        if (!item) {
+            connectionStates_.erase(it++);
+            continue;
+        }
+
+        AbilityRuntime::ConnectionData data;
+        if (item->HandleDataAbilityDied(abilityToken, data)) {
+            allData.emplace_back(data);
+        }
+
+        if (item->IsEmpty()) {
+            connectionStates_.erase(it++);
+        } else {
+            it++;
+        }
+    }
 }
 
 bool ConnectionStateManager::HandleDlpAbilityInner(const std::shared_ptr<AbilityRecord> &dlpAbility,
