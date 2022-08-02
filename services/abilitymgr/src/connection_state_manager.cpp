@@ -15,7 +15,6 @@
 
 #include "connection_state_manager.h"
 
-#include <sstream>
 #include <fstream>
 
 #include "connection_observer_errors.h"

@@ -261,6 +261,5 @@ void ConnectionObserverClientImpl::ServiceDeathRecipient::OnRemoteDied(const wpt
     }
     owner->HandleRemoteDied(remote);
 }
-
 } // namespace AbilityRuntime
 } // namespace OHOS

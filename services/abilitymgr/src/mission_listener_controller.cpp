@@ -47,8 +47,7 @@ int MissionListenerController::AddMissionListener(const sptr<IMissionListener> &
     }
 
     std::lock_guard<std::recursive_mutex> guard(listenerLock_);
-    auto it = std::find_if(missionListeners_.begin(), missionListeners_.end(),
-        [&listener](const sptr<IMissionListener> &item) {
+    auto it = std::find_if(missionListeners_.begin(), missionListeners_.end(), [&listener](const sptr<IMissionListener> &item) {
             return (item && item->AsObject() == listener->AsObject());
         }
     );
