@@ -760,6 +760,7 @@ void Ability::OnMemoryLevel(int level)
     HILOG_INFO("%{public}s start.", __func__);
     if (scene_ == nullptr) {
         HILOG_DEBUG("WindowScene is null");
+        return;
     }
     scene_->NotifyMemoryLevel(level);
 }
