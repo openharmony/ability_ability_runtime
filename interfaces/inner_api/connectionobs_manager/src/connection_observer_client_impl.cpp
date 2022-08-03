@@ -65,7 +65,7 @@ void ConnectionObserverClientImpl::HandleExtensionConnected(const ConnectionData
     for (auto it = observers.begin(); it != observers.end(); ++it) {
         auto observer = *it;
         if (observer) {
-            observer->OnServiceDied();
+            observer->OnExtensionConnected(data);
         }
     }
 }
@@ -76,7 +76,7 @@ void ConnectionObserverClientImpl::HandleExtensionDisconnected(const ConnectionD
     for (auto it = observers.begin(); it != observers.end(); ++it) {
         auto observer = *it;
         if (observer) {
-            observer->OnServiceDied();
+            observer->OnExtensionDisconnected(data);
         }
     }
 }
@@ -87,7 +87,7 @@ void ConnectionObserverClientImpl::HandleDlpAbilityOpened(const DlpStateData &da
     for (auto it = observers.begin(); it != observers.end(); ++it) {
         auto observer = *it;
         if (observer) {
-            observer->OnServiceDied();
+            observer->OnDlpAbilityOpened(data);
         }
     }
 }
@@ -98,7 +98,7 @@ void ConnectionObserverClientImpl::HandleDlpAbilityClosed(const DlpStateData &da
     for (auto it = observers.begin(); it != observers.end(); ++it) {
         auto observer = *it;
         if (observer) {
-            observer->OnServiceDied();
+            observer->OnDlpAbilityClosed(data);
         }
     }
 }
