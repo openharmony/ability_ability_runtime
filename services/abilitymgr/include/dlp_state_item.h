@@ -32,8 +32,22 @@ public:
     DlpStateItem(int32_t dlpUid, int32_t dlpPid);
     virtual ~DlpStateItem();
 
+    /**
+     * add an opened dlp ability.
+     *
+     * @param record target dlp ability.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
     bool AddDlpConnectionState(const std::shared_ptr<AbilityRecord> &record, AbilityRuntime::DlpStateData &data);
 
+    /**
+     * remove an closed dlp ability.
+     *
+     * @param record target dlp ability.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
     bool RemoveDlpConnectionState(const std::shared_ptr<AbilityRecord> &record, AbilityRuntime::DlpStateData &data);
 
 private:

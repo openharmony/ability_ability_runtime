@@ -35,8 +35,20 @@ public:
      */
     virtual ~ConnectionObserverClient() = default;
 
+    /**
+     * register connection state observer.
+     *
+     * @param observer the observer callback.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t RegisterObserver(const std::shared_ptr<ConnectionObserver> &observer);
 
+    /**
+     * unregister connection state observer.
+     *
+     * @param observer the observer callback.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     int32_t UnregisterObserver(const std::shared_ptr<ConnectionObserver> &observer);
 
 private:
