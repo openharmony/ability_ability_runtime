@@ -56,20 +56,67 @@ public:
     ConnectionStateItem(int32_t callerUid, int32_t callerPid, const std::string &callerName);
     virtual ~ConnectionStateItem();
 
+    /**
+     * add a connection to target extension.
+     *
+     * @param record the connection record which mark an connection.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
     bool AddConnection(const std::shared_ptr<ConnectionRecord> &record, AbilityRuntime::ConnectionData &data);
 
+    /**
+     * remove a connection to target extension.
+     *
+     * @param record the connection record which mark an connection.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
     bool RemoveConnection(const std::shared_ptr<ConnectionRecord> &record, AbilityRuntime::ConnectionData &data);
 
+    /**
+     * add a connection to target data ability.
+     *
+     * @param caller the caller of this data ability.
+     * @param dataAbility data ability that acquired.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
     bool AddDataAbilityConnection(const DataAbilityCaller &caller,
         const std::shared_ptr<DataAbilityRecord> &dataAbility, AbilityRuntime::ConnectionData &data);
 
+    /**
+     * remove a connection to target data ability.
+     *
+     * @param caller the caller of this data ability.
+     * @param dataAbility data ability that acquired.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
     bool RemoveDataAbilityConnection(const DataAbilityCaller &caller,
         const std::shared_ptr<DataAbilityRecord> &dataAbility, AbilityRuntime::ConnectionData &data);
 
+    /**
+     * handle died of data ability.
+     *
+     * @param token target token of data ability.
+     * @param data output relationship data.
+     * @return Returns true if need report relationship.
+     */
     bool HandleDataAbilityDied(const sptr<IRemoteObject> &token, AbilityRuntime::ConnectionData &data);
 
+    /**
+     * generate all relationship data of this item.
+     *
+     * @param datas output relationship data.
+     */
     void GenerateAllConnectionData(std::vector<AbilityRuntime::ConnectionData> &datas);
 
+    /**
+     * check if connections is empty.
+     *
+     * @return true if no connections.
+     */
     bool IsEmpty() const;
 
 private:
@@ -84,8 +131,8 @@ private:
     int32_t callerUid_ = 0;
     int32_t callerPid_ = 0;
     std::string callerName_;
-    std::map<sptr<IRemoteObject>, std::shared_ptr<ConnectedExtension>> connectionMap_; // extension
-    std::map<sptr<IRemoteObject>, std::shared_ptr<ConnectedDataAbility>> dataAbilityMap_; // data ability
+    std::map<sptr<IRemoteObject>, std::shared_ptr<ConnectedExtension>> connectionMap_; // key:targetExtension token
+    std::map<sptr<IRemoteObject>, std::shared_ptr<ConnectedDataAbility>> dataAbilityMap_; // key:targetDatability token
 };
 }  // namespace AAFwk
 }  // namespace OHOS

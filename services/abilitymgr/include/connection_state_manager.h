@@ -33,20 +33,102 @@ class ConnectionStateManager : public std::enable_shared_from_this<ConnectionSta
     DECLARE_DELAYED_SINGLETON(ConnectionStateManager)
 public:
     static std::string GetProcessNameByPid(int32_t pid);
+
+    /**
+     * init manager.
+     *
+     */
     void Init();
+
+    /**
+     * register connection state observer.
+     *
+     * @param observer callback of client.
+     * @return Returns ERR_OK if success.
+     */
     int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
+
+    /**
+     * unregister connection state observer.
+     *
+     * @param observer callback of client.
+     * @return Returns ERR_OK if success.
+     */
     int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
+
+    /**
+     * add an connection to manager.
+     *
+     * @param connectionRecord connection record info.
+     */
     void AddConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord);
+
+    /**
+     * remove an connection.
+     *
+     * @param connectionRecord connection record info.
+     * @param isCallerDied whether caller was died.
+     */
     void RemoveConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord, bool isCallerDied);
+
+    /**
+     * add a data ability acquired information to manager.
+     *
+     * @param caller caller of data ability.
+     * @param record target data ability.
+     */
     void AddDataAbilityConnection(const DataAbilityCaller &caller,
         const std::shared_ptr<DataAbilityRecord> &record);
+
+    /**
+     * remove a data ability acquired information from manager.
+     *
+     * @param caller caller of data ability.
+     * @param record target data ability.
+     */
     void RemoveDataAbilityConnection(const DataAbilityCaller &caller,
         const std::shared_ptr<DataAbilityRecord> &record);
+
+    /**
+     * handle when data ability was died.
+     *
+     * @param record target data ability.
+     */
     void HandleDataAbilityDied(const std::shared_ptr<DataAbilityRecord> &record);
+
+    /**
+     * handle when data ability caller was died.
+     *
+     * @param callerPid caller pid of data ability.
+     */
     void HandleDataAbilityCallerDied(int32_t callerPid);
+
+    /**
+     * add dlp manager to manager.
+     *
+     * @param dlpManger dlp manager record.
+     */
     void AddDlpManager(const std::shared_ptr<AbilityRecord> &dlpManger);
+
+    /**
+     * remove dlp manager from manager.
+     *
+     * @param dlpManger dlp manager record.
+     */
     void RemoveDlpManager(const std::shared_ptr<AbilityRecord> &dlpManger);
+
+    /**
+     * a dlp ability was started.
+     *
+     * @param dlpAbility dlp manager record.
+     */
     void AddDlpAbility(const std::shared_ptr<AbilityRecord> &dlpAbility);
+
+    /**
+     * a dlp ability was terminated.
+     *
+     * @param dlpAbility dlp manager record.
+     */
     void RemoveDlpAbility(const std::shared_ptr<AbilityRecord> &dlpAbility);
 
 private:

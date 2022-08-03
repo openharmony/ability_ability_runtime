@@ -39,14 +39,38 @@ public:
      */
     virtual ~ConnectionObserver() = default;
 
+    /**
+     * called when extension was connected.
+     *
+     * @param data connection relationship data.
+     */
     virtual void OnExtensionConnected(const ConnectionData& data) = 0;
 
+    /**
+     * called when extension was disconnected.
+     *
+     * @param data connection relationship data.
+     */
     virtual void OnExtensionDisconnected(const ConnectionData& data) = 0;
 
+    /**
+     * called when dlp ability was started.
+     *
+     * @param data dlp state data.
+     */
     virtual void OnDlpAbilityOpened(const DlpStateData& data) = 0;
 
+    /**
+     * called when dlp ability was terminated.
+     *
+     * @param data dlp state data.
+     */
     virtual void OnDlpAbilityClosed(const DlpStateData& data) = 0;
 
+    /**
+     * called when service was died.
+     *
+     */
     virtual void OnServiceDied() {}
 };
 } // namespace AbilityRuntime
