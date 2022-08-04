@@ -615,16 +615,16 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         "ContextContainer::InitResourceManager hapModuleInfos count: %{public}zu", bundleInfo.hapModuleInfos.size());
     std::regex pattern(AbilityRuntime::Constants::ABS_CODE_PATH);
     for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+        if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
+            continue;
+        }
         std::string loadPath;
         if (!hapModuleInfo.hapPath.empty()) {
             loadPath = hapModuleInfo.hapPath;
         } else {
-            loadPath = hapModuleInfo.resourcePath;
+            loadPath = std::regex_replace(hapModuleInfo.resourcePath, pattern,
+                AbilityRuntime::Constants::LOCAL_BUNDLES);
         }
-        if (loadPath.empty()) {
-            continue;
-        }
-        loadPath = std::regex_replace(loadPath, pattern, AbilityRuntime::Constants::LOCAL_BUNDLES);
         if (!resourceManager->AddResource(loadPath.c_str())) {
             HILOG_ERROR("ContextContainer::InitResourceManager AddResource failed");
         }
