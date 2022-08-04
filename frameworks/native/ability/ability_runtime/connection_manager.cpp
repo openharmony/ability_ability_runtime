@@ -127,10 +127,6 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject> &connectC
             abilityConnection->SetConnectCallback(connectCallback);
         }
 
-        if (item->first.abilityConnection) {
-            item->first.abilityConnection->SetConnectCallback(connectCallback);
-        }
-
         HILOG_INFO("%{public}s end, find abilityConnection exist, abilityConnectionsSize:%{public}d.",
             __func__, (int32_t)abilityConnections_.size());
         if (item->second.empty()) {
