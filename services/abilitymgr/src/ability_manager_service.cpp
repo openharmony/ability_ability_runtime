@@ -228,8 +228,6 @@ bool AbilityManagerService::Init()
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
     CHECK_POINTER_RETURN_BOOL(freeInstallManager_);
 
-    DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
-
     // init user controller.
     userController_ = std::make_shared<UserController>();
     userController_->Init();
@@ -263,6 +261,8 @@ bool AbilityManagerService::Init()
     handler_->PostTask(startResidentAppsTask, "StartResidentApps");
 
     SubscribeBackgroundTask();
+
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
 
     HILOG_INFO("Init success.");
     return true;
@@ -678,7 +678,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
             HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-    
+
     auto result = CheckCrowdtestForeground(want, requestCode, userId);
     if (result != ERR_OK) {
         return result;

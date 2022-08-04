@@ -19,6 +19,7 @@
 #include <mutex>
 #include <unordered_map>
 
+#include "application_state_observer_stub.h"
 #include "connection_state_item.h"
 #include "connection_observer_controller.h"
 #include "dlp_state_item.h"
@@ -131,7 +132,35 @@ public:
      */
     void RemoveDlpAbility(const std::shared_ptr<AbilityRecord> &dlpAbility);
 
+    /**
+     * handle app process died.
+     *
+     * @param pid app process pid.
+     */
+    void HandleAppDied(int32_t pid);
+
 private:
+    class InnerAppStateObserver : public AppExecFwk::ApplicationStateObserverStub {
+    public:
+        using ProcessDiedHandler = std::function<void(int32_t)>;
+        explicit InnerAppStateObserver(const ProcessDiedHandler handler) : handler_(handler) {}
+        ~InnerAppStateObserver() = default;
+        void OnForegroundApplicationChanged(const AppExecFwk::AppStateData &appStateData) {}
+        void OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) {}
+        void OnExtensionStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) {}
+        void OnProcessCreated(const AppExecFwk::ProcessData &processData) {}
+        void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) {}
+        void OnProcessDied(const AppExecFwk::ProcessData &processData)
+        {
+            if (handler_) {
+                handler_(processData.pid);
+            }
+        }
+
+    private:
+        ProcessDiedHandler handler_;
+    };
+
     bool AddConnectionInner(const std::shared_ptr<ConnectionRecord> &connectionRecord,
         AbilityRuntime::ConnectionData &data);
     bool RemoveConnectionInner(const std::shared_ptr<ConnectionRecord> &connectionRecord,
@@ -146,6 +175,7 @@ private:
         std::vector<AbilityRuntime::ConnectionData> &allData);
     bool HandleDlpAbilityInner(const std::shared_ptr<AbilityRecord> &dlpAbility,
         bool isAdd, AbilityRuntime::DlpStateData &dlpData);
+    void InitAppStateObserver();
 
 private:
     std::shared_ptr<ConnectionObserverController> observerController_;
@@ -155,6 +185,8 @@ private:
 
     std::recursive_mutex dlpLock_;
     std::unordered_map<int32_t, std::shared_ptr<DlpStateItem>> dlpItems_;
+
+    sptr<InnerAppStateObserver> appStateObserver_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
