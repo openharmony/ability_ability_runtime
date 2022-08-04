@@ -17,13 +17,27 @@
 
 #include <fstream>
 
+#include "app_mgr_interface.h"
 #include "connection_observer_errors.h"
 #include "hilog_wrapper.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace AAFwk {
 namespace {
 static const int MAX_PROCESS_LEN = 256;
+OHOS::sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr()
+{
+    OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        return nullptr;
+    }
+    OHOS::sptr<OHOS::IRemoteObject> object = systemAbilityManager->GetSystemAbility(OHOS::APP_MGR_SERVICE_ID);
+    return OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
+}
 }
 using namespace OHOS::AbilityRuntime;
 
@@ -48,6 +62,7 @@ void ConnectionStateManager::Init()
     if (!observerController_) {
         observerController_ = std::make_shared<ConnectionObserverController>();
     }
+    InitAppStateObserver();
 }
 
 int ConnectionStateManager::RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
@@ -256,6 +271,11 @@ void ConnectionStateManager::RemoveDlpAbility(const std::shared_ptr<AbilityRecor
     }
 }
 
+void ConnectionStateManager::HandleAppDied(int32_t pid)
+{
+    HandleCallerDied(pid);
+}
+
 bool ConnectionStateManager::AddConnectionInner(const std::shared_ptr<ConnectionRecord> &connectionRecord,
     AbilityRuntime::ConnectionData &data)
 {
@@ -444,6 +464,29 @@ bool ConnectionStateManager::HandleDlpAbilityInner(const std::shared_ptr<Ability
     }
 
     return dlpItem->RemoveDlpConnectionState(dlpAbility, dlpData);
+}
+
+void ConnectionStateManager::InitAppStateObserver()
+{
+    if (appStateObserver_) {
+        return;
+    }
+
+    sptr<OHOS::AppExecFwk::IAppMgr> appManager = GetAppMgr();
+    if (!appManager) {
+        HILOG_WARN("%{public}s app manager nullptr!", __func__);
+        return;
+    }
+
+    appStateObserver_ = new (std::nothrow)InnerAppStateObserver([](int32_t pid) {
+        DelayedSingleton<ConnectionStateManager>::GetInstance()->HandleAppDied(pid);
+    });
+    int32_t err = appManager->RegisterApplicationStateObserver(appStateObserver_);
+    if (err != 0) {
+        HILOG_ERROR("%{public}s register to appmanager failed. err:%{public}d", __func__, err);
+        appStateObserver_ = nullptr;
+        return;
+    }
 }
 } // namespace AAFwk
 } // namespace OHOS
