@@ -21,9 +21,6 @@
 #include "ability_config.h"
 #include "ability_manager_errors.h"
 #include "bundlemgr/bundle_mgr_interface.h"
-#include "common_event.h"
-#include "common_event_manager.h"
-#include "common_event_support.h"
 #include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
 #include "permission_verification.h"
@@ -189,17 +186,6 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     }
 
     return false;
-}
-
-static void AppFwkBootEvent(const char *key, const char *value, void *context)
-{
-    if (strcmp(value, "true") == 0) {
-        HILOG_INFO("%{public}s %{public}s is true", __func__, key);
-        Want want;
-        want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
-        EventFwk::CommonEventData commonData {want};
-        EventFwk::CommonEventManager::PublishCommonEvent(commonData);
-    }
 }
 }  // namespace AbilityUtil
 }  // namespace AAFwk
