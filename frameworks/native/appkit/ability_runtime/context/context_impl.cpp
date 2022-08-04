@@ -342,19 +342,19 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
     std::string inner(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + GetBundleName());
     std::string outer(ABS_CODE_PATH);
     for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+        if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
+            continue;
+        }
         std::string loadPath;
         if (!hapModuleInfo.hapPath.empty()) {
             loadPath = hapModuleInfo.hapPath;
         } else {
             loadPath = hapModuleInfo.resourcePath;
-        }
-        if (loadPath.empty()) {
-            continue;
-        }
-        if (currentBundle) {
-            loadPath.replace(0, inner.size(), LOCAL_CODE_PATH);
-        } else {
-            loadPath.replace(0, outer.size(), LOCAL_BUNDLES);
+            if (currentBundle) {
+                loadPath.replace(0, inner.size(), LOCAL_CODE_PATH);
+            } else {
+                loadPath.replace(0, outer.size(), LOCAL_BUNDLES);
+            }
         }
         if (!resourceManager->AddResource(loadPath.c_str())) {
             HILOG_ERROR("ContextImpl::InitResourceManager AddResource fail, moduleResPath: %{public}s",

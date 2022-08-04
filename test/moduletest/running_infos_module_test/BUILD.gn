@@ -28,6 +28,7 @@ ohos_moduletest("running_infos_module_test") {
 
   sources = [ "running_infos_module_test.cpp" ]
   sources += [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/sa_mgr/src/sa_mgr_client_mock.cpp",
     "${ability_runtime_test_path}/moduletest/mock/src/mock_app_mgr_client.cpp",
     "${ability_runtime_test_path}/moduletest/mock/src/mock_bundle_mgr.cpp",
@@ -93,6 +94,11 @@ ohos_moduletest("running_infos_module_test") {
   if (efficiency_manager) {
     cflags_cc += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
+  }
+
+  if (resource_schedule_service_enable) {
+    cflags_cc += [ "-RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+    external_deps += [ "resource_schedule_service:ressched_client" ]
   }
 
   if (background_task_mgr_continuous_task_enable) {
