@@ -15,8 +15,6 @@
 
 #include "connection_state_manager.h"
 
-#include <fstream>
-
 #include "app_mgr_interface.h"
 #include "connection_observer_errors.h"
 #include "hilog_wrapper.h"
@@ -27,7 +25,6 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-static const int MAX_PROCESS_LEN = 256;
 OHOS::sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr()
 {
     OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
@@ -44,18 +41,6 @@ using namespace OHOS::AbilityRuntime;
 ConnectionStateManager::ConnectionStateManager() {}
 
 ConnectionStateManager::~ConnectionStateManager() {}
-
-std::string ConnectionStateManager::GetProcessNameByPid(int32_t pid)
-{
-    char path[MAX_PROCESS_LEN] = { 0 };
-    if (snprintf_s(path, MAX_PROCESS_LEN, MAX_PROCESS_LEN - 1, "/proc/%d/cmdline", pid) <= 0) {
-        return "";
-    }
-    std::ifstream file(path);
-    std::string name = "";
-    getline(file, name);
-    return name;
-}
 
 void ConnectionStateManager::Init()
 {

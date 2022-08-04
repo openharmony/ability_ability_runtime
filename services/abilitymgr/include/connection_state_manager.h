@@ -33,8 +33,6 @@ namespace AAFwk {
 class ConnectionStateManager : public std::enable_shared_from_this<ConnectionStateManager> {
     DECLARE_DELAYED_SINGLETON(ConnectionStateManager)
 public:
-    static std::string GetProcessNameByPid(int32_t pid);
-
     /**
      * init manager.
      *
