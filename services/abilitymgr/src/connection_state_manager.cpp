@@ -211,7 +211,7 @@ void ConnectionStateManager::AddDlpManager(const std::shared_ptr<AbilityRecord> 
     }
 
     auto userId = dlpManger->GetOwnerMissionUserId();
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::recursive_mutex> guard(dlpLock_);
     auto it = dlpItems_.find(userId);
     if (it == dlpItems_.end()) {
         dlpItems_[userId] = std::make_shared<DlpStateItem>(dlpManger->GetUid(), dlpManger->GetPid());
@@ -224,7 +224,7 @@ void ConnectionStateManager::RemoveDlpManager(const std::shared_ptr<AbilityRecor
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::recursive_mutex> guard(dlpLock_);
     dlpItems_.erase(dlpManger->GetOwnerMissionUserId());
 }
 
