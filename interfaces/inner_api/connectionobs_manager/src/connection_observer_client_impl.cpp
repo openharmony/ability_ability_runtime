@@ -92,7 +92,7 @@ void ConnectionObserverClientImpl::HandleDlpAbilityOpened(const DlpStateData &da
     }
 }
 
-void ConnectionObserverClientImpl::HandleDlpAbilityClosed(const DlpStateData &dataa)
+void ConnectionObserverClientImpl::HandleDlpAbilityClosed(const DlpStateData &data)
 {
     auto observers = GetObservers();
     for (auto it = observers.begin(); it != observers.end(); ++it) {
