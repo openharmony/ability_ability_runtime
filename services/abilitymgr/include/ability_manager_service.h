@@ -42,6 +42,8 @@
 #include "system_ability.h"
 #include "uri.h"
 #include "ability_config.h"
+#include "parameter.h"
+#include "parameters.h"
 #include "pending_want_manager.h"
 #include "ams_configuration_parameter.h"
 #include "user_controller.h"
@@ -1015,6 +1017,8 @@ private:
     int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
 
     int StartAppgallery(int requestCode, int32_t userId, std::string action);
+
+    void AddWatchParameter(const char *parameter, ParameterChgPtr callback);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
