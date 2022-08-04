@@ -683,8 +683,6 @@ void DataAbilityManager::ReportDataAbilityAcquired(const sptr<IRemoteObject> &cl
     auto abilityRecord = Token::GetAbilityRecordByToken(client);
     if (abilityRecord) {
         caller.callerName = abilityRecord->GetAbilityInfo().bundleName;
-    } else {
-        caller.callerName = "pid:" + std::to_string(caller.callerPid);
     }
 
     DelayedSingleton<ConnectionStateManager>::GetInstance()->AddDataAbilityConnection(caller, record);

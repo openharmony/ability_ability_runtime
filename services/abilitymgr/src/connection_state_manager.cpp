@@ -71,6 +71,11 @@ int ConnectionStateManager::UnregisterObserver(const sptr<AbilityRuntime::IConne
 
 void ConnectionStateManager::AddConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord)
 {
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
     if (!connectionRecord) {
         HILOG_ERROR("connection record is invalid");
         return;
@@ -81,16 +86,17 @@ void ConnectionStateManager::AddConnection(const std::shared_ptr<ConnectionRecor
         HILOG_WARN("add connection, no need to notify observers");
         return;
     }
-
-    std::shared_ptr<ConnectionObserverController> controller = observerController_;
-    if (controller) {
-        controller->NotifyExtensionConnected(connectionData);
-    }
+    controller->NotifyExtensionConnected(connectionData);
 }
 
 void ConnectionStateManager::RemoveConnection(const std::shared_ptr<ConnectionRecord> &connectionRecord,
     bool isCallerDied)
 {
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
     if (!connectionRecord) {
         HILOG_ERROR("connection record is invalid when remove connection");
         return;
@@ -107,16 +113,17 @@ void ConnectionStateManager::RemoveConnection(const std::shared_ptr<ConnectionRe
         HILOG_WARN("remove connection, no need to notify observers");
         return;
     }
-
-    std::shared_ptr<ConnectionObserverController> controller = observerController_;
-    if (controller) {
-        controller->NotifyExtensionDisconnected(connectionData);
-    }
+    controller->NotifyExtensionDisconnected(connectionData);
 }
 
 void ConnectionStateManager::AddDataAbilityConnection(const DataAbilityCaller &caller,
     const std::shared_ptr<DataAbilityRecord> &record)
 {
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
     if (!record) {
         HILOG_ERROR("data ability record is invalid");
         return;
@@ -132,16 +139,17 @@ void ConnectionStateManager::AddDataAbilityConnection(const DataAbilityCaller &c
         HILOG_WARN("add data ability onnection, no need to notify observers");
         return;
     }
-
-    std::shared_ptr<ConnectionObserverController> controller = observerController_;
-    if (controller) {
-        controller->NotifyExtensionConnected(connectionData);
-    }
+    controller->NotifyExtensionConnected(connectionData);
 }
 
 void ConnectionStateManager::RemoveDataAbilityConnection(const DataAbilityCaller &caller,
     const std::shared_ptr<DataAbilityRecord> &record)
 {
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
     if (!record) {
         HILOG_ERROR("data ability record is invalid");
         return;
@@ -157,11 +165,7 @@ void ConnectionStateManager::RemoveDataAbilityConnection(const DataAbilityCaller
         HILOG_WARN("remove data ability, no need to notify observers");
         return;
     }
-
-    std::shared_ptr<ConnectionObserverController> controller = observerController_;
-    if (controller) {
-        controller->NotifyExtensionDisconnected(connectionData);
-    }
+    controller->NotifyExtensionDisconnected(connectionData);
 }
 
 void ConnectionStateManager::HandleDataAbilityDied(const std::shared_ptr<DataAbilityRecord> &record)
@@ -230,30 +234,32 @@ void ConnectionStateManager::RemoveDlpManager(const std::shared_ptr<AbilityRecor
 
 void ConnectionStateManager::AddDlpAbility(const std::shared_ptr<AbilityRecord> &dlpAbility)
 {
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
     DlpStateData dlpData;
     if (!HandleDlpAbilityInner(dlpAbility, true, dlpData)) {
         HILOG_DEBUG("no need to report dlp opened connection state.");
         return;
     }
-
-    std::shared_ptr<ConnectionObserverController> controller = observerController_;
-    if (controller) {
-        controller->NotifyDlpAbilityOpened(dlpData);
-    }
+    controller->NotifyDlpAbilityOpened(dlpData);
 }
 
 void ConnectionStateManager::RemoveDlpAbility(const std::shared_ptr<AbilityRecord> &dlpAbility)
 {
+    std::shared_ptr<ConnectionObserverController> controller = observerController_;
+    if (!controller) {
+        return;
+    }
+
     DlpStateData dlpData;
     if (!HandleDlpAbilityInner(dlpAbility, false, dlpData)) {
         HILOG_DEBUG("no need to report dlp closed connection state.");
         return;
     }
-
-    std::shared_ptr<ConnectionObserverController> controller = observerController_;
-    if (controller) {
-        controller->NotifyDlpAbilityClosed(dlpData);
-    }
+    controller->NotifyDlpAbilityClosed(dlpData);
 }
 
 void ConnectionStateManager::HandleAppDied(int32_t pid)

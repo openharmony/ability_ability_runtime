@@ -227,7 +227,6 @@ void ConnectionRecord::AttachCallerInfo()
 
     callerUid_ = static_cast<int32_t>(IPCSkeleton::GetCallingUid());
     callerPid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid());
-    callerName_ = "pid:" + std::to_string(callerPid_);
 }
 
 int32_t ConnectionRecord::GetCallerUid() const
