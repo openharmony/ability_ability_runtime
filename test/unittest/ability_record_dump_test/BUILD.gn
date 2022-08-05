@@ -35,8 +35,8 @@ ohos_unittest("ability_record_dump_test") {
     "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "utils_base:utils",
     "startup_l2:syspara_watchagent",
+    "utils_base:utils",
   ]
 
   if (background_task_mgr_continuous_task_enable) {
