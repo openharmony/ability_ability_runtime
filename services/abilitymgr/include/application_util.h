@@ -74,7 +74,7 @@ static bool IsCrowdtestExpired(const Want &want, int32_t userId)
         want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
         EventFwk::CommonEventData commonData {want};
         EventFwk::CommonEventManager::PublishCommonEvent(commonData);
-        HILOG_INFO("BootEvent completed");
+        HILOG_INFO("%{public}s BootEvent completed", __func__);
     }
 }
 }  // namespace ApplicationlUtil
