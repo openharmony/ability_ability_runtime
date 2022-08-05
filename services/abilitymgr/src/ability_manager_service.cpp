@@ -211,8 +211,8 @@ void AbilityManagerService::OnStart()
 
     SetParameter(BOOTEVENT_APPFWK_READY.c_str(), "true");
 
-    AddWatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(),
-        AAFwk::ApplicationUtil::AppFwkBootEventCallback);
+    // auto context = new std::weak_ptr<AbilityManagerService>(shared_from_this());
+    WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), AAFwk::ApplicationUtil::AppFwkBootEventCallback, nullptr);
 
     HILOG_INFO("AMS start success.");
 }
@@ -4954,17 +4954,6 @@ int AbilityManagerService::StartAppgallery(int requestCode, int32_t userId, std:
     want.SetElementName(MARKET_BUNDLE_NAME, "");
     want.SetAction(action);
     return StartAbilityInner(want, nullptr, requestCode, -1, userId);
-}
-
-void AbilityManagerService::AddWatchParameter(const char *parameter, ParameterChgPtr callback)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    auto context = new std::weak_ptr<AbilityManagerService>(shared_from_this());
-    int ret = WatchParameter(parameter, callback, context);
-    if (ret != 0) {
-        HILOG_ERROR("%{public}s watch parameter failed.", __func__);
-        return;
-    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
