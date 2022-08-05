@@ -556,13 +556,6 @@ int32_t DataAbilityRecord::GetDiedCallerPid(const sptr<IRemoteObject> &remote)
         }
     }
 
-    if (result == 0) {
-        auto abilityRecord = Token::GetAbilityRecordByToken(remote);
-        if (abilityRecord) {
-            result = abilityRecord->GetPid();
-        }
-    }
-
     return result;
 }
 }  // namespace AAFwk
