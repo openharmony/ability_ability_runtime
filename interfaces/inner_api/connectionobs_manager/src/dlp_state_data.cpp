@@ -41,15 +41,15 @@ bool DlpStateData::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(dlpUid)) {
+    if (!parcel.WriteInt32(callerUid)) {
         return false;
     }
 
-    if (!parcel.WriteInt32(dlpPid)) {
+    if (!parcel.WriteInt32(callerPid)) {
         return false;
     }
 
-    if (!parcel.WriteString16(Str8ToStr16(dlpBundleName))) {
+    if (!parcel.WriteString16(Str8ToStr16(callerName))) {
         return false;
     }
 
@@ -82,18 +82,18 @@ bool DlpStateData::ReadFromParcel(Parcel &parcel)
     }
     targetAbilityName = Str16ToStr8(strValue);
 
-    if (!parcel.ReadInt32(dlpUid)) {
+    if (!parcel.ReadInt32(callerUid)) {
         return false;
     }
 
-    if (!parcel.ReadInt32(dlpPid)) {
+    if (!parcel.ReadInt32(callerPid)) {
         return false;
     }
 
     if (!parcel.ReadString16(strValue)) {
         return false;
     }
-    dlpBundleName = Str16ToStr8(strValue);
+    callerName = Str16ToStr8(strValue);
 
     return true;
 }

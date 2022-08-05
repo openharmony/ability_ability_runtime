@@ -87,9 +87,9 @@ bool DlpStateItem::HandleDlpConnectionState(const std::shared_ptr<AbilityRecord>
 void DlpStateItem::GenerateDlpStateData(
     const std::shared_ptr<AbilityRecord> &dlpAbility, AbilityRuntime::DlpStateData &dlpData)
 {
-    dlpData.dlpUid = dlpUid_;
-    dlpData.dlpPid = dlpPid_;
-    dlpData.dlpBundleName = DLP_BUNDLE_NAME;
+    dlpData.callerUid = dlpUid_;
+    dlpData.callerPid = dlpPid_;
+    dlpData.callerName = DLP_BUNDLE_NAME;
     dlpData.targetPid = dlpAbility->GetPid();
     dlpData.targetUid = dlpAbility->GetUid();
     dlpData.targetBundleName = dlpAbility->GetAbilityInfo().bundleName;
