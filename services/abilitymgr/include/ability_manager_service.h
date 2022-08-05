@@ -1017,8 +1017,6 @@ private:
 
     int StartAppgallery(int requestCode, int32_t userId, std::string action);
 
-    void AddWatchParameter(const char *parameter, ParameterChgPtr callback);
-
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
