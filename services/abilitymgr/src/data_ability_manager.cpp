@@ -680,9 +680,11 @@ void DataAbilityManager::ReportDataAbilityAcquired(const sptr<IRemoteObject> &cl
     caller.callerPid = IPCSkeleton::GetCallingPid();
     caller.callerUid = IPCSkeleton::GetCallingUid();
     caller.callerToken = client;
-    auto abilityRecord = Token::GetAbilityRecordByToken(client);
-    if (abilityRecord) {
-        caller.callerName = abilityRecord->GetAbilityInfo().bundleName;
+    if (client && !isSaCall) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(client);
+        if (abilityRecord) {
+            caller.callerName = abilityRecord->GetAbilityInfo().bundleName;
+        }
     }
 
     DelayedSingleton<ConnectionStateManager>::GetInstance()->AddDataAbilityConnection(caller, record);
