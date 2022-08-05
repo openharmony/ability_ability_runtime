@@ -46,6 +46,7 @@
 #include "iservice_registry.h"
 #include "itest_observer.h"
 #include "mission_info_mgr.h"
+#include "parameter.h"
 #include "permission_verification.h"
 #include "sa_mgr_client.h"
 #include "system_ability_token_callback.h"

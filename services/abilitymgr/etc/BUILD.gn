@@ -16,22 +16,22 @@ import("//build/ohos.gni")
 #################################################################################
 
 group("appfwk_etc") {
-    deps = [
-        ":appfwk.para",
-        ":appfwk.para.dac"
-    ]
+  deps = [
+    ":appfwk.para",
+    ":appfwk.para.dac",
+  ]
 }
 
 ohos_prebuilt_etc("appfwk.para") {
-    source = "appfwk.para"
-    relative_install_dir = "param"
-    part_name = "ability_runtime"
-    subsystem_name = "ability"
+  source = "appfwk.para"
+  relative_install_dir = "param"
+  part_name = "ability_runtime"
+  subsystem_name = "ability"
 }
 
 ohos_prebuilt_etc("appfwk.para.dac") {
-    source = "appfwk.para.dac"
-    relative_install_dir = "param"
-    part_name = "ability_runtime"
-    subsystem_name = "ability"
+  source = "appfwk.para.dac"
+  relative_install_dir = "param"
+  part_name = "ability_runtime"
+  subsystem_name = "ability"
 }
