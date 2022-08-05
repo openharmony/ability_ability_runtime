@@ -211,8 +211,7 @@ void AbilityManagerService::OnStart()
 
     SetParameter(BOOTEVENT_APPFWK_READY.c_str(), "true");
 
-    auto context = new std::weak_ptr<AbilityManagerService>(shared_from_this());
-    WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), AAFwk::ApplicationUtil::AppFwkBootEventCallback, context);
+    WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), AAFwk::ApplicationUtil::AppFwkBootEventCallback, nullptr);
 
     HILOG_INFO("AMS start success.");
 }
