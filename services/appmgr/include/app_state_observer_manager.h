@@ -60,6 +60,8 @@ private:
     void OnObserverDied(const wptr<IRemoteObject> &remote);
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state);
+    void HandleOnProcessCreatedCommon(const ProcessData &data);
+    void HandleOnProcessDiedCommon(const ProcessData &data);
 
 private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;

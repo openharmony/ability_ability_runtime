@@ -372,6 +372,9 @@ protected:
      *
      */
     void Background();
+
+private:
+    void AfterFocusedCommon(bool isFocused);
 #endif
 
 protected:
