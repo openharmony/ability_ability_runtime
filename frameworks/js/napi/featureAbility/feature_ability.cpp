@@ -1068,6 +1068,7 @@ napi_value GetWindowWrapAsync(
         },
         [](napi_env env, napi_status status, void *data) {
             HILOG_INFO("GetWindowWrapAsync, main event thread complete.");
+            Check(data);
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             napi_value callback = 0;
             napi_value undefined = 0;
@@ -1094,6 +1095,11 @@ napi_value GetWindowWrapAsync(
     NAPI_CALL(env, napi_get_null(env, &result));
     HILOG_INFO("%{public}s, asyncCallback end.", __func__);
     return result;
+}
+
+void Check(void *data)
+{
+
 }
 
 napi_value GetWindowWrapPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo)

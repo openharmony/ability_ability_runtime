@@ -238,14 +238,7 @@ void AppStateObserverManager::HandleOnProcessCreated(const std::shared_ptr<AppRu
     ProcessData data = WrapProcessData(appRecord);
     HILOG_DEBUG("Process Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
-    std::lock_guard<std::recursive_mutex> lockNotify(observerLock_);
-    for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
-            it->first->OnProcessCreated(data);
-        }
-    }
+    HandleOnProcessCreatedCommon(data);
 }
 
 void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord)
@@ -257,6 +250,11 @@ void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr
     ProcessData data = WrapRenderProcessData(renderRecord);
     HILOG_DEBUG("RenderProcess Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
+    HandleOnProcessCreatedCommon(data);
+}
+
+void AppStateObserverManager::HandleOnProcessCreatedCommon(const ProcessData &data)
+{
     std::lock_guard<std::recursive_mutex> lockNotify(observerLock_);
     for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
         std::vector<std::string>::iterator iter = std::find(it->second.begin(),
@@ -276,14 +274,7 @@ void AppStateObserverManager::HandleOnProcessDied(const std::shared_ptr<AppRunni
     ProcessData data = WrapProcessData(appRecord);
     HILOG_DEBUG("Process died, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d.",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
-    std::lock_guard<std::recursive_mutex> lockNotify(observerLock_);
-    for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
-        std::vector<std::string>::iterator iter = std::find(it->second.begin(),
-            it->second.end(), data.bundleName);
-        if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
-            it->first->OnProcessDied(data);
-        }
-    }
+    HandleOnProcessDiedCommon(data);
 }
 
 void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord)
@@ -295,6 +286,11 @@ void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<Re
     ProcessData data = WrapRenderProcessData(renderRecord);
     HILOG_DEBUG("Render Process died, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d.",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
+    HandleOnProcessDiedCommon(data);
+}
+
+void AppStateObserverManager::HandleOnProcessDiedCommon(const ProcessData &data)
+{
     std::lock_guard<std::recursive_mutex> lockNotify(observerLock_);
     for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
         std::vector<std::string>::iterator iter = std::find(it->second.begin(),

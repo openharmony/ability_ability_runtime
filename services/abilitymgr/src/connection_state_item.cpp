@@ -380,26 +380,14 @@ bool ConnectionStateItem::RemoveDataAbilityConnection(const DataAbilityCaller &c
     }
 
     auto token = dataAbility->GetToken();
-    if (!token) {
-        HILOG_ERROR("invalid data ability token.");
-        return false;
-    }
-
-    auto it = dataAbilityMap_.find(token);
-    if (it == dataAbilityMap_.end()) {
-        HILOG_ERROR("no such connected data ability.");
-        return false;
-    }
-
-    auto connectedDataAbility = it->second;
-    if (!connectedDataAbility) {
-        HILOG_ERROR("can not find such connectedDataAbility");
+    std::shared_ptr<ConnectedDataAbility> connectedDataAbility;
+    if (!CheckTokenAndConnectionData(token, data, connectedDataAbility)) {
         return false;
     }
 
     bool needNotify = connectedDataAbility->RemoveCaller(caller);
     if (needNotify) {
-        dataAbilityMap_.erase(it);
+        dataAbilityMap_.erase(dataAbilityMap_.find(token));
         GenerateConnectionData(connectedDataAbility, data);
     }
 
@@ -409,7 +397,21 @@ bool ConnectionStateItem::RemoveDataAbilityConnection(const DataAbilityCaller &c
 bool ConnectionStateItem::HandleDataAbilityDied(const sptr<IRemoteObject> &token,
     AbilityRuntime::ConnectionData &data)
 {
+    std::shared_ptr<ConnectedDataAbility> connectedDataAbility;
+    if (!CheckTokenAndConnectionData(token, data, connectedDataAbility)) {
+        return false;
+    }
+
+    dataAbilityMap_.erase(dataAbilityMap_.find(token));
+    GenerateConnectionData(connectedDataAbility, data);
+    return true;
+}
+
+bool ConnectionStateItem::CheckTokenAndConnectionData(const sptr<IRemoteObject> &token,
+    AbilityRuntime::ConnectionData &data, std::shared_ptr<ConnectedDataAbility> &connectedDataAbility)
+{
     if (!token) {
+        HILOG_WARN("invalid data ability token.");
         return false;
     }
 
@@ -419,14 +421,12 @@ bool ConnectionStateItem::HandleDataAbilityDied(const sptr<IRemoteObject> &token
         return false;
     }
 
-    auto connectedDataAbility = it->second;
+    connectedDataAbility = it->second;
     if (!connectedDataAbility) {
         HILOG_ERROR("can not find such connectedDataAbility");
         return false;
     }
 
-    dataAbilityMap_.erase(it);
-    GenerateConnectionData(connectedDataAbility, data);
     return true;
 }
 
