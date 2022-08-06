@@ -50,9 +50,10 @@ void WatchDog::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer &event)
     if (eventId == MAIN_THREAD_IS_ALIVE) {
         WatchDog::appMainThreadIsAlive_ = true;
         if (currentHandler_ != nullptr) {
-            currentHandler_->RemoveTask(MAIN_THREAD_IS_ALIVE_MSG);
+            currentHandler_->RemoveTask(MAIN_THREAD_TIMEOUT_TASK);
         }
         timeOut_.store(false);
+        isSixSecondEvent_.store(false);
     }
 }
 
@@ -137,18 +138,21 @@ bool WatchDog::Timer()
         return true;
     }
     while (!stopWatchDog_) {
-        if (WaitForDuration(INI_TIMER_SECOND)) {
+        if (WaitForDuration(CHECK_INTERVAL_TIME)) {
             HILOG_DEBUG("cvWatchDog2 is stopped");
             return true;
         }
         auto timeoutTask = [&]() {
-            timeOut_.store(true);
+            if (isSixSecondEvent_) {
+                timeOut_.store(true);
+            }
             appMainThreadIsAlive_ = false;
-            std::string eventType = "THREAD_BLOCK_3S";
+            std::string eventType = isSixSecondEvent_ ? "THREAD_BLOCK_6S" : "THREAD_BLOCK_3S";
             std::string msgContent = "App main thread is not response!";
             MainHandlerDumper handlerDumper;
             appMainHandler_->Dump(handlerDumper);
             msgContent += handlerDumper.GetDumpInfo();
+            isSixSecondEvent_.store(true);
             if (applicationInfo_ != nullptr) {
                 OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, eventType,
                     OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
@@ -171,11 +175,11 @@ bool WatchDog::Timer()
             const char *hook_mode = "startup:";
             int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
             if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
-                currentHandler_->PostTask(timeoutTask, MAIN_THREAD_IS_ALIVE_MSG, MAIN_THREAD_TIMEOUT_TIME);
+                currentHandler_->PostTask(timeoutTask, MAIN_THREAD_TIMEOUT_TASK, CHECK_INTERVAL_TIME);
             }
         }
         if (appMainHandler_ != nullptr) {
-            appMainHandler_->SendEvent(MAIN_THREAD_IS_ALIVE);
+            appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE_MSG);
         }
     }
     return true;
