@@ -179,7 +179,7 @@ bool WatchDog::Timer()
             }
         }
         if (appMainHandler_ != nullptr) {
-            appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE_MSG);
+            appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
         }
     }
     return true;
