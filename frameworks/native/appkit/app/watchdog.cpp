@@ -143,6 +143,10 @@ bool WatchDog::Timer()
             return true;
         }
         auto timeoutTask = [&]() {
+            if (timeOut_) {
+                return;
+            }
+
             if (isSixSecondEvent_) {
                 timeOut_.store(true);
             }
