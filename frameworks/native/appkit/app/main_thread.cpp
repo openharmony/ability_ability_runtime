@@ -947,6 +947,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         auto versionCode = appInfo.versionCode;
         wptr<MainThread> weak = this;
         auto uncaughtTask = [weak, bundleName, versionCode](NativeValue* v) {
+            HILOG_INFO("Js uncaught exception callback come.");
             NativeObject* obj = AbilityRuntime::ConvertNativeValueTo<NativeObject>(v);
             std::string errorMsg = GetNativeStrFromJsTaggedObj(obj, "message");
             std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
