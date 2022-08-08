@@ -42,10 +42,7 @@ config("ability_config") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  defines = [
-    "AMS_LOG_TAG = \"Ability\"",
-    "AMS_LOG_DOMAIN = 0xD002200",
-  ]
+  defines = [ "AMS_LOG_TAG = \"Ability\"" ]
   if (target_cpu == "arm64") {
     defines += [ "_ARM64_" ]
   }
@@ -102,7 +99,7 @@ ohos_shared_library("static_subscriber_ipc") {
     "ability_base:want",
     "common_event_service:cesfwk_innerkits",
     "ipc:ipc_core",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     "utils_base:utils",
   ]
 
@@ -229,7 +226,7 @@ ohos_shared_library("abilitykit_native") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "relational_store:rdb_data_share_adapter",
-    "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     "utils_base:utils",
   ]
 
