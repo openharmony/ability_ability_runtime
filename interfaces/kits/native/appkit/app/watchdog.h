@@ -94,9 +94,10 @@ protected:
 private:
     bool Timer();
     bool WaitForDuration(uint32_t duration);
+    void reportEvent();
 
     std::atomic_bool stopWatchDog_ = false;
-    std::atomic<bool> timeOut_ = false;
+    std::atomic_bool needReport_ = true;
     std::atomic_bool isSixSecondEvent_ = false;
     std::shared_ptr<ApplicationInfo> applicationInfo_ = nullptr;
     std::shared_ptr<std::thread> watchDogThread_ = nullptr;
