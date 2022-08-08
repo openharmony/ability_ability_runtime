@@ -153,8 +153,8 @@ bool WatchDog::Timer()
             const char *hook_mode = "startup:";
             int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
             if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
-                currentHandler_->PostTask(std::bind(&WatchDog::reportEvent),
-                    MAIN_THREAD_TIMEOUT_TASK, CHECK_INTERVAL_TIME);
+                auto timeoutTask = std::bind(&WatchDog::reportEvent, this);
+                currentHandler_->PostTask(timeoutTask, MAIN_THREAD_TIMEOUT_TASK, CHECK_INTERVAL_TIME);
             }
         }
         if (appMainHandler_ != nullptr) {
