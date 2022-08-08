@@ -23,7 +23,9 @@
 #include "iservice_registry.h"
 #include "runtime.h"
 #include "system_ability_definition.h"
+#ifdef SUPPORT_GRAPHICS
 #include "window.h"
+#endif
 #include "ability_thread.h"
 
 namespace OHOS {
@@ -63,8 +65,9 @@ void OHOSApplication::DispatchAbilitySavedState(const PacMap &outState)
  */
 void OHOSApplication::OnForeground()
 {
+    HILOG_DEBUG("NotifyApplicationState::OnForeground begin");
     if (runtime_ == nullptr) {
-        HILOG_ERROR("NotifyApplicationState, runtime_ is nullptr");
+        HILOG_DEBUG("NotifyApplicationState, runtime_ is nullptr");
         return;
     }
     runtime_->NotifyApplicationState(false);
@@ -78,8 +81,9 @@ void OHOSApplication::OnForeground()
  */
 void OHOSApplication::OnBackground()
 {
+    HILOG_DEBUG("NotifyApplicationState::OnBackground begin");
     if (runtime_ == nullptr) {
-        HILOG_ERROR("NotifyApplicationState, runtime_ is nullptr");
+        HILOG_DEBUG("NotifyApplicationState, runtime_ is nullptr");
         return;
     }
     runtime_->NotifyApplicationState(true);
@@ -137,6 +141,7 @@ void OHOSApplication::DumpApplication()
  */
 void OHOSApplication::SetRuntime(std::unique_ptr<AbilityRuntime::Runtime>&& runtime)
 {
+    HILOG_DEBUG("OHOSApplication::SetRuntime begin");
     if (runtime == nullptr) {
         HILOG_ERROR("OHOSApplication::SetRuntime failed, runtime is empty");
         return;
@@ -188,7 +193,7 @@ void OHOSApplication::RegisterAbilityLifecycleCallbacks(const std::shared_ptr<Ab
     HILOG_DEBUG("OHOSApplication::RegisterAbilityLifecycleCallbacks: called");
 
     if (callBack == nullptr) {
-        HILOG_ERROR("OHOSApplication::RegisterAbilityLifecycleCallbacks: observer is null");
+        HILOG_DEBUG("OHOSApplication::RegisterAbilityLifecycleCallbacks: observer is null");
         return;
     }
 
@@ -206,7 +211,7 @@ void OHOSApplication::UnregisterAbilityLifecycleCallbacks(const std::shared_ptr<
     HILOG_DEBUG("OHOSApplication::UnregisterAbilityLifecycleCallbacks: called");
 
     if (callBack == nullptr) {
-        HILOG_ERROR("OHOSApplication::UnregisterAbilityLifecycleCallbacks: observer is null");
+        HILOG_DEBUG("OHOSApplication::UnregisterAbilityLifecycleCallbacks: observer is null");
         return;
     }
 
@@ -350,7 +355,7 @@ void OHOSApplication::RegisterElementsCallbacks(const std::shared_ptr<ElementsCa
     HILOG_DEBUG("OHOSApplication::RegisterElementsCallbacks: called");
 
     if (callback == nullptr) {
-        HILOG_ERROR("OHOSApplication::RegisterElementsCallbacks: observer is null");
+        HILOG_DEBUG("OHOSApplication::RegisterElementsCallbacks: observer is null");
         return;
     }
 
@@ -368,7 +373,7 @@ void OHOSApplication::UnregisterElementsCallbacks(const std::shared_ptr<Elements
     HILOG_DEBUG("OHOSApplication::UnregisterElementsCallbacks: called");
 
     if (callback == nullptr) {
-        HILOG_ERROR("OHOSApplication::UnregisterElementsCallbacks: observer is null");
+        HILOG_DEBUG("OHOSApplication::UnregisterElementsCallbacks: observer is null");
         return;
     }
 
@@ -385,7 +390,7 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
 {
     HILOG_DEBUG("OHOSApplication::OnConfigurationUpdated: called");
     if (!abilityRecordMgr_ || !configuration_) {
-        HILOG_ERROR("abilityRecordMgr_ or configuration_ is null");
+        HILOG_DEBUG("abilityRecordMgr_ or configuration_ is null");
         return;
     }
 
@@ -395,7 +400,7 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
     configuration_->Merge(changeKeyV, config);
 
     // Notify all abilities
-    HILOG_DEBUG(
+    HILOG_INFO(
         "Number of ability to be notified : [%{public}d]", static_cast<int>(abilityRecordMgr_->GetRecordCount()));
     for (const auto &abilityToken : abilityRecordMgr_->GetAllTokens()) {
         auto abilityRecord = abilityRecordMgr_->GetAbilityItem(abilityToken);
@@ -405,7 +410,7 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
     }
 
     // Notify AbilityStage
-    HILOG_DEBUG("Number of abilityStage to be notified : [%{public}zu]", abilityStages_.size());
+    HILOG_INFO("Number of abilityStage to be notified : [%{public}zu]", abilityStages_.size());
     for (auto it = abilityStages_.begin(); it != abilityStages_.end(); it++) {
         auto abilityStage = it->second;
         if (abilityStage) {
@@ -415,7 +420,7 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
 
 #ifdef SUPPORT_GRAPHICS
     // Notify Window
-    HILOG_INFO("Update configuration for all window.");
+    HILOG_DEBUG("Update configuration for all window.");
     auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
     Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
 #endif
@@ -439,7 +444,7 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
  */
 void OHOSApplication::OnMemoryLevel(int level)
 {
-    HILOG_INFO("OHOSApplication::OnMemoryLevel: called");
+    HILOG_DEBUG("OHOSApplication::OnMemoryLevel: called");
 
     HILOG_DEBUG("Number of ability to be notified : [%{public}d]",
         static_cast<int>(abilityRecordMgr_->GetRecordCount()));
