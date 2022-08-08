@@ -133,12 +133,12 @@ bool WatchDog::WaitForDuration(uint32_t duration)
 bool WatchDog::Timer()
 {
     if (WaitForDuration(INI_TIMER_FIRST_SECOND)) {
-        HILOG_INFO("cvWatchDog1 is stopped");
+        HILOG_DEBUG("cvWatchDog1 is stopped");
         return true;
     }
     while (!stopWatchDog_) {
         if (WaitForDuration(INI_TIMER_SECOND)) {
-            HILOG_INFO("cvWatchDog2 is stopped");
+            HILOG_DEBUG("cvWatchDog2 is stopped");
             return true;
         }
         auto timeoutTask = [&]() {
@@ -183,7 +183,7 @@ bool WatchDog::Timer()
 
 void MainHandlerDumper::Dump(const std::string &message)
 {
-    HILOG_INFO("message is %{public}s", message.c_str());
+    HILOG_DEBUG("message is %{public}s", message.c_str());
     dumpInfo += message;
 }
 
