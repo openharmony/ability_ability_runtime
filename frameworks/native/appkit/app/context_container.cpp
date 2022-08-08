@@ -622,9 +622,10 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         if (!hapModuleInfo.hapPath.empty()) {
             loadPath = hapModuleInfo.hapPath;
         } else {
-            loadPath = std::regex_replace(hapModuleInfo.resourcePath, pattern,
-                AbilityRuntime::Constants::LOCAL_BUNDLES);
+            loadPath = hapModuleInfo.resourcePath;
         }
+        loadPath = std::regex_replace(loadPath, pattern, AbilityRuntime::Constants::LOCAL_BUNDLES);
+        HILOG_DEBUG("ContextContainer::InitResourceManager loadPath: %{public}s", loadPath.c_str());
         if (!resourceManager->AddResource(loadPath.c_str())) {
             HILOG_ERROR("ContextContainer::InitResourceManager AddResource failed");
         }
