@@ -23,10 +23,7 @@ config("appmgr_test_config") {
     "${ability_runtime_test_path}/moduletest:services_mock_ams_config",
   ]
 
-  defines = [
-    "AMS_LOG_TAG = \"AppMgrService\"",
-    "AMS_LOG_DOMAIN = 0xD00111E",
-  ]
+  defines = [ "AMS_LOG_TAG = \"AppMgrService\"" ]
 
   include_dirs = [
     "${ability_runtime_test_path}/mock/services_appmgr_test/include",
@@ -120,10 +117,14 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/call_container.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/call_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/caller_info.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/connection_observer_controller.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/connection_record.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/connection_state_item.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/connection_state_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/data_ability_caller_recipient.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/data_ability_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/data_ability_record.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/dlp_state_item.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/free_install_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/lifecycle_deal.cpp",
@@ -154,6 +155,7 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/distributed_ability_runtime",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
   ]
@@ -168,6 +170,7 @@ ohos_source_set("abilityms_test_source") {
   }
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
+    "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/sa_mgr:sa_mgr_mock",
     "//base/hiviewdfx/hiview/adapter/utility:hiview_adapter_utility",
