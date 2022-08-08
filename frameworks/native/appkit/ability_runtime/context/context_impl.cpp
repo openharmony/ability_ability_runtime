@@ -339,8 +339,8 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
 
     HILOG_DEBUG(
         "ContextImpl::InitResourceManager hapModuleInfos count: %{public}zu", bundleInfo.hapModuleInfos.size());
-    std::string inner(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + GetBundleName());
-    std::string outer(ABS_CODE_PATH);
+    std::regex inner_pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + GetBundleName());
+    std::regex outer_pattern(ABS_CODE_PATH);
     for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
         if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
             continue;
@@ -350,12 +350,15 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
             loadPath = hapModuleInfo.hapPath;
         } else {
             loadPath = hapModuleInfo.resourcePath;
-            if (currentBundle) {
-                loadPath.replace(0, inner.size(), LOCAL_CODE_PATH);
-            } else {
-                loadPath.replace(0, outer.size(), LOCAL_BUNDLES);
-            }
         }
+
+        if (currentBundle) {
+            loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
+        } else {
+            loadPath = std::regex_replace(loadPath, outer_pattern, LOCAL_BUNDLES);
+        }
+        HILOG_DEBUG("ContextImpl::InitResourceManager loadPath: %{public}s", loadPath.c_str());
+
         if (!resourceManager->AddResource(loadPath.c_str())) {
             HILOG_ERROR("ContextImpl::InitResourceManager AddResource fail, moduleResPath: %{public}s",
                 loadPath.c_str());
@@ -506,7 +509,7 @@ sptr<IRemoteObject> ContextImpl::GetToken()
 
 void ContextImpl::CreateDirIfNotExist(const std::string& dirPath) const
 {
-    HILOG_INFO("createDir: create directory if not exists.");
+    HILOG_DEBUG("createDir: create directory if not exists.");
     if (!OHOS::HiviewDFX::FileUtil::FileExists(dirPath)) {
         bool createDir = OHOS::HiviewDFX::FileUtil::ForceCreateDirectory(dirPath);
         if (!createDir) {
