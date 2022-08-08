@@ -380,14 +380,26 @@ bool ConnectionStateItem::RemoveDataAbilityConnection(const DataAbilityCaller &c
     }
 
     auto token = dataAbility->GetToken();
-    std::shared_ptr<ConnectedDataAbility> connectedDataAbility;
-    if (!CheckTokenAndConnectionData(token, data, connectedDataAbility)) {
+    if (!token) {
+        HILOG_ERROR("invalid data ability token.");
+        return false;
+    }
+
+    auto it = dataAbilityMap_.find(token);
+    if (it == dataAbilityMap_.end()) {
+        HILOG_ERROR("no such connected data ability.");
+        return false;
+    }
+
+    auto connectedDataAbility = it->second;
+    if (!connectedDataAbility) {
+        HILOG_ERROR("can not find such connectedDataAbility");
         return false;
     }
 
     bool needNotify = connectedDataAbility->RemoveCaller(caller);
     if (needNotify) {
-        dataAbilityMap_.erase(dataAbilityMap_.find(token));
+        dataAbilityMap_.erase(it);
         GenerateConnectionData(connectedDataAbility, data);
     }
 
@@ -397,12 +409,23 @@ bool ConnectionStateItem::RemoveDataAbilityConnection(const DataAbilityCaller &c
 bool ConnectionStateItem::HandleDataAbilityDied(const sptr<IRemoteObject> &token,
     AbilityRuntime::ConnectionData &data)
 {
-    std::shared_ptr<ConnectedDataAbility> connectedDataAbility;
-    if (!CheckTokenAndConnectionData(token, data, connectedDataAbility)) {
+    if (!token) {
         return false;
     }
 
-    dataAbilityMap_.erase(dataAbilityMap_.find(token));
+    auto it = dataAbilityMap_.find(token);
+    if (it == dataAbilityMap_.end()) {
+        HILOG_ERROR("no such connected data ability.");
+        return false;
+    }
+
+    auto connectedDataAbility = it->second;
+    if (!connectedDataAbility) {
+        HILOG_ERROR("can not find such connectedDataAbility");
+        return false;
+    }
+
+    dataAbilityMap_.erase(it);
     GenerateConnectionData(connectedDataAbility, data);
     return true;
 }
