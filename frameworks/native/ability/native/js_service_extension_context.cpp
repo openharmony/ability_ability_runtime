@@ -253,18 +253,18 @@ private:
 
             auto context = weak.lock();
             if (context != nullptr && calldata->callerCallBack != nullptr && calldata->remoteCallee != nullptr) {
-                auto releaseAbilityFunc = [weak] (
+                auto releaseCallFunc = [weak] (
                     const std::shared_ptr<CallerCallBack> &callback) -> ErrCode {
                     auto contextForRelease = weak.lock();
                     if (contextForRelease == nullptr) {
-                        HILOG_ERROR("releaseAbilityFunction, context is nullptr");
+                        HILOG_ERROR("releaseCallFunction, context is nullptr");
                         return -1;
                     }
-                    return contextForRelease->ReleaseAbility(callback);
+                    return contextForRelease->ReleaseCall(callback);
                 };
                 task.Resolve(engine,
                     CreateJsCallerComplex(
-                        engine, releaseAbilityFunc, calldata->remoteCallee, calldata->callerCallBack));
+                        engine, releaseCallFunc, calldata->remoteCallee, calldata->callerCallBack));
             } else {
                 HILOG_ERROR("OnStartAbilityByCall callComplete params error %{public}s is nullptr",
                     context == nullptr ? "context" :
@@ -440,6 +440,7 @@ private:
         ConnecttionKey key;
         key.id = serialNumber_;
         key.want = want;
+        connection->SetConnectionId(key.id);
         connects_.emplace(key, connection);
         if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
@@ -500,6 +501,7 @@ private:
         ConnecttionKey key;
         key.id = serialNumber_;
         key.want = want;
+        connection->SetConnectionId(key.id);
         connects_.emplace(key, connection);
         if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
@@ -830,6 +832,11 @@ JSServiceExtensionConnection::JSServiceExtensionConnection(NativeEngine& engine)
 
 JSServiceExtensionConnection::~JSServiceExtensionConnection() = default;
 
+void JSServiceExtensionConnection::SetConnectionId(int64_t id)
+{
+    connectionId_ = id;
+}
+
 void JSServiceExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
@@ -933,10 +940,11 @@ void JSServiceExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFw
     std::string abilityName = element.GetAbilityName();
     auto item = std::find_if(connects_.begin(),
         connects_.end(),
-        [bundleName, abilityName](
+        [bundleName, abilityName, connectionId = connectionId_](
             const std::map<ConnecttionKey, sptr<JSServiceExtensionConnection>>::value_type &obj) {
             return (bundleName == obj.first.want.GetBundle()) &&
-                   (abilityName == obj.first.want.GetElement().GetAbilityName());
+                   (abilityName == obj.first.want.GetElement().GetAbilityName()) &&
+                   connectionId == obj.first.id;
         });
     if (item != connects_.end()) {
         // match bundlename && abilityname
