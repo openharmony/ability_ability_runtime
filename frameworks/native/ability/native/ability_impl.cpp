@@ -510,21 +510,22 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
     HILOG_INFO("isStageBasedModel: %{public}d", ability_->GetAbilityInfo()->isStageBasedModel);
     if (ability_->GetAbilityInfo()->isStageBasedModel) {
         std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = ability_->GetAbilityContext();
-        if (abilityContext != nullptr) {
-            std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
-                abilityContext->GetApplicationContext();
-            if (applicationContext != nullptr && !applicationContext->isAbilityLifecycleCallbackEmpty()) {
-                AbilityRuntime::JsAbility& jsAbility = static_cast<AbilityRuntime::JsAbility&>(*ability_);
-                if (isFocused) {
-                    applicationContext->DispatchWindowStageFocus(jsAbility.GetJsAbility(),
-                        jsAbility.GetJsWindowStage());
-                } else {
-                    applicationContext->DispatchWindowStageUnfocus(jsAbility.GetJsAbility(),
-                        jsAbility.GetJsWindowStage());
-                }
+        if (abilityContext == nullptr) {
+            return;
+        }
+        
+        std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
+            abilityContext->GetApplicationContext();
+        if (applicationContext != nullptr && !applicationContext->isAbilityLifecycleCallbackEmpty()) {
+            AbilityRuntime::JsAbility& jsAbility = static_cast<AbilityRuntime::JsAbility&>(*ability_);
+            if (isFocused) {
+                applicationContext->DispatchWindowStageFocus(jsAbility.GetJsAbility(),
+                    jsAbility.GetJsWindowStage());
+            } else {
+                applicationContext->DispatchWindowStageUnfocus(jsAbility.GetJsAbility(),
+                    jsAbility.GetJsWindowStage());
             }
         }
-        return;
     }
     if (ability_->GetWant() == nullptr) {
         HILOG_WARN("want is nullptr.");

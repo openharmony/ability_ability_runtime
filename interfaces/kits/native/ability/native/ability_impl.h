@@ -372,9 +372,6 @@ protected:
      *
      */
     void Background();
-
-private:
-    void AfterFocusedCommon(bool isFocused);
 #endif
 
 protected:
@@ -457,6 +454,9 @@ private:
     bool hasSaveData_ = false;
     bool needSaveDate_ = false;
     PacMap restoreData_;
+
+private:
+    void AfterFocusedCommon(bool isFocused);
 
 #ifdef SUPPORT_GRAPHICS
 private:
