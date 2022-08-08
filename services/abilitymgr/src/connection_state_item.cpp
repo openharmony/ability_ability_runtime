@@ -430,29 +430,6 @@ bool ConnectionStateItem::HandleDataAbilityDied(const sptr<IRemoteObject> &token
     return true;
 }
 
-bool ConnectionStateItem::CheckTokenAndConnectionData(const sptr<IRemoteObject> &token,
-    AbilityRuntime::ConnectionData &data, std::shared_ptr<ConnectedDataAbility> &connectedDataAbility)
-{
-    if (!token) {
-        HILOG_WARN("invalid data ability token.");
-        return false;
-    }
-
-    auto it = dataAbilityMap_.find(token);
-    if (it == dataAbilityMap_.end()) {
-        HILOG_ERROR("no such connected data ability.");
-        return false;
-    }
-
-    connectedDataAbility = it->second;
-    if (!connectedDataAbility) {
-        HILOG_ERROR("can not find such connectedDataAbility");
-        return false;
-    }
-
-    return true;
-}
-
 bool ConnectionStateItem::IsEmpty() const
 {
     return connectionMap_.empty() && dataAbilityMap_.empty();
