@@ -128,9 +128,6 @@ private:
     void GenerateConnectionData(const std::shared_ptr<ConnectedDataAbility> &connectedDataAbility,
         AbilityRuntime::ConnectionData &data);
 
-    bool CheckTokenAndConnectionData(const sptr<IRemoteObject> &token,
-        AbilityRuntime::ConnectionData &data, std::shared_ptr<ConnectedDataAbility> &connectedDataAbility);
-
     int32_t callerUid_ = 0;
     int32_t callerPid_ = 0;
     std::string callerName_;
