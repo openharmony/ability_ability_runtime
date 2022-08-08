@@ -100,7 +100,7 @@ void AbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& confi
 
 void AbilityStage::OnMemoryLevel(int level)
 {
-    HILOG_INFO("%{public}s called.", __func__);
+    HILOG_DEBUG("%{public}s called.", __func__);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -27,7 +27,10 @@ ohos_moduletest("on_new_want_module_test") {
   ]
 
   sources = [ "on_new_want_module_test.cpp" ]
-  sources += [ "//foundation/distributedhardware/device_manager/test/unittest/mock/parameter.cpp" ]
+  sources += [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_service.cpp",
+    "//foundation/distributedhardware/device_manager/test/unittest/mock/parameter.cpp",
+  ]
 
   configs = [
     "${ability_runtime_test_path}/moduletest:aafwk_module_test_config",
@@ -60,7 +63,7 @@ ohos_moduletest("on_new_want_module_test") {
       "${ace_engine_path}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
       "${global_path}/i18n/frameworks/intl:intl_util",
       "${multimedia_path}/interfaces/innerkits:image_native",
-      "//third_party/libpng:libpng",
+      "//third_party/libjpeg:libjpeg_static",
     ]
   }
 
@@ -88,6 +91,11 @@ ohos_moduletest("on_new_want_module_test") {
   if (efficiency_manager) {
     cflags_cc += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
+  }
+
+  if (resource_schedule_service_enable) {
+    cflags_cc += [ "-RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+    external_deps += [ "resource_schedule_service:ressched_client" ]
   }
 
   if (background_task_mgr_continuous_task_enable) {

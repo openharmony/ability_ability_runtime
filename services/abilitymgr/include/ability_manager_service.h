@@ -480,6 +480,10 @@ public:
 
     virtual int GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info) override;
 
+    virtual int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
+
+    virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
+
     virtual int LockMissionForCleanup(int32_t missionId) override;
 
     virtual int UnlockMissionForCleanup(int32_t missionId) override;
@@ -522,13 +526,13 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) override;
 
     /**
-     * Release Ability, disconnect session with common ability.
+     * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param element, the element of target service.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ReleaseAbility(
+    virtual int ReleaseCall(
         const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) override;
 
     /**
@@ -962,7 +966,6 @@ private:
     void StopFreezingScreen();
     void UserStarted(int32_t userId);
     void SwitchToUser(int32_t userId);
-    void StartLauncherAbility(int32_t userId);
     void SwitchToUser(int32_t oldUserId, int32_t userId);
     void SwitchManagers(int32_t userId, bool switchUser = true);
     void StartUserApps(int32_t userId, bool isBoot);
@@ -1012,6 +1015,8 @@ private:
         int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType);
 
     void SubscribeBackgroundTask();
+
+    void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
     int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
 
