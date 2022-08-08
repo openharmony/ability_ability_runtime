@@ -504,11 +504,7 @@ void AbilityImpl::AfterFocused()
 void AbilityImpl::AfterFocusedCommon(bool isFocused)
 {
     if (!ability_ || !ability_->GetAbilityInfo() || !contextDeal_ || !handler_) {
-        if (isFocused) {
-            HILOG_WARN("AbilityImpl::AfterFocused failed");
-        } else {
-            HILOG_WARN("AbilityImpl::AfterUnFocused failed");
-        }
+        HILOG_WARN("AbilityImpl::%{public}s failed", isFocused ? "AfterFocused" : "AfterUnFocused");
         return;
     }
     HILOG_INFO("isStageBasedModel: %{public}d", ability_->GetAbilityInfo()->isStageBasedModel);
@@ -535,9 +531,10 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
         return;
     }
 
-    auto task = [abilityImpl = shared_from_this(), want = *(ability_->GetWant()), contextDeal = contextDeal_, isFocused]() {
+    auto task = [abilityImpl = shared_from_this(), want = *(ability_->GetWant()), contextDeal = contextDeal_,
+        focuseMode = isFocused]() {
         auto info = contextDeal->GetLifeCycleStateInfo();
-        if (isFocused) {
+        if (focuseMode) {
             info.state = AbilityLifeCycleState::ABILITY_STATE_ACTIVE;
         } else {
             info.state = AbilityLifeCycleState::ABILITY_STATE_INACTIVE;
