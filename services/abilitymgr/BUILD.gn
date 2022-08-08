@@ -136,13 +136,10 @@ ohos_shared_library("abilityms") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
-<<<<<<< HEAD
     "samgr_standard:samgr_proxy",
+    "samgr:samgr_proxy",
     "startup_l2:syspara",
     "startup_l2:syspara_watchagent",
-=======
-    "samgr:samgr_proxy",
->>>>>>> ebc3ba48eac3dd81d86412e93c7c5216f161936b
     "utils_base:utils",
   ]
 
