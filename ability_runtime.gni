@@ -25,6 +25,7 @@ ace_engine_path = "//foundation/arkui/ace_engine"
 
 bundlefwk_path = "//foundation/bundlemanager/bundle_framework"
 bundlefwk_inner_api_path = "${bundlefwk_path}/interfaces/inner_api"
+bundlefwk_services_path = "${bundlefwk_path}/services"
 
 multimedia_path = "//foundation/multimedia/image_standard"
 multimodalinput_path = "//foundation/multimodalinput/input"

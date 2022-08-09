@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_JS_MODULE_SEARCHER_H
 #define OHOS_ABILITY_RUNTIME_JS_MODULE_SEARCHER_H
 
+#include <sstream>
 #include <string>
 
 namespace OHOS {
@@ -23,6 +24,10 @@ namespace AbilityRuntime {
 class JsModuleSearcher final {
 public:
     explicit JsModuleSearcher(const std::string& bundleName) : bundleName_(bundleName) {}
+    explicit JsModuleSearcher(const std::string& bundleName, const std::string& hapPath) {
+       bundleName_ = bundleName;
+       hapPath_ = hapPath;
+    }
     ~JsModuleSearcher() = default;
 
     JsModuleSearcher(const JsModuleSearcher&) = default;
@@ -31,6 +36,8 @@ public:
     JsModuleSearcher& operator=(JsModuleSearcher&&) = default;
 
     std::string operator()(const std::string& curJsModulePath, const std::string& newJsModuleUri) const;
+    bool GetABCFileBuffer(
+        const std::string& curJsModulePath, const std::string& newJsModuleUri,  std::ostream &dest) const;
 
 private:
     static void FixExtName(std::string& path);
@@ -42,8 +49,10 @@ private:
     static std::string FindNpmPackage(const std::string& curJsModulePath, const std::string& npmPackage);
 
     std::string ParseOhmUri(const std::string& curJsModulePath, const std::string& newJsModuleUri) const;
+    std::string ParseJsModuleUri(const std::string& curJsModulePath, const std::string& newJsModuleUri) const;
 
     std::string bundleName_;
+    std::string hapPath_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

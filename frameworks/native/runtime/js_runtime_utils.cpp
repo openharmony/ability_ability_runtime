@@ -15,8 +15,12 @@
 
 #include "js_runtime_utils.h"
 
+#include <regex>
+
+#include "ability_constants.h"
 #include "hilog_wrapper.h"
 #include "js_runtime.h"
+#include "runtime_extractor.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -38,6 +42,11 @@ std::unique_ptr<AsyncTask> CreateAsyncTaskWithLastParam(NativeEngine& engine, Na
 } // namespace
 
 // Help Functions
+bool StringStartWith(const std::string& str, const char* startStr, size_t startStrLen)
+{
+    return ((str.length() >= startStrLen) && (str.compare(0, startStrLen, startStr) == 0));
+}
+
 NativeValue* CreateJsError(NativeEngine& engine, int32_t errCode, const std::string& message)
 {
     return engine.CreateError(CreateJsValue(engine, errCode), CreateJsValue(engine, message));
@@ -236,6 +245,39 @@ std::unique_ptr<AsyncTask> CreateAsyncTaskWithLastParam(NativeEngine& engine, Na
 {
     return CreateAsyncTaskWithLastParam(engine, lastParam, std::unique_ptr<AsyncTask::ExecuteCallback>(),
         std::unique_ptr<AsyncTask::CompleteCallback>(), result);
+}
+
+bool GetABCFile(const std::string& hapPath, const std::string& srcPath, std::ostream &dest)
+{
+    if (hapPath.empty() || srcPath.empty()) {
+        HILOG_ERROR("GetABCFile::hapPath or srcPath is nullptr");
+        return false;
+    }
+
+    std::string loadPath;
+    if (!StringStartWith(hapPath, Constants::SYSTEM_APP_PATH, sizeof(Constants::SYSTEM_APP_PATH) - 1)) {
+        std::regex hapPattern(std::string(Constants::ABS_CODE_PATH) + std::string(Constants::FILE_SEPARATOR));
+        loadPath = std::regex_replace(hapPath, hapPattern, "");
+        loadPath = std::string(Constants::LOCAL_CODE_PATH) + std::string(Constants::FILE_SEPARATOR) +
+            loadPath.substr(loadPath.find(std::string(Constants::FILE_SEPARATOR)) + 1);
+    } else {
+        loadPath = hapPath;
+    }
+    RuntimeExtractor runtimeExtractor(loadPath);
+    if (!runtimeExtractor.Init()) {
+        HILOG_ERROR("GetABCFile::Runtime extractor init failed");
+        return false;
+    }
+
+    std::regex srcPattern(std::string(Constants::LOCAL_CODE_PATH) + std::string(Constants::FILE_SEPARATOR));
+    std::string relativePath = std::regex_replace(srcPath, srcPattern, "");
+    relativePath = relativePath.substr(relativePath.find(std::string(Constants::FILE_SEPARATOR)) + 1);
+    if (!runtimeExtractor.ExtractABCFile(relativePath, dest)) {
+        HILOG_ERROR("GetABCFile::Extract abc file failed");
+        return false;
+    }
+
+    return true;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -48,7 +48,6 @@ ohos_shared_library("runtime") {
   configs = [
     ":runtime_config",
     "//arkcompiler/ets_runtime:ark_jsruntime_public_config",
-    "${ability_runtime_services_path}/common:common_config",
   ]
 
   public_configs = [ ":runtime_public_config" ]
@@ -56,6 +55,7 @@ ohos_shared_library("runtime") {
   deps = [
     "//arkcompiler/ets_runtime:libark_jsruntime",
     "//foundation/arkui/napi:ace_napi_ark",
+    ":runtime_extractor"
   ]
 
   external_deps = [
@@ -89,6 +89,34 @@ ohos_shared_library("runtime") {
       "napi:ace_container_scope",
     ]
   }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+ohos_source_set("runtime_extractor") {
+  include_dirs = [ "include" ]
+
+  sources = [
+    "${ability_runtime_native_path}/runtime/runtime_extractor.cpp",
+  ]
+
+  configs = [ 
+    "${ability_runtime_services_path}/common:common_config",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  public_deps = [
+    "${bundlefwk_services_path}/bundlemgr:parser_common",
+  ]
+  
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 
   subsystem_name = "ability"
   part_name = "ability_runtime"

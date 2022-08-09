@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "hilog_wrapper.h"
+#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -47,11 +48,6 @@ inline bool StringEndWith(const std::string& str, const char* endStr, size_t end
 {
     size_t len = str.length();
     return ((len >= endStrLen) && (str.compare(len - endStrLen, endStrLen, endStr) == 0));
-}
-
-inline bool StringStartWith(const std::string& str, const char* startStr, size_t startStrLen)
-{
-    return ((str.length() >= startStrLen) && (str.compare(0, startStrLen, startStr) == 0));
 }
 
 void SplitString(const std::string& str, std::vector<std::string>& out, size_t pos = 0, const char* seps = "\\/")
@@ -101,43 +97,8 @@ inline std::string StripString(const std::string& str, const char* charSet = " \
 
 std::string JsModuleSearcher::operator()(const std::string& curJsModulePath, const std::string& newJsModuleUri) const
 {
-    HILOG_INFO("Search JS module (%{public}s, %{public}s) begin",
-        curJsModulePath.c_str(), newJsModuleUri.c_str());
-
-    std::string newJsModulePath;
-
-    if (curJsModulePath.empty() || newJsModuleUri.empty()) {
-        return newJsModulePath;
-    }
-    std::string normalizeUri = newJsModuleUri;
-    replace(normalizeUri.begin(), normalizeUri.end(), '\\', '/');
-
-    switch (normalizeUri[0]) {
-        case '.': {
-            newJsModulePath = MakeNewJsModulePath(curJsModulePath, normalizeUri);
-            break;
-        }
-        case '@': {
-            newJsModulePath = ParseOhmUri(curJsModulePath, normalizeUri);
-            if (newJsModulePath.empty()) {
-                newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
-            }
-            break;
-        }
-        default: {
-            newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
-            break;
-        }
-    }
-
-    FixExtName(newJsModulePath);
-
-    HILOG_INFO("Search JS module (%{public}s, %{public}s) => %{public}s end",
-        curJsModulePath.c_str(), normalizeUri.c_str(), newJsModulePath.c_str());
-
-    return newJsModulePath;
+    return ParseJsModuleUri(curJsModulePath, newJsModuleUri);
 }
-
 
 void JsModuleSearcher::FixExtName(std::string& path)
 {
@@ -380,6 +341,54 @@ std::string JsModuleSearcher::ParseOhmUri(const std::string& curJsModulePath, co
     }
 
     return FindNpmPackageInTopLevel(moduleInstallPath, JoinString(pathVector, '/', index + 1));
+}
+
+std::string JsModuleSearcher::ParseJsModuleUri(const std::string& curJsModulePath, const std::string& newJsModuleUri) const
+{
+    HILOG_DEBUG("Search JS module ParseJsModuleUri (%{public}s, %{public}s) begin", curJsModulePath.c_str(),
+        newJsModuleUri.c_str());
+
+    std::string newJsModulePath;
+    if (curJsModulePath.empty() || newJsModuleUri.empty()) {
+        return newJsModulePath;
+    }
+    std::string normalizeUri = newJsModuleUri;
+    replace(normalizeUri.begin(), normalizeUri.end(), '\\', '/');
+
+    switch (normalizeUri[0]) {
+        case '.': {
+            newJsModulePath = MakeNewJsModulePath(curJsModulePath, normalizeUri);
+            break;
+        }
+        case '@': {
+            newJsModulePath = ParseOhmUri(curJsModulePath, normalizeUri);
+            if (newJsModulePath.empty()) {
+                newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
+            }
+            break;
+        }
+        default: {
+            newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
+            break;
+        }
+    }
+
+    FixExtName(newJsModulePath);
+    HILOG_DEBUG("Search JS module ParseJsModuleUri (%{public}s, %{public}s) => %{public}s end",
+        curJsModulePath.c_str(), normalizeUri.c_str(), newJsModulePath.c_str());
+    return newJsModulePath;
+}
+
+bool JsModuleSearcher::GetABCFileBuffer(
+    const std::string& curJsModulePath, const std::string& newJsModuleUri, std::ostream &dest) const
+{
+    std::string newJsModulePath = ParseJsModuleUri(curJsModulePath, newJsModuleUri);
+
+    if (!GetABCFile(hapPath_, newJsModulePath, dest)) {
+        HILOG_ERROR("Get abc file failed");
+        return false;
+    }
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <type_traits>
 
 #include "native_engine/native_engine.h"
@@ -111,6 +112,8 @@ NativeValue* CreateNativeArray(NativeEngine& engine, const std::vector<T>& data)
     return arrayValue;
 }
 
+bool StringStartWith(const std::string& str, const char* startStr, size_t startStrLen);
+bool StringEndWith(const std::string& str, const char* endStr, size_t endStrLen);
 NativeValue* CreateJsError(NativeEngine& engine, int32_t errCode, const std::string& message = std::string());
 void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name, NativeCallback func);
 void BindNativeProperty(NativeObject& object, const char* name, NativeCallback getter);
@@ -184,6 +187,8 @@ std::unique_ptr<AsyncTask> CreateAsyncTaskWithLastParam(NativeEngine& engine, Na
 
 std::unique_ptr<AsyncTask> CreateAsyncTaskWithLastParam(NativeEngine& engine, NativeValue* lastParam,
     nullptr_t, nullptr_t, NativeValue** result);
+
+bool GetABCFile(const std::string& hapPath, const std::string& srcPath, std::ostream &dest);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 

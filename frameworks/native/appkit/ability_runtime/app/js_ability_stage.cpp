@@ -69,7 +69,7 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
         std::string moduleName(hapModuleInfo.moduleName);
         moduleName.append("::").append("AbilityStage");
         auto moduleObj =
-            jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
+            jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, hapModuleInfo.hapPath);
         return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
     }
 
@@ -82,7 +82,7 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
         std::string moduleName(hapModuleInfo.moduleName);
         moduleName.append("::").append("AbilityStage");
         moduleObj =
-            jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
+            jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, hapModuleInfo.hapPath);
         HILOG_INFO("JsAbilityStage srcPath is %{public}s", srcPath.c_str());
     }
     return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
