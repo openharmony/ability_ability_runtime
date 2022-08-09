@@ -22,12 +22,26 @@
 #include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 
+#ifdef WINDOWS_PLATFORM
+#include <io.h>
+
+namespace {
+char* realpath(const char* path, char* resolvedPath)
+{
+    if (_access(path, 0) < 0) {
+        return nullptr;
+    }
+    if (strcpy_s(resolvedPath, PATH_MAX, path) != 0) {
+        return nullptr;
+    }
+    return resolvedPath;
+}
+}
+#endif
+
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr char DEFAULT_BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
-constexpr char BUNDLES_INSTALL_PATH[] = "/data/bundles/";
-
 constexpr char PREFIX_BUNDLE[] = "@bundle:";
 constexpr char PREFIX_MODULE[] = "@module:";
 constexpr char PREFIX_LOCAL[] = "@local:";
@@ -121,17 +135,17 @@ void JsModuleSearcher::FixExtName(std::string& path)
     path.append(EXT_NAME_ABC);
 }
 
-std::string JsModuleSearcher::GetInstallPath(const std::string& curJsModulePath, bool module)
+std::string JsModuleSearcher::GetInstallPath(const std::string& curJsModulePath, bool module) const
 {
     size_t pos = std::string::npos;
-    if (StringStartWith(curJsModulePath, DEFAULT_BUNDLE_INSTALL_PATH, sizeof(DEFAULT_BUNDLE_INSTALL_PATH) - 1)) {
-        pos = sizeof(DEFAULT_BUNDLE_INSTALL_PATH) - 1 - 1;
+    if (StringStartWith(curJsModulePath, bundleInstallPath_.c_str(), bundleInstallPath_.length())) {
+        pos = bundleInstallPath_.length() - 1;
     } else {
-        if (!StringStartWith(curJsModulePath, BUNDLES_INSTALL_PATH, sizeof(BUNDLES_INSTALL_PATH) - 1)) {
+        if (!StringStartWith(curJsModulePath, otherBundleInstallPath_.c_str(), otherBundleInstallPath_.length())) {
             return std::string();
         }
 
-        pos = curJsModulePath.find('/', sizeof(BUNDLES_INSTALL_PATH) - 1);
+        pos = curJsModulePath.find('/', otherBundleInstallPath_.length());
         if (pos == std::string::npos) {
             return std::string();
         }
@@ -148,7 +162,7 @@ std::string JsModuleSearcher::GetInstallPath(const std::string& curJsModulePath,
 }
 
 std::string JsModuleSearcher::MakeNewJsModulePath(
-    const std::string& curJsModulePath, const std::string& newJsModuleUri)
+    const std::string& curJsModulePath, const std::string& newJsModuleUri) const
 {
     std::string moduleInstallPath = GetInstallPath(curJsModulePath, true);
     if (moduleInstallPath.empty()) {
@@ -180,18 +194,21 @@ std::string JsModuleSearcher::MakeNewJsModulePath(
             pathVector.emplace_back(std::move(value));
         }
     }
-    char path[PATH_MAX];
+
     std::string jsModulePath = moduleInstallPath + JoinString(pathVector, '/');
+    FixExtName(jsModulePath);
     if (jsModulePath.size() >= PATH_MAX) {
         return std::string();
     }
+
+    char path[PATH_MAX];
     if (realpath(jsModulePath.c_str(), path) != nullptr) {
         return std::string(path);
     }
     return std::string();
 }
 
-std::string JsModuleSearcher::FindNpmPackageInPath(const std::string& npmPath)
+std::string JsModuleSearcher::FindNpmPackageInPath(const std::string& npmPath) const
 {
     std::string fileName = npmPath + "/" + NPM_ENTRY_FILE;
 
@@ -228,7 +245,7 @@ std::string JsModuleSearcher::FindNpmPackageInPath(const std::string& npmPath)
 }
 
 std::string JsModuleSearcher::FindNpmPackageInTopLevel(
-    const std::string& moduleInstallPath, const std::string& npmPackage, size_t start)
+    const std::string& moduleInstallPath, const std::string& npmPackage, size_t start) const
 {
     for (size_t level = start; level <= MAX_NPM_LEVEL; ++level) {
         std::string path = moduleInstallPath + NPM_PATH_SEGMENT + '/' + std::to_string(level) + '/' + npmPackage;
@@ -241,7 +258,7 @@ std::string JsModuleSearcher::FindNpmPackageInTopLevel(
     return std::string();
 }
 
-std::string JsModuleSearcher::FindNpmPackage(const std::string& curJsModulePath, const std::string& npmPackage)
+std::string JsModuleSearcher::FindNpmPackage(const std::string& curJsModulePath, const std::string& npmPackage) const
 {
     std::string newJsModulePath = MakeNewJsModulePath(curJsModulePath, npmPackage);
     if (!newJsModulePath.empty()) {
@@ -302,9 +319,9 @@ std::string JsModuleSearcher::ParseOhmUri(const std::string& curJsModulePath, co
 
         const auto& bundleName = pathVector[index++];
         if (bundleName == bundleName_) {
-            moduleInstallPath = DEFAULT_BUNDLE_INSTALL_PATH;
+            moduleInstallPath = bundleInstallPath_;
         } else {
-            moduleInstallPath = BUNDLES_INSTALL_PATH;
+            moduleInstallPath = otherBundleInstallPath_;
             moduleInstallPath.append(bundleName).append("/");
         }
         moduleInstallPath.append(pathVector[index++]).append("/");
@@ -352,9 +369,9 @@ std::string JsModuleSearcher::ParseJsModuleUri(const std::string& curJsModulePat
     if (curJsModulePath.empty() || newJsModuleUri.empty()) {
         return newJsModulePath;
     }
-    std::string normalizeUri = newJsModuleUri;
-    replace(normalizeUri.begin(), normalizeUri.end(), '\\', '/');
 
+    std::string normalizeUri = newJsModuleUri;
+    std::replace(normalizeUri.begin(), normalizeUri.end(), '\\', '/');
     switch (normalizeUri[0]) {
         case '.': {
             newJsModulePath = MakeNewJsModulePath(curJsModulePath, normalizeUri);

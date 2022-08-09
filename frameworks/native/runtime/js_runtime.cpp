@@ -189,11 +189,7 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            if (!options.hapPath.empty()) {
-                panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName, options.hapPath));
-            } else {
-                panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
-            }
+            panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName, options.hapPath));
         }
         return JsRuntime::Initialize(options);
     }
