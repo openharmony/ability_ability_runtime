@@ -1011,8 +1011,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             application_->GetRuntime());
         LoadAndRegisterExtension("system/lib64/libwallpaper_extension_module.z.so", "WallpaperExtension",
             application_->GetRuntime());
-        LoadAndRegisterExtension("system/lib64/libinputmethod_extension_module.z.so", "InputMethodExtensionAbility",
-            application_->GetRuntime());
 #else
         LoadAllExtensions("system/lib/extensionability");
         LoadAndRegisterExtension("system/lib/libdatashare_ext_ability_module.z.so", "DataShareExtAbility",
@@ -1022,8 +1020,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         LoadAndRegisterExtension("system/lib/libaccessibility_extension_module.z.so", "AccessibilityExtension",
             application_->GetRuntime());
         LoadAndRegisterExtension("system/lib/libwallpaper_extension_module.z.so", "WallpaperExtension",
-            application_->GetRuntime());
-        LoadAndRegisterExtension("system/lib/libinputmethod_extension_module.z.so", "InputMethodExtensionAbility",
             application_->GetRuntime());
 #endif
     }
@@ -1738,7 +1734,7 @@ MainThread::MainHandler::MainHandler(const std::shared_ptr<EventRunner> &runner,
 void MainThread::MainHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer &event)
 {
     auto eventId = event->GetInnerEventId();
-    if (eventId == MAIN_THREAD_IS_ALIVE) {
+    if (eventId == CHECK_MAIN_THREAD_IS_ALIVE) {
         auto watchDogHanlder = WatchDog::GetCurrentHandler();
         if (watchDogHanlder != nullptr) {
             watchDogHanlder->SendEvent(MAIN_THREAD_IS_ALIVE);

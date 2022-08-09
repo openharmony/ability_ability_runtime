@@ -113,7 +113,6 @@ NativeValue* CreateNativeArray(NativeEngine& engine, const std::vector<T>& data)
 }
 
 bool StringStartWith(const std::string& str, const char* startStr, size_t startStrLen);
-bool StringEndWith(const std::string& str, const char* endStr, size_t endStrLen);
 NativeValue* CreateJsError(NativeEngine& engine, int32_t errCode, const std::string& message = std::string());
 void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name, NativeCallback func);
 void BindNativeProperty(NativeObject& object, const char* name, NativeCallback getter);
