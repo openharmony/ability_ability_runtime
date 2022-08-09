@@ -63,11 +63,13 @@ JsTestRunner::JsTestRunner(
         srcPath.append(".abc");
         srcPath_ = srcPath;
     }
-    HILOG_INFO("JsTestRunner srcPath is %{public}s", srcPath_.c_str());
+    HILOG_DEBUG("JsTestRunner srcPath is %{public}s", srcPath_.c_str());
     if (!isFaJsModel) {
         std::string moduleName;
+        hapPath_ = bundleInfo.hapModuleInfos.back().hapPath;
+        HILOG_DEBUG("JsTestRunner hapPath is %{public}s", hapPath_.c_str());
         jsTestRunnerObj_ = jsRuntime_.LoadModule(moduleName, srcPath_,
-            bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE);
+            bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE, hapPath_);
     }
 }
 
@@ -87,7 +89,7 @@ bool JsTestRunner::Initialize()
             HILOG_ERROR("mgmtResult init error");
             return false;
         }
-        if (!jsRuntime_.RunSandboxScript(srcPath_)) {
+        if (!jsRuntime_.RunSandboxScript(srcPath_, hapPath_)) {
             HILOG_ERROR("RunScript srcPath_ err");
             return false;
         }

@@ -22,6 +22,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
+
 #include "connect_server_manager.h"
 #include "event_handler.h"
 #include "hdc_register.h"
@@ -106,14 +107,25 @@ public:
         debugMode_ = true;
     }
 
-    bool RunScript(const std::string& path) override
+    bool RunScript(const std::string& path, const std::string& hapPath) override
     {
-        return nativeEngine_->RunScriptPath(path.c_str()) != nullptr;
+        bool result = false;
+        if (!hapPath.empty()) {
+            std::ostringstream outStreamForABC;
+            if (!GetABCFile(hapPath, path, outStreamForABC)) {
+                HILOG_ERROR("Get abc file failed");
+                return result;
+            }
+            result = nativeEngine_->RunScriptPath(path.c_str()) != nullptr; //, (void *)outStreamForABC
+        } else {
+            result = nativeEngine_->RunScriptPath(path.c_str()) != nullptr;
+        }
+        return result;
     }
 
-    NativeValue* LoadJsModule(const std::string& path) override
+    NativeValue* LoadJsModule(const std::string& path, const std::string& hapPath) override
     {
-        if (!RunScript(path)) {
+        if (!RunScript(path, hapPath)) {
             HILOG_ERROR("Failed to run script: %{public}s", path.c_str());
             return nullptr;
         }
@@ -177,7 +189,11 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
+            if (!options.hapPath.empty()) {
+                panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName, options.hapPath));
+            } else {
+                panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
+            }
         }
         return JsRuntime::Initialize(options);
     }
@@ -226,7 +242,7 @@ void InitSyscapModule(NativeEngine& engine, NativeObject& globalObject)
 bool MakeFilePath(const std::string& codePath, const std::string& modulePath, std::string& fileName)
 {
     std::string path(codePath);
-    path.append("/").append(modulePath);
+    path.append("/").append(modulePath);//  phone/./ets/MainAbility6/MainAbility6.abc
     if (path.length() > PATH_MAX) {
         HILOG_ERROR("Path length(%{public}d) longer than MAX(%{public}d)", (int32_t)path.length(), PATH_MAX);
         return false;
@@ -468,13 +484,13 @@ void JsRuntime::Deinitialize()
     nativeEngine_.reset();
 }
 
-NativeValue* JsRuntime::LoadJsBundle(const std::string& path)
+NativeValue* JsRuntime::LoadJsBundle(const std::string& path, const std::string& hapPath)
 {
     NativeObject* globalObj = ConvertNativeValueTo<NativeObject>(nativeEngine_->GetGlobal());
     NativeValue* exports = nativeEngine_->CreateObject();
     globalObj->SetProperty("exports", exports);
 
-    if (!RunScript(path)) {
+    if (!RunScript(path, hapPath)) {
         HILOG_ERROR("Failed to run script: %{public}s", path.c_str());
         return nullptr;
     }
@@ -494,8 +510,8 @@ NativeValue* JsRuntime::LoadJsBundle(const std::string& path)
     return exportObj;
 }
 
-std::unique_ptr<NativeReference> JsRuntime::LoadModule(
-    const std::string& moduleName, const std::string& modulePath, bool esmodule)
+std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& moduleName,
+    const std::string& modulePath, bool esmodule, const std::string& hapPath)
 {
     HILOG_INFO("JsRuntime::LoadModule(%{public}s, %{public}s, %{public}s)", moduleName.c_str(), modulePath.c_str(),
         esmodule ? "true" : "false");
@@ -514,7 +530,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(
             return std::unique_ptr<NativeReference>();
         }
 
-        classValue = esmodule ? LoadJsModule(fileName) : LoadJsBundle(fileName);
+        classValue = esmodule ? LoadJsModule(fileName, hapPath) : LoadJsBundle(fileName, hapPath);
         if (classValue == nullptr) {
             return std::unique_ptr<NativeReference>();
         }
@@ -550,12 +566,23 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
     return std::unique_ptr<NativeReference>(nativeEngine_->CreateReference(instanceValue, 1));
 }
 
-bool JsRuntime::RunScript(const std::string& path)
+bool JsRuntime::RunScript(const std::string& path, const std::string& hapPath)
 {
-    return nativeEngine_->RunScript(path.c_str()) != nullptr;
+    bool result = false;
+    if (!hapPath.empty()) {
+        std::ostringstream outStreamForABC;
+        if (!GetABCFile(hapPath, path, outStreamForABC)) {
+            HILOG_ERROR("Get abc file failed");
+            return result;
+        }
+        result = nativeEngine_->RunScript(path.c_str()) != nullptr; //, (void *)outStreamForABC
+    } else {
+        result = nativeEngine_->RunScript(path.c_str()) != nullptr;
+    }
+    return result;
 }
 
-bool JsRuntime::RunSandboxScript(const std::string& path)
+bool JsRuntime::RunSandboxScript(const std::string& path, const std::string& hapPath)
 {
     std::string fileName;
     if (!MakeFilePath(codePath_, path, fileName)) {
@@ -563,7 +590,7 @@ bool JsRuntime::RunSandboxScript(const std::string& path)
         return false;
     }
 
-    if (!RunScript(fileName)) {
+    if (!RunScript(fileName, hapPath)) {
         HILOG_ERROR("Failed to run script: %{public}s", fileName.c_str());
         return false;
     }
