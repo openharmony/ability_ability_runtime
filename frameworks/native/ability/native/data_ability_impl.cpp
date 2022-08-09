@@ -411,8 +411,7 @@ bool DataAbilityImpl::CheckExecuteBatchPermission(
         std::shared_ptr<DataAbilityOperation> operation = operations[i];
         if (operation->IsInsertOperation() || operation->IsUpdateOperation() || operation->IsDeleteOperation()) {
             needCheckWritePermission = true;
-        }
-        if (operation->IsAssertOperation()) {
+        } else if (operation->IsAssertOperation()) {
             needCheckReadPermission = true;
         }
         if (needCheckReadPermission && needCheckWritePermission) {
@@ -444,9 +443,7 @@ bool DataAbilityImpl::CheckOpenFilePermission(const std::string &mode) const
             HILOG_WARN("DataAbilityImpl::OpenFile failed, do not have read permission");
             return false;
         }
-    }
-
-    if (mode.find(WRITE) != string::npos) {
+    } else if (mode.find(WRITE) != string::npos) {
         if (!CheckReadAndWritePermission(WRITE)) {
             HILOG_WARN("DataAbilityImpl::OpenFile failed, do not have write permission");
             return false;
