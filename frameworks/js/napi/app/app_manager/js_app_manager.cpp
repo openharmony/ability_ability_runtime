@@ -122,6 +122,7 @@ public:
 private:
     sptr<OHOS::AppExecFwk::IAppMgr> appManager_ = nullptr;
     sptr<OHOS::AAFwk::IAbilityManager> abilityManager_ = nullptr;
+    sptr<JSApplicationStateObserver> observer = nullptr;
 
     NativeValue* OnRegisterApplicationStateObserver(NativeEngine& engine, NativeCallbackInfo& info)
     {
@@ -138,7 +139,9 @@ private:
         static int64_t serialNumber = 0;
         std::vector<std::string> bundleNameList;
         // unwarp observer
-        sptr<JSApplicationStateObserver> observer = new JSApplicationStateObserver(engine);
+        if (observer == nullptr) {
+            observer = new JSApplicationStateObserver(engine);
+        }
         observer->SetJsObserverObject(info.argv[INDEX_ZERO]);
         if (info.argc == ARGC_TWO) {
             AppExecFwk::UnwrapArrayStringFromJS(reinterpret_cast<napi_env>(&engine),
