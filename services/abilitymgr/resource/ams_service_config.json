@@ -5,7 +5,7 @@
         "app_not_response_process_timeout_time" : 1000,
         "ams_timeout_time" : 180,
         "device_type" : "phone",
-        "bootanni_timeout_time" : 5
+        "bootanimation_timeout_time" : 5
     },
     "system_configuration":{
         "system_orientation": "vertical"

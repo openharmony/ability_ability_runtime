@@ -61,9 +61,9 @@ std::string AmsConfigurationParameter::GetDeviceType() const
     return deviceType_;
 }
 
-int AmsConfigurationParameter::GetBootanniTimeoutTime() const
+int AmsConfigurationParameter::GetBootanimationTimeoutTime() const
 {
-    return bootanniTime_;
+    return bootanimationTime_;
 }
 
 int AmsConfigurationParameter::LoadAmsConfiguration(const std::string &filePath)
@@ -123,7 +123,7 @@ int AmsConfigurationParameter::LoadAppConfigurationForStartUpService(nlohmann::j
             Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::AMS_TIMEOUT_TIME).get<int>();
         maxRestartNum_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::ROOT_LAUNCHER_RESTART_MAX).get<int>();
         deviceType_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::DEVICE_TYPE).get<std::string>();
-        bootanniTime_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::BOOTANNI_TIMEOUT_TIME).get<int>();
+        bootanimationTime_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::BOOTANIMATION_TIMEOUT_TIME).get<int>();
         HILOG_INFO("get ams service config success!");
         ret = 0;
     }
