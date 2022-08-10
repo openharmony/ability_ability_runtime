@@ -54,6 +54,7 @@ public:
      * Get the save time of the current content
      */
     int GetMissionSaveTime() const;
+
     /**
      * Get current system direction parameters, Temporary method.
      */
@@ -63,20 +64,24 @@ public:
      * Get the max number of restart.
      */
     int GetMaxRestartNum() const;
+
     /**
      * get the application not response process timeout time.
      */
     int GetANRTimeOutTime() const;
+
     /**
      * get ability manager service not response process timeout time.
      */
     int GetAMSTimeOutTime() const;
+
     /**
      * get device type.
      */
     std::string GetDeviceType() const;
+
     /**
-     * 
+     * get boot animation stared tiimout time.
      */
     int GetBootanniTimeoutTime() const;
 
