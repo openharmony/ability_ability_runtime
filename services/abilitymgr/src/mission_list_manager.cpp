@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
+constexpr uint32_t SCENE_FLAG_KEYCARD = 1;
 constexpr char EVENT_KEY_UID[] = "UID";
 constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
@@ -632,7 +633,10 @@ int MissionListManager::MinimizeAbilityLocked(const std::shared_ptr<AbilityRecor
 
     abilityRecord->SetMinimizeReason(fromUser);
     MoveToBackgroundTask(abilityRecord);
-    UpdateMissionTimeStamp(abilityRecord);
+    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYCARD) {
+        UpdateMissionTimeStamp(abilityRecord);
+    }
+
     return ERR_OK;
 }
 
@@ -1470,7 +1474,9 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
     abilityRecord->SetIsNewWant(false);
     NotifyMissionCreated(abilityRecord);
     if (abilityRecord->IsNeedTakeSnapShot()) {
-        UpdateMissionSnapshot(abilityRecord);
+        if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYCARD) {
+            UpdateMissionSnapshot(abilityRecord);
+        }
     } else {
         abilityRecord->SetNeedSnapShot(true);
     }
