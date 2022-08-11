@@ -34,7 +34,7 @@
         </div>
     </div>
 
-    <div id="container" class="container" style="display:{{pcDisplay}};">
+    <div id="container" class="container" style="display:{{pcDisplay}};border: 1px solid #000">
         <div id="div-title" class="div-title">
             <text id="title" class="title">
                 {{labelAppName}}{{$t('message.title')}}
