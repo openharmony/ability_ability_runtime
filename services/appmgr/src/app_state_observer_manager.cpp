@@ -115,7 +115,7 @@ void AppStateObserverManager::OnProcessDied(const std::shared_ptr<AppRunningReco
             return;
         }
         HILOG_INFO("OnProcessDied come.");
-        self->HandleOnProcessDied(appRecord);
+        self->HandleOnAppProcessDied(appRecord);
     };
     handler_->PostTask(task);
 }
@@ -143,7 +143,7 @@ void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningR
             return;
         }
         HILOG_INFO("OnProcessCreated come.");
-        self->HandleOnProcessCreated(appRecord);
+        self->HandleOnAppProcessCreated(appRecord);
     };
     handler_->PostTask(task);
 }
@@ -229,7 +229,7 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(const AbilityStat
     }
 }
 
-void AppStateObserverManager::HandleOnProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
+void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
         HILOG_ERROR("app record is null");
@@ -238,7 +238,7 @@ void AppStateObserverManager::HandleOnProcessCreated(const std::shared_ptr<AppRu
     ProcessData data = WrapProcessData(appRecord);
     HILOG_DEBUG("Process Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
-    HandleOnProcessCreatedCommon(data);
+    HandleOnProcessCreated(data);
 }
 
 void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr<RenderRecord> &renderRecord)
@@ -250,10 +250,10 @@ void AppStateObserverManager::HandleOnRenderProcessCreated(const std::shared_ptr
     ProcessData data = WrapRenderProcessData(renderRecord);
     HILOG_DEBUG("RenderProcess Create, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
-    HandleOnProcessCreatedCommon(data);
+    HandleOnProcessCreated(data);
 }
 
-void AppStateObserverManager::HandleOnProcessCreatedCommon(const ProcessData &data)
+void AppStateObserverManager::HandleOnProcessCreated(const ProcessData &data)
 {
     std::lock_guard<std::recursive_mutex> lockNotify(observerLock_);
     for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
@@ -265,7 +265,7 @@ void AppStateObserverManager::HandleOnProcessCreatedCommon(const ProcessData &da
     }
 }
 
-void AppStateObserverManager::HandleOnProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord)
+void AppStateObserverManager::HandleOnAppProcessDied(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
         HILOG_ERROR("app record is null");
@@ -274,7 +274,7 @@ void AppStateObserverManager::HandleOnProcessDied(const std::shared_ptr<AppRunni
     ProcessData data = WrapProcessData(appRecord);
     HILOG_DEBUG("Process died, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d.",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
-    HandleOnProcessDiedCommon(data);
+    HandleOnProcessDied(data);
 }
 
 void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &renderRecord)
@@ -286,10 +286,10 @@ void AppStateObserverManager::HandleOnRenderProcessDied(const std::shared_ptr<Re
     ProcessData data = WrapRenderProcessData(renderRecord);
     HILOG_DEBUG("Render Process died, bundle:%{public}s, pid:%{public}d, uid:%{public}d, size:%{public}d.",
         data.bundleName.c_str(), data.pid, data.uid, (int32_t)appStateObserverMap_.size());
-    HandleOnProcessDiedCommon(data);
+    HandleOnProcessDied(data);
 }
 
-void AppStateObserverManager::HandleOnProcessDiedCommon(const ProcessData &data)
+void AppStateObserverManager::HandleOnProcessDied(const ProcessData &data)
 {
     std::lock_guard<std::recursive_mutex> lockNotify(observerLock_);
     for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
