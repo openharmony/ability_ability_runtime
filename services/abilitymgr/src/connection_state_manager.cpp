@@ -134,7 +134,7 @@ void ConnectionStateManager::RemoveConnection(const std::shared_ptr<ConnectionRe
 void ConnectionStateManager::AddDataAbilityConnection(const DataAbilityCaller &caller,
     const std::shared_ptr<DataAbilityRecord> &record)
 {
-    if (!CheckAddAndRemoveDataAbilityConnection(caller, record)) {
+    if (!CheckDataAbilityConnectionParams(caller, record)) {
         return;
     }
 
@@ -149,7 +149,7 @@ void ConnectionStateManager::AddDataAbilityConnection(const DataAbilityCaller &c
 void ConnectionStateManager::RemoveDataAbilityConnection(const DataAbilityCaller &caller,
     const std::shared_ptr<DataAbilityRecord> &record)
 {
-    if (!CheckAddAndRemoveDataAbilityConnection(caller, record)) {
+    if (!CheckDataAbilityConnectionParams(caller, record)) {
         return;
     }
 
@@ -161,7 +161,7 @@ void ConnectionStateManager::RemoveDataAbilityConnection(const DataAbilityCaller
     observerController_->NotifyExtensionDisconnected(connectionData);
 }
 
-bool ConnectionStateManager::CheckAddAndRemoveDataAbilityConnection(const DataAbilityCaller &caller,
+bool ConnectionStateManager::CheckDataAbilityConnectionParams(const DataAbilityCaller &caller,
     const std::shared_ptr<DataAbilityRecord> &record) const
 {
     if (!observerController_) {
