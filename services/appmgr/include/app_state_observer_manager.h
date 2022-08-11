@@ -61,7 +61,7 @@ private:
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state);
     void HandleOnProcessCreated(const ProcessData &data);
-    void HandleOnProcessDiedCommon(const ProcessData &data);
+    void HandleOnProcessDied(const ProcessData &data);
 
 private:
     std::shared_ptr<AppExecFwk::EventHandler> handler_;
