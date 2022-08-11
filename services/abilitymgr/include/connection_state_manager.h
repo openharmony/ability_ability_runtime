@@ -146,7 +146,7 @@ public:
     void HandleAppDied(int32_t pid);
 
 private:
-    bool CheckAddAndRemoveDataAbilityConnection(const DataAbilityCaller &caller,
+    bool CheckDataAbilityConnectionParams(const DataAbilityCaller &caller,
         const std::shared_ptr<DataAbilityRecord> &record) const;
 
 private:
