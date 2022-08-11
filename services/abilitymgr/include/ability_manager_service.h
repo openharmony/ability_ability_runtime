@@ -42,6 +42,7 @@
 #include "system_ability.h"
 #include "uri.h"
 #include "ability_config.h"
+#include "parameter.h"
 #include "pending_want_manager.h"
 #include "ams_configuration_parameter.h"
 #include "user_controller.h"
@@ -1038,6 +1039,7 @@ private:
     std::shared_ptr<AmsConfigurationParameter> amsConfigResolver_;
     const static std::map<std::string, AbilityManagerService::DumpKey> dumpMap;
     const static std::map<std::string, AbilityManagerService::DumpsysKey> dumpsysMap;
+    const static std::map<int32_t, AppExecFwk::SupportWindowMode> windowModeMap;
 
     std::unordered_map<int, std::shared_ptr<MissionListManager>> missionListManagers_;
     std::shared_ptr<MissionListManager> currentMissionListManager_;
@@ -1060,6 +1062,7 @@ private:
 
 #ifdef SUPPORT_GRAPHICS
     int32_t ShowPickerDialog(const Want& want, int32_t userId);
+    bool CheckWindowMode(int32_t windowMode, const std::vector<AppExecFwk::SupportWindowMode>& windowModes) const;
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
     std::shared_ptr<ApplicationAnrListener> anrListener_;
