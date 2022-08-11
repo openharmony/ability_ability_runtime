@@ -106,12 +106,12 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
     std::string params;
     nlohmann::json jsonObj;
     jsonObj[APP_NAME] = appName;
-    if(!position.wideScreen) {
-        auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();    
-        jsonObj[OFF_SET_X] = position.offsetX/display->GetWidth()*100;
-        jsonObj[OFF_SET_Y] = position.offsetY/display->GetHeight()*100;
-        jsonObj[WIDTH] = position.width/2;
-        jsonObj[HEIGHT] = position.height/2;
+    if (!position.wideScreen) {
+        auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        jsonObj[OFF_SET_X] = LINE_NUMS_ZERO;
+        jsonObj[OFF_SET_Y] = LINE_NUMS_ZERO;
+        jsonObj[WIDTH] = position.width/UI_HALF;
+        jsonObj[HEIGHT] = position.height/UI_HALF;
         jsonObj[DEVICE_TYPE] = deviceType_;
         params = jsonObj.dump();
         position.width = display->GetWidth();

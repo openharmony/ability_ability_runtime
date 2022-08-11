@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<div class="222">
+<div class="back">
     <div id="black-overlay" class = "black-overlay" style="display:{{phoneDisplay}};">
         <div id="container" class="container" style="width:{{labelwidth}}vp;height:{{labelheight}}vp;margin-left:{{labeloffsetX}}vp;margin-top:{{labeloffsetY}}vp">
             <div id="div-title" class="div-title">
@@ -20,7 +20,7 @@
                 {{labelAppName}}{{$t('message.title')}}
                 </text>
                 <text id="title-list" class="title-list">
-                {{labelVisibilityType}} labelwidth {{labelwidth}}vp labelheight {{labelheight}}vp labeloffsetX {{labeloffsetX}}vp labeloffsetY{{labeloffsetY}}vp{{$t('message.titleList')}}
+                {{$t('message.titleList')}}
                 </text>
             </div>  
             <div id= "but" class="but">
