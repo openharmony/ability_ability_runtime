@@ -81,7 +81,7 @@ public:
     std::string GetDeviceType() const;
 
     /**
-     * get boot animation stared tiimout time.
+     * get boot animation stared timout time.
      */
     int GetBootAnimationTimeoutTime() const;
 
