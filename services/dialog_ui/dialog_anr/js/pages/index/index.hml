@@ -40,7 +40,7 @@
                 {{labelAppName}}{{$t('message.title')}}
             </text>
             <text id="title-list" class="title-list">
-                {{labelVisibilityType}} labelwidth {{labelwidth}}vp labelheight {{labelheight}}vp labeloffsetX {{labeloffsetX}}vp labeloffsetY{{labeloffsetY}}vp{{$t('message.titleList')}}
+                {{$t('message.titleList')}}
             </text>
         </div>  
         <div id= "but" class="but">

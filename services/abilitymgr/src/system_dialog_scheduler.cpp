@@ -104,16 +104,16 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_ANR, position);
     std::string params;
-    nlohmann::json jsonObj;
-    jsonObj[APP_NAME] = appName;
+    nlohmann::json anrData;
+    anrData[APP_NAME] = appName;
     if (!position.wideScreen) {
         auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-        jsonObj[OFF_SET_X] = LINE_NUMS_ZERO;
-        jsonObj[OFF_SET_Y] = LINE_NUMS_ZERO;
-        jsonObj[WIDTH] = position.width/UI_HALF;
-        jsonObj[HEIGHT] = position.height/UI_HALF;
-        jsonObj[DEVICE_TYPE] = deviceType_;
-        params = jsonObj.dump();
+        anrData[OFF_SET_X] = LINE_NUMS_ZERO;
+        anrData[OFF_SET_Y] = LINE_NUMS_ZERO;
+        anrData[WIDTH] = position.width/UI_HALF;
+        anrData[HEIGHT] = position.height/UI_HALF;
+        anrData[DEVICE_TYPE] = deviceType_;
+        params = anrData.dump();
         position.width = display->GetWidth();
         position.height = display->GetHeight();
         position.width_narrow = display->GetWidth();
@@ -121,8 +121,8 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
         position.offsetX = (display->GetWidth() - position.width) / UI_HALF;
         position.offsetY = (display->GetHeight() - position.height) / UI_HALF;
     } else {
-        jsonObj[DEVICE_TYPE] = deviceType_;
-        params = jsonObj.dump();
+        anrData[DEVICE_TYPE] = deviceType_;
+        params = anrData.dump();
     }
     auto callback = [anrCallBack] (int32_t id, const std::string& event, const std::string& params) {
         HILOG_INFO("Dialog anr callback: id : %{public}d, event: %{public}s, params: %{public}s",
