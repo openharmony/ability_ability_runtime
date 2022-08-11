@@ -56,7 +56,6 @@ ohos_moduletest("running_infos_module_test") {
     "//third_party/googletest:gtest_main",
     "//third_party/icu/icu4c:shared_icuuc",
     "//third_party/jsoncpp:jsoncpp",
-    "//utils/native/base:utils",
   ]
 
   if (ability_runtime_graphics) {
@@ -77,6 +76,7 @@ ohos_moduletest("running_infos_module_test") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "dsoftbus:softbus_client",
@@ -89,6 +89,7 @@ ohos_moduletest("running_infos_module_test") {
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
+    "startup_l2:syspara_watchagent",
   ]
 
   if (efficiency_manager) {
