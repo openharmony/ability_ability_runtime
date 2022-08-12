@@ -12,7 +12,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<div class="back">
+<div class="outermost-layer">
     <div id="black-overlay" class = "black-overlay" style="display:{{phoneDisplay}};">
         <div id="container" class="container" style="width:{{labelwidth}}vp;height:{{labelheight}}vp;margin-left:{{labeloffsetX}}vp;margin-top:{{labeloffsetY}}vp">
             <div id="div-title" class="div-title">
