@@ -50,6 +50,8 @@ void WatchDogTest::SetUp(void)
 void WatchDogTest::TearDown(void)
 {}
 
+// TODO: Remove this when WatchDogHandler is removed
+
 /**
  * @tc.number: AppExecFwk_WatchDog_GetAppMainThreadState_0100
  * @tc.name: GetAppMainThreadState

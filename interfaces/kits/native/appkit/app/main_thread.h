@@ -468,6 +468,8 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::shared_ptr<EventHandler> dfxHandler_;
     static std::shared_ptr<OHOSApplication> applicationForAnr_;
+    // TODO: add a new flag to mark the state of the application
+    // it will be checked in the Watchdog::Timer
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**
