@@ -794,7 +794,7 @@ void AbilityConnectManager::HandleTerminateDisconnectTask(const ConnectListType&
         auto targetService = connectRecord->GetAbilityRecord();
         if (targetService) {
             HILOG_WARN("This record complete disconnect directly. recordId:%{public}d", connectRecord->GetRecordId());
-            connectRecord->CompleteDisconnect(ERR_OK, true);
+            connectRecord->CompleteDisconnect(ERR_OK, false);
             targetService->RemoveConnectRecordFromList(connectRecord);
             RemoveConnectionRecordFromMap(connectRecord);
         };
