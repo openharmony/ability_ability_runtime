@@ -53,6 +53,7 @@
 #include "hisysevent.h"
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
+#include "xcollie/watchdog.h"
 
 #if defined(ABILITY_LIBRARY_LOADER) || defined(APPLICATION_LIBRARY_LOADER)
 #include <dirent.h>
@@ -647,6 +648,8 @@ void MainThread::HandleTerminateApplicationLocal()
         return;
     }
 
+    // TODO: Remove this when we remove the watchDogHandler from the main thread.
+    // 原runner停止逻辑
     if (watchDogHandler_ != nullptr) {
         watchDogHandler_->Stop();
     }
@@ -734,6 +737,8 @@ bool MainThread::InitCreate(
         return false;
     }
 
+    // TODO: Remove this when we remove the watchDogHandler from the main thread.
+    // SetApplicationInfo 用来reportEvent的，没有report可以直接remove
     if (watchDogHandler_ != nullptr) {
         watchDogHandler_->SetApplicationInfo(applicationInfo_);
     }
@@ -1478,6 +1483,12 @@ void MainThread::HandleTerminateApplication()
         return;
     }
 
+    // TODO: Remove this when we remove the watchDogHandler from the main thread.
+    /**
+     * OHOS::HiviewDFX::WatchDog::GetInstance().StopWatchDog()
+     * and the original stop action
+     * stop watchDogRunner_
+     */
     if (watchDogHandler_ != nullptr) {
         watchDogHandler_->Stop();
     }
@@ -1585,11 +1596,13 @@ void MainThread::TaskTimeoutDetected(const std::shared_ptr<EventRunner> &runner)
     HILOG_DEBUG("MainThread::TaskTimeoutDetected called end.");
 }
 
+// TODO: Remove watchDogRunner
 void MainThread::Init(const std::shared_ptr<EventRunner> &runner, const std::shared_ptr<EventRunner> &watchDogRunner)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("MainThread:Init Start");
     mainHandler_ = std::make_shared<MainHandler>(runner, this);
+    // TODO: Remove this when we remove the watchDogHandler from the main thread.
     watchDogHandler_ = std::make_shared<WatchDog>(watchDogRunner);
     dfxHandler_ = std::make_shared<EventHandler>(EventRunner::Create(DFX_THREAD_NAME));
     wptr<MainThread> weak = this;
@@ -1601,17 +1614,25 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner, const std::sha
         }
         appThread->SetRunnerStarted(true);
     };
+    // TODO: Remove
     auto taskWatchDog = []() {
         HILOG_DEBUG("MainThread:WatchDogHandler Start");
     };
     if (!mainHandler_->PostTask(task)) {
         HILOG_ERROR("MainThread::Init PostTask task failed");
     }
+    // TODO: Remove this when we remove the watchDogHandler from the main thread.
     if (!watchDogHandler_->PostTask(taskWatchDog)) {
         HILOG_ERROR("MainThread::Init WatchDog postTask task failed");
     }
     TaskTimeoutDetected(runner);
 
+    // TODO: Remove this when we remove the watchDogHandler from the main thread.
+    // Init using the way of HiviewDFX
+    /**
+     * auto task = std::bind(&WatchDog::Timmer, this);
+     * OHOS::HiviewDFX::WatchDog::GetInstance()->RunPeriodicTask("AppkitWatchDog", task, INI_TIMER_FIRST_SECOND, CHECK_INTERVAL_TIME);
+     */
     watchDogHandler_->Init(mainHandler_, watchDogHandler_);
     TaskHandlerClient::GetInstance()->CreateRunner();
     HILOG_DEBUG("MainThread:Init end.");
@@ -1686,6 +1707,7 @@ void MainThread::Start()
         HILOG_ERROR("MainThread::main failed, runner is nullptr");
         return;
     }
+    // TODO: Remove WatchDogRunner
     std::shared_ptr<EventRunner> runnerWatchDog = EventRunner::Create("WatchDogRunner");
     if (runnerWatchDog == nullptr) {
         HILOG_ERROR("MainThread::Start runnerWatchDog is nullptr");
@@ -1705,6 +1727,7 @@ void MainThread::Start()
     sigaction(SIGNAL_JS_HEAP, &sigAct, NULL);
     sigaction(SIGNAL_JS_HEAP_PRIV, &sigAct, NULL);
 
+    // TODO: Change to Init(runner)
     thread->Init(runner, runnerWatchDog);
 
     thread->Attach();
@@ -1733,6 +1756,7 @@ void MainThread::MainHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::P
 {
     auto eventId = event->GetInnerEventId();
     if (eventId == CHECK_MAIN_THREAD_IS_ALIVE) {
+        // TODO:
         auto watchDogHanlder = WatchDog::GetCurrentHandler();
         if (watchDogHanlder != nullptr) {
             watchDogHanlder->SendEvent(MAIN_THREAD_IS_ALIVE);
