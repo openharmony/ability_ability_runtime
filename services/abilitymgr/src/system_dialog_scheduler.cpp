@@ -86,25 +86,12 @@ void SystemDialogScheduler::ScheduleShowDialog(const std::string &name, const Di
 
     HILOG_INFO("Show Dialog:[%{public}s],Dialog position:[%{public}d,%{public}d,%{public}d,%{public}d],str:%{public}s",
         name.data(), position.offsetX, position.offsetY, position.width, position.height, params.data());
-    HILOG_INFO(
-        "Show Dialog:[%{public}s],Dialog win position:[%{public}d,%{public}d,%{public}d,%{public}d],str:%{public}s",
-        name.data(), position.window_offsetX, position.window_offsetY,
-        position.window_width, position.window_height, params.data());
-    if (deviceType_ == STR_PHONE) {
-        Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
-            name,
-            params,
-            OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-            position.window_offsetX, position.window_offsetY, position.window_width, position.window_height,
-            callback);
-    } else if (deviceType_ == STR_PC) {
-        Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
-            name,
-            params,
-            OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
-            position.offsetX, position.offsetY, position.width, position.height,
-            callback);
-    }
+    Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
+        name,
+        params,
+        OHOS::Rosen::WindowType::WINDOW_TYPE_SYSTEM_ALARM_WINDOW,
+        position.offsetX, position.offsetY, position.width, position.height,
+        callback);
     HILOG_INFO("Show UI Dialog finished.");
 }
 
@@ -123,6 +110,10 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
         anrData[OFF_SET_Y] = position.offsetY;
         anrData[WIDTH] = position.width;
         anrData[HEIGHT] = position.height;
+        position.offsetX = position.window_offsetX;
+        position.offsetY = position.window_offsetY;
+        position.width = position.window_width;
+        position.height = position.window_height;
     }
     params = anrData.dump();
     auto callback = [anrCallBack] (int32_t id, const std::string& event, const std::string& params) {
