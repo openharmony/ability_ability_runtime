@@ -77,8 +77,8 @@ foundation/ability/dmsfwk           # dmsfwk分布式组件管理部件
 ├── interfaces
 │   ├── inner_api 				    # dmsfwk的系统内部件间接口
 │   └── kits                        # dmsfwk的对外接口
-├── services                                        # dmsfwk分布式组件管理代码
-└── util					          # 公共方法代码
+├── services                        # dmsfwk分布式组件管理代码
+└── util					        # 公共方法代码
 
 foundation/ability/form_fwk     # form_fwk卡片运行时部件
 ├── frameworks
