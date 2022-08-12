@@ -86,9 +86,11 @@ void SystemDialogScheduler::ScheduleShowDialog(const std::string &name, const Di
 
     HILOG_INFO("Show Dialog:[%{public}s],Dialog position:[%{public}d,%{public}d,%{public}d,%{public}d],str:%{public}s",
         name.data(), position.offsetX, position.offsetY, position.width, position.height, params.data());
-    HILOG_INFO("Show Dialog:[%{public}s],Dialog window position:[%{public}d,%{public}d,%{public}d,%{public}d],str:%{public}s",
-        name.data(), position.window_offsetX, position.window_offsetY, position.window_width, position.window_height, params.data());
-    if(deviceType_ == STR_PHONE) {
+    HILOG_INFO(
+        "Show Dialog:[%{public}s],Dialog win position:[%{public}d,%{public}d,%{public}d,%{public}d],str:%{public}s",
+        name.data(), position.window_offsetX, position.window_offsetY,
+        position.window_width, position.window_height, params.data());
+    if (deviceType_ == STR_PHONE) {
         Ace::UIServiceMgrClient::GetInstance()->ShowDialog(
             name,
             params,
@@ -121,7 +123,7 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
         anrData[OFF_SET_Y] = position.offsetY;
         anrData[WIDTH] = position.width;
         anrData[HEIGHT] = position.height;
-    } 
+    }
     params = anrData.dump();
     auto callback = [anrCallBack] (int32_t id, const std::string& event, const std::string& params) {
         HILOG_INFO("Dialog anr callback: id : %{public}d, event: %{public}s, params: %{public}s",
@@ -331,12 +333,13 @@ void SystemDialogScheduler::GetDialogPositionAndSize(DialogType type, DialogPosi
                 if (position.wideScreen) {
                     position.offsetX = (display->GetWidth() - position.width) / UI_HALF;
                     position.offsetY = (display->GetHeight() - position.height) / UI_HALF;
-                } else { 
+                } else {
                     position.width = position.width/UI_HALF;
                     position.height = position.height/UI_HALF;
                     position.offsetX = LINE_NUMS_ZERO;
                     position.offsetY = LINE_NUMS_ZERO;
-                }break;
+                }
+                break;
             case DialogAlign::BOTTOM:
                 position.offsetX = (display->GetWidth() - position.width) / UI_HALF;
                 position.offsetY = display->GetHeight() - position.height - UI_DEFAULT_BUTTOM_CLIP;
