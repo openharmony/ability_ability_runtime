@@ -458,7 +458,7 @@ bool DataAbilityImpl::CheckReadAndWritePermission(const std::string &permissionT
     std::string permission = GetPermissionInfo(permissionType);
     if (permission.empty()) {
         HILOG_DEBUG("%{public}s, permission is empty", __func__);
-        return false;
+        return true;
     }
 
     auto tokenId = IPCSkeleton::GetCallingTokenID();
