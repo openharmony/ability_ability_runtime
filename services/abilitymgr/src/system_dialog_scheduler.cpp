@@ -102,7 +102,7 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_ANR, position);
     std::string params;
-    params = GetAnrParams(position);
+    params = GetAnrParams(position, appName);
     auto callback = [anrCallBack] (int32_t id, const std::string& event, const std::string& params) {
         HILOG_INFO("Dialog anr callback: id : %{public}d, event: %{public}s, params: %{public}s",
             id, event.data(), params.data());
@@ -125,7 +125,7 @@ int32_t SystemDialogScheduler::ShowANRDialog(const std::string &appName, const C
     return ERR_OK;
 }
 
-const std::string SystemDialogScheduler::GetAnrParams(const DialogPosition position) const
+const std::string SystemDialogScheduler::GetAnrParams(const DialogPosition position, const std::string &appName) const
 {
     nlohmann::json anrData;
     anrData[APP_NAME] = appName;
@@ -136,7 +136,7 @@ const std::string SystemDialogScheduler::GetAnrParams(const DialogPosition posit
         anrData[WIDTH] = position.window_width;
         anrData[HEIGHT] = position.window_height;
     }
-    return params = anrData.dump();
+    return anrData.dump();
 }
 
 int32_t SystemDialogScheduler::ShowTipsDialog()
