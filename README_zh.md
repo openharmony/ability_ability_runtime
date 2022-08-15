@@ -69,7 +69,7 @@ foundation/ability            #元能力子系统
 │
 ├── ability_lite              # ability_lite轻量化元能力部件
 │
-├── dmsfwk                   # dmsfwk分布式组件管理部件
+├── dmsfwk                    # dmsfwk分布式组件管理部件
 │
 ├── form_fwk                  # form_fwk卡片运行时部件
 │
