@@ -13,30 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_MODULE_SEARCHER_H
-#define OHOS_ABILITY_RUNTIME_JS_MODULE_SEARCHER_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_MODULE_READER_H
+#define OHOS_ABILITY_RUNTIME_JS_MODULE_READER_H
 
+#include <sstream>
 #include <string>
 
 namespace OHOS {
 namespace AbilityRuntime {
-class JsModuleSearcher final {
+class JsModuleReader final {
 public:
-    explicit JsModuleSearcher(const std::string& bundleName) : bundleName_(bundleName)
+    explicit JsModuleReader(const std::string& bundleName, const std::string& hapPath)
+        : bundleName_(bundleName), hapPath_(hapPath)
     {}
-    ~JsModuleSearcher() = default;
+    ~JsModuleReader() = default;
 
-    JsModuleSearcher(const JsModuleSearcher&) = default;
-    JsModuleSearcher(JsModuleSearcher&&) = default;
-    JsModuleSearcher& operator=(const JsModuleSearcher&) = default;
-    JsModuleSearcher& operator=(JsModuleSearcher&&) = default;
+    JsModuleReader(const JsModuleReader&) = default;
+    JsModuleReader(JsModuleReader&&) = default;
+    JsModuleReader& operator=(const JsModuleReader&) = default;
+    JsModuleReader& operator=(JsModuleReader&&) = default;
 
-    std::string operator()(const std::string& curJsModulePath, const std::string& newJsModuleUri) const;
+    std::vector<uint8_t> operator()(const std::string& curJsModulePath, const std::string& newJsModuleUri) const;
 
 private:
     std::string bundleName_;
+    std::string hapPath_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
 
-#endif // OHOS_ABILITY_RUNTIME_JS_MODULE_SEARCHER_H
+#endif // OHOS_ABILITY_RUNTIME_JS_MODULE_READER_H

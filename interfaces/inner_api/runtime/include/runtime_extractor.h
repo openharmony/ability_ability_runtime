@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,14 +24,6 @@ class RuntimeExtractor : public AppExecFwk::BaseExtractor {
 public:
     explicit RuntimeExtractor(const std::string &source);
     virtual ~RuntimeExtractor() override;
-
-    /**
-     * @brief Extract the abc file of a hap to dest stream.
-     * @param srcPath Indicates the src path of the abc file in hap.
-     * @param dest Indicates the obtained std::ostream object.
-     * @return Returns true if the Profile is successfully extracted; returns false otherwise.
-     */
-    bool ExtractABCFile(const std::string& srcPath, std::ostream &dest) const;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

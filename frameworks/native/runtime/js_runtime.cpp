@@ -22,13 +22,13 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-
 #include "connect_server_manager.h"
 #include "event_handler.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
 #include "js_console_log.h"
 #include "js_module_searcher.h"
+#include "js_module_reader.h"
 #include "js_runtime_utils.h"
 #include "js_timer.h"
 #include "js_worker.h"
@@ -111,12 +111,17 @@ public:
     {
         bool result = false;
         if (!hapPath.empty()) {
-            std::ostringstream outStreamForABC;
-            if (!GetABCFile(hapPath, path, outStreamForABC)) {
+            std::ostringstream outStream;
+            if (!GetFileBufferFromHap(hapPath, path, outStream)) {
                 HILOG_ERROR("Get abc file failed");
                 return result;
             }
-            result = nativeEngine_->RunScriptPath(path.c_str()) != nullptr; //, (void *)outStreamForABC
+
+            const auto& outStr = outStream.str();
+            std::vector<uint8_t> buffer;
+            buffer.assign(outStr.begin(), outStr.end());
+
+            result = nativeEngine_->RunScriptBuffer(path.c_str(), buffer) != nullptr;
         } else {
             result = nativeEngine_->RunScriptPath(path.c_str()) != nullptr;
         }
@@ -189,7 +194,8 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName, options.hapPath));
+            panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
+            panda::JSNApi::SetHostResolveBufferTracker(vm_, JsModuleReader(options.bundleName, options.hapPath));
         }
         return JsRuntime::Initialize(options);
     }
@@ -234,46 +240,6 @@ void InitSyscapModule(NativeEngine& engine, NativeObject& globalObject)
 {
     BindNativeFunction(engine, globalObject, "canIUse", CanIUse);
 }
-
-bool MakeFilePath(const std::string& codePath, const std::string& modulePath, std::string& fileName)
-{
-    std::string path(codePath);
-    path.append("/").append(modulePath);//  phone/./ets/MainAbility6/MainAbility6.abc
-    if (path.length() > PATH_MAX) {
-        HILOG_ERROR("Path length(%{public}d) longer than MAX(%{public}d)", (int32_t)path.length(), PATH_MAX);
-        return false;
-    }
-    char resolvedPath[PATH_MAX + 1] = { 0 };
-    if (realpath(path.c_str(), resolvedPath) != nullptr) {
-        fileName = resolvedPath;
-        return true;
-    }
-
-    auto start = path.find_last_of('/');
-    auto end = path.find_last_of('.');
-    if (end == std::string::npos || end == 0) {
-        HILOG_ERROR("No secondary file path");
-        return false;
-    }
-
-    auto pos = path.find_last_of('.', end - 1);
-    if (pos == std::string::npos) {
-        HILOG_ERROR("No secondary file path");
-        return false;
-    }
-
-    path.erase(start + 1, pos - start);
-    HILOG_INFO("Try using secondary file path: %{public}s", path.c_str());
-
-    if (realpath(path.c_str(), resolvedPath) == nullptr) {
-        HILOG_ERROR("Failed to call realpath, errno = %{public}d", errno);
-        return false;
-    }
-
-    fileName = resolvedPath;
-    return true;
-}
-
 class UvLoopHandler : public AppExecFwk::FileDescriptorListener, public std::enable_shared_from_this<UvLoopHandler> {
 public:
     explicit UvLoopHandler(uv_loop_t* uvLoop) : uvLoop_(uvLoop) {}
@@ -507,7 +473,7 @@ NativeValue* JsRuntime::LoadJsBundle(const std::string& path, const std::string&
 }
 
 std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& moduleName,
-    const std::string& modulePath, bool esmodule, const std::string& hapPath)
+    const std::string& modulePath, const std::string& hapPath, bool esmodule)
 {
     HILOG_INFO("JsRuntime::LoadModule(%{public}s, %{public}s, %{public}s)", moduleName.c_str(), modulePath.c_str(),
         esmodule ? "true" : "false");
@@ -566,12 +532,17 @@ bool JsRuntime::RunScript(const std::string& path, const std::string& hapPath)
 {
     bool result = false;
     if (!hapPath.empty()) {
-        std::ostringstream outStreamForABC;
-        if (!GetABCFile(hapPath, path, outStreamForABC)) {
+        std::ostringstream outStream;
+        if (!GetFileBufferFromHap(hapPath, path, outStream)) {
             HILOG_ERROR("Get abc file failed");
             return result;
         }
-        result = nativeEngine_->RunScript(path.c_str()) != nullptr; //, (void *)outStreamForABC
+
+        const auto& outStr = outStream.str();
+        std::vector<uint8_t> buffer;
+        buffer.assign(outStr.begin(), outStr.end());
+
+        result = nativeEngine_->RunScriptBuffer(path.c_str(), buffer) != nullptr;
     } else {
         result = nativeEngine_->RunScript(path.c_str()) != nullptr;
     }

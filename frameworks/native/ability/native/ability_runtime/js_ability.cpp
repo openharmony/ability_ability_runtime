@@ -113,7 +113,8 @@ void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
     auto &engine = jsRuntime_.GetNativeEngine();
 
     jsAbilityObj_ =
-        jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE, abilityInfo->hapPath);
+        jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo->hapPath,
+        abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
     if (jsAbilityObj_ == nullptr) {
         HILOG_ERROR("Failed to get AbilityStage object");
         return;

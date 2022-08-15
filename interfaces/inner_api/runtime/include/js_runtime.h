@@ -56,7 +56,7 @@ public:
     }
 
     std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName,
-        const std::string& modulePath, bool esmodule = false, const std::string& hapPath = nullptr);
+        const std::string& modulePath, const std::string& hapPath, bool esmodule = false);
     std::unique_ptr<NativeReference> LoadSystemModule(
         const std::string& moduleName, NativeValue* const* argv = nullptr, size_t argc = 0);
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
@@ -66,7 +66,7 @@ public:
     void NotifyApplicationState(bool isBackground) override;
 
     bool RunSandboxScript(const std::string& path, const std::string& hapPath);
-    virtual bool RunScript(const std::string& path, const std::string& hapPath = nullptr) = 0;
+    virtual bool RunScript(const std::string& path, const std::string& hapPath) = 0;
 
     void PreloadSystemModule(const std::string& moduleName) override;
 
