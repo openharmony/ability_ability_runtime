@@ -28,11 +28,5 @@ RuntimeExtractor::~RuntimeExtractor()
 {
     HILOG_DEBUG("RuntimeExtractor destroyed");
 }
-
-bool RuntimeExtractor::ExtractABCFile(const std::string& srcPath, std::ostream &dest) const
-{
-    HILOG_DEBUG("%{public}s: hapPath is %{public}s", __func__, srcPath.c_str());
-    return AppExecFwk::BaseExtractor::ExtractByName(srcPath, dest);
-}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

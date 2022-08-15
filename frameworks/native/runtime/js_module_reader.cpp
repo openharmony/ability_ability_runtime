@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-#include "js_module_searcher.h"
+#include "js_module_reader.h"
 
 #include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-std::string JsModuleSearcher::operator()(const std::string& curJsModulePath, const std::string& newJsModuleUri) const
+std::vector<uint8_t> JsModuleReader::operator()(
+    const std::string& curJsModulePath, const std::string& newJsModuleUri) const
 {
-    HILOG_INFO("Search JS module (%{public}s, %{public}s) begin",
-        curJsModulePath.c_str(), newJsModuleUri.c_str());
+    HILOG_INFO("Read JS module (%{public}s, %{public}s) begin", curJsModulePath.c_str(), newJsModuleUri.c_str());
 
-    std::string newJsModulePath;
-
+    std::vector<uint8_t> buffer;
     if (curJsModulePath.empty() || newJsModuleUri.empty()) {
-        return newJsModulePath;
+        return buffer;
     }
 
     std::string normalizeUri = newJsModuleUri;
     std::replace(normalizeUri.begin(), normalizeUri.end(), '\\', '/');
 
+    std::string newJsModulePath;
     switch (normalizeUri[0]) {
         case '.': {
             newJsModulePath = MakeNewJsModulePath(curJsModulePath, normalizeUri);
@@ -51,13 +51,21 @@ std::string JsModuleSearcher::operator()(const std::string& curJsModulePath, con
             break;
         }
     }
-
     FixExtName(newJsModulePath);
 
-    HILOG_INFO("Search JS module (%{public}s, %{public}s) => %{public}s end",
+    std::ostringstream dest;
+    if (!GetFileBufferFromHap(hapPath_, newJsModulePath, dest)) {
+        HILOG_ERROR("Get abc file failed");
+        return buffer;
+    }
+
+    const auto& outStr = dest.str();
+    buffer.assign(outStr.begin(), outStr.end());
+
+    HILOG_INFO("Read JS module (%{public}s, %{public}s) => %{public}s end",
         curJsModulePath.c_str(), normalizeUri.c_str(), newJsModulePath.c_str());
 
-    return newJsModulePath;
+    return buffer;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
