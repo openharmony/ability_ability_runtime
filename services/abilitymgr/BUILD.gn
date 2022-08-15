@@ -50,7 +50,7 @@ config("abilityms_config") {
     "//base/account/os_account/frameworks/common/account_error/include",
     "//base/account/os_account/frameworks/common/database/include",
     "//base/account/os_account/interfaces/innerkits/osaccount/native/include",
-    "//base/startup/syspara_lite/interfaces/innerkits/native/syspara/include",
+    "//base/startup/init/interfaces/innerkits/include/syspara",
     "${ability_runtime_innerkits_path}/wantagent/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
     "${bgtaskmgr_interfaces_path}/innerkits/include",
