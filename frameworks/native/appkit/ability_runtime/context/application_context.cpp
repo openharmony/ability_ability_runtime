@@ -149,14 +149,18 @@ void ApplicationContext::DispatchOnAbilityContinue(const std::weak_ptr<NativeRef
 void ApplicationContext::DispatchConfigurationUpdated(const AppExecFwk::Configuration &config)
 {
     for (auto envCallback : envCallbacks_) {
-        envCallback->OnConfigurationUpdated(config);
+        if (envCallback != nullptr) {
+            envCallback->OnConfigurationUpdated(config);
+        }
     }
 }
 
 void ApplicationContext::DispatchMemoryLevel(const int level)
 {
     for (auto envCallback : envCallbacks_) {
-        envCallback->OnMemoryLevel(level);
+        if (envCallback != nullptr) {
+            envCallback->OnMemoryLevel(level);
+        }
     }
 }
 
