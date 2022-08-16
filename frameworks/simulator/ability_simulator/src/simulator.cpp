@@ -39,7 +39,7 @@ constexpr int32_t DEFAULT_ARK_PROPERTIES = -1;
 constexpr size_t DEFAULT_GC_THREAD_NUM = 7;
 constexpr size_t DEFAULT_LONG_PAUSE_TIME = 40;
 
-int32_t PrintVmLog(int32_t id, int32_t level, const char* tag, const char* fmt, const char* message)
+int32_t PrintVmLog(int32_t, int32_t, const char*, const char*, const char* message)
 {
     HILOG_INFO("ArkLog: %{public}s", message);
     return 0;
@@ -166,7 +166,7 @@ void CallObjectMethod(NativeEngine& engine, NativeValue* value, const char *name
 
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        HILOG_ERROR("Failed to get Ability object");
+        HILOG_ERROR("%{public}s, Failed to get Ability object", __func__);
         return;
     }
 
