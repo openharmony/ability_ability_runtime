@@ -27,7 +27,6 @@
 #include "resource_manager.h"
 #include "foundation/ability/ability_runtime/interfaces/inner_api/runtime/include/runtime.h"
 #include "ipc_singleton.h"
-#include "watchdog.h"
 #define ABILITY_LIBRARY_LOADER
 
 class Runtime;
@@ -35,6 +34,9 @@ namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::Global;
 using OHOS::AbilityRuntime::Runtime;
+constexpr uint32_t INI_TIMER_FIRST_SECOND = 10000;
+constexpr uint32_t CHECK_INTERVAL_TIME = 3000;
+constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 enum class MainThreadState { INIT, ATTACH, READY, RUNNING };
 struct BundleInfo;
 class ContextDeal;
@@ -218,6 +220,14 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
+    /**
+     *
+     * @brief Get the App main thread state.
+     *
+     * @return Returns the App main thread state.
+     */
+    static bool GetAppMainThreadState();
+
 private:
     /**
      *
@@ -384,7 +394,7 @@ private:
      * @param runner the runner belong to the mainthread.
      *
      */
-    void Init(const std::shared_ptr<EventRunner> &runner, const std::shared_ptr<EventRunner> &watchDogRunner);
+    void Init(const std::shared_ptr<EventRunner> &runner);
 
     /**
      *
@@ -432,6 +442,11 @@ private:
     static void HandleDumpHeap(bool isPrivate);
     static void HandleSignal(int signal);
 
+    bool Timer();
+    bool WaitForDuration(uint32_t duration);
+    void reportEvent();
+    bool IsStopWatchdog();
+
     class MainHandler : public EventHandler {
     public:
         MainHandler(const std::shared_ptr<EventRunner> &runner, const sptr<MainThread> &thread);
@@ -458,7 +473,6 @@ private:
     std::shared_ptr<OHOSApplication> application_ = nullptr;
     std::shared_ptr<ApplicationImpl> applicationImpl_ = nullptr;
     std::shared_ptr<MainHandler> mainHandler_ = nullptr;
-    std::shared_ptr<WatchDog> watchDogHandler_ = nullptr;
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
     MainThreadState mainThreadState_ = MainThreadState::INIT;
     sptr<IAppMgr> appMgr_ = nullptr;  // appMgrService Handler
@@ -468,8 +482,12 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::shared_ptr<EventHandler> dfxHandler_;
     static std::shared_ptr<OHOSApplication> applicationForAnr_;
-    // TODO: add a new flag to mark the state of the application
-    // it will be checked in the Watchdog::Timer
+    static volatile bool appMainThreadIsAlive_;
+    std::atomic_bool stopWatchdog_ = false;
+    std::mutex cvMutex_;
+    std::condition_variable cvWatchDog_;
+    std::atomic_bool needReport_ = true;
+    std::atomic_bool isSixSecondEvent_ = false;
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**
@@ -525,6 +543,15 @@ private:
 #endif  // APPLICATION_LIBRARY_LOADER
     DISALLOW_COPY_AND_MOVE(MainThread);
 };
+
+// class MainHandlerDumper : public Dumper {
+// public:
+//     virtual void Dump(const std::string &message) override;
+//     virtual std::string GetTag() override;
+//     std::string GetDumpInfo();
+// private:
+//     std::string dumpInfo;
+// };
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_MAIN_THREAD_H
