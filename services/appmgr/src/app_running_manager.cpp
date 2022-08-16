@@ -378,7 +378,6 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 
     auto isKeepAliveApp = appRecord->IsKeepAliveApp();
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
-
     if (isLastAbilityRecord && !isKeepAliveApp && !isLauncherApp) {
         HILOG_DEBUG("The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
