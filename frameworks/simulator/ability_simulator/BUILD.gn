@@ -13,6 +13,7 @@
 
 import("//arkcompiler/ets_frontend/ts2panda/ts2abc_config.gni")
 import("//build/ohos.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 ts2abc_gen_abc("gen_abc_js_mock") {
@@ -78,6 +79,7 @@ ohos_shared_library("ability_simulator") {
 
   deps = [
     ":gen_obj_src_js_mock_abc",
+    "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base",
     "//arkcompiler/ets_runtime:libark_jsruntime",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_$platform",
     "//foundation/ability/ability_runtime/frameworks/simulator/osal:simulator_osal",
