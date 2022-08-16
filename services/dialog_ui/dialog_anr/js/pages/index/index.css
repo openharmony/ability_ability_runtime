@@ -54,7 +54,7 @@
     height: 72vp;
     margin-left: 5%;
     margin-right: 5%;
-    font-weight: regular;
+    font-weight: "sans-serif";
 }
 
 .but {
@@ -90,11 +90,11 @@
 .text-waiting {
     font-size: 16fp;
     color:  #ff007dff;
-    font-weight: regular;
+    font-weight: "sans-serif";
 }
 
 .text-close {
     font-size: 16fp;
-    color: #FFFFFF;
-    font-weight: regular;
+    color: #ffffffff;
+    font-weight: "sans-serif";
 }
