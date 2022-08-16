@@ -558,6 +558,22 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
     return info;
 }
 
+std::string AbilityRecord::GetLabel()
+{
+    std::string strLabel = applicationInfo_.label;
+    auto resourceMgr = CreateResourceManager();
+    if (!resourceMgr) {
+        return strLabel;
+    }
+
+    auto result = resourceMgr->GetStringById(applicationInfo_.labelId, strLabel);
+    if (result != OHOS::Global::Resource::RState::SUCCESS) {
+        HILOG_WARN("%{public}s. Failed to GetStringById.", __func__);
+    }
+
+    return strLabel;
+}
+
 std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResourceManager(
     const AppExecFwk::AbilityInfo &abilityInfo) const
 {
