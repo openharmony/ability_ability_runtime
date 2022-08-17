@@ -17,7 +17,6 @@
 #include <thread>
 
 #include "main_thread.h"
-#include "watchdog.h"
 
 using namespace testing::ext;
 using namespace OHOS;
@@ -59,7 +58,7 @@ void WatchDogTest::TearDown(void)
  */
 HWTEST_F(WatchDogTest, AppExecFwk_WatchDog_GetAppMainThreadState_0100, Function | MediumTest | Level3)
 {
-    bool ret = WatchDog::GetAppMainThreadState();
+    bool ret = MainThread::GetAppMainThreadState();
     EXPECT_FALSE(ret);
 }
 
@@ -75,7 +74,7 @@ HWTEST_F(WatchDogTest, AppExecFwk_WatchDog_GetAppMainThreadState_0200, Function 
     });
     mainthread.detach();
     std::this_thread::sleep_for(std::chrono::milliseconds(U_SLEEP_TIME));
-    bool ret = WatchDog::GetAppMainThreadState();
+    bool ret = MainThread::GetAppMainThreadState();
     EXPECT_FALSE(ret);
 }
 }  // namespace AppExecFwk
