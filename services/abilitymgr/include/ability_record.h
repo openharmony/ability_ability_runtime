@@ -806,9 +806,7 @@ public:
 
     bool CanRestartRootLauncher();
 
-#ifdef SUPPORT_GRAPHICS
     std::string GetLabel();
-#endif
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
