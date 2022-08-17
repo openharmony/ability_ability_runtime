@@ -478,7 +478,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
         HILOG_DEBUG("Start service or extension, name is %{public}s.", abilityInfo.name.c_str());
 #ifdef EFFICIENCY_MANAGER_ENABLE
-        auto bms = AbilityUtil::GetBundleManager();
+        auto bms = GetBundleManager();
         if (bms) {
             SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
                 bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
@@ -499,7 +499,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
     ReportAbilitStartInfoToRSS(abilityInfo);
 #ifdef EFFICIENCY_MANAGER_ENABLE
-    auto bms = AbilityUtil::GetBundleManager();
+    auto bms = GetBundleManager();
     if (bms) {
         SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
             bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
@@ -1591,6 +1591,13 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         HILOG_ERROR("connectManager is nullptr. userId=%{public}d", validUserId);
         return ERR_INVALID_VALUE;
     }
+
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    std::string reason = (type == AppExecFwk::AbilityType::PAGE) ?
+        "THAW_BY_START_PAGE_ABILITY" : "THAW_BY_OTHER_NOT_FOREGROUND_REASON";
+    SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
+        abilityRequest.uid, "", reason);
+#endif // EFFICIENCY_MANAGER_ENABLE
     return connectManager->ConnectAbilityLocked(abilityRequest, connect, callerToken);
 }
 
@@ -3767,7 +3774,13 @@ int AbilityManagerService::StartAbilityByCall(
         HILOG_ERROR("currentMissionListManager_ is Null. curentUserId=%{public}d", GetUserId());
         return ERR_INVALID_VALUE;
     }
-
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    auto type = abilityRequest.abilityInfo.type;
+    std::string reason = (type == AppExecFwk::AbilityType::PAGE) ?
+        "THAW_BY_START_PAGE_ABILITY" : "THAW_BY_OTHER_NOT_FOREGROUND_REASON";
+    SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
+        abilityRequest.uid, "", reason);
+#endif // EFFICIENCY_MANAGER_ENABLE
     return currentMissionListManager_->ResolveLocked(abilityRequest);
 }
 
