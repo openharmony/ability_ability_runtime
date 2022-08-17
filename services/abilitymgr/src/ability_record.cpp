@@ -288,6 +288,25 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
     }
 }
 
+std::string AbilityRecord::GetLabel()
+{
+    std::string strLabel = applicationInfo_.label;
+
+#ifdef SUPPORT_GRAPHICS
+    auto resourceMgr = CreateResourceManager(abilityInfo_);
+    if (!resourceMgr) {
+        return strLabel;
+    }
+
+    auto result = resourceMgr->GetStringById(applicationInfo_.labelId, strLabel);
+    if (result != OHOS::Global::Resource::RState::SUCCESS) {
+        HILOG_WARN("%{public}s. Failed to GetStringById.", __func__);
+    }
+#endif
+
+    return strLabel;
+}
+
 #ifdef SUPPORT_GRAPHICS
 void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest &abilityRequest,
     std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
@@ -556,22 +575,6 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
     }
     info->abilityToken_ = abilityToken;
     return info;
-}
-
-std::string AbilityRecord::GetLabel()
-{
-    std::string strLabel = applicationInfo_.label;
-    auto resourceMgr = CreateResourceManager();
-    if (!resourceMgr) {
-        return strLabel;
-    }
-
-    auto result = resourceMgr->GetStringById(applicationInfo_.labelId, strLabel);
-    if (result != OHOS::Global::Resource::RState::SUCCESS) {
-        HILOG_WARN("%{public}s. Failed to GetStringById.", __func__);
-    }
-
-    return strLabel;
 }
 
 std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResourceManager(
