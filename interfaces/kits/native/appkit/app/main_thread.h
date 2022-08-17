@@ -226,7 +226,7 @@ public:
      *
      * @return Returns the App main thread state.
      */
-    static bool GetAppMainThreadState();
+    bool GetAppMainThreadState();
 
 private:
     /**
@@ -482,7 +482,7 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::shared_ptr<EventHandler> dfxHandler_;
     static std::shared_ptr<OHOSApplication> applicationForAnr_;
-    static volatile bool appMainThreadIsAlive_;
+    std::atomic_bool appMainThreadIsAlive_;
     std::atomic_bool stopWatchdog_ = false;
     std::mutex cvMutex_;
     std::condition_variable cvWatchDog_;
@@ -544,14 +544,14 @@ private:
     DISALLOW_COPY_AND_MOVE(MainThread);
 };
 
-// class MainHandlerDumper : public Dumper {
-// public:
-//     virtual void Dump(const std::string &message) override;
-//     virtual std::string GetTag() override;
-//     std::string GetDumpInfo();
-// private:
-//     std::string dumpInfo;
-// };
+class MainHandlerDumper : public Dumper {
+public:
+    virtual void Dump(const std::string &message) override;
+    virtual std::string GetTag() override;
+    std::string GetDumpInfo();
+private:
+    std::string dumpInfo;
+};
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_MAIN_THREAD_H

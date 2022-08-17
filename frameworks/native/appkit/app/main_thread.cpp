@@ -66,7 +66,6 @@ namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime::Constants;
 std::shared_ptr<OHOSApplication> MainThread::applicationForAnr_ = nullptr;
 std::shared_ptr<EventHandler> MainThread::dfxHandler_ = nullptr;
-volatile bool MainThread::appMainThreadIsAlive_ = false;
 namespace {
 constexpr int32_t DELIVERY_TIME = 200;
 constexpr int32_t DISTRIBUTE_TIME = 100;
@@ -654,8 +653,8 @@ void MainThread::HandleTerminateApplicationLocal()
         return;
     }
 
+    stopWatchdog_.store(true);
     OHOS::HiviewDFX::Watchdog::GetInstance().StopWatchdog();
-    stopWatchdog_ = true;
 
     int ret = runner->Stop();
     if (ret != ERR_OK) {
@@ -1481,8 +1480,8 @@ void MainThread::HandleTerminateApplication()
         return;
     }
 
+    stopWatchdog_.store(true);
     OHOS::HiviewDFX::Watchdog::GetInstance().StopWatchdog();
-    stopWatchdog_ = true;
 
     int ret = runner->Stop();
     if (ret != ERR_OK) {
@@ -1725,8 +1724,10 @@ void MainThread::MainHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::P
 {
     auto eventId = event->GetInnerEventId();
     if (eventId == CHECK_MAIN_THREAD_IS_ALIVE) {
-        // TODO:
-        mainThreadObj_->appMainThreadIsAlive_ = true;
+        mainThreadObj_->appMainThreadIsAlive_.store(true);
+        mainThreadObj_->needReport_.store(true);
+        mainThreadObj_->isSixSecondEvent_.store(false);
+        // mainThreadObj_->appMainThreadIsAlive_ = true;
     }
 }
 
@@ -1945,10 +1946,16 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     HILOG_DEBUG("end.");
 }
 
+/**
+     *
+     * @brief Get the App main thread state.
+     *
+     * @return Returns the App main thread state.
+     */
 bool MainThread::GetAppMainThreadState()
 {
     bool ret = appMainThreadIsAlive_;
-    appMainThreadIsAlive_ = false;
+    appMainThreadIsAlive_.store(false);
     return ret;
 }
 
@@ -1966,7 +1973,6 @@ bool MainThread::WaitForDuration(uint32_t duration)
             return true;
         }
         return appThread->IsStopWatchdog();
-        // return false;
     };
     if (cvWatchDog_.wait_for(lock, std::chrono::milliseconds(duration), condition)) {
         return true;
@@ -1978,24 +1984,22 @@ bool MainThread::Timer()
 {
     if (WaitForDuration(INI_TIMER_FIRST_SECOND)) {
         HILOG_DEBUG("cvWatchDog1 is stopped");
+        
         return true;
     }
     while (!stopWatchdog_) {
+        if (mainHandler_ != nullptr) {
+            mainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
+        }
         if (WaitForDuration(CHECK_INTERVAL_TIME)) {
             HILOG_DEBUG("cvWatchDog2 is stopped");
-            return true; 
+            return true;
         }
         if (!needReport_) {
             HILOG_ERROR("Watchdog timeout, wait for the handler to recover, and do not send event.");
             continue;
         }
-        // 向MainThreadHandler发起事件
-        if (mainHandler_ != nullptr) {
-            mainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
-        }
-        // TODO: 是否要设置等待事件处理时间？
         if (!GetAppMainThreadState()) {
-            // false 时线程卡死上报
             // check libc.hook_mode
             const int bufferLen = 128;
             char paramOutBuf[bufferLen] = {0};
@@ -2030,10 +2034,9 @@ void MainThread::reportEvent()
         isSixSecondEvent_.store(true);
     }
     std::string msgContent = "App main thread is not response!";
-    // TODO: dump is needed?
-    // MainHandlerDumper handlerDumper;
-    // mainHandler_->Dump(handlerDumper);
-    // msgContent += handlerDumper.GetDumpInfo();
+    MainHandlerDumper handlerDumper;
+    mainHandler_->Dump(handlerDumper);
+    msgContent += handlerDumper.GetDumpInfo();
 
     OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, eventType,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_UID, applicationInfo->uid,
@@ -2042,21 +2045,21 @@ void MainThread::reportEvent()
     HILOG_INFO("reportEvent success, %{public}zu %{public}s", msgContent.size(), msgContent.c_str());
 }
 
-// void MainHandlerDumper::Dump(const std::string &message)
-// {
-//     HILOG_DEBUG("message is %{public}s", message.c_str());
-//     dumpInfo += message;
-// }
+void MainHandlerDumper::Dump(const std::string &message)
+{
+    HILOG_DEBUG("message is %{public}s", message.c_str());
+    dumpInfo += message;
+}
 
-// std::string MainHandlerDumper::GetTag()
-// {
-//     return "";
-// }
+std::string MainHandlerDumper::GetTag()
+{
+    return "";
+}
 
-// std::string MainHandlerDumper::GetDumpInfo()
-// {
-//     return dumpInfo;
-// }
+std::string MainHandlerDumper::GetDumpInfo()
+{
+    return dumpInfo;
+}
 #endif  // ABILITY_LIBRARY_LOADER
 }  // namespace AppExecFwk
 }  // namespace OHOS
