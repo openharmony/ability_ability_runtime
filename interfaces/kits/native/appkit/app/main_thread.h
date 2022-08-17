@@ -482,7 +482,7 @@ private:
     std::string abilityLibraryType_ = ".so";
     static std::shared_ptr<EventHandler> dfxHandler_;
     static std::shared_ptr<OHOSApplication> applicationForAnr_;
-    std::atomic_bool appMainThreadIsAlive_;
+    std::atomic_bool appMainThreadIsAlive_ = false;
     std::atomic_bool stopWatchdog_ = false;
     std::mutex cvMutex_;
     std::condition_variable cvWatchDog_;
