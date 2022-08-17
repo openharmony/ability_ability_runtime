@@ -1727,7 +1727,6 @@ void MainThread::MainHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::P
         mainThreadObj_->appMainThreadIsAlive_.store(true);
         mainThreadObj_->needReport_.store(true);
         mainThreadObj_->isSixSecondEvent_.store(false);
-        // mainThreadObj_->appMainThreadIsAlive_ = true;
     }
 }
 
@@ -2000,7 +1999,6 @@ bool MainThread::Timer()
             continue;
         }
         if (!GetAppMainThreadState()) {
-            // check libc.hook_mode
             const int bufferLen = 128;
             char paramOutBuf[bufferLen] = {0};
             const char *hook_mode = "startup:";
