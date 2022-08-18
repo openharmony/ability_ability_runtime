@@ -261,6 +261,42 @@ ohos_unittest("ability_start_setting_test") {
   ]
 }
 
+ohos_unittest("watchdog_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include",
+    "//third_party/json/include",
+  ]
+
+  configs = [
+    ":module_context_config",
+    ":ability_start_setting_config",
+  ]
+
+  sources = [
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
+    "watchdog_test.cpp",
+  ]
+
+  deps = [
+    "${ability_runtime_native_path}/appkit:appkit_native",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+    "//utils/native/base:utils",
+    "//utils/native/base:utilsbase",
+  ]
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "eventhandler:libeventhandler",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
+}
+
 ###############################################################################
 
 group("unittest") {
@@ -273,6 +309,7 @@ group("unittest") {
     ":application_test",
     ":context_container_test",
     ":context_deal_test",
+    ":watchdog_test",
   ]
 
   deps += [ "ability_delegator:unittest" ]
