@@ -16,7 +16,6 @@
 #include "main_thread.h"
 
 #include <new>
-#include <parameter.h>
 #include <regex>
 #include <unistd.h>
 
@@ -54,7 +53,6 @@
 #include "hisysevent.h"
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
-#include "xcollie/watchdog.h"
 
 #if defined(ABILITY_LIBRARY_LOADER) || defined(APPLICATION_LIBRARY_LOADER)
 #include <dirent.h>
@@ -74,10 +72,6 @@ constexpr int32_t JS_CRASH_DELAY_TIME = 3000;
 constexpr int SIGNAL_JS_HEAP = 39;
 constexpr int SIGNAL_JS_HEAP_PRIV = 40;
 
-constexpr char EVENT_KEY_UID[] = "UID";
-constexpr char EVENT_KEY_PID[] = "PID";
-constexpr char EVENT_KEY_MESSAGE[] = "MSG";
-constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_VERSION[] = "VERSION";
 constexpr char EVENT_KEY_TYPE[] = "TYPE";
@@ -653,8 +647,9 @@ void MainThread::HandleTerminateApplicationLocal()
         return;
     }
 
-    stopWatchdog_.store(true);
-    OHOS::HiviewDFX::Watchdog::GetInstance().StopWatchdog();
+    if (watchdog_ != nullptr) {
+        watchdog_->Stop();
+    }
 
     int ret = runner->Stop();
     if (ret != ERR_OK) {
@@ -739,6 +734,9 @@ bool MainThread::InitCreate(
         return false;
     }
 
+    if (watchdog_ != nullptr) {
+        watchdog_->SetApplicationInfo(applicationInfo_);
+    }
 
     contextDeal->SetProcessInfo(processInfo_);
     contextDeal->SetApplicationInfo(applicationInfo_);
@@ -1480,8 +1478,9 @@ void MainThread::HandleTerminateApplication()
         return;
     }
 
-    stopWatchdog_.store(true);
-    OHOS::HiviewDFX::Watchdog::GetInstance().StopWatchdog();
+    if (watchdog_ != nullptr) {
+        watchdog_->Stop();
+    }
 
     int ret = runner->Stop();
     if (ret != ERR_OK) {
@@ -1591,6 +1590,7 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("MainThread:Init Start");
     mainHandler_ = std::make_shared<MainHandler>(runner, this);
+    watchdog_ = std::make_shared<Watchdog>();
     dfxHandler_ = std::make_shared<EventHandler>(EventRunner::Create(DFX_THREAD_NAME));
     wptr<MainThread> weak = this;
     auto task = [weak]() {
@@ -1605,10 +1605,9 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
         HILOG_ERROR("MainThread::Init PostTask task failed");
     }
     TaskTimeoutDetected(runner);
-
-    auto watchdogTask = std::bind(&MainThread::Timer, this);
-    OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask, INI_TIMER_FIRST_SECOND, CHECK_INTERVAL_TIME);
     
+    watchdog_->Init(mainHandler_);
+
     TaskHandlerClient::GetInstance()->CreateRunner();
     HILOG_DEBUG("MainThread:Init end.");
 }
@@ -1724,9 +1723,9 @@ void MainThread::MainHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::P
 {
     auto eventId = event->GetInnerEventId();
     if (eventId == CHECK_MAIN_THREAD_IS_ALIVE) {
-        mainThreadObj_->appMainThreadIsAlive_.store(true);
-        mainThreadObj_->needReport_.store(true);
-        mainThreadObj_->isSixSecondEvent_.store(false);
+        if (mainThreadObj_ != nullptr) {
+            mainThreadObj_->CheckMainThreadIsAlive();
+        }
     }
 }
 
@@ -1945,118 +1944,10 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     HILOG_DEBUG("end.");
 }
 
-/**
-     *
-     * @brief Get the App main thread state.
-     *
-     * @return Returns the App main thread state.
-     */
-bool MainThread::GetAppMainThreadState()
+void MainThread::CheckMainThreadIsAlive()
 {
-    bool ret = appMainThreadIsAlive_;
-    appMainThreadIsAlive_.store(false);
-    return ret;
-}
-
-bool MainThread::IsStopWatchdog() {
-    return stopWatchdog_;
-}
-
-bool MainThread::WaitForDuration(uint32_t duration)
-{
-    std::unique_lock<std::mutex> lock(cvMutex_);
-    wptr<MainThread> weak = this;
-    auto condition = [weak] {
-        auto appThread = weak.promote();
-        if (appThread == nullptr) {
-            return true;
-        }
-        return appThread->IsStopWatchdog();
-    };
-    if (cvWatchDog_.wait_for(lock, std::chrono::milliseconds(duration), condition)) {
-        return true;
-    }
-    return false;
-}
-
-bool MainThread::Timer()
-{
-    if (WaitForDuration(INI_TIMER_FIRST_SECOND)) {
-        HILOG_DEBUG("cvWatchDog1 is stopped");
-        
-        return true;
-    }
-    while (!stopWatchdog_) {
-        if (mainHandler_ != nullptr) {
-            mainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
-        }
-        if (WaitForDuration(CHECK_INTERVAL_TIME)) {
-            HILOG_DEBUG("cvWatchDog2 is stopped");
-            return true;
-        }
-        if (!needReport_) {
-            HILOG_ERROR("Watchdog timeout, wait for the handler to recover, and do not send event.");
-            continue;
-        }
-        if (!GetAppMainThreadState()) {
-            const int bufferLen = 128;
-            char paramOutBuf[bufferLen] = {0};
-            const char *hook_mode = "startup:";
-            int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
-            if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
-                reportEvent();
-            }
-        }
-    }
-    return true;
-}
-
-void MainThread::reportEvent()
-{
-    auto applicationInfo = GetApplicationInfo();
-    if (applicationInfo == nullptr) {
-        HILOG_ERROR("reportEvent fail, applicationInfo_ is nullptr.");
-        return;
-    }
-
-    if (!needReport_) {
-        return;
-    }
-    
-    std::string eventType;
-    if (isSixSecondEvent_) {
-        eventType = "THREAD_BLOCK_6S";
-        needReport_.store(false);
-    } else {
-        eventType = "THREAD_BLOCK_3S";
-        isSixSecondEvent_.store(true);
-    }
-    std::string msgContent = "App main thread is not response!";
-    MainHandlerDumper handlerDumper;
-    mainHandler_->Dump(handlerDumper);
-    msgContent += handlerDumper.GetDumpInfo();
-
-    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, eventType,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_UID, applicationInfo->uid,
-        EVENT_KEY_PID, static_cast<int32_t>(getpid()), EVENT_KEY_PACKAGE_NAME, applicationInfo->bundleName,
-        EVENT_KEY_PROCESS_NAME, applicationInfo->process, EVENT_KEY_MESSAGE, msgContent);
-    HILOG_INFO("reportEvent success, %{public}zu %{public}s", msgContent.size(), msgContent.c_str());
-}
-
-void MainHandlerDumper::Dump(const std::string &message)
-{
-    HILOG_DEBUG("message is %{public}s", message.c_str());
-    dumpInfo += message;
-}
-
-std::string MainHandlerDumper::GetTag()
-{
-    return "";
-}
-
-std::string MainHandlerDumper::GetDumpInfo()
-{
-    return dumpInfo;
+    watchdog_->SetAppMainThreadState(true);
+    watchdog_->AllowReportEvent();
 }
 #endif  // ABILITY_LIBRARY_LOADER
 }  // namespace AppExecFwk
