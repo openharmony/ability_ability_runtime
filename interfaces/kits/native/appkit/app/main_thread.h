@@ -426,8 +426,6 @@ private:
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
         BundleInfo& bundleInfo);
 
-    void PostProcessSecurityExitTask(bool delay);
-
     /**
      *
      * @brief The handle of application not response process.
