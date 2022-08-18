@@ -475,11 +475,18 @@ bool DataAbilityImpl::CheckReadAndWritePermission(const std::string &permissionT
 
 std::string DataAbilityImpl::GetPermissionInfo(const std::string &permissionType) const
 {
+    HILOG_DEBUG("%{public}s begin, permissionType:%{public}s", __func__, permissionType.c_str());
     std::shared_ptr<AbilityInfo> abilityInfo = ability_->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        HILOG_WARN("%{public}s abilityInfo is nullptr", __func__);
+        return "";
+    }
     if (permissionType == READ) {
         return abilityInfo->readPermission;
-    } else {
+    } else if (permissionType == WRITE) {
         return abilityInfo->writePermission;
+    } else {
+        return "";
     }
 }
 }  // namespace AppExecFwk
