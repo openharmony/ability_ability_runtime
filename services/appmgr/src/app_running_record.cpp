@@ -357,7 +357,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
 
 void AppRunningRecord::AddAbilityStage()
 {
-    if (!isNewMission_) {
+    if (!isStageBasedModel_) {
         HILOG_INFO("Current version than supports !");
         return;
     }
@@ -432,8 +432,8 @@ void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 
 void AppRunningRecord::ScheduleTerminate()
 {
-    SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT);
     if (appLifeCycleDeal_) {
+        SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT);
         appLifeCycleDeal_->ScheduleTerminate();
     }
 }
@@ -786,12 +786,12 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
     }
     moduleRecord->AbilityTerminated(token);
 
-    if (moduleRecord->GetAbilities().empty()) {
+    if (moduleRecord->GetAbilities().empty() && !IsKeepAliveApp()) {
         RemoveModuleRecord(moduleRecord);
     }
 
     auto moduleRecordList = GetAllModuleRecord();
-    if (moduleRecordList.empty()) {
+    if (moduleRecordList.empty() && !IsKeepAliveApp()) {
         ScheduleTerminate();
     }
 }
@@ -961,10 +961,20 @@ bool AppRunningRecord::IsKeepAliveApp() const
     return isKeepAliveApp_;
 }
 
-void AppRunningRecord::SetKeepAliveAppState(bool isKeepAlive, bool isNewMission)
+bool AppRunningRecord::IsEmptyKeepAliveApp() const
+{
+    return isEmptyKeepAliveApp_;
+}
+
+void AppRunningRecord::SetKeepAliveAppState(bool isKeepAlive, bool isEmptyKeepAliveApp)
 {
     isKeepAliveApp_ = isKeepAlive;
-    isNewMission_ = isNewMission;
+    isEmptyKeepAliveApp_ = isEmptyKeepAliveApp;
+}
+
+void AppRunningRecord::SetStageModelState(bool isStageBasedModel)
+{
+    isStageBasedModel_ = isStageBasedModel;
 }
 
 bool AppRunningRecord::GetTheModuleInfoNeedToUpdated(const std::string bundleName, HapModuleInfo &info)

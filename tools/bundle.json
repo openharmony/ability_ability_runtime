@@ -12,7 +12,9 @@
     "component": {
         "name": "ability_tools",
         "subsystem": "ability",
-        "syscap": [],
+        "syscap": [
+            "SystemCapability.Ability.AbilityTools.AbilityAssistant"
+        ],
         "features": [],
         "adapted_system_type": [
             "standard"
@@ -25,7 +27,7 @@
                 "hiviewdfx_hilog_native",
                 "ipc",
                 "samgr",
-                "utils_base"
+                "c_utils"
             ],
             "third_party": []
         },

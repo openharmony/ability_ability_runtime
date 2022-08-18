@@ -533,6 +533,7 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const spt
         SetWindowModeAndDisplayId(info, want);
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
     return info;
 }
 
@@ -555,6 +556,7 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
         SetWindowModeAndDisplayId(info, std::make_shared<Want>(abilityRequest.want));
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
     return info;
 }
 
@@ -1816,7 +1818,7 @@ ResolveResultType AbilityRecord::Resolve(const AbilityRequest &abilityRequest)
     return ResolveResultType::OK_NO_REMOTE_OBJ;
 }
 
-bool AbilityRecord::ReleaseCall(const sptr<IAbilityConnection> & connect)
+bool AbilityRecord::ReleaseCall(const sptr<IAbilityConnection>& connect)
 {
     HILOG_DEBUG("ability release call record by callback.");
     CHECK_POINTER_RETURN_BOOL(callContainer_);
