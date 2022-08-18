@@ -39,7 +39,8 @@ void Watchdog::Init(const std::shared_ptr<EventHandler> &mainHandler)
 {
     Watchdog::appMainHandler_ = mainHandler;
     auto watchdogTask = std::bind(&Watchdog::Timer, this);
-    OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask, INI_TIMER_FIRST_SECOND, CHECK_INTERVAL_TIME);
+    OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask,
+        INI_TIMER_FIRST_SECOND, CHECK_INTERVAL_TIME);
 }
 
 void Watchdog::Stop()
