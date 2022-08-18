@@ -411,7 +411,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         HILOG_DEBUG("Update MissionId UpdateMissionId(%{public}d, %{public}d) end", info.missionInfo.id, startMethod);
     }
 
-    if (findReusedMissionInfo && targetRecord) {
+    if (!findReusedMissionInfo && targetRecord) {
         info.missionInfo.label = targetRecord->GetLabel();
     }
 
