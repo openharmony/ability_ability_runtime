@@ -265,7 +265,9 @@ ohos_unittest("watchdog_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
     "//third_party/json/include",
   ]
 
@@ -291,6 +293,7 @@ ohos_unittest("watchdog_test") {
     "ability_base:base",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",

@@ -26,29 +26,28 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AppExecFwk {
-const int U_SLEEP_TIME = 13000; // Corresponding to INI_TIMER_FIRST_SECOND and INI_TIMER_SECOND
-class WatchDogTest : public testing::Test {
+class WatchdogTest : public testing::Test {
 public:
-    WatchDogTest()
+    WatchdogTest()
     {}
-    ~WatchDogTest()
+    ~WatchdogTest()
     {}
     std::shared_ptr<MockHandler> mockHandler_ = nullptr;
     std::shared_ptr<EventRunner> runner_ = nullptr;
-    Watchdog watchdog_ = nullptr;
+    std::shared_ptr<Watchdog> watchdog_ = nullptr;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
 
-void WatchDogTest::SetUpTestCase(void)
+void WatchdogTest::SetUpTestCase(void)
 {}
 
-void WatchDogTest::TearDownTestCase(void)
+void WatchdogTest::TearDownTestCase(void)
 {}
 
-void WatchDogTest::SetUp(void)
+void WatchdogTest::SetUp(void)
 {
     runner_ = EventRunner::Create("");
     mockHandler_ = std::make_shared<MockHandler>(runner_);
@@ -57,7 +56,7 @@ void WatchDogTest::SetUp(void)
     watchdog_->Init(mockHandler_);
 }
 
-void WatchDogTest::TearDown(void)
+void WatchdogTest::TearDown(void)
 {
     watchdog_->Stop();
 }
