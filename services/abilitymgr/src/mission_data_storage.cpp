@@ -382,12 +382,6 @@ void MissionDataStorage::WriteRgb888ToJpeg(const char* fileName, uint32_t width,
         return;
     }
 
-    char path[PATH_MAX];
-    if (realpath(fileName, path) == nullptr) {
-        HILOG_ERROR("snapshot: realpath [%s] error", fileName);
-        return;
-    }
-
     FILE *file = fopen(fileName, "wb");
     if (file == nullptr) {
         HILOG_ERROR("snapshot: open file [%s] error, nullptr!\n", fileName);
