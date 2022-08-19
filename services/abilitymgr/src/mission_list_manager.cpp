@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
+constexpr uint32_t SCENE_FLAG_KEYGUARD = 1;
 constexpr char EVENT_KEY_UID[] = "UID";
 constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
@@ -388,7 +389,6 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
     }
 
     if (!findReusedMissionInfo) {
-        info.missionInfo.label = abilityRequest.appInfo.label;
         if (!DelayedSingleton<MissionInfoMgr>::GetInstance()->GenerateMissionId(info.missionInfo.id)) {
             HILOG_DEBUG("failed to generate mission id.");
             return;
@@ -409,6 +409,10 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
                 startMethod);
         }
         HILOG_DEBUG("Update MissionId UpdateMissionId(%{public}d, %{public}d) end", info.missionInfo.id, startMethod);
+    }
+
+    if (!findReusedMissionInfo && targetRecord) {
+        info.missionInfo.label = targetRecord->GetLabel();
     }
 
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
@@ -439,6 +443,10 @@ void MissionListManager::BuildInnerMissionInfo(InnerMissionInfo &info, const std
     info.missionInfo.time = GetCurrentTime();
     info.missionInfo.iconPath = abilityRequest.appInfo.iconPath;
     info.missionInfo.want = abilityRequest.want;
+    info.isTemporary = abilityRequest.abilityInfo.removeMissionAfterTerminate;
+    if (abilityRequest.want.GetIntParam(DLP_INDEX, 0) != 0) {
+        info.isTemporary = true;
+    }
 }
 
 std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(
@@ -638,7 +646,10 @@ int MissionListManager::MinimizeAbilityLocked(const std::shared_ptr<AbilityRecor
 
     abilityRecord->SetMinimizeReason(fromUser);
     MoveToBackgroundTask(abilityRecord);
-    UpdateMissionTimeStamp(abilityRecord);
+    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
+        UpdateMissionTimeStamp(abilityRecord);
+    }
+
     return ERR_OK;
 }
 
@@ -1033,7 +1044,7 @@ void MissionListManager::CompleteBackground(const std::shared_ptr<AbilityRecord>
     for (auto terminateAbility : terminateAbilityList_) {
         if (terminateAbility->GetAbilityState() == AbilityState::BACKGROUND) {
             auto timeoutTask = [terminateAbility, self]() {
-                HILOG_WARN("Disconnect ability terminate timeout.");
+                HILOG_WARN("Terminate ability timeout after background.");
                 self->DelayCompleteTerminate(terminateAbility);
             };
             terminateAbility->Terminate(timeoutTask);
@@ -1129,7 +1140,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
     if (abilityRecord->GetAbilityState() == AbilityState::BACKGROUND) {
         auto self(shared_from_this());
         auto task = [abilityRecord, self]() {
-            HILOG_WARN("Disconnect ability terminate timeout.");
+            HILOG_WARN("Terminate ability timeout.");
             self->DelayCompleteTerminate(abilityRecord);
         };
         abilityRecord->Terminate(task);
@@ -1476,7 +1487,9 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
     abilityRecord->SetIsNewWant(false);
     NotifyMissionCreated(abilityRecord);
     if (abilityRecord->IsNeedTakeSnapShot()) {
-        UpdateMissionSnapshot(abilityRecord);
+        if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
+            UpdateMissionSnapshot(abilityRecord);
+        }
     } else {
         abilityRecord->SetNeedSnapShot(true);
     }
