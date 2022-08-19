@@ -105,10 +105,14 @@ private:
                     return;
                 }
                 auto observer = observerWptr.lock();
-                if (observer && observer->RemoveJsObserverObject(observerId)) {
+                bool isEmpty = false;
+                if (observer && observer->RemoveJsObserverObject(observerId, isEmpty)) {
                     task.Resolve(engine, engine.CreateUndefined());
                 } else {
                     task.Reject(engine, CreateJsError(engine, ERROR_CODE, "observer is not exist!"));
+                }
+                if (isEmpty) {
+                    AppExecFwk::ApplicationDataManager::GetInstance().RemoveErrorObserver();
                 }
             };
 
@@ -142,8 +146,10 @@ NativeValue* JsErrorManagerInit(NativeEngine* engine, NativeValue* exportObj)
     object->SetNativePointer(jsErrorManager.release(), JsErrorManager::Finalizer, nullptr);
 
     HILOG_INFO("JsErrorManager BindNativeFunction called");
-    BindNativeFunction(*engine, *object, "registerErrorObserver", JsErrorManager::RegisterErrorObserver);
-    BindNativeFunction(*engine, *object, "unregisterErrorObserver", JsErrorManager::UnregisterErrorObserver);
+    const char *moduleName = "JsErrorManager";
+    BindNativeFunction(*engine, *object, "registerErrorObserver", moduleName, JsErrorManager::RegisterErrorObserver);
+    BindNativeFunction(*engine, *object, "unregisterErrorObserver",
+        moduleName, JsErrorManager::UnregisterErrorObserver);
     return engine->CreateUndefined();
 }
 }  // namespace AbilityRuntime

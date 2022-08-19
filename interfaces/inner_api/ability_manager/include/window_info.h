@@ -43,6 +43,7 @@ struct AbilityTransitionInfo : public Parcelable {
     uint32_t minWindowWidth_;
     uint32_t maxWindowHeight_;
     uint32_t minWindowHeight_;
+    int32_t missionId_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -58,17 +59,8 @@ struct AbilityTransitionInfo : public Parcelable {
             return false;
         }
 
-        if (!abilityToken_) {
-            if (!parcel.WriteBool(false)) {
-                return false;
-            }
-        } else {
-            if (!parcel.WriteBool(true)) {
-                return false;
-            }
-            if (!parcel.WriteObject(abilityToken_)) {
-                return false;
-            }
+        if (!WriteAbilityToken(parcel)) {
+            return false;
         }
 
         if (!(parcel.WriteUint64(displayId_) && parcel.WriteBool(isShowWhenLocked_) && parcel.WriteBool(isRecent_))) {
@@ -93,6 +85,27 @@ struct AbilityTransitionInfo : public Parcelable {
 
         if (!WriteWindowInfo(parcel)) {
             return false;
+        }
+
+        if (!parcel.WriteInt32(missionId_)) {
+            return false;
+        }
+        return true;
+    }
+
+    bool WriteAbilityToken(Parcel& parcel) const
+    {
+        if (!abilityToken_) {
+            if (!parcel.WriteBool(false)) {
+                return false;
+            }
+        } else {
+            if (!parcel.WriteBool(true)) {
+                return false;
+            }
+            if (!parcel.WriteObject(abilityToken_)) {
+                return false;
+            }
         }
 
         return true;
@@ -129,6 +142,7 @@ struct AbilityTransitionInfo : public Parcelable {
         info->minWindowWidth_ = parcel.ReadUint32();
         info->maxWindowHeight_ = parcel.ReadUint32();
         info->minWindowHeight_ = parcel.ReadUint32();
+        info->missionId_ = parcel.ReadInt32();
         return info;
     }
 };

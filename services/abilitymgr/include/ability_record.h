@@ -781,7 +781,7 @@ public:
 
     // new version
     ResolveResultType Resolve(const AbilityRequest &abilityRequest);
-    bool ReleaseCall(const sptr<IAbilityConnection> & connect);
+    bool ReleaseCall(const sptr<IAbilityConnection>& connect);
     bool IsNeedToCallRequest() const;
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
@@ -805,6 +805,8 @@ public:
     #endif
 
     bool CanRestartRootLauncher();
+
+    std::string GetLabel();
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);

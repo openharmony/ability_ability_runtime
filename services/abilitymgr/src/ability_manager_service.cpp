@@ -121,6 +121,7 @@ const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 const std::string BOOTEVENT_APPFWK_READY = "bootevent.appfwk.ready";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
+const std::string BOOTEVENT_BOOT_ANIMATION_STARTED = "bootevent.bootanimation.started";
 const int DEFAULT_DMS_MISSION_ID = -1;
 const std::map<std::string, AbilityManagerService::DumpKey> AbilityManagerService::dumpMap = {
     std::map<std::string, AbilityManagerService::DumpKey>::value_type("--all", KEY_DUMP_ALL),
@@ -188,9 +189,6 @@ AbilityManagerService::AbilityManagerService()
       state_(ServiceRunningState::STATE_NOT_START),
       iBundleManager_(nullptr)
 {
-    std::shared_ptr<AppScheduler> appScheduler(
-        DelayedSingleton<AppScheduler>::GetInstance().get(), [](AppScheduler *x) { x->DecStrongRef(x); });
-    appScheduler_ = appScheduler;
     DumpFuncInit();
     DumpSysFuncInit();
 }
@@ -268,6 +266,8 @@ bool AbilityManagerService::Init()
     implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     anrListener_ = std::make_shared<ApplicationAnrListener>();
     MMI::InputManager::GetInstance()->SetAnrObserver(anrListener_);
+    WaitParameter(BOOTEVENT_BOOT_ANIMATION_STARTED.c_str(), "true",
+        amsConfigResolver_->GetBootAnimationTimeoutTime());
 #endif
     anrDisposer_ = std::make_shared<AppNoResponseDisposer>(amsConfigResolver_->GetANRTimeOutTime());
 
@@ -1421,7 +1421,7 @@ int AbilityManagerService::ConnectAbility(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Connect ability called.");
+    HILOG_INFO("Connect ability called, element uri: %{public}s.", want.GetElement().GetURI().c_str());
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
     AAFWK::EventInfo eventInfo;
@@ -2532,9 +2532,7 @@ void AbilityManagerService::DumpSysProcess(
             "  uid #" + std::to_string(ProcessInfo.uid_);
         info.push_back(dumpInfo);
         auto appState = static_cast<AppState>(ProcessInfo.state_);
-        if (appScheduler_) {
-            dumpInfo = "      state #" + appScheduler_->ConvertAppState(appState);
-        }
+        dumpInfo = "      state #" + DelayedSingleton<AppScheduler>::GetInstance()->ConvertAppState(appState);
         info.push_back(dumpInfo);
     }
 }
@@ -3575,9 +3573,8 @@ void AbilityManagerService::ConnectBmsService()
 {
     HILOG_DEBUG("%{public}s", __func__);
     HILOG_INFO("Waiting AppMgr Service run completed.");
-    CHECK_POINTER(appScheduler_);
-    while (!appScheduler_->Init(shared_from_this())) {
-        HILOG_ERROR("failed to init appScheduler_");
+    while (!DelayedSingleton<AppScheduler>::GetInstance()->Init(shared_from_this())) {
+        HILOG_ERROR("failed to init AppScheduler");
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
 
