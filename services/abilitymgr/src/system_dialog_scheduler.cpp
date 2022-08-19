@@ -14,7 +14,6 @@
  */
 #include "system_dialog_scheduler.h"
 
-#include <csignal>
 #include <regex>
 
 #include "ability_constants.h"
@@ -345,8 +344,12 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
     resourceManager->UpdateResConfig(*resConfig);
 
     std::regex pattern(std::string(AbilityRuntime::Constants::ABS_CODE_PATH) +
+<<<<<<< HEAD
         std::string(AbilityRuntime::Constants::FILE_SEPARATOR) + bundleInfo.name
         + std::string(AbilityRuntime::Constants::FILE_SEPARATOR));
+=======
+        std::string(AbilityRuntime::Constants::FILE_SEPARATOR) + bundleInfo.name);
+>>>>>>> ca9c0d996e78082900dd8bab7f72fcd6fbc2f7e8
     for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
         if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
             continue;
@@ -358,8 +361,12 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
             loadPath = hapModuleInfo.resourcePath;
         }
         HILOG_DEBUG("GetAppNameFromResource loadPath: %{public}s", loadPath.c_str());
+<<<<<<< HEAD
         loadPath = std::regex_replace(loadPath, pattern, std::string(AbilityRuntime::Constants::LOCAL_CODE_PATH)
             + std::string(AbilityRuntime::Constants::FILE_SEPARATOR));
+=======
+        loadPath = std::regex_replace(loadPath, pattern, std::string(AbilityRuntime::Constants::LOCAL_CODE_PATH));
+>>>>>>> ca9c0d996e78082900dd8bab7f72fcd6fbc2f7e8
         if (!resourceManager->AddResource(loadPath.c_str())) {
             HILOG_ERROR("ResourceManager add %{public}s resource path failed!", bundleInfo.name.c_str());
         }

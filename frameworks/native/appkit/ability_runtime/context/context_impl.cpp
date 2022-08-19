@@ -201,10 +201,12 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
         return nullptr;
     }
 
+    std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     std::vector<std::string> moduleResPaths;
     for (auto &info: bundleInfo.hapModuleInfos) {
         if (info.moduleName == moduleName) {
             moduleResPaths.emplace_back(info.resourcePath);
+            appContext->InitHapModuleInfo(info);
             break;
         }
     }
@@ -215,7 +217,6 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
     }
 
     bundleInfo.moduleResPaths.swap(moduleResPaths);
-    std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     InitResourceManager(bundleInfo, appContext, GetBundleName() == bundleName);
     appContext->SetApplicationInfo(std::make_shared<AppExecFwk::ApplicationInfo>(bundleInfo.applicationInfo));
     return appContext;
