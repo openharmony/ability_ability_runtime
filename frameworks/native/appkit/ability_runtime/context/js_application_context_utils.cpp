@@ -585,7 +585,7 @@ NativeValue *JsApplicationContextUtils::OnUnregisterEnvironmentCallback(
 NativeValue *CreateJsApplicationContext(NativeEngine &engine, std::shared_ptr<ApplicationContext> applicationContext,
     DetachCallback detach, AttachCallback attach, bool keepApplicationContext)
 {
-    HILOG_INFO("CreateJsApplicationContext start");
+    HILOG_DEBUG("CreateJsApplicationContext start");
     NativeValue* objValue;
     if (detach == nullptr || attach == nullptr) {
         objValue = engine.CreateObject();
@@ -636,7 +636,6 @@ NativeValue *CreateJsApplicationContext(NativeEngine &engine, std::shared_ptr<Ap
     BindNativeFunction(engine, *object, "getArea", mdName, JsApplicationContextUtils::GetArea);
     BindNativeFunction(engine, *object, "createModuleContext", mdName, JsApplicationContextUtils::CreateModuleContext);
 
-    HILOG_INFO("CreateJsApplicationContext end");
     return objValue;
 }
 }  // namespace AbilityRuntime
