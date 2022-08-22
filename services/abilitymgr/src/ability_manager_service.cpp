@@ -498,7 +498,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     auto bms = GetBundleManager();
     if (bms) {
         ReportEventToSuspendManager(bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
-                abilityInfo.bundleName, type);
+            abilityInfo.bundleName, type);
     }
     HILOG_DEBUG("Start ability, name is %{public}s.", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
