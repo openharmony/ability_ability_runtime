@@ -1018,6 +1018,8 @@ private:
 
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
+    void ReportEventToSuspendManager(const int32_t uid, const std::string &bundleName, AppExecFwk::AbilityType type);
+
     int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
 
     int StartAppgallery(int requestCode, int32_t userId, std::string action);
