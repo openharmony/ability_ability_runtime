@@ -523,7 +523,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_020, TestSize.Level1)
 }
 
 /**
- * @tc.name: AppMgrClient_020
+ * @tc.name: AppMgrClient_021
  * @tc.desc: Verify the function when parameter is 0
  * @tc.type: FUNC
  * @tc.require: issueI581UZ
