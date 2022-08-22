@@ -477,14 +477,11 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             return ERR_INVALID_VALUE;
         }
         HILOG_DEBUG("Start service or extension, name is %{public}s.", abilityInfo.name.c_str());
-#ifdef EFFICIENCY_MANAGER_ENABLE
         auto bms = GetBundleManager();
         if (bms) {
-            SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-                bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
-                abilityInfo.bundleName, "THAW_BY_START_NOT_PAGE_ABILITY");
+            ReportEventToSuspendManager(bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
+                abilityInfo.bundleName, type);
         }
-#endif // EFFICIENCY_MANAGER_ENABLE
         return connectManager->StartAbility(abilityRequest);
     }
 
@@ -498,14 +495,11 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return ERR_INVALID_VALUE;
     }
     ReportAbilitStartInfoToRSS(abilityInfo);
-#ifdef EFFICIENCY_MANAGER_ENABLE
     auto bms = GetBundleManager();
     if (bms) {
-        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-            bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
-            abilityInfo.bundleName, "THAW_BY_START_PAGE_ABILITY");
+        ReportEventToSuspendManager(bms->GetUidByBundleName(abilityInfo.bundleName, validUserId),
+                abilityInfo.bundleName, type);
     }
-#endif // EFFICIENCY_MANAGER_ENABLE
     HILOG_DEBUG("Start ability, name is %{public}s.", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
 }
@@ -904,6 +898,16 @@ void AbilityManagerService::ReportAbilitStartInfoToRSS(const AppExecFwk::Ability
             ResourceSchedule::ResType::RES_TYPE_APP_ABILITY_START, 0, eventParams);
     }
 #endif
+}
+
+void AbilityManagerService::ReportEventToSuspendManager(const int32_t uid, const std::string &bundleName,
+    AppExecFwk::AbilityType type)
+{
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    std::string reason = (type == AppExecFwk::AbilityType::PAGE) ?
+        "THAW_BY_START_PAGE_ABILITY" : "THAW_BY_START_NOT_PAGE_ABILITY";
+    SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(uid, bundleName, reason);
+#endif // EFFICIENCY_MANAGER_ENABLE
 }
 
 int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
@@ -1592,12 +1596,7 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         return ERR_INVALID_VALUE;
     }
 
-#ifdef EFFICIENCY_MANAGER_ENABLE
-    std::string reason = (type == AppExecFwk::AbilityType::PAGE) ?
-        "THAW_BY_START_PAGE_ABILITY" : "THAW_BY_OTHER_NOT_FOREGROUND_REASON";
-    SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-        abilityRequest.uid, "", reason);
-#endif // EFFICIENCY_MANAGER_ENABLE
+    ReportEventToSuspendManager(abilityRequest.uid, "", type);
     return connectManager->ConnectAbilityLocked(abilityRequest, connect, callerToken);
 }
 
@@ -3774,13 +3773,7 @@ int AbilityManagerService::StartAbilityByCall(
         HILOG_ERROR("currentMissionListManager_ is Null. curentUserId=%{public}d", GetUserId());
         return ERR_INVALID_VALUE;
     }
-#ifdef EFFICIENCY_MANAGER_ENABLE
-    auto type = abilityRequest.abilityInfo.type;
-    std::string reason = (type == AppExecFwk::AbilityType::PAGE) ?
-        "THAW_BY_START_PAGE_ABILITY" : "THAW_BY_OTHER_NOT_FOREGROUND_REASON";
-    SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-        abilityRequest.uid, "", reason);
-#endif // EFFICIENCY_MANAGER_ENABLE
+    ReportEventToSuspendManager(abilityRequest.uid, "", abilityRequest.abilityInfo.type);
     return currentMissionListManager_->ResolveLocked(abilityRequest);
 }
 
