@@ -484,7 +484,6 @@ std::shared_ptr<NativeReference> JsAbility::GetJsWindowStage()
     HILOG_DEBUG("%{public}s called.", __func__);
     if (jsWindowStageObj_ == nullptr) {
         HILOG_ERROR("jsWindowSatge is nullptr");
-        return nullptr;
     }
     return jsWindowStageObj_;
 }
@@ -766,7 +765,6 @@ std::shared_ptr<NativeReference> JsAbility::GetJsAbility()
     HILOG_DEBUG("%{public}s called.", __func__);
     if (jsAbilityObj_ == nullptr) {
         HILOG_ERROR("jsAbility object is nullptr");
-        return nullptr;
     }
     return jsAbilityObj_;
 }
