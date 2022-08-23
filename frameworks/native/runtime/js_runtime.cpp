@@ -34,6 +34,7 @@
 #include "js_worker.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "parameters.h"
+#include "runtime_extractor.h"
 #include "systemcapability.h"
 
 #ifdef SUPPORT_GRAPHICS
@@ -112,7 +113,10 @@ public:
         bool result = false;
         if (!hapPath.empty()) {
             std::ostringstream outStream;
-            if (!GetFileBufferFromHap(hapPath, path, outStream)) {
+            if (runtimeExtractor_ == nullptr) {
+                runtimeExtractor_ = InitRuntimeExtractor(hapPath);
+            }
+            if (!GetFileBuffer(runtimeExtractor_, path, outStream)) {
                 HILOG_ERROR("Get abc file failed");
                 return result;
             }
@@ -194,8 +198,10 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
+            runtimeExtractor_ = InitRuntimeExtractor(options.hapPath);
             panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
-            panda::JSNApi::SetHostResolveBufferTracker(vm_, JsModuleReader(options.bundleName, options.hapPath));
+            panda::JSNApi::SetHostResolveBufferTracker(
+                vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor_));
         }
         return JsRuntime::Initialize(options);
     }
@@ -238,7 +244,8 @@ NativeValue* CanIUse(NativeEngine* engine, NativeCallbackInfo* info)
 
 void InitSyscapModule(NativeEngine& engine, NativeObject& globalObject)
 {
-    BindNativeFunction(engine, globalObject, "canIUse", CanIUse);
+    const char *moduleName = "JsRuntime";
+    BindNativeFunction(engine, globalObject, "canIUse", moduleName, CanIUse);
 }
 class UvLoopHandler : public AppExecFwk::FileDescriptorListener, public std::enable_shared_from_this<UvLoopHandler> {
 public:
@@ -377,7 +384,8 @@ bool JsRuntime::Initialize(const Options& options)
         InitSyscapModule(*nativeEngine_, *globalObj);
 
         // Simple hook function 'isSystemplugin'
-        BindNativeFunction(*nativeEngine_, *globalObj, "isSystemplugin",
+        const char *moduleName = "JsRuntime";
+        BindNativeFunction(*nativeEngine_, *globalObj, "isSystemplugin", moduleName,
             [](NativeEngine* engine, NativeCallbackInfo* info) -> NativeValue* {
                 return engine->CreateUndefined();
             });
@@ -472,11 +480,11 @@ NativeValue* JsRuntime::LoadJsBundle(const std::string& path, const std::string&
     return exportObj;
 }
 
-std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& moduleName,
-    const std::string& modulePath, const std::string& hapPath, bool esmodule)
+std::unique_ptr<NativeReference> JsRuntime::LoadModule(
+    const std::string& moduleName, const std::string& modulePath, const std::string& hapPath, bool esmodule)
 {
-    HILOG_INFO("JsRuntime::LoadModule(%{public}s, %{public}s, %{public}s)", moduleName.c_str(), modulePath.c_str(),
-        esmodule ? "true" : "false");
+    HILOG_DEBUG("JsRuntime::LoadModule(%{public}s, %{public}s, %{public}s, %{public}s)",
+        moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
 
     HandleScope handleScope(*this);
 
@@ -533,7 +541,10 @@ bool JsRuntime::RunScript(const std::string& path, const std::string& hapPath)
     bool result = false;
     if (!hapPath.empty()) {
         std::ostringstream outStream;
-        if (!GetFileBufferFromHap(hapPath, path, outStream)) {
+        if (runtimeExtractor_ == nullptr) {
+            runtimeExtractor_ = InitRuntimeExtractor(hapPath);
+        }
+        if (!GetFileBuffer(runtimeExtractor_, path, outStream)) {
             HILOG_ERROR("Get abc file failed");
             return result;
         }

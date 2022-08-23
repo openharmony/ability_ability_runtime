@@ -23,7 +23,13 @@ namespace AbilityRuntime {
 class RuntimeExtractor : public AppExecFwk::BaseExtractor {
 public:
     explicit RuntimeExtractor(const std::string &source);
+    explicit RuntimeExtractor(const std::string &source, const std::string &hapPath);
     virtual ~RuntimeExtractor() override;
+
+    bool isSameHap(const std::string &hapPath) const;
+
+private:
+    std::string hapPath_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

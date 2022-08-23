@@ -21,10 +21,13 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+class RuntimeExtractor;
+
 class JsModuleReader final {
 public:
-    explicit JsModuleReader(const std::string& bundleName, const std::string& hapPath)
-        : bundleName_(bundleName), hapPath_(hapPath)
+    explicit JsModuleReader(const std::string& bundleName, const std::string& hapPath,
+        const std::shared_ptr<RuntimeExtractor>& runtimeExtractor)
+        : bundleName_(bundleName), hapPath_(hapPath), runtimeExtractor_(runtimeExtractor)
     {}
     ~JsModuleReader() = default;
 
@@ -38,6 +41,7 @@ public:
 private:
     std::string bundleName_;
     std::string hapPath_;
+    std::shared_ptr<RuntimeExtractor> runtimeExtractor_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

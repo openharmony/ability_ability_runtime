@@ -59,9 +59,6 @@ ohos_shared_library("runtime") {
     "//foundation/arkui/napi:ace_napi_ark",
   ]
 
-  public_deps =
-      [ "${bundlefwk_inner_api_path}/appexecfwk_base:appexecfwk_base" ]
-
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
@@ -69,6 +66,7 @@ ohos_shared_library("runtime") {
     "ability_base:zuri",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",

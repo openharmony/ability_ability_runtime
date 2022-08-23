@@ -22,42 +22,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 std::string JsModuleSearcher::operator()(const std::string& curJsModulePath, const std::string& newJsModuleUri) const
 {
-    HILOG_INFO("Search JS module (%{public}s, %{public}s) begin",
-        curJsModulePath.c_str(), newJsModuleUri.c_str());
-
-    std::string newJsModulePath;
-
-    if (curJsModulePath.empty() || newJsModuleUri.empty()) {
-        return newJsModulePath;
-    }
-
-    std::string normalizeUri = newJsModuleUri;
-    std::replace(normalizeUri.begin(), normalizeUri.end(), '\\', '/');
-
-    switch (normalizeUri[0]) {
-        case '.': {
-            newJsModulePath = MakeNewJsModulePath(curJsModulePath, normalizeUri);
-            break;
-        }
-        case '@': {
-            newJsModulePath = ParseOhmUri(bundleName_, curJsModulePath, normalizeUri);
-            if (newJsModulePath.empty()) {
-                newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
-            }
-            break;
-        }
-        default: {
-            newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
-            break;
-        }
-    }
-
-    FixExtName(newJsModulePath);
-
-    HILOG_INFO("Search JS module (%{public}s, %{public}s) => %{public}s end",
-        curJsModulePath.c_str(), normalizeUri.c_str(), newJsModulePath.c_str());
-
-    return newJsModulePath;
+    return NormalizeUri(bundleName_, curJsModulePath, newJsModuleUri);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

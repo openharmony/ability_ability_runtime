@@ -288,6 +288,25 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
     }
 }
 
+std::string AbilityRecord::GetLabel()
+{
+    std::string strLabel = applicationInfo_.label;
+
+#ifdef SUPPORT_GRAPHICS
+    auto resourceMgr = CreateResourceManager(abilityInfo_);
+    if (!resourceMgr) {
+        return strLabel;
+    }
+
+    auto result = resourceMgr->GetStringById(applicationInfo_.labelId, strLabel);
+    if (result != OHOS::Global::Resource::RState::SUCCESS) {
+        HILOG_WARN("%{public}s. Failed to GetStringById.", __func__);
+    }
+#endif
+
+    return strLabel;
+}
+
 #ifdef SUPPORT_GRAPHICS
 void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest &abilityRequest,
     std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
@@ -533,6 +552,9 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const spt
         SetWindowModeAndDisplayId(info, want);
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
+    info->abilityName_ = abilityInfo_.name;
+    info->bundleName_ = abilityInfo_.bundleName;
     return info;
 }
 
@@ -555,6 +577,9 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
         SetWindowModeAndDisplayId(info, std::make_shared<Want>(abilityRequest.want));
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
+    info->abilityName_ = abilityInfo_.name;
+    info->bundleName_ = abilityInfo_.bundleName;
     return info;
 }
 

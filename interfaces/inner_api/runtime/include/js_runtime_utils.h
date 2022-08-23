@@ -23,7 +23,6 @@
 
 #include "native_engine/native_engine.h"
 
-#include "ability_info.h"
 #include "js_runtime.h"
 
 namespace OHOS {
@@ -114,7 +113,8 @@ NativeValue* CreateNativeArray(NativeEngine& engine, const std::vector<T>& data)
 }
 
 NativeValue* CreateJsError(NativeEngine& engine, int32_t errCode, const std::string& message = std::string());
-void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name, NativeCallback func);
+void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name,
+    const char* moduleName, NativeCallback func);
 void BindNativeProperty(NativeObject& object, const char* name, NativeCallback getter);
 void* GetNativePointerFromCallbackInfo(NativeEngine* engine, NativeCallbackInfo* info, const char* name);
 
@@ -198,7 +198,12 @@ std::string ParseOhmUri(
     const std::string bundleName, const std::string& curJsModulePath, const std::string& newJsModuleUri);
 std::string ParseJsModuleUri(const std::string& curJsModulePath, const std::string& newJsModuleUri);
 bool MakeFilePath(const std::string& codePath, const std::string& modulePath, std::string& fileName);
-std::string GetOhmUri(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo);
+std::string NormalizeUri(
+    const std::string& bundleName, const std::string& curJsModulePath, const std::string& newJsModuleUri);
+std::shared_ptr<RuntimeExtractor> InitRuntimeExtractor(const std::string& hapPath);
+std::string ParseHapPath(const std::string& hapPath);
+bool GetFileBuffer(
+    const std::shared_ptr<RuntimeExtractor>& runtimeExtractor, const std::string& srcPath, std::ostream &dest);
 bool GetFileBufferFromHap(const std::string& hapPath, const std::string& srcPath, std::ostream &dest);
 bool GetFileListFromHap(const std::string& hapPath, const std::string& srcPath, std::vector<std::string>& assetList);
 }  // namespace AbilityRuntime

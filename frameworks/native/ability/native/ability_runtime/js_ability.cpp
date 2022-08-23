@@ -54,7 +54,12 @@ NativeValue *AttachJsAbilityContext(NativeEngine *engine, void *value, void *)
         return nullptr;
     }
     NativeValue *object = CreateJsAbilityContext(*engine, ptr, nullptr, nullptr);
-    auto contextObj = JsRuntime::LoadSystemModuleByEngine(engine, "application.AbilityContext", &object, 1)->Get();
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(engine, "application.AbilityContext", &object, 1);
+    if (systemModule == nullptr) {
+        HILOG_WARN("invalid systemModule.");
+        return nullptr;
+    }
+    auto contextObj = systemModule->Get();
     NativeObject *nObject = ConvertNativeValueTo<NativeObject>(contextObj);
     nObject->ConvertToNativeBindingObject(engine, DetachCallbackFunc, AttachJsAbilityContext, value, nullptr);
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(ptr);
@@ -112,9 +117,8 @@ void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
     HandleScope handleScope(jsRuntime_);
     auto &engine = jsRuntime_.GetNativeEngine();
 
-    jsAbilityObj_ =
-        jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo->hapPath,
-        abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    jsAbilityObj_ = jsRuntime_.LoadModule(
+        moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
     if (jsAbilityObj_ == nullptr) {
         HILOG_ERROR("Failed to get AbilityStage object");
         return;
@@ -436,7 +440,9 @@ void JsAbility::DoOnForeground(const Want &want)
         std::weak_ptr<Ability> weakAbility = shared_from_this();
         abilityDisplayMoveListener_ = new AbilityDisplayMoveListener(weakAbility);
         window->RegisterDisplayMoveListener(abilityDisplayMoveListener_);
-        window->SetPrivacyMode(securityFlag_);
+        if (securityFlag_) {
+            window->SetSystemPrivacyMode(true);
+        }
     }
 
     HILOG_DEBUG("%{public}s begin scene_->GoForeground, sceneFlag_:%{public}d.", __func__, Ability::sceneFlag_);
