@@ -1018,7 +1018,7 @@ private:
 
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
-    void ReportEventToSuspendManager(const int32_t uid, const std::string &bundleName, AppExecFwk::AbilityType type);
+    void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
 
     int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
 
