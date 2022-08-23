@@ -24,6 +24,7 @@
 #include "ability_util.h"
 #include "accesstoken_kit.h"
 #include "bundle_mgr_client.h"
+#include "connection_state_manager.h"
 #include "hitrace_meter.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
@@ -51,6 +52,7 @@ const std::string ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
 const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbilityTokenCallback";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
+const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 int64_t AbilityRecord::abilityRecordId = 0;
 int64_t AbilityRecord::g_abilityRecordEventId_ = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -176,6 +178,11 @@ int32_t AbilityRecord::GetUid()
     return uid_;
 }
 
+int32_t AbilityRecord::GetPid()
+{
+    return pid_;
+}
+
 int AbilityRecord::LoadAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -279,6 +286,25 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
         LoadAbility();
     }
+}
+
+std::string AbilityRecord::GetLabel()
+{
+    std::string strLabel = applicationInfo_.label;
+
+#ifdef SUPPORT_GRAPHICS
+    auto resourceMgr = CreateResourceManager(abilityInfo_);
+    if (!resourceMgr) {
+        return strLabel;
+    }
+
+    auto result = resourceMgr->GetStringById(applicationInfo_.labelId, strLabel);
+    if (result != OHOS::Global::Resource::RState::SUCCESS) {
+        HILOG_WARN("%{public}s. Failed to GetStringById.", __func__);
+    }
+#endif
+
+    return strLabel;
 }
 
 #ifdef SUPPORT_GRAPHICS
@@ -526,6 +552,9 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const spt
         SetWindowModeAndDisplayId(info, want);
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
+    info->abilityName_ = abilityInfo_.name;
+    info->bundleName_ = abilityInfo_.bundleName;
     return info;
 }
 
@@ -548,6 +577,9 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
         SetWindowModeAndDisplayId(info, std::make_shared<Want>(abilityRequest.want));
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
+    info->abilityName_ = abilityInfo_.name;
+    info->bundleName_ = abilityInfo_.bundleName;
     return info;
 }
 
@@ -720,6 +752,7 @@ int AbilityRecord::TerminateAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Schedule terminate ability to AppMs, ability:%{public}s.", abilityInfo_.name.c_str());
+    HandleDlpClosed();
     return DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
 }
 
@@ -779,6 +812,8 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         if (schedulerObject != nullptr) {
             schedulerObject->AddDeathRecipient(schedulerDeathRecipient_);
         }
+        pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
+        HandleDlpAttached();
     } else {
         HILOG_ERROR("scheduler is nullptr");
         isReady_ = false;
@@ -791,6 +826,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
             }
         }
         scheduler_ = scheduler;
+        pid_ = 0;
     }
 }
 
@@ -1506,6 +1542,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         ability->SendResultToCallers();
     };
     handler->PostTask(uriTask);
+    HandleDlpClosed();
 }
 
 void AbilityRecord::SetConnRemoteObject(const sptr<IRemoteObject> &remoteObject)
@@ -1804,7 +1841,7 @@ ResolveResultType AbilityRecord::Resolve(const AbilityRequest &abilityRequest)
     return ResolveResultType::OK_NO_REMOTE_OBJ;
 }
 
-bool AbilityRecord::Release(const sptr<IAbilityConnection> & connect)
+bool AbilityRecord::ReleaseCall(const sptr<IAbilityConnection>& connect)
 {
     HILOG_DEBUG("ability release call record by callback.");
     CHECK_POINTER_RETURN_BOOL(callContainer_);
@@ -1963,6 +2000,28 @@ void AbilityRecord::GrantUriPermission(const Want &want)
         if (abilityMgr) {
             abilityMgr->GrantUriPermission(want, GetCurrentAccountId(), targetTokenId);
         }
+    }
+}
+
+void AbilityRecord::HandleDlpAttached()
+{
+    if (abilityInfo_.bundleName == DLP_BUNDLE_NAME) {
+        DelayedSingleton<ConnectionStateManager>::GetInstance()->AddDlpManager(shared_from_this());
+    }
+
+    if (appIndex_ > 0) {
+        DelayedSingleton<ConnectionStateManager>::GetInstance()->AddDlpAbility(shared_from_this());
+    }
+}
+
+void AbilityRecord::HandleDlpClosed()
+{
+    if (abilityInfo_.bundleName == DLP_BUNDLE_NAME) {
+        DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveDlpManager(shared_from_this());
+    }
+
+    if (appIndex_ > 0) {
+        DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveDlpAbility(shared_from_this());
     }
 }
 

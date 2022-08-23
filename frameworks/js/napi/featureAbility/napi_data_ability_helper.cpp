@@ -154,12 +154,10 @@ napi_value DataAbilityHelperConstructor(napi_env env, napi_callback_info info)
         [](napi_env env, void *data, void *hint) {
             DataAbilityHelper *objectInfo = static_cast<DataAbilityHelper *>(data);
             HILOG_INFO("DAHelper finalize_cb regInstances_.size = %{public}zu", g_registerInstances.size());
-            auto onCBIter = std::find_if(g_registerInstances.begin(),
-                g_registerInstances.end(),
-                [&objectInfo](const DAHelperOnOffCB *onCB) { return onCB->dataAbilityHelper == objectInfo; });
-            if (onCBIter != g_registerInstances.end()) {
-                HILOG_INFO("DataAbilityHelper finalize_cb find helper");
-                DeleteDAHelperOnOffCB(*onCBIter);
+            for (auto iter = g_registerInstances.begin(); iter != g_registerInstances.end();) {
+                if (!NeedErase(iter, objectInfo)) {
+                    iter = g_registerInstances.erase(iter);
+                }
             }
             HILOG_INFO("DAHelper finalize_cb regInstances_.size = %{public}zu", g_registerInstances.size());
             g_dataAbilityHelperList.remove_if(
@@ -960,15 +958,10 @@ napi_value UnRegisterSync(napi_env env, DAHelperOnOffCB *offCB)
     for (auto &iter : offCB->DestroyList) {
         HILOG_INFO("NAPI_UnRegister ReleaseJSCallback. 1 ---");
         if (iter->observer != nullptr) {
-            if (iter->observer->GetWorkPre() == 1) {
-                iter->observer->SetAssociatedObject(iter);
-                iter->observer->ChangeWorkInt();
-                HILOG_INFO("NAPI_UnRegister ReleaseJSCallback. 3 ---");
-            } else {
-                delete iter;
-                iter = nullptr;
-                HILOG_INFO("NAPI_UnRegister ReleaseJSCallback. 4 ---");
-            }
+            iter->observer->ReleaseJSCallback();
+            delete iter;
+            iter = nullptr;
+            HILOG_INFO("NAPI_UnRegister ReleaseJSCallback. 2 ---");
         }
     }
 
@@ -1009,68 +1002,69 @@ void FindRegisterObs(napi_env env, DAHelperOnOffCB *data)
     HILOG_INFO("NAPI_UnRegister, FindRegisterObs main event thread execute.end %{public}zu", data->NotifyList.size());
 }
 
-NAPIDataAbilityObserver::~NAPIDataAbilityObserver()
+void NAPIDataAbilityObserver::ReleaseJSCallback()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (ref_ == nullptr) {
-        HILOG_ERROR("%{public}s, ref_ is null.", __func__);
+        HILOG_ERROR("NAPIDataAbilityObserver::ReleaseJSCallback, ref_ is null.");
         return;
     }
-    napi_delete_reference(env_, ref_);
-    HILOG_INFO("%{public}s, called. end", __func__);
-}
 
-void NAPIDataAbilityObserver::SetAssociatedObject(DAHelperOnOffCB* object)
-{
-    onCB_ = object;
+    if (isCallingback_) {
+        needRelease_ = true;
+        HILOG_WARN("%{public}s, ref_ is calling back.", __func__);
+        return;
+    }
+
+    SafeReleaseJSCallback();
     HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called. end", __func__);
 }
 
-void NAPIDataAbilityObserver::ChangeWorkPre()
+void NAPIDataAbilityObserver::SafeReleaseJSCallback()
 {
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called.", __func__);
-    std::lock_guard<std::mutex> lock_l(mutex_);
-    workPre_ = 1;
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called. end %{public}d", __func__, workPre_);
-}
+    uv_loop_s* loop = nullptr;
+    napi_get_uv_event_loop(env_, &loop);
+    if (loop == nullptr) {
+        HILOG_ERROR("%{public}s, loop == nullptr.", __func__);
+        return;
+    }
 
-void NAPIDataAbilityObserver::ChangeWorkInt()
-{
-    intrust_ = 1;
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called. end %{public}d", __func__, intrust_);
-}
+    struct DelRefCallbackInfo {
+        napi_env env_;
+        napi_ref ref_;
+    };
 
-void NAPIDataAbilityObserver::ChangeWorkPreDone()
-{
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called.", __func__);
-    std::lock_guard<std::mutex> lock_l(mutex_);
-    workPre_ = 0;
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called. end %{public}d", __func__, workPre_);
-}
+    DelRefCallbackInfo* delRefCallbackInfo = new DelRefCallbackInfo {
+        .env_ = env_,
+        .ref_ = ref_,
+    };
 
-void NAPIDataAbilityObserver::ChangeWorkRunDone()
-{
-    intrust_ = 0;
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called end %{public}d", __func__, intrust_);
-}
-
-int NAPIDataAbilityObserver::GetWorkPre()
-{
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called.", __func__);
-    std::lock_guard<std::mutex> lock_l(mutex_);
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called. end %{public}d", __func__, workPre_);
-    return workPre_;
-}
-
-int NAPIDataAbilityObserver::GetWorkInt()
-{
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called. end %{public}d", __func__, intrust_);
-    return intrust_;
-}
-
-const DAHelperOnOffCB* NAPIDataAbilityObserver::GetAssociatedObject(void)
-{
-    HILOG_INFO("NAPIDataAbilityObserver::%{public}s, called.", __func__);
-    return onCB_;
+    uv_work_t* work = new uv_work_t;
+    work->data = (void*)delRefCallbackInfo;
+    int ret = uv_queue_work(
+        loop, work, [](uv_work_t* work) {},
+        [](uv_work_t* work, int status) {
+            // JS Thread
+            DelRefCallbackInfo* delRefCallbackInfo =  reinterpret_cast<DelRefCallbackInfo*>(work->data);
+            napi_delete_reference(delRefCallbackInfo->env_, delRefCallbackInfo->ref_);
+            if (delRefCallbackInfo != nullptr) {
+                delete delRefCallbackInfo;
+                delRefCallbackInfo = nullptr;
+            }
+            if (work != nullptr) {
+                delete work;
+                work = nullptr;
+            }
+        });
+    if (ret != 0) {
+        if (delRefCallbackInfo != nullptr) {
+            delete delRefCallbackInfo;
+        }
+        if (work != nullptr) {
+            delete work;
+        }
+    }
+    ref_ = nullptr;
 }
 
 void NAPIDataAbilityObserver::SetEnv(const napi_env &env)
@@ -1098,33 +1092,46 @@ static void OnChangeJSThreadWorker(uv_work_t *work, int status)
         return;
     }
 
-    napi_value result[ARGS_TWO] = {0};
-    result[PARAM0] = GetCallbackErrorValue(onCB->cbBase.cbInfo.env, NO_ERROR);
-    napi_value callback = 0;
-    napi_value undefined = 0;
-    napi_get_undefined(onCB->cbBase.cbInfo.env, &undefined);
-    napi_value callResult = 0;
-    napi_get_reference_value(onCB->cbBase.cbInfo.env, onCB->cbBase.cbInfo.callback, &callback);
-    napi_call_function(onCB->cbBase.cbInfo.env, undefined, callback, ARGS_TWO, &result[PARAM0], &callResult);
     if (onCB->observer != nullptr) {
-        if (onCB->observer->GetWorkInt() == 1) {
-            const DAHelperOnOffCB* assicuated = onCB->observer->GetAssociatedObject();
-            if (assicuated != nullptr) {
-                HILOG_INFO("OnChange, uv_queue_work ReleaseJSCallback Called");
-                onCB->observer->SetAssociatedObject(nullptr);
-                delete assicuated;
-                assicuated = nullptr;
-            }
-        } else {
-            onCB->observer->ChangeWorkRunDone();
-            onCB->observer->ChangeWorkPreDone();
-        }
+        onCB->observer->CallJsMethod();
     }
+
     delete onCB;
     onCB = nullptr;
     delete work;
     work = nullptr;
     HILOG_INFO("OnChange, uv_queue_work. end");
+}
+
+void NAPIDataAbilityObserver::CallJsMethod()
+{
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (ref_ == nullptr || env_ == nullptr) {
+            HILOG_WARN("%{public}s observer is invalid.", __func__);
+            return;
+        }
+        isCallingback_ = true;
+    }
+    napi_value result[ARGS_TWO] = {0};
+    result[PARAM0] = GetCallbackErrorValue(env_, NO_ERROR);
+    napi_value callback = 0;
+    napi_value undefined = 0;
+    napi_get_undefined(env_, &undefined);
+    napi_value callResult = 0;
+    napi_get_reference_value(env_, ref_, &callback);
+    napi_call_function(env_, undefined, callback, ARGS_TWO, &result[PARAM0], &callResult);
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (needRelease_ && ref_ != nullptr) {
+            HILOG_INFO("%{public}s to delete callback.", __func__);
+            napi_delete_reference(env_, ref_);
+            ref_ = nullptr;
+            needRelease_ = false;
+        }
+        isCallingback_ = false;
+    }
 }
 
 void NAPIDataAbilityObserver::OnChange()
@@ -1133,19 +1140,15 @@ void NAPIDataAbilityObserver::OnChange()
         HILOG_ERROR("%{public}s, OnChange ref is nullptr.", __func__);
         return;
     }
-    ChangeWorkPre();
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
         HILOG_ERROR("%{public}s, loop is nullptr.", __func__);
-        ChangeWorkPreDone();
         return;
     }
 
     uv_work_t *work = new uv_work_t;
     DAHelperOnOffCB *onCB = new DAHelperOnOffCB;
-    onCB->cbBase.cbInfo.env = env_;
-    onCB->cbBase.cbInfo.callback = ref_;
     onCB->observer = this;
     work->data = (void *)onCB;
     int rev = uv_queue_work(
@@ -3147,11 +3150,7 @@ void BatchInsertPromiseCompleteCB(napi_env env, napi_status status, void *data)
 napi_value NAPI_Query(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("%{public}s,called", __func__);
-    DAHelperQueryCB *queryCB = new (std::nothrow) DAHelperQueryCB;
-    if (queryCB == nullptr) {
-        HILOG_ERROR("%{public}s, queryCB == nullptr.", __func__);
-        return WrapVoidToJS(env);
-    }
+    DAHelperQueryCB *queryCB = new DAHelperQueryCB;
     queryCB->cbBase.cbInfo.env = env;
     queryCB->cbBase.asyncWork = nullptr;
     queryCB->cbBase.deferred = nullptr;
@@ -3187,7 +3186,7 @@ napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *que
     napi_value thisVar = nullptr;
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, &thisVar, nullptr));
-    if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
+    if (argcAsync > argCountWithAsync) {
         HILOG_ERROR("%{public}s, Wrong argument count.", __func__);
         return nullptr;
     }
@@ -3200,8 +3199,7 @@ napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *que
     }
 
     std::vector<std::string> result;
-    bool arrayStringbool = false;
-    arrayStringbool = NapiValueToArrayStringUtf8(env, args[PARAM1], result);
+    bool arrayStringbool = NapiValueToArrayStringUtf8(env, args[PARAM1], result);
     if (!arrayStringbool) {
         HILOG_ERROR("%{public}s, The return value of arraystringbool is false", __func__);
     }
@@ -3217,7 +3215,7 @@ napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *que
     queryCB->dataAbilityHelper = objectInfo;
 
     if (argcAsync > argcPromise) {
-        ret = QueryAsync(env, args, ARGS_THREE, queryCB);
+        ret = QuerySync(env, args, ARGS_THREE, queryCB);
     } else {
         ret = QueryPromise(env, queryCB);
     }
@@ -3225,15 +3223,13 @@ napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *que
     return ret;
 }
 
-napi_value QueryAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB)
+napi_value QuerySync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB)
 {
     HILOG_INFO("%{public}s, asyncCallback.", __func__);
     if (args == nullptr || queryCB == nullptr) {
         HILOG_ERROR("%{public}s, param == nullptr.", __func__);
         return nullptr;
     }
-    napi_value resourceName = 0;
-    NAPI_CALL(env, napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName));
 
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, args[argCallback], &valuetype));
@@ -3241,19 +3237,38 @@ napi_value QueryAsync(napi_env env, napi_value *args, const size_t argCallback, 
         NAPI_CALL(env, napi_create_reference(env, args[argCallback], 1, &queryCB->cbBase.cbInfo.callback));
     }
 
-    NAPI_CALL(env,
-        napi_create_async_work(env,
-            nullptr,
-            resourceName,
-            QueryExecuteCB,
-            QueryAsyncCompleteCB,
-            (void *)queryCB,
-            &queryCB->cbBase.asyncWork));
-    NAPI_CALL(env, napi_queue_async_work(env, queryCB->cbBase.asyncWork));
-    napi_value result = 0;
-    NAPI_CALL(env, napi_get_null(env, &result));
+    if (queryCB->dataAbilityHelper != nullptr) {
+        queryCB->execResult = INVALID_PARAMETER;
+        if (!queryCB->uri.empty()) {
+            OHOS::Uri uri(queryCB->uri);
+            auto resultset = queryCB->dataAbilityHelper->Query(uri, queryCB->columns, queryCB->predicates);
+            if (resultset != nullptr) {
+                queryCB->result = resultset;
+                queryCB->execResult = NO_ERROR;
+            }
+        }
+    }
+
+    napi_value callback = nullptr;
+    NAPI_CALL(env, napi_get_reference_value(env, queryCB->cbBase.cbInfo.callback, &callback));
+    napi_value result[ARGS_TWO] = {nullptr};
+    result[PARAM0] = GetCallbackErrorValue(env, queryCB->execResult);
+    result[PARAM1] = WrapResultSet(env, queryCB->result);
+    napi_value undefined = nullptr;
+    NAPI_CALL(env, napi_get_undefined(env, &undefined));
+    napi_value callResult = nullptr;
+    NAPI_CALL(env, napi_call_function(env, undefined, callback, ARGS_TWO, &result[PARAM0], &callResult));
+
+    if (queryCB->cbBase.cbInfo.callback != nullptr) {
+        NAPI_CALL(env, napi_delete_reference(env, queryCB->cbBase.cbInfo.callback));
+    }
+    delete queryCB;
+    queryCB = nullptr;
+
+    napi_value ret = 0;
+    NAPI_CALL(env, napi_get_null(env, &ret));
     HILOG_INFO("%{public}s, asyncCallback end.", __func__);
-    return result;
+    return ret;
 }
 
 napi_value QueryPromise(napi_env env, DAHelperQueryCB *queryCB)
@@ -3263,86 +3278,27 @@ napi_value QueryPromise(napi_env env, DAHelperQueryCB *queryCB)
         HILOG_ERROR("%{public}s, param == nullptr.", __func__);
         return nullptr;
     }
-    napi_value resourceName;
-    NAPI_CALL(env, napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName));
-    napi_deferred deferred;
-    napi_value promise = 0;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
-    queryCB->cbBase.deferred = deferred;
 
-    NAPI_CALL(env,
-        napi_create_async_work(env,
-            nullptr,
-            resourceName,
-            QueryExecuteCB,
-            QueryPromiseCompleteCB,
-            (void *)queryCB,
-            &queryCB->cbBase.asyncWork));
-    NAPI_CALL(env, napi_queue_async_work(env, queryCB->cbBase.asyncWork));
-    HILOG_INFO("%{public}s, promise end.", __func__);
-    return promise;
-}
-
-void QueryPromiseCompleteCB(napi_env env, napi_status status, void *data)
-{
-    HILOG_INFO("NAPI_DAHelperQueryCB,  main event thread complete.");
-    DAHelperQueryCB *queryCB = static_cast<DAHelperQueryCB *>(data);
-    napi_value result = nullptr;
-    result = WrapResultSet(env, queryCB->result);
-    NAPI_CALL_RETURN_VOID(env, napi_resolve_deferred(env, queryCB->cbBase.deferred, result));
-    NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, queryCB->cbBase.asyncWork));
-    delete queryCB;
-    queryCB = nullptr;
-    HILOG_INFO("NAPI_DAHelperQueryCB,  main event thread complete end.");
-}
-
-void QueryExecuteCB(napi_env env, void *data)
-{
-    HILOG_INFO("NAPI_Query, worker pool thread execute.");
-    DAHelperQueryCB *queryCB = static_cast<DAHelperQueryCB *>(data);
     if (queryCB->dataAbilityHelper != nullptr) {
-        queryCB->execResult = INVALID_PARAMETER;
         if (!queryCB->uri.empty()) {
             OHOS::Uri uri(queryCB->uri);
             auto resultset = queryCB->dataAbilityHelper->Query(uri, queryCB->columns, queryCB->predicates);
             if (resultset != nullptr) {
                 queryCB->result = resultset;
-                queryCB->execResult = NO_ERROR;
-            } else {
-                HILOG_INFO("NAPI_Query, resultset == nullptr.");
             }
-        } else {
-            HILOG_ERROR("NAPI_Query, dataAbilityHelper uri is empty");
         }
-    } else {
-        HILOG_ERROR("NAPI_Query, dataAbilityHelper == nullptr");
     }
-    HILOG_INFO("NAPI_Query, worker pool thread execute end.");
-}
 
-void QueryAsyncCompleteCB(napi_env env, napi_status status, void *data)
-{
-    HILOG_INFO("NAPI_Query, main event thread complete.");
-    DAHelperQueryCB *queryCB = static_cast<DAHelperQueryCB *>(data);
-    napi_value callback = nullptr;
-    napi_value undefined = nullptr;
-    napi_value result[ARGS_TWO] = {nullptr};
-    napi_value callResult = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_get_undefined(env, &undefined));
-    NAPI_CALL_RETURN_VOID(env, napi_get_reference_value(env, queryCB->cbBase.cbInfo.callback, &callback));
-
-    result[PARAM0] = GetCallbackErrorValue(env, queryCB->execResult);
-    result[PARAM1] = WrapResultSet(env, queryCB->result);
-
-    NAPI_CALL_RETURN_VOID(env, napi_call_function(env, undefined, callback, ARGS_TWO, &result[PARAM0], &callResult));
-
-    if (queryCB->cbBase.cbInfo.callback != nullptr) {
-        NAPI_CALL_RETURN_VOID(env, napi_delete_reference(env, queryCB->cbBase.cbInfo.callback));
-    }
-    NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, queryCB->cbBase.asyncWork));
+    napi_deferred deferred;
+    napi_value promise = 0;
+    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    napi_value result = WrapResultSet(env, queryCB->result);
+    NAPI_CALL(env, napi_resolve_deferred(env, deferred, result));
     delete queryCB;
     queryCB = nullptr;
-    HILOG_INFO("NAPI_Query, main event thread complete end.");
+
+    HILOG_INFO("%{public}s, promise end.", __func__);
+    return promise;
 }
 
 napi_value WrapResultSet(napi_env env, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet)
@@ -3751,22 +3707,43 @@ void GetDataAbilityResultForResult(
     HILOG_INFO("%{public}s, NAPI_ExecuteBatch, getDataAbilityResultForResult end.", __func__);
 }
 
+void EraseMemberProperties(DAHelperOnOffCB* onCB)
+{
+    if (onCB->observer) {
+        HILOG_DEBUG("EraseMemberProperties, call ReleaseJSCallback");
+        onCB->observer->ReleaseJSCallback();
+        onCB->observer = nullptr;
+    }
+    if (onCB->dataAbilityHelper) {
+        HILOG_DEBUG("EraseMemberProperties, call Release");
+        onCB->dataAbilityHelper->Release();
+        onCB->dataAbilityHelper = nullptr;
+    }
+}
+
+bool NeedErase(std::vector<DAHelperOnOffCB*>::iterator& iter, DataAbilityHelper* objectInfo)
+{
+    if ((*iter) == nullptr) {
+        return false;
+    }
+    if ((*iter)->dataAbilityHelper == objectInfo) {
+        EraseMemberProperties(*iter);
+        delete (*iter);
+        (*iter) = nullptr;
+        iter = g_registerInstances.erase(iter);
+    } else {
+        ++iter;
+    }
+    return true;
+}
+
 void DeleteDAHelperOnOffCB(DAHelperOnOffCB *onCB)
 {
     if (!onCB) {
         HILOG_INFO("DeleteDAHelperOnOffCB, onCB is nullptr, no need delete");
         return;
     }
-
-    if (onCB->observer) {
-        HILOG_INFO("DeleteDAHelperOnOffCB, call ReleaseJSCallback");
-        onCB->observer = nullptr;
-    }
-    if (onCB->dataAbilityHelper) {
-        HILOG_INFO("DeleteDAHelperOnOffCB, call Release");
-        onCB->dataAbilityHelper->Release();
-        onCB->dataAbilityHelper = nullptr;
-    }
+    EraseMemberProperties(onCB);
 
     auto end = remove(g_registerInstances.begin(), g_registerInstances.end(), onCB);
     if (end != g_registerInstances.end()) {

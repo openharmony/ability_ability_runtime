@@ -143,6 +143,14 @@ public:
 
     /**
      *
+     * @brief Notify the current memory.
+     *
+     * @param level Indicates the memory trim level, which shows the current memory usage status.
+     */
+    void ScheduleMemoryLevel(int level) override;
+
+    /**
+     *
      * @brief Low the memory which used by application.
      *
      */
@@ -304,6 +312,15 @@ private:
 
     /**
      *
+     * @brief Notify the memory.
+     *
+     * @param level Indicates the memory trim level, which shows the current memory usage status.
+     *
+     */
+    void HandleMemoryLevel(int level);
+
+    /**
+     *
      * @brief send the new config to the application.
      *
      * @param config The updated config.
@@ -401,8 +418,6 @@ private:
      */
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
         BundleInfo& bundleInfo);
-
-    void PostProcessSecurityExitTask(bool delay);
 
     /**
      *

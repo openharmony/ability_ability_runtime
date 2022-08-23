@@ -22,7 +22,7 @@ namespace OHOS {
 namespace AppExecFwk {
 int64_t AppRunningRecord::appEventId_ = 0;
 
-RenderRecord::RenderRecord(pid_t hostPid, const std::string& renderParam,
+RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
     int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host)
     : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(ipcFd), sharedFd_(sharedFd), host_(host)
 {}
@@ -30,7 +30,7 @@ RenderRecord::RenderRecord(pid_t hostPid, const std::string& renderParam,
 RenderRecord::~RenderRecord()
 {}
 
-std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(pid_t hostPid, const std::string& renderParam,
+std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
     int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host)
 {
     if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 || !host) {
@@ -38,6 +38,8 @@ std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(pid_t hostPid, co
     }
 
     auto renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam, ipcFd, sharedFd, host);
+    renderRecord->SetHostUid(host->GetUid());
+    renderRecord->SetHostBundleName(host->GetBundleName());
 
     return renderRecord;
 }
@@ -47,37 +49,57 @@ void RenderRecord::SetPid(pid_t pid)
     pid_ = pid;
 }
 
-pid_t RenderRecord::GetPid()
+pid_t RenderRecord::GetPid() const
 {
     return pid_;
 }
 
-pid_t RenderRecord::GetHostPid()
+pid_t RenderRecord::GetHostPid() const
 {
     return hostPid_;
 }
 
-std::string RenderRecord::GetRenderParam()
+void RenderRecord::SetHostUid(const int32_t hostUid)
+{
+    hostUid_ = hostUid;
+}
+
+int32_t RenderRecord::GetHostUid() const
+{
+    return hostUid_;
+}
+
+void RenderRecord::SetHostBundleName(const std::string &hostBundleName)
+{
+    hostBundleName_ = hostBundleName;
+}
+
+std::string RenderRecord::GetHostBundleName() const
+{
+    return hostBundleName_;
+}
+
+std::string RenderRecord::GetRenderParam() const
 {
     return renderParam_;
 }
 
-int32_t RenderRecord::GetIpcFd()
+int32_t RenderRecord::GetIpcFd() const
 {
     return ipcFd_;
 }
 
-int32_t RenderRecord::GetSharedFd()
+int32_t RenderRecord::GetSharedFd() const
 {
     return sharedFd_;
 }
 
-std::shared_ptr<AppRunningRecord> RenderRecord::GetHostRecord()
+std::shared_ptr<AppRunningRecord> RenderRecord::GetHostRecord() const
 {
     return host_.lock();
 }
 
-sptr<IRenderScheduler> RenderRecord::GetScheduler()
+sptr<IRenderScheduler> RenderRecord::GetScheduler() const
 {
     return renderScheduler_;
 }
@@ -335,7 +357,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
 
 void AppRunningRecord::AddAbilityStage()
 {
-    if (!isNewMission_) {
+    if (!isStageBasedModel_) {
         HILOG_INFO("Current version than supports !");
         return;
     }
@@ -410,8 +432,8 @@ void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 
 void AppRunningRecord::ScheduleTerminate()
 {
-    SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT);
     if (appLifeCycleDeal_) {
+        SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT);
         appLifeCycleDeal_->ScheduleTerminate();
     }
 }
@@ -455,6 +477,13 @@ void AppRunningRecord::ScheduleTrimMemory()
 {
     if (appLifeCycleDeal_ && priorityObject_) {
         appLifeCycleDeal_->ScheduleTrimMemory(priorityObject_->GetTimeLevel());
+    }
+}
+
+void AppRunningRecord::ScheduleMemoryLevel(int32_t level)
+{
+    if (appLifeCycleDeal_) {
+        appLifeCycleDeal_->ScheduleMemoryLevel(level);
     }
 }
 
@@ -757,12 +786,12 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
     }
     moduleRecord->AbilityTerminated(token);
 
-    if (moduleRecord->GetAbilities().empty()) {
+    if (moduleRecord->GetAbilities().empty() && !IsKeepAliveApp()) {
         RemoveModuleRecord(moduleRecord);
     }
 
     auto moduleRecordList = GetAllModuleRecord();
-    if (moduleRecordList.empty()) {
+    if (moduleRecordList.empty() && !IsKeepAliveApp()) {
         ScheduleTerminate();
     }
 }
@@ -932,10 +961,20 @@ bool AppRunningRecord::IsKeepAliveApp() const
     return isKeepAliveApp_;
 }
 
-void AppRunningRecord::SetKeepAliveAppState(bool isKeepAlive, bool isNewMission)
+bool AppRunningRecord::IsEmptyKeepAliveApp() const
+{
+    return isEmptyKeepAliveApp_;
+}
+
+void AppRunningRecord::SetKeepAliveAppState(bool isKeepAlive, bool isEmptyKeepAliveApp)
 {
     isKeepAliveApp_ = isKeepAlive;
-    isNewMission_ = isNewMission;
+    isEmptyKeepAliveApp_ = isEmptyKeepAliveApp;
+}
+
+void AppRunningRecord::SetStageModelState(bool isStageBasedModel)
+{
+    isStageBasedModel_ = isStageBasedModel;
 }
 
 bool AppRunningRecord::GetTheModuleInfoNeedToUpdated(const std::string bundleName, HapModuleInfo &info)
@@ -1108,6 +1147,16 @@ void AppRunningRecord::SetKilling()
 bool AppRunningRecord::IsKilling() const
 {
     return isKilling_;
+}
+
+void AppRunningRecord::RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObject>& token) const
+{
+    auto moduleRecord = GetModuleRunningRecordByToken(token);
+    if (!moduleRecord) {
+        HILOG_ERROR("can not find module record");
+        return;
+    }
+    (void)moduleRecord->RemoveTerminateAbilityTimeoutTask(token);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

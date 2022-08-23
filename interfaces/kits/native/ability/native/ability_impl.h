@@ -311,6 +311,15 @@ public:
      */
     virtual void NotifyContinuationResult(int32_t result);
 
+    /**
+     * @brief Notify current memory level to ability.
+     *
+     * @param level Current memory level.
+     *
+     * @return
+     */
+    virtual void NotifyMemoryLevel(int32_t level);
+
     bool IsStageBasedModel() const;
 
 #ifdef SUPPORT_GRAPHICS
@@ -445,6 +454,9 @@ private:
     bool hasSaveData_ = false;
     bool needSaveDate_ = false;
     PacMap restoreData_;
+
+private:
+    void AfterFocusedCommon(bool isFocused);
 
 #ifdef SUPPORT_GRAPHICS
 private:

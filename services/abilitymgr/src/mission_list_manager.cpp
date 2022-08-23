@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
+constexpr uint32_t SCENE_FLAG_KEYGUARD = 1;
 constexpr char EVENT_KEY_UID[] = "UID";
 constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
@@ -381,23 +382,13 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
     findReusedMissionInfo = (findReusedMissionInfo && info.missionInfo.id > 0);
     HILOG_INFO("try find reused mission info. result:%{public}d", findReusedMissionInfo);
 
-    info.missionName = missionName;
-    info.isSingletonMode = isSingleton;
-    info.startMethod = startMethod;
-    info.bundleName = abilityRequest.abilityInfo.bundleName;
-    info.uid = abilityRequest.uid;
-    info.missionInfo.runningState = 0;
-    info.missionInfo.continuable = abilityRequest.abilityInfo.continuable;
-    info.missionInfo.time = GetCurrentTime();
-    info.missionInfo.iconPath = abilityRequest.appInfo.iconPath;
-    info.missionInfo.want = abilityRequest.want;
+    BuildInnerMissionInfo(info, missionName, isSingleton, startMethod, abilityRequest);
     auto element = info.missionInfo.want.GetElement();
     if (element.GetBundleName().empty() || element.GetAbilityName().empty()) {
         info.missionInfo.want.SetElementName(abilityRequest.abilityInfo.bundleName, abilityRequest.abilityInfo.name);
     }
 
     if (!findReusedMissionInfo) {
-        info.missionInfo.label = abilityRequest.appInfo.label;
         if (!DelayedSingleton<MissionInfoMgr>::GetInstance()->GenerateMissionId(info.missionInfo.id)) {
             HILOG_DEBUG("failed to generate mission id.");
             return;
@@ -420,6 +411,10 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         HILOG_DEBUG("Update MissionId UpdateMissionId(%{public}d, %{public}d) end", info.missionInfo.id, startMethod);
     }
 
+    if (!findReusedMissionInfo && targetRecord) {
+        info.missionInfo.label = targetRecord->GetLabel();
+    }
+
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
         targetRecord->SetSpecifiedFlag(abilityRequest.specifiedFlag);
     }
@@ -432,6 +427,25 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(info);
     } else {
         DelayedSingleton<MissionInfoMgr>::GetInstance()->AddMissionInfo(info);
+    }
+}
+
+void MissionListManager::BuildInnerMissionInfo(InnerMissionInfo &info, const std::string &missionName,
+    const bool isSingleton, const int32_t startMethod, const AbilityRequest &abilityRequest)
+{
+    info.missionName = missionName;
+    info.isSingletonMode = isSingleton;
+    info.startMethod = startMethod;
+    info.bundleName = abilityRequest.abilityInfo.bundleName;
+    info.uid = abilityRequest.uid;
+    info.missionInfo.runningState = 0;
+    info.missionInfo.continuable = abilityRequest.abilityInfo.continuable;
+    info.missionInfo.time = GetCurrentTime();
+    info.missionInfo.iconPath = abilityRequest.appInfo.iconPath;
+    info.missionInfo.want = abilityRequest.want;
+    info.isTemporary = abilityRequest.abilityInfo.removeMissionAfterTerminate;
+    if (abilityRequest.want.GetIntParam(DLP_INDEX, 0) != 0) {
+        info.isTemporary = true;
     }
 }
 
@@ -632,7 +646,10 @@ int MissionListManager::MinimizeAbilityLocked(const std::shared_ptr<AbilityRecor
 
     abilityRecord->SetMinimizeReason(fromUser);
     MoveToBackgroundTask(abilityRecord);
-    UpdateMissionTimeStamp(abilityRecord);
+    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
+        UpdateMissionTimeStamp(abilityRecord);
+    }
+
     return ERR_OK;
 }
 
@@ -1027,7 +1044,7 @@ void MissionListManager::CompleteBackground(const std::shared_ptr<AbilityRecord>
     for (auto terminateAbility : terminateAbilityList_) {
         if (terminateAbility->GetAbilityState() == AbilityState::BACKGROUND) {
             auto timeoutTask = [terminateAbility, self]() {
-                HILOG_WARN("Disconnect ability terminate timeout.");
+                HILOG_WARN("Terminate ability timeout after background.");
                 self->DelayCompleteTerminate(terminateAbility);
             };
             terminateAbility->Terminate(timeoutTask);
@@ -1123,7 +1140,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
     if (abilityRecord->GetAbilityState() == AbilityState::BACKGROUND) {
         auto self(shared_from_this());
         auto task = [abilityRecord, self]() {
-            HILOG_WARN("Disconnect ability terminate timeout.");
+            HILOG_WARN("Terminate ability timeout.");
             self->DelayCompleteTerminate(abilityRecord);
         };
         abilityRecord->Terminate(task);
@@ -1470,7 +1487,9 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
     abilityRecord->SetIsNewWant(false);
     NotifyMissionCreated(abilityRecord);
     if (abilityRecord->IsNeedTakeSnapShot()) {
-        UpdateMissionSnapshot(abilityRecord);
+        if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
+            UpdateMissionSnapshot(abilityRecord);
+        }
     } else {
         abilityRecord->SetNeedSnapShot(true);
     }
@@ -2400,9 +2419,10 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     return targetAbilityRecord->LoadAbility();
 }
 
-int MissionListManager::ReleaseLocked(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
+int MissionListManager::ReleaseCallLocked(
+    const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
 {
-    HILOG_DEBUG("release ability.");
+    HILOG_DEBUG("release call ability.");
 
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
@@ -2412,7 +2432,7 @@ int MissionListManager::ReleaseLocked(const sptr<IAbilityConnection> &connect, c
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecordByName(element);
     CHECK_POINTER_AND_RETURN(abilityRecord, RELEASE_CALL_ABILITY_INNER_ERR);
 
-    if (!abilityRecord->Release(connect)) {
+    if (!abilityRecord->ReleaseCall(connect)) {
         HILOG_ERROR("ability release call record failed.");
         return RELEASE_CALL_ABILITY_INNER_ERR;
     }
@@ -2476,7 +2496,7 @@ void MissionListManager::OnCallConnectDied(const std::shared_ptr<CallRecord> &ca
     AppExecFwk::ElementName element = callRecord->GetTargetServiceName();
     auto abilityRecord = GetAbilityRecordByName(element);
     CHECK_POINTER(abilityRecord);
-    abilityRecord->Release(callRecord->GetConCallBack());
+    abilityRecord->ReleaseCall(callRecord->GetConCallBack());
 }
 void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag)
 {

@@ -22,27 +22,20 @@ namespace OHOS {
 namespace AppExecFwk {
 class NAPIDataAbilityObserver : public AAFwk::DataAbilityObserverStub {
 public:
-    virtual ~NAPIDataAbilityObserver();
     void OnChange() override;
     void SetEnv(const napi_env &env);
     void SetCallbackRef(const napi_ref &ref);
+    void ReleaseJSCallback();
 
-    void SetAssociatedObject(DAHelperOnOffCB* object);
-    const DAHelperOnOffCB* GetAssociatedObject(void);
-
-    void ChangeWorkPre();
-    void ChangeWorkInt();
-    void ChangeWorkPreDone();
-    void ChangeWorkRunDone();
-    int GetWorkPre();
-    int GetWorkInt();
+    void CallJsMethod();
 
 private:
+    void SafeReleaseJSCallback();
+
     napi_env env_ = nullptr;
     napi_ref ref_ = nullptr;
-    DAHelperOnOffCB* onCB_ = nullptr;
-    int workPre_ = 0;
-    int intrust_ = 0;
+    bool isCallingback_ = false;
+    bool needRelease_ = false;
     std::mutex mutex_;
 };
 
@@ -399,15 +392,9 @@ napi_value NAPI_Query(napi_env env, napi_callback_info info);
 
 napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *queryCB);
 
-napi_value QueryAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB);
+napi_value QuerySync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB);
 
 napi_value QueryPromise(napi_env env, DAHelperQueryCB *queryCB);
-
-void QueryExecuteCB(napi_env env, void *data);
-
-void QueryAsyncCompleteCB(napi_env env, napi_status status, void *data);
-
-void QueryPromiseCompleteCB(napi_env env, napi_status status, void *data);
 
 napi_value WrapResultSet(napi_env env, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
 
@@ -490,6 +477,8 @@ void GetDataAbilityResultForResult(
     napi_env env, const std::vector<std::shared_ptr<DataAbilityResult>> dataAbilityResult, napi_value result);
 
 void DeleteDAHelperOnOffCB(DAHelperOnOffCB *onCB);
+bool NeedErase(std::vector<DAHelperOnOffCB*>::iterator& iter, DataAbilityHelper* objectInfo);
+void EraseMemberProperties(DAHelperOnOffCB* onCB);
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif /* OHOS_ABILITY_RUNTIME_NAPI_DATA_ABILITY_HELPER_H */

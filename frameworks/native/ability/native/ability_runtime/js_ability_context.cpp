@@ -23,6 +23,7 @@
 #include "js_data_struct_converter.h"
 #include "js_runtime_utils.h"
 #include "ability_runtime/js_caller_complex.h"
+#include "napi_common_ability.h"
 #include "napi_common_start_options.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -195,8 +196,9 @@ NativeValue* JsAbilityContext::OnStartAbility(NativeEngine& engine, NativeCallba
                 task.Reject(engine, CreateJsError(engine, 1, "Context is released"));
                 return;
             }
-            auto errcode = (unwrapArgc == 1) ?
+            auto innerErrorCode = (unwrapArgc == 1) ?
                 context->StartAbility(want, -1) : context->StartAbility(want, startOptions, -1);
+            ErrCode errcode = AppExecFwk::GetStartAbilityErrorCode(innerErrorCode);
             if (errcode == 0) {
                 task.Resolve(engine, engine.CreateUndefined());
             } else {
@@ -247,9 +249,10 @@ NativeValue* JsAbilityContext::OnStartAbilityWithAccount(NativeEngine& engine, N
                     return;
                 }
 
-                auto errcode = (unwrapArgc == INDEX_TWO) ?
+                auto innerErrorCode = (unwrapArgc == INDEX_TWO) ?
                     context->StartAbilityWithAccount(want, accountId, -1) : context->StartAbilityWithAccount(
                         want, accountId, startOptions, -1);
+                ErrCode errcode = AppExecFwk::GetStartAbilityErrorCode(innerErrorCode);
                 if (errcode == 0) {
                     task.Resolve(engine, engine.CreateUndefined());
                 } else {
@@ -328,17 +331,18 @@ NativeValue* JsAbilityContext::OnStartAbilityByCall(NativeEngine& engine, Native
 
         auto context = weak.lock();
         if (context != nullptr && calldata->callerCallBack != nullptr && calldata->remoteCallee != nullptr) {
-            auto releaseAbilityFunc = [weak] (
+            auto releaseCallAbilityFunc = [weak] (
                 const std::shared_ptr<CallerCallBack> &callback) -> ErrCode {
                 auto contextForRelease = weak.lock();
                 if (contextForRelease == nullptr) {
-                    HILOG_ERROR("releaseAbilityFunction, context is nullptr");
+                    HILOG_ERROR("releaseCallAbilityFunction, context is nullptr");
                     return -1;
                 }
-                return contextForRelease->ReleaseAbility(callback);
+                return contextForRelease->ReleaseCall(callback);
             };
             task.Resolve(engine,
-                CreateJsCallerComplex(engine, releaseAbilityFunc, calldata->remoteCallee, calldata->callerCallBack));
+                CreateJsCallerComplex(
+                    engine, releaseCallAbilityFunc, calldata->remoteCallee, calldata->callerCallBack));
         } else {
             HILOG_ERROR("OnStartAbilityByCall callComplete params error %{public}s is nullptr",
                 context == nullptr ? "context" :
@@ -735,6 +739,7 @@ NativeValue* JsAbilityContext::OnConnectAbility(NativeEngine& engine, NativeCall
     ConnectionKey key;
     key.id = g_serialNumber;
     key.want = want;
+    connection->SetConnectionId(key.id);
     abilityConnects_.emplace(key, connection);
     if (g_serialNumber < INT32_MAX) {
         g_serialNumber++;
@@ -794,6 +799,7 @@ NativeValue* JsAbilityContext::OnConnectAbilityWithAccount(NativeEngine& engine,
     ConnectionKey key;
     key.id = g_serialNumber;
     key.want = want;
+    connection->SetConnectionId(key.id);
     abilityConnects_.emplace(key, connection);
     if (g_serialNumber < INT32_MAX) {
         g_serialNumber++;
@@ -961,7 +967,7 @@ NativeValue* JsAbilityContext::OnRequestPermissionsFromUser(NativeEngine& engine
         asyncTask->Reject(engine, CreateJsError(engine, 1, "context is released!"));
     } else {
         curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
-        context->RequestPermissionsFromUser(permissionList, curRequestCode_, std::move(task));
+        context->RequestPermissionsFromUser(engine, permissionList, curRequestCode_, std::move(task));
     }
     HILOG_INFO("OnRequestPermissionsFromUser is called end");
     return result;
@@ -1131,37 +1137,100 @@ NativeValue* CreateJsAbilityContext(NativeEngine& engine, std::shared_ptr<Abilit
         object->SetProperty("config", CreateJsConfiguration(engine, *configuration));
     }
 
-    BindNativeFunction(engine, *object, "startAbility", JsAbilityContext::StartAbility);
-    BindNativeFunction(engine, *object, "startAbilityWithAccount", JsAbilityContext::StartAbilityWithAccount);
-    BindNativeFunction(engine, *object, "startAbilityByCall", JsAbilityContext::StartAbilityByCall);
-    BindNativeFunction(engine, *object, "startAbilityForResult", JsAbilityContext::StartAbilityForResult);
-    BindNativeFunction(engine, *object, "startAbilityForResultWithAccount",
+    const char *moduleName = "JsAbilityContext";
+    BindNativeFunction(engine, *object, "startAbility", moduleName, JsAbilityContext::StartAbility);
+    BindNativeFunction(engine, *object, "startAbilityWithAccount", moduleName,
+        JsAbilityContext::StartAbilityWithAccount);
+    BindNativeFunction(engine, *object, "startAbilityByCall", moduleName, JsAbilityContext::StartAbilityByCall);
+    BindNativeFunction(engine, *object, "startAbilityForResult", moduleName, JsAbilityContext::StartAbilityForResult);
+    BindNativeFunction(engine, *object, "startAbilityForResultWithAccount", moduleName,
         JsAbilityContext::StartAbilityForResultWithAccount);
-    BindNativeFunction(engine, *object, "startServiceExtensionAbility", JsAbilityContext::StartServiceExtensionAbility);
-    BindNativeFunction(engine, *object, "startServiceExtensionAbilityWithAccount",
+    BindNativeFunction(engine, *object, "startServiceExtensionAbility", moduleName,
+        JsAbilityContext::StartServiceExtensionAbility);
+    BindNativeFunction(engine, *object, "startServiceExtensionAbilityWithAccount", moduleName,
         JsAbilityContext::StartServiceExtensionAbilityWithAccount);
-    BindNativeFunction(engine, *object, "stopServiceExtensionAbility", JsAbilityContext::StopServiceExtensionAbility);
-    BindNativeFunction(engine, *object, "stopServiceExtensionAbilityWithAccount",
+    BindNativeFunction(engine, *object, "stopServiceExtensionAbility", moduleName,
+        JsAbilityContext::StopServiceExtensionAbility);
+    BindNativeFunction(engine, *object, "stopServiceExtensionAbilityWithAccount", moduleName,
         JsAbilityContext::StopServiceExtensionAbilityWithAccount);
-    BindNativeFunction(engine, *object, "connectAbility", JsAbilityContext::ConnectAbility);
-    BindNativeFunction(engine, *object, "connectAbilityWithAccount", JsAbilityContext::ConnectAbilityWithAccount);
-    BindNativeFunction(engine, *object, "disconnectAbility", JsAbilityContext::DisconnectAbility);
-    BindNativeFunction(engine, *object, "terminateSelf", JsAbilityContext::TerminateSelf);
-    BindNativeFunction(engine, *object, "terminateSelfWithResult", JsAbilityContext::TerminateSelfWithResult);
-    BindNativeFunction(engine, *object, "requestPermissionsFromUser", JsAbilityContext::RequestPermissionsFromUser);
-    BindNativeFunction(engine, *object, "restoreWindowStage", JsAbilityContext::RestoreWindowStage);
-    BindNativeFunction(engine, *object, "isTerminating", JsAbilityContext::IsTerminating);
+    BindNativeFunction(engine, *object, "connectAbility", moduleName, JsAbilityContext::ConnectAbility);
+    BindNativeFunction(engine, *object, "connectAbilityWithAccount", moduleName,
+        JsAbilityContext::ConnectAbilityWithAccount);
+    BindNativeFunction(engine, *object, "disconnectAbility", moduleName, JsAbilityContext::DisconnectAbility);
+    BindNativeFunction(engine, *object, "terminateSelf", moduleName, JsAbilityContext::TerminateSelf);
+    BindNativeFunction(engine, *object, "terminateSelfWithResult", moduleName,
+        JsAbilityContext::TerminateSelfWithResult);
+    BindNativeFunction(engine, *object, "requestPermissionsFromUser", moduleName,
+        JsAbilityContext::RequestPermissionsFromUser);
+    BindNativeFunction(engine, *object, "restoreWindowStage", moduleName, JsAbilityContext::RestoreWindowStage);
+    BindNativeFunction(engine, *object, "isTerminating", moduleName, JsAbilityContext::IsTerminating);
 
 #ifdef SUPPORT_GRAPHICS
-    BindNativeFunction(engine, *object, "setMissionLabel", JsAbilityContext::SetMissionLabel);
-    BindNativeFunction(engine, *object, "setMissionIcon", JsAbilityContext::SetMissionIcon);
+    BindNativeFunction(engine, *object, "setMissionLabel", moduleName, JsAbilityContext::SetMissionLabel);
+    BindNativeFunction(engine, *object, "setMissionIcon", moduleName, JsAbilityContext::SetMissionIcon);
 #endif
     return objValue;
 }
 
 JSAbilityConnection::JSAbilityConnection(NativeEngine& engine) : engine_(engine) {}
 
-JSAbilityConnection::~JSAbilityConnection() = default;
+JSAbilityConnection::~JSAbilityConnection()
+{
+    uv_loop_t *loop = engine_.GetUVLoop();
+    if (loop == nullptr) {
+        HILOG_ERROR("~JSAbilityConnection: failed to get uv loop.");
+        return;
+    }
+
+    ConnectCallback *cb = new (std::nothrow) ConnectCallback();
+    if (cb == nullptr) {
+        HILOG_ERROR("~JSAbilityConnection: failed to create cb.");
+        return;
+    }
+    cb->jsConnectionObject_ = std::move(jsConnectionObject_);
+
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        HILOG_ERROR("~JSAbilityConnection: failed to create work.");
+        delete cb;
+        cb = nullptr;
+        return;
+    }
+    work->data = reinterpret_cast<void *>(cb);
+    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
+    [](uv_work_t *work, int status) {
+        if (work == nullptr) {
+            HILOG_ERROR("~JSAbilityConnection: work is nullptr.");
+            return;
+        }
+        if (work->data == nullptr) {
+            HILOG_ERROR("~JSAbilityConnection: data is nullptr.");
+            delete work;
+            work = nullptr;
+            return;
+        }
+        ConnectCallback *cb = reinterpret_cast<ConnectCallback *>(work->data);
+        delete cb;
+        cb = nullptr;
+        delete work;
+        work = nullptr;
+    });
+    if (ret != 0) {
+        if (cb != nullptr) {
+            delete cb;
+            cb = nullptr;
+        }
+        if (work != nullptr) {
+            delete work;
+            work = nullptr;
+        }
+    }
+}
+
+void JSAbilityConnection::SetConnectionId(int64_t id)
+{
+    connectionId_ = id;
+}
 
 void JSAbilityConnection::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
@@ -1261,10 +1330,11 @@ void JSAbilityConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::Elemen
     std::string bundleName = element.GetBundleName();
     std::string abilityName = element.GetAbilityName();
     auto item = std::find_if(abilityConnects_.begin(), abilityConnects_.end(),
-        [bundleName, abilityName] (
+        [bundleName, abilityName, connectionId = connectionId_] (
             const std::map<ConnectionKey, sptr<JSAbilityConnection>>::value_type &obj) {
                 return (bundleName == obj.first.want.GetBundle()) &&
-                    (abilityName == obj.first.want.GetElement().GetAbilityName());
+                    (abilityName == obj.first.want.GetElement().GetAbilityName()) &&
+                    connectionId == obj.first.id;
         });
     if (item != abilityConnects_.end()) {
         // match bundlename && abilityname

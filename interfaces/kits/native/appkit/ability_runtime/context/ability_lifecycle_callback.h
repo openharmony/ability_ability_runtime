@@ -52,7 +52,7 @@ public:
         const std::shared_ptr<NativeReference> &windowStage) = 0;
 
     /**
-     * Called back when the window stage is created.
+     * Called back when the window stage is destroy.
      *
      * @since 9
      * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
@@ -64,7 +64,7 @@ public:
         const std::shared_ptr<NativeReference> &windowStage) = 0;
 
     /**
-     * Called back when the window stage is actived.
+     * Called back when the window stage is active.
      *
      * @since 9
      * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
@@ -76,7 +76,7 @@ public:
         const std::shared_ptr<NativeReference> &windowStage) = 0;
 
     /**
-     * Called back when the window stage is inactived.
+     * Called back when the window stage is inactive.
      *
      * @since 9
      * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
@@ -88,7 +88,7 @@ public:
         const std::shared_ptr<NativeReference> &windowStage) = 0;
 
     /**
-     * Called back when the ability window stage is created.
+     * Called back when the ability is destroy.
      *
      * @since 9
      * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
@@ -98,7 +98,7 @@ public:
     virtual void OnAbilityDestroy(const std::shared_ptr<NativeReference> &ability) = 0;
 
     /**
-     * Called back when the ability window stage is created.
+     * Called back when the ability is foreground.
      *
      * @since 9
      * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
@@ -108,7 +108,7 @@ public:
     virtual void OnAbilityForeground(const std::shared_ptr<NativeReference> &ability) = 0;
 
     /**
-     * Called back when the ability window stage is created.
+     * Called back when the ability is background.
      *
      * @since 9
      * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
@@ -118,7 +118,7 @@ public:
     virtual void OnAbilityBackground(const std::shared_ptr<NativeReference> &ability) = 0;
 
     /**
-     * Called back when the ability window stage is created.
+     * Called back when the ability is continue.
      *
      * @since 9
      * @syscap SystemCapability.Ability.AbilityRuntime.AbilityCore
@@ -147,11 +147,11 @@ public:
     void OnAbilityContinue(const std::shared_ptr<NativeReference> &ability) override;
     int32_t Register(NativeValue *jsCallback);
     bool UnRegister(int32_t callbackId);
-    bool IsEmpty();
+    bool IsEmpty() const;
     static int32_t serialNumber_;
 
 private:
-    NativeEngine* engine_;
+    NativeEngine* engine_ = nullptr;
     std::shared_ptr<NativeReference> jsCallback_;
     std::map<int32_t, std::shared_ptr<NativeReference>> callbacks_;
     void CallJsMethod(const std::string &methodName, const std::shared_ptr<NativeReference> &ability);
@@ -160,9 +160,8 @@ private:
         const std::shared_ptr<NativeReference> &windowStage);
     void CallWindowStageJsMethodInner(const std::string &methodName, const std::shared_ptr<NativeReference> &ability,
         const std::shared_ptr<NativeReference> &windowStage);
-    void CallJsMethodInnerCommon(const std::string &methodName,
-        const std::shared_ptr<NativeReference> &ability, const std::shared_ptr<NativeReference> &windowStage,
-        bool isWindowStage);
+    void CallJsMethodInnerCommon(const std::string &methodName, const std::shared_ptr<NativeReference> &ability,
+        const std::shared_ptr<NativeReference> &windowStage, bool isWindowStage);
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

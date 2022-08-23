@@ -25,7 +25,7 @@
 #include "datetime_ex.h"
 #include "hilog_wrapper.h"
 #include "perf_profile.h"
-
+#include "app_mgr_service.h"
 #include "app_process_data.h"
 #include "app_state_observer_manager.h"
 #include "bundle_constants.h"
@@ -50,6 +50,7 @@
 #include "uri_permission_manager_client.h"
 #include "event_report.h"
 #include "hisysevent.h"
+#include "app_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -319,10 +320,10 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
     appRecord->LaunchApplication(*configuration_);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
 
-    // There is no ability when the resident process starts
+    // There is no ability when the empty resident process starts
     // The status of all resident processes is ready
     // There is no process of switching the foreground, waiting for his first ability to start
-    if (appRecord->IsKeepAliveApp()) {
+    if (appRecord->IsEmptyKeepAliveApp()) {
         appRecord->AddAbilityStage();
         return;
     }
@@ -691,6 +692,29 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
+{
+    HILOG_INFO("AppMgrServiceInner start");
+
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        HILOG_ERROR("callerToken not SA %{public}s", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    if (!(level == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_MODERATE ||
+        level == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_CRITICAL ||
+        level == OHOS::AppExecFwk::MemoryLevel::MEMORY_LEVEL_LOW)) {
+        HILOG_ERROR("Level value error!");
+        return ERR_INVALID_VALUE;
+    }
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager nullptr!");
+        return ERR_INVALID_VALUE;
+    }
+
+    return appRunningManager_->NotifyMemoryLevel(level);
+}
+
 void AppMgrServiceInner::GetRunningProcesses(const std::shared_ptr<AppRunningRecord> &appRecord,
     std::vector<RunningProcessInfo> &info)
 {
@@ -799,6 +823,8 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(con
         return nullptr;
     }
 
+    bool isKeepAlive = bundleInfo.isKeepAlive && bundleInfo.singleton;
+    appRecord->SetKeepAliveAppState(isKeepAlive, false);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want);
     if (want) {
@@ -1398,6 +1424,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     if (renderRecord && renderRecord->GetPid() > 0) {
         HILOG_DEBUG("Kill render process when nwebhost died.");
         KillProcessByPid(renderRecord->GetPid());
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
     }
 
     if (appRecord->IsKeepAliveApp()) {
@@ -1614,10 +1641,11 @@ void AppMgrServiceInner::StartResidentProcess(const std::vector<BundleInfo> &inf
     }
 
     for (auto &bundle : infos) {
-        auto processName = bundle.applicationInfo.process.empty() ?
-            bundle.applicationInfo.bundleName : bundle.applicationInfo.process;
-        HILOG_INFO("processName = [%{public}s]", processName.c_str());
-
+        HILOG_INFO("processName = [%{public}s]", bundle.applicationInfo.process.c_str());
+        if (bundle.applicationInfo.process.empty()) {
+            continue;
+        }
+        auto processName = bundle.applicationInfo.process;
         // Inspection records
         auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(
             bundle.applicationInfo.name, processName, bundle.applicationInfo.uid, bundle);
@@ -1653,15 +1681,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         return;
     }
 
-    bool isStageBased = false;
-    bool moduelJson = false;
-    if (!info.hapModuleInfos.empty()) {
-        isStageBased = info.hapModuleInfos.back().isStageBasedModel;
-        moduelJson = info.hapModuleInfos.back().isModuleJson;
-    }
-    HILOG_INFO("StartEmptyResidentProcess stage:%{public}d moduel:%{public}d size:%{public}d",
-        isStageBased, moduelJson, (int32_t)info.hapModuleInfos.size());
-    appRecord->SetKeepAliveAppState(true, isStageBased);
+    appRecord->SetKeepAliveAppState(true, true);
 
     if (restartCount > 0) {
         HILOG_INFO("StartEmptyResidentProcess restartCount : [%{public}d], ", restartCount);
@@ -1745,9 +1765,11 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
     EventFwk::CommonEventManager::PublishCommonEvent(commonData);
 }
 
-int32_t AppMgrServiceInner::RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer)
+int32_t AppMgrServiceInner::RegisterApplicationStateObserver(
+    const sptr<IApplicationStateObserver> &observer, const std::vector<std::string> &bundleNameList)
 {
-    return DelayedSingleton<AppStateObserverManager>::GetInstance()->RegisterApplicationStateObserver(observer);
+    return DelayedSingleton<AppStateObserverManager>::GetInstance()->RegisterApplicationStateObserver(
+        observer, bundleNameList);
 }
 
 int32_t AppMgrServiceInner::UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer)
@@ -2094,6 +2116,11 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is null");
         return ERR_INVALID_VALUE;
+    }
+
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateConfigurationPerm();
+    if (ret != ERR_OK) {
+        return ret;
     }
 
     std::vector<std::string> changeKeyV;
@@ -2498,6 +2525,7 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
     renderRecord->SetPid(pid);
     HILOG_INFO("start render process successed, hostPid:%{public}d, pid:%{public}d uid:%{public}d",
         renderRecord->GetHostPid(), pid, startMsg.uid);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessCreated(renderRecord);
     return 0;
 }
 
@@ -2530,7 +2558,10 @@ void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
 {
     HILOG_ERROR("On render remote died.");
     if (appRunningManager_) {
-        appRunningManager_->OnRemoteRenderDied(remote);
+        auto renderRecord = appRunningManager_->OnRemoteRenderDied(remote);
+        if (renderRecord) {
+            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+        }
     }
 }
 

@@ -773,6 +773,7 @@ public:
 
     void SetUid(int32_t uid);
     int32_t GetUid();
+    int32_t GetPid();
     void SetSwitchingPause(bool state);
     bool IsSwitchingPause();
     void SetOwnerMissionUserId(int32_t userId);
@@ -780,7 +781,7 @@ public:
 
     // new version
     ResolveResultType Resolve(const AbilityRequest &abilityRequest);
-    bool Release(const sptr<IAbilityConnection> & connect);
+    bool ReleaseCall(const sptr<IAbilityConnection>& connect);
     bool IsNeedToCallRequest() const;
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
@@ -804,6 +805,8 @@ public:
     #endif
 
     bool CanRestartRootLauncher();
+
+    std::string GetLabel();
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
@@ -833,6 +836,9 @@ private:
         std::string srcAbilityId);
 
     bool IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken);
+
+    void HandleDlpAttached();
+    void HandleDlpClosed();
 
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
@@ -916,6 +922,7 @@ private:
     AppState appState_ = AppState::BEGIN;
 
     int32_t uid_ = 0;
+    int32_t pid_ = 0;
     std::weak_ptr<MissionList> missionList_;
     std::weak_ptr<Mission> mission_;
     int32_t missionId_ = -1;

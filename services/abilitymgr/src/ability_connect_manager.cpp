@@ -211,6 +211,7 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
     auto serviceMapIter = serviceMap_.find(element.GetURI());
     if (serviceMapIter == serviceMap_.end()) {
         targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        targetService->SetOwnerMissionUserId(userId_);
         if (isCreatedByConnect && targetService != nullptr) {
             targetService->SetCreateByConnectMode();
         }
@@ -264,6 +265,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     // 4. Other cases , need to connect the service ability
     auto connectRecord = ConnectionRecord::CreateConnectionRecord(callerToken, targetService, connect);
     CHECK_POINTER_AND_RETURN(connectRecord, ERR_INVALID_VALUE);
+    connectRecord->AttachCallerInfo();
     connectRecord->SetConnectState(ConnectionState::CONNECTING);
     targetService->AddConnectRecordToList(connectRecord);
     connectRecordList.push_back(connectRecord);
@@ -792,7 +794,7 @@ void AbilityConnectManager::HandleTerminateDisconnectTask(const ConnectListType&
         auto targetService = connectRecord->GetAbilityRecord();
         if (targetService) {
             HILOG_WARN("This record complete disconnect directly. recordId:%{public}d", connectRecord->GetRecordId());
-            connectRecord->CompleteDisconnect(ERR_OK, false);
+            connectRecord->CompleteDisconnect(ERR_OK, true);
             targetService->RemoveConnectRecordFromList(connectRecord);
             RemoveConnectionRecordFromMap(connectRecord);
         };
@@ -1047,22 +1049,37 @@ bool AbilityConnectManager::IsAbilityNeedRestart(const std::shared_ptr<AbilityRe
         return false;
     }
 
-    auto GetKeepAliveAbilities = [&bundleInfos](std::vector<std::pair<std::string, std::string>> &keepAliveAbilities) {
+    auto CheckIsAbilityKeepAlive = [](const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::string processName, std::string &mainElement) {
+        if (!hapModuleInfo.isModuleJson) {
+            // old application model
+            mainElement = hapModuleInfo.mainAbility;
+            for (auto abilityInfo : hapModuleInfo.abilityInfos) {
+                if (abilityInfo.process == processName && abilityInfo.name == mainElement) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // new application model
+        if (hapModuleInfo.process == processName) {
+            mainElement = hapModuleInfo.mainElementName;
+            return true;
+        }
+        return false;
+    };
+
+    auto GetKeepAliveAbilities = [&](std::vector<std::pair<std::string, std::string>> &keepAliveAbilities) {
         for (size_t i = 0; i < bundleInfos.size(); i++) {
-            if (!bundleInfos[i].isKeepAlive) {
+            std::string processName = bundleInfos[i].applicationInfo.process;
+            if (!bundleInfos[i].isKeepAlive || processName.empty()) {
                 continue;
             }
             std::string bundleName = bundleInfos[i].name;
             for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
                 std::string mainElement;
-                if (!hapModuleInfo.isModuleJson) {
-                    // old application model
-                    mainElement = hapModuleInfo.mainAbility;
-                } else {
-                    // new application model
-                    mainElement = hapModuleInfo.mainElementName;
-                }
-                if (!mainElement.empty()) {
+                if (CheckIsAbilityKeepAlive(hapModuleInfo, processName, mainElement) && !mainElement.empty()) {
                     keepAliveAbilities.push_back(std::make_pair(bundleName, mainElement));
                 }
             }

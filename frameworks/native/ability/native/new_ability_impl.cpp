@@ -49,12 +49,13 @@ void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Lif
     }
 #endif
     SetLifeCycleStateInfo(targetState);
-
-    ability_->SetLaunchParam(targetState.launchParam);
-    if (ability_ && lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL) {
-        ability_->SetStartAbilitySetting(targetState.setting);
-        Start(want);
-        CheckAndRestore();
+    if (ability_ != nullptr) {
+        ability_->SetLaunchParam(targetState.launchParam);
+        if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL) {
+            ability_->SetStartAbilitySetting(targetState.setting);
+            Start(want);
+            CheckAndRestore();
+        }
     }
 
     bool ret = false;
@@ -76,7 +77,7 @@ void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Lif
  */
 bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState)
 {
-    HILOG_INFO("NewAbilityImpl::AbilityTransaction begin");
+    HILOG_DEBUG("NewAbilityImpl::AbilityTransaction begin");
     bool ret = true;
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
@@ -119,7 +120,7 @@ bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycle
             break;
         }
     }
-    HILOG_INFO("NewAbilityImpl::AbilityTransaction end: retVal = %{public}d", (int)ret);
+    HILOG_DEBUG("NewAbilityImpl::AbilityTransaction end: retVal = %{public}d", (int)ret);
     return ret;
 }
 }  // namespace AppExecFwk
