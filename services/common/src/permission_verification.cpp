@@ -139,6 +139,30 @@ bool PermissionVerification::VerifyMissionPermission()
     return false;
 }
 
+int PermissionVerification::VerifyAppStateObserverPermission()
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_RUNNING_STATE_OBSERVER)) {
+        HILOG_INFO("Permission verification succeeded.");
+        return ERR_OK;
+    }
+    HILOG_ERROR("Permission verification failed.");
+    return ERR_PERMISSION_DENIED;
+}
+
+int32_t PermissionVerification::VerifyUpdateConfigurationPerm()
+{
+    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_UPDATE_CONFIGURATION)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
+        return ERR_OK;
+    }
+
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
+    return ERR_PERMISSION_DENIED;
+}
+
 unsigned int PermissionVerification::GetCallingTokenID()
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();

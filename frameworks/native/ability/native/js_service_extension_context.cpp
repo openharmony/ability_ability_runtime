@@ -24,6 +24,7 @@
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
+#include "napi_common_ability.h"
 #include "napi_common_want.h"
 #include "napi_common_util.h"
 #include "napi_remote_object.h"
@@ -171,9 +172,10 @@ private:
                     return;
                 }
 
-                ErrCode errcode = ERR_OK;
-                (unwrapArgc == 1) ? errcode = context->StartAbility(want) :
-                    errcode = context->StartAbility(want, startOptions);
+                ErrCode innerErrorCode = ERR_OK;
+                (unwrapArgc == 1) ? innerErrorCode = context->StartAbility(want) :
+                    innerErrorCode = context->StartAbility(want, startOptions);
+                ErrCode errcode = AppExecFwk::GetStartAbilityErrorCode(innerErrorCode);
                 if (errcode == 0) {
                     task.Resolve(engine, engine.CreateUndefined());
                 } else {
@@ -242,7 +244,7 @@ private:
     AsyncTask::CompleteCallback GetCallComplete(std::shared_ptr<StartAbilityByCallParameters> calls)
     {
         auto callComplete = [weak = context_, calldata = calls] (
-            NativeEngine& engine, AsyncTask& task, int32_t status) {
+            NativeEngine& engine, AsyncTask& task, int32_t) {
             if (calldata->err != 0) {
                 HILOG_ERROR("OnStartAbilityByCall callComplete err is %{public}d", calldata->err);
                 task.Reject(engine, CreateJsError(engine, calldata->err, "callComplete err."));
@@ -251,18 +253,18 @@ private:
 
             auto context = weak.lock();
             if (context != nullptr && calldata->callerCallBack != nullptr && calldata->remoteCallee != nullptr) {
-                auto releaseAbilityFunc = [weak] (
+                auto releaseCallFunc = [weak] (
                     const std::shared_ptr<CallerCallBack> &callback) -> ErrCode {
                     auto contextForRelease = weak.lock();
                     if (contextForRelease == nullptr) {
-                        HILOG_ERROR("releaseAbilityFunction, context is nullptr");
+                        HILOG_ERROR("releaseCallFunction, context is nullptr");
                         return -1;
                     }
-                    return contextForRelease->ReleaseAbility(callback);
+                    return contextForRelease->ReleaseCall(callback);
                 };
                 task.Resolve(engine,
                     CreateJsCallerComplex(
-                        engine, releaseAbilityFunc, calldata->remoteCallee, calldata->callerCallBack));
+                        engine, releaseCallFunc, calldata->remoteCallee, calldata->callerCallBack));
             } else {
                 HILOG_ERROR("OnStartAbilityByCall callComplete params error %{public}s is nullptr",
                     context == nullptr ? "context" :
@@ -278,14 +280,14 @@ private:
     AsyncTask::ExecuteCallback GetCallExecute(std::shared_ptr<StartAbilityByCallParameters> calls)
     {
         auto callExecute = [calldata = calls] () {
-            constexpr int CALLER_TIME_OUT = 10; // 10s
+            constexpr int callerTimeOut = 10; // 10s
             std::unique_lock<std::mutex> lock(calldata->mutexlock);
             if (calldata->remoteCallee != nullptr) {
                 HILOG_INFO("OnStartAbilityByCall callExecute callee isn`t nullptr");
                 return;
             }
 
-            if (calldata->condition.wait_for(lock, std::chrono::seconds(CALLER_TIME_OUT)) == std::cv_status::timeout) {
+            if (calldata->condition.wait_for(lock, std::chrono::seconds(callerTimeOut)) == std::cv_status::timeout) {
                 HILOG_ERROR("OnStartAbilityByCall callExecute waiting callee timeout");
                 calldata->err = -1;
             }
@@ -362,9 +364,10 @@ private:
                         return;
                     }
 
-                    ErrCode errcode = ERR_OK;
-                    (unwrapArgc == ARGC_TWO) ? errcode = context->StartAbilityWithAccount(want, accountId) :
-                    errcode = context->StartAbilityWithAccount(want, accountId, startOptions);
+                    ErrCode innerErrorCode = ERR_OK;
+                    (unwrapArgc == ARGC_TWO) ? innerErrorCode = context->StartAbilityWithAccount(want, accountId) :
+                        innerErrorCode = context->StartAbilityWithAccount(want, accountId, startOptions);
+                    ErrCode errcode = AppExecFwk::GetStartAbilityErrorCode(innerErrorCode);
                     if (errcode == 0) {
                         task.Resolve(engine, engine.CreateUndefined());
                     } else {
@@ -437,6 +440,7 @@ private:
         ConnecttionKey key;
         key.id = serialNumber_;
         key.want = want;
+        connection->SetConnectionId(key.id);
         connects_.emplace(key, connection);
         if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
@@ -497,6 +501,7 @@ private:
         ConnecttionKey key;
         key.id = serialNumber_;
         key.want = want;
+        connection->SetConnectionId(key.id);
         connects_.emplace(key, connection);
         if (serialNumber_ < INT32_MAX) {
             serialNumber_++;
@@ -803,21 +808,25 @@ NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_p
     // make handler
     handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
 
-    BindNativeFunction(engine, *object, "startAbility", JsServiceExtensionContext::StartAbility);
-    BindNativeFunction(engine, *object, "terminateSelf", JsServiceExtensionContext::TerminateAbility);
-    BindNativeFunction(engine, *object, "connectAbility", JsServiceExtensionContext::ConnectAbility);
-    BindNativeFunction(engine, *object, "disconnectAbility", JsServiceExtensionContext::DisconnectAbility);
-    BindNativeFunction(engine, *object, "startAbilityWithAccount", JsServiceExtensionContext::StartAbilityWithAccount);
-    BindNativeFunction(engine, *object, "startAbilityByCall", JsServiceExtensionContext::StartAbilityByCall);
+    const char *moduleName = "JsServiceExtensionContext";
+    BindNativeFunction(engine, *object, "startAbility", moduleName, JsServiceExtensionContext::StartAbility);
+    BindNativeFunction(engine, *object, "terminateSelf", moduleName, JsServiceExtensionContext::TerminateAbility);
+    BindNativeFunction(engine, *object, "connectAbility", moduleName, JsServiceExtensionContext::ConnectAbility);
+    BindNativeFunction(engine, *object, "disconnectAbility",
+        moduleName, JsServiceExtensionContext::DisconnectAbility);
+    BindNativeFunction(engine, *object, "startAbilityWithAccount",
+        moduleName, JsServiceExtensionContext::StartAbilityWithAccount);
+    BindNativeFunction(engine, *object, "startAbilityByCall",
+        moduleName, JsServiceExtensionContext::StartAbilityByCall);
     BindNativeFunction(
-        engine, *object, "connectAbilityWithAccount", JsServiceExtensionContext::ConnectAbilityWithAccount);
-    BindNativeFunction(engine, *object, "startServiceExtensionAbility",
+        engine, *object, "connectAbilityWithAccount", moduleName, JsServiceExtensionContext::ConnectAbilityWithAccount);
+    BindNativeFunction(engine, *object, "startServiceExtensionAbility", moduleName,
         JsServiceExtensionContext::StartServiceExtensionAbility);
-    BindNativeFunction(engine, *object, "startServiceExtensionAbilityWithAccount",
+    BindNativeFunction(engine, *object, "startServiceExtensionAbilityWithAccount", moduleName,
         JsServiceExtensionContext::StartServiceExtensionAbilityWithAccount);
-    BindNativeFunction(engine, *object, "stopServiceExtensionAbility",
+    BindNativeFunction(engine, *object, "stopServiceExtensionAbility", moduleName,
         JsServiceExtensionContext::StopServiceExtensionAbility);
-    BindNativeFunction(engine, *object, "stopServiceExtensionAbilityWithAccount",
+    BindNativeFunction(engine, *object, "stopServiceExtensionAbilityWithAccount", moduleName,
         JsServiceExtensionContext::StopServiceExtensionAbilityWithAccount);
 
     return objValue;
@@ -826,6 +835,11 @@ NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_p
 JSServiceExtensionConnection::JSServiceExtensionConnection(NativeEngine& engine) : engine_(engine) {}
 
 JSServiceExtensionConnection::~JSServiceExtensionConnection() = default;
+
+void JSServiceExtensionConnection::SetConnectionId(int64_t id)
+{
+    connectionId_ = id;
+}
 
 void JSServiceExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
@@ -930,10 +944,11 @@ void JSServiceExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFw
     std::string abilityName = element.GetAbilityName();
     auto item = std::find_if(connects_.begin(),
         connects_.end(),
-        [bundleName, abilityName](
+        [bundleName, abilityName, connectionId = connectionId_](
             const std::map<ConnecttionKey, sptr<JSServiceExtensionConnection>>::value_type &obj) {
             return (bundleName == obj.first.want.GetBundle()) &&
-                   (abilityName == obj.first.want.GetElement().GetAbilityName());
+                   (abilityName == obj.first.want.GetElement().GetAbilityName()) &&
+                   connectionId == obj.first.id;
         });
     if (item != connects_.end()) {
         // match bundlename && abilityname

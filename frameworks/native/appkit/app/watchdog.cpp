@@ -50,9 +50,10 @@ void WatchDog::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer &event)
     if (eventId == MAIN_THREAD_IS_ALIVE) {
         WatchDog::appMainThreadIsAlive_ = true;
         if (currentHandler_ != nullptr) {
-            currentHandler_->RemoveTask(MAIN_THREAD_IS_ALIVE_MSG);
+            currentHandler_->RemoveTask(MAIN_THREAD_TIMEOUT_TASK);
         }
-        timeOut_.store(false);
+        needReport_.store(true);
+        isSixSecondEvent_.store(false);
     }
 }
 
@@ -133,34 +134,15 @@ bool WatchDog::WaitForDuration(uint32_t duration)
 bool WatchDog::Timer()
 {
     if (WaitForDuration(INI_TIMER_FIRST_SECOND)) {
-        HILOG_INFO("cvWatchDog1 is stopped");
+        HILOG_DEBUG("cvWatchDog1 is stopped");
         return true;
     }
     while (!stopWatchDog_) {
-        if (WaitForDuration(INI_TIMER_SECOND)) {
-            HILOG_INFO("cvWatchDog2 is stopped");
+        if (WaitForDuration(CHECK_INTERVAL_TIME)) {
+            HILOG_DEBUG("cvWatchDog2 is stopped");
             return true;
         }
-        auto timeoutTask = [&]() {
-            timeOut_.store(true);
-            appMainThreadIsAlive_ = false;
-            std::string eventType = "THREAD_BLOCK_3S";
-            std::string msgContent = "App main thread is not response!";
-            MainHandlerDumper handlerDumper;
-            appMainHandler_->Dump(handlerDumper);
-            msgContent += handlerDumper.GetDumpInfo();
-            if (applicationInfo_ != nullptr) {
-                OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, eventType,
-                    OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
-                    EVENT_KEY_UID, applicationInfo_->uid,
-                    EVENT_KEY_PID, static_cast<int32_t>(getpid()),
-                    EVENT_KEY_PACKAGE_NAME, applicationInfo_->bundleName,
-                    EVENT_KEY_PROCESS_NAME, applicationInfo_->process,
-                    EVENT_KEY_MESSAGE, msgContent);
-            }
-            HILOG_INFO("%{public}zu %{public}s", msgContent.size(), msgContent.c_str());
-        };
-        if (timeOut_) {
+        if (!needReport_) {
             HILOG_ERROR("Watchdog timeout, wait for the handler to recover, and do not send event.");
             continue;
         }
@@ -171,19 +153,52 @@ bool WatchDog::Timer()
             const char *hook_mode = "startup:";
             int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
             if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
-                currentHandler_->PostTask(timeoutTask, MAIN_THREAD_IS_ALIVE_MSG, MAIN_THREAD_TIMEOUT_TIME);
+                auto timeoutTask = std::bind(&WatchDog::reportEvent, this);
+                currentHandler_->PostTask(timeoutTask, MAIN_THREAD_TIMEOUT_TASK, CHECK_INTERVAL_TIME);
             }
         }
         if (appMainHandler_ != nullptr) {
-            appMainHandler_->SendEvent(MAIN_THREAD_IS_ALIVE);
+            appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
         }
     }
     return true;
 }
 
+void WatchDog::reportEvent()
+{
+    if (applicationInfo_ == nullptr) {
+        HILOG_ERROR("reportEvent fail, applicationInfo_ is nullptr.");
+        return;
+    }
+    
+    if (!needReport_) {
+        return;
+    }
+
+    appMainThreadIsAlive_ = false;
+    std::string eventType;
+    if (isSixSecondEvent_) {
+        eventType = "THREAD_BLOCK_6S";
+        needReport_.store(false);
+    } else {
+        eventType = "THREAD_BLOCK_3S";
+        isSixSecondEvent_.store(true);
+    }
+    std::string msgContent = "App main thread is not response!";
+    MainHandlerDumper handlerDumper;
+    appMainHandler_->Dump(handlerDumper);
+    msgContent += handlerDumper.GetDumpInfo();
+
+    OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, eventType,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_UID, applicationInfo_->uid,
+        EVENT_KEY_PID, static_cast<int32_t>(getpid()), EVENT_KEY_PACKAGE_NAME, applicationInfo_->bundleName,
+        EVENT_KEY_PROCESS_NAME, applicationInfo_->process, EVENT_KEY_MESSAGE, msgContent);
+    HILOG_INFO("reportEvent success, %{public}zu %{public}s", msgContent.size(), msgContent.c_str());
+}
+
 void MainHandlerDumper::Dump(const std::string &message)
 {
-    HILOG_INFO("message is %{public}s", message.c_str());
+    HILOG_DEBUG("message is %{public}s", message.c_str());
     dumpInfo += message;
 }
 

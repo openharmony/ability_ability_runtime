@@ -108,6 +108,10 @@ private:
 NativeValue* CreateJsAbilityContext(NativeEngine& engine, std::shared_ptr<AbilityContext> context,
                                     DetachCallback detach, AttachCallback attach);
 
+struct ConnectCallback {
+    std::unique_ptr<NativeReference> jsConnectionObject_ = nullptr;
+};
+
 class JSAbilityConnection : public AbilityConnectCallback {
 public:
     explicit JSAbilityConnection(NativeEngine& engine);
@@ -120,10 +124,12 @@ public:
     void HandleOnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode);
     void SetJsConnectionObject(NativeValue* jsConnectionObject);
     void CallJsFailed(int32_t errorCode);
+    void SetConnectionId(int64_t id);
 private:
     NativeValue* ConvertElement(const AppExecFwk::ElementName &element);
     NativeEngine& engine_;
     std::unique_ptr<NativeReference> jsConnectionObject_ = nullptr;
+    int64_t connectionId_ = -1;
 };
 
 struct ConnectionKey {
