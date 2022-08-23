@@ -492,7 +492,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
     ReportAbilitStartInfoToRSS(abilityInfo);
     ReportEventToSuspendManager(abilityInfo);
-    }
     HILOG_DEBUG("Start ability, name is %{public}s.", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
 }
