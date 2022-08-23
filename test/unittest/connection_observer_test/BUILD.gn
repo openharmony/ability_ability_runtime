@@ -24,13 +24,9 @@ ohos_unittest("connection_observer_test") {
     "${ability_runtime_services_path}/common/include",
   ]
 
-  sources = [
-    "connection_observer_test.cpp",
-  ]
+  sources = [ "connection_observer_test.cpp" ]
 
-  configs = [
-    "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager_public_config",
-  ]
+  configs = [ "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager_public_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
