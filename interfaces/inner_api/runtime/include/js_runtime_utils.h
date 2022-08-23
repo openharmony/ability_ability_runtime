@@ -200,12 +200,7 @@ std::string ParseJsModuleUri(const std::string& curJsModulePath, const std::stri
 bool MakeFilePath(const std::string& codePath, const std::string& modulePath, std::string& fileName);
 std::string NormalizeUri(
     const std::string& bundleName, const std::string& curJsModulePath, const std::string& newJsModuleUri);
-std::shared_ptr<RuntimeExtractor> InitRuntimeExtractor(const std::string& hapPath);
 std::string ParseHapPath(const std::string& hapPath);
-bool GetFileBuffer(
-    const std::shared_ptr<RuntimeExtractor>& runtimeExtractor, const std::string& srcPath, std::ostream &dest);
-bool GetFileBufferFromHap(const std::string& hapPath, const std::string& srcPath, std::ostream &dest);
-bool GetFileListFromHap(const std::string& hapPath, const std::string& srcPath, std::vector<std::string>& assetList);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 

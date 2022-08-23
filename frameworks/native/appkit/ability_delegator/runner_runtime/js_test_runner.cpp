@@ -78,7 +78,7 @@ JsTestRunner::~JsTestRunner() = default;
 bool JsTestRunner::Initialize()
 {
     if (isFaJsModel_) {
-        if (!jsRuntime_.RunScript("/system/etc/strip.native.min.abc", hapPath_)) {
+        if (!jsRuntime_.RunScript("/system/etc/strip.native.min.abc", "")) {
             HILOG_ERROR("RunScript err");
             return false;
         }

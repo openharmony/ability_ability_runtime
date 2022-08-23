@@ -15,6 +15,7 @@
 
 #include "js_module_reader.h"
 
+#include "extractor_utils.h"
 #include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
 #include "runtime_extractor.h"

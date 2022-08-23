@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class RuntimeExtractor : public AppExecFwk::BaseExtractor {
+class RuntimeExtractor : public BaseExtractor {
 public:
     explicit RuntimeExtractor(const std::string &source);
     explicit RuntimeExtractor(const std::string &source, const std::string &hapPath);
