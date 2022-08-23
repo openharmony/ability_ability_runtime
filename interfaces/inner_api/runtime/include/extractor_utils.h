@@ -13,31 +13,19 @@
  * limitations under the License.
  */
 
-#include "runtime_extractor.h"
+#ifndef OHOS_ABILITY_RUNTIME_EXTRACTOR_UTILS_H
+#define OHOS_ABILITY_RUNTIME_EXTRACTOR_UTILS_H
 
-#include "hilog_wrapper.h"
+#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-RuntimeExtractor::RuntimeExtractor(const std::string &source) : BaseExtractor(source)
-{
-    HILOG_DEBUG("RuntimeExtractor is created");
-}
-
-RuntimeExtractor::RuntimeExtractor(
-    const std::string &source, const std::string &hapPath) : BaseExtractor(source)
-{
-    hapPath_ = hapPath;
-}
-
-RuntimeExtractor::~RuntimeExtractor()
-{
-    HILOG_DEBUG("RuntimeExtractor destroyed");
-}
-
-bool RuntimeExtractor::isSameHap(const std::string &hapPath) const
-{
-    return !hapPath_.empty() && !hapPath.empty() && hapPath_ == hapPath;
-}
+std::shared_ptr<RuntimeExtractor> InitRuntimeExtractor(const std::string& hapPath);
+bool GetFileBuffer(
+    const std::shared_ptr<RuntimeExtractor>& runtimeExtractor, const std::string& srcPath, std::ostringstream &dest);
+bool GetFileBufferFromHap(const std::string& hapPath, const std::string& srcPath, std::ostringstream &dest);
+bool GetFileListFromHap(const std::string& hapPath, const std::string& srcPath, std::vector<std::string>& assetList);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
+
+#endif  // OHOS_ABILITY_RUNTIME_EXTRACTOR_UTILS_H

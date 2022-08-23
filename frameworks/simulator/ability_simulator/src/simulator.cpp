@@ -348,7 +348,6 @@ bool SimulatorImpl::OnInit()
         std::bind(&DebuggerTask::OnPostTask, &debuggerTask_, std::placeholders::_1));
 
     panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(""));
-    panda::JSNApi::SetHostResolveBufferTracker(vm_, JsModuleReader("", ""));
     auto nativeEngine = std::make_unique<ArkNativeEngine>(vm_, nullptr);
 
     HandleScope handleScope(*nativeEngine);

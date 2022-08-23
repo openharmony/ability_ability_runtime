@@ -24,6 +24,7 @@
 
 #include "connect_server_manager.h"
 #include "event_handler.h"
+#include "extractor_utils.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
 #include "js_console_log.h"

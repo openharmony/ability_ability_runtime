@@ -67,14 +67,16 @@ ohos_shared_library("ability_simulator") {
 
   sources = [
     "//foundation/ability/ability_runtime/frameworks/native/runtime/js_console_log.cpp",
-    "//foundation/ability/ability_runtime/frameworks/native/runtime/js_module_reader.cpp",
     "//foundation/ability/ability_runtime/frameworks/native/runtime/js_module_searcher.cpp",
     "//foundation/ability/ability_runtime/frameworks/native/runtime/js_runtime_utils.cpp",
     "src/js_timer.cpp",
     "src/simulator.cpp",
   ]
 
-  public_configs = [ ":ability_simulator_public_config" ]
+  public_configs = [
+    ":ability_simulator_public_config",
+    "${ability_runtime_services_path}/common:common_config",
+  ]
 
   configs = [ "//arkcompiler/ets_runtime:ark_jsruntime_public_config" ]
 
@@ -84,7 +86,6 @@ ohos_shared_library("ability_simulator") {
     "//arkcompiler/ets_runtime/ecmascript/tooling:libark_ecma_debugger",
     "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_$platform",
     "//foundation/ability/ability_runtime/frameworks/simulator/osal:simulator_osal",
-    "//foundation/ability/ability_runtime/interfaces/inner_api/runtime:runtime_extractor",
     "//foundation/arkui/ace_engine/frameworks/bridge/js_frontend/engine/jsi/debugger:ark_debugger",
     "//foundation/arkui/napi:ace_napi",
     "//foundation/arkui/napi:ace_napi_ark",
