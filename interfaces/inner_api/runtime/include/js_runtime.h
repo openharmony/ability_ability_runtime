@@ -33,6 +33,7 @@ class EventHandler;
 } // namespace AppExecFwk
 namespace AbilityRuntime {
 class TimerTask;
+class RuntimeExtractor;
 
 void *DetachCallbackFunc(NativeEngine *engine, void *value, void *hint);
 
@@ -55,8 +56,8 @@ public:
         return Language::JS;
     }
 
-    std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName,
-        const std::string& modulePath, const std::string& hapPath, bool esmodule = false);
+    std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName, const std::string& modulePath,
+        const std::string& hapPath, bool esmodule = false);
     std::unique_ptr<NativeReference> LoadSystemModule(
         const std::string& moduleName, NativeValue* const* argv = nullptr, size_t argc = 0);
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
@@ -87,6 +88,7 @@ protected:
     std::unique_ptr<NativeReference> methodRequireNapiRef_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::unordered_map<std::string, NativeReference*> modules_;
+    std::shared_ptr<RuntimeExtractor> runtimeExtractor_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

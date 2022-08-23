@@ -135,9 +135,13 @@ NativeValue* CreateJsError(NativeEngine& engine, int32_t errCode, const std::str
     return engine.CreateError(CreateJsValue(engine, errCode), CreateJsValue(engine, message));
 }
 
-void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name, NativeCallback func)
+void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name,
+    const char* moduleName, NativeCallback func)
 {
-    object.SetProperty(name, engine.CreateFunction(name, strlen(name), func, nullptr));
+    std::string fullName(moduleName);
+    fullName += ".";
+    fullName += name;
+    object.SetProperty(name, engine.CreateFunction(fullName.c_str(), fullName.length(), func, nullptr));
 }
 
 void BindNativeProperty(NativeObject& object, const char* name, NativeCallback getter)
@@ -617,46 +621,44 @@ bool MakeFilePath(const std::string& codePath, const std::string& modulePath, st
     return true;
 }
 
-std::string GetOhmUri(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo)
+std::string NormalizeUri(
+    const std::string& bundleName, const std::string& curJsModulePath, const std::string& newJsModuleUri)
 {
-    std::string ohmUri;
-    if (!abilityInfo) {
-        HILOG_ERROR("GetOhmUri::AbilityInfo is nullptr");
-        return ohmUri;
+    std::string newJsModulePath;
+    if (curJsModulePath.empty() || newJsModuleUri.empty()) {
+        return newJsModulePath;
     }
 
-    std::string srcPath(abilityInfo->package);
-    if (!abilityInfo->isModuleJson) {
-        /* temporary compatibility api8 + config.json */
-        srcPath.append("/assets/js/");
-        if (!abilityInfo->srcPath.empty()) {
-            srcPath.append(abilityInfo->srcPath);
+    std::string normalizeUri = newJsModuleUri;
+    std::replace(normalizeUri.begin(), normalizeUri.end(), '\\', '/');
+
+    switch (normalizeUri[0]) {
+        case '.': {
+            newJsModulePath = MakeNewJsModulePath(curJsModulePath, normalizeUri);
+            break;
         }
-        srcPath.append("/").append(abilityInfo->name).append(".abc");
-    } else {
-        if (abilityInfo->srcEntrance.empty()) {
-            HILOG_ERROR("GetOhmUri::AbilityInfo srcEntrance is empty");
-            return ohmUri;
+        case '@': {
+            newJsModulePath = ParseOhmUri(bundleName, curJsModulePath, normalizeUri);
+            if (newJsModulePath.empty()) {
+                newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
+            }
+            break;
         }
-        srcPath.append("/");
-        srcPath.append(abilityInfo->srcEntrance);
-        srcPath.erase(srcPath.rfind("."));
-        srcPath.append(".abc");
-    }
-    HILOG_DEBUG("GetOhmUri::JsAbility srcPath is %{public}s", srcPath.c_str());
-
-    if (!MakeFilePath(Constants::LOCAL_CODE_PATH, srcPath, ohmUri)) {
-        HILOG_ERROR("GetOhmUri::Failed to make module file path: %{private}s", srcPath.c_str());
+        default: {
+            newJsModulePath = FindNpmPackage(curJsModulePath, normalizeUri);
+            break;
+        }
     }
 
-    return ohmUri;
+    FixExtName(newJsModulePath);
+    return newJsModulePath;
 }
 
-bool GetFileBufferFromHap(const std::string& hapPath, const std::string& srcPath, std::ostream &dest)
+std::shared_ptr<RuntimeExtractor> InitRuntimeExtractor(const std::string& hapPath)
 {
-    if (hapPath.empty() || srcPath.empty()) {
-        HILOG_ERROR("GetFileBufferFromHap::hapPath or srcPath is nullptr");
-        return false;
+    if (hapPath.empty()) {
+        HILOG_ERROR("InitRuntimeExtractor::hapPath is nullptr");
+        return nullptr;
     }
 
     std::string loadPath;
@@ -668,21 +670,42 @@ bool GetFileBufferFromHap(const std::string& hapPath, const std::string& srcPath
     } else {
         loadPath = hapPath;
     }
-    RuntimeExtractor runtimeExtractor(loadPath);
-    if (!runtimeExtractor.Init()) {
+    auto runtimeExtractor = std::make_shared<RuntimeExtractor>(loadPath, hapPath);
+    if (!runtimeExtractor->Init()) {
         HILOG_ERROR("GetFileBufferFromHap::Runtime extractor init failed");
+        return nullptr;
+    }
+
+    return runtimeExtractor;
+}
+
+bool GetFileBuffer(
+    const std::shared_ptr<RuntimeExtractor>& runtimeExtractor, const std::string& srcPath, std::ostream &dest)
+{
+    if (runtimeExtractor == nullptr || srcPath.empty()) {
+        HILOG_ERROR("GetFileBuffer::runtimeExtractor or srcPath is nullptr");
         return false;
     }
 
     std::regex srcPattern(std::string(Constants::LOCAL_CODE_PATH) + std::string(Constants::FILE_SEPARATOR));
     std::string relativePath = std::regex_replace(srcPath, srcPattern, "");
     relativePath = relativePath.substr(relativePath.find(std::string(Constants::FILE_SEPARATOR)) + 1);
-    if (!runtimeExtractor.ExtractByName(relativePath, dest)) {
-        HILOG_ERROR("GetFileBufferFromHap::Extract abc file failed");
+    if (!runtimeExtractor->ExtractByName(relativePath, dest)) {
+        HILOG_ERROR("GetFileBufferFromHap::Extract file failed");
         return false;
     }
 
     return true;
+}
+
+bool GetFileBufferFromHap(const std::string& hapPath, const std::string& srcPath, std::ostream &dest)
+{
+    if (hapPath.empty() || srcPath.empty()) {
+        HILOG_ERROR("GetFileBufferFromHap::hapPath or srcPath is nullptr");
+        return false;
+    }
+
+    return GetFileBuffer(InitRuntimeExtractor(hapPath), srcPath, dest);
 }
 
 bool GetFileListFromHap(const std::string& hapPath, const std::string& srcPath, std::vector<std::string>& assetList)

@@ -125,7 +125,12 @@ NativeValue* StartTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* in
         task->PushArgs(std::shared_ptr<NativeReference>(engine->CreateReference(info->argv[index], 1)));
     }
 
-    task->Start(delayTime, isInterval ? delayTime : 0);
+    // if setInterval is called, interval must not be zero for repeat, so set to 1ms
+    int64_t interval = 0;
+    if (isInterval) {
+        interval = delayTime > 0 ? delayTime : 1;
+    }
+    task->Start(delayTime, interval);
 
     {
         std::lock_guard<std::mutex> lock(g_mutex);
@@ -169,10 +174,11 @@ NativeValue* StopTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* inf
 
 void InitTimerModule(NativeEngine& engine, NativeObject& globalObject)
 {
-    BindNativeFunction(engine, globalObject, "setTimeout", StartTimeout);
-    BindNativeFunction(engine, globalObject, "setInterval", StartInterval);
-    BindNativeFunction(engine, globalObject, "clearTimeout", StopTimeoutOrInterval);
-    BindNativeFunction(engine, globalObject, "clearInterval", StopTimeoutOrInterval);
+    const char *moduleName = "AsJsTimer";
+    BindNativeFunction(engine, globalObject, "setTimeout", moduleName, StartTimeout);
+    BindNativeFunction(engine, globalObject, "setInterval", moduleName, StartInterval);
+    BindNativeFunction(engine, globalObject, "clearTimeout", moduleName, StopTimeoutOrInterval);
+    BindNativeFunction(engine, globalObject, "clearInterval", moduleName, StopTimeoutOrInterval);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
