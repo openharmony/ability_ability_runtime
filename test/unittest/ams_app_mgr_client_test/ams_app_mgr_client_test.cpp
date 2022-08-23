@@ -449,7 +449,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_015, TestSize.Level1)
 
 /**
  * @tc.name: AppMgrClient_016
- * @tc.desc: Verify the function when parameter is 2 
+ * @tc.desc: Verify the function when parameter is 2
  * @tc.type: FUNC
  * @tc.require: issueI5823X
  */
@@ -464,7 +464,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_016, TestSize.Level1)
 
 /**
  * @tc.name: AppMgrClient_017
- * @tc.desc: Verify the function when parameter is 1 
+ * @tc.desc: Verify the function when parameter is 1
  * @tc.type: FUNC
  * @tc.require: issueI5823X
  */
@@ -479,7 +479,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_017, TestSize.Level1)
 
 /**
  * @tc.name: AppMgrClient_018
- * @tc.desc: Verify the function when parameter is 0 
+ * @tc.desc: Verify the function when parameter is 0
  * @tc.type: FUNC
  * @tc.require: issueI5823X
  */
@@ -494,7 +494,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_018, TestSize.Level1)
 
 /**
  * @tc.name: AppMgrClient_019
- * @tc.desc: Verify the function when parameter is 2 
+ * @tc.desc: Verify the function when parameter is 2
  * @tc.type: FUNC
  * @tc.require: issueI581UZ
  */
@@ -509,7 +509,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_019, TestSize.Level1)
 
 /**
  * @tc.name: AppMgrClient_020
- * @tc.desc: Verify the function when parameter is 1 
+ * @tc.desc: Verify the function when parameter is 1
  * @tc.type: FUNC
  * @tc.require: issueI581UZ
  */
@@ -524,7 +524,7 @@ HWTEST_F(AmsAppMgrClientTest, AppMgrClient_020, TestSize.Level1)
 
 /**
  * @tc.name: AppMgrClient_021
- * @tc.desc: Verify the function when parameter is 0 
+ * @tc.desc: Verify the function when parameter is 0
  * @tc.type: FUNC
  * @tc.require: issueI581UZ
  */
