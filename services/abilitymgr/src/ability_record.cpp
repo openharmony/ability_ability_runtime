@@ -591,12 +591,14 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     } else {
         loadPath = abilityInfo.resourcePath;
     }
-    std::regex pattern(std::string(AbilityRuntime::Constants::ABS_CODE_PATH) +
-        std::string(AbilityRuntime::Constants::FILE_SEPARATOR) + abilityInfo.bundleName);
-    loadPath = std::regex_replace(loadPath, pattern, std::string(AbilityRuntime::Constants::LOCAL_CODE_PATH));
-    HILOG_DEBUG("CreateResourceManager loadPath: %{public}s", loadPath.c_str());
-    if (loadPath.empty() || !resourceMgr->AddResource(loadPath.c_str())) {
-        HILOG_WARN("%{public}s AddResource failed.", __func__);
+
+    if (loadPath.empty()) {
+        HILOG_ERROR("CreateResourceManager get loadPath failed");
+    } else {
+        HILOG_DEBUG("CreateResourceManager loadPath: %{public}s", loadPath.c_str());
+        if (!resourceMgr->AddResource(loadPath.c_str())) {
+            HILOG_WARN("%{public}s AddResource failed.", __func__);
+        }
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());

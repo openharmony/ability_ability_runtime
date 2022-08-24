@@ -754,7 +754,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
-    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
             continue;
         }
@@ -777,7 +777,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     resConfig->SetLocaleInfo(locale);
     const icu::Locale *localeInfo = resConfig->GetLocaleInfo();
     if (localeInfo != nullptr) {
-        HILOG_INFO("Language: %{public}s, script: %{public}s, region: %{public}s,",
+        HILOG_INFO("Language: %{public}s, script: %{public}s, region: %{public}s",
             localeInfo->getLanguage(),
             localeInfo->getScript(),
             localeInfo->getCountry());

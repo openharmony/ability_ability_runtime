@@ -342,7 +342,7 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         "ContextImpl::InitResourceManager hapModuleInfos count: %{public}zu", bundleInfo.hapModuleInfos.size());
     std::regex inner_pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + GetBundleName());
     std::regex outer_pattern(ABS_CODE_PATH);
-    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
             continue;
         }
