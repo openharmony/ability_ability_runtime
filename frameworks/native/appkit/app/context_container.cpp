@@ -612,7 +612,7 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
     HILOG_DEBUG(
         "ContextContainer::InitResourceManager hapModuleInfos count: %{public}zu", bundleInfo.hapModuleInfos.size());
     std::regex pattern(AbilityRuntime::Constants::ABS_CODE_PATH);
-    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
             continue;
         }

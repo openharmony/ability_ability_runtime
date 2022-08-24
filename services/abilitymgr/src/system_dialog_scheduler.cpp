@@ -376,7 +376,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
 
     std::regex pattern(std::string(AbilityRuntime::Constants::ABS_CODE_PATH) +
         std::string(AbilityRuntime::Constants::FILE_SEPARATOR) + bundleInfo.name);
-    for (auto hapModuleInfo: bundleInfo.hapModuleInfos) {
+    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
             continue;
         }
@@ -387,7 +387,6 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
             loadPath = hapModuleInfo.resourcePath;
         }
         HILOG_DEBUG("GetAppNameFromResource loadPath: %{public}s", loadPath.c_str());
-        loadPath = std::regex_replace(loadPath, pattern, std::string(AbilityRuntime::Constants::LOCAL_CODE_PATH));
         if (!resourceManager->AddResource(loadPath.c_str())) {
             HILOG_ERROR("ResourceManager add %{public}s resource path failed!", bundleInfo.name.c_str());
         }
