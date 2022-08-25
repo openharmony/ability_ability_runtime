@@ -217,14 +217,14 @@ void AppMgrServiceInner::MakeProcessName(
     if (!appInfo) {
         return;
     }
-    if (!appInfo->process.empty()) {
-        processName = appInfo->process;
-        return;
-    }
     // check after abilityInfo, because abilityInfo contains extension process.
     if (hapModuleInfo.isStageBasedModel && !hapModuleInfo.process.empty()) {
         processName = hapModuleInfo.process;
         HILOG_INFO("Stage mode, Make processName:%{public}s", processName.c_str());
+        return;
+    }
+    if (!appInfo->process.empty()) {
+        processName = appInfo->process;
         return;
     }
     processName = appInfo->bundleName;
@@ -499,7 +499,7 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
         return ERR_NO_INIT;
     }
 
-    auto errCode = VerifyProcessPermission();
+    auto errCode = VerifyProcessPermission(uid);
     if (errCode != ERR_OK) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         return errCode;
@@ -2118,6 +2118,11 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         return ERR_INVALID_VALUE;
     }
 
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateConfigurationPerm();
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
     std::vector<std::string> changeKeyV;
     configuration_->CompareDifferent(changeKeyV, config);
     uint32_t size = changeKeyV.size();
@@ -2347,7 +2352,7 @@ int AppMgrServiceInner::GetApplicationInfoByProcessID(const int pid, AppExecFwk:
     return ERR_OK;
 }
 
-int AppMgrServiceInner::VerifyProcessPermission()
+int AppMgrServiceInner::VerifyProcessPermission(int uid)
 {
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (isSaCall) {
@@ -2364,6 +2369,10 @@ int AppMgrServiceInner::VerifyProcessPermission()
     if (!appRecord) {
         HILOG_ERROR("Get app running record by calling pid failed. callingPId: %{public}d", callerPid);
         return ERR_INVALID_OPERATION;
+    }
+
+    if (uid != DEFAULT_UID && IPCSkeleton::GetCallingUid() == uid) {
+        return ERR_OK;
     }
 
     auto applicationInfo = appRecord->GetApplicationInfo();
