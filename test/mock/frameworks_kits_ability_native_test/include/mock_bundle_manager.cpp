@@ -198,6 +198,14 @@ bool BundleMgrService::GetApplicationInfo(
     }
     appInfo.name = "Helloworld";
     appInfo.bundleName = "com.foobar.hiworld";
+    if (appName == "com.crowdtest.expired") {
+        appInfo.appDistributionType = "crowdtesting";
+        appInfo.crowdtestDeadline = 0;
+    }
+    if (appName == "com.crowdtest.unexpired") {
+        appInfo.appDistributionType = "crowdtesting";
+        appInfo.crowdtestDeadline = 1860000000;
+    }
     return true;
 }
 bool BundleMgrService::GetApplicationInfos(
