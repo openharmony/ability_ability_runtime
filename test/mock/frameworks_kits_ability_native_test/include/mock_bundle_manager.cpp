@@ -20,6 +20,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+const long int UNEXPIRED_TIME = 1860000000;
 bool BundleMgrProxy::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
 {
@@ -204,7 +205,7 @@ bool BundleMgrService::GetApplicationInfo(
     }
     if (appName == "com.crowdtest.unexpired") {
         appInfo.appDistributionType = "crowdtesting";
-        appInfo.crowdtestDeadline = 1860000000;
+        appInfo.crowdtestDeadline = UNEXPIRED_TIME;
     }
     return true;
 }
