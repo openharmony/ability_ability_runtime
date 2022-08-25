@@ -195,7 +195,7 @@ HWTEST_F(AbilityServiceStartTest, StartUpEvent_001, TestSize.Level1)
     EXPECT_TRUE(strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0);
 
     ret = GetParameter("bootevent.appfwk.ready", "", paramOutBuf, bufferLen);
-    EXPECT_FALSE(strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0);
+    EXPECT_TRUE(strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0);
     aams_->OnStop();
 }
 }  // namespace AAFwk
