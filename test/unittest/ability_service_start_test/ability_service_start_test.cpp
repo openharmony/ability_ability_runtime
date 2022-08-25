@@ -18,6 +18,7 @@
 #include "system_ability_definition.h"
 #include "bundlemgr/mock_bundle_manager.h"
 #include "sa_mgr_client.h"
+#include "parameter.h"
 
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
