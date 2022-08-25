@@ -46,7 +46,7 @@ void DlpUtilsTest::TearDown()
  * @tc.name: OtherAppsAccessDlpCheck_0100
  * @tc.desc: OtherAppsAccessDlpCheck Test
  * @tc.type: FUNC
- * @tc.require: I581SE
+ * @tc.require: issueI581SE
  */
 HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0100, TestSize.Level0)
 {
@@ -63,7 +63,7 @@ HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0100, TestSize.Level0)
  * @tc.name: OtherAppsAccessDlpCheck_0200
  * @tc.desc: OtherAppsAccessDlpCheck Test
  * @tc.type: FUNC
- * @tc.require: I581RO
+ * @tc.require: issueI581RO
  */
 HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0200, TestSize.Level0)
 {
@@ -79,7 +79,7 @@ HWTEST_F(DlpUtilsTest, OtherAppsAccessDlpCheck_0200, TestSize.Level0)
  * @tc.name: DlpAccessOtherAppsCheck_0100
  * @tc.desc: DlpAccessOtherAppsCheck test
  * @tc.type: FUNC
- * @tc.require: I581RO
+ * @tc.require: issueI581RO
  */
 HWTEST_F(DlpUtilsTest, DlpAccessOtherAppsCheck_0100, TestSize.Level0)
 {
