@@ -25,7 +25,7 @@ class RuntimeExtractor;
 
 class JsModuleReader final {
 public:
-    explicit JsModuleReader(const std::string& bundleName, const std::string& hapPath,
+    JsModuleReader(const std::string& bundleName, const std::string& hapPath,
         const std::shared_ptr<RuntimeExtractor>& runtimeExtractor)
         : bundleName_(bundleName), hapPath_(hapPath), runtimeExtractor_(runtimeExtractor)
     {}

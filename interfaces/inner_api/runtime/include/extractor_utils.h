@@ -22,9 +22,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 std::shared_ptr<RuntimeExtractor> InitRuntimeExtractor(const std::string& hapPath);
 bool GetFileBuffer(
-    const std::shared_ptr<RuntimeExtractor>& runtimeExtractor, const std::string& srcPath, std::ostringstream &dest);
-bool GetFileBufferFromHap(const std::string& hapPath, const std::string& srcPath, std::ostringstream &dest);
-bool GetFileListFromHap(const std::string& hapPath, const std::string& srcPath, std::vector<std::string>& assetList);
+    const std::shared_ptr<RuntimeExtractor>& runtimeExtractor, const std::string& srcPath, std::ostringstream& dest);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 

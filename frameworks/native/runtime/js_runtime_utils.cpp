@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,8 @@ constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr char OTHER_BUNDLE_INSTALL_PATH[] = "/data/bundles/";
 
 constexpr size_t MAX_NPM_LEVEL = 1;
+constexpr size_t SEGMENTS_LIMIT_TWO = 2;
+constexpr size_t SEGMENTS_LIMIT_THREE = 3;
 
 std::unique_ptr<AsyncTask> CreateAsyncTaskWithLastParam(NativeEngine& engine, NativeValue* lastParam,
     std::unique_ptr<AsyncTask::ExecuteCallback>&& execute, std::unique_ptr<AsyncTask::CompleteCallback>&& complete,
@@ -458,7 +460,16 @@ std::string FindNpmPackageInPath(const std::string& npmPath)
     stream.seekg(0);
     stream.read(path, fileLen);
     path[fileLen] = '\0';
-    return npmPath + '/' + StripString(path);
+    stream.close();
+
+    std::string npmPackagePath = npmPath + '/' + StripString(path);
+    if (npmPackagePath.size() >= PATH_MAX) {
+        return std::string();
+    }
+    if (realpath(npmPackagePath.c_str(), path) == nullptr) {
+        return std::string();
+    }
+    return path;
 }
 
 std::string FindNpmPackageInTopLevel(
@@ -521,7 +532,7 @@ std::string FindNpmPackage(const std::string& curJsModulePath, const std::string
 }
 
 std::string ParseOhmUri(
-    const std::string originBundleName, const std::string& curJsModulePath, const std::string& newJsModuleUri)
+    const std::string& originBundleName, const std::string& curJsModulePath, const std::string& newJsModuleUri)
 {
     std::string moduleInstallPath;
     std::vector<std::string> pathVector;
@@ -531,7 +542,7 @@ std::string ParseOhmUri(
         SplitString(newJsModuleUri, pathVector, sizeof(PREFIX_BUNDLE) - 1);
 
         // Uri should have atleast 3 segments
-        if (pathVector.size() < 3) {
+        if (pathVector.size() < SEGMENTS_LIMIT_THREE) {
             return std::string();
         }
 
@@ -547,7 +558,7 @@ std::string ParseOhmUri(
         SplitString(newJsModuleUri, pathVector, sizeof(PREFIX_MODULE) - 1);
 
         // Uri should have atleast 2 segments
-        if (pathVector.size() < 2) {
+        if (pathVector.size() < SEGMENTS_LIMIT_TWO) {
             return std::string();
         }
 
@@ -583,7 +594,7 @@ bool MakeFilePath(const std::string& codePath, const std::string& modulePath, st
     std::string path(codePath);
     path.append("/").append(modulePath);
     if (path.length() > PATH_MAX) {
-        HILOG_ERROR("Path length(%{public}d) longer than MAX(%{public}d)", (int32_t)path.length(), PATH_MAX);
+        HILOG_ERROR("Path length(%{public}zu) longer than MAX(%{public}d)", path.length(), PATH_MAX);
         return false;
     }
     char resolvedPath[PATH_MAX + 1] = { 0 };
@@ -606,7 +617,7 @@ bool MakeFilePath(const std::string& codePath, const std::string& modulePath, st
     }
 
     path.erase(start + 1, pos - start);
-    HILOG_INFO("Try using secondary file path: %{public}s", path.c_str());
+    HILOG_DEBUG("Try using secondary file path: %{private}s", path.c_str());
 
     if (realpath(path.c_str(), resolvedPath) == nullptr) {
         HILOG_ERROR("Failed to call realpath, errno = %{public}d", errno);

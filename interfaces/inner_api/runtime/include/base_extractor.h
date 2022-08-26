@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,14 +59,11 @@ public:
     bool HasEntry(const std::string &fileName) const;
     bool IsDirExist(const std::string &dir) const;
     bool IsStageBasedModel(std::string abilityName);
-    bool IsNewVersion() const;
 
 protected:
     const std::string sourceFile_;
     ZipFile zipFile_;
     bool initial_ = false;
-private:
-    bool isNewVersion_ = true;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
