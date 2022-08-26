@@ -137,7 +137,7 @@ public:
     virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid);
 
     /**
-     * KillApplicationSelf, kill the application self.
+     * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
