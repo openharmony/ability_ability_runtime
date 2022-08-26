@@ -19,23 +19,19 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-RuntimeExtractor::RuntimeExtractor(const std::string &source) : BaseExtractor(source)
-{
-    HILOG_DEBUG("RuntimeExtractor is created");
-}
+RuntimeExtractor::RuntimeExtractor(const std::string& source) : BaseExtractor(source)
+{}
 
 RuntimeExtractor::RuntimeExtractor(
-    const std::string &source, const std::string &hapPath) : BaseExtractor(source)
+    const std::string& source, const std::string& hapPath) : BaseExtractor(source)
 {
     hapPath_ = hapPath;
 }
 
 RuntimeExtractor::~RuntimeExtractor()
-{
-    HILOG_DEBUG("RuntimeExtractor destroyed");
-}
+{}
 
-bool RuntimeExtractor::isSameHap(const std::string &hapPath) const
+bool RuntimeExtractor::isSameHap(const std::string& hapPath) const
 {
     return !hapPath_.empty() && !hapPath.empty() && hapPath_ == hapPath;
 }

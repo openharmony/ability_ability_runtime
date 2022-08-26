@@ -28,8 +28,8 @@
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
 #include "js_console_log.h"
-#include "js_module_searcher.h"
 #include "js_module_reader.h"
+#include "js_module_searcher.h"
 #include "js_runtime_utils.h"
 #include "js_timer.h"
 #include "js_worker.h"
@@ -109,7 +109,7 @@ public:
         debugMode_ = true;
     }
 
-    bool RunScript(const std::string& path, const std::string& hapPath) override
+    bool RunScript(const std::string& srcPath, const std::string& hapPath) override
     {
         bool result = false;
         if (!hapPath.empty()) {
@@ -117,7 +117,7 @@ public:
             if (runtimeExtractor_ == nullptr) {
                 runtimeExtractor_ = InitRuntimeExtractor(hapPath);
             }
-            if (!GetFileBuffer(runtimeExtractor_, path, outStream)) {
+            if (!GetFileBuffer(runtimeExtractor_, srcPath, outStream)) {
                 HILOG_ERROR("Get abc file failed");
                 return result;
             }
@@ -126,9 +126,9 @@ public:
             std::vector<uint8_t> buffer;
             buffer.assign(outStr.begin(), outStr.end());
 
-            result = nativeEngine_->RunScriptBuffer(path.c_str(), buffer) != nullptr;
+            result = nativeEngine_->RunScriptBuffer(srcPath.c_str(), buffer) != nullptr;
         } else {
-            result = nativeEngine_->RunScriptPath(path.c_str()) != nullptr;
+            result = nativeEngine_->RunScriptPath(srcPath.c_str()) != nullptr;
         }
         return result;
     }
@@ -136,7 +136,7 @@ public:
     NativeValue* LoadJsModule(const std::string& path, const std::string& hapPath) override
     {
         if (!RunScript(path, hapPath)) {
-            HILOG_ERROR("Failed to run script: %{public}s", path.c_str());
+            HILOG_ERROR("Failed to run script: %{private}s", path.c_str());
             return nullptr;
         }
 
@@ -200,9 +200,12 @@ private:
         if (!options.preload) {
             bundleName_ = options.bundleName;
             runtimeExtractor_ = InitRuntimeExtractor(options.hapPath);
-            panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
-            panda::JSNApi::SetHostResolveBufferTracker(
-                vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor_));
+            if (!options.hapPath.empty()) {
+                panda::JSNApi::SetHostResolveBufferTracker(
+                    vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor_));
+            } else {
+                panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
+            }
         }
         return JsRuntime::Initialize(options);
     }
@@ -462,19 +465,19 @@ NativeValue* JsRuntime::LoadJsBundle(const std::string& path, const std::string&
     globalObj->SetProperty("exports", exports);
 
     if (!RunScript(path, hapPath)) {
-        HILOG_ERROR("Failed to run script: %{public}s", path.c_str());
+        HILOG_ERROR("Failed to run script: %{private}s", path.c_str());
         return nullptr;
     }
 
     NativeObject* exportsObj = ConvertNativeValueTo<NativeObject>(globalObj->GetProperty("exports"));
     if (exportsObj == nullptr) {
-        HILOG_ERROR("Failed to get exports objcect: %{public}s", path.c_str());
+        HILOG_ERROR("Failed to get exports objcect: %{private}s", path.c_str());
         return nullptr;
     }
 
     NativeValue* exportObj = exportsObj->GetProperty("default");
     if (exportObj == nullptr) {
-        HILOG_ERROR("Failed to get default objcect: %{public}s", path.c_str());
+        HILOG_ERROR("Failed to get default objcect: %{private}s", path.c_str());
         return nullptr;
     }
 
@@ -484,7 +487,7 @@ NativeValue* JsRuntime::LoadJsBundle(const std::string& path, const std::string&
 std::unique_ptr<NativeReference> JsRuntime::LoadModule(
     const std::string& moduleName, const std::string& modulePath, const std::string& hapPath, bool esmodule)
 {
-    HILOG_DEBUG("JsRuntime::LoadModule(%{public}s, %{public}s, %{public}s, %{public}s)",
+    HILOG_DEBUG("JsRuntime::LoadModule(%{public}s, %{private}s, %{private}s, %{public}s)",
         moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
 
     HandleScope handleScope(*this);
@@ -537,7 +540,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
     return std::unique_ptr<NativeReference>(nativeEngine_->CreateReference(instanceValue, 1));
 }
 
-bool JsRuntime::RunScript(const std::string& path, const std::string& hapPath)
+bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath)
 {
     bool result = false;
     if (!hapPath.empty()) {
@@ -545,7 +548,7 @@ bool JsRuntime::RunScript(const std::string& path, const std::string& hapPath)
         if (runtimeExtractor_ == nullptr) {
             runtimeExtractor_ = InitRuntimeExtractor(hapPath);
         }
-        if (!GetFileBuffer(runtimeExtractor_, path, outStream)) {
+        if (!GetFileBuffer(runtimeExtractor_, srcPath, outStream)) {
             HILOG_ERROR("Get abc file failed");
             return result;
         }
@@ -554,9 +557,9 @@ bool JsRuntime::RunScript(const std::string& path, const std::string& hapPath)
         std::vector<uint8_t> buffer;
         buffer.assign(outStr.begin(), outStr.end());
 
-        result = nativeEngine_->RunScriptBuffer(path.c_str(), buffer) != nullptr;
+        result = nativeEngine_->RunScriptBuffer(srcPath.c_str(), buffer) != nullptr;
     } else {
-        result = nativeEngine_->RunScript(path.c_str()) != nullptr;
+        result = nativeEngine_->RunScript(srcPath.c_str()) != nullptr;
     }
     return result;
 }

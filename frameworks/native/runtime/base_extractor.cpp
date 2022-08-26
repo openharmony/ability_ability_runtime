@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,19 +22,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-namespace {
-constexpr const char* MODULE_PROFILE_NAME = "module.json";
-}
-
 BaseExtractor::BaseExtractor(const std::string &source) : sourceFile_(source), zipFile_(source)
-{
-    HILOG_DEBUG("BaseExtractor instance is created");
-}
+{}
 
 BaseExtractor::~BaseExtractor()
-{
-    HILOG_DEBUG("BaseExtractor instance is destroyed");
-}
+{}
 
 bool BaseExtractor::Init()
 {
@@ -43,9 +35,7 @@ bool BaseExtractor::Init()
         return false;
     }
     ZipEntry zipEntry;
-    isNewVersion_ = zipFile_.GetEntry(MODULE_PROFILE_NAME, zipEntry);
     initial_ = true;
-    HILOG_DEBUG("success");
     return true;
 }
 
@@ -87,7 +77,6 @@ bool BaseExtractor::ExtractByName(const std::string &fileName, std::ostream &des
 
 bool BaseExtractor::ExtractFile(const std::string &fileName, const std::string &targetPath) const
 {
-    HILOG_DEBUG("begin to extract %{public}s file into %{private}s targetPath", fileName.c_str(), targetPath.c_str());
     std::ofstream fileStream;
     fileStream.open(targetPath, std::ios_base::out | std::ios_base::binary);
     if (!fileStream.is_open()) {
@@ -125,13 +114,7 @@ bool BaseExtractor::IsStageBasedModel(std::string abilityName)
     std::string name = splitStrs.empty() ? abilityName : splitStrs.back();
     std::string entry = "assets/js/" + name + "/" + name + ".js";
     bool isStageBasedModel = entryMap.find(entry) != entryMap.end();
-    HILOG_DEBUG("name:%{public}s isStageBasedModel:%{public}d", abilityName.c_str(), isStageBasedModel);
     return isStageBasedModel;
-}
-
-bool BaseExtractor::IsNewVersion() const
-{
-    return isNewVersion_;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

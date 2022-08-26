@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,9 +51,7 @@ ZipEntry::ZipEntry(const CentralDirEntry &centralEntry)
 }
 
 ZipFile::ZipFile(const std::string &pathName) : pathName_(pathName)
-{
-    HILOG_DEBUG("create instance from %{private}s", pathName_.c_str());
-}
+{}
 
 ZipFile::~ZipFile()
 {
@@ -62,7 +60,6 @@ ZipFile::~ZipFile()
 
 void ZipFile::SetContentLocation(const ZipPos start, const size_t length)
 {
-    HILOG_DEBUG("set content location start position(%{public}llu), length(%{public}zu)", start, length);
     fileStartPos_ = start;
     fileLength_ = length;
 }
@@ -103,8 +100,6 @@ bool ZipFile::ParseEndDirectory()
     }
 
     centralDirPos_ = endDir_.offset + fileStartPos_;
-    HILOG_DEBUG("parse EOCD offset(0x%{public}08x) file start position(0x%{public}08llx)",
-        endDir_.offset, fileStartPos_);
 
     return CheckEndDir(endDir_);
 }
@@ -157,15 +152,11 @@ bool ZipFile::ParseAllEntries()
         currentPos += sizeof(directoryEntry);
         currentPos += directoryEntry.nameSize + directoryEntry.extraSize + directoryEntry.commentSize;
     }
-
-    HILOG_DEBUG("parse %{public}d central entries from %{private}s", endDir_.totalEntries, pathName_.c_str());
     return ret;
 }
 
 bool ZipFile::Open()
 {
-    HILOG_DEBUG("open: %{private}s", pathName_.c_str());
-
     if (isOpen_) {
         HILOG_ERROR("has already opened");
         return true;
@@ -225,8 +216,6 @@ bool ZipFile::Open()
 
 void ZipFile::Close()
 {
-    HILOG_DEBUG("close: %{private}s", pathName_.c_str());
-
     if (!isOpen_ || file_ == nullptr) {
         HILOG_WARN("file is not opened");
         return;
@@ -255,7 +244,6 @@ bool ZipFile::HasEntry(const std::string &entryName) const
 
 bool ZipFile::IsDirExist(const std::string &dir) const
 {
-    HILOG_DEBUG("target dir: %{public}s", dir.c_str());
     if (dir.empty()) {
         HILOG_ERROR("target dir is empty");
         return false;
@@ -268,24 +256,21 @@ bool ZipFile::IsDirExist(const std::string &dir) const
 
     for (const auto &item : entriesMap_) {
         if (item.first.find(tempDir) == 0) {
-            HILOG_DEBUG("find target dir, fileName : %{public}s", item.first.c_str());
             return true;
         }
     }
-    HILOG_DEBUG("target dir not found, dir : %{public}s", dir.c_str());
+    HILOG_ERROR("target dir not found, dir : %{private}s", dir.c_str());
     return false;
 }
 
 bool ZipFile::GetEntry(const std::string &entryName, ZipEntry &resultEntry) const
 {
-    HILOG_DEBUG("get entry by name: %{public}s", entryName.c_str());
     auto iter = entriesMap_.find(entryName);
     if (iter != entriesMap_.end()) {
         resultEntry = iter->second;
-        HILOG_DEBUG("get entry succeed");
         return true;
     }
-    HILOG_ERROR("get entry failed");
+    HILOG_ERROR("get entry %{public}s failed", entryName.c_str());
     return false;
 }
 
@@ -410,7 +395,6 @@ bool ZipFile::SeekToEntryStart(const ZipEntry &zipEntry, const uint16_t extraSiz
     }
     startOffset += fileStartPos_;  // add file start relative to file stream
 
-    HILOG_DEBUG("seek to entry start 0x%{public}08llx", startOffset);
     if (fseek(file_, startOffset, SEEK_SET) != 0) {
         HILOG_ERROR("seek failed, error: %{public}d", errno);
         return false;
@@ -420,8 +404,6 @@ bool ZipFile::SeekToEntryStart(const ZipEntry &zipEntry, const uint16_t extraSiz
 
 bool ZipFile::UnzipWithStore(const ZipEntry &zipEntry, const uint16_t extraSize, std::ostream &dest) const
 {
-    HILOG_DEBUG("unzip with store");
-
     if (!SeekToEntryStart(zipEntry, extraSize)) {
         HILOG_ERROR("seek to entry start failed");
         return false;
@@ -497,8 +479,6 @@ bool ZipFile::ReadZStream(const BytePtr &buffer, z_stream &zstream, uint32_t &re
 
 bool ZipFile::UnzipWithInflated(const ZipEntry &zipEntry, const uint16_t extraSize, std::ostream &dest) const
 {
-    HILOG_DEBUG("unzip with inflated");
-
     z_stream zstream;
     if (!SeekToEntryStart(zipEntry, extraSize) || !InitZStream(zstream)) {
         return false;
@@ -566,8 +546,6 @@ ZipPos ZipFile::GetEntryDataOffset(const ZipEntry &zipEntry, const uint16_t extr
 
 bool ZipFile::GetDataOffsetRelative(const std::string &file, ZipPos &offset, uint32_t &length) const
 {
-    HILOG_DEBUG("get data relative offset for file %{private}s", file.c_str());
-
     ZipEntry zipEntry;
     if (!GetEntry(file, zipEntry)) {
         HILOG_ERROR("extract file: not find file");
@@ -587,8 +565,6 @@ bool ZipFile::GetDataOffsetRelative(const std::string &file, ZipPos &offset, uin
 
 bool ZipFile::ExtractFile(const std::string &file, std::ostream &dest) const
 {
-    HILOG_DEBUG("extract file %{private}s", file.c_str());
-
     ZipEntry zipEntry;
     if (!GetEntry(file, zipEntry)) {
         HILOG_ERROR("extract file: not find file");
