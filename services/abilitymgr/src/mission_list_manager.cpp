@@ -1304,16 +1304,19 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
                 return;
             }
             InnerMissionInfo innerMissionInfo;
+            auto missionId = abilityRecord->GetMissionId();
             int result = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-                abilityRecord->GetMissionId(), innerMissionInfo);
+                missionId, innerMissionInfo);
             if (result != 0) {
-                HILOG_INFO("Get missionInfo error, result is %{public}d, missionId is %{public}d",
-                    result, abilityRecord->GetMissionId());
+                HILOG_ERROR("Get missionInfo error, result is %{public}d, missionId is %{public}d", result, missionId);
                 break;
             }
             innerMissionInfo.missionInfo.time = GetCurrentTime();
             innerMissionInfo.missionInfo.runningState = -1;
             DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(innerMissionInfo);
+            if (listenerController_) {
+                listenerController_->NotifyMissionClosed(missionId);
+            }
             HILOG_DEBUG("Destroy ability record count %{public}ld", abilityRecord.use_count());
             break;
         }
@@ -1780,9 +1783,12 @@ void MissionListManager::MoveToTerminateList(const std::shared_ptr<AbilityRecord
         HILOG_WARN("load timeout will not wait for died event, directly remove.");
         // update running state.
         InnerMissionInfo info;
-        if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-            selMission->GetMissionId(), info) == 0) {
+        auto missionId = selMission->GetMissionId();
+        if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(missionId, info) == 0) {
             info.missionInfo.runningState = -1;
+            if (listenerController_) {
+                listenerController_->NotifyMissionClosed(missionId);
+            }
             DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(info);
         }
         return;
@@ -2048,15 +2054,18 @@ void MissionListManager::HandleAbilityDiedByDefault(std::shared_ptr<AbilityRecor
     }
 
     // update running state.
+    auto missionId = mission->GetMissionId();
     if (!ability->IsUninstallAbility()) {
         if ((ability->GetAppIndex() != 0) || ability->GetAbilityInfo().removeMissionAfterTerminate ||
             ability->GetAbilityInfo().excludeFromMissions) {
-            RemoveMissionLocked(mission->GetMissionId(), ability->GetAbilityInfo().excludeFromMissions);
+            RemoveMissionLocked(missionId, ability->GetAbilityInfo().excludeFromMissions);
         } else {
             InnerMissionInfo info;
-            if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-                mission->GetMissionId(), info) == 0) {
+            if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(missionId, info) == 0) {
                 info.missionInfo.runningState = -1;
+                if (listenerController_) {
+                    listenerController_->NotifyMissionClosed(missionId);
+                }
                 DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(info);
             }
         }
