@@ -141,7 +141,7 @@ public:
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid) = 0;
 
     /**
-     * KillApplicationSelf, kill the application self.
+     * Kill the application self.
      *
      * @return Returns ERR_OK on success, others on failure.
      */
