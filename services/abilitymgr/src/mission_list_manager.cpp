@@ -2063,10 +2063,11 @@ void MissionListManager::HandleAbilityDiedByDefault(std::shared_ptr<AbilityRecor
             InnerMissionInfo info;
             if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(missionId, info) == 0) {
                 info.missionInfo.runningState = -1;
-                if (listenerController_) {
-                    listenerController_->NotifyMissionClosed(missionId);
-                }
                 DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(info);
+            }
+
+            if (listenerController_) {
+                listenerController_->NotifyMissionClosed(missionId);
             }
         }
     }
