@@ -216,6 +216,15 @@ napi_value GetContinueAbilityOptionsDeviceID(
 
 bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilityStartSetting &setting);
 
+napi_value NAPI_TerminateAbilityCommon(napi_env env, napi_callback_info info);
+
+napi_value TerminateAbilityWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo *asyncCallbackInfo);
+
+napi_value TerminateAbilityAsync(
+    napi_env env, napi_value *args, const size_t argCallback, AsyncCallbackInfo *asyncCallbackInfo);
+
+napi_value TerminateAbilityPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo);
+
 class NAPIAbilityConnection : public AAFwk::AbilityConnectionStub {
 public:
     void OnAbilityConnectDone(
