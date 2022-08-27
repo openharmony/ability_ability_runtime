@@ -4700,17 +4700,17 @@ napi_value TerminateAbilityAsync(
 
     NAPI_CALL(env, napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            HILOG_INFO("NAPI_TerminateAbility, worker pool thread execute.");
+            HILOG_INFO("%{public}s, worker pool thread execute.", __func__);
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             if (asyncCallbackInfo->ability != nullptr) {
                 asyncCallbackInfo->ability->TerminateAbility();
             } else {
-                HILOG_ERROR("NAPI_TerminateAbility, ability == nullptr");
+                HILOG_ERROR("%{public}s, ability == nullptr", __func__);
             }
-            HILOG_INFO("NAPI_TerminateAbility, worker pool thread execute end.");
+            HILOG_INFO("%{public}s, worker pool thread execute end.", __func__);
         },
         [](napi_env env, napi_status status, void *data) {
-            HILOG_INFO("NAPI_TerminateAbility, main event thread complete.");
+            HILOG_INFO("%{public}s, main event thread complete.", __func__);
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             napi_value callback = 0;
             napi_value undefined = 0;
@@ -4727,7 +4727,7 @@ napi_value TerminateAbilityAsync(
             }
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
-            HILOG_INFO("NAPI_TerminateAbility, main event thread complete end.");
+            HILOG_INFO("%{public}s, main event thread complete end.", __func__);
         },
         (void *)asyncCallbackInfo,
         &asyncCallbackInfo->asyncWork));
@@ -4742,7 +4742,7 @@ napi_value TerminateAbilityPromise(napi_env env, AsyncCallbackInfo *asyncCallbac
 {
     HILOG_INFO("%{public}s, promise.", __func__);
     if (asyncCallbackInfo == nullptr) {
-        HILOG_ERROR("TerminateAbilityPromise, param == nullptr.");
+        HILOG_ERROR("%{public}s, param == nullptr.", __func__);
         return nullptr;
     }
     napi_value resourceName = 0;
@@ -4755,24 +4755,24 @@ napi_value TerminateAbilityPromise(napi_env env, AsyncCallbackInfo *asyncCallbac
 
     NAPI_CALL(env, napi_create_async_work(env, nullptr, resourceName,
         [](napi_env env, void *data) {
-            HILOG_INFO("NAPI_TerminateAbility, worker pool thread execute.");
+            HILOG_INFO("%{public}s, worker pool thread execute.", __func__);
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             if (asyncCallbackInfo->ability != nullptr) {
                 asyncCallbackInfo->ability->TerminateAbility();
             } else {
-                HILOG_INFO("NAPI_TerminateAbility, ability == nullptr");
+                HILOG_INFO("%{public}s, ability == nullptr", __func__);
             }
-            HILOG_INFO("NAPI_TerminateAbility, worker pool thread execute end.");
+            HILOG_INFO("%{public}s, worker pool thread execute end.", __func__);
         },
         [](napi_env env, napi_status status, void *data) {
-            HILOG_INFO("NAPI_TerminateAbility,  main event thread complete.");
+            HILOG_INFO("%{public}s, main event thread complete.", __func__);
             AsyncCallbackInfo *asyncCallbackInfo = static_cast<AsyncCallbackInfo *>(data);
             napi_value result = 0;
             napi_get_null(env, &result);
             napi_resolve_deferred(env, asyncCallbackInfo->deferred, result);
             napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
             delete asyncCallbackInfo;
-            HILOG_INFO("NAPI_TerminateAbility,  main event thread complete end.");
+            HILOG_INFO("%{public}s, main event thread complete end.", __func__);
         },
         (void *)asyncCallbackInfo,
         &asyncCallbackInfo->asyncWork));
