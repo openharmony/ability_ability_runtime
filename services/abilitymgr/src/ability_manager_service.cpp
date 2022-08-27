@@ -4337,6 +4337,9 @@ int32_t AbilityManagerService::InitAbilityInfoFromExtension(AppExecFwk::Extensio
     abilityInfo.process = extensionInfo.process;
     abilityInfo.metadata = extensionInfo.metadata;
     abilityInfo.type = AppExecFwk::AbilityType::EXTENSION;
+    if (!extensionInfo.hapPath.empty()) {
+        abilityInfo.hapPath = extensionInfo.hapPath;
+    }
     return 0;
 }
 

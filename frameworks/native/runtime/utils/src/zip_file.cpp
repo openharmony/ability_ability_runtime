@@ -259,7 +259,7 @@ bool ZipFile::IsDirExist(const std::string &dir) const
             return true;
         }
     }
-    HILOG_ERROR("target dir not found, dir : %{private}s", dir.c_str());
+    HILOG_WARN("target dir not found, dir : %{private}s", dir.c_str());
     return false;
 }
 
