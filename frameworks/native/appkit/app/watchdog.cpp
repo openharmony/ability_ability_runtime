@@ -43,7 +43,7 @@ void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
     }
     auto watchdogTask = std::bind(&Watchdog::Timer, this);
     OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask,
-        INI_TIMER_FIRST_SECOND, CHECK_INTERVAL_TIME);
+        CHECK_INTERVAL_TIME, INI_TIMER_FIRST_SECOND);
 }
 
 void Watchdog::Stop()
@@ -102,11 +102,11 @@ bool Watchdog::WaitForDuration(uint32_t duration)
     return false;
 }
 
-bool Watchdog::Timer()
+void Watchdog::Timer()
 {
     if (!needReport_) {
         HILOG_ERROR("Watchdog timeout, wait for the handler to recover, and do not send event.");
-        continue;
+        return;
     }
     if (IsReportEvent()) {
         const int bufferLen = 128;
