@@ -88,7 +88,7 @@ public:
     bool IsReportEvent();
 
 private:
-    bool Timer();
+    void Timer();
     bool WaitForDuration(uint32_t duration);
     void reportEvent();
 
