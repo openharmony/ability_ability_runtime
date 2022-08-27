@@ -19,12 +19,13 @@
 #include <cerrno>
 #include <climits>
 #include <cstdlib>
+#include <regex>
 #include <sys/epoll.h>
 #include <unistd.h>
 
+#include "ability_constants.h"
 #include "connect_server_manager.h"
 #include "event_handler.h"
-#include "extractor_utils.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
 #include "js_console_log.h"
@@ -114,10 +115,14 @@ public:
         bool result = false;
         if (!hapPath.empty()) {
             std::ostringstream outStream;
-            if (runtimeExtractor_ == nullptr) {
-                runtimeExtractor_ = InitRuntimeExtractor(hapPath);
+            std::shared_ptr<RuntimeExtractor> runtimeExtractor;
+            if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
+                runtimeExtractor = RuntimeExtractor(hapPath).Create();
+                runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
+            } else {
+                runtimeExtractor = runtimeExtractorMap_.at(hapPath);
             }
-            if (!GetFileBuffer(runtimeExtractor_, srcPath, outStream)) {
+            if (!runtimeExtractor->GetFileBuffer(srcPath, outStream)) {
                 HILOG_ERROR("Get abc file failed");
                 return result;
             }
@@ -199,10 +204,11 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            runtimeExtractor_ = InitRuntimeExtractor(options.hapPath);
             if (!options.hapPath.empty()) {
+                std::shared_ptr<RuntimeExtractor> runtimeExtractor = RuntimeExtractor(options.hapPath).Create();
+                runtimeExtractorMap_.insert(make_pair(options.hapPath, runtimeExtractor));
                 panda::JSNApi::SetHostResolveBufferTracker(
-                    vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor_));
+                    vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor));
             } else {
                 panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
             }
@@ -499,9 +505,15 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(
         classValue = it->second->Get();
     } else {
         std::string fileName;
-        if (!MakeFilePath(codePath_, modulePath, fileName)) {
-            HILOG_ERROR("Failed to make module file path: %{private}s", modulePath.c_str());
-            return std::unique_ptr<NativeReference>();
+        if (!hapPath.empty()) {
+            fileName.append(codePath_).append(Constants::FILE_SEPARATOR).append(modulePath);
+            std::regex pattern(std::string(Constants::FILE_DOT) + std::string(Constants::FILE_SEPARATOR));
+            fileName = std::regex_replace(fileName, pattern, "");
+        } else {
+            if (!MakeFilePath(codePath_, modulePath, fileName)) {
+                HILOG_ERROR("Failed to make module file path: %{private}s", modulePath.c_str());
+                return std::unique_ptr<NativeReference>();
+            }
         }
 
         classValue = esmodule ? LoadJsModule(fileName, hapPath) : LoadJsBundle(fileName, hapPath);
@@ -545,10 +557,14 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
     bool result = false;
     if (!hapPath.empty()) {
         std::ostringstream outStream;
-        if (runtimeExtractor_ == nullptr) {
-            runtimeExtractor_ = InitRuntimeExtractor(hapPath);
+        std::shared_ptr<RuntimeExtractor> runtimeExtractor;
+        if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
+            runtimeExtractor = RuntimeExtractor(hapPath).Create();
+            runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
+        } else {
+            runtimeExtractor = runtimeExtractorMap_.at(hapPath);
         }
-        if (!GetFileBuffer(runtimeExtractor_, srcPath, outStream)) {
+        if (!runtimeExtractor->GetFileBuffer(srcPath, outStream)) {
             HILOG_ERROR("Get abc file failed");
             return result;
         }
