@@ -35,9 +35,12 @@ std::shared_ptr<EventHandler> Watchdog::appMainHandler_ = nullptr;
 Watchdog::Watchdog()
 {}
 
-void Watchdog::Init(const std::shared_ptr<EventHandler> &mainHandler)
+void Watchdog::Init(const std::shared_ptr<EventHandler> mainHandler)
 {
     Watchdog::appMainHandler_ = mainHandler;
+    if (appMainHandler_ != nullptr) {
+        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
+    }
     auto watchdogTask = std::bind(&Watchdog::Timer, this);
     OHOS::HiviewDFX::Watchdog::GetInstance().RunPeriodicalTask("AppkitWatchdog", watchdogTask,
         INI_TIMER_FIRST_SECOND, CHECK_INTERVAL_TIME);
@@ -101,34 +104,22 @@ bool Watchdog::WaitForDuration(uint32_t duration)
 
 bool Watchdog::Timer()
 {
-    if (WaitForDuration(INI_TIMER_FIRST_SECOND)) {
-        HILOG_DEBUG("cvWatchDog1 is stopped");
-        
-        return true;
+    if (!needReport_) {
+        HILOG_ERROR("Watchdog timeout, wait for the handler to recover, and do not send event.");
+        continue;
     }
-    while (!stopWatchdog_) {
-        if (appMainHandler_ != nullptr) {
-            appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
-        }
-        if (WaitForDuration(CHECK_INTERVAL_TIME)) {
-            HILOG_DEBUG("cvWatchDog2 is stopped");
-            return true;
-        }
-        if (!needReport_) {
-            HILOG_ERROR("Watchdog timeout, wait for the handler to recover, and do not send event.");
-            continue;
-        }
-        if (IsReportEvent()) {
-            const int bufferLen = 128;
-            char paramOutBuf[bufferLen] = {0};
-            const char *hook_mode = "startup:";
-            int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
-            if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
-                reportEvent();
-            }
+    if (IsReportEvent()) {
+        const int bufferLen = 128;
+        char paramOutBuf[bufferLen] = {0};
+        const char *hook_mode = "startup:";
+        int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
+        if (ret <= 0 || strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) != 0) {
+            reportEvent();
         }
     }
-    return true;
+    if (appMainHandler_ != nullptr) {
+        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
+    }
 }
 
 void Watchdog::reportEvent()
