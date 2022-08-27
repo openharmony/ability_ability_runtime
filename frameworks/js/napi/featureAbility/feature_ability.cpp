@@ -57,7 +57,6 @@ napi_value FeatureAbilityInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("startAbilityForResult", NAPI_StartAbilityForResult),
         DECLARE_NAPI_FUNCTION("finishWithResult", NAPI_SetResult),
         DECLARE_NAPI_FUNCTION("terminateSelfWithResult", NAPI_SetResult),
-        DECLARE_NAPI_FUNCTION("terminateAbility", NAPI_TerminateAbility),
         DECLARE_NAPI_FUNCTION("terminateSelf", NAPI_TerminateAbility),
         DECLARE_NAPI_FUNCTION("hasWindowFocus", NAPI_HasWindowFocus),
         DECLARE_NAPI_FUNCTION("getContext", NAPI_GetContext),
