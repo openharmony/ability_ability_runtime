@@ -40,9 +40,8 @@ public:
      * @brief Init the Watchdog.
      *
      * @param mainHandler The handler of main thread.
-     * @param watchDogHandler The handler of watchdog thread.
      */
-    void Init(const std::shared_ptr<EventHandler> &mainHandler);
+    void Init(const std::shared_ptr<EventHandler> mainHandler);
 
     /**
      *
@@ -53,13 +52,25 @@ public:
 
     /**
      *
-     * @brief Stop the mainthread function of watchdog.
+     * @brief Set the info of application.
      *
+     * @param applicationInfo The info of application
      */
     void SetApplicationInfo(const std::shared_ptr<ApplicationInfo> &applicationInfo);
 
+    /**
+     *
+     * @brief Set the state of main thread.
+     *
+     * @param appMainThreadState The state of main thread.
+     */
     void SetAppMainThreadState(const bool appMainThreadState);
 
+    /**
+     *
+     * @brief Allow report the main thread timeout event.
+     *
+     */
     void AllowReportEvent();
 
     /**
@@ -69,6 +80,11 @@ public:
      */
     bool IsStopWatchdog();
 
+    /**
+     *
+     * @brief Check and reset the main thread state.
+     *
+     */
     bool IsReportEvent();
 
 private:
