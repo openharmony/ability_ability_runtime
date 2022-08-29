@@ -806,6 +806,8 @@ public:
 
     bool CanRestartRootLauncher();
 
+    std::string GetLabel();
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
 
@@ -866,7 +868,7 @@ private:
         const std::shared_ptr<Want> &want, const AbilityRequest &abilityRequest);
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo &abilityInfo) const;
-    sptr<Media::PixelMap> GetPixelMap(const uint32_t windowIconId,
+    std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t windowIconId,
         std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const;
     void StartingWindowHot(const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
         const AbilityRequest &abilityRequest);

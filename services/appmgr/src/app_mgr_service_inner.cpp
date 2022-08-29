@@ -217,14 +217,14 @@ void AppMgrServiceInner::MakeProcessName(
     if (!appInfo) {
         return;
     }
-    if (!appInfo->process.empty()) {
-        processName = appInfo->process;
-        return;
-    }
     // check after abilityInfo, because abilityInfo contains extension process.
     if (hapModuleInfo.isStageBasedModel && !hapModuleInfo.process.empty()) {
         processName = hapModuleInfo.process;
         HILOG_INFO("Stage mode, Make processName:%{public}s", processName.c_str());
+        return;
+    }
+    if (!appInfo->process.empty()) {
+        processName = appInfo->process;
         return;
     }
     processName = appInfo->bundleName;
@@ -320,10 +320,10 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
     appRecord->LaunchApplication(*configuration_);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
 
-    // There is no ability when the resident process starts
+    // There is no ability when the empty resident process starts
     // The status of all resident processes is ready
     // There is no process of switching the foreground, waiting for his first ability to start
-    if (appRecord->IsKeepAliveApp()) {
+    if (appRecord->IsEmptyKeepAliveApp()) {
         appRecord->AddAbilityStage();
         return;
     }
@@ -532,6 +532,32 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
             HILOG_ERROR("KillApplication is fail bundleName: %{public}s pid: %{public}d", bundleName.c_str(), *iter);
             return result;
         }
+    }
+    return result;
+}
+
+int32_t AppMgrServiceInner::KillApplicationSelf()
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    if (!appRunningManager_->ProcessExitByPid(callerPid)) {
+        HILOG_INFO("The callerPid is invalid");
+        return ERR_OK;
+    }
+    std::list<pid_t> pids;
+    pids.push_back(callerPid);
+    int64_t startTime = SystemTimeMillis();
+    if (WaitForRemoteProcessExit(pids, startTime)) {
+        HILOG_INFO("The remote process exited successfully");
+        return ERR_OK;
+    }
+    int result = KillProcessByPid(callerPid);
+    if (result < 0) {
+        HILOG_ERROR("KillApplication is fail, pid: %{public}d", callerPid);
     }
     return result;
 }
@@ -823,6 +849,8 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(con
         return nullptr;
     }
 
+    bool isKeepAlive = bundleInfo.isKeepAlive && bundleInfo.singleton;
+    appRecord->SetKeepAliveAppState(isKeepAlive, false);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want);
     if (want) {
@@ -1639,10 +1667,11 @@ void AppMgrServiceInner::StartResidentProcess(const std::vector<BundleInfo> &inf
     }
 
     for (auto &bundle : infos) {
-        auto processName = bundle.applicationInfo.process.empty() ?
-            bundle.applicationInfo.bundleName : bundle.applicationInfo.process;
-        HILOG_INFO("processName = [%{public}s]", processName.c_str());
-
+        HILOG_INFO("processName = [%{public}s]", bundle.applicationInfo.process.c_str());
+        if (bundle.applicationInfo.process.empty()) {
+            continue;
+        }
+        auto processName = bundle.applicationInfo.process;
         // Inspection records
         auto appRecord = appRunningManager_->CheckAppRunningRecordIsExist(
             bundle.applicationInfo.name, processName, bundle.applicationInfo.uid, bundle);
@@ -1678,15 +1707,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         return;
     }
 
-    bool isStageBased = false;
-    bool moduelJson = false;
-    if (!info.hapModuleInfos.empty()) {
-        isStageBased = info.hapModuleInfos.back().isStageBasedModel;
-        moduelJson = info.hapModuleInfos.back().isModuleJson;
-    }
-    HILOG_INFO("StartEmptyResidentProcess stage:%{public}d moduel:%{public}d size:%{public}d",
-        isStageBased, moduelJson, (int32_t)info.hapModuleInfos.size());
-    appRecord->SetKeepAliveAppState(true, isStageBased);
+    appRecord->SetKeepAliveAppState(true, true);
 
     if (restartCount > 0) {
         HILOG_INFO("StartEmptyResidentProcess restartCount : [%{public}d], ", restartCount);
@@ -2121,6 +2142,11 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is null");
         return ERR_INVALID_VALUE;
+    }
+
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateConfigurationPerm();
+    if (ret != ERR_OK) {
+        return ret;
     }
 
     std::vector<std::string> changeKeyV;

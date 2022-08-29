@@ -67,15 +67,15 @@ private:
 class JsTimer final {
 public:
     JsTimer(JsRuntime& jsRuntime, const std::shared_ptr<NativeReference>& jsFunction, const std::string &name,
-        int64_t interval)
-        : jsRuntime_(jsRuntime), jsFunction_(jsFunction), name_(name), interval_(interval)
+        int64_t interval, bool isInterval)
+        : jsRuntime_(jsRuntime), jsFunction_(jsFunction), name_(name), interval_(interval), isInterval_(isInterval)
     {}
 
     ~JsTimer() = default;
 
     void operator()() const
     {
-        if (interval_ > 0) {
+        if (isInterval_) {
             jsRuntime_.PostTask(*this, name_, interval_);
         }
 #ifdef SUPPORT_GRAPHICS
@@ -108,6 +108,7 @@ private:
     std::vector<std::shared_ptr<NativeReference>> jsArgs_;
     std::string name_;
     int64_t interval_ = 0;
+    bool isInterval_ = false;
 #ifdef SUPPORT_GRAPHICS
     int32_t containerScopeId_ = ContainerScope::CurrentId();
 #endif
@@ -119,7 +120,7 @@ private:
 NativeValue* StartTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* info, bool isInterval)
 {
     if (engine == nullptr || info == nullptr) {
-        HILOG_ERROR("Start timeout or interval failed with engine or callback info is nullptr.");
+        HILOG_ERROR("StartTimeoutOrInterval, engine or callback info is nullptr.");
         return nullptr;
     }
 
@@ -138,7 +139,7 @@ NativeValue* StartTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* in
 
     // create timer task
     JsRuntime& jsRuntime = *reinterpret_cast<JsRuntime*>(engine->GetJsEngine());
-    JsTimer task(jsRuntime, jsFunction, name, isInterval ? delayTime : 0);
+    JsTimer task(jsRuntime, jsFunction, name, delayTime, isInterval);
     for (size_t index = 2; index < info->argc; ++index) {
         task.PushArgs(std::shared_ptr<NativeReference>(engine->CreateReference(info->argv[index], 1)));
     }
@@ -183,10 +184,12 @@ NativeValue* StopTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* inf
 
 void InitTimerModule(NativeEngine& engine, NativeObject& globalObject)
 {
-    BindNativeFunction(engine, globalObject, "setTimeout", StartTimeout);
-    BindNativeFunction(engine, globalObject, "setInterval", StartInterval);
-    BindNativeFunction(engine, globalObject, "clearTimeout", StopTimeoutOrInterval);
-    BindNativeFunction(engine, globalObject, "clearInterval", StopTimeoutOrInterval);
+    HILOG_DEBUG("InitTimerModule begin.");
+    const char *moduleName = "JsTimer";
+    BindNativeFunction(engine, globalObject, "setTimeout", moduleName, StartTimeout);
+    BindNativeFunction(engine, globalObject, "setInterval", moduleName, StartInterval);
+    BindNativeFunction(engine, globalObject, "clearTimeout", moduleName, StopTimeoutOrInterval);
+    BindNativeFunction(engine, globalObject, "clearInterval", moduleName, StopTimeoutOrInterval);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

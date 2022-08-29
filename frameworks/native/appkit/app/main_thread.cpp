@@ -753,16 +753,21 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    std::vector<std::string> resPaths;
-    ChangeToLocalPath(bundleInfo.name, bundleInfo.moduleResPaths, resPaths);
-    for (auto moduleResPath : resPaths) {
-        if (!moduleResPath.empty()) {
-            HILOG_INFO("length: %{public}zu, moduleResPath: %{public}s",
-                moduleResPath.length(),
-                moduleResPath.c_str());
-            if (!resourceManager->AddResource(moduleResPath.c_str())) {
-                HILOG_ERROR("AddResource failed");
-            }
+    std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
+    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+        if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
+            continue;
+        }
+        std::string loadPath;
+        if (!hapModuleInfo.hapPath.empty()) {
+            loadPath = hapModuleInfo.hapPath;
+        } else {
+            loadPath = hapModuleInfo.resourcePath;
+        }
+        loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH));
+        HILOG_DEBUG("ModuleResPath: %{public}s", loadPath.c_str());
+        if (!resourceManager->AddResource(loadPath.c_str())) {
+            HILOG_ERROR("AddResource failed");
         }
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -772,20 +777,20 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     resConfig->SetLocaleInfo(locale);
     const icu::Locale *localeInfo = resConfig->GetLocaleInfo();
     if (localeInfo != nullptr) {
-        HILOG_INFO("language: %{public}s, script: %{public}s, region: %{public}s,",
+        HILOG_INFO("Language: %{public}s, script: %{public}s, region: %{public}s",
             localeInfo->getLanguage(),
             localeInfo->getScript(),
             localeInfo->getCountry());
     } else {
-        HILOG_INFO("localeInfo is nullptr.");
+        HILOG_INFO("LocaleInfo is nullptr.");
     }
 
     std::string colormode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    HILOG_DEBUG("colormode is %{public}s.", colormode.c_str());
+    HILOG_DEBUG("Colormode is %{public}s.", colormode.c_str());
     resConfig->SetColorMode(ConvertColorMode(colormode));
 
     std::string hasPointerDevice = config.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-    HILOG_DEBUG("hasPointerDevice is %{public}s.", hasPointerDevice.c_str());
+    HILOG_DEBUG("HasPointerDevice is %{public}s.", hasPointerDevice.c_str());
     resConfig->SetInputDevice(ConvertHasPointerDevice(hasPointerDevice));
 #endif
     resourceManager->UpdateResConfig(*resConfig);
@@ -925,6 +930,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         AbilityRuntime::Runtime::Options options;
         options.bundleName = appInfo.bundleName;
         options.codePath = LOCAL_CODE_PATH;
+        options.hapPath = bundleInfo.hapModuleInfos.back().hapPath;
         options.eventRunner = mainHandler_->GetEventRunner();
         options.loadAce = true;
         std::string nativeLibraryPath = appInfo.nativeLibraryPath;
@@ -1091,12 +1097,12 @@ void MainThread::LoadNativeLiabrary(std::string &nativeLibraryPath)
 void MainThread::ChangeToLocalPath(const std::string &bundleName,
     const std::vector<std::string> &sourceDirs, std::vector<std::string> &localPath)
 {
+    std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName
+        + std::string(FILE_SEPARATOR));
     for (auto item : sourceDirs) {
         if (item.empty()) {
             continue;
         }
-        std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName
-            + std::string(FILE_SEPARATOR));
         localPath.emplace_back(
             std::regex_replace(item, pattern, std::string(LOCAL_CODE_PATH) + std::string(FILE_SEPARATOR)));
     }
@@ -1212,6 +1218,7 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         AbilityRuntime::Runtime::Options options;
         options.codePath = LOCAL_CODE_PATH;
         options.eventRunner = mainHandler_->GetEventRunner();
+        options.hapPath = bundleInfo.hapModuleInfos.back().hapPath;
         options.loadAce = false;
         if (bundleInfo.hapModuleInfos.empty() || bundleInfo.hapModuleInfos.front().abilityInfos.empty()) {
             HILOG_ERROR("Failed to abilityInfos");
@@ -1220,6 +1227,10 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         bool isFaJsModel = bundleInfo.hapModuleInfos.front().abilityInfos.front().srcLanguage == "js" ? true : false;
         static auto runtime = AbilityRuntime::Runtime::Create(options);
         auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
+        if (testRunner == nullptr) {
+            HILOG_ERROR("Failed to Create testRunner");
+            return false;
+        }
         if (!testRunner->Initialize()) {
             HILOG_ERROR("Failed to Initialize testRunner");
             return false;

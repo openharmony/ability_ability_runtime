@@ -81,6 +81,7 @@ void MissionDataStorage::SetEventHandler(const std::shared_ptr<AppExecFwk::Event
 bool MissionDataStorage::LoadAllMissionInfo(std::list<InnerMissionInfo> &missionInfoList)
 {
     std::vector<std::string> fileNameVec;
+    std::vector<int32_t> tempMissions;
     std::string dirPath = GetMissionDataDirPath();
     OHOS::HiviewDFX::FileUtil::GetDirFiles(dirPath, fileNameVec);
 
@@ -102,7 +103,15 @@ bool MissionDataStorage::LoadAllMissionInfo(std::list<InnerMissionInfo> &mission
             HILOG_ERROR("parse mission info failed. file: %{public}s", fileName.c_str());
             continue;
         }
+        if (misssionInfo.isTemporary) {
+            tempMissions.push_back(misssionInfo.missionInfo.id);
+            continue;
+        }
         missionInfoList.push_back(misssionInfo);
+    }
+
+    for (auto missionId : tempMissions) {
+        DeleteMissionInfo(missionId);
     }
     return true;
 }
@@ -333,14 +342,14 @@ void MissionDataStorage::DeleteMissionSnapshot(int32_t missionId, bool isLowReso
     }
 }
 
-sptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, bool isLowResolution) const
+std::shared_ptr<Media::PixelMap> MissionDataStorage::GetSnapshot(int missionId, bool isLowResolution) const
 {
     auto pixelMapPtr = GetPixelMap(missionId, isLowResolution);
     if (!pixelMapPtr) {
         HILOG_ERROR("%{public}s: GetPixelMap failed.", __func__);
         return nullptr;
     }
-    return sptr<Media::PixelMap>(pixelMapPtr.release());
+    return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
 std::unique_ptr<Media::PixelMap> MissionDataStorage::GetPixelMap(int missionId, bool isLowResolution) const

@@ -54,9 +54,15 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 
     std::regex rule("[a-zA-Z.]+[-_#]{1}");
     std::string signCode;
+    bool isStageBasedModel = false;
     ClipStringContent(rule, bundleInfo.appId, signCode);
+    if (!bundleInfo.hapModuleInfos.empty()) {
+        isStageBasedModel = bundleInfo.hapModuleInfos.back().isStageBasedModel;
+    }
+    HILOG_DEBUG("Create AppRunningRecord, processName: %{public}s, StageBasedModel:%{public}d, recordId: %{public}d",
+        processName.c_str(), isStageBasedModel, recordId);
 
-    HILOG_INFO("Create AppRunningRecord, processName: %{public}s, recordId: %{public}d", processName.c_str(), recordId);
+    appRecord->SetStageModelState(isStageBasedModel);
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
     appRunningRecordMap_.emplace(recordId, appRecord);
@@ -202,6 +208,24 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
     return (pids.empty() ? false : true);
 }
 
+bool AppRunningManager::ProcessExitByPid(pid_t pid)
+{
+    std::lock_guard<std::recursive_mutex> guard(lock_);
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord) {
+            pid_t appPid = appRecord->GetPriorityObject()->GetPid();
+            if (appPid == pid) {
+                appRecord->SetKilling();
+                appRecord->ScheduleProcessSecurityExit();
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
     std::lock_guard<std::recursive_mutex> guard(lock_);
@@ -325,7 +349,7 @@ void AppRunningManager::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &to
         abilityRecord->SetTerminating();
     }
 
-    if (appRecord->IsLastAbilityRecord(token)) {
+    if (appRecord->IsLastAbilityRecord(token) && !appRecord->IsKeepAliveApp()) {
         appRecord->SetTerminating();
     }
 
@@ -350,7 +374,12 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token)
         return;
     }
 
-    if (appRecord->IsLastAbilityRecord(token)) {
+    auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
+    if (abilityRecord) {
+        abilityRecord->SetTerminating();
+    }
+
+    if (appRecord->IsLastAbilityRecord(token) && !appRecord->IsKeepAliveApp()) {
         HILOG_INFO("The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
     }
@@ -369,17 +398,17 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         HILOG_ERROR("appRecord is nullptr.");
         return;
     }
-    bool isLastAbilityRecord = appRecord->IsLastAbilityRecord(token);
-    bool isClearMission = (clearMissionFlag && appMgrServiceInner != nullptr);
-    if (isClearMission) {
-        isLastAbilityRecord = appRecord->IsLastPageAbilityRecord(token);
-    }
     appRecord->TerminateAbility(token, false);
 
-    if (isLastAbilityRecord && !appRecord->IsKeepAliveApp()) {
+    auto isLastAbility =
+        clearMissionFlag ? appRecord->IsLastPageAbilityRecord(token) : appRecord->IsLastAbilityRecord(token);
+    auto isKeepAliveApp = appRecord->IsKeepAliveApp();
+    auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
+    if (isLastAbility && !isKeepAliveApp && !isLauncherApp) {
         HILOG_DEBUG("The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
-        if (isClearMission) {
+        if (clearMissionFlag && appMgrServiceInner != nullptr) {
+            appRecord->RemoveTerminateAbilityTimeoutTask(token);
             HILOG_DEBUG("The ability is the last, kill application");
             auto pid = appRecord->GetPriorityObject()->GetPid();
             auto result = appMgrServiceInner->KillProcessByPid(pid);

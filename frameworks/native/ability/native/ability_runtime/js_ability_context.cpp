@@ -1137,37 +1137,95 @@ NativeValue* CreateJsAbilityContext(NativeEngine& engine, std::shared_ptr<Abilit
         object->SetProperty("config", CreateJsConfiguration(engine, *configuration));
     }
 
-    BindNativeFunction(engine, *object, "startAbility", JsAbilityContext::StartAbility);
-    BindNativeFunction(engine, *object, "startAbilityWithAccount", JsAbilityContext::StartAbilityWithAccount);
-    BindNativeFunction(engine, *object, "startAbilityByCall", JsAbilityContext::StartAbilityByCall);
-    BindNativeFunction(engine, *object, "startAbilityForResult", JsAbilityContext::StartAbilityForResult);
-    BindNativeFunction(engine, *object, "startAbilityForResultWithAccount",
+    const char *moduleName = "JsAbilityContext";
+    BindNativeFunction(engine, *object, "startAbility", moduleName, JsAbilityContext::StartAbility);
+    BindNativeFunction(engine, *object, "startAbilityWithAccount", moduleName,
+        JsAbilityContext::StartAbilityWithAccount);
+    BindNativeFunction(engine, *object, "startAbilityByCall", moduleName, JsAbilityContext::StartAbilityByCall);
+    BindNativeFunction(engine, *object, "startAbilityForResult", moduleName, JsAbilityContext::StartAbilityForResult);
+    BindNativeFunction(engine, *object, "startAbilityForResultWithAccount", moduleName,
         JsAbilityContext::StartAbilityForResultWithAccount);
-    BindNativeFunction(engine, *object, "startServiceExtensionAbility", JsAbilityContext::StartServiceExtensionAbility);
-    BindNativeFunction(engine, *object, "startServiceExtensionAbilityWithAccount",
+    BindNativeFunction(engine, *object, "startServiceExtensionAbility", moduleName,
+        JsAbilityContext::StartServiceExtensionAbility);
+    BindNativeFunction(engine, *object, "startServiceExtensionAbilityWithAccount", moduleName,
         JsAbilityContext::StartServiceExtensionAbilityWithAccount);
-    BindNativeFunction(engine, *object, "stopServiceExtensionAbility", JsAbilityContext::StopServiceExtensionAbility);
-    BindNativeFunction(engine, *object, "stopServiceExtensionAbilityWithAccount",
+    BindNativeFunction(engine, *object, "stopServiceExtensionAbility", moduleName,
+        JsAbilityContext::StopServiceExtensionAbility);
+    BindNativeFunction(engine, *object, "stopServiceExtensionAbilityWithAccount", moduleName,
         JsAbilityContext::StopServiceExtensionAbilityWithAccount);
-    BindNativeFunction(engine, *object, "connectAbility", JsAbilityContext::ConnectAbility);
-    BindNativeFunction(engine, *object, "connectAbilityWithAccount", JsAbilityContext::ConnectAbilityWithAccount);
-    BindNativeFunction(engine, *object, "disconnectAbility", JsAbilityContext::DisconnectAbility);
-    BindNativeFunction(engine, *object, "terminateSelf", JsAbilityContext::TerminateSelf);
-    BindNativeFunction(engine, *object, "terminateSelfWithResult", JsAbilityContext::TerminateSelfWithResult);
-    BindNativeFunction(engine, *object, "requestPermissionsFromUser", JsAbilityContext::RequestPermissionsFromUser);
-    BindNativeFunction(engine, *object, "restoreWindowStage", JsAbilityContext::RestoreWindowStage);
-    BindNativeFunction(engine, *object, "isTerminating", JsAbilityContext::IsTerminating);
+    BindNativeFunction(engine, *object, "connectAbility", moduleName, JsAbilityContext::ConnectAbility);
+    BindNativeFunction(engine, *object, "connectAbilityWithAccount", moduleName,
+        JsAbilityContext::ConnectAbilityWithAccount);
+    BindNativeFunction(engine, *object, "disconnectAbility", moduleName, JsAbilityContext::DisconnectAbility);
+    BindNativeFunction(engine, *object, "terminateSelf", moduleName, JsAbilityContext::TerminateSelf);
+    BindNativeFunction(engine, *object, "terminateSelfWithResult", moduleName,
+        JsAbilityContext::TerminateSelfWithResult);
+    BindNativeFunction(engine, *object, "requestPermissionsFromUser", moduleName,
+        JsAbilityContext::RequestPermissionsFromUser);
+    BindNativeFunction(engine, *object, "restoreWindowStage", moduleName, JsAbilityContext::RestoreWindowStage);
+    BindNativeFunction(engine, *object, "isTerminating", moduleName, JsAbilityContext::IsTerminating);
 
 #ifdef SUPPORT_GRAPHICS
-    BindNativeFunction(engine, *object, "setMissionLabel", JsAbilityContext::SetMissionLabel);
-    BindNativeFunction(engine, *object, "setMissionIcon", JsAbilityContext::SetMissionIcon);
+    BindNativeFunction(engine, *object, "setMissionLabel", moduleName, JsAbilityContext::SetMissionLabel);
+    BindNativeFunction(engine, *object, "setMissionIcon", moduleName, JsAbilityContext::SetMissionIcon);
 #endif
     return objValue;
 }
 
 JSAbilityConnection::JSAbilityConnection(NativeEngine& engine) : engine_(engine) {}
 
-JSAbilityConnection::~JSAbilityConnection() = default;
+JSAbilityConnection::~JSAbilityConnection()
+{
+    uv_loop_t *loop = engine_.GetUVLoop();
+    if (loop == nullptr) {
+        HILOG_ERROR("~JSAbilityConnection: failed to get uv loop.");
+        return;
+    }
+
+    ConnectCallback *cb = new (std::nothrow) ConnectCallback();
+    if (cb == nullptr) {
+        HILOG_ERROR("~JSAbilityConnection: failed to create cb.");
+        return;
+    }
+    cb->jsConnectionObject_ = std::move(jsConnectionObject_);
+
+    uv_work_t *work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        HILOG_ERROR("~JSAbilityConnection: failed to create work.");
+        delete cb;
+        cb = nullptr;
+        return;
+    }
+    work->data = reinterpret_cast<void *>(cb);
+    int ret = uv_queue_work(loop, work, [](uv_work_t *work) {},
+    [](uv_work_t *work, int status) {
+        if (work == nullptr) {
+            HILOG_ERROR("~JSAbilityConnection: work is nullptr.");
+            return;
+        }
+        if (work->data == nullptr) {
+            HILOG_ERROR("~JSAbilityConnection: data is nullptr.");
+            delete work;
+            work = nullptr;
+            return;
+        }
+        ConnectCallback *cb = reinterpret_cast<ConnectCallback *>(work->data);
+        delete cb;
+        cb = nullptr;
+        delete work;
+        work = nullptr;
+    });
+    if (ret != 0) {
+        if (cb != nullptr) {
+            delete cb;
+            cb = nullptr;
+        }
+        if (work != nullptr) {
+            delete work;
+            work = nullptr;
+        }
+    }
+}
 
 void JSAbilityConnection::SetConnectionId(int64_t id)
 {

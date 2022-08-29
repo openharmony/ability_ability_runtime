@@ -155,6 +155,7 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/distributed_ability_runtime",
     "${ability_runtime_innerkits_path}/dataobs_manager/include",
   ]
@@ -191,12 +192,12 @@ ohos_source_set("abilityms_test_source") {
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
+    "init:libbeget_proxy",
     "ipc:ipc_core",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
-    "startup_l2:syspara_watchagent",
   ]
 
   if (efficiency_manager) {
@@ -234,6 +235,7 @@ ohos_source_set("abilityms_test_source") {
       "${global_path}/i18n/frameworks/intl:intl_util",
       "${multimedia_path}/interfaces/innerkits:image_native",
       "//third_party/icu/icu4c:shared_icuuc",
+      "//third_party/libjpeg-turbo:turbojpeg_static",
     ]
     external_deps += [
       "input:libmmi-client",
@@ -256,6 +258,7 @@ group("unittest") {
     "ability_manager_proxy_test:unittest",
     "ability_manager_service_account_test:unittest",
     "ability_manager_service_anr_test:unittest",
+    "ability_manager_service_crowdtest_test:unittest",
     "ability_manager_stub_test:unittest",
     "ability_record_dump_test:unittest",
     "ability_record_test:unittest",
@@ -294,6 +297,7 @@ group("unittest") {
     "app_scheduler_test:unittest",
     "completed_dispatcher_test:unittest",
     "configuration_test:unittest",
+    "connection_observer_test:unittest",
     "connection_record_test:unittest",
     "data_ability_manager_test:unittest",
     "data_ability_observer_proxy_test:unittest",
@@ -304,6 +308,7 @@ group("unittest") {
     "dataobs_mgr_proxy_test:unittest",
     "dataobs_mgr_service_test:unittest",
     "dataobs_mgr_stub_test:unittest",
+    "dlp_utils_test:unittest",
     "frameworks_kits_ability_ability_runtime_test:unittest",
     "frameworks_kits_ability_native_test:unittest",
     "frameworks_kits_appkit_native_test:unittest",

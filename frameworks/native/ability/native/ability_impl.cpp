@@ -505,7 +505,7 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
         
         std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
             abilityContext->GetApplicationContext();
-        if (applicationContext != nullptr && !applicationContext->isAbilityLifecycleCallbackEmpty()) {
+        if (applicationContext != nullptr && !applicationContext->IsAbilityLifecycleCallbackEmpty()) {
             AbilityRuntime::JsAbility& jsAbility = static_cast<AbilityRuntime::JsAbility&>(*ability_);
             if (isFocused) {
                 applicationContext->DispatchWindowStageFocus(jsAbility.GetJsAbility(),
@@ -515,6 +515,7 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
                     jsAbility.GetJsWindowStage());
             }
         }
+        return;
     }
     if (ability_->GetWant() == nullptr) {
         HILOG_WARN("want is nullptr.");
