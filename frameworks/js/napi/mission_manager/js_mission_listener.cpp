@@ -46,7 +46,7 @@ void JsMissionListener::OnMissionMovedToFront(int32_t missionId)
 
 void JsMissionListener::OnMissionClosed(int32_t missionId)
 {
-    CallJsMethod("OnMissionClosed", missionId);
+    CallJsMethod("onMissionClosed", missionId);
 }
 
 void JsMissionListener::AddJsListenerObject(int32_t listenerId, NativeValue* jsListenerObject)
