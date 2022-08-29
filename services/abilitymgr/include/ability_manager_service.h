@@ -927,7 +927,6 @@ private:
     void DumpMissionListInner(const std::string &args, std::vector<std::string> &info);
     void DumpMissionInfosInner(const std::string &args, std::vector<std::string> &info);
     void DumpFuncInit();
-    bool IsExistFile(const std::string &path);
 
     int CheckCallPermissions(const AbilityRequest &abilityRequest);
     bool JudgeMultiUserConcurrency(const int32_t userId);
@@ -1018,6 +1017,8 @@ private:
 
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
+    void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
+
     int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
 
     int StartAppgallery(int requestCode, int32_t userId, std::string action);
@@ -1031,7 +1032,6 @@ private:
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
     std::shared_ptr<AbilityConnectManager> connectManager_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
-    std::shared_ptr<AppScheduler> appScheduler_;
     std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
     std::shared_ptr<DataAbilityManager> dataAbilityManager_;
     std::shared_ptr<DataAbilityManager> systemDataAbilityManager_;

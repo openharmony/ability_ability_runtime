@@ -15,9 +15,11 @@
 
 #include "ability_record.h"
 
+#include <regex>
 #include <singleton.h>
 #include <vector>
 
+#include "ability_constants.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_scheduler_stub.h"
@@ -288,6 +290,25 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
     }
 }
 
+std::string AbilityRecord::GetLabel()
+{
+    std::string strLabel = applicationInfo_.label;
+
+#ifdef SUPPORT_GRAPHICS
+    auto resourceMgr = CreateResourceManager(abilityInfo_);
+    if (!resourceMgr) {
+        return strLabel;
+    }
+
+    auto result = resourceMgr->GetStringById(applicationInfo_.labelId, strLabel);
+    if (result != OHOS::Global::Resource::RState::SUCCESS) {
+        HILOG_WARN("%{public}s. Failed to GetStringById.", __func__);
+    }
+#endif
+
+    return strLabel;
+}
+
 #ifdef SUPPORT_GRAPHICS
 void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest &abilityRequest,
     std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
@@ -533,6 +554,9 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const spt
         SetWindowModeAndDisplayId(info, want);
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
+    info->abilityName_ = abilityInfo_.name;
+    info->bundleName_ = abilityInfo_.bundleName;
     return info;
 }
 
@@ -555,6 +579,9 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
         SetWindowModeAndDisplayId(info, std::make_shared<Want>(abilityRequest.want));
     }
     info->abilityToken_ = abilityToken;
+    info->missionId_ = missionId_;
+    info->abilityName_ = abilityInfo_.name;
+    info->bundleName_ = abilityInfo_.bundleName;
     return info;
 }
 
@@ -562,8 +589,20 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     const AppExecFwk::AbilityInfo &abilityInfo) const
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
-    if (!resourceMgr->AddResource(abilityInfo.resourcePath.c_str())) {
-        HILOG_WARN("%{public}s AddResource failed.", __func__);
+    std::string loadPath;
+    if (!abilityInfo.hapPath.empty()) {
+        loadPath = abilityInfo.hapPath;
+    } else {
+        loadPath = abilityInfo.resourcePath;
+    }
+
+    if (loadPath.empty()) {
+        HILOG_ERROR("CreateResourceManager get loadPath failed");
+    } else {
+        HILOG_DEBUG("CreateResourceManager loadPath: %{public}s", loadPath.c_str());
+        if (!resourceMgr->AddResource(loadPath.c_str())) {
+            HILOG_WARN("%{public}s AddResource failed.", __func__);
+        }
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -574,7 +613,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     return resourceMgr;
 }
 
-sptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
+std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const
 {
     std::string iconPath;
@@ -600,7 +639,7 @@ sptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
         return nullptr;
     }
     HILOG_DEBUG("%{public}s OUT.", __func__);
-    return sptr<Media::PixelMap>(pixelMapPtr.release());
+    return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
 sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(
