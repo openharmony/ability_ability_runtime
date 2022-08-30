@@ -477,7 +477,7 @@ int AbilityManagerProxy::ConnectAbility(
         HILOG_ERROR("extensionType write failed.");
         return INNER_ERR;
     }
-    error = Remote()->SendRequest(IAbilityManager::CONNECT_ABILITY, data, reply, option);
+    error = Remote()->SendRequest(IAbilityManager::CONNECT_ABILITY_WITH_TYPE, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
         return error;

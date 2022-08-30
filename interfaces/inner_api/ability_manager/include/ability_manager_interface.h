@@ -924,6 +924,8 @@ public:
 
         RELEASE_CALL_ABILITY,
 
+        CONNECT_ABILITY_WITH_TYPE,
+
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
 
