@@ -17,8 +17,8 @@
 #define OHOS_ABILITY_RUNTIME_BACKGROUND_TASK_OBSERVER_H
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
-#include "background_task_subscriber.h"
 #include "background_task_mgr_helper.h"
+#include "background_task_subscriber.h"
 #include "iremote_object.h"
 
 namespace OHOS {
