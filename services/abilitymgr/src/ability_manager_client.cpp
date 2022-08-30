@@ -245,8 +245,8 @@ ErrCode AbilityManagerClient::ConnectDataShareExtensionAbility(const Want &want,
         return ABILITY_SERVICE_NOT_CONNECTED;
     }
 
-    HILOG_INFO("Connect data extension ability, bundleName:%{public}s, abilityName:%{public}s, userId:%{public}d.",
-        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    HILOG_INFO("Connect data share extension ability, bundleName:%{public}s, abilityName:%{public}s.",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     return abms->ConnectAbility(want, connect, nullptr, AppExecFwk::ExtensionAbilityType::DATASHARE, userId);
 }
 
