@@ -23,10 +23,8 @@
 
 namespace OHOS {
 namespace AAFwk {
-#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 const int32_t SUBSCRIBE_BACKGROUND_TASK_TRY = 5;
 const int32_t REPOLL_TIME_MICRO_SECONDS = 1000000;
-#endif
 class BackgroundTaskObserver : public BackgroundTaskMgr::BackgroundTaskSubscriber,
                                public std::enable_shared_from_this<BackgroundTaskObserver> {
 public:
