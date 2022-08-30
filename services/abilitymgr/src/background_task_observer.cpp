@@ -54,6 +54,12 @@ void BackgroundTaskObserver::OnRemoteDied(const wptr<IRemoteObject> &object)
         }
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
+    bgTaskUids_.clear();
+    std::vector<std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>> continuousTasks;
+    BackgroundTaskMgr::BackgroundTaskMgrHelper::GetContinuousTaskApps(continuousTasks);
+    for (size_t index =0; index < continuousTasks.size(); index++) {
+        bgTaskUids_.push_front(continuousTasks[index]->GetCreatorUid());
+    }
 }
 
 bool BackgroundTaskObserver::IsBackgroundTaskUid(const int uid)
