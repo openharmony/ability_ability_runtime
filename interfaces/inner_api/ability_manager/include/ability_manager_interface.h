@@ -242,6 +242,26 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
     /**
+     * Connect extension ability.
+     *
+     * @param want, special want for service type's ability.
+     * @param connect, callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @param extensionType, type of the extension.
+     * @param userId, the service user ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int ConnectAbility(
+        const Want &want,
+        const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::ExtensionAbilityType extensionType,
+        int32_t userId = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
+
+    /**
      * DisconnectAbility, disconnect session with service ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
