@@ -424,6 +424,13 @@ int AbilityManagerProxy::CloseAbility(const sptr<IRemoteObject> &token, int resu
 int AbilityManagerProxy::ConnectAbility(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
+    return ConnectAbility(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+}
+
+int AbilityManagerProxy::ConnectAbility(
+    const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
+{
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -464,6 +471,10 @@ int AbilityManagerProxy::ConnectAbility(
     }
     if (!data.WriteInt32(userId)) {
         HILOG_ERROR("userId write failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(extensionType))) {
+        HILOG_ERROR("extensionType write failed.");
         return INNER_ERR;
     }
     error = Remote()->SendRequest(IAbilityManager::CONNECT_ABILITY, data, reply, option);
