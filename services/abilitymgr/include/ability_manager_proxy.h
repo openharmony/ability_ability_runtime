@@ -189,7 +189,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
-    virtual int ConnectAbility(
+    virtual int ConnectAbilityCommon(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,

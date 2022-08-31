@@ -242,7 +242,7 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
     /**
-     * Connect extension ability.
+     * Connect ability common method.
      *
      * @param want, special want for service type's ability.
      * @param connect, callback used to notify caller the result of connecting or disconnecting.
@@ -251,7 +251,7 @@ public:
      * @param userId, the service user ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ConnectAbility(
+    virtual int ConnectAbilityCommon(
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
