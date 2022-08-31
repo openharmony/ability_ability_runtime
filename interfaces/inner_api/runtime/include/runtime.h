@@ -58,7 +58,6 @@ public:
     virtual Language GetLanguage() const = 0;
 
     virtual void StartDebugMode(bool needBreakPoint) = 0;
-    virtual std::string BuildJsStackTrace() = 0;
     virtual bool BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames) = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) = 0;
     virtual void NotifyApplicationState(bool isBackground) = 0;

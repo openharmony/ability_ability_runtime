@@ -219,6 +219,13 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
+    /**
+     *
+     * @brief Check the App main thread state.
+     *
+     */
+    void CheckMainThreadIsAlive();
+
 private:
     /**
      *
@@ -385,7 +392,7 @@ private:
      * @param runner the runner belong to the mainthread.
      *
      */
-    void Init(const std::shared_ptr<EventRunner> &runner, const std::shared_ptr<EventRunner> &watchDogRunner);
+    void Init(const std::shared_ptr<EventRunner> &runner);
 
     /**
      *
@@ -422,16 +429,20 @@ private:
 
     /**
      *
-     * @brief The handle of application not response process.
+     * @brief The handle of mix stack dump request.
      *
      * @param sigMessage Recieve the sig message.
      *
      */
     static void HandleMixDumpRequest();
-    static void HandleScheduleANRProcess();
     static void HandleDumpHeap(bool isPrivate);
     static void Dump_SignalHandler(int sig, siginfo_t *si, void *context);
     static void HandleSignal(int signal);
+
+    bool Timer();
+    bool WaitForDuration(uint32_t duration);
+    void reportEvent();
+    bool IsStopWatchdog();
 
     class MainHandler : public EventHandler {
     public:
@@ -459,8 +470,8 @@ private:
     std::shared_ptr<OHOSApplication> application_ = nullptr;
     std::shared_ptr<ApplicationImpl> applicationImpl_ = nullptr;
     std::shared_ptr<MainHandler> mainHandler_ = nullptr;
-    std::shared_ptr<WatchDog> watchDogHandler_ = nullptr;
     std::shared_ptr<AbilityRecordMgr> abilityRecordMgr_ = nullptr;
+    std::shared_ptr<Watchdog> watchdog_ = nullptr;
     MainThreadState mainThreadState_ = MainThreadState::INIT;
     sptr<IAppMgr> appMgr_ = nullptr;  // appMgrService Handler
     sptr<IRemoteObject::DeathRecipient> deathRecipient_ = nullptr;

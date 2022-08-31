@@ -182,6 +182,5 @@ void MixStackDumper::GetThreadList(std::vector<pid_t>& threadList)
         HILOG_ERROR("GetThreadList::closedir failed.");
     }
 }
-
 } // AppExecFwk
 } // OHOS
