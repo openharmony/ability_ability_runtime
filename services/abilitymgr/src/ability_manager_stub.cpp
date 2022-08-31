@@ -453,7 +453,7 @@ int AbilityManagerStub::ConnectAbilityInner(MessageParcel &data, MessageParcel &
         token = data.ReadRemoteObject();
     }
     int32_t userId = data.ReadInt32();
-    int32_t result = ConnectAbility(*want, callback, token, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+    int32_t result = ConnectAbilityCommon(*want, callback, token, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
     reply.WriteInt32(result);
     if (want != nullptr) {
         delete want;
@@ -478,7 +478,7 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     }
     int32_t userId = data.ReadInt32();
     AppExecFwk::ExtensionAbilityType extensionType = static_cast<AppExecFwk::ExtensionAbilityType>(data.ReadInt32());
-    int32_t result = ConnectAbility(*want, callback, token, extensionType, userId);
+    int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId);
     reply.WriteInt32(result);
     if (want != nullptr) {
         delete want;

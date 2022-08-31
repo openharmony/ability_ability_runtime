@@ -424,14 +424,13 @@ int AbilityManagerProxy::CloseAbility(const sptr<IRemoteObject> &token, int resu
 int AbilityManagerProxy::ConnectAbility(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
-    return ConnectAbility(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+    return ConnectAbilityCommon(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
 }
 
-int AbilityManagerProxy::ConnectAbility(
+int AbilityManagerProxy::ConnectAbilityCommon(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
     AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
 {
-    int error;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -477,7 +476,10 @@ int AbilityManagerProxy::ConnectAbility(
         HILOG_ERROR("extensionType write failed.");
         return INNER_ERR;
     }
-    error = Remote()->SendRequest(IAbilityManager::CONNECT_ABILITY_WITH_TYPE, data, reply, option);
+    if (Remote() == nullptr) {
+        return INNER_ERR;
+    }
+    int error = Remote()->SendRequest(IAbilityManager::CONNECT_ABILITY_WITH_TYPE, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
         return error;

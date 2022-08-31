@@ -1419,10 +1419,10 @@ int AbilityManagerService::MinimizeAbility(const sptr<IRemoteObject> &token, boo
 int AbilityManagerService::ConnectAbility(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
-    return ConnectAbility(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+    return ConnectAbilityCommon(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
 }
 
-int AbilityManagerService::ConnectAbility(
+int AbilityManagerService::ConnectAbilityCommon(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
     AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
 {
@@ -1558,14 +1558,8 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
 
     if (abilityRequest.abilityInfo.isStageBasedModel) {
         bool isService = (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE);
-        bool isData = (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::DATASHARE);
-        if (extensionType == AppExecFwk::ExtensionAbilityType::DATASHARE && !isData) {
-            HILOG_ERROR("Not data extension type, please don't use ConnectDataShareExtensionAbility.");
-            return ERR_WRONG_INTERFACE_CALL;
-        }
-
-        if (extensionType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED && (isData || isService)) {
-            HILOG_ERROR("Data or service extension type, please don't use ConnectExtensionAbility.");
+        if (isService && extensionType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+            HILOG_ERROR("Service extension type, please use ConnectAbility.");
             return ERR_WRONG_INTERFACE_CALL;
         }
     }
