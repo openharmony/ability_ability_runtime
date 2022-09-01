@@ -3643,8 +3643,8 @@ ErrCode Ability::SetMissionLabel(const std::string &label)
             return -1;
         }
 
-        if (window->SetAPPWindowLable(label) != OHOS::Rosen::WMError::WM_OK) {
-            HILOG_ERROR("SetAPPWindowLable failed.");
+        if (window->SetAPPWindowLabel(label) != OHOS::Rosen::WMError::WM_OK) {
+            HILOG_ERROR("SetAPPWindowLabel failed.");
             return -1;
         }
         return ERR_OK;

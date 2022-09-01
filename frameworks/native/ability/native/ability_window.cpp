@@ -204,9 +204,9 @@ ErrCode AbilityWindow::SetMissionLabel(const std::string &label)
         return -1;
     }
 
-    auto ret = window->SetAPPWindowLable(label);
+    auto ret = window->SetAPPWindowLabel(label);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
-        HILOG_ERROR("SetAPPWindowLable failed, errCode:%{public}d.", ret);
+        HILOG_ERROR("SetAPPWindowLabel failed, errCode:%{public}d.", ret);
         return -1;
     }
 
