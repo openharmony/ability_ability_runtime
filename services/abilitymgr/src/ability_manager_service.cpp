@@ -23,6 +23,8 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <thread>
 #include <unistd.h>
 #include <csignal>
@@ -875,6 +877,18 @@ void AbilityManagerService::ReportAbilitStartInfoToRSS(const AppExecFwk::Ability
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     if (abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
         abilityInfo.launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
+        std::vector<AppExecFwk::RunningProcessInfo> runningProcessInfos;
+        int ret = IN_PROCESS_CALL(GetProcessRunningInfos(runningProcessInfos));
+        if (ret != ERR_OK) {
+            return;
+        }
+        bool isColdStart = true;
+        for (auto const &info : runningProcessInfos) {
+            if (info.uid_ == abilityInfo.applicationInfo.uid) {
+                isColdStart = false;
+                break;
+            }
+        }
         std::unordered_map<std::string, std::string> eventParams {
             { "name", "ability_start" },
             { "uid", std::to_string(abilityInfo.applicationInfo.uid) },
@@ -882,7 +896,7 @@ void AbilityManagerService::ReportAbilitStartInfoToRSS(const AppExecFwk::Ability
             { "abilityName", abilityInfo.name }
         };
         ResourceSchedule::ResSchedClient::GetInstance().ReportData(
-            ResourceSchedule::ResType::RES_TYPE_APP_ABILITY_START, 0, eventParams);
+            ResourceSchedule::ResType::RES_TYPE_APP_ABILITY_START, isColdStart ? 1 : 0, eventParams);
     }
 #endif
 }
@@ -1417,6 +1431,13 @@ int AbilityManagerService::MinimizeAbility(const sptr<IRemoteObject> &token, boo
 int AbilityManagerService::ConnectAbility(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
+    return ConnectAbilityCommon(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+}
+
+int AbilityManagerService::ConnectAbilityCommon(
+    const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
+{
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Connect ability called, element uri: %{public}s.", want.GetElement().GetURI().c_str());
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
@@ -1495,14 +1516,14 @@ int AbilityManagerService::ConnectAbility(
 
     if (callerToken != nullptr && callerToken->GetObjectDescriptor() != u"ohos.aafwk.AbilityToken") {
         HILOG_INFO("%{public}s invalid Token.", __func__);
-        eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, nullptr);
+        eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, nullptr, extensionType);
         if (eventInfo.errCode != ERR_OK) {
             AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
                 HiSysEventType::FAULT, eventInfo);
         }
         return eventInfo.errCode;
     }
-    eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken);
+    eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken, extensionType);
     if (eventInfo.errCode != ERR_OK) {
         AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
             HiSysEventType::FAULT, eventInfo);
@@ -1530,7 +1551,8 @@ int AbilityManagerService::DisconnectAbility(const sptr<IAbilityConnection> &con
 }
 
 int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
-    const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken)
+    const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
+    AppExecFwk::ExtensionAbilityType extensionType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Connect local ability begin.");
@@ -1544,6 +1566,14 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     if (result != ERR_OK) {
         HILOG_ERROR("Generate ability request error.");
         return result;
+    }
+
+    if (abilityRequest.abilityInfo.isStageBasedModel) {
+        bool isService = (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE);
+        if (isService && extensionType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+            HILOG_ERROR("Service extension type, please use ConnectAbility.");
+            return ERR_WRONG_INTERFACE_CALL;
+        }
     }
     auto abilityInfo = abilityRequest.abilityInfo;
     int32_t validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : userId;
@@ -2166,15 +2196,6 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityManagerService::GetConnectRe
 sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
     const Uri &uri, bool tryBind, const sptr<IRemoteObject> &callerToken)
 {
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        HILOG_INFO("callerToken not SA %{public}s", __func__);
-        if (!VerificationAllToken(callerToken)) {
-            HILOG_INFO("VerificationAllToken fail");
-            return nullptr;
-        }
-    }
-
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, nullptr);
 
@@ -2211,7 +2232,10 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
         abilityRequest.abilityInfo.name.c_str());
 
     if (CheckStaticCfgPermission(abilityRequest.abilityInfo) != AppExecFwk::Constants::PERMISSION_GRANTED) {
-        return nullptr;
+        if (!VerificationAllToken(callerToken)) {
+            HILOG_INFO("VerificationAllToken fail");
+            return nullptr;
+        }
     }
 
     if (abilityRequest.abilityInfo.applicationInfo.singleton) {
@@ -2220,7 +2244,10 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
 
     std::shared_ptr<DataAbilityManager> dataAbilityManager = GetDataAbilityManagerByUserId(userId);
     CHECK_POINTER_AND_RETURN(dataAbilityManager, nullptr);
-    return dataAbilityManager->Acquire(abilityRequest, tryBind, callerToken, isSaCall);
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    bool isNotHap = isSaCall || isShellCall;
+    return dataAbilityManager->Acquire(abilityRequest, tryBind, callerToken, isNotHap);
 }
 
 bool AbilityManagerService::CheckDataAbilityRequest(AbilityRequest &abilityRequest)
@@ -2252,22 +2279,16 @@ int AbilityManagerService::ReleaseDataAbility(
         return ERR_INVALID_VALUE;
     }
 
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        HILOG_INFO("callerToken not SA %{public}s", __func__);
-        if (!VerificationAllToken(callerToken)) {
-            HILOG_ERROR("VerificationAllToken fail");
-            return ERR_INVALID_STATE;
-        }
-    }
-
     std::shared_ptr<DataAbilityManager> dataAbilityManager = GetDataAbilityManager(dataAbilityScheduler);
     if (!dataAbilityManager) {
         HILOG_ERROR("dataAbilityScheduler is not exists");
         return ERR_INVALID_VALUE;
     }
 
-    return dataAbilityManager->Release(dataAbilityScheduler, callerToken, isSaCall);
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    bool isNotHap = isSaCall || isShellCall;
+    return dataAbilityManager->Release(dataAbilityScheduler, callerToken, isNotHap);
 }
 
 int AbilityManagerService::AttachAbilityThread(
@@ -2621,6 +2642,20 @@ void AbilityManagerService::DumpStateInner(const std::string &args, std::vector<
     } else {
         info.emplace_back("error: invalid argument, please see 'ability dump -h'.");
     }
+}
+
+bool AbilityManagerService::IsExistFile(const std::string &path)
+{
+    HILOG_INFO("%{public}s", __func__);
+    if (path.empty()) {
+        return false;
+    }
+    struct stat buf = {};
+    if (stat(path.c_str(), &buf) != 0) {
+        return false;
+    }
+    HILOG_INFO("%{public}s  :file exists", __func__);
+    return S_ISREG(buf.st_mode);
 }
 
 void AbilityManagerService::DataDumpStateInner(const std::string &args, std::vector<std::string> &info)
@@ -4540,7 +4575,7 @@ int AbilityManagerService::CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abi
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (isSaCall) {
         // do not need check static config permission when start ability by SA
-        return ERR_OK;
+        return AppExecFwk::Constants::PERMISSION_GRANTED;
     }
 
     auto tokenId = IPCSkeleton::GetCallingTokenID();
