@@ -56,20 +56,19 @@ std::shared_ptr<BaseExtractor> BaseExtractor::Create()
         return std::shared_ptr<BaseExtractor>();
     }
 
-    std::shared_ptr<BaseExtractor> instance;
     std::string loadPath;
-    if (!StringStartWith(sourceFile_, Constants::SYSTEM_APP_PATH, sizeof(Constants::SYSTEM_APP_PATH) - 1)) {
+    if (StringStartWith(sourceFile_, Constants::ABS_CODE_PATH, std::string(Constants::ABS_CODE_PATH).length())) {
         loadPath = GetLoadPath(sourceFile_);
     } else {
         loadPath = sourceFile_;
     }
-    instance = std::make_shared<BaseExtractor>(loadPath);
-    if (!instance->Init()) {
+    std::shared_ptr<BaseExtractor> baseExtractor = std::make_shared<BaseExtractor>(loadPath);
+    if (!baseExtractor->Init()) {
         HILOG_ERROR("BaseExtractor create failed");
         return std::shared_ptr<BaseExtractor>();
     }
 
-    return instance;
+    return baseExtractor;
 }
 
 bool BaseExtractor::GetFileBuffer(const std::string& srcPath, std::ostringstream& dest)

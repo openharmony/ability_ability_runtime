@@ -204,14 +204,11 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            if (!options.hapPath.empty()) {
-                std::shared_ptr<RuntimeExtractor> runtimeExtractor = RuntimeExtractor(options.hapPath).Create();
-                runtimeExtractorMap_.insert(make_pair(options.hapPath, runtimeExtractor));
-                panda::JSNApi::SetHostResolveBufferTracker(
-                    vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor));
-            } else {
-                panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
-            }
+            panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
+            std::shared_ptr<RuntimeExtractor> runtimeExtractor = RuntimeExtractor(options.hapPath).Create();
+            runtimeExtractorMap_.insert(make_pair(options.hapPath, runtimeExtractor));
+            panda::JSNApi::SetHostResolveBufferTracker(
+                vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor));
         }
         return JsRuntime::Initialize(options);
     }
@@ -257,6 +254,46 @@ void InitSyscapModule(NativeEngine& engine, NativeObject& globalObject)
     const char *moduleName = "JsRuntime";
     BindNativeFunction(engine, globalObject, "canIUse", moduleName, CanIUse);
 }
+
+bool MakeFilePath(const std::string& codePath, const std::string& modulePath, std::string& fileName)
+{
+    std::string path(codePath);
+    path.append("/").append(modulePath);
+    if (path.length() > PATH_MAX) {
+        HILOG_ERROR("Path length(%{public}zu) longer than MAX(%{public}d)", path.length(), PATH_MAX);
+        return false;
+    }
+    char resolvedPath[PATH_MAX + 1] = { 0 };
+    if (realpath(path.c_str(), resolvedPath) != nullptr) {
+        fileName = resolvedPath;
+        return true;
+    }
+
+    auto start = path.find_last_of('/');
+    auto end = path.find_last_of('.');
+    if (end == std::string::npos || end == 0) {
+        HILOG_ERROR("No secondary file path");
+        return false;
+    }
+
+    auto pos = path.find_last_of('.', end - 1);
+    if (pos == std::string::npos) {
+        HILOG_ERROR("No secondary file path");
+        return false;
+    }
+
+    path.erase(start + 1, pos - start);
+    HILOG_DEBUG("Try using secondary file path: %{private}s", path.c_str());
+
+    if (realpath(path.c_str(), resolvedPath) == nullptr) {
+        HILOG_ERROR("Failed to call realpath, errno = %{public}d", errno);
+        return false;
+    }
+
+    fileName = resolvedPath;
+    return true;
+}
+
 class UvLoopHandler : public AppExecFwk::FileDescriptorListener, public std::enable_shared_from_this<UvLoopHandler> {
 public:
     explicit UvLoopHandler(uv_loop_t* uvLoop) : uvLoop_(uvLoop) {}

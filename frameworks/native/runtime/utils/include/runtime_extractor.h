@@ -20,12 +20,12 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class RuntimeExtractor : public BaseExtractor {
+class RuntimeExtractor final : public BaseExtractor {
 public:
     explicit RuntimeExtractor(const std::string& source);
-    RuntimeExtractor(const std::string& source, const std::string& hapPath);
+    RuntimeExtractor(const std::string& source, const bool isRuntime);
     std::shared_ptr<RuntimeExtractor> Create();
-    virtual ~RuntimeExtractor() override;
+    ~RuntimeExtractor() override;
 
     bool isSameHap(const std::string& hapPath) const;
 

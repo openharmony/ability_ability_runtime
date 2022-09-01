@@ -27,12 +27,9 @@ inline bool StringStartWith(const std::string& str, const char* startStr, size_t
 }
 } // namespace
 RuntimeExtractor::RuntimeExtractor(const std::string& source) : BaseExtractor(source)
-{}
-
-RuntimeExtractor::RuntimeExtractor(
-    const std::string& source, const std::string& hapPath) : BaseExtractor(source)
 {
-    hapPath_ = hapPath;
+    hapPath_ = source;
+    zipFile_.SetIsRuntime(true);
 }
 
 std::shared_ptr<RuntimeExtractor> RuntimeExtractor::Create()
@@ -42,20 +39,19 @@ std::shared_ptr<RuntimeExtractor> RuntimeExtractor::Create()
         return std::shared_ptr<RuntimeExtractor>();
     }
 
-    std::shared_ptr<RuntimeExtractor> instance;
     std::string loadPath;
-    if (!StringStartWith(sourceFile_, Constants::SYSTEM_APP_PATH, sizeof(Constants::SYSTEM_APP_PATH) - 1)) {
+    if (StringStartWith(sourceFile_, Constants::ABS_CODE_PATH, std::string(Constants::ABS_CODE_PATH).length())) {
         loadPath = GetLoadPath(sourceFile_);
     } else {
         loadPath = sourceFile_;
     }
-    instance = std::make_shared<RuntimeExtractor>(loadPath);
-    if (!instance->Init()) {
+    std::shared_ptr<RuntimeExtractor> runtimeExtractor = std::make_shared<RuntimeExtractor>(loadPath);
+    if (!runtimeExtractor->Init()) {
         HILOG_ERROR("RuntimeExtractor create failed");
         return std::shared_ptr<RuntimeExtractor>();
     }
 
-    return instance;
+    return runtimeExtractor;
 }
 
 RuntimeExtractor::~RuntimeExtractor()

@@ -24,8 +24,6 @@ constexpr const char* LOCAL_CODE_PATH = "/data/storage/el1/bundle";
 constexpr const char* LOCAL_BUNDLES = "/data/bundles";
 constexpr const char* FILE_SEPARATOR = "/";
 constexpr const char* FILE_DOT = "\\.";
-
-constexpr const char SYSTEM_APP_PATH[] = "/system/app";
 }  // namespace Constants
 }  // namespace AbilityRuntime
 }  // namespace OHOS
