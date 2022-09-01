@@ -63,7 +63,6 @@ public:
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
     void RemoveTask(const std::string& name);
     void DumpHeapSnapshot(bool isPrivate) override;
-    std::string BuildJsStackTrace() override;
     void NotifyApplicationState(bool isBackground) override;
 
     bool RunSandboxScript(const std::string& path, const std::string& hapPath);
@@ -83,6 +82,7 @@ protected:
     bool isArkEngine_ = false;
     bool debugMode_ = false;
     bool preloaded_ = false;
+    bool isBundle_ = true;
     std::unique_ptr<NativeEngine> nativeEngine_;
     std::string codePath_;
     std::unique_ptr<NativeReference> methodRequireNapiRef_;
