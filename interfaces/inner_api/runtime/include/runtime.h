@@ -38,6 +38,7 @@ public:
         std::shared_ptr<AppExecFwk::EventRunner> eventRunner;
         bool loadAce = true;
         bool preload = false;
+        bool isBundle = true;
     };
 
     static std::unique_ptr<Runtime> Create(const Options& options);
@@ -50,7 +51,6 @@ public:
     virtual Language GetLanguage() const = 0;
 
     virtual void StartDebugMode(bool needBreakPoint) = 0;
-    virtual std::string BuildJsStackTrace() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) = 0;
     virtual void NotifyApplicationState(bool isBackground) = 0;
     virtual void PreloadSystemModule(const std::string& moduleName) = 0;

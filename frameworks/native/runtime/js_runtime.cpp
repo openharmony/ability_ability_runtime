@@ -22,6 +22,7 @@
 #include <regex>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <regex>
 
 #include "ability_constants.h"
 #include "connect_server_manager.h"
@@ -113,7 +114,7 @@ public:
     bool RunScript(const std::string& srcPath, const std::string& hapPath) override
     {
         bool result = false;
-        if (!hapPath.empty()) {
+        if (isBundle_ && !hapPath.empty()) {
             std::ostringstream outStream;
             std::shared_ptr<RuntimeExtractor> runtimeExtractor;
             if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
@@ -185,6 +186,7 @@ private:
             pandaOption.SetGcPoolSize(DEFAULT_GC_POOL_SIZE);
             pandaOption.SetLogLevel(panda::RuntimeOption::LOG_LEVEL::INFO);
             pandaOption.SetLogBufPrint(PrintVmLog);
+
             // Fix a problem that if vm will crash if preloaded
             if (options.preload) {
                 pandaOption.SetEnableAsmInterpreter(false);
@@ -210,6 +212,8 @@ private:
             panda::JSNApi::SetHostResolveBufferTracker(
                 vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor));
         }
+        isBundle_ = options.isBundle;
+        panda::JSNApi::SetBundle(vm_, options.isBundle);
         return JsRuntime::Initialize(options);
     }
 
@@ -532,7 +536,6 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(
 {
     HILOG_DEBUG("JsRuntime::LoadModule(%{public}s, %{private}s, %{private}s, %{public}s)",
         moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
-
     HandleScope handleScope(*this);
 
     NativeValue* classValue = nullptr;
@@ -592,7 +595,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
 bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath)
 {
     bool result = false;
-    if (!hapPath.empty()) {
+    if (isBundle_ && !hapPath.empty()) {
         std::ostringstream outStream;
         std::shared_ptr<RuntimeExtractor> runtimeExtractor;
         if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
@@ -645,13 +648,6 @@ void JsRuntime::RemoveTask(const std::string& name)
 void JsRuntime::DumpHeapSnapshot(bool isPrivate)
 {
     nativeEngine_->DumpHeapSnapshot(true, DumpFormat::JSON, isPrivate);
-}
-
-std::string JsRuntime::BuildJsStackTrace()
-{
-    std::string straceStr = "";
-    [[maybe_unused]]bool temp = nativeEngine_->BuildJsStackTrace(straceStr);
-    return straceStr;
 }
 
 void JsRuntime::NotifyApplicationState(bool isBackground)
