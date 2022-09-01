@@ -17,7 +17,6 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 config("ability_extractor_config") {
   include_dirs = [
     "utils/include",
-    "//third_party/json/include",
     "//third_party/zlib/contrib/minizip",
     "//third_party/zlib",
   ]
@@ -39,8 +38,6 @@ ohos_source_set("runtime_extractor") {
     ":ability_extractor_config",
     "${ability_runtime_services_path}/common:common_config",
   ]
-
-  deps = [ "//third_party/zlib:shared_libz" ]
 
   external_deps = [
     "c_utils:utils",
