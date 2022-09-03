@@ -31,10 +31,7 @@
 #include "configuration_convertor.h"
 #include "context_deal.h"
 #include "context_impl.h"
-#include "dfx_dump_catcher.h"
-#include "dfx_dump_res.h"
 #include "extension_module_loader.h"
-#include "faultloggerd_client.h"
 #include "hilog_wrapper.h"
 #ifdef SUPPORT_GRAPHICS
 #include "form_extension.h"
@@ -43,7 +40,6 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "js_runtime.h"
-#include "mix_stack_dumper.h"
 #include "ohos_application.h"
 #include "resource_manager.h"
 #include "runtime.h"
@@ -64,17 +60,15 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime::Constants;
-std::shared_ptr<OHOSApplication> MainThread::applicationForAnr_ = nullptr;
+std::shared_ptr<OHOSApplication> MainThread::applicationForDump_ = nullptr;
 std::shared_ptr<EventHandler> MainThread::dfxHandler_ = nullptr;
+std::shared_ptr<MixStackDumper> MainThread::mixStackDumper_ = nullptr;
 namespace {
 constexpr int32_t DELIVERY_TIME = 200;
 constexpr int32_t DISTRIBUTE_TIME = 100;
 constexpr int32_t UNSPECIFIED_USERID = -2;
-constexpr int SIGDUMP = 35;
 constexpr int SIGNAL_JS_HEAP = 39;
 constexpr int SIGNAL_JS_HEAP_PRIV = 40;
-constexpr int NATIVE_DUMP = -1;
-constexpr int MIX_DUMP = -2;
 
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_VERSION[] = "VERSION";
@@ -99,10 +93,6 @@ constexpr char EXTENSION_PARAMS_NAME[] = "name";
     const std::string acelibdir("/system/lib/libace.z.so");
 #endif
 #endif
-
-typedef void (*DumpSignalHandlerFunc) (int sig, siginfo_t *si, void *context);
-static DumpSignalHandlerFunc dumpSignalHandlerFunc_ = nullptr;
-static pid_t targetDumpTid_ = -1;
 
 /**
  *
@@ -874,7 +864,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HILOG_ERROR("HandleLaunchApplication::application launch failed");
         return;
     }
-    applicationForAnr_ = application_;
+    applicationForDump_ = application_;
+    mixStackDumper_ = std::make_shared<MixStackDumper>();
+    mixStackDumper_->InstallDumpHandler(applicationForDump_);
 
     // init resourceManager.
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
@@ -1636,71 +1628,12 @@ void MainThread::HandleSignal(int signal)
     }
 }
 
-void MainThread::Dump_SignalHandler(int sig, siginfo_t *si, void *context)
-{
-    switch (si->si_code) {
-        case NATIVE_DUMP: {
-            if (dumpSignalHandlerFunc_ != nullptr) {
-                dumpSignalHandlerFunc_(sig, si, context);
-            }
-            break;
-        }
-        case MIX_DUMP: {
-            targetDumpTid_ = si->si_value.sival_int;
-            dfxHandler_->PostTask(&MainThread::HandleMixDumpRequest);
-            break;
-        }
-        default:
-            break;
-    }
-}
-
 void MainThread::HandleDumpHeap(bool isPrivate)
 {
     HILOG_DEBUG("Dump heap start.");
-    if (applicationForAnr_ != nullptr && applicationForAnr_->GetRuntime() != nullptr) {
+    if (applicationForDump_ != nullptr && applicationForDump_->GetRuntime() != nullptr) {
         HILOG_DEBUG("Send dump heap to ark start.");
-        applicationForAnr_->GetRuntime()->DumpHeapSnapshot(isPrivate);
-    }
-}
-
-void MainThread::HandleMixDumpRequest()
-{
-    int fd = -1;
-    int resFd = -1;
-    int dumpRes = OHOS::HiviewDFX::ProcessDumpRes::DUMP_ESUCCESS;
-    do {
-        fd = RequestPipeFd(getpid(), FaultLoggerPipeType::PIPE_FD_WRITE_BUF);
-        resFd = RequestPipeFd(getpid(), FaultLoggerPipeType::PIPE_FD_WRITE_RES);
-        if (fd < 0 || resFd < 0) {
-            HILOG_ERROR("MainThread::HandleProcessMixDumpRequest request pipe fd failed");
-            dumpRes = OHOS::HiviewDFX::ProcessDumpRes::DUMP_EGETFD;
-            break;
-        }
-        MixStackDumper mixDumper;
-        if (targetDumpTid_ > 0) {
-            mixDumper.DumpMixFrame(applicationForAnr_, fd, targetDumpTid_);
-            targetDumpTid_ = -1;
-            break;
-        }
-        std::vector<pid_t> threads;
-        mixDumper.GetThreadList(threads);
-        for (auto& tid : threads) {
-            mixDumper.DumpMixFrame(applicationForAnr_, fd, tid);
-        }
-    } while (false);
-    OHOS::HiviewDFX::DumpResMsg dumpResMsg;
-    dumpResMsg.res = dumpRes;
-    const char* strRes = OHOS::HiviewDFX::DfxDumpRes::GetInstance().GetResStr(dumpRes);
-    if (strncpy_s(dumpResMsg.strRes, sizeof(dumpResMsg.strRes), strRes, sizeof(dumpResMsg.strRes) - 1) != 0) {
-        HILOG_ERROR("MainThread::HandleProcessMixDumpRequest strncpy_s failed.");
-    }
-    if (resFd != -1) {
-        write(resFd, &dumpResMsg, sizeof(struct OHOS::HiviewDFX::DumpResMsg));
-        close(resFd);
-    }
-    if (fd != -1) {
-        close(fd);
+        applicationForDump_->GetRuntime()->DumpHeapSnapshot(isPrivate);
     }
 }
 
@@ -1726,18 +1659,6 @@ void MainThread::Start()
     sigaction(SIGUSR1, &sigAct, NULL);
     sigaction(SIGNAL_JS_HEAP, &sigAct, NULL);
     sigaction(SIGNAL_JS_HEAP_PRIV, &sigAct, NULL);
-
-    struct sigaction newDumpAction;
-    struct sigaction oldDumpAction;
-    (void)memset_s(&newDumpAction, sizeof(newDumpAction), 0, sizeof(newDumpAction));
-    (void)memset_s(&oldDumpAction, sizeof(oldDumpAction), 0, sizeof(oldDumpAction));
-    sigfillset(&newDumpAction.sa_mask);
-    newDumpAction.sa_sigaction = Dump_SignalHandler;
-    newDumpAction.sa_flags = SA_RESTART | SA_SIGINFO | SA_ONSTACK;
-    sigaction(SIGDUMP, &newDumpAction, &oldDumpAction);
-    if (oldDumpAction.sa_sigaction != nullptr) {
-        dumpSignalHandlerFunc_ = oldDumpAction.sa_sigaction;
-    }
 
     thread->Init(runner);
 

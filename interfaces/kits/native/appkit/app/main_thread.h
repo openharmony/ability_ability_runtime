@@ -16,7 +16,6 @@
 #ifndef OHOS_ABILITY_RUNTIME_MAIN_THREAD_H
 #define OHOS_ABILITY_RUNTIME_MAIN_THREAD_H
 
-#include <signal.h>
 #include <string>
 #include <mutex>
 #include "event_handler.h"
@@ -28,6 +27,7 @@
 #include "resource_manager.h"
 #include "foundation/ability/ability_runtime/interfaces/inner_api/runtime/include/runtime.h"
 #include "ipc_singleton.h"
+#include "mix_stack_dumper.h"
 #include "watchdog.h"
 #define ABILITY_LIBRARY_LOADER
 
@@ -427,16 +427,7 @@ private:
     bool PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
         BundleInfo& bundleInfo);
 
-    /**
-     *
-     * @brief The handle of mix stack dump request.
-     *
-     * @param sigMessage Recieve the sig message.
-     *
-     */
-    static void HandleMixDumpRequest();
     static void HandleDumpHeap(bool isPrivate);
-    static void Dump_SignalHandler(int sig, siginfo_t *si, void *context);
     static void HandleSignal(int signal);
 
     bool Timer();
@@ -479,7 +470,8 @@ private:
     std::string pathSeparator_ = "/";
     std::string abilityLibraryType_ = ".so";
     static std::shared_ptr<EventHandler> dfxHandler_;
-    static std::shared_ptr<OHOSApplication> applicationForAnr_;
+    static std::shared_ptr<OHOSApplication> applicationForDump_;
+    static std::shared_ptr<MixStackDumper> mixStackDumper_;
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**

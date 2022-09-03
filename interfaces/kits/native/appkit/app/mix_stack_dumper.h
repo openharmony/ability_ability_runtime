@@ -16,10 +16,12 @@
 #ifndef OHOS_ABILITY_RUNTIME_MIX_STACK_DUMPER_H
 #define OHOS_ABILITY_RUNTIME_MIX_STACK_DUMPER_H
 
+#include <signal.h>
 #include <unistd.h>
 #include <vector>
 
 #include "dfx_dump_catcher.h"
+#include "event_handler.h"
 #include "ohos_application.h"
 #include "runtime.h"
 
@@ -29,14 +31,22 @@ class MixStackDumper {
 public:
     MixStackDumper() = default;
     ~MixStackDumper() = default;
-    void DumpMixFrame(std::shared_ptr<OHOSApplication> application, int fd, pid_t tid);
-    void GetThreadList(std::vector<pid_t>& threadList);
+    void InstallDumpHandler(std::shared_ptr<OHOSApplication> application);
 
 private:
+    void DumpMixFrame(int fd, pid_t tid);
+    void GetThreadList(std::vector<pid_t>& threadList);
     bool IsJsNativePcEqual(uintptr_t *jsNativePointer, uint64_t nativePc, uint64_t nativeOffset);
     void BuildJsNativeMixStack(int fd, std::vector<JsFrames>& jsFrames,
         std::vector<std::shared_ptr<OHOS::HiviewDFX::DfxFrame>>& nativeFrames);
     std::string GetThreadStackTraceLabel(pid_t tid);
+
+    static void Dump_SignalHandler(int sig, siginfo_t *si, void *context);
+    static void HandleMixDumpRequest();
+
+private:
+    static std::shared_ptr<EventHandler> DumpHandler_;
+    static std::shared_ptr<OHOSApplication> application_;
 };
 } // AppExecFwk
 } // OHOS
