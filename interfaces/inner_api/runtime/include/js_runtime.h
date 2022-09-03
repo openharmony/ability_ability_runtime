@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "native_engine/native_engine.h"
-
 #include "runtime.h"
 
 namespace OHOS {
@@ -33,7 +32,7 @@ class EventHandler;
 } // namespace AppExecFwk
 namespace AbilityRuntime {
 class TimerTask;
-class RuntimeExtractor;
+class BaseExtractor;
 
 void *DetachCallbackFunc(NativeEngine *engine, void *value, void *hint);
 
@@ -88,7 +87,7 @@ protected:
     std::unique_ptr<NativeReference> methodRequireNapiRef_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::unordered_map<std::string, NativeReference*> modules_;
-    std::map<std::string, std::shared_ptr<RuntimeExtractor>> runtimeExtractorMap_;
+    std::map<std::string, std::shared_ptr<BaseExtractor>> runtimeExtractorMap_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
