@@ -27,7 +27,6 @@
 #include "resource_manager.h"
 #include "foundation/ability/ability_runtime/interfaces/inner_api/runtime/include/runtime.h"
 #include "ipc_singleton.h"
-#include "mix_stack_dumper.h"
 #include "watchdog.h"
 #define ABILITY_LIBRARY_LOADER
 
@@ -469,9 +468,8 @@ private:
     std::string aceApplicationName_ = "AceApplication";
     std::string pathSeparator_ = "/";
     std::string abilityLibraryType_ = ".so";
-    static std::shared_ptr<EventHandler> dfxHandler_;
+    static std::shared_ptr<EventHandler> signalHandler_;
     static std::shared_ptr<OHOSApplication> applicationForDump_;
-    static std::shared_ptr<MixStackDumper> mixStackDumper_;
 
 #ifdef ABILITY_LIBRARY_LOADER
     /**
