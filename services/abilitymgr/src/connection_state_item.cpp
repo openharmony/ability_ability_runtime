@@ -145,7 +145,7 @@ public:
         bool needNotify = callers_.empty();
         auto it = find_if(callers_.begin(), callers_.end(), [&caller](const std::shared_ptr<CallerInfo> &info) {
             if (caller.isNotHap) {
-                return info && info->isNotHap() && info->GetCallerPid() == caller.callerPid;
+                return info && info->IsNotHap() && info->GetCallerPid() == caller.callerPid;
             } else {
                 return info && info->GetCallerToken() == caller.callerToken;
             }
@@ -165,7 +165,7 @@ public:
 
         auto it = find_if(callers_.begin(), callers_.end(), [&caller](const std::shared_ptr<CallerInfo> &info) {
             if (caller.isNotHap) {
-                return info && info->isNotHap() && info->GetCallerPid() == caller.callerPid;
+                return info && info->IsNotHap() && info->GetCallerPid() == caller.callerPid;
             } else {
                 return info && info->GetCallerToken() == caller.callerToken;
             }
@@ -193,7 +193,7 @@ private:
         CallerInfo(bool isNotHap, int32_t callerPid, const sptr<IRemoteObject> &callerToken)
             : isNotHap_(isNotHap), callerPid_(callerPid), callerToken_(callerToken) {}
 
-        bool isNotHap() const
+        bool IsNotHap() const
         {
             return isNotHap_;
         }
