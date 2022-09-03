@@ -45,7 +45,7 @@ private:
     static void HandleMixDumpRequest();
 
 private:
-    static std::shared_ptr<EventHandler> DumpHandler_;
+    static std::shared_ptr<EventHandler> dumpHandler_;
     static std::shared_ptr<OHOSApplication> application_;
 };
 } // AppExecFwk

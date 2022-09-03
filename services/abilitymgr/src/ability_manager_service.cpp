@@ -112,6 +112,7 @@ const int32_t GET_PARAMETER_INCORRECT = -9;
 const int32_t GET_PARAMETER_OTHER = -1;
 const int32_t SIZE_10 = 10;
 const int32_t CROWDTEST_EXPIRED_REFUSED = -1;
+const int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
 const std::string ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTest";
 const std::string MARKET_BUNDLE_NAME = "com.huawei.hmos.appgallery";
 const std::string BUNDLE_NAME_KEY = "bundleName";
@@ -1431,6 +1432,13 @@ int AbilityManagerService::MinimizeAbility(const sptr<IRemoteObject> &token, boo
 int AbilityManagerService::ConnectAbility(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
+    return ConnectAbilityCommon(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+}
+
+int AbilityManagerService::ConnectAbilityCommon(
+    const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
+{
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Connect ability called, element uri: %{public}s.", want.GetElement().GetURI().c_str());
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
@@ -1509,14 +1517,14 @@ int AbilityManagerService::ConnectAbility(
 
     if (callerToken != nullptr && callerToken->GetObjectDescriptor() != u"ohos.aafwk.AbilityToken") {
         HILOG_INFO("%{public}s invalid Token.", __func__);
-        eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, nullptr);
+        eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, nullptr, extensionType);
         if (eventInfo.errCode != ERR_OK) {
             AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
                 HiSysEventType::FAULT, eventInfo);
         }
         return eventInfo.errCode;
     }
-    eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken);
+    eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken, extensionType);
     if (eventInfo.errCode != ERR_OK) {
         AAFWK::EventReport::SendExtensionEvent(AAFWK::CONNECT_SERVICE_ERROR,
             HiSysEventType::FAULT, eventInfo);
@@ -1544,7 +1552,8 @@ int AbilityManagerService::DisconnectAbility(const sptr<IAbilityConnection> &con
 }
 
 int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
-    const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken)
+    const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
+    AppExecFwk::ExtensionAbilityType extensionType)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Connect local ability begin.");
@@ -1558,6 +1567,14 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     if (result != ERR_OK) {
         HILOG_ERROR("Generate ability request error.");
         return result;
+    }
+
+    if (abilityRequest.abilityInfo.isStageBasedModel) {
+        bool isService = (abilityRequest.abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE);
+        if (isService && extensionType != AppExecFwk::ExtensionAbilityType::SERVICE) {
+            HILOG_ERROR("Service extension type, please use ConnectAbility.");
+            return ERR_WRONG_INTERFACE_CALL;
+        }
     }
     auto abilityInfo = abilityRequest.abilityInfo;
     int32_t validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : userId;
@@ -3844,7 +3861,8 @@ bool AbilityManagerService::CheckCallerEligibility(const AppExecFwk::AbilityInfo
             return false;
         }
         AppExecFwk::ApplicationInfo callerAppInfo;
-        result = IN_PROCESS_CALL(bms->GetApplicationInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
+        result = IN_PROCESS_CALL(bms->GetApplicationInfo(bundleName,
+            AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO,
             GetUserId(), callerAppInfo));
         if (!result) {
             HILOG_ERROR("GetApplicationInfo from bms fail.");
@@ -3872,9 +3890,8 @@ bool AbilityManagerService::CheckCallerEligibility(const AppExecFwk::AbilityInfo
 int AbilityManagerService::StartUser(int userId)
 {
     HILOG_DEBUG("%{public}s, userId:%{public}d", __func__, userId);
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
+        HILOG_ERROR("%{public}s: Permission verification failed, not account process", __func__);
         return CHECK_PERMISSION_FAILED;
     }
 
@@ -3887,9 +3904,8 @@ int AbilityManagerService::StartUser(int userId)
 int AbilityManagerService::StopUser(int userId, const sptr<IStopUserCallback> &callback)
 {
     HILOG_DEBUG("%{public}s", __func__);
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
+        HILOG_ERROR("%{public}s: Permission verification failed, not account process", __func__);
         return CHECK_PERMISSION_FAILED;
     }
 

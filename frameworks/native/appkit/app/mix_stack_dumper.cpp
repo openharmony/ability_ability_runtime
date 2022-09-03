@@ -29,7 +29,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 std::shared_ptr<OHOSApplication> MixStackDumper::application_ = nullptr;
-std::shared_ptr<EventHandler> MixStackDumper::DumpHandler_ = nullptr;
+std::shared_ptr<EventHandler> MixStackDumper::dumpHandler_ = nullptr;
 namespace {
 const std::string MIX_DUMP_THREAD_NAME = "DfxMixDumper";
 constexpr int SIGDUMP = 35;
@@ -50,6 +50,9 @@ static std::string PrintJsFrame(JsFrames& jsFrame)
 
 static std::string PrintNativeFrame(std::shared_ptr<OHOS::HiviewDFX::DfxFrame> frame)
 {
+    if (frame == nullptr) {
+        return "";
+    }
     char buf[FRAME_BUF_LEN] = {0};
     std::string mapName = frame->GetFrameMapName();
     if (mapName.empty()) {
@@ -93,7 +96,7 @@ void MixStackDumper::Dump_SignalHandler(int sig, siginfo_t *si, void *context)
         }
         case MIX_DUMP: {
             targetDumpTid_ = si->si_value.sival_int;
-            DumpHandler_->PostTask(&MixStackDumper::HandleMixDumpRequest);
+            dumpHandler_->PostTask(&MixStackDumper::HandleMixDumpRequest);
             break;
         }
         default:
@@ -103,7 +106,7 @@ void MixStackDumper::Dump_SignalHandler(int sig, siginfo_t *si, void *context)
 
 void MixStackDumper::InstallDumpHandler(std::shared_ptr<OHOSApplication> application)
 {
-    DumpHandler_ = std::make_shared<EventHandler>(EventRunner::Create(MIX_DUMP_THREAD_NAME));
+    dumpHandler_ = std::make_shared<EventHandler>(EventRunner::Create(MIX_DUMP_THREAD_NAME));
     application_ = application;
     struct sigaction newDumpAction;
     struct sigaction oldDumpAction;
