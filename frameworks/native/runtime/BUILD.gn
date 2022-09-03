@@ -14,6 +14,33 @@
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
+config("string_utils_config") {
+  include_dirs = [ "utils/include" ]
+}
+
+ohos_source_set("string_utils") {
+  if (is_mingw) {
+    defines = [ "WINDOWS_PLATFORM" ]
+  } else {
+    defines = [ "MAC_PLATFORM" ]
+  }
+
+  sources = [ "utils/src/file_path_utils.cpp" ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  public_configs = [
+    ":string_utils_config",
+    "${ability_runtime_services_path}/common:common_config",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 config("ability_extractor_config") {
   include_dirs = [
     "utils/include",
@@ -25,7 +52,6 @@ config("ability_extractor_config") {
 ohos_source_set("runtime_extractor") {
   sources = [
     "utils/src/base_extractor.cpp",
-    "utils/src/runtime_extractor.cpp",
     "utils/src/zip_file.cpp",
   ]
 
@@ -33,6 +59,8 @@ ohos_source_set("runtime_extractor") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
+
+  deps = [ ":string_utils" ]
 
   public_configs = [
     ":ability_extractor_config",

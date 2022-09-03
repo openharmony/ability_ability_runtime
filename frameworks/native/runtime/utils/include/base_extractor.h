@@ -26,7 +26,7 @@ class BaseExtractor {
 public:
     explicit BaseExtractor(const std::string &source);
     virtual ~BaseExtractor();
-    std::shared_ptr<BaseExtractor> Create();
+    static std::shared_ptr<BaseExtractor> Create(const std::string& hapPath);
 
     /**
      * @brief Open compressed file.
@@ -64,13 +64,14 @@ public:
     bool IsStageBasedModel(std::string abilityName);
     bool GetFileBuffer(const std::string& srcPath, std::ostringstream& dest);
     bool GetFileList(const std::string& srcPath, std::vector<std::string>& assetList);
-    std::string GetLoadPath(const std::string& hapPath);
-    std::string GetRelativePath(const std::string& srcPath);
+    bool IsSameHap(const std::string& hapPath) const;
+    void SetRuntimeFlag(bool isRuntime);
 
-protected:
+private:
     const std::string sourceFile_;
     ZipFile zipFile_;
     bool initial_ = false;
+    std::string hapPath_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

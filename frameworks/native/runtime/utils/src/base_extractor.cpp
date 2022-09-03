@@ -20,20 +20,16 @@
 #include <sstream>
 
 #include "ability_constants.h"
+#include "file_path_utils.h"
 #include "hilog_wrapper.h"
 #include "string_ex.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-namespace {
-inline bool StringStartWith(const std::string& str, const char* startStr, size_t startStrLen)
-{
-    return ((str.length() >= startStrLen) && (str.compare(0, startStrLen, startStr) == 0));
-}
-} // namespace
-
 BaseExtractor::BaseExtractor(const std::string &source) : sourceFile_(source), zipFile_(source)
-{}
+{
+    hapPath_ = source;
+}
 
 BaseExtractor::~BaseExtractor()
 {}
@@ -49,18 +45,18 @@ bool BaseExtractor::Init()
     return true;
 }
 
-std::shared_ptr<BaseExtractor> BaseExtractor::Create()
+std::shared_ptr<BaseExtractor> BaseExtractor::Create(const std::string& hapPath)
 {
-    if (sourceFile_.empty()) {
+    if (hapPath.empty()) {
         HILOG_ERROR("source is nullptr");
         return std::shared_ptr<BaseExtractor>();
     }
 
     std::string loadPath;
-    if (StringStartWith(sourceFile_, Constants::ABS_CODE_PATH, std::string(Constants::ABS_CODE_PATH).length())) {
-        loadPath = GetLoadPath(sourceFile_);
+    if (StringStartWith(hapPath, Constants::ABS_CODE_PATH, std::string(Constants::ABS_CODE_PATH).length())) {
+        loadPath = GetLoadPath(hapPath);
     } else {
-        loadPath = sourceFile_;
+        loadPath = hapPath;
     }
     std::shared_ptr<BaseExtractor> baseExtractor = std::make_shared<BaseExtractor>(loadPath);
     if (!baseExtractor->Init()) {
@@ -202,24 +198,14 @@ bool BaseExtractor::IsStageBasedModel(std::string abilityName)
     return isStageBasedModel;
 }
 
-std::string BaseExtractor::GetLoadPath(const std::string& hapPath)
+bool BaseExtractor::IsSameHap(const std::string& hapPath) const
 {
-    std::regex hapPattern(std::string(Constants::ABS_CODE_PATH) + std::string(Constants::FILE_SEPARATOR));
-    std::string loadPath = std::regex_replace(hapPath, hapPattern, "");
-    loadPath = std::string(Constants::LOCAL_CODE_PATH) + std::string(Constants::FILE_SEPARATOR) +
-        loadPath.substr(loadPath.find(std::string(Constants::FILE_SEPARATOR)) + 1);
-    return loadPath;
+    return !hapPath_.empty() && !hapPath.empty() && hapPath_ == hapPath;
 }
 
-std::string BaseExtractor::GetRelativePath(const std::string& srcPath)
+void BaseExtractor::SetRuntimeFlag(bool isRuntime)
 {
-    std::regex srcPattern(Constants::LOCAL_CODE_PATH);
-    std::string relativePath = std::regex_replace(srcPath, srcPattern, "");
-    if (relativePath.find(Constants::FILE_SEPARATOR) == 0) {
-        relativePath = relativePath.substr(1);
-        relativePath = relativePath.substr(relativePath.find(std::string(Constants::FILE_SEPARATOR)) + 1);
-    }
-    return relativePath;
+    zipFile_.SetIsRuntime(isRuntime);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

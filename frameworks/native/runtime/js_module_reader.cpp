@@ -15,17 +15,22 @@
 
 #include "js_module_reader.h"
 
+#include "file_path_utils.h"
 #include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
-#include "runtime_extractor.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 std::vector<uint8_t> JsModuleReader::operator()(
     const std::string& curJsModulePath, const std::string& newJsModuleUri) const
 {
-    std::string newJsModulePath = NormalizeUri(bundleName_, curJsModulePath, newJsModuleUri);
     std::vector<uint8_t> buffer;
+    if (runtimeExtractor_ == nullptr) {
+        HILOG_ERROR("Runtime extractor does not exist");
+        return buffer;
+    }
+
+    std::string newJsModulePath = NormalizeUri(GetBundleName(), curJsModulePath, newJsModuleUri);
     if (newJsModulePath.empty()) {
         return buffer;
     }

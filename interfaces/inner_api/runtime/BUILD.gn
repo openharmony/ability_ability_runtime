@@ -58,6 +58,7 @@ ohos_shared_library("runtime") {
 
   deps = [
     "${ability_runtime_native_path}/runtime:runtime_extractor",
+    "${ability_runtime_native_path}/runtime:string_utils",
     "//arkcompiler/ets_runtime:libark_jsruntime",
     "//foundation/arkui/napi:ace_napi_ark",
   ]

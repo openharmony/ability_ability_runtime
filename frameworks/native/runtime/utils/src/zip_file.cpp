@@ -19,6 +19,7 @@
 #include <cstring>
 #include <ostream>
 
+#include "file_path_utils.h"
 #include "hilog_wrapper.h"
 #include "securec.h"
 #include "zlib.h"
@@ -39,12 +40,6 @@ constexpr size_t FILE_READ_COUNT = 1;
 constexpr uint8_t INFLATE_ERROR_TIMES = 5;
 const char FILE_SEPARATOR_CHAR = '/';
 constexpr char EXT_NAME_ABC[] = ".abc";
-
-inline bool StringEndWith(const std::string& str, const char* endStr, size_t endStrLen)
-{
-    size_t len = str.length();
-    return ((len >= endStrLen) && (str.compare(len - endStrLen, endStrLen, endStr) == 0));
-}
 }  // namespace
 
 ZipEntry::ZipEntry(const CentralDirEntry &centralEntry)

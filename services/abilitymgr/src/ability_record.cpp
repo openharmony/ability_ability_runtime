@@ -599,6 +599,11 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
 std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const
 {
+    if (resourceMgr == nullptr) {
+        HILOG_WARN("%{public}s resource manager does not exist.", __func__);
+        return nullptr;
+    }
+
     std::string iconPath;
     std::unique_ptr<uint8_t[]> iconOut;
     size_t len;
