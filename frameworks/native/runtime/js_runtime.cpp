@@ -30,6 +30,7 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
+#include "hot_reloader.h"
 #include "js_console_log.h"
 #include "js_module_reader.h"
 #include "js_module_searcher.h"
@@ -179,7 +180,7 @@ public:
             return;
         }
 
-        HILOG_DEBUG("There's %{public}d patch file.", fileNames.size());
+        HILOG_DEBUG("There's %{public}zu patch file.", fileNames.size());
         for (const auto &fileName : fileNames) {
             HILOG_DEBUG("Found %{private}s in %{private}s.", fileName.c_str(), hqfFile.c_str());
             std::string patchFile = hqfFile + "/" + fileName;
@@ -205,6 +206,7 @@ public:
     void NotifyHotReloadPage() override
     {
         HILOG_DEBUG("function called.");
+        Ace::HotReloader::HotReload();
     }
 
 private:
