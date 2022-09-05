@@ -51,7 +51,7 @@ config("ability_extractor_config") {
 
 ohos_source_set("runtime_extractor") {
   sources = [
-    "utils/src/base_extractor.cpp",
+    "utils/src/runtime_extractor.cpp",
     "utils/src/zip_file.cpp",
   ]
 

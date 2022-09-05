@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_BASE_EXTRACTOR_H
-#define OHOS_ABILITY_RUNTIME_BASE_EXTRACTOR_H
+#ifndef OHOS_ABILITY_RUNTIME_RUNTIME_EXTRACTOR_H
+#define OHOS_ABILITY_RUNTIME_RUNTIME_EXTRACTOR_H
 
 #include <string>
 
@@ -22,11 +22,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class BaseExtractor {
+class RuntimeExtractor {
 public:
-    explicit BaseExtractor(const std::string &source);
-    virtual ~BaseExtractor();
-    static std::shared_ptr<BaseExtractor> Create(const std::string& hapPath);
+    explicit RuntimeExtractor(const std::string &source);
+    virtual ~RuntimeExtractor();
+    static std::shared_ptr<RuntimeExtractor> Create(const std::string& hapPath);
 
     /**
      * @brief Open compressed file.
@@ -80,4 +80,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_BASE_EXTRACTOR_H
+#endif  // OHOS_ABILITY_RUNTIME_RUNTIME_EXTRACTOR_H
