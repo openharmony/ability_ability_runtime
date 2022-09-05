@@ -37,7 +37,7 @@ void MockApplication::OnConfigurationUpdated(const Configuration &config)
     GTEST_LOG_(INFO) << "MockApplication::OnConfigurationUpdated called";
     bool iscalled = true;
     EXPECT_TRUE(iscalled);
-    if (GetProcessInfo()->GetPid() == INMOCKAPPLICATION_TWO ) {
+    if (GetProcessInfo()->GetPid() == INMOCKAPPLICATION_TWO) {
         RegisterElementsCallbacks(elementCallBack_);
         OHOSApplication::OnConfigurationUpdated(config);
         UnregisterElementsCallbacks(elementCallBack_);
