@@ -29,6 +29,7 @@
 #include "extractor_utils.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
+#include "hot_reloader.h"
 #include "js_console_log.h"
 #include "js_module_reader.h"
 #include "js_module_searcher.h"
@@ -171,7 +172,7 @@ public:
             return;
         }
 
-        HILOG_DEBUG("There's %{public}d patch file.", fileNames.size());
+        HILOG_DEBUG("There's %{public}zu patch file.", fileNames.size());
         for (const auto &fileName : fileNames) {
             HILOG_DEBUG("Found %{private}s in %{private}s.", fileName.c_str(), hqfFile.c_str());
             std::string patchFile = hqfFile + "/" + fileName;
@@ -185,7 +186,7 @@ public:
             const auto &outStr = outStream.str();
             std::vector<uint8_t> buffer;
             buffer.assign(outStr.begin(), outStr.end());
-            HILOG_INFO("patchFile: %{private}s, buffersize: %{public}d, baseFile: %{private}s.",
+            HILOG_INFO("patchFile: %{private}s, buffersize: %{public}zu, baseFile: %{private}s.",
                 patchFile.c_str(), buffer.size(), baseFile.c_str());
             bool ret = panda::JSNApi::LoadPatch(vm_, patchFile, buffer.data(), buffer.size(), baseFile);
             if (!ret) {
@@ -199,6 +200,7 @@ public:
     void NotifyHotReloadPage() override
     {
         HILOG_DEBUG("function called.");
+        Ace::HotReloader::HotReload();
     }
 
 private:
