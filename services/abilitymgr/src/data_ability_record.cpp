@@ -230,8 +230,8 @@ int DataAbilityRecord::AddClient(const sptr<IRemoteObject> &client, bool tryBind
         auto clientAbilityRecord = Token::GetAbilityRecordByToken(client);
         CHECK_POINTER_AND_RETURN(clientAbilityRecord, ERR_UNKNOWN_OBJECT);
         appScheduler->AbilityBehaviorAnalysis(ability_->GetToken(), clientAbilityRecord->GetToken(), 0, 0, 1);
-        HILOG_INFO("Ability ability '%{public}s|%{public}s'.", clientAbilityRecord->GetAbilityInfo().name.c_str(),
-            clientAbilityRecord->GetApplicationInfo().bundleName.c_str());
+        HILOG_INFO("Ability '%{public}s|%{public}s'.", clientAbilityRecord->GetApplicationInfo().bundleName.c_str(),
+            clientAbilityRecord->GetAbilityInfo().name.c_str());
     }
 
     HILOG_INFO("Data ability '%{public}s|%{public}s'.", ability_->GetApplicationInfo().bundleName.c_str(),
