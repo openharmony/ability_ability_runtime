@@ -1963,8 +1963,7 @@ void Ability::OnChange(Rosen::DisplayId displayId)
 
     std::vector<std::string> changeKeyV;
     configuration->CompareDifferent(changeKeyV, newConfig);
-    uint32_t size = changeKeyV.size();
-    HILOG_DEBUG("changeKeyV size :%{public}u", size);
+    HILOG_DEBUG("changeKeyV size :%{public}zu", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
         auto task = [ability = shared_from_this(), configuration = *configuration]() {
@@ -2016,8 +2015,7 @@ void Ability::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
     }
 
     configuration->CompareDifferent(changeKeyV, newConfig);
-    uint32_t size = changeKeyV.size();
-    HILOG_DEBUG("changeKeyV size :%{public}u", size);
+    HILOG_DEBUG("changeKeyV size :%{public}zu", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
         auto task = [ability = shared_from_this(), configuration = *configuration]() {
