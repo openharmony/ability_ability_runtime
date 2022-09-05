@@ -35,6 +35,8 @@ napi_value WrapWantParams(napi_env env, const AAFwk::WantParams &wantParams);
 bool UnwrapWantParams(napi_env env, napi_value param, AAFwk::WantParams &wantParams);
 bool BlackListFilter(const std::string &strProName);
 
+NativeValue* CreateJsWant(NativeEngine &engine, const Want &want);
+
 napi_value WrapWant(napi_env env, const Want &want);
 bool UnwrapWant(napi_env env, napi_value param, Want &want);
 

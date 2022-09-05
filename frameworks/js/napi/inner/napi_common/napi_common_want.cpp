@@ -23,6 +23,7 @@
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
+#include "js_runtime_utils.h"
 #include "long_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
@@ -30,7 +31,8 @@
 #include "remote_object_wrapper.h"
 #include "want_params_wrapper.h"
 #include "napi_remote_object.h"
-
+#include "native_engine/native_engine.h"
+using namespace OHOS::AbilityRuntime;
 namespace OHOS {
 namespace AppExecFwk {
 const int PROPERTIES_SIZE = 2;
@@ -1047,6 +1049,24 @@ bool InnerUnwrapWantOptions(napi_env env, napi_value param, const char *property
 
     want.SetFlags(flags);
     return true;
+}
+
+NativeValue* CreateJsWant(NativeEngine &engine, const Want &want)
+{
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+
+    object->SetProperty("deviceId", CreateJsValue(engine, want.GetElement().GetDeviceID()));
+    object->SetProperty("bundleName", CreateJsValue(engine, want.GetElement().GetBundleName()));
+    object->SetProperty("abilityName", CreateJsValue(engine, want.GetElement().GetAbilityName()));
+    object->SetProperty("moduleName", CreateJsValue(engine, want.GetElement().GetModuleName()));
+    object->SetProperty("uri", CreateJsValue(engine, want.GetUriString()));
+    object->SetProperty("type", CreateJsValue(engine, want.GetType()));
+    object->SetProperty("flags", CreateJsValue(engine, want.GetFlags()));
+    object->SetProperty("action", CreateJsValue(engine, want.GetAction()));
+    object->SetProperty("parameters", CreateJsValue(engine, want.GetParams()));
+    object->SetProperty("entities", CreateJsValue(engine, want.GetEntities()));
+    return objValue;
 }
 
 napi_value WrapWant(napi_env env, const Want &want)
