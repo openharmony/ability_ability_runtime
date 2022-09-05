@@ -24,7 +24,6 @@
 #include <regex>
 
 #include "ability_constants.h"
-#include "base_extractor.h"
 #include "connect_server_manager.h"
 #include "event_handler.h"
 #include "file_path_utils.h"
@@ -39,6 +38,7 @@
 #include "js_worker.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "parameters.h"
+#include "runtime_extractor.h"
 #include "systemcapability.h"
 
 #ifdef SUPPORT_GRAPHICS
@@ -117,9 +117,9 @@ public:
         bool result = false;
         if (isBundle_ && !hapPath.empty()) {
             std::ostringstream outStream;
-            std::shared_ptr<BaseExtractor> runtimeExtractor;
+            std::shared_ptr<RuntimeExtractor> runtimeExtractor;
             if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
-                runtimeExtractor = BaseExtractor::Create(hapPath);
+                runtimeExtractor = RuntimeExtractor::Create(hapPath);
                 runtimeExtractor->SetRuntimeFlag(true);
                 runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
             } else {
@@ -166,7 +166,7 @@ public:
             return;
         }
 
-        AbilityRuntime::BaseExtractor extractor(hqfFile);
+        AbilityRuntime::RuntimeExtractor extractor(hqfFile);
         if (!extractor.Init()) {
             HILOG_ERROR("Extractor of %{private}s init failed.", hqfFile.c_str());
             return;
@@ -260,7 +260,7 @@ private:
         if (!options.preload) {
             bundleName_ = options.bundleName;
             panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
-            std::shared_ptr<BaseExtractor> runtimeExtractor = BaseExtractor::Create(options.hapPath);
+            std::shared_ptr<RuntimeExtractor> runtimeExtractor = RuntimeExtractor::Create(options.hapPath);
             runtimeExtractor->SetRuntimeFlag(true);
             runtimeExtractorMap_.insert(make_pair(options.hapPath, runtimeExtractor));
             panda::JSNApi::SetHostResolveBufferTracker(
@@ -612,9 +612,9 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
     bool result = false;
     if (isBundle_ && !hapPath.empty()) {
         std::ostringstream outStream;
-        std::shared_ptr<BaseExtractor> runtimeExtractor;
+        std::shared_ptr<RuntimeExtractor> runtimeExtractor;
         if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
-            runtimeExtractor = BaseExtractor::Create(hapPath);
+            runtimeExtractor = RuntimeExtractor::Create(hapPath);
             runtimeExtractor->SetRuntimeFlag(true);
             runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
         } else {

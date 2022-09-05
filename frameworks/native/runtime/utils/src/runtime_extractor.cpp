@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "base_extractor.h"
+#include "runtime_extractor.h"
 
 #include <fstream>
 #include <regex>
@@ -26,15 +26,15 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-BaseExtractor::BaseExtractor(const std::string &source) : sourceFile_(source), zipFile_(source)
+RuntimeExtractor::RuntimeExtractor(const std::string &source) : sourceFile_(source), zipFile_(source)
 {
     hapPath_ = source;
 }
 
-BaseExtractor::~BaseExtractor()
+RuntimeExtractor::~RuntimeExtractor()
 {}
 
-bool BaseExtractor::Init()
+bool RuntimeExtractor::Init()
 {
     if (!zipFile_.Open()) {
         HILOG_ERROR("open zip file failed");
@@ -45,11 +45,11 @@ bool BaseExtractor::Init()
     return true;
 }
 
-std::shared_ptr<BaseExtractor> BaseExtractor::Create(const std::string& hapPath)
+std::shared_ptr<RuntimeExtractor> RuntimeExtractor::Create(const std::string& hapPath)
 {
     if (hapPath.empty()) {
         HILOG_ERROR("source is nullptr");
-        return std::shared_ptr<BaseExtractor>();
+        return std::shared_ptr<RuntimeExtractor>();
     }
 
     std::string loadPath;
@@ -58,16 +58,16 @@ std::shared_ptr<BaseExtractor> BaseExtractor::Create(const std::string& hapPath)
     } else {
         loadPath = hapPath;
     }
-    std::shared_ptr<BaseExtractor> baseExtractor = std::make_shared<BaseExtractor>(loadPath);
-    if (!baseExtractor->Init()) {
-        HILOG_ERROR("BaseExtractor create failed");
-        return std::shared_ptr<BaseExtractor>();
+    std::shared_ptr<RuntimeExtractor> runtimeExtractor = std::make_shared<RuntimeExtractor>(loadPath);
+    if (!runtimeExtractor->Init()) {
+        HILOG_ERROR("RuntimeExtractor create failed");
+        return std::shared_ptr<RuntimeExtractor>();
     }
 
-    return baseExtractor;
+    return runtimeExtractor;
 }
 
-bool BaseExtractor::GetFileBuffer(const std::string& srcPath, std::ostringstream& dest)
+bool RuntimeExtractor::GetFileBuffer(const std::string& srcPath, std::ostringstream& dest)
 {
     if (!initial_) {
         HILOG_ERROR("extractor is not initial");
@@ -88,7 +88,7 @@ bool BaseExtractor::GetFileBuffer(const std::string& srcPath, std::ostringstream
     return true;
 }
 
-bool BaseExtractor::GetFileList(const std::string& srcPath, std::vector<std::string>& assetList)
+bool RuntimeExtractor::GetFileList(const std::string& srcPath, std::vector<std::string>& assetList)
 {
     if (!initial_) {
         HILOG_ERROR("extractor is not initial");
@@ -120,7 +120,7 @@ bool BaseExtractor::GetFileList(const std::string& srcPath, std::vector<std::str
     return true;
 }
 
-bool BaseExtractor::HasEntry(const std::string &fileName) const
+bool RuntimeExtractor::HasEntry(const std::string &fileName) const
 {
     if (!initial_) {
         HILOG_ERROR("extractor is not initial");
@@ -130,7 +130,7 @@ bool BaseExtractor::HasEntry(const std::string &fileName) const
     return zipFile_.HasEntry(fileName);
 }
 
-bool BaseExtractor::IsDirExist(const std::string &dir) const
+bool RuntimeExtractor::IsDirExist(const std::string &dir) const
 {
     if (!initial_) {
         HILOG_ERROR("extractor is not initial");
@@ -143,7 +143,7 @@ bool BaseExtractor::IsDirExist(const std::string &dir) const
     return zipFile_.IsDirExist(dir);
 }
 
-bool BaseExtractor::ExtractByName(const std::string &fileName, std::ostream &dest) const
+bool RuntimeExtractor::ExtractByName(const std::string &fileName, std::ostream &dest) const
 {
     if (!initial_) {
         HILOG_ERROR("extractor is not initial");
@@ -156,7 +156,7 @@ bool BaseExtractor::ExtractByName(const std::string &fileName, std::ostream &des
     return true;
 }
 
-bool BaseExtractor::ExtractFile(const std::string &fileName, const std::string &targetPath) const
+bool RuntimeExtractor::ExtractFile(const std::string &fileName, const std::string &targetPath) const
 {
     std::ofstream fileStream;
     fileStream.open(targetPath, std::ios_base::out | std::ios_base::binary);
@@ -178,7 +178,7 @@ bool BaseExtractor::ExtractFile(const std::string &fileName, const std::string &
     return true;
 }
 
-bool BaseExtractor::GetZipFileNames(std::vector<std::string> &fileNames)
+bool RuntimeExtractor::GetZipFileNames(std::vector<std::string> &fileNames)
 {
     auto &entryMap = zipFile_.GetAllEntries();
     for (auto &entry : entryMap) {
@@ -187,7 +187,7 @@ bool BaseExtractor::GetZipFileNames(std::vector<std::string> &fileNames)
     return true;
 }
 
-void BaseExtractor::GetSpecifiedTypeFiles(std::vector<std::string> &fileNames, const std::string &suffix)
+void RuntimeExtractor::GetSpecifiedTypeFiles(std::vector<std::string> &fileNames, const std::string &suffix)
 {
     auto &entryMap = zipFile_.GetAllEntries();
     for (auto &entry : entryMap) {
@@ -203,7 +203,7 @@ void BaseExtractor::GetSpecifiedTypeFiles(std::vector<std::string> &fileNames, c
     return;
 }
 
-bool BaseExtractor::IsStageBasedModel(std::string abilityName)
+bool RuntimeExtractor::IsStageBasedModel(std::string abilityName)
 {
     auto &entryMap = zipFile_.GetAllEntries();
     std::vector<std::string> splitStrs;
@@ -214,12 +214,12 @@ bool BaseExtractor::IsStageBasedModel(std::string abilityName)
     return isStageBasedModel;
 }
 
-bool BaseExtractor::IsSameHap(const std::string& hapPath) const
+bool RuntimeExtractor::IsSameHap(const std::string& hapPath) const
 {
     return !hapPath_.empty() && !hapPath.empty() && hapPath_ == hapPath;
 }
 
-void BaseExtractor::SetRuntimeFlag(bool isRuntime)
+void RuntimeExtractor::SetRuntimeFlag(bool isRuntime)
 {
     zipFile_.SetIsRuntime(isRuntime);
 }
