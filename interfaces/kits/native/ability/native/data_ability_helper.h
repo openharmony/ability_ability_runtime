@@ -13,31 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_DATA_ABILITY_HELPER_H
-#define FOUNDATION_APPEXECFWK_OHOS_DATA_ABILITY_HELPER_H
+#ifndef OHOS_ABILITY_RUNTIME_DATA_ABILITY_HELPER_H
+#define OHOS_ABILITY_RUNTIME_DATA_ABILITY_HELPER_H
 
-#include <mutex>
-#include <map>
-#include <string>
-
-#include "context.h"
-#include "foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/context/context.h"
-#include "uri.h"
-
-using Uri = OHOS::Uri;
+#include "data_ability_helper_impl.h"
 
 namespace OHOS {
-namespace NativeRdb {
-class AbsSharedResultSet;
-class DataAbilityPredicates;
-class ValuesBucket;
-}  // namespace NativeRdb
+namespace DataShare {
+class DataShareHelper;
+}
 namespace AppExecFwk {
-using string = std::string;
-class DataAbilityResult;
-class DataAbilityOperation;
-class PacMap;
-class IDataAbilityObserver;
 class DataAbilityHelper final : public std::enable_shared_from_this<DataAbilityHelper> {
 public:
     ~DataAbilityHelper() = default;
@@ -307,49 +292,20 @@ public:
     std::vector<std::shared_ptr<DataAbilityResult>> ExecuteBatch(
         const Uri &uri, const std::vector<std::shared_ptr<DataAbilityOperation>> &operations);
 
-private:
-    DataAbilityHelper(const std::shared_ptr<Context> &context, const std::shared_ptr<Uri> &uri,
-        const sptr<AAFwk::IAbilityScheduler> &dataAbilityProxy, bool tryBind = false);
-    DataAbilityHelper(const std::shared_ptr<OHOS::AbilityRuntime::Context> &context, const std::shared_ptr<Uri> &uri,
-        const sptr<AAFwk::IAbilityScheduler> &dataAbilityProxy, bool tryBind = false);
-    DataAbilityHelper(const std::shared_ptr<Context> &context);
-    DataAbilityHelper(const sptr<IRemoteObject> &token, const std::shared_ptr<Uri> &uri,
-        const sptr<AAFwk::IAbilityScheduler> &dataAbilityProxy);
-    DataAbilityHelper(const sptr<IRemoteObject> &token);
-
-    void AddDataAbilityDeathRecipient(const sptr<IRemoteObject> &token);
-    void OnSchedulerDied(const wptr<IRemoteObject> &remote);
-
-    bool CheckUriParam(const Uri &uri);
-    bool CheckOhosUri(const Uri &uri);
-
-    sptr<IRemoteObject> token_;
-    std::weak_ptr<Context> context_;
-    std::shared_ptr<Uri> uri_ = nullptr;
-    bool tryBind_ = false;
-    bool isSystemCaller_ = false;
-    sptr<AAFwk::IAbilityScheduler> dataAbilityProxy_ = nullptr;
-    std::mutex lock_;
-    static std::mutex oplock_;
-
-    sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_ = nullptr;  // caller binderDied Recipient
-    std::map<sptr<AAFwk::IDataAbilityObserver>, sptr<AAFwk::IAbilityScheduler>> registerMap_;
-    std::map<sptr<AAFwk::IDataAbilityObserver>, std::string> uriMap_;
-};
-
-class DataAbilityDeathRecipient : public IRemoteObject::DeathRecipient {
-public:
-    using RemoteDiedHandler = std::function<void(const wptr<IRemoteObject> &)>;
-
-    explicit DataAbilityDeathRecipient(RemoteDiedHandler handler);
-
-    virtual ~DataAbilityDeathRecipient();
-
-    virtual void OnRemoteDied(const wptr<IRemoteObject> &remote);
+    void SetCallFromJs();
 
 private:
-    RemoteDiedHandler handler_;
+    DataAbilityHelper(const std::shared_ptr<DataAbilityHelperImpl> &helperImpl);
+    DataAbilityHelper(const std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper);
+
+    static bool TransferScheme(const Uri &uri, Uri &dataShareUri);
+
+    std::shared_ptr<DataAbilityHelperImpl> dataAbilityHelperImpl_ = nullptr;
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_ = nullptr;
+
+    bool callFromJs_ = false; // true: call from js, false: call from native
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_DATA_ABILITY_HELPER_H
+#endif  // OHOS_ABILITY_RUNTIME_DATA_ABILITY_HELPER_H
+

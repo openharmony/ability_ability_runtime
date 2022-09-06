@@ -22,19 +22,33 @@ ApplicationDataManager::ApplicationDataManager() {}
 
 ApplicationDataManager::~ApplicationDataManager() {}
 
+ApplicationDataManager &ApplicationDataManager::GetInstance()
+{
+    static ApplicationDataManager manager;
+    return manager;
+}
+
 void ApplicationDataManager::AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer)
 {
     HILOG_DEBUG("Add error observer come.");
     errorObserver_ = observer;
 }
 
-void ApplicationDataManager::NotifyUnhandledException(const std::string &errMsg)
+bool ApplicationDataManager::NotifyUnhandledException(const std::string &errMsg)
 {
     HILOG_DEBUG("Notify error observer come.");
-    std::shared_ptr<IErrorObserver> observer = errorObserver_.lock();
-    if (observer) {
-        observer->OnUnhandledException(errMsg);
+    if (errorObserver_) {
+        errorObserver_->OnUnhandledException(errMsg);
+        return true;
     }
+
+    return false;
+}
+
+void ApplicationDataManager::RemoveErrorObserver()
+{
+    HILOG_DEBUG("Remove error observer come.");
+    errorObserver_ = nullptr;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

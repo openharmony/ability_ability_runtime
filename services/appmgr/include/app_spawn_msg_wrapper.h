@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_SPAWN_MSG_WRAPPER_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_SPAWN_MSG_WRAPPER_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_SPAWN_MSG_WRAPPER_H
+#define OHOS_ABILITY_RUNTIME_APP_SPAWN_MSG_WRAPPER_H
 
 #include <string>
 #include <vector>
@@ -38,6 +38,11 @@ struct AppSpawnStartMsg {
     int32_t pid;
     int32_t code = 0; // 0: DEFAULT; 1: GET_RENDER_TERMINATION_STATUS
     uint32_t flags;
+    int32_t bundleIndex;   // when dlp launch another app used, default is 0
+    uint8_t setAllowInternet;
+    uint8_t allowInternet; // hap sockect allowed
+    uint8_t reserved1;
+    uint8_t reserved2;
 };
 
 using AppSpawnMsg = AppSpawn::ClientSocket::AppProperty;
@@ -46,6 +51,7 @@ constexpr auto LEN_PID = sizeof(pid_t);
 struct StartFlags {
     static const int COLD_START = 0;
     static const int BACKUP_EXTENSION = 1;
+    static const int DLP_MANAGER = 2;
 };
 
 union AppSpawnPidMsg {
@@ -128,4 +134,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_SPAWN_MSG_WRAPPER_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_SPAWN_MSG_WRAPPER_H

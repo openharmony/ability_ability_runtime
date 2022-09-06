@@ -20,6 +20,7 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "connection_state_manager.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
@@ -43,7 +44,7 @@ DataAbilityManager::~DataAbilityManager()
 }
 
 sptr<IAbilityScheduler> DataAbilityManager::Acquire(
-    const AbilityRequest &abilityRequest, bool tryBind, const sptr<IRemoteObject> &client, bool isSaCall)
+    const AbilityRequest &abilityRequest, bool tryBind, const sptr<IRemoteObject> &client, bool isNotHap)
 {
     HILOG_DEBUG("%{public}s(%{public}d)", __PRETTY_FUNCTION__, __LINE__);
 
@@ -60,7 +61,7 @@ sptr<IAbilityScheduler> DataAbilityManager::Acquire(
     std::shared_ptr<AbilityRecord> clientAbilityRecord;
     const std::string dataAbilityName(abilityRequest.abilityInfo.bundleName + '.' + abilityRequest.abilityInfo.name);
 
-    if (client && !isSaCall) {
+    if (client && !isNotHap) {
         clientAbilityRecord = Token::GetAbilityRecordByToken(client);
         if (!clientAbilityRecord) {
             HILOG_ERROR("Data ability manager acquire: invalid client token.");
@@ -107,18 +108,20 @@ sptr<IAbilityScheduler> DataAbilityManager::Acquire(
     }
 
     if (client) {
-        dataAbilityRecord->AddClient(client, tryBind, isSaCall);
+        dataAbilityRecord->AddClient(client, tryBind, isNotHap);
     }
 
     if (DEBUG_ENABLED) {
         DumpLocked(__func__, __LINE__);
     }
 
+    ReportDataAbilityAcquired(client, isNotHap, dataAbilityRecord);
+
     return scheduler;
 }
 
 int DataAbilityManager::Release(
-    const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &client, bool isSaCall)
+    const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &client, bool isNotHap)
 {
     HILOG_DEBUG("%{public}s(%{public}d)", __PRETTY_FUNCTION__, __LINE__);
 
@@ -149,7 +152,9 @@ int DataAbilityManager::Release(
 
     auto abilityRecord = dataAbilityRecord->GetAbilityRecord();
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_UNKNOWN_OBJECT);
-    int result = AbilityUtil::JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
+    auto abilityMs = DelayedSingleton<AbilityManagerService>::GetInstance();
+    CHECK_POINTER_AND_RETURN(abilityMs, GET_ABILITY_SERVICE_FAILED);
+    int result = abilityMs->JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
     if (result != ERR_OK) {
         HILOG_ERROR("%{public}s JudgeAbilityVisibleControl error.", __func__);
         return result;
@@ -160,11 +165,13 @@ int DataAbilityManager::Release(
         return ERR_UNKNOWN_OBJECT;
     }
 
-    dataAbilityRecord->RemoveClient(client, isSaCall);
+    dataAbilityRecord->RemoveClient(client, isNotHap);
 
     if (DEBUG_ENABLED) {
         DumpLocked(__func__, __LINE__);
     }
+
+    ReportDataAbilityReleased(client, isNotHap, dataAbilityRecord);
 
     return ERR_OK;
 }
@@ -296,6 +303,7 @@ void DataAbilityManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abi
             // If 'abilityRecord' is a data ability server, trying to remove it from 'dataAbilityRecords_'.
             for (auto it = dataAbilityRecordsLoaded_.begin(); it != dataAbilityRecordsLoaded_.end();) {
                 if (it->second && it->second->GetAbilityRecord() == abilityRecord) {
+                    DelayedSingleton<ConnectionStateManager>::GetInstance()->HandleDataAbilityDied(it->second);
                     it->second->KillBoundClientProcesses();
                     HILOG_DEBUG("Removing died data ability record...");
                     it = dataAbilityRecordsLoaded_.erase(it);
@@ -637,7 +645,7 @@ void DataAbilityManager::RestartDataAbility(const std::shared_ptr<AbilityRecord>
     }
 
     for (size_t i = 0; i < bundleInfos.size(); i++) {
-        if (!bundleInfos[i].isKeepAlive) {
+        if (!bundleInfos[i].isKeepAlive || bundleInfos[i].applicationInfo.process.empty()) {
             continue;
         }
         for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
@@ -647,7 +655,8 @@ void DataAbilityManager::RestartDataAbility(const std::shared_ptr<AbilityRecord>
             }
             // old application model, it maybe a data ability
             std::string mainElement = hapModuleInfo.mainAbility;
-            if (abilityRecord->GetAbilityInfo().name != mainElement) {
+            if (abilityRecord->GetAbilityInfo().name != mainElement ||
+                abilityRecord->GetAbilityInfo().process != bundleInfos[i].applicationInfo.process) {
                 continue;
             }
             std::string uriStr;
@@ -662,6 +671,37 @@ void DataAbilityManager::RestartDataAbility(const std::shared_ptr<AbilityRecord>
             }
         }
     }
+}
+
+void DataAbilityManager::ReportDataAbilityAcquired(const sptr<IRemoteObject> &client, bool isNotHap,
+    std::shared_ptr<DataAbilityRecord> &record)
+{
+    DataAbilityCaller caller;
+    caller.isNotHap = isNotHap;
+    caller.callerPid = IPCSkeleton::GetCallingPid();
+    caller.callerUid = IPCSkeleton::GetCallingUid();
+    caller.callerToken = client;
+    if (client && !isNotHap) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(client);
+        if (abilityRecord) {
+            caller.callerName = abilityRecord->GetAbilityInfo().bundleName;
+        }
+    } else {
+        caller.callerName = ConnectionStateManager::GetProcessNameByPid(caller.callerPid);
+    }
+
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->AddDataAbilityConnection(caller, record);
+}
+
+void DataAbilityManager::ReportDataAbilityReleased(const sptr<IRemoteObject> &client, bool isNotHap,
+    std::shared_ptr<DataAbilityRecord> &record)
+{
+    DataAbilityCaller caller;
+    caller.isNotHap = isNotHap;
+    caller.callerPid = IPCSkeleton::GetCallingPid();
+    caller.callerUid = IPCSkeleton::GetCallingUid();
+    caller.callerToken = client;
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveDataAbilityConnection(caller, record);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_CALL_RECORD_H
-#define OHOS_AAFWK_CALL_RECORD_H
+#ifndef OHOS_ABILITY_RUNTIME_CALL_RECORD_H
+#define OHOS_ABILITY_RUNTIME_CALL_RECORD_H
 
 #include "ability_connect_callback_interface.h"
 #include "nocopyable.h"
@@ -70,7 +70,7 @@ public:
 
     void Dump(std::vector<std::string> &info) const;
     bool SchedulerConnectDone();
-    bool SchedulerDisConnectDone();
+    bool SchedulerDisconnectDone();
     void OnCallStubDied(const wptr<IRemoteObject> & remote);
 
     int32_t GetCallerUid() const;
@@ -79,7 +79,7 @@ public:
     int32_t GetCallRecordId() const;
     AppExecFwk::ElementName GetTargetServiceName() const;
     sptr<IRemoteObject> GetCallerToken() const;
-    
+
 private:
     static int64_t callRecordId;
     int recordId_;                                  // record id
@@ -96,4 +96,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_CALL_RECORD_H
+#endif  // OHOS_ABILITY_RUNTIME_CALL_RECORD_H

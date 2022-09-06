@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_PERMISSION_VERIFICATION_H
-#define OHOS_AAFWK_PERMISSION_VERIFICATION_H
-
-#include <string.h>
+#ifndef OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
+#define OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H
 
 #include "singleton.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -27,20 +26,36 @@ public:
     PermissionVerification() = default;
     ~PermissionVerification() = default;
 
-    bool VerifyCallingPermission(const std::string &permissionName);
+    bool VerifyCallingPermission(const std::string &permissionName) const;
 
-    bool IsSACall();
+    bool IsSACall() const;
+
+    bool IsShellCall() const;
 
     bool CheckSpecificSystemAbilityAccessPermission();
 
-    bool VerifyRunningInfoPerm();
+    bool VerifyRunningInfoPerm() const;
 
-    bool VerifyControllerPerm();
+    bool VerifyControllerPerm() const;
+
+    bool VerifyDlpPermission(Want &want);
+
+    int VerifyAccountPermission();
+
+    bool VerifyMissionPermission();
+
+    int VerifyAppStateObserverPermission();
+
+    int32_t VerifyUpdateConfigurationPerm();
+
+    bool VerifyInstallBundlePermission();
+
+    bool VerifyGetBundleInfoPrivilegedPermission();
 
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
-    unsigned int GetCallingTokenID();
+    unsigned int GetCallingTokenID() const;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif // OHOS_AAFWK_PERMISSION_VERIFICATION_H
+#endif // OHOS_ABILITY_RUNTIME_PERMISSION_VERIFICATION_H

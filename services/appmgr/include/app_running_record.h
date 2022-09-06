@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_RUNNING_RECORD_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_RUNNING_RECORD_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_RUNNING_RECORD_H
+#define OHOS_ABILITY_RUNTIME_APP_RUNNING_RECORD_H
 
 #include <list>
 #include <map>
@@ -51,34 +51,41 @@ class AppRunningRecord;
  */
 class RenderRecord {
 public:
-    RenderRecord(pid_t hostPid, const std::string& renderParam,
+    RenderRecord(pid_t hostPid, const std::string &renderParam,
         int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host);
 
     virtual ~RenderRecord();
 
-    static std::shared_ptr<RenderRecord> CreateRenderRecord(pid_t hostPid, const std::string& renderParam,
+    static std::shared_ptr<RenderRecord> CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
         int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host);
 
     void SetPid(pid_t pid);
-    pid_t GetPid();
-    pid_t GetHostPid();
-    std::string GetRenderParam();
-    int32_t GetIpcFd();
-    int32_t GetSharedFd();
-    std::shared_ptr<AppRunningRecord> GetHostRecord();
-    sptr<IRenderScheduler> GetScheduler();
+    pid_t GetPid() const ;
+    pid_t GetHostPid() const;
+    int32_t GetHostUid() const;
+    std::string GetHostBundleName() const;
+    std::string GetRenderParam() const;
+    int32_t GetIpcFd() const;
+    int32_t GetSharedFd() const;
+    std::shared_ptr<AppRunningRecord> GetHostRecord() const;
+    sptr<IRenderScheduler> GetScheduler() const;
     void SetScheduler(const sptr<IRenderScheduler> &scheduler);
     void SetDeathRecipient(const sptr<AppDeathRecipient> recipient);
     void RegisterDeathRecipient();
 
 private:
+    void SetHostUid(const int32_t hostUid);
+    void SetHostBundleName(const std::string &hostBundleName);
+
     pid_t pid_ = 0;
     pid_t hostPid_ = 0;
+    int32_t hostUid_ = 0;
+    std::string hostBundleName_;
     std::string renderParam_;
     int32_t ipcFd_ = 0;
     int32_t sharedFd_ = 0;
     std::weak_ptr<AppRunningRecord> host_; // nweb host
-    sptr<IRenderScheduler> renderScheduler_;
+    sptr<IRenderScheduler> renderScheduler_ = nullptr;
     sptr<AppDeathRecipient> deathRecipient_ = nullptr;
 };
 
@@ -342,6 +349,13 @@ public:
     void ScheduleTrimMemory();
 
     /**
+     * ScheduleMemoryLevel, Notifies the application of the current memory.
+     *
+     * @return
+     */
+    void ScheduleMemoryLevel(int32_t level);
+
+    /**
      * GetAbilityRunningRecordByToken, Obtaining the ability record through token.
      *
      * @param token, the unique identification to the ability.
@@ -436,14 +450,21 @@ public:
 
     bool IsLastAbilityRecord(const sptr<IRemoteObject> &token);
 
+    bool IsLastPageAbilityRecord(const sptr<IRemoteObject> &token);
+
     void SetTerminating();
 
     bool IsTerminating();
 
     bool IsKeepAliveApp() const;
 
-    // Please use with caution, it may affect the ability to start.
-    void SetKeepAliveAppState(bool isKeepAlive, bool isNewMission);
+    bool IsEmptyKeepAliveApp() const;
+
+    void SetKeepAliveAppState(bool isKeepAlive, bool isEmptyKeepAliveApp);
+
+    void SetEmptyKeepAliveAppState(bool isEmptyKeepAlive);
+
+    void SetStageModelState(bool isStageBasedModel);
 
     std::list<std::shared_ptr<ModuleRunningRecord>> GetAllModuleRecord() const;
 
@@ -493,6 +514,18 @@ public:
 
     void SetKilling();
     bool IsKilling() const;
+    void SetAppIndex(const int32_t appIndex);
+    int32_t GetAppIndex() const;
+    void SetSecurityFlag(bool securityFlag);
+    bool GetSecurityFlag() const;
+
+    using Closure = std::function<void()>;
+    void PostTask(std::string msg, int64_t timeOut, const Closure &task);
+    void RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObject>& token) const;
+
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+
+    int32_t NotifyHotReloadPage();
 
 private:
     /**
@@ -542,7 +575,8 @@ private:
 
 private:
     bool isKeepAliveApp_ = false;  // Only resident processes can be set to true, please choose carefully
-    bool isNewMission_ = false;
+    bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
+    bool isStageBasedModel_ = false;
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
@@ -578,7 +612,9 @@ private:
     // render record
     std::shared_ptr<RenderRecord> renderRecord_ = nullptr;
     AppSpawnStartMsg startMsg_;
+    int32_t appIndex_ = 0;
+    bool securityFlag_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_RUNNING_RECORD_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_RUNNING_RECORD_H

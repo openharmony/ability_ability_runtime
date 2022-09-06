@@ -17,6 +17,9 @@
 
 #include "string_ex.h"
 #include "ability_manager_interface.h"
+#ifdef WITH_DLP
+#include "dlp_file_kits.h"
+#endif // WITH_DLP
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
@@ -29,6 +32,9 @@ namespace OHOS {
 namespace AAFwk {
 std::shared_ptr<AbilityManagerClient> AbilityManagerClient::instance_ = nullptr;
 std::recursive_mutex AbilityManagerClient::mutex_;
+#ifdef WITH_DLP
+const std::string DLP_PARAMS_SANDBOX = "ohos.dlp.params.sandbox";
+#endif // WITH_DLP
 
 #define CHECK_POINTER_RETURN(object)     \
     if (!object) {                       \
@@ -101,6 +107,7 @@ ErrCode AbilityManagerClient::StartAbility(const Want &want, int requestCode, in
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, userId, requestCode);
 }
 
@@ -112,6 +119,7 @@ ErrCode AbilityManagerClient::StartAbility(
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("Start ability come, ability:%{public}s, userId:%{public}d.",
         want.GetElement().GetAbilityName().c_str(), userId);
+    HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, callerToken, userId, requestCode);
 }
 
@@ -121,6 +129,7 @@ ErrCode AbilityManagerClient::StartAbility(const Want &want, const AbilityStartS
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, abilityStartSetting, callerToken, userId, requestCode);
 }
 
@@ -132,6 +141,7 @@ ErrCode AbilityManagerClient::StartAbility(const Want &want, const StartOptions 
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("%{public}s come, abilityName=%{public}s, userId=%{public}d.",
         __func__, want.GetElement().GetAbilityName().c_str(), userId);
+    HandleDlpApp(const_cast<Want &>(want));
     return abms->StartAbility(want, startOptions, callerToken, userId, requestCode);
 }
 
@@ -210,7 +220,7 @@ ErrCode AbilityManagerClient::ConnectAbility(const Want &want, const sptr<IAbili
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("Connect ability called, bundleName:%{public}s, abilityName:%{public}s, userId:%{public}d.",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
-    return abms->ConnectAbility(want, connect, nullptr, userId);
+    return abms->ConnectAbilityCommon(want, connect, nullptr, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
 }
 
 ErrCode AbilityManagerClient::ConnectAbility(
@@ -221,7 +231,41 @@ ErrCode AbilityManagerClient::ConnectAbility(
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("Connect ability called, bundleName:%{public}s, abilityName:%{public}s, userId:%{public}d.",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
-    return abms->ConnectAbility(want, connect, callerToken, userId);
+    return abms->ConnectAbilityCommon(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+}
+
+ErrCode AbilityManagerClient::ConnectDataShareExtensionAbility(const Want &want,
+    const sptr<IAbilityConnection> &connect, int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    if (abms == nullptr) {
+        HILOG_ERROR("Connect failed, bundleName:%{public}s, abilityName:%{public}s, uri:%{public}s.",
+            want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+            want.GetUriString().c_str());
+        return ABILITY_SERVICE_NOT_CONNECTED;
+    }
+
+    HILOG_INFO("Connect called, bundleName:%{public}s, abilityName:%{public}s, uri:%{public}s.",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(),
+        want.GetUriString().c_str());
+    return abms->ConnectAbilityCommon(want, connect, nullptr, AppExecFwk::ExtensionAbilityType::DATASHARE, userId);
+}
+
+ErrCode AbilityManagerClient::ConnectExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
+    int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    if (abms == nullptr) {
+        HILOG_ERROR("Connect failed, bundleName:%{public}s, abilityName:%{public}s",
+            want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
+        return ABILITY_SERVICE_NOT_CONNECTED;
+    }
+
+    HILOG_INFO("Connect called, bundleName:%{public}s, abilityName:%{public}s, userId:%{public}d.",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
+    return abms->ConnectAbilityCommon(want, connect, nullptr, AppExecFwk::ExtensionAbilityType::UNSPECIFIED, userId);
 }
 
 ErrCode AbilityManagerClient::DisconnectAbility(const sptr<IAbilityConnection> &connect)
@@ -478,13 +522,6 @@ ErrCode AbilityManagerClient::GetWantSenderInfo(const sptr<IWantSender> &target,
     return abms->GetWantSenderInfo(target, info);
 }
 
-void AbilityManagerClient::GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo)
-{
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN(abms);
-    abms->GetSystemMemoryAttr(memoryInfo);
-}
-
 ErrCode AbilityManagerClient::GetAppMemorySize()
 {
     auto abms = GetAbilityManager();
@@ -666,12 +703,12 @@ ErrCode AbilityManagerClient::StartAbilityByCall(
     return abms->StartAbilityByCall(want, connect, callToken);
 }
 
-ErrCode AbilityManagerClient::ReleaseAbility(
+ErrCode AbilityManagerClient::ReleaseCall(
     const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->ReleaseAbility(connect, element);
+    return abms->ReleaseCall(connect, element);
 }
 
 ErrCode AbilityManagerClient::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info)
@@ -844,6 +881,13 @@ ErrCode AbilityManagerClient::SendANRProcessID(int pid)
     return abms->SendANRProcessID(pid);
 }
 
+void AbilityManagerClient::UpdateMissionSnapShot(const sptr<IRemoteObject>& token)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->UpdateMissionSnapShot(token);
+}
+
 #ifdef ABILITY_COMMAND_FOR_TEST
 ErrCode AbilityManagerClient::BlockAmsService()
 {
@@ -928,6 +972,14 @@ ErrCode AbilityManagerClient::DumpAbilityInfoDone(std::vector<std::string> &info
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->DumpAbilityInfoDone(infos, callerToken);
+}
+
+void AbilityManagerClient::HandleDlpApp(Want &want)
+{
+#ifdef WITH_DLP
+    bool sandboxFlag = Security::DlpPermission::DlpFileKits::GetSandboxFlag(want);
+    want.SetParam(DLP_PARAMS_SANDBOX, sandboxFlag);
+#endif // WITH_DLP
 }
 }  // namespace AAFwk
 }  // namespace OHOS

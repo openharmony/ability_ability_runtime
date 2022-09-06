@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_PROXY_H
-#define OHOS_AAFWK_ABILITY_MANAGER_PROXY_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_PROXY_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_PROXY_H
 
 #include "ability_manager_interface.h"
 #include "hilog_wrapper.h"
@@ -187,6 +187,13 @@ public:
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    virtual int ConnectAbilityCommon(
+        const Want &want,
+        const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::ExtensionAbilityType extensionType,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
@@ -364,11 +371,6 @@ public:
 
     virtual int GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info) override;
 
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    virtual void GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo) override;
     virtual int GetAppMemorySize() override;
 
     virtual bool IsRamConstrainedDevice() override;
@@ -420,13 +422,13 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) override;
 
     /**
-     * Release Ability, disconnect session with common ability.
+     * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param element, the element of target service.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ReleaseAbility(
+    virtual int ReleaseCall(
         const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) override;
 
     virtual int StartUser(int userId) override;
@@ -583,6 +585,12 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int DumpAbilityInfoDone(std::vector<std::string> &infos, const sptr<IRemoteObject> &callerToken) override;
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     */
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
 
 private:
     template <typename T>

@@ -76,6 +76,7 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[FORCE_TIMEOUT] = &AbilityManagerStub::ForceTimeoutForTestInner;
 #endif
     requestFuncMap_[FREE_INSTALL_ABILITY_FROM_REMOTE] = &AbilityManagerStub::FreeInstallAbilityFromRemoteInner;
+    requestFuncMap_[CONNECT_ABILITY_WITH_TYPE] = &AbilityManagerStub::ConnectAbilityWithTypeInner;
 }
 
 void AbilityManagerStub::SecondStepInit()
@@ -92,7 +93,6 @@ void AbilityManagerStub::SecondStepInit()
     requestFuncMap_[UNREGISTER_CANCEL_LISTENER] = &AbilityManagerStub::UnregisterCancelListenerInner;
     requestFuncMap_[GET_PENDING_REQUEST_WANT] = &AbilityManagerStub::GetPendingRequestWantInner;
     requestFuncMap_[GET_PENDING_WANT_SENDER_INFO] = &AbilityManagerStub::GetPendingRequestWantInner;
-    requestFuncMap_[GET_SYSTEM_MEMORY_ATTR] = &AbilityManagerStub::GetSystemMemoryAttrInner;
     requestFuncMap_[GET_APP_MEMORY_SIZE] = &AbilityManagerStub::GetAppMemorySizeInner;
     requestFuncMap_[IS_RAM_CONSTRAINED_DEVICE] = &AbilityManagerStub::IsRamConstrainedDeviceInner;
     requestFuncMap_[CLEAR_UP_APPLICATION_DATA] = &AbilityManagerStub::ClearUpApplicationDataInner;
@@ -107,7 +107,7 @@ void AbilityManagerStub::SecondStepInit()
     requestFuncMap_[MOVE_MISSION_TO_FRONT] = &AbilityManagerStub::MoveMissionToFrontInner;
     requestFuncMap_[MOVE_MISSION_TO_FRONT_BY_OPTIONS] = &AbilityManagerStub::MoveMissionToFrontByOptionsInner;
     requestFuncMap_[START_CALL_ABILITY] = &AbilityManagerStub::StartAbilityByCallInner;
-    requestFuncMap_[RELEASE_CALL_ABILITY] = &AbilityManagerStub::ReleaseInner;
+    requestFuncMap_[RELEASE_CALL_ABILITY] = &AbilityManagerStub::ReleaseCallInner;
     requestFuncMap_[START_USER] = &AbilityManagerStub::StartUserInner;
     requestFuncMap_[STOP_USER] = &AbilityManagerStub::StopUserInner;
     requestFuncMap_[GET_ABILITY_RUNNING_INFO] = &AbilityManagerStub::GetAbilityRunningInfosInner;
@@ -138,6 +138,9 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[DUMP_ABILITY_INFO_DONE] = &AbilityManagerStub::DumpAbilityInfoDoneInner;
     requestFuncMap_[START_EXTENSION_ABILITY] = &AbilityManagerStub::StartExtensionAbilityInner;
     requestFuncMap_[STOP_EXTENSION_ABILITY] = &AbilityManagerStub::StopExtensionAbilityInner;
+    requestFuncMap_[UPDATE_MISSION_SNAPSHOT] = &AbilityManagerStub::UpdateMissionSnapShotInner;
+    requestFuncMap_[REGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::RegisterConnectionObserverInner;
+    requestFuncMap_[UNREGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::UnregisterConnectionObserverInner;
 #ifdef SUPPORT_GRAPHICS
     requestFuncMap_[SET_MISSION_LABEL] = &AbilityManagerStub::SetMissionLabelInner;
     requestFuncMap_[SET_MISSION_ICON] = &AbilityManagerStub::SetMissionIconInner;
@@ -450,9 +453,36 @@ int AbilityManagerStub::ConnectAbilityInner(MessageParcel &data, MessageParcel &
         token = data.ReadRemoteObject();
     }
     int32_t userId = data.ReadInt32();
-    int32_t result = ConnectAbility(*want, callback, token, userId);
+    int32_t result = ConnectAbilityCommon(*want, callback, token, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
     reply.WriteInt32(result);
-    delete want;
+    if (want != nullptr) {
+        delete want;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, MessageParcel &reply)
+{
+    Want *want = data.ReadParcelable<Want>();
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IAbilityConnection> callback = nullptr;
+    sptr<IRemoteObject> token = nullptr;
+    if (data.ReadBool()) {
+        callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
+    }
+    if (data.ReadBool()) {
+        token = data.ReadRemoteObject();
+    }
+    int32_t userId = data.ReadInt32();
+    AppExecFwk::ExtensionAbilityType extensionType = static_cast<AppExecFwk::ExtensionAbilityType>(data.ReadInt32());
+    int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId);
+    reply.WriteInt32(result);
+    if (want != nullptr) {
+        delete want;
+    }
     return NO_ERROR;
 }
 
@@ -749,14 +779,6 @@ int AbilityManagerStub::GetWantSenderInfoInner(MessageParcel &data, MessageParce
     return NO_ERROR;
 }
 
-int AbilityManagerStub::GetSystemMemoryAttrInner(MessageParcel &data, MessageParcel &reply)
-{
-    AppExecFwk::SystemMemoryAttr memoryInfo;
-    GetSystemMemoryAttr(memoryInfo);
-    reply.WriteParcelable(&memoryInfo);
-    return NO_ERROR;
-}
-
 int AbilityManagerStub::GetAppMemorySizeInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t result = GetAppMemorySize();
@@ -1018,7 +1040,7 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     return NO_ERROR;
 }
 
-int AbilityManagerStub::ReleaseInner(MessageParcel &data, MessageParcel &reply)
+int AbilityManagerStub::ReleaseCallInner(MessageParcel &data, MessageParcel &reply)
 {
     auto callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
     if (callback == nullptr) {
@@ -1031,7 +1053,7 @@ int AbilityManagerStub::ReleaseInner(MessageParcel &data, MessageParcel &reply)
         HILOG_ERROR("callback stub receive element is nullptr");
         return ERR_INVALID_VALUE;
     }
-    int32_t result = ReleaseAbility(callback, *element);
+    int32_t result = ReleaseCall(callback, *element);
 
     HILOG_DEBUG("release call ability ret = %d", result);
 
@@ -1325,6 +1347,18 @@ int AbilityManagerStub::SendANRProcessIDInner(MessageParcel &data, MessageParcel
     return NO_ERROR;
 }
 
+int AbilityManagerStub::RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
+{
+    // should implement in child.
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
+{
+    // should implement in child
+    return NO_ERROR;
+}
+
 #ifdef ABILITY_COMMAND_FOR_TEST
 int AbilityManagerStub::ForceTimeoutForTestInner(MessageParcel &data, MessageParcel &reply)
 {
@@ -1406,6 +1440,41 @@ int AbilityManagerStub::DumpAbilityInfoDoneInner(MessageParcel &data, MessagePar
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
+}
+
+int AbilityManagerStub::UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        HILOG_ERROR("UpdateMissionSnapShot read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+    UpdateMissionSnapShot(token);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::RegisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AbilityRuntime::IConnectionObserver> observer = iface_cast<AbilityRuntime::IConnectionObserver>(
+        data.ReadRemoteObject());
+    if (!observer) {
+        HILOG_ERROR("RegisterConnectionObserverInner read observer failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    return RegisterObserver(observer);
+}
+
+int AbilityManagerStub::UnregisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AbilityRuntime::IConnectionObserver> observer = iface_cast<AbilityRuntime::IConnectionObserver>(
+        data.ReadRemoteObject());
+    if (!observer) {
+        HILOG_ERROR("UnregisterConnectionObserverInner read observer failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    return UnregisterObserver(observer);
 }
 
 #ifdef SUPPORT_GRAPHICS

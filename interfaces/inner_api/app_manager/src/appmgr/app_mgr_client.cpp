@@ -25,6 +25,7 @@
 #include "app_mgr_interface.h"
 #include "app_service_manager.h"
 #include "hilog_wrapper.h"
+#include "app_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -264,6 +265,22 @@ AppMgrResultCode AppMgrClient::KillApplicationByUid(const std::string &bundleNam
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
+AppMgrResultCode AppMgrClient::KillApplicationSelf()
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            int32_t result = amsService->KillApplicationSelf();
+            if (result == ERR_OK) {
+                return AppMgrResultCode::RESULT_OK;
+            }
+            return AppMgrResultCode::ERROR_KILL_APPLICATION;
+        }
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
 AppMgrResultCode AppMgrClient::ClearUpApplicationData(const std::string &bundleName)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
@@ -301,6 +318,17 @@ AppMgrResultCode AppMgrClient::GetProcessRunningInfosByUserId(std::vector<Runnin
         return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::NotifyMemoryLevel(MemoryLevel level)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+
+    if (service == nullptr) {
+        HILOG_ERROR("service is nullptr");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return AppMgrResultCode(service->NotifyMemoryLevel(level));
 }
 
 AppMgrResultCode AppMgrClient::GetConfiguration(Configuration& config)
@@ -356,21 +384,6 @@ void AppMgrClient::PrepareTerminate(const sptr<IRemoteObject> &token)
         return;
     }
     amsService->PrepareTerminate(token);
-}
-
-/**
- * Get system memory information.
- * @param SystemMemoryAttr, memory information.
- */
-void AppMgrClient::GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig)
-{
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        HILOG_ERROR("service is nullptr");
-        return;
-    }
-
-    service->GetSystemMemoryAttr(memoryInfo, strConfig);
 }
 
 void AppMgrClient::GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info)

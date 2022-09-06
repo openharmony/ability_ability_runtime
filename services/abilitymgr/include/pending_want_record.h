@@ -13,19 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_PENDING_WANT_RECORD_H
-#define OHOS_AAFWK_PENDING_WANT_RECORD_H
+#ifndef OHOS_ABILITY_RUNTIME_PENDING_WANT_RECORD_H
+#define OHOS_ABILITY_RUNTIME_PENDING_WANT_RECORD_H
 
 #include <list>
 #include <mutex>
 
 #include "iremote_object.h"
-#include "refbase.h"
-
-#include "ability_record.h"
-#include "want_sender_stub.h"
-#include "sender_info.h"
 #include "pending_want_key.h"
+#include "refbase.h"
+#include "sender_info.h"
+#include "want_sender_stub.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -65,4 +63,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_PENDING_WANT_RECORD_H
+#endif  // OHOS_ABILITY_RUNTIME_PENDING_WANT_RECORD_H
