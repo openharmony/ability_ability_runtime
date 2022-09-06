@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ABILITYRUNTIME_OHOS_JS_SERVICE_EXTENSION_H
-#define FOUNDATION_ABILITYRUNTIME_OHOS_JS_SERVICE_EXTENSION_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_H
+#define OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_H
 
 #include "configuration.h"
 #include "service_extension.h"
 
 class NativeReference;
 class NativeValue;
+class NativeObject;
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -84,6 +85,16 @@ public:
     virtual void OnDisconnect(const AAFwk::Want &want) override;
 
     /**
+     * @brief Called when all abilities connected to this Service extension are disconnected.
+     *
+     * You can override this function to implement your own processing logic.
+     * @param callbackInfo Indicates the lifecycle transaction callback information
+     * @param isAsyncCallback Indicates whether it is an asynchronous lifecycle callback
+     */
+    void OnDisconnect(const AAFwk::Want &want, AppExecFwk::AbilityTransactionCallbackInfo *callbackInfo,
+        bool &isAsyncCallback) override;
+
+    /**
      * @brief Called back when Service is started.
      * This method can be called only by Service. You can use the StartAbility(ohos.aafwk.content.Want) method to start
      * Service. Then the system calls back the current method to use the transferred want parameter to execute its own
@@ -124,7 +135,15 @@ public:
 private:
     NativeValue* CallObjectMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0);
 
+    void BindContext(NativeEngine& engine, NativeObject* obj);
+
     void GetSrcPath(std::string &srcPath);
+
+    NativeValue *CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
+
+    bool CheckPromise(NativeValue *result);
+
+    bool CallPromise(NativeValue *result, AppExecFwk::AbilityTransactionCallbackInfo *callbackInfo);
 
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
@@ -132,4 +151,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // FOUNDATION_ABILITYRUNTIME_OHOS_JS_SERVICE_EXTENSION_H
+#endif  // OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_H

@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_JS_HAP_MODULE_INFO_UTILS_H
-#define ABILITY_RUNTIME_JS_HAP_MODULE_INFO_UTILS_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_HAP_MODULE_INFO_UTILS_H
+#define OHOS_ABILITY_RUNTIME_JS_HAP_MODULE_INFO_UTILS_H
 
 #include "hap_module_info.h"
 
 class NativeEngine;
 class NativeValue;
+class NativeObject;
 
 namespace OHOS {
 namespace AbilityRuntime {
-class JsRuntime;
-
 NativeValue* CreateJsHapModuleInfo(NativeEngine& engine, AppExecFwk::HapModuleInfo& hapModuleInfo);
+void SetProperty(NativeEngine &engine, NativeObject* &object, const std::vector<std::string> properties,
+    const std::string &proName);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // ABILITY_RUNTIME_JS_HAP_MODULE_INFO_UTILS_H
+#endif  // OHOS_ABILITY_RUNTIME_JS_HAP_MODULE_INFO_UTILS_H

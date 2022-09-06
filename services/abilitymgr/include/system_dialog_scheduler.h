@@ -12,12 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_AAFWK_SYSTEM_DIALOG_SCHEDULER_H
-#define OHOS_AAFWK_SYSTEM_DIALOG_SCHEDULER_H
+#ifndef OHOS_ABILITY_RUNTIME_SYSTEM_DIALOG_SCHEDULER_H
+#define OHOS_ABILITY_RUNTIME_SYSTEM_DIALOG_SCHEDULER_H
 
 #include <functional>
 
 #include "bundle_mgr_interface.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -38,6 +39,10 @@ struct DialogPosition {
     int32_t offsetY = 0;
     int32_t width = 0;
     int32_t height = 0;
+    int32_t window_width = 0;
+    int32_t window_height = 0;
+    int32_t window_offsetX = 0;
+    int32_t window_offsetY = 0;
     int32_t width_narrow = 0;
     int32_t height_narrow = 0;
     bool wideScreen = true;
@@ -53,22 +58,33 @@ struct DialogAppInfo {
  * @class SystemDialogScheduler
  * SystemDialogScheduler.
  */
-class SystemDialogScheduler {
+class SystemDialogScheduler : public DelayedSingleton<SystemDialogScheduler> {
 public:
     using DialogCallback = std::function<void(int32_t id, const std::string& event, const std::string& param)>;
     using Closure = std::function<void()>;
+    using SelectorClosure = std::function<void(const std::string& bundle, const std::string& abilityName)>;
 
-    explicit SystemDialogScheduler(const std::string &deviceType);
+    explicit SystemDialogScheduler() = default;
     virtual ~SystemDialogScheduler() = default;
 
-    int32_t ShowANRDialog(const std::string &appName, const Closure &callBack);
+    int32_t ShowANRDialog(const std::string &appName, const Closure &anrCallBack);
+    int32_t ShowSelectorDialog(const std::vector<DialogAppInfo> &infos, const SelectorClosure &startAbilityCallBack);
+    int32_t ShowTipsDialog();
 
     void GetAppNameFromResource(int32_t labelId,
         const std::string &bundleName, int32_t userId, std::string &appName);
+    void SetDeviceType(const std::string &deviceType)
+    {
+        deviceType_ = deviceType;
+    }
 
 private:
+    const std::string GetAnrParams(const DialogPosition position, const std::string &appName) const;
+    const std::string GetSelectorParams(const std::vector<DialogAppInfo> &infos) const;
+    
     void InitDialogPosition(DialogType type, DialogPosition &position) const;
     void GetDialogPositionAndSize(DialogType type, DialogPosition &position, int lineNums = 0) const;
+    void DialogPositionAdaptive(DialogPosition &position, int lineNums) const;
     
     void ScheduleShowDialog(const std::string &name, const DialogPosition &position,
         const std::string &params, DialogCallback callback) const;
@@ -81,4 +97,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_SYSTEM_DIALOG_SCHEDULER_H
+#endif  // OHOS_ABILITY_RUNTIME_SYSTEM_DIALOG_SCHEDULER_H

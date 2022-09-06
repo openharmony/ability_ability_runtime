@@ -217,7 +217,9 @@ std::shared_ptr<AbilityRecord> MissionList::GetAbilityRecordByName(const AppExec
             const AppExecFwk::AbilityInfo &abilityInfo = mission->GetAbilityRecord()->GetAbilityInfo();
             AppExecFwk::ElementName localElement(abilityInfo.deviceId, abilityInfo.bundleName,
                 abilityInfo.name, abilityInfo.moduleName);
-            if (localElement == element) {
+            AppExecFwk::ElementName localElementNoModuleName(abilityInfo.deviceId,
+                abilityInfo.bundleName, abilityInfo.name); // note: moduleName of input param element maybe empty
+            if (localElement == element || localElementNoModuleName == element) {
                 return mission->GetAbilityRecord();
             }
         }
@@ -362,5 +364,25 @@ int MissionList::BlockAbilityByRecordId(int32_t abilityRecordId)
     return ret;
 }
 #endif
+
+int32_t MissionList::GetMissionCountByUid(int32_t targetUid) const
+{
+    int32_t count = 0;
+    for (const auto& mission : missions_) {
+        if (!mission) {
+            continue;
+        }
+
+        auto abilityRecord = mission->GetAbilityRecord();
+        if (!abilityRecord) {
+            continue;
+        }
+
+        if (abilityRecord->GetUid() == targetUid) {
+            count++;
+        }
+    }
+    return count;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

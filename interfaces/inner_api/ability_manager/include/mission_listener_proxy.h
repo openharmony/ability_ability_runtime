@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_MISSION_LISTENER_PROXY_H
-#define FOUNDATION_APPEXECFWK_OHOS_MISSION_LISTENER_PROXY_H
+#ifndef OHOS_ABILITY_RUNTIME_MISSION_LISTENER_PROXY_H
+#define OHOS_ABILITY_RUNTIME_MISSION_LISTENER_PROXY_H
 
 #include <string>
 #include "iremote_proxy.h"
@@ -68,6 +68,13 @@ public:
     virtual void OnMissionIconUpdated(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
 #endif
 
+    /**
+     * @brief When a mission is closed, AbilityMs notifies the listener of the mission id
+     *
+     * @param missionId, mission Id.
+     */
+    virtual void OnMissionClosed(int32_t missionId) override;
+
 private:
     void SendRequestCommon(int32_t missionId, IMissionListener::MissionListenerCmd cmd);
 
@@ -76,4 +83,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_MISSION_LISTENER_PROXY_H
+#endif  // OHOS_ABILITY_RUNTIME_MISSION_LISTENER_PROXY_H

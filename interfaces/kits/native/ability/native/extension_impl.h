@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ABILITYRUNTIME_OHOS_EXTENSION_IMPL_H
-#define FOUNDATION_ABILITYRUNTIME_OHOS_EXTENSION_IMPL_H
+#ifndef OHOS_ABILITY_RUNTIME_EXTENSION_IMPL_H
+#define OHOS_ABILITY_RUNTIME_EXTENSION_IMPL_H
 
 #include "extension.h"
 #include "lifecycle_state_info.h"
@@ -70,6 +70,13 @@ public:
     void ScheduleUpdateConfiguration(const AppExecFwk::Configuration &config);
 
     /**
+     * @brief Notify current memory level.
+     *
+     * @param level Current memory level.
+     */
+    void NotifyMemoryLevel(int level);
+
+    /**
      * @brief Connect the Extension. and Calling information back to Extension.
      *
      * @param want The Want object to connect to.
@@ -83,6 +90,19 @@ public:
      * @param want The Want object to disconnect to.
      */
     void DisconnectExtension(const Want &want);
+
+    /**
+     * @brief Disconnects the connected object.
+     *
+     * @param want The Want object to disconnect to.
+     * @param isAsyncCallback Indicates whether it is an asynchronous lifecycle callback
+     */
+    void DisconnectExtension(const Want &want, bool &isAsyncCallback);
+
+    /**
+     * @brief The callback of disconnect.
+     */
+    void DisconnectExtensionCallback();
 
     /**
      * @brief Command the Extension. and Calling information back to Extension.
@@ -119,4 +139,4 @@ protected:
 };
 }
 }
-#endif  // FOUNDATION_ABILITYRUNTIME_OHOS_EXTENSION_IMPL_H
+#endif  // OHOS_ABILITY_RUNTIME_EXTENSION_IMPL_H

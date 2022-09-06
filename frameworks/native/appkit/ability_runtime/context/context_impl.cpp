@@ -25,9 +25,7 @@
 #ifdef SUPPORT_GRAPHICS
 #include "locale_config.h"
 #endif
-#ifdef OS_ACCOUNT_PART_ENABLED
-#include "os_account_manager.h"
-#endif // OS_ACCOUNT_PART_ENABLED
+#include "os_account_manager_wrapper.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 #include "bundle_mgr_proxy.h"
@@ -54,9 +52,6 @@ const std::string ContextImpl::CONTEXT_TEMP("/temp");
 const std::string ContextImpl::CONTEXT_FILES("/files");
 const std::string ContextImpl::CONTEXT_HAPS("/haps");
 const std::string ContextImpl::CONTEXT_ELS[] = {"el1", "el2"};
-#ifndef OS_ACCOUNT_PART_ENABLED
-const int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif // OS_ACCOUNT_PART_ENABLED
 
 std::string ContextImpl::GetBundleName() const
 {
@@ -199,23 +194,29 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
     }
     HILOG_DEBUG("ContextImpl::CreateModuleContext length: %{public}zu, bundleName: %{public}s",
         (size_t)bundleName.length(), bundleName.c_str());
-    bundleMgr->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
+    bundleMgr->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, accountId);
 
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
         HILOG_ERROR("ContextImpl::CreateModuleContext GetBundleInfo is error");
         return nullptr;
     }
 
+    std::vector<std::string> moduleResPaths;
+    for (auto &info : bundleInfo.hapModuleInfos) {
+        if (info.moduleName == moduleName) {
+            moduleResPaths.emplace_back(info.resourcePath);
+            break;
+        }
+    }
+
+    if (moduleResPaths.empty()) {
+        HILOG_ERROR("ContextImpl::CreateModuleContext hapModuleInfos is error.");
+        return nullptr;
+    }
+
+    bundleInfo.moduleResPaths.swap(moduleResPaths);
     std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
-
-    std::string prefix = ABS_CODE_PATH + FILE_SEPARATOR + bundleName + FILE_SEPARATOR + moduleName + FILE_SEPARATOR;
-    bundleInfo.moduleResPaths.erase(
-        std::remove_if(bundleInfo.moduleResPaths.begin(), bundleInfo.moduleResPaths.end(), [&prefix](std::string path) {
-            return path.compare(0, prefix.size(), prefix) != 0;
-        }),
-        bundleInfo.moduleResPaths.end());
     InitResourceManager(bundleInfo, appContext, GetBundleName() == bundleName);
-
     appContext->SetApplicationInfo(std::make_shared<AppExecFwk::ApplicationInfo>(bundleInfo.applicationInfo));
     return appContext;
 }
@@ -259,28 +260,28 @@ std::string ContextImpl::GetBaseDir() const
 int ContextImpl::GetCurrentAccountId() const
 {
     int userId = 0;
-#ifdef OS_ACCOUNT_PART_ENABLED
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromProcess(userId);
-#else // OS_ACCOUNT_PART_ENABLED
-    userId = DEFAULT_OS_ACCOUNT_ID;
-    HILOG_DEBUG("ContextImpl::GetCurrentAccountId do not have os account part, use default id.");
-#endif // OS_ACCOUNT_PART_ENABLED
+    auto instance = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance();
+    if (instance == nullptr) {
+        HILOG_ERROR("Failed to get OsAccountManager instance.");
+        return userId;
+    }
+    instance->GetOsAccountLocalIdFromProcess(userId);
     return userId;
 }
 
 int ContextImpl::GetCurrentActiveAccountId() const
 {
     std::vector<int> accountIds;
-#ifdef OS_ACCOUNT_PART_ENABLED
-    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(accountIds);
+    auto instance = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance();
+    if (instance == nullptr) {
+        HILOG_ERROR("Failed to get OsAccountManager instance.");
+        return 0;
+    }
+    ErrCode ret = instance->QueryActiveOsAccountIds(accountIds);
     if (ret != ERR_OK) {
         HILOG_ERROR("ContextImpl::GetCurrentActiveAccountId error.");
         return 0;
     }
-#else // OS_ACCOUNT_PART_ENABLED
-    accountIds.push_back(DEFAULT_OS_ACCOUNT_ID);
-    HILOG_DEBUG("ContextImpl::GetCurrentActiveAccountId do not have os account part, use default id.");
-#endif // OS_ACCOUNT_PART_ENABLED
 
     if (accountIds.size() == 0) {
         HILOG_ERROR("ContextImpl::GetCurrentActiveAccountId error, no accounts.");
@@ -345,10 +346,9 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         return;
     }
 
-    HILOG_DEBUG(
-        "ContextImpl::InitResourceManager moduleResPaths count: %{public}zu", bundleInfo.moduleResPaths.size());
+    HILOG_DEBUG("ContextImpl::InitResourceManager moduleResPaths count: %{public}zu", bundleInfo.moduleResPaths.size());
     std::vector<std::string> moduleResPaths;
-    std::string inner(ABS_CODE_PATH + FILE_SEPARATOR + GetBundleName());
+    std::string inner(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + GetBundleName());
     std::string outer(ABS_CODE_PATH);
     for (auto item : bundleInfo.moduleResPaths) {
         if (item.empty()) {
@@ -372,6 +372,10 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (resConfig == nullptr) {
+        HILOG_ERROR("ContextImpl::InitResourceManager create ResConfig failed");
+        return;
+    }
 #ifdef SUPPORT_GRAPHICS
     UErrorCode status = U_ZERO_ERROR;
     icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -392,9 +396,12 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
 sptr<AppExecFwk::IBundleMgr> ContextImpl::GetBundleManager() const
 {
     HILOG_DEBUG("ContextImpl::GetBundleManager");
-    auto bundleObj =
-        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(
-            BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    auto instance = OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
+    if (instance == nullptr) {
+        HILOG_ERROR("failed to get SysMrgClient instance");
+        return nullptr;
+    }
+    auto bundleObj = instance->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleObj == nullptr) {
         HILOG_ERROR("failed to get bundle manager service");
         return nullptr;
@@ -515,7 +522,7 @@ sptr<IRemoteObject> ContextImpl::GetToken()
 
 void ContextImpl::CreateDirIfNotExist(const std::string& dirPath) const
 {
-    HILOG_INFO("createDir: create directory if not exists.");
+    HILOG_DEBUG("createDir: create directory if not exists.");
     if (!OHOS::HiviewDFX::FileUtil::FileExists(dirPath)) {
         bool createDir = OHOS::HiviewDFX::FileUtil::ForceCreateDirectory(dirPath);
         if (!createDir) {

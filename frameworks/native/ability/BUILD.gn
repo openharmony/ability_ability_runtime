@@ -12,15 +12,15 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//foundation/ability/ability_runtime/aafwk.gni")
+import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("ability_context_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "${aafwk_path}/interfaces/kits/native/appkit/ability_runtime/context",
-    "${aafwk_path}/interfaces/kits/native/ability/ability_runtime",
-    "${aafwk_path}/interfaces/kits/native/ability/ability_runtime/context",
-    "${aafwk_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime/context",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
   ]
 
   cflags = []
@@ -38,6 +38,7 @@ ohos_shared_library("ability_context_native") {
   sources = [
     "ability_runtime/ability_connection.cpp",
     "ability_runtime/ability_context_impl.cpp",
+    "ability_runtime/authorization_result.cpp",
     "ability_runtime/connection_manager.cpp",
     "ability_runtime/js_extension_context.cpp",
     "ability_runtime/local_call_container.cpp",
@@ -45,23 +46,23 @@ ohos_shared_library("ability_context_native") {
   ]
 
   deps = [
-    "${native_path}/appkit:app_context",
-    "${native_path}/appkit:app_context_utils",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:app_context_utils",
   ]
 
   external_deps = [
-    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_manager",
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtoken_callback_sdk",
+    "c_utils:utils",
     "faultloggerd:lib_dfx_dump_catcher",
     "hichecker_native:libhichecker",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
-    "utils_base:utils",
   ]
 
   subsystem_name = "ability"

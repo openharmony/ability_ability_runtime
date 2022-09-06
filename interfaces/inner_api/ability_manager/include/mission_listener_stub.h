@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_MISSION_LISTENER_STUB_H
-#define OHOS_AAFWK_MISSION_LISTENER_STUB_H
+#ifndef OHOS_ABILITY_RUNTIME_MISSION_LISTENER_STUB_H
+#define OHOS_ABILITY_RUNTIME_MISSION_LISTENER_STUB_H
 
 #include <iremote_object.h>
 #include <iremote_stub.h>
@@ -45,10 +45,11 @@ private:
     int OnMissionSnapshotChangedInner(MessageParcel &data, MessageParcel &reply);
     int OnMissionMovedToFrontInner(MessageParcel &data, MessageParcel &reply);
     int OnMissionIconUpdatedInner(MessageParcel &data, MessageParcel &reply);
+    int OnMissionClosedInner(MessageParcel &data, MessageParcel &reply);
 
     using MissionListenerFunc = int (MissionListenerStub::*)(MessageParcel &data, MessageParcel &reply);
     std::vector<MissionListenerFunc> vecMemberFunc_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_MISSION_LISTENER_STUB_H
+#endif  // OHOS_ABILITY_RUNTIME_MISSION_LISTENER_STUB_H

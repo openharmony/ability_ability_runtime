@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_NEW_ABILITY_IMPL_H
-#define FOUNDATION_APPEXECFWK_OHOS_NEW_ABILITY_IMPL_H
+#ifndef OHOS_ABILITY_RUNTIME_NEW_ABILITY_IMPL_H
+#define OHOS_ABILITY_RUNTIME_NEW_ABILITY_IMPL_H
 
 #include "ability_impl.h"
 
@@ -45,7 +45,13 @@ public:
      * @param targetState The life cycle state to switch to.
      *
      */
-    void HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState);
+    void HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState) override;
+
+    /**
+     * @brief The life cycle callback of NewAbility.
+     * @param state The life cycle state to switch to.
+     */
+    void AbilityTransactionCallback(const AbilityLifeCycleState &state) override;
 
     /**
      * @brief Handling the life cycle switching of NewAbility in switch.
@@ -60,4 +66,4 @@ public:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_NEW_ABILITY_IMPL_H
+#endif  // OHOS_ABILITY_RUNTIME_NEW_ABILITY_IMPL_H

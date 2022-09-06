@@ -15,6 +15,7 @@
 
 #include "permission_verification.h"
 
+#include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
@@ -22,8 +23,10 @@
 
 namespace OHOS {
 namespace AAFwk {
+const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
+const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const std::string DMS_PROCESS_NAME = "distributedsched";
-bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName)
+bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
 {
     HILOG_DEBUG("VerifyCallingPermission permission %{public}s", permissionName.c_str());
     auto callerToken = GetCallingTokenID();
@@ -36,9 +39,9 @@ bool PermissionVerification::VerifyCallingPermission(const std::string &permissi
     return true;
 }
 
-bool PermissionVerification::IsSACall()
+bool PermissionVerification::IsSACall() const
 {
-    HILOG_DEBUG("AmsMgrScheduler::IsSACall is called.");
+    HILOG_DEBUG("%{public}s: is called.", __func__);
     auto callerToken = GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
@@ -46,6 +49,19 @@ bool PermissionVerification::IsSACall()
         return true;
     }
     HILOG_DEBUG("Not SA called.");
+    return false;
+}
+
+bool PermissionVerification::IsShellCall() const
+{
+    HILOG_DEBUG("%{public}s: is called.", __func__);
+    auto callerToken = GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        HILOG_DEBUG("caller tokenType is shell, verify success");
+        return true;
+    }
+    HILOG_DEBUG("Not shell called.");
     return false;
 }
 
@@ -66,7 +82,7 @@ bool PermissionVerification::CheckSpecificSystemAbilityAccessPermission()
     return true;
 }
 
-bool PermissionVerification::VerifyRunningInfoPerm()
+bool PermissionVerification::VerifyRunningInfoPerm() const
 {
     if (IsSACall()) {
         HILOG_DEBUG("%{public}s: the interface called by SA.", __func__);
@@ -80,7 +96,7 @@ bool PermissionVerification::VerifyRunningInfoPerm()
     return false;
 }
 
-bool PermissionVerification::VerifyControllerPerm()
+bool PermissionVerification::VerifyControllerPerm() const
 {
     if (IsSACall()) {
         HILOG_DEBUG("%{public}s: the interface called by SA.", __func__);
@@ -94,7 +110,95 @@ bool PermissionVerification::VerifyControllerPerm()
     return false;
 }
 
-unsigned int PermissionVerification::GetCallingTokenID()
+bool PermissionVerification::VerifyDlpPermission(Want &want)
+{
+    if (want.GetIntParam(DLP_PARAMS_INDEX, 0) == 0) {
+        want.RemoveParam(DLP_PARAMS_SECURITY_FLAG);
+        return true;
+    }
+
+    if (IsSACall()) {
+        return true;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_ACCESS_DLP)) {
+        return true;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return false;
+}
+
+int PermissionVerification::VerifyAccountPermission()
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)) {
+        return ERR_OK;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return CHECK_PERMISSION_FAILED;
+}
+
+bool PermissionVerification::VerifyMissionPermission()
+{
+    if (IsSACall()) {
+        return true;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        HILOG_DEBUG("%{public}s: Permission verification succeeded.", __func__);
+        return true;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return false;
+}
+
+int PermissionVerification::VerifyAppStateObserverPermission()
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_RUNNING_STATE_OBSERVER)) {
+        HILOG_INFO("Permission verification succeeded.");
+        return ERR_OK;
+    }
+    HILOG_ERROR("Permission verification failed.");
+    return ERR_PERMISSION_DENIED;
+}
+
+int32_t PermissionVerification::VerifyUpdateConfigurationPerm()
+{
+    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_UPDATE_CONFIGURATION)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
+        return ERR_OK;
+    }
+
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
+    return ERR_PERMISSION_DENIED;
+}
+
+bool PermissionVerification::VerifyInstallBundlePermission()
+{
+    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_INSTALL_BUNDLE)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_INSTALL_BUNDLE);
+        return true;
+    }
+
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_INSTALL_BUNDLE);
+    return false;
+}
+
+bool PermissionVerification::VerifyGetBundleInfoPrivilegedPermission()
+{
+    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
+        return true;
+    }
+
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
+    return false;
+}
+
+unsigned int PermissionVerification::GetCallingTokenID() const
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerToken : %{private}u", callerToken);

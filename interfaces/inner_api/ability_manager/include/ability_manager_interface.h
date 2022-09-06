@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_INTERFACE_H
-#define OHOS_AAFWK_ABILITY_MANAGER_INTERFACE_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_INTERFACE_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_INTERFACE_H
 
 #include <vector>
 
@@ -48,11 +48,11 @@
 
 namespace OHOS {
 namespace AAFwk {
-const std::string ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
+constexpr const char* ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
 const int DEFAULT_INVAL_VALUE = -1;
 const int DELAY_LOCAL_FREE_INSTALL_TIMEOUT = 40000;
 const int DELAY_REMOTE_FREE_INSTALL_TIMEOUT = 30000 + DELAY_LOCAL_FREE_INSTALL_TIMEOUT;
-const std::string FROM_REMOTE_KEY = "freeInstallFromRemote";
+constexpr const char* FROM_REMOTE_KEY = "freeInstallFromRemote";
 /**
  * @class IAbilityManager
  * IAbilityManager interface is used to access ability manager services.
@@ -242,6 +242,26 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
     /**
+     * Connect ability common method.
+     *
+     * @param want, special want for service type's ability.
+     * @param connect, callback used to notify caller the result of connecting or disconnecting.
+     * @param callerToken, caller ability token.
+     * @param extensionType, type of the extension.
+     * @param userId, the service user ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int ConnectAbilityCommon(
+        const Want &want,
+        const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::ExtensionAbilityType extensionType,
+        int32_t userId = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
+
+    /**
      * DisconnectAbility, disconnect session with service ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
@@ -408,12 +428,6 @@ public:
 
     virtual int GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info) = 0;
 
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    virtual void GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo) = 0;
-
     virtual int ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId, int32_t missionId,
         const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams) = 0;
 
@@ -460,12 +474,12 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) = 0;
 
     /**
-     * Release Ability, disconnect session with common ability.
+     * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ReleaseAbility(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) = 0;
+    virtual int ReleaseCall(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) = 0;
 
     virtual int StartUser(int userId) = 0;
 
@@ -654,6 +668,12 @@ public:
     {
         return 0;
     }
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     */
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) = 0;
 
     enum {
         // ipc id 1-1000 for kit
@@ -879,8 +899,6 @@ public:
 
         GET_ABILITY_MISSION_SNAPSHOT,
 
-        GET_SYSTEM_MEMORY_ATTR,
-
         GET_APP_MEMORY_SIZE,
 
         IS_RAM_CONSTRAINED_DEVICE,
@@ -906,6 +924,8 @@ public:
 
         RELEASE_CALL_ABILITY,
 
+        CONNECT_ABILITY_WITH_TYPE,
+
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
 
@@ -926,6 +946,7 @@ public:
         STOP_SYNC_MISSIONS = 1113,
         REGISTER_SNAPSHOT_HANDLER = 1114,
         GET_MISSION_SNAPSHOT_INFO = 1115,
+        UPDATE_MISSION_SNAPSHOT = 1116,
 
         // ipc id for user test(1120)
         START_USER_TEST = 1120,
@@ -942,6 +963,8 @@ public:
 
         REGISTER_WMS_HANDLER = 2500,
         COMPLETEFIRSTFRAMEDRAWING = 2501,
+        REGISTER_CONNECTION_OBSERVER = 2502,
+        UNREGISTER_CONNECTION_OBSERVER = 2503,
 
         GET_TOP_ABILITY = 3000,
         FREE_INSTALL_ABILITY_FROM_REMOTE = 3001,
@@ -949,4 +972,4 @@ public:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_INTERFACE_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_INTERFACE_H

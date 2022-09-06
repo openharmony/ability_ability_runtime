@@ -45,7 +45,7 @@ void CallContainer::AddCallRecord(const sptr<IAbilityConnection> & connect,
     CHECK_POINTER(callRecord);
     CHECK_POINTER(connect);
     CHECK_POINTER(connect->AsObject());
-    
+
     auto iter = callRecordMap_.find(connect->AsObject());
     if (iter != callRecordMap_.end()) {
         RemoveConnectDeathRecipient(connect);
@@ -83,7 +83,7 @@ bool CallContainer::RemoveCallRecord(const sptr<IAbilityConnection> & connect)
     if (iter != callRecordMap_.end()) {
         auto callrecord = iter->second;
         if (callrecord) {
-            callrecord->SchedulerDisConnectDone();
+            callrecord->SchedulerDisconnectDone();
         }
         RemoveConnectDeathRecipient(connect);
         callRecordMap_.erase(callRecordMap_.find(connect->AsObject()));

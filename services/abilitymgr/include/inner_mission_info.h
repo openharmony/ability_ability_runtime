@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_AAFWK_SERVICES_ABILITYMGR_INNER_MISSION_INFO_H
-#define FOUNDATION_AAFWK_SERVICES_ABILITYMGR_INNER_MISSION_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_INNER_MISSION_INFO_H
+#define OHOS_ABILITY_RUNTIME_INNER_MISSION_INFO_H
 
 #include <string>
 
@@ -47,6 +47,7 @@ struct InnerMissionInfo {
     int32_t startMethod;
     std::string bundleName;
     int32_t uid;
+    bool isTemporary;
 
     std::string ToJsonStr() const;
     bool FromJsonStr(const std::string &jsonStr);
@@ -54,4 +55,4 @@ struct InnerMissionInfo {
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_AAFWK_SERVICES_ABILITYMGR_INNER_MISSION_INFO_H
+#endif  // OHOS_ABILITY_RUNTIME_INNER_MISSION_INFO_H

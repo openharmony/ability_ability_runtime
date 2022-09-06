@@ -13,25 +13,37 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_WINDOW_TRANSITION_INFO_H
-#define OHOS_AAFWK_WINDOW_TRANSITION_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_WINDOW_INFO_H
+#define OHOS_ABILITY_RUNTIME_WINDOW_INFO_H
 
 #ifdef SUPPORT_GRAPHICS
 #include <typeinfo>
 
+#include "ability_info.h"
 #include "iremote_object.h"
 #include "parcel.h"
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+    constexpr int32_t WINDOW_MODE_MAX_SIZE = 4;
+}
 struct AbilityTransitionInfo : public Parcelable {
     std::string bundleName_;
     std::string abilityName_;
-    uint32_t mode_ = 1;
+    uint32_t mode_ = 0;
+    std::vector<AppExecFwk::SupportWindowMode> windowModes_;
     sptr<IRemoteObject> abilityToken_ = nullptr;
     uint64_t displayId_ = 0;
     bool isShowWhenLocked_ = false;
     bool isRecent_ = false;
+    double maxWindowRatio_;
+    double minWindowRatio_;
+    uint32_t maxWindowWidth_;
+    uint32_t minWindowWidth_;
+    uint32_t maxWindowHeight_;
+    uint32_t minWindowHeight_;
+    int32_t missionId_;
 
     virtual bool Marshalling(Parcel& parcel) const override
     {
@@ -47,6 +59,42 @@ struct AbilityTransitionInfo : public Parcelable {
             return false;
         }
 
+        if (!WriteAbilityToken(parcel)) {
+            return false;
+        }
+
+        if (!(parcel.WriteUint64(displayId_) && parcel.WriteBool(isShowWhenLocked_) && parcel.WriteBool(isRecent_))) {
+            return false;
+        }
+
+        auto size = windowModes_.size();
+        if (size > 0 && size <= WINDOW_MODE_MAX_SIZE) {
+            if (!parcel.WriteUint32(static_cast<uint32_t>(size))) {
+                return false;
+            }
+            for (decltype(size) i = 0; i < size; i++) {
+                if (!parcel.WriteUint32(static_cast<uint32_t>(windowModes_[i]))) {
+                    return false;
+                }
+            }
+        } else {
+            if (!parcel.WriteUint32(0)) {
+                return false;
+            }
+        }
+
+        if (!WriteWindowInfo(parcel)) {
+            return false;
+        }
+
+        if (!parcel.WriteInt32(missionId_)) {
+            return false;
+        }
+        return true;
+    }
+
+    bool WriteAbilityToken(Parcel& parcel) const
+    {
         if (!abilityToken_) {
             if (!parcel.WriteBool(false)) {
                 return false;
@@ -60,19 +108,14 @@ struct AbilityTransitionInfo : public Parcelable {
             }
         }
 
-        if (!parcel.WriteUint64(displayId_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(isShowWhenLocked_)) {
-            return false;
-        }
-
-        if (!parcel.WriteBool(isRecent_)) {
-            return false;
-        }
-
         return true;
+    }
+
+    bool WriteWindowInfo(Parcel& parcel) const
+    {
+        return (parcel.WriteDouble(maxWindowRatio_) && parcel.WriteDouble(minWindowRatio_) &&
+            parcel.WriteUint32(maxWindowWidth_) && parcel.WriteUint32(minWindowWidth_) &&
+            parcel.WriteUint32(maxWindowHeight_) && parcel.WriteUint32(minWindowHeight_));
     }
 
     static AbilityTransitionInfo* Unmarshalling(Parcel& parcel)
@@ -87,10 +130,23 @@ struct AbilityTransitionInfo : public Parcelable {
         info->displayId_ = parcel.ReadUint64();
         info->isShowWhenLocked_ = parcel.ReadBool();
         info->isRecent_ = parcel.ReadBool();
+        auto size = parcel.ReadUint32();
+        if (size > 0 && size <= WINDOW_MODE_MAX_SIZE) {
+            for (decltype(size) i = 0; i < size; i++) {
+                info->windowModes_.push_back(static_cast<AppExecFwk::SupportWindowMode>(parcel.ReadUint32()));
+            }
+        }
+        info->maxWindowRatio_ = parcel.ReadDouble();
+        info->minWindowRatio_ = parcel.ReadDouble();
+        info->maxWindowWidth_ = parcel.ReadUint32();
+        info->minWindowWidth_ = parcel.ReadUint32();
+        info->maxWindowHeight_ = parcel.ReadUint32();
+        info->minWindowHeight_ = parcel.ReadUint32();
+        info->missionId_ = parcel.ReadInt32();
         return info;
     }
 };
 } // namespace AAFwk
 } // namespace OHOS
 #endif
-#endif // OHOS_AAFWK_WINDOW_TRANSITION_INFO_H
+#endif // OHOS_ABILITY_RUNTIME_WINDOW_INFO_H

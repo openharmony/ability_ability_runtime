@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_CONTEXT_DEAL_H
-#define FOUNDATION_APPEXECFWK_OHOS_CONTEXT_DEAL_H
+#ifndef OHOS_ABILITY_RUNTIME_CONTEXT_DEAL_H
+#define OHOS_ABILITY_RUNTIME_CONTEXT_DEAL_H
 
 #include "context.h"
 #include "profile.h"
@@ -404,15 +404,14 @@ public:
     /**
      * @brief Requests certain permissions from the system.
      * This method is called for permission request. This is an asynchronous method. When it is executed,
-     * the Ability.onRequestPermissionsFromUserResult(int, String[], int[]) method will be called back.
+     * the task will be called back.
      *
      * @param permissions Indicates the list of permissions to be requested. This parameter cannot be null.
      * @param permissionsState Indicates the list of permissions' state to be requested. This parameter cannot be null.
-     * @param requestCode Indicates the request code to be passed to the Ability.onRequestPermissionsFromUserResult(int,
-     * String[], int[]) callback method. This code cannot be a negative number.
+     * @param task The callback or promise fo js interface.
      */
     void RequestPermissionsFromUser(std::vector<std::string> &permissions, std::vector<int> &permissionsState,
-        int requestCode) override;
+        PermissionRequestTask &&task) override;
 
     /**
      * @brief Starts a new ability with special ability start setting.
@@ -655,7 +654,7 @@ private:
     bool IsCreateBySystemApp() const;
     int GetCurrentAccountId() const;
     void CreateDirIfNotExist(const std::string& dirPath) const;
-    
+
     std::shared_ptr<ProcessInfo> processInfo_ = nullptr;
     std::shared_ptr<ApplicationInfo> applicationInfo_ = nullptr;
     std::shared_ptr<AbilityInfo> abilityInfo_ = nullptr;
@@ -676,4 +675,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_CONTEXT_DEAL_H
+#endif  // OHOS_ABILITY_RUNTIME_CONTEXT_DEAL_H

@@ -34,6 +34,8 @@ AppSchedulerHost::AppSchedulerHost()
         &AppSchedulerHost::HandleScheduleLowMemory;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_SHRINK_MEMORY_APPLICATION_TRANSACTION)] =
         &AppSchedulerHost::HandleScheduleShrinkMemory;
+    memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_MEMORYLEVEL_APPLICATION_TRANSACTION)] =
+        &AppSchedulerHost::HandleScheduleMemoryLevel;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_LAUNCH_ABILITY_TRANSACTION)] =
         &AppSchedulerHost::HandleScheduleLaunchAbility;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_CLEAN_ABILITY_TRANSACTION)] =
@@ -50,6 +52,10 @@ AppSchedulerHost::AppSchedulerHost()
         &AppSchedulerHost::HandleScheduleAbilityStage;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_ACCEPT_WANT)] =
         &AppSchedulerHost::HandleScheduleAcceptWant;
+    memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NOTIFY_LOAD_REPAIR_PATCH)] =
+        &AppSchedulerHost::HandleNotifyLoadRepairPatch;
+    memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NOTIFY_HOT_RELOAD_PAGE)] =
+        &AppSchedulerHost::HandleNotifyHotReloadPage;
 }
 
 AppSchedulerHost::~AppSchedulerHost()
@@ -109,6 +115,13 @@ int32_t AppSchedulerHost::HandleScheduleShrinkMemory(MessageParcel &data, Messag
 {
     HITRACE_METER(HITRACE_TAG_APP);
     ScheduleShrinkMemory(data.ReadInt32());
+    return NO_ERROR;
+}
+
+int32_t AppSchedulerHost::HandleScheduleMemoryLevel(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    ScheduleMemoryLevel(data.ReadInt32());
     return NO_ERROR;
 }
 
@@ -214,6 +227,21 @@ int32_t AppSchedulerHost::HandleScheduleAcceptWant(MessageParcel &data, MessageP
     auto moduleName = data.ReadString();
     ScheduleAcceptWant(*want, moduleName);
     delete want;
+    return NO_ERROR;
+}
+
+int32_t AppSchedulerHost::HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::string bundleName = data.ReadString();
+    ScheduleNotifyLoadRepairPatch(bundleName);
+    return NO_ERROR;
+}
+
+int32_t AppSchedulerHost::HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    ScheduleNotifyHotReloadPage();
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

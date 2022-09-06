@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_STATE_DATA_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_STATE_DATA_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_STATE_DATA_H
+#define OHOS_ABILITY_RUNTIME_APP_STATE_DATA_H
 
 #include <sys/types.h>
 
@@ -50,7 +50,8 @@ struct AppStateData : public Parcelable {
     int32_t pid = -1;
     int32_t uid = 0;
     int32_t state = 0;
+    int32_t accessTokenId = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_STATE_DATA_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_STATE_DATA_H

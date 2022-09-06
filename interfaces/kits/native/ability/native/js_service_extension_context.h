@@ -13,22 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_JS_SERVICE_EXTENSION_CONTEXT_H
-#define ABILITY_RUNTIME_JS_SERVICE_EXTENSION_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_CONTEXT_H
 
 #include <memory>
 
 #include "ability_connect_callback.h"
 #include "service_extension_context.h"
 #include "event_handler.h"
-
-class NativeEngine;
-class NativeValue;
-class NativeReference;
+#include "native_engine/native_engine.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_ptr<ServiceExtensionContext> context);
+NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_ptr<ServiceExtensionContext> context,
+                                             DetachCallback detach, AttachCallback attach);
 
 class JSServiceExtensionConnection : public AbilityConnectCallback {
 public:
@@ -42,9 +40,11 @@ public:
     void HandleOnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode);
     void SetJsConnectionObject(NativeValue* jsConnectionObject);
     void CallJsFailed(int32_t errorCode);
+    void SetConnectionId(int64_t id);
 private:
     NativeEngine& engine_;
     std::unique_ptr<NativeReference> jsConnectionObject_ = nullptr;
+    int64_t connectionId_ = -1;
 };
 
 struct ConnecttionKey {
@@ -67,4 +67,4 @@ static int64_t serialNumber_ = 0;
 static std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // ABILITY_RUNTIME_JS_SERVICE_EXTENSION_CONTEXT_H
+#endif  // OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_CONTEXT_H

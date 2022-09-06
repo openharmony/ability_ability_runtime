@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_ABILITY_IMPL_H
-#define FOUNDATION_APPEXECFWK_OHOS_ABILITY_IMPL_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_IMPL_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_IMPL_H
 
 #include "ability.h"
 #include "iability_lifecycle_callback.h"
@@ -96,6 +96,12 @@ public:
 
     // Page Service Ability has different AbilityTransaction
     virtual void HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState);
+
+    /**
+     * @brief The life cycle callback.
+     * @param state The life cycle state to switch to.
+     */
+    virtual void AbilityTransactionCallback(const AbilityLifeCycleState &state);
 
     /**
      * @brief Send the result code and data to be returned by this Page ability to the caller.
@@ -311,6 +317,15 @@ public:
      */
     virtual void NotifyContinuationResult(int32_t result);
 
+    /**
+     * @brief Notify current memory level to ability.
+     *
+     * @param level Current memory level.
+     *
+     * @return
+     */
+    virtual void NotifyMemoryLevel(int32_t level);
+
     bool IsStageBasedModel() const;
 
 #ifdef SUPPORT_GRAPHICS
@@ -382,6 +397,19 @@ protected:
     void Stop();
 
     /**
+     * @brief Toggles the lifecycle status of Ability to AAFwk::ABILITY_STATE_INITIAL. And notifies the application
+     * that it belongs to of the lifecycle status.
+     * @param isAsyncCallback Indicates whether it is an asynchronous lifecycle callback
+     */
+    void Stop(bool &isAsyncCallback);
+
+    /**
+     * @brief Toggles the lifecycle status of Ability to AAFwk::ABILITY_STATE_INITIAL. And notifies the application
+     * that it belongs to of the lifecycle status.
+     */
+    void StopCallback();
+
+    /**
      * @brief Toggles the lifecycle status of Ability to AAFwk::ABILITY_STATE_ACTIVE. And notifies the application
      * that it belongs to of the lifecycle status.
      *
@@ -446,6 +474,9 @@ private:
     bool needSaveDate_ = false;
     PacMap restoreData_;
 
+private:
+    void AfterFocusedCommon(bool isFocused);
+
 #ifdef SUPPORT_GRAPHICS
 private:
 class WindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
@@ -458,6 +489,7 @@ public:
     void AfterFocused() override;
     void AfterUnfocused() override;
     void ForegroundFailed() override;
+    void ForegroundInvalidMode() override;
 private:
     sptr<IRemoteObject> token_ = nullptr;
     std::weak_ptr<AbilityImpl> owner_;
@@ -477,4 +509,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_ABILITY_IMPL_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_IMPL_H

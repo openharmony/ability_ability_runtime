@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_MISSION_INFO_MGR_H
-#define OHOS_AAFWK_MISSION_INFO_MGR_H
+#ifndef OHOS_ABILITY_RUNTIME_MISSION_INFO_MGR_H
+#define OHOS_ABILITY_RUNTIME_MISSION_INFO_MGR_H
 
 #include <list>
 #include <mutex>
@@ -149,7 +149,7 @@ public:
      * @param missionId Indicates this mission id.
      * @return Returns PixelMap of snapshot.
      */
-    sptr<Media::PixelMap> GetSnapshot(int32_t missionId) const;
+    std::shared_ptr<Media::PixelMap> GetSnapshot(int32_t missionId) const;
 #endif
 
     /**
@@ -179,6 +179,9 @@ private:
     bool LoadAllMissionInfo();
 
     void GetMatchedMission(const std::string &bundleName, int32_t uid, std::list<int32_t> &missions);
+#ifdef SUPPORT_GRAPHICS
+    void CreateWhitePixelMap(Snapshot &snapshot) const;
+#endif
 
 private:
     int32_t currentMissionId_ = MIN_MISSION_ID;
@@ -190,4 +193,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_MISSION_INFO_MGR_H
+#endif  // OHOS_ABILITY_RUNTIME_MISSION_INFO_MGR_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_H
 
 #include <list>
 #include <string>
@@ -134,6 +134,15 @@ public:
      */
     virtual int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId) override;
 
+    /**
+     * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify applications background the current memory level.
+     *
+     * @param level, current memory level.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t NotifyMemoryLevel(int32_t level) override;
+
     // the function about system
     /**
      * CheckPermission, call CheckPermission() through proxy object, check the permission.
@@ -158,12 +167,6 @@ public:
      * @return sptr<IAmsMgr>, return to AMS interface instance.
      */
     virtual sptr<IAmsMgr> GetAmsMgr() override;
-
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    virtual void GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig) override;
 
     /**
      * Notify that the ability stage has been updated
@@ -227,6 +230,12 @@ public:
     virtual int BlockAppService() override;
     #endif
 
+    bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
+
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName) override;
+
+    int32_t NotifyHotReloadPage(const std::string &bundleName) override;
+
 private:
     /**
      * Init, Initialize application services.
@@ -279,7 +288,8 @@ private:
      * @param observer, ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer) override;
+    virtual int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+        const std::vector<std::string> &bundleNameList = {}) override;
 
     /**
      * Unregister application or process state observer.
@@ -307,4 +317,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_H

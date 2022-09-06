@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_CONTEXT_H
-#define FOUNDATION_APPEXECFWK_OHOS_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_CONTEXT_H
 
 #include <memory>
 
@@ -35,6 +35,7 @@ class DataShareHelper;
 namespace AppExecFwk {
 using Want = OHOS::AAFwk::Want;
 using AbilityStartSetting = AAFwk::AbilityStartSetting;
+using PermissionRequestTask = std::function<void(const std::vector<std::string>&, const std::vector<int>&)>;
 // Request permissions for user
 #define OHOS_REQUEST_PERMISSION_BUNDLENAME "com.ohos.systemui"
 #define OHOS_REQUEST_PERMISSION_ABILITY_NAME "com.ohos.systemui.systemdialog.MainAbility"
@@ -55,7 +56,7 @@ using AbilityStartSetting = AAFwk::AbilityStartSetting;
 constexpr int INVALID_RESOURCE_VALUE = -1;  // GetColor() Failed return Value
 constexpr int DEFAULT_ACCOUNT_ID = -1;
 
-class DataAbilityHelper;
+class DataAbilityHelperImpl;
 class ContinuationConnector;
 class IAbilityManager;
 class EventRunner;
@@ -417,16 +418,14 @@ public:
     /**
      * @brief Requests certain permissions from the system.
      * This method is called for permission request. This is an asynchronous method. When it is executed,
-     * the Ability.onRequestPermissionsFromUserResult(int, String[], int[]) method will be called back.
+     * the task will be called back.
      *
      * @param permissions Indicates the list of permissions to be requested. This parameter cannot be null.
      * @param permissionsState Indicates the list of permissions' state to be requested. This parameter cannot be null.
-     * @param requestCode Indicates the request code to be passed to the Ability.onRequestPermissionsFromUserResult(int,
-     * String[], int[]) callback method. This code cannot be a negative number.
-     *
+     * @param task The callback or promise fo js interface.
      */
     virtual void RequestPermissionsFromUser(std::vector<std::string> &permissions, std::vector<int> &permissionsState,
-        int requestCode) = 0;
+        PermissionRequestTask &&task) = 0;
 
     /**
      * @brief Starts a new ability with special ability start setting.
@@ -606,7 +605,7 @@ public:
      */
     virtual bool PrintDrawnCompleted() = 0;
 
-    friend DataAbilityHelper;
+    friend DataAbilityHelperImpl;
     friend OHOS::DataShare::DataShareHelper;
     friend ContinuationConnector;
 
@@ -615,4 +614,4 @@ protected:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_CONTEXT_H
+#endif  // OHOS_ABILITY_RUNTIME_CONTEXT_H
