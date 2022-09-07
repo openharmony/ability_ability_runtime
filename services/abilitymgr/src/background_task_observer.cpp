@@ -54,6 +54,8 @@ void BackgroundTaskObserver::OnRemoteDied(const wptr<IRemoteObject> &object)
         }
         usleep(REPOLL_TIME_MICRO_SECONDS);
     }
+
+    std::lock_guard<std::mutex> lock(bgTaskMutex_);
     bgTaskUids_.clear();
     std::vector<std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>> continuousTasks;
     BackgroundTaskMgr::BackgroundTaskMgrHelper::GetContinuousTaskApps(continuousTasks);
