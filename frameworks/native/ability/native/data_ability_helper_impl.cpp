@@ -839,7 +839,7 @@ sptr<AAFwk::IAbilityScheduler> DataAbilityHelperImpl::GetDataAbilityProxy(const 
             AddDataAbilityDeathRecipient(dataAbilityProxy->AsObject());
         }
     }
-
+    ReportEventToSuspendManager(uri.ToString());
     return dataAbilityProxy;
 }
 
