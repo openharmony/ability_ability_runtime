@@ -814,7 +814,7 @@ std::vector<std::shared_ptr<DataAbilityResult>> DataAbilityHelperImpl::ExecuteBa
 void DataAbilityHelperImpl::ReportEventToSuspendManager(const std::string &uriString) const
 {
 #ifdef EFFICIENCY_MANAGER_ENABLE
-    OHOS::SuspendManager::AppInfo appInfo(-1, "", -1, uriString, "THAW_BY_START_NOT_PAGE_ABILITY");
+    OHOS::SuspendManager::AppInfo appInfo(-1, -1, uriString, "", "THAW_BY_START_NOT_PAGE_ABILITY");
     OHOS::SuspendManager::SuspendManagerClient::GetInstance().ThawOneAppByAppInfo(appInfo);
 #endif // EFFICIENCY_MANAGER_ENABLE
 
