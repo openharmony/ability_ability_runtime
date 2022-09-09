@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "native_engine/native_engine.h"
-
 #include "runtime.h"
 
 namespace OHOS {
@@ -63,7 +62,7 @@ public:
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
     void RemoveTask(const std::string& name);
     void DumpHeapSnapshot(bool isPrivate) override;
-    std::string BuildJsStackTrace() override;
+    bool BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames) override;
     void NotifyApplicationState(bool isBackground) override;
 
     bool RunSandboxScript(const std::string& path, const std::string& hapPath);
@@ -83,12 +82,13 @@ protected:
     bool isArkEngine_ = false;
     bool debugMode_ = false;
     bool preloaded_ = false;
+    bool isBundle_ = true;
     std::unique_ptr<NativeEngine> nativeEngine_;
     std::string codePath_;
     std::unique_ptr<NativeReference> methodRequireNapiRef_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::unordered_map<std::string, NativeReference*> modules_;
-    std::shared_ptr<RuntimeExtractor> runtimeExtractor_;
+    std::map<std::string, std::shared_ptr<RuntimeExtractor>> runtimeExtractorMap_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
