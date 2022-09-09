@@ -49,7 +49,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-const int32_t DEFAULT_UID = -1;
 using OHOS::AAFwk::Want;
 class AppMgrServiceInner : public std::enable_shared_from_this<AppMgrServiceInner> {
 public:
@@ -264,7 +263,7 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t NotifyMemoryLevel(int32_t level);
-    
+
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
         const sptr<IRemoteObject> &token,
         const sptr<IRemoteObject> &preToken,
@@ -335,7 +334,7 @@ public:
      *
      * @return all the ability information in the application record.
      */
-    const std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> &GetRecordMap() const;
+    std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> GetRecordMap() const;
 
     /**
      * GetAppRunningRecordByPid, Get process record by application pid.
@@ -455,7 +454,7 @@ public:
      */
     void LoadResidentProcess(const std::vector<BundleInfo> &infos);
 
-    void StartResidentProcess(const std::vector<BundleInfo> &infos,  int restartCount);
+    void StartResidentProcess(const std::vector<BundleInfo> &infos,  int restartCount, bool isEmptyKeepAliveApp);
 
     bool CheckRemoteClient();
 
@@ -526,9 +525,9 @@ public:
 
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status);
 
-    int VerifyProcessPermission(int uid = DEFAULT_UID);
+    int VerifyProcessPermission() const;
 
-    int VerifyAccountPermission(const std::string &permissionName, const int userId);
+    int VerifyAccountPermission(const std::string &permissionName, const int userId) const;
 
     void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
 
@@ -551,9 +550,17 @@ public:
      * @return ERR_OK, return back success，others fail.
      */
     int32_t KillProcessByPid(const pid_t pid) const;
+
+    bool GetAppRunningStateByBundleName(const std::string &bundleName);
+
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+
+    int32_t NotifyHotReloadPage(const std::string &bundleName);
+
 private:
 
-    void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount);
+    void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount,
+        bool isEmptyKeepAliveApp);
 
     void RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord);
 
@@ -723,6 +730,8 @@ private:
     void OnRenderRemoteDied(const wptr<IRemoteObject> &remote);
 
     void AddWatchParameter();
+
+    bool VerifyAPL() const;
 
     static void PointerDeviceEventCallback(const char *key, const char *value, void *context);
 

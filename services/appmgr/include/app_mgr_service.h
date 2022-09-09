@@ -142,7 +142,7 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t NotifyMemoryLevel(int32_t level) override;
-    
+
     // the function about system
     /**
      * CheckPermission, call CheckPermission() through proxy object, check the permission.
@@ -201,6 +201,14 @@ public:
     virtual int FinishUserTest(
         const std::string &msg, const int64_t &resultCode, const std::string &bundleName) override;
 
+    /**
+     * @brief Application hidumper.
+     * @param fd Indicates the fd.
+     * @param args Indicates the params.
+     * @return Returns the dump result.
+     */
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
+
     virtual void ScheduleAcceptWantDone(
         const int32_t recordId, const AAFwk::Want &want, const std::string &flag) override;
 
@@ -229,6 +237,12 @@ public:
      */
     virtual int BlockAppService() override;
     #endif
+
+    bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
+
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName) override;
+
+    int32_t NotifyHotReloadPage(const std::string &bundleName) override;
 
 private:
     /**
@@ -298,6 +312,9 @@ private:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetForegroundApplications(std::vector<AppStateData> &list) override;
+
+    void Dump(const std::vector<std::u16string>& args, std::string& result) const;
+    void ShowHelp(std::string& result) const;
 
 private:
     std::shared_ptr<AppMgrServiceInner> appMgrServiceInner_;

@@ -23,12 +23,10 @@
 
 namespace OHOS {
 namespace AAFwk {
-const std::string BLACK_ACTION_SEND_DATA = "ohos.want.action.sendData";
-const std::string BLACK_ACTION_SEND_MULTIPLE_DATA = "ohos.want.action.sendMultipleData";
+const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 
 const std::vector<std::string> ImplicitStartProcessor::blackList = {
-    std::vector<std::string>::value_type(BLACK_ACTION_SEND_DATA),
-    std::vector<std::string>::value_type(BLACK_ACTION_SEND_MULTIPLE_DATA)
+    std::vector<std::string>::value_type(BLACK_ACTION_SELECT_DATA),
 };
 
 bool ImplicitStartProcessor::IsImplicitStartAction(const Want &want)
@@ -70,7 +68,6 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         IPCSkeleton::SetCallingIdentity(oldIdentity);
 
         AAFwk::Want targetWant = request.want;
-        targetWant.SetAction("");
         targetWant.SetElementName(bundle, abilityName);
         auto callBack = [imp, targetWant, request, userId]() -> int32_t {
             return imp->ImplicitStartAbilityInner(targetWant, request, userId);

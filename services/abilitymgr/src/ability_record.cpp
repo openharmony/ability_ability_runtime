@@ -15,11 +15,9 @@
 
 #include "ability_record.h"
 
-#include <regex>
 #include <singleton.h>
 #include <vector>
 
-#include "ability_constants.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_scheduler_stub.h"
@@ -28,6 +26,7 @@
 #include "bundle_mgr_client.h"
 #include "connection_state_manager.h"
 #include "hitrace_meter.h"
+#include "image_source.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
@@ -231,17 +230,13 @@ bool AbilityRecord::CanRestartRootLauncher()
     return true;
 }
 
-void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
+void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Start to foreground ability, name is %{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
 
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, AbilityManagerService::FOREGROUND_TIMEOUT);
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
-    if (handler && task) {
-        handler->PostTask(task, "CancelStartingWindow", AbilityManagerService::FOREGROUND_TIMEOUT);
-    }
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
@@ -268,7 +263,10 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
     HILOG_DEBUG("ability record: %{public}s", element.c_str());
 
     if (isReady_) {
-        if (IsAbilityState(AbilityState::BACKGROUND)) {
+        if (IsAbilityState(AbilityState::FOREGROUND)) {
+            HILOG_DEBUG("Activate %{public}s", element.c_str());
+            ForegroundAbility(sceneFlag);
+        } else {
             // background to active state
             HILOG_DEBUG("MoveToForeground, %{public}s", element.c_str());
             lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
@@ -279,9 +277,6 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
                 uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
 #endif // EFFICIENCY_MANAGER_ENABLE
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
-        } else {
-            HILOG_DEBUG("Activate %{public}s", element.c_str());
-            ForegroundAbility(nullptr, sceneFlag);
         }
     } else {
         HILOG_INFO("To load ability.");
@@ -319,7 +314,10 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     HILOG_INFO("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
 
     if (isReady_) {
-        if (IsAbilityState(AbilityState::BACKGROUND)) {
+        if (IsAbilityState(AbilityState::FOREGROUND)) {
+            HILOG_DEBUG("Activate %{public}s", element.c_str());
+            ForegroundAbility(sceneFlag);
+        } else {
             // background to active state
             HILOG_DEBUG("MoveToForeground, %{public}s", element.c_str());
             lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
@@ -329,9 +327,6 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
             CancelStartingWindowHotTask();
 
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
-        } else {
-            HILOG_DEBUG("Activate %{public}s", element.c_str());
-            ForegroundAbility(nullptr, sceneFlag);
         }
     } else {
         HILOG_INFO("SUPPORT_GRAPHICS: to load ability.");
@@ -589,20 +584,8 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     const AppExecFwk::AbilityInfo &abilityInfo) const
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
-    std::string loadPath;
-    if (!abilityInfo.hapPath.empty()) {
-        loadPath = abilityInfo.hapPath;
-    } else {
-        loadPath = abilityInfo.resourcePath;
-    }
-
-    if (loadPath.empty()) {
-        HILOG_ERROR("CreateResourceManager get loadPath failed");
-    } else {
-        HILOG_DEBUG("CreateResourceManager loadPath: %{public}s", loadPath.c_str());
-        if (!resourceMgr->AddResource(loadPath.c_str())) {
-            HILOG_WARN("%{public}s AddResource failed.", __func__);
-        }
+    if (!resourceMgr->AddResource(abilityInfo.resourcePath.c_str())) {
+        HILOG_WARN("%{public}s AddResource failed.", __func__);
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -613,33 +596,50 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     return resourceMgr;
 }
 
-sptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
+std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const
 {
-    std::string iconPath;
-    auto iconPathErrval = resourceMgr->GetMediaById(windowIconId, iconPath);
-    if (iconPathErrval != OHOS::Global::Resource::RState::SUCCESS) {
-        HILOG_ERROR("GetMediaById iconPath failed");
+    if (resourceMgr == nullptr) {
+        HILOG_WARN("%{public}s resource manager does not exist.", __func__);
         return nullptr;
     }
-    HILOG_DEBUG("GetMediaById iconPath: %{private}s", iconPath.c_str());
+
+    std::string iconPath;
+    std::unique_ptr<uint8_t[]> iconOut;
+    size_t len;
+    Global::Resource::RState iconPathErrval;
+    if (!abilityInfo_.hapPath.empty()) {
+        iconPathErrval = resourceMgr->GetMediaDataById(windowIconId, len, iconOut);
+    } else {
+        iconPathErrval = resourceMgr->GetMediaById(windowIconId, iconPath);
+    }
+    if (iconPathErrval != Global::Resource::RState::SUCCESS) {
+        HILOG_ERROR("Get media id failed");
+        return nullptr;
+    }
+    HILOG_DEBUG("Get media id: %{private}d", windowIconId);
 
     uint32_t errorCode = 0;
     Media::SourceOptions opts;
-    auto imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
+    std::unique_ptr<Media::ImageSource> imageSource;
+    if (!abilityInfo_.hapPath.empty()) {
+        imageSource = Media::ImageSource::CreateImageSource(iconOut.get(), len, opts, errorCode);
+    } else {
+        imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
+    }
     if (errorCode != 0) {
-        HILOG_ERROR("Failed to create image source path %{private}s err %{public}d", iconPath.c_str(), errorCode);
+        HILOG_ERROR("Failed to create icon id %{private}d err %{public}d", windowIconId, errorCode);
         return nullptr;
     }
 
     Media::DecodeOptions decodeOpts;
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {
-        HILOG_ERROR("Failed to create pixelmap path %{private}s err %{public}d", iconPath.c_str(), errorCode);
+        HILOG_ERROR("Failed to create pixelmap id %{private}d err %{public}d", windowIconId, errorCode);
         return nullptr;
     }
     HILOG_DEBUG("%{public}s OUT.", __func__);
-    return sptr<Media::PixelMap>(pixelMapPtr.release());
+    return std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
 }
 
 sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(

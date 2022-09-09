@@ -17,6 +17,14 @@
 #define OHOS_ABILITY_RUNTIME_RUNTIME_H
 
 #include <string>
+#include <vector>
+
+struct JsFrames {
+    std::string functionName;
+    std::string fileName;
+    std::string pos;
+    uintptr_t *nativePointer = nullptr;
+};
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -38,6 +46,7 @@ public:
         std::shared_ptr<AppExecFwk::EventRunner> eventRunner;
         bool loadAce = true;
         bool preload = false;
+        bool isBundle = true;
     };
 
     static std::unique_ptr<Runtime> Create(const Options& options);
@@ -50,11 +59,13 @@ public:
     virtual Language GetLanguage() const = 0;
 
     virtual void StartDebugMode(bool needBreakPoint) = 0;
-    virtual std::string BuildJsStackTrace() = 0;
+    virtual bool BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames) = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) = 0;
     virtual void NotifyApplicationState(bool isBackground) = 0;
     virtual void PreloadSystemModule(const std::string& moduleName) = 0;
     virtual void FinishPreload() = 0;
+    virtual void LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) = 0;
+    virtual void NotifyHotReloadPage() = 0;
 
     Runtime(const Runtime&) = delete;
     Runtime(Runtime&&) = delete;
