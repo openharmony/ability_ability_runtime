@@ -26,11 +26,11 @@ namespace {
 const int32_t ERROR_USER_ID_U256 = 256;
 }
 using namespace OHOS::AAFwk;
-int BundleMgrProxy::QueryWantAbility(
-    const AAFwk::Want &__attribute__((unused)) want, std::vector<AbilityInfo> &__attribute__((unused)) abilityInfos)
-{
-    return 0;
-}
+// int BundleMgrProxy::QueryWantAbility(
+//     const AAFwk::Want &__attribute__((unused)) want, std::vector<AbilityInfo> &__attribute__((unused)) abilityInfos)
+// {
+//     return 0;
+// }
 
 bool BundleMgrProxy::QueryAbilityInfo(const AAFwk::Want &want, AbilityInfo &abilityInfo)
 {
@@ -48,16 +48,16 @@ bool BundleMgrProxy::QueryAbilityInfo(const AAFwk::Want &want, AbilityInfo &abil
     return true;
 }
 
-bool BundleMgrProxy::GetBundleInfo(
-    const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId)
-{
-    return true;
-}
+// bool BundleMgrProxy::GetBundleInfo(
+//     const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId)
+// {
+//     return true;
+// }
 
-bool BundleMgrProxy::QueryAbilityInfoByUri(const std::string &uri, AbilityInfo &abilityInfo)
-{
-    return false;
-}
+// bool BundleMgrProxy::QueryAbilityInfoByUri(const std::string &uri, AbilityInfo &abilityInfo)
+// {
+//     return false;
+// }
 
 bool BundleMgrProxy::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
@@ -70,10 +70,10 @@ bool BundleMgrProxy::GetApplicationInfo(
     return true;
 }
 
-int BundleMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
-{
-    return 0;
-}
+// int BundleMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+// {
+//     return 0;
+// }
 
 BundleMgrService::BundleMgrService()
 {
@@ -98,11 +98,11 @@ BundleMgrService::~BundleMgrService()
     GTEST_LOG_(INFO) << "~BundleMgrService()";
 }
 
-bool BundleMgrService::GetBundleInfo(
-    const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId)
-{
-    return true;
-}
+// bool BundleMgrService::GetBundleInfo(
+//     const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId)
+// {
+//     return true;
+// }
 
 bool BundleMgrService::QueryAbilityInfo(const AAFwk::Want &want, AbilityInfo &abilityInfo)
 {
@@ -160,10 +160,10 @@ bool BundleMgrService::QueryAbilityInfo(const Want &want, int32_t flags, int32_t
     return flag;
 }
 
-bool BundleMgrService::QueryAbilityInfoByUri(const std::string &uri, AbilityInfo &abilityInfo)
-{
-    return false;
-}
+// bool BundleMgrService::QueryAbilityInfoByUri(const std::string &uri, AbilityInfo &abilityInfo)
+// {
+//     return false;
+// }
 
 bool BundleMgrService::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
