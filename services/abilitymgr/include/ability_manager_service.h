@@ -1031,62 +1031,89 @@ private:
     int StartAppgallery(int requestCode, int32_t userId, std::string action);
 
     /**
-     * Check if Caller is allowed to start ServiceAbility(FA) or ServiceExtension(Stage) or DataShareExtension(Stage)
+     * Check if Caller is allowed to start ServiceAbility(FA) or ServiceExtension(Stage) or DataShareExtension(Stage).
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Service.
      */
     int CheckCallServicePermission(const AbilityRequest &abilityRequest);
 
     /**
      * Check if Caller is allowed to start DataAbility(FA)
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start DataAbility.
      */
     int CheckCallDataAbilityPermission(AbilityRequest &abilityRequest);
 
     /**
-     * Check if Caller is allowed to start ServiceExtension(Stage) or DataShareExtension(Stage)
+     * Check if Caller is allowed to start ServiceExtension(Stage) or DataShareExtension(Stage).
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start ServiceExtension.
      */
     int CheckCallServiceExtensionPermission(const AbilityRequest &abilityRequest);
 
     /**
-     * Check if Caller is allowed to start other Extension(Stage)
+     * Check if Caller is allowed to start other Extension(Stage).
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start OtherExtension.
      */
     int CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest);
 
     /**
-     * Check if Caller is allowed to start ServiceAbility(FA)
+     * Check if Caller is allowed to start ServiceAbility(FA).
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start ServiceAbility.
      */
     int CheckCallServiceAbilityPermission(const AbilityRequest &abilityRequest);
 
     /**
-     * Check if Caller is allowed to start PageAbility(FA) or Ability(Stage)
+     * Check if Caller is allowed to start PageAbility(FA) or Ability(Stage).
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Ability.
      */
     int CheckCallAbilityPermission(const AbilityRequest &abilityRequest);
 
     /**
-     * Check if Caller is allowed to start Ability(Stage) by call
+     * Check if Caller is allowed to start Ability(Stage) by call.
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Ability by call.
      */
     int CheckStartByCallPermission(const AbilityRequest &abilityRequest);
 
     /**
-     * Judge if CallerApp is in background state
+     * Judge if Caller-Application is in background state.
      *
+     * @param abilityRequest, abilityRequest.
+     * @param isBackgroundCall, Indicates the Caller-Application state.
+     *                          TRUE: The Caller-Application is not in focus and not in foreground state.
+     *                          FALSE: The Caller-Application is in focus or in foreground state.
+     * @return Returns ERR_OK on check success, others on check failure.
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall);
 
     /**
-     *  Temporary, use old rule to check permission
+     *  Temporary, use old rule to check permission.
      *
+     * @param abilityRequest, abilityRequest.
+     * @param isStartByCall, Indicates whether it is the StartAbilityByCall function call.
+     *                       TRUE: Is StartAbilityByCall function call.
+     *                       FALSE: Is other function call, such as StartAbility, ConnectAbility and so on.
+     * @return Returns ERR_OK on check success, others on check failure.
      */
     int CheckCallerPermissionOldRule(const AbilityRequest &abilityRequest, const bool isStartByCall = false);
 
     /**
-     *  Temporary, judge is use new rule to start ability
+     *  Temporary, judge is use new check-permission rule to start ability.
      *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns TRUE: Use new rule.
+     *                 FALSE: Use old rule.
      */
     bool IsUseNewStartUpRule(const AbilityRequest &abilityRequest);
 
@@ -1125,6 +1152,19 @@ private:
     std::multimap<std::string, std::string> timeoutMap_;
 
     static sptr<AbilityManagerService> instance_;
+
+    // Component StartUp rule switch
+    bool startUpNewRule_ = false;
+    /** It only takes effect when startUpNewRule_ is TRUE
+     *  TRUE: When Caller-Application is Launcher or SystemUI, use old rule.
+     *  FALSE: Apply new rule to all application
+     */
+    bool newRuleExceptLauncherSystemUI_ = true;
+    /** Indicates the criteria for judging whether the Caller-Application is in the background
+     *  TRUE: Determine the state by AAFwk::AppState::FOREGROUND.
+     *  FALSE: Determine the state by AppExecFwk::AppProcessState::APP_STATE_FOCUS.
+     */
+    bool backgroundJudgeFlag_ = true;
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;

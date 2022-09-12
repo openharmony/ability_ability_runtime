@@ -87,9 +87,12 @@ const std::string ARGS_USER_ID = "-u";
 const std::string ARGS_CLIENT = "-c";
 const std::string ILLEGAL_INFOMATION = "The arguments are illegal and you can enter '-h' for help.";
 
+constexpr int32_t NEW_RULE_VALUE_SIZE = 6;
 const std::string COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 const std::string NEW_RULES_EXCEPT_LAUNCHER_SYSTEMUI = "component.startup.newRules.except.LauncherSystemUI";
-constexpr int32_t NEW_RULE_VALUE_SIZE = 6;
+const std::string BACKGROUND_JUDGE_FLAG = "component.startup.backgroundJudge.flag";
+const std::string BUNDLE_NAME_LAUNCHER = "com.ohos.launcher";
+const std::string BUNDLE_NAME_SYSTEMUI = "com.ohos.systemui";
 } // namespace
 
 using namespace std::chrono;
@@ -284,6 +287,10 @@ bool AbilityManagerService::Init()
     SubscribeBackgroundTask();
 
     DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
+
+    startUpNewRule_ = CheckNewRuleSwitchState(COMPONENT_STARTUP_NEW_RULES);
+    newRuleExceptLauncherSystemUI_ = CheckNewRuleSwitchState(NEW_RULES_EXCEPT_LAUNCHER_SYSTEMUI);
+    backgroundJudgeFlag_ = CheckNewRuleSwitchState(BACKGROUND_JUDGE_FLAG);
 
     HILOG_INFO("Init success.");
     return true;
@@ -5064,6 +5071,15 @@ int AbilityManagerService::CheckCallDataAbilityPermission(AbilityRequest &abilit
     HILOG_DEBUG("%{public}s begin", __func__);
     abilityRequest.appInfo = abilityRequest.abilityInfo.applicationInfo;
     abilityRequest.uid = abilityRequest.appInfo.uid;
+    if (abilityRequest.appInfo.name.empty() || abilityRequest.appInfo.bundleName.empty()) {
+        HILOG_ERROR("Invalid app info for data ability acquiring.");
+        return ERR_INVALID_VALUE;
+    }
+    if (abilityRequest.abilityInfo.type != AppExecFwk::AbilityType::DATA) {
+        HILOG_ERROR("BMS query result is not a data ability.");
+        return ERR_INVALID_VALUE;
+    }
+
     if (!IsUseNewStartUpRule(abilityRequest)) {
         return CheckCallerPermissionOldRule(abilityRequest);
     }
@@ -5075,15 +5091,6 @@ int AbilityManagerService::CheckCallDataAbilityPermission(AbilityRequest &abilit
     if (result != ERR_OK) {
         HILOG_ERROR("Do not have permission to start DataAbility");
         return result;
-    }
-
-    if (abilityRequest.appInfo.name.empty() || abilityRequest.appInfo.bundleName.empty()) {
-        HILOG_ERROR("Invalid app info for data ability acquiring.");
-        return ERR_INVALID_VALUE;
-    }
-    if (abilityRequest.abilityInfo.type != AppExecFwk::AbilityType::DATA) {
-        HILOG_ERROR("BMS query result is not a data ability.");
-        return ERR_INVALID_VALUE;
     }
 
     return ERR_OK;
@@ -5178,6 +5185,15 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
 int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abilityRequest)
 {
     HILOG_DEBUG("%{public}s begin", __func__);
+    // check whether the target ability is singleton mode and page type.
+    if (abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
+        abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON) {
+        HILOG_DEBUG("Called ability is common ability and singleton.");
+    } else {
+        HILOG_ERROR("Called ability is not common ability or singleton.");
+        return RESOLVE_CALL_ABILITY_TYPE_ERR;
+    }
+
     if (!IsUseNewStartUpRule(abilityRequest)) {
         return CheckCallerPermissionOldRule(abilityRequest, true);
     }
@@ -5193,16 +5209,8 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
         HILOG_ERROR("Do not have permission to StartAbilityByCall.");
         return RESOLVE_CALL_NO_PERMISSIONS;
     }
-
     HILOG_DEBUG("The caller has permission to resolve the call proxy of common ability.");
-    // check whether the target ability is singleton mode and page type.
-    if (abilityRequest.abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
-        abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON) {
-        HILOG_DEBUG("Called ability is common ability and singleton.");
-    } else {
-        HILOG_ERROR("Called ability is not common ability or singleton.");
-        return RESOLVE_CALL_ABILITY_TYPE_ERR;
-    }
+
     return ERR_OK;
 }
 
@@ -5219,11 +5227,14 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
 
     std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     CHECK_POINTER_AND_RETURN(callerAbility, ERR_INVALID_VALUE);
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->
-        GetRunningProcessInfoByToken(callerAbility->GetToken(), processInfo);
-    isBackgroundCall = processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOCUS &&
-                        callerAbility->GetAppState() != AAFwk::AppState::FOREGROUND;
+    if (backgroundJudgeFlag_) {
+        isBackgroundCall = callerAbility->GetAppState() != AAFwk::AppState::FOREGROUND;
+    } else {
+        AppExecFwk::RunningProcessInfo processInfo;
+        DelayedSingleton<AppScheduler>::GetInstance()->
+            GetRunningProcessInfoByToken(callerAbility->GetToken(), processInfo);
+        isBackgroundCall = processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOCUS;
+    }
 
     return ERR_OK;
 }
@@ -5259,17 +5270,17 @@ int AbilityManagerService::CheckCallerPermissionOldRule(const AbilityRequest &ab
 
 bool AbilityManagerService::IsUseNewStartUpRule(const AbilityRequest &abilityRequest)
 {
-    if (!CheckNewRuleSwitchState(COMPONENT_STARTUP_NEW_RULES)) {
+    if (!startUpNewRule_) {
         return false;
     }
 
-    if (CheckNewRuleSwitchState(NEW_RULES_EXCEPT_LAUNCHER_SYSTEMUI)) {
+    if (newRuleExceptLauncherSystemUI_) {
         // TEMP, caller is Launcher or systemUI, PASS
         std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
         if (callerAbility) {
             const std::string &bundleName = callerAbility->GetApplicationInfo().bundleName;
             HILOG_INFO("IsUseNewStartUpRule, caller bundleName is %{public}s.", bundleName.c_str());
-            if (bundleName == "com.ohos.launcher" || bundleName == "com.ohos.systemui") {
+            if (bundleName == BUNDLE_NAME_LAUNCHER || bundleName == BUNDLE_NAME_SYSTEMUI) {
                 return false;
             }
         }
