@@ -841,7 +841,7 @@ int MissionListManager::AbilityTransactionDone(const sptr<IRemoteObject> &token,
     }
 
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_INFO("ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
+    HILOG_DEBUG("ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
 
     if (targetState == AbilityState::BACKGROUND) {
         abilityRecord->SaveAbilityState(saveData);
@@ -920,7 +920,7 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     // ability do not save window mode
     abilityRecord->RemoveWindowMode();
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_INFO("ability: %{public}s", element.c_str());
+    HILOG_DEBUG("ability: %{public}s", element.c_str());
 
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
 
@@ -2139,7 +2139,12 @@ int MissionListManager::SetMissionLabel(const sptr<IRemoteObject> &token, const 
         return -1;
     }
 
-    return DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionLabel(missionId, label);
+    auto ret = DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionLabel(missionId, label);
+    if (ret == 0 && listenerController_) {
+        listenerController_->NotifyMissionLabelUpdated(missionId);
+    }
+
+    return ret;
 }
 
 int MissionListManager::SetMissionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon)

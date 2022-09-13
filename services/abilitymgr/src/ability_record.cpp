@@ -102,6 +102,15 @@ Token::~Token()
 std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
 {
     CHECK_POINTER_AND_RETURN(token, nullptr);
+    // Double check if token is valid
+    sptr<IAbilityToken> theToken = iface_cast<IAbilityToken>(token);
+    if (!theToken) {
+        return nullptr;
+    }
+    if (theToken->GetDescriptor() != u"ohos.aafwk.AbilityToken") {
+        return nullptr;
+    }
+
     return (static_cast<Token *>(token.GetRefPtr()))->GetAbilityRecord();
 }
 
@@ -311,7 +320,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetWant().GetElement().GetURI();
-    HILOG_INFO("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
+    HILOG_DEBUG("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
 
     if (isReady_) {
         if (IsAbilityState(AbilityState::FOREGROUND)) {
@@ -1138,7 +1147,7 @@ void SystemAbilityCallerRecord::SetResultToSystemAbility(
         return;
     }
     std::string srcDeviceId = data[0];
-    HILOG_INFO("Get srcDeviceId = %{public}s", srcDeviceId.c_str());
+    HILOG_DEBUG("Get srcDeviceId = %{public}s", srcDeviceId.c_str());
     int missionId = atoi(data[1].c_str());
     HILOG_INFO("Get missionId = %{public}d", missionId);
     resultWant.SetParam(DMS_SRC_NETWORK_ID, srcDeviceId);
