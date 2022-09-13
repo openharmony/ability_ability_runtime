@@ -38,8 +38,8 @@ constexpr int MIX_DUMP = -2;
 }
 
 typedef void (*DumpSignalHandlerFunc) (int sig, siginfo_t *si, void *context);
-static DumpSignalHandlerFunc dumpSignalHandlerFunc_ = nullptr;
-static pid_t targetDumpTid_ = -1;
+static DumpSignalHandlerFunc g_dumpSignalHandlerFunc = nullptr;
+static pid_t g_targetDumpTid = -1;
 
 static std::string PrintJsFrame(JsFrames& jsFrame)
 {
@@ -87,8 +87,8 @@ void MixStackDumper::Dump_SignalHandler(int sig, siginfo_t *si, void *context)
 {
     switch (si->si_code) {
         case NATIVE_DUMP: {
-            if (dumpSignalHandlerFunc_ != nullptr) {
-                dumpSignalHandlerFunc_(sig, si, context);
+            if (g_dumpSignalHandlerFunc != nullptr) {
+                g_dumpSignalHandlerFunc(sig, si, context);
             }
             break;
         }
@@ -97,7 +97,7 @@ void MixStackDumper::Dump_SignalHandler(int sig, siginfo_t *si, void *context)
             if (handler == nullptr) {
                 return;
             }
-            targetDumpTid_ = si->si_value.sival_int;
+            g_targetDumpTid = si->si_value.sival_int;
             handler->PostTask(&MixStackDumper::HandleMixDumpRequest);
             break;
         }
@@ -119,7 +119,7 @@ void MixStackDumper::InstallDumpHandler(std::shared_ptr<OHOSApplication> applica
     newDumpAction.sa_flags = SA_RESTART | SA_SIGINFO | SA_ONSTACK;
     sigaction(SIGDUMP, &newDumpAction, &oldDumpAction);
     if (oldDumpAction.sa_sigaction != nullptr) {
-        dumpSignalHandlerFunc_ = oldDumpAction.sa_sigaction;
+        g_dumpSignalHandlerFunc = oldDumpAction.sa_sigaction;
     }
 }
 
@@ -268,7 +268,6 @@ void MixStackDumper::Destroy()
         catcher_->DestroyFrameCatcher();
         catcher_ = nullptr;
     }
-
 }
 
 void MixStackDumper::HandleMixDumpRequest()
@@ -286,9 +285,9 @@ void MixStackDumper::HandleMixDumpRequest()
         }
         MixStackDumper mixDumper;
         mixDumper.Init();
-        if (targetDumpTid_ > 0) {
-            mixDumper.DumpMixFrame(fd, targetDumpTid_);
-            targetDumpTid_ = -1;
+        if (g_targetDumpTid > 0) {
+            mixDumper.DumpMixFrame(fd, g_targetDumpTid);
+            g_targetDumpTid = -1;
             mixDumper.Destroy();
             break;
         }
