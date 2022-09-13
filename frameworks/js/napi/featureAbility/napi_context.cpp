@@ -3449,7 +3449,7 @@ NativeValue* NapiJsContext::OnVerifyPermission(NativeEngine &engine, NativeCallb
             *value = obj->ability_->VerifySelfPermission(permission);
         }
     };
-    auto complete = [obj = this] (NativeEngine &engine, AsyncTask &task, int32_t status) {
+    auto complete = [obj = this, value = errorVal] (NativeEngine &engine, AsyncTask &task, int32_t status) {
         if (*value == static_cast<int32_t>(NAPI_ERR_ACE_ABILITY)) {
             task.Reject(engine, CreateJsError( engine, *value,obj->ConvertErrorCode(*value)));
             return;
@@ -3772,7 +3772,7 @@ NativeValue* NapiJsContext::OnSetWakeUpScreen(NativeEngine &engine, NativeCallba
         HILOG_ERROR("input params int error");
         return engine.CreateUndefined();
     }
-    auto complete = [obj = this, wakeUp, value = errorVal]
+    auto complete = [obj = this, wakeUp]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
         if (obj->ability_ == nullptr) {
             task.Reject(engine,
@@ -3804,7 +3804,7 @@ NativeValue* NapiJsContext::OnSetDisplayOrientation(NativeEngine &engine, Native
         HILOG_ERROR("input params int error");
         return engine.CreateUndefined();
     }
-    auto complete = [obj = this, orientation, value = errorVal]
+    auto complete = [obj = this, orientation]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
         if (obj->ability_ == nullptr) {
             task.Reject(engine,
