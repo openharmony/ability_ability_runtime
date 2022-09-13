@@ -2237,6 +2237,7 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
         userId = U0_USER_ID;
     }
 
+    ReportEventToSuspendManager(abilityRequest.abilityInfo);
     std::shared_ptr<DataAbilityManager> dataAbilityManager = GetDataAbilityManagerByUserId(userId);
     CHECK_POINTER_AND_RETURN(dataAbilityManager, nullptr);
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
