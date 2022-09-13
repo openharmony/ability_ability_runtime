@@ -18,14 +18,15 @@
 #include <dlfcn.h>
 #include <uv.h>
 
-#include "js_runtime_utils.h"
-#include "js_napi_common_ability.h"
 #include "hilog_wrapper.h"
 #include "napi_common_util.h"
+#include "napi_context.h"
 #include "napi_base_context.h"
 #include "napi_remote_object.h"
+#include "js_napi_common_ability.h"
+#include "js_runtime_utils.h"
 #include "securec.h"
-#include "napi_context.h"
+
 using namespace OHOS::AbilityRuntime;
 
 namespace OHOS {
@@ -4807,7 +4808,7 @@ napi_value NAPI_TerminateAbilityCommon(napi_env env, napi_callback_info info)
     return ret;
 }
 
-JsNapiCommon::JsNapiCommon() : ability_(nullptr), value_(0)
+JsNapiCommon::JsNapiCommon() : ability_(nullptr)
 {}
 
 NativeValue* JsNapiCommon::JsGetContext(NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType)
@@ -4828,30 +4829,30 @@ NativeValue* JsNapiCommon::JsGetFilesDir(NativeEngine &engine, NativeCallbackInf
         return engine.CreateUndefined();
     }
 
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsFilesDir> filesDir = std::make_shared<JsFilesDir>();
-    auto execute = [obj = this, dir = filesDir, abilityType] () {
+    auto execute = [obj = this, dir = filesDir, abilityType, value = errorVal] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         auto context = obj->ability_->GetAbilityContext();
         if (context == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
             HILOG_ERROR("task execute error, the abilitycontext is nullptr");
             return;
         }
         dir->name = context->GetFilesDir();
     };
-    auto complete = [obj = this, dir = filesDir]
+    auto complete = [obj = this, dir = filesDir, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
-            auto ecode = dir == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
+            auto ecode = dir == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -4874,29 +4875,29 @@ NativeValue* JsNapiCommon::JsIsUpdatingConfigurations(
         return engine.CreateUndefined();
     }
 
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsConfigurations> config = std::make_shared<JsConfigurations>();
-    auto execute = [obj = this, data = config, abilityType] () {
+    auto execute = [obj = this, data = config, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         if (data == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
             HILOG_ERROR("task execute error, param is nullptr");
             return;
         }
         data->status = obj->ability_->IsUpdatingConfigurations();
     };
-    auto complete = [obj = this, info = config]
+    auto complete = [obj = this, info = config, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
-            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
+            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -4919,29 +4920,29 @@ NativeValue* JsNapiCommon::JsPrintDrawnCompleted(
         HILOG_ERROR("input params count error, argc=%{public}zu", info.argc);
         return engine.CreateUndefined();
     }
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsDrawnCompleted> drawComplete = std::make_shared<JsDrawnCompleted>();
-    auto execute = [obj = this, data = drawComplete, abilityType] () {
+    auto execute = [obj = this, data = drawComplete, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         if (data == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
-            HILOG_ERROR("task execute error, name is nullptr");
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            HILOG_ERROR("task execute error, data is nullptr");
             return;
         }
         data->status = obj->ability_->PrintDrawnCompleted();
     };
-    auto complete = [obj = this, draw = drawComplete]
+    auto complete = [obj = this, draw = drawComplete, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || draw == nullptr) {
-            auto ecode = draw == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || draw == nullptr) {
+            auto ecode = draw == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -4963,30 +4964,30 @@ NativeValue* JsNapiCommon::JsGetCacheDir(NativeEngine &engine, NativeCallbackInf
         HILOG_ERROR("input params count error, argc=%{public}zu", info.argc);
         return engine.CreateUndefined();
     }
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsCacheDir> cacheDir = std::make_shared<JsCacheDir>();
-    auto execute = [obj = this, dir = cacheDir, abilityType] () {
+    auto execute = [obj = this, dir = cacheDir, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         auto context = obj->ability_->GetAbilityContext();
         if (context == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
             HILOG_ERROR("task execute error, the abilitycontext is nullptr");
             return;
         }
         dir->name = context->GetCacheDir();
     };
-    auto complete = [obj = this, dir = cacheDir]
+    auto complete = [obj = this, dir = cacheDir, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
-            auto ecode = dir == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
+            auto ecode = dir == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -5010,28 +5011,28 @@ NativeValue* JsNapiCommon::JsGetCtxAppType(
         return engine.CreateUndefined();
     }
 
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsCtxAppType> type = std::make_shared<JsCtxAppType>();
-    auto execute = [obj = this, apptype = type, abilityType] () {
+    auto execute = [obj = this, apptype = type, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         if (apptype == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
             return;
         }
         apptype->name = obj->ability_->GetAppType();
     };
-    auto complete = [obj = this, apptype = type]
+    auto complete = [obj = this, apptype = type, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || apptype == nullptr) {
-            auto ecode = apptype == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || apptype == nullptr) {
+            auto ecode = apptype == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -5054,16 +5055,16 @@ NativeValue* JsNapiCommon::JsGetCtxHapModuleInfo(
         HILOG_ERROR("input params count error, argc=%{public}zu", info.argc);
         return engine.CreateUndefined();
     }
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsHapModuleInfo> infoData = std::make_shared<JsHapModuleInfo>();
-    auto execute = [obj = this, hapMod = infoData, abilityType] () {
+    auto execute = [obj = this, hapMod = infoData, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         auto getInfo = obj->ability_->GetHapModuleInfo();
@@ -5071,13 +5072,13 @@ NativeValue* JsNapiCommon::JsGetCtxHapModuleInfo(
             hapMod->hapModInfo = *getInfo;
         } else {
             HILOG_ERROR("GetHapModuleInfo return nullptr");
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
         }
     };
-    auto complete = [obj = this, info = infoData]
+    auto complete = [obj = this, info = infoData, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
-            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
+            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -5101,16 +5102,16 @@ NativeValue* JsNapiCommon::JsGetAppVersionInfo(
         return engine.CreateUndefined();
     }
 
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsApplicationInfo> infoData = std::make_shared<JsApplicationInfo>();
-    auto execute = [obj = this, appInfo = infoData, abilityType] () {
+    auto execute = [obj = this, appInfo = infoData, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         auto getInfo = obj->ability_->GetApplicationInfo();
@@ -5118,13 +5119,13 @@ NativeValue* JsNapiCommon::JsGetAppVersionInfo(
             appInfo->appInfo = *getInfo;
         } else {
             HILOG_ERROR("GetApplicationInfo return nullptr");
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
         }
     };
-    auto complete = [obj = this, info = infoData]
+    auto complete = [obj = this, info = infoData, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
-            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
+            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -5139,17 +5140,6 @@ NativeValue* JsNapiCommon::JsGetAppVersionInfo(
     return result;
 }
 
-NativeValue* JsNapiCommon::JsGetApplicationContext(
-    NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType)
-{
-    if (!CheckAbilityType(abilityType)) {
-        HILOG_ERROR("ability type error");
-        return engine.CreateUndefined();
-    }
-
-    return CreateNapiJSContext(engine);
-}
-
 NativeValue* JsNapiCommon::JsGetCtxAbilityInfo(
     NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType)
 {
@@ -5159,16 +5149,16 @@ NativeValue* JsNapiCommon::JsGetCtxAbilityInfo(
         return engine.CreateUndefined();
     }
 
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsAbilityInfoInfo> infoData = std::make_shared<JsAbilityInfoInfo>();
-    auto execute = [obj = this, abilityInfo = infoData, abilityType] () {
+    auto execute = [obj = this, abilityInfo = infoData, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         auto getInfo = obj->ability_->GetAbilityInfo();
@@ -5176,13 +5166,13 @@ NativeValue* JsNapiCommon::JsGetCtxAbilityInfo(
             abilityInfo->abilityInfo = *getInfo;
         } else {
             HILOG_ERROR("GetAbilityInfo return nullptr");
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
         }
     };
-    auto complete = [obj = this, info = infoData]
+    auto complete = [obj = this, info = infoData, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
-            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
+            auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -5206,31 +5196,31 @@ NativeValue* JsNapiCommon::JsGetOrCreateDistributedDir(
         return engine.CreateUndefined();
     }
 
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::shared_ptr<JsOrCreateDistributedDir> orCreateDistributedDir = std::make_shared<JsOrCreateDistributedDir>();
-    auto execute = [obj = this, dir = orCreateDistributedDir, abilityType] () {
+    auto execute = [obj = this, dir = orCreateDistributedDir, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
         auto context = obj->ability_->GetAbilityContext();
         if (context == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the abilitycontext is nullptr");
             return;
         }
         dir->name = context->GetDistributedFilesDir();
     };
 
-    auto complete = [obj = this, dir = orCreateDistributedDir]
+    auto complete = [obj = this, dir = orCreateDistributedDir, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
-            auto ecode = dir == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : obj->value_;
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
+            auto ecode = dir == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(engine, CreateJsError(engine, ecode, obj->ConvertErrorCode(ecode)));
             return;
         }
@@ -5254,26 +5244,26 @@ NativeValue* JsNapiCommon::JsGetDisplayOrientation(
         return engine.CreateUndefined();
     }
 
-    value_ = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
-    auto execute = [obj = this, abilityType] () {
+    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
+    auto execute = [obj = this, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
             HILOG_ERROR("task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
-            obj->value_ = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
             return;
         }
-        obj->value_ = obj->ability_->GetDisplayOrientation();
+        *value = obj->ability_->GetDisplayOrientation();
     };
-    auto complete = [obj = this]
+    auto complete = [obj = this, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
-        if (obj->value_ == NAPI_ERR_NO_ERROR) {
+        if (*value == NAPI_ERR_NO_ERROR) {
             task.Reject(engine, CreateJsError(engine, NAPI_ERR_ACE_ABILITY, "ability is nullptr"));
         }
 
-        task.Resolve(engine, CreateJsValue(engine, obj->value_));
+        task.Resolve(engine, CreateJsValue(engine, *value));
     };
 
     auto callback = info.argc == ARGS_ZERO ? nullptr : info.argv[PARAM0];
