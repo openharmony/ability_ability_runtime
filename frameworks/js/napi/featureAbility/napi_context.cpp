@@ -24,8 +24,8 @@
 #include "feature_ability_common.h"
 #include "file_ex.h"
 #include "hilog_wrapper.h"
-#include "securec.h"
 #include "js_napi_common_ability.h"
+#include "securec.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
