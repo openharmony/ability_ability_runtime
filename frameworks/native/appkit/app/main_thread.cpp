@@ -24,6 +24,7 @@
 #include "ability_delegator_registry.h"
 #include "ability_loader.h"
 #include "ability_thread.h"
+#include "ability_util.h"
 #include "app_loader.h"
 #include "application_data_manager.h"
 #include "application_env_impl.h"
@@ -905,8 +906,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         isStageBased = bundleInfo.hapModuleInfos.back().isStageBasedModel;
     }
 
-    HILOG_INFO("stageBased:%{public}d moduleJson:%{public}d size:%{public}d",
-        isStageBased, moduelJson, (int32_t)bundleInfo.hapModuleInfos.size());
+    HILOG_INFO("stageBased:%{public}d moduleJson:%{public}d size:%{public}zu",
+        isStageBased, moduelJson, bundleInfo.hapModuleInfos.size());
 
     if (!InitResourceManager(resourceManager, contextDeal, appInfo, bundleInfo, config)) {
         HILOG_ERROR("MainThread::handleLaunchApplication InitResourceManager failed");
@@ -1253,27 +1254,12 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("MainThread::handleLaunchAbility called start.");
-
-    if (applicationImpl_ == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility applicationImpl_ is null");
-        return;
-    }
-
-    if (abilityRecordMgr_ == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility abilityRecordMgr_ is null");
-        return;
-    }
-
-    if (abilityRecord == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility parameter(abilityRecord) is null");
-        return;
-    }
+    CHECK_POINTER_LOG(applicationImpl_, "MainThread::HandleLaunchAbility applicationImpl_ is null");
+    CHECK_POINTER_LOG(abilityRecordMgr_, "MainThread::HandleLaunchAbility abilityRecordMgr_ is null");
+    CHECK_POINTER_LOG(abilityRecord, "MainThread::HandleLaunchAbility parameter(abilityRecord) is null");
 
     auto abilityToken = abilityRecord->GetToken();
-    if (abilityToken == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility failed. abilityRecord->GetToken failed");
-        return;
-    }
+    CHECK_POINTER_LOG(abilityToken, "MainThread::HandleLaunchAbility failed. abilityRecord->GetToken failed");
 
     abilityRecordMgr_->SetToken(abilityToken);
     abilityRecordMgr_->AddAbilityRecord(abilityToken, abilityRecord);

@@ -436,6 +436,7 @@ void AppRunningManager::GetRunningProcessInfoByToken(
     info.pid_ = appRecord->GetPriorityObject()->GetPid();
     info.uid_ = appRecord->GetUid();
     info.bundleNames.emplace_back(appRecord->GetBundleName());
+    info.state_ = static_cast<AppExecFwk::AppProcessState>(appRecord->GetState());
 }
 
 void AppRunningManager::ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr)
@@ -505,7 +506,7 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 {
     HILOG_INFO("call %{public}s", __func__);
     std::lock_guard<std::recursive_mutex> guard(lock_);
-    HILOG_INFO("current app size %{public}d", static_cast<int>(appRunningRecordMap_.size()));
+    HILOG_INFO("current app size %{public}zu", appRunningRecordMap_.size());
     int32_t result = ERR_OK;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -519,8 +520,7 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
 {
-    HILOG_INFO("call %{public}s, current app size %{public}d", __func__,
-        static_cast<int>(appRunningRecordMap_.size()));
+    HILOG_INFO("call %{public}s, current app size %{public}zu", __func__, appRunningRecordMap_.size());
     std::lock_guard<std::recursive_mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
