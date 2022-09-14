@@ -20,6 +20,7 @@
 #include "appexecfwk_errors.h"
 #include "event_handler.h"
 #include "event_runner.h"
+#include "form_caller_mgr.h"
 #include "form_extension.h"
 #include "form_mgr_errors.h"
 #include "form_supply_proxy.h"
@@ -42,7 +43,7 @@ int FormExtensionProviderClient::AcquireProviderFormInfo(const AppExecFwk::FormJ
 
     Want connectWant(want);
     connectWant.SetParam(Constants::ACQUIRE_TYPE, want.GetIntParam(Constants::ACQUIRE_TYPE, 0));
-    connectWant.SetParam(Constants::FORM_CONNECT_ID, want.GetLongParam(Constants::FORM_CONNECT_ID, 0));
+    connectWant.SetParam(Constants::FORM_CONNECT_ID, want.GetIntParam(Constants::FORM_CONNECT_ID, 0));
     connectWant.SetParam(Constants::FORM_SUPPLY_INFO, want.GetStringParam(Constants::FORM_SUPPLY_INFO));
     connectWant.SetParam(Constants::PROVIDER_FLAG, true);
     connectWant.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo.formId));
@@ -69,7 +70,7 @@ void FormExtensionProviderClient::AcquireFormExtensionProviderInfo(const AppExec
     HILOG_INFO("%{public}s called.", __func__);
     Want connectWant(want);
     connectWant.SetParam(Constants::ACQUIRE_TYPE, want.GetIntParam(Constants::ACQUIRE_TYPE, 0));
-    connectWant.SetParam(Constants::FORM_CONNECT_ID, want.GetLongParam(Constants::FORM_CONNECT_ID, 0));
+    connectWant.SetParam(Constants::FORM_CONNECT_ID, want.GetIntParam(Constants::FORM_CONNECT_ID, 0));
     connectWant.SetParam(Constants::FORM_SUPPLY_INFO, want.GetStringParam(Constants::FORM_SUPPLY_INFO));
     connectWant.SetParam(Constants::PROVIDER_FLAG, true);
     connectWant.SetParam(Constants::PARAM_FORM_IDENTITY_KEY, std::to_string(formJsInfo.formId));
@@ -136,6 +137,13 @@ void FormExtensionProviderClient::NotifyFormExtensionDelete(const int64_t formId
 {
     HILOG_INFO("%{public}s called.", __func__);
     int errorCode = ERR_OK;
+    auto hostToken = want.GetRemoteObject(Constants::PARAM_FORM_HOST_TOKEN);
+    if (hostToken != nullptr) {
+        HILOG_DEBUG("remove provider caller.");
+        FormCallerMgr::GetInstance().RemoveFormProviderCaller(formId, hostToken);
+        HandleResultCode(errorCode, want, callerToken);
+        return;
+    }
     std::shared_ptr<FormExtension> ownerFormExtension = GetOwner();
     if (ownerFormExtension == nullptr) {
         HILOG_ERROR("%{public}s error, ownerFormExtension is nullptr.", __func__);
@@ -234,7 +242,9 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdate(const int64_t formId
         ownerFormExtension->OnUpdate(formId);
     }
 
-    HandleResultCode(errorCode, want, callerToken);
+    if (want.HasParameter(Constants::FORM_CONNECT_ID)) {
+        HandleResultCode(errorCode, want, callerToken);
+    }
     HILOG_INFO("%{public}s called end.", __func__);
 }
 
@@ -370,7 +380,9 @@ void FormExtensionProviderClient::FireFormExtensionEvent(const int64_t formId, c
         ownerFormExtension->OnEvent(formId, message);
     }
 
-    HandleResultCode(errorCode, want, callerToken);
+    if (want.HasParameter(Constants::FORM_CONNECT_ID)) {
+        HandleResultCode(errorCode, want, callerToken);
+    }
     HILOG_INFO("%{public}s called end.", __func__);
 }
 
@@ -483,19 +495,22 @@ int FormExtensionProviderClient::HandleResultCode(int errorCode, const Want &wan
     }
 }
 
-std::pair<int, int> FormExtensionProviderClient::CheckParam(const Want &want, const sptr<IRemoteObject> &callerToken)
+std::pair<ErrCode, ErrCode> FormExtensionProviderClient::CheckParam(const Want &want, const sptr<IRemoteObject> &callerToken)
 {
+    if (IsCallBySelfBundle()) {
+        return std::pair<ErrCode, ErrCode>(ERR_OK, ERR_OK);
+    }
     sptr<IFormSupply> formSupplyClient = iface_cast<IFormSupply>(callerToken);
     if (formSupplyClient == nullptr) {
         HILOG_ERROR("%{public}s warn, IFormSupply is nullptr", __func__);
-        return std::pair<int, int>(ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED, ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED);
+        return std::pair<ErrCode, ErrCode>(ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED, ERR_APPEXECFWK_FORM_BIND_PROVIDER_FAILED);
     }
     if (!FormProviderClient::CheckIsSystemApp()) {
         HILOG_ERROR("%{public}s warn, caller permission denied.", __func__);
         int errorCode = HandleResultCode(ERR_APPEXECFWK_FORM_PERMISSION_DENY, want, callerToken);
-        return std::pair<int, int>(ERR_APPEXECFWK_FORM_PERMISSION_DENY, errorCode);
+        return std::pair<ErrCode, ErrCode>(ERR_APPEXECFWK_FORM_PERMISSION_DENY, errorCode);
     }
-    return std::pair<int, int>(ERR_OK, ERR_OK);
+    return std::pair<ErrCode, ErrCode>(ERR_OK, ERR_OK);
 }
 
 int32_t FormExtensionProviderClient::AcquireShareFormData(int64_t formId, const std::string &remoteDeviceId,

@@ -26,6 +26,7 @@
 #include "bundle_mgr_client.h"
 #include "connection_state_manager.h"
 #include "hitrace_meter.h"
+#include "image_source.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
@@ -101,6 +102,15 @@ Token::~Token()
 std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
 {
     CHECK_POINTER_AND_RETURN(token, nullptr);
+    // Double check if token is valid
+    sptr<IAbilityToken> theToken = iface_cast<IAbilityToken>(token);
+    if (!theToken) {
+        return nullptr;
+    }
+    if (theToken->GetDescriptor() != u"ohos.aafwk.AbilityToken") {
+        return nullptr;
+    }
+
     return (static_cast<Token *>(token.GetRefPtr()))->GetAbilityRecord();
 }
 
@@ -310,7 +320,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetWant().GetElement().GetURI();
-    HILOG_INFO("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
+    HILOG_DEBUG("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
 
     if (isReady_) {
         if (IsAbilityState(AbilityState::FOREGROUND)) {
@@ -598,26 +608,43 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
 std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const
 {
-    std::string iconPath;
-    auto iconPathErrval = resourceMgr->GetMediaById(windowIconId, iconPath);
-    if (iconPathErrval != OHOS::Global::Resource::RState::SUCCESS) {
-        HILOG_ERROR("GetMediaById iconPath failed");
+    if (resourceMgr == nullptr) {
+        HILOG_WARN("%{public}s resource manager does not exist.", __func__);
         return nullptr;
     }
-    HILOG_DEBUG("GetMediaById iconPath: %{private}s", iconPath.c_str());
+
+    std::string iconPath;
+    std::unique_ptr<uint8_t[]> iconOut;
+    size_t len;
+    Global::Resource::RState iconPathErrval;
+    if (!abilityInfo_.hapPath.empty()) {
+        iconPathErrval = resourceMgr->GetMediaDataById(windowIconId, len, iconOut);
+    } else {
+        iconPathErrval = resourceMgr->GetMediaById(windowIconId, iconPath);
+    }
+    if (iconPathErrval != Global::Resource::RState::SUCCESS) {
+        HILOG_ERROR("Get media id failed");
+        return nullptr;
+    }
+    HILOG_DEBUG("Get media id: %{private}d", windowIconId);
 
     uint32_t errorCode = 0;
     Media::SourceOptions opts;
-    auto imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
+    std::unique_ptr<Media::ImageSource> imageSource;
+    if (!abilityInfo_.hapPath.empty()) {
+        imageSource = Media::ImageSource::CreateImageSource(iconOut.get(), len, opts, errorCode);
+    } else {
+        imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
+    }
     if (errorCode != 0) {
-        HILOG_ERROR("Failed to create image source path %{private}s err %{public}d", iconPath.c_str(), errorCode);
+        HILOG_ERROR("Failed to create icon id %{private}d err %{public}d", windowIconId, errorCode);
         return nullptr;
     }
 
     Media::DecodeOptions decodeOpts;
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
     if (errorCode != 0) {
-        HILOG_ERROR("Failed to create pixelmap path %{private}s err %{public}d", iconPath.c_str(), errorCode);
+        HILOG_ERROR("Failed to create pixelmap id %{private}d err %{public}d", windowIconId, errorCode);
         return nullptr;
     }
     HILOG_DEBUG("%{public}s OUT.", __func__);
@@ -1120,7 +1147,7 @@ void SystemAbilityCallerRecord::SetResultToSystemAbility(
         return;
     }
     std::string srcDeviceId = data[0];
-    HILOG_INFO("Get srcDeviceId = %{public}s", srcDeviceId.c_str());
+    HILOG_DEBUG("Get srcDeviceId = %{public}s", srcDeviceId.c_str());
     int missionId = atoi(data[1].c_str());
     HILOG_INFO("Get missionId = %{public}d", missionId);
     resultWant.SetParam(DMS_SRC_NETWORK_ID, srcDeviceId);

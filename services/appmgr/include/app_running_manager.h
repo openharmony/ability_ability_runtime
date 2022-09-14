@@ -95,7 +95,7 @@ public:
      *
      * @return the application record list.
      */
-    const std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> &GetAppRunningRecordMap();
+    std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> GetAppRunningRecordMap();
 
     /**
      * RemoveAppRunningRecordById, Remove application information through application id.
@@ -161,6 +161,9 @@ public:
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByRenderPid(const pid_t pid);
     std::shared_ptr<RenderRecord> OnRemoteRenderDied(const wptr<IRemoteObject> &remote);
     bool ProcessExitByPid(pid_t pid);
+    bool GetAppRunningStateByBundleName(const std::string &bundleName);
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+    int32_t NotifyHotReloadPage(const std::string &bundleName);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
 
