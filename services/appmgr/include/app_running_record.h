@@ -531,6 +531,8 @@ public:
 
     void SetContinuousTaskAppState(bool isContinuousTask);
 
+    void Unfocused();
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilitystage data.
@@ -582,6 +584,7 @@ private:
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isStageBasedModel_ = false;
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
+    ApplicationState lastState_ = ApplicationState::APP_STATE_CREATE; // last state of this process
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     int32_t appRecordId_ = 0;
