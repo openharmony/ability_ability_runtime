@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_INTERFACE_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_INTERFACE_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_INTERFACE_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_INTERFACE_H
 
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -126,10 +126,13 @@ public:
     virtual int GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId) = 0;
 
     /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
+     * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify abilities background the current memory level.
+     *
+     * @param level, the current memory level
+     * @return ERR_OK ,return back success，others fail.
      */
-    virtual void GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig) = 0;
+    virtual int NotifyMemoryLevel(int32_t level) = 0;
 
     /**
      * Notify that the ability stage has been updated
@@ -147,7 +150,8 @@ public:
      * @param observer, ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer) = 0;
+    virtual int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+        const std::vector<std::string> &bundleNameList = {}) = 0;
 
     /**
      * Unregister application or process state observer.
@@ -239,6 +243,30 @@ public:
 
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) = 0;
 
+    /**
+     * @brief Get the running state of application by bundle name.
+     *
+     * @param bundleName Bundle name
+     * @return Returns true if process is running, false if process isn't running.
+     */
+    virtual bool GetAppRunningStateByBundleName(const std::string &bundleName) = 0;
+
+    /**
+     * @brief Notify application load patch.
+     *
+     * @param bundleName Bundle name
+     * @return Returns 0 on success, error code on failure.
+     */
+    virtual int32_t NotifyLoadRepairPatch(const std::string &bundleName) = 0;
+
+    /**
+     * @brief Notify application reload page.
+     *
+     * @param bundleName Bundle name
+     * @return Returns 0 on success, error code on failure.
+     */
+    virtual int32_t NotifyHotReloadPage(const std::string &bundleName) = 0;
+
     enum class Message {
         APP_ATTACH_APPLICATION = 0,
         APP_APPLICATION_FOREGROUNDED,
@@ -250,7 +278,6 @@ public:
         APP_CLEAR_UP_APPLICATION_DATA,
         APP_GET_ALL_RUNNING_PROCESSES,
         APP_GET_RUNNING_PROCESSES_BY_USER_ID,
-        APP_GET_SYSTEM_MEMORY_ATTR,
         APP_ADD_ABILITY_STAGE_INFO_DONE,
         STARTUP_RESIDENT_PROCESS,
         REGISTER_APPLICATION_STATE_OBSERVER,
@@ -268,9 +295,13 @@ public:
         UPDATE_CONFIGURATION,
         REGISTER_CONFIGURATION_OBSERVER,
         UNREGISTER_CONFIGURATION_OBSERVER,
+        APP_NOTIFY_MEMORY_LEVEL,
+        GET_APP_RUNNING_STATE,
+        NOTIFY_LOAD_REPAIR_PATCH,
+        NOTIFY_HOT_RELOAD_PAGE,
     };
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_INTERFACE_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_INTERFACE_H

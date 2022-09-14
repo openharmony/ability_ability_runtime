@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_INNER_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_INNER_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_INNER_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_INNER_H
 
 #include <list>
 #include <map>
@@ -213,6 +213,8 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid);
 
+    virtual int32_t KillApplicationSelf();
+
     /**
      * KillApplicationByUserId, kill the application by user ID.
      *
@@ -252,6 +254,15 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId);
+
+    /**
+     * NotifyMemoryLevel, Notify applications background the current memory level.
+     *
+     * @param level, current memory level.
+     *
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t NotifyMemoryLevel(int32_t level);
 
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
         const sptr<IRemoteObject> &token,
@@ -323,7 +334,7 @@ public:
      *
      * @return all the ability information in the application record.
      */
-    const std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> &GetRecordMap() const;
+    std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> GetRecordMap() const;
 
     /**
      * GetAppRunningRecordByPid, Get process record by application pid.
@@ -443,7 +454,7 @@ public:
      */
     void LoadResidentProcess(const std::vector<BundleInfo> &infos);
 
-    void StartResidentProcess(const std::vector<BundleInfo> &infos,  int restartCount);
+    void StartResidentProcess(const std::vector<BundleInfo> &infos,  int restartCount, bool isEmptyKeepAliveApp);
 
     bool CheckRemoteClient();
 
@@ -452,7 +463,8 @@ public:
      * @param observer, ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
+    int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+        const std::vector<std::string> &bundleNameList = {});
 
     /**
      * Unregister application or process state observer.
@@ -513,9 +525,9 @@ public:
 
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status);
 
-    int VerifyProcessPermission();
+    int VerifyProcessPermission() const;
 
-    int VerifyAccountPermission(const std::string &permissionName, const int userId);
+    int VerifyAccountPermission(const std::string &permissionName, const int userId) const;
 
     void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
 
@@ -529,9 +541,26 @@ public:
      * @return
      */
     void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
+
+    /**
+     * KillProcessByPid, Kill process by PID.
+     *
+     * @param pid_t, the app record pid.
+     *
+     * @return ERR_OK, return back success，others fail.
+     */
+    int32_t KillProcessByPid(const pid_t pid) const;
+
+    bool GetAppRunningStateByBundleName(const std::string &bundleName);
+
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+
+    int32_t NotifyHotReloadPage(const std::string &bundleName);
+
 private:
 
-    void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount);
+    void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount,
+        bool isEmptyKeepAliveApp);
 
     void RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord);
 
@@ -540,10 +569,12 @@ private:
 
     bool GetBundleInfo(const std::string &bundleName, BundleInfo &bundleInfo);
 
-    void MakeProcessName(std::string &processName, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        const std::shared_ptr<ApplicationInfo> &appInfo, HapModuleInfo &hapModuleInfo, int32_t appIndex);
+    void MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo,
+        const HapModuleInfo &hapModuleInfo, int32_t appIndex, std::string &processName);
+
     void MakeProcessName(
-        std::string &processName, const std::shared_ptr<ApplicationInfo> &appInfo, HapModuleInfo &hapModuleInfo);
+        const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo, std::string &processName);
     /**
      * StartAbility, load the ability that needed to be started(Start on the basis of the original process).
      *  Start on a new boot process
@@ -624,15 +655,6 @@ private:
     int32_t KillApplicationByUserIdLocked(const std::string &bundleName, const int userId);
 
     /**
-     * KillProcessByPid, Kill process by PID.
-     *
-     * @param pid_t, the app record pid.
-     *
-     * @return ERR_OK, return back success，others fail.
-     */
-    int32_t KillProcessByPid(const pid_t pid) const;
-
-    /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
      *
      * @param pids, process number collection to exit.
@@ -707,6 +729,12 @@ private:
 
     void OnRenderRemoteDied(const wptr<IRemoteObject> &remote);
 
+    void AddWatchParameter();
+
+    bool VerifyAPL() const;
+
+    static void PointerDeviceEventCallback(const char *key, const char *value, void *context);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.
@@ -753,4 +781,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_SERVICE_INNER_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_SERVICE_INNER_H

@@ -21,6 +21,7 @@ config("dataobs_manager_public_config") {
     "//utils/system/safwk/native/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_services_path}/dataobsmgr/include",
+    "${ability_base_kits_path}/uri/include",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -44,12 +45,10 @@ ohos_shared_library("dataobs_manager") {
   deps = []
 
   external_deps = [
-    "ability_base:zuri",
-    "eventhandler:libeventhandler",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "samgr_standard:samgr_proxy",
-    "utils_base:utils",
+    "samgr:samgr_proxy",
   ]
 
   subsystem_name = "ability"

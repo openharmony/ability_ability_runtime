@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_CLIENT_H
-#define OHOS_AAFWK_ABILITY_MANAGER_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H
 
 #include <mutex>
 
@@ -259,6 +259,28 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * Connect data share extension ability.
+     *
+     * @param want, special want for the data share extension ability.
+     * @param connect, callback used to notify caller the result of connecting or disconnecting.
+     * @param userId, the extension runs in.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectDataShareExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * Connect extension ability.
+     *
+     * @param want, special want for the extension ability.
+     * @param connect, callback used to notify caller the result of connecting or disconnecting.
+     * @param userId, the extension runs in.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
      * DisconnectAbility, disconnect session with service ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
@@ -362,12 +384,6 @@ public:
     ErrCode GetPendingRequestWant(const sptr<IWantSender> &target, std::shared_ptr<Want> &want);
 
     ErrCode GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info);
-
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    void GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo);
 
     ErrCode GetAppMemorySize();
 
@@ -555,12 +571,12 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callToken);
 
     /**
-     * Release Ability, disconnect session with common ability.
+     * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ReleaseAbility(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element);
+    ErrCode ReleaseCall(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element);
 
     ErrCode GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info);
 
@@ -767,6 +783,11 @@ public:
      */
     ErrCode DumpAbilityInfoDone(std::vector<std::string> &infos, const sptr<IRemoteObject> &callerToken);
 
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     */
+    void UpdateMissionSnapShot(const sptr<IRemoteObject>& token);
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -788,4 +809,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_CLIENT_H

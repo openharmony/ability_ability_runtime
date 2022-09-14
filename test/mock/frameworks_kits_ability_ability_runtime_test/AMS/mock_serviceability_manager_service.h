@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_SERVICEABILITY_MOCK_MANAGER_SERVICE_H
-#define OHOS_AAFWK_SERVICEABILITY_MOCK_MANAGER_SERVICE_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_SERVICEABILITY_MANAGER_SERVICE_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_SERVICEABILITY_MANAGER_SERVICE_H
 
 #include <memory>
 #include <singleton.h>
@@ -56,7 +56,7 @@ public:
 
     int TerminateAbility(
         const sptr<IRemoteObject> &token, int resultCode = -1, const Want *resultWant = nullptr) override;
-    virtual int CloseAbility(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
+    int CloseAbility(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr) override
     {
         return 0;
@@ -88,7 +88,7 @@ public:
 
     int TerminateAbilityByCaller(const sptr<IRemoteObject> &callerToken, int requestCode) override;
 
-    int ReleaseAbility(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) override;
+    int ReleaseCall(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) override;
 
     MOCK_METHOD1(KillProcess, int(const std::string &bundleName));
     MOCK_METHOD2(UninstallApp, int(const std::string &bundleName, int32_t uid));
@@ -107,7 +107,6 @@ public:
     MOCK_METHOD5(StartAbility, int(const Want &want, const AbilityStartSetting &abilityStartSetting,
                                    const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode));
     MOCK_METHOD1(GetPendinTerminateAbilityTestgRequestWant, void(int id));
-    MOCK_METHOD1(GetSystemMemoryAttr, void(AppExecFwk::SystemMemoryAttr &memoryInfo));
     MOCK_METHOD3(StartContinuation, int(const Want &want, const sptr<IRemoteObject> &abilityToken, int32_t status));
     MOCK_METHOD2(NotifyContinuationResult, int(int32_t missionId, int32_t result));
 
@@ -154,7 +153,12 @@ public:
         return 0;
     }
 
-    virtual int ClearUpApplicationData(const std::string &bundleName) override
+    void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override
+    {
+        return;
+    }
+
+    int ClearUpApplicationData(const std::string &bundleName) override
     {
         return 0;
     }
@@ -240,41 +244,41 @@ public:
         return 0;
     }
 
-    virtual int StartUserTest(const Want &want, const sptr<IRemoteObject> &observer) override
+    int StartUserTest(const Want &want, const sptr<IRemoteObject> &observer) override
     {
         return 0;
     }
 
-    virtual int FinishUserTest(
+    int FinishUserTest(
         const std::string &msg, const int64_t &resultCode, const std::string &bundleName) override
     {
         return 0;
     }
 
-    virtual int GetTopAbility(sptr<IRemoteObject> &token) override
+    int GetTopAbility(sptr<IRemoteObject> &token) override
     {
         return 0;
     }
 
-    virtual int DelegatorDoAbilityForeground(const sptr<IRemoteObject> &token) override
+    int DelegatorDoAbilityForeground(const sptr<IRemoteObject> &token) override
     {
         return 0;
     }
 
-    virtual int DelegatorDoAbilityBackground(const sptr<IRemoteObject> &token) override
+    int DelegatorDoAbilityBackground(const sptr<IRemoteObject> &token) override
     {
         return 0;
     }
 
-    virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler) override
+    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler) override
     {
         return 0;
     }
 
-    virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) override {}
+    void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) override {}
 
 #ifdef ABILITY_COMMAND_FOR_TEST
-    virtual int ForceTimeoutForTest(const std::string &abilityName, const std::string &state) override
+    int ForceTimeoutForTest(const std::string &abilityName, const std::string &state) override
     {
         return 0;
     }
@@ -286,4 +290,4 @@ public:
 };
 } // namespace AAFwk
 } // namespace OHOS
-#endif // OHOS_AAFWK_SERVICEABILITY_MOCK_MANAGER_SERVICE_H
+#endif // MOCK_OHOS_ABILITY_RUNTIME_MOCK_SERVICEABILITY_MANAGER_SERVICE_H

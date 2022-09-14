@@ -59,27 +59,28 @@ int LocalCallContainer::StartAbilityByCallInner(
     HILOG_DEBUG("start ability by call, localCallRecord->AddCaller(callback) end");
 
     auto remote = localCallRecord->GetRemoteObject();
-    if (remote == nullptr) {
-        auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
-        if (abilityClient == nullptr) {
-            HILOG_ERROR("LocalCallContainer::Resolve abilityClient is nullptr");
-            return ERR_INVALID_VALUE;
-        }
-        sptr<IAbilityConnection> connect = iface_cast<IAbilityConnection>(this->AsObject());
-        HILOG_DEBUG("start ability by call, abilityClient->StartAbilityByCall call");
-        return abilityClient->StartAbilityByCall(want, connect, callerToken);
-    }
     // already finish call request.
-    HILOG_DEBUG("start ability by call, callback->InvokeCallBack(remote) begin");
-    callback->InvokeCallBack(remote);
-    HILOG_DEBUG("start ability by call, callback->InvokeCallBack(remote) end");
-
-    return ERR_OK;
+    if (remote) {
+        HILOG_DEBUG("start ability by call, callback->InvokeCallBack(remote) begin");
+        callback->InvokeCallBack(remote);
+        HILOG_DEBUG("start ability by call, callback->InvokeCallBack(remote) end");
+        if (!want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
+            return ERR_OK;
+        }
+    }
+    auto abilityClient = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityClient == nullptr) {
+        HILOG_ERROR("LocalCallContainer::Resolve abilityClient is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IAbilityConnection> connect = iface_cast<IAbilityConnection>(this->AsObject());
+    HILOG_DEBUG("start ability by call, abilityClient->StartAbilityByCall call");
+    return abilityClient->StartAbilityByCall(want, connect, callerToken);
 }
 
-int LocalCallContainer::Release(const std::shared_ptr<CallerCallBack>& callback)
+int LocalCallContainer::ReleaseCall(const std::shared_ptr<CallerCallBack>& callback)
 {
-    HILOG_DEBUG("LocalCallContainer::Release begin.");
+    HILOG_DEBUG("LocalCallContainer::ReleaseCall begin.");
     auto isExist = [&callback](auto &record) {
         return record.second->RemoveCaller(callback);
     };
@@ -98,7 +99,7 @@ int LocalCallContainer::Release(const std::shared_ptr<CallerCallBack>& callback)
 
     if (record->IsExistCallBack()) {
         // just release callback.
-        HILOG_DEBUG("LocalCallContainer::Release callback not exist.");
+        HILOG_DEBUG("LocalCallContainer::ReleaseCall, The callee has onther callers, just release this callback.");
         return ERR_OK;
     }
 
@@ -110,13 +111,13 @@ int LocalCallContainer::Release(const std::shared_ptr<CallerCallBack>& callback)
         return ERR_INVALID_VALUE;
     }
     sptr<IAbilityConnection> connect = iface_cast<IAbilityConnection>(this->AsObject());
-    if (abilityClient->ReleaseAbility(connect, elementName) != ERR_OK) {
-        HILOG_ERROR("ReleaseAbility failed.");
+    if (abilityClient->ReleaseCall(connect, elementName) != ERR_OK) {
+        HILOG_ERROR("ReleaseCall failed.");
         return ERR_INVALID_VALUE;
     }
 
     callProxyRecords_.erase(iter);
-    HILOG_DEBUG("LocalCallContainer::Release end.");
+    HILOG_DEBUG("LocalCallContainer::ReleaseCall end.");
     return ERR_OK;
 }
 
@@ -179,7 +180,7 @@ bool LocalCallContainer::GetCallLocalRecord(
     for (auto pair : callProxyRecords_) {
         AppExecFwk::ElementName callElement;
         if (!callElement.ParseURI(pair.first)) {
-            HILOG_ERROR("Parse uri to elementName failed, elementName uri: %{public}s", pair.first.c_str());
+            HILOG_ERROR("Parse uri to elementName failed, elementName uri: %{private}s", pair.first.c_str());
             continue;
         }
         // elementName in callProxyRecords_ has moduleName (sometimes not empty),

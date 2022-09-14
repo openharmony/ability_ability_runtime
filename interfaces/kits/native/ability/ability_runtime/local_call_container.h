@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
-#define ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
+#ifndef OHOS_ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
+#define OHOS_ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
 
 #include "ability_connect_callback_stub.h"
 #include "ability_connect_callback_proxy.h"
@@ -33,7 +33,7 @@ public:
     int StartAbilityByCallInner(
         const Want &want, const std::shared_ptr<CallerCallBack> &callback, const sptr<IRemoteObject> &callerToken);
 
-    int Release(const std::shared_ptr<CallerCallBack> &callback);
+    int ReleaseCall(const std::shared_ptr<CallerCallBack> &callback);
 
     void DumpCalls(std::vector<std::string> &info) const;
 
@@ -52,4 +52,4 @@ private:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
+#endif // OHOS_ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H

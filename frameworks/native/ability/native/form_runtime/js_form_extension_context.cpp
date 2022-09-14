@@ -18,12 +18,12 @@
 #include <cinttypes>
 #include <cstdint>
 
-#include "form_runtime/js_form_extension_util.h"
 #include "hilog_wrapper.h"
 #include "js_extension_context.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
+#include "napi_common_ability.h"
 #include "napi_common_start_options.h"
 #include "napi_common_want.h"
 #include "napi_remote_object.h"
@@ -76,27 +76,17 @@ private:
 
         AppExecFwk::FormProviderData formProviderData;
         std::string formDataStr = "{}";
-        std::map<std::string, int> rawImageDataMap;
         NativeObject* nativeObject = ConvertNativeValueTo<NativeObject>(info.argv[1]);
         if (nativeObject != nullptr) {
             NativeValue* nativeDataValue = nativeObject->GetProperty("data");
             if (nativeDataValue == nullptr || !ConvertFromJsValue(engine, nativeDataValue, formDataStr)) {
                 HILOG_ERROR("%{public}s called. nativeDataValue is nullptr or ConvertFromJsValue failed", __func__);
             }
-            nativeDataValue = nativeObject->GetProperty("image");
-            if (nativeDataValue != nullptr) {
-                UnwrapRawImageDataMap(engine, nativeDataValue, rawImageDataMap);
-            }
         } else {
             HILOG_ERROR("%{public}s called. nativeObject is nullptr", __func__);
         }
 
         formProviderData = AppExecFwk::FormProviderData(formDataStr);
-        HILOG_INFO("Image number is %{public}zu", rawImageDataMap.size());
-        for (auto entry : rawImageDataMap) {
-            formProviderData.AddImageData(entry.first, entry.second);
-        }
-
         AsyncTask::CompleteCallback complete =
             [weak = context_, formId, formProviderData](NativeEngine& engine, AsyncTask& task, int32_t status) {
                 auto context = weak.lock();
@@ -150,9 +140,9 @@ private:
                     return;
                 }
 
-                ErrCode errcode = ERR_OK;
                 // entry to the core functionality.
-                errcode = context->StartAbility(want);
+                ErrCode innerErrorCode = context->StartAbility(want);
+                ErrCode errcode = AppExecFwk::GetStartAbilityErrorCode(innerErrorCode);
                 if (errcode == 0) {
                     task.Resolve(engine, engine.CreateUndefined());
                 } else {
@@ -183,8 +173,9 @@ NativeValue* CreateJsFormExtensionContext(NativeEngine& engine, std::shared_ptr<
     std::unique_ptr<JsFormExtensionContext> jsContext = std::make_unique<JsFormExtensionContext>(context);
     object->SetNativePointer(jsContext.release(), JsFormExtensionContext::Finalizer, nullptr);
 
-    BindNativeFunction(engine, *object, "updateForm", JsFormExtensionContext::UpdateForm);
-    BindNativeFunction(engine, *object, "startAbility", JsFormExtensionContext::StartAbility);
+    const char *moduleName = "JsFormExtensionContext";
+    BindNativeFunction(engine, *object, "updateForm", moduleName, JsFormExtensionContext::UpdateForm);
+    BindNativeFunction(engine, *object, "startAbility", moduleName, JsFormExtensionContext::StartAbility);
 
     HILOG_INFO("%{public}s called end.", __func__);
     return objValue;

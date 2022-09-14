@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_ABILITY_CONTEXT_IMPL_H
-#define ABILITY_RUNTIME_ABILITY_CONTEXT_IMPL_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_CONTEXT_IMPL_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_CONTEXT_IMPL_H
 
 #include "ability_context.h"
+
+#include <uv.h>
 
 #include "context_impl.h"
 #include "configuration.h"
@@ -81,10 +83,8 @@ public:
 
     sptr<IRemoteObject> GetToken() override;
 
-    void RequestPermissionsFromUser(const std::vector<std::string> &permissions,
-        int requestCode, PermissionRequestTask &&task) override;
-    void OnRequestPermissionsFromUserResult(
-        int requestCode, const std::vector<std::string> &permissions, const std::vector<int> &grantResults) override;
+    void RequestPermissionsFromUser(NativeEngine& engine, const std::vector<std::string> &permissions, int requestCode,
+        PermissionRequestTask &&task) override;
 
     ErrCode RestoreWindowStage(NativeEngine& engine, NativeValue* contentStorage) override;
 
@@ -132,7 +132,7 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() const override;
 
     /**
-     * call function by callback object
+     * call function by callback objectS
      *
      * @param want Request info for ability.
      * @param callback Indicates the callback object.
@@ -148,7 +148,7 @@ public:
      *
      * @return Returns zero on success, others on failure.
      */
-    ErrCode ReleaseAbility(const std::shared_ptr<CallerCallBack> &callback) override;
+    ErrCode ReleaseCall(const std::shared_ptr<CallerCallBack> &callback) override;
 
     /**
      * register ability callback
@@ -193,17 +193,28 @@ public:
 #endif
 
 private:
+    static std::mutex mutex_;
+    static std::map<int, PermissionRequestTask> permissionRequestCallbacks;
     sptr<IRemoteObject> token_ = nullptr;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
     std::shared_ptr<AbilityRuntime::Context> stageContext_ = nullptr;
     std::map<int, RuntimeTask> resultCallbacks_;
-    std::map<int, PermissionRequestTask> permissionRequestCallbacks_;
     std::unique_ptr<NativeReference> contentStorage_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
     sptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
+
+    static void ResultCallbackJSThreadWorker(uv_work_t* work, int status);
+    void StartGrantExtension(NativeEngine& engine, const std::vector<std::string>& permissions,
+        const std::vector<int>& permissionsState, int requestCode, PermissionRequestTask &&task);
+
+    struct ResultCallback {
+        std::vector<std::string> permissions_;
+        std::vector<int> grantResults_;
+        int requestCode_;
+    };
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // ABILITY_RUNTIME_ABILITY_CONTEXT_IMPL_H
+#endif // OHOS_ABILITY_RUNTIME_ABILITY_CONTEXT_IMPL_H

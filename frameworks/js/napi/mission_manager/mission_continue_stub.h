@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_MISSION_CONTINUE_STUB_H
-#define OHOS_MISSION_CONTINUE_STUB_H
+#ifndef OHOS_ABILITY_RUNTIME_MISSION_CONTINUE_STUB_H
+#define OHOS_ABILITY_RUNTIME_MISSION_CONTINUE_STUB_H
 
 #include <iremote_object.h>
 #include <iremote_stub.h>
@@ -29,11 +29,11 @@ public:
     MissionContinueStub();
     virtual ~MissionContinueStub();
 
-    virtual int OnRemoteRequest(
+    int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 private:
     DISALLOW_COPY_AND_MOVE(MissionContinueStub);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_MISSION_CONTINUE_STUB_H
+#endif  // OHOS_ABILITY_RUNTIME_MISSION_CONTINUE_STUB_H

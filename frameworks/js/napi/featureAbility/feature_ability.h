@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_APPEXECFWK_FEATURE_ABILITY_H
-#define OHOS_APPEXECFWK_FEATURE_ABILITY_H
+#ifndef OHOS_ABILITY_RUNTIME_FEATURE_ABILITY_H
+#define OHOS_ABILITY_RUNTIME_FEATURE_ABILITY_H
 #include "../inner/napi_common/feature_ability_common.h"
 using Want = OHOS::AAFwk::Want;
 
@@ -103,6 +103,16 @@ napi_value NAPI_HasWindowFocus(napi_env env, napi_callback_info info);
  * @return The return value from NAPI C++ to JS for the module.
  */
 napi_value NAPI_GetContext(napi_env env, napi_callback_info info);
+
+/**
+ * @brief Get window.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param info The callback info passed into the callback function.
+ *
+ * @return The return value from NAPI C++ to JS for the module.
+ */
+napi_value NAPI_GetWindow(napi_env env, napi_callback_info info);
 
 /**
  * @brief Get want.
@@ -219,19 +229,6 @@ napi_value HasWindowFocusAsync(
 napi_value HasWindowFocusPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo);
 
 /**
- * @brief TerminateAbility processing function.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param asyncCallbackInfo Process data asynchronously.
- *
- * @return Return JS data successfully, otherwise return nullptr.
- */
-napi_value TerminateAbilityWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo *asyncCallbackInfo);
-napi_value TerminateAbilityAsync(
-    napi_env env, napi_value *args, const size_t argCallback, AsyncCallbackInfo *asyncCallbackInfo);
-napi_value TerminateAbilityPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo);
-
-/**
  * @brief SetResult processing function.
  *
  * @param env The environment that the Node-API call is invoked under.
@@ -257,7 +254,7 @@ napi_value StartAbilityForResultAsync(napi_env env, AsyncCallbackInfo *asyncCall
 napi_value StartAbilityForResultPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo);
 
 /**
- * @brief TerminateAbility processing function.
+ * @brief ContinueAbility processing function.
  *
  * @param env The environment that the Node-API call is invoked under.
  * @param asyncCallbackInfo Process data asynchronously.
@@ -358,4 +355,4 @@ napi_value NAPI_FADisConnectAbility(napi_env env, napi_callback_info info);
 napi_value NAPI_FAContinueAbility(napi_env env, napi_callback_info info);
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif /* OHOS_APPEXECFWK_FEATURE_ABILITY_H */
+#endif /* OHOS_ABILITY_RUNTIME_FEATURE_ABILITY_H */

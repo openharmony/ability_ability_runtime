@@ -15,6 +15,8 @@
 
 #include "free_install_manager.h"
 
+#include <chrono>
+
 #include "ability_info.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
@@ -27,7 +29,12 @@ namespace OHOS {
 namespace AAFwk {
 const std::u16string DMS_FREE_INSTALL_CALLBACK_TOKEN = u"ohos.DistributedSchedule.IDmsFreeInstallCallback";
 const std::string DMS_MISSION_ID = "dmsMissionId";
+const std::string PARAM_FREEINSTALL_APPID = "ohos.freeinstall.params.callingAppId";
+const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.callingBundleNames";
+const std::string PARAM_FREEINSTALL_UID = "ohos.freeinstall.params.callingUid";
 constexpr uint32_t IDMS_CALLBACK_ON_FREE_INSTALL_DONE = 0;
+constexpr uint32_t UPDATE_ATOMOIC_SERVICE_TASK_TIMER = 24 * 60 * 60 * 1000; /* 24h */
+
 FreeInstallManager::FreeInstallManager(const std::weak_ptr<AbilityManagerService> &server)
     : server_(server)
 {
@@ -71,15 +78,77 @@ bool FreeInstallManager::IsTopAbility(const sptr<IRemoteObject> &callerToken)
 }
 
 int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int requestCode,
-    const sptr<IRemoteObject> &callerToken, bool ifOperateRemote)
+    const sptr<IRemoteObject> &callerToken)
 {
+    HILOG_INFO("StartFreeInstall called");
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall && !IsTopAbility(callerToken)) {
+        return NOT_TOP_ABILITY;
+    }
+    FreeInstallInfo info = BuildFreeInstallInfo(want, userId, requestCode, callerToken);
+    {
+        std::lock_guard<std::mutex> lock(freeInstallListLock_);
+        freeInstallList_.push_back(info);
+    }
+    sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this());
+    auto bms = AbilityUtil::GetBundleManager();
+    CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
+    AppExecFwk::AbilityInfo abilityInfo = {};
+    constexpr auto flag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION;
+    info.want.SetParam(PARAM_FREEINSTALL_UID, IPCSkeleton::GetCallingUid());
+    if (bms->QueryAbilityInfo(info.want, flag, info.userId, abilityInfo, callback)) {
+        HILOG_INFO("The app has installed.");
+    }
+    std::string callingAppId = info.want.GetStringParam(PARAM_FREEINSTALL_APPID);
+    std::vector<std::string> callingBundleNames = info.want.GetStringArrayParam(PARAM_FREEINSTALL_BUNDLENAMES);
+    if (callingAppId.empty() && callingBundleNames.empty()) {
+        HILOG_INFO("callingAppId and callingBundleNames are empty");
+    }
+    info.want.RemoveParam(PARAM_FREEINSTALL_APPID);
+    info.want.RemoveParam(PARAM_FREEINSTALL_BUNDLENAMES);
+    auto future = info.promise->get_future();
+    std::future_status status = future.wait_for(std::chrono::milliseconds(DELAY_LOCAL_FREE_INSTALL_TIMEOUT));
+    if (status == std::future_status::timeout) {
+        info.isInstalled = true;
+        return FREE_INSTALL_TIMEOUT;
+    }
+    return future.get();
+}
+
+int FreeInstallManager::RemoteFreeInstall(const Want &want, int32_t userId, int requestCode,
+    const sptr<IRemoteObject> &callerToken)
+{
+    HILOG_INFO("RemoteFreeInstall called");
     bool isFromRemote = want.GetBoolParam(FROM_REMOTE_KEY, false);
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall && !isFromRemote) {
-        if (!IsTopAbility(callerToken)) {
-            return HandleFreeInstallErrorCode(NOT_TOP_ABILITY);
-        }
+    if (!isSaCall && !isFromRemote && !IsTopAbility(callerToken)) {
+        return NOT_TOP_ABILITY;
     }
+    FreeInstallInfo info = BuildFreeInstallInfo(want, userId, requestCode, callerToken);
+    {
+        std::lock_guard<std::mutex> lock(freeInstallListLock_);
+        freeInstallList_.push_back(info);
+    }
+    sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this());
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    DistributedClient dmsClient;
+    auto result = dmsClient.StartRemoteFreeInstall(info.want, callerUid, info.requestCode, accessToken, callback);
+    if (result != ERR_NONE) {
+        return result;
+    }
+    auto remoteFuture = info.promise->get_future();
+    std::future_status remoteStatus = remoteFuture.wait_for(std::chrono::milliseconds(
+        DELAY_REMOTE_FREE_INSTALL_TIMEOUT));
+    if (remoteStatus == std::future_status::timeout) {
+        return FREE_INSTALL_TIMEOUT;
+    }
+    return remoteFuture.get();
+}
+
+FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32_t userId, int requestCode,
+    const sptr<IRemoteObject> &callerToken)
+{
     auto promise = std::make_shared<std::promise<int32_t>>();
     FreeInstallInfo info = {
         .want = want,
@@ -88,47 +157,16 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
         .callerToken = callerToken,
         .promise = promise
     };
-    freeInstallList_.push_back(info);
-    sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this());
-    if (ifOperateRemote) {
-        int32_t callerUid = IPCSkeleton::GetCallingUid();
-        uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-        DistributedClient dmsClient;
-        auto result = dmsClient.StartRemoteFreeInstall(info.want, callerUid, info.requestCode, accessToken, callback);
-        if (result != ERR_NONE) {
-            return HandleFreeInstallErrorCode(result);
-        }
-        auto remoteFuture = info.promise->get_future();
-        std::future_status remoteStatus = remoteFuture.wait_for(std::chrono::milliseconds(
-            DELAY_REMOTE_FREE_INSTALL_TIMEOUT));
-        if (remoteStatus == std::future_status::timeout) {
-            return HandleFreeInstallErrorCode(FREE_INSTALL_TIMEOUT);
-        }
-        return HandleFreeInstallErrorCode(remoteFuture.get());
-    }
-    auto bms = AbilityUtil::GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
-    AppExecFwk::AbilityInfo abilityInfo = {};
-    constexpr auto flag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION;
-    if (bms->QueryAbilityInfo(info.want, flag, info.userId, abilityInfo, callback)) {
-        HILOG_INFO("The app has installed.");
-    }
-    auto future = info.promise->get_future();
-    std::future_status status = future.wait_for(std::chrono::milliseconds(DELAY_LOCAL_FREE_INSTALL_TIMEOUT));
-    if (status == std::future_status::timeout) {
-        info.isInstalled = true;
-        return HandleFreeInstallErrorCode(FREE_INSTALL_TIMEOUT);
-    }
-    return HandleFreeInstallErrorCode(future.get());
+    return info;
 }
 
 int FreeInstallManager::StartRemoteFreeInstall(const Want &want, int requestCode, int32_t validUserId,
-    const sptr<IRemoteObject> &callerToken, bool ifOperateRemote)
+    const sptr<IRemoteObject> &callerToken)
 {
     HILOG_INFO("%{public}s", __func__);
     if (!want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
         HILOG_INFO("%{public}s: StartAbility freeInstall", __func__);
-        return StartFreeInstall(want, validUserId, requestCode, callerToken, ifOperateRemote);
+        return RemoteFreeInstall(want, validUserId, requestCode, callerToken);
     }
     int32_t missionId = DelayedSingleton<AbilityManagerService>::GetInstance()->
         GetMissionIdByAbilityToken(callerToken);
@@ -138,11 +176,12 @@ int FreeInstallManager::StartRemoteFreeInstall(const Want &want, int requestCode
     Want* newWant = const_cast<Want*>(&want);
     newWant->SetParam(DMS_MISSION_ID, missionId);
     HILOG_INFO("%{public}s: StartAbilityForResult freeInstall", __func__);
-    return StartFreeInstall(*newWant, validUserId, requestCode, callerToken, ifOperateRemote);
+    return RemoteFreeInstall(*newWant, validUserId, requestCode, callerToken);
 }
 
 int FreeInstallManager::NotifyDmsCallback(const Want &want, int resultCode)
 {
+    std::lock_guard<std::mutex> autoLock(distributedFreeInstallLock_);
     if (dmsFreeInstallCbs_.empty()) {
         HILOG_ERROR("Has no dms callback.");
         return ERR_INVALID_VALUE;
@@ -188,6 +227,7 @@ int FreeInstallManager::NotifyDmsCallback(const Want &want, int resultCode)
 
 void FreeInstallManager::NotifyFreeInstallResult(const Want &want, int resultCode)
 {
+    std::lock_guard<std::mutex> lock(freeInstallListLock_);
     if (freeInstallList_.empty()) {
         HILOG_INFO("Has no app callback.");
         return;
@@ -205,10 +245,6 @@ void FreeInstallManager::NotifyFreeInstallResult(const Want &want, int resultCod
         if ((*it).isInstalled) {
             it = freeInstallList_.erase(it);
             continue;
-        }
-
-        if (!isFromRemote && resultCode == ERR_OK) {
-            resultCode = ERR_OK;
         }
 
         if ((*it).promise != nullptr) {
@@ -236,10 +272,14 @@ int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, const spt
         .requestCode = requestCode,
         .dmsCallback = callback
     };
-    dmsFreeInstallCbs_.push_back(info);
+
+    {
+        std::lock_guard<std::mutex> autoLock(distributedFreeInstallLock_);
+        dmsFreeInstallCbs_.push_back(info);
+    }
 
     auto freeInstallTask = [manager = shared_from_this(), info]() {
-        auto result = manager->StartFreeInstall(info.want, info.userId, info.requestCode, nullptr, false);
+        auto result = manager->StartFreeInstall(info.want, info.userId, info.requestCode, nullptr);
         if (result != ERR_OK) {
             manager->NotifyDmsCallback(info.want, result);
         }
@@ -253,37 +293,22 @@ int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, const spt
     return ERR_OK;
 }
 
-int FreeInstallManager::HandleFreeInstallErrorCode(int resultCode)
-{
-    auto it = FIErrorStrs.find(static_cast<enum NativeFreeInstallError>(resultCode));
-    if (it != FIErrorStrs.end()) {
-        HILOG_ERROR("Error code : %{public}d, info: %{public}s", resultCode, it->second.c_str());
-    }
-
-    auto itToApp = FIErrorToAppMaps.find(static_cast<enum NativeFreeInstallError>(resultCode));
-    if (itToApp == FIErrorToAppMaps.end()) {
-        HILOG_ERROR("Undefind error code.");
-        return NativeFreeInstallError::UNDEFINE_ERROR_CODE;
-    }
-    return itToApp->second;
-}
-
 int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
-    const sptr<IRemoteObject> &callerToken, std::string& localDeviceId, pid_t pid)
+    const sptr<IRemoteObject> &callerToken, const std::string& localDeviceId)
 {
-    pid_t callingPid = IPCSkeleton::GetCallingPid();
     auto bms = AbilityUtil::GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
-    if (callingPid != pid) {
-        std::string wantBundleName = want.GetElement().GetBundleName();
-        std::string wantAbilityName = want.GetElement().GetAbilityName();
-        std::string wantDeviceId = want.GetElement().GetDeviceID();
-        std::string wantModuleName = want.GetStringParam("moduleName");
-        if (!(localDeviceId == wantDeviceId || wantDeviceId.empty())) {
-            HILOG_ERROR("AbilityManagerService::ConnectFreeInstall. wantDeviceId error");
-            return ERR_INVALID_VALUE;
-        }
+    std::string wantDeviceId = want.GetElement().GetDeviceID();
+    if (!(localDeviceId == wantDeviceId || wantDeviceId.empty())) {
+        HILOG_ERROR("AbilityManagerService::ConnectFreeInstall. wantDeviceId error");
+        return ERR_INVALID_VALUE;
+    }
 
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        std::string wantAbilityName = want.GetElement().GetAbilityName();
+        std::string wantBundleName = want.GetElement().GetBundleName();
+        std::string wantModuleName = want.GetElement().GetModuleName();
         if (wantBundleName.empty() || wantAbilityName.empty()) {
             HILOG_ERROR("AbilityManagerService::ConnectFreeInstall. wantBundleName or wantAbilityName is empty");
             return ERR_INVALID_VALUE;
@@ -298,10 +323,13 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
     }
 
     AppExecFwk::AbilityInfo abilityInfo;
-    if (!(bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId,
-        abilityInfo))) {
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    if (!(bms->QueryAbilityInfo(
+        want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfo)) &&
+        !bms->QueryExtensionAbilityInfos(
+            want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos)) {
         HILOG_INFO("AbilityManagerService::ConnectFreeInstall. try to StartFreeInstall");
-        int result = StartFreeInstall(want, userId, DEFAULT_INVAL_VALUE, callerToken, false);
+        int result = StartFreeInstall(want, userId, DEFAULT_INVAL_VALUE, callerToken);
         if (result) {
             HILOG_ERROR("AbilityManagerService::ConnectFreeInstall. StartFreeInstall error");
             return result;
@@ -311,17 +339,34 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
     return ERR_OK;
 }
 
+std::time_t FreeInstallManager::GetTimeStamp()
+{
+    std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> tp =
+        std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now());
+    std::time_t timestamp = tp.time_since_epoch().count();
+    return timestamp;
+}
+
 void FreeInstallManager::OnInstallFinished(int resultCode, const Want &want, int32_t userId)
 {
     HILOG_INFO("%{public}s resultCode = %{public}d", __func__, resultCode);
     NotifyDmsCallback(want, resultCode);
     NotifyFreeInstallResult(want, resultCode);
 
+    std::weak_ptr<FreeInstallManager> thisWptr(shared_from_this());
     if (resultCode == ERR_OK) {
-        auto updateAtmoicServiceTask = [want, userId]() {
-            auto bms = AbilityUtil::GetBundleManager();
-            CHECK_POINTER(bms);
-            bms->UpgradeAtomicService(want, userId);
+        auto updateAtmoicServiceTask = [want, userId, thisWptr, &timeStampMap = timeStampMap_]() {
+            auto sptr = thisWptr.lock();
+            HILOG_DEBUG("bundleName: %{public}s, moduleName: %{public}s", want.GetElement().GetBundleName().c_str(),
+                want.GetElement().GetModuleName().c_str());
+            std::string nameKey = want.GetElement().GetBundleName() + want.GetElement().GetModuleName();
+            if (timeStampMap.find(nameKey) == timeStampMap.end() ||
+                sptr->GetTimeStamp() - timeStampMap[nameKey] > UPDATE_ATOMOIC_SERVICE_TASK_TIMER) {
+                auto bms = AbilityUtil::GetBundleManager();
+                CHECK_POINTER(bms);
+                bms->UpgradeAtomicService(want, userId);
+                timeStampMap.emplace(nameKey, sptr->GetTimeStamp());
+            }
         };
 
         std::shared_ptr<AbilityEventHandler> handler =

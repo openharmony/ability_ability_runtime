@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_APPLICATION_H
-#define FOUNDATION_APPEXECFWK_OHOS_APPLICATION_H
+#ifndef OHOS_ABILITY_RUNTIME_OHOS_APPLICATION_H
+#define OHOS_ABILITY_RUNTIME_OHOS_APPLICATION_H
 
 #include <string>
 #include <list>
@@ -280,6 +280,10 @@ public:
      */
     void SetExtensionTypeMap(std::map<int32_t, std::string> map);
 
+    void NotifyLoadRepairPatch(const std::string &hqfFile, const std::string &hapPath);
+
+    void NotifyHotReloadPage();
+
 private:
     std::list<std::shared_ptr<AbilityLifecycleCallbacks>> abilityLifecycleCallbacks_;
     std::list<std::shared_ptr<ElementsCallback>> elementsCallbacks_;
@@ -292,4 +296,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_APPLICATION_H
+#endif  // OHOS_ABILITY_RUNTIME_OHOS_APPLICATION_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_KITS_APPKIT_TEST_MOCK_APPLICATION_H
-#define FOUNDATION_APPEXECFWK_KITS_APPKIT_TEST_MOCK_APPLICATION_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_APPLICATION_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_APPLICATION_H
 
 #include <gtest/gtest.h>
 #include "ohos_application.h"
@@ -65,4 +65,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_KITS_APPKIT_TEST_MOCK_APPLICATION_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_APPLICATION_H

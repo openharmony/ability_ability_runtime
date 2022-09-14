@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_FORMMGR_INCLUDE_FORMMGR_FORM_SUPPLY_CALLBACK_H
-#define FOUNDATION_APPEXECFWK_SERVICES_FORMMGR_INCLUDE_FORMMGR_FORM_SUPPLY_CALLBACK_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_FORM_SUPPLY_CALLBACK_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_FORM_SUPPLY_CALLBACK_H
 
 #include "form_supply_stub.h"
 
@@ -36,14 +36,14 @@ public:
      * @param providerFormInfo providerFormInfo
      * @param want data
      */
-    virtual int OnAcquire(const FormProviderInfo &formInfo, const Want& want) override;
+    int OnAcquire(const FormProviderInfo &formInfo, const Want& want) override;
 
     /**
      * onEventHandle
      *
      * @param want data
      */
-    virtual int OnEventHandle(const Want& want) override;
+    int OnEventHandle(const Want& want) override;
 
     /**
      * OnAcquireStateResult
@@ -53,8 +53,11 @@ public:
      * @param wantArg The want of onAcquireFormState.
      * @param want input data
      */
-    virtual int OnAcquireStateResult(FormState state, const std::string &provider, const Want &wantArg,
+    int OnAcquireStateResult(FormState state, const std::string &provider, const Want &wantArg,
                                      const Want &want) override;
+
+    void OnShareAcquire(int64_t formId, const std::string &remoteDeviceId,
+        const AAFwk::WantParams &wantParams, int64_t requestCode, const bool &result) override;
 
 private:
     static std::mutex mutex;
@@ -64,4 +67,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_FORMMGR_INCLUDE_FORMMGR_FORM_SUPPLY_CALLBACK_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_FORM_SUPPLY_CALLBACK_H

@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ABILITYRUNTIME_OHOS_EXTENSION_H
-#define FOUNDATION_ABILITYRUNTIME_OHOS_EXTENSION_H
+#ifndef OHOS_ABILITY_RUNTIME_EXTENSION_H
+#define OHOS_ABILITY_RUNTIME_EXTENSION_H
 
 #include <string>
 
+#include "ability_transaction_callback_info.h"
 #include "iremote_object.h"
 #include "want.h"
 
@@ -94,6 +95,16 @@ public:
     virtual void OnDisconnect(const AAFwk::Want &want);
 
     /**
+     * @brief Called when all abilities connected to this Service extension are disconnected.
+     *
+     * You can override this function to implement your own processing logic.
+     * @param callbackInfo Indicates the lifecycle transaction callback information
+     * @param isAsyncCallback Indicates whether it is an asynchronous lifecycle callback
+     */
+    virtual void OnDisconnect(const AAFwk::Want &want, AppExecFwk::AbilityTransactionCallbackInfo *callbackInfo,
+        bool &isAsyncCallback);
+
+    /**
      * @brief Called back when Service is started.
      * This method can be called only by Service. You can use the StartAbility(ohos.aafwk.content.Want) method to start
      * Service. Then the system calls back the current method to use the transferred want parameter to execute its own
@@ -124,6 +135,13 @@ public:
     virtual void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration);
 
     /**
+     * @brief Notify current memory level.
+     *
+     * @param level Current memory level.
+     */
+    virtual void OnMemoryLevel(int level);
+
+    /**
      * @brief Called when extension need dump info.
      *
      * @param params The params from service.
@@ -141,4 +159,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // FOUNDATION_ABILITYRUNTIME_OHOS_EXTENSION_H
+#endif  // OHOS_ABILITY_RUNTIME_EXTENSION_H

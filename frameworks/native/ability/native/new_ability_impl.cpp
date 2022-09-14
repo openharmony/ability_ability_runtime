@@ -41,7 +41,7 @@ void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Lif
     }
     if ((lifecycleState_ == targetState.state) && !targetState.isNewWant) {
         if (ability_ != nullptr && targetState.state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
-            ability_->RequsetFocus(want);
+            ability_->RequestFocus(want);
             AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, targetState.state, GetRestoreData());
         }
         HILOG_ERROR("Org lifeCycleState equals to Dst lifeCycleState.");
@@ -49,20 +49,26 @@ void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Lif
     }
 #endif
     SetLifeCycleStateInfo(targetState);
-
-    ability_->SetLaunchParam(targetState.launchParam);
-    if (ability_ && lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL) {
-        ability_->SetStartAbilitySetting(targetState.setting);
-        Start(want);
-        CheckAndRestore();
+    if (ability_ != nullptr) {
+        ability_->SetLaunchParam(targetState.launchParam);
+        if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL) {
+            ability_->SetStartAbilitySetting(targetState.setting);
+            Start(want);
+            CheckAndRestore();
+        }
     }
 
     bool ret = false;
     ret = AbilityTransaction(want, targetState);
     if (ret) {
-        HILOG_INFO("Handle ability transaction done, notify ability manager service.");
-        AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, targetState.state, GetRestoreData());
+        AbilityTransactionCallback(targetState.state);
     }
+}
+
+void NewAbilityImpl::AbilityTransactionCallback(const AbilityLifeCycleState &state)
+{
+    HILOG_INFO("Handle ability transaction done, notify ability manager service.");
+    AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, state, GetRestoreData());
 }
 
 /**
@@ -76,7 +82,7 @@ void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Lif
  */
 bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState)
 {
-    HILOG_INFO("NewAbilityImpl::AbilityTransaction begin");
+    HILOG_DEBUG("NewAbilityImpl::AbilityTransaction begin");
     bool ret = true;
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
@@ -85,7 +91,12 @@ bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycle
                 Background();
             }
 #endif
-            Stop();
+            bool isAsyncCallback = false;
+            Stop(isAsyncCallback);
+            if (isAsyncCallback) {
+                // AMS will be notified after async callback
+                ret = false;
+            }
             break;
         }
         case AAFwk::ABILITY_STATE_FOREGROUND_NEW: {
@@ -95,7 +106,7 @@ bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycle
 #ifdef SUPPORT_GRAPHICS
             if (lifecycleState_ == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
                 if (ability_) {
-                    ability_->RequsetFocus(want);
+                    ability_->RequestFocus(want);
                 }
             } else {
                 Foreground(want);
@@ -119,7 +130,7 @@ bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycle
             break;
         }
     }
-    HILOG_INFO("NewAbilityImpl::AbilityTransaction end: retVal = %{public}d", (int)ret);
+    HILOG_DEBUG("NewAbilityImpl::AbilityTransaction end: retVal = %{public}d", (int)ret);
     return ret;
 }
 }  // namespace AppExecFwk

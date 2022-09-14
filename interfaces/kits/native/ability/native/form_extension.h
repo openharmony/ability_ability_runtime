@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_FORM_EXTENSION_H
-#define FOUNDATION_APPEXECFWK_OHOS_FORM_EXTENSION_H
+#ifndef OHOS_ABILITY_RUNTIME_FORM_EXTENSION_H
+#define OHOS_ABILITY_RUNTIME_FORM_EXTENSION_H
 
 #include "extension_base.h"
 #include "form_provider_info.h"
@@ -138,7 +138,16 @@ public:
      * @return none.
      */
     virtual FormState OnAcquireFormState(const Want &want);
+
+    /**
+     * @brief Request currently shared data
+     *
+     * @param wantParams Indicates the form share information data.
+     *
+     * @return none.
+     */
+    virtual bool OnShare(int64_t formId, AAFwk::WantParams &wantParams);
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_FORM_EXTENSION_H
+#endif  // OHOS_ABILITY_RUNTIME_FORM_EXTENSION_H

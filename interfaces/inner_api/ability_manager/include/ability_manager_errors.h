@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_ERRORS_H
-#define OHOS_AAFWK_ABILITY_MANAGER_ERRORS_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_ERRORS_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_ERRORS_H
 
 #include <map>
 
@@ -30,7 +30,11 @@ enum {
     /**
      *  Module type: ABility Kit side
      */
-    ABILITY_MODULE_TYPE_KIT = 1
+    ABILITY_MODULE_TYPE_KIT = 1,
+    /**
+     *  Module type: Ability  connection state kit side
+     */
+    ABILITY_MODULE_TYPE_CONNECTION_STATE_KIT = 2
 };
 
 // offset of aafwk error, only be used in this file.
@@ -249,10 +253,26 @@ enum {
      * Result(2097198) for parcel fail.
      */
     ERR_AAFWK_PARCEL_FAIL,
+
     /**
      * Result(2097199) for for implicit start ability is failed.
      */
     ERR_IMPLICIT_START_ABILITY_FAIL,
+
+    /**
+     * Result(2097200) for instance reach to upper limit.
+     */
+    ERR_REACH_UPPER_LIMIT,
+
+    /**
+     * Result(2097201) for window mode.
+     */
+    ERR_AAFWK_INVALID_WINDOW_MODE,
+
+    /**
+     * Result(2097202) for wrong interface call.
+     */
+    ERR_WRONG_INTERFACE_CALL,
 };
 
 enum {
@@ -411,38 +431,6 @@ enum NativeFreeInstallError {
     UNDEFINE_ERROR_CODE = 3,
 };
 
-static const std::map<NativeFreeInstallError, int> FIErrorToAppMaps = {
-    {FREE_INSTALL_OK, 0},
-    {FA_FREE_INSTALL_QUERY_ERROR, 1},
-    {HAG_QUERY_TIMEOUT, 1},
-    {FA_NETWORK_UNAVAILABLE, 2},
-    {FA_FREE_INSTALL_SERVICE_ERROR, 3},
-    {FA_CRASH, 3},
-    {FA_TIMEOUT, 3},
-    {UNKNOWN_EXCEPTION, 3},
-    {NOT_SUPPORT_PA_ON_SAME_DEVICE, 3},
-    {FA_INTERNET_ERROR, 3},
-    {JUMP_TO_THE_APPLICATION_MARKET_UPGRADE, 3},
-    {USER_GIVES_UP, 4},
-    {INSTALLATION_ERROR_IN_FREE_INSTALL, 4},
-    {HAP_PACKAGE_DOWNLOAD_TIMED_OUT, 4},
-    {CONCURRENT_TASKS_WAITING_FOR_RETRY, 5},
-    {FA_PACKAGE_DOES_NOT_SUPPORT_FREE_INSTALL, 6},
-    {NOT_ALLOWED_TO_PULL_THIS_FA, 7},
-    {NOT_SUPPORT_CROSS_DEVICE_FREE_INSTALL_PA, 7},
-    {DMS_PERMISSION_DENIED, 8},
-    {DMS_COMPONENT_ACCESS_PERMISSION_DENIED, 8},
-    {DMS_ACCOUNT_ACCESS_PERMISSION_DENIED, 8},
-    {INVALID_PARAMETERS_ERR, 9},
-    {INVALID_REMOTE_PARAMETERS_ERR, 9},
-    {REMOTE_DEVICE_NOT_COMPATIBLE, 10},
-    {DEVICE_OFFLINE_ERR, 11},
-    {FREE_INSTALL_TIMEOUT, 12},
-    {NOT_TOP_ABILITY, 13},
-    {TARGET_BUNDLE_NOT_EXIST, 14},
-    {CONTINUE_FREE_INSTALL_FAILED, 15},
-};
-
 static const std::map<NativeFreeInstallError, std::string> FIErrorStrs = {
     {
         FREE_INSTALL_OK,
@@ -563,4 +551,4 @@ static const std::map<NativeFreeInstallError, std::string> FIErrorStrs = {
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_ERRORS_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_ERRORS_H

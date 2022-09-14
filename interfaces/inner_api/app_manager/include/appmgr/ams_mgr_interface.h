@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_AMS_MGR_INTERFACE_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_AMS_MGR_INTERFACE_H
+#ifndef OHOS_ABILITY_RUNTIME_AMS_MGR_INTERFACE_H
+#define OHOS_ABILITY_RUNTIME_AMS_MGR_INTERFACE_H
 
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -140,6 +140,16 @@ public:
      */
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid) = 0;
 
+    /**
+     * Kill the application self.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int KillApplicationSelf()
+    {
+        return ERR_OK;
+    }
+
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) = 0;
 
     virtual void PrepareTerminate(const sptr<IRemoteObject> &token) = 0;
@@ -173,9 +183,10 @@ public:
         UPDATE_CONFIGURATION,
         GET_CONFIGURATION,
         GET_APPLICATION_INFO_BY_PROCESS_ID,
+        KILL_APPLICATION_SELF
     };
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_AMS_MGR_INTERFACE_H
+#endif  // OHOS_ABILITY_RUNTIME_AMS_MGR_INTERFACE_H

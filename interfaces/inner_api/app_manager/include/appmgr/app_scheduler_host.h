@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_HOST_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_HOST_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_SCHEDULER_HOST_H
+#define OHOS_ABILITY_RUNTIME_APP_SCHEDULER_HOST_H
 
 #include <map>
 
@@ -40,6 +40,7 @@ private:
     int32_t HandleScheduleTerminateApplication(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleLowMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleShrinkMemory(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleScheduleMemoryLevel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleLaunchAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleCleanAbility(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleLaunchApplication(MessageParcel &data, MessageParcel &reply);
@@ -48,6 +49,8 @@ private:
     int32_t HandleScheduleConfigurationUpdated(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleProcessSecurityExit(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleAcceptWant(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply);
 
     using AppSchedulerFunc = int32_t (AppSchedulerHost::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, AppSchedulerFunc> memberFuncMap_;
@@ -56,4 +59,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_HOST_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_SCHEDULER_HOST_H

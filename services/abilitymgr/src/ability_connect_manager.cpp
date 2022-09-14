@@ -24,6 +24,7 @@
 #include "hitrace_meter.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
+#include "parameter.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -61,7 +62,9 @@ int AbilityConnectManager::TerminateAbility(const std::shared_ptr<AbilityRecord>
                 if (it->GetCaller() == caller && it->GetRequestCode() == requestCode) {
                     targetAbility = service.second;
                     if (targetAbility) {
-                        result = AbilityUtil::JudgeAbilityVisibleControl(targetAbility->GetAbilityInfo());
+                        auto abilityMs = DelayedSingleton<AbilityManagerService>::GetInstance();
+                        CHECK_POINTER(abilityMs);
+                        result = abilityMs->JudgeAbilityVisibleControl(targetAbility->GetAbilityInfo());
                     }
                     break;
                 }
@@ -208,6 +211,10 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
     auto serviceMapIter = serviceMap_.find(element.GetURI());
     if (serviceMapIter == serviceMap_.end()) {
         targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        if (targetService) {
+            targetService->SetOwnerMissionUserId(userId_);
+        }
+
         if (isCreatedByConnect && targetService != nullptr) {
             targetService->SetCreateByConnectMode();
         }
@@ -240,7 +247,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Connect ability called, callee:%{public}s.", abilityRequest.want.GetElement().GetURI().c_str());
+    HILOG_DEBUG("Connect ability called, callee:%{public}s.", abilityRequest.want.GetElement().GetURI().c_str());
     std::lock_guard<std::recursive_mutex> guard(Lock_);
 
     // 1. get target service ability record, and check whether it has been loaded.
@@ -261,6 +268,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     // 4. Other cases , need to connect the service ability
     auto connectRecord = ConnectionRecord::CreateConnectionRecord(callerToken, targetService, connect);
     CHECK_POINTER_AND_RETURN(connectRecord, ERR_INVALID_VALUE);
+    connectRecord->AttachCallerInfo();
     connectRecord->SetConnectState(ConnectionState::CONNECTING);
     targetService->AddConnectRecordToList(connectRecord);
     connectRecordList.push_back(connectRecord);
@@ -314,7 +322,9 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             auto abilityRecord = connectRecord->GetAbilityRecord();
             CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
             HILOG_INFO("Disconnect ability, caller:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
-            int result = AbilityUtil::JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
+            auto abilityMs = DelayedSingleton<AbilityManagerService>::GetInstance();
+            CHECK_POINTER_AND_RETURN(abilityMs, GET_ABILITY_SERVICE_FAILED);
+            int result = abilityMs->JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
             if (result != ERR_OK) {
                 HILOG_ERROR("Judge ability visible error.");
                 return result;
@@ -352,7 +362,7 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
         eventHandler_->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetEventId());
     }
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_INFO("Ability: %{public}s", element.c_str());
+    HILOG_DEBUG("Ability: %{public}s", element.c_str());
     abilityRecord->SetScheduler(scheduler);
     abilityRecord->Inactivate();
 
@@ -367,7 +377,7 @@ void AbilityConnectManager::OnAbilityRequestDone(const sptr<IRemoteObject> &toke
     auto abilityRecord = GetServiceRecordByToken(token);
     CHECK_POINTER(abilityRecord);
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_INFO("Ability: %{public}s", element.c_str());
+    HILOG_DEBUG("Ability: %{public}s", element.c_str());
 
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         abilityRecord->Inactivate();
@@ -405,7 +415,7 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
     int targetState = AbilityRecord::ConvertLifeCycleToAbilityState(static_cast<AbilityLifeCycleState>(state));
     std::string abilityState = AbilityRecord::ConvertAbilityState(static_cast<AbilityState>(targetState));
-    HILOG_INFO("Ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
+    HILOG_DEBUG("Ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
 
     switch (state) {
         case AbilityState::INACTIVE: {
@@ -496,7 +506,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     }
 
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_INFO("Disconnect ability done, service:%{public}s.", element.c_str());
+    HILOG_DEBUG("Disconnect ability done, service:%{public}s.", element.c_str());
 
     // complete disconnect and remove record from conn map
     connect->ScheduleDisconnectAbilityDone();
@@ -671,6 +681,16 @@ void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord>
         delayTime = AbilityManagerService::CONNECT_TIMEOUT;
     }
 
+    // check libc.hook_mode
+    const int bufferLen = 128;
+    char paramOutBuf[bufferLen] = {0};
+    const char *hook_mode = "startup:";
+    int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen - 1);
+    if (ret > 0 && strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0) {
+        HILOG_DEBUG("Hook_mode: no timeoutTask");
+        return;
+    }
+
     auto timeoutTask = [abilityRecord, connectManager = shared_from_this(), resultCode]() {
         HILOG_WARN("Connect or load ability timeout.");
         connectManager->HandleStartTimeoutTask(abilityRecord, resultCode);
@@ -777,7 +797,7 @@ void AbilityConnectManager::HandleTerminateDisconnectTask(const ConnectListType&
         auto targetService = connectRecord->GetAbilityRecord();
         if (targetService) {
             HILOG_WARN("This record complete disconnect directly. recordId:%{public}d", connectRecord->GetRecordId());
-            connectRecord->CompleteDisconnect(ERR_OK, false);
+            connectRecord->CompleteDisconnect(ERR_OK, true);
             targetService->RemoveConnectRecordFromList(connectRecord);
             RemoveConnectionRecordFromMap(connectRecord);
         };
@@ -899,7 +919,7 @@ void AbilityConnectManager::RemoveServiceAbility(const std::shared_ptr<AbilityRe
     const AppExecFwk::AbilityInfo &abilityInfo = abilityRecord->GetAbilityInfo();
     AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName,
         abilityInfo.name, abilityInfo.moduleName);
-    HILOG_INFO("Remove service(%{public}s) from map.", element.GetURI().c_str());
+    HILOG_DEBUG("Remove service(%{public}s) from map.", element.GetURI().c_str());
     auto it = serviceMap_.find(element.GetURI());
     if (it != serviceMap_.end()) {
         HILOG_INFO("Remove service(%{public}s) from map.", abilityInfo.name.c_str());
@@ -1032,22 +1052,37 @@ bool AbilityConnectManager::IsAbilityNeedRestart(const std::shared_ptr<AbilityRe
         return false;
     }
 
-    auto GetKeepAliveAbilities = [&bundleInfos](std::vector<std::pair<std::string, std::string>> &keepAliveAbilities) {
+    auto CheckIsAbilityKeepAlive = [](const AppExecFwk::HapModuleInfo &hapModuleInfo,
+        const std::string processName, std::string &mainElement) {
+        if (!hapModuleInfo.isModuleJson) {
+            // old application model
+            mainElement = hapModuleInfo.mainAbility;
+            for (auto abilityInfo : hapModuleInfo.abilityInfos) {
+                if (abilityInfo.process == processName && abilityInfo.name == mainElement) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // new application model
+        if (hapModuleInfo.process == processName) {
+            mainElement = hapModuleInfo.mainElementName;
+            return true;
+        }
+        return false;
+    };
+
+    auto GetKeepAliveAbilities = [&](std::vector<std::pair<std::string, std::string>> &keepAliveAbilities) {
         for (size_t i = 0; i < bundleInfos.size(); i++) {
-            if (!bundleInfos[i].isKeepAlive) {
+            std::string processName = bundleInfos[i].applicationInfo.process;
+            if (!bundleInfos[i].isKeepAlive || processName.empty()) {
                 continue;
             }
             std::string bundleName = bundleInfos[i].name;
             for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
                 std::string mainElement;
-                if (!hapModuleInfo.isModuleJson) {
-                    // old application model
-                    mainElement = hapModuleInfo.mainAbility;
-                } else {
-                    // new application model
-                    mainElement = hapModuleInfo.mainElementName;
-                }
-                if (!mainElement.empty()) {
+                if (CheckIsAbilityKeepAlive(hapModuleInfo, processName, mainElement) && !mainElement.empty()) {
                     keepAliveAbilities.push_back(std::make_pair(bundleName, mainElement));
                 }
             }

@@ -17,6 +17,7 @@
 
 #include "appexecfwk_errors.h"
 #include "hilog_wrapper.h"
+#include "hitrace_meter.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
 
@@ -266,6 +267,31 @@ int32_t AppMgrProxy::GetProcessRunningInfosByUserId(std::vector<RunningProcessIn
     return result;
 }
 
+int32_t AppMgrProxy::NotifyMemoryLevel(int32_t level)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    data.WriteInt32(level);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote() is NULL");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t ret =
+        remote->SendRequest(
+            static_cast<uint32_t>(IAppMgr::Message::APP_NOTIFY_MEMORY_LEVEL), data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
+    }
+    int result = reply.ReadInt32();
+    return result;
+}
+
 bool AppMgrProxy::SendTransactCmd(IAppMgr::Message code, MessageParcel &data, MessageParcel &reply)
 {
     MessageOption option(MessageOption::TF_SYNC);
@@ -280,38 +306,6 @@ bool AppMgrProxy::SendTransactCmd(IAppMgr::Message code, MessageParcel &data, Me
         return false;
     }
     return true;
-}
-
-/**
- * Get system memory information.
- * @param SystemMemoryAttr, memory information.
- */
-void AppMgrProxy::GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("WriteInterfaceToken failed");
-        return;
-    }
-
-    if (!data.WriteString(strConfig)) {
-        HILOG_ERROR("want write failed.");
-        return;
-    }
-
-    if (!SendTransactCmd(IAppMgr::Message::APP_GET_SYSTEM_MEMORY_ATTR, data, reply)) {
-        HILOG_ERROR("SendTransactCmd failed");
-        return;
-    }
-
-    std::shared_ptr<SystemMemoryAttr> remoteRetsult(reply.ReadParcelable<SystemMemoryAttr>());
-    if (remoteRetsult == nullptr) {
-        HILOG_ERROR("recv SystemMemoryAttr failed");
-        return;
-    }
-
-    memoryInfo = *remoteRetsult;
 }
 
 void AppMgrProxy::AddAbilityStageDone(const int32_t recordId)
@@ -380,7 +374,7 @@ int AppMgrProxy::GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcel
 }
 
 int AppMgrProxy::RegisterApplicationStateObserver(
-    const sptr<IApplicationStateObserver> &observer)
+    const sptr<IApplicationStateObserver> &observer, const std::vector<std::string> &bundleNameList)
 {
     if (!observer) {
         HILOG_ERROR("observer null");
@@ -395,6 +389,10 @@ int AppMgrProxy::RegisterApplicationStateObserver(
     }
     if (!data.WriteRemoteObject(observer->AsObject())) {
         HILOG_ERROR("observer write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteStringVector(bundleNameList)) {
+        HILOG_ERROR("bundleNameList write failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -571,7 +569,7 @@ int AppMgrProxy::StartRenderProcess(const std::string &renderParam, int32_t ipcF
     int32_t sharedFd, pid_t &renderPid)
 {
     if (renderParam.empty() || ipcFd <= 0 || sharedFd <= 0) {
-        HILOG_ERROR("Invalid params, renderParam:%{public}s, ipcFd:%{public}d, sharedFd:%{public}d",
+        HILOG_ERROR("Invalid params, renderParam:%{private}s, ipcFd:%{public}d, sharedFd:%{public}d",
             renderParam.c_str(), ipcFd, sharedFd);
         return -1;
     }
@@ -796,5 +794,104 @@ int AppMgrProxy::BlockAppService()
     return reply.ReadInt32();
 }
 #endif
+
+bool AppMgrProxy::GetAppRunningStateByBundleName(const std::string &bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return false;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        HILOG_ERROR("Write bundle name failed.");
+        return false;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::GET_APP_RUNNING_STATE),
+        data, reply, option);
+    if (ret != 0) {
+        HILOG_WARN("Send request failed with error code %{public}d.", ret);
+        return false;
+    }
+
+    return reply.ReadBool();
+}
+
+int32_t AppMgrProxy::NotifyLoadRepairPatch(const std::string &bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        HILOG_ERROR("Write bundle name failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::NOTIFY_LOAD_REPAIR_PATCH),
+        data, reply, option);
+    if (ret != 0) {
+        HILOG_WARN("Send request failed with error code %{public}d.", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::NotifyHotReloadPage(const std::string &bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteString(bundleName)) {
+        HILOG_ERROR("Write bundle name failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::NOTIFY_HOT_RELOAD_PAGE),
+        data, reply, option);
+    if (ret != 0) {
+        HILOG_WARN("Send request failed with error code %{public}d.", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

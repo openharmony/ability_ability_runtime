@@ -13,13 +13,15 @@
 
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-config("aafwk_module_test_config") {
-  defines = [
-    # "AMS_LOG_TAG = \"AbilityMgrService\"",
-    # "AMS_LOG_DOMAIN = 0xD00111F",
-  ]
+config("moduletest_exception_config") {
+  cflags_cc = [ "-fexceptions" ]
+}
 
-  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+config("aafwk_module_test_config") {
+  configs = [
+    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
+    ":moduletest_exception_config",
+  ]
 
   include_dirs = [
     "${ability_runtime_test_path}/moduletest/mock/include",

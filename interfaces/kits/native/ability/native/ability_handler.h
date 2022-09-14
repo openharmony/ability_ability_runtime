@@ -13,19 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_ABILITY_HANDLER_H
-#define FOUNDATION_APPEXECFWK_ABILITY_HANDLER_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_HANDLER_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_HANDLER_H
 
-#include "ability_thread.h"
 #include "event_handler.h"
 #include "refbase.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-class AbilityThread;
 class AbilityHandler : public EventHandler {
 public:
-    AbilityHandler(const std::shared_ptr<EventRunner> &runner, const sptr<AbilityThread> &server);
+    AbilityHandler(const std::shared_ptr<EventRunner> &runner);
     ~AbilityHandler() = default;
 
     /**
@@ -34,10 +32,7 @@ public:
      * @param event The event should be processed.
      */
     void ProcessEvent(const InnerEvent::Pointer &event) override;
-
-private:
-    sptr<AbilityThread> server_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_ABILITY_HANDLER_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_HANDLER_H

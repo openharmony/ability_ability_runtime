@@ -42,6 +42,7 @@ const int CLEAN_ABILITY_SCHEDULED = 1 << 7;
 const int PROFILE_CHANGED_SCHEDULED = 1 << 8;
 const int SCHEDULE_CONFIGURATION_UPDATED = 1 << 9;
 const int ABILITY_RUNNING_RECORD_NUM = 1000;
+const int MEMORY_LEVEL_SCHEDULED = 1 << 10;
 }  // namespace
 class MockedSchedulerBase {
 public:
@@ -89,6 +90,10 @@ public:
     {
         scheduled_ |= LOW_MEMORY_SCHEDULED;
     }
+    void ScheduleMemoryLevel(const int) override
+    {
+        scheduled_ |= MEMORY_LEVEL_SCHEDULED;
+    }
     void ScheduleLaunchApplication(const AppLaunchData &, const Configuration &) override
     {
         scheduled_ |= LAUNCH_APPLICATION_SCHEDULED;
@@ -128,6 +133,16 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override
     {}
+
+    int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName) override
+    {
+        return 0;
+    }
+
+    int32_t ScheduleNotifyHotReloadPage() override
+    {
+        return 0;
+    }
 
     void Reset() override
     {

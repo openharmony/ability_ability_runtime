@@ -276,20 +276,9 @@ private:
     {
         HILOG_INFO("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
-        if (info.argc != ARG_COUNT_TWO && info.argc != ARG_COUNT_THREE) {
-            HILOG_ERROR("missionSnapshot: need two or three params");
-            errCode = ERR_NOT_OK;
-        }
         std::string deviceId;
-        if (!errCode && !ConvertFromJsValue(engine, info.argv[0], deviceId)) {
-            HILOG_ERROR("missionSnapshot: Parse deviceId failed");
-            errCode = ERR_NOT_OK;
-        }
         int32_t missionId = -1;
-        if (!errCode && !ConvertFromJsValue(engine, info.argv[1], missionId)) {
-            HILOG_ERROR("missionSnapshot: Parse missionId failed");
-            errCode = ERR_NOT_OK;
-        }
+        CheckMissionSnapShotParams(engine, info, errCode, deviceId, missionId);
         AsyncTask::CompleteCallback complete =
             [deviceId, missionId, errCode, isLowResolution](NativeEngine &engine, AsyncTask &task, int32_t status) {
                 if (errCode != 0) {
@@ -324,6 +313,23 @@ private:
         AsyncTask::Schedule("MissioManager::OnGetMissionSnapShot",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
+    }
+
+    void CheckMissionSnapShotParams(NativeEngine &engine, NativeCallbackInfo &info, int32_t &errCode,
+        std::string &deviceId, int32_t &missionId)
+    {
+        if (info.argc != ARG_COUNT_TWO && info.argc != ARG_COUNT_THREE) {
+            HILOG_ERROR("missionSnapshot: need two or three params");
+            errCode = ERR_NOT_OK;
+        }
+        if (!errCode && !ConvertFromJsValue(engine, info.argv[0], deviceId)) {
+            HILOG_ERROR("missionSnapshot: Parse deviceId failed");
+            errCode = ERR_NOT_OK;
+        }
+        if (!errCode && !ConvertFromJsValue(engine, info.argv[1], missionId)) {
+            HILOG_ERROR("missionSnapshot: Parse missionId failed");
+            errCode = ERR_NOT_OK;
+        }
     }
 
     NativeValue* OnLockMission(NativeEngine &engine, NativeCallbackInfo &info)
@@ -516,18 +522,21 @@ NativeValue* JsMissionManagerInit(NativeEngine* engine, NativeValue* exportObj)
     std::unique_ptr<JsMissionManager> jsMissionManager = std::make_unique<JsMissionManager>();
     object->SetNativePointer(jsMissionManager.release(), JsMissionManager::Finalizer, nullptr);
 
-    BindNativeFunction(*engine, *object, "registerMissionListener", JsMissionManager::RegisterMissionListener);
-    BindNativeFunction(*engine, *object, "unregisterMissionListener", JsMissionManager::UnregisterMissionListener);
-    BindNativeFunction(*engine, *object, "getMissionInfos", JsMissionManager::GetMissionInfos);
-    BindNativeFunction(*engine, *object, "getMissionInfo", JsMissionManager::GetMissionInfo);
-    BindNativeFunction(*engine, *object, "getMissionSnapShot", JsMissionManager::GetMissionSnapShot);
-    BindNativeFunction(*engine, *object, "getLowResolutionMissionSnapShot",
+    const char *moduleName = "JsMissionManager";
+    BindNativeFunction(*engine, *object, "registerMissionListener",
+        moduleName, JsMissionManager::RegisterMissionListener);
+    BindNativeFunction(*engine, *object, "unregisterMissionListener",
+        moduleName, JsMissionManager::UnregisterMissionListener);
+    BindNativeFunction(*engine, *object, "getMissionInfos", moduleName, JsMissionManager::GetMissionInfos);
+    BindNativeFunction(*engine, *object, "getMissionInfo", moduleName, JsMissionManager::GetMissionInfo);
+    BindNativeFunction(*engine, *object, "getMissionSnapShot", moduleName, JsMissionManager::GetMissionSnapShot);
+    BindNativeFunction(*engine, *object, "getLowResolutionMissionSnapShot", moduleName,
         JsMissionManager::GetLowResolutionMissionSnapShot);
-    BindNativeFunction(*engine, *object, "lockMission", JsMissionManager::LockMission);
-    BindNativeFunction(*engine, *object, "unlockMission", JsMissionManager::UnlockMission);
-    BindNativeFunction(*engine, *object, "clearMission", JsMissionManager::ClearMission);
-    BindNativeFunction(*engine, *object, "clearAllMissions", JsMissionManager::ClearAllMissions);
-    BindNativeFunction(*engine, *object, "moveMissionToFront", JsMissionManager::MoveMissionToFront);
+    BindNativeFunction(*engine, *object, "lockMission", moduleName, JsMissionManager::LockMission);
+    BindNativeFunction(*engine, *object, "unlockMission", moduleName, JsMissionManager::UnlockMission);
+    BindNativeFunction(*engine, *object, "clearMission", moduleName, JsMissionManager::ClearMission);
+    BindNativeFunction(*engine, *object, "clearAllMissions", moduleName, JsMissionManager::ClearAllMissions);
+    BindNativeFunction(*engine, *object, "moveMissionToFront", moduleName, JsMissionManager::MoveMissionToFront);
     return engine->CreateUndefined();
 }
 }  // namespace AbilityRuntime

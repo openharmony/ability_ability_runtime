@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_INTERFACE_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_INTERFACE_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_SCHEDULER_INTERFACE_H
+#define OHOS_ABILITY_RUNTIME_APP_SCHEDULER_INTERFACE_H
 
 #include "iremote_broker.h"
 #include "ability_info.h"
@@ -70,6 +70,14 @@ public:
      * @return
      */
     virtual void ScheduleLowMemory() = 0;
+
+    /**
+     * ScheduleMemoryLevel, call ScheduleMemoryLevel() through proxy project,
+     * Notify applications background the current memory level.
+     *
+     * @return
+     */
+    virtual void ScheduleMemoryLevel(int32_t level) = 0;
 
     /**
      * ScheduleLaunchApplication, call ScheduleLaunchApplication() through proxy project,
@@ -131,6 +139,21 @@ public:
 
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) = 0;
 
+    /**
+     * @brief Notify application load patch.
+     *
+     * @param bundleName Bundle name
+     * @return Returns 0 on success, error code on failure.
+     */
+    virtual int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName) = 0;
+
+    /**
+     * @brief Notify application relaod page.
+     *
+     * @return Returns 0 on success, error code on failure.
+     */
+    virtual int32_t ScheduleNotifyHotReloadPage() = 0;
+
     enum class Message {
         SCHEDULE_FOREGROUND_APPLICATION_TRANSACTION = 0,
         SCHEDULE_BACKGROUND_APPLICATION_TRANSACTION,
@@ -145,8 +168,11 @@ public:
         SCHEDULE_PROCESS_SECURITY_EXIT_TRANSACTION,
         SCHEDULE_ABILITY_STAGE_INFO,
         SCHEDULE_ACCEPT_WANT,
+        SCHEDULE_MEMORYLEVEL_APPLICATION_TRANSACTION,
+        SCHEDULE_NOTIFY_LOAD_REPAIR_PATCH,
+        SCHEDULE_NOTIFY_HOT_RELOAD_PAGE,
     };
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_INTERFACE_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_SCHEDULER_INTERFACE_H

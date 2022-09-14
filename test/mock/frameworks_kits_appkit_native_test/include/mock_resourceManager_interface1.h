@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_MOCK_RESOURCE_MANAGER_RESOURCEMANAGER1_H
-#define OHOS_MOCK_RESOURCE_MANAGER_RESOURCEMANAGER1_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_RESOURCEMANAGER_INTERFACE1_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_RESOURCEMANAGER_INTERFACE1_H
 
 #include "res_config.h"
 #include <string>

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_ABILITY_TEST_H
-#define MOCK_ABILITY_TEST_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_TEST_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_TEST_H
 
 #include "gmock/gmock.h"
 
@@ -130,4 +130,4 @@ public:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // MOCK_ABILITY_TEST_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_TEST_H

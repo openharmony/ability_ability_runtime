@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_WATCH_DOG_H
-#define FOUNDATION_APPEXECFWK_WATCH_DOG_H
+#ifndef OHOS_ABILITY_RUNTIME_WATCHDOG_H
+#define OHOS_ABILITY_RUNTIME_WATCHDOG_H
 
 #include <string>
 #include <mutex>
@@ -25,24 +25,23 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-const uint32_t MAIN_THREAD_IS_ALIVE = 0;
-const uint32_t MAIN_THREAD_TIMEOUT_TIME = 6000;
-const uint32_t INI_TIMER_FIRST_SECOND = 10000;
-const uint32_t INI_TIMER_SECOND = 3000;
-const std::string MAIN_THREAD_IS_ALIVE_MSG = "MAIN_THREAD_IS_ALIVE";
-class WatchDog : public EventHandler {
+constexpr uint32_t MAIN_THREAD_IS_ALIVE = 0;
+constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
+constexpr uint32_t CHECK_INTERVAL_TIME = 3000;
+constexpr uint32_t INI_TIMER_FIRST_SECOND = 10000;
+constexpr const char* MAIN_THREAD_TIMEOUT_TASK = "MAIN_THREAD_TIMEOUT_TASK";
+class Watchdog {
 public:
-    WatchDog(const std::shared_ptr<EventRunner> &runner);
-    virtual ~WatchDog() = default;
+    Watchdog();
+    virtual ~Watchdog() = default;
 
     /**
      *
      * @brief Init the Watchdog.
      *
      * @param mainHandler The handler of main thread.
-     * @param watchDogHandler The handler of watchdog thread.
      */
-    void Init(const std::shared_ptr<EventHandler> &mainHandler, const std::shared_ptr<WatchDog> &watchDogHandler);
+    void Init(const std::shared_ptr<EventHandler> mainHandler);
 
     /**
      *
@@ -53,48 +52,54 @@ public:
 
     /**
      *
-     * @brief Stop the mainthread function of watchdog.
+     * @brief Set the info of application.
      *
+     * @param applicationInfo The info of application
      */
     void SetApplicationInfo(const std::shared_ptr<ApplicationInfo> &applicationInfo);
 
     /**
      *
-     * @brief Get the eventHandler of watchdog thread.
+     * @brief Set the state of main thread.
      *
-     * @return Returns the eventHandler of watchdog thread.
+     * @param appMainThreadState The state of main thread.
      */
-    static std::shared_ptr<WatchDog> GetCurrentHandler();
+    void SetAppMainThreadState(const bool appMainThreadState);
 
     /**
      *
-     * @brief Get the App main thread state.
+     * @brief Allow report the main thread timeout event.
      *
-     * @return Returns the App main thread state.
      */
-    static bool GetAppMainThreadState();
+    void AllowReportEvent();
 
-protected:
     /**
      *
-     * @brief Process the event.
-     *
-     * @param event the event want to be processed.
+     * @brief Get StopWatchdog flag.
      *
      */
-    void ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer &event) override;
+    bool IsStopWatchdog();
+
+    /**
+     *
+     * @brief Check and reset the main thread state.
+     *
+     */
+    bool IsReportEvent();
 
 private:
-    bool Timer();
+    void Timer();
+    bool WaitForDuration(uint32_t duration);
+    void reportEvent();
 
-    std::atomic_bool stopWatchDog_ = false;
-    std::atomic<bool> timeOut_ = false;
+    std::atomic_bool appMainThreadIsAlive_ = false;
+    std::atomic_bool stopWatchdog_ = false;
+    std::atomic_bool needReport_ = true;
+    std::atomic_bool isSixSecondEvent_ = false;
     std::shared_ptr<ApplicationInfo> applicationInfo_ = nullptr;
-    std::shared_ptr<std::thread> watchDogThread_ = nullptr;
-    std::shared_ptr<EventRunner> watchDogRunner_ = nullptr;
-    static bool appMainThreadIsAlive_;
+    std::mutex cvMutex_;
+    std::condition_variable cvWatchdog_;
     static std::shared_ptr<EventHandler> appMainHandler_;
-    static std::shared_ptr<WatchDog> currentHandler_;
 };
 
 class MainHandlerDumper : public Dumper {
@@ -107,4 +112,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_WATCH_DOG_H
+#endif  // OHOS_ABILITY_RUNTIME_WATCHDOG_H

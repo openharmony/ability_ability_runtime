@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_AAFWK_SERVICES_ABILITYMGR_INCLUDE_MISSION_DATA_STORAGE_H
-#define FOUNDATION_AAFWK_SERVICES_ABILITYMGR_INCLUDE_MISSION_DATA_STORAGE_H
+#ifndef OHOS_ABILITY_RUNTIME_MISSION_DATA_STORAGE_H
+#define OHOS_ABILITY_RUNTIME_MISSION_DATA_STORAGE_H
 
 #include <list>
 #include <mutex>
@@ -26,14 +26,14 @@
 
 namespace OHOS {
 namespace AAFwk {
-const std::string TASK_DATA_FILE_BASE_PATH = "/data/service/el1/public/AbilityManagerService";
-const std::string MISSION_DATA_FILE_PATH = "MissionInfo";
-const std::string MISSION_JSON_FILE_PREFIX = "mission";
-const std::string LOW_RESOLUTION_FLAG = "little";
-const std::string JSON_FILE_SUFFIX = ".json";
-const std::string PNG_FILE_SUFFIX = ".png";
-const std::string FILE_SEPARATOR = "/";
-const std::string UNDERLINE_SEPARATOR = "_";
+constexpr const char* TASK_DATA_FILE_BASE_PATH = "/data/service/el1/public/AbilityManagerService";
+constexpr const char* MISSION_DATA_FILE_PATH = "MissionInfo";
+constexpr const char* MISSION_JSON_FILE_PREFIX = "mission";
+constexpr const char* LOW_RESOLUTION_FLAG = "little";
+constexpr const char* JSON_FILE_SUFFIX = ".json";
+constexpr const char* JPEG_FILE_SUFFIX = ".jpg";
+constexpr const char* FILE_SEPARATOR = "/";
+constexpr const char* UNDERLINE_SEPARATOR = "_";
 const int32_t SCALE = 2;
 
 class MissionDataStorage : public std::enable_shared_from_this<MissionDataStorage> {
@@ -99,7 +99,7 @@ public:
      * @param missionId Indicates this mission id.
      * @return Returns PixelMap of snapshot.
      */
-    sptr<Media::PixelMap> GetSnapshot(int missionId, bool isLowResolution = false) const;
+    std::shared_ptr<Media::PixelMap> GetSnapshot(int missionId, bool isLowResolution = false) const;
 
     std::unique_ptr<Media::PixelMap> GetPixelMap(int missionId, bool isLowResolution) const;
 #endif
@@ -114,7 +114,7 @@ private:
     bool CheckFileNameValid(const std::string &fileName);
 
 #ifdef SUPPORT_GRAPHICS
-    bool WriteToPng(const char* fileName, uint32_t width, uint32_t height, const uint8_t* data);
+    void WriteRgb888ToJpeg(const char* fileName, uint32_t width, uint32_t height, const uint8_t* data);
 
     bool GetCachedSnapshot(int32_t missionId, MissionSnapshot& missionSnapshot);
 
@@ -128,6 +128,11 @@ private:
     void SaveSnapshotFile(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap>& snapshot,
         bool isPrivate, bool isLowResolution);
 
+    bool RGB565ToRGB888(const uint16_t *rgb565Buf, int32_t rgb565Size, uint8_t *rgb888Buf, int32_t rgb888Size);
+    bool RGBA8888ToRGB888(const uint32_t *rgba8888Buf, int32_t rgba8888Size, uint8_t *rgb888Buf, int32_t rgb888Size);
+    void SaveRGB565Image(const std::shared_ptr<Media::PixelMap> &frame, const char* fileName);
+    void SaveRGBA8888Image(const std::shared_ptr<Media::PixelMap> &frame, const char* fileName);
+
     std::map<int32_t, std::shared_ptr<Media::PixelMap>> cachedPixelMap_;
 #endif
 
@@ -137,4 +142,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_AAFWK_SERVICES_ABILITYMGR_INCLUDE_MISSION_DATA_STORAGE_H
+#endif  // OHOS_ABILITY_RUNTIME_MISSION_DATA_STORAGE_H

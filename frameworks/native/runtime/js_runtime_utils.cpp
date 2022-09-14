@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include "hilog_wrapper.h"
 #include "js_runtime.h"
-
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
@@ -43,9 +42,13 @@ NativeValue* CreateJsError(NativeEngine& engine, int32_t errCode, const std::str
     return engine.CreateError(CreateJsValue(engine, errCode), CreateJsValue(engine, message));
 }
 
-void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name, NativeCallback func)
+void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name,
+    const char* moduleName, NativeCallback func)
 {
-    object.SetProperty(name, engine.CreateFunction(name, strlen(name), func, nullptr));
+    std::string fullName(moduleName);
+    fullName += ".";
+    fullName += name;
+    object.SetProperty(name, engine.CreateFunction(fullName.c_str(), fullName.length(), func, nullptr));
 }
 
 void BindNativeProperty(NativeObject& object, const char* name, NativeCallback getter)
@@ -148,7 +151,7 @@ void AsyncTask::Schedule(const std::string &name, NativeEngine& engine, std::uni
 
 void AsyncTask::Resolve(NativeEngine& engine, NativeValue* value)
 {
-    HILOG_INFO("AsyncTask::Resolve is called");
+    HILOG_DEBUG("AsyncTask::Resolve is called");
     if (deferred_) {
         deferred_->Resolve(value);
         deferred_.reset();
@@ -161,7 +164,7 @@ void AsyncTask::Resolve(NativeEngine& engine, NativeValue* value)
         engine.CallFunction(engine.CreateUndefined(), callbackRef_->Get(), argv, ArraySize(argv));
         callbackRef_.reset();
     }
-    HILOG_INFO("AsyncTask::Resolve is called end.");
+    HILOG_DEBUG("AsyncTask::Resolve is called end.");
 }
 
 void AsyncTask::Reject(NativeEngine& engine, NativeValue* error)

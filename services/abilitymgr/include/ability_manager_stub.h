@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_STUB_H
-#define OHOS_AAFWK_ABILITY_MANAGER_STUB_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_STUB_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_STUB_H
 
 #include "ability_manager_interface.h"
 
@@ -22,6 +22,7 @@
 #include <iremote_stub.h>
 
 #include "hilog_wrapper.h"
+#include "iconnection_observer.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -53,6 +54,11 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int DoAbilityBackground(const sptr<IRemoteObject> &token, uint32_t flag) override;
+
+    virtual int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
+
+    virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
+
 private:
     void FirstStepInit();
     void SecondStepInit();
@@ -77,6 +83,7 @@ private:
     int StopExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int StartAbilityAddCallerInner(MessageParcel &data, MessageParcel &reply);
     int ConnectAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int ConnectAbilityWithTypeInner(MessageParcel &data, MessageParcel &reply);
     int DisconnectAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StopServiceAbilityInner(MessageParcel &data, MessageParcel &reply);
     int DumpStateInner(MessageParcel &data, MessageParcel &reply);
@@ -100,7 +107,6 @@ private:
     int GetPendingRequestWantInner(MessageParcel &data, MessageParcel &reply);
     int GetWantSenderInfoInner(MessageParcel &data, MessageParcel &reply);
 
-    int GetSystemMemoryAttrInner(MessageParcel &data, MessageParcel &reply);
     int GetAppMemorySizeInner(MessageParcel &data, MessageParcel &reply);
     int IsRamConstrainedDeviceInner(MessageParcel &data, MessageParcel &reply);
     int ClearUpApplicationDataInner(MessageParcel &data, MessageParcel &reply);
@@ -126,7 +132,7 @@ private:
 
 	// for new version ability (call ability)
     int StartAbilityByCallInner(MessageParcel &data, MessageParcel &reply);
-    int ReleaseInner(MessageParcel &data, MessageParcel &reply);
+    int ReleaseCallInner(MessageParcel &data, MessageParcel &reply);
     int StartUserInner(MessageParcel &data, MessageParcel &reply);
     int StopUserInner(MessageParcel &data, MessageParcel &reply);
     int GetAbilityRunningInfosInner(MessageParcel &data, MessageParcel &reply);
@@ -152,6 +158,9 @@ private:
     int IsRunningInStabilityTestInner(MessageParcel &data, MessageParcel &reply);
     int MoveMissionToFrontByOptionsInner(MessageParcel &data, MessageParcel &reply);
 
+    int UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply);
+    int RegisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
+    int UnregisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
 #ifdef SUPPORT_GRAPHICS
     int SetMissionLabelInner(MessageParcel &data, MessageParcel &reply);
     int SetMissionIconInner(MessageParcel &data, MessageParcel &reply);
@@ -179,4 +188,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_STUB_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_STUB_H

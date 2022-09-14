@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_AMS_MGR_SCHEDULER_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_AMS_MGR_SCHEDULER_H
+#ifndef OHOS_ABILITY_RUNTIME_AMS_MGR_SCHEDULER_H
+#define OHOS_ABILITY_RUNTIME_AMS_MGR_SCHEDULER_H
 
 #include "if_system_ability_manager.h"
 #include "nocopyable.h"
@@ -146,6 +146,8 @@ public:
      */
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid) override;
 
+    virtual int KillApplicationSelf() override;
+
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application) override;
 
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) override;
@@ -177,4 +179,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_AMS_MGR_SCHEDULER_H
+#endif  // OHOS_ABILITY_RUNTIME_AMS_MGR_SCHEDULER_H

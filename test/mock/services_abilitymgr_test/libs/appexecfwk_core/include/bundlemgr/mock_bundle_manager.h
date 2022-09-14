@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MOCK_BUNDLE_MANAGER_H
-#define OHOS_AAFWK_ABILITY_MOCK_BUNDLE_MANAGER_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_BUNDLE_MANAGER_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_BUNDLE_MANAGER_H
 
 #include <vector>
 #include <gmock/gmock.h>
@@ -74,7 +74,7 @@ auto HiMusicInfo = [](std::string bundleName, AbilityInfo &abilityInfo, ElementN
     }
     if (elementTemp.GetAbilityName() == "MusicTopAbility") {
         abilityInfo.process = "p1";
-        abilityInfo.launchMode = LaunchMode::SINGLETOP;
+        abilityInfo.launchMode = LaunchMode::STANDARD;
     }
     if (elementTemp.GetAbilityName() == "MusicSAbility") {
         abilityInfo.process = "p2";
@@ -405,4 +405,4 @@ public:
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
-#endif  // OHOS_AAFWK_ABILITY_MOCK_BUNDLE_MANAGER_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_BUNDLE_MANAGER_H

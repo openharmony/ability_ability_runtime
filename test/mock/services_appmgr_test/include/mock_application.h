@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_TEST_MOCK_APPLICATION_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_TEST_MOCK_APPLICATION_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_APPLICATION_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_APPLICATION_H
 
 #include "gmock/gmock.h"
 #include "semaphore_ex.h"
@@ -28,6 +28,7 @@ public:
     MOCK_METHOD0(ScheduleTerminateApplication, void());
     MOCK_METHOD1(ScheduleShrinkMemory, void(const int));
     MOCK_METHOD0(ScheduleLowMemory, void());
+    MOCK_METHOD1(ScheduleMemoryLevel, void(int32_t level));
     MOCK_METHOD2(ScheduleLaunchApplication, void(const AppLaunchData &, const Configuration &config));
     MOCK_METHOD3(ScheduleLaunchAbility, void(const AbilityInfo &, const sptr<IRemoteObject> &,
         const std::shared_ptr<AAFwk::Want> &));
@@ -37,6 +38,8 @@ public:
     MOCK_METHOD0(ScheduleProcessSecurityExit, void());
     MOCK_METHOD1(ScheduleAbilityStage, void(const HapModuleInfo &));
     MOCK_METHOD2(ScheduleAcceptWant, void(const AAFwk::Want &want, const std::string &moduleName));
+    MOCK_METHOD1(ScheduleNotifyLoadRepairPatch, int32_t(const std::string &bundleName));
+    MOCK_METHOD0(ScheduleNotifyHotReloadPage, int32_t());
 
     void Post()
     {
@@ -110,4 +113,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_TEST_MOCK_APPLICATION_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_APPLICATION_H

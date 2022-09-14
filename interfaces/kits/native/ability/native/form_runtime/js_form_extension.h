@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_JS_FORM_EXTENSION_H
-#define FOUNDATION_APPEXECFWK_OHOS_JS_FORM_EXTENSION_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_FORM_EXTENSION_H
+#define OHOS_ABILITY_RUNTIME_JS_FORM_EXTENSION_H
 
 #include "configuration.h"
 #include "form_extension.h"
@@ -60,6 +60,8 @@ public:
 
     FormState OnAcquireFormState(const Want &want) override;
 
+    bool OnShare(int64_t formId, AAFwk::WantParams &wantParams) override;
+
 private:
     NativeValue* CallObjectMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0);
 
@@ -74,4 +76,4 @@ private:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // FOUNDATION_APPEXECFWK_OHOS_JS_FORM_EXTENSION_H
+#endif // OHOS_ABILITY_RUNTIME_JS_FORM_EXTENSION_H

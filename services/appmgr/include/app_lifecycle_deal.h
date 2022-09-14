@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_LIFECYCLE_DEAL_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_LIFECYCLE_DEAL_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_LIFECYCLE_DEAL_H
+#define OHOS_ABILITY_RUNTIME_APP_LIFECYCLE_DEAL_H
 
 #include "app_scheduler_proxy.h"
 #include "app_launch_data.h"
@@ -93,6 +93,16 @@ public:
     void ScheduleTrimMemory(int32_t timeLevel);
 
     /**
+     * ScheduleMemoryLevel, call ScheduleMemorylevel() through proxy project,
+     * Notifies the application of the current memory.
+     *
+     * @param The memory level.
+     *
+     * @return
+     */
+    void ScheduleMemoryLevel(int32_t Level);
+
+    /**
      * LowMemoryWarning, call ScheduleLowMemory() through proxy project,
      * Notify application to low memory.
      *
@@ -141,10 +151,14 @@ public:
      */
     int32_t UpdateConfiguration(const Configuration &config);
 
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+
+    int32_t NotifyHotReloadPage();
+
 private:
     sptr<IAppScheduler> appThread_ = nullptr;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_LIFECYCLE_DEAL_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_LIFECYCLE_DEAL_H

@@ -15,13 +15,15 @@
 
 #include "permission_verification.h"
 
+#include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "hilog_wrapper.h"
-#include "ipc_skeleton.h"
 #include "permission_constants.h"
 
 namespace OHOS {
 namespace AAFwk {
+const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
+const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const std::string DMS_PROCESS_NAME = "distributedsched";
 bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName)
 {
@@ -38,7 +40,7 @@ bool PermissionVerification::VerifyCallingPermission(const std::string &permissi
 
 bool PermissionVerification::IsSACall()
 {
-    HILOG_DEBUG("AmsMgrScheduler::IsSACall is called.");
+    HILOG_DEBUG("%{public}s: is called.", __func__);
     auto callerToken = GetCallingTokenID();
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
@@ -46,6 +48,19 @@ bool PermissionVerification::IsSACall()
         return true;
     }
     HILOG_DEBUG("Not SA called.");
+    return false;
+}
+
+bool PermissionVerification::IsShellCall()
+{
+    HILOG_DEBUG("%{public}s: is called.", __func__);
+    auto callerToken = GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL) {
+        HILOG_DEBUG("caller tokenType is shell, verify success");
+        return true;
+    }
+    HILOG_DEBUG("Not shell called.");
     return false;
 }
 
@@ -94,11 +109,248 @@ bool PermissionVerification::VerifyControllerPerm()
     return false;
 }
 
+bool PermissionVerification::VerifyDlpPermission(Want &want)
+{
+    if (want.GetIntParam(DLP_PARAMS_INDEX, 0) == 0) {
+        want.RemoveParam(DLP_PARAMS_SECURITY_FLAG);
+        return true;
+    }
+
+    if (IsSACall()) {
+        return true;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_ACCESS_DLP)) {
+        return true;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return false;
+}
+
+int PermissionVerification::VerifyAccountPermission()
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)) {
+        return ERR_OK;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return CHECK_PERMISSION_FAILED;
+}
+
+bool PermissionVerification::VerifyMissionPermission()
+{
+    if (IsSACall()) {
+        return true;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
+        HILOG_DEBUG("%{public}s: Permission verification succeeded.", __func__);
+        return true;
+    }
+    HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+    return false;
+}
+
+int PermissionVerification::VerifyAppStateObserverPermission()
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_RUNNING_STATE_OBSERVER)) {
+        HILOG_INFO("Permission verification succeeded.");
+        return ERR_OK;
+    }
+    HILOG_ERROR("Permission verification failed.");
+    return ERR_PERMISSION_DENIED;
+}
+
+int32_t PermissionVerification::VerifyUpdateConfigurationPerm()
+{
+    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_UPDATE_CONFIGURATION)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
+        return ERR_OK;
+    }
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
+    return ERR_PERMISSION_DENIED;
+}
+
+bool PermissionVerification::VerifyInstallBundlePermission()
+{
+    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_INSTALL_BUNDLE)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_INSTALL_BUNDLE);
+        return true;
+    }
+
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_INSTALL_BUNDLE);
+    return false;
+}
+
+bool PermissionVerification::VerifyGetBundleInfoPrivilegedPermission()
+{
+    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
+        return true;
+    }
+
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
+    return false;
+}
+
+int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInfo &verificationInfo)
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+
+    if ((verificationInfo.apiTargetVersion > API8 || IsShellCall()) &&
+        !JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    if (!JudgeAssociatedWakeUp(verificationInfo.accessTokenId, verificationInfo.associatedWakeUp)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo)
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+
+    if ((verificationInfo.apiTargetVersion > API8 || IsShellCall()) &&
+        !JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    if (!JudgeAssociatedWakeUp(verificationInfo.accessTokenId, verificationInfo.associatedWakeUp)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    return ERR_OK;
+}
+
+int PermissionVerification::CheckCallAbilityPermission(const VerificationInfo &verificationInfo)
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible) &&
+        JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        return ERR_OK;
+    }
+    return CHECK_PERMISSION_FAILED;
+}
+
+int PermissionVerification::CheckCallServiceExtensionPermission(const VerificationInfo &verificationInfo)
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible) &&
+        JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        return ERR_OK;
+    }
+    return CHECK_PERMISSION_FAILED;
+}
+
+int PermissionVerification::CheckCallOtherExtensionPermission(const VerificationInfo &verificationInfo)
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+    if (JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible) &&
+        JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        return ERR_OK;
+    }
+    return CHECK_PERMISSION_FAILED;
+}
+
+int PermissionVerification::CheckStartByCallPermission(const VerificationInfo &verificationInfo)
+{
+    if (IsSACall()) {
+        return ERR_OK;
+    }
+
+    if (IsCallFromSameAccessToken(verificationInfo.accessTokenId)) {
+        HILOG_ERROR("Not remote call, Caller is from same APP, StartAbilityByCall reject");
+        return CHECK_PERMISSION_FAILED;
+    }
+    // Different APP call, check permissions
+    if (!VerifyCallingPermission(PermissionConstants::PERMISSION_ABILITY_BACKGROUND_COMMUNICATION)) {
+        HILOG_ERROR("PERMISSION_ABILITY_BACKGROUND_COMMUNICATION verification failed, StartAbilityByCall reject");
+        return CHECK_PERMISSION_FAILED;
+    }
+    if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    if (!JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    return ERR_OK;
+}
+
 unsigned int PermissionVerification::GetCallingTokenID()
 {
     auto callerToken = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerToken : %{private}u", callerToken);
     return callerToken;
+}
+
+bool PermissionVerification::JudgeStartInvisibleAbility(const uint32_t accessTokenId, const bool visible)
+{
+    if (visible) {
+        HILOG_DEBUG("TargetAbility visible is true, PASS.");
+        return true;
+    }
+    if (IsCallFromSameAccessToken(accessTokenId)) {
+        HILOG_DEBUG("TargetAbility is in same APP, PASS.");
+        return true;
+    }
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_INVISIBLE_ABILITY)) {
+        HILOG_DEBUG("Caller has PERMISSION_START_INVISIBLE_ABILITY, PASS.");
+        return true;
+    }
+    HILOG_ERROR("PERMISSION_START_INVISIBLE_ABILITY verification failed.");
+    return false;
+}
+
+bool PermissionVerification::JudgeStartAbilityFromBackground(const bool isBackgroundCall)
+{
+    if (!isBackgroundCall) {
+        HILOG_DEBUG("Caller is not background, PASS.");
+        return true;
+    }
+    // Temporarily supports permissions with two different spellings
+    // PERMISSION_START_ABILIIES_FROM_BACKGROUND will be removed later due to misspelling
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND) ||
+        VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILIIES_FROM_BACKGROUND)) {
+        HILOG_DEBUG("Caller has PERMISSION_START_ABILITIES_FROM_BACKGROUND, PASS.");
+        return true;
+    }
+    HILOG_ERROR("PERMISSION_START_ABILITIES_FROM_BACKGROUND verification failed.");
+    return false;
+}
+
+bool PermissionVerification::JudgeAssociatedWakeUp(const uint32_t accessTokenId, const bool associatedWakeUp)
+{
+    if (IsCallFromSameAccessToken(accessTokenId)) {
+        HILOG_DEBUG("TargetAbility is in same APP, PASS.");
+        return true;
+    }
+    if (associatedWakeUp) {
+        HILOG_DEBUG("TargetAbility is allowed associatedWakeUp, PASS.");
+        return true;
+    }
+    HILOG_ERROR("The target ServiceAbility/DataAbility is not allowed associatedWakeUp.");
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -203,12 +203,8 @@ void StartSyncRemoteMissionsAsyncWork(napi_env env, const napi_value resourceNam
 
 napi_value NAPI_StartSyncRemoteMissions(napi_env env, napi_callback_info info)
 {
-    HILOG_INFO("%{public}s, test1 called.", __func__);
+    HILOG_INFO("%{public}s, called.", __func__);
     auto syncContext = new SyncRemoteMissionsContext();
-    if (syncContext == nullptr) {
-        HILOG_ERROR("%{public}s, syncContext is nullptr.", __func__);
-        NAPI_ASSERT(env, false, "wrong arguments");
-    }
     if (!ProcessSyncInput(env, info, true, syncContext)) {
         delete syncContext;
         syncContext = nullptr;
@@ -281,10 +277,6 @@ napi_value NAPI_StopSyncRemoteMissions(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("%{public}s, called.", __func__);
     auto syncContext = new SyncRemoteMissionsContext();
-    if (syncContext == nullptr) {
-        HILOG_ERROR("%{public}s, syncContext is nullptr.", __func__);
-        NAPI_ASSERT(env, false, "wrong arguments");
-    }
     if (!ProcessSyncInput(env, info, false, syncContext)) {
         delete syncContext;
         syncContext = nullptr;
@@ -361,7 +353,7 @@ void RegisterMissionExecuteCB(napi_env env, void *data)
         HILOG_INFO("add registration.");
         registration_[registerMissionCB->deviceId] = registration;
     }
-    HILOG_INFO("%{public}s end.deviceId:%{public}d ", __func__, registerMissionCB->result);
+    HILOG_DEBUG("%{public}s end.deviceId:%{public}d ", __func__, registerMissionCB->result);
 }
 
 void RegisterMissionCallbackCompletedCB(napi_env env, napi_status status, void *data)
@@ -667,10 +659,6 @@ void NAPIRemoteMissionListener::NotifyMissionsChanged(const std::string& deviceI
     }
 
     uv_work_t *work = new uv_work_t;
-    if (work == nullptr) {
-        HILOG_ERROR("%{public}s, work==nullptr.", __func__);
-        return;
-    }
 
     auto registerMissionCB = new (std::nothrow) RegisterMissionCB;
     if (registerMissionCB == nullptr) {
@@ -741,10 +729,6 @@ void NAPIRemoteMissionListener::NotifySnapshot(const std::string& deviceId, int3
     }
 
     uv_work_t *work = new uv_work_t;
-    if (work == nullptr) {
-        HILOG_ERROR("%{public}s, work==nullptr.", __func__);
-        return;
-    }
 
     auto registerMissionCB = new (std::nothrow) RegisterMissionCB;
     if (registerMissionCB == nullptr) {
@@ -807,10 +791,6 @@ void NAPIRemoteMissionListener::NotifyNetDisconnect(const std::string& deviceId,
     }
 
     uv_work_t *work = new uv_work_t;
-    if (work == nullptr) {
-        HILOG_ERROR("%{public}s, work==nullptr.", __func__);
-        return;
-    }
 
     auto registerMissionCB = new (std::nothrow) RegisterMissionCB;
     if (registerMissionCB == nullptr) {
@@ -860,7 +840,7 @@ void UnRegisterMissionExecuteCB(napi_env env, void *data)
         HILOG_INFO("remove registration.");
         registration_.erase(registerMissionCB->deviceId);
     }
-    HILOG_INFO("%{public}s end.deviceId:%{public}d ", __func__, registerMissionCB->result);
+    HILOG_DEBUG("%{public}s end.deviceId:%{public}d ", __func__, registerMissionCB->result);
 }
 
 void UnRegisterMissionPromiseCompletedCB(napi_env env, napi_status status, void *data)
@@ -1011,7 +991,7 @@ napi_value WrapString(napi_env env, const std::string &param, const std::string 
     napi_create_object(env, &jsObject);
 
     napi_value jsValue = nullptr;
-    HILOG_INFO("%{public}s called. %{public}s = %{public}s", __func__, paramName.c_str(), param.c_str());
+    HILOG_DEBUG("%{public}s called. %{public}s = %{public}s", __func__, paramName.c_str(), param.c_str());
     napi_create_string_utf8(env, param.c_str(), NAPI_AUTO_LENGTH, &jsValue);
     napi_set_named_property(env, jsObject, paramName.c_str(), jsValue);
 
@@ -1026,7 +1006,7 @@ napi_value WrapInt32(napi_env env, int32_t num, const std::string &paramName)
     napi_create_object(env, &jsObject);
 
     napi_value jsValue = nullptr;
-    HILOG_INFO("%{public}s called. %{public}s = %{public}d", __func__, paramName.c_str(), num);
+    HILOG_DEBUG("%{public}s called. %{public}s = %{public}d", __func__, paramName.c_str(), num);
     napi_create_int32(env, num, &jsValue);
     napi_set_named_property(env, jsObject, paramName.c_str(), jsValue);
 
@@ -1347,10 +1327,6 @@ void NAPIMissionContinue::OnContinueDone(int32_t result)
     }
 
     uv_work_t *work = new uv_work_t;
-    if (work == nullptr) {
-        HILOG_ERROR("%{public}s, work==nullptr.", __func__);
-        return;
-    }
 
     auto continueAbilityCB = new (std::nothrow) ContinueAbilityCB;
     if (continueAbilityCB == nullptr) {

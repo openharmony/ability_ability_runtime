@@ -24,29 +24,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-/**
- *
- * default constructor
- *
- */
-AbilityImplFactory::AbilityImplFactory()
-{}
+AbilityImplFactory::AbilityImplFactory() {}
 
-/**
- *
- * default Destructor
- *
- */
-AbilityImplFactory::~AbilityImplFactory()
-{}
+AbilityImplFactory::~AbilityImplFactory() {}
 
-/**
- * @brief Create impl object based on abilitytype
- *
- * @param type AbilityType:PAGE/SERVICE/PROVIDER
- *
- * @return AbilityImpl object
- */
 std::shared_ptr<AbilityImpl> AbilityImplFactory::MakeAbilityImplObject(const std::shared_ptr<AbilityInfo> &info)
 {
     if (info == nullptr) {
@@ -55,7 +36,7 @@ std::shared_ptr<AbilityImpl> AbilityImplFactory::MakeAbilityImplObject(const std
     }
 
     std::shared_ptr<AbilityImpl> abilityImpl = nullptr;
-    HILOG_INFO("AbilityImplFactory::MakeAbilityImplObject type:%{public}d, isStageBasedModel:%{public}d", info->type,
+    HILOG_DEBUG("AbilityImplFactory::MakeAbilityImplObject type:%{public}d, isStageBasedModel:%{public}d", info->type,
         info->isStageBasedModel);
     switch (info->type) {
 #ifdef SUPPORT_GRAPHICS

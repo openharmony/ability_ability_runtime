@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_CLIENT_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_PROXY_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_PROXY_H
 
 #include "iremote_proxy.h"
 #include "want.h"
@@ -117,10 +117,13 @@ public:
     virtual int32_t GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId) override;
 
     /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
+     * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify abilities background the current memory level.
+     *
+     * @param level, the current memory level
+     * @return ERR_OK ,return back success，others fail.
      */
-    virtual void GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig) override;
+    virtual int32_t NotifyMemoryLevel(int32_t level) override;
 
     /**
      * Notify that the ability stage has been updated
@@ -138,7 +141,8 @@ public:
      * @param observer, ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer) override;
+    virtual int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+        const std::vector<std::string> &bundleNameList = {}) override;
 
     /**
      * Unregister application or process state observer.
@@ -233,6 +237,12 @@ public:
 
     virtual int32_t UnregisterConfigurationObserver(const sptr<IConfigurationObserver> &observer) override;
 
+    bool GetAppRunningStateByBundleName(const std::string &bundleName) override;
+
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName) override;
+
+    int32_t NotifyHotReloadPage(const std::string &bundleName) override;
+
 private:
     bool SendTransactCmd(IAppMgr::Message code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);
@@ -242,4 +252,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_MGR_CLIENT_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_PROXY_H

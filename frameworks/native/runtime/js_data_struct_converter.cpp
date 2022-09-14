@@ -16,6 +16,7 @@
 #include "js_data_struct_converter.h"
 
 #include "configuration_convertor.h"
+#include "hilog_wrapper.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 
@@ -151,7 +152,7 @@ NativeValue* CreateJsApplicationInfo(NativeEngine& engine, const AppExecFwk::App
     object->SetProperty("enabled", CreateJsValue(engine, applicationInfo.enabled));
     object->SetProperty("label", CreateJsValue(engine, applicationInfo.label));
     object->SetProperty("labelId", CreateJsValue(engine, std::to_string(applicationInfo.labelId)));
-    object->SetProperty("icon", CreateJsValue(engine, applicationInfo.icon));
+    object->SetProperty("icon", CreateJsValue(engine, applicationInfo.iconPath));
     object->SetProperty("iconId", CreateJsValue(engine, std::to_string(applicationInfo.iconId)));
     object->SetProperty("process", CreateJsValue(engine, applicationInfo.process));
     object->SetProperty("supportedModes", CreateJsValue(engine, applicationInfo.supportedModes));
@@ -214,6 +215,43 @@ NativeValue* CreateJsConfiguration(NativeEngine& engine, const AppExecFwk::Confi
 
     object->SetProperty("displayId", CreateJsValue(engine, displayId));
 
+    std::string hasPointerDevice = configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    object->SetProperty("hasPointerDevice", CreateJsValue(engine, hasPointerDevice == "true" ? true : false));
+
+    return objValue;
+}
+
+NativeValue* CreateJsExtensionAbilityInfo(NativeEngine& engine, const AppExecFwk::ExtensionAbilityInfo& info)
+{
+    HILOG_DEBUG("CreateJsExtensionAbilityInfo begin");
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        return objValue;
+    }
+    object->SetProperty("bundleName", CreateJsValue(engine, info.bundleName));
+    object->SetProperty("moduleName", CreateJsValue(engine, info.moduleName));
+    object->SetProperty("name", CreateJsValue(engine, info.name));
+    object->SetProperty("labelId", CreateJsValue(engine, info.labelId));
+    object->SetProperty("descriptionId", CreateJsValue(engine, info.descriptionId));
+    object->SetProperty("iconId", CreateJsValue(engine, info.iconId));
+    object->SetProperty("isVisible", CreateJsValue(engine, info.visible));
+    object->SetProperty("extensionAbilityType", CreateJsValue(engine, info.type));
+    NativeValue *permissionArrayValue = engine.CreateArray(info.permissions.size());
+    NativeArray *permissionArray = ConvertNativeValueTo<NativeArray>(permissionArrayValue);
+    if (permissionArray != nullptr) {
+        int index = 0;
+        for (auto permission : info.permissions) {
+            permissionArray->SetElement(index++, CreateJsValue(engine, permission));
+        }
+    }
+    object->SetProperty("permissions", permissionArrayValue);
+    object->SetProperty("applicationInfo", CreateJsApplicationInfo(engine, info.applicationInfo));
+    object->SetProperty("metadata", CreateJsMetadataArray(engine, info.metadata));
+    object->SetProperty("enabled", CreateJsValue(engine, info.enabled));
+    object->SetProperty("readPermission", CreateJsValue(engine, info.readPermission));
+    object->SetProperty("writePermission", CreateJsValue(engine, info.writePermission));
+    HILOG_DEBUG("CreateJsExtensionAbilityInfo end");
     return objValue;
 }
 }  // namespace AbilityRuntime

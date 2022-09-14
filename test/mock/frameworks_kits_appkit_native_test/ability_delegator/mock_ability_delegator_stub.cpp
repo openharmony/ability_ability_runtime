@@ -90,7 +90,7 @@ int MockAbilityDelegatorStub::StartAbilityByCall(
     return 0;
 }
 
-int MockAbilityDelegatorStub::ReleaseAbility(const sptr<IAbilityConnection> &connect,
+int MockAbilityDelegatorStub::ReleaseCall(const sptr<IAbilityConnection> &connect,
     const AppExecFwk::ElementName &element)
 {
     return 0;
@@ -100,6 +100,11 @@ int MockAbilityDelegatorStub::GetMissionSnapshot(const std::string& deviceId, in
     MissionSnapshot& snapshot, bool isLowResolution)
 {
     return 0;
+}
+
+void MockAbilityDelegatorStub::UpdateMissionSnapShot(const sptr<IRemoteObject>& token)
+{
+    return;
 }
 
 int MockAbilityDelegatorStub::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler)
@@ -272,7 +277,7 @@ int MockAbilityDelegatorStub2::StartAbilityByCall(
 {
     return 0;
 }
-int MockAbilityDelegatorStub2::ReleaseAbility(const sptr<IAbilityConnection> &connect,
+int MockAbilityDelegatorStub2::ReleaseCall(const sptr<IAbilityConnection> &connect,
     const AppExecFwk::ElementName &element)
 {
     return 0;
@@ -282,6 +287,11 @@ int MockAbilityDelegatorStub2::GetMissionSnapshot(const std::string& deviceId, i
     MissionSnapshot& snapshot, bool isLowResolution)
 {
     return 0;
+}
+
+void MockAbilityDelegatorStub2::UpdateMissionSnapShot(const sptr<IRemoteObject>& token)
+{
+    return;
 }
 
 int MockAbilityDelegatorStub2::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler)
