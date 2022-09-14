@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_MOCK_ABILITY_MANAGER_CLIENT2_H
-#define OHOS_AAFWK_MOCK_ABILITY_MANAGER_CLIENT2_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_INTERFACE1_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_INTERFACE1_H
 
 #include <mutex>
 
@@ -141,7 +141,7 @@ public:
     {
         return true;
     };
-    virtual bool GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo) override
+    bool GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo) override
     {
         return true;
     }
@@ -246,7 +246,7 @@ public:
     {
         return true;
     }
-    virtual sptr<IBundleUserMgr> GetBundleUserMgr() override
+    sptr<IBundleUserMgr> GetBundleUserMgr() override
     {
         return nullptr;
     }
@@ -265,4 +265,4 @@ public:
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_INTERFACE1_H

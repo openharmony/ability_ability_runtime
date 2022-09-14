@@ -25,11 +25,13 @@
 #include "data_ability_result.h"
 #include "hilog_wrapper.h"
 #include "values_bucket.h"
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "suspend_manager_client.h"
+#endif // EFFICIENCY_MANAGER_ENABLE
 
 namespace OHOS {
 namespace AppExecFwk {
 std::string SchemeOhos = "dataability";
-std::mutex DataAbilityHelperImpl::oplock_;
 using IAbilityScheduler = OHOS::AAFwk::IAbilityScheduler;
 using AbilityManagerClient = OHOS::AAFwk::AbilityManagerClient;
 DataAbilityHelperImpl::DataAbilityHelperImpl(const std::shared_ptr<Context> &context, const std::shared_ptr<Uri> &uri,
@@ -149,7 +151,7 @@ std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(
     }
 
     if (!CheckUri(uri)) {
-        HILOG_WARN("uri is invalid.");
+        HILOG_ERROR("uri is invalid.");
         return nullptr;
     }
 
@@ -190,7 +192,7 @@ std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(
     }
 
     if (!CheckUri(uri)) {
-        HILOG_WARN("uri is invalid.");
+        HILOG_ERROR("uri is invalid.");
         return nullptr;
     }
 
@@ -252,7 +254,7 @@ std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(
     }
 
     if (!CheckUri(uri)) {
-        HILOG_WARN("uri is invalid.");
+        HILOG_ERROR("uri is invalid.");
         return nullptr;
     }
 
@@ -334,7 +336,6 @@ std::vector<std::string> DataAbilityHelperImpl::GetFileTypes(Uri &uri, const std
  */
 int DataAbilityHelperImpl::OpenFile(Uri &uri, const std::string &mode)
 {
-    HILOG_INFO("DataAbilityHelperImpl::OpenFile start.");
     int fd = -1;
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = GetDataAbilityProxy(uri);
     if (dataAbilityProxy == nullptr) {
@@ -412,6 +413,7 @@ std::shared_ptr<AppExecFwk::PacMap> DataAbilityHelperImpl::Call(
     }
 
     result = dataAbilityProxy->Call(uri, method, arg, pacMap);
+
     ReleaseDataAbility(dataAbilityProxy);
     HILOG_INFO("Return result is or not nullptr: %{public}d.", result == nullptr);
     return result;
@@ -634,10 +636,12 @@ bool DataAbilityHelperImpl::CheckOhosUri(const Uri &uri)
 void DataAbilityHelperImpl::RegisterObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
 {
     if (!CheckUriAndDataObserver(uri, dataObserver)) {
+        HILOG_ERROR("RegisterObserver param is invalid.");
         return;
     }
 
     Uri tmpUri(uri.ToString());
+
     std::lock_guard<std::mutex> lock_l(oplock_);
     sptr<AAFwk::IAbilityScheduler> dataAbilityProxy = nullptr;
     if (uri_ == nullptr) {
@@ -648,6 +652,9 @@ void DataAbilityHelperImpl::RegisterObserver(const Uri &uri, const sptr<AAFwk::I
             uriMap_.emplace(dataObserver, tmpUri.GetPath());
         } else {
             auto path = uriMap_.find(dataObserver);
+            if (path == uriMap_.end()) {
+                return;
+            }
             if (path->second != tmpUri.GetPath()) {
                 HILOG_ERROR("Input uri's path is not equal the one the observer used.");
                 return;
@@ -676,6 +683,7 @@ void DataAbilityHelperImpl::RegisterObserver(const Uri &uri, const sptr<AAFwk::I
 void DataAbilityHelperImpl::UnregisterObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
 {
     if (!CheckUriAndDataObserver(uri, dataObserver)) {
+        HILOG_ERROR("UnregisterObserver param is invalid.");
         return;
     }
 
@@ -688,6 +696,9 @@ void DataAbilityHelperImpl::UnregisterObserver(const Uri &uri, const sptr<AAFwk:
             return;
         }
         auto path = uriMap_.find(dataObserver);
+        if (path == uriMap_.end()) {
+            return;
+        }
         if (path->second != tmpUri.GetPath()) {
             HILOG_ERROR("Input uri's path is not equal the one the observer used.");
             return;
@@ -799,6 +810,15 @@ std::vector<std::shared_ptr<DataAbilityResult>> DataAbilityHelperImpl::ExecuteBa
     return results;
 }
 
+
+void DataAbilityHelperImpl::ReportEventToSuspendManager(const std::string &uriString) const
+{
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    OHOS::SuspendManager::AppInfo appInfo(-1, -1, uriString, "", "THAW_BY_START_NOT_PAGE_ABILITY");
+    OHOS::SuspendManager::SuspendManagerClient::GetInstance().ThawOneAppByAppInfo(appInfo);
+#endif // EFFICIENCY_MANAGER_ENABLE
+}
+
 sptr<AAFwk::IAbilityScheduler> DataAbilityHelperImpl::GetDataAbilityProxy(const Uri &uri, bool addDeathRecipient)
 {
     if (!CheckUriParam(uri)) {
@@ -819,7 +839,7 @@ sptr<AAFwk::IAbilityScheduler> DataAbilityHelperImpl::GetDataAbilityProxy(const 
             AddDataAbilityDeathRecipient(dataAbilityProxy->AsObject());
         }
     }
-
+    ReportEventToSuspendManager(uri.ToString());
     return dataAbilityProxy;
 }
 
@@ -843,7 +863,7 @@ bool DataAbilityHelperImpl::CheckUri(const std::shared_ptr<Uri> &uri)
     }
 
     if (uri->GetScheme() != SchemeOhos) {
-        HILOG_ERROR("Input param invalid, the uri is not dataability, Scheme: %{public}s.", uri->GetScheme().c_str());
+        HILOG_ERROR("Input param invalid, the uri is not dataability, Scheme: %{private}s.", uri->GetScheme().c_str());
         return false;
     }
 
@@ -882,3 +902,4 @@ DataAbilityDeathRecipient::~DataAbilityDeathRecipient()
 {}
 }  // namespace AppExecFwk
 }  // namespace OHOS
+

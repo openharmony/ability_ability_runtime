@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_WMS_HANDLER_H
-#define OHOS_AAFWK_WMS_HANDLER_H
+#ifndef OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_H
+#define OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_H
 
 #ifdef SUPPORT_GRAPHICS
 #include "iremote_broker.h"
@@ -35,9 +35,10 @@ public:
 
     virtual int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken) = 0;
 
-    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap, uint32_t bgColor) = 0;
+    virtual void StartingWindow(sptr<AbilityTransitionInfo> info,
+        std::shared_ptr<Media::PixelMap> pixelMap, uint32_t bgColor) = 0;
 
-    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap) = 0;
+    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap) = 0;
 
     virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken) = 0;
 
@@ -61,4 +62,4 @@ public:
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif
-#endif  // OHOS_AAFWK_WMS_HANDLER_H
+#endif  // OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_H

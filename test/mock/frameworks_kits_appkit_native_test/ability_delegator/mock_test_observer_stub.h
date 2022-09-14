@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_AAFWK_STANDARD_TOOLS_TEST_MOCK_ABILITY_DELEGATOR_MOCK_TEST_OBSERVER_STUB_H
-#define FOUNDATION_AAFWK_STANDARD_TOOLS_TEST_MOCK_ABILITY_DELEGATOR_MOCK_TEST_OBSERVER_STUB_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_TEST_OBSERVER_STUB_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_TEST_OBSERVER_STUB_H
 
 #include "gmock/gmock.h"
 
@@ -25,12 +25,12 @@ namespace AAFwk {
 class MockTestObserverStub : public TestObserverStub {
 public:
     MockTestObserverStub() = default;
-    virtual ~MockTestObserverStub() override;
-    virtual int OnRemoteRequest(
+    ~MockTestObserverStub() override;
+    int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-    virtual void TestStatus(const std::string &msg, const int64_t &resultCode) override;
-    virtual void TestFinished(const std::string &msg, const int64_t &resultCode) override;
-    virtual ShellCommandResult ExecuteShellCommand(
+    void TestStatus(const std::string &msg, const int64_t &resultCode) override;
+    void TestFinished(const std::string &msg, const int64_t &resultCode) override;
+    ShellCommandResult ExecuteShellCommand(
         const std::string &cmd, const int64_t timeoutMs) override;
 public:
     bool testStatusFlag;
@@ -38,4 +38,4 @@ public:
 }  // namespace AAFwk
 }  // namespace OHOS
 
-#endif  // FOUNDATION_AAFWK_STANDARD_TOOLS_TEST_MOCK_ABILITY_DELEGATOR_MOCK_TEST_OBSERVER_STUB_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_TEST_OBSERVER_STUB_H

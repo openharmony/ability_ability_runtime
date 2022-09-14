@@ -23,6 +23,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
+constexpr uint32_t JS_CONSOLE_LOG_DOMAIN = 0xFEFE;
+constexpr char JS_CONSOLE_LOG_TAG[] = "JsApp";
+
 std::string MakeLogContent(NativeCallbackInfo& info)
 {
     std::string content;
@@ -67,7 +70,7 @@ NativeValue* ConsoleLog(NativeEngine* engine, NativeCallbackInfo* info)
     }
 
     std::string content = MakeLogContent(*info);
-    HiLogPrint(LOG_APP, LEVEL, AMS_LOG_DOMAIN, "JsApp", "%{public}s", content.c_str());
+    HiLogPrint(LOG_APP, LEVEL, JS_CONSOLE_LOG_DOMAIN, JS_CONSOLE_LOG_TAG, "%{public}s", content.c_str());
 
     return engine->CreateUndefined();
 }
@@ -81,13 +84,13 @@ void InitConsoleLogModule(NativeEngine& engine, NativeObject& globalObject)
         HILOG_ERROR("Failed to create console object");
         return;
     }
-
-    BindNativeFunction(engine, *consoleObj, "log", ConsoleLog<LOG_INFO>);
-    BindNativeFunction(engine, *consoleObj, "debug", ConsoleLog<LOG_DEBUG>);
-    BindNativeFunction(engine, *consoleObj, "info", ConsoleLog<LOG_INFO>);
-    BindNativeFunction(engine, *consoleObj, "warn", ConsoleLog<LOG_WARN>);
-    BindNativeFunction(engine, *consoleObj, "error", ConsoleLog<LOG_ERROR>);
-    BindNativeFunction(engine, *consoleObj, "fatal", ConsoleLog<LOG_FATAL>);
+    const char *moduleName = "console";
+    BindNativeFunction(engine, *consoleObj, "log", moduleName, ConsoleLog<LOG_INFO>);
+    BindNativeFunction(engine, *consoleObj, "debug", moduleName, ConsoleLog<LOG_DEBUG>);
+    BindNativeFunction(engine, *consoleObj, "info", moduleName, ConsoleLog<LOG_INFO>);
+    BindNativeFunction(engine, *consoleObj, "warn", moduleName, ConsoleLog<LOG_WARN>);
+    BindNativeFunction(engine, *consoleObj, "error", moduleName, ConsoleLog<LOG_ERROR>);
+    BindNativeFunction(engine, *consoleObj, "fatal", moduleName, ConsoleLog<LOG_FATAL>);
 
     globalObject.SetProperty("console", consoleValue);
 }

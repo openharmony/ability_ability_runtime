@@ -20,7 +20,6 @@
 #include "ability_manager_client.h"
 #include "continuation_handler.h"
 #include "distributed_client.h"
-#include "distributed_objectstore.h"
 #include "hilog_wrapper.h"
 #include "operation_builder.h"
 #include "string_ex.h"
@@ -47,7 +46,7 @@ ContinuationManager::ContinuationManager()
 bool ContinuationManager::Init(const std::shared_ptr<Ability> &ability, const sptr<IRemoteObject> &continueToken,
     const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ContinuationHandler> &continuationHandler)
 {
-    HILOG_INFO("%{public}s called begin", __func__);
+    HILOG_DEBUG("%{public}s called begin", __func__);
     if (ability == nullptr) {
         HILOG_ERROR("ContinuationManager::Init failed. ability is nullptr");
         return false;
@@ -74,7 +73,7 @@ bool ContinuationManager::Init(const std::shared_ptr<Ability> &ability, const sp
     continueToken_ = continueToken;
 
     continuationHandler_ = continuationHandler;
-    HILOG_INFO("%{public}s called end", __func__);
+    HILOG_DEBUG("%{public}s called end", __func__);
     return true;
 }
 
@@ -168,11 +167,6 @@ int32_t ContinuationManager::OnContinueAndGetContent(WantParams &wantParams)
         HILOG_ERROR("OnContinue failed.");
         return CONTINUE_ON_CONTINUE_FAILED;
     }
-#ifdef DISTRIBUTED_DATA_OBJECT_ENABLE
-    auto abilityInfo = abilityInfo_.lock();
-    std::string &bundleName = abilityInfo->bundleName;
-    ObjectStore::DistributedObjectStore::GetInstance(bundleName)->TriggerSync();
-#endif
 
 #ifdef SUPPORT_GRAPHICS
     bool ret = GetContentInfo(wantParams);

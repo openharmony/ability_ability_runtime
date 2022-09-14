@@ -250,20 +250,20 @@ int AbilityManagerProxy::StartExtensionAbility(const Want &want, const sptr<IRem
         }
     }
     if (!data.WriteInt32(userId)) {
-        HILOG_ERROR("userId write failed.");
+        HILOG_ERROR("StartExtensionAbility, userId write failed.");
         return INNER_ERR;
     }
     if (!data.WriteInt32(static_cast<int32_t>(extensionType))) {
-        HILOG_ERROR("extensionType write failed.");
+        HILOG_ERROR("StartExtensionAbility, extensionType write failed.");
         return INNER_ERR;
     }
     if (!Remote()) {
-        HILOG_ERROR("Remote error.");
+        HILOG_ERROR("StartExtensionAbility, Remote error.");
         return INNER_ERR;
     }
     error = Remote()->SendRequest(IAbilityManager::START_EXTENSION_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("Send request error: %{public}d", error);
+        HILOG_ERROR("StartExtensionAbility, Send request error: %{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -424,7 +424,13 @@ int AbilityManagerProxy::CloseAbility(const sptr<IRemoteObject> &token, int resu
 int AbilityManagerProxy::ConnectAbility(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId)
 {
-    int error;
+    return ConnectAbilityCommon(want, connect, callerToken, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
+}
+
+int AbilityManagerProxy::ConnectAbilityCommon(
+    const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
+{
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -463,12 +469,19 @@ int AbilityManagerProxy::ConnectAbility(
         }
     }
     if (!data.WriteInt32(userId)) {
-        HILOG_ERROR("userId write failed.");
+        HILOG_ERROR("%{public}s, userId write failed.", __func__);
         return INNER_ERR;
     }
-    error = Remote()->SendRequest(IAbilityManager::CONNECT_ABILITY, data, reply, option);
+    if (!data.WriteInt32(static_cast<int32_t>(extensionType))) {
+        HILOG_ERROR("%{public}s, extensionType write failed.", __func__);
+        return INNER_ERR;
+    }
+    if (Remote() == nullptr) {
+        return INNER_ERR;
+    }
+    int error = Remote()->SendRequest(IAbilityManager::CONNECT_ABILITY_WITH_TYPE, data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("Send request error: %{public}d", error);
+        HILOG_ERROR("%{public}s, Send request error: %{public}d", __func__, error);
         return error;
     }
     return reply.ReadInt32();
@@ -880,6 +893,28 @@ int AbilityManagerProxy::GetMissionSnapshot(const std::string& deviceId, int32_t
     return reply.ReadInt32();
 }
 
+void AbilityManagerProxy::UpdateMissionSnapShot(const sptr<IRemoteObject>& token)
+{
+    int error;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        HILOG_ERROR("token write failed.");
+        return;
+    }
+    error = Remote()->SendRequest(IAbilityManager::UPDATE_MISSION_SNAPSHOT, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return;
+    }
+    return;
+}
+
 int AbilityManagerProxy::KillProcess(const std::string &bundleName)
 {
     MessageParcel data;
@@ -1261,32 +1296,6 @@ int AbilityManagerProxy::GetWantSenderInfo(const sptr<IWantSender> &target, std:
     info = std::move(wantSenderInfo);
 
     return NO_ERROR;
-}
-
-void AbilityManagerProxy::GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("WriteInterfaceToken failed");
-        return;
-    }
-
-    auto error = Remote()->SendRequest(IAbilityManager::GET_SYSTEM_MEMORY_ATTR, data, reply, option);
-    if (error != NO_ERROR) {
-        HILOG_ERROR("Send request error: %{public}d", error);
-        return;
-    }
-
-    std::shared_ptr<AppExecFwk::SystemMemoryAttr> remoteRetsult(reply.ReadParcelable<AppExecFwk::SystemMemoryAttr>());
-    if (remoteRetsult == nullptr) {
-        HILOG_ERROR("recv SystemMemoryAttr failed");
-        return;
-    }
-
-    memoryInfo = *remoteRetsult;
 }
 
 int AbilityManagerProxy::GetAppMemorySize()
@@ -2106,7 +2115,8 @@ int AbilityManagerProxy::StartAbilityByCall(
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::ReleaseAbility(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
+int AbilityManagerProxy::ReleaseCall(
+    const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
 {
     int error;
     MessageParcel data;

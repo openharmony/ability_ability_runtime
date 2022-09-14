@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NAPI_WANT_AGENT_H
-#define NAPI_WANT_AGENT_H
+#ifndef OHOS_ABILITY_RUNTIME_NAPI_WANT_AGENT_H
+#define OHOS_ABILITY_RUNTIME_NAPI_WANT_AGENT_H
 
 #include <map>
 #include <memory>
@@ -159,7 +159,7 @@ public:
     virtual ~TriggerCompleteCallBack();
 
 public:
-    virtual void OnSendFinished(const AAFwk::Want &want, int resultCode, const std::string &resultData,
+    void OnSendFinished(const AAFwk::Want &want, int resultCode, const std::string &resultData,
         const AAFwk::WantParams &resultExtras) override;
     void SetCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetWantAgentInstance(const std::shared_ptr<WantAgent> &wantAgent);
@@ -185,6 +185,7 @@ napi_value NAPI_GetOperationType(napi_env env, napi_callback_info info);
 
 napi_value GetCallbackErrorResult(napi_env env, int errCode);
 napi_value NapiGetNull(napi_env env);
+napi_value JSParaError(const napi_env &env, const bool bCallback);
 
 void DeleteRecordByCode(const int32_t code);
 static std::unique_ptr<std::map<AsyncGetWantAgentCallbackInfo *, const int32_t>,
@@ -204,4 +205,4 @@ static std::unique_ptr<std::map<AsyncGetWantAgentCallbackInfo *, const int32_t>,
         });
 static std::recursive_mutex g_mutex;
 }  // namespace OHOS
-#endif  // NAPI_WANT_AGENT_H
+#endif  // OHOS_ABILITY_RUNTIME_NAPI_WANT_AGENT_H

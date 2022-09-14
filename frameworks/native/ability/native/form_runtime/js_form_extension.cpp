@@ -19,7 +19,6 @@
 #include "form_provider_data.h"
 #include "form_runtime/form_extension_provider_client.h"
 #include "form_runtime/js_form_extension_context.h"
-#include "form_runtime/js_form_extension_util.h"
 #include "hilog_wrapper.h"
 #include "js_extension_context.h"
 #include "js_runtime.h"
@@ -34,12 +33,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 const int ON_EVENT_PARAMS_SIZE = 2;
-
-void* DetachFormExtensionContext(NativeEngine*, void* value, void*)
-{
-    HILOG_INFO("DetachFormExtensionContext");
-    return value;
-}
 
 NativeValue* AttachFormExtensionContext(NativeEngine* engine, void* value, void*)
 {
@@ -57,8 +50,14 @@ NativeValue* AttachFormExtensionContext(NativeEngine* engine, void* value, void*
     auto contextObj = JsRuntime::LoadSystemModuleByEngine(engine,
         "application.FormExtensionContext", &object, 1)->Get();
     NativeObject *nObject = ConvertNativeValueTo<NativeObject>(contextObj);
-    nObject->ConvertToNativeBindingObject(engine, DetachFormExtensionContext, AttachFormExtensionContext,
+    nObject->ConvertToNativeBindingObject(engine, DetachCallbackFunc, AttachFormExtensionContext,
         value, nullptr);
+    auto workContext = new (std::nothrow) std::weak_ptr<FormExtensionContext>(ptr);
+    nObject->SetNativePointer(workContext,
+        [](NativeEngine *, void * data, void *) {
+            HILOG_INFO("Finalizer for weak_ptr form extension context is called");
+            delete static_cast<std::weak_ptr<FormExtensionContext> *>(data);
+        }, nullptr);
     return contextObj;
 }
 
@@ -87,12 +86,13 @@ void JsFormExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    HILOG_INFO("JsFormExtension::Init moduleName:%{public}s,srcPath:%{public}s.",
+    HILOG_DEBUG("JsFormExtension::Init moduleName:%{public}s,srcPath:%{public}s.",
         moduleName.c_str(), srcPath.c_str());
     HandleScope handleScope(jsRuntime_);
     auto& engine = jsRuntime_.GetNativeEngine();
 
-    jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->compileMode == CompileMode::ES_MODULE);
+    jsObj_ = jsRuntime_.LoadModule(
+        moduleName, srcPath, abilityInfo_->hapPath, abilityInfo_->compileMode == CompileMode::ES_MODULE);
     if (jsObj_ == nullptr) {
         HILOG_ERROR("Failed to get jsObj_");
         return;
@@ -124,8 +124,8 @@ void JsFormExtension::BindContext(NativeEngine& engine, NativeObject* obj)
         HILOG_ERROR("Failed to get context native object");
         return;
     }
-    auto workContext = new std::weak_ptr<FormExtensionContext>(context);
-    nativeObj->ConvertToNativeBindingObject(&engine, DetachFormExtensionContext, AttachFormExtensionContext,
+    auto workContext = new (std::nothrow) std::weak_ptr<FormExtensionContext>(context);
+    nativeObj->ConvertToNativeBindingObject(&engine, DetachCallbackFunc, AttachFormExtensionContext,
         workContext, nullptr);
     HILOG_INFO("JsFormExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef_.get());
@@ -173,15 +173,6 @@ OHOS::AppExecFwk::FormProviderInfo JsFormExtension::OnCreate(const OHOS::AAFwk::
     }
 
     AppExecFwk::FormProviderData formData = AppExecFwk::FormProviderData(formDataStr);
-    nativeDataValue = nativeObject->GetProperty("image");
-    if (nativeDataValue != nullptr) {
-        std::map<std::string, int> rawImageDataMap;
-        UnwrapRawImageDataMap(*nativeEngine, nativeDataValue, rawImageDataMap);
-        HILOG_INFO("Image number is %{public}zu", rawImageDataMap.size());
-        for (auto entry : rawImageDataMap) {
-            formData.AddImageData(entry.first, entry.second);
-        }
-    }
     formProviderInfo.SetFormData(formData);
     HILOG_INFO("%{public}s called end.", __func__);
     return formProviderInfo;
@@ -383,6 +374,40 @@ FormState JsFormExtension::OnAcquireFormState(const Want &want)
     } else {
         return (AppExecFwk::FormState) state;
     }
+}
+
+bool JsFormExtension::OnShare(int64_t formId, AAFwk::WantParams &wantParams)
+{
+    HILOG_DEBUG("%{public}s called.", __func__);
+    HandleScope handleScope(jsRuntime_);
+    NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
+    if (nativeEngine == nullptr) {
+        HILOG_ERROR("%{public}s OnShare get NativeEngine is nullptr", __func__);
+        return false;
+    }
+
+    auto formIdStr = std::to_string(formId);
+    NativeValue* argv[] = { nativeEngine->CreateString(formIdStr.c_str(), formIdStr.length()) };
+    NativeValue* nativeResult = CallObjectMethod("onShare", argv, 1);
+    if (nativeResult == nullptr) {
+        HILOG_ERROR("%{public}s OnShare return value is nullptr", __func__);
+        return false;
+    }
+
+    if (nativeResult->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+        HILOG_ERROR("%{public}s OnShare return value`s type is %{public}d", __func__,
+            static_cast<int32_t>(nativeResult->TypeOf()));
+        return false;
+    }
+
+    if (!OHOS::AppExecFwk::UnwrapWantParams(reinterpret_cast<napi_env>(nativeEngine),
+        reinterpret_cast<napi_value>(nativeResult), wantParams)) {
+        HILOG_ERROR("%{public}s OnShare UnwrapWantParams failed, return false", __func__);
+        return false;
+    }
+
+    HILOG_DEBUG("%{public}s called end.", __func__);
+    return true;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_APPEXECFWK_NAPI_COMMON_ABILITY_H
-#define OHOS_APPEXECFWK_NAPI_COMMON_ABILITY_H
+#ifndef OHOS_ABILITY_RUNTIME_NAPI_COMMON_ABILITY_H
+#define OHOS_ABILITY_RUNTIME_NAPI_COMMON_ABILITY_H
 #include "ability_connect_callback_stub.h"
 #include "ability_info.h"
 #include "ability_manager_errors.h"
+#include "application_info.h"
 #include "feature_ability_common.h"
 
 namespace OHOS {
@@ -30,8 +31,10 @@ napi_status SaveGlobalDataAbilityHelper(napi_env env, napi_value constructor);
 napi_value GetGlobalDataAbilityHelper(napi_env env);
 bool& GetDataAbilityHelperStatus();
 
-void SaveAppInfo(AppInfo_ &appInfo, const ApplicationInfo &appInfoOrg);
-napi_value WrapAppInfo(napi_env env, const AppInfo_ &appInfo);
+napi_value WrapAppInfo(napi_env env, const ApplicationInfo &appInfo);
+napi_value WrapProperties(napi_env env, const std::vector<std::string> properties, const std::string &proName,
+    napi_value &result);
+napi_value WrapModuleInfos(napi_env env, const ApplicationInfo &appInfo, napi_value &result);
 int32_t GetStartAbilityErrorCode(ErrCode innerErrorCode);
 
 /**
@@ -213,6 +216,29 @@ napi_value GetContinueAbilityOptionsDeviceID(
 
 bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilityStartSetting &setting);
 
+/**
+ * @brief terminateAbility.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param info The callback info passed into the callback function.
+ *
+ * @return The return value from NAPI C++ to JS for the module.
+ */
+napi_value NAPI_TerminateAbilityCommon(napi_env env, napi_callback_info info);
+
+/**
+ * @brief TerminateAbility processing function.
+ *
+ * @param env The environment that the Node-API call is invoked under.
+ * @param asyncCallbackInfo Process data asynchronously.
+ *
+ * @return Return JS data successfully, otherwise return nullptr.
+ */
+napi_value TerminateAbilityWrap(napi_env env, napi_callback_info info, AsyncCallbackInfo *asyncCallbackInfo);
+napi_value TerminateAbilityAsync(
+    napi_env env, napi_value *args, const size_t argCallback, AsyncCallbackInfo *asyncCallbackInfo);
+napi_value TerminateAbilityPromise(napi_env env, AsyncCallbackInfo *asyncCallbackInfo);
+
 class NAPIAbilityConnection : public AAFwk::AbilityConnectionStub {
 public:
     void OnAbilityConnectDone(
@@ -316,4 +342,4 @@ enum ErrorCode {
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // OHOS_APPEXECFWK_NAPI_COMMON_ABILITY_H
+#endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_ABILITY_H

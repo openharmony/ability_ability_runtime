@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_ABILITY_STAGE_H
-#define ABILITY_RUNTIME_ABILITY_STAGE_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_STAGE_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_STAGE_H
 
 #include <map>
 #include <memory>
 #include <string>
 
 #include "ability_local_record.h"
-#include "foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/context/context.h"
 #include "configuration.h"
+#include "hap_module_info.h"
 #include "want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+class Context;
 class Runtime;
 /**
  * @brief the hap level entity
  *
- * To share the data amony the abilities of a hap,
+ * To share the data among the abilities of a hap,
  * and supply lifecycle func for the developers.
- *
  */
 class AbilityStage {
 public:
@@ -43,15 +43,16 @@ public:
     AbilityStage() = default;
     virtual ~AbilityStage() = default;
     virtual void OnCreate(const AAFwk::Want &want) const;
-    virtual void OnDestory() const;
+    virtual void OnDestroy() const;
     virtual std::string OnAcceptWant(const AAFwk::Want &want);
-    virtual void Init(std::shared_ptr<Context> context);
+    virtual void Init(const std::shared_ptr<Context> &context);
     std::shared_ptr<Context> GetContext() const;
     void AddAbility(const sptr<IRemoteObject> &token,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord);
     void RemoveAbility(const sptr<IRemoteObject> &token);
-    bool ContainsAbility();
+    bool ContainsAbility() const;
     virtual void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration);
+    virtual void OnMemoryLevel(int level);
 
 private:
     std::shared_ptr<Context> context_;
@@ -59,4 +60,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // ABILITY_RUNTIME_ABILITY_STAGE_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_STAGE_H

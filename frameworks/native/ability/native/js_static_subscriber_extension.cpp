@@ -35,30 +35,30 @@ constexpr size_t ARGC_ONE = 1;
 
 using namespace OHOS::AppExecFwk;
 
-void* DetachStaticSubscriberExtensionContext(NativeEngine*, void* value, void*)
-{
-    HILOG_INFO("DetachStaticSubscriberExtensionContext");
-    return value;
-}
-
-NativeValue* AttachStaticSubscriberExtensionContext(NativeEngine* engine, void* value, void*)
+NativeValue *AttachStaticSubscriberExtensionContext(NativeEngine *engine, void *value, void *)
 {
     HILOG_INFO("AttachStaticSubscriberExtensionContext");
     if (value == nullptr) {
         HILOG_WARN("invalid parameter.");
         return nullptr;
     }
-    auto ptr = reinterpret_cast<std::weak_ptr<StaticSubscriberExtensionContext>*>(value)->lock();
+    auto ptr = reinterpret_cast<std::weak_ptr<StaticSubscriberExtensionContext> *>(value)->lock();
     if (ptr == nullptr) {
         HILOG_WARN("invalid context.");
         return nullptr;
     }
-    NativeValue* object = CreateJsStaticSubscriberExtensionContext(*engine, ptr, nullptr, nullptr);
+    NativeValue *object = CreateJsStaticSubscriberExtensionContext(*engine, ptr, nullptr, nullptr);
     auto contextObj = JsRuntime::LoadSystemModuleByEngine(engine,
         "application.StaticSubscriberExtensionContext", &object, 1)->Get();
     NativeObject *nObject = ConvertNativeValueTo<NativeObject>(contextObj);
     nObject->ConvertToNativeBindingObject(engine,
-        DetachStaticSubscriberExtensionContext, AttachStaticSubscriberExtensionContext, value, nullptr);
+        DetachCallbackFunc, AttachStaticSubscriberExtensionContext, value, nullptr);
+    auto workContext = new (std::nothrow) std::weak_ptr<StaticSubscriberExtensionContext>(ptr);
+    nObject->SetNativePointer(workContext,
+        [](NativeEngine *, void *data, void *) {
+            HILOG_INFO("Finalizer for weak_ptr static subscriber extension context is called");
+            delete static_cast<std::weak_ptr<StaticSubscriberExtensionContext> *>(data);
+        }, nullptr);
     return contextObj;
 }
 
@@ -87,12 +87,13 @@ void JsStaticSubscriberExtension::Init(const std::shared_ptr<AbilityLocalRecord>
 
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    HILOG_INFO("JsStaticSubscriberExtension::Init moduleName:%{public}s,srcPath:%{public}s.",
+    HILOG_DEBUG("JsStaticSubscriberExtension::Init moduleName:%{public}s,srcPath:%{public}s.",
         moduleName.c_str(), srcPath.c_str());
     HandleScope handleScope(jsRuntime_);
     auto& engine = jsRuntime_.GetNativeEngine();
 
-    jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->compileMode == CompileMode::ES_MODULE);
+    jsObj_ = jsRuntime_.LoadModule(moduleName, srcPath, abilityInfo_->hapPath,
+        abilityInfo_->compileMode == CompileMode::ES_MODULE);
     if (jsObj_ == nullptr) {
         HILOG_ERROR("Failed to get jsObj_");
         return;
@@ -119,8 +120,8 @@ void JsStaticSubscriberExtension::Init(const std::shared_ptr<AbilityLocalRecord>
         HILOG_ERROR("Failed to get context native object");
         return;
     }
-    auto workContext = new std::weak_ptr<StaticSubscriberExtensionContext>(context);
-    nativeObj->ConvertToNativeBindingObject(&engine, DetachStaticSubscriberExtensionContext,
+    auto workContext = new (std::nothrow) std::weak_ptr<StaticSubscriberExtensionContext>(context);
+    nativeObj->ConvertToNativeBindingObject(&engine, DetachCallbackFunc,
         AttachStaticSubscriberExtensionContext, workContext, nullptr);
     HILOG_INFO("JsStaticSubscriberExtension::Init Bind.");
     context->Bind(jsRuntime_, shellContextRef.release());

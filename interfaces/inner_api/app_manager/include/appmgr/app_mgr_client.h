@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APP_MGR_CLIENT_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APP_MGR_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H
+#define OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H
 
 #include "iremote_object.h"
 #include "refbase.h"
@@ -30,6 +30,7 @@
 #include "system_memory_attr.h"
 #include "istart_specified_ability_response.h"
 #include "iconfiguration_observer.h"
+#include "app_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -136,6 +137,13 @@ public:
     virtual AppMgrResultCode KillApplicationByUid(const std::string &bundleName, const int uid);
 
     /**
+     * Kill the application self.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual AppMgrResultCode KillApplicationSelf();
+
+    /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
      * clear the application data.
      *
@@ -164,6 +172,15 @@ public:
     virtual AppMgrResultCode GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId);
 
     /**
+     * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify abilities background the current memory level.
+     *
+     * @param level, the current memory level
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual AppMgrResultCode NotifyMemoryLevel(MemoryLevel level);
+    
+    /**
      * GetConfiguration
      *
      * @param info, configuration.
@@ -174,13 +191,6 @@ public:
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token);
 
     virtual void PrepareTerminate(const sptr<IRemoteObject> &token);
-
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     * @param strConfig, params string.
-     */
-    virtual void GetSystemMemoryAttr(SystemMemoryAttr &memoryInfo, std::string &strConfig);
 
     virtual void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
     /**
@@ -290,4 +300,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APP_MGR_CLIENT_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_CLIENT_H

@@ -21,14 +21,17 @@
 #undef private
 #undef protected
 
+#include "ability_connect_callback_stub.h"
 #include "ability_manager_service.h"
-#include "ability_scheduler.h"
+#include "ability_scheduler_mock.h"
 #include "connection_record.h"
 #include "mock_ability_connect_callback.h"
-#include "ability_scheduler_mock.h"
-#include "ability_connect_callback_stub.h"
+#include "mock_bundle_manager.h"
+#include "sa_mgr_client.h"
+#include "system_ability_definition.h"
 
 using namespace testing::ext;
+using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AAFwk {
@@ -47,11 +50,14 @@ public:
 
 void AbilityRecordTest::SetUpTestCase(void)
 {
+    OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->RegisterSystemAbility(
+        OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, new BundleMgrService());
     OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->OnStart();
 }
 void AbilityRecordTest::TearDownTestCase(void)
 {
     OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->OnStop();
+    OHOS::DelayedSingleton<SaMgrClient>::DestroyInstance();
 }
 
 void AbilityRecordTest::SetUp(void)
@@ -226,7 +232,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Resolve_005, TestSize.Level1)
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Release_001, TestSize.Level1)
 {
     sptr<IAbilityConnection> connect = new AbilityConnectCallback();
-    EXPECT_EQ(abilityRecord_->Release(connect), false);
+    EXPECT_EQ(abilityRecord_->ReleaseCall(connect), false);
 }
 
 /*
@@ -249,7 +255,7 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_Release_002, TestSize.Level1)
         abilityRequest.connect, abilityRequest.callerToken);
     abilityRecord_->callContainer_ = std::make_shared<CallContainer>();
     abilityRecord_->callContainer_->AddCallRecord(abilityRequest.connect, callRecord);
-    EXPECT_EQ(abilityRecord_->Release(connect), true);
+    EXPECT_EQ(abilityRecord_->ReleaseCall(connect), true);
 }
 
 /*

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_MOCK_ABILITY_MANAGER_CLIENT2_H
-#define OHOS_AAFWK_MOCK_ABILITY_MANAGER_CLIENT2_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_INTERFACE1_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_INTERFACE1_H
 
 #include <mutex>
 
@@ -39,8 +39,8 @@ public:
 class MockAbilityStub : public IRemoteStub<IAbilityMock> {
 public:
     MockAbilityStub() = default;
-    virtual ~MockAbilityStub() = default;
-    virtual int OnRemoteRequest(
+    ~MockAbilityStub() = default;
+    int OnRemoteRequest(
         uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
     {
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -50,7 +50,7 @@ public:
 class MockAbilityContextDeal : public ContextDeal {
 public:
     MockAbilityContextDeal();
-    virtual ~MockAbilityContextDeal();
+    ~MockAbilityContextDeal();
 
     std::shared_ptr<HapModuleInfo> GetHapModuleInfo();
 
@@ -79,7 +79,7 @@ namespace AAFwk {
 class MockAbilityManagerClient : public AbilityManagerClient {
 public:
     MockAbilityManagerClient();
-    virtual ~MockAbilityManagerClient();
+    ~MockAbilityManagerClient();
 
     ErrCode GetStartAbility();
     ErrCode GetTerminateAbility();
@@ -111,4 +111,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_INTERFACE1_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_OHOS_ABILITYRUNTIME_JS_RUNTIME_UTILS_H
-#define FOUNDATION_OHOS_ABILITYRUNTIME_JS_RUNTIME_UTILS_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_RUNTIME_UTILS_H
+#define OHOS_ABILITY_RUNTIME_JS_RUNTIME_UTILS_H
 
 #include <cstdint>
 #include <memory>
+#include <sstream>
 #include <type_traits>
 
 #include "native_engine/native_engine.h"
@@ -50,6 +51,8 @@ inline NativeValue* CreateJsValue(NativeEngine& engine, const T& value)
         return engine.CreateString(value.c_str(), value.length());
     } else if constexpr (std::is_enum_v<ValueType>) {
         return engine.CreateNumber(static_cast<std::make_signed_t<ValueType>>(value));
+    } else if constexpr (std::is_same_v<ValueType, const char*>) {
+        return (value != nullptr) ? engine.CreateString(value, strlen(value)) : engine.CreateUndefined();
     }
     return engine.CreateUndefined();
 }
@@ -110,7 +113,8 @@ NativeValue* CreateNativeArray(NativeEngine& engine, const std::vector<T>& data)
 }
 
 NativeValue* CreateJsError(NativeEngine& engine, int32_t errCode, const std::string& message = std::string());
-void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name, NativeCallback func);
+void BindNativeFunction(NativeEngine& engine, NativeObject& object, const char* name,
+    const char* moduleName, NativeCallback func);
 void BindNativeProperty(NativeObject& object, const char* name, NativeCallback getter);
 void* GetNativePointerFromCallbackInfo(NativeEngine* engine, NativeCallbackInfo* info, const char* name);
 
@@ -185,4 +189,4 @@ std::unique_ptr<AsyncTask> CreateAsyncTaskWithLastParam(NativeEngine& engine, Na
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 
-#endif  // FOUNDATION_OHOS_ABILITYRUNTIME_JS_RUNTIME_UTILS_H
+#endif  // OHOS_ABILITY_RUNTIME_JS_RUNTIME_UTILS_H

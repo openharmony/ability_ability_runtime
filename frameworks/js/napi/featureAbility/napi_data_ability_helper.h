@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_APPEXECFWK_NAPI_DATA_ABILITY_HELPER_H
-#define OHOS_APPEXECFWK_NAPI_DATA_ABILITY_HELPER_H
+#ifndef OHOS_ABILITY_RUNTIME_NAPI_DATA_ABILITY_HELPER_H
+#define OHOS_ABILITY_RUNTIME_NAPI_DATA_ABILITY_HELPER_H
 #include "data_ability_observer_stub.h"
 #include "feature_ability_common.h"
 
@@ -27,25 +27,15 @@ public:
     void SetCallbackRef(const napi_ref &ref);
     void ReleaseJSCallback();
 
-    void SetAssociatedObject(DAHelperOnOffCB* object);
-    const DAHelperOnOffCB* GetAssociatedObject(void);
-
-    void ChangeWorkPre();
-    void ChangeWorkRun();
-    void ChangeWorkInt();
-    void ChangeWorkPreDone();
-    void ChangeWorkRunDone();
-    int GetWorkPre();
-    int GetWorkRun();
-    int GetWorkInt();
+    void CallJsMethod();
 
 private:
+    void SafeReleaseJSCallback();
+
     napi_env env_ = nullptr;
     napi_ref ref_ = nullptr;
-    DAHelperOnOffCB* onCB_ = nullptr;
-    int workPre_ = 0;
-    int workRun_ = 0;
-    int intrust_ = 0;
+    bool isCallingback_ = false;
+    bool needRelease_ = false;
     std::mutex mutex_;
 };
 
@@ -259,14 +249,11 @@ napi_value UnRegisterWrap(napi_env env, napi_callback_info info, DAHelperOnOffCB
  * @brief Off Async.
  *
  * @param env The environment that the Node-API call is invoked under.
- * @param args Indicates the arguments passed into the callback.
- * @param argcPromise Asynchronous data processing.
  * @param insertCB Process data asynchronously.
  *
  * @return Return JS data successfully, otherwise return nullptr.
  */
-napi_value UnRegisterAsync(
-    napi_env env, napi_value *args, size_t argcAsync, const size_t argcPromise, DAHelperOnOffCB *insertCB);
+napi_value UnRegisterSync(napi_env env, DAHelperOnOffCB *insertCB);
 
 /**
  * @brief Off asynchronous processing function.
@@ -288,7 +275,6 @@ void FindRegisterObs(napi_env env, DAHelperOnOffCB *data);
  */
 napi_value UnwrapValuesBucket(std::string &value, napi_env env, napi_value args);
 
-static std::vector<DAHelperOnOffCB *> registerInstances_;
 napi_value NAPI_Release(napi_env env, napi_callback_info info);
 
 napi_value ReleaseWrap(napi_env env, napi_callback_info info, DAHelperReleaseCB *releaseCB);
@@ -406,15 +392,9 @@ napi_value NAPI_Query(napi_env env, napi_callback_info info);
 
 napi_value QueryWrap(napi_env env, napi_callback_info info, DAHelperQueryCB *queryCB);
 
-napi_value QueryAsync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB);
+napi_value QuerySync(napi_env env, napi_value *args, const size_t argCallback, DAHelperQueryCB *queryCB);
 
 napi_value QueryPromise(napi_env env, DAHelperQueryCB *queryCB);
-
-void QueryExecuteCB(napi_env env, void *data);
-
-void QueryAsyncCompleteCB(napi_env env, napi_status status, void *data);
-
-void QueryPromiseCompleteCB(napi_env env, napi_status status, void *data);
 
 napi_value WrapResultSet(napi_env env, const std::shared_ptr<NativeRdb::AbsSharedResultSet> &resultSet);
 
@@ -497,6 +477,8 @@ void GetDataAbilityResultForResult(
     napi_env env, const std::vector<std::shared_ptr<DataAbilityResult>> dataAbilityResult, napi_value result);
 
 void DeleteDAHelperOnOffCB(DAHelperOnOffCB *onCB);
+bool NeedErase(std::vector<DAHelperOnOffCB*>::iterator& iter, DataAbilityHelper* objectInfo);
+void EraseMemberProperties(DAHelperOnOffCB* onCB);
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif /* OHOS_APPEXECFWK_NAPI_DATA_ABILITY_HELPER_H */
+#endif /* OHOS_ABILITY_RUNTIME_NAPI_DATA_ABILITY_HELPER_H */

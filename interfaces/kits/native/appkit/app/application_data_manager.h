@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_APPEXECFWK_APP_DATA_MANAGER_H
-#define OHOS_APPEXECFWK_APP_DATA_MANAGER_H
+#ifndef OHOS_ABILITY_RUNTIME_APPLICATION_DATA_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_APPLICATION_DATA_MANAGER_H
 
 #include <string>
 
@@ -27,14 +27,15 @@ class ApplicationDataManager {
 public:
     static ApplicationDataManager &GetInstance();
     void AddErrorObserver(const std::shared_ptr<IErrorObserver> &observer);
-    void NotifyUnhandledException(const std::string &errMsg);
+    bool NotifyUnhandledException(const std::string &errMsg);
+    void RemoveErrorObserver();
 
 private:
     ApplicationDataManager();
     ~ApplicationDataManager();
     DISALLOW_COPY_AND_MOVE(ApplicationDataManager);
-    std::weak_ptr<IErrorObserver> errorObserver_;
+    std::shared_ptr<IErrorObserver> errorObserver_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // OHOS_APPEXECFWK_APP_DATA_MANAGER_H
+#endif  // OHOS_ABILITY_RUNTIME_APPLICATION_DATA_MANAGER_H

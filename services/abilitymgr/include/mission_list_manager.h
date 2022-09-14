@@ -305,7 +305,7 @@ public:
      * @param connect, caller callback ipc.
      * @param element, target ability name.
      */
-    int ReleaseLocked(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element);
+    int ReleaseCallLocked(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element);
     /**
      * @brief register snapshotHandler
      * @param handler the snapshotHandler
@@ -323,6 +323,12 @@ public:
     bool GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
         MissionSnapshot& missionSnapshot, bool isLowResolution);
     void GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm);
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     */
+    void UpdateSnapShot(const sptr<IRemoteObject>& token);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -398,6 +404,7 @@ private:
     int DispatchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void DelayCompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteTerminateAndUpdateMission(const std::shared_ptr<AbilityRecord> &abilityRecord);
     bool RemoveMissionList(const std::list<std::shared_ptr<MissionList>> lists,
@@ -419,6 +426,7 @@ private:
     void GetForegroundAbilities(const std::shared_ptr<MissionList>& missionList,
         std::list<std::shared_ptr<AbilityRecord>>& foregroundList);
     std::shared_ptr<Mission> GetMissionBySpecifiedFlag(const AAFwk::Want &want, const std::string &flag) const;
+    bool IsReachToLimitLocked(const AbilityRequest &abilityRequest);
 
     // handle timeout event
     void HandleLoadTimeout(const std::shared_ptr<AbilityRecord> &ability);
@@ -440,6 +448,8 @@ private:
     void TerminatePreviousAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void NotifyMissionCreated(const std::shared_ptr<AbilityRecord> &abilityRecord) const;
     bool IsExcludeFromMissions(const std::shared_ptr<Mission> &mission);
+    void BuildInnerMissionInfo(InnerMissionInfo &info, const std::string &missionName,
+        const bool isSingleton, const int32_t startMethod, const AbilityRequest &abilityRequest);
 
     int userId_;
     mutable std::recursive_mutex managerLock_;

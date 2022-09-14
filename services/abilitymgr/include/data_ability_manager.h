@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_DATA_ABILITY_MANAGER_H
-#define OHOS_AAFWK_DATA_ABILITY_MANAGER_H
+#ifndef OHOS_ABILITY_RUNTIME_DATA_ABILITY_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_DATA_ABILITY_MANAGER_H
 
 #include <map>
 #include <memory>
@@ -35,8 +35,8 @@ public:
 
 public:
     sptr<IAbilityScheduler> Acquire(
-        const AbilityRequest &abilityRequest, bool tryBind, const sptr<IRemoteObject> &client, bool isSaCall);
-    int Release(const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &client, bool isSaCall);
+        const AbilityRequest &abilityRequest, bool tryBind, const sptr<IRemoteObject> &client, bool isNotHap);
+    int Release(const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &client, bool isNotHap);
     int AttachAbilityThread(const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &token);
     int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state);
     void OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state);
@@ -59,6 +59,10 @@ private:
     DataAbilityRecordPtr LoadLocked(const std::string &name, const AbilityRequest &req);
     void DumpLocked(const char *func, int line);
     void RestartDataAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void ReportDataAbilityAcquired(const sptr<IRemoteObject> &client, bool isNotHap,
+        std::shared_ptr<DataAbilityRecord> &record);
+    void ReportDataAbilityReleased(const sptr<IRemoteObject> &client, bool isNotHap,
+        std::shared_ptr<DataAbilityRecord> &record);
 
 private:
     std::mutex mutex_;
@@ -68,4 +72,4 @@ private:
 }  // namespace AAFwk
 }  // namespace OHOS
 
-#endif  // OHOS_AAFWK_DATA_ABILITY_MANAGER_H
+#endif  // OHOS_ABILITY_RUNTIME_DATA_ABILITY_MANAGER_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_MISSION_LISTENER_INTERFACE_H
-#define OHOS_AAFWK_MISSION_LISTENER_INTERFACE_H
+#ifndef OHOS_ABILITY_RUNTIME_MISSION_LISTENER_INTERFACE_H
+#define OHOS_ABILITY_RUNTIME_MISSION_LISTENER_INTERFACE_H
 
 #include "iremote_broker.h"
 #ifdef SUPPORT_GRAPHICS
@@ -69,6 +69,20 @@ public:
     virtual void OnMissionIconUpdated(int32_t missionId, const std::shared_ptr<OHOS::Media::PixelMap> &icon) = 0;
 #endif
 
+    /**
+     * @brief When a mission is closed, AbilityMs notifies the listener of the mission id
+     *
+     * @param missionId, mission Id.
+     */
+    virtual void OnMissionClosed(int32_t missionId) = 0;
+
+    /**
+     * @brief When a mission's label was changed, AbilityMs notifies the listener of the mission id
+     *
+     * @param missionId, mission Id.
+     */
+    virtual void OnMissionLabelUpdated(int32_t missionId) = 0;
+
     enum MissionListenerCmd {
         // ipc id for OnMissionCreated
         ON_MISSION_CREATED = 0,
@@ -85,10 +99,16 @@ public:
         // ipc id for OnMissionIconUpdated
         ON_MISSION_ICON_UPDATED,
 
+        // ipc id for OnMissionClosed
+        ON_MISSION_CLOSED,
+
+        // ipc id for OnMissionLabelUpdated
+        ON_MISSION_LABEL_UPDATED,
+
         // maximum of enum
         MISSION_LINSTENER_CMD_MAX
     };
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_MISSION_LISTENER_INTERFACE_H
+#endif  // OHOS_ABILITY_RUNTIME_MISSION_LISTENER_INTERFACE_H

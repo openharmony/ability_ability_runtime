@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_DATA_ABILITY_RECORD_H
-#define OHOS_AAFWK_DATA_ABILITY_RECORD_H
+#ifndef OHOS_ABILITY_RUNTIME_DATA_ABILITY_RECORD_H
+#define OHOS_ABILITY_RUNTIME_DATA_ABILITY_RECORD_H
 
 #include <list>
 #include <string>
@@ -39,8 +39,8 @@ public:
     sptr<IAbilityScheduler> GetScheduler();
     int Attach(const sptr<IAbilityScheduler> &scheduler);
     int OnTransitionDone(int state);
-    int AddClient(const sptr<IRemoteObject> &client, bool tryBind, bool isSaCall);
-    int RemoveClient(const sptr<IRemoteObject> &client, bool isSaCall);
+    int AddClient(const sptr<IRemoteObject> &client, bool tryBind, bool isNotHap);
+    int RemoveClient(const sptr<IRemoteObject> &client, bool isNotHap);
     int RemoveClients(const std::shared_ptr<AbilityRecord> &client = nullptr);
     size_t GetClientCount(const sptr<IRemoteObject> &client = nullptr) const;
     int KillBoundClientProcesses();
@@ -57,9 +57,11 @@ private:
     struct ClientInfo {
         IRemoteObjectPtr client;
         bool tryBind;
-        bool isSaCall;
+        bool isNotHap;
+        int32_t clientPid = 0;
     };
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
+    int32_t GetDiedCallerPid(const sptr<IRemoteObject> &remote);
 
 private:
     std::condition_variable_any loadedCond_ {};
@@ -71,4 +73,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_DATA_ABILITY_RECORD_H
+#endif  // OHOS_ABILITY_RUNTIME_DATA_ABILITY_RECORD_H

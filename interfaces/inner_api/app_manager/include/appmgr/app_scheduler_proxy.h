@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_CLIENT_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_SCHEDULER_PROXY_H
+#define OHOS_ABILITY_RUNTIME_APP_SCHEDULER_PROXY_H
 
 #include "iremote_proxy.h"
 #include "app_scheduler_interface.h"
@@ -67,6 +67,14 @@ public:
      * @return
      */
     virtual void ScheduleLowMemory() override;
+
+    /**
+     * ScheduleMemoryLevel, call ScheduleMemoryLevel() through proxy project,
+     * Notify applications background the current memory level.
+     *
+     * @return
+     */
+    virtual void ScheduleMemoryLevel(int32_t level) override;
 
     /**
      * ScheduleLaunchApplication, call ScheduleLaunchApplication() through proxy project,
@@ -134,10 +142,15 @@ public:
 
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
+    int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName) override;
+
+    int32_t ScheduleNotifyHotReloadPage() override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    void ScheduleMemoryCommon(const int32_t level, const uint32_t operation);
     static inline BrokerDelegator<AppSchedulerProxy> delegator_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_APP_SCHEDULER_CLIENT_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_SCHEDULER_PROXY_H

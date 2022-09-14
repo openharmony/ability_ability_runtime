@@ -778,19 +778,8 @@ void CallOnRequestPermissionsFromUserResult(int requestCode, const std::vector<s
         return;
     }
 
-    uv_work_t *work = new (std::nothrow) uv_work_t;
-    if (work == nullptr) {
-        HILOG_ERROR("%{public}s, work==null.", __func__);
-        return;
-    }
-    OnRequestPermissionsFromUserResultCallback *onRequestPermissionCB =
-        new (std::nothrow) OnRequestPermissionsFromUserResultCallback;
-    if (onRequestPermissionCB == nullptr) {
-        HILOG_ERROR("%{public}s, the string vector permissions is empty.", __func__);
-        delete work;
-        work = nullptr;
-        return;
-    }
+    uv_work_t *work = new uv_work_t;
+    OnRequestPermissionsFromUserResultCallback *onRequestPermissionCB = new OnRequestPermissionsFromUserResultCallback;
     onRequestPermissionCB->requestCode = requestCode;
     onRequestPermissionCB->permissions = permissions;
     onRequestPermissionCB->grantResults = grantResults;
@@ -1101,7 +1090,7 @@ void GetAppInfoExecuteCB(napi_env env, void *data)
 
     std::shared_ptr<ApplicationInfo> appInfoPtr = appInfoCB->cbBase.ability->GetApplicationInfo();
     if (appInfoPtr != nullptr) {
-        SaveAppInfo(appInfoCB->appInfo, *appInfoPtr);
+        appInfoCB->appInfo = *appInfoPtr;
     } else {
         HILOG_ERROR("NAPI_GetApplicationInfo, appInfoPtr == nullptr");
         appInfoCB->cbBase.errCode = NAPI_ERR_ABILITY_CALL_INVALID;
@@ -2696,6 +2685,12 @@ napi_value NAPI_IsUpdatingConfigurations(napi_env env, napi_callback_info info)
     return NAPI_IsUpdatingConfigurationsCommon(env, info, AbilityType::PAGE);
 }
 
+napi_value NAPI_GetExternalCacheDir(napi_env env, napi_callback_info info)
+{
+    HILOG_DEBUG("%{public}s called", __func__);
+    return NAPI_GetExternalCacheDirCommon(env, info, AbilityType::PAGE);
+}
+
 napi_value NAPI_PrintDrawnCompleted(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("%{public}s called", __func__);
@@ -2765,6 +2760,7 @@ napi_value ContextPermissionInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setWakeUpScreen", NAPI_SetWakeUpScreen),
         DECLARE_NAPI_FUNCTION("setDisplayOrientation", NAPI_SetDisplayOrientation),
         DECLARE_NAPI_FUNCTION("getDisplayOrientation", NAPI_GetDisplayOrientation),
+        DECLARE_NAPI_FUNCTION("getExternalCacheDir", NAPI_GetExternalCacheDir),
     };
 
     NAPI_CALL(env,

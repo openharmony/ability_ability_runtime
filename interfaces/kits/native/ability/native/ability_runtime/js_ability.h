@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_JS_ABILITY_H
-#define ABILITY_RUNTIME_JS_ABILITY_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_ABILITY_H
+#define OHOS_ABILITY_RUNTIME_JS_ABILITY_H
 
 #include "ability.h"
 #include "ability_delegator_infos.h"
@@ -41,19 +41,20 @@ public:
     JsAbility(JsRuntime &jsRuntime);
     ~JsAbility() override;
 
-    void Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<OHOSApplication> &application,
+    void Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<OHOSApplication> application,
         std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
 
     void OnStart(const Want &want) override;
     void OnStop() override;
+    void OnStop(AppExecFwk::AbilityTransactionCallbackInfo *callbackInfo, bool &isAsyncCallback) override;
+    void OnStopCallback() override;
     int32_t OnContinue(WantParams &wantParams) override;
     void OnConfigurationUpdated(const Configuration &configuration) override;
     void UpdateContextConfiguration() override;
+    void OnMemoryLevel(int level) override;
     void OnNewWant(const Want &want) override;
 
     void OnAbilityResult(int requestCode, int resultCode, const Want &resultData) override;
-    void OnRequestPermissionsFromUserResult(
-        int requestCode, const std::vector<std::string> &permissions, const std::vector<int> &grantResults) override;
 
     sptr<IRemoteObject> CallRequest() override;
 
@@ -65,6 +66,8 @@ public:
      */
     virtual void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
+    std::shared_ptr<NativeReference> GetJsAbility();
+
 #ifdef SUPPORT_GRAPHICS
 public:
     void OnSceneCreated() override;
@@ -74,17 +77,23 @@ public:
     void OnForeground(const Want &want) override;
     void OnBackground() override;
 
+    std::shared_ptr<NativeReference> GetJsWindowStage();
+
 protected:
     void DoOnForeground(const Want &want) override;
-    void RequsetFocus(const Want &want) override;
+    void RequestFocus(const Want &want) override;
     void ContinuationRestore(const Want &want) override;
 
 private:
     void GetPageStackFromWant(const Want &want, std::string &pageStack);
+    std::shared_ptr<NativeReference> jsWindowStageObj_;
 #endif
 
 private:
-    void CallObjectMethod(const char *name, NativeValue *const *argv = nullptr, size_t argc = 0);
+    NativeValue *CallObjectMethod(const char *name, NativeValue *const *argv = nullptr, size_t argc = 0,
+        bool withResult = false);
+    bool CheckPromise(NativeValue* result);
+    bool CallPromise(NativeValue* result, AppExecFwk::AbilityTransactionCallbackInfo *callbackInfo);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
 
@@ -95,4 +104,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // ABILITY_RUNTIME_JS_ABILITY_H
+#endif  // OHOS_ABILITY_RUNTIME_JS_ABILITY_H

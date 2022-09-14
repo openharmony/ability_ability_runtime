@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_MOCK_INHERITANCE_IMPL_H
-#define FOUNDATION_APPEXECFWK_OHOS_MOCK_INHERITANCE_IMPL_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_IMPL_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_IMPL_H
 
 #include "ability.h"
 #include "ability_impl.h"
@@ -98,4 +98,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_MOCK_PAGE_ABILITY_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_IMPL_H

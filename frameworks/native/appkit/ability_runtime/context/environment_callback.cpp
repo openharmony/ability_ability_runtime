@@ -16,8 +16,8 @@
 #include "environment_callback.h"
 
 #include "hilog_wrapper.h"
-#include "js_runtime_utils.h"
 #include "js_data_struct_converter.h"
+#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -66,7 +66,8 @@ void JsEnvironmentCallback::CallJsMethod(
             if (jsEnvCallback) {
                 jsEnvCallback->CallJsMethodInner(methodName, config);
             }
-        });
+        }
+    );
     NativeReference *callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
     AsyncTask::Schedule("JsEnvironmentCallback::OnConfigurationUpdated",
@@ -88,7 +89,6 @@ int32_t JsEnvironmentCallback::Register(NativeValue *jsCallback)
         serialNumber_++;
     } else {
         serialNumber_ = 0;
-        return -1;
     }
     callbacks_.emplace(callbackId, std::shared_ptr<NativeReference>(engine_->CreateReference(jsCallback, 1)));
     return callbackId;
@@ -99,14 +99,14 @@ bool JsEnvironmentCallback::UnRegister(int32_t callbackId)
     HILOG_DEBUG("UnRegister called, env callbackId : %{public}d", callbackId);
     auto it = callbacks_.find(callbackId);
     if (it == callbacks_.end()) {
-        HILOG_ERROR("UnRegister env callbackId: %{publid}d is not in callbacks_", callbackId);
+        HILOG_ERROR("UnRegister env callbackId: %{public}d is not in callbacks_", callbackId);
         return false;
     }
     HILOG_DEBUG("callbacks_.callbackId : %{public}d", it->first);
     return callbacks_.erase(callbackId) == 1;
 }
 
-bool JsEnvironmentCallback::IsEmpty()
+bool JsEnvironmentCallback::IsEmpty() const
 {
     return callbacks_.empty();
 }

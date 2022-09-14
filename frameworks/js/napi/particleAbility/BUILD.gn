@@ -13,14 +13,16 @@
 
 import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
+import("//foundation/distributeddatamgr/relational_store/relational_store.gni")
+
 ohos_shared_library("particleability") {
   include_dirs = [
     "//third_party/node/src",
     "${ability_runtime_napi_path}/featureAbility",
     "${ability_runtime_services_path}/common/include",
-    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/rdb/include",
-    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/common/include",
-    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/dataability/include",
+    "${relational_store_napi_path}/rdb/include",
+    "${relational_store_napi_path}/common/include",
+    "${relational_store_napi_path}/dataability/include",
     "//third_party/jsoncpp",
     "//third_party/jsoncpp/include/json",
   ]
@@ -29,9 +31,9 @@ ohos_shared_library("particleability") {
     "${ability_runtime_napi_path}/featureAbility/napi_context.cpp",
     "${ability_runtime_napi_path}/featureAbility/napi_data_ability_helper.cpp",
     "${ability_runtime_napi_path}/featureAbility/napi_data_ability_operation.cpp",
-    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/common/src/js_utils.cpp",
-    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/dataability/src/napi_data_ability_predicates.cpp",
-    "${distributeddatamgr_path}/appdatamgr/relational_store/frameworks/js/napi/rdb/src/napi_result_set.cpp",
+    "${relational_store_napi_path}/common/src/js_utils.cpp",
+    "${relational_store_napi_path}/dataability/src/napi_data_ability_predicates.cpp",
+    "${relational_store_napi_path}/rdb/src/napi_result_set.cpp",
     "native_module.cpp",
     "particle_ability.cpp",
   ]
@@ -39,30 +41,25 @@ ohos_shared_library("particleability") {
   deps = [
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${ability_runtime_native_path}/appkit:appkit_native",
     "//third_party/jsoncpp:jsoncpp",
-    "//third_party/libuv:uv_static",
+    "//third_party/libuv:uv",
   ]
 
   external_deps = [
-    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
-    "ability_runtime:app_manager",
     "ability_runtime:data_ability_helper",
     "ability_runtime:napi_base_context",
     "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "eventhandler:libeventhandler",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "relational_store:rdb_data_share_adapter",
-    "utils_base:utils",
   ]
 
   relative_install_dir = "module/ability"

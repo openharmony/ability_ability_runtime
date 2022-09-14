@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_AMS_MGR_CLIENT_H
-#define FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_AMS_MGR_CLIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_AMS_MGR_PROXY_H
+#define OHOS_ABILITY_RUNTIME_AMS_MGR_PROXY_H
 
 #include "iremote_proxy.h"
 
@@ -134,6 +134,8 @@ public:
      */
     virtual int32_t KillApplicationByUid(const std::string &bundleName, const int uid) override;
 
+    virtual int KillApplicationSelf() override;
+
     virtual int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application) override;
 
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) override;
@@ -154,4 +156,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_INTERFACES_INNERKITS_APPEXECFWK_CORE_INCLUDE_APPMGR_AMS_MGR_CLIENT_H
+#endif  // OHOS_ABILITY_RUNTIME_AMS_MGR_PROXY_H

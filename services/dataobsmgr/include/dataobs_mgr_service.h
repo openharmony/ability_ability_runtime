@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_DATAOBS_MANAGER_SERVICE_H
-#define OHOS_AAFWK_DATAOBS_MANAGER_SERVICE_H
+#ifndef OHOS_ABILITY_RUNTIME_DATAOBS_MGR_SERVICE_H
+#define OHOS_ABILITY_RUNTIME_DATAOBS_MGR_SERVICE_H
 
 #include <memory>
 #include <singleton.h>
@@ -55,6 +55,14 @@ public:
     virtual int NotifyChange(const Uri &uri) override;
 
     /**
+     * @brief DataObs hidumper.
+     * @param fd Indicates the fd.
+     * @param args Indicates the params.
+     * @return Returns the dump result.
+     */
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
+
+    /**
      * GetEventHandler, get the dataobs manager service's handler.
      *
      * @return Returns EventHandler ptr.
@@ -63,6 +71,10 @@ public:
 
 private:
     bool Init();
+    void Dump(const std::vector<std::u16string>& args, std::string& result) const;
+    void ShowHelp(std::string& result) const;
+
+private:
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> handler_;
     DataObsServiceRunningState state_;
@@ -71,4 +83,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_DATAOBS_MANAGER_SERVICE_H
+#endif  // OHOS_ABILITY_RUNTIME_DATAOBS_MGR_SERVICE_H

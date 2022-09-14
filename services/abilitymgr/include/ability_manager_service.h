@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_MANAGER_SERVICE_H
-#define OHOS_AAFWK_ABILITY_MANAGER_SERVICE_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
 #include <future>
 #include <memory>
@@ -42,10 +42,13 @@
 #include "system_ability.h"
 #include "uri.h"
 #include "ability_config.h"
+#include "parameter.h"
 #include "pending_want_manager.h"
 #include "ams_configuration_parameter.h"
 #include "user_controller.h"
+#include "resident_process_manager.h"
 #ifdef SUPPORT_GRAPHICS
+#include "application_anr_listener.h"
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #endif
@@ -226,6 +229,13 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
+    virtual int ConnectAbilityCommon(
+        const Want &want,
+        const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::ExtensionAbilityType extensionType,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
     /**
      * ContinueMission, continue ability from mission center.
      *
@@ -379,7 +389,7 @@ public:
      * @param args Indicates the params.
      * @return Returns the dump result.
      */
-    int Dump(int fd, const std::vector<std::u16string> &args) override;
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
 
     /**
      * dump ability stack info, about userID, mission stack info,
@@ -477,6 +487,10 @@ public:
 
     virtual int GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info) override;
 
+    virtual int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
+
+    virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
+
     virtual int LockMissionForCleanup(int32_t missionId) override;
 
     virtual int UnlockMissionForCleanup(int32_t missionId) override;
@@ -505,11 +519,6 @@ public:
 
     virtual int StopSyncRemoteMissions(const std::string& devId) override;
 
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    virtual void GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo) override;
     virtual int GetAppMemorySize() override;
 
     virtual bool IsRamConstrainedDevice() override;
@@ -524,13 +533,13 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) override;
 
     /**
-     * Release Ability, disconnect session with common ability.
+     * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param element, the element of target service.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ReleaseAbility(
+    virtual int ReleaseCall(
         const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element) override;
 
     /**
@@ -783,9 +792,14 @@ public:
 
     bool GetLocalDeviceId(std::string& localDeviceId);
 
-#ifdef SUPPORT_GRAPHICS
-    int32_t ImplicitStartAbilityInner(const Want &targetWant, const AbilityRequest &request, int32_t userId);
-#endif
+    int JudgeAbilityVisibleControl(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid = -1);
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     */
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -795,7 +809,7 @@ public:
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
 
     static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 10000; // ms
-    static constexpr uint32_t LOAD_TIMEOUT = 3000;            // ms
+    static constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
     static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
     static constexpr uint32_t INACTIVE_TIMEOUT = 500;         // ms
     static constexpr uint32_t TERMINATE_TIMEOUT = 10000;      // ms
@@ -807,6 +821,7 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT = 5000;   // ms
     static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
     static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
+    static constexpr uint32_t KILL_TIMEOUT = 3000;           // ms
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
@@ -862,35 +877,22 @@ private:
      * start highest priority ability.
      *
      */
-    void StartHighestPriorityAbility(bool isBoot);
-    /**
-     * starting settings data ability.
-     *
-     */
-    void StartingSettingsDataAbility();
-
+    void StartHighestPriorityAbility(int32_t userId, bool isBoot);
     /**
      * connet bms.
      *
      */
     void ConnectBmsService();
-
     /**
      * get the user id.
      *
      */
     int GetUserId();
-
     /**
      * Determine whether it is a system APP
      *
      */
     bool IsSystemUiApp(const AppExecFwk::AbilityInfo &info) const;
-    /**
-     * Select to start the application according to the configuration file of AMS
-     *
-     */
-    void StartSystemApplication();
     /**
      * Get parameters from the global
      *
@@ -903,7 +905,8 @@ private:
         const Want &want,
         const int32_t userId,
         const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken);
+        const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::ExtensionAbilityType extensionType);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int ConnectRemoteAbility(const Want &want, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
@@ -934,7 +937,6 @@ private:
     void DumpFuncInit();
     bool IsExistFile(const std::string &path);
 
-    int CheckCallPermissions(const AbilityRequest &abilityRequest);
     bool JudgeMultiUserConcurrency(const int32_t userId);
     /**
      * dumpsys info
@@ -955,9 +957,10 @@ private:
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     void DataDumpSysStateInner(
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
-    ErrCode ProcessMultiParam(std::vector<std::string> &argsStr, std::string &result);
-    void ShowHelp(std::string &result);
-    void ShowIllegalInfomation(std::string &result);
+    ErrCode ProcessMultiParam(std::vector<std::string>& argsStr, std::string& result);
+    void ShowHelp(std::string& result);
+    void ShowIllegalInfomation(std::string& result);
+    int Dump(const std::vector<std::u16string>& args, std::string& result);
 
     void InitConnectManager(int32_t userId, bool switchUser);
     void InitDataAbilityManager(int32_t userId, bool switchUser);
@@ -965,17 +968,15 @@ private:
 
     int32_t InitAbilityInfoFromExtension(AppExecFwk::ExtensionAbilityInfo &extensionInfo,
         AppExecFwk::AbilityInfo &abilityInfo);
-    
+
     // multi user
     void StartFreezingScreen();
     void StopFreezingScreen();
     void UserStarted(int32_t userId);
     void SwitchToUser(int32_t userId);
-    void StartLauncherAbility(int32_t userId);
     void SwitchToUser(int32_t oldUserId, int32_t userId);
     void SwitchManagers(int32_t userId, bool switchUser = true);
     void StartUserApps(int32_t userId, bool isBoot);
-    void StartSystemAbilityByUser(int32_t userId, bool isBoot);
     void PauseOldUser(int32_t userId);
     void PauseOldMissionListManager(int32_t userId);
     void PauseOldConnectManager(int32_t userId);
@@ -983,7 +984,6 @@ private:
 
     bool VerificationAllToken(const sptr<IRemoteObject> &token);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManager(const sptr<IAbilityScheduler> &scheduler);
-    bool CheckDataAbilityRequest(AbilityRequest &abilityRequest);
     std::shared_ptr<MissionListManager> GetListManagerByUserId(int32_t userId);
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByUserId(int32_t userId);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByUserId(int32_t userId);
@@ -997,11 +997,11 @@ private:
 
     bool IsNeedTimeoutForTest(const std::string &abilityName, const std::string &state) const;
 
-    void StartupResidentProcess(int userId);
-
-    int VerifyMissionPermission();
+    void StartResidentApps();
 
     int VerifyAccountPermission(int32_t userId);
+
+    bool CheckCallerEligibility(const AppExecFwk::AbilityInfo &abilityInfo, int callerUid);
 
     using DumpFuncType = void (AbilityManagerService::*)(const std::string &args, std::vector<std::string> &info);
     std::map<uint32_t, DumpFuncType> dumpFuncMap_;
@@ -1014,14 +1014,111 @@ private:
     void GrantUriPermission(const Want &want, int32_t validUserId);
     bool VerifyUriPermission(const AbilityRequest &abilityRequest, const Want &want);
 
-    void StartMainElement(int userId, std::vector<AppExecFwk::BundleInfo> &bundleInfos);
-
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
     int GenerateExtensionAbilityRequest(const Want &want, AbilityRequest &request,
         const sptr<IRemoteObject> &callerToken, int32_t userId);
     int CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
         int32_t validUserId, AppExecFwk::ExtensionAbilityType extensionType);
+
+    void SubscribeBackgroundTask();
+
+    void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
+
+    void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
+
+    int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
+
+    int StartAppgallery(int requestCode, int32_t userId, std::string action);
+
+    /**
+     * Check if Caller is allowed to start ServiceAbility(FA) or ServiceExtension(Stage) or DataShareExtension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Service.
+     */
+    int CheckCallServicePermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start DataAbility(FA)
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start DataAbility.
+     */
+    int CheckCallDataAbilityPermission(AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start ServiceExtension(Stage) or DataShareExtension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start ServiceExtension.
+     */
+    int CheckCallServiceExtensionPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start other Extension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start OtherExtension.
+     */
+    int CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start ServiceAbility(FA).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start ServiceAbility.
+     */
+    int CheckCallServiceAbilityPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start PageAbility(FA) or Ability(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Ability.
+     */
+    int CheckCallAbilityPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start Ability(Stage) by call.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Ability by call.
+     */
+    int CheckStartByCallPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Judge if Caller-Application is in background state.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @param isBackgroundCall, Indicates the Caller-Application state.
+     *                          TRUE: The Caller-Application is not in focus and not in foreground state.
+     *                          FALSE: The Caller-Application is in focus or in foreground state.
+     * @return Returns ERR_OK on check success, others on check failure.
+     */
+    int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall);
+
+    /**
+     *  Temporary, use old rule to check permission.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @param isStartByCall, Indicates whether it is the StartAbilityByCall function call.
+     *                       TRUE: Is StartAbilityByCall function call.
+     *                       FALSE: Is other function call, such as StartAbility, ConnectAbility and so on.
+     * @return Returns ERR_OK on check success, others on check failure.
+     */
+    int CheckCallerPermissionOldRule(const AbilityRequest &abilityRequest, const bool isStartByCall = false);
+
+    /**
+     *  Temporary, judge is use new check-permission rule to start ability.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns TRUE: Use new rule.
+     *                 FALSE: Use old rule.
+     */
+    bool IsUseNewStartUpRule(const AbilityRequest &abilityRequest);
+
+    bool CheckNewRuleSwitchState(const std::string &param);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
@@ -1032,7 +1129,6 @@ private:
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
     std::shared_ptr<AbilityConnectManager> connectManager_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
-    std::shared_ptr<AppScheduler> appScheduler_;
     std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
     std::shared_ptr<DataAbilityManager> dataAbilityManager_;
     std::shared_ptr<DataAbilityManager> systemDataAbilityManager_;
@@ -1041,12 +1137,13 @@ private:
     std::shared_ptr<AmsConfigurationParameter> amsConfigResolver_;
     const static std::map<std::string, AbilityManagerService::DumpKey> dumpMap;
     const static std::map<std::string, AbilityManagerService::DumpsysKey> dumpsysMap;
+    const static std::map<int32_t, AppExecFwk::SupportWindowMode> windowModeMap;
 
     std::unordered_map<int, std::shared_ptr<MissionListManager>> missionListManagers_;
     std::shared_ptr<MissionListManager> currentMissionListManager_;
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
-    
+
     std::shared_ptr<UserController> userController_;
     sptr<AppExecFwk::IAbilityController> abilityController_ = nullptr;
     bool controllerIsAStabilityTest_ = false;
@@ -1057,17 +1154,32 @@ private:
 
     static sptr<AbilityManagerService> instance_;
 
+    // Component StartUp rule switch
+    bool startUpNewRule_ = false;
+    /** It only takes effect when startUpNewRule_ is TRUE
+     *  TRUE: When Caller-Application is Launcher or SystemUI, use old rule.
+     *  FALSE: Apply new rule to all application
+     */
+    bool newRuleExceptLauncherSystemUI_ = true;
+    /** Indicates the criteria for judging whether the Caller-Application is in the background
+     *  TRUE: Determine the state by AAFwk::AppState::FOREGROUND.
+     *  FALSE: Determine the state by AppExecFwk::AppProcessState::APP_STATE_FOCUS.
+     */
+    bool backgroundJudgeFlag_ = true;
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
 
 #ifdef SUPPORT_GRAPHICS
     int32_t ShowPickerDialog(const Want& want, int32_t userId);
+    bool CheckWindowMode(int32_t windowMode, const std::vector<AppExecFwk::SupportWindowMode>& windowModes) const;
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
+    std::shared_ptr<ApplicationAnrListener> anrListener_;
 #endif
     std::shared_ptr<AppNoResponseDisposer> anrDisposer_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_MANAGER_SERVICE_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H

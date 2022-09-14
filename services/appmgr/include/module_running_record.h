@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_MODULE_RUNNING_RECORD_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_MODULE_RUNNING_RECORD_H
+#ifndef OHOS_ABILITY_RUNTIME_MODULE_RUNNING_RECORD_H
+#define OHOS_ABILITY_RUNTIME_MODULE_RUNNING_RECORD_H
 
 #include <string>
 #include <list>
@@ -177,6 +177,8 @@ public:
 
     const std::shared_ptr<ApplicationInfo> GetAppInfo();
 
+    bool RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObject>& token) const;
+
 private:
     void SendEvent(uint32_t msg, int64_t timeOut, const std::shared_ptr<AbilityRunningRecord> &abilityRecord);
 
@@ -195,4 +197,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_MODULE_RUNNING_RECORD_H
+#endif  // OHOS_ABILITY_RUNTIME_MODULE_RUNNING_RECORD_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_ABILITY_RECORD_H
-#define OHOS_AAFWK_ABILITY_RECORD_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_RECORD_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_RECORD_H
 
 #include <ctime>
 #include <functional>
@@ -187,7 +187,6 @@ enum AbilityCallType {
     START_OPTIONS_TYPE,
     START_SETTINGS_TYPE,
     START_EXTENSION_TYPE,
-    CONNECT_ABILITY_TYPE,
 };
 struct AbilityRequest {
     Want want;
@@ -290,7 +289,7 @@ public:
      * foreground the ability.
      *
      */
-    void ForegroundAbility(const Closure &task, uint32_t sceneFlag = 0);
+    void ForegroundAbility(uint32_t sceneFlag = 0);
 
     /**
      * process request of foregrounding the ability.
@@ -410,6 +409,15 @@ public:
      */
     bool IsReady() const;
 
+    inline void SetNeedSnapShot(bool needTakeSnapShot)
+    {
+        needTakeSnapShot_ = needTakeSnapShot;
+    }
+
+    inline bool IsNeedTakeSnapShot()
+    {
+        return needTakeSnapShot_;
+    }
 #ifdef SUPPORT_GRAPHICS
     /**
      * check whether the ability 's window is attached.
@@ -765,6 +773,7 @@ public:
 
     void SetUid(int32_t uid);
     int32_t GetUid();
+    int32_t GetPid();
     void SetSwitchingPause(bool state);
     bool IsSwitchingPause();
     void SetOwnerMissionUserId(int32_t userId);
@@ -772,13 +781,15 @@ public:
 
     // new version
     ResolveResultType Resolve(const AbilityRequest &abilityRequest);
-    bool Release(const sptr<IAbilityConnection> & connect);
+    bool ReleaseCall(const sptr<IAbilityConnection>& connect);
     bool IsNeedToCallRequest() const;
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
     bool CallRequest();
     bool IsStartToBackground() const;
     void SetStartToBackground(const bool flag);
+    bool IsStartToForeground() const;
+    void SetStartToForeground(const bool flag);
     void SetMinimizeReason(bool fromUser);
     bool IsMinimizeFromUser() const;
     void SetClearMissionFlag(bool clearMissionFlag);
@@ -794,6 +805,8 @@ public:
     #endif
 
     bool CanRestartRootLauncher();
+
+    std::string GetLabel();
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
@@ -824,6 +837,9 @@ private:
 
     bool IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken);
 
+    void HandleDlpAttached();
+    void HandleDlpClosed();
+
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
     void AnimationTask(bool isRecent, const AbilityRequest &abilityRequest,
@@ -852,7 +868,7 @@ private:
         const std::shared_ptr<Want> &want, const AbilityRequest &abilityRequest);
     std::shared_ptr<Global::Resource::ResourceManager> CreateResourceManager(
         const AppExecFwk::AbilityInfo &abilityInfo) const;
-    sptr<Media::PixelMap> GetPixelMap(const uint32_t windowIconId,
+    std::shared_ptr<Media::PixelMap> GetPixelMap(const uint32_t windowIconId,
         std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const;
     void StartingWindowHot(const std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<Want> &want,
         const AbilityRequest &abilityRequest);
@@ -906,6 +922,7 @@ private:
     AppState appState_ = AppState::BEGIN;
 
     int32_t uid_ = 0;
+    int32_t pid_ = 0;
     std::weak_ptr<MissionList> missionList_;
     std::weak_ptr<Mission> mission_;
     int32_t missionId_ = -1;
@@ -916,6 +933,7 @@ private:
     std::shared_ptr<CallContainer> callContainer_ = nullptr;
     bool isStartedByCall_ = false;
     bool isStartToBackground_ = false;
+    bool isStartToForeground_ = false;
     int32_t appIndex_ = 0;
     bool minimizeReason_ = false;
 
@@ -930,6 +948,7 @@ private:
     mutable std::condition_variable dumpCondition_;
     mutable bool isDumpTimeout_ = false;
     std::vector<std::string> dumpInfos_;
+    bool needTakeSnapShot_ = true;
 
 #ifdef SUPPORT_GRAPHICS
     bool isStartingWindow_ = false;
@@ -937,4 +956,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_ABILITY_RECORD_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_RECORD_H

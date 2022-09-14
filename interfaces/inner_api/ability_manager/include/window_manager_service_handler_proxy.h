@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_WMS_HANDLER_PROXY_H
-#define OHOS_AAFWK_WMS_HANDLER_PROXY_H
+#ifndef OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_PROXY_H
+#define OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_PROXY_H
 
 #ifdef SUPPORT_GRAPHICS
 #include "iremote_proxy.h"
@@ -32,10 +32,10 @@ public:
 
     virtual int32_t GetFocusWindow(sptr<IRemoteObject>& abilityToken) override;
 
-    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap,
+    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap,
         uint32_t bgColor) override;
 
-    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, sptr<Media::PixelMap> pixelMap) override;
+    virtual void StartingWindow(sptr<AbilityTransitionInfo> info, std::shared_ptr<Media::PixelMap> pixelMap) override;
 
     virtual void CancelStartingWindow(sptr<IRemoteObject> abilityToken) override;
 
@@ -45,4 +45,4 @@ private:
 }  // namespace AAFwk
 }  // namespace OHOS
 #endif
-#endif  // OHOS_AAFWK_WMS_HANDLER_PROXY_H
+#endif  // OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_PROXY_H

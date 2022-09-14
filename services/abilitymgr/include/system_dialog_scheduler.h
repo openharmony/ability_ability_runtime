@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_AAFWK_SYSTEM_DIALOG_SCHEDULER_H
-#define OHOS_AAFWK_SYSTEM_DIALOG_SCHEDULER_H
+#ifndef OHOS_ABILITY_RUNTIME_SYSTEM_DIALOG_SCHEDULER_H
+#define OHOS_ABILITY_RUNTIME_SYSTEM_DIALOG_SCHEDULER_H
 
 #include <functional>
 
@@ -39,6 +39,10 @@ struct DialogPosition {
     int32_t offsetY = 0;
     int32_t width = 0;
     int32_t height = 0;
+    int32_t window_width = 0;
+    int32_t window_height = 0;
+    int32_t window_offsetX = 0;
+    int32_t window_offsetY = 0;
     int32_t width_narrow = 0;
     int32_t height_narrow = 0;
     bool wideScreen = true;
@@ -75,6 +79,7 @@ public:
     }
 
 private:
+    const std::string GetAnrParams(const DialogPosition position, const std::string &appName) const;
     const std::string GetSelectorParams(const std::vector<DialogAppInfo> &infos) const;
     
     void InitDialogPosition(DialogType type, DialogPosition &position) const;
@@ -92,4 +97,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_SYSTEM_DIALOG_SCHEDULER_H
+#endif  // OHOS_ABILITY_RUNTIME_SYSTEM_DIALOG_SCHEDULER_H

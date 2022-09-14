@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ABILITY_RUNTIME_JS_CALLERCOMPLEX_H
-#define ABILITY_RUNTIME_JS_CALLERCOMPLEX_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_CALLER_COMPLEX_H
+#define OHOS_ABILITY_RUNTIME_JS_CALLER_COMPLEX_H
 
 #include <memory>
+#include <functional>
 #include <native_engine/native_value.h>
 
 #include "iremote_object.h"
@@ -23,11 +24,13 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+using ReleaseCallFunc = std::function<ErrCode(std::shared_ptr<CallerCallBack>&)>;
+
 NativeValue* CreateJsCallerComplex(
-    NativeEngine& engine, std::shared_ptr<AbilityContext> context, sptr<IRemoteObject> callee,
+    NativeEngine& engine, ReleaseCallFunc releaseCallFunc, sptr<IRemoteObject> callee,
     std::shared_ptr<CallerCallBack> callerCallBack);
 
 NativeValue* CreateJsCalleeRemoteObject(NativeEngine& engine, sptr<IRemoteObject> callee);
 } // AbilityRuntime
 } // OHOS
-#endif  // ABILITY_RUNTIME_JS_CALLERCOMPLEX_H
+#endif  // OHOS_ABILITY_RUNTIME_JS_CALLER_COMPLEX_H

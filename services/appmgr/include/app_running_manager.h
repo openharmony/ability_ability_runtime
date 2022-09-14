@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_RUNNING_MANAGER_H
-#define FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_RUNNING_MANAGER_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_RUNNING_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_APP_RUNNING_MANAGER_H
 
 #include <map>
 #include <mutex>
@@ -95,7 +95,7 @@ public:
      *
      * @return the application record list.
      */
-    const std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> &GetAppRunningRecordMap();
+    std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> GetAppRunningRecordMap();
 
     /**
      * RemoveAppRunningRecordById, Remove application information through application id.
@@ -132,6 +132,15 @@ public:
     * @return Returns ERR_OK on success, others on failure.
     */
     int32_t UpdateConfiguration(const Configuration &config);
+
+    /*
+    *  Notify application background of current memory level.
+    *
+    * @param level current memory level.
+    * @return Returns ERR_OK on success, others on failure.
+    */
+    int32_t NotifyMemoryLevel(int32_t level);
+
     void HandleTerminateTimeOut(int64_t eventId);
     void HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecord(const int64_t eventId);
@@ -150,7 +159,11 @@ public:
     void HandleAddAbilityStageTimeOut(const int64_t eventId);
     void HandleStartSpecifiedAbilityTimeOut(const int64_t eventId);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByRenderPid(const pid_t pid);
-    void OnRemoteRenderDied(const wptr<IRemoteObject> &remote);
+    std::shared_ptr<RenderRecord> OnRemoteRenderDied(const wptr<IRemoteObject> &remote);
+    bool ProcessExitByPid(pid_t pid);
+    bool GetAppRunningStateByBundleName(const std::string &bundleName);
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+    int32_t NotifyHotReloadPage(const std::string &bundleName);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
 
@@ -162,4 +175,4 @@ private:
 }  // namespace AppExecFwk
 }  // namespace OHOS
 
-#endif  // FOUNDATION_APPEXECFWK_SERVICES_APPMGR_INCLUDE_APP_MGR_RUNNING_MANAGER_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_RUNNING_MANAGER_H

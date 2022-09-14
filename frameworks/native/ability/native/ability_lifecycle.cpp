@@ -18,50 +18,27 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-/**
- * @brief Obtains the current lifecycle event.
- * Lifecycle events drive lifecycle state changes. Therefore, you are able to know the lifecycle state
- * once you obtain the lifecycle event. For example, if the ON_ACTIVE event is received, the ability or
- * ability slice is in the ACTIVE state; if the ON_FOREGROUND event is received, the ability or ability
- * slice is changing from the BACKGROUND state to INACTIVE.
- *
- * @return Returns the current lifecycle event.
- */
 LifeCycle::Event LifeCycle::GetLifecycleState()
 {
-    HILOG_INFO("LifeCycle::GetLifecycleState: called");
+    HILOG_DEBUG("LifeCycle::GetLifecycleState: called");
     return state_;
 }
 
-/**
- * @brief Adds a lifecycle observer.
- * The observer will be notified of lifecycle changes.
- *
- * @param observer Indicates the lifecycle observer, either LifecycleObserver or LifecycleStateObserver.
- * The value cannot be null.
- *
- */
 void LifeCycle::AddObserver(const std::shared_ptr<ILifecycleObserver> &observer)
 {
-    HILOG_INFO("LifeCycle::AddObserver: called");
+    HILOG_DEBUG("LifeCycle::AddObserver: called");
 
     if (observer == nullptr) {
-        HILOG_INFO("LifeCycle::AddObserver: observer is null");
+        HILOG_ERROR("LifeCycle::AddObserver: observer is null");
         return;
     }
 
     callbacks_.emplace_back(observer);
 }
 
-/**
- * @brief While Ability's lifecycle changes, dispatch lifecycle event.
- *
- * @param event  Lifecycle state.
- * @param want  Indicates the Want containing information about the target ability to change lifecycle state.
- */
 void LifeCycle::DispatchLifecycle(const LifeCycle::Event &event, const Want &want)
 {
-    HILOG_INFO("LifeCycle::DispatchLifecycle: event:%{public}d", event);
+    HILOG_DEBUG("LifeCycle::DispatchLifecycle: event:%{public}d", event);
     if ((event != LifeCycle::Event::ON_FOREGROUND) && (event != LifeCycle::Event::ON_START)) {
         HILOG_ERROR("event value error: event is %{public}d", event);
         return;
@@ -95,14 +72,9 @@ void LifeCycle::DispatchLifecycle(const LifeCycle::Event &event, const Want &wan
     }
 }
 
-/**
- * @brief While Ability's lifecycle changes, dispatch lifecycle event.
- *
- * @param event  Lifecycle state.
- */
 void LifeCycle::DispatchLifecycle(const LifeCycle::Event &event)
 {
-    HILOG_INFO("LifeCycle::DispatchLifecycle: event:%{public}d", event);
+    HILOG_DEBUG("LifeCycle::DispatchLifecycle: event:%{public}d", event);
     if ((event != LifeCycle::Event::ON_ACTIVE) && (event != LifeCycle::Event::ON_BACKGROUND) &&
         (event != LifeCycle::Event::ON_INACTIVE) && (event != LifeCycle::Event::ON_STOP)) {
         HILOG_ERROR("event value error: event is %{public}d", event);
@@ -149,20 +121,12 @@ void LifeCycle::DispatchLifecycle(const LifeCycle::Event &event)
     }
 }
 
-/**
- * @brief Removes a lifecycle observer.
- * You are advised to call this method if you no longer need to listen to lifecycle changes. This reduces the
- * performance loss caused by observing lifecycle changes.
- *
- * @param observer  Indicates the lifecycle observer, either LifecycleObserver or LifecycleStateObserver.
- * The value cannot be null.
- */
 void LifeCycle::RemoveObserver(const std::shared_ptr<ILifecycleObserver> &observer)
 {
-    HILOG_INFO("LifeCycle::RemoveObserver: called");
+    HILOG_DEBUG("LifeCycle::RemoveObserver: called");
 
     if (observer == nullptr) {
-        HILOG_INFO("LifeCycle::RemoveObserver: observer is null");
+        HILOG_ERROR("LifeCycle::RemoveObserver: observer is null");
         return;
     }
 

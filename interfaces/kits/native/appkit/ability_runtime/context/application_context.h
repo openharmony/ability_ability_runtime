@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ABILITY_RUNTIME_APPLICATION_CONTEXT_H
-#define ABILITY_RUNTIME_APPLICATION_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_APPLICATION_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_APPLICATION_CONTEXT_H
 
 #include <vector>
 #include <shared_mutex>
@@ -32,15 +32,22 @@ public:
     ~ApplicationContext() = default;
     void RegisterAbilityLifecycleCallback(const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback);
     void UnregisterAbilityLifecycleCallback(const std::shared_ptr<AbilityLifecycleCallback> &abilityLifecycleCallback);
+    bool IsAbilityLifecycleCallbackEmpty() const;
     void RegisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
     void UnregisterEnvironmentCallback(const std::shared_ptr<EnvironmentCallback> &environmentCallback);
-    void DispatchOnAbilityCreate(const std::weak_ptr<NativeReference> &abilityObj);
-    void DispatchOnAbilityWindowStageCreate(const std::weak_ptr<NativeReference> &abilityObj);
-    void DispatchOnAbilityWindowStageDestroy(const std::weak_ptr<NativeReference> &abilityObj);
-    void DispatchOnAbilityDestroy(const std::weak_ptr<NativeReference> &abilityObj);
-    void DispatchOnAbilityForeground(const std::weak_ptr<NativeReference> &abilityObj);
-    void DispatchOnAbilityBackground(const std::weak_ptr<NativeReference> &abilityObj);
-    void DispatchOnAbilityContinue(const std::weak_ptr<NativeReference> &abilityObj);
+    void DispatchOnAbilityCreate(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnWindowStageCreate(const std::shared_ptr<NativeReference> &ability,
+        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchOnWindowStageDestroy(const std::shared_ptr<NativeReference> &ability,
+        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchWindowStageFocus(const std::shared_ptr<NativeReference> &ability,
+        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchWindowStageUnfocus(const std::shared_ptr<NativeReference> &ability,
+        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchOnAbilityDestroy(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnAbilityForeground(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnAbilityBackground(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnAbilityContinue(const std::shared_ptr<NativeReference> &ability);
     void DispatchConfigurationUpdated(const AppExecFwk::Configuration &config);
 
     std::string GetBundleName() const override;
@@ -77,4 +84,4 @@ private:
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif  // ABILITY_RUNTIME_APPLICATION_CONTEXT_H
+#endif  // OHOS_ABILITY_RUNTIME_APPLICATION_CONTEXT_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_APP_SCHEDULER_H
-#define OHOS_AAFWK_APP_SCHEDULER_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_SCHEDULER_H
+#define OHOS_ABILITY_RUNTIME_APP_SCHEDULER_H
 
 #include <memory>
 #include <unordered_set>
@@ -230,12 +230,6 @@ public:
 
     void PrepareTerminate(const sptr<IRemoteObject> &token);
 
-    /**
-     * Get system memory information.
-     * @param SystemMemoryAttr, memory information.
-     */
-    void GetSystemMemoryAttr(AppExecFwk::SystemMemoryAttr &memoryInfo, std::string &strConfig);
-
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
     /**
      * Start a resident process
@@ -327,4 +321,4 @@ private:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
-#endif  // OHOS_AAFWK_APP_SCHEDULER_H
+#endif  // OHOS_ABILITY_RUNTIME_APP_SCHEDULER_H

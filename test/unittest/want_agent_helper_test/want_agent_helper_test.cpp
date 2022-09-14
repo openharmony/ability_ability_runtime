@@ -25,6 +25,7 @@
 #define private public
 #define protected public
 #include "pending_want.h"
+#include "remote_native_token.h"
 #undef private
 #undef protected
 #include "want.h"
@@ -62,7 +63,9 @@ public:
 };
 
 void WantAgentHelperTest::SetUpTestCase(void)
-{}
+{
+    RemoteNativeToken::SetNativeToken();
+}
 
 void WantAgentHelperTest::TearDownTestCase(void)
 {}
@@ -199,7 +202,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_0900, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1000
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() != wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() != wantAgentInfo.flags_.size()
  */
 HWTEST_F(WantAgentHelperTest, WantAgentHelper_1000, Function | MediumTest | Level1)
 {
@@ -220,7 +223,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1000, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1100
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.FlagsTransformer return 0
  */
 HWTEST_F(WantAgentHelperTest, WantAgentHelper_1100, Function | MediumTest | Level1)
@@ -242,7 +245,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1100, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1200
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.FlagsTransformer return ok
  *                 4.Type is WantAgentConstant::OperationType::START_ABILITY
  */
@@ -267,7 +270,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1200, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1300
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.FlagsTransformer return ok
  *                 4.Type is WantAgentConstant::OperationType::START_ABILITIES
  */
@@ -292,7 +295,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1300, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1400
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.FlagsTransformer return ok
  *                 4.Type is WantAgentConstant::OperationType::START_SERVICE
  */
@@ -317,7 +320,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1400, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1500
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.FlagsTransformer return ok
  *                 4.Type is WantAgentConstant::OperationType::START_FOREGROUND_SERVICE
  */
@@ -342,7 +345,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1500, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1600
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.FlagsTransformer return ok
  *                 4.Type is WantAgentConstant::OperationType::START_FOREGROUND_SERVICE
  */
@@ -367,7 +370,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1600, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1700
  * @tc.name      : WantAgentHelper GetWantAgent
  * @tc.desc      : 1.GetWantAgent context is not nullptr
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.FlagsTransformer return ok
  *                 4.Type is 100
  */
@@ -391,7 +394,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1700, Function | MediumTest | Leve
 /*
  * @tc.number    : WantAgentHelper_1800
  * @tc.name      : WantAgentHelper GetWantAgent(const WantAgentInfo &paramsInfo)
- * @tc.desc      : 1.wantAgentInfo.wants_.siez() == 0
+ * @tc.desc      : 1.wantAgentInfo.wants_.size() == 0
  */
 HWTEST_F(WantAgentHelperTest, WantAgentHelper_1800, Function | MediumTest | Level1)
 {
@@ -409,7 +412,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1800, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_1900
  * @tc.name      : WantAgentHelper GetWantAgent(const WantAgentInfo &paramsInfo)
  * @tc.desc      : 1.wantAgentInfo.wants_ not empty
- *                 2.wantAgentInfo.wants_.siez() != wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() != wantAgentInfo.flags_.size()
  */
 HWTEST_F(WantAgentHelperTest, WantAgentHelper_1900, Function | MediumTest | Level1)
 {
@@ -423,14 +426,14 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_1900, Function | MediumTest | Leve
     wantAgentInfo.operationType_ = static_cast<WantAgentConstant::OperationType>(100);
     wantAgentInfo.requestCode_ = 10;
     auto wantAgent = wantAgentHelper->GetWantAgent(wantAgentInfo);
-    EXPECT_EQ(wantAgent, nullptr);
+    EXPECT_NE(wantAgent, nullptr);
 }
 
 /*
  * @tc.number    : WantAgentHelper_2000
  * @tc.name      : WantAgentHelper GetWantAgent(const WantAgentInfo &paramsInfo)
  * @tc.desc      : 1.wantAgentInfo.wants_ not empty
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.wantAgentInfo.wants_[0] is nullptr
  */
 HWTEST_F(WantAgentHelperTest, WantAgentHelper_2000, Function | MediumTest | Level1)
@@ -454,7 +457,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_2000, Function | MediumTest | Leve
  * @tc.number    : WantAgentHelper_2100
  * @tc.name      : WantAgentHelper GetWantAgent(const WantAgentInfo &paramsInfo)
  * @tc.desc      : 1.wantAgentInfo.wants_ not empty
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.wantAgentInfo.wants_[0] is not nullptr
  *                 4.wantAgentInfo.extraInfo_ is not nullptr
  */
@@ -475,14 +478,14 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_2100, Function | MediumTest | Leve
     wParams->SetParam(key, Boolean::Box(value));
     wantAgentInfo.extraInfo_ = wParams;
     auto wantAgent = wantAgentHelper->GetWantAgent(wantAgentInfo);
-    EXPECT_EQ(wantAgent, nullptr);
+    EXPECT_NE(wantAgent, nullptr);
 }
 
 /*
  * @tc.number    : WantAgentHelper_2200
  * @tc.name      : WantAgentHelper GetWantAgent(const WantAgentInfo &paramsInfo)
  * @tc.desc      : 1.wantAgentInfo.wants_ not empty
- *                 2.wantAgentInfo.wants_.siez() == wantAgentInfo.flags_.siez()
+ *                 2.wantAgentInfo.wants_.size() == wantAgentInfo.flags_.size()
  *                 3.wantAgentInfo.wants_[0] is not nullptr
  *                 4.wantAgentInfo.extraInfo_ is nullptr
  */
@@ -499,7 +502,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_2200, Function | MediumTest | Leve
     wantAgentInfo.requestCode_ = 10;
     wantAgentInfo.extraInfo_ = nullptr;
     auto wantAgent = wantAgentHelper->GetWantAgent(wantAgentInfo);
-    EXPECT_EQ(wantAgent, nullptr);
+    EXPECT_NE(wantAgent, nullptr);
 }
 
 /*

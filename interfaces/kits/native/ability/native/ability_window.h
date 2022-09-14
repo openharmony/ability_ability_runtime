@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_WINDOW_H
-#define OHOS_ABILITY_WINDOW_H
+#ifndef OHOS_ABILITY_RUNTIME_ABILITY_WINDOW_H
+#define OHOS_ABILITY_RUNTIME_ABILITY_WINDOW_H
 
 #include <map>
 
@@ -23,6 +23,10 @@
 #include "window_option.h"
 #include "window_scene.h"
 #include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
+
+#ifdef SUPPORT_GRAPHICS
+#include "pixel_map.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -45,24 +49,6 @@ public:
         std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         sptr<Rosen::IWindowLifeCycle> &listener, int32_t displayId, sptr<Rosen::WindowOption> option,
         bool isPrivacy);
-
-    /**
-     * @brief Called when this ability is started.
-     *
-     */
-    void OnPostAbilityStart();
-
-    /**
-     * @brief Called when this ability is activated.
-     *
-     */
-    void OnPostAbilityActive();
-
-    /**
-     * @brief Called when this ability is inactivated.
-     *
-     */
-    void OnPostAbilityInactive();
 
     /**
      * @brief Called when this ability is background.
@@ -91,6 +77,24 @@ public:
      */
     const sptr<Rosen::Window> GetWindow();
 
+#ifdef SUPPORT_GRAPHICS
+    /**
+     * @brief Set mission label of this ability.
+     *
+     * @param label the label of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode SetMissionLabel(const std::string &label);
+
+    /**
+     * @brief Set mission icon of this ability.
+     *
+     * @param icon the icon of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon);
+#endif
+
 private:
     std::shared_ptr<AbilityHandler> handler_ = nullptr;
     std::weak_ptr<IAbilityEvent> ability_;
@@ -100,4 +104,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_WINDOW_H
+#endif  // OHOS_ABILITY_RUNTIME_ABILITY_WINDOW_H

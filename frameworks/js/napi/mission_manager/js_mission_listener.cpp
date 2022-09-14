@@ -44,6 +44,16 @@ void JsMissionListener::OnMissionMovedToFront(int32_t missionId)
     CallJsMethod("onMissionMovedToFront", missionId);
 }
 
+void JsMissionListener::OnMissionClosed(int32_t missionId)
+{
+    CallJsMethod("onMissionClosed", missionId);
+}
+
+void JsMissionListener::OnMissionLabelUpdated(int32_t missionId)
+{
+    CallJsMethod("onMissionLabelUpdated", missionId);
+}
+
 void JsMissionListener::AddJsListenerObject(int32_t listenerId, NativeValue* jsListenerObject)
 {
     jsListenerObjectMap_.emplace(

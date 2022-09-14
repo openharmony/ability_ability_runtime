@@ -41,24 +41,6 @@ config("module_private_config") {
 ohos_moduletest("ability_moduletest") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/caller_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/image_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_listener_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_listener_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_snapshot.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/remote_mission_listener_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/remote_mission_listener_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/want_sender_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/wants_info.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_bundle_manager.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_test/AMS/mock_ability_manager_client.cpp",
@@ -78,13 +60,13 @@ ohos_moduletest("ability_moduletest") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
     "//base/hiviewdfx/hiview/adapter/utility:hiview_adapter_utility",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/jsoncpp:jsoncpp",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -94,6 +76,7 @@ ohos_moduletest("ability_moduletest") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "relational_store:native_appdatafwk",
@@ -110,14 +93,6 @@ ohos_moduletest("ability_moduletest") {
 ohos_moduletest("ability_conetxt_test") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/caller_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_bundle_manager.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_test/AMS/mock_ability_manager_client.cpp",
@@ -137,12 +112,12 @@ ohos_moduletest("ability_conetxt_test") {
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/jsoncpp:jsoncpp",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -152,6 +127,7 @@ ohos_moduletest("ability_conetxt_test") {
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "relational_store:native_appdatafwk",
@@ -165,10 +141,7 @@ ohos_moduletest("ability_conetxt_test") {
 
 ohos_moduletest("ability_thread_call_request_module_test") {
   module_out_path = module_output_path
-  sources = [
-    "${ability_runtime_native_path}/appkit/app/context_container.cpp",
-    "ability_thread_call_request_module_test.cpp",
-  ]
+  sources = [ "ability_thread_call_request_module_test.cpp" ]
 
   configs = [ ":module_private_config" ]
 
@@ -176,6 +149,7 @@ ohos_moduletest("ability_thread_call_request_module_test") {
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gtest_main",
   ]
@@ -186,33 +160,15 @@ ohos_moduletest("ability_thread_call_request_module_test") {
     "ability_base:zuri",
     "ability_runtime:runtime",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
-    "utils_base:utils",
   ]
 }
 
 ohos_moduletest("data_ability_operation_moduletest") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_native_path}/ability/native/data_ability_operation.cpp",
-    "${ability_runtime_native_path}/ability/native/data_ability_operation_builder.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_manager_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/caller_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/lifecycle_state_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_listener_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_listener_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/mission_snapshot.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/remote_mission_listener_proxy.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/remote_mission_listener_stub.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/want_sender_info.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/wants_info.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/mock_bundle_manager.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include/sys_mgr_client_mock.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_test/AMS/mock_ability_manager_client.cpp",
@@ -237,7 +193,6 @@ ohos_moduletest("data_ability_operation_moduletest") {
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
     "//third_party/jsoncpp:jsoncpp",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -246,6 +201,7 @@ ohos_moduletest("data_ability_operation_moduletest") {
     "ability_base:want",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "relational_store:native_appdatafwk",
@@ -292,13 +248,13 @@ ohos_moduletest("data_ability_helper_module_test") {
     "ability_base:want",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
-    "utils_base:utils",
   ]
 
   if (ability_runtime_graphics) {

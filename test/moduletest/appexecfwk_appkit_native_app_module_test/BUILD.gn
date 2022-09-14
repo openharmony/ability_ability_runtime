@@ -26,16 +26,12 @@ config("module_private_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
   ]
 
-  defines = [
-    "AMS_LOG_TAG = \"ApplicationModuleTest\"",
-    "AMS_LOG_DOMAIN = 0xD001152",
-  ]
+  defines = [ "AMS_LOG_TAG = \"ApplicationModuleTest\"" ]
 }
 
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
@@ -55,7 +51,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -63,6 +58,7 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
@@ -73,7 +69,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
@@ -93,7 +88,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -101,6 +95,7 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
@@ -111,7 +106,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
@@ -131,7 +125,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -139,6 +132,7 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
@@ -149,7 +143,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
 ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
   module_out_path = module_output_path
   sources = [
-    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_mgr_stub.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_application.cpp",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/sys_mgr_client_mock.cpp",
@@ -169,7 +162,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -177,6 +169,7 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",

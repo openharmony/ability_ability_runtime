@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_OHOS_DATA_ABILITY_HELPER_H
-#define FOUNDATION_APPEXECFWK_OHOS_DATA_ABILITY_HELPER_H
+#ifndef OHOS_ABILITY_RUNTIME_DATA_ABILITY_HELPER_H
+#define OHOS_ABILITY_RUNTIME_DATA_ABILITY_HELPER_H
 
 #include "data_ability_helper_impl.h"
+
 namespace OHOS {
+namespace DataShare {
+class DataShareHelper;
+}
 namespace AppExecFwk {
 class DataAbilityHelper final : public std::enable_shared_from_this<DataAbilityHelper> {
 public:
@@ -288,12 +292,20 @@ public:
     std::vector<std::shared_ptr<DataAbilityResult>> ExecuteBatch(
         const Uri &uri, const std::vector<std::shared_ptr<DataAbilityOperation>> &operations);
 
+    void SetCallFromJs();
+
 private:
     DataAbilityHelper(const std::shared_ptr<DataAbilityHelperImpl> &helperImpl);
+    DataAbilityHelper(const std::shared_ptr<DataShare::DataShareHelper> &dataShareHelper);
 
-    std::shared_ptr<DataAbilityHelperImpl> dataAbilityHelperImpl_;
+    static bool TransferScheme(const Uri &uri, Uri &dataShareUri);
+
+    std::shared_ptr<DataAbilityHelperImpl> dataAbilityHelperImpl_ = nullptr;
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper_ = nullptr;
+
+    bool callFromJs_ = false; // true: call from js, false: call from native
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_OHOS_DATA_ABILITY_HELPER_H
+#endif  // OHOS_ABILITY_RUNTIME_DATA_ABILITY_HELPER_H
 

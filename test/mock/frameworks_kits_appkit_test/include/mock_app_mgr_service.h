@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_APPEXECFWK_KITS_APPKIT_TEST_MOCK_INCLUDE_MOCK_APP_MGR_SERVICE_H
-#define FOUNDATION_APPEXECFWK_KITS_APPKIT_TEST_MOCK_INCLUDE_MOCK_APP_MGR_SERVICE_H
+#ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_H
+#define MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_H
 
 #include <gtest/gtest.h>
 #include "gmock/gmock.h"
@@ -35,9 +35,9 @@ public:
     MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject> &token, const AbilityState state));
     MOCK_METHOD1(SetAppFreezingTime, void(int time));
     MOCK_METHOD1(GetAppFreezingTime, void(int &time));
-    MOCK_METHOD2(GetSystemMemoryAttr, void(SystemMemoryAttr &memoryInfo, std::string &strConfig));
     MOCK_METHOD1(AddAbilityStageDone, void(const int32_t recordId));
     MOCK_METHOD1(StartupResidentProcess, void(const std::vector<AppExecFwk::BundleInfo> &bundleInfos));
+    MOCK_METHOD1(NotifyMemoryLevel, int(int32_t level));
     MOCK_METHOD2(GetProcessRunningInfosByUserId, int(std::vector<RunningProcessInfo> &info, int32_t userId));
     MOCK_METHOD4(StartUserTestProcess, int(const AAFwk::Want &want, const sptr<IRemoteObject> &observer,
         const BundleInfo &bundleInfo, int32_t userId));
@@ -57,6 +57,9 @@ public:
     MOCK_METHOD1(UpdateConfiguration, int32_t(const Configuration &config));
     MOCK_METHOD1(RegisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver> &observer));
     MOCK_METHOD1(UnregisterConfigurationObserver, int32_t(const sptr<IConfigurationObserver> &observer));
+    MOCK_METHOD1(GetAppRunningStateByBundleName, bool(const std::string &bundleName));
+    MOCK_METHOD1(NotifyLoadRepairPatch, int32_t(const std::string &bundleName));
+    MOCK_METHOD1(NotifyHotReloadPage, int32_t(const std::string &bundleName));
 
     void AttachApplication(const sptr<IRemoteObject> &app)
     {
@@ -291,4 +294,4 @@ private:
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // FOUNDATION_APPEXECFWK_KITS_APPKIT_TEST_MOCK_INCLUDE_MOCK_APP_MGR_SERVICE_H
+#endif  // MOCK_OHOS_ABILITY_RUNTIME_MOCK_APP_MGR_SERVICE_H

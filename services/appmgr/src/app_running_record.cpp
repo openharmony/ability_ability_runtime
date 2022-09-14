@@ -22,7 +22,7 @@ namespace OHOS {
 namespace AppExecFwk {
 int64_t AppRunningRecord::appEventId_ = 0;
 
-RenderRecord::RenderRecord(pid_t hostPid, const std::string& renderParam,
+RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
     int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host)
     : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(ipcFd), sharedFd_(sharedFd), host_(host)
 {}
@@ -30,7 +30,7 @@ RenderRecord::RenderRecord(pid_t hostPid, const std::string& renderParam,
 RenderRecord::~RenderRecord()
 {}
 
-std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(pid_t hostPid, const std::string& renderParam,
+std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
     int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host)
 {
     if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 || !host) {
@@ -38,6 +38,8 @@ std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(pid_t hostPid, co
     }
 
     auto renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam, ipcFd, sharedFd, host);
+    renderRecord->SetHostUid(host->GetUid());
+    renderRecord->SetHostBundleName(host->GetBundleName());
 
     return renderRecord;
 }
@@ -47,37 +49,57 @@ void RenderRecord::SetPid(pid_t pid)
     pid_ = pid;
 }
 
-pid_t RenderRecord::GetPid()
+pid_t RenderRecord::GetPid() const
 {
     return pid_;
 }
 
-pid_t RenderRecord::GetHostPid()
+pid_t RenderRecord::GetHostPid() const
 {
     return hostPid_;
 }
 
-std::string RenderRecord::GetRenderParam()
+void RenderRecord::SetHostUid(const int32_t hostUid)
+{
+    hostUid_ = hostUid;
+}
+
+int32_t RenderRecord::GetHostUid() const
+{
+    return hostUid_;
+}
+
+void RenderRecord::SetHostBundleName(const std::string &hostBundleName)
+{
+    hostBundleName_ = hostBundleName;
+}
+
+std::string RenderRecord::GetHostBundleName() const
+{
+    return hostBundleName_;
+}
+
+std::string RenderRecord::GetRenderParam() const
 {
     return renderParam_;
 }
 
-int32_t RenderRecord::GetIpcFd()
+int32_t RenderRecord::GetIpcFd() const
 {
     return ipcFd_;
 }
 
-int32_t RenderRecord::GetSharedFd()
+int32_t RenderRecord::GetSharedFd() const
 {
     return sharedFd_;
 }
 
-std::shared_ptr<AppRunningRecord> RenderRecord::GetHostRecord()
+std::shared_ptr<AppRunningRecord> RenderRecord::GetHostRecord() const
 {
     return host_.lock();
 }
 
-sptr<IRenderScheduler> RenderRecord::GetScheduler()
+sptr<IRenderScheduler> RenderRecord::GetScheduler() const
 {
     return renderScheduler_;
 }
@@ -335,7 +357,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
 
 void AppRunningRecord::AddAbilityStage()
 {
-    if (!isNewMission_) {
+    if (!isStageBasedModel_) {
         HILOG_INFO("Current version than supports !");
         return;
     }
@@ -344,11 +366,12 @@ void AppRunningRecord::AddAbilityStage()
         SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG, AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
         HILOG_INFO("Current Informed module : [%{public}s] | bundle : [%{public}s]",
             abilityStage.moduleName.c_str(), mainBundleName_.c_str());
+        if (appLifeCycleDeal_ == nullptr) {
+            HILOG_WARN("appLifeCycleDeal_ is null");
+            return;
+        }
         appLifeCycleDeal_->AddAbilityStage(abilityStage);
-        return;
     }
-
-    HILOG_INFO("The current process[%{public}s] is updated", processName_.c_str());
 }
 
 void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
@@ -356,11 +379,13 @@ void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bund
     HapModuleInfo hapModuleInfo;
     if (GetTheModuleInfoNeedToUpdated(bundleName, hapModuleInfo)) {
         if (!eventHandler_->HasInnerEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG)) {
+            HILOG_INFO("%{public}s START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG is not exist.", __func__);
             SendEvent(AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG,
                 AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT);
-        } else {
-            HILOG_INFO(
-                "%{public}s START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG is exist, don't set new event.", __func__);
+        }
+        if (appLifeCycleDeal_ == nullptr) {
+            HILOG_WARN("appLifeCycleDeal_ is null");
+            return;
         }
         appLifeCycleDeal_->AddAbilityStage(hapModuleInfo);
     }
@@ -411,9 +436,11 @@ void AppRunningRecord::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
 void AppRunningRecord::ScheduleTerminate()
 {
     SendEvent(AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG, AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT);
-    if (appLifeCycleDeal_) {
-        appLifeCycleDeal_->ScheduleTerminate();
+    if (appLifeCycleDeal_ == nullptr) {
+        HILOG_WARN("appLifeCycleDeal_ is null");
+        return;
     }
+    appLifeCycleDeal_->ScheduleTerminate();
 }
 
 void AppRunningRecord::LaunchPendingAbilities()
@@ -455,6 +482,13 @@ void AppRunningRecord::ScheduleTrimMemory()
 {
     if (appLifeCycleDeal_ && priorityObject_) {
         appLifeCycleDeal_->ScheduleTrimMemory(priorityObject_->GetTimeLevel());
+    }
+}
+
+void AppRunningRecord::ScheduleMemoryLevel(int32_t level)
+{
+    if (appLifeCycleDeal_) {
+        appLifeCycleDeal_->ScheduleMemoryLevel(level);
     }
 }
 
@@ -757,12 +791,12 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
     }
     moduleRecord->AbilityTerminated(token);
 
-    if (moduleRecord->GetAbilities().empty()) {
+    if (moduleRecord->GetAbilities().empty() && !IsKeepAliveApp()) {
         RemoveModuleRecord(moduleRecord);
     }
 
     auto moduleRecordList = GetAllModuleRecord();
-    if (moduleRecordList.empty()) {
+    if (moduleRecordList.empty() && !IsKeepAliveApp()) {
         ScheduleTerminate();
     }
 }
@@ -862,6 +896,15 @@ void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
     eventHandler_->SendEvent(msg, appEventId_, timeOut);
 }
 
+void AppRunningRecord::PostTask(std::string msg, int64_t timeOut, const Closure &task)
+{
+    if (!eventHandler_) {
+        HILOG_ERROR("eventHandler_ is nullptr");
+        return;
+    }
+    eventHandler_->PostTask(task, msg, timeOut);
+}
+
 int64_t AppRunningRecord::GetEventId() const
 {
     return eventId_;
@@ -923,10 +966,20 @@ bool AppRunningRecord::IsKeepAliveApp() const
     return isKeepAliveApp_;
 }
 
-void AppRunningRecord::SetKeepAliveAppState(bool isKeepAlive, bool isNewMission)
+bool AppRunningRecord::IsEmptyKeepAliveApp() const
+{
+    return isEmptyKeepAliveApp_;
+}
+
+void AppRunningRecord::SetKeepAliveAppState(bool isKeepAlive, bool isEmptyKeepAliveApp)
 {
     isKeepAliveApp_ = isKeepAlive;
-    isNewMission_ = isNewMission;
+    isEmptyKeepAliveApp_ = isEmptyKeepAliveApp;
+}
+
+void AppRunningRecord::SetStageModelState(bool isStageBasedModel)
+{
+    isStageBasedModel_ = isStageBasedModel;
 }
 
 bool AppRunningRecord::GetTheModuleInfoNeedToUpdated(const std::string bundleName, HapModuleInfo &info)
@@ -1007,6 +1060,10 @@ void AppRunningRecord::ScheduleAcceptWant(const std::string &moduleName)
 {
     SendEvent(
         AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT);
+    if (appLifeCycleDeal_ == nullptr) {
+        HILOG_WARN("appLifeCycleDeal_ is null");
+        return;
+    }
     appLifeCycleDeal_->ScheduleAcceptWant(SpecifiedWant_, moduleName);
 }
 
@@ -1081,6 +1138,16 @@ int32_t AppRunningRecord::GetAppIndex() const
     return appIndex_;
 }
 
+void AppRunningRecord::SetSecurityFlag(bool securityFlag)
+{
+    securityFlag_ = securityFlag;
+}
+
+bool AppRunningRecord::GetSecurityFlag() const
+{
+    return securityFlag_;
+}
+
 void AppRunningRecord::SetKilling()
 {
     isKilling_ = true;
@@ -1089,6 +1156,38 @@ void AppRunningRecord::SetKilling()
 bool AppRunningRecord::IsKilling() const
 {
     return isKilling_;
+}
+
+void AppRunningRecord::RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObject>& token) const
+{
+    auto moduleRecord = GetModuleRunningRecordByToken(token);
+    if (!moduleRecord) {
+        HILOG_ERROR("can not find module record");
+        return;
+    }
+    (void)moduleRecord->RemoveTerminateAbilityTimeoutTask(token);
+}
+
+int32_t AppRunningRecord::NotifyLoadRepairPatch(const std::string &bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    if (!appLifeCycleDeal_) {
+        HILOG_ERROR("appLifeCycleDeal_ is null");
+        return ERR_INVALID_VALUE;
+    }
+    return appLifeCycleDeal_->NotifyLoadRepairPatch(bundleName);
+}
+
+int32_t AppRunningRecord::NotifyHotReloadPage()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    if (!appLifeCycleDeal_) {
+        HILOG_ERROR("appLifeCycleDeal_ is null");
+        return ERR_INVALID_VALUE;
+    }
+    return appLifeCycleDeal_->NotifyHotReloadPage();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
