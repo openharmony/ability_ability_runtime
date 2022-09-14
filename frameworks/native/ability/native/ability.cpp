@@ -54,10 +54,6 @@
 #include "continuous_task_param.h"
 #endif
 
-#ifdef DISTRIBUTED_DATA_OBJECT_ENABLE
-#include "distributed_objectstore.h"
-#endif
-
 #ifdef SUPPORT_GRAPHICS
 #include "display_type.h"
 #include "form_host_client.h"
@@ -85,10 +81,6 @@ const std::string LAUNCHER_ABILITY_NAME = "com.ohos.launcher.MainAbility";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
-
-#ifdef DISTRIBUTED_DATA_OBJECT_ENABLE
-constexpr int32_t DISTRIBUTED_OBJECT_TIMEOUT = 10000;
-#endif
 
 Ability* Ability::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
@@ -119,11 +111,7 @@ void Ability::Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::s
     if (abilityInfo_->type == AbilityType::PAGE) {
         if (!abilityInfo_->isStageBasedModel) {
             abilityWindow_ = std::make_shared<AbilityWindow>();
-            if (abilityWindow_ != nullptr) {
-                HILOG_DEBUG("%{public}s begin abilityWindow_->Init", __func__);
-                abilityWindow_->Init(handler_, shared_from_this());
-                HILOG_DEBUG("%{public}s end abilityWindow_->Init", __func__);
-            }
+            abilityWindow_->Init(handler_, shared_from_this());
         }
         continuationManager_ = std::make_shared<ContinuationManager>();
         std::weak_ptr<Ability> ability = shared_from_this();
@@ -348,9 +336,6 @@ void Ability::OnActive()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("%{public}s begin.", __func__);
 #ifdef SUPPORT_GRAPHICS
-    if (abilityWindow_ != nullptr) {
-        abilityWindow_->OnPostAbilityActive();
-    }
     bWindowFocus_ = true;
 #endif
     if (abilityLifecycleExecutor_ == nullptr) {
@@ -372,9 +357,6 @@ void Ability::OnInactive()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("%{public}s begin", __func__);
 #ifdef SUPPORT_GRAPHICS
-    if (abilityWindow_ != nullptr && abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        abilityWindow_->OnPostAbilityInactive();
-    }
     bWindowFocus_ = false;
 #endif
     if (abilityLifecycleExecutor_ == nullptr) {
@@ -412,54 +394,13 @@ bool Ability::IsRestoredInContinuation() const
     return true;
 }
 
-void Ability::WaitingDistributedObjectSyncComplete(const Want& want)
-{
-#ifdef DISTRIBUTED_DATA_OBJECT_ENABLE
-    int sessionId = want.GetIntParam(DMS_SESSION_ID, DEFAULT_DMS_SESSION_ID);
-    std::string originDeviceId = want.GetStringParam(DMS_ORIGIN_DEVICE_ID);
-
-    HILOG_DEBUG("continuation WaitingDistributedObjectSyncComplete begin");
-    auto timeout = [self = shared_from_this(), sessionId, originDeviceId]() {
-        HILOG_DEBUG("DistributedObject sync timeout");
-        self->continuationManager_->NotifyCompleteContinuation(
-            originDeviceId, sessionId, false, nullptr);
-    };
-
-    // std::shared_ptr<AppExecFwk::EventHandler> handler = handler_;
-    auto callback = [self = shared_from_this(), sessionId, originDeviceId]() {
-        HILOG_DEBUG("DistributedObject sync complete");
-        if (self->handler_ != nullptr) {
-            self->handler_->RemoveTask("Waiting_Sync_Timeout");
-        }
-        self->continuationManager_->NotifyCompleteContinuation(
-            originDeviceId, sessionId, true, nullptr);
-    };
-
-    std::string &bundleName = abilityInfo_->bundleName;
-    ObjectStore::DistributedObjectStore::GetInstance(bundleName)->TriggerRestore(callback);
-
-    if (handler_ != nullptr) {
-        handler_->PostTask(timeout, "Waiting_Sync_Timeout", DISTRIBUTED_OBJECT_TIMEOUT);
-    }
-#else
-    NotifyContinuationResult(want, true);
-#endif
-}
-
 void Ability::NotifyContinuationResult(const Want& want, bool success)
 {
-    HILOG_DEBUG("NotifyContinuationResult begin");
-    std::weak_ptr<IReverseContinuationSchedulerReplicaHandler> ReplicaHandler = continuationHandler_;
-    reverseContinuationSchedulerReplica_ = sptr<ReverseContinuationSchedulerReplica>(
-        new (std::nothrow) ReverseContinuationSchedulerReplica(handler_, ReplicaHandler));
+    HILOG_INFO("NotifyContinuationResult begin");
 
-    if (reverseContinuationSchedulerReplica_ == nullptr) {
-        HILOG_ERROR("Ability::NotityContinuationComplete failed, create reverseContinuationSchedulerReplica failed");
-        return;
-    }
     int sessionId = want.GetIntParam(DMS_SESSION_ID, DEFAULT_DMS_SESSION_ID);
     std::string originDeviceId = want.GetStringParam(DMS_ORIGIN_DEVICE_ID);
-    HILOG_DEBUG("Ability::NotityContinuationComplete");
+    HILOG_DEBUG("Ability::NotifyContinuationComplete");
     continuationManager_->NotifyCompleteContinuation(
         originDeviceId, sessionId, success, reverseContinuationSchedulerReplica_);
 }
@@ -1550,6 +1491,10 @@ void Ability::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("%{public}s begin.", __func__);
+    if (abilityInfo_ == nullptr) {
+        HILOG_ERROR("abilityInfo_ is nullptr.");
+        return;
+    }
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
         if (abilityInfo_->isStageBasedModel) {
             if (scene_ == nullptr) {
@@ -1836,6 +1781,76 @@ int Ability::GetCurrentWindowMode()
     return windowMode;
 }
 
+ErrCode Ability::SetMissionLabel(const std::string &label)
+{
+    HILOG_DEBUG("%{public}s start", __func__);
+    if (!abilityInfo_ || abilityInfo_->type != AppExecFwk::AbilityType::PAGE) {
+        HILOG_ERROR("invalid ability info.");
+        return -1;
+    }
+
+    // stage mode
+    if (abilityInfo_->isStageBasedModel) {
+        if (scene_ == nullptr) {
+            HILOG_ERROR("get window scene failed.");
+            return -1;
+        }
+        auto window = scene_->GetMainWindow();
+        if (window == nullptr) {
+            HILOG_ERROR("get window scene failed.");
+            return -1;
+        }
+
+        if (window->SetAPPWindowLabel(label) != OHOS::Rosen::WMError::WM_OK) {
+            HILOG_ERROR("SetAPPWindowLabel failed.");
+            return -1;
+        }
+        return ERR_OK;
+    }
+
+    // fa mode
+    if (abilityWindow_ == nullptr) {
+        HILOG_ERROR("abilityWindow is nullptr.");
+        return -1;
+    }
+    return abilityWindow_->SetMissionLabel(label);
+}
+
+ErrCode Ability::SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon)
+{
+    HILOG_DEBUG("%{public}s start", __func__);
+    if (!abilityInfo_ || abilityInfo_->type != AppExecFwk::AbilityType::PAGE) {
+        HILOG_ERROR("invalid ability info, can not set mission icon.");
+        return -1;
+    }
+
+    // stage mode
+    if (abilityInfo_->isStageBasedModel) {
+        if (scene_ == nullptr) {
+            HILOG_ERROR("get window scene failed, can not set mission icon.");
+            return -1;
+        }
+        auto window = scene_->GetMainWindow();
+        if (window == nullptr) {
+            HILOG_ERROR("get window scene failed, can not set mission icon.");
+            return -1;
+        }
+
+        if (window->SetAPPWindowIcon(icon) != OHOS::Rosen::WMError::WM_OK) {
+            HILOG_ERROR("SetAPPWindowIcon failed.");
+            return -1;
+        }
+        return ERR_OK;
+    }
+
+    // fa mode
+    if (abilityWindow_ == nullptr) {
+        HILOG_ERROR("abilityWindow is nullptr, can not set mission icon.");
+        return -1;
+    }
+    return abilityWindow_->SetMissionIcon(icon);
+}
+
 void Ability::OnCreate(Rosen::DisplayId displayId)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
@@ -1893,8 +1908,7 @@ void Ability::OnChange(Rosen::DisplayId displayId)
 
     std::vector<std::string> changeKeyV;
     configuration->CompareDifferent(changeKeyV, newConfig);
-    uint32_t size = changeKeyV.size();
-    HILOG_DEBUG("changeKeyV size :%{public}u", size);
+    HILOG_DEBUG("changeKeyV size :%{public}zu", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
         auto task = [ability = shared_from_this(), configuration = *configuration]() {
@@ -1946,8 +1960,7 @@ void Ability::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
     }
 
     configuration->CompareDifferent(changeKeyV, newConfig);
-    uint32_t size = changeKeyV.size();
-    HILOG_DEBUG("changeKeyV size :%{public}u", size);
+    HILOG_DEBUG("changeKeyV size :%{public}zu", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
         auto task = [ability = shared_from_this(), configuration = *configuration]() {

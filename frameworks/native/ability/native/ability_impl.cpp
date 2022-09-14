@@ -20,6 +20,7 @@
 #include "data_ability_predicates.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
+#include "ohos_application.h"
 #include "values_bucket.h"
 
 namespace OHOS {
@@ -163,7 +164,6 @@ void AbilityImpl::StopCallback()
 #endif
     abilityLifecycleCallbacks_->OnAbilityStop(ability_);
     ability_->DestroyInstance(); // Release window and ability.
-    ability_ = nullptr;
 }
 
 void AbilityImpl::Active()
