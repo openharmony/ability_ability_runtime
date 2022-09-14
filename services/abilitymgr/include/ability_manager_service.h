@@ -1027,10 +1027,6 @@ private:
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
 
-    int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
-
-    int StartAppgallery(int requestCode, int32_t userId, std::string action);
-
     /**
      * Check if Caller is allowed to start ServiceAbility(FA) or ServiceExtension(Stage) or DataShareExtension(Stage).
      *
