@@ -124,6 +124,7 @@ void AppMgrServiceInner::Init()
     GetGlobalConfiguration();
     AddWatchParameter();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
+    InitFocusListener();
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
