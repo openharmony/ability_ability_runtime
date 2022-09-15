@@ -2223,6 +2223,11 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
 
     std::shared_ptr<DataAbilityManager> dataAbilityManager = GetDataAbilityManagerByUserId(userId);
     CHECK_POINTER_AND_RETURN(dataAbilityManager, nullptr);
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
+        abilityRequest.abilityInfo.applicationInfo.uid,
+        abilityRequest.abilityInfo.bundleName, "THAW_BY_START_NOT_PAGE_ABILITY");
+#endif // EFFICIENCY_MANAGER_ENABLE
     return dataAbilityManager->Acquire(abilityRequest, tryBind, callerToken, isSaCall);
 }
 
