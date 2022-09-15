@@ -4025,7 +4025,7 @@ void AbilityManagerService::StartFreezingScreen()
     HILOG_INFO("%{public}s", __func__);
 #ifdef SUPPORT_GRAPHICS
     std::vector<Rosen::DisplayId> displayIds = Rosen::DisplayManager::GetInstance().GetAllDisplayIds();
-    Rosen::DisplayManager::GetInstance().Freeze(displayIds);
+    IN_PROCESS_CALL_WITHOUT_RET(Rosen::DisplayManager::GetInstance().Freeze(displayIds));
 #endif
 }
 
@@ -4034,7 +4034,7 @@ void AbilityManagerService::StopFreezingScreen()
     HILOG_INFO("%{public}s", __func__);
 #ifdef SUPPORT_GRAPHICS
     std::vector<Rosen::DisplayId> displayIds = Rosen::DisplayManager::GetInstance().GetAllDisplayIds();
-    Rosen::DisplayManager::GetInstance().Unfreeze(displayIds);
+    IN_PROCESS_CALL_WITHOUT_RET(Rosen::DisplayManager::GetInstance().Unfreeze(displayIds));
 #endif
 }
 
