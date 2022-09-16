@@ -204,11 +204,12 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
             std::vector<std::string>::iterator iter = std::find(it->second.begin(),
                 it->second.end(), data.bundleName);
-            if ((it->second.empty() || iter != it->second.end()) && it->first != nullptr) {
+            bool valid = (it->second.empty() || iter != it->second.end()) && it->first != nullptr;
+            if (valid) {
                 it->first->OnForegroundApplicationChanged(data);
-                if (needNotifyApp) {
-                    it->first->OnAppStateChanged(data);
-                }
+            }
+            if (valid && needNotifyApp) {
+                it->first->OnAppStateChanged(data);
             }
         }
     }
