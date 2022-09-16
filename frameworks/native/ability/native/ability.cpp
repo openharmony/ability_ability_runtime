@@ -81,6 +81,7 @@ const std::string LAUNCHER_ABILITY_NAME = "com.ohos.launcher.MainAbility";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
+const std::string COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 
 Ability* Ability::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime)
 {
@@ -292,7 +293,6 @@ void Ability::OnStop()
     // Call JS Func(onWindowStageDestroy) and Release the scene.
     if (scene_ != nullptr) {
         scene_->GoDestroy();
-        scene_ = nullptr;
         onSceneDestroyed();
     }
 #endif
@@ -1449,6 +1449,15 @@ void Ability::OnFeatureAbilityResult(int requestCode, int resultCode, const Want
         resultCallbacks_.erase(requestCode);
     }
     HILOG_DEBUG("%{public}s end.", __func__);
+}
+
+bool Ability::IsUseNewStartUpRule()
+{
+    if (!isNewRuleFlagSetted_ && setWant_) {
+        startUpNewRule_ = setWant_->GetBoolParam(COMPONENT_STARTUP_NEW_RULES, false);
+        isNewRuleFlagSetted_ = true;
+    }
+    return startUpNewRule_;
 }
 
 #ifdef SUPPORT_GRAPHICS
