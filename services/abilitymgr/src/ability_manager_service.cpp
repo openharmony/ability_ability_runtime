@@ -5105,7 +5105,7 @@ int AbilityManagerService::CheckCallDataAbilityPermission(AbilityRequest &abilit
 
 int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequest &abilityRequest)
 {
-    HILOG_DEBUG("%{public}s begin", __func__);
+    HILOG_DEBUG("CheckCallServiceExtensionPermission begin");
     if (!IsUseNewStartUpRule(abilityRequest)) {
         return CheckCallerPermissionOldRule(abilityRequest);
     }
@@ -5126,7 +5126,7 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
 
 int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest)
 {
-    HILOG_DEBUG("%{public}s begin", __func__);
+    HILOG_DEBUG("CheckCallOtherExtensionPermission begin");
     if (!IsUseNewStartUpRule(abilityRequest)) {
         return CheckCallerPermissionOldRule(abilityRequest);
     }
@@ -5140,7 +5140,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
 
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallOtherExtensionPermission(verificationInfo);
     if (result != ERR_OK) {
-        HILOG_ERROR("Do not have permission to start OtherExtension");
+        HILOG_ERROR("CheckCallOtherExtensionPermission, Do not have permission to start OtherExtension");
     }
     return result;
 }
