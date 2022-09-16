@@ -531,7 +531,7 @@ public:
 
     void SetContinuousTaskAppState(bool isContinuousTask);
 
-    void Unfocused();
+    void Unfocused(const sptr<IRemoteObject> &token);
 
 private:
     /**
@@ -574,6 +574,8 @@ private:
      */
     void AbilityBackground(const std::shared_ptr<AbilityRunningRecord> &ability);
     // drive application state changes when ability state changes.
+
+    void AbilityFocused(const std::shared_ptr<AbilityRunningRecord> &ability);
 
     void SendEvent(uint32_t msg, int64_t timeOut);
 

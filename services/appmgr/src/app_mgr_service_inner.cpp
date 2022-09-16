@@ -2679,9 +2679,17 @@ void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> 
         HILOG_ERROR("focused, no such appRecord, pid:%{public}d", focusChangeInfo->pid_);
         return;
     }
+
     appRecord->SetState(ApplicationState::APP_STATE_FOCUS);
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOCUS);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+
+    auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(focusChangeInfo->abilityToken_);
+    if (!abilityRecord || abilityRecord->GetAbilityInfo() == nullptr ||
+        abilityRecord->GetAbilityInfo()->type != AbilityType::PAGE) {
+        return;
+    }
+    appRecord->UpdateAbilityState(focusChangeInfo->abilityToken_, AbilityState::ABILITY_STATE_FOCUS);
 }
 
 void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo)
@@ -2697,7 +2705,7 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
         HILOG_ERROR("unfocused, no such appRecord, pid:%{public}d", focusChangeInfo->pid_);
         return;
     }
-    appRecord->Unfocused();
+    appRecord->Unfocused(focusChangeInfo->abilityToken_);
     OnAppStateChanged(appRecord, appRecord->GetState());
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
 }
