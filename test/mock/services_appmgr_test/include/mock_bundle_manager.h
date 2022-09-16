@@ -44,7 +44,9 @@ public:
 
     virtual bool GetApplicationInfo(
         const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo) override;
-
+    virtual bool GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModuleInfo &hapModuleInfo);
+    virtual bool GetHapModuleInfo(
+        const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo) override;
     virtual bool QueryKeepAliveBundleInfos(std::vector<BundleInfo> &bundleInfos) override
     {
         int appUid = 2100;
