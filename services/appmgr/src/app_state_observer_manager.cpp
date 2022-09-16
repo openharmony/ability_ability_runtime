@@ -209,7 +209,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
                 it->first->OnForegroundApplicationChanged(data);
             }
             if (valid && needNotifyApp) {
-                it->first->OnAppStateChanged(data);
+                it->first->OnApplicationStateChanged(data);
             }
         }
     }
