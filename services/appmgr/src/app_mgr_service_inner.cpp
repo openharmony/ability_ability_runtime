@@ -2647,8 +2647,10 @@ void AppMgrServiceInner::InitFocusListener()
 
     focusListener_ = new WindowFocusChangedListener(shared_from_this());
     auto registerTask = [innerService = shared_from_this()]() {
-        HILOG_INFO("RegisterFocusListener task");
-        innerService->RegisterFocusListener();
+        if (innerService) {
+            HILOG_INFO("RegisterFocusListener task");
+            innerService->RegisterFocusListener();
+        }
     };
     if (eventHandler_) {
         eventHandler_->PostTask(registerTask, "RegisterFocusListenerTask", REGISTER_FOCUS_DELAY);

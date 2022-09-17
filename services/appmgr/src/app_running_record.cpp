@@ -235,7 +235,7 @@ void AppRunningRecord::Unfocused(const sptr<IRemoteObject> &token)
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     if (abilityRecord && abilityRecord->GetAbilityInfo() != nullptr &&
-        abilityRecord->GetAbilityInfo()->type != AbilityType::PAGE) {
+        abilityRecord->GetAbilityInfo()->type == AbilityType::PAGE) {
         abilityRecord->Unfocused();
         StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(abilityRecord->GetState()), true);
     }
