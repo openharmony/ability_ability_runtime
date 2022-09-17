@@ -2674,9 +2674,19 @@ void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> 
     }
     HILOG_DEBUG("focused, uid:%{public}d, pid:%{public}d", focusChangeInfo->uid_, focusChangeInfo->pid_);
 
+    if (focusChangeInfo->pid_ <= 0) {
+        return;
+    }
+
     auto appRecord = GetAppRunningRecordByPid(focusChangeInfo->pid_);
     if (!appRecord) {
         HILOG_ERROR("focused, no such appRecord, pid:%{public}d", focusChangeInfo->pid_);
+        return;
+    }
+
+    auto state = appRecord->GetState();
+    if (state < ApplicationState::APP_STATE_FOREGROUND || state > ApplicationState::APP_STATE_BACKGROUND) {
+        HILOG_WARN("invalid state.");
         return;
     }
 
@@ -2700,11 +2710,21 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
     }
     HILOG_DEBUG("unfocused, uid:%{public}d, pid:%{public}d", focusChangeInfo->uid_, focusChangeInfo->pid_);
 
+    if (focusChangeInfo->pid_ <= 0) {
+        return;
+    }
+
     auto appRecord = GetAppRunningRecordByPid(focusChangeInfo->pid_);
     if (!appRecord) {
         HILOG_ERROR("unfocused, no such appRecord, pid:%{public}d", focusChangeInfo->pid_);
         return;
     }
+
+    if (appRecord->GetState() != ApplicationState::APP_STATE_FOCUS) {
+        HILOG_WARN("invalid state, not focus, handle nothing.");
+        return;
+    }
+
     appRecord->Unfocused(focusChangeInfo->abilityToken_);
     OnAppStateChanged(appRecord, appRecord->GetState(), false);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
