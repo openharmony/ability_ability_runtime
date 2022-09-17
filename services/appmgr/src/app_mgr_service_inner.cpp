@@ -2681,7 +2681,7 @@ void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> 
     }
 
     appRecord->SetState(ApplicationState::APP_STATE_FOCUS);
-    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOCUS);
+    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOCUS, false);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
 
     auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(focusChangeInfo->abilityToken_);
@@ -2706,7 +2706,7 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
         return;
     }
     appRecord->Unfocused(focusChangeInfo->abilityToken_);
-    OnAppStateChanged(appRecord, appRecord->GetState());
+    OnAppStateChanged(appRecord, appRecord->GetState(), false);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
 }
 

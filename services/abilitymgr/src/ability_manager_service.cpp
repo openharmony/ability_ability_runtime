@@ -3968,7 +3968,7 @@ void AbilityManagerService::UpdateFocusState(std::vector<AbilityRunningInfo> &in
 
     for (auto &item : info) {
         if (item.uid == abilityRecord->GetUid() && item.pid == abilityRecord->GetPid() &&
-            item.ability == abilityRecord->GetElement()) {
+            item.ability == abilityRecord->GetWant().GetElement()) {
             item.abilityState = static_cast<int>(AbilityState::ACTIVE);
             break;
         }
