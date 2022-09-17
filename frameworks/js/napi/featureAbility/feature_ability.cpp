@@ -65,6 +65,7 @@ napi_value FeatureAbilityInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("finishWithResult", NAPI_SetResult),
         DECLARE_NAPI_FUNCTION("terminateSelfWithResult", NAPI_SetResult),
         DECLARE_NAPI_FUNCTION("terminateSelf", NAPI_TerminateAbility),
+        DECLARE_NAPI_FUNCTION("getContext", NAPI_GetContext),
         DECLARE_NAPI_FUNCTION("getWant", NAPI_GetWant),
         DECLARE_NAPI_FUNCTION("getAppType", NAPI_GetAppType),
         DECLARE_NAPI_FUNCTION("getAbilityName", NAPI_GetAbilityName),
@@ -89,12 +90,13 @@ public:
 
     Ability* GetAbility(NativeEngine &engine);
     static void Finalizer(NativeEngine *engine, void *data, void *hint);
-    static NativeValue* GetContext(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* HasWindowFocus(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* ConnectAbility(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* DisconnectAbility(NativeEngine *engine, NativeCallbackInfo *info);
 private:
+#ifdef SUPPORT_GRAPHICS
     NativeValue* OnHasWindowFocus(NativeEngine &engine, NativeCallbackInfo &info);
+#endif
 };
 
 void JsFeatureAbility::Finalizer(NativeEngine *engine, void *data, void *hint)
@@ -122,18 +124,11 @@ NativeValue* JsFeatureAbilityInit(NativeEngine *engine, NativeValue *exports)
     object->SetNativePointer(jsFeatureAbility.release(), JsFeatureAbility::Finalizer, nullptr);
 
     const char *moduleName = "JsFeatureAbility";
-    BindNativeFunction(*engine, *object, "getContext", moduleName, JsFeatureAbility::GetContext);
     BindNativeFunction(*engine, *object, "hasWindowFocus", moduleName, JsFeatureAbility::HasWindowFocus);
     BindNativeFunction(*engine, *object, "connectAbility", moduleName, JsFeatureAbility::ConnectAbility);
     BindNativeFunction(*engine, *object, "disconnectAbility", moduleName, JsFeatureAbility::DisconnectAbility);
 
     return exports;
-}
-
-NativeValue* JsFeatureAbility::GetContext(NativeEngine *engine, NativeCallbackInfo *info)
-{
-    JsFeatureAbility *me = CheckParamsAndGetThis<JsFeatureAbility>(engine, info);
-    return (me != nullptr) ? me->JsGetContext(*engine, *info, AbilityType::PAGE) : nullptr;
 }
 
 NativeValue *JsFeatureAbility::HasWindowFocus(NativeEngine *engine, NativeCallbackInfo *info)
@@ -166,14 +161,14 @@ NativeValue* JsFeatureAbility::OnHasWindowFocus(NativeEngine &engine, NativeCall
         HILOG_ERROR(" wrong number of arguments.");
         return engine.CreateUndefined();
     }
-    Ability *ability = GetAbility(engine);
-    if (ability == nullptr) {
-        HILOG_ERROR("ability is nullptr");
-        return engine.CreateUndefined();
-    }
     AsyncTask::CompleteCallback complete =
-        [ability](NativeEngine &engine, AsyncTask &task, int32_t status) {
-            auto ret = ability->HasWindowFocus();
+        [obj = this](NativeEngine &engine, AsyncTask &task, int32_t status) {
+            if (obj->ability_ == nullptr) {
+                HILOG_ERROR("HasWindowFocus execute error, the ability is nullptr");
+                task.Reject(engine, CreateJsError(engine, NAPI_ERR_ACE_ABILITY, "HasWindowFocus failed"));
+                return;
+            }
+            auto ret = obj->ability_->HasWindowFocus();
             task.Resolve(engine, CreateJsValue(engine, ret));
         };
     NativeValue *result = nullptr;

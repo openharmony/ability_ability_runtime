@@ -4809,20 +4809,10 @@ napi_value NAPI_TerminateAbilityCommon(napi_env env, napi_callback_info info)
 JsNapiCommon::JsNapiCommon() : ability_(nullptr)
 {}
 
-NativeValue* JsNapiCommon::JsGetContext(NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType)
-{
-    if (!CheckAbilityType(abilityType)) {
-        HILOG_ERROR("ability type error");
-        return engine.CreateUndefined();
-    }
-    //Because PR 2987 no into the code, so the Context related here does not handle first.
-    return engine.CreateUndefined();
-}
-
 NativeValue* JsNapiCommon::JsConnectAbility(
     NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType)
 {
-    auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
+    int32_t errorVal = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
     int64_t id = 0;
     HILOG_DEBUG("%{public}s is called", __func__);
     if (info.argc != ARGS_TWO) {
@@ -4847,14 +4837,20 @@ NativeValue* JsNapiCommon::JsConnectAbility(
     abilityConnection->SetEnv(env);
     abilityConnection->SetConnectCBRef(callbackArray[PARAM0]);
     abilityConnection->SetDisconnectCBRef(callbackArray[PARAM1]);
+
+    if (ability_ == nullptr) {
+        errorVal = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+        HILOG_ERROR("JsConnectAbility, the ability is nullptr");
+    }
+
     bool result = false;
     if (!CheckAbilityType(abilityType)) {
-        *errorVal = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+        errorVal = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
     } else {
         result = ability_->ConnectAbility(want, abilityConnection);
     }
 
-    if (*errorVal != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || result == false) {
+    if (errorVal != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || result == false) {
         HILOG_ERROR("CommonJsConnectAbility failed.");
         // return error code in onFailed asynccallback
         napi_value callback = 0;
@@ -4862,7 +4858,7 @@ NativeValue* JsNapiCommon::JsConnectAbility(
         napi_value result = 0;
         napi_value callResult = 0;
         int errorCode = NO_ERROR;
-        switch (*errorVal) {
+        switch (errorVal) {
             case NAPI_ERR_ACE_ABILITY:
                 errorCode = ABILITY_NOT_FOUND;
                 break;
@@ -4896,8 +4892,7 @@ NativeValue* JsNapiCommon::JsDisConnectAbility(
         HILOG_ERROR("input params int error");
         return engine.CreateUndefined();
     }
-    auto item = std::find_if(connects_.begin(),
-        connects_.end(),
+    auto item = std::find_if(connects_.begin(), connects_.end(), 
         [&id](std::map<ConnecttionKey, sptr<NAPIAbilityConnection>>::value_type &obj) {
             return id == obj.first.id;
         });
@@ -4911,7 +4906,7 @@ NativeValue* JsNapiCommon::JsDisConnectAbility(
     auto execute = [obj = this, value = errorVal, abilityType, abilityConnection] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            HILOG_ERROR("task execute error, the ability is nullptr");
+            HILOG_ERROR("task execute error, the ability is nullptr.");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
@@ -4922,17 +4917,11 @@ NativeValue* JsNapiCommon::JsDisConnectAbility(
     };
     auto complete = [obj = this, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, const int32_t status) {
-        if (*value == static_cast<int32_t>(NAPI_ERR_ACE_ABILITY)) {
-            task.Reject(engine, CreateJsError(engine, NAPI_ERR_ACE_ABILITY, "ability is nullptr"));
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR)) {
+            task.Reject(engine, CreateJsError(engine, *value, "DisconnectAbility failed."));
             return;
         }
-        if (*value == static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID)) {
-            task.Reject(engine, CreateJsError(engine, NAPI_ERR_ABILITY_TYPE_INVALID, "Invalid Parameter."));
-            return;
-        }
-        if (*value == static_cast<int32_t>(NAPI_ERR_NO_ERROR)) {
-            task.Resolve(engine, CreateJsValue(engine, *value));
-        }
+        task.Resolve(engine, CreateJsValue(engine, *value));
     };
     NativeValue *lastParam = (info.argc == ARGS_ONE) ? nullptr : info.argv[PARAM1];
     NativeValue *result = nullptr;
@@ -4941,7 +4930,7 @@ NativeValue* JsNapiCommon::JsDisConnectAbility(
     return result;
 }
 
-sptr<NAPIAbilityConnection> JsNapiCommon::BuildWant(Want &want, int64_t &id)
+sptr<NAPIAbilityConnection> JsNapiCommon::BuildWant(const Want &want, int64_t &id)
 {
     HILOG_DEBUG("%{public}s uri:%{public}s", __func__, want.GetElement().GetURI().c_str());
     std::string deviceId = want.GetElement().GetDeviceID();
@@ -4978,7 +4967,7 @@ sptr<NAPIAbilityConnection> JsNapiCommon::BuildWant(Want &want, int64_t &id)
     return abilityConnection;
 }
 
-void JsNapiCommon::ChangeAbilityConnection(napi_ref *callbackArray, const napi_env env, napi_value &arg1)
+void JsNapiCommon::ChangeAbilityConnection(napi_ref *callbackArray, const napi_env env, const napi_value &arg1)
 {
     napi_value jsMethod = nullptr;
     napi_get_named_property(env, arg1, "onConnect", &jsMethod);
