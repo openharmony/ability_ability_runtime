@@ -2864,7 +2864,6 @@ static bool BindNapiJSContextFunction(NativeEngine &engine, NativeObject* object
         HILOG_ERROR("input params error");
         return false;
     }
-
     const char* moduleName = "context";
     BindNativeFunction(
         engine, *object, "requestPermissionsFromUser", moduleName, NapiJsContext::JsRequestPermissionsFromUser);
@@ -2905,27 +2904,22 @@ static NativeValue* ConstructNapiJSContext(NativeEngine &engine)
         HILOG_ERROR("CreateObject failed");
         return nullptr;
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
         return nullptr;
     }
-
     auto jsCalss = std::make_unique<NapiJsContext>();
     if (jsCalss == nullptr) {
         HILOG_ERROR("new NapiJsContext failed");
         return nullptr;
     }
-
     if (!jsCalss->DataInit(engine)) {
         HILOG_ERROR("NapiJsContext init failed");
         return nullptr;
     }
-
     object->SetNativePointer(jsCalss.release(), NapiJsContext::Finalizer, nullptr);
     object->SetProperty("stageMode", engine.CreateBoolean(false));
-
     if (!BindNapiJSContextFunction(engine, object)) {
         HILOG_ERROR("bind func failed");
         return nullptr;

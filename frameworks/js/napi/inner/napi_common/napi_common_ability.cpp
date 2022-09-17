@@ -5216,7 +5216,6 @@ NativeValue* JsNapiCommon::JsGetOrCreateDistributedDir(
         }
         dir->name = context->GetDistributedFilesDir();
     };
-
     auto complete = [obj = this, dir = orCreateDistributedDir, value = errorVal]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
         if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
@@ -5281,13 +5280,11 @@ NativeValue* JsNapiCommon::CreateProcessInfo(NativeEngine &engine, const std::sh
         HILOG_ERROR("input params error");
         return engine.CreateUndefined();
     }
-
     auto objContext = engine.CreateObject();
     if (objContext == nullptr) {
         HILOG_ERROR("CreateObject failed");
         return engine.CreateUndefined();
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
@@ -5312,7 +5309,6 @@ NativeValue* JsNapiCommon::CreateElementName(NativeEngine &engine, const std::sh
         HILOG_ERROR("CreateObject failed");
         return engine.CreateUndefined();
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
@@ -5336,13 +5332,11 @@ NativeValue* JsNapiCommon::CreateHapModuleInfo(
         HILOG_ERROR("input params error");
         return engine.CreateUndefined();
     }
-
     auto objContext = engine.CreateObject();
     if (objContext == nullptr) {
         HILOG_ERROR("CreateObject failed");
         return engine.CreateUndefined();
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
@@ -5375,7 +5369,6 @@ NativeValue* JsNapiCommon::CreateModuleInfo(NativeEngine &engine, const ModuleIn
         HILOG_ERROR("CreateObject failed");
         return engine.CreateUndefined();
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
@@ -5396,10 +5389,10 @@ NativeValue* JsNapiCommon::CreateModuleInfos(NativeEngine &engine, const std::ve
         HILOG_ERROR("CreateArray failed");
         return engine.CreateUndefined();
     }
-
     for (uint32_t i = 0; i < moduleInfos.size(); i++) {
         array->SetElement(i, CreateModuleInfo(engine, moduleInfos.at(i)));
     }
+
     return arrayValue;
 }
 
@@ -5411,7 +5404,6 @@ NativeValue* JsNapiCommon::CreateAppInfo(NativeEngine &engine, const Application
         HILOG_ERROR("CreateObject failed");
         return engine.CreateUndefined();
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
@@ -5455,7 +5447,6 @@ NativeValue* JsNapiCommon::CreateAbilityInfo(NativeEngine &engine, const Ability
         HILOG_ERROR("CreateObject failed");
         return engine.CreateUndefined();
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
@@ -5515,10 +5506,10 @@ NativeValue* JsNapiCommon::CreateAbilityInfos(NativeEngine &engine, const std::v
         HILOG_ERROR("CreateArray failed");
         return engine.CreateUndefined();
     }
-
     for (uint32_t i = 0; i < abilityInfos.size(); i++) {
         array->SetElement(i, CreateAbilityInfo(engine, abilityInfos.at(i)));
     }
+
     return arrayValue;
 }
 
@@ -5528,7 +5519,6 @@ bool JsNapiCommon::CheckAbilityType(const AbilityType typeWant)
         HILOG_ERROR("input params int error");
         return false;
     }
-
     const std::shared_ptr<AbilityInfo> info = ability_->GetAbilityInfo();
     if (info == nullptr) {
         HILOG_ERROR("get ability info error");
@@ -5556,13 +5546,11 @@ NativeValue* JsNapiCommon::CreateAppVersionInfo(
         HILOG_ERROR("input params error");
         return engine.CreateUndefined();
     }
-
     auto objContext = engine.CreateObject();
     if (objContext == nullptr) {
         HILOG_ERROR("CreateObject failed");
         return engine.CreateUndefined();
     }
-
     auto object = ConvertNativeValueTo<NativeObject>(objContext);
     if (object == nullptr) {
         HILOG_ERROR("ConvertNativeValueTo object failed");
@@ -5603,7 +5591,6 @@ bool JsNapiCommon::GetStringsValue(NativeEngine &engine, NativeValue *object, st
         HILOG_ERROR("input params error");
         return false;
     }
-
     for (uint32_t i = 0; i < array->GetLength(); i++) {
         std::string itemStr("");
         if (!ConvertFromJsValue(engine, array->GetElement(i), itemStr)) {
@@ -5638,7 +5625,6 @@ std::string JsNapiCommon::ConvertErrorCode(int32_t errCode)
         { static_cast<int32_t>(NAPI_ERR_PARAM_INVALID), std::string("input param error") },
         { static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID), std::string("ability type error") }
     };
-
     auto findECode = errMap.find(errCode);
     if (findECode == errMap.end()) {
         HILOG_ERROR("convert error code failed");
