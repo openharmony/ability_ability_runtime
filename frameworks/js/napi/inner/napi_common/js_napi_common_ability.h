@@ -82,13 +82,12 @@ public:
         Want want;
     };
 
-    NativeValue* JsGetContext(NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType);
     NativeValue* JsConnectAbility(NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType);
     NativeValue* JsDisConnectAbility(NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType);
 
     bool CheckAbilityType(const AbilityType typeWant);
-    sptr<NAPIAbilityConnection> BuildWant(Want &want, int64_t &id);
-    void ChangeAbilityConnection(napi_ref *callbackArray, const napi_env env, napi_value &arg1);
+    sptr<NAPIAbilityConnection> BuildWant(const Want &want, int64_t &id);
+    void ChangeAbilityConnection(napi_ref *callbackArray, const napi_env env, const napi_value &arg1);
 
     Ability *ability_;
 };
