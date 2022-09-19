@@ -16,9 +16,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#define private public
-#define protected public
-
 #include "hilog_wrapper.h"
 #include "mission_listener_controller.h"
 #include "mission_listener_stub.h"
