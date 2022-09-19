@@ -21,18 +21,15 @@ namespace AAFwk{
 void AbilityInterceptorExecuter::AddInterceptor(std::shared_ptr<AbilityInterceptor> interceptor)
 {
     if (interceptor != nullptr) {
-        HILOG_INFO("[DEBUG] Add interceptor to executer");
         interceptorList_.push_back(interceptor);
     }
 }
 
 ErrCode AbilityInterceptorExecuter::DoProcess()
 {
-    HILOG_INFO("[DEBUG] Process interceptors");
     int32_t result = ERR_OK;
     auto item = interceptorList_.begin();
     while (item != interceptorList_.end()) {
-        HILOG_INFO("[DEBUG] Process interceptor");
         result = (*item)->DoProcess();
         if (result != ERR_OK) {
             break;

@@ -41,9 +41,7 @@ CrowdTestInterceptor::~CrowdTestInterceptor()
 
 ErrCode CrowdTestInterceptor::DoProcess()
 {
-    HILOG_INFO("[DEBUG] Do CrowdTest intercept");
     if (CheckCrowdtest()) {
-        HILOG_INFO("[DEBUG] Crowdtest expired");
         HILOG_ERROR("Crowdtest expired.");
 #ifdef SUPPORT_GRAPHICS
         if (isForeground_) {
@@ -56,17 +54,19 @@ ErrCode CrowdTestInterceptor::DoProcess()
 #endif
         return ERR_CROWDTEST_EXPIRED;
     }
-    HILOG_INFO("[DEBUG] Not Crowdtest expired");
     return ERR_OK;
 }
 
 bool CrowdTestInterceptor::CheckCrowdtest()
 {
+    // get bms
     auto bms = AbilityUtil::GetBundleManager();
     if (!bms) {
         HILOG_ERROR("GetBundleManager failed");
         return false;
     }
+
+    // get crowdtest status and time
     std::string bundleName = want_.GetBundle();
     AppExecFwk::ApplicationInfo callerAppInfo;
     bool result = IN_PROCESS_CALL(
@@ -101,7 +101,7 @@ DisposedInterceptor::~DisposedInterceptor()
 ErrCode DisposedInterceptor::DoProcess()
 {
     if (CheckDisposed()) {
-        HILOG_ERROR("");
+        HILOG_ERROR("The target application is in disposed status");
 #ifdef SUPPORT_GRAPHICS
         if (isForeground_) {
             int ret = AbilityUtil::StartAppgallery(requestCode_, userId_, ACTION_MARKET_CROWDTEST);
