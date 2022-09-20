@@ -27,25 +27,25 @@
 namespace OHOS {
 namespace AAFwk {
 const std::string ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTest";
+const std::string ACTION_MARKET_DISPOSED = "ohos.want.action.marketDisposed";
 const std::string PERMISSION_MANAGE_DISPOSED_APP_STATUS = "ohos.permission.MANAGE_DISPOSED_APP_STATUS";
 
 AbilityInterceptor::~AbilityInterceptor()
 {}
 
-CrowdTestInterceptor::CrowdTestInterceptor(const Want &want, int requestCode, int32_t userId, bool isForeground)
-    : want_(want), requestCode_(requestCode), userId_(userId), isForeground_(isForeground)
+CrowdTestInterceptor::CrowdTestInterceptor()
 {}
 
 CrowdTestInterceptor::~CrowdTestInterceptor()
 {}
 
-ErrCode CrowdTestInterceptor::DoProcess()
+ErrCode CrowdTestInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground)
 {
-    if (CheckCrowdtest()) {
+    if (CheckCrowdtest(want, userId)) {
         HILOG_ERROR("Crowdtest expired.");
 #ifdef SUPPORT_GRAPHICS
-        if (isForeground_) {
-            int ret = AbilityUtil::StartAppgallery(requestCode_, userId_, ACTION_MARKET_CROWDTEST);
+        if (isForeground) {
+            int ret = AbilityUtil::StartAppgallery(requestCode, userId, ACTION_MARKET_CROWDTEST);
             if (ret != ERR_OK) {
                 HILOG_ERROR("Crowdtest implicit start appgallery failed.");
                 return ret;
@@ -57,7 +57,7 @@ ErrCode CrowdTestInterceptor::DoProcess()
     return ERR_OK;
 }
 
-bool CrowdTestInterceptor::CheckCrowdtest()
+bool CrowdTestInterceptor::CheckCrowdtest(const Want &want, int32_t userId)
 {
     // get bms
     auto bms = AbilityUtil::GetBundleManager();
@@ -67,11 +67,11 @@ bool CrowdTestInterceptor::CheckCrowdtest()
     }
 
     // get crowdtest status and time
-    std::string bundleName = want_.GetBundle();
+    std::string bundleName = want.GetBundle();
     AppExecFwk::ApplicationInfo callerAppInfo;
     bool result = IN_PROCESS_CALL(
         bms->GetApplicationInfo(bundleName, AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO,
-            userId_, callerAppInfo)
+            userId, callerAppInfo)
     );
     if (!result) {
         HILOG_ERROR("GetApplicaionInfo from bms failed.");
@@ -91,20 +91,19 @@ bool CrowdTestInterceptor::CheckCrowdtest()
     return false;
 }
 
-DisposedInterceptor::DisposedInterceptor(const Want &want, int requestCode, int32_t userId, bool isForeground)
-    : want_(want), requestCode_(requestCode), userId_(userId), isForeground_(isForeground)
+DisposedInterceptor::DisposedInterceptor()
 {}
 
 DisposedInterceptor::~DisposedInterceptor()
 {}
 
-ErrCode DisposedInterceptor::DoProcess()
+ErrCode DisposedInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground)
 {
-    if (CheckDisposed()) {
+    if (CheckDisposed(want)) {
         HILOG_ERROR("The target application is in disposed status");
 #ifdef SUPPORT_GRAPHICS
-        if (isForeground_) {
-            int ret = AbilityUtil::StartAppgallery(requestCode_, userId_, ACTION_MARKET_CROWDTEST);
+        if (isForeground) {
+            int ret = AbilityUtil::StartAppgallery(requestCode, userId, ACTION_MARKET_DISPOSED);
             if (ret != ERR_OK) {
                 HILOG_ERROR("Disposed implicit start appgallery failed.");
                 return ret;
@@ -116,7 +115,7 @@ ErrCode DisposedInterceptor::DoProcess()
     return ERR_OK;
 }
 
-bool DisposedInterceptor::CheckDisposed()
+bool DisposedInterceptor::CheckDisposed(const Want &want)
 {
     // get bms
     auto bms = AbilityUtil::GetBundleManager();
@@ -126,7 +125,7 @@ bool DisposedInterceptor::CheckDisposed()
     }
 
     // get disposed status
-    std::string bundleName = want_.GetBundle();
+    std::string bundleName = want.GetBundle();
     int disposedStatus = bms->GetDisposedStatus(bundleName);
 
     if (disposedStatus != 0) {
