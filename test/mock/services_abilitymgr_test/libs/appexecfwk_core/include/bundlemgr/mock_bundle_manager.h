@@ -259,6 +259,8 @@ public:
 
     bool GetBundleInfo(
         const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId) override;
+    
+    int32_t GetDisposedStatus(const std::string &bundleName) override;
 
     MOCK_METHOD3(GetApplicationInfos,
         bool(const ApplicationFlag flag, const int userId, std::vector<ApplicationInfo> &appInfos));
@@ -396,6 +398,13 @@ public:
         abilityInfo.name = "MainAbility";
         abilityInfo.bundleName = "com.ohos.launcher";
         return true;
+    }
+    virtual int32_t GetDisposedStatus(const std::string &bundleName)
+    {
+        if (bundleName.compare("com.test.disposed") == 0) {
+            return -1;
+        }
+        return 0;
     }
 public:
     using QueryAbilityInfoFunType =
