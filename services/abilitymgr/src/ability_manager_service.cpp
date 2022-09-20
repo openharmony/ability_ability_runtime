@@ -5053,7 +5053,6 @@ int32_t AbilityManagerService::ShowPickerDialog(
     constexpr char PICKER_DIALOG_ABILITY_BUNDLE_NAME[] = "com.ohos.sharepickerdialog";
     constexpr char PICKER_DIALOG_ABILITY_NAME[] = "PickerDialog";
     constexpr char TOKEN_KEY[] = "ohos.ability.params.token";
-
     newWant.SetElementName(PICKER_DIALOG_ABILITY_BUNDLE_NAME, PICKER_DIALOG_ABILITY_NAME);
     newWant.SetParam(TOKEN_KEY, callerToken);
     // note: clear actions
