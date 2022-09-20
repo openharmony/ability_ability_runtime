@@ -32,12 +32,12 @@ public:
      *
      * @param interceptor, interceptor handle the interception processing.
      */
-    void AddInterceptor(std::shared_ptr<AbilityInterceptor> interceptor);
+    void AddInterceptor(const std::shared_ptr<AbilityInterceptor> &interceptor);
 
     /**
      * Excute the DoProcess of the interceptors.
      */
-    ErrCode DoProcess();
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground);
 private:
     std::vector<std::shared_ptr<AbilityInterceptor>> interceptorList_;
 };

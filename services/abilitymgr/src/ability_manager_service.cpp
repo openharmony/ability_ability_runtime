@@ -31,10 +31,9 @@
 #include <cstdlib>
 
 #include "ability_info.h"
+#include "ability_interceptor.h"
 #include "ability_manager_errors.h"
 #include "ability_util.h"
-#include "ability_interceptor_executer.h"
-#include "ability_interceptor.h"
 #include "application_util.h"
 #include "hitrace_meter.h"
 #include "bundle_mgr_client.h"
@@ -285,6 +284,10 @@ bool AbilityManagerService::Init()
     newRuleExceptLauncherSystemUI_ = CheckNewRuleSwitchState(NEW_RULES_EXCEPT_LAUNCHER_SYSTEMUI);
     backgroundJudgeFlag_ = CheckNewRuleSwitchState(BACKGROUND_JUDGE_FLAG);
 
+    interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
+    interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
+    interceptorExecuter_->AddInterceptor(std::make_shared<DisposedInterceptor>());
+
     HILOG_INFO("Init success.");
     return true;
 }
@@ -380,10 +383,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_INFO("%{public}s: Caller is specific system ability.", __func__);
     }
 
-    std::shared_ptr<AbilityInterceptorExecuter> executer = std::make_shared<AbilityInterceptorExecuter>();
-    executer->AddInterceptor(std::make_shared<CrowdTestInterceptor>(want, requestCode, GetUserId(), true));
-    executer->AddInterceptor(std::make_shared<DisposedInterceptor>(want, requestCode, GetUserId(), true));
-    auto result = executer->DoProcess();
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
     if (result != ERR_OK) {
         return result;
     }
@@ -542,10 +543,8 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         return ERR_INVALID_VALUE;
     }
 
-    std::shared_ptr<AbilityInterceptorExecuter> executer = std::make_shared<AbilityInterceptorExecuter>();
-    executer->AddInterceptor(std::make_shared<CrowdTestInterceptor>(want, requestCode, GetUserId(), true));
-    executer->AddInterceptor(std::make_shared<DisposedInterceptor>(want, requestCode, GetUserId(), true));
-    auto result = executer->DoProcess();
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
     if (result != ERR_OK) {
         return result;
     }
@@ -704,10 +703,8 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         return ERR_INVALID_VALUE;
     }
 
-    std::shared_ptr<AbilityInterceptorExecuter> executer = std::make_shared<AbilityInterceptorExecuter>();
-    executer->AddInterceptor(std::make_shared<CrowdTestInterceptor>(want, requestCode, GetUserId(), true));
-    executer->AddInterceptor(std::make_shared<DisposedInterceptor>(want, requestCode, GetUserId(), true));
-    auto result = executer->DoProcess();
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
     if (result != ERR_OK) {
         return result;
     }
@@ -978,10 +975,8 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
         return ERR_INVALID_VALUE;
     }
 
-    std::shared_ptr<AbilityInterceptorExecuter> executer = std::make_shared<AbilityInterceptorExecuter>();
-    executer->AddInterceptor(std::make_shared<CrowdTestInterceptor>(want, 0, GetUserId(), false));
-    executer->AddInterceptor(std::make_shared<DisposedInterceptor>(want, 0, GetUserId(), false));
-    auto result = executer->DoProcess();
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
         return result;
     }
@@ -1498,10 +1493,8 @@ int AbilityManagerService::ConnectAbilityCommon(
         return CHECK_PERMISSION_FAILED;
     }
 
-    std::shared_ptr<AbilityInterceptorExecuter> executer = std::make_shared<AbilityInterceptorExecuter>();
-    executer->AddInterceptor(std::make_shared<CrowdTestInterceptor>(want, 0, GetUserId(), false));
-    executer->AddInterceptor(std::make_shared<DisposedInterceptor>(want, 0, GetUserId(), false));
-    auto result = executer->DoProcess();
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
         return result;
     }
@@ -3761,10 +3754,8 @@ int AbilityManagerService::StartAbilityByCall(
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
 
-    std::shared_ptr<AbilityInterceptorExecuter> executer = std::make_shared<AbilityInterceptorExecuter>();
-    executer->AddInterceptor(std::make_shared<CrowdTestInterceptor>(want, 0, GetUserId(), false));
-    executer->AddInterceptor(std::make_shared<DisposedInterceptor>(want, 0, GetUserId(), false));
-    auto result = executer->DoProcess();
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
         return result;
     }

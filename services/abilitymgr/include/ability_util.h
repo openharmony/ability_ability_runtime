@@ -190,7 +190,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     return false;
 }
 
-inline int StartAppgallery(int requestCode, int32_t userId, std::string action)
+inline int StartAppgallery(const int requestCode, const int32_t userId, const std::string &action)
 {
     Want want;
     want.SetElementName(MARKET_BUNDLE_NAME, "");

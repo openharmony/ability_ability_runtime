@@ -18,19 +18,19 @@
 
 namespace OHOS {
 namespace AAFwk{
-void AbilityInterceptorExecuter::AddInterceptor(std::shared_ptr<AbilityInterceptor> interceptor)
+void AbilityInterceptorExecuter::AddInterceptor(const std::shared_ptr<AbilityInterceptor> &interceptor)
 {
     if (interceptor != nullptr) {
         interceptorList_.push_back(interceptor);
     }
 }
 
-ErrCode AbilityInterceptorExecuter::DoProcess()
+ErrCode AbilityInterceptorExecuter::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground)
 {
     int32_t result = ERR_OK;
     auto item = interceptorList_.begin();
     while (item != interceptorList_.end()) {
-        result = (*item)->DoProcess();
+        result = (*item)->DoProcess(want, requestCode, userId, isForeground);
         if (result != ERR_OK) {
             break;
         } else {

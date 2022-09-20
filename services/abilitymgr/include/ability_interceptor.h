@@ -28,35 +28,27 @@ public:
     /**
      * Excute interception processing.
      */
-    virtual ErrCode DoProcess() = 0;
+    virtual ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) = 0;
 private:
 };
 
+// start ability interceptor
 class CrowdTestInterceptor : public AbilityInterceptor {
 public:
-    CrowdTestInterceptor(const Want &want, int requestCode, int32_t userId, bool isForeground);
+    CrowdTestInterceptor();
     ~CrowdTestInterceptor();
-    ErrCode DoProcess() override;
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
 private:
-    bool CheckCrowdtest();
-    const Want want_;
-    int requestCode_;
-    int32_t userId_;
-    bool isForeground_;
+    bool CheckCrowdtest(const Want &want, int32_t userId);
 };
 
 class DisposedInterceptor : public AbilityInterceptor {
 public:
-    DisposedInterceptor(const Want &want, int requestCode, int32_t userId, bool isForeground_);
+    DisposedInterceptor();
     ~DisposedInterceptor();
-    ErrCode DoProcess() override;
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
 private:
-    bool CheckDisposed();
-    
-    const Want want_;
-    int requestCode_;
-    int32_t userId_;
-    bool isForeground_;
+    bool CheckDisposed(const Want &want);
 };
 } // namespace AAFwk
 } // namespace OHOS
