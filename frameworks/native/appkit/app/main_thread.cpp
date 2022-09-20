@@ -855,11 +855,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     ProcessInfo processInfo = appLaunchData.GetProcessInfo();
     Profile appProfile = appLaunchData.GetProfile();
 
+    HILOG_DEBUG("MainThread handle launch application, InitCreate Start.");
     std::shared_ptr<ContextDeal> contextDeal = nullptr;
     if (!InitCreate(contextDeal, appInfo, processInfo, appProfile)) {
         HILOG_ERROR("MainThread::handleLaunchApplication InitCreate failed");
         return;
     }
+    HILOG_DEBUG("MainThread handle launch application, InitCreate End.");
 
     // get application shared point
     application_ = std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName());
@@ -869,14 +871,16 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
     applicationForDump_ = application_;
     mixStackDumper_ = std::make_shared<MixStackDumper>();
-    mixStackDumper_->InstallDumpHandler(applicationForDump_);
+    mixStackDumper_->InstallDumpHandler(applicationForDump_, signalHandler_);
 
     // init resourceManager.
+    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager Start.");
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (resourceManager == nullptr) {
         HILOG_ERROR("MainThread::handleLaunchApplication create resourceManager failed");
         return;
     }
+    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager End.");
 
     sptr<IBundleMgr> bundleMgr = contextDeal->GetBundleManager();
     if (bundleMgr == nullptr) {
@@ -909,10 +913,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     HILOG_INFO("stageBased:%{public}d moduleJson:%{public}d size:%{public}zu",
         isStageBased, moduelJson, bundleInfo.hapModuleInfos.size());
 
+    HILOG_DEBUG("MainThread handle launch application, InitResourceManager Start.");
     if (!InitResourceManager(resourceManager, contextDeal, appInfo, bundleInfo, config)) {
         HILOG_ERROR("MainThread::handleLaunchApplication InitResourceManager failed");
         return;
     }
+    HILOG_DEBUG("MainThread handle launch application, InitResourceManager End.");
 
     // create contextImpl
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
@@ -1994,14 +2000,15 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
         std::string moduleName = hqfInfo.moduleName;
         std::string resolvedHapPath;
         for (auto hapInfo : bundleInfo.hapModuleInfos) {
-            if (hapInfo.moduleName == moduleName) {
-                std::string hapPath = AbilityRuntime::GetLoadPath(hapInfo.hapPath);
-                auto position = hapPath.rfind('/');
-                if (position != std::string::npos) {
-                    resolvedHapPath = hapPath.erase(position) + FILE_SEPARATOR + moduleName;
-                }
-                break;
+            if (hapInfo.moduleName != moduleName) {
+                continue;
             }
+            std::string hapPath = AbilityRuntime::GetLoadPath(hapInfo.hapPath);
+            auto position = hapPath.rfind('/');
+            if (position != std::string::npos) {
+                resolvedHapPath = hapPath.erase(position) + FILE_SEPARATOR + moduleName;
+            }
+            break;
         }
 
         std::string resolvedHqfFile(AbilityRuntime::GetLoadPath(hqfInfo.hqfFilePath));

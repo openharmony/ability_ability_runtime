@@ -94,7 +94,9 @@ const std::string BUNDLE_NAME_SYSTEMUI = "com.ohos.systemui";
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 using namespace BackgroundTaskMgr;
+#endif
 const bool CONCURRENCY_MODE_FALSE = false;
 const int32_t MAIN_USER_ID = 100;
 const int32_t U0_USER_ID = 0;
@@ -2273,6 +2275,7 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
 
     std::shared_ptr<DataAbilityManager> dataAbilityManager = GetDataAbilityManagerByUserId(userId);
     CHECK_POINTER_AND_RETURN(dataAbilityManager, nullptr);
+    ReportEventToSuspendManager(abilityRequest.abilityInfo);
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
     bool isNotHap = isSaCall || isShellCall;
@@ -3018,7 +3021,7 @@ int AbilityManagerService::GenerateAbilityRequest(
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
 #ifdef SUPPORT_GRAPHICS
     if (want.GetAction().compare(ACTION_CHOOSE) == 0) {
-        return ShowPickerDialog(want, userId);
+        return ShowPickerDialog(want, userId, callerToken);
     }
 #endif
     auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
@@ -3941,8 +3944,38 @@ int AbilityManagerService::GetAbilityRunningInfos(std::vector<AbilityRunningInfo
     currentMissionListManager_->GetAbilityRunningInfos(info, isPerm);
     connectManager_->GetAbilityRunningInfos(info, isPerm);
     dataAbilityManager_->GetAbilityRunningInfos(info, isPerm);
+    UpdateFocusState(info);
 
     return ERR_OK;
+}
+
+void AbilityManagerService::UpdateFocusState(std::vector<AbilityRunningInfo> &info)
+{
+    if (info.empty()) {
+        return;
+    }
+
+#ifdef SUPPORT_GRAPHICS
+    sptr<IRemoteObject> token;
+    int ret = GetTopAbility(token);
+    if (ret != ERR_OK || token == nullptr) {
+        return;
+    }
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (abilityRecord == nullptr) {
+        HILOG_WARN("%{public}s abilityRecord is null.", __func__);
+        return;
+    }
+
+    for (auto &item : info) {
+        if (item.uid == abilityRecord->GetUid() && item.pid == abilityRecord->GetPid() &&
+            item.ability == abilityRecord->GetWant().GetElement()) {
+            item.abilityState = static_cast<int>(AbilityState::ACTIVE);
+            break;
+        }
+    }
+#endif
 }
 
 int AbilityManagerService::GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info)
@@ -4051,7 +4084,7 @@ void AbilityManagerService::StartFreezingScreen()
     HILOG_INFO("%{public}s", __func__);
 #ifdef SUPPORT_GRAPHICS
     std::vector<Rosen::DisplayId> displayIds = Rosen::DisplayManager::GetInstance().GetAllDisplayIds();
-    Rosen::DisplayManager::GetInstance().Freeze(displayIds);
+    IN_PROCESS_CALL_WITHOUT_RET(Rosen::DisplayManager::GetInstance().Freeze(displayIds));
 #endif
 }
 
@@ -4060,7 +4093,7 @@ void AbilityManagerService::StopFreezingScreen()
     HILOG_INFO("%{public}s", __func__);
 #ifdef SUPPORT_GRAPHICS
     std::vector<Rosen::DisplayId> displayIds = Rosen::DisplayManager::GetInstance().GetAllDisplayIds();
-    Rosen::DisplayManager::GetInstance().Unfreeze(displayIds);
+    IN_PROCESS_CALL_WITHOUT_RET(Rosen::DisplayManager::GetInstance().Unfreeze(displayIds));
 #endif
 }
 
@@ -4311,8 +4344,13 @@ bool AbilityManagerService::IsRunningInStabilityTest()
 
 bool AbilityManagerService::IsAbilityControllerStart(const Want &want, const std::string &bundleName)
 {
-    if (abilityController_ != nullptr && controllerIsAStabilityTest_) {
-        HILOG_DEBUG("%{public}s, controllerIsAStabilityTest_: %{public}d", __func__, controllerIsAStabilityTest_);
+    HILOG_DEBUG("method call, controllerIsAStabilityTest_: %{public}d", controllerIsAStabilityTest_);
+    if (abilityController_ == nullptr) {
+        HILOG_DEBUG("abilityController_ is nullptr");
+        return true;
+    }
+
+    if (controllerIsAStabilityTest_) {
         bool isStart = abilityController_->AllowAbilityStart(want, bundleName);
         if (!isStart) {
             HILOG_INFO("Not finishing start ability because controller starting: %{public}s", bundleName.c_str());
@@ -4324,8 +4362,13 @@ bool AbilityManagerService::IsAbilityControllerStart(const Want &want, const std
 
 bool AbilityManagerService::IsAbilityControllerForeground(const std::string &bundleName)
 {
-    if (abilityController_ != nullptr && controllerIsAStabilityTest_) {
-        HILOG_DEBUG("%{public}s, controllerIsAStabilityTest_: %{public}d", __func__, controllerIsAStabilityTest_);
+    HILOG_DEBUG("method call, controllerIsAStabilityTest_: %{public}d", controllerIsAStabilityTest_);
+    if (abilityController_ == nullptr) {
+        HILOG_DEBUG("abilityController_ is nullptr");
+        return true;
+    }
+
+    if (controllerIsAStabilityTest_) {
         bool isResume = abilityController_->AllowAbilityBackground(bundleName);
         if (!isResume) {
             HILOG_INFO("Not finishing terminate ability because controller resuming: %{public}s", bundleName.c_str());
@@ -4992,17 +5035,19 @@ void AbilityManagerService::CompleteFirstFrameDrawing(const sptr<IRemoteObject> 
     }
 }
 
-int32_t AbilityManagerService::ShowPickerDialog(const Want& want, int32_t userId)
+int32_t AbilityManagerService::ShowPickerDialog(
+    const Want& want, int32_t userId, const sptr<IRemoteObject> &callerToken)
 {
-    auto bms = GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
-    HILOG_INFO("share content: ShowPickerDialog, userId is %{public}d", userId);
-    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
-    IN_PROCESS_CALL_WITHOUT_RET(
-        bms->QueryAbilityInfos(
-            want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfos)
-    );
-    return Ace::UIServiceMgrClient::GetInstance()->ShowAppPickerDialog(want, abilityInfos, userId);
+    AAFwk::Want newWant = want;
+    constexpr char PICKER_DIALOG_ABILITY_BUNDLE_NAME[] = "com.ohos.sharepickerdialog";
+    constexpr char PICKER_DIALOG_ABILITY_NAME[] = "PickerDialog";
+    constexpr char TOKEN_KEY[] = "ohos.ability.params.token";
+    
+    newWant.SetElementName(PICKER_DIALOG_ABILITY_BUNDLE_NAME, PICKER_DIALOG_ABILITY_NAME);
+    newWant.SetParam(TOKEN_KEY, callerToken);
+    // note: clear actions
+    newWant.SetAction("");
+    return StartAbility(newWant, DEFAULT_INVAL_VALUE, userId);
 }
 #endif
 
@@ -5106,7 +5151,7 @@ int AbilityManagerService::CheckCallDataAbilityPermission(AbilityRequest &abilit
 
 int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequest &abilityRequest)
 {
-    HILOG_DEBUG("%{public}s begin", __func__);
+    HILOG_DEBUG("CheckCallServiceExtensionPermission begin");
     if (!IsUseNewStartUpRule(abilityRequest)) {
         return CheckCallerPermissionOldRule(abilityRequest);
     }
@@ -5127,7 +5172,7 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
 
 int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest)
 {
-    HILOG_DEBUG("%{public}s begin", __func__);
+    HILOG_DEBUG("CheckCallOtherExtensionPermission begin");
     if (!IsUseNewStartUpRule(abilityRequest)) {
         return CheckCallerPermissionOldRule(abilityRequest);
     }
@@ -5141,7 +5186,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
 
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallOtherExtensionPermission(verificationInfo);
     if (result != ERR_OK) {
-        HILOG_ERROR("Do not have permission to start OtherExtension");
+        HILOG_ERROR("CheckCallOtherExtensionPermission, Do not have permission to start OtherExtension");
     }
     return result;
 }

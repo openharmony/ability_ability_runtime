@@ -280,7 +280,8 @@ HWTEST_F(PandingWantManagerTest, pending_want_mgr_test_005, TestSize.Level1)
     };
     EXPECT_CALL(*amsSerice, GetWantSender(_, _)).Times(1).WillOnce(Invoke(amsProxyGetWantSenderReturn));
 
-    auto amsProxySendWantSenderReturn = [&abilityManager](const sptr<IWantSender> &target, const SenderInfo &senderInfo) {
+    auto amsProxySendWantSenderReturn = [&abilityManager](const sptr<IWantSender> &target,
+        const SenderInfo &senderInfo) {
         return abilityManager->SendWantSender(target, senderInfo);
     };
     EXPECT_CALL(*amsSerice, SendWantSender(_, _)).Times(1).WillOnce(Invoke(amsProxySendWantSenderReturn));
@@ -342,7 +343,8 @@ HWTEST_F(PandingWantManagerTest, pending_want_mgr_test_006, TestSize.Level1)
         [&abilityManager](const sptr<IWantSender> &target) { return abilityManager->GetPendingWantCode(target); };
     EXPECT_CALL(*amsSerice, GetPendingWantCode(_)).Times(1).WillOnce(Invoke(amsProxyGetPendingWantCode));
 
-    auto amsProxyRegisterCancelListener = [&abilityManager](const sptr<IWantSender> &sender, const sptr<IWantReceiver> &recevier) {
+    auto amsProxyRegisterCancelListener = [&abilityManager](const sptr<IWantSender> &sender,
+        const sptr<IWantReceiver> &recevier) {
         return abilityManager->RegisterCancelListener(sender, recevier);
     };
     EXPECT_CALL(*amsSerice, RegisterCancelListener(_, _)).Times(1).WillOnce(Invoke(amsProxyRegisterCancelListener));
@@ -365,7 +367,7 @@ HWTEST_F(PandingWantManagerTest, pending_want_mgr_test_006, TestSize.Level1)
     EXPECT_NE(code, -1);
 
     // mock CancelListener
-    auto cancalCall = [&](int resultCode) -> void { EXPECT_EQ(resultCode, requsetCode); };
+    auto cancalCall = [requsetCode](int resultCode) -> void { EXPECT_EQ(resultCode, requsetCode); };
 
     std::shared_ptr<MockCancelListener> listener = std::make_shared<MockCancelListener>();
     EXPECT_CALL(*listener, OnCancelled(_)).Times(1).WillOnce(Invoke(cancalCall));
@@ -462,7 +464,7 @@ HWTEST_F(PandingWantManagerTest, pending_want_mgr_test_007, TestSize.Level1)
     info = MakeWantAgentInfo(type, requsetCode, flags, wants);
 
     // mock CancelListener
-    auto cancalCall = [&](int resultCode) -> void { EXPECT_EQ(resultCode, requsetCode); };
+    auto cancalCall = [requsetCode](int resultCode) -> void { EXPECT_EQ(resultCode, requsetCode); };
 
     std::shared_ptr<MockCancelListener> listener = std::make_shared<MockCancelListener>();
     EXPECT_CALL(*listener, OnCancelled(_)).Times(1).WillOnce(Invoke(cancalCall));
