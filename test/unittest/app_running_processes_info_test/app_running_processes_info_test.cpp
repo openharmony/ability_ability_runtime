@@ -34,6 +34,7 @@
 #include "mock_iapp_state_callback.h"
 #include "mock_bundle_manager.h"
 #include "mock_application.h"
+#include "mock_native_token.h"
 
 using namespace testing::ext;
 using OHOS::iface_cast;
@@ -44,6 +45,7 @@ using testing::Invoke;
 using testing::InvokeWithoutArgs;
 using testing::Return;
 using testing::SetArgReferee;
+using ::testing::DoAll;
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -95,7 +97,9 @@ protected:
 };
 
 void AppRunningProcessesInfoTest::SetUpTestCase()
-{}
+{
+    MockNativeToken::SetNativeToken();
+}
 
 void AppRunningProcessesInfoTest::TearDownTestCase()
 {}

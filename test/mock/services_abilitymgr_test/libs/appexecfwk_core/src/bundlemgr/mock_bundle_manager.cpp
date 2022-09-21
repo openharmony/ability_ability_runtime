@@ -24,13 +24,9 @@ namespace OHOS {
 namespace AppExecFwk {
 namespace {
 const int32_t ERROR_USER_ID_U256 = 256;
+const int32_t USER_ID_U1000 = 1000;
 }
 using namespace OHOS::AAFwk;
-int BundleMgrProxy::QueryWantAbility(
-    const AAFwk::Want &__attribute__((unused)) want, std::vector<AbilityInfo> &__attribute__((unused)) abilityInfos)
-{
-    return 0;
-}
 
 bool BundleMgrProxy::QueryAbilityInfo(const AAFwk::Want &want, AbilityInfo &abilityInfo)
 {
@@ -52,11 +48,6 @@ bool BundleMgrProxy::GetBundleInfo(
     const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId)
 {
     return true;
-}
-
-bool BundleMgrProxy::QueryAbilityInfoByUri(const std::string &uri, AbilityInfo &abilityInfo)
-{
-    return false;
 }
 
 bool BundleMgrProxy::GetApplicationInfo(
@@ -172,11 +163,6 @@ bool BundleMgrService::QueryAbilityInfo(const Want &want, int32_t flags, int32_t
     return flag;
 }
 
-bool BundleMgrService::QueryAbilityInfoByUri(const std::string &uri, AbilityInfo &abilityInfo)
-{
-    return false;
-}
-
 bool BundleMgrService::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo)
 {
@@ -224,7 +210,7 @@ bool BundleMgrService::CheckWantEntity(const AAFwk::Want &want, AbilityInfo &abi
 
 int BundleMgrService::GetUidByBundleName(const std::string &bundleName, const int userId)
 {
-    return 1000;
+    return USER_ID_U1000;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
