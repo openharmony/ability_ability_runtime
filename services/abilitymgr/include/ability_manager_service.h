@@ -39,6 +39,7 @@
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "mission_list_manager.h"
+#include "permission_verification.h"
 #include "system_ability.h"
 #include "uri.h"
 #include "ability_config.h"

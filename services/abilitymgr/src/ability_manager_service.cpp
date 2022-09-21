@@ -45,7 +45,6 @@
 #include "iservice_registry.h"
 #include "itest_observer.h"
 #include "mission_info_mgr.h"
-#include "permission_verification.h"
 #include "sa_mgr_client.h"
 #include "system_ability_token_callback.h"
 #include "softbus_bus_center.h"
@@ -5178,7 +5177,6 @@ int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityReques
     }
 
     AAFwk::PermissionVerification::VerificationInfo verificationInfo = CreateVerificationInfo(abilityRequest);
-
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
