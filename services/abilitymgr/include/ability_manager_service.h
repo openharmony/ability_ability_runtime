@@ -1124,6 +1124,9 @@ private:
 
     void UpdateFocusState(std::vector<AbilityRunningInfo> &info);
 
+    AAFwk::PermissionVerification::VerificationInfo CreateVerificationInfo(
+        const AbilityRequest &abilityRequest);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 

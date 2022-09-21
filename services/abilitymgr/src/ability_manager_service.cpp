@@ -5117,15 +5117,7 @@ int AbilityManagerService::CheckCallDataAbilityPermission(AbilityRequest &abilit
         return CheckCallerPermissionOldRule(abilityRequest);
     }
 
-    AAFwk::PermissionVerification::VerificationInfo verificationInfo;
-    verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
-    verificationInfo.visible = abilityRequest.abilityInfo.visible;
-    verificationInfo.associatedWakeUp = abilityRequest.appInfo.associatedWakeUp;
-    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (callerAbility) {
-        verificationInfo.apiTargetVersion = callerAbility->GetApplicationInfo().apiTargetVersion;
-    }
-
+    AAFwk::PermissionVerification::VerificationInfo verificationInfo = CreateVerificationInfo(abilityRequest);
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallDataAbilityPermission(verificationInfo);
     if (result != ERR_OK) {
         HILOG_ERROR("Do not have permission to start DataAbility");
@@ -5185,14 +5177,7 @@ int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityReques
         return CheckCallerPermissionOldRule(abilityRequest);
     }
 
-    AAFwk::PermissionVerification::VerificationInfo verificationInfo;
-    verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
-    verificationInfo.visible = abilityRequest.abilityInfo.visible;
-    verificationInfo.associatedWakeUp = abilityRequest.appInfo.associatedWakeUp;
-    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (callerAbility) {
-        verificationInfo.apiTargetVersion = callerAbility->GetApplicationInfo().apiTargetVersion;
-    }
+    AAFwk::PermissionVerification::VerificationInfo verificationInfo = CreateVerificationInfo(abilityRequest);
 
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
@@ -5203,6 +5188,21 @@ int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityReques
         HILOG_ERROR("Do not have permission to start ServiceAbility");
     }
     return result;
+}
+
+AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVerificationInfo(
+    const AbilityRequest &abilityRequest)
+{
+    AAFwk::PermissionVerification::VerificationInfo verificationInfo;
+    verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
+    verificationInfo.visible = abilityRequest.abilityInfo.visible;
+    verificationInfo.associatedWakeUp = abilityRequest.appInfo.associatedWakeUp;
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility) {
+        verificationInfo.apiTargetVersion = callerAbility->GetApplicationInfo().apiTargetVersion;
+    }
+
+    return verificationInfo;
 }
 
 int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abilityRequest)
