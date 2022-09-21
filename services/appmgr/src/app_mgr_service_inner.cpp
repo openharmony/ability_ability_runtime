@@ -54,6 +54,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+using namespace OHOS::Rosen;
 using namespace OHOS::Security;
 
 namespace {
@@ -65,6 +66,8 @@ constexpr int64_t MICROSECONDS = 1000000;
 constexpr int KILL_PROCESS_TIMEOUT_MICRO_SECONDS = 1000;
 // Kill process delaytime setting
 constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
+// delay regist focus listener to wms
+constexpr int REGISTER_FOCUS_DELAY = 5000;
 const std::string CLASS_NAME = "ohos.app.MainThread";
 const std::string FUNC_NAME = "main";
 const std::string SO_PATH = "system/lib64/libmapleappkit.z.so";
@@ -121,6 +124,7 @@ void AppMgrServiceInner::Init()
     GetGlobalConfiguration();
     AddWatchParameter();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
+    InitFocusListener();
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
@@ -363,9 +367,12 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     }
     appRecord->PopForegroundingAbilityTokens();
     ApplicationState appState = appRecord->GetState();
-    if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
+    if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND ||
+        appState == ApplicationState::APP_STATE_FOCUS) {
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
-        OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND);
+        bool needNotifyApp = appRunningManager_->IsApplicationFirstForeground(*appRecord);
+        OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND, needNotifyApp);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
     } else {
         HILOG_WARN("app name(%{public}s), app state(%{public}d)!",
             appRecord->GetName().c_str(),
@@ -394,9 +401,12 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         HILOG_ERROR("get app record failed");
         return;
     }
-    if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
+    if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND ||
+        appRecord->GetState() == ApplicationState::APP_STATE_FOCUS) {
         appRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
-        OnAppStateChanged(appRecord, ApplicationState::APP_STATE_BACKGROUND);
+        bool needNotifyApp = appRunningManager_->IsApplicationBackground(appRecord->GetBundleName());
+        OnAppStateChanged(appRecord, ApplicationState::APP_STATE_BACKGROUND, needNotifyApp);
+        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
     } else {
         HILOG_WARN("app name(%{public}s), app state(%{public}d)!",
             appRecord->GetName().c_str(),
@@ -439,7 +449,7 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     }
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
     appRecord->RemoveAppDeathRecipient();
-    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_TERMINATED);
+    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_TERMINATED, false);
     appRunningManager_->RemoveAppRunningRecordById(recordId);
     RemoveAppFromRecentListById(recordId);
     AAFWK::EventInfo eventInfo;
@@ -749,6 +759,8 @@ void AppMgrServiceInner::GetRunningProcesses(const std::shared_ptr<AppRunningRec
     runningProcessInfo.pid_ = appRecord->GetPriorityObject()->GetPid();
     runningProcessInfo.uid_ = appRecord->GetUid();
     runningProcessInfo.state_ = static_cast<AppProcessState>(appRecord->GetState());
+    runningProcessInfo.isContinuousTask = appRecord->IsContinuousTask();
+    runningProcessInfo.isKeepAlive = appRecord->IsKeepAliveApp();
     appRecord->GetBundleNames(runningProcessInfo.bundleNames);
     info.emplace_back(runningProcessInfo);
 }
@@ -1199,7 +1211,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetAppRunningRecordByAppRe
 }
 
 void AppMgrServiceInner::OnAppStateChanged(
-    const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state)
+    const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state, bool needNotifyApp)
 {
     if (!appRecord) {
         HILOG_ERROR("OnAppStateChanged come, app record is null");
@@ -1214,7 +1226,7 @@ void AppMgrServiceInner::OnAppStateChanged(
         }
     }
 
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnAppStateChanged(appRecord, state);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnAppStateChanged(appRecord, state, needNotifyApp);
 }
 
 AppProcessData AppMgrServiceInner::WrapAppProcessData(const std::shared_ptr<AppRunningRecord> &appRecord,
@@ -1338,7 +1350,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     appRecord->SetUid(startMsg.uid);
     appRecord->SetStartMsg(startMsg);
     appRecord->SetAppMgrServiceInner(weak_from_this());
-    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE);
+    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, false);
     AddAppToRecentList(appName, appRecord->GetProcessName(), pid, appRecord->GetRecordId());
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessCreated(appRecord);
     PerfProfile::GetInstance().SetAppForkEndTime(GetTickCount());
@@ -1581,7 +1593,7 @@ void AppMgrServiceInner::HandleTerminateApplicationTimeOut(const int64_t eventId
     }
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
     appRecord->RemoveAppDeathRecipient();
-    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_TERMINATED);
+    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_TERMINATED, false);
     pid_t pid = appRecord->GetPriorityObject()->GetPid();
     if (pid > 0) {
         auto timeoutTask = [pid, innerService = shared_from_this()]() {
@@ -2623,6 +2635,100 @@ void AppMgrServiceInner::AddWatchParameter()
     }
 }
 
+void AppMgrServiceInner::InitFocusListener()
+{
+    HILOG_INFO("begin initFocus listener.");
+    if (focusListener_) {
+        return;
+    }
+
+    focusListener_ = new WindowFocusChangedListener(shared_from_this(), eventHandler_);
+    auto registerTask = [innerService = shared_from_this()]() {
+        if (innerService) {
+            HILOG_INFO("RegisterFocusListener task");
+            innerService->RegisterFocusListener();
+        }
+    };
+    if (eventHandler_) {
+        eventHandler_->PostTask(registerTask, "RegisterFocusListenerTask", REGISTER_FOCUS_DELAY);
+    }
+}
+
+void AppMgrServiceInner::RegisterFocusListener()
+{
+    HILOG_INFO("RegisterFocusListener begin");
+    if (!focusListener_) {
+        HILOG_ERROR("no focusListener_");
+        return;
+    }
+    WindowManager::GetInstance().RegisterFocusChangedListener(focusListener_);
+    HILOG_INFO("RegisterFocusListener end");
+}
+
+void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo)
+{
+    if (!focusChangeInfo) {
+        HILOG_WARN("focused, invalid focusChangeInfo");
+        return;
+    }
+    HILOG_DEBUG("focused, uid:%{public}d, pid:%{public}d", focusChangeInfo->uid_, focusChangeInfo->pid_);
+
+    if (focusChangeInfo->pid_ <= 0) {
+        return;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(focusChangeInfo->pid_);
+    if (!appRecord) {
+        HILOG_ERROR("focused, no such appRecord, pid:%{public}d", focusChangeInfo->pid_);
+        return;
+    }
+
+    auto state = appRecord->GetState();
+    if (state < ApplicationState::APP_STATE_FOREGROUND || state > ApplicationState::APP_STATE_BACKGROUND) {
+        HILOG_WARN("invalid state.");
+        return;
+    }
+
+    appRecord->SetState(ApplicationState::APP_STATE_FOCUS);
+    OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOCUS, false);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+
+    auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(focusChangeInfo->abilityToken_);
+    if (!abilityRecord || abilityRecord->GetAbilityInfo() == nullptr ||
+        abilityRecord->GetAbilityInfo()->type != AbilityType::PAGE) {
+        return;
+    }
+    appRecord->UpdateAbilityState(focusChangeInfo->abilityToken_, AbilityState::ABILITY_STATE_FOCUS);
+}
+
+void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo)
+{
+    if (!focusChangeInfo) {
+        HILOG_WARN("unfocused, invalid focusChangeInfo");
+        return;
+    }
+    HILOG_DEBUG("unfocused, uid:%{public}d, pid:%{public}d", focusChangeInfo->uid_, focusChangeInfo->pid_);
+
+    if (focusChangeInfo->pid_ <= 0) {
+        return;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(focusChangeInfo->pid_);
+    if (!appRecord) {
+        HILOG_ERROR("unfocused, no such appRecord, pid:%{public}d", focusChangeInfo->pid_);
+        return;
+    }
+
+    if (appRecord->GetState() != ApplicationState::APP_STATE_FOCUS) {
+        HILOG_WARN("invalid state, not focus, handle nothing.");
+        return;
+    }
+
+    appRecord->Unfocused(focusChangeInfo->abilityToken_);
+    OnAppStateChanged(appRecord, appRecord->GetState(), false);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+}
+
 void AppMgrServiceInner::PointerDeviceEventCallback(const char *key, const char *value, void *context)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -2693,5 +2799,31 @@ int32_t AppMgrServiceInner::NotifyHotReloadPage(const std::string &bundleName)
 
     return appRunningManager_->NotifyHotReloadPage(bundleName);
 }
+
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+int32_t AppMgrServiceInner::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
+{
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        HILOG_ERROR("callerToken not SA %{public}s", __func__);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!appRunningManager_) {
+        HILOG_ERROR("app running manager is nullptr.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    auto appRecord = appRunningManager_->GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        HILOG_ERROR("Get app running record by pid failed. pid: %{public}d", pid);
+        return false;
+    }
+    appRecord->SetContinuousTaskAppState(isContinuousTask);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
+
+    return ERR_OK;
+}
+#endif
 }  // namespace AppExecFwk
 }  // namespace OHOS
