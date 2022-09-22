@@ -121,13 +121,16 @@ public:
             std::shared_ptr<RuntimeExtractor> runtimeExtractor;
             if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
                 runtimeExtractor = RuntimeExtractor::Create(hapPath);
+                if (runtimeExtractor == nullptr) {
+                    return result;
+                }
                 runtimeExtractor->SetRuntimeFlag(true);
                 runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
             } else {
                 runtimeExtractor = runtimeExtractorMap_.at(hapPath);
             }
             if (!runtimeExtractor->GetFileBuffer(srcPath, outStream)) {
-                HILOG_ERROR("Get abc file failed");
+                HILOG_ERROR("RunScript, Get abc file failed");
                 return result;
             }
 
@@ -261,6 +264,9 @@ private:
             bundleName_ = options.bundleName;
             panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
             std::shared_ptr<RuntimeExtractor> runtimeExtractor = RuntimeExtractor::Create(options.hapPath);
+            if (runtimeExtractor == nullptr) {
+                return false;
+            }
             runtimeExtractor->SetRuntimeFlag(true);
             runtimeExtractorMap_.insert(make_pair(options.hapPath, runtimeExtractor));
             panda::JSNApi::SetHostResolveBufferTracker(
@@ -490,7 +496,7 @@ bool JsRuntime::Initialize(const Options& options)
         auto moduleManager = NativeModuleManager::GetInstance();
         std::string packagePath = options.packagePath;
         if (moduleManager && !packagePath.empty()) {
-            moduleManager->SetAppLibPath(packagePath.c_str());
+            moduleManager->SetAppLibPath(std::vector<std::string>(1, packagePath));
         }
 
         InitTimerModule(*nativeEngine_, *globalObj);
@@ -615,6 +621,9 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
         std::shared_ptr<RuntimeExtractor> runtimeExtractor;
         if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
             runtimeExtractor = RuntimeExtractor::Create(hapPath);
+            if (runtimeExtractor == nullptr) {
+                return result;
+            }
             runtimeExtractor->SetRuntimeFlag(true);
             runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
         } else {

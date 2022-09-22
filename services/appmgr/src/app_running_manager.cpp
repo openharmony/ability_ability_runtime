@@ -623,5 +623,38 @@ int32_t AppRunningManager::NotifyHotReloadPage(const std::string &bundleName)
     }
     return result;
 }
+
+bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &foregroundingRecord)
+{
+    HILOG_DEBUG("function called.");
+    std::lock_guard<std::recursive_mutex> guard(lock_);
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr || appRecord->GetBundleName() != foregroundingRecord.GetBundleName()) {
+            continue;
+        }
+        auto state = appRecord->GetState();
+        if ((state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_FOCUS) &&
+            appRecord->GetRecordId() != foregroundingRecord.GetRecordId()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
+{
+    HILOG_DEBUG("function called.");
+    std::lock_guard<std::recursive_mutex> guard(lock_);
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        auto state = appRecord->GetState();
+        if (appRecord && appRecord->GetBundleName() == bundleName &&
+            (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_FOCUS)) {
+            return false;
+        }
+    }
+    return true;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

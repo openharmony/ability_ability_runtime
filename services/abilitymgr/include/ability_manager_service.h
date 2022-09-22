@@ -492,6 +492,8 @@ public:
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
 
+    virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos) override;
+
     virtual int LockMissionForCleanup(int32_t missionId) override;
 
     virtual int UnlockMissionForCleanup(int32_t missionId) override;
@@ -801,6 +803,8 @@ public:
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
 
+    bool GetStartUpNewRuleFlag() const;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -809,6 +813,22 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT_MSG = 5;
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
 
+#ifdef SUPPORT_ASAN
+    static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 50000; // ms
+    static constexpr uint32_t LOAD_TIMEOUT = 50000;            // ms
+    static constexpr uint32_t ACTIVE_TIMEOUT = 25000;          // ms
+    static constexpr uint32_t INACTIVE_TIMEOUT = 2500;         // ms
+    static constexpr uint32_t TERMINATE_TIMEOUT = 50000;      // ms
+    static constexpr uint32_t CONNECT_TIMEOUT = 15000;         // ms
+    static constexpr uint32_t DISCONNECT_TIMEOUT = 2500;       // ms
+    static constexpr uint32_t COMMAND_TIMEOUT = 25000;         // ms
+    static constexpr uint32_t RESTART_TIMEOUT = 25000;         // ms
+    static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 2500;  // ms
+    static constexpr uint32_t FOREGROUND_TIMEOUT = 25000;   // ms
+    static constexpr uint32_t BACKGROUND_TIMEOUT = 15000;   // ms
+    static constexpr uint32_t DUMP_TIMEOUT = 5000;            // ms
+    static constexpr uint32_t KILL_TIMEOUT = 15000;           // ms
+#else
     static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 10000; // ms
     static constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
     static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
@@ -823,6 +843,7 @@ public:
     static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
     static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
     static constexpr uint32_t KILL_TIMEOUT = 3000;           // ms
+#endif
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
@@ -1117,6 +1138,8 @@ private:
 
     bool CheckNewRuleSwitchState(const std::string &param);
 
+    void UpdateFocusState(std::vector<AbilityRunningInfo> &info);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
@@ -1169,7 +1192,7 @@ private:
 #endif
 
 #ifdef SUPPORT_GRAPHICS
-    int32_t ShowPickerDialog(const Want& want, int32_t userId);
+    int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
     bool CheckWindowMode(int32_t windowMode, const std::vector<AppExecFwk::SupportWindowMode>& windowModes) const;
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
