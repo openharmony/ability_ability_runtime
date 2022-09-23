@@ -800,7 +800,7 @@ HWTEST_F(WantAgentHelperTest, WantAgentHelper_3800, Function | MediumTest | Leve
     flagsVec = WantAgentHelper::ParseFlags(jsonObject);
     std::vector<WantAgentConstant::Flags>::iterator constantIt = std::find(flagsVec.begin(), flagsVec.end(),
         WantAgentConstant::Flags::CONSTANT_FLAG);
-    EXPECT_EQ(constantIt != flagsVec.end(), true); 
+    EXPECT_EQ(constantIt != flagsVec.end(), true);
 
     jsonObject.clear();
     jsonObject["flags"] = 1000000000;
