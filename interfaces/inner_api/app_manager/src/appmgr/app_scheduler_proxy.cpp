@@ -269,7 +269,7 @@ void AppSchedulerProxy::ScheduleAbilityStage(const HapModuleInfo &abilityStage)
     } else if (componentSize > mid) {
         constexpr int32_t size = 800 * 1024; // 800 kb
         data.SetDataCapacity(size);
-    } 
+    }
     if (!WriteInterfaceToken(data)) {
         return;
     }
