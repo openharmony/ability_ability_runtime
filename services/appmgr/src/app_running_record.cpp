@@ -323,14 +323,14 @@ void AppRunningRecord::ClearAbility(const std::shared_ptr<AbilityRunningRecord> 
     }
 }
 
-void AppRunningRecord::RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &moudleRecord)
+void AppRunningRecord::RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &moduleRecord)
 {
     HILOG_INFO("Remove module record.");
 
     for (auto &item : hapModules_) {
         auto iter = std::find_if(item.second.begin(),
             item.second.end(),
-            [&moudleRecord](const std::shared_ptr<ModuleRunningRecord> &record) { return moudleRecord == record; });
+            [&moduleRecord](const std::shared_ptr<ModuleRunningRecord> &record) { return moduleRecord == record; });
         if (iter != item.second.end()) {
             iter = item.second.erase(iter);
             if (item.second.empty()) {
@@ -570,7 +570,7 @@ void AppRunningRecord::AddModule(const std::shared_ptr<ApplicationInfo> &appInfo
     }
 
     if (!abilityInfo || !token) {
-        HILOG_ERROR("abilityinfo or token is nullptr");
+        HILOG_ERROR("abilityInfo or token is nullptr");
         return;
     }
     moduleRecord->AddAbility(token, abilityInfo, want);
@@ -758,8 +758,8 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
     StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true);
     if (curState_ == ApplicationState::APP_STATE_FOREGROUND || curState_ == ApplicationState::APP_STATE_FOCUS) {
         int32_t foregroundSize = 0;
-        auto abilitysMap = GetAbilities();
-        for (const auto &item : abilitysMap) {
+        auto abilitiesMap = GetAbilities();
+        for (const auto &item : abilitiesMap) {
             const auto &abilityRecord = item.second;
             if (abilityRecord && abilityRecord->GetState() == AbilityState::ABILITY_STATE_FOREGROUND &&
                 abilityRecord->GetAbilityInfo() &&
