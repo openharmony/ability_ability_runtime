@@ -221,7 +221,7 @@ HWTEST_F(AmsServiceLoadAbilityProcessTest, LoadAbility_002, TestSize.Level1)
 
     StartLoadAbility(token2, token, abilityInfo2, appInfo2, PID2);
     const uint32_t EXPECT_MAP_SIZE = 2;
-    if(recordMap.size() == EXPECT_MAP_SIZE) {
+    if (recordMap.size() == EXPECT_MAP_SIZE) {
         auto record2 = service_->appRunningManager_->CheckAppRunningRecordIsExist(
             appInfo2->name, "com.ohos.test.special", appInfo2->uid, bundleInfo);
         EXPECT_NE(record2, nullptr);
