@@ -54,6 +54,7 @@ const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbility
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
+const std::string COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 int64_t AbilityRecord::abilityRecordId = 0;
 int64_t AbilityRecord::g_abilityRecordEventId_ = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -127,6 +128,8 @@ AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &ab
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (abilityMgr) {
         abilityMgr->GetMaxRestartNum(restartMax_);
+        bool flag = abilityMgr->GetStartUpNewRuleFlag();
+        want_.SetParam(COMPONENT_STARTUP_NEW_RULES, flag);
     }
     restartCount_ = restartMax_;
     appIndex_ = want.GetIntParam(DLP_INDEX, 0);
@@ -298,8 +301,13 @@ std::string AbilityRecord::GetLabel()
 {
     std::string strLabel = applicationInfo_.label;
 
+    if (abilityInfo_.resourcePath.empty()) {
+        HILOG_WARN("resource path is empty.");
+        return strLabel;
+    }
+
 #ifdef SUPPORT_GRAPHICS
-    auto resourceMgr = CreateResourceManager(abilityInfo_);
+    auto resourceMgr = CreateResourceManager();
     if (!resourceMgr) {
         return strLabel;
     }
@@ -589,12 +597,19 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
     return info;
 }
 
-std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResourceManager(
-    const AppExecFwk::AbilityInfo &abilityInfo) const
+std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResourceManager() const
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
-    if (!resourceMgr->AddResource(abilityInfo.resourcePath.c_str())) {
-        HILOG_WARN("%{public}s AddResource failed.", __func__);
+    if (!abilityInfo_.hapPath.empty()) {
+        if (!resourceMgr->AddResource(abilityInfo_.hapPath.c_str())) {
+            HILOG_WARN("%{public}s AddResource failed.", __func__);
+            return nullptr;
+        }
+    } else {
+        if (!resourceMgr->AddResource(abilityInfo_.resourcePath.c_str())) {
+            HILOG_WARN("%{public}s AddResource failed.", __func__);
+            return nullptr;
+        }
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -717,7 +732,7 @@ void AbilityRecord::StartingWindowCold(const std::shared_ptr<StartOptions> &star
         return;
     }
 
-    auto resourceMgr = CreateResourceManager(abilityInfo_);
+    auto resourceMgr = CreateResourceManager();
     if (!resourceMgr) {
         HILOG_WARN("%{public}s, Get resourceMgr failed.", __func__);
         return;
