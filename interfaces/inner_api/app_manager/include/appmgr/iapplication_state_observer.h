@@ -57,6 +57,13 @@ public:
     virtual void OnProcessCreated(const ProcessData &processData) = 0;
 
     /**
+     * Will be called when the process state change.
+     *
+     * @param processData Process data.
+     */
+    virtual void OnProcessStateChanged(const ProcessData &processData) {}
+
+    /**
      * Will be called when the process die.
      *
      * @param processData Process data.
@@ -70,13 +77,17 @@ public:
      */
     virtual void OnApplicationStateChanged(const AppStateData &appStateData) = 0;
 
+    virtual void OnAppStateChanged(const AppStateData &appStateData) {}
+
     enum class Message {
         TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED = 0,
         TRANSACT_ON_ABILITY_STATE_CHANGED,
         TRANSACT_ON_EXTENSION_STATE_CHANGED,
         TRANSACT_ON_PROCESS_CREATED,
+        TRANSACT_ON_PROCESS_STATE_CHANGED,
         TRANSACT_ON_PROCESS_DIED,
         TRANSACT_ON_APPLICATION_STATE_CHANGED,
+        TRANSACT_ON_APP_STATE_CHANGED,
     };
 };
 }  // namespace AppExecFwk

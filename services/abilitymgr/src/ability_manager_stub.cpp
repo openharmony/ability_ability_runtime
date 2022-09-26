@@ -76,6 +76,7 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[FORCE_TIMEOUT] = &AbilityManagerStub::ForceTimeoutForTestInner;
 #endif
     requestFuncMap_[FREE_INSTALL_ABILITY_FROM_REMOTE] = &AbilityManagerStub::FreeInstallAbilityFromRemoteInner;
+    requestFuncMap_[CONNECT_ABILITY_WITH_TYPE] = &AbilityManagerStub::ConnectAbilityWithTypeInner;
 }
 
 void AbilityManagerStub::SecondStepInit()
@@ -140,6 +141,7 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[UPDATE_MISSION_SNAPSHOT] = &AbilityManagerStub::UpdateMissionSnapShotInner;
     requestFuncMap_[REGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::RegisterConnectionObserverInner;
     requestFuncMap_[UNREGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::UnregisterConnectionObserverInner;
+    requestFuncMap_[GET_DLP_CONNECTION_INFOS] = &AbilityManagerStub::GetDlpConnectionInfosInner;
 #ifdef SUPPORT_GRAPHICS
     requestFuncMap_[SET_MISSION_LABEL] = &AbilityManagerStub::SetMissionLabelInner;
     requestFuncMap_[SET_MISSION_ICON] = &AbilityManagerStub::SetMissionIconInner;
@@ -452,9 +454,36 @@ int AbilityManagerStub::ConnectAbilityInner(MessageParcel &data, MessageParcel &
         token = data.ReadRemoteObject();
     }
     int32_t userId = data.ReadInt32();
-    int32_t result = ConnectAbility(*want, callback, token, userId);
+    int32_t result = ConnectAbilityCommon(*want, callback, token, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
     reply.WriteInt32(result);
-    delete want;
+    if (want != nullptr) {
+        delete want;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, MessageParcel &reply)
+{
+    Want *want = data.ReadParcelable<Want>();
+    if (want == nullptr) {
+        HILOG_ERROR("%{public}s, want is nullptr", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IAbilityConnection> callback = nullptr;
+    sptr<IRemoteObject> token = nullptr;
+    if (data.ReadBool()) {
+        callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
+    }
+    if (data.ReadBool()) {
+        token = data.ReadRemoteObject();
+    }
+    int32_t userId = data.ReadInt32();
+    AppExecFwk::ExtensionAbilityType extensionType = static_cast<AppExecFwk::ExtensionAbilityType>(data.ReadInt32());
+    int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId);
+    reply.WriteInt32(result);
+    if (want != nullptr) {
+        delete want;
+    }
     return NO_ERROR;
 }
 
@@ -1331,6 +1360,12 @@ int AbilityManagerStub::UnregisterObserver(const sptr<AbilityRuntime::IConnectio
     return NO_ERROR;
 }
 
+int AbilityManagerStub::GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos)
+{
+    // should implement in child
+    return NO_ERROR;
+}
+
 #ifdef ABILITY_COMMAND_FOR_TEST
 int AbilityManagerStub::ForceTimeoutForTestInner(MessageParcel &data, MessageParcel &reply)
 {
@@ -1447,6 +1482,30 @@ int AbilityManagerStub::UnregisterConnectionObserverInner(MessageParcel &data, M
     }
 
     return UnregisterObserver(observer);
+}
+
+int AbilityManagerStub::GetDlpConnectionInfosInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<AbilityRuntime::DlpConnectionInfo> infos;
+    auto result = GetDlpConnectionInfos(infos);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("write result failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!reply.WriteInt32(infos.size())) {
+        HILOG_ERROR("write infos size failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    for (auto &item : infos) {
+        if (!reply.WriteParcelable(&item)) {
+            HILOG_ERROR("write info item failed");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
+    return ERR_OK;
 }
 
 #ifdef SUPPORT_GRAPHICS

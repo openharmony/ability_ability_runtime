@@ -25,6 +25,7 @@
 #include "ability_event_interface.h"
 #include "ability_lifecycle_executor.h"
 #include "ability_lifecycle_interface.h"
+#include "ability_transaction_callback_info.h"
 #include "appexecfwk_errors.h"
 #include "configuration.h"
 #include "context.h"
@@ -197,6 +198,22 @@ public:
      * You can override this function to implement your own processing logic.
      */
     virtual void OnStop();
+
+    /**
+     * @brief Called when this ability enters the <b>STATE_STOP</b> state.
+     *
+     * The ability in the <b>STATE_STOP</b> is being destroyed.
+     * You can override this function to implement your own processing logic.
+     *
+     * @param callbackInfo Indicates the lifecycle transaction callback information
+     * @param isAsyncCallback Indicates whether it is an asynchronous lifecycle callback
+     */
+    virtual void OnStop(AbilityTransactionCallbackInfo *callbackInfo, bool &isAsyncCallback);
+
+    /**
+     * @brief The callback of OnStop.
+     */
+    virtual void OnStopCallback();
 
     /**
      * @brief Called when this ability enters the <b>STATE_ACTIVE</b> state.
@@ -1104,10 +1121,30 @@ public:
      */
     void SetSceneListener(const sptr<Rosen::IWindowLifeCycle> &listener);
 
+#ifdef SUPPORT_GRAPHICS
     /**
      * @brief Called back at ability context.
+     *
+     * @return current window mode of the ability.
      */
     virtual int GetCurrentWindowMode() override;
+
+    /**
+     * @brief Set mission label of this ability.
+     *
+     * @param label the label of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode SetMissionLabel(const std::string &label) override;
+
+    /**
+     * @brief Set mission icon of this ability.
+     *
+     * @param icon the icon of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
+#endif
 
 protected:
     class AbilityDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
@@ -1231,19 +1268,14 @@ protected:
     bool IsRestoredInContinuation() const;
 
     /**
-     * @brief wait for distributed object to complete sync
-     *
-     * @param want the want param.
-     */
-    void WaitingDistributedObjectSyncComplete(const Want& want);
-
-    /**
      * @brief Notify continuation
      *
      * @param want the want param.
      * @param success whether continuation success.
      */
     void NotifyContinuationResult(const Want& want, bool success);
+
+    bool IsUseNewStartUpRule();
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
     std::shared_ptr<AbilityStartSetting> setting_ = nullptr;
@@ -1314,6 +1346,9 @@ private:
     // If session id cannot get from want, assign it as default.
     static const int DEFAULT_DMS_SESSION_ID;
     sptr<IBundleMgr> iBundleMgr_;
+
+    bool isNewRuleFlagSetted_ = false;
+    bool startUpNewRule_ = false;
 
 #ifdef SUPPORT_GRAPHICS
 private:

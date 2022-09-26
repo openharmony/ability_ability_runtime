@@ -13,8 +13,15 @@
 
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
+config("moduletest_exception_config") {
+  cflags_cc = [ "-fexceptions" ]
+}
+
 config("aafwk_module_test_config") {
-  configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
+  configs = [
+    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
+    ":moduletest_exception_config",
+  ]
 
   include_dirs = [
     "${ability_runtime_test_path}/moduletest/mock/include",
@@ -54,8 +61,8 @@ group("moduletest") {
     "module_test_dump_util:module_test_dump_util",
     "on_new_want_module_test:moduletest",
     "panding_want_manager_test:moduletest",
+    "quick_fix:moduletest",
     "running_infos_module_test:moduletest",
-    "start_ability_implicit_module_test:moduletest",
     "start_option_display_id_test:moduletest",
     "//third_party/icu/icu4c:shared_icuuc",
     "//third_party/jsoncpp:jsoncpp",

@@ -523,6 +523,18 @@ public:
     void PostTask(std::string msg, int64_t timeOut, const Closure &task);
     void RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObject>& token) const;
 
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+
+    int32_t NotifyHotReloadPage();
+
+    int32_t NotifyUnLoadRepairPatch(const std::string &bundleName);
+
+    bool IsContinuousTask();
+
+    void SetContinuousTaskAppState(bool isContinuousTask);
+
+    void Unfocused(const sptr<IRemoteObject> &token);
+
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilitystage data.
@@ -565,6 +577,8 @@ private:
     void AbilityBackground(const std::shared_ptr<AbilityRunningRecord> &ability);
     // drive application state changes when ability state changes.
 
+    void AbilityFocused(const std::shared_ptr<AbilityRunningRecord> &ability);
+
     void SendEvent(uint32_t msg, int64_t timeOut);
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record);
@@ -574,6 +588,7 @@ private:
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isStageBasedModel_ = false;
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
+    ApplicationState lastState_ = ApplicationState::APP_STATE_CREATE; // last state of this process
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     int32_t appRecordId_ = 0;
@@ -604,6 +619,7 @@ private:
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
     bool isKilling_ = false;
+    bool isContinuousTask_ = false;    // Only continuestask processes can be set to true, please choose carefully
 
     // render record
     std::shared_ptr<RenderRecord> renderRecord_ = nullptr;

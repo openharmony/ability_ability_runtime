@@ -21,7 +21,7 @@ namespace OHOS {
 namespace AAFwk {
 using namespace OHOS::AppExecFwk;
 namespace {
-const std::string THREAD_NAME = "mission_listener";
+const std::string THREAD_NAME = "MissionListener";
 }
 using Cmd = IMissionListener::MissionListenerCmd;
 
@@ -213,6 +213,42 @@ void MissionListenerController::NotifyMissionIconChanged(int32_t missionId,
     handler_->PostTask(task);
 }
 #endif
+
+void MissionListenerController::NotifyMissionClosed(int32_t missionId)
+{
+    if (!handler_) {
+        HILOG_ERROR("handler not init");
+        return;
+    }
+    auto task = [weak = weak_from_this(), missionId]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            HILOG_ERROR("self is nullptr, NotifyMissionClosed failed.");
+            return;
+        }
+        HILOG_INFO("notify listeners mission is closed, missionId:%{public}d.", missionId);
+        self->CallListeners(&IMissionListener::OnMissionClosed, missionId);
+    };
+    handler_->PostTask(task);
+}
+
+void MissionListenerController::NotifyMissionLabelUpdated(int32_t missionId)
+{
+    if (!handler_) {
+        HILOG_ERROR("NotifyMissionLabelUpdated, handler not init");
+        return;
+    }
+    auto task = [weak = weak_from_this(), missionId]() {
+        auto self = weak.lock();
+        if (self == nullptr) {
+            HILOG_ERROR("self is nullptr, NotifyMissionLabelUpdated failed.");
+            return;
+        }
+        HILOG_INFO("notify listeners mission label has updated, missionId:%{public}d.", missionId);
+        self->CallListeners(&IMissionListener::OnMissionLabelUpdated, missionId);
+    };
+    handler_->PostTask(task);
+}
 
 void MissionListenerController::OnListenerDied(const wptr<IRemoteObject> &remote)
 {

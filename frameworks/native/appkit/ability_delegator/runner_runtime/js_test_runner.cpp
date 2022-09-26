@@ -50,27 +50,40 @@ JsTestRunner::JsTestRunner(
     bool isFaJsModel)
     : jsRuntime_(jsRuntime), isFaJsModel_(isFaJsModel)
 {
+    std::string moduleName;
     if (args) {
         std::string srcPath;
         if (bundleInfo.hapModuleInfos.back().isModuleJson) {
             srcPath.append(args->GetTestModuleName());
             srcPath.append("/ets/TestRunner/");
+            moduleName = args->GetTestModuleName();
         } else {
             srcPath.append(args->GetTestPackageName());
             srcPath.append("/assets/js/TestRunner/");
+            moduleName = args->GetTestPackageName();
         }
         srcPath.append(args->GetTestRunnerClassName());
         srcPath.append(".abc");
         srcPath_ = srcPath;
     }
     HILOG_DEBUG("JsTestRunner srcPath is %{public}s", srcPath_.c_str());
-    if (!isFaJsModel) {
-        std::string moduleName;
-        hapPath_ = bundleInfo.hapModuleInfos.back().hapPath;
-        HILOG_DEBUG("JsTestRunner hapPath is %{public}s", hapPath_.c_str());
-        jsTestRunnerObj_ = jsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
-            bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    if (isFaJsModel) {
+        return;
     }
+    if (!moduleName.empty()) {
+        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+            if ((hapModuleInfo.isModuleJson && hapModuleInfo.name == moduleName) ||
+                hapModuleInfo.package == moduleName) {
+                hapPath_ = hapModuleInfo.hapPath;
+                break;
+            }
+        }
+    } else {
+        hapPath_ = bundleInfo.hapModuleInfos.back().hapPath;
+    }
+    HILOG_DEBUG("JsTestRunner hapPath is %{public}s", hapPath_.c_str());
+    jsTestRunnerObj_ = jsRuntime_.LoadModule(moduleName, srcPath_, hapPath_,
+        bundleInfo.hapModuleInfos.back().compileMode == AppExecFwk::CompileMode::ES_MODULE);
 }
 
 JsTestRunner::~JsTestRunner() = default;

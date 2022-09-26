@@ -19,6 +19,7 @@
 #include "app_mgr_service.h"
 #undef private
 #include "hilog_wrapper.h"
+#include "mock_native_token.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -38,7 +39,9 @@ public:
 };
 
 void AppMgrServiceDumpTest::SetUpTestCase(void)
-{}
+{
+    MockNativeToken::SetNativeToken();
+}
 
 void AppMgrServiceDumpTest::TearDownTestCase(void)
 {}
@@ -90,6 +93,51 @@ HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_GetProcessRunningInfosByUserId
     EXPECT_EQ(result, ERR_OK);
 
     HILOG_INFO("AppMgrServiceDump_GetProcessRunningInfosByUserId_0200 end");
+}
+
+/*
+ * @tc.number    : AppMgrServiceDump_0100
+ * @tc.name      : AppMgrService dump
+ * @tc.desc      : 1.Test dump interface
+ */
+HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_0100, TestSize.Level1)
+{
+    HILOG_INFO("AppMgrServiceDump_0100 start");
+
+    auto appMgrService = std::make_shared<AppMgrService>();
+    EXPECT_NE(appMgrService, nullptr);
+
+    appMgrService->Init();
+    constexpr int fd(0);
+    std::vector<std::u16string> args;
+    auto arg = Str8ToStr16("-h");
+    args.emplace_back(arg);
+    auto result = appMgrService->Dump(fd, args);
+    EXPECT_EQ(result, ERR_OK);
+
+    HILOG_INFO("AppMgrServiceDump_0100 end");
+}
+
+/*
+ * @tc.number    : AppMgrServiceDump_0200
+ * @tc.name      : AppMgrService dump
+ * @tc.desc      : 1.Test dump interface
+ */
+HWTEST_F(AppMgrServiceDumpTest, AppMgrServiceDump_0200, TestSize.Level1)
+{
+    HILOG_INFO("AppMgrServiceDump_0200 start");
+
+    auto appMgrService = std::make_shared<AppMgrService>();
+    EXPECT_NE(appMgrService, nullptr);
+
+    constexpr int fd(0);
+    std::vector<std::u16string> args;
+    auto arg = Str8ToStr16("-h");
+    args.emplace_back(arg);
+    auto result = appMgrService->Dump(fd, args);
+    EXPECT_EQ(result, ERR_APPEXECFWK_HIDUMP_ERROR);
+
+    HILOG_INFO("AppMgrServiceDump_0200 end");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

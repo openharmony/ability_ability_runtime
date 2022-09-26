@@ -26,7 +26,7 @@ ace_engine_path = "//foundation/arkui/ace_engine"
 bundlefwk_path = "//foundation/bundlemanager/bundle_framework"
 bundlefwk_inner_api_path = "${bundlefwk_path}/interfaces/inner_api"
 
-multimedia_path = "//foundation/multimedia/image_standard"
+multimedia_path = "//foundation/multimedia/image_framework"
 multimodalinput_path = "//foundation/multimodalinput/input"
 windowmanager_path = "//foundation/window/window_manager"
 graphic_path = "//foundation/graphic/graphic_2d"
@@ -41,11 +41,11 @@ ability_base_kits_path = "${ability_base_path}/interfaces/kits/native"
 ability_base_native_path = "${ability_base_path}/frameworks/native"
 appspawn_path = "//base/startup/appspawn"
 init_path = "//base/startup/init"
+ipc_native_path = "//foundation/communication/ipc/ipc/native"
 
 declare_args() {
   background_task_mgr_continuous_task_enable = true
   resource_schedule_service_enable = true
-  distributed_data_object_enable = true
   ability_runtime_graphics = true
   ability_runtime_power = true
   ability_runtime_relational = true
@@ -75,11 +75,6 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.resourceschedule_efficiency_manager)) {
     efficiency_manager = false
-  }
-
-  if (defined(global_parts_info) &&
-      !defined(global_parts_info.distributeddatamgr_data_object)) {
-    distributed_data_object_enable = false
   }
 
   if (defined(global_parts_info) &&

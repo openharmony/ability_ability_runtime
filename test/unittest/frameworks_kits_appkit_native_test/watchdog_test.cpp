@@ -17,6 +17,7 @@
 #include <thread>
 
 #include "main_thread.h"
+#include "mock_app_thread.h"
 #include "watchdog.h"
 
 using namespace testing::ext;
@@ -25,55 +26,64 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AppExecFwk {
-const int U_SLEEP_TIME = 13000; // Corresponding to INI_TIMER_FIRST_SECOND and INI_TIMER_SECOND
-class WatchDogTest : public testing::Test {
+class WatchdogTest : public testing::Test {
 public:
-    WatchDogTest()
+    WatchdogTest()
     {}
-    ~WatchDogTest()
+    ~WatchdogTest()
     {}
+    std::shared_ptr<MockHandler> mockHandler_ = nullptr;
+    std::shared_ptr<EventRunner> runner_ = nullptr;
+    std::shared_ptr<Watchdog> watchdog_ = nullptr;
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
 };
 
-void WatchDogTest::SetUpTestCase(void)
+void WatchdogTest::SetUpTestCase(void)
 {}
 
-void WatchDogTest::TearDownTestCase(void)
+void WatchdogTest::TearDownTestCase(void)
 {}
 
-void WatchDogTest::SetUp(void)
-{}
-
-void WatchDogTest::TearDown(void)
-{}
-
-/**
- * @tc.number: AppExecFwk_WatchDog_GetAppMainThreadState_0100
- * @tc.name: GetAppMainThreadState
- * @tc.desc: Test the abnormal state of GetAppMainThreadState.
- */
-HWTEST_F(WatchDogTest, AppExecFwk_WatchDog_GetAppMainThreadState_0100, Function | MediumTest | Level3)
+void WatchdogTest::SetUp(void)
 {
-    bool ret = WatchDog::GetAppMainThreadState();
-    EXPECT_FALSE(ret);
+    runner_ = EventRunner::Create("");
+    mockHandler_ = std::make_shared<MockHandler>(runner_);
+
+    watchdog_ = std::make_shared<Watchdog>();
+    watchdog_->Init(mockHandler_);
+}
+
+void WatchdogTest::TearDown(void)
+{
+    watchdog_->Stop();
 }
 
 /**
- * @tc.number: AppExecFwk_WatchDog_GetAppMainThreadState_0200
- * @tc.name: GetAppMainThreadState
- * @tc.desc: Test whether GetAppMainThreadState are called normally.
+ * @tc.number: AppExecFwk_Watchdog_IsReportEvent_0001
+ * @tc.name: IsReportEvent
+ * @tc.desc: Test the abnormal state of IsReportEvent.
+ * @tc.require: issueI5MGFU
  */
-HWTEST_F(WatchDogTest, AppExecFwk_WatchDog_GetAppMainThreadState_0200, Function | MediumTest | Level3)
+HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_IsReportEvent_0001, Function | MediumTest | Level3)
 {
-    std::thread mainthread([&]() {
-        MainThread::Start();
-    });
-    mainthread.detach();
-    std::this_thread::sleep_for(std::chrono::milliseconds(U_SLEEP_TIME));
-    bool ret = WatchDog::GetAppMainThreadState();
+    bool ret = watchdog_->IsReportEvent();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: AppExecFwk_Watchdog_IsReportEvent_0002
+ * @tc.name: IsReportEvent
+ * @tc.desc: Test the change state of IsReportEvent.
+ * @tc.require: issueI5MGFU
+ */
+HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_IsReportEvent_0002, Function | MediumTest | Level3)
+{
+    watchdog_->SetAppMainThreadState(true);
+    watchdog_->AllowReportEvent();
+    bool ret = watchdog_->IsReportEvent();
     EXPECT_FALSE(ret);
 }
 }  // namespace AppExecFwk

@@ -28,6 +28,7 @@ enum class AppProcessState {
     APP_STATE_CREATE = APP_STATE_BEGIN,
     APP_STATE_READY,
     APP_STATE_FOREGROUND,
+    APP_STATE_FOCUS,
     APP_STATE_BACKGROUND,
     APP_STATE_TERMINATED,
     APP_STATE_END,
@@ -52,6 +53,8 @@ struct RunningProcessInfo : public Parcelable {
     std::int32_t uid_;
     AppProcessState state_;
     std::vector<std::string> bundleNames;
+    bool isContinuousTask = false;
+    bool isKeepAlive = false;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
