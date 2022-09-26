@@ -80,7 +80,7 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject> &connec
             HILOG_ERROR("%{public}s, AbilityConnection has disconnected", __func__);
             abilityConnections_.erase(item);
             HILOG_DEBUG("%{public}s end, not find connection, abilityConnectionsSize:%{public}zu.",
-            __func__, abilityConnections_.size());
+                __func__, abilityConnections_.size());
             return ERR_INVALID_VALUE;
         }
     } else {
