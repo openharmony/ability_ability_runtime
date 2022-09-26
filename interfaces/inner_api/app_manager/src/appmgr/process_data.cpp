@@ -16,12 +16,15 @@
 #include "process_data.h"
 
 #include "hilog_wrapper.h"
+#include "parcel_macro_base.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 bool ProcessData::Marshalling(Parcel &parcel) const
 {
-    return (parcel.WriteString(bundleName) && parcel.WriteInt32(pid) && parcel.WriteInt32(uid));
+    return (parcel.WriteString(bundleName) && parcel.WriteInt32(pid) && parcel.WriteInt32(uid) &&
+        parcel.WriteInt32(static_cast<int32_t>(state)) && parcel.WriteBool(isContinuousTask) &&
+        parcel.WriteBool(isKeepAlive));
 }
 
 bool ProcessData::ReadFromParcel(Parcel &parcel)
@@ -29,6 +32,9 @@ bool ProcessData::ReadFromParcel(Parcel &parcel)
     bundleName = parcel.ReadString();
     pid = parcel.ReadInt32();
     uid = parcel.ReadInt32();
+    state = static_cast<AppProcessState>(parcel.ReadInt32());
+    isContinuousTask = parcel.ReadBool();
+    isKeepAlive = parcel.ReadBool();
 
     return true;
 }

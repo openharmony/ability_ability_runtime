@@ -22,6 +22,7 @@
 #include "application_state_observer_stub.h"
 #include "connection_state_item.h"
 #include "connection_observer_controller.h"
+#include "dlp_connection_info.h"
 #include "dlp_state_item.h"
 
 namespace OHOS {
@@ -145,6 +146,13 @@ public:
      */
     void HandleAppDied(int32_t pid);
 
+    /**
+     * get exist dlp connection infos.
+     *
+     * @param infos output dlp connection result.
+     */
+    void GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos);
+
 private:
     bool CheckDataAbilityConnectionParams(const DataAbilityCaller &caller,
         const std::shared_ptr<DataAbilityRecord> &record) const;
@@ -159,6 +167,7 @@ private:
         void OnAbilityStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) {}
         void OnExtensionStateChanged(const AppExecFwk::AbilityStateData &abilityStateData) {}
         void OnProcessCreated(const AppExecFwk::ProcessData &processData) {}
+        void OnProcessStateChanged(const AppExecFwk::ProcessData &processData) {}
         void OnApplicationStateChanged(const AppExecFwk::AppStateData &appStateData) {}
         void OnProcessDied(const AppExecFwk::ProcessData &processData)
         {

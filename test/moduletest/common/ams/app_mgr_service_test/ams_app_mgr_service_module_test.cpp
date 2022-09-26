@@ -25,6 +25,7 @@
 #include "app_scheduler_proxy.h"
 #include "mock_app_mgr_service_inner.h"
 #include "mock_app_spawn_socket.h"
+#include "mock_native_token.h"
 #include "semaphore_ex.h"
 
 using namespace testing::ext;
@@ -70,6 +71,18 @@ public:
     {}
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override
     {}
+    int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName) override
+    {
+        return 0;
+    }
+    int32_t ScheduleNotifyHotReloadPage() override
+    {
+        return 0;
+    }
+    int32_t ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName) override
+    {
+        return 0;
+    }
 };
 class AppMgrServiceModuleTest : public testing::Test {
 public:
@@ -86,6 +99,7 @@ protected:
 
 void AppMgrServiceModuleTest::SetUpTestCase()
 {
+    MockNativeToken::SetNativeToken();
     if (!appMgrService_) {
         appMgrService_ = std::make_shared<AppMgrService>();
     }

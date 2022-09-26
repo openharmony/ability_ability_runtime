@@ -41,6 +41,22 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+NativeValue *PromiseCallback(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    if (info == nullptr || info->functionInfo == nullptr || info->functionInfo->data == nullptr) {
+        HILOG_ERROR("Invalid input info.");
+        return nullptr;
+    }
+    void *data = info->functionInfo->data;
+    auto *callbackInfo = static_cast<AppExecFwk::AbilityTransactionCallbackInfo *>(data);
+    callbackInfo->Call();
+    AppExecFwk::AbilityTransactionCallbackInfo::Destroy(callbackInfo);
+    info->functionInfo->data = nullptr;
+    return nullptr;
+}
+}
+
 NativeValue *AttachJsAbilityContext(NativeEngine *engine, void *value, void *)
 {
     HILOG_DEBUG("AttachJsAbilityContext");
@@ -204,10 +220,54 @@ void JsAbility::OnStart(const Want &want)
 void JsAbility::OnStop()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("OnStop begin.");
     Ability::OnStop();
 
     CallObjectMethod("onDestroy");
+    OnStopCallback();
+    HILOG_DEBUG("OnStop end.");
+}
 
+void JsAbility::OnStop(AppExecFwk::AbilityTransactionCallbackInfo *callbackInfo, bool &isAsyncCallback)
+{
+    if (callbackInfo == nullptr) {
+        isAsyncCallback = false;
+        OnStop();
+        return;
+    }
+
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("OnStop begin.");
+    Ability::OnStop();
+
+    HandleScope handleScope(jsRuntime_);
+    NativeValue *result = CallObjectMethod("onDestroy", nullptr, 0, true);
+    if (!CheckPromise(result)) {
+        OnStopCallback();
+        isAsyncCallback = false;
+        return;
+    }
+
+    std::weak_ptr<Ability> weakPtr = shared_from_this();
+    auto asyncCallback = [abilityWeakPtr = weakPtr]() {
+        auto ability = abilityWeakPtr.lock();
+        if (ability == nullptr) {
+            HILOG_ERROR("ability is nullptr.");
+            return;
+        }
+        ability->OnStopCallback();
+    };
+    callbackInfo->Push(asyncCallback);
+    isAsyncCallback = CallPromise(result, callbackInfo);
+    if (!isAsyncCallback) {
+        HILOG_ERROR("Failed to call promise.");
+        OnStopCallback();
+    }
+    HILOG_DEBUG("OnStop end.");
+}
+
+void JsAbility::OnStopCallback()
+{
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
         HILOG_DEBUG("Call AbilityDelegator::PostPerformStop");
@@ -420,7 +480,7 @@ void JsAbility::DoOnForeground(const Want &want)
                 HILOG_ERROR("restore: content storage is nullptr");
             }
             OnSceneRestored();
-            WaitingDistributedObjectSyncComplete(want);
+            NotifyContinuationResult(want, true);
         } else {
             OnSceneCreated();
         }
@@ -483,7 +543,7 @@ void JsAbility::ContinuationRestore(const Want &want)
         HILOG_ERROR("restore: content storage is nullptr");
     }
     OnSceneRestored();
-    WaitingDistributedObjectSyncComplete(want);
+    NotifyContinuationResult(want, true);
 }
 
 std::shared_ptr<NativeReference> JsAbility::GetJsWindowStage()
@@ -565,7 +625,10 @@ void JsAbility::OnMemoryLevel(int level)
 
     HandleScope handleScope(jsRuntime_);
     auto &nativeEngine = jsRuntime_.GetNativeEngine();
-
+    if (jsAbilityObj_ == nullptr) {
+        HILOG_ERROR("Failed to get AbilityStage object");
+        return;
+    }
     NativeValue *value = jsAbilityObj_->Get();
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
@@ -654,14 +717,14 @@ sptr<IRemoteObject> JsAbility::CallRequest()
 
     HandleScope handleScope(jsRuntime_);
     HILOG_DEBUG("JsAbility::CallRequest set runtime scope.");
-    auto& nativeEngine = jsRuntime_.GetNativeEngine();
+    auto &nativeEngine = jsRuntime_.GetNativeEngine();
     auto value = jsAbilityObj_->Get();
     if (value == nullptr) {
         HILOG_ERROR("JsAbility::CallRequest value is nullptr");
         return nullptr;
     }
 
-    NativeObject* obj = ConvertNativeValueTo<NativeObject>(value);
+    NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
         HILOG_ERROR("JsAbility::CallRequest obj is nullptr");
         return nullptr;
@@ -679,24 +742,18 @@ sptr<IRemoteObject> JsAbility::CallRequest()
         return nullptr;
     }
 
-    auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(
-        reinterpret_cast<napi_env>(&nativeEngine), reinterpret_cast<napi_value>(remoteJsObj));
-    if (remoteObj == nullptr) {
-        HILOG_ERROR("JsAbility::CallRequest obj is nullptr");
-    }
-
-    remoteCallee_ = remoteObj;
+    remoteCallee_ = SetNewRuleFlagToCallee(nativeEngine, remoteJsObj);
     HILOG_DEBUG("JsAbility::CallRequest end.");
     return remoteCallee_;
 }
 
-void JsAbility::CallObjectMethod(const char *name, NativeValue *const *argv, size_t argc)
+NativeValue *JsAbility::CallObjectMethod(const char *name, NativeValue *const *argv, size_t argc, bool withResult)
 {
     HILOG_DEBUG("JsAbility::CallObjectMethod(%{public}s", name);
 
     if (!jsAbilityObj_) {
         HILOG_WARN("Not found Ability.js");
-        return;
+        return nullptr;
     }
 
     HandleScope handleScope(jsRuntime_);
@@ -706,15 +763,57 @@ void JsAbility::CallObjectMethod(const char *name, NativeValue *const *argv, siz
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
         HILOG_ERROR("Failed to get Ability object");
-        return;
+        return nullptr;
     }
 
     NativeValue *methodOnCreate = obj->GetProperty(name);
     if (methodOnCreate == nullptr) {
         HILOG_ERROR("Failed to get '%{public}s' from Ability object", name);
-        return;
+        return nullptr;
+    }
+    if (withResult) {
+        return handleScope.Escape(nativeEngine.CallFunction(value, methodOnCreate, argv, argc));
     }
     nativeEngine.CallFunction(value, methodOnCreate, argv, argc);
+    return nullptr;
+}
+
+bool JsAbility::CheckPromise(NativeValue *result)
+{
+    if (result == nullptr) {
+        HILOG_DEBUG("result is null, no need to call promise.");
+        return false;
+    }
+    if (!result->IsPromise()) {
+        HILOG_DEBUG("result is not promise, no need to call promise.");
+        return false;
+    }
+    return true;
+}
+
+bool JsAbility::CallPromise(NativeValue *result, AppExecFwk::AbilityTransactionCallbackInfo *callbackInfo)
+{
+    auto *retObj = ConvertNativeValueTo<NativeObject>(result);
+    if (retObj == nullptr) {
+        HILOG_ERROR("Failed to convert native value to NativeObject.");
+        return false;
+    }
+    NativeValue *then = retObj->GetProperty("then");
+    if (then == nullptr) {
+        HILOG_ERROR("Failed to get property: then.");
+        return false;
+    }
+    if (!then->IsCallable()) {
+        HILOG_ERROR("property then is not callable.");
+        return false;
+    }
+    HandleScope handleScope(jsRuntime_);
+    auto &nativeEngine = jsRuntime_.GetNativeEngine();
+    auto promiseCallback = nativeEngine.CreateFunction("promiseCallback", strlen("promiseCallback"), PromiseCallback,
+        callbackInfo);
+    NativeValue *argv[1] = { promiseCallback };
+    nativeEngine.CallFunction(result, then, argv, 1);
+    return true;
 }
 
 std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> JsAbility::CreateADelegatorAbilityProperty()
@@ -783,6 +882,32 @@ std::shared_ptr<NativeReference> JsAbility::GetJsAbility()
         HILOG_ERROR("jsAbility object is nullptr");
     }
     return jsAbilityObj_;
+}
+
+sptr<IRemoteObject> JsAbility::SetNewRuleFlagToCallee(NativeEngine &nativeEngine, NativeValue* remoteJsObj)
+{
+    NativeObject* calleeObj = ConvertNativeValueTo<NativeObject>(remoteJsObj);
+    if (calleeObj == nullptr) {
+        HILOG_ERROR("JsAbility::SetNewRuleFlagToCallee calleeObj is nullptr");
+        return nullptr;
+    }
+    auto setFlagMethod = calleeObj->GetProperty("setNewRuleFlag");
+    if (setFlagMethod == nullptr || !setFlagMethod->IsCallable()) {
+        HILOG_ERROR("JsAbility::SetNewRuleFlagToCallee setFlagMethod is %{public}s",
+            setFlagMethod == nullptr ? "nullptr" : "not func");
+        return nullptr;
+    }
+    auto flag = nativeEngine.CreateBoolean(IsUseNewStartUpRule());
+    NativeValue *argv[1] = { flag };
+    nativeEngine.CallFunction(remoteJsObj, setFlagMethod, argv, 1);
+
+    auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(
+        reinterpret_cast<napi_env>(&nativeEngine), reinterpret_cast<napi_value>(remoteJsObj));
+    if (remoteObj == nullptr) {
+        HILOG_ERROR("JsAbility::CallRequest obj is nullptr");
+        return nullptr;
+    }
+    return remoteObj;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

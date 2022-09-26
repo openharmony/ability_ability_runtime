@@ -21,12 +21,16 @@
 #include <cstdlib>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <regex>
 
+#include "ability_constants.h"
 #include "connect_server_manager.h"
 #include "event_handler.h"
-#include "extractor_utils.h"
+#include "file_path_utils.h"
+#include "ecmascript/napi/include/jsnapi.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
+#include "hot_reloader.h"
 #include "js_console_log.h"
 #include "js_module_reader.h"
 #include "js_module_searcher.h"
@@ -112,11 +116,21 @@ public:
     bool RunScript(const std::string& srcPath, const std::string& hapPath) override
     {
         bool result = false;
-        if (!hapPath.empty()) {
+        if (isBundle_ && !hapPath.empty()) {
             std::ostringstream outStream;
-            runtimeExtractor_ = InitRuntimeExtractor(hapPath);
-            if (!GetFileBuffer(runtimeExtractor_, srcPath, outStream)) {
-                HILOG_ERROR("Get abc file failed");
+            std::shared_ptr<RuntimeExtractor> runtimeExtractor;
+            if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
+                runtimeExtractor = RuntimeExtractor::Create(hapPath);
+                if (runtimeExtractor == nullptr) {
+                    return result;
+                }
+                runtimeExtractor->SetRuntimeFlag(true);
+                runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
+            } else {
+                runtimeExtractor = runtimeExtractorMap_.at(hapPath);
+            }
+            if (!runtimeExtractor->GetFileBuffer(srcPath, outStream)) {
+                HILOG_ERROR("RunScript, Get abc file failed");
                 return result;
             }
 
@@ -146,6 +160,89 @@ public:
 
         return ArkNativeEngine::ArkValueToNativeValue(
             static_cast<ArkNativeEngine*>(nativeEngine_.get()), exportObj);
+    }
+
+    void LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override
+    {
+        HILOG_DEBUG("function called.");
+        if (vm_ == nullptr) {
+            HILOG_ERROR("vm is nullptr.");
+            return;
+        }
+
+        AbilityRuntime::RuntimeExtractor extractor(hqfFile);
+        if (!extractor.Init()) {
+            HILOG_ERROR("Extractor of %{private}s init failed.", hqfFile.c_str());
+            return;
+        }
+
+        std::vector<std::string> fileNames;
+        extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
+        if (fileNames.empty()) {
+            HILOG_WARN("There's no abc file in hqf %{private}s.", hqfFile.c_str());
+            return;
+        }
+
+        for (const auto &fileName : fileNames) {
+            std::string patchFile = hqfFile + "/" + fileName;
+            std::string baseFile = hapPath + "/" + fileName;
+            std::ostringstream outStream;
+            if (!extractor.ExtractByName(fileName, outStream)) {
+                HILOG_ERROR("Extract %{public}s failed.", patchFile.c_str());
+                return;
+            }
+
+            const auto &outStr = outStream.str();
+            std::vector<uint8_t> buffer;
+            buffer.assign(outStr.begin(), outStr.end());
+            HILOG_DEBUG("LoadPatch, patchFile: %{private}s, baseFile: %{private}s.",
+                patchFile.c_str(), baseFile.c_str());
+            bool ret = panda::JSNApi::LoadPatch(vm_, patchFile, buffer.data(), buffer.size(), baseFile);
+            if (!ret) {
+                HILOG_ERROR("LoadPatch failed.");
+                return;
+            }
+            HILOG_DEBUG("Load patch %{private}s succeed.", patchFile.c_str());
+        }
+    }
+
+    void UnLoadRepairPatch(const std::string& hqfFile) override
+    {
+        HILOG_DEBUG("function called.");
+        if (vm_ == nullptr) {
+            HILOG_ERROR("vm is nullptr.");
+            return;
+        }
+
+        AbilityRuntime::RuntimeExtractor extractor(hqfFile);
+        if (!extractor.Init()) {
+            HILOG_ERROR("Extractor of %{private}s init failed.", hqfFile.c_str());
+            return;
+        }
+
+        std::vector<std::string> fileNames;
+        extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
+        if (fileNames.empty()) {
+            HILOG_WARN("There's no abc file in hqf %{private}s.", hqfFile.c_str());
+            return;
+        }
+
+        for (const auto &fileName : fileNames) {
+            std::string patchFile = hqfFile + "/" + fileName;
+            HILOG_DEBUG("UnloadPatch, patchFile: %{private}s.", patchFile.c_str());
+            bool ret = panda::JSNApi::UnloadPatch(vm_, patchFile);
+            if (!ret) {
+                HILOG_ERROR("UnLoadPatch failed.");
+                return;
+            }
+            HILOG_DEBUG("UnLoad patch %{private}s succeed.", patchFile.c_str());
+        }
+    }
+
+    void NotifyHotReloadPage() override
+    {
+        HILOG_DEBUG("function called.");
+        Ace::HotReloader::HotReload();
     }
 
 private:
@@ -178,6 +275,7 @@ private:
             pandaOption.SetGcPoolSize(DEFAULT_GC_POOL_SIZE);
             pandaOption.SetLogLevel(panda::RuntimeOption::LOG_LEVEL::INFO);
             pandaOption.SetLogBufPrint(PrintVmLog);
+
             // Fix a problem that if vm will crash if preloaded
             if (options.preload) {
                 pandaOption.SetEnableAsmInterpreter(false);
@@ -197,11 +295,18 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            runtimeExtractor_ = InitRuntimeExtractor(options.hapPath);
-            panda::JSNApi::SetHostResolveBufferTracker(
-                vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor_));
             panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
+            std::shared_ptr<RuntimeExtractor> runtimeExtractor = RuntimeExtractor::Create(options.hapPath);
+            if (runtimeExtractor == nullptr) {
+                return false;
+            }
+            runtimeExtractor->SetRuntimeFlag(true);
+            runtimeExtractorMap_.insert(make_pair(options.hapPath, runtimeExtractor));
+            panda::JSNApi::SetHostResolveBufferTracker(
+                vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor));
         }
+        isBundle_ = options.isBundle;
+        panda::JSNApi::SetBundle(vm_, options.isBundle);
         return JsRuntime::Initialize(options);
     }
 
@@ -246,6 +351,7 @@ void InitSyscapModule(NativeEngine& engine, NativeObject& globalObject)
     const char *moduleName = "JsRuntime";
     BindNativeFunction(engine, globalObject, "canIUse", moduleName, CanIUse);
 }
+
 class UvLoopHandler : public AppExecFwk::FileDescriptorListener, public std::enable_shared_from_this<UvLoopHandler> {
 public:
     explicit UvLoopHandler(uv_loop_t* uvLoop) : uvLoop_(uvLoop) {}
@@ -423,7 +529,7 @@ bool JsRuntime::Initialize(const Options& options)
         auto moduleManager = NativeModuleManager::GetInstance();
         std::string packagePath = options.packagePath;
         if (moduleManager && !packagePath.empty()) {
-            moduleManager->SetAppLibPath(packagePath.c_str());
+            moduleManager->SetAppLibPath(std::vector<std::string>(1, packagePath));
         }
 
         InitTimerModule(*nativeEngine_, *globalObj);
@@ -484,7 +590,6 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(
 {
     HILOG_DEBUG("JsRuntime::LoadModule(%{public}s, %{private}s, %{private}s, %{public}s)",
         moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
-
     HandleScope handleScope(*this);
 
     NativeValue* classValue = nullptr;
@@ -494,9 +599,15 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(
         classValue = it->second->Get();
     } else {
         std::string fileName;
-        if (!MakeFilePath(codePath_, modulePath, fileName)) {
-            HILOG_ERROR("Failed to make module file path: %{private}s", modulePath.c_str());
-            return std::unique_ptr<NativeReference>();
+        if (!hapPath.empty()) {
+            fileName.append(codePath_).append(Constants::FILE_SEPARATOR).append(modulePath);
+            std::regex pattern(std::string(Constants::FILE_DOT) + std::string(Constants::FILE_SEPARATOR));
+            fileName = std::regex_replace(fileName, pattern, "");
+        } else {
+            if (!MakeFilePath(codePath_, modulePath, fileName)) {
+                HILOG_ERROR("Failed to make module file path: %{private}s", modulePath.c_str());
+                return std::unique_ptr<NativeReference>();
+            }
         }
 
         classValue = esmodule ? LoadJsModule(fileName, hapPath) : LoadJsBundle(fileName, hapPath);
@@ -538,10 +649,20 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModule(
 bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath)
 {
     bool result = false;
-    if (!hapPath.empty()) {
+    if (isBundle_ && !hapPath.empty()) {
         std::ostringstream outStream;
-        runtimeExtractor_ = InitRuntimeExtractor(hapPath);
-        if (!GetFileBuffer(runtimeExtractor_, srcPath, outStream)) {
+        std::shared_ptr<RuntimeExtractor> runtimeExtractor;
+        if (runtimeExtractorMap_.find(hapPath) == runtimeExtractorMap_.end()) {
+            runtimeExtractor = RuntimeExtractor::Create(hapPath);
+            if (runtimeExtractor == nullptr) {
+                return result;
+            }
+            runtimeExtractor->SetRuntimeFlag(true);
+            runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
+        } else {
+            runtimeExtractor = runtimeExtractorMap_.at(hapPath);
+        }
+        if (!runtimeExtractor->GetFileBuffer(srcPath, outStream)) {
             HILOG_ERROR("Get abc file failed");
             return result;
         }
@@ -587,11 +708,22 @@ void JsRuntime::DumpHeapSnapshot(bool isPrivate)
     nativeEngine_->DumpHeapSnapshot(true, DumpFormat::JSON, isPrivate);
 }
 
-std::string JsRuntime::BuildJsStackTrace()
+bool JsRuntime::BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames)
 {
-    std::string straceStr = "";
-    [[maybe_unused]]bool temp = nativeEngine_->BuildJsStackTrace(straceStr);
-    return straceStr;
+    std::vector<JsFrameInfo> jsFrameInfo;
+    bool ret = nativeEngine_->BuildJsStackInfoList(tid, jsFrameInfo);
+    if (!ret) {
+        return ret;
+    }
+    for (auto jf : jsFrameInfo) {
+        struct JsFrames jsFrame;
+        jsFrame.functionName = jf.functionName;
+        jsFrame.fileName = jf.fileName;
+        jsFrame.pos = jf.pos;
+        jsFrame.nativePointer = jf.nativePointer;
+        jsFrames.emplace_back(jsFrame);
+    }
+    return ret;
 }
 
 void JsRuntime::NotifyApplicationState(bool isBackground)

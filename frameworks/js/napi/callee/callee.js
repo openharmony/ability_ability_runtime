@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 var rpc = requireNapi("rpc")
+var accessControl = requireNapi("abilityAccessCtrl")
 
 const EVENT_CALL_NOTIFY = 1;
 const REQUEST_SUCCESS = 0;
 const REQUEST_FAILED = 1;
+const PERMISSION_ABILITY_BACKGROUND_COMMUNICATION = "ohos.permission.ABILITY_BACKGROUND_COMMUNICATION"
 
 class Callee extends rpc.RemoteObject {
     constructor(des) {
         if (typeof des === 'string') {
             super(des);
             this.callList = new Map();
+            this.startUpNewRule = false;
             console.log("Callee constructor is OK " + typeof des);
         } else {
             console.log("Callee constructor error, des is " + typeof des);
@@ -30,8 +33,25 @@ class Callee extends rpc.RemoteObject {
         }
     }
 
+    setNewRuleFlag(flag) {
+        this.startUpNewRule = flag;
+    }
+
     onRemoteRequest(code, data, reply, option) {
         console.log("Callee onRemoteRequest code [" + typeof code + " " + code + "]");
+        if (this.startUpNewRule) {
+            console.log("Use new start up rule, check caller permission.");
+            let accessManger = accessControl.createAtManager();
+            let accessTokenId = rpc.IPCSkeleton.getCallingTokenId();
+            let grantStatus =
+                accessManger.verifyAccessTokenSync(accessTokenId, PERMISSION_ABILITY_BACKGROUND_COMMUNICATION);
+            if (grantStatus === accessControl.GrantStatus.PERMISSION_DENIED) {
+                console.log(
+                    "Callee onRemoteRequest error, the Caller does not have PERMISSION_ABILITY_BACKGROUND_COMMUNICATION");
+                return false;
+            }
+        }
+
         if (typeof code !== 'number' || typeof data !== 'object' ||
             typeof reply !== 'object' || typeof option !== 'object') {
             console.log("Callee onRemoteRequest error, code is [" +
@@ -66,19 +86,18 @@ class Callee extends rpc.RemoteObject {
                 reply.writeString(typeof result);
                 console.log("Callee onRemoteRequest error, retval is " + REQUEST_FAILED + ", type is " + typeof result);
             }
-
         } else {
             console.log("Callee onRemoteRequest error, code is " + code);
             return false;
         }
-
         console.log("Callee onRemoteRequest code proc success");
         return true;
     }
 
     on(method, callback) {
         if (typeof method !== 'string' || method == "" || typeof callback !== 'function') {
-            console.log("Callee on error, method is [" + typeof method + "], typeof callback [" + typeof callback + "]");
+            console.log(
+                "Callee on error, method is [" + typeof method + "], typeof callback [" + typeof callback + "]");
             throw new Error("function input parameter error");
             return;
         }

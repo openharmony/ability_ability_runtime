@@ -26,6 +26,7 @@
 
 #include "ability_connect_manager.h"
 #include "ability_event_handler.h"
+#include "ability_interceptor_executer.h"
 #include "ability_manager_stub.h"
 #include "app_no_response_disposer.h"
 #include "app_scheduler.h"
@@ -39,6 +40,7 @@
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "mission_list_manager.h"
+#include "permission_verification.h"
 #include "system_ability.h"
 #include "uri.h"
 #include "ability_config.h"
@@ -229,6 +231,13 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
+    virtual int ConnectAbilityCommon(
+        const Want &want,
+        const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::ExtensionAbilityType extensionType,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
     /**
      * ContinueMission, continue ability from mission center.
      *
@@ -382,7 +391,7 @@ public:
      * @param args Indicates the params.
      * @return Returns the dump result.
      */
-    int Dump(int fd, const std::vector<std::u16string> &args) override;
+    int Dump(int fd, const std::vector<std::u16string>& args) override;
 
     /**
      * dump ability stack info, about userID, mission stack info,
@@ -483,6 +492,8 @@ public:
     virtual int RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer) override;
+
+    virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos) override;
 
     virtual int LockMissionForCleanup(int32_t missionId) override;
 
@@ -793,6 +804,8 @@ public:
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
 
+    bool GetStartUpNewRuleFlag() const;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -801,6 +814,22 @@ public:
     static constexpr uint32_t FOREGROUND_TIMEOUT_MSG = 5;
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
 
+#ifdef SUPPORT_ASAN
+    static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 150000; // ms
+    static constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms
+    static constexpr uint32_t ACTIVE_TIMEOUT = 75000;          // ms
+    static constexpr uint32_t INACTIVE_TIMEOUT = 7500;         // ms
+    static constexpr uint32_t TERMINATE_TIMEOUT = 150000;      // ms
+    static constexpr uint32_t CONNECT_TIMEOUT = 45000;         // ms
+    static constexpr uint32_t DISCONNECT_TIMEOUT = 7500;       // ms
+    static constexpr uint32_t COMMAND_TIMEOUT = 75000;         // ms
+    static constexpr uint32_t RESTART_TIMEOUT = 75000;         // ms
+    static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 7500;  // ms
+    static constexpr uint32_t FOREGROUND_TIMEOUT = 75000;   // ms
+    static constexpr uint32_t BACKGROUND_TIMEOUT = 45000;   // ms
+    static constexpr uint32_t DUMP_TIMEOUT = 15000;            // ms
+    static constexpr uint32_t KILL_TIMEOUT = 45000;           // ms
+#else
     static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 10000; // ms
     static constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
     static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
@@ -815,6 +844,7 @@ public:
     static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
     static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
     static constexpr uint32_t KILL_TIMEOUT = 3000;           // ms
+#endif
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
@@ -898,7 +928,8 @@ private:
         const Want &want,
         const int32_t userId,
         const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken);
+        const sptr<IRemoteObject> &callerToken,
+        AppExecFwk::ExtensionAbilityType extensionType);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int ConnectRemoteAbility(const Want &want, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
@@ -928,7 +959,6 @@ private:
     void DumpMissionInfosInner(const std::string &args, std::vector<std::string> &info);
     void DumpFuncInit();
 
-    int CheckCallPermissions(const AbilityRequest &abilityRequest);
     bool JudgeMultiUserConcurrency(const int32_t userId);
     /**
      * dumpsys info
@@ -949,9 +979,10 @@ private:
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     void DataDumpSysStateInner(
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
-    ErrCode ProcessMultiParam(std::vector<std::string> &argsStr, std::string &result);
-    void ShowHelp(std::string &result);
-    void ShowIllegalInfomation(std::string &result);
+    ErrCode ProcessMultiParam(std::vector<std::string>& argsStr, std::string& result);
+    void ShowHelp(std::string& result);
+    void ShowIllegalInfomation(std::string& result);
+    int Dump(const std::vector<std::u16string>& args, std::string& result);
 
     void InitConnectManager(int32_t userId, bool switchUser);
     void InitDataAbilityManager(int32_t userId, bool switchUser);
@@ -975,7 +1006,6 @@ private:
 
     bool VerificationAllToken(const sptr<IRemoteObject> &token);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManager(const sptr<IAbilityScheduler> &scheduler);
-    bool CheckDataAbilityRequest(AbilityRequest &abilityRequest);
     std::shared_ptr<MissionListManager> GetListManagerByUserId(int32_t userId);
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByUserId(int32_t userId);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByUserId(int32_t userId);
@@ -1019,9 +1049,99 @@ private:
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
 
-    int CheckCrowdtestForeground(const Want &want, int requestCode, int32_t userId);
+    /**
+     * Check if Caller is allowed to start ServiceAbility(FA) or ServiceExtension(Stage) or DataShareExtension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Service.
+     */
+    int CheckCallServicePermission(const AbilityRequest &abilityRequest);
 
-    int StartAppgallery(int requestCode, int32_t userId, std::string action);
+    /**
+     * Check if Caller is allowed to start DataAbility(FA)
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start DataAbility.
+     */
+    int CheckCallDataAbilityPermission(AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start ServiceExtension(Stage) or DataShareExtension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start ServiceExtension.
+     */
+    int CheckCallServiceExtensionPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start other Extension(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start OtherExtension.
+     */
+    int CheckCallOtherExtensionPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start ServiceAbility(FA).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start ServiceAbility.
+     */
+    int CheckCallServiceAbilityPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start PageAbility(FA) or Ability(Stage).
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Ability.
+     */
+    int CheckCallAbilityPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Check if Caller is allowed to start Ability(Stage) by call.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns whether the caller is allowed to start Ability by call.
+     */
+    int CheckStartByCallPermission(const AbilityRequest &abilityRequest);
+
+    /**
+     * Judge if Caller-Application is in background state.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @param isBackgroundCall, Indicates the Caller-Application state.
+     *                          TRUE: The Caller-Application is not in focus and not in foreground state.
+     *                          FALSE: The Caller-Application is in focus or in foreground state.
+     * @return Returns ERR_OK on check success, others on check failure.
+     */
+    int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall);
+
+    /**
+     *  Temporary, use old rule to check permission.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @param isStartByCall, Indicates whether it is the StartAbilityByCall function call.
+     *                       TRUE: Is StartAbilityByCall function call.
+     *                       FALSE: Is other function call, such as StartAbility, ConnectAbility and so on.
+     * @return Returns ERR_OK on check success, others on check failure.
+     */
+    int CheckCallerPermissionOldRule(const AbilityRequest &abilityRequest, const bool isStartByCall = false);
+
+    /**
+     *  Temporary, judge is use new check-permission rule to start ability.
+     *
+     * @param abilityRequest, abilityRequest.
+     * @return Returns TRUE: Use new rule.
+     *                 FALSE: Use old rule.
+     */
+    bool IsUseNewStartUpRule(const AbilityRequest &abilityRequest);
+
+    bool CheckNewRuleSwitchState(const std::string &param);
+
+    void UpdateFocusState(std::vector<AbilityRunningInfo> &info);
+
+    AAFwk::PermissionVerification::VerificationInfo CreateVerificationInfo(
+        const AbilityRequest &abilityRequest);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
@@ -1057,18 +1177,32 @@ private:
 
     static sptr<AbilityManagerService> instance_;
 
+    // Component StartUp rule switch
+    bool startUpNewRule_ = false;
+    /** It only takes effect when startUpNewRule_ is TRUE
+     *  TRUE: When Caller-Application is Launcher or SystemUI, use old rule.
+     *  FALSE: Apply new rule to all application
+     */
+    bool newRuleExceptLauncherSystemUI_ = true;
+    /** Indicates the criteria for judging whether the Caller-Application is in the background
+     *  TRUE: Determine the state by AAFwk::AppState::FOREGROUND.
+     *  FALSE: Determine the state by AppExecFwk::AppProcessState::APP_STATE_FOCUS.
+     */
+    bool backgroundJudgeFlag_ = true;
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
 
 #ifdef SUPPORT_GRAPHICS
-    int32_t ShowPickerDialog(const Want& want, int32_t userId);
+    int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
     bool CheckWindowMode(int32_t windowMode, const std::vector<AppExecFwk::SupportWindowMode>& windowModes) const;
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
     std::shared_ptr<ApplicationAnrListener> anrListener_;
 #endif
     std::shared_ptr<AppNoResponseDisposer> anrDisposer_;
+    std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

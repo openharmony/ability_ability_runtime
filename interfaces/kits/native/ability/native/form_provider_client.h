@@ -162,7 +162,6 @@ public:
      * @return none.
      */
     void ClearOwner(const std::shared_ptr<Ability> ability);
-
 protected:
     bool CheckIsSystemApp() const;
     int HandleDisconnect(const Want &want, const sptr<IRemoteObject> &callerToken);
@@ -172,6 +171,7 @@ protected:
                                  const sptr<IRemoteObject> &callerToken);
     void HandleRemoteAcquire(const FormJsInfo &formJsInfo, const FormProviderInfo &formProviderInfo,
         const Want &want, const sptr<IRemoteObject> &token);
+    bool IsCallBySelfBundle();
 private:
     std::shared_ptr<Ability> GetOwner();
 private:

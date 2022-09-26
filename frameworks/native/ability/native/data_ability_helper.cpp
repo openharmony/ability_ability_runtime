@@ -292,10 +292,14 @@ int DataAbilityHelper::OpenFile(Uri &uri, const std::string &mode)
         fd = dataAbilityHelperImpl_->OpenFile(uri, mode);
     }
     if (dataShareHelper_) {
-        HILOG_INFO("Call DataShareHelper OpenFile.");
-        Uri dataShareUri("");
-        if (TransferScheme(uri, dataShareUri)) {
-            fd = dataShareHelper_->OpenFile(dataShareUri, mode);
+        if (callFromJs_) {
+            HILOG_ERROR("Call DataShareHelper OpenFile, DataShareHelper no this interface.");
+        } else {
+            HILOG_INFO("Call DataShareHelper OpenFile.");
+            Uri dataShareUri("");
+            if (TransferScheme(uri, dataShareUri)) {
+                fd = dataShareHelper_->OpenFile(dataShareUri, mode);
+            }
         }
     }
     return fd;
@@ -636,13 +640,13 @@ Uri DataAbilityHelper::NormalizeUri(Uri &uri)
     Uri urivalue("");
     if (dataAbilityHelperImpl_) {
         HILOG_INFO("Call DataAbilityHelperImpl NormalizeUri.");
-        dataAbilityHelperImpl_->NormalizeUri(uri);
+        urivalue = dataAbilityHelperImpl_->NormalizeUri(uri);
     }
     if (dataShareHelper_) {
         HILOG_INFO("Call DataShareHelper NormalizeUri.");
         Uri dataShareUri("");
         if (TransferScheme(uri, dataShareUri)) {
-            dataShareHelper_->NormalizeUri(dataShareUri);
+            urivalue = dataShareHelper_->NormalizeUri(dataShareUri);
         }
     }
     return urivalue;
@@ -713,8 +717,13 @@ bool DataAbilityHelper::TransferScheme(const Uri &uri, Uri &dataShareUri)
         return true;
     }
 
-    HILOG_ERROR("Input param invalid, uri: %{public}s", inputUri.ToString().c_str());
+    HILOG_ERROR("Input param invalid, uri: %{private}s", inputUri.ToString().c_str());
     return false;
+}
+
+void DataAbilityHelper::SetCallFromJs()
+{
+    callFromJs_ = true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

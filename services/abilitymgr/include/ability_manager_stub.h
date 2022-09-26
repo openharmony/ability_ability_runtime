@@ -21,6 +21,7 @@
 #include <iremote_object.h>
 #include <iremote_stub.h>
 
+#include "dlp_connection_info.h"
 #include "hilog_wrapper.h"
 #include "iconnection_observer.h"
 
@@ -59,6 +60,8 @@ public:
 
     virtual int UnregisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer);
 
+    virtual int GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos);
+
 private:
     void FirstStepInit();
     void SecondStepInit();
@@ -83,6 +86,7 @@ private:
     int StopExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int StartAbilityAddCallerInner(MessageParcel &data, MessageParcel &reply);
     int ConnectAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int ConnectAbilityWithTypeInner(MessageParcel &data, MessageParcel &reply);
     int DisconnectAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StopServiceAbilityInner(MessageParcel &data, MessageParcel &reply);
     int DumpStateInner(MessageParcel &data, MessageParcel &reply);
@@ -160,6 +164,7 @@ private:
     int UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply);
     int RegisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
     int UnregisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
+    int GetDlpConnectionInfosInner(MessageParcel &data, MessageParcel &reply);
 #ifdef SUPPORT_GRAPHICS
     int SetMissionLabelInner(MessageParcel &data, MessageParcel &reply);
     int SetMissionIconInner(MessageParcel &data, MessageParcel &reply);

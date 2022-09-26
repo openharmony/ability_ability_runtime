@@ -45,6 +45,9 @@ bool AbilityWindow::InitWindow(Rosen::WindowType winType,
     bool isPrivacy)
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
+    if (windowScene_ == nullptr) {
+        windowScene_ = std::make_shared<Rosen::WindowScene>();
+    }
     auto ret = windowScene_->Init(displayId, abilityContext, listener, option);
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         HILOG_ERROR("%{public}s error. failed to init window scene!", __func__);
@@ -70,34 +73,6 @@ bool AbilityWindow::InitWindow(Rosen::WindowType winType,
     isWindowAttached = true;
     HILOG_DEBUG("%{public}s end.", __func__);
     return true;
-}
-
-/**
- * @brief Called when this ability is activated.
- *
- */
-void AbilityWindow::OnPostAbilityActive()
-{
-    HILOG_DEBUG("AbilityWindow::OnPostAbilityActive called.");
-    if (!isWindowAttached) {
-        HILOG_ERROR("AbilityWindow::OnPostAbilityActive window not attached.");
-        return;
-    }
-    HILOG_DEBUG("AbilityWindow::OnPostAbilityActive end.");
-}
-
-/**
- * @brief Called when this ability is inactivated.
- *
- */
-void AbilityWindow::OnPostAbilityInactive()
-{
-    HILOG_DEBUG("AbilityWindow::OnPostAbilityInactive called.");
-    if (!isWindowAttached) {
-        HILOG_ERROR("AbilityWindow::OnPostAbilityInactive window not attached.");
-        return;
-    }
-    HILOG_DEBUG("AbilityWindow::OnPostAbilityInactive end.");
 }
 
 /**
@@ -155,10 +130,8 @@ void AbilityWindow::OnPostAbilityStop()
     }
 
     if (windowScene_) {
-        windowScene_ = nullptr;
-        HILOG_DEBUG("AbilityWindow::window windowScene_ release end.");
+        windowScene_->GoDestroy();
     }
-
     isWindowAttached = false;
     HILOG_DEBUG("AbilityWindow::OnPostAbilityStop end.");
 }
@@ -172,8 +145,47 @@ const sptr<Rosen::Window> AbilityWindow::GetWindow()
 {
     if (!isWindowAttached) {
         HILOG_ERROR("AbilityWindow::GetWindow window not attached.");
+        return nullptr;
     }
     return windowScene_ ? windowScene_->GetMainWindow() : nullptr;
 }
+
+#ifdef SUPPORT_GRAPHICS
+ErrCode AbilityWindow::SetMissionLabel(const std::string &label)
+{
+    HILOG_DEBUG("%{public}s start", __func__);
+    auto window = GetWindow();
+    if (!window) {
+        HILOG_ERROR("get window failed.");
+        return -1;
+    }
+
+    auto ret = window->SetAPPWindowLabel(label);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        HILOG_ERROR("SetAPPWindowLabel failed, errCode:%{public}d.", ret);
+        return -1;
+    }
+
+    return ERR_OK;
+}
+
+ErrCode AbilityWindow::SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon)
+{
+    HILOG_DEBUG("%{public}s start", __func__);
+    auto window = GetWindow();
+    if (!window) {
+        HILOG_ERROR("get window failed, will not set mission icon.");
+        return -1;
+    }
+
+    auto ret = window->SetAPPWindowIcon(icon);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        HILOG_ERROR("SetAPPWindowIcon failed, errCode:%{public}d.", ret);
+        return -1;
+    }
+
+    return ERR_OK;
+}
+#endif
 }  // namespace AppExecFwk
 }  // namespace OHOS

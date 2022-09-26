@@ -271,6 +271,15 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
         return ERR_INVALID_VALUE;
     }
 
+    if (targetAbilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
+        HILOG_ERROR("pending state is FOREGROUND.");
+        targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+        return 0;
+    } else {
+        HILOG_ERROR("pending state is not FOREGROUND.");
+        targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+    }
+
     if (abilityRequest.IsContinuation()) {
         targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
     } else {
@@ -641,9 +650,9 @@ int MissionListManager::MinimizeAbilityLocked(const std::shared_ptr<AbilityRecor
         return ERR_INVALID_VALUE;
     }
     HILOG_INFO("%{public}s called, ability:%{public}s.", __func__, abilityRecord->GetAbilityInfo().name.c_str());
+    abilityRecord->SetPendingState(AbilityState::BACKGROUND);
 
-    if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUND) &&
-        !abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
+    if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
         HILOG_ERROR("Minimize ability fail, ability state is invalid, not foregroundnew or foregerounding_new.");
         return ERR_OK;
     }
@@ -701,6 +710,9 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
         abilityRecord->CallRequest();
     }
 
+    auto taskName = std::to_string(abilityRecord->GetMissionId()) + "_cold";
+    handler->RemoveTask(taskName);
+    abilityRecord->PostCancelStartingWindowHotTask();
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
 
     return ERR_OK;
@@ -841,7 +853,7 @@ int MissionListManager::AbilityTransactionDone(const sptr<IRemoteObject> &token,
     }
 
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_INFO("ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
+    HILOG_DEBUG("ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
 
     if (targetState == AbilityState::BACKGROUND) {
         abilityRecord->SaveAbilityState(saveData);
@@ -895,6 +907,8 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
 #ifdef SUPPORT_GRAPHICS
         HILOG_INFO("%{public}s foreground succeeded.", __func__);
         abilityRecord->SetStartingWindow(false);
+        auto taskName = std::to_string(abilityRecord->GetMissionId()) + "_hot";
+        handler->RemoveTask(taskName);
 #endif
         auto task = [self, abilityRecord]() { self->CompleteForegroundSuccess(abilityRecord); };
         handler->PostTask(task);
@@ -920,7 +934,7 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     // ability do not save window mode
     abilityRecord->RemoveWindowMode();
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_INFO("ability: %{public}s", element.c_str());
+    HILOG_DEBUG("ability: %{public}s", element.c_str());
 
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
 
@@ -969,6 +983,17 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
         HILOG_DEBUG("call request after completing foreground state");
         abilityRecord->CallRequest();
         abilityRecord->SetStartToForeground(false);
+    }
+
+    if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
+        abilityRecord->SetMinimizeReason(true);
+        MoveToBackgroundTask(abilityRecord);
+        if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
+            UpdateMissionTimeStamp(abilityRecord);
+        }
+    } else if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
+        HILOG_ERROR("not continuous startup.");
+        abilityRecord->SetPendingState(AbilityState::INITIAL);
     }
 }
 
@@ -1030,6 +1055,12 @@ void MissionListManager::CompleteBackground(const std::shared_ptr<AbilityRecord>
     // send application state to AppMS.
     // notify AppMS to update application state.
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
+    if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
+        DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
+    } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
+        HILOG_ERROR("not continuous startup.");
+        abilityRecord->SetPendingState(AbilityState::INITIAL);
+    }
 
     if (abilityRecord->IsSwitchingPause()) {
         abilityRecord->SetSwitchingPause(false);
@@ -1302,16 +1333,19 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
                 return;
             }
             InnerMissionInfo innerMissionInfo;
+            auto missionId = abilityRecord->GetMissionId();
             int result = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-                abilityRecord->GetMissionId(), innerMissionInfo);
+                missionId, innerMissionInfo);
             if (result != 0) {
-                HILOG_INFO("Get missionInfo error, result is %{public}d, missionId is %{public}d",
-                    result, abilityRecord->GetMissionId());
+                HILOG_ERROR("Get missionInfo error, result is %{public}d, missionId is %{public}d", result, missionId);
                 break;
             }
             innerMissionInfo.missionInfo.time = GetCurrentTime();
             innerMissionInfo.missionInfo.runningState = -1;
             DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(innerMissionInfo);
+            if (listenerController_) {
+                listenerController_->NotifyMissionClosed(missionId);
+            }
             HILOG_DEBUG("Destroy ability record count %{public}ld", abilityRecord.use_count());
             break;
         }
@@ -1593,7 +1627,7 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t eventId)
 
 #ifdef SUPPORT_GRAPHICS
     if (abilityRecord->IsStartingWindow()) {
-        CancelStartingWindow(abilityRecord);
+        PostCancelStartingWindowTask(abilityRecord);
     }
 #endif
 
@@ -1675,7 +1709,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
         abilityRecord->SetStartingWindow(false);
     }
     if (abilityRecord->IsStartingWindow()) {
-        CancelStartingWindow(abilityRecord);
+        PostCancelStartingWindowTask(abilityRecord);
     }
 #endif
 
@@ -1778,9 +1812,12 @@ void MissionListManager::MoveToTerminateList(const std::shared_ptr<AbilityRecord
         HILOG_WARN("load timeout will not wait for died event, directly remove.");
         // update running state.
         InnerMissionInfo info;
-        if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-            selMission->GetMissionId(), info) == 0) {
+        auto missionId = selMission->GetMissionId();
+        if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(missionId, info) == 0) {
             info.missionInfo.runningState = -1;
+            if (listenerController_) {
+                listenerController_->NotifyMissionClosed(missionId);
+            }
             DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(info);
         }
         return;
@@ -1847,7 +1884,7 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
 #ifdef SUPPORT_GRAPHICS
     if (abilityRecord->IsStartingWindow()) {
-        CancelStartingWindow(abilityRecord);
+        PostCancelStartingWindowTask(abilityRecord);
     }
 #endif
 
@@ -2046,16 +2083,20 @@ void MissionListManager::HandleAbilityDiedByDefault(std::shared_ptr<AbilityRecor
     }
 
     // update running state.
+    auto missionId = mission->GetMissionId();
     if (!ability->IsUninstallAbility()) {
         if ((ability->GetAppIndex() != 0) || ability->GetAbilityInfo().removeMissionAfterTerminate ||
             ability->GetAbilityInfo().excludeFromMissions) {
-            RemoveMissionLocked(mission->GetMissionId(), ability->GetAbilityInfo().excludeFromMissions);
+            RemoveMissionLocked(missionId, ability->GetAbilityInfo().excludeFromMissions);
         } else {
             InnerMissionInfo info;
-            if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-                mission->GetMissionId(), info) == 0) {
+            if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(missionId, info) == 0) {
                 info.missionInfo.runningState = -1;
                 DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(info);
+            }
+
+            if (listenerController_) {
+                listenerController_->NotifyMissionClosed(missionId);
             }
         }
     }
@@ -2129,7 +2170,12 @@ int MissionListManager::SetMissionLabel(const sptr<IRemoteObject> &token, const 
         return -1;
     }
 
-    return DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionLabel(missionId, label);
+    auto ret = DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionLabel(missionId, label);
+    if (ret == 0 && listenerController_) {
+        listenerController_->NotifyMissionLabelUpdated(missionId);
+    }
+
+    return ret;
 }
 
 int MissionListManager::SetMissionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon)
@@ -2174,7 +2220,7 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
     NotifyMissionCreated(abilityRecord);
 }
 
-Closure MissionListManager::GetCancelStartingWindow(const std::shared_ptr<AbilityRecord> &abilityRecord) const
+Closure MissionListManager::GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const
 {
     auto windowHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetWMSHandler();
     if (!windowHandler) {
@@ -2191,7 +2237,7 @@ Closure MissionListManager::GetCancelStartingWindow(const std::shared_ptr<Abilit
     };
 }
 
-void MissionListManager::CancelStartingWindow(const std::shared_ptr<AbilityRecord> &abilityRecord) const
+void MissionListManager::PostCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const
 {
     HILOG_INFO("%{public}s was called.", __func__);
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
@@ -2200,7 +2246,7 @@ void MissionListManager::CancelStartingWindow(const std::shared_ptr<AbilityRecor
         return;
     }
 
-    auto task = GetCancelStartingWindow(abilityRecord);
+    auto task = GetCancelStartingWindowTask(abilityRecord);
     if (!task) {
         HILOG_ERROR("Fail to get CancelStartingWindow task.");
         return;

@@ -264,17 +264,26 @@ ohos_unittest("ability_start_setting_test") {
 ohos_unittest("watchdog_test") {
   module_out_path = module_output_path
 
-  include_dirs = [ "//third_party/json/include" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
+    "//third_party/json/include",
+  ]
 
   configs = [
     ":module_context_config",
     ":ability_start_setting_config",
   ]
 
-  sources = [ "watchdog_test.cpp" ]
+  sources = [
+    "${ability_runtime_test_path}/mock/frameworks_kits_appkit_test/include/mock_app_thread.cpp",
+    "watchdog_test.cpp",
+  ]
 
   deps = [
     "${ability_runtime_native_path}/appkit:appkit_native",
+    "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -282,11 +291,34 @@ ohos_unittest("watchdog_test") {
     "ability_base:base",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "c_utils:utilsbase",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+  ]
+}
+
+ohos_unittest("mix_stack_dumper_test") {
+  module_out_path = module_output_path
+
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
+    "${ability_runtime_test_path}/mock/frameworks_kits_runtime_test/",
+  ]
+
+  sources = [ "mix_stack_dumper_test.cpp" ]
+
+  deps = [
+    "${ability_runtime_native_path}/appkit:appkit_native",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:runtime",
+    "faultloggerd:lib_dfx_dump_catcher",
   ]
 }
 
@@ -302,6 +334,7 @@ group("unittest") {
     ":application_test",
     ":context_container_test",
     ":context_deal_test",
+    ":mix_stack_dumper_test",
     ":watchdog_test",
   ]
 

@@ -24,6 +24,7 @@
 #include "ability_delegator_registry.h"
 #include "ability_loader.h"
 #include "ability_thread.h"
+#include "ability_util.h"
 #include "app_loader.h"
 #include "application_data_manager.h"
 #include "application_env_impl.h"
@@ -32,6 +33,7 @@
 #include "context_deal.h"
 #include "context_impl.h"
 #include "extension_module_loader.h"
+#include "file_path_utils.h"
 #include "hilog_wrapper.h"
 #ifdef SUPPORT_GRAPHICS
 #include "form_extension.h"
@@ -40,6 +42,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "js_runtime.h"
+#include "mix_stack_dumper.h"
 #include "ohos_application.h"
 #include "resource_manager.h"
 #include "runtime.h"
@@ -48,8 +51,6 @@
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 #include "task_handler_client.h"
-#include "faultloggerd_client.h"
-#include "dfx_dump_catcher.h"
 #include "hisysevent.h"
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
@@ -62,8 +63,9 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime::Constants;
-std::shared_ptr<OHOSApplication> MainThread::applicationForAnr_ = nullptr;
-std::shared_ptr<EventHandler> MainThread::dfxHandler_ = nullptr;
+std::shared_ptr<OHOSApplication> MainThread::applicationForDump_ = nullptr;
+std::shared_ptr<EventHandler> MainThread::signalHandler_ = nullptr;
+static std::shared_ptr<MixStackDumper> mixStackDumper_ = nullptr;
 namespace {
 constexpr int32_t DELIVERY_TIME = 200;
 constexpr int32_t DISTRIBUTE_TIME = 100;
@@ -81,7 +83,7 @@ constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 
 const int32_t JSCRASH_TYPE = 3;
 const std::string JSVM_TYPE = "ARK";
-const std::string  DFX_THREAD_NAME = "DfxThreadName";
+const std::string SIGNAL_HANDLER = "SignalHandler";
 constexpr char EXTENSION_PARAMS_TYPE[] = "type";
 constexpr char EXTENSION_PARAMS_NAME[] = "name";
 }
@@ -624,9 +626,9 @@ void MainThread::HandleTerminateApplicationLocal()
     }
     applicationImpl_->PerformTerminateStrong();
 
-    std::shared_ptr<EventRunner> dfxRunner = dfxHandler_->GetEventRunner();
-    if (dfxRunner) {
-        dfxRunner->Stop();
+    std::shared_ptr<EventRunner> signalRunner = signalHandler_->GetEventRunner();
+    if (signalRunner) {
+        signalRunner->Stop();
     }
 
     std::shared_ptr<EventRunner> runner = mainHandler_->GetEventRunner();
@@ -635,8 +637,8 @@ void MainThread::HandleTerminateApplicationLocal()
         return;
     }
 
-    if (watchDogHandler_ != nullptr) {
-        watchDogHandler_->Stop();
+    if (watchdog_ != nullptr) {
+        watchdog_->Stop();
     }
 
     int ret = runner->Stop();
@@ -722,8 +724,8 @@ bool MainThread::InitCreate(
         return false;
     }
 
-    if (watchDogHandler_ != nullptr) {
-        watchDogHandler_->SetApplicationInfo(applicationInfo_);
+    if (watchdog_ != nullptr) {
+        watchdog_->SetApplicationInfo(applicationInfo_);
     }
 
     contextDeal->SetProcessInfo(processInfo_);
@@ -749,8 +751,7 @@ bool MainThread::CheckForHandleLaunchApplication(const AppLaunchData &appLaunchD
 }
 
 bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-    std::shared_ptr<ContextDeal> &contextDeal, ApplicationInfo &appInfo, BundleInfo& bundleInfo,
-    const Configuration &config)
+    BundleInfo& bundleInfo, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
@@ -793,6 +794,9 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     HILOG_DEBUG("HasPointerDevice is %{public}s.", hasPointerDevice.c_str());
     resConfig->SetInputDevice(ConvertHasPointerDevice(hasPointerDevice));
 #endif
+    std::string deviceType = config.GetItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
+    HILOG_DEBUG("deviceType is %{public}s <---->  %{public}d.", deviceType.c_str(), ConvertDeviceType(deviceType));
+    resConfig->SetDeviceType(ConvertDeviceType(deviceType));
     resourceManager->UpdateResConfig(*resConfig);
     return true;
 }
@@ -858,11 +862,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     ProcessInfo processInfo = appLaunchData.GetProcessInfo();
     Profile appProfile = appLaunchData.GetProfile();
 
+    HILOG_DEBUG("MainThread handle launch application, InitCreate Start.");
     std::shared_ptr<ContextDeal> contextDeal = nullptr;
     if (!InitCreate(contextDeal, appInfo, processInfo, appProfile)) {
         HILOG_ERROR("MainThread::handleLaunchApplication InitCreate failed");
         return;
     }
+    HILOG_DEBUG("MainThread handle launch application, InitCreate End.");
 
     // get application shared point
     application_ = std::shared_ptr<OHOSApplication>(ApplicationLoader::GetInstance().GetApplicationByName());
@@ -870,14 +876,18 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         HILOG_ERROR("HandleLaunchApplication::application launch failed");
         return;
     }
-    applicationForAnr_ = application_;
+    applicationForDump_ = application_;
+    mixStackDumper_ = std::make_shared<MixStackDumper>();
+    mixStackDumper_->InstallDumpHandler(applicationForDump_, signalHandler_);
 
     // init resourceManager.
+    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager Start.");
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (resourceManager == nullptr) {
         HILOG_ERROR("MainThread::handleLaunchApplication create resourceManager failed");
         return;
     }
+    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager End.");
 
     sptr<IBundleMgr> bundleMgr = contextDeal->GetBundleManager();
     if (bundleMgr == nullptr) {
@@ -907,13 +917,15 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         isStageBased = bundleInfo.hapModuleInfos.back().isStageBasedModel;
     }
 
-    HILOG_INFO("stageBased:%{public}d moduleJson:%{public}d size:%{public}d",
-        isStageBased, moduelJson, (int32_t)bundleInfo.hapModuleInfos.size());
+    HILOG_INFO("stageBased:%{public}d moduleJson:%{public}d size:%{public}zu",
+        isStageBased, moduelJson, bundleInfo.hapModuleInfos.size());
 
-    if (!InitResourceManager(resourceManager, contextDeal, appInfo, bundleInfo, config)) {
+    HILOG_DEBUG("MainThread handle launch application, InitResourceManager Start.");
+    if (!InitResourceManager(resourceManager, bundleInfo, config)) {
         HILOG_ERROR("MainThread::handleLaunchApplication InitResourceManager failed");
         return;
     }
+    HILOG_DEBUG("MainThread handle launch application, InitResourceManager End.");
 
     // create contextImpl
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
@@ -933,6 +945,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.hapPath = bundleInfo.hapModuleInfos.back().hapPath;
         options.eventRunner = mainHandler_->GetEventRunner();
         options.loadAce = true;
+        options.isBundle = (bundleInfo.hapModuleInfos.back().compileMode != AppExecFwk::CompileMode::ES_MODULE);
         std::string nativeLibraryPath = appInfo.nativeLibraryPath;
         if (!nativeLibraryPath.empty()) {
             if (nativeLibraryPath.back() == '/') {
@@ -1254,27 +1267,12 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("MainThread::handleLaunchAbility called start.");
-
-    if (applicationImpl_ == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility applicationImpl_ is null");
-        return;
-    }
-
-    if (abilityRecordMgr_ == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility abilityRecordMgr_ is null");
-        return;
-    }
-
-    if (abilityRecord == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility parameter(abilityRecord) is null");
-        return;
-    }
+    CHECK_POINTER_LOG(applicationImpl_, "MainThread::HandleLaunchAbility applicationImpl_ is null");
+    CHECK_POINTER_LOG(abilityRecordMgr_, "MainThread::HandleLaunchAbility abilityRecordMgr_ is null");
+    CHECK_POINTER_LOG(abilityRecord, "MainThread::HandleLaunchAbility parameter(abilityRecord) is null");
 
     auto abilityToken = abilityRecord->GetToken();
-    if (abilityToken == nullptr) {
-        HILOG_ERROR("MainThread::HandleLaunchAbility failed. abilityRecord->GetToken failed");
-        return;
-    }
+    CHECK_POINTER_LOG(abilityToken, "MainThread::HandleLaunchAbility failed. abilityRecord->GetToken failed");
 
     abilityRecordMgr_->SetToken(abilityToken);
     abilityRecordMgr_->AddAbilityRecord(abilityToken, abilityRecord);
@@ -1303,6 +1301,16 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
 #else
     AbilityThread::AbilityThreadMain(application_, abilityRecord, mainHandler_->GetEventRunner(), stageContext);
 #endif
+
+    if (runtime) {
+        std::vector<std::pair<std::string, std::string>> hqfFilePair;
+        if (GetHqfFileAndHapPath(appInfo->bundleName, hqfFilePair)) {
+            for (auto it = hqfFilePair.begin(); it != hqfFilePair.end(); it++) {
+                HILOG_INFO("hqfFile: %{private}s, hapPath: %{private}s.", it->first.c_str(), it->second.c_str());
+                runtime->LoadRepairPatch(it->first, it->second);
+            }
+        }
+    }
 }
 
 /**
@@ -1468,9 +1476,9 @@ void MainThread::HandleTerminateApplication()
         HILOG_WARN("%{public}s: applicationImpl_->PerformTerminate() failed.", __func__);
     }
 
-    std::shared_ptr<EventRunner> dfxRunner = dfxHandler_->GetEventRunner();
-    if (dfxRunner) {
-        dfxRunner->Stop();
+    std::shared_ptr<EventRunner> signalRunner = signalHandler_->GetEventRunner();
+    if (signalRunner) {
+        signalRunner->Stop();
     }
 
     appMgr_->ApplicationTerminated(applicationImpl_->GetRecordId());
@@ -1480,8 +1488,8 @@ void MainThread::HandleTerminateApplication()
         return;
     }
 
-    if (watchDogHandler_ != nullptr) {
-        watchDogHandler_->Stop();
+    if (watchdog_ != nullptr) {
+        watchdog_->Stop();
     }
 
     int ret = runner->Stop();
@@ -1587,13 +1595,13 @@ void MainThread::TaskTimeoutDetected(const std::shared_ptr<EventRunner> &runner)
     HILOG_DEBUG("MainThread::TaskTimeoutDetected called end.");
 }
 
-void MainThread::Init(const std::shared_ptr<EventRunner> &runner, const std::shared_ptr<EventRunner> &watchDogRunner)
+void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("MainThread:Init Start");
     mainHandler_ = std::make_shared<MainHandler>(runner, this);
-    watchDogHandler_ = std::make_shared<WatchDog>(watchDogRunner);
-    dfxHandler_ = std::make_shared<EventHandler>(EventRunner::Create(DFX_THREAD_NAME));
+    watchdog_ = std::make_shared<Watchdog>();
+    signalHandler_ = std::make_shared<EventHandler>(EventRunner::Create(SIGNAL_HANDLER));
     wptr<MainThread> weak = this;
     auto task = [weak]() {
         auto appThread = weak.promote();
@@ -1603,18 +1611,13 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner, const std::sha
         }
         appThread->SetRunnerStarted(true);
     };
-    auto taskWatchDog = []() {
-        HILOG_DEBUG("MainThread:WatchDogHandler Start");
-    };
     if (!mainHandler_->PostTask(task)) {
         HILOG_ERROR("MainThread::Init PostTask task failed");
     }
-    if (!watchDogHandler_->PostTask(taskWatchDog)) {
-        HILOG_ERROR("MainThread::Init WatchDog postTask task failed");
-    }
     TaskTimeoutDetected(runner);
 
-    watchDogHandler_->Init(mainHandler_, watchDogHandler_);
+    watchdog_->Init(mainHandler_);
+
     TaskHandlerClient::GetInstance()->CreateRunner();
     HILOG_DEBUG("MainThread:Init end.");
 }
@@ -1622,18 +1625,14 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner, const std::sha
 void MainThread::HandleSignal(int signal)
 {
     switch (signal) {
-        case SIGUSR1: {
-            dfxHandler_->PostTask(&MainThread::HandleScheduleANRProcess);
-            break;
-        }
         case SIGNAL_JS_HEAP: {
             auto heapFunc = std::bind(&MainThread::HandleDumpHeap, false);
-            dfxHandler_->PostTask(heapFunc);
+            signalHandler_->PostTask(heapFunc);
             break;
         }
         case SIGNAL_JS_HEAP_PRIV: {
             auto privateHeapFunc = std::bind(&MainThread::HandleDumpHeap, true);
-            dfxHandler_->PostTask(privateHeapFunc);
+            signalHandler_->PostTask(privateHeapFunc);
             break;
         }
         default:
@@ -1644,38 +1643,9 @@ void MainThread::HandleSignal(int signal)
 void MainThread::HandleDumpHeap(bool isPrivate)
 {
     HILOG_DEBUG("Dump heap start.");
-    if (applicationForAnr_ != nullptr && applicationForAnr_->GetRuntime() != nullptr) {
+    if (applicationForDump_ != nullptr && applicationForDump_->GetRuntime() != nullptr) {
         HILOG_DEBUG("Send dump heap to ark start.");
-        applicationForAnr_->GetRuntime()->DumpHeapSnapshot(isPrivate);
-    }
-}
-
-void MainThread::HandleScheduleANRProcess()
-{
-    HILOG_DEBUG("MainThread:HandleScheduleANRProcess start.");
-    int rFD = -1;
-    std::string mainThreadStackInfo;
-    if ((rFD = RequestFileDescriptor(int32_t(FaultLoggerType::JS_STACKTRACE))) < 0) {
-        HILOG_ERROR("MainThread::HandleScheduleANRProcess request file eescriptor failed");
-        return;
-    }
-    if (applicationForAnr_ != nullptr && applicationForAnr_->GetRuntime() != nullptr) {
-        mainThreadStackInfo = applicationForAnr_->GetRuntime()->BuildJsStackTrace();
-        if (write(rFD, mainThreadStackInfo.c_str(), mainThreadStackInfo.size()) !=
-          (ssize_t)mainThreadStackInfo.size()) {
-            HILOG_ERROR("MainThread::HandleScheduleANRProcess write main thread stack info failed");
-        }
-    }
-    OHOS::HiviewDFX::DfxDumpCatcher dumplog;
-    std::string proStackInfo;
-    if (dumplog.DumpCatch(getpid(), 0, proStackInfo) == false) {
-        HILOG_ERROR("MainThread::HandleScheduleANRProcess get process stack info failed");
-    }
-    if (write(rFD, proStackInfo.c_str(), proStackInfo.size()) != (ssize_t)proStackInfo.size()) {
-        HILOG_ERROR("MainThread::HandleScheduleANRProcess write process stack info failed");
-    }
-    if (rFD != -1) {
-        close(rFD);
+        applicationForDump_->GetRuntime()->DumpHeapSnapshot(isPrivate);
     }
 }
 
@@ -1686,11 +1656,6 @@ void MainThread::Start()
     std::shared_ptr<EventRunner> runner = EventRunner::GetMainEventRunner();
     if (runner == nullptr) {
         HILOG_ERROR("MainThread::main failed, runner is nullptr");
-        return;
-    }
-    std::shared_ptr<EventRunner> runnerWatchDog = EventRunner::Create("WatchDogRunner");
-    if (runnerWatchDog == nullptr) {
-        HILOG_ERROR("MainThread::Start runnerWatchDog is nullptr");
         return;
     }
     sptr<MainThread> thread = sptr<MainThread>(new (std::nothrow) MainThread());
@@ -1707,7 +1672,7 @@ void MainThread::Start()
     sigaction(SIGNAL_JS_HEAP, &sigAct, NULL);
     sigaction(SIGNAL_JS_HEAP_PRIV, &sigAct, NULL);
 
-    thread->Init(runner, runnerWatchDog);
+    thread->Init(runner);
 
     thread->Attach();
 
@@ -1735,9 +1700,8 @@ void MainThread::MainHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::P
 {
     auto eventId = event->GetInnerEventId();
     if (eventId == CHECK_MAIN_THREAD_IS_ALIVE) {
-        auto watchDogHanlder = WatchDog::GetCurrentHandler();
-        if (watchDogHanlder != nullptr) {
-            watchDogHanlder->SendEvent(MAIN_THREAD_IS_ALIVE);
+        if (mainThreadObj_ != nullptr) {
+            mainThreadObj_->CheckMainThreadIsAlive();
         }
     }
 }
@@ -1956,6 +1920,142 @@ void MainThread::ScheduleAcceptWant(const AAFwk::Want &want, const std::string &
     }
     HILOG_DEBUG("end.");
 }
+
+void MainThread::CheckMainThreadIsAlive()
+{
+    watchdog_->SetAppMainThreadState(true);
+    watchdog_->AllowReportEvent();
+}
 #endif  // ABILITY_LIBRARY_LOADER
+
+int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    wptr<MainThread> weak = this;
+    auto task = [weak, bundleName]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr || appThread->application_ == nullptr) {
+            HILOG_ERROR("app thread or application is nullptr.");
+            return;
+        }
+
+        std::vector<std::pair<std::string, std::string>> hqfFilePair;
+        if (appThread->GetHqfFileAndHapPath(bundleName, hqfFilePair)) {
+            for (auto it = hqfFilePair.begin(); it != hqfFilePair.end(); it++) {
+                HILOG_INFO("LoadPatch, hqfFile: %{private}s, hapPath: %{private}s.",
+                    it->first.c_str(), it->second.c_str());
+                appThread->application_->NotifyLoadRepairPatch(it->first, it->second);
+            }
+        } else {
+            HILOG_DEBUG("There's no hqfFile need to load.");
+        }
+    };
+    if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
+        HILOG_ERROR("Post task failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    return NO_ERROR;
+}
+
+int32_t MainThread::ScheduleNotifyHotReloadPage()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    wptr<MainThread> weak = this;
+    auto task = [weak]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr || appThread->application_ == nullptr) {
+            HILOG_ERROR("app thread or application is nullptr.");
+            return;
+        }
+        appThread->application_->NotifyHotReloadPage();
+    };
+    if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
+        HILOG_ERROR("Post task failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    return NO_ERROR;
+}
+
+bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
+    std::vector<std::pair<std::string, std::string>> &fileMap)
+{
+    HILOG_DEBUG("function called.");
+    auto bundleObj = DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bundleObj == nullptr) {
+        HILOG_ERROR("Failed to get bundle manager service.");
+        return false;
+    }
+
+    sptr<IBundleMgr> bundleMgr = iface_cast<IBundleMgr>(bundleObj);
+    if (bundleMgr == nullptr) {
+        HILOG_ERROR("Bundle manager is nullptr.");
+        return false;
+    }
+
+    BundleInfo bundleInfo;
+    if (!bundleMgr->GetBundleInfo(bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo)) {
+        HILOG_ERROR("Get bundle info of %{public}s failed.", bundleName.c_str());
+        return false;
+    }
+
+    std::vector<HqfInfo> hqfInfos = bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
+    HILOG_INFO("[%{public}s] has %{public}zu hqf.", bundleName.c_str(), hqfInfos.size());
+    for (auto hqfInfo : hqfInfos) {
+        std::string moduleName = hqfInfo.moduleName;
+        std::string resolvedHapPath;
+        for (auto hapInfo : bundleInfo.hapModuleInfos) {
+            if (hapInfo.moduleName != moduleName) {
+                continue;
+            }
+            std::string hapPath = AbilityRuntime::GetLoadPath(hapInfo.hapPath);
+            auto position = hapPath.rfind('/');
+            if (position != std::string::npos) {
+                resolvedHapPath = hapPath.erase(position) + FILE_SEPARATOR + moduleName;
+            }
+            break;
+        }
+
+        std::string resolvedHqfFile(AbilityRuntime::GetLoadPath(hqfInfo.hqfFilePath));
+        HILOG_INFO("bundleName: %{public}s, moduleName: %{public}s, hqf file: %{private}s, hap path: %{private}s.",
+            bundleName.c_str(), moduleName.c_str(), resolvedHqfFile.c_str(), resolvedHapPath.c_str());
+        fileMap.push_back(std::pair<std::string, std::string>(resolvedHqfFile, resolvedHapPath));
+    }
+
+    return true;
+}
+
+int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    wptr<MainThread> weak = this;
+    auto task = [weak, bundleName]() {
+        auto appThread = weak.promote();
+        if (appThread == nullptr || appThread->application_ == nullptr) {
+            HILOG_ERROR("app thread or application is nullptr.");
+            return;
+        }
+
+        std::vector<std::pair<std::string, std::string>> hqfFilePair;
+        if (appThread->GetHqfFileAndHapPath(bundleName, hqfFilePair)) {
+            for (auto it = hqfFilePair.begin(); it != hqfFilePair.end(); it++) {
+                HILOG_INFO("UnloadPatch, hqfFile: %{private}s.", it->first.c_str());
+                appThread->application_->NotifyUnLoadRepairPatch(it->first);
+            }
+        } else {
+            HILOG_DEBUG("There's no hqfFile need to unload.");
+        }
+    };
+    if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
+        HILOG_ERROR("Post task failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    return NO_ERROR;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

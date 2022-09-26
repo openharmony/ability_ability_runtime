@@ -268,6 +268,21 @@ enum {
      * Result(2097201) for window mode.
      */
     ERR_AAFWK_INVALID_WINDOW_MODE,
+
+    /**
+     * Result(2097202) for wrong interface call.
+     */
+    ERR_WRONG_INTERFACE_CALL,
+
+    /**
+     * Result(2097203) for crowdtest expired.
+     */
+    ERR_CROWDTEST_EXPIRED,
+
+    /**
+     * Result(2097204) for application abnormal.
+     */
+    ERR_DISPOSED_STATUS,
 };
 
 enum {

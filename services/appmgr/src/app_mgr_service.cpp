@@ -133,10 +133,11 @@ ErrCode AppMgrService::Init()
         HILOG_ERROR("init failed without inner service");
         return ERR_INVALID_OPERATION;
     }
-    appMgrServiceInner_->Init();
-    handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrServiceInner_);
 
+    handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrServiceInner_);
     appMgrServiceInner_->SetEventHandler(handler_);
+    appMgrServiceInner_->Init();
+
     ErrCode openErr = appMgrServiceInner_->OpenAppSpawnConnection();
     if (FAILED(openErr)) {
         HILOG_WARN("failed to connect to AppSpawnDaemon! errCode: %{public}08x", openErr);
@@ -375,6 +376,45 @@ int AppMgrService::FinishUserTest(const std::string &msg, const int64_t &resultC
     return ERR_OK;
 }
 
+int AppMgrService::Dump(int fd, const std::vector<std::u16string>& args)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("%{public}s, appms is not ready.", __func__);
+        return ERR_APPEXECFWK_HIDUMP_ERROR;
+    }
+
+    std::string result;
+    Dump(args, result);
+    int ret = dprintf(fd, "%s\n", result.c_str());
+    if (ret < 0) {
+        HILOG_ERROR("%{public}s, dprintf error.", __func__);
+        return ERR_APPEXECFWK_HIDUMP_ERROR;
+    }
+    return ERR_OK;
+}
+
+void AppMgrService::Dump(const std::vector<std::u16string>& args, std::string& result) const
+{
+    auto size = args.size();
+    if (size == 0) {
+        ShowHelp(result);
+        return;
+    }
+
+    std::string optionKey = Str16ToStr8(args[0]);
+    if (optionKey != "-h") {
+        result.append("error: unkown option.\n");
+    }
+    ShowHelp(result);
+}
+
+void AppMgrService::ShowHelp(std::string& result) const
+{
+    result.append("Usage:\n")
+        .append("-h                          ")
+        .append("help text for the tool\n");
+}
+
 void AppMgrService::ScheduleAcceptWantDone(const int32_t recordId, const AAFwk::Want &want, const std::string &flag)
 {
     if (!IsReady()) {
@@ -482,5 +522,57 @@ int AppMgrService::BlockAppService()
     return ERR_OK;
 }
 #endif
+
+bool AppMgrService::GetAppRunningStateByBundleName(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return false;
+    }
+
+    return appMgrServiceInner_->GetAppRunningStateByBundleName(bundleName);
+}
+
+int32_t AppMgrService::NotifyLoadRepairPatch(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    return appMgrServiceInner_->NotifyLoadRepairPatch(bundleName);
+}
+
+int32_t AppMgrService::NotifyHotReloadPage(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    return appMgrServiceInner_->NotifyHotReloadPage(bundleName);
+}
+
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+int32_t AppMgrService::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    return appMgrServiceInner_->SetContinuousTaskProcess(pid, isContinuousTask);
+}
+#endif
+
+int32_t AppMgrService::NotifyUnLoadRepairPatch(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    return appMgrServiceInner_->NotifyUnLoadRepairPatch(bundleName);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

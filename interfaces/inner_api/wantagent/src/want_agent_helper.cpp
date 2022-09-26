@@ -396,7 +396,7 @@ std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonSt
         operationType = static_cast<WantAgentConstant::OperationType>(jsonObject.at("operationType").get<int>());
     }
 
-    std::vector<WantAgentConstant::Flags> flagsVec = parseFlags(jsonObject);
+    std::vector<WantAgentConstant::Flags> flagsVec = ParseFlags(jsonObject);
 
     std::vector<std::shared_ptr<AAFwk::Want>> wants = {};
     if (jsonObject.contains("wants")) {
@@ -422,26 +422,31 @@ std::shared_ptr<WantAgent> WantAgentHelper::FromString(const std::string &jsonSt
     return GetWantAgent(info);
 }
 
-std::vector<WantAgentConstant::Flags> WantAgentHelper::parseFlags(nlohmann::json jsonObject)
+std::vector<WantAgentConstant::Flags> WantAgentHelper::ParseFlags(nlohmann::json jsonObject)
 {
     int flags = -1;
     std::vector<WantAgentConstant::Flags> flagsVec = {};
     if (jsonObject.contains("flags")) {
         flags = jsonObject.at("flags").get<int>();
     }
-    if (static_cast<uint32_t>(flags) & FLAG_ONE_SHOT) {
+
+    if (flags < 0) {
+        return flagsVec;
+    }
+
+    if (static_cast<uint32_t>(flags) & static_cast<uint32_t>(FLAG_ONE_SHOT)) {
         flagsVec.emplace_back(WantAgentConstant::Flags::ONE_TIME_FLAG);
     }
-    if (static_cast<uint32_t>(flags) & FLAG_NO_CREATE) {
+    if (static_cast<uint32_t>(flags) & static_cast<uint32_t>(FLAG_NO_CREATE)) {
         flagsVec.emplace_back(WantAgentConstant::Flags::NO_BUILD_FLAG);
     }
-    if (static_cast<uint32_t>(flags) & FLAG_CANCEL_CURRENT) {
+    if (static_cast<uint32_t>(flags) & static_cast<uint32_t>(FLAG_CANCEL_CURRENT)) {
         flagsVec.emplace_back(WantAgentConstant::Flags::CANCEL_PRESENT_FLAG);
     }
-    if (static_cast<uint32_t>(flags) & FLAG_UPDATE_CURRENT) {
+    if (static_cast<uint32_t>(flags) & static_cast<uint32_t>(FLAG_UPDATE_CURRENT)) {
         flagsVec.emplace_back(WantAgentConstant::Flags::UPDATE_PRESENT_FLAG);
     }
-    if (static_cast<uint32_t>(flags) & FLAG_IMMUTABLE) {
+    if (static_cast<uint32_t>(flags) & static_cast<uint32_t>(FLAG_IMMUTABLE)) {
         flagsVec.emplace_back(WantAgentConstant::Flags::CONSTANT_FLAG);
     }
 

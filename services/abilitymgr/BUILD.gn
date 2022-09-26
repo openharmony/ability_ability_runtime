@@ -25,9 +25,11 @@ group("abilityms_target") {
   ]
 }
 
-config("abilityms_config") {
+config("abilityms_exception_config") {
   cflags_cc = [ "-fexceptions" ]
+}
 
+config("abilityms_config") {
   include_dirs = [
     "include/",
     "${ability_runtime_innerkits_path}/ability_manager/include",
@@ -56,9 +58,14 @@ config("abilityms_config") {
     "${bgtaskmgr_frameworks_path}/common/include",
     "${bgtaskmgr_frameworks_path}/include",
     "${init_path}/interfaces/innerkits/include/syspara/",
+    "${bundlefwk_inner_api_path}/appexecfwk_core/include",
   ]
 
   defines = []
+
+  if (is_asan) {
+    defines += [ "SUPPORT_ASAN" ]
+  }
 
   if (ability_command_for_test) {
     defines += [ "ABILITY_COMMAND_FOR_TEST" ]
@@ -86,6 +93,11 @@ config("abilityms_config") {
   if (efficiency_manager) {
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
   }
+
+  if (is_asan) {
+    defines += [ "SUPPORT_ASAN" ]
+  }
+
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -96,7 +108,10 @@ ohos_shared_library("abilityms") {
   sources = abilityms_files
   sources += [ "src/sa_mgr_client.cpp" ]
   cflags_cc = []
-  configs = [ ":abilityms_config" ]
+  configs = [
+    ":abilityms_config",
+    ":abilityms_exception_config",
+  ]
   deps = [
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_services_path}/common:event_report",
@@ -109,18 +124,16 @@ ohos_shared_library("abilityms") {
   ]
 
   external_deps = [
-    "ability_base:base",
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
-    "ability_runtime:ability_context_native",
     "ability_runtime:ability_deps_wrapper",
+    "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_manager",
     "ability_runtime:connection_obs_manager",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
@@ -169,7 +182,6 @@ ohos_shared_library("abilityms") {
       "input:libmmi-client",
       "multimedia_image_standard:image_native",
       "window_manager:libdm",
-      "window_manager:libwm",
     ]
   }
 
