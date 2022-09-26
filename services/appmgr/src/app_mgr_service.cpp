@@ -133,10 +133,11 @@ ErrCode AppMgrService::Init()
         HILOG_ERROR("init failed without inner service");
         return ERR_INVALID_OPERATION;
     }
-    appMgrServiceInner_->Init();
-    handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrServiceInner_);
 
+    handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrServiceInner_);
     appMgrServiceInner_->SetEventHandler(handler_);
+    appMgrServiceInner_->Init();
+
     ErrCode openErr = appMgrServiceInner_->OpenAppSpawnConnection();
     if (FAILED(openErr)) {
         HILOG_WARN("failed to connect to AppSpawnDaemon! errCode: %{public}08x", openErr);
@@ -550,6 +551,28 @@ int32_t AppMgrService::NotifyHotReloadPage(const std::string &bundleName)
     }
 
     return appMgrServiceInner_->NotifyHotReloadPage(bundleName);
+}
+
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+int32_t AppMgrService::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    return appMgrServiceInner_->SetContinuousTaskProcess(pid, isContinuousTask);
+}
+#endif
+
+int32_t AppMgrService::NotifyUnLoadRepairPatch(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    return appMgrServiceInner_->NotifyUnLoadRepairPatch(bundleName);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -219,7 +219,26 @@ void AppRunningRecord::SetState(const ApplicationState state)
         HILOG_ERROR("Invalid application state");
         return;
     }
+
+    if (curState_ != ApplicationState::APP_STATE_FOCUS) {
+        lastState_ = curState_;
+    }
     curState_ = state;
+}
+
+void AppRunningRecord::Unfocused(const sptr<IRemoteObject> &token)
+{
+    if (curState_ != ApplicationState::APP_STATE_FOCUS) {
+        return;
+    }
+    curState_ = lastState_;
+
+    auto abilityRecord = GetAbilityRunningRecordByToken(token);
+    if (abilityRecord && abilityRecord->GetAbilityInfo() != nullptr &&
+        abilityRecord->GetAbilityInfo()->type == AbilityType::PAGE) {
+        abilityRecord->Unfocused();
+        StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(abilityRecord->GetState()), true);
+    }
 }
 
 const std::list<std::shared_ptr<ApplicationInfo>> AppRunningRecord::GetAppInfoList()
@@ -676,6 +695,8 @@ void AppRunningRecord::UpdateAbilityState(const sptr<IRemoteObject> &token, cons
         AbilityForeground(abilityRecord);
     } else if (state == AbilityState::ABILITY_STATE_BACKGROUND) {
         AbilityBackground(abilityRecord);
+    } else if (state == AbilityState::ABILITY_STATE_FOCUS) {
+        AbilityFocused(abilityRecord);
     } else {
         HILOG_WARN("wrong state");
     }
@@ -690,7 +711,8 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
     }
     AbilityState curAbilityState = ability->GetState();
     if (curAbilityState != AbilityState::ABILITY_STATE_READY &&
-        curAbilityState != AbilityState::ABILITY_STATE_BACKGROUND) {
+        curAbilityState != AbilityState::ABILITY_STATE_BACKGROUND &&
+        curAbilityState != AbilityState::ABILITY_STATE_FOCUS) {
         HILOG_ERROR("ability state(%{public}d) error", static_cast<int32_t>(curAbilityState));
         return;
     }
@@ -702,14 +724,15 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
         }
         foregroundingAbilityTokens_.push_back(ability->GetToken());
         return;
-    } else if (curState_ == ApplicationState::APP_STATE_FOREGROUND) {
-        // Just change ability to foreground if current application state is foreground.
+    } else if (curState_ == ApplicationState::APP_STATE_FOREGROUND ||
+        curState_ == ApplicationState::APP_STATE_FOCUS) {
+        // Just change ability to foreground if current application state is foreground or focus.
         auto moduleRecord = GetModuleRunningRecordByToken(ability->GetToken());
         moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOREGROUND);
         StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND), true);
         auto serviceInner = appMgrServiceInner_.lock();
         if (serviceInner) {
-            serviceInner->OnAppStateChanged(shared_from_this(), curState_);
+            serviceInner->OnAppStateChanged(shared_from_this(), curState_, false);
         }
     } else {
         HILOG_WARN("wrong application state");
@@ -723,8 +746,9 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
         HILOG_ERROR("ability is null");
         return;
     }
-    if (ability->GetState() != AbilityState::ABILITY_STATE_FOREGROUND) {
-        HILOG_ERROR("ability state is not foreground");
+    if (ability->GetState() != AbilityState::ABILITY_STATE_FOREGROUND &&
+        ability->GetState() != AbilityState::ABILITY_STATE_FOCUS) {
+        HILOG_ERROR("ability state is not foreground or focus");
         return;
     }
 
@@ -732,7 +756,7 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
     auto moduleRecord = GetModuleRunningRecordByToken(ability->GetToken());
     moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_BACKGROUND);
     StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND), true);
-    if (curState_ == ApplicationState::APP_STATE_FOREGROUND) {
+    if (curState_ == ApplicationState::APP_STATE_FOREGROUND || curState_ == ApplicationState::APP_STATE_FOCUS) {
         int32_t foregroundSize = 0;
         auto abilitysMap = GetAbilities();
         for (const auto &item : abilitysMap) {
@@ -752,6 +776,35 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
     } else {
         HILOG_WARN("wrong application state");
     }
+}
+
+void AppRunningRecord::AbilityFocused(const std::shared_ptr<AbilityRunningRecord> &ability)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!ability) {
+        HILOG_ERROR("ability is null");
+        return;
+    }
+
+    // background to focus may not exist.
+    if (ability->GetState() != AbilityState::ABILITY_STATE_FOREGROUND &&
+        ability->GetState() != AbilityState::ABILITY_STATE_BACKGROUND) {
+        HILOG_ERROR("ability state is not foreground or background");
+        return;
+    }
+
+    // background to focus, schedule application to foreground.
+    if (lastState_ == ApplicationState::APP_STATE_BACKGROUND) {
+        ScheduleForegroundRunning();
+    }
+
+    // change ability state to focus.
+    auto moduleRecord = GetModuleRunningRecordByToken(ability->GetToken());
+    if (!moduleRecord) {
+        return;
+    }
+    moduleRecord->OnAbilityStateChanged(ability, AbilityState::ABILITY_STATE_FOCUS);
+    StateChangedNotifyObserver(ability, static_cast<int32_t>(AbilityState::ABILITY_STATE_FOCUS), true);
 }
 
 void AppRunningRecord::PopForegroundingAbilityTokens()
@@ -1188,6 +1241,27 @@ int32_t AppRunningRecord::NotifyHotReloadPage()
         return ERR_INVALID_VALUE;
     }
     return appLifeCycleDeal_->NotifyHotReloadPage();
+}
+
+int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    if (!appLifeCycleDeal_) {
+        HILOG_ERROR("appLifeCycleDeal_ is null");
+        return ERR_INVALID_VALUE;
+    }
+    return appLifeCycleDeal_->NotifyUnLoadRepairPatch(bundleName);
+}
+
+bool AppRunningRecord::IsContinuousTask()
+{
+    return isContinuousTask_;
+}
+
+void AppRunningRecord::SetContinuousTaskAppState(bool isContinuousTask)
+{
+    isContinuousTask_ = isContinuousTask;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
