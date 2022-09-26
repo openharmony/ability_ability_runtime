@@ -15,11 +15,9 @@
 
 #include "ability_record.h"
 
-#include <regex>
 #include <singleton.h>
 #include <vector>
 
-#include "ability_constants.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_scheduler_stub.h"
