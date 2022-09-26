@@ -170,8 +170,7 @@ HWTEST_F(AbilityManagerServiceAnrTest, SendANRProcessID_001, TestSize.Level1)
         auto result = abilityMs_->SendANRProcessID(pid);
         sleep(6);
         EXPECT_FALSE(Ace::UIServiceMgrClient::GetInstance()->GetAppRunningState());
-        result = kill(pid, SIGKILL);
-        EXPECT_EQ(result, -1);
+        kill(pid, SIGKILL);
     }
 }
 
