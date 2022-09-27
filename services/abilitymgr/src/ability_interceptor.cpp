@@ -19,6 +19,7 @@
 #include <string>
 
 #include "ability_manager_errors.h"
+#include "app_running_control_rule_result.h"
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundle_constants.h"
 #include "in_process_call_wrapper.h"
@@ -99,11 +100,13 @@ DisposedInterceptor::~DisposedInterceptor()
 
 ErrCode DisposedInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground)
 {
-    if (CheckDisposed(want)) {
-        HILOG_ERROR("The target application is in disposed status");
+    AppExecFwk::AppRunningControlRuleResult controlRule;
+    if (CheckDisposed(want, userId, controlRule)) {
+        HILOG_ERROR("The target application is intercpted. %{public}s",
+            controlRule.ruleParam.controlMessage.c_str());
 #ifdef SUPPORT_GRAPHICS
         if (isForeground) {
-            int ret = AbilityUtil::StartAppgallery(requestCode, userId, ACTION_MARKET_DISPOSED);
+            int ret = AbilityManagerClient::GetInstance()->StartAbility(*controlRule.ruleParam.controlWant);
             if (ret != ERR_OK) {
                 HILOG_ERROR("Disposed implicit start appgallery failed.");
                 return ret;
@@ -115,7 +118,7 @@ ErrCode DisposedInterceptor::DoProcess(const Want &want, int requestCode, int32_
     return ERR_OK;
 }
 
-bool DisposedInterceptor::CheckDisposed(const Want &want)
+bool DisposedInterceptor::CheckDisposed(const Want &want, int32_t userId, AppExecFwk::AppRunningControlRuleResult &controlRule)
 {
     // get bms
     auto bms = AbilityUtil::GetBundleManager();
@@ -127,8 +130,10 @@ bool DisposedInterceptor::CheckDisposed(const Want &want)
     // get disposed status
     std::string bundleName = want.GetBundle();
     int disposedStatus = bms->GetDisposedStatus(bundleName);
+    auto appControlMgr = bms->GetAppControlProxy();
+    appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule);
 
-    if (disposedStatus != 0) {
+    if (controlRule.ruleParam.controlWant != nullptr) {
         HILOG_DEBUG("The target app's status is abnormal, the status is: %{public}d", disposedStatus);
         return true;
     }

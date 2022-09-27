@@ -48,7 +48,7 @@ public:
     ~DisposedInterceptor();
     ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
 private:
-    bool CheckDisposed(const Want &want);
+    bool CheckDisposed(const Want &want, int32_t userId, AppExecFwk::AppRunningControlRuleResult &controlRule);
 };
 } // namespace AAFwk
 } // namespace OHOS
