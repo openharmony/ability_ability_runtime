@@ -3334,12 +3334,12 @@ NativeValue* NapiJsContext::OnRequestPermissionsFromUser(NativeEngine &engine, N
 
     auto errorVal = std::make_shared<int32_t>(0);
     std::vector<std::string> permissionList;
-    if(!GetStringsValue(engine, info.argv[PARAM0], permissionList)) {
+    if (!GetStringsValue(engine, info.argv[PARAM0], permissionList)) {
         HILOG_ERROR("input params string error");
         return engine.CreateUndefined();
     }
     int32_t code = 0;
-    if(!ConvertFromJsValue(engine, info.argv[PARAM1], code)) {
+    if (!ConvertFromJsValue(engine, info.argv[PARAM1], code)) {
         HILOG_ERROR("input params int error");
         return engine.CreateUndefined();
     }
@@ -3445,7 +3445,7 @@ NativeValue* NapiJsContext::OnVerifyPermission(NativeEngine &engine, NativeCallb
     };
     auto complete = [obj = this, value = errorVal] (NativeEngine &engine, AsyncTask &task, int32_t status) {
         if (*value == static_cast<int32_t>(NAPI_ERR_ACE_ABILITY)) {
-            task.Reject(engine, CreateJsError( engine, *value,obj->ConvertErrorCode(*value)));
+            task.Reject(engine, CreateJsError( engine, *value, obj->ConvertErrorCode(*value)));
             return;
         }
         task.Resolve(engine, CreateJsValue(engine, *value));
