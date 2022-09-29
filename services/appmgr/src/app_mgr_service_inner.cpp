@@ -328,8 +328,8 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
     // There is no ability when the empty resident process starts
     // The status of all resident processes is ready
     // There is no process of switching the foreground, waiting for his first ability to start
-    appRecord->AddAbilityStage();
     if (appRecord->IsEmptyKeepAliveApp()) {
+        appRecord->AddAbilityStage();
         return;
     }
 
@@ -372,6 +372,8 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         appState == ApplicationState::APP_STATE_FOCUS) {
         if (appState != ApplicationState::APP_STATE_FOCUS) {
             appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
+        } else {
+            appRecord->SetLastState(ApplicationState::APP_STATE_FOREGROUND);
         }
         bool needNotifyApp = appRunningManager_->IsApplicationFirstForeground(*appRecord);
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND, needNotifyApp);
@@ -1697,6 +1699,7 @@ void AppMgrServiceInner::StartResidentProcess(const std::vector<BundleInfo> &inf
             HILOG_INFO("processName [%{public}s] Already exists ", processName.c_str());
             continue;
         }
+        HILOG_INFO("Start empty resident process, processName = [%{public}s]", processName.c_str());
         StartEmptyResidentProcess(bundle, processName, restartCount, isEmptyKeepAliveApp);
     }
 }
@@ -2314,6 +2317,14 @@ void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_
     auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
     if (!appRecord) {
         HILOG_ERROR("appRecord is nullptr");
+        return;
+    }
+    const int bufferLen = 128;
+    char paramOutBuf[bufferLen] = {0};
+    const char *hook_mode = "startup:";
+    int ret = GetParameter("libc.hook_mode", "", paramOutBuf, bufferLen);
+    if (ret > 0 && strncmp(paramOutBuf, hook_mode, strlen(hook_mode)) == 0) {
+        HILOG_DEBUG("Hook_mode: no handle time out");
         return;
     }
 
