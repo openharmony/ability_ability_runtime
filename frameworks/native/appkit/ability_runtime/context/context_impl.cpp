@@ -219,7 +219,6 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
     }
 
     bundleInfo.moduleResPaths.swap(moduleResPaths);
-    std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     appContext->SetConfiguration(config_);
     InitResourceManager(bundleInfo, appContext, GetBundleName() == bundleName);
     appContext->SetApplicationInfo(GetApplicationInfo());
