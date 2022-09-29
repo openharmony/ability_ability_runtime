@@ -681,4 +681,19 @@ HWTEST_F(PendingWantTest, PendingWant_3800, Function | MediumTest | Level1)
     bool ret = pendingWant.Marshalling(parcel);
     EXPECT_EQ(ret, false);
 }
+
+/*
+ * @tc.number    : PendingWant_3900
+ * @tc.name      : Marshalling_02
+ * @tc.desc      : test Marshalling function when target is target
+ * tc.issue      : I5TGRZ
+ */
+HWTEST_F(PendingWantTest, PendingWant_3900, Function | MediumTest | Level1)
+{
+    sptr<AAFwk::IWantSender> target(new (std::nothrow) PendingWantRecord());
+    PendingWant pendingWant(target);
+    MessageParcel parcel;
+    bool ret = pendingWant.Marshalling(parcel);
+    EXPECT_EQ(ret, true);
+}
 }  // namespace OHOS::AbilityRuntime::WantAgent
