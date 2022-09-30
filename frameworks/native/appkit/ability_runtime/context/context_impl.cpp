@@ -38,6 +38,7 @@ using namespace OHOS::AbilityRuntime::Constants;
 const size_t Context::CONTEXT_TYPE_ID(std::hash<const char*> {} ("Context"));
 const int64_t ContextImpl::CONTEXT_CREATE_BY_SYSTEM_APP(0x00000001);
 const mode_t MODE = 0770;
+const mode_t MODE_DATASET = 0774;
 const std::string ContextImpl::CONTEXT_DATA_APP("/data/app/");
 const std::string ContextImpl::CONTEXT_BUNDLE("/bundle/");
 const std::string ContextImpl::CONTEXT_DISTRIBUTEDFILES_BASE_BEFORE("/mnt/hmdfs/");
@@ -76,7 +77,7 @@ std::string ContextImpl::GetBundleCodeDir()
     } else {
         dir = LOCAL_CODE_PATH;
     }
-    CreateDirIfNotExist(dir);
+    CreateDirIfNotExist(dir, MODE);
     HILOG_DEBUG("ContextImpl::GetBundleCodeDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -84,7 +85,7 @@ std::string ContextImpl::GetBundleCodeDir()
 std::string ContextImpl::GetCacheDir()
 {
     std::string dir = GetBaseDir() + CONTEXT_FILE_SEPARATOR + CONTEXT_CACHE;
-    CreateDirIfNotExist(dir);
+    CreateDirIfNotExist(dir, MODE);
     HILOG_DEBUG("ContextImpl::GetCacheDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -111,7 +112,7 @@ std::string ContextImpl::GetDatabaseDir()
     if (parentContext_ != nullptr) {
         dir = dir + CONTEXT_FILE_SEPARATOR + ((GetHapModuleInfo() == nullptr) ? "" : GetHapModuleInfo()->moduleName);
     }
-    CreateDirIfNotExist(dir);
+    CreateDirIfNotExist(dir, MODE_DATASET);
     HILOG_DEBUG("ContextImpl::GetDatabaseDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -119,7 +120,7 @@ std::string ContextImpl::GetDatabaseDir()
 std::string ContextImpl::GetPreferencesDir()
 {
     std::string dir = GetBaseDir() + CONTEXT_FILE_SEPARATOR + CONTEXT_PREFERENCES;
-    CreateDirIfNotExist(dir);
+    CreateDirIfNotExist(dir, MODE);
     HILOG_DEBUG("ContextImpl::GetPreferencesDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -127,7 +128,7 @@ std::string ContextImpl::GetPreferencesDir()
 std::string ContextImpl::GetTempDir()
 {
     std::string dir = GetBaseDir() + CONTEXT_TEMP;
-    CreateDirIfNotExist(dir);
+    CreateDirIfNotExist(dir, MODE);
     HILOG_DEBUG("ContextImpl::GetTempDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -135,7 +136,7 @@ std::string ContextImpl::GetTempDir()
 std::string ContextImpl::GetFilesDir()
 {
     std::string dir = GetBaseDir() + CONTEXT_FILES;
-    CreateDirIfNotExist(dir);
+    CreateDirIfNotExist(dir, MODE);
     HILOG_DEBUG("ContextImpl::GetFilesDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -150,7 +151,7 @@ std::string ContextImpl::GetDistributedFilesDir()
     } else {
         dir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_DISTRIBUTEDFILES;
     }
-    CreateDirIfNotExist(dir);
+    CreateDirIfNotExist(dir, MODE_DATASET);
     HILOG_DEBUG("ContextImpl::GetDistributedFilesDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -522,7 +523,7 @@ sptr<IRemoteObject> ContextImpl::GetToken()
     return token_;
 }
 
-void ContextImpl::CreateDirIfNotExist(const std::string& dirPath) const
+void ContextImpl::CreateDirIfNotExist(const std::string& dirPath, const mode_t& mode) const
 {
     HILOG_DEBUG("createDir: create directory if not exists.");
     if (!OHOS::FileExists(dirPath)) {
@@ -531,7 +532,7 @@ void ContextImpl::CreateDirIfNotExist(const std::string& dirPath) const
             HILOG_ERROR("createDir: create dir %{public}s failed.", dirPath.c_str());
             return;
         }
-        chmod(dirPath.c_str(), MODE);
+        chmod(dirPath.c_str(), mode);
     }
 }
 
