@@ -17,18 +17,15 @@
 
 #include <dlfcn.h>
 #include <uv.h>
-#include "js_runtime_utils.h"
-#include "js_napi_common_ability.h"
+
 #include "hilog_wrapper.h"
+#include "js_napi_common_ability.h"
+#include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_context.h"
 #include "napi_base_context.h"
 #include "napi_remote_object.h"
-#include "js_napi_common_ability.h"
-#include "js_runtime_utils.h"
 #include "securec.h"
-#include "napi_context.h"
-using namespace OHOS::AbilityRuntime;
 
 using namespace OHOS::AbilityRuntime;
 
@@ -4825,10 +4822,10 @@ NativeValue* JsNapiCommon::JsConnectAbility(
         return engine.CreateUndefined();
     }
     auto env = reinterpret_cast<napi_env>(&engine);
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[PARAM0]);
-    auto arg1 = reinterpret_cast<napi_value>(info.argv[PARAM1]);
+    auto firstParam = reinterpret_cast<napi_value>(info.argv[PARAM0]);
+    auto secondParam = reinterpret_cast<napi_value>(info.argv[PARAM1]);
     Want want;
-    if (!UnwrapWant(env, arg0, want)) {
+    if (!UnwrapWant(env, firstParam, want)) {
         HILOG_ERROR("called. Invoke UnwrapWant fail");
         return engine.CreateUndefined();
     }
@@ -4838,7 +4835,7 @@ NativeValue* JsNapiCommon::JsConnectAbility(
         return engine.CreateUndefined();
     }
     napi_ref callbackArray[PARAM3];
-    ChangeAbilityConnection(callbackArray, env, arg1);
+    ChangeAbilityConnection(callbackArray, env, secondParam);
     abilityConnection->SetEnv(env);
     abilityConnection->SetConnectCBRef(callbackArray[PARAM0]);
     abilityConnection->SetDisconnectCBRef(callbackArray[PARAM1]);

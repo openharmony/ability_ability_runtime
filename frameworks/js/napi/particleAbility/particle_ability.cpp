@@ -19,10 +19,10 @@
 #include <vector>
 
 #include "hilog_wrapper.h"
-#include "securec.h"
 #include "js_runtime_utils.h"
 #include "napi_common_ability.h"
 #include "napi/native_api.h"
+#include "securec.h"
 
 using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AAFwk;
@@ -310,7 +310,7 @@ Ability* JsParticleAbility::GetAbility(napi_env env)
     if (ret != napi_ok) {
         napi_get_last_error_info(env, &errorInfo);
         HILOG_ERROR("get_value_external=%{public}d err:%{public}s", ret, errorInfo->error_message);
-    return nullptr;
+        return nullptr;
     }
     return ability;
 }
@@ -324,6 +324,11 @@ NativeValue* JsParticleAbility::OnPACancelBackgroundRunning(NativeEngine &engine
 
     AsyncTask::CompleteCallback complete =
         [obj = this](NativeEngine &engine, AsyncTask &task, int32_t status) {
+            if (obj->ability_ == nullptr) {
+                HILOG_ERROR("task execute error, the ability is nullptr.");
+                task.Reject(engine, CreateJsError(engine, NAPI_ERR_ACE_ABILITY, "StopBackgroundRunning failed."));
+                return;
+            }
             obj->ability_->StopBackgroundRunning();
             task.Resolve(engine, engine.CreateUndefined());
         };
