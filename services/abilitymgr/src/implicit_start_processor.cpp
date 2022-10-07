@@ -59,7 +59,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         return ret;
     }
 
-    auto startAbilityTask = [imp = shared_from_this(), request, userId,
+     auto startAbilityTask = [imp = shared_from_this(), request, userId,
         identity = IPCSkeleton::ResetCallingIdentity()](const std::string& bundle, const std::string& abilityName) {
         HILOG_INFO("implicit start ability call back.");
 
@@ -74,10 +74,11 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         };
         return imp->CallStartAbilityInner(userId, targetWant, callBack, request.callType);
     };
-
     if (dialogAppInfos.size() == 0) {
         HILOG_ERROR("implicit query ability infos failed, show tips dialog.");
-        sysDialogScheduler->ShowTipsDialog();
+        Want want = sysDialogScheduler->ShowTipsDialog();
+        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+        abilityMgr->StartAbility(want);
         return ERR_IMPLICIT_START_ABILITY_FAIL;
     }
 
@@ -88,7 +89,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     }
 
     HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose.");
-    return sysDialogScheduler->ShowSelectorDialog(dialogAppInfos, startAbilityTask);
+    Want want = sysDialogScheduler->ShowSelectorDialog(dialogAppInfos);
+    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+    return abilityMgr->StartAbility(want);
 }
 
 int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
