@@ -106,7 +106,8 @@ void MixStackDumper::Dump_SignalHandler(int sig, siginfo_t *si, void *context)
     }
 }
 
-void MixStackDumper::InstallDumpHandler(std::shared_ptr<OHOSApplication> application, std::shared_ptr<EventHandler> handler)
+void MixStackDumper::InstallDumpHandler(std::shared_ptr<OHOSApplication> application,
+    std::shared_ptr<EventHandler> handler)
 {
     MixStackDumper::signalHandler_ = handler;
     MixStackDumper::application_ = application;
@@ -188,11 +189,11 @@ void MixStackDumper::PrintNativeFrames(int fd, std::vector<std::shared_ptr<OHOS:
     }
 }
 
-void MixStackDumper::DumpMixFrame(int fd, pid_t tid)
+bool MixStackDumper::DumpMixFrame(int fd, pid_t tid)
 {
     if (catcher_ == nullptr) {
         HILOG_ERROR("No FrameCatcher? call init first.");
-        return;
+        return false;
     }
 
     std::string threadComm = GetThreadStackTraceLabel(tid);
@@ -201,7 +202,7 @@ void MixStackDumper::DumpMixFrame(int fd, pid_t tid)
         std::string result = "Failed to suspend thread(" + std::to_string(tid) + ").\n";
         HILOG_ERROR("%{public}s", result.c_str());
         write(fd, result.c_str(), result.size());
-        return;
+        return false;
     }
 
     bool onlyDumpNative = false;
@@ -221,11 +222,12 @@ void MixStackDumper::DumpMixFrame(int fd, pid_t tid)
 
     if (onlyDumpNative) {
         PrintNativeFrames(fd, nativeFrames);
-        return;
+        return true;
     }
 
     BuildJsNativeMixStack(fd, jsFrames, nativeFrames);
     write(fd, "\n", 1);
+    return true;
 }
 
 void MixStackDumper::GetThreadList(std::vector<pid_t>& threadList)
@@ -256,9 +258,9 @@ void MixStackDumper::GetThreadList(std::vector<pid_t>& threadList)
     }
 }
 
-void MixStackDumper::Init()
+void MixStackDumper::Init(pid_t pid)
 {
-    catcher_ = std::make_unique<OHOS::HiviewDFX::DfxDumpCatcher>(getpid());
+    catcher_ = std::make_unique<OHOS::HiviewDFX::DfxDumpCatcher>(pid);
     catcher_->InitFrameCatcher();
 }
 
@@ -284,7 +286,7 @@ void MixStackDumper::HandleMixDumpRequest()
             break;
         }
         MixStackDumper mixDumper;
-        mixDumper.Init();
+        mixDumper.Init(getpid());
         if (g_targetDumpTid > 0) {
             mixDumper.DumpMixFrame(fd, g_targetDumpTid);
             g_targetDumpTid = -1;

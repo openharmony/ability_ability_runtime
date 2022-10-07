@@ -1121,7 +1121,6 @@ public:
      */
     void SetSceneListener(const sptr<Rosen::IWindowLifeCycle> &listener);
 
-#ifdef SUPPORT_GRAPHICS
     /**
      * @brief Called back at ability context.
      *
@@ -1144,7 +1143,6 @@ public:
      * @return Returns ERR_OK if success.
      */
     virtual ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
-#endif
 
 protected:
     class AbilityDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
@@ -1275,6 +1273,8 @@ protected:
      */
     void NotifyContinuationResult(const Want& want, bool success);
 
+    bool IsUseNewStartUpRule();
+
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
     std::shared_ptr<AbilityStartSetting> setting_ = nullptr;
     LaunchParam launchParam_;
@@ -1344,6 +1344,9 @@ private:
     // If session id cannot get from want, assign it as default.
     static const int DEFAULT_DMS_SESSION_ID;
     sptr<IBundleMgr> iBundleMgr_;
+
+    bool isNewRuleFlagSetted_ = false;
+    bool startUpNewRule_ = false;
 
 #ifdef SUPPORT_GRAPHICS
 private:
