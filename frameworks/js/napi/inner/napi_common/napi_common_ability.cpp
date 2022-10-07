@@ -4814,7 +4814,6 @@ napi_value NAPI_TerminateAbilityCommon(napi_env env, napi_callback_info info)
 JsNapiCommon::JsNapiCommon() : ability_(nullptr)
 {}
 
-<<<<<<< HEAD
 NativeValue* JsNapiCommon::JsConnectAbility(
     NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType)
 {
