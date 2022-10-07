@@ -31,12 +31,13 @@ class MixStackDumper {
 public:
     MixStackDumper() = default;
     ~MixStackDumper() = default;
-    void InstallDumpHandler(std::shared_ptr<OHOSApplication> application, std::shared_ptr<EventHandler> handler);
+    void InstallDumpHandler(std::shared_ptr<OHOSApplication> application,
+        std::shared_ptr<EventHandler> handler);
 
 private:
-    void Init();
+    void Init(pid_t pid);
     void Destroy();
-    void DumpMixFrame(int fd, pid_t tid);
+    bool DumpMixFrame(int fd, pid_t tid);
     void GetThreadList(std::vector<pid_t>& threadList);
     bool IsJsNativePcEqual(uintptr_t *jsNativePointer, uint64_t nativePc, uint64_t nativeOffset);
     void BuildJsNativeMixStack(int fd, std::vector<JsFrames>& jsFrames,

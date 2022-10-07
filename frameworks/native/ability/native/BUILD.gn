@@ -131,6 +131,7 @@ ohos_shared_library("abilitykit_native") {
 
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/process_info.cpp",
+    "${ability_runtime_napi_path}/featureAbility/napi_context.cpp",
     "${ability_runtime_napi_path}/inner/napi_common/napi_common_ability.cpp",
     "${ability_runtime_napi_path}/inner/napi_common/napi_common_configuration.cpp",
     "${ability_runtime_napi_path}/inner/napi_common/napi_common_start_options.cpp",
@@ -211,7 +212,6 @@ ohos_shared_library("abilitykit_native") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "ipc_js:rpc",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "relational_store:rdb_data_share_adapter",
@@ -234,6 +234,7 @@ ohos_shared_library("abilitykit_native") {
     ":ability_utils",
     "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
     "//foundation/arkui/napi:ace_napi",
+    "//foundation/communication/ipc/interfaces/kits/js/napi:rpc",
   ]
 
   if (ability_runtime_graphics) {
@@ -251,7 +252,7 @@ ohos_shared_library("abilitykit_native") {
     external_deps += [
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
-      "multimedia_image_standard:image",
+      "multimedia_image_framework:image",
     ]
 
     public_deps += [
@@ -475,6 +476,8 @@ ohos_shared_library("service_extension_module") {
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "ipc_js:rpc",
+    "napi:ace_napi",
     "resource_management:global_resmgr",
   ]
 
