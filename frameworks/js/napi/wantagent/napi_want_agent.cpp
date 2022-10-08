@@ -208,13 +208,13 @@ NativeValue* JsWantAgent::GetUid(NativeEngine *engine, NativeCallbackInfo *info)
     return (me != nullptr) ? me->OnGetUid(*engine, *info) : nullptr;
 };
 
-NativeValue* JsWantAgent::Cancel(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWantAgent::Cancel(NativeEngine *engine, NativeCallbackInfo *info)
 {
     JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
     return (me != nullptr) ? me->OnCancel(*engine, *info) : nullptr;
 };
 
-NativeValue* JsWantAgent::Trigger(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue* JsWantAgent::Trigger(NativeEngine *engine, NativeCallbackInfo *info)
 {
     JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
     return (me != nullptr) ? me->OnTrigger(*engine, *info) : nullptr;
