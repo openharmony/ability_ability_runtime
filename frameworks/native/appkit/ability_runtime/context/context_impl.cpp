@@ -38,7 +38,6 @@ using namespace OHOS::AbilityRuntime::Constants;
 const size_t Context::CONTEXT_TYPE_ID(std::hash<const char*> {} ("Context"));
 const int64_t ContextImpl::CONTEXT_CREATE_BY_SYSTEM_APP(0x00000001);
 const mode_t MODE = 0770;
-const mode_t MODE_DATASET = 0774;
 const std::string ContextImpl::CONTEXT_DATA_APP("/data/app/");
 const std::string ContextImpl::CONTEXT_BUNDLE("/bundle/");
 const std::string ContextImpl::CONTEXT_DISTRIBUTEDFILES_BASE_BEFORE("/mnt/hmdfs/");
@@ -112,7 +111,7 @@ std::string ContextImpl::GetDatabaseDir()
     if (parentContext_ != nullptr) {
         dir = dir + CONTEXT_FILE_SEPARATOR + ((GetHapModuleInfo() == nullptr) ? "" : GetHapModuleInfo()->moduleName);
     }
-    CreateDirIfNotExist(dir, MODE_DATASET);
+    CreateDirIfNotExist(dir, 0);
     HILOG_DEBUG("ContextImpl::GetDatabaseDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -151,7 +150,7 @@ std::string ContextImpl::GetDistributedFilesDir()
     } else {
         dir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_DISTRIBUTEDFILES;
     }
-    CreateDirIfNotExist(dir, MODE_DATASET);
+    CreateDirIfNotExist(dir, 0);
     HILOG_DEBUG("ContextImpl::GetDistributedFilesDir:%{public}s", dir.c_str());
     return dir;
 }
@@ -532,7 +531,9 @@ void ContextImpl::CreateDirIfNotExist(const std::string& dirPath, const mode_t& 
             HILOG_ERROR("createDir: create dir %{public}s failed.", dirPath.c_str());
             return;
         }
-        chmod(dirPath.c_str(), mode);
+        if (mode != 0) {
+            chmod(dirPath.c_str(), mode);
+        }
     }
 }
 
