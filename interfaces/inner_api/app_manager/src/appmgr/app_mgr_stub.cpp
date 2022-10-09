@@ -31,6 +31,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+constexpr int32_t CYCLE_LIMIT = 1000;
 AppMgrStub::AppMgrStub()
 {
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_ATTACH_APPLICATION)] =
@@ -100,6 +101,8 @@ AppMgrStub::AppMgrStub()
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::SET_CONTINUOUSTASK_PROCESS)] =
         &AppMgrStub::HandleSetContinuousTaskProcess;
 #endif
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::NOTIFY_UNLOAD_REPAIR_PATCH)] =
+        &AppMgrStub::HandleNotifyUnLoadRepairPatch;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -259,6 +262,9 @@ int32_t AppMgrStub::HandleStartupResidentProcess(MessageParcel &data, MessagePar
     HITRACE_METER(HITRACE_TAG_APP);
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     int32_t infoSize = data.ReadInt32();
+    if (infoSize > CYCLE_LIMIT) {
+        return ERR_INVALID_VALUE;
+    }
     for (int32_t i = 0; i < infoSize; i++) {
         std::unique_ptr<AppExecFwk::BundleInfo> bundleInfo(data.ReadParcelable<AppExecFwk::BundleInfo>());
         if (!bundleInfo) {
@@ -534,5 +540,17 @@ int32_t AppMgrStub::HandleSetContinuousTaskProcess(MessageParcel &data, MessageP
     return NO_ERROR;
 }
 #endif
+
+int32_t AppMgrStub::HandleNotifyUnLoadRepairPatch(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    std::string bundleName = data.ReadString();
+    auto ret = NotifyUnLoadRepairPatch(bundleName);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
