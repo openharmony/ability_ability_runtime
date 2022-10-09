@@ -130,11 +130,17 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId, AppExecF
     // get disposed status
     std::string bundleName = want.GetBundle();
     auto appControlMgr = bms->GetAppControlProxy();
+    if (appControlMgr == nullptr) {
+        HILOG_ERROR("Get appControlMgr failed");
+        return false;
+    }
     appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule);
 
     if (controlRule.controlWant != nullptr) {
+        HILOG_INFO("app has been control");
         return true;
     }
+    HILOG_INFO("app is available");
     return false;
 }
 } // namespace AAFwk
