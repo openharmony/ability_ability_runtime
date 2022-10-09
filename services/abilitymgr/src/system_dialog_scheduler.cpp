@@ -80,9 +80,9 @@ const int32_t LINE_NUMS_THREE = 3;
 const int32_t LINE_NUMS_FOUR = 4;
 const int32_t LINE_NUMS_EIGHT = 8;
 
-AAFwk::Want SystemDialogScheduler::ShowANRDialog(int userId, int pid)
+AAFwk::Want SystemDialogScheduler::GetANRDialogWant(int userId, int pid)
 {
-    HILOG_DEBUG("ShowAnrDialog start");
+    HILOG_DEBUG("GetANRDialogWant start");
     AAFwk::Want want;
     AppExecFwk::ApplicationInfo appInfo;
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
@@ -99,10 +99,7 @@ AAFwk::Want SystemDialogScheduler::ShowANRDialog(int userId, int pid)
 
     want.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_ANR_DIALOG);
     want.SetParam(BUNDLE_NAME, appInfo.bundleName);
-    want.SetParam(OFF_SET_X, position.offsetX);
-    want.SetParam(OFF_SET_Y, position.offsetY);
-    want.SetParam(WIDTH, position.width);
-    want.SetParam(HEIGHT, position.height);
+    want.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
     want.SetParam(DIALOG_PARAMS, params);
     return want;
 }
@@ -121,9 +118,9 @@ const std::string SystemDialogScheduler::GetAnrParams(const DialogPosition posit
     return anrData.dump();
 }
 
-Want SystemDialogScheduler::ShowTipsDialog()
+Want SystemDialogScheduler::GetTipsDialogWant()
 {
-    HILOG_DEBUG("ShowTipsDialog start");
+    HILOG_DEBUG("GetTipsDialogWant start");
     
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_TIPS, position);
@@ -134,27 +131,21 @@ Want SystemDialogScheduler::ShowTipsDialog()
 
     AAFwk::Want want;
     want.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_TIPS_DIALOG);
-    want.SetParam(OFF_SET_X, position.offsetX);
-    want.SetParam(OFF_SET_Y, position.offsetY);
-    want.SetParam(WIDTH, position.width);
-    want.SetParam(HEIGHT, position.height);
+    want.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
     want.SetParam(DIALOG_PARAMS, params);
     return want;
 }
 
-Want SystemDialogScheduler::ShowSelectorDialog(const std::vector<DialogAppInfo> &dialogAppInfos)
+Want SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos)
 {
-    HILOG_DEBUG("ShowSelectorDialog start");
+    HILOG_DEBUG("GetSelectorDialogWant start");
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_SELECTOR, position, static_cast<int>(dialogAppInfos.size()));
     std::string params = GetSelectorParams(dialogAppInfos);
 
     AAFwk::Want want;
     want.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_SELECTOR_DIALOG);
-    want.SetParam(OFF_SET_X, position.offsetX);
-    want.SetParam(OFF_SET_Y, position.offsetY);
-    want.SetParam(WIDTH, position.width);
-    want.SetParam(HEIGHT, position.height);
+    want.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
     want.SetParam(DIALOG_PARAMS, params);
 
     return want;
@@ -182,6 +173,16 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
     jsonObject["hapList"] = hapListObj;
 
     return jsonObject.dump();
+}
+
+const std::string SystemDialogScheduler::GetDialogPositionParams(const DialogPosition position) const
+{
+    nlohmann::json dialogPositionData;
+    dialogPositionData[OFF_SET_X] = position.offsetX;
+    dialogPositionData[OFF_SET_Y] = position.offsetY;
+    dialogPositionData[WIDTH] = position.width;
+    dialogPositionData[HEIGHT] = position.height;
+    return dialogPositionData.dump();
 }
 
 void SystemDialogScheduler::InitDialogPosition(DialogType type, DialogPosition &position) const
