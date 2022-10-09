@@ -295,7 +295,7 @@ bool AbilityManagerService::Init()
 
     interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
-    interceptorExecuter_->AddInterceptor(std::make_shared<DisposedInterceptor>());
+    interceptorExecuter_->AddInterceptor(std::make_shared<ControlInterceptor>());
 
     HILOG_INFO("Init success.");
     return true;
