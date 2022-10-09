@@ -4367,7 +4367,12 @@ int AbilityManagerService::SendANRProcessID(int pid)
         HILOG_ERROR("SystemDialogScheduler is nullptr.");
         return ERR_INVALID_VALUE;
     }
-    Want want = sysDialog->GetANRDialogWant(GetUserId(), pid);
+
+    Want want;
+    if (!sysDialog->GetANRDialogWant(GetUserId(), pid, want)) {
+        HILOG_ERROR("GetANRDialogWant failed.");
+        return ERR_INVALID_VALUE;
+    }
     return StartAbility(want);
 }
 

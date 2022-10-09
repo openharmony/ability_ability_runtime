@@ -64,7 +64,7 @@ public:
     explicit SystemDialogScheduler() = default;
     virtual ~SystemDialogScheduler() = default;
 
-    Want GetANRDialogWant(int userId, int pid);
+    bool GetANRDialogWant(int userId, int pid, AAFwk::Want &want);
     Want GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos);
     Want GetTipsDialogWant();
 
