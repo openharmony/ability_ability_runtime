@@ -23,6 +23,7 @@
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
+#include "js_runtime_utils.h"
 #include "long_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
@@ -33,6 +34,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+using namespace OHOS::AbilityRuntime;
 const int PROPERTIES_SIZE = 2;
 EXTERN_C_START
 /**

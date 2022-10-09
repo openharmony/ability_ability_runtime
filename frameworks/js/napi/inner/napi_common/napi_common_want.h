@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include "js_runtime_utils.h"
+#include "native_engine/native_engine.h"
 #include "napi_common_data.h"
 #include "want.h"
 #include "want_params.h"
@@ -57,7 +59,7 @@ bool InnerWrapJsWantParams(
     TBase *ao = TBase::Query(value);
     if (ao != nullptr) {
         NativeT natValue = T::Unbox(ao);
-        object->SetProperty(key.c_str(), CreateJsValue(engine, natValue));
+        object->SetProperty(key.c_str(), OHOS::AbilityRuntime::CreateJsValue(engine, natValue));
         return true;
     }
     return false;
@@ -87,7 +89,7 @@ bool InnerWrapWantParamsArray(
             }
         }
     }
-    object->SetProperty(key.c_str(), CreateNativeArray(engine, natArray));
+    object->SetProperty(key.c_str(), OHOS::AbilityRuntime::CreateNativeArray(engine, natArray));
     return true;
 }
 
