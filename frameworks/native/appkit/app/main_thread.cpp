@@ -17,7 +17,6 @@
 
 #include <new>
 #include <regex>
-#include <thread>
 #include <unistd.h>
 
 #include "ability_constants.h"
@@ -44,9 +43,6 @@
 #include "iservice_registry.h"
 #include "js_runtime.h"
 #include "mix_stack_dumper.h"
-#if defined(NWEB)
-#include "nweb_pre_dns_adapter.h"
-#endif
 #include "ohos_application.h"
 #include "resource_manager.h"
 #include "runtime.h"
@@ -58,6 +54,11 @@
 #include "hisysevent.h"
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
+
+#if defined(NWEB)
+#include <thread>
+#include "nweb_pre_dns_adapter.h"
+#endif
 
 #if defined(ABILITY_LIBRARY_LOADER) || defined(APPLICATION_LIBRARY_LOADER)
 #include <dirent.h>
