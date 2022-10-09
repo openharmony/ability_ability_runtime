@@ -48,6 +48,49 @@ bool HandleFdObject(napi_env env, napi_value param, std::string strProName, AAFw
 
 bool HandleRemoteObject(napi_env env, napi_value param, std::string strProName, AAFwk::WantParams &wantParams);
 
+NativeValue* CreateJsWantParams(NativeEngine &engine, const AAFwk::WantParams &wantParams);
+template<class TBase, class T, class NativeT>
+bool InnerWrapJsWantParams(
+    NativeEngine &engine, NativeObject* object, const std::string &key, const AAFwk::WantParams &wantParams)
+{
+    auto value = wantParams.GetParam(key);
+    TBase *ao = TBase::Query(value);
+    if (ao != nullptr) {
+        NativeT natValue = T::Unbox(ao);
+        object->SetProperty(key.c_str(), CreateJsValue(engine, natValue));
+        return true;
+    }
+    return false;
+}
+
+bool InnerWrapJsWantParamsWantParams(
+    NativeEngine &engine, NativeObject* object, const std::string &key, const AAFwk::WantParams &wantParams);
+
+bool WrapJsWantParamsArray(
+    NativeEngine &engine, NativeObject* object, const std::string &key, sptr<AAFwk::IArray> &ao);
+
+template<class TBase, class T, class NativeT>
+bool InnerWrapWantParamsArray(
+    NativeEngine &engine, NativeObject* object, const std::string &key, sptr<AAFwk::IArray> &ao)
+{
+    long size = 0;
+    if (ao->GetLength(size) != ERR_OK) {
+        return false;
+    }
+    std::vector<NativeT> natArray;
+    for (long i = 0; i < size; i++) {
+        sptr<AAFwk::IInterface> iface = nullptr;
+        if (ao->Get(i, iface) == ERR_OK) {
+            TBase *iValue = TBase::Query(iface);
+            if (iValue != nullptr) {
+                natArray.push_back(T::Unbox(iValue));
+            }
+        }
+    }
+    object->SetProperty(key.c_str(), CreateNativeArray(engine, natArray));
+    return true;
+}
+
 EXTERN_C_END
 }  // namespace AppExecFwk
 }  // namespace OHOS
