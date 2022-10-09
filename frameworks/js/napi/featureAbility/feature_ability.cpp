@@ -86,7 +86,7 @@ napi_value FeatureAbilityInit(napi_env env, napi_value exports)
 class JsFeatureAbility : public JsNapiCommon {
 public:
     JsFeatureAbility() = default;
-    virtual ~JsFeatureAbility() = default override;
+    virtual ~JsFeatureAbility() override = default;
 
     Ability* GetAbility(NativeEngine &engine);
     static void Finalizer(NativeEngine *engine, void *data, void *hint);
