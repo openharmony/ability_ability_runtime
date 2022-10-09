@@ -40,6 +40,7 @@
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "mission_list_manager.h"
+#include "permission_verification.h"
 #include "system_ability.h"
 #include "uri.h"
 #include "ability_config.h"
@@ -814,20 +815,20 @@ public:
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
 
 #ifdef SUPPORT_ASAN
-    static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 50000; // ms
-    static constexpr uint32_t LOAD_TIMEOUT = 50000;            // ms
-    static constexpr uint32_t ACTIVE_TIMEOUT = 25000;          // ms
-    static constexpr uint32_t INACTIVE_TIMEOUT = 2500;         // ms
-    static constexpr uint32_t TERMINATE_TIMEOUT = 50000;      // ms
-    static constexpr uint32_t CONNECT_TIMEOUT = 15000;         // ms
-    static constexpr uint32_t DISCONNECT_TIMEOUT = 2500;       // ms
-    static constexpr uint32_t COMMAND_TIMEOUT = 25000;         // ms
-    static constexpr uint32_t RESTART_TIMEOUT = 25000;         // ms
-    static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 2500;  // ms
-    static constexpr uint32_t FOREGROUND_TIMEOUT = 25000;   // ms
-    static constexpr uint32_t BACKGROUND_TIMEOUT = 15000;   // ms
-    static constexpr uint32_t DUMP_TIMEOUT = 5000;            // ms
-    static constexpr uint32_t KILL_TIMEOUT = 15000;           // ms
+    static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 150000; // ms
+    static constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms
+    static constexpr uint32_t ACTIVE_TIMEOUT = 75000;          // ms
+    static constexpr uint32_t INACTIVE_TIMEOUT = 7500;         // ms
+    static constexpr uint32_t TERMINATE_TIMEOUT = 150000;      // ms
+    static constexpr uint32_t CONNECT_TIMEOUT = 45000;         // ms
+    static constexpr uint32_t DISCONNECT_TIMEOUT = 7500;       // ms
+    static constexpr uint32_t COMMAND_TIMEOUT = 75000;         // ms
+    static constexpr uint32_t RESTART_TIMEOUT = 75000;         // ms
+    static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 7500;  // ms
+    static constexpr uint32_t FOREGROUND_TIMEOUT = 75000;   // ms
+    static constexpr uint32_t BACKGROUND_TIMEOUT = 45000;   // ms
+    static constexpr uint32_t DUMP_TIMEOUT = 15000;            // ms
+    static constexpr uint32_t KILL_TIMEOUT = 45000;           // ms
 #else
     static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 10000; // ms
     static constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
@@ -916,13 +917,14 @@ private:
      */
     bool IsSystemUiApp(const AppExecFwk::AbilityInfo &info) const;
     /**
-     * Get parameters from the global
+     * Init parameters from the global
      *
      */
-    void GetGlobalConfiguration();
+    void InitGlobalConfiguration();
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
-    int StartRemoteAbility(const Want &want, int requestCode);
+    int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
+        const sptr<IRemoteObject> &callerToken);
     int ConnectLocalAbility(
         const Want &want,
         const int32_t userId,
@@ -930,7 +932,7 @@ private:
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
-    int ConnectRemoteAbility(const Want &want, const sptr<IRemoteObject> &connect);
+    int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
     int PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId);
     void UpdateCallerInfo(Want& want);
@@ -947,7 +949,8 @@ private:
         MissionInfo &missionInfo);
     int32_t GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
         MissionSnapshot& missionSnapshot);
-    int StartRemoteAbilityByCall(const Want &want, const sptr<IRemoteObject> &connect);
+    int StartRemoteAbilityByCall(const Want &want, const sptr<IRemoteObject> &callerToken,
+        const sptr<IRemoteObject> &connect);
     int ReleaseRemoteAbility(const sptr<IRemoteObject> &connect, const AppExecFwk::ElementName &element);
 
     void DumpInner(const std::string &args, std::vector<std::string> &info);
@@ -1139,6 +1142,11 @@ private:
     bool CheckNewRuleSwitchState(const std::string &param);
 
     void UpdateFocusState(std::vector<AbilityRunningInfo> &info);
+
+    AAFwk::PermissionVerification::VerificationInfo CreateVerificationInfo(
+        const AbilityRequest &abilityRequest);
+
+    int AddStartControlParam(Want &want, const sptr<IRemoteObject> &callerToken);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
