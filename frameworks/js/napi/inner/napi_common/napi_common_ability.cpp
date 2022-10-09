@@ -4894,7 +4894,7 @@ NativeValue* JsNapiCommon::JsDisConnectAbility(
         HILOG_ERROR("input params int error");
         return engine.CreateUndefined();
     }
-    auto item = std::find_if(connects_.begin(), connects_.end(), 
+    auto item = std::find_if(connects_.begin(), connects_.end(),
         [&id](std::map<ConnecttionKey, sptr<NAPIAbilityConnection>>::value_type &obj) {
             return id == obj.first.id;
         });
