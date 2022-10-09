@@ -81,15 +81,14 @@ const int32_t LINE_NUMS_THREE = 3;
 const int32_t LINE_NUMS_FOUR = 4;
 const int32_t LINE_NUMS_EIGHT = 8;
 
-AAFwk::Want SystemDialogScheduler::GetANRDialogWant(int userId, int pid)
+bool SystemDialogScheduler::GetANRDialogWant(int userId, int pid, AAFwk::Want &want)
 {
     HILOG_DEBUG("GetANRDialogWant start");
-    AAFwk::Want want;
     AppExecFwk::ApplicationInfo appInfo;
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (appScheduler->GetApplicationInfoByProcessID(pid, appInfo) != ERR_OK) {
         HILOG_ERROR("Get application info failed.");
-        return want;
+        return false;
     }
 
     std::string appName {""};
@@ -102,7 +101,7 @@ AAFwk::Want SystemDialogScheduler::GetANRDialogWant(int userId, int pid)
     want.SetParam(BUNDLE_NAME, appInfo.bundleName);
     want.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
     want.SetParam(DIALOG_PARAMS, params);
-    return want;
+    return true;
 }
 
 const std::string SystemDialogScheduler::GetAnrParams(const DialogPosition position, const std::string &appName) const
