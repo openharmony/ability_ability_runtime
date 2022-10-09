@@ -19,9 +19,11 @@
 #include <vector>
 
 #include "../inner/napi_common/napi_common_ability.h"
+#include "../inner/napi_common/js_napi_common_ability.h"
 #include "ability_process.h"
 #include "element_name.h"
 #include "hilog_wrapper.h"
+#include "js_runtime_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "js_window.h"
 #endif
@@ -35,6 +37,7 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace AppExecFwk {
+using namespace OHOS::AbilityRuntime;
 static int64_t dummyRequestCode_ = 0;
 CallbackInfo g_aceCallbackInfo;
 
@@ -60,7 +63,7 @@ napi_value FeatureAbilityInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("terminateSelf", NAPI_TerminateAbility),
         DECLARE_NAPI_FUNCTION("hasWindowFocus", NAPI_HasWindowFocus),
         DECLARE_NAPI_FUNCTION("getContext", NAPI_GetContext),
-        DECLARE_NAPI_FUNCTION("getWant", NAPI_GetWant),
+        //DECLARE_NAPI_FUNCTION("getWant", NAPI_GetWant),
         DECLARE_NAPI_FUNCTION("getAppType", NAPI_GetAppType),
         DECLARE_NAPI_FUNCTION("getAbilityName", NAPI_GetAbilityName),
         DECLARE_NAPI_FUNCTION("getAbilityInfo", NAPI_GetAbilityInfo),
@@ -75,7 +78,54 @@ napi_value FeatureAbilityInit(napi_env env, napi_value exports)
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
 
+    return reinterpret_cast<napi_value>(JsFeatureAbilityInit(reinterpret_cast<NativeEngine*>(env),
+        reinterpret_cast<NativeValue*>(exports)));
+}
+
+class JsFeatureAbility : public JsNapiCommon {
+public:
+    JsFeatureAbility() = default;
+    ~JsFeatureAbility() = default;
+
+    Ability* GetAbility(NativeEngine &engine);
+    static void Finalizer(NativeEngine *engine, void *data, void *hint);
+    static NativeValue* GetWant(NativeEngine *engine, NativeCallbackInfo *info);
+};
+
+void JsFeatureAbility::Finalizer(NativeEngine* engine, void* data, void* hint)
+{
+    HILOG_DEBUG("JsFeatureAbility::Finalizer is called");
+    std::unique_ptr<JsFeatureAbility>(static_cast<JsFeatureAbility*>(data));
+}
+
+NativeValue* JsFeatureAbilityInit(NativeEngine *engine, NativeValue *exports)
+{
+    HILOG_DEBUG("JsFeatureAbilityInit is called");
+    if (engine == nullptr || exports == nullptr) {
+        HILOG_ERROR("Invalid input parameters");
+        return exports;
+    }
+
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(exports);
+    if (object == nullptr) {
+        HILOG_ERROR("object is nullptr");
+        return exports;
+    }
+
+    std::unique_ptr<JsFeatureAbility> jsFeatureAbility = std::make_unique<JsFeatureAbility>();
+    jsFeatureAbility->ability_ = jsFeatureAbility->GetAbility(*engine);
+    object->SetNativePointer(jsFeatureAbility.release(), JsFeatureAbility::Finalizer, nullptr);
+
+    const char *moduleName = "JsFeatureAbility";
+    BindNativeFunction(*engine, *object, "getWant", moduleName, JsFeatureAbility::GetWant);
+
     return exports;
+}
+
+NativeValue* JsFeatureAbility::GetWant(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsFeatureAbility *me = CheckParamsAndGetThis<JsFeatureAbility>(engine, info);
+    return (me != nullptr) ? me->JsGetWant(*engine, *info, AbilityType::PAGE) : nullptr;
 }
 
 /**
