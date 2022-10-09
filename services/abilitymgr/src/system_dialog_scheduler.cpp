@@ -70,6 +70,7 @@ const std::string DIALOG_SELECTOR_NAME = "dialog_selector_service";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string BUNDLE_NAME_DIALOG = "com.ohos.amsdialog";
 const std::string DIALOG_PARAMS = "params";
+const std::string DIALOG_POSITION = "position";
 const std::string ABILITY_NAME_ANR_DIALOG = "AnrDialog";
 const std::string ABILITY_NAME_TIPS_DIALOG = "TipsDialog";
 const std::string ABILITY_NAME_SELECTOR_DIALOG = "SelectorDialog";
