@@ -36,7 +36,6 @@ namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime;
 const int PROPERTIES_SIZE = 2;
-EXTERN_C_START
 /**
  * @brief Init param of wantOptions.
  *
@@ -1267,6 +1266,5 @@ bool WrapJsWantParamsArray(NativeEngine &engine, NativeObject* object, const std
         return false;
     }
 }
-EXTERN_C_END
 }  // namespace AppExecFwk
 }  // namespace OHOS
