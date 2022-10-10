@@ -23,6 +23,7 @@
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundle_constants.h"
 #include "in_process_call_wrapper.h"
+#include "ipc_skeleton.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
@@ -118,7 +119,8 @@ ErrCode ControlInterceptor::DoProcess(const Want &want, int requestCode, int32_t
     return ERR_OK;
 }
 
-bool ControlInterceptor::CheckControl(const Want &want, int32_t userId, AppExecFwk::AppRunningControlRuleResult &controlRule)
+bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
+    AppExecFwk::AppRunningControlRuleResult &controlRule)
 {
     // get bms
     auto bms = AbilityUtil::GetBundleManager();
@@ -134,13 +136,16 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId, AppExecF
         HILOG_ERROR("Get appControlMgr failed");
         return false;
     }
-    appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule);
 
+    auto ret = IN_PROCESS_CALL(appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule));
+    if (ret != ERR_OK) {
+        HILOG_INFO("GetAppRunningControlRule failed");
+        return false;
+    }
+    
     if (controlRule.controlWant != nullptr) {
-        HILOG_INFO("app has been control");
         return true;
     }
-    HILOG_INFO("app is available");
     return false;
 }
 } // namespace AAFwk
