@@ -2293,6 +2293,15 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
         return nullptr;
     }
 
+    Want want;
+    ElementName element("", abilityRequest.abilityInfo.bundleName, "");
+    want.SetElement(element);
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
+    if (result != ERR_OK) {
+        return nullptr;
+    }
+
     abilityRequest.callerToken = callerToken;
     if (CheckCallDataAbilityPermission(abilityRequest) != ERR_OK) {
         HILOG_ERROR("Invalid ability request info for data ability acquiring.");
