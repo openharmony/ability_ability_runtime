@@ -5827,7 +5827,7 @@ NativeValue* JsNapiCommon::JsGetWant(
         }
 
         auto wantData = obj->ability_->GetWant();
-        if(wantData == nullptr || want == nullptr){
+        if (wantData == nullptr || want == nullptr) {
             HILOG_ERROR("wantData or want is nullptr!");
             *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
             return;
