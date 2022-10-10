@@ -23,14 +23,17 @@
 #include "ability_process.h"
 #include "element_name.h"
 #include "hilog_wrapper.h"
+#include "hitrace_meter.h"
 #include "js_runtime_utils.h"
 #ifdef SUPPORT_GRAPHICS
 #include "js_window.h"
 #endif
+#include "napi_common_util.h"
 #include "napi_context.h"
 #include "napi_data_ability_helper.h"
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
 #include "securec.h"
-#include "hitrace_meter.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -61,17 +64,13 @@ napi_value FeatureAbilityInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("finishWithResult", NAPI_SetResult),
         DECLARE_NAPI_FUNCTION("terminateSelfWithResult", NAPI_SetResult),
         DECLARE_NAPI_FUNCTION("terminateSelf", NAPI_TerminateAbility),
-        DECLARE_NAPI_FUNCTION("hasWindowFocus", NAPI_HasWindowFocus),
         DECLARE_NAPI_FUNCTION("getContext", NAPI_GetContext),
-        //DECLARE_NAPI_FUNCTION("getWant", NAPI_GetWant),
         DECLARE_NAPI_FUNCTION("getAppType", NAPI_GetAppType),
         DECLARE_NAPI_FUNCTION("getAbilityName", NAPI_GetAbilityName),
         DECLARE_NAPI_FUNCTION("getAbilityInfo", NAPI_GetAbilityInfo),
         DECLARE_NAPI_FUNCTION("getHapModuleInfo", NAPI_GetHapModuleInfo),
         DECLARE_NAPI_FUNCTION("getDataAbilityHelper", NAPI_GetDataAbilityHelper),
         DECLARE_NAPI_FUNCTION("acquireDataAbilityHelper", NAPI_AcquireDataAbilityHelper),
-        DECLARE_NAPI_FUNCTION("connectAbility", NAPI_FAConnectAbility),
-        DECLARE_NAPI_FUNCTION("disconnectAbility", NAPI_FADisConnectAbility),
         DECLARE_NAPI_FUNCTION("continueAbility", NAPI_FAContinueAbility),
         DECLARE_NAPI_FUNCTION("getWantSync", NAPI_GetWantSync),
         DECLARE_NAPI_FUNCTION("getWindow", NAPI_GetWindow),
@@ -85,14 +84,21 @@ napi_value FeatureAbilityInit(napi_env env, napi_value exports)
 class JsFeatureAbility : public JsNapiCommon {
 public:
     JsFeatureAbility() = default;
-    ~JsFeatureAbility() = default;
+    virtual ~JsFeatureAbility() override = default;
 
     Ability* GetAbility(NativeEngine &engine);
     static void Finalizer(NativeEngine *engine, void *data, void *hint);
+    static NativeValue* HasWindowFocus(NativeEngine *engine, NativeCallbackInfo *info);
+    static NativeValue* ConnectAbility(NativeEngine *engine, NativeCallbackInfo *info);
+    static NativeValue* DisconnectAbility(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* GetWant(NativeEngine *engine, NativeCallbackInfo *info);
+private:
+#ifdef SUPPORT_GRAPHICS
+    NativeValue* OnHasWindowFocus(NativeEngine &engine, NativeCallbackInfo &info);
+#endif
 };
 
-void JsFeatureAbility::Finalizer(NativeEngine* engine, void* data, void* hint)
+void JsFeatureAbility::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
     HILOG_DEBUG("JsFeatureAbility::Finalizer is called");
     std::unique_ptr<JsFeatureAbility>(static_cast<JsFeatureAbility*>(data));
@@ -118,6 +124,9 @@ NativeValue* JsFeatureAbilityInit(NativeEngine *engine, NativeValue *exports)
 
     const char *moduleName = "JsFeatureAbility";
     BindNativeFunction(*engine, *object, "getWant", moduleName, JsFeatureAbility::GetWant);
+    BindNativeFunction(*engine, *object, "hasWindowFocus", moduleName, JsFeatureAbility::HasWindowFocus);
+    BindNativeFunction(*engine, *object, "connectAbility", moduleName, JsFeatureAbility::ConnectAbility);
+    BindNativeFunction(*engine, *object, "disconnectAbility", moduleName, JsFeatureAbility::DisconnectAbility);
 
     return exports;
 }
@@ -127,6 +136,55 @@ NativeValue* JsFeatureAbility::GetWant(NativeEngine *engine, NativeCallbackInfo 
     JsFeatureAbility *me = CheckParamsAndGetThis<JsFeatureAbility>(engine, info);
     return (me != nullptr) ? me->JsGetWant(*engine, *info, AbilityType::PAGE) : nullptr;
 }
+
+NativeValue *JsFeatureAbility::HasWindowFocus(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    #ifdef SUPPORT_GRAPHICS
+        JsFeatureAbility *me = CheckParamsAndGetThis<JsFeatureAbility>(engine, info);
+        return (me != nullptr) ? me->OnHasWindowFocus(*engine, *info) : nullptr;
+    #else
+        return nullptr;
+    #endif
+}
+
+NativeValue* JsFeatureAbility::ConnectAbility(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsFeatureAbility *me = CheckParamsAndGetThis<JsFeatureAbility>(engine, info);
+    return (me != nullptr) ? me->JsConnectAbility(*engine, *info, AbilityType::PAGE) : nullptr;
+}
+
+NativeValue* JsFeatureAbility::DisconnectAbility(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsFeatureAbility *me = CheckParamsAndGetThis<JsFeatureAbility>(engine, info);
+    return (me != nullptr) ? me->JsDisConnectAbility(*engine, *info, AbilityType::PAGE) : nullptr;
+}
+
+#ifdef SUPPORT_GRAPHICS
+NativeValue* JsFeatureAbility::OnHasWindowFocus(NativeEngine &engine, NativeCallbackInfo &info)
+{
+    HILOG_DEBUG("%{public}s is called", __FUNCTION__);
+    if (info.argc > ARGS_ONE || info.argc < ARGS_ZERO) {
+        HILOG_ERROR(" wrong number of arguments.");
+        return engine.CreateUndefined();
+    }
+    AsyncTask::CompleteCallback complete =
+        [obj = this](NativeEngine &engine, AsyncTask &task, int32_t status) {
+            if (obj->ability_ == nullptr) {
+                HILOG_ERROR("HasWindowFocus execute error, the ability is nullptr");
+                task.Reject(engine, CreateJsError(engine, NAPI_ERR_ACE_ABILITY, "HasWindowFocus failed"));
+                return;
+            }
+            auto ret = obj->ability_->HasWindowFocus();
+            task.Resolve(engine, CreateJsValue(engine, ret));
+        };
+    NativeValue *result = nullptr;
+    NativeValue *lastParam = (info.argc == ARGS_ZERO) ? nullptr : info.argv[PARAM0];
+    AsyncTask::Schedule("JSFeatureAbility::OnHasWindowFocus",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    HILOG_DEBUG("OnHasWindowFocus is called end");
+    return result;
+}
+#endif
 
 Ability* JsFeatureAbility::GetAbility(NativeEngine &engine)
 {
@@ -159,6 +217,7 @@ Ability* JsFeatureAbility::GetAbility(NativeEngine &engine)
 
     return ability;
 }
+
 /**
  * @brief FeatureAbility NAPI method : startAbility.
  *
