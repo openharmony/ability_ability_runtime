@@ -462,46 +462,6 @@ NativeValue* JsWantAgent::OnCancel(NativeEngine &engine, NativeCallbackInfo &inf
     return result;
 }
 
-auto GetTriggerInfo(NativeEngine &engine, NativeCallbackInfo &info, std::shared_ptr<WantAgent> &wantAgent, 
-        napi_valuetype &wantAgentType, TriggerInfo &triggerInfo, std::shared_ptr<TriggerCompleteCallBack> &triggerObj)
-{
-    auto env = reinterpret_cast<napi_env>(&engine);
-    auto arg = reinterpret_cast<napi_value>(info.argv);
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[ARGC_ZERO]);
-    auto arg2 = reinterpret_cast<napi_value>(info.argv[ARGC_TWO]);
-
-    WantAgent *pWantAgent = nullptr;
-    if (info.argc != ARGC_THREE ) {
-        HILOG_ERROR("Not enough params");
-        return ERR_NOT_OK;
-    }
-
-    napi_unwrap(env, arg0, (void **)&(pWantAgent));
-    if (pWantAgent == nullptr) {
-        HILOG_ERROR("Parse pWantAgent failed");
-        return ERR_NOT_OK;
-    }
-    wantAgent = std::make_shared<WantAgent>(*pWantAgent);
-
-    napi_typeof(env, arg0, &wantAgentType);
-    if (wantAgentType != napi_object) {
-        HILOG_ERROR("Wrong argument type. Object expected.");
-        return ERR_NOT_OK;
-    }
-
-    napi_value ret = NAPI_GetTriggerInfo(&arg, ARGC_THREE, env, triggerInfo);
-    if (ret == nullptr) {
-        HILOG_ERROR("Get trigger info error");
-        return ERR_NOT_OK;
-    }
-
-    napi_ref callback[2] = {0};
-    napi_create_reference(env, arg2, 1, &callback[0]);
-    triggerObj->SetCallbackInfo(env, callback[0]);
-    triggerObj->SetWantAgentInstance(wantAgent);
-    return BUSINESS_ERROR_CODE_OK;
-}
-
 NativeValue* JsWantAgent::OnTrigger(NativeEngine &engine, NativeCallbackInfo &info)
 {
     HILOG_DEBUG("%{public}s is called", __FUNCTION__);
@@ -512,25 +472,100 @@ NativeValue* JsWantAgent::OnTrigger(NativeEngine &engine, NativeCallbackInfo &in
     }
 
     std::shared_ptr<WantAgent> wantAgent = nullptr;
-    napi_valuetype wantAgentType = napi_valuetype::napi_null;
     TriggerInfo triggerInfo;
     auto triggerObj = std::make_shared<TriggerCompleteCallBack>();
-    int32_t errCode = GetTriggerInfo(engine, info, wantAgent, wantAgentType, triggerInfo, triggerObj);
+    int32_t errCode = UnWrapTriggerInfoParam(engine, info, wantAgent, triggerInfo, triggerObj);
     if (errCode != BUSINESS_ERROR_CODE_OK) {
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
-    AsyncTask::CompleteCallback complete =
-        [wantAgent, triggerObj, triggerInfo](NativeEngine &engine, AsyncTask &task, int32_t status) {
-            HILOG_DEBUG("OnTrigger AsyncTask is called");
-            WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
-            task.Resolve(engine, engine.CreateUndefined());
-        };
 
-    NativeValue* lastParam = info.argv[INDEX_TWO];
-    NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsWantAgent::OnTrigger",
-        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
+    return engine.CreateNull();
+}
+
+int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallbackInfo &info,
+    std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
+    std::shared_ptr<TriggerCompleteCallBack> &triggerObj)
+{
+    if (info.argc != ARGC_THREE ) {
+        HILOG_ERROR("Not enough params");
+        return ERR_NOT_OK;
+    }
+    auto env = reinterpret_cast<napi_env>(&engine);
+    auto argWantagent = reinterpret_cast<napi_value>(info.argv[ARGC_ZERO]);
+    auto argCallback = reinterpret_cast<napi_value>(info.argv[ARGC_TWO]);
+
+    napi_valuetype wantAgentType = napi_valuetype::napi_null;
+    napi_typeof(env, argWantagent, &wantAgentType);
+    if (wantAgentType != napi_object) {
+        HILOG_ERROR("Wrong argument type. Object expected.");
+        return ERR_NOT_OK;
+    }
+    WantAgent *pWantAgent = nullptr;
+    napi_unwrap(env, argWantagent, (void **)&(pWantAgent));
+    if (pWantAgent == nullptr) {
+        HILOG_ERROR("Parse pWantAgent failed");
+        return ERR_NOT_OK;
+    }
+    wantAgent = std::make_shared<WantAgent>(*pWantAgent);
+
+    int32_t ret = GetTriggerInfo(engine, info.argv[ARGC_ONE], triggerInfo);
+    if (ret != BUSINESS_ERROR_CODE_OK) {
+        HILOG_ERROR("Get trigger info error");
+        return ret;
+    }
+
+    napi_ref callback[2] = {0};
+    napi_create_reference(env, argCallback, 1, &callback[0]);
+    triggerObj->SetCallbackInfo(env, callback[0]);
+    triggerObj->SetWantAgentInstance(wantAgent);
+
+    return BUSINESS_ERROR_CODE_OK;
+}
+
+int32_t JsWantAgent::GetTriggerInfo(NativeEngine &engine, NativeValue *param, TriggerInfo &triggerInfo)
+{
+    if (param->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+        HILOG_ERROR("param type mismatch!");
+        return ERR_NOT_OK;
+    }
+
+    NativeObject *objectParam = ConvertNativeValueTo<NativeObject>(param);
+
+    int32_t code = -1;
+    NativeValue *jsCode = objectParam->GetProperty("code");
+    if (!ConvertFromJsValue(engine, jsCode, code)) {
+        return ERR_NOT_OK;
+    }
+
+    NativeValue *jsWant = objectParam->GetProperty("want");
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    if (jsWant != nullptr) {
+        want = std::make_shared<AAFwk::Want>();
+        if (!UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(jsWant), *want)) {
+            return ERR_NOT_OK;
+        }
+    }
+
+    std::string permission = "";
+    NativeValue *jsPermission = objectParam->GetProperty("permission");
+    if (!ConvertFromJsValue(engine, jsPermission, permission)) {
+        return ERR_NOT_OK;
+    }
+
+    NativeValue *jsExtraInfo = objectParam->GetProperty("extraInfo");
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
+    if (jsExtraInfo != nullptr) {
+        extraInfo = std::make_shared<AAFwk::WantParams>();
+        if (!UnwrapWantParams(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(jsExtraInfo),
+            *extraInfo)) {
+            return ERR_NOT_OK;
+        }
+    }
+
+    TriggerInfo triggerInfoData(permission, extraInfo, want, code);
+    triggerInfo = triggerInfoData;
+    return BUSINESS_ERROR_CODE_OK;
 }
 
 NativeValue* JsWantAgentInit(NativeEngine* engine, NativeValue* exportObj)
@@ -632,52 +667,6 @@ napi_value WantAgentOperationTypeInit(napi_env env, napi_value exports)
 
     napi_define_properties(env, exports, sizeof(exportFuncs) / sizeof(*exportFuncs), exportFuncs);
     return exports;
-}
-
-napi_value NAPI_GetTriggerInfo(napi_value argv[NUMBER_OF_PARAMETERS_THREE], uint8_t argvLen, napi_env env,
-    TriggerInfo &triggerInfo)
-{
-    if (argvLen < 1) {
-        return nullptr;
-    }
-    // Get triggerInfo
-    napi_value jsTriggerInfo = argv[1];
-    napi_valuetype valueType = napi_valuetype::napi_null;
-    NAPI_CALL(env, napi_typeof(env, jsTriggerInfo, &valueType));
-    NAPI_ASSERT_RETURN_NULL(env, valueType == napi_object, "param type mismatch!");
-
-    // Get triggerInfo code
-    int32_t code = -1;
-    if (!UnwrapInt32ByPropertyName(env, jsTriggerInfo, "code", code)) {
-        return nullptr;
-    }
-    // Get triggerInfo want
-    napi_value jsWant = nullptr;
-    jsWant = GetPropertyValueByPropertyName(env, jsTriggerInfo, "want", napi_object);
-    std::shared_ptr<AAFwk::Want> want = nullptr;
-    if (jsWant != nullptr) {
-        want = std::make_shared<AAFwk::Want>();
-        if (!UnwrapWant(env, jsWant, *want)) {
-            return nullptr;
-        }
-    }
-    // Get triggerInfo permission
-    std::string permission = {};
-    UnwrapStringByPropertyName(env, jsTriggerInfo, "permission", permission);
-    // Get triggerInfo extraInfo
-    napi_value jsExtraInfo = nullptr;
-    jsExtraInfo = GetPropertyValueByPropertyName(env, jsTriggerInfo, "extraInfo", napi_object);
-    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
-    if (jsExtraInfo != nullptr) {
-        extraInfo = std::make_shared<AAFwk::WantParams>();
-        if (!UnwrapWantParams(env, jsExtraInfo, *extraInfo)) {
-            return nullptr;
-        }
-    }
-
-    TriggerInfo triggerInfoData(permission, extraInfo, want, code);
-    triggerInfo = triggerInfoData;
-    return NapiGetNull(env);
 }
 
 auto NAPI_GetWantAgentWrapExecuteCallBack = [](napi_env env, void *data) {
