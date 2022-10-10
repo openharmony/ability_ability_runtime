@@ -28,7 +28,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-EXTERN_C_START
 
 napi_value WrapElementName(napi_env env, const ElementName &elementName);
 bool UnwrapElementName(napi_env env, napi_value param, ElementName &elementName);
@@ -92,8 +91,6 @@ bool InnerWrapWantParamsArray(
     object->SetProperty(key.c_str(), OHOS::AbilityRuntime::CreateNativeArray(engine, natArray));
     return true;
 }
-
-EXTERN_C_END
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_NAPI_COMMON_WANT_H
