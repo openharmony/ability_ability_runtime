@@ -98,6 +98,7 @@ public:
         NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType);
     NativeValue* JsGetDisplayOrientation(
         NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType);
+    NativeValue* JsGetWant(NativeEngine &engine, NativeCallbackInfo &info, const AbilityType abilityType);
 
     NativeValue* CreateProcessInfo(NativeEngine &engine, const std::shared_ptr<JsProcessInfo> &processInfo);
     NativeValue* CreateElementName(NativeEngine &engine, const std::shared_ptr<JsElementName> &elementName);
@@ -110,6 +111,7 @@ public:
     NativeValue* CreateAbilityInfo(NativeEngine &engine, const std::shared_ptr<JsAbilityInfoInfo> &abilityInfo);
     NativeValue* CreateAbilityInfos(NativeEngine &engine, const std::vector<AbilityInfo> &abilityInfos);
     NativeValue* CreateAppVersionInfo(NativeEngine &engine, const std::shared_ptr<JsApplicationInfo> &appInfo);
+    NativeValue* CreateWant(NativeEngine &engine, const std::shared_ptr<JsWant> &want);
     bool CheckAbilityType(const AbilityType typeWant);
     bool UnwarpVerifyPermissionParams(NativeEngine &engine, NativeCallbackInfo &info, JsPermissionOptions &options);
     bool GetStringsValue(NativeEngine &engine, NativeValue *object, std::vector<std::string> &strList);
