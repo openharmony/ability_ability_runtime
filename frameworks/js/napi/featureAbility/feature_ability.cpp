@@ -128,6 +128,37 @@ NativeValue* JsFeatureAbility::GetWant(NativeEngine *engine, NativeCallbackInfo 
     return (me != nullptr) ? me->JsGetWant(*engine, *info, AbilityType::PAGE) : nullptr;
 }
 
+Ability* JsFeatureAbility::GetAbility(NativeEngine &engine)
+{
+    napi_status ret;
+    napi_value global = 0;
+    auto env = reinterpret_cast<napi_env>(&engine);
+    const napi_extended_error_info *errorInfo = nullptr;
+    ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        napi_get_last_error_info(env, &errorInfo);
+        HILOG_ERROR("get_global=%{public}d err:%{public}s", ret, errorInfo->error_message);
+        return nullptr;
+    }
+
+    napi_value abilityObj = 0;
+    ret = napi_get_named_property(env, global, "ability", &abilityObj);
+    if (ret != napi_ok) {
+        napi_get_last_error_info(env, &errorInfo);
+        HILOG_ERROR("get_named_property=%{public}d err:%{public}s", ret, errorInfo->error_message);
+        return nullptr;
+    }
+
+    Ability *ability = nullptr;
+    ret = napi_get_value_external(env, abilityObj, (void **)&ability);
+    if (ret != napi_ok) {
+        napi_get_last_error_info(env, &errorInfo);
+        HILOG_ERROR("get_value_external=%{public}d err:%{public}s", ret, errorInfo->error_message);
+        return nullptr;
+    }
+
+    return ability;
+}
 /**
  * @brief FeatureAbility NAPI method : startAbility.
  *
