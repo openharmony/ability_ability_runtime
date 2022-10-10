@@ -118,6 +118,10 @@ private:
     NativeValue* OnGetUid(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnCancel(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnTrigger(NativeEngine &engine, NativeCallbackInfo &info);
+    int32_t UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallbackInfo &info,
+    std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
+    std::shared_ptr<TriggerCompleteCallBack> &triggerObj);
+    int32_t GetTriggerInfo(NativeEngine &engine, NativeValue *param, TriggerInfo &triggerInfo);
 };
 
 class TriggerCompleteCallBack : public CompletedCallback {
@@ -143,10 +147,6 @@ napi_value WantAgentOperationTypeInit(napi_env env, napi_value exports);
 
 napi_value NAPI_GetWantAgent(napi_env env, napi_callback_info info);
 napi_value NAPI_GetOperationType(napi_env env, napi_callback_info info);
-napi_value NAPI_GetTriggerInfo(napi_value argv[NUMBER_OF_PARAMETERS_THREE], uint8_t argvLen, napi_env env,
-    TriggerInfo &triggerInfo);
-auto GetTriggerInfo(NativeEngine &engine, NativeCallbackInfo &info, std::shared_ptr<WantAgent> &wantAgent, 
-        napi_valuetype &wantAgentType, TriggerInfo &triggerInfo, std::shared_ptr<TriggerCompleteCallBack> &triggerObj);
 napi_value GetCallbackErrorResult(napi_env env, int errCode);
 napi_value NapiGetNull(napi_env env);
 napi_value JSParaError(const napi_env &env, const bool bCallback);
