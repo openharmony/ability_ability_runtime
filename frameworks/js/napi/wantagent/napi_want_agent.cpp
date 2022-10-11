@@ -475,7 +475,7 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
 
     if (info.argv[ARGC_ZERO]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
-        return reinterpret_cast<NativeValue*>(JSParaError(env, false));
+        return ERR_NOT_OK;
     }
     WantAgent *pWantAgent = nullptr;
     napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[ARGC_ZERO]), (void **)&(pWantAgent));
