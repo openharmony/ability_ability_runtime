@@ -230,30 +230,23 @@ NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[0]);
-    auto arg1 = reinterpret_cast<napi_value>(info.argv[1]);
-
-    napi_valuetype wantAgentFirstType = napi_valuetype::napi_null;
-    napi_typeof(env, arg0, &wantAgentFirstType);
-    if (wantAgentFirstType != napi_object) {
+    if (info.argv[0]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    napi_unwrap(env, arg0, (void **)&(pWantAgentFirst));
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[0]), (void **)&(pWantAgentFirst));
     if (pWantAgentFirst == nullptr) {
         HILOG_ERROR("Parse pWantAgentFirst failed");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    napi_valuetype wantAgentSecondType = napi_valuetype::napi_null;
-    napi_typeof(env, arg1, &wantAgentSecondType);
-    if (wantAgentSecondType != napi_object) {
+    if (info.argv[1]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    napi_unwrap(env, arg1, (void **)&(pWantAgentSecond));
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[1]), (void **)&(pWantAgentSecond));
     if (pWantAgentSecond == nullptr) {
         HILOG_ERROR("Parse pWantAgentSceond failed");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
@@ -284,15 +277,12 @@ NativeValue* JsWantAgent::OnGetWant(NativeEngine &engine, NativeCallbackInfo &in
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[0]);
-    napi_valuetype wantAgentType = napi_valuetype::napi_null;
-    napi_typeof(env, arg0, &wantAgentType);
-    if (wantAgentType != napi_object) {
+    if (info.argv[0]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    napi_unwrap(env, arg0, (void **)&(pWantAgent));
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[0]), (void **)&(pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
@@ -324,15 +314,12 @@ NativeValue* JsWantAgent::OnGetOperationType(NativeEngine &engine, NativeCallbac
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[0]);
-    napi_valuetype wantAgentType = napi_valuetype::napi_null;
-    napi_typeof(env, arg0, &wantAgentType);
-    if (wantAgentType != napi_object) {
+    if (info.argv[0]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    napi_unwrap(env, arg0, (void **)&(pWantAgent));
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[0]), (void **)&(pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
@@ -361,14 +348,12 @@ NativeValue* JsWantAgent::OnGetBundleName(NativeEngine &engine, NativeCallbackIn
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[0]);
-    napi_valuetype wantAgentType = napi_valuetype::napi_null;
-    napi_typeof(env, arg0, &wantAgentType);
-    if (wantAgentType != napi_object) {
+    if (info.argv[0]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
-    napi_unwrap(env, arg0, (void **)&(pWantAgent));
+
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[0]), (void **)&(pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
@@ -397,14 +382,12 @@ NativeValue* JsWantAgent::OnGetUid(NativeEngine &engine, NativeCallbackInfo &inf
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[0]);
-    napi_valuetype wantAgentType = napi_valuetype::napi_null;
-    napi_typeof(env, arg0, &wantAgentType);
-    if (wantAgentType != napi_object) {
+    if (info.argv[0]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
-    napi_unwrap(env, arg0, (void **)&(pWantAgent));
+
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[0]), (void **)&(pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
@@ -433,15 +416,12 @@ NativeValue* JsWantAgent::OnCancel(NativeEngine &engine, NativeCallbackInfo &inf
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    auto arg0 = reinterpret_cast<napi_value>(info.argv[0]);
-    napi_valuetype wantAgentType = napi_valuetype::napi_null;
-    napi_typeof(env, arg0, &wantAgentType);
-    if (wantAgentType != napi_object) {
+    if (info.argv[0]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
 
-    napi_unwrap(env, arg0, (void **)&(pWantAgent));
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[0]), (void **)&(pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
@@ -492,17 +472,14 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
         return ERR_NOT_OK;
     }
     auto env = reinterpret_cast<napi_env>(&engine);
-    auto argWantagent = reinterpret_cast<napi_value>(info.argv[ARGC_ZERO]);
-    auto argCallback = reinterpret_cast<napi_value>(info.argv[ARGC_TWO]);
 
-    napi_valuetype wantAgentType = napi_valuetype::napi_null;
-    napi_typeof(env, argWantagent, &wantAgentType);
-    if (wantAgentType != napi_object) {
+    if (info.argv[ARGC_ZERO]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
-        return ERR_NOT_OK;
+        return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
     WantAgent *pWantAgent = nullptr;
-    napi_unwrap(env, argWantagent, (void **)&(pWantAgent));
+    napi_unwrap(env, reinterpret_cast<napi_value>(info.argv[ARGC_ZERO]), (void **)&(pWantAgent));
+
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         return ERR_NOT_OK;
@@ -516,7 +493,7 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
     }
 
     napi_ref callback[2] = {0};
-    napi_create_reference(env, argCallback, 1, &callback[0]);
+    napi_create_reference(env, reinterpret_cast<napi_value>(info.argv[ARGC_TWO]), 1, &callback[0]);
     triggerObj->SetCallbackInfo(env, callback[0]);
     triggerObj->SetWantAgentInstance(wantAgent);
 
