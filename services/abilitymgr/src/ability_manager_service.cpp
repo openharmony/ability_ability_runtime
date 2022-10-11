@@ -2293,11 +2293,7 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
         return nullptr;
     }
 
-    Want want;
-    ElementName element("", abilityRequest.abilityInfo.bundleName, "");
-    want.SetElement(element);
-    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
+    auto result = DataAbilityIntercept(abilityRequest.abilityInfo.bundleName, GetUserId());
     if (result != ERR_OK) {
         return nullptr;
     }
@@ -2309,8 +2305,7 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
     }
 
     HILOG_DEBUG("Query data ability info: %{public}s|%{public}s|%{public}s",
-        abilityRequest.appInfo.name.c_str(),
-        abilityRequest.appInfo.bundleName.c_str(),
+        abilityRequest.appInfo.name.c_str(), abilityRequest.appInfo.bundleName.c_str(),
         abilityRequest.abilityInfo.name.c_str());
 
     if (CheckStaticCfgPermission(abilityRequest.abilityInfo) != AppExecFwk::Constants::PERMISSION_GRANTED) {
@@ -5449,6 +5444,15 @@ int AbilityManagerService::AddStartControlParam(Want &want, const sptr<IRemoteOb
     }
     want.SetParam(DMS_IS_CALLER_BACKGROUND, isCallerBackground);
     return ERR_OK;
+}
+
+int AbilityManagerService::DataAbilityIntercept(const std::string &bundleName, int32_t userId)
+{
+    Want want;
+    ElementName element("", bundleName, "");
+    want.SetElement(element);
+    return interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, 0, userId, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

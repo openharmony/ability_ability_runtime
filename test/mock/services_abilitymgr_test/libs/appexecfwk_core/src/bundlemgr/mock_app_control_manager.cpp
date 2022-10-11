@@ -31,7 +31,8 @@ ErrCode AppControlProxy::AddAppInstallControlRule(const std::vector<std::string>
     return ERR_OK;
 }
 
-ErrCode AppControlProxy::DeleteAppInstallControlRule(const std::vector<std::string> &appIds, int32_t userId)
+ErrCode AppControlProxy::DeleteAppInstallControlRule(const AppInstallControlRuleType controlRuleType,
+    const std::vector<std::string> &appIds, int32_t userId)
 {
     return ERR_OK;
 }

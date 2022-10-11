@@ -22,9 +22,10 @@
 #include "app_running_control_rule_result.h"
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundle_constants.h"
+#include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
-#include "hilog_wrapper.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -103,11 +104,10 @@ ErrCode ControlInterceptor::DoProcess(const Want &want, int requestCode, int32_t
 {
     AppExecFwk::AppRunningControlRuleResult controlRule;
     if (CheckControl(want, userId, controlRule)) {
-        HILOG_ERROR("The target application is intercpted. %{public}s",
-            controlRule.controlMessage.c_str());
+        HILOG_INFO("The target application is intercpted. %{public}s", controlRule.controlMessage.c_str());
 #ifdef SUPPORT_GRAPHICS
         if (isForeground) {
-            int ret = AbilityManagerClient::GetInstance()->StartAbility(*controlRule.controlWant);
+            int ret = AbilityManagerClient::GetInstance()->StartAbility(*controlRule.controlWant, userId, requestCode);
             if (ret != ERR_OK) {
                 HILOG_ERROR("Control implicit start appgallery failed.");
                 return ret;
