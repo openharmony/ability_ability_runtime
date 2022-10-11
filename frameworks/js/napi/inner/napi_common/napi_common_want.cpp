@@ -1051,24 +1051,6 @@ bool InnerUnwrapWantOptions(napi_env env, napi_value param, const char *property
     return true;
 }
 
-NativeValue* CreateJsWant(NativeEngine &engine, const Want &want)
-{
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-
-    object->SetProperty("deviceId", CreateJsValue(engine, want.GetElement().GetDeviceID()));
-    object->SetProperty("bundleName", CreateJsValue(engine, want.GetElement().GetBundleName()));
-    object->SetProperty("abilityName", CreateJsValue(engine, want.GetElement().GetAbilityName()));
-    object->SetProperty("moduleName", CreateJsValue(engine, want.GetElement().GetModuleName()));
-    object->SetProperty("uri", CreateJsValue(engine, want.GetUriString()));
-    object->SetProperty("type", CreateJsValue(engine, want.GetType()));
-    object->SetProperty("flags", CreateJsValue(engine, want.GetFlags()));
-    object->SetProperty("action", CreateJsValue(engine, want.GetAction()));
-    object->SetProperty("parameters", CreateJsValue(engine, want.GetParams()));
-    object->SetProperty("entities", CreateJsValue(engine, want.GetEntities()));
-    return objValue;
-}
-
 napi_value WrapWant(napi_env env, const Want &want)
 {
     napi_value jsObject = nullptr;
