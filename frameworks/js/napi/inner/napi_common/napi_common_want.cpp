@@ -23,7 +23,6 @@
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
-#include "js_runtime_utils.h"
 #include "long_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
@@ -31,8 +30,7 @@
 #include "remote_object_wrapper.h"
 #include "want_params_wrapper.h"
 #include "napi_remote_object.h"
-#include "native_engine/native_engine.h"
-using namespace OHOS::AbilityRuntime;
+
 namespace OHOS {
 namespace AppExecFwk {
 const int PROPERTIES_SIZE = 2;
