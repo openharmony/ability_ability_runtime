@@ -225,7 +225,8 @@ NativeValue* JsWantAgent::Trigger(NativeEngine *engine, NativeCallbackInfo *info
     return (me != nullptr) ? me->OnTrigger(*engine, *info) : nullptr;
 };
 
-NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info) {
+NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info)
+{
     HILOG_DEBUG("enter, argc = %{public}d", static_cast<int32_t>(info.argc));
     auto env = reinterpret_cast<napi_env>(&engine);
     WantAgent *pWantAgentFirst = nullptr;
