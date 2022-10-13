@@ -28,6 +28,7 @@
 #include "locale_config.h"
 #endif
 #include "os_account_manager_wrapper.h"
+#include "parameters.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 #include "bundle_mgr_proxy.h"
@@ -360,7 +361,8 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
             if (hapModuleInfo.resourcePath.empty() && hapModuleInfo.hapPath.empty()) {
                 continue;
             }
-            std::string loadPath = hapModuleInfo.hapPath.empty() ? hapModuleInfo.resourcePath : hapModuleInfo.hapPath;
+            std::string loadPath =  (system::GetBoolParameter(COMPRESS_PROPERTY, false) &&
+                !hapModuleInfo.hapPath.empty()) ? hapModuleInfo.hapPath : hapModuleInfo.resourcePath;
             if (currentBundle) {
                 loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
             } else {
