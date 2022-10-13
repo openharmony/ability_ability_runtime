@@ -36,7 +36,6 @@ namespace OHOS {
         std::vector<std::shared_ptr<AAFwk::Want>> wants;
         wants.push_back(want);
         int resultCode = 0;
-        std::string permission = "ohos.permission.GET_BUNDLE_INFO";
 
         // get want agentInfo
         Parcel paramsParcel;
@@ -53,6 +52,7 @@ namespace OHOS {
         std::shared_ptr<WantAgent> wantAgent = WantAgentHelper::GetWantAgent(agentInfo);
         if (wantAgent) {
             // trigger want agent
+            constexpr std::string permission = "ohos.permission.GET_BUNDLE_INFO";
             TriggerInfo triggerInfo(permission, extraInfo, want, resultCode);
             WantAgentHelper::TriggerWantAgent(wantAgent, nullptr, triggerInfo);
         }
