@@ -25,6 +25,10 @@
 using namespace OHOS::AAFwk;
 using namespace OHOS::AbilityRuntime::WantAgent;
 
+namespace {
+    const std::string GET_BUNDLE_INFO_PERMISSION = "ohos.permission.GET_BUNDLE_INFO";
+}
+
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
@@ -52,8 +56,7 @@ namespace OHOS {
         std::shared_ptr<WantAgent> wantAgent = WantAgentHelper::GetWantAgent(agentInfo);
         if (wantAgent) {
             // trigger want agent
-            constexpr std::string permission = "ohos.permission.GET_BUNDLE_INFO";
-            TriggerInfo triggerInfo(permission, extraInfo, want, resultCode);
+            TriggerInfo triggerInfo(GET_BUNDLE_INFO_PERMISSION, extraInfo, want, resultCode);
             WantAgentHelper::TriggerWantAgent(wantAgent, nullptr, triggerInfo);
         }
 
