@@ -183,27 +183,32 @@ void JsWantAgent::Finalizer(NativeEngine* engine, void* data, void* hint)
     std::unique_ptr<JsWantAgent>(static_cast<JsWantAgent*>(data));
 }
 
-NativeValue* JsWantAgent::Equal(NativeEngine *engine, NativeCallbackInfo *info) {
+NativeValue* JsWantAgent::Equal(NativeEngine *engine, NativeCallbackInfo *info)
+{
     JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
     return (me != nullptr) ? me->OnEqual(*engine, *info) : nullptr;
 };
 
-NativeValue* JsWantAgent::GetWant(NativeEngine *engine, NativeCallbackInfo *info) {
+NativeValue* JsWantAgent::GetWant(NativeEngine *engine, NativeCallbackInfo *info)
+{
     JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
     return (me != nullptr) ? me->OnGetWant(*engine, *info) : nullptr;
 };
 
-NativeValue* JsWantAgent::GetOperationType(NativeEngine *engine, NativeCallbackInfo *info) {
+NativeValue* JsWantAgent::GetOperationType(NativeEngine *engine, NativeCallbackInfo *info)
+{
     JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
     return (me != nullptr) ? me->OnGetOperationType(*engine, *info) : nullptr;
 };
 
-NativeValue* JsWantAgent::GetBundleName(NativeEngine *engine, NativeCallbackInfo *info) {
+NativeValue* JsWantAgent::GetBundleName(NativeEngine *engine, NativeCallbackInfo *info)
+{
     JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
     return (me != nullptr) ? me->OnGetBundleName(*engine, *info) : nullptr;
 };
 
-NativeValue* JsWantAgent::GetUid(NativeEngine *engine, NativeCallbackInfo *info) {
+NativeValue* JsWantAgent::GetUid(NativeEngine *engine, NativeCallbackInfo *info)
+{
     JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
     return (me != nullptr) ? me->OnGetUid(*engine, *info) : nullptr;
 };
@@ -258,7 +263,7 @@ NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info
         [wantAgentFirst, wantAgentSecond](NativeEngine &engine, AsyncTask &task, int32_t status) {
             HILOG_DEBUG("OnEqual AsyncTask is called");
             bool ret = WantAgentHelper::JudgeEquality(wantAgentFirst, wantAgentSecond);
-            task.Resolve(engine,CreateJsValue(engine, ret));
+            task.Resolve(engine, CreateJsValue(engine, ret));
         };
     NativeValue *lastParam = (info.argc >= ARGC_THREE) ? info.argv[INDEX_TWO] : nullptr;
     NativeValue *result = nullptr;
@@ -267,7 +272,8 @@ NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info
     return result;
 }
 
-NativeValue* JsWantAgent::OnGetWant(NativeEngine &engine, NativeCallbackInfo &info) {
+NativeValue* JsWantAgent::OnGetWant(NativeEngine &engine, NativeCallbackInfo &info)
+{
     HILOG_DEBUG("enter, argc = %{public}d", static_cast<int32_t>(info.argc));
 
     auto env = reinterpret_cast<napi_env>(&engine);
@@ -305,7 +311,8 @@ NativeValue* JsWantAgent::OnGetWant(NativeEngine &engine, NativeCallbackInfo &in
     return result;
 }
 
-NativeValue* JsWantAgent::OnGetOperationType(NativeEngine &engine, NativeCallbackInfo &info) {
+NativeValue* JsWantAgent::OnGetOperationType(NativeEngine &engine, NativeCallbackInfo &info)
+{
     HILOG_DEBUG("JsWantAgent::OnGetOperationType enter, argc = %{public}d", static_cast<int32_t>(info.argc));
     auto env = reinterpret_cast<napi_env>(&engine);
     WantAgent *pWantAgent = nullptr;
@@ -329,7 +336,7 @@ NativeValue* JsWantAgent::OnGetOperationType(NativeEngine &engine, NativeCallbac
     AsyncTask::CompleteCallback complete = [wantAgent](NativeEngine &engine, AsyncTask &task, int32_t status) {
         HILOG_DEBUG("OnGetOperationType AsyncTask is called");
         auto ret = WantAgentHelper::GetType(wantAgent);
-        task.Resolve(engine,CreateJsValue(engine, ret));
+        task.Resolve(engine, CreateJsValue(engine, ret));
     };
     NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     NativeValue *result = nullptr;
@@ -363,7 +370,7 @@ NativeValue* JsWantAgent::OnGetBundleName(NativeEngine &engine, NativeCallbackIn
     AsyncTask::CompleteCallback complete = [wantAgent](NativeEngine &engine, AsyncTask &task, int32_t status) {
         HILOG_DEBUG("OnGetBundleName AsyncTask is called");
         auto ret = WantAgentHelper::GetBundleName(wantAgent);
-        task.Resolve(engine,CreateJsValue(engine, ret));
+        task.Resolve(engine, CreateJsValue(engine, ret));
     };
     NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     NativeValue *result = nullptr;
@@ -397,7 +404,7 @@ NativeValue* JsWantAgent::OnGetUid(NativeEngine &engine, NativeCallbackInfo &inf
     AsyncTask::CompleteCallback complete = [wantAgent](NativeEngine &engine, AsyncTask &task, int32_t status) {
         HILOG_DEBUG("OnGetUid AsyncTask is called");
         auto ret = WantAgentHelper::GetUid(wantAgent);
-        task.Resolve(engine,CreateJsValue(engine, ret));
+        task.Resolve(engine, CreateJsValue(engine, ret));
     };
     NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     NativeValue *result = nullptr;
@@ -446,7 +453,7 @@ NativeValue* JsWantAgent::OnTrigger(NativeEngine &engine, NativeCallbackInfo &in
 {
     HILOG_DEBUG("%{public}s is called", __FUNCTION__);
     auto env = reinterpret_cast<napi_env>(&engine);
-    if (info.argc != ARGC_THREE ) {
+    if (info.argc != ARGC_THREE) {
         HILOG_ERROR("Not enough params");
         return reinterpret_cast<NativeValue*>(JSParaError(env, false));
     }
@@ -467,7 +474,7 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
     std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
     std::shared_ptr<TriggerCompleteCallBack> &triggerObj)
 {
-    if (info.argc != ARGC_THREE ) {
+    if (info.argc != ARGC_THREE) {
         HILOG_ERROR("Not enough params");
         return ERR_NOT_OK;
     }
