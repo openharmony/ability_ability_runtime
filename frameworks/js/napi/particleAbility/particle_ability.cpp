@@ -317,6 +317,7 @@ Ability* JsParticleAbility::GetAbility(napi_env env)
     }
     return ability;
 }
+
 NativeValue* JsParticleAbility::OnPACancelBackgroundRunning(NativeEngine &engine, NativeCallbackInfo &info)
 {
     HILOG_INFO("%{public}s is called", __FUNCTION__);
@@ -329,11 +330,17 @@ NativeValue* JsParticleAbility::OnPACancelBackgroundRunning(NativeEngine &engine
         [obj = this](NativeEngine &engine, AsyncTask &task, int32_t status) {
             if (obj->ability_ == nullptr) {
                 HILOG_ERROR("task execute error, the ability is nullptr.");
-                task.Reject(engine, CreateJsError(engine, NAPI_ERR_ACE_ABILITY, "StopBackgroundRunning failed."));
+                task.Reject(engine, CreateJsError(engine, NAPI_ERR_ACE_ABILITY, "ability is nullptr."));
                 return;
             }
-            obj->ability_->StopBackgroundRunning();
-            task.Resolve(engine, engine.CreateUndefined());
+            int result = obj->ability_->StopBackgroundRunning();
+            if (result != NAPI_ERR_NO_ERROR) {
+                HILOG_ERROR("StopBackgroundRunning execute error.");
+                task.Reject(engine, CreateJsError(engine, result, "StopBackgroundRunning failed."));
+                return;
+            }
+
+            task.Resolve(engine, CreateJsValue(engine, NAPI_ERR_NO_ERROR));
         };
 
     NativeValue *lastParam = (info.argc >= ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
