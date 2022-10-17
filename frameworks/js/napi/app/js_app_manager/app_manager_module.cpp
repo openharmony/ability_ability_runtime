@@ -17,12 +17,12 @@
 #include "js_app_manager.h"
 
 extern "C" __attribute__((constructor))
-void NAPI_application_AppManager_AutoRegister()
+void NAPI_app_ability_AppManager_AutoRegister()
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
-        .name = "application.appManager",
-        .fileName = "application/appmanager_napi.so/app_manager.js",
+        .name = "app.ability.appManager",
+        .fileName = "app/ability/libappmanager.so/app_manager.js",
         .registerCallback = OHOS::AbilityRuntime::JsAppManagerInit,
     };
 

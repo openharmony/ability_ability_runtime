@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "ability_manager_interface.h"
+#include "ability_runtime_error_util.h"
 #include "app_mgr_interface.h"
 #include "hilog_wrapper.h"
 #include "js_runtime.h"
@@ -70,6 +71,18 @@ public:
     {
         JsAppManager* me = CheckParamsAndGetThis<JsAppManager>(engine, info);
         return (me != nullptr) ? me->OnUnregisterApplicationStateObserver(*engine, *info) : nullptr;
+    }
+
+    static NativeValue* On(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsAppManager* me = CheckParamsAndGetThis<JsAppManager>(engine, info);
+        return (me != nullptr) ? me->OnOn(*engine, *info) : nullptr;
+    }
+
+    static NativeValue* Off(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsAppManager* me = CheckParamsAndGetThis<JsAppManager>(engine, info);
+        return (me != nullptr) ? me->OnOff(*engine, *info) : nullptr;
     }
 
     static NativeValue* GetForegroundApplications(NativeEngine* engine, NativeCallbackInfo* info)
@@ -130,6 +143,7 @@ private:
         // only support 1 or 2 params
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
             HILOG_ERROR("Not enough params");
+            AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
             return engine.CreateUndefined();
         }
         if (appManager_ == nullptr) {
@@ -205,7 +219,7 @@ private:
                 }
                 int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
                 if (ret == 0 && observer->RemoveJsObserverObject(observerId)) {
-                    task.Resolve(engine, engine.CreateUndefined());
+                    task.ResolveWithNoError(engine, engine.CreateUndefined());
                     std::lock_guard<std::mutex> lock(g_observerMutex);
                     HILOG_DEBUG("UnregisterApplicationStateObserver success size:%{public}zu",
                         observer->GetJsObserverMapSize());
@@ -220,6 +234,16 @@ private:
         AsyncTask::Schedule("JSAppManager::OnUnregisterApplicationStateObserver",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
+    }
+
+    NativeValue* OnOn(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        return engine.CreateUndefined();
+    }
+
+    NativeValue* OnOff(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        return engine.CreateUndefined();
     }
 
     NativeValue* OnGetForegroundApplications(NativeEngine& engine, NativeCallbackInfo& info)
@@ -247,7 +271,7 @@ private:
                 int32_t ret = appManager->GetForegroundApplications(list);
                 if (ret == 0) {
                     HILOG_DEBUG("OnGetForegroundApplications success.");
-                    task.Resolve(engine, CreateJsAppStateDataArray(engine, list));
+                    task.ResolveWithNoError(engine, CreateJsAppStateDataArray(engine, list));
                 } else {
                     HILOG_ERROR("OnGetForegroundApplications failed error:%{public}d", ret);
                     task.Reject(engine, CreateJsError(engine, ret, "OnGetForegroundApplications failed"));
@@ -280,7 +304,7 @@ private:
                 std::vector<AppExecFwk::RunningProcessInfo> infos;
                 auto ret = appManager->GetAllRunningProcesses(infos);
                 if (ret == 0) {
-                    task.Resolve(engine, CreateJsProcessRunningInfoArray(engine, infos));
+                    task.ResolveWithNoError(engine, CreateJsProcessRunningInfoArray(engine, infos));
                 } else {
                     task.Reject(engine, CreateJsError(engine, ret, "Get mission infos failed."));
                 }
@@ -316,7 +340,7 @@ private:
                 }
                 bool ret = abilityManager->IsRunningInStabilityTest();
                 HILOG_INFO("IsRunningInStabilityTest result:%{public}d", ret);
-                task.Resolve(engine, CreateJsValue(engine, ret));
+                task.ResolveWithNoError(engine, CreateJsValue(engine, ret));
             };
 
         NativeValue* lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
@@ -358,7 +382,7 @@ private:
             }
             auto ret = abilityManager->KillProcess(bundleName);
             if (ret == 0) {
-                task.Resolve(engine, CreateJsValue(engine, ret));
+                task.ResolveWithNoError(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, ret, "kill process failed."));
             }
@@ -404,7 +428,7 @@ private:
             }
             auto ret = abilityManager->ClearUpApplicationData(bundleName);
             if (ret == 0) {
-                task.Resolve(engine, CreateJsValue(engine, ret));
+                task.ResolveWithNoError(engine, engine.CreateUndefined());
             } else {
                 task.Reject(engine, CreateJsError(engine, ret, "clear up application failed."));
             }
@@ -448,7 +472,7 @@ private:
                 }
                 auto ret = appManager->GetAmsMgr()->KillProcessWithAccount(bundleName, accountId);
                 if (ret == 0) {
-                    task.Resolve(engine, engine.CreateUndefined());
+                    task.ResolveWithNoError(engine, engine.CreateUndefined());
                 } else {
                     task.Reject(engine, CreateJsError(engine, ret, "Kill processes failed."));
                 }
@@ -483,7 +507,7 @@ private:
                 }
                 int32_t memorySize = abilityManager->GetAppMemorySize();
                 HILOG_INFO("GetAppMemorySize memorySize:%{public}d", memorySize);
-                task.Resolve(engine, CreateJsValue(engine, memorySize));
+                task.ResolveWithNoError(engine, CreateJsValue(engine, memorySize));
             };
 
         NativeValue* lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
@@ -515,7 +539,7 @@ private:
                 }
                 bool ret = abilityManager->IsRamConstrainedDevice();
                 HILOG_INFO("IsRamConstrainedDevice result:%{public}d", ret);
-                task.Resolve(engine, CreateJsValue(engine, ret));
+                task.ResolveWithNoError(engine, CreateJsValue(engine, ret));
             };
 
         NativeValue* lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
@@ -563,11 +587,13 @@ NativeValue* JsAppManagerInit(NativeEngine* engine, NativeValue* exportObj)
         std::make_unique<JsAppManager>(GetAppManagerInstance(), GetAbilityManagerInstance());
     object->SetNativePointer(jsAppManager.release(), JsAppManager::Finalizer, nullptr);
 
-    const char *moduleName = "JsAppManager";
+    const char *moduleName = "AppManager";
     BindNativeFunction(*engine, *object, "registerApplicationStateObserver", moduleName,
         JsAppManager::RegisterApplicationStateObserver);
     BindNativeFunction(*engine, *object, "unregisterApplicationStateObserver", moduleName,
         JsAppManager::UnregisterApplicationStateObserver);
+    BindNativeFunction(*engine, *object, "on", moduleName, JsAppManager::On);
+    BindNativeFunction(*engine, *object, "off", moduleName, JsAppManager::Off);
     BindNativeFunction(*engine, *object, "getForegroundApplications", moduleName,
         JsAppManager::GetForegroundApplications);
     BindNativeFunction(*engine, *object, "getProcessRunningInfos", moduleName,
