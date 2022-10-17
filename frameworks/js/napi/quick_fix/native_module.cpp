@@ -20,8 +20,8 @@ extern "C" __attribute__((constructor)) void NAPI_application_quickfixmanager_Au
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
-        .name = "application.quickFixManager",
-        .fileName = "application/libquickfixmanager_napi.so/quickfixmanager.js",
+        .name = "app.ability.quickFixManager",
+        .fileName = "app/ability/libquickfixmanager_napi.so/quickfixmanager.js",
         .registerCallback = OHOS::AbilityRuntime::CreateJsQuickFixManager,
     };
 
