@@ -236,7 +236,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleSaveAppState_003, TestSize.Level1)
 
 /**
  * @tc.name:  ScheduleSaveAppState_004
- * @tc.desc:  ScheduleSaveAppState should be retuen true.
+ * @tc.desc:  ScheduleSaveAppState should be return true.
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
@@ -304,7 +304,7 @@ HWTEST_F(AppRecoveryUnitTest, ScheduleRecoverApp_004, TestSize.Level1)
 
 /**
  * @tc.name:  ScheduleRecoverApp_005
- * @tc.desc:  ScheduleRecoverApp should be retuen true.
+ * @tc.desc:  ScheduleRecoverApp should be return true.
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */
@@ -334,7 +334,7 @@ HWTEST_F(AppRecoveryUnitTest, TryRecoverApp_001, TestSize.Level1)
 
 /**
  * @tc.name:  TryRecoverApp_002
- * @tc.desc:  TryRecoverApp should be retuen true.
+ * @tc.desc:  TryRecoverApp should be return true.
  * @tc.type: FUNC
  * @tc.require: I5UL6H
  */

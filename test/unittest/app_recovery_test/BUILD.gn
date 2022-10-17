@@ -25,25 +25,23 @@ ohos_unittest("AppRecoveryUnitTest") {
   ]
 
   # push recovery source file here
-  sources = [
-    "app_recovery_test.cpp",
-  ]
+  sources = [ "app_recovery_test.cpp" ]
 
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
   deps = [
-    "${multimedia_path}/interfaces/innerkits:image_native",
-    "${windowmanager_path}/dm:libdm",
-    "${windowmanager_path}/interfaces/kits/napi/window_runtime:windowstage_kit",
-    "${windowmanager_path}/wm:libwm",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
     "${ability_runtime_services_path}/common:event_report",
+    "${multimedia_path}/interfaces/innerkits:image_native",
+    "${windowmanager_path}/dm:libdm",
+    "${windowmanager_path}/interfaces/kits/napi/window_runtime:windowstage_kit",
+    "${windowmanager_path}/wm:libwm",
   ]
 
   external_deps = [
@@ -77,7 +75,5 @@ ohos_unittest("AppRecoveryUnitTest") {
 group("unittest") {
   testonly = true
 
-  deps = [
-    ":AppRecoveryUnitTest",
-  ]
+  deps = [ ":AppRecoveryUnitTest" ]
 }
