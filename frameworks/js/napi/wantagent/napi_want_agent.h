@@ -125,7 +125,9 @@ private:
     CallbackInfo triggerCompleteInfo_;
 };
 
-NativeValue* JsWantAgentInit(NativeEngine* engine, NativeValue* exportObj);
+NativeValue* JsWantAgentInit(NativeEngine *engine, NativeValue *exportObj);
+NativeValue* WantAgentFlagsInit(NativeEngine *engine);
+NativeValue* WantAgentOperationTypeInit(NativeEngine *engine);
 napi_value GetCallbackErrorResult(napi_env env, int errCode);
 napi_value NapiGetNull(napi_env env);
 }  // namespace OHOS

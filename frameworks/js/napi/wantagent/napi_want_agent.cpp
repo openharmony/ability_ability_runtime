@@ -870,7 +870,7 @@ NativeValue* WantAgentFlagsInit(NativeEngine *engine)
     return objValue;
 }
 
-NativeValue *WantAgentOperationTypeInit(NativeEngine *engine)
+NativeValue* WantAgentOperationTypeInit(NativeEngine *engine)
 {
     HILOG_INFO("enter");
 
