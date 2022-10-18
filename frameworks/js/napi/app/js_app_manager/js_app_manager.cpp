@@ -253,8 +253,7 @@ private:
             [appManager = appManager_](NativeEngine& engine, AsyncTask& task, int32_t status) {
                 if (appManager == nullptr) {
                     HILOG_ERROR("appManager nullptr");
-                    task.Reject(engine, AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(engine,
-                        ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR));
+                    task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
                     return;
                 }
                 std::vector<AppExecFwk::AppStateData> list;
@@ -264,8 +263,7 @@ private:
                     task.ResolveWithNoError(engine, CreateJsAppStateDataArray(engine, list));
                 } else {
                     HILOG_ERROR("OnGetForegroundApplications failed error:%{public}d", ret);
-                    task.Reject(engine, AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(engine,
-                        ERR_ABILITY_RUNTIME_EXTERNAL_NO_ACCESS_PERMISSION));
+                    task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED));
                 }
             };
 
@@ -283,8 +281,7 @@ private:
             [appManager = appManager_](NativeEngine &engine, AsyncTask &task, int32_t status) {
                 if (appManager == nullptr) {
                     HILOG_WARN("abilityManager nullptr");
-                    task.Reject(engine, AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(engine,
-                        ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR));
+                    task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
                     return;
                 }
                 std::vector<AppExecFwk::RunningProcessInfo> infos;
@@ -292,8 +289,7 @@ private:
                 if (ret == 0) {
                     task.ResolveWithNoError(engine, CreateJsProcessRunningInfoArray(engine, infos));
                 } else {
-                    task.Reject(engine, AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(engine,
-                        ERR_ABILITY_RUNTIME_EXTERNAL_NO_ACCESS_PERMISSION));
+                    task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_PERMISSION_DENIED));
                 }
             };
 
@@ -311,8 +307,7 @@ private:
             [abilityManager = abilityManager_](NativeEngine& engine, AsyncTask& task, int32_t status) {
                 if (abilityManager == nullptr) {
                     HILOG_WARN("abilityManager nullptr");
-                    task.Reject(engine, AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(engine,
-                        ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR));
+                    task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
                     return;
                 }
                 bool ret = abilityManager->IsRunningInStabilityTest();
@@ -468,8 +463,7 @@ private:
             [abilityManager = abilityManager_](NativeEngine& engine, AsyncTask& task, int32_t status) {
                 if (abilityManager == nullptr) {
                     HILOG_WARN("abilityManager nullptr");
-                    task.Reject(engine, AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(engine,
-                        ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR));
+                    task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
                     return;
                 }
                 int32_t memorySize = abilityManager->GetAppMemorySize();
@@ -490,8 +484,7 @@ private:
             [abilityManager = abilityManager_](NativeEngine& engine, AsyncTask& task, int32_t status) {
                 if (abilityManager == nullptr) {
                     HILOG_WARN("abilityManager nullptr");
-                    task.Reject(engine, AbilityRuntimeErrorUtil::CreateErrorByInternalErrCode(engine,
-                        ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR));
+                    task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
                     return;
                 }
                 bool ret = abilityManager->IsRamConstrainedDevice();
