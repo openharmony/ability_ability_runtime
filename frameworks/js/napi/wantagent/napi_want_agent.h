@@ -52,18 +52,18 @@ class TriggerCompleteCallBack;
 
 struct CallbackInfo {
     std::shared_ptr<WantAgent> wantAgent = nullptr;
-    napi_env env = nullptr;
-    napi_ref ref = 0;
+    NativeEngine *engine = nullptr;
+    std::unique_ptr<NativeReference> nativeRef = nullptr;
 };
 
 struct TriggerReceiveDataWorker {
-    napi_env env;
-    napi_ref ref = 0;
     std::shared_ptr<WantAgent> wantAgent;
     AAFwk::Want want;
     int resultCode;
     std::string resultData;
     AAFwk::WantParams resultExtras;
+    NativeEngine *engine = nullptr;
+    std::unique_ptr<NativeReference> nativeRef = nullptr;
 };
 
 struct WantAgentWantsParas {
@@ -89,6 +89,8 @@ public:
     static NativeValue* GetWantAgent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* NapiGetWant(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* NapiTrigger(NativeEngine *engine, NativeCallbackInfo *info);
+    static NativeValue* WrapWantAgent(NativeEngine &engine, const std::shared_ptr<WantAgent> &wantAgent);
+    static void UnwrapWantAgent(NativeEngine &engine, NativeValue *jsParam, void** result);
 
 private:
     NativeValue* OnEqual(NativeEngine &engine, NativeCallbackInfo &info);
@@ -102,11 +104,9 @@ private:
     NativeValue* OnNapiGetWant(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnNapiTrigger(NativeEngine &engine, NativeCallbackInfo &info);
     int32_t UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallbackInfo &info,
-    std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
-    std::shared_ptr<TriggerCompleteCallBack> &triggerObj);
+        std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
+        std::shared_ptr<TriggerCompleteCallBack> &triggerObj);
     int32_t GetTriggerInfo(NativeEngine &engine, NativeValue *param, TriggerInfo &triggerInfo);
-    NativeValue* WrapWantAgent(NativeEngine &engine, const std::shared_ptr<WantAgent> &wantAgent);
-    void UnwrapWantAgent(NativeEngine &engine, NativeValue *jsParam, void** result);
     int32_t GetWantAgentParam(NativeEngine &engine, NativeCallbackInfo &info, WantAgentWantsParas &paras);
 };
 
@@ -118,7 +118,7 @@ public:
 public:
     void OnSendFinished(const AAFwk::Want &want, int resultCode, const std::string &resultData,
         const AAFwk::WantParams &resultExtras) override;
-    void SetCallbackInfo(const napi_env &env, const napi_ref &ref);
+    void SetCallbackInfo(NativeEngine &engine, NativeReference *ref);
     void SetWantAgentInstance(const std::shared_ptr<WantAgent> &wantAgent);
 
 private:
@@ -128,7 +128,6 @@ private:
 NativeValue* JsWantAgentInit(NativeEngine *engine, NativeValue *exportObj);
 NativeValue* WantAgentFlagsInit(NativeEngine *engine);
 NativeValue* WantAgentOperationTypeInit(NativeEngine *engine);
-napi_value GetCallbackErrorResult(napi_env env, int errCode);
 napi_value NapiGetNull(napi_env env);
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_NAPI_WANT_AGENT_H

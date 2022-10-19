@@ -53,10 +53,10 @@ TriggerCompleteCallBack::TriggerCompleteCallBack()
 TriggerCompleteCallBack::~TriggerCompleteCallBack()
 {}
 
-void TriggerCompleteCallBack::SetCallbackInfo(const napi_env &env, const napi_ref &ref)
+void TriggerCompleteCallBack::SetCallbackInfo(NativeEngine &engine, NativeReference *ref)
 {
-    triggerCompleteInfo_.env = env;
-    triggerCompleteInfo_.ref = ref;
+    triggerCompleteInfo_.engine = &engine;
+    triggerCompleteInfo_.nativeRef.reset(ref);
 }
 
 void TriggerCompleteCallBack::SetWantAgentInstance(const std::shared_ptr<WantAgent> &wantAgent)
@@ -115,45 +115,43 @@ auto OnSendFinishedUvAfterWorkCallback = [](uv_work_t *work, int status) {
         delete work;
         return;
     }
-    napi_value result[NUMBER_OF_PARAMETERS_TWO] = {0};
 
-    result[0] = GetCallbackErrorResult(dataWorkerData->env, BUSINESS_ERROR_CODE_OK);
-    napi_create_object(dataWorkerData->env, &result[1]);
-    // wrap wantAgent
-    napi_value wantAgentClass = nullptr;
-    auto constructorcb = [](napi_env env, napi_callback_info info) -> napi_value {
-        napi_value thisVar = nullptr;
-        napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr);
-        return thisVar;
-    };
-    napi_define_class(
-        dataWorkerData->env, "WantAgentClass", NAPI_AUTO_LENGTH, constructorcb, nullptr, 0, nullptr, &wantAgentClass);
-    napi_value jsWantAgent = nullptr;
-    napi_new_instance(dataWorkerData->env, wantAgentClass, 0, nullptr, &jsWantAgent);
-    auto finalizecb = [](napi_env env, void *data, void *hint) {};
-    napi_wrap(dataWorkerData->env, jsWantAgent, (void *)dataWorkerData->wantAgent.get(), finalizecb, nullptr, nullptr);
-    napi_set_named_property(dataWorkerData->env, result[1], "wantAgent", jsWantAgent);
-    //  wrap want
-    napi_value jsWant = WrapWant(dataWorkerData->env, dataWorkerData->want);
-    napi_set_named_property(dataWorkerData->env, result[1], "want", jsWant);
-    // wrap finalCode
-    napi_value jsFinalCode = nullptr;
-    napi_create_int32(dataWorkerData->env, dataWorkerData->resultCode, &jsFinalCode);
-    napi_set_named_property(dataWorkerData->env, result[1], "finalCode", jsFinalCode);
-    // wrap finalData
-    napi_value jsFinalData = nullptr;
-    napi_create_string_utf8(dataWorkerData->env, dataWorkerData->resultData.c_str(), NAPI_AUTO_LENGTH, &jsFinalData);
-    napi_set_named_property(dataWorkerData->env, result[1], "finalData", jsFinalData);
-    // wrap extraInfo
-    napi_value jsExtraInfo = WrapWantParams(dataWorkerData->env, dataWorkerData->resultExtras);
-    napi_set_named_property(dataWorkerData->env, result[1], "extraInfo", jsExtraInfo);
+    NativeValue *args[ARGC_TWO] = {0};
+    NativeValue *objValueFirst = dataWorkerData->engine->CreateObject();
+    NativeObject *objectFirst = ConvertNativeValueTo<NativeObject>(objValueFirst);
 
-    napi_value callResult = nullptr;
-    napi_value undefined = nullptr;
-    napi_value callback = nullptr;
-    napi_get_undefined(dataWorkerData->env, &undefined);
-    napi_get_reference_value(dataWorkerData->env, dataWorkerData->ref, &callback);
-    napi_call_function(dataWorkerData->env, undefined, callback, NUMBER_OF_PARAMETERS_TWO, &result[0], &callResult);
+    if (objectFirst == nullptr) {
+        HILOG_ERROR("Failed to get objectFirst");
+        delete dataWorkerData;
+        dataWorkerData = nullptr;
+        delete work;
+        return;
+    }
+
+    objectFirst->SetProperty("code", CreateJsValue(*(dataWorkerData->engine), BUSINESS_ERROR_CODE_OK));
+
+    NativeValue *objValueSecond = dataWorkerData->engine->CreateObject();
+    NativeObject *objectSecond = ConvertNativeValueTo<NativeObject>(objValueSecond);
+
+    if (objectSecond == nullptr) {
+        HILOG_ERROR("Failed to get objectSecond");
+        delete dataWorkerData;
+        dataWorkerData = nullptr;
+        delete work;
+        return;
+    }
+    objectSecond->SetProperty("wantAgent", JsWantAgent::WrapWantAgent(*(dataWorkerData->engine),
+        dataWorkerData->wantAgent));
+    objectSecond->SetProperty("want", CreateJsWant(*(dataWorkerData->engine), dataWorkerData->want));
+    objectSecond->SetProperty("finalCode", CreateJsValue(*(dataWorkerData->engine), dataWorkerData->resultCode));
+    objectSecond->SetProperty("finalData", CreateJsValue(*(dataWorkerData->engine), dataWorkerData->resultData));
+    objectSecond->SetProperty("extraInfo", CreateJsWantParams(*(dataWorkerData->engine), dataWorkerData->resultExtras));
+    args[ARGC_ZERO] = objValueFirst;
+    args[ARGC_ONE] = objValueSecond;
+
+    NativeValue *value = dataWorkerData->nativeRef->Get();
+    NativeValue *callback = dataWorkerData->nativeRef->Get();
+    dataWorkerData->engine->CallFunction(value, callback, args, ARGC_TWO);
 
     delete dataWorkerData;
     dataWorkerData = nullptr;
@@ -164,13 +162,14 @@ void TriggerCompleteCallBack::OnSendFinished(
     const AAFwk::Want &want, int resultCode, const std::string &resultData, const AAFwk::WantParams &resultExtras)
 {
     HILOG_INFO("TriggerCompleteCallBack::OnSendFinished start");
-    if (triggerCompleteInfo_.ref == nullptr) {
+    if (triggerCompleteInfo_.nativeRef == nullptr) {
         HILOG_INFO("triggerCompleteInfo_ CallBack is nullptr");
         return;
     }
-    uv_loop_s *loop = nullptr;
+
+    uv_loop_t *loop = nullptr;
 #if NAPI_VERSION >= NUMBER_OF_PARAMETERS_TWO
-    napi_get_uv_event_loop(triggerCompleteInfo_.env, &loop);
+    loop = triggerCompleteInfo_.engine->GetUVLoop();
 #endif  // NAPI_VERSION >= 2
     if (loop == nullptr) {
         HILOG_INFO("loop instance is nullptr");
@@ -193,8 +192,8 @@ void TriggerCompleteCallBack::OnSendFinished(
     dataWorker->resultCode = resultCode;
     dataWorker->resultData = resultData;
     dataWorker->resultExtras = resultExtras;
-    dataWorker->env = triggerCompleteInfo_.env;
-    dataWorker->ref = triggerCompleteInfo_.ref;
+    dataWorker->engine = triggerCompleteInfo_.engine;
+    dataWorker->nativeRef = std::move(triggerCompleteInfo_.nativeRef);
     dataWorker->wantAgent = triggerCompleteInfo_.wantAgent;
     work->data = (void *)dataWorker;
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, OnSendFinishedUvAfterWorkCallback);
@@ -548,7 +547,6 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
         HILOG_ERROR("Not enough params");
         return ERR_NOT_OK;
     }
-    auto env = reinterpret_cast<napi_env>(&engine);
 
     if (info.argv[ARGC_ZERO]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
         HILOG_ERROR("Wrong argument type. Object expected.");
@@ -569,9 +567,8 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
         return ret;
     }
 
-    napi_ref callback[2] = {0};
-    napi_create_reference(env, reinterpret_cast<napi_value>(info.argv[ARGC_TWO]), 1, &callback[0]);
-    triggerObj->SetCallbackInfo(env, callback[0]);
+    NativeReference *ref = engine.CreateReference(info.argv[ARGC_TWO], 1);
+    triggerObj->SetCallbackInfo(engine, ref);
     triggerObj->SetWantAgentInstance(wantAgent);
 
     return BUSINESS_ERROR_CODE_OK;
@@ -931,16 +928,6 @@ NativeValue* JsWantAgentInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "getWantAgent", moduleName, JsWantAgent::GetWantAgent);
     HILOG_DEBUG("JsWantAgentInit end");
     return engine->CreateUndefined();
-}
-
-napi_value GetCallbackErrorResult(napi_env env, int errCode)
-{
-    napi_value result = nullptr;
-    napi_value eCode = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, errCode, &eCode));
-    NAPI_CALL(env, napi_create_object(env, &result));
-    NAPI_CALL(env, napi_set_named_property(env, result, "code", eCode));
-    return result;
 }
 
 napi_value NapiGetNull(napi_env env)
