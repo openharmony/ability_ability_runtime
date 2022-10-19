@@ -209,9 +209,9 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
     std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     bool hasModule = false;
     auto info = std::find_if(bundleInfo.hapModuleInfos.begin(), bundleInfo.hapModuleInfos.end(),
-                            [&moduleName](const AppExecFwk::HapModuleInfo &hapModuleInfo) {
-                                 return hapModuleInfo.moduleName == moduleName;
-                            });
+        [&moduleName](const AppExecFwk::HapModuleInfo &hapModuleInfo) {
+            return hapModuleInfo.moduleName == moduleName;
+        });
     if (info != bundleInfo.hapModuleInfos.end()) {
         hasModule = true;
         appContext->InitHapModuleInfo(*info);
