@@ -1029,6 +1029,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             return AbilityRuntime::FormExtension::Create(application->GetRuntime());
         });
 #endif
+        AbilityLoader::GetInstance().RegisterExtension("StaticSubscriberExtension", [application = application_]() {
+            return AbilityRuntime::StaticSubscriberExtension::Create(application->GetRuntime());
+        });
 #ifdef __aarch64__
         LoadAllExtensions("system/lib64/extensionability");
 #else
