@@ -514,6 +514,8 @@ public:
      */
     int GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens);
 
+    virtual int32_t PreStartNWebSpawnProcess(const pid_t hostPid);
+
     virtual int32_t StartRenderProcess(const pid_t hostPid, const std::string &renderParam,
         int32_t ipcFd, int32_t sharedFd, pid_t &renderPid);
 
@@ -549,11 +551,11 @@ public:
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName);
 
-    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
 
-    int32_t NotifyHotReloadPage(const std::string &bundleName);
+    int32_t NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
 
-    int32_t NotifyUnLoadRepairPatch(const std::string &bundleName);
+    int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
 
     void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);

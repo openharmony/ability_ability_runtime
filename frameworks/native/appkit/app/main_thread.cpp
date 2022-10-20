@@ -59,6 +59,7 @@
 
 #if defined(NWEB)
 #include <thread>
+#include "app_mgr_client.h"
 #include "nweb_pre_dns_adapter.h"
 #endif
 
@@ -958,6 +959,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.eventRunner = mainHandler_->GetEventRunner();
         options.loadAce = true;
         options.isBundle = (bundleInfo.hapModuleInfos.back().compileMode != AppExecFwk::CompileMode::ES_MODULE);
+        options.isDebugVersion = bundleInfo.applicationInfo.debug;
         std::string nativeLibraryPath = appInfo.nativeLibraryPath;
         if (!nativeLibraryPath.empty()) {
             if (nativeLibraryPath.back() == '/') {
@@ -1030,9 +1032,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             return AbilityRuntime::FormExtension::Create(application->GetRuntime());
         });
 #endif
-        AbilityLoader::GetInstance().RegisterExtension("StaticSubscriberExtension", [application = application_]() {
-            return AbilityRuntime::StaticSubscriberExtension::Create(application->GetRuntime());
-        });
 #ifdef __aarch64__
         LoadAllExtensions("system/lib64/extensionability");
 #else
@@ -1074,6 +1073,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #if defined(NWEB)
     // pre dns for nweb
     std::thread(&OHOS::NWeb::PreDnsInThread).detach();
+
+    // start nwebspawn process
+    std::thread(PreStartNWebSpawn).detach();
 #endif
 
     HILOG_DEBUG("MainThread::handleLaunchApplication called end.");
@@ -1213,10 +1215,6 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         return false;
     }
     auto args = std::make_shared<AbilityDelegatorArgs>(record->want);
-    if (!args) {
-        HILOG_ERROR("args is null");
-        return false;
-    }
     if (isStageBased) { // Stage model
         HILOG_DEBUG("PrepareAbilityDelegator for Stage model.");
         auto testRunner = TestRunner::Create(application_->GetRuntime(), args, false);
@@ -1253,6 +1251,18 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
     }
     return true;
 }
+
+#ifdef NWEB
+void MainThread::PreStartNWebSpawn()
+{
+    HILOG_INFO("MainThread::PreStartNWebSpawn");
+    std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    std::string nwebPath = contextImpl->GetCacheDir() + "/web";
+    if (access(nwebPath.c_str(), F_OK) != -1) {
+        std::make_unique<AppExecFwk::AppMgrClient>()->PreStartNWebSpawnProcess();
+    }
+}
+#endif
 
 /**
  *
@@ -1615,8 +1625,6 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
     TaskTimeoutDetected(runner);
 
     watchdog_->Init(mainHandler_);
-
-    TaskHandlerClient::GetInstance()->CreateRunner();
     HILOG_DEBUG("MainThread:Init end.");
 }
 
@@ -1926,28 +1934,32 @@ void MainThread::CheckMainThreadIsAlive()
 }
 #endif  // ABILITY_LIBRARY_LOADER
 
-int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName)
+int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
+    const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("ScheduleNotifyLoadRepairPatch function called.");
     wptr<MainThread> weak = this;
-    auto task = [weak, bundleName]() {
+    auto task = [weak, bundleName, callback]() {
         auto appThread = weak.promote();
-        if (appThread == nullptr || appThread->application_ == nullptr) {
-            HILOG_ERROR("ScheduleNotifyLoadRepairPatch, app thread or application is nullptr.");
+        if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
+            HILOG_ERROR("ScheduleNotifyLoadRepairPatch, parameter is nullptr.");
             return;
         }
 
+        bool ret = true;
         std::vector<std::pair<std::string, std::string>> hqfFilePair;
         if (appThread->GetHqfFileAndHapPath(bundleName, hqfFilePair)) {
             for (auto it = hqfFilePair.begin(); it != hqfFilePair.end(); it++) {
                 HILOG_INFO("ScheduleNotifyLoadRepairPatch, LoadPatch, hqfFile: %{private}s, hapPath: %{private}s.",
                     it->first.c_str(), it->second.c_str());
-                appThread->application_->NotifyLoadRepairPatch(it->first, it->second);
+                ret = appThread->application_->NotifyLoadRepairPatch(it->first, it->second);
             }
         } else {
             HILOG_DEBUG("ScheduleNotifyLoadRepairPatch, There's no hqfFile need to load.");
         }
+
+        callback->OnLoadPatchDone(ret ? NO_ERROR : ERR_INVALID_OPERATION);
     };
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
         HILOG_ERROR("ScheduleNotifyLoadRepairPatch, Post task failed.");
@@ -1957,18 +1969,19 @@ int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName)
     return NO_ERROR;
 }
 
-int32_t MainThread::ScheduleNotifyHotReloadPage()
+int32_t MainThread::ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
     wptr<MainThread> weak = this;
-    auto task = [weak]() {
+    auto task = [weak, callback]() {
         auto appThread = weak.promote();
-        if (appThread == nullptr || appThread->application_ == nullptr) {
-            HILOG_ERROR("app thread or application is nullptr.");
+        if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
+            HILOG_ERROR("parameter is nullptr.");
             return;
         }
-        appThread->application_->NotifyHotReloadPage();
+        auto ret = appThread->application_->NotifyHotReloadPage();
+        callback->OnReloadPageDone(ret ? NO_ERROR : ERR_INVALID_OPERATION);
     };
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
         HILOG_ERROR("Post task failed.");
@@ -2026,27 +2039,31 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     return true;
 }
 
-int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName)
+int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName,
+    const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("ScheduleNotifyUnLoadRepairPatch function called.");
     wptr<MainThread> weak = this;
-    auto task = [weak, bundleName]() {
+    auto task = [weak, bundleName, callback]() {
         auto appThread = weak.promote();
-        if (appThread == nullptr || appThread->application_ == nullptr) {
-            HILOG_ERROR("ScheduleNotifyUnLoadRepairPatch, app thread or application is nullptr.");
+        if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
+            HILOG_ERROR("ScheduleNotifyUnLoadRepairPatch, parameter is nullptr.");
             return;
         }
 
+        bool ret = true;
         std::vector<std::pair<std::string, std::string>> hqfFilePair;
         if (appThread->GetHqfFileAndHapPath(bundleName, hqfFilePair)) {
             for (auto it = hqfFilePair.begin(); it != hqfFilePair.end(); it++) {
                 HILOG_INFO("ScheduleNotifyUnLoadRepairPatch, UnloadPatch, hqfFile: %{private}s.", it->first.c_str());
-                appThread->application_->NotifyUnLoadRepairPatch(it->first);
+                ret = appThread->application_->NotifyUnLoadRepairPatch(it->first);
             }
         } else {
             HILOG_DEBUG("ScheduleNotifyUnLoadRepairPatch, There's no hqfFile need to unload.");
         }
+
+        callback->OnUnloadPatchDone(ret ? NO_ERROR : ERR_INVALID_OPERATION);
     };
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
         HILOG_ERROR("ScheduleNotifyUnLoadRepairPatch, Post task failed.");

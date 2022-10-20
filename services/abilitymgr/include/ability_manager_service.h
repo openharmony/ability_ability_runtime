@@ -54,6 +54,7 @@
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #endif
+#include "event_report.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -803,8 +804,7 @@ public:
      * @param token The target ability.
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
-    virtual void ScheduleRecoverAbility(const sptr<IRemoteObject>& token,
-        int32_t reason, int32_t savedStateId) override;
+    virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason) override;
 
     bool GetStartUpNewRuleFlag() const;
 
@@ -1149,7 +1149,9 @@ private:
 
     int AddStartControlParam(Want &want, const sptr<IRemoteObject> &callerToken);
 
-    void RecoverAbilityRestart(AAFwk::Want& want);
+    void RecoverAbilityRestart(const Want &want);
+
+    AAFWK::EventInfo BuildEventInfo(const Want &want, int32_t userId);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

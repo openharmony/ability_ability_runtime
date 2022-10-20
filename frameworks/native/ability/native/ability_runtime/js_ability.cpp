@@ -463,14 +463,14 @@ void JsAbility::AbilityContinuationOrRecover(const Want &want)
         OnSceneRestored();
         NotifyContinuationResult(want, true);
     } else if (ShouldRecoverState(want)) {
-        if (abilityRecovery_ != nullptr) {
-            std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::LIFECYCLE);
-            HandleScope handleScope(jsRuntime_);
-            auto &engine = jsRuntime_.GetNativeEngine();
-            auto mainWindow = scene_->GetMainWindow();
-            if (mainWindow != nullptr) {
-                mainWindow->SetUIContent(pageStack, &engine, nullptr, true);
-            }
+        std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
+        HandleScope handleScope(jsRuntime_);
+        auto &engine = jsRuntime_.GetNativeEngine();
+        auto mainWindow = scene_->GetMainWindow();
+        if (mainWindow != nullptr) {
+            mainWindow->SetUIContent(pageStack, &engine, abilityContext_->GetContentStorage()->Get(), true);
+        } else {
+            HILOG_ERROR("AppRecovery:AbilityContinuationOrRecover mainWindow nullptr");
         }
         OnSceneRestored();
     } else {
@@ -660,34 +660,6 @@ int32_t JsAbility::OnSaveState(int32_t reason, WantParams &wantParams)
     return *numberResult;
 }
 
-void JsAbility::OnRestoreState(int32_t reason, WantParams &wantParams)
-{
-    HandleScope handleScope(jsRuntime_);
-    auto &nativeEngine = jsRuntime_.GetNativeEngine();
-    if (jsAbilityObj_ == nullptr) {
-        HILOG_ERROR("AppRecovery Failed to get JsAbility object");
-        return;
-    }
-    NativeValue *value = jsAbilityObj_->Get();
-    NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
-    if (obj == nullptr) {
-        HILOG_ERROR("AppRecovery Failed to get Ability object");
-        return;
-    }
-
-    NativeValue *methodOnRestoreState = obj->GetProperty("onRestoreState");
-    if (methodOnRestoreState == nullptr) {
-        HILOG_ERROR("AppRecovery Failed to get 'onRestoreState' from Ability object");
-        return;
-    }
-
-    napi_value napiWantParams = OHOS::AppExecFwk::WrapWantParams(reinterpret_cast<napi_env>(&nativeEngine), wantParams);
-    NativeValue* jsReason = CreateJsValue(nativeEngine, reason);
-    NativeValue* jsWantParams = reinterpret_cast<NativeValue *>(napiWantParams);
-    NativeValue* args[] = { jsReason, jsWantParams };
-    (void)nativeEngine.CallFunction(value, methodOnRestoreState, args, 2); // 2:args size
-}
-
 void JsAbility::OnConfigurationUpdated(const Configuration &configuration)
 {
     Ability::OnConfigurationUpdated(configuration);
@@ -706,6 +678,7 @@ void JsAbility::OnConfigurationUpdated(const Configuration &configuration)
         reinterpret_cast<napi_env>(&nativeEngine), *fullConfig);
     NativeValue* jsConfiguration = reinterpret_cast<NativeValue*>(napiConfiguration);
     CallObjectMethod("onConfigurationUpdated", &jsConfiguration, 1);
+    CallObjectMethod("onConfigurationUpdate", &jsConfiguration, 1);
 }
 
 void JsAbility::OnMemoryLevel(int level)
@@ -939,29 +912,50 @@ void JsAbility::Dump(const std::vector<std::string> &params, std::vector<std::st
     }
 
     NativeValue* method = obj->GetProperty("dump");
-    if (method == nullptr) {
-        HILOG_ERROR("Failed to get dump from object");
-        return;
+    NativeValue* onDumpMethod = obj->GetProperty("onDump");
+
+    NativeValue* dumpInfo = nullptr;
+    if (method != nullptr) {
+        dumpInfo = nativeEngine.CallFunction(value, method, argv, 1);
     }
-    HILOG_DEBUG("Dump CallFunction dump, success");
-    NativeValue* dumpInfo = nativeEngine.CallFunction(value, method, argv, 1);
-    if (dumpInfo == nullptr) {
-        HILOG_ERROR("dumpInfo nullptr.");
-        return;
+
+    NativeValue* onDumpInfo = nullptr;
+    if (onDumpMethod != nullptr) {
+        onDumpInfo = nativeEngine.CallFunction(value, onDumpMethod, argv, 1);
     }
-    NativeArray* dumpInfoNative = ConvertNativeValueTo<NativeArray>(dumpInfo);
-    if (dumpInfoNative == nullptr) {
-        HILOG_ERROR("dumpInfoNative nullptr.");
-        return;
+
+    NativeArray* dumpInfoNative = nullptr;
+    if (dumpInfo != nullptr) {
+        dumpInfoNative = ConvertNativeValueTo<NativeArray>(dumpInfo);
     }
-    for (uint32_t i = 0; i < dumpInfoNative->GetLength(); i++) {
-        std::string dumpInfoStr;
-        if (!ConvertFromJsValue(nativeEngine, dumpInfoNative->GetElement(i), dumpInfoStr)) {
-            HILOG_ERROR("Parse dumpInfoStr failed");
-            return;
+
+    NativeArray* onDumpInfoNative = nullptr;
+    if (onDumpInfo != nullptr) {
+        onDumpInfoNative = ConvertNativeValueTo<NativeArray>(onDumpInfo);
+    }
+
+    if (dumpInfoNative != nullptr) {
+        for (uint32_t i = 0; i < dumpInfoNative->GetLength(); i++) {
+            std::string dumpInfoStr;
+            if (!ConvertFromJsValue(nativeEngine, dumpInfoNative->GetElement(i), dumpInfoStr)) {
+                HILOG_ERROR("Parse dumpInfoStr failed");
+                return;
+            }
+            info.push_back(dumpInfoStr);
         }
-        info.push_back(dumpInfoStr);
     }
+
+    if (onDumpInfoNative != nullptr) {
+        for (uint32_t i = 0; i < onDumpInfoNative->GetLength(); i++) {
+            std::string dumpInfoStr;
+            if (!ConvertFromJsValue(nativeEngine, onDumpInfoNative->GetElement(i), dumpInfoStr)) {
+                HILOG_ERROR("Parse dumpInfoStr from onDumpInfoNative failed");
+                return;
+            }
+            info.push_back(dumpInfoStr);
+        }
+    }
+
     HILOG_DEBUG("Dump info size: %{public}zu", info.size());
 }
 
