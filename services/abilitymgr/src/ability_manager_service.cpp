@@ -5297,7 +5297,9 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
             // Allow background startup within 1 second after application startup if state is FOREGROUND
             int64_t aliveTime = AbilityUtil::SystemTimeMillis() - processInfo.startTimeMillis_;
             isBackgroundCall = aliveTime > APP_ALIVE_TIME_MS;
-            HILOG_DEBUG("Process %{public}s is alive %{public}lld ms.", processInfo.processName_.c_str(), aliveTime);
+            HILOG_DEBUG(
+                "Process %{public}s is alive %{public}s ms.",
+                processInfo.processName_.c_str(), std::to_string(aliveTime).c_str());
         }
     }
     HILOG_DEBUG("backgroundJudgeFlag: %{public}d, isBackgroundCall: %{public}d, callerAppState: %{public}d.",
