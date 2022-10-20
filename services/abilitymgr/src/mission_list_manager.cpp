@@ -282,6 +282,8 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
 
     if (abilityRequest.IsContinuation()) {
         targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
+    } else if (abilityRequest.IsAppRecovery()) {
+        targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
     } else {
         targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
     }
@@ -2804,7 +2806,6 @@ void MissionListManager::ResumeManager()
 
 void MissionListManager::GetAllForegroundAbilities(std::list<std::shared_ptr<AbilityRecord>>& foregroundList)
 {
-    std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     for (auto& missionList : currentMissionLists_) {
         GetForegroundAbilities(missionList, foregroundList);
     }

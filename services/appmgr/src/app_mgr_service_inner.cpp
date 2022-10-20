@@ -760,6 +760,7 @@ void AppMgrServiceInner::GetRunningProcesses(const std::shared_ptr<AppRunningRec
     runningProcessInfo.isContinuousTask = appRecord->IsContinuousTask();
     runningProcessInfo.isKeepAlive = appRecord->IsKeepAliveApp();
     runningProcessInfo.isFocused = appRecord->GetFocusFlag();
+    runningProcessInfo.startTimeMillis_ = appRecord->GetAppStartTime();
     appRecord->GetBundleNames(runningProcessInfo.bundleNames);
     info.emplace_back(runningProcessInfo);
 }
@@ -1072,9 +1073,9 @@ void AppMgrServiceInner::KillProcessByAbilityToken(const sptr<IRemoteObject> &to
         return;
     }
 
-    std::list<pid_t> pids;
     pid_t pid = appRecord->GetPriorityObject()->GetPid();
     if (pid > 0) {
+        std::list<pid_t> pids;
         pids.push_back(pid);
         appRecord->ScheduleProcessSecurityExit();
         if (!WaitForRemoteProcessExit(pids, SystemTimeMillisecond())) {
@@ -2044,10 +2045,6 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
     auto appInfo = std::make_shared<ApplicationInfo>(abilityInfo.applicationInfo);
-    if (!appInfo) {
-        HILOG_ERROR("appInfo is nullptr.");
-        return;
-    }
 
     int32_t appIndex = want.GetIntParam(DLP_PARAMS_INDEX, 0);
     if (!GetBundleAndHapInfo(abilityInfo, appInfo, bundleInfo, hapModuleInfo, appIndex)) {
@@ -2056,10 +2053,6 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
 
     std::string processName;
     auto abilityInfoPtr = std::make_shared<AbilityInfo>(abilityInfo);
-    if (!abilityInfoPtr) {
-        HILOG_ERROR("abilityInfoPtr is nullptr.");
-        return;
-    }
     MakeProcessName(abilityInfoPtr, appInfo, hapModuleInfo, appIndex, processName);
 
     std::vector<HapModuleInfo> hapModules;
@@ -2461,6 +2454,40 @@ int AppMgrServiceInner::VerifyAccountPermission(const std::string &permissionNam
     return isCallingPerm ? ERR_OK : ERR_PERMISSION_DENIED;
 }
 
+int AppMgrServiceInner::PreStartNWebSpawnProcess(const pid_t hostPid)
+{
+    HILOG_INFO("AppMgrServiceInner::PreStartNWebSpawnProcess, hostPid:%{public}d", hostPid);
+    if (hostPid <= 0) {
+        HILOG_ERROR("invalid param, hostPid:%{public}d", hostPid);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is , not start render process");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto appRecord = GetAppRunningRecordByPid(hostPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord, hostpid:%{public}d", hostPid);
+        return ERR_INVALID_VALUE;
+    }
+
+    auto nwebSpawnClient = remoteClientManager_->GetNWebSpawnClient();
+    if (!nwebSpawnClient) {
+        HILOG_ERROR("nwebSpawnClient is null");
+        return ERR_INVALID_VALUE;
+    }
+
+    ErrCode errCode = nwebSpawnClient->PreStartNWebSpawnProcess();
+    if (FAILED(errCode)) {
+        HILOG_ERROR("failed to spawn new render process, errCode %{public}08x", errCode);
+        return ERR_INVALID_VALUE;
+    }
+
+    return 0;
+}
+
 int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::string &renderParam,
     int32_t ipcFd, int32_t sharedFd, pid_t &renderPid)
 {
@@ -2772,7 +2799,8 @@ bool AppMgrServiceInner::GetAppRunningStateByBundleName(const std::string &bundl
     return appRunningManager_->GetAppRunningStateByBundleName(bundleName);
 }
 
-int32_t AppMgrServiceInner::NotifyLoadRepairPatch(const std::string &bundleName)
+int32_t AppMgrServiceInner::NotifyLoadRepairPatch(const std::string &bundleName,
+    const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
@@ -2781,10 +2809,10 @@ int32_t AppMgrServiceInner::NotifyLoadRepairPatch(const std::string &bundleName)
         return ERR_INVALID_OPERATION;
     }
 
-    return appRunningManager_->NotifyLoadRepairPatch(bundleName);
+    return appRunningManager_->NotifyLoadRepairPatch(bundleName, callback);
 }
 
-int32_t AppMgrServiceInner::NotifyHotReloadPage(const std::string &bundleName)
+int32_t AppMgrServiceInner::NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
@@ -2793,7 +2821,7 @@ int32_t AppMgrServiceInner::NotifyHotReloadPage(const std::string &bundleName)
         return ERR_INVALID_OPERATION;
     }
 
-    return appRunningManager_->NotifyHotReloadPage(bundleName);
+    return appRunningManager_->NotifyHotReloadPage(bundleName, callback);
 }
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
@@ -2822,7 +2850,8 @@ int32_t AppMgrServiceInner::SetContinuousTaskProcess(int32_t pid, bool isContinu
 }
 #endif
 
-int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleName)
+int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleName,
+    const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
@@ -2831,7 +2860,7 @@ int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleNam
         return ERR_INVALID_OPERATION;
     }
 
-    return appRunningManager_->NotifyUnLoadRepairPatch(bundleName);
+    return appRunningManager_->NotifyUnLoadRepairPatch(bundleName, callback);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
