@@ -44,10 +44,14 @@ group("fuzztest") {
     "startusertest_fuzzer:fuzztest",
     "stopserviceability_fuzzer:fuzztest",
     "stopserviceextensionability_fuzzer:fuzztest",
+    "stopusercallbackstub_fuzzer:fuzztest",
+    "systemabilitytokencallbackstub_fuzzer:fuzztest",
     "terminateability_fuzzer:fuzztest",
     "updateconfiguration_fuzzer:fuzztest",
     "uripermissionmanager_fuzzer:fuzztest",
     "wantagenthelperstring_fuzzer:fuzztest",
     "wantagenthelpertrigger_fuzzer:fuzztest",
+    "wantreceiverstub_fuzzer:fuzztest",
+    "wantsenderstub_fuzzer:fuzztest",
   ]
 }
