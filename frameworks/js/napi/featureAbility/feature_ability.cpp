@@ -1059,7 +1059,8 @@ void CallOnAbilityResult(int requestCode, int resultCode, const Want &resultData
 
             if (onAbilityCB->cb.errCode != ERR_OK) {
                 int32_t errCode = GetStartAbilityErrorCode(onAbilityCB->cb.errCode);
-                onAbilityCB->cb.asyncTask->Reject(*(onAbilityCB->cb.engine), CreateJsError(*(onAbilityCB->cb.engine), errCode, "StartAbilityForResult Error"));
+                onAbilityCB->cb.asyncTask->Reject(*(onAbilityCB->cb.engine),
+                    CreateJsError(*(onAbilityCB->cb.engine), errCode, "StartAbilityForResult Error"));
                 delete onAbilityCB;
                 onAbilityCB = nullptr;
                 delete work;

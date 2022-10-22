@@ -5914,7 +5914,7 @@ NativeValue* JsNapiCommon::JsStartAbility(NativeEngine &engine, NativeCallbackIn
         }
     };
 
-    auto complete = [obj = this, value = errorVal]
+    auto complete = [value = errorVal]
         (NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (*value != NAPI_ERR_NO_ERROR) {
             int32_t errCode = GetStartAbilityErrorCode(*value);
@@ -5926,7 +5926,7 @@ NativeValue* JsNapiCommon::JsStartAbility(NativeEngine &engine, NativeCallbackIn
 
     auto callback = (info.argc == ARGS_ONE) ? nullptr : info.argv[PARAM1];
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsNapiCommon::CommonJsStartAbility",
+    AsyncTask::Schedule("JsNapiCommon::JsStartAbility",
         engine, CreateAsyncTaskWithLastParam(engine, callback, std::move(execute), std::move(complete), &result));
 
     return result;
