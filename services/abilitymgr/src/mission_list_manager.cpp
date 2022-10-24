@@ -1508,7 +1508,6 @@ void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject>& token)
     }
     HILOG_INFO("UpdateSnapShot, ability:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
     UpdateMissionSnapshot(abilityRecord);
-    abilityRecord->SetNeedSnapShot(false);
 }
 
 void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -1520,13 +1519,8 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
     }
     HILOG_INFO("Move the ability to background, ability:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
     abilityRecord->SetIsNewWant(false);
-    NotifyMissionCreated(abilityRecord);
-    if (abilityRecord->IsNeedTakeSnapShot()) {
-        if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
-            UpdateMissionSnapshot(abilityRecord);
-        }
-    } else {
-        abilityRecord->SetNeedSnapShot(true);
+    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
+        UpdateMissionSnapshot(abilityRecord);
     }
 
     auto self(shared_from_this());
@@ -1600,7 +1594,7 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
         ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
 }
 
-void MissionListManager::UpdateMissionSnapshot(const std::shared_ptr<AbilityRecord>& abilityRecord)
+void MissionListManager::UpdateMissionSnapshot(const std::shared_ptr<AbilityRecord>& abilityRecord) const
 {
     CHECK_POINTER(abilityRecord);
     if (abilityRecord->GetAbilityInfo().excludeFromMissions) {
@@ -2221,6 +2215,7 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
         return;
     }
     NotifyMissionCreated(abilityRecord);
+    UpdateMissionSnapshot(abilityRecord);
 }
 
 Closure MissionListManager::GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const
