@@ -273,6 +273,17 @@ NativeValue* JsWantAgent::NapiTrigger(NativeEngine *engine, NativeCallbackInfo *
     return (me != nullptr) ? me->OnNapiTrigger(*engine, *info) : nullptr;
 };
 
+NativeValue* JsWantAgent::NapiGetWantAgent(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
+    return (me != nullptr) ? me->OnNapiGetWantAgent(*engine, *info) : nullptr;
+};
+
+NativeValue* JsWantAgent::NapiGetOperationType(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsWantAgent *me = CheckParamsAndGetThis<JsWantAgent>(engine, info);
+    return (me != nullptr) ? me->OnNapiGetOperationType(*engine, *info) : nullptr;
+};
 
 NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info)
 {
@@ -292,7 +303,7 @@ NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info
         return RetErrMsg(engine, lastParam, errCode);
     }
 
-    UnwrapWantAgent(engine, info.argv[0], (void **)&(pWantAgentFirst));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgentFirst));
     if (pWantAgentFirst == nullptr) {
         HILOG_ERROR("Parse pWantAgentFirst failed");
         errCode = ERR_NOT_OK;
@@ -305,7 +316,7 @@ NativeValue* JsWantAgent::OnEqual(NativeEngine &engine, NativeCallbackInfo &info
         return RetErrMsg(engine, lastParam, errCode);
     }
 
-    UnwrapWantAgent(engine, info.argv[1], (void **)&(pWantAgentSecond));
+    UnwrapWantAgent(engine, info.argv[1], reinterpret_cast<void **>(&pWantAgentSecond));
     if (pWantAgentSecond == nullptr) {
         HILOG_ERROR("Parse pWantAgentSceond failed");
         errCode = ERR_NOT_OK;
@@ -345,7 +356,7 @@ NativeValue* JsWantAgent::OnGetWant(NativeEngine &engine, NativeCallbackInfo &in
         return RetErrMsg(engine, lastParam, errCode);
     }
 
-    UnwrapWantAgent(engine, info.argv[0], (void **)&(pWantAgent));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         errCode = ERR_NOT_OK;
@@ -386,7 +397,7 @@ NativeValue* JsWantAgent::OnGetOperationType(NativeEngine &engine, NativeCallbac
         return RetErrMsg(engine, lastParam, errCode);
     }
 
-    UnwrapWantAgent(engine, info.argv[0], (void **)&(pWantAgent));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         errCode = ERR_NOT_OK;
@@ -423,7 +434,7 @@ NativeValue* JsWantAgent::OnGetBundleName(NativeEngine &engine, NativeCallbackIn
         return RetErrMsg(engine, lastParam, errCode);
     }
 
-    UnwrapWantAgent(engine, info.argv[0], (void **)&(pWantAgent));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         errCode = ERR_NOT_OK;
@@ -460,7 +471,7 @@ NativeValue* JsWantAgent::OnGetUid(NativeEngine &engine, NativeCallbackInfo &inf
         return RetErrMsg(engine, lastParam, errCode);
     }
 
-    UnwrapWantAgent(engine, info.argv[0], (void **)&(pWantAgent));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         errCode = ERR_NOT_OK;
@@ -497,7 +508,7 @@ NativeValue* JsWantAgent::OnCancel(NativeEngine &engine, NativeCallbackInfo &inf
         return RetErrMsg(engine, lastParam, errCode);
     }
 
-    UnwrapWantAgent(engine, info.argv[0], (void **)&(pWantAgent));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         errCode = ERR_NOT_OK;
@@ -553,7 +564,7 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
         return ERR_NOT_OK;
     }
     WantAgent *pWantAgent = nullptr;
-    UnwrapWantAgent(engine, info.argv[ARGC_ZERO], (void **)&(pWantAgent));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
 
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
@@ -788,7 +799,7 @@ NativeValue* JsWantAgent::OnNapiGetWant(NativeEngine &engine, NativeCallbackInfo
         return engine.CreateUndefined();
     }
 
-    UnwrapWantAgent(engine, info.argv[0], (void **)&(pWantAgent));
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
     if (pWantAgent == nullptr) {
         HILOG_ERROR("Parse pWantAgent failed");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -833,6 +844,88 @@ NativeValue* JsWantAgent::OnNapiTrigger(NativeEngine &engine, NativeCallbackInfo
 
     WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
     return engine.CreateNull();
+}
+
+NativeValue* JsWantAgent::OnNapiGetWantAgent(NativeEngine &engine, NativeCallbackInfo &info)
+{
+    HILOG_DEBUG("enter, argc = %{public}d", static_cast<int32_t>(info.argc));
+    if (info.argc > ARGC_TWO || info.argc < ARGC_ONE) {
+        HILOG_ERROR("Not enough params");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+
+    NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    std::shared_ptr<WantAgentWantsParas> spParas = std::make_shared<WantAgentWantsParas>();
+    uint32_t ret = GetWantAgentParam(engine, info, *spParas);
+    if (ret != 0) {
+        HILOG_ERROR("Failed to get wantAgent param.");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+
+    AsyncTask::CompleteCallback complete = [obj = this, parasobj = spParas](NativeEngine &engine,
+        AsyncTask &task, int32_t status) {
+        HILOG_DEBUG("OnNapiGetWantAgent AsyncTask is called");
+        std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>(parasobj->extraInfo);
+        WantAgentInfo wantAgentInfo(parasobj->requestCode,
+                                    static_cast<WantAgentConstant::OperationType>(parasobj->operationType),
+                                    parasobj->wantAgentFlags,
+                                    parasobj->wants,
+                                    extraInfo);
+
+        auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
+        std::shared_ptr<WantAgent> wantAgent = WantAgentHelper::GetWantAgent(context, wantAgentInfo);
+
+        if (wantAgent == nullptr) {
+            HILOG_INFO("GetWantAgent instance is nullptr...");
+        }
+        task.ResolveWithNoError(engine, obj->WrapWantAgent(engine, wantAgent));
+    };
+
+    NativeValue *result = nullptr;
+    AsyncTask::Schedule("JsWantAgent::OnNapiGetWantAgent",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
+}
+
+NativeValue* JsWantAgent::OnNapiGetOperationType(NativeEngine &engine, NativeCallbackInfo &info)
+{
+    HILOG_DEBUG("JsWantAgent::OnNapiGetOperationType enter, argc = %{public}d", static_cast<int32_t>(info.argc));
+    int32_t errCode = BUSINESS_ERROR_CODE_OK;
+    WantAgent *pWantAgent = nullptr;
+    if (info.argc > ARGC_TWO || info.argc < ARGC_ONE) {
+        HILOG_ERROR("Not enough params");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+
+    if (info.argv[0]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+        HILOG_ERROR("Wrong argument type. Object expected.");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+
+    UnwrapWantAgent(engine, info.argv[0], reinterpret_cast<void **>(&pWantAgent));
+
+    if (pWantAgent == nullptr) {
+        HILOG_ERROR("Parse pWantAgent failed");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+
+    std::shared_ptr<WantAgent> wantAgent = std::make_shared<WantAgent>(*pWantAgent);
+    AsyncTask::CompleteCallback complete = [wantAgent](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        HILOG_DEBUG("OnNapiGetOperationType AsyncTask is called");
+        auto ret = WantAgentHelper::GetType(wantAgent);
+        task.ResolveWithNoError(engine, CreateJsValue(engine, ret));
+    };
+
+    NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    NativeValue *result = nullptr;
+    AsyncTask::Schedule("JsWantAgent::OnNapiGetOperationType",
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+    return result;
 }
 
 NativeValue* WantAgentFlagsInit(NativeEngine *engine)
