@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "loadability_fuzzer.h"
+#include "killprocessbyabilitytoken_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -55,22 +55,9 @@ namespace OHOS {
             std::cout << "Get ability token failed." << std::endl;
             return false;
         }
-        sptr<IRemoteObject> preToken = GetFuzzAbilityToken();
-        if (!preToken) {
-            std::cout << "Get ability preToken failed." << std::endl;
-            return false;
-        }
-        AbilityInfo abilityInfo;
-        ApplicationInfo appInfo;
 
-        // fuzz for want
-        Parcel wantParcel;
-        Want* want = nullptr;
-        if (wantParcel.WriteBuffer(data, size)) {
-            want = Want::Unmarshalling(wantParcel);
-            if (want) {
-                appMgrClient->LoadAbility(token, preToken, abilityInfo, appInfo, *want);
-            }
+        if (appMgrClient->KillProcessByAbilityToken(token) != AppMgrResultCode::RESULT_OK) {
+            return false;
         }
 
         delete appMgrClient;
