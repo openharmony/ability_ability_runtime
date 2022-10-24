@@ -89,6 +89,8 @@ public:
     static NativeValue* GetWantAgent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* NapiGetWant(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* NapiTrigger(NativeEngine *engine, NativeCallbackInfo *info);
+    static NativeValue* NapiGetWantAgent(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* NapiGetOperationType(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* WrapWantAgent(NativeEngine &engine, const std::shared_ptr<WantAgent> &wantAgent);
     static void UnwrapWantAgent(NativeEngine &engine, NativeValue *jsParam, void** result);
 
@@ -103,6 +105,8 @@ private:
     NativeValue* OnGetWantAgent(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnNapiGetWant(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnNapiTrigger(NativeEngine &engine, NativeCallbackInfo &info);
+    NativeValue* OnNapiGetWantAgent(NativeEngine &engine, NativeCallbackInfo &info);
+    NativeValue* OnNapiGetOperationType(NativeEngine &engine, NativeCallbackInfo &info);
     int32_t UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallbackInfo &info,
         std::shared_ptr<WantAgent> &wantAgent, TriggerInfo &triggerInfo,
         std::shared_ptr<TriggerCompleteCallBack> &triggerObj);

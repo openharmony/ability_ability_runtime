@@ -63,8 +63,8 @@ NativeValue* JsNapiWantAgentInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "cancel", moduleName, JsWantAgent::Cancel);
     BindNativeFunction(*engine, *object, "trigger", moduleName, JsWantAgent::NapiTrigger);
     BindNativeFunction(*engine, *object, "getWant", moduleName, JsWantAgent::NapiGetWant);
-    BindNativeFunction(*engine, *object, "getWantAgent", moduleName, JsWantAgent::GetWantAgent);
-    BindNativeFunction(*engine, *object, "getOperationType", moduleName, JsWantAgent::GetOperationType);
+    BindNativeFunction(*engine, *object, "getWantAgent", moduleName, JsWantAgent::NapiGetWantAgent);
+    BindNativeFunction(*engine, *object, "getOperationType", moduleName, JsWantAgent::NapiGetOperationType);
     HILOG_DEBUG("JsNapiWantAgentInit end");
     return exportObj;
 }
