@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "loadability_fuzzer.h"
+#include "killprocessesbyuserid_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -29,20 +29,6 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
     constexpr size_t FOO_MAX_LEN = 1024;
 
-    sptr<Token> GetFuzzAbilityToken()
-    {
-        sptr<Token> token = nullptr;
-        AbilityRequest abilityRequest;
-        abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
-        abilityRequest.abilityInfo.name = "MainAbility";
-        abilityRequest.abilityInfo.type = AbilityType::DATA;
-        std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-        if (abilityRecord) {
-          token = abilityRecord->GetToken();
-        }
-        return token;
-    }
-
     bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     {
         AppMgrClient* appMgrClient = new AppMgrClient();
@@ -50,27 +36,10 @@ namespace OHOS {
             return false;
         }
 
-        sptr<IRemoteObject> token = GetFuzzAbilityToken();
-        if (!token) {
-            std::cout << "Get ability token failed." << std::endl;
-            return false;
-        }
-        sptr<IRemoteObject> preToken = GetFuzzAbilityToken();
-        if (!preToken) {
-            std::cout << "Get ability preToken failed." << std::endl;
-            return false;
-        }
-        AbilityInfo abilityInfo;
-        ApplicationInfo appInfo;
+        int32_t userId = 100;
 
-        // fuzz for want
-        Parcel wantParcel;
-        Want* want = nullptr;
-        if (wantParcel.WriteBuffer(data, size)) {
-            want = Want::Unmarshalling(wantParcel);
-            if (want) {
-                appMgrClient->LoadAbility(token, preToken, abilityInfo, appInfo, *want);
-            }
+        if (appMgrClient->KillProcessesByUserId(userId) != AppMgrResultCode::RESULT_OK) {
+            return false;
         }
 
         delete appMgrClient;
