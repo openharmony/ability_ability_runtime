@@ -195,7 +195,7 @@ void TriggerCompleteCallBack::OnSendFinished(
     dataWorker->engine = triggerCompleteInfo_.engine;
     dataWorker->nativeRef = std::move(triggerCompleteInfo_.nativeRef);
     dataWorker->wantAgent = triggerCompleteInfo_.wantAgent;
-    work->data = (void *)dataWorker;
+    work->data = static_cast<void *>(dataWorker);
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, OnSendFinishedUvAfterWorkCallback);
     if (ret != 0) {
         delete dataWorker;
