@@ -71,13 +71,13 @@ NativeValue* JsNapiWantAgentInit(NativeEngine* engine, NativeValue* exportObj)
 EXTERN_C_END
 
 extern "C" __attribute__((constructor))
-void NAPI_application_WantAgent_AutoRegister()
+void NAPI_app_ability_WantAgent_AutoRegister()
 {
     auto moduleManager = NativeModuleManager::GetInstance();
     NativeModule newModuleInfo = {
         .name = "app.ability.wantAgent",
-        .fileName = "application/wantagent_napi.so/want_agent_napi.js",
-        .registerCallback = OHOS::JsWantAgentInit,
+        .fileName = "app/ability/wantagent_napi.so/want_agent.js",
+        .registerCallback = OHOS::JsNapiWantAgentInit,
     };
 
     moduleManager->Register(&newModuleInfo);
