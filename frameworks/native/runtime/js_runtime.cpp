@@ -51,6 +51,8 @@ namespace AbilityRuntime {
 namespace {
 constexpr uint8_t SYSCAP_MAX_SIZE = 64;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
+const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
+const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
 #if defined(_ARM64_)
 constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/libark_debugger.z.so";
 #else
@@ -298,6 +300,14 @@ private:
                 pandaOption.SetEnableAsmInterpreter(asmInterpreterEnabled);
                 pandaOption.SetAsmOpcodeDisableRange(asmOpcodeDisableRange);
             }
+            bool aotEnabled = OHOS::system::GetBoolParameter("persist.ark.aot", true);
+            pandaOption.SetEnableAOT(aotEnabled);
+            bool profileEnabled = OHOS::system::GetBoolParameter("persist.ark.profile", false);
+            pandaOption.SetEnableProfile(profileEnabled);
+            std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
+            pandaOption.SetAnDir(sandBoxAnFilePath);
+            pandaOption.SetProfileDir(SANDBOX_ARK_PROIFILE_PATH);
+            HILOG_DEBUG("JSRuntime::Initialize ArkNative file path = %{public}s", options.arkNativeFilePath.c_str());
             vm_ = panda::JSNApi::CreateJSVM(pandaOption);
             if (vm_ == nullptr) {
                 return false;
@@ -480,11 +490,6 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(NativeEngin
     }
 
     return std::unique_ptr<NativeReference>(engine->CreateReference(instanceValue, 1));
-}
-
-void *DetachCallbackFunc(NativeEngine *engine, void *value, void *)
-{
-    return value;
 }
 
 bool JsRuntime::Initialize(const Options& options)
@@ -718,12 +723,16 @@ bool JsRuntime::RunSandboxScript(const std::string& path, const std::string& hap
 
 void JsRuntime::PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime)
 {
-    eventHandler_->PostTask(task, name, delayTime);
+    if (eventHandler_ != nullptr) {
+        eventHandler_->PostTask(task, name, delayTime);
+    }
 }
 
 void JsRuntime::RemoveTask(const std::string& name)
 {
-    eventHandler_->RemoveTask(name);
+    if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(name);
+    }
 }
 
 void JsRuntime::DumpHeapSnapshot(bool isPrivate)
