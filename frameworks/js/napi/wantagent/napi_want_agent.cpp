@@ -855,7 +855,6 @@ NativeValue* JsWantAgent::OnNapiGetWantAgent(NativeEngine &engine, NativeCallbac
         return engine.CreateUndefined();
     }
 
-    NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     std::shared_ptr<WantAgentWantsParas> spParas = std::make_shared<WantAgentWantsParas>();
     uint32_t ret = GetWantAgentParam(engine, info, *spParas);
     if (ret != 0) {
@@ -883,6 +882,7 @@ NativeValue* JsWantAgent::OnNapiGetWantAgent(NativeEngine &engine, NativeCallbac
         task.ResolveWithNoError(engine, obj->WrapWantAgent(engine, wantAgent));
     };
 
+    NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     NativeValue *result = nullptr;
     AsyncTask::Schedule("JsWantAgent::OnNapiGetWantAgent",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -892,7 +892,6 @@ NativeValue* JsWantAgent::OnNapiGetWantAgent(NativeEngine &engine, NativeCallbac
 NativeValue* JsWantAgent::OnNapiGetOperationType(NativeEngine &engine, NativeCallbackInfo &info)
 {
     HILOG_DEBUG("JsWantAgent::OnNapiGetOperationType enter, argc = %{public}d", static_cast<int32_t>(info.argc));
-    int32_t errCode = BUSINESS_ERROR_CODE_OK;
     WantAgent *pWantAgent = nullptr;
     if (info.argc > ARGC_TWO || info.argc < ARGC_ONE) {
         HILOG_ERROR("Not enough params");
