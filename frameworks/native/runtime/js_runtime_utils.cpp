@@ -185,6 +185,24 @@ void AsyncTask::ResolveWithNoError(NativeEngine& engine, NativeValue* value)
     HILOG_DEBUG("AsyncTask::Resolve is called end.");
 }
 
+void AsyncTask::ResolveForForm(NativeEngine& engine, NativeValue* value)
+{
+    HILOG_DEBUG("AsyncTask::ResolveForForm is called");
+    if (deferred_) {
+        deferred_->Resolve(engine.CreateUndefined());
+        deferred_.reset();
+    }
+    if (callbackRef_) {
+        NativeValue* argv[] = {
+            value,
+            engine.CreateUndefined()
+        };
+        engine.CallFunction(engine.CreateUndefined(), callbackRef_->Get(), argv, ArraySize(argv));
+        callbackRef_.reset();
+    }
+    HILOG_DEBUG("AsyncTask::ResolveForForm is called end.");
+}
+
 void AsyncTask::Reject(NativeEngine& engine, NativeValue* error)
 {
     if (deferred_) {
