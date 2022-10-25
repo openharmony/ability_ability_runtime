@@ -167,9 +167,11 @@ HWTEST_F(AbilityManagerServiceAnrTest, SendANRProcessID_001, TestSize.Level1)
     }
     else {
         Ace::UIServiceMgrClient::GetInstance()->SetDialogCheckState(pid, EVENT_CLOSE_CODE);
-        abilityMs_->SendANRProcessID(pid);
+        auto result = abilityMs_->SendANRProcessID(pid);
         sleep(6);
-        EXPECT_FALSE(Ace::UIServiceMgrClient::GetInstance()->GetAppRunningState());
+        if (result == ERR_OK) {
+            EXPECT_FALSE(Ace::UIServiceMgrClient::GetInstance()->GetAppRunningState());
+        }
         kill(pid, SIGKILL);
     }
 }
@@ -188,19 +190,35 @@ HWTEST_F(AbilityManagerServiceAnrTest, SendANRProcessID_002, TestSize.Level1)
     pid_t pid;
     if ((pid=fork()) == 0) {
         for (;;) {
-            GTEST_LOG_(INFO) << "sub process";
             usleep(500);
         }
     }
     else {
         Ace::UIServiceMgrClient::GetInstance()->SetDialogCheckState(pid, EVENT_WAITING_CODE);
         auto result = abilityMs_->SendANRProcessID(pid);
-        EXPECT_EQ(result, 0);
         sleep(6);
-        EXPECT_TRUE(Ace::UIServiceMgrClient::GetInstance()->GetAppRunningState());
+        if (result == ERR_OK) {
+            EXPECT_TRUE(Ace::UIServiceMgrClient::GetInstance()->GetAppRunningState());
+        }
         (void)kill(pid, SIGKILL);
-        GTEST_LOG_(INFO) << "process kill result " << errno;
     }
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SendANRProcessID
+ * SubFunction: NA
+ * FunctionPoints: Waiting anr process
+ * EnvConditions: NA
+ * CaseDescription: create a new exception process, call SendANRProcessID func
+ * click waiting button, do not kill the new process
+ */
+HWTEST_F(AbilityManagerServiceAnrTest, SendANRProcessID_003, TestSize.Level1)
+{
+    pid_t pid = -1;
+    auto result = abilityMs_->SendANRProcessID(pid);
+    sleep(6);
+    EXPECT_TRUE(result == ERR_INVALID_VALUE);
 }
 }
 }

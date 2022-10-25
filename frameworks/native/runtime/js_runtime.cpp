@@ -25,9 +25,9 @@
 
 #include "ability_constants.h"
 #include "connect_server_manager.h"
+#include "ecmascript/napi/include/jsnapi.h"
 #include "event_handler.h"
 #include "file_path_utils.h"
-#include "ecmascript/napi/include/jsnapi.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
 #include "hot_reloader.h"
@@ -170,25 +170,25 @@ public:
             static_cast<ArkNativeEngine*>(nativeEngine_.get()), exportObj);
     }
 
-    void LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override
+    bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override
     {
         HILOG_DEBUG("LoadRepairPatch function called.");
         if (vm_ == nullptr) {
             HILOG_ERROR("LoadRepairPatch, vm is nullptr.");
-            return;
+            return false;
         }
 
         AbilityRuntime::RuntimeExtractor extractor(hqfFile);
         if (!extractor.Init()) {
             HILOG_ERROR("LoadRepairPatch, Extractor of %{private}s init failed.", hqfFile.c_str());
-            return;
+            return false;
         }
 
         std::vector<std::string> fileNames;
         extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
         if (fileNames.empty()) {
             HILOG_WARN("LoadRepairPatch, There's no abc file in hqf %{private}s.", hqfFile.c_str());
-            return;
+            return true;
         }
 
         for (const auto &fileName : fileNames) {
@@ -197,7 +197,7 @@ public:
             std::ostringstream outStream;
             if (!extractor.ExtractByName(fileName, outStream)) {
                 HILOG_ERROR("LoadRepairPatch, Extract %{public}s failed.", patchFile.c_str());
-                return;
+                return false;
             }
 
             const auto &outStr = outStream.str();
@@ -208,31 +208,33 @@ public:
             bool ret = panda::JSNApi::LoadPatch(vm_, patchFile, buffer.data(), buffer.size(), baseFile);
             if (!ret) {
                 HILOG_ERROR("LoadRepairPatch, LoadPatch failed.");
-                return;
+                return false;
             }
             HILOG_DEBUG("LoadRepairPatch, Load patch %{private}s succeed.", patchFile.c_str());
         }
+
+        return true;
     }
 
-    void UnLoadRepairPatch(const std::string& hqfFile) override
+    bool UnLoadRepairPatch(const std::string& hqfFile) override
     {
         HILOG_DEBUG("UnLoadRepairPatch function called.");
         if (vm_ == nullptr) {
             HILOG_ERROR("UnLoadRepairPatch vm is nullptr.");
-            return;
+            return false;
         }
 
         AbilityRuntime::RuntimeExtractor extractor(hqfFile);
         if (!extractor.Init()) {
             HILOG_ERROR("UnLoadRepairPatch, Extractor of %{private}s init failed.", hqfFile.c_str());
-            return;
+            return false;
         }
 
         std::vector<std::string> fileNames;
         extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
         if (fileNames.empty()) {
             HILOG_WARN("UnLoadRepairPatch, There's no abc file in hqf %{private}s.", hqfFile.c_str());
-            return;
+            return true;
         }
 
         for (const auto &fileName : fileNames) {
@@ -241,16 +243,19 @@ public:
             bool ret = panda::JSNApi::UnloadPatch(vm_, patchFile);
             if (!ret) {
                 HILOG_ERROR("UnLoadRepairPatch, UnLoadPatch failed.");
-                return;
+                return false;
             }
             HILOG_DEBUG("UnLoadRepairPatch, UnLoad patch %{private}s succeed.", patchFile.c_str());
         }
+
+        return true;
     }
 
-    void NotifyHotReloadPage() override
+    bool NotifyHotReloadPage() override
     {
         HILOG_DEBUG("function called.");
         Ace::HotReloader::HotReload();
+        return true;
     }
 
 private:
@@ -533,15 +538,18 @@ bool JsRuntime::Initialize(const Options& options)
         eventHandler_->AddFileDescriptorListener(fd, events, std::make_shared<UvLoopHandler>(uvLoop));
 
         codePath_ = options.codePath;
+    }
 
-        auto moduleManager = NativeModuleManager::GetInstance();
-        std::string packagePath = options.packagePath;
-        if (moduleManager && !packagePath.empty()) {
-            moduleManager->SetAppLibPath(std::vector<std::string>(1, packagePath));
+    auto moduleManager = NativeModuleManager::GetInstance();
+    if (moduleManager != nullptr) {
+        for (const auto &appLibPath : options.appLibPaths) {
+            moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second);
         }
+    }
 
+    if (!options.preload) {
         InitTimerModule(*nativeEngine_, *globalObj);
-        InitWorkerModule(*nativeEngine_, codePath_);
+        InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion);
     }
 
     preloaded_ = options.preload;
@@ -559,7 +567,7 @@ void JsRuntime::Deinitialize()
 
     auto uvLoop = nativeEngine_->GetUVLoop();
     auto fd = uvLoop != nullptr ? uv_backend_fd(uvLoop) : -1;
-    if (fd >= 0) {
+    if (fd >= 0 && eventHandler_ != nullptr) {
         eventHandler_->RemoveFileDescriptorListener(fd);
     }
     RemoveTask(TIMER_TASK);
@@ -710,12 +718,16 @@ bool JsRuntime::RunSandboxScript(const std::string& path, const std::string& hap
 
 void JsRuntime::PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime)
 {
-    eventHandler_->PostTask(task, name, delayTime);
+    if (eventHandler_ != nullptr) {
+        eventHandler_->PostTask(task, name, delayTime);
+    }
 }
 
 void JsRuntime::RemoveTask(const std::string& name)
 {
-    eventHandler_->RemoveTask(name);
+    if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(name);
+    }
 }
 
 void JsRuntime::DumpHeapSnapshot(bool isPrivate)
