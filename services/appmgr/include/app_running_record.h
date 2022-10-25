@@ -523,11 +523,11 @@ public:
     void PostTask(std::string msg, int64_t timeOut, const Closure &task);
     void RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObject>& token) const;
 
-    int32_t NotifyLoadRepairPatch(const std::string &bundleName);
+    int32_t NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
 
-    int32_t NotifyHotReloadPage();
+    int32_t NotifyHotReloadPage(const sptr<IQuickFixCallback> &callback);
 
-    int32_t NotifyUnLoadRepairPatch(const std::string &bundleName);
+    int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
 
     bool IsContinuousTask();
 
@@ -544,6 +544,8 @@ public:
     bool UpdateAbilityFocusState(const sptr<IRemoteObject> &token, bool isFocus);
 
     bool GetFocusFlag() const;
+
+    int64_t GetAppStartTime() const;
 
 private:
     /**
@@ -627,6 +629,7 @@ private:
     AAFwk::Want SpecifiedWant_;
     std::string moduleName_;
     bool isDebugApp_ = false;
+    int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 

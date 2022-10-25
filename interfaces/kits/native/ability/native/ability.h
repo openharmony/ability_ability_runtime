@@ -82,6 +82,7 @@ class AbilityWindow;
 #endif
 class ILifeCycle;
 class ContinuationManager;
+class AbilityRecovery;
 class ContinuationRegisterManager;
 class IContinuationRegisterManager;
 class Ability : public IAbilityEvent,
@@ -800,6 +801,22 @@ public:
      */
     virtual void OnRemoteTerminated() override;
 
+    /**
+     * @brief Prepare user data of local Ability.
+     *
+     * @param reason the reason why framework invoke this function
+     * @param wantParams Indicates the user data to be saved.
+     * @return result code defined in abilityConstants
+     */
+    virtual int32_t OnSaveState(int32_t reason, WantParams &wantParams);
+
+    /**
+     * @brief enable ability recovery.
+     *
+     * @param abilityRecovery shared_ptr of abilityRecovery
+     */
+    void EnableAbilityRecovery(const std::shared_ptr<AbilityRecovery>& abilityRecovery);
+
 #ifdef SUPPORT_GRAPHICS
 public:
     friend class PageAbilityImpl;
@@ -958,7 +975,7 @@ public:
      *
      * @param windowOption Indicates the window option defined by the user.
      */
-    virtual void InitWindow(Rosen::WindowType winType, int32_t displayId, sptr<Rosen::WindowOption> option);
+    virtual void InitWindow(int32_t displayId, sptr<Rosen::WindowOption> option);
 
     /**
      * @brief Get the window belong to the ability.
@@ -1273,10 +1290,17 @@ protected:
      */
     void NotifyContinuationResult(const Want& want, bool success);
 
+    /**
+     * @brief judge whether we should restore state
+     * @return true if we we should restore state
+     */
+    bool ShouldRecoverState(const Want& want);
+
     bool IsUseNewStartUpRule();
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
     std::shared_ptr<AbilityStartSetting> setting_ = nullptr;
+    std::shared_ptr<AbilityRecovery> abilityRecovery_ = nullptr;
     LaunchParam launchParam_;
     int32_t appIndex_ = 0;
     bool securityFlag_ = false;
@@ -1301,6 +1325,7 @@ private:
     bool VerifySupportForContinuation();
     void HandleCreateAsContinuation(const Want &want);
     bool IsFlagExists(unsigned int flag, unsigned int flagSet);
+    void HandleCreateAsRecovery(const Want &want);
     /**
      * @brief Set the start ability setting.
      * @param setting the start ability setting.

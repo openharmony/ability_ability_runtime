@@ -20,6 +20,11 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+static constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nano second
+static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
+}
+
 int64_t AppRunningRecord::appEventId_ = 0;
 
 RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
@@ -134,6 +139,12 @@ AppRunningRecord::AppRunningRecord(
         isLauncherApp_ = info->isLauncherApp;
         mainAppName_ = info->name;
     }
+
+    struct timespec t;
+    t.tv_sec = 0;
+    t.tv_nsec = 0;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    startTimeMillis_ = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS);
 }
 
 void AppRunningRecord::SetApplicationClient(const sptr<IAppScheduler> &thread)
@@ -526,7 +537,6 @@ void AppRunningRecord::AddModule(const std::shared_ptr<ApplicationInfo> &appInfo
     }
 
     std::shared_ptr<ModuleRunningRecord> moduleRecord;
-    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleList;
 
     auto initModuleRecord = [=](const std::shared_ptr<ModuleRunningRecord> &moduleRecord) {
         moduleRecord->Init(hapModuleInfo);
@@ -544,6 +554,7 @@ void AppRunningRecord::AddModule(const std::shared_ptr<ApplicationInfo> &appInfo
         }
     } else {
         moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, eventHandler_);
+        std::vector<std::shared_ptr<ModuleRunningRecord>> moduleList;
         moduleList.push_back(moduleRecord);
         hapModules_.emplace(appInfo->bundleName, moduleList);
         appInfos_.emplace(appInfo->bundleName, appInfo);
@@ -1255,7 +1266,7 @@ void AppRunningRecord::RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteObjec
     (void)moduleRecord->RemoveTerminateAbilityTimeoutTask(token);
 }
 
-int32_t AppRunningRecord::NotifyLoadRepairPatch(const std::string &bundleName)
+int32_t AppRunningRecord::NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
@@ -1263,10 +1274,10 @@ int32_t AppRunningRecord::NotifyLoadRepairPatch(const std::string &bundleName)
         HILOG_ERROR("appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;
     }
-    return appLifeCycleDeal_->NotifyLoadRepairPatch(bundleName);
+    return appLifeCycleDeal_->NotifyLoadRepairPatch(bundleName, callback);
 }
 
-int32_t AppRunningRecord::NotifyHotReloadPage()
+int32_t AppRunningRecord::NotifyHotReloadPage(const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
@@ -1274,10 +1285,11 @@ int32_t AppRunningRecord::NotifyHotReloadPage()
         HILOG_ERROR("appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;
     }
-    return appLifeCycleDeal_->NotifyHotReloadPage();
+    return appLifeCycleDeal_->NotifyHotReloadPage(callback);
 }
 
-int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName)
+int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName,
+    const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
@@ -1285,7 +1297,7 @@ int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName)
         HILOG_ERROR("appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;
     }
-    return appLifeCycleDeal_->NotifyUnLoadRepairPatch(bundleName);
+    return appLifeCycleDeal_->NotifyUnLoadRepairPatch(bundleName, callback);
 }
 
 bool AppRunningRecord::IsContinuousTask()
@@ -1301,6 +1313,11 @@ void AppRunningRecord::SetContinuousTaskAppState(bool isContinuousTask)
 bool AppRunningRecord::GetFocusFlag() const
 {
     return isFocused_;
+}
+
+int64_t AppRunningRecord::GetAppStartTime() const
+{
+    return startTimeMillis_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -18,6 +18,7 @@
 #include <singleton.h>
 #include <vector>
 
+#include "ability_constants.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_scheduler_stub.h"
@@ -30,6 +31,7 @@
 #include "errors.h"
 #include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
+#include "parameters.h"
 #include "system_ability_token_callback.h"
 #include "uri_permission_manager_client.h"
 #ifdef SUPPORT_GRAPHICS
@@ -385,7 +387,7 @@ void AbilityRecord::NotifyAnimationFromTerminatingAbility() const
     }
 
     sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
-    SetAbilityTransitionInfo(abilityInfo_, fromInfo);
+    SetAbilityTransitionInfo(fromInfo);
     fromInfo->reason_ = TransitionReason::CLOSE;
     windowHandler->NotifyWindowTransition(fromInfo, nullptr);
 }
@@ -587,6 +589,10 @@ void AbilityRecord::StartingWindowTask(bool isRecent, bool isCold, const Ability
 
 void AbilityRecord::PostCancelStartingWindowHotTask()
 {
+    if (want_.GetBoolParam(DEBUG_APP, false)) {
+        HILOG_INFO("PostCancelStartingWindowHotTask was called, debug mode, just return.");
+        return;
+    }
     HILOG_INFO("PostCancelStartingWindowHotTask was called.");
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_LOG(handler, "Fail to get AbilityEventHandler.");
@@ -609,6 +615,10 @@ void AbilityRecord::PostCancelStartingWindowHotTask()
 
 void AbilityRecord::PostCancelStartingWindowColdTask()
 {
+    if (want_.GetBoolParam(DEBUG_APP, false)) {
+        HILOG_INFO("PostCancelStartingWindowColdTask was called, debug mode, just return.");
+        return;
+    }
     HILOG_INFO("PostCancelStartingWindowColdTask was called.");
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_LOG(handler, "Fail to get AbilityEventHandler.");
@@ -702,18 +712,21 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
     resourceMgr->UpdateResConfig(*resConfig);
 
-    if (!abilityInfo_.resourcePath.empty()) {
-        if (!resourceMgr->AddResource(abilityInfo_.resourcePath.c_str())) {
-            HILOG_WARN("%{public}s AddResource failed.", __func__);
-            return nullptr;
-        }
-    } else if (!abilityInfo_.hapPath.empty()) {
-        if (!resourceMgr->AddResource(abilityInfo_.hapPath.c_str())) {
-            HILOG_WARN("%{public}s AddResource failed.", __func__);
-            return nullptr;
-        }
-    } else {
+    if (abilityInfo_.resourcePath.empty() && abilityInfo_.hapPath.empty()) {
         HILOG_WARN("Invalid app resource.");
+        return nullptr;
+    }
+
+    std::string loadPath;
+    if (system::GetBoolParameter(AbilityRuntime::Constants::COMPRESS_PROPERTY, false) &&
+        !abilityInfo_.hapPath.empty()) {
+        loadPath = abilityInfo_.hapPath;
+    } else {
+        loadPath = abilityInfo_.resourcePath;
+    }
+
+    if (!resourceMgr->AddResource(loadPath.c_str())) {
+        HILOG_WARN("%{public}s AddResource failed.", __func__);
         return nullptr;
     }
     return resourceMgr;
@@ -730,19 +743,20 @@ std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windo
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
     std::unique_ptr<Media::ImageSource> imageSource;
-    if (!abilityInfo_.resourcePath.empty()) { // already unzip hap
-        std::string iconPath;
-        if (resourceMgr->GetMediaById(windowIconId, iconPath) != Global::Resource::RState::SUCCESS) {
-            return nullptr;
-        }
-        imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
-    } else { // hap is not unzip
+    if (system::GetBoolParameter(AbilityRuntime::Constants::COMPRESS_PROPERTY, false) &&
+        !abilityInfo_.hapPath.empty()) { // hap is not unzip
         std::unique_ptr<uint8_t[]> iconOut;
         size_t len;
         if (resourceMgr->GetMediaDataById(windowIconId, len, iconOut) != Global::Resource::RState::SUCCESS) {
             return nullptr;
         }
         imageSource = Media::ImageSource::CreateImageSource(iconOut.get(), len, opts, errorCode);
+    } else { // already unzip hap
+        std::string iconPath;
+        if (resourceMgr->GetMediaById(windowIconId, iconPath) != Global::Resource::RState::SUCCESS) {
+            return nullptr;
+        }
+        imageSource = Media::ImageSource::CreateImageSource(iconPath, opts, errorCode);
     }
 
     if (errorCode != 0 || imageSource == nullptr) {
