@@ -131,13 +131,13 @@ struct SyncRemoteMissionsContext {
     napi_ref callbackRef;
 };
 
-int32_t ErrorCodeReturn(int32_t code);
-std::string ErrorMessageReturn(int32_t code);
+static int32_t ErrorCodeReturn(int32_t code);
+static std::string ErrorMessageReturn(int32_t code);
 bool SetSyncRemoteMissionsContext(const napi_env &env, const napi_value &value,
     SyncRemoteMissionsContext* context, std::string &errInfo);
-bool ProcessSyncInput(napi_env env, napi_callback_info info, bool isStart,
+bool ProcessSyncInput(napi_env &env, napi_callback_info info, bool isStart,
     SyncRemoteMissionsContext* syncContext, std::string &errInfo);
-void ReturnValueToApplication(napi_env env, napi_value *result, RegisterMissionCB *registerMissionCB);
+void ReturnValueToApplication(napi_env &env, napi_value *result, RegisterMissionCB *registerMissionCB);
 void CallbackReturn(napi_value *result, RegisterMissionCB *registerMissionCB);
 napi_value GetUndefined();
 mutex registrationLock_;

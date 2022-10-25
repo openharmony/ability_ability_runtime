@@ -46,7 +46,7 @@ napi_value GenerateBusinessError(const napi_env &env, int32_t errCode, const std
     return businessError;
 }
 
-int32_t ErrorCodeReturn(int32_t code)
+static int32_t ErrorCodeReturn(int32_t code)
 {
     switch (code) {
         case NO_ERROR:
@@ -90,7 +90,7 @@ int32_t ErrorCodeReturn(int32_t code)
     };
 }
 
-std::string ErrorMessageReturn(int32_t code)
+static std::string ErrorMessageReturn(int32_t code)
 {
     switch (code) {
         case NO_ERROR:
@@ -104,14 +104,14 @@ std::string ErrorMessageReturn(int32_t code)
         case NO_MISSION_INFO_FOR_MISSION_ID:
             return std::string("failed to get the missionInfo of the specified missionId.");
         case REMOTE_UNINSTALLED_AND_UNSUPPORT_FREEINSTALL_FOR_CONTINUE:
-            return std::string("the application is not installed on the \
-remote end and installation-free is not supported.");
+            return std::string("the application is not installed on the "
+        "remote end and installation-free is not supported.");
         case CONTINUE_WITHOUT_FREEINSTALL_FLAG:
-            return std::string("the application is not installed on the remote end but \
-installation-free is supported, try again with freeInstall flag.");
+            return std::string("the application is not installed on the remote end but "
+        "installation-free is supported, try again with freeInstall flag.");
         case OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET:
-            return std::string("the operation device must be the device where the \
-application to be continued is located or the target device to be continued.");
+            return std::string("the operation device must be the device where the "
+        "application to be continued is located or the target device to be continued.");
         case CONTINUE_ALREADY_IN_PROGRESS:
             return std::string("the local continuation task is already in progress.");
         default:
@@ -229,7 +229,7 @@ bool SetSyncRemoteMissionsContext(const napi_env &env, const napi_value &value,
     return true;
 }
 
-bool ProcessSyncInput(napi_env env, napi_callback_info info, bool isStart,
+bool ProcessSyncInput(napi_env &env, napi_callback_info info, bool isStart,
     SyncRemoteMissionsContext* syncContext, std::string &errInfo)
 {
     HILOG_INFO("%{public}s,called.", __func__);
@@ -634,14 +634,14 @@ bool RegisterMissionWrapDeviceId(napi_env &env, napi_value &argc,
         return false;
     }
 
-    napi_value firstNApi = nullptr;
-    napi_get_named_property(env, argc, "deviceId", &firstNApi);
-    if (firstNApi == nullptr) {
+    napi_value napiDeviceId = nullptr;
+    napi_get_named_property(env, argc, "deviceId", &napiDeviceId);
+    if (napiDeviceId == nullptr) {
         HILOG_ERROR("%{public}s, not find deviceId.", __func__);
         errInfo = "Parameter error. The value of \"deviceId\" must not be undefined";
         return false;
     }
-    napi_typeof(env, firstNApi, &valueType);
+    napi_typeof(env, napiDeviceId, &valueType);
     if (valueType != napi_string) {
         HILOG_ERROR("%{public}s, deviceId error type.", __func__);
         errInfo = "Parameter error. The type of \"deviceId\" must be string";
@@ -649,7 +649,7 @@ bool RegisterMissionWrapDeviceId(napi_env &env, napi_value &argc,
     }
     char deviceId[VALUE_BUFFER_SIZE + 1] = {0};
     size_t valueLen = 0;
-    napi_get_value_string_utf8(env, firstNApi, deviceId, VALUE_BUFFER_SIZE + 1, &valueLen);
+    napi_get_value_string_utf8(env, napiDeviceId, deviceId, VALUE_BUFFER_SIZE + 1, &valueLen);
     if (valueLen > VALUE_BUFFER_SIZE) {
         HILOG_ERROR("%{public}s, deviceId length not correct", __func__);
         errInfo = "Parameter error. The length of \"deviceId\" must be less than " +
@@ -1043,33 +1043,33 @@ bool GetUnRegisterMissionDeviceId(napi_env env, const napi_value &value,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
-    napi_value firstNApi = nullptr;
+    napi_value napiDeviceId = nullptr;
     napi_valuetype valueType = napi_undefined;
     bool isDeviceId = false;
     napi_has_named_property(env, value, "deviceId", &isDeviceId);
     napi_typeof(env, value, &valueType);
     if (isDeviceId && valueType == napi_object) {
-        napi_get_named_property(env, value, "deviceId", &firstNApi);
+        napi_get_named_property(env, value, "deviceId", &napiDeviceId);
     } else {
         HILOG_ERROR("%{public}s, Wrong argument name for deviceId.", __func__);
         errInfo = "Parameter error. The key of \"MissionDeviceInfo\" must be deviceId";
         return false;
     }
-    if (firstNApi == nullptr) {
+    if (napiDeviceId == nullptr) {
         HILOG_ERROR("%{public}s, not find deviceId.", __func__);
         errInfo = "Parameter error. The value of \"deviceId\" must not be undefined";
         return false;
     }
 
     size_t valueLen = 0;
-    napi_typeof(env, firstNApi, &valueType);
+    napi_typeof(env, napiDeviceId, &valueType);
     if (valueType != napi_string) {
         HILOG_ERROR("%{public}s, Wrong argument type.", __func__);
         errInfo = "Parameter error. The type of \"deviceId\" must be string";
         return false;
     }
     char deviceId[VALUE_BUFFER_SIZE + 1] = {0};
-    napi_get_value_string_utf8(env, firstNApi, deviceId, VALUE_BUFFER_SIZE + 1, &valueLen);
+    napi_get_value_string_utf8(env, napiDeviceId, deviceId, VALUE_BUFFER_SIZE + 1, &valueLen);
     if (valueLen > VALUE_BUFFER_SIZE) {
         HILOG_ERROR("%{public}s, deviceId length not correct", __func__);
         errInfo = "Parameter error. The length of \"deviceId\" must be less than " +
@@ -1290,59 +1290,59 @@ bool CheckContinueKeyExist(napi_env env, const napi_value &value)
     return true;
 }
 
-bool CheckContinueDeviceInfoSrcDeviceId(napi_env &env, napi_value &firstNApi,
+bool CheckContinueDeviceInfoSrcDeviceId(napi_env &env, napi_value &napiSrcDeviceId,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, firstNApi, &valueType);
+    napi_typeof(env, napiSrcDeviceId, &valueType);
     if (valueType != napi_string) {
         HILOG_ERROR("%{public}s, Wrong argument type srcDeviceId.", __func__);
         errInfo = "Parameter error. The type of \"srcDeviceId\" must be string";
         return false;
     }
-    continueAbilityCB->srcDeviceId = AppExecFwk::UnwrapStringFromJS(env, firstNApi, "");
+    continueAbilityCB->srcDeviceId = AppExecFwk::UnwrapStringFromJS(env, napiSrcDeviceId, "");
     return true;
 }
 
-bool CheckContinueDeviceInfoDstDeviceId(napi_env &env, napi_value &secondNApi,
+bool CheckContinueDeviceInfoDstDeviceId(napi_env &env, napi_value &napiDstDeviceId,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, secondNApi, &valueType);
+    napi_typeof(env, napiDstDeviceId, &valueType);
     if (valueType != napi_string) {
         HILOG_ERROR("%{public}s, Wrong argument type dstDeviceId.", __func__);
         errInfo = "Parameter error. The type of \"dstDeviceId\" must be string";
         return false;
     }
-    continueAbilityCB->dstDeviceId = AppExecFwk::UnwrapStringFromJS(env, secondNApi, "");
+    continueAbilityCB->dstDeviceId = AppExecFwk::UnwrapStringFromJS(env, napiDstDeviceId, "");
     return true;
 }
 
-bool CheckContinueDeviceInfoMissionId(napi_env &env, napi_value &thirdNApi,
+bool CheckContinueDeviceInfoMissionId(napi_env &env, napi_value &napiMissionId,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, thirdNApi, &valueType);
+    napi_typeof(env, napiMissionId, &valueType);
     if (valueType != napi_number) {
         HILOG_ERROR("%{public}s, Wrong argument type missionId.", __func__);
         errInfo = "Parameter error. The type of \"missionId\" must be number";
         return false;
     }
-    continueAbilityCB->missionId = AppExecFwk::UnwrapInt32FromJS(env, thirdNApi, -1);
+    continueAbilityCB->missionId = AppExecFwk::UnwrapInt32FromJS(env, napiMissionId, -1);
     return true;
 }
 
-bool CheckContinueDeviceInfoWantParam(napi_env &env, napi_value &fourthNApi,
+bool CheckContinueDeviceInfoWantParam(napi_env &env, napi_value &napiWantParam,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, fourthNApi, &valueType);
+    napi_typeof(env, napiWantParam, &valueType);
     if (valueType != napi_object) {
         HILOG_ERROR("%{public}s, Wrong argument type wantParam.", __func__);
         errInfo = "Parameter error. The type of \"wantParams\" must be object";
         return false;
     }
-    if (!AppExecFwk::UnwrapWantParams(env, fourthNApi, continueAbilityCB->wantParams)) {
+    if (!AppExecFwk::UnwrapWantParams(env, napiWantParam, continueAbilityCB->wantParams)) {
         HILOG_ERROR("%{public}s, Wrong argument type wantParam.", __func__);
         errInfo = "Parameter error. The type of \"wantParams\" must be array";
         return false;
@@ -1359,10 +1359,10 @@ bool CheckContinueFirstArgs(napi_env env, const napi_value &value,
         errInfo = "Parameter error. The type of \"parameter\" must be ContinueMission";
         return false;
     }
-    napi_value firstNApi = nullptr;
-    napi_value secondNApi = nullptr;
-    napi_value thirdNApi = nullptr;
-    napi_value fourthNApi = nullptr;
+    napi_value napiSrcDeviceId = nullptr;
+    napi_value napiDstDeviceId = nullptr;
+    napi_value napiMissionId = nullptr;
+    napi_value napiWantParam = nullptr;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     if (valueType != napi_object) {
@@ -1370,20 +1370,21 @@ bool CheckContinueFirstArgs(napi_env env, const napi_value &value,
         errInfo = "Parameter error. The type of \"parameter\" must be ContinueMission";
         return false;
     }
-    napi_get_named_property(env, value, "srcDeviceId", &firstNApi);
-    napi_get_named_property(env, value, "dstDeviceId", &secondNApi);
-    napi_get_named_property(env, value, "missionId", &thirdNApi);
-    napi_get_named_property(env, value, "wantParam", &fourthNApi);
-    if (firstNApi == nullptr || secondNApi == nullptr || thirdNApi == nullptr || fourthNApi == nullptr) {
+    napi_get_named_property(env, value, "srcDeviceId", &napiSrcDeviceId);
+    napi_get_named_property(env, value, "dstDeviceId", &napiDstDeviceId);
+    napi_get_named_property(env, value, "missionId", &napiMissionId);
+    napi_get_named_property(env, value, "wantParam", &napiWantParam);
+    if (napiSrcDeviceId == nullptr || napiDstDeviceId == nullptr ||
+    napiMissionId == nullptr || napiWantParam == nullptr) {
         HILOG_ERROR("%{public}s, miss required parameters.", __func__);
         errInfo = "Parameter error. The number of \"ContinueMission\" must be 4";
         return false;
     }
     
-    if (!CheckContinueDeviceInfoSrcDeviceId(env, firstNApi, continueAbilityCB, errInfo) ||
-    !CheckContinueDeviceInfoDstDeviceId(env, secondNApi, continueAbilityCB, errInfo) ||
-    !CheckContinueDeviceInfoMissionId(env, thirdNApi, continueAbilityCB, errInfo) ||
-    !CheckContinueDeviceInfoWantParam(env, fourthNApi, continueAbilityCB, errInfo)) {
+    if (!CheckContinueDeviceInfoSrcDeviceId(env, napiSrcDeviceId, continueAbilityCB, errInfo) ||
+    !CheckContinueDeviceInfoDstDeviceId(env, napiDstDeviceId, continueAbilityCB, errInfo) ||
+    !CheckContinueDeviceInfoMissionId(env, napiMissionId, continueAbilityCB, errInfo) ||
+    !CheckContinueDeviceInfoWantParam(env, napiWantParam, continueAbilityCB, errInfo)) {
         HILOG_ERROR("%{public}s, continueMission check ContinueDeviceInfo value failed.", __func__);
         return false;
     }
