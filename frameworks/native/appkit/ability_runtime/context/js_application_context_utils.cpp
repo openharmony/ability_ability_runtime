@@ -814,15 +814,10 @@ NativeValue *JsApplicationContextUtils::OnOffEnvironment(
 }  // namespace
 
 NativeValue *CreateJsApplicationContext(NativeEngine &engine, std::shared_ptr<ApplicationContext> applicationContext,
-    DetachCallback detach, AttachCallback attach, bool keepApplicationContext)
+    bool keepApplicationContext)
 {
     HILOG_DEBUG("CreateJsApplicationContext start");
-    NativeValue* objValue;
-    if (detach == nullptr || attach == nullptr) {
-        objValue = engine.CreateObject();
-    } else {
-        objValue = engine.CreateNBObject(detach, attach);
-    }
+    NativeValue* objValue = engine.CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
     if (object == nullptr) {
         return objValue;
@@ -868,6 +863,8 @@ NativeValue *CreateJsApplicationContext(NativeEngine &engine, std::shared_ptr<Ap
     BindNativeFunction(engine, *object, "switchArea", MD_NAME, JsApplicationContextUtils::SwitchArea);
     BindNativeFunction(engine, *object, "getArea", MD_NAME, JsApplicationContextUtils::GetArea);
     BindNativeFunction(engine, *object, "createModuleContext", MD_NAME, JsApplicationContextUtils::CreateModuleContext);
+    BindNativeFunction(engine, *object, "on", MD_NAME, JsApplicationContextUtils::On);
+    BindNativeFunction(engine, *object, "off", MD_NAME, JsApplicationContextUtils::Off);
 
     return objValue;
 }

@@ -211,6 +211,22 @@ void AsyncTask::RejectWithMessage(NativeEngine& engine, NativeValue* error, Nati
         NativeValue* argv[] = {
             error,
             messsage,
+             };
+        engine.CallFunction(engine.CreateUndefined(), callbackRef_->Get(), argv, ArraySize(argv));
+        callbackRef_.reset();
+    }
+}
+
+void AsyncTask::RejectWithNull(NativeEngine& engine, NativeValue* error)
+{
+    if (deferred_) {
+        deferred_->Reject(error);
+        deferred_.reset();
+    }
+    if (callbackRef_) {
+        NativeValue* argv[] = {
+            error,
+            engine.CreateNull(),
         };
         engine.CallFunction(engine.CreateUndefined(), callbackRef_->Get(), argv, ArraySize(argv));
         callbackRef_.reset();
