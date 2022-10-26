@@ -1675,7 +1675,6 @@ void GetDataAbilityHelperAsyncCompleteCB(napi_env env, napi_status status, void 
 {
     HILOG_INFO("NAPI_GetDataAbilityHelper, main event thread complete.");
     DataAbilityHelperCB *dataAbilityHelperCB = static_cast<DataAbilityHelperCB *>(data);
-    std::unique_ptr<DataAbilityHelperCB> callbackPtr {dataAbilityHelperCB};
     napi_value uri = nullptr;
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
