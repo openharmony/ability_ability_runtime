@@ -1375,16 +1375,16 @@ bool CheckContinueFirstArgs(napi_env &env, const napi_value &value,
     napi_get_named_property(env, value, "missionId", &napiMissionId);
     napi_get_named_property(env, value, "wantParam", &napiWantParam);
     if (napiSrcDeviceId == nullptr || napiDstDeviceId == nullptr ||
-    napiMissionId == nullptr || napiWantParam == nullptr) {
+        napiMissionId == nullptr || napiWantParam == nullptr) {
         HILOG_ERROR("%{public}s, miss required parameters.", __func__);
         errInfo = "Parameter error. The number of \"ContinueMission\" must be 4";
         return false;
     }
     
     if (!CheckContinueDeviceInfoSrcDeviceId(env, napiSrcDeviceId, continueAbilityCB, errInfo) ||
-    !CheckContinueDeviceInfoDstDeviceId(env, napiDstDeviceId, continueAbilityCB, errInfo) ||
-    !CheckContinueDeviceInfoMissionId(env, napiMissionId, continueAbilityCB, errInfo) ||
-    !CheckContinueDeviceInfoWantParam(env, napiWantParam, continueAbilityCB, errInfo)) {
+        !CheckContinueDeviceInfoDstDeviceId(env, napiDstDeviceId, continueAbilityCB, errInfo) ||
+        !CheckContinueDeviceInfoMissionId(env, napiMissionId, continueAbilityCB, errInfo) ||
+        !CheckContinueDeviceInfoWantParam(env, napiWantParam, continueAbilityCB, errInfo)) {
         HILOG_ERROR("%{public}s, continueMission check ContinueDeviceInfo value failed.", __func__);
         return false;
     }
