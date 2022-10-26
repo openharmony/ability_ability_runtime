@@ -34,8 +34,8 @@ napi_value NAPI_StopSyncRemoteMissions(napi_env env, napi_callback_info info);
 napi_value NAPI_RegisterMissionListener(napi_env env, napi_callback_info info);
 napi_value NAPI_UnRegisterMissionListener(napi_env env, napi_callback_info info);
 napi_value NAPI_ContinueAbility(napi_env env, napi_callback_info info);
-napi_value WrapString(napi_env env, const std::string &deviceId, const std::string &paramName);
-napi_value WrapInt32(napi_env env, int32_t num, const std::string &paramName);
+napi_value WrapString(napi_env &env, const std::string &deviceId, const std::string &paramName);
+napi_value WrapInt32(napi_env &env, int32_t num, const std::string &paramName);
 
 class NAPIMissionContinue : public MissionContinueStub {
 public:
