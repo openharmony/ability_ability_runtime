@@ -260,7 +260,7 @@ bool ProcessSyncInput(napi_env &env, napi_callback_info info, bool isStart,
     return true;
 }
 
-void StartSyncRemoteMissionsAsyncWork(napi_env env, const napi_value resourceName,
+void StartSyncRemoteMissionsAsyncWork(napi_env &env, const napi_value resourceName,
     SyncRemoteMissionsContext* syncContext)
 {
     HILOG_INFO("%{public}s, called.", __func__);
@@ -333,7 +333,7 @@ napi_value NAPI_StartSyncRemoteMissions(napi_env env, napi_callback_info info)
     return result;
 }
 
-void StopSyncRemoteMissionsAsyncWork(napi_env env, napi_value resourceName,
+void StopSyncRemoteMissionsAsyncWork(napi_env &env, napi_value resourceName,
     SyncRemoteMissionsContext* syncContext)
 {
     HILOG_INFO("%{public}s, called.", __func__);
@@ -405,7 +405,7 @@ napi_value NAPI_StopSyncRemoteMissions(napi_env env, napi_callback_info info)
     return result;
 }
 
-RegisterMissionCB *CreateRegisterMissionCBCBInfo(napi_env env)
+RegisterMissionCB *CreateRegisterMissionCBCBInfo(napi_env &env)
 {
     HILOG_INFO("%{public}s called.", __func__);
     auto registerMissionCB = new (std::nothrow) RegisterMissionCB;
@@ -483,7 +483,7 @@ void RegisterMissionCallbackCompletedCB(napi_env env, napi_status status, void *
     HILOG_INFO("%{public}s end.", __func__);
 }
 
-void ReturnValueToApplication(napi_env env, napi_value *result, RegisterMissionCB *registerMissionCB)
+void ReturnValueToApplication(napi_env &env, napi_value *result, RegisterMissionCB *registerMissionCB)
 {
     if (registerMissionCB->callbackRef == nullptr) { // promise
         if (registerMissionCB->result == 0) {
@@ -548,7 +548,7 @@ bool CheckMissionCallbackProperty(napi_env &env, const napi_value &value, std::s
     return true;
 }
 
-bool SetCallbackReference(napi_env env, const napi_value &value,
+bool SetCallbackReference(napi_env &env, const napi_value &value,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -601,7 +601,7 @@ bool SetCallbackReference(napi_env env, const napi_value &value,
     return true;
 }
 
-bool CreateCallbackReference(napi_env env, const napi_value &value,
+bool CreateCallbackReference(napi_env &env, const napi_value &value,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -660,7 +660,7 @@ bool RegisterMissionWrapDeviceId(napi_env &env, napi_value &argc,
     return true;
 }
 
-napi_value RegisterMissionWrap(napi_env env, napi_callback_info info,
+napi_value RegisterMissionWrap(napi_env &env, napi_callback_info info,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -1039,7 +1039,7 @@ napi_value UnRegisterMissionPromise(napi_env env, RegisterMissionCB *registerMis
     return promise;
 }
 
-bool GetUnRegisterMissionDeviceId(napi_env env, const napi_value &value,
+bool GetUnRegisterMissionDeviceId(napi_env &env, const napi_value &value,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -1081,7 +1081,7 @@ bool GetUnRegisterMissionDeviceId(napi_env env, const napi_value &value,
     return true;
 }
 
-napi_value UnRegisterMissionWrap(napi_env env, napi_callback_info info,
+napi_value UnRegisterMissionWrap(napi_env &env, napi_callback_info info,
     RegisterMissionCB *registerMissionCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -1140,7 +1140,7 @@ napi_value NAPI_UnRegisterMissionListener(napi_env env, napi_callback_info info)
     return ret;
 }
 
-napi_value WrapString(napi_env env, const std::string &param, const std::string &paramName)
+napi_value WrapString(napi_env &env, const std::string &param, const std::string &paramName)
 {
     HILOG_INFO("%{public}s called.", __func__);
 
@@ -1155,7 +1155,7 @@ napi_value WrapString(napi_env env, const std::string &param, const std::string 
     return jsObject;
 }
 
-napi_value WrapInt32(napi_env env, int32_t num, const std::string &paramName)
+napi_value WrapInt32(napi_env &env, int32_t num, const std::string &paramName)
 {
     HILOG_INFO("%{public}s called.", __func__);
 
@@ -1170,7 +1170,7 @@ napi_value WrapInt32(napi_env env, int32_t num, const std::string &paramName)
     return jsObject;
 }
 
-ContinueAbilityCB *CreateContinueAbilityCBCBInfo(napi_env env)
+ContinueAbilityCB *CreateContinueAbilityCBCBInfo(napi_env &env)
 {
     HILOG_INFO("%{public}s called.", __func__);
     auto continueAbilityCB = new (std::nothrow) ContinueAbilityCB;
@@ -1273,7 +1273,7 @@ napi_value ContinueAbilityAsync(napi_env env, ContinueAbilityCB *continueAbility
     return result;
 }
 
-bool CheckContinueKeyExist(napi_env env, const napi_value &value)
+bool CheckContinueKeyExist(napi_env &env, const napi_value &value)
 {
     bool isSrcDeviceId = false;
     napi_has_named_property(env, value, "srcDeviceId", &isSrcDeviceId);
@@ -1350,7 +1350,7 @@ bool CheckContinueDeviceInfoWantParam(napi_env &env, napi_value &napiWantParam,
     return true;
 }
 
-bool CheckContinueFirstArgs(napi_env env, const napi_value &value,
+bool CheckContinueFirstArgs(napi_env &env, const napi_value &value,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -1393,7 +1393,7 @@ bool CheckContinueFirstArgs(napi_env env, const napi_value &value,
     return true;
 }
 
-bool CheckContinueCallback(napi_env env, const napi_value &value,
+bool CheckContinueCallback(napi_env &env, const napi_value &value,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -1429,7 +1429,7 @@ bool CheckContinueCallback(napi_env env, const napi_value &value,
     return true;
 }
 
-napi_value ContinueAbilityWrap(napi_env env, napi_callback_info info,
+napi_value ContinueAbilityWrap(napi_env &env, napi_callback_info info,
     ContinueAbilityCB *continueAbilityCB, std::string &errInfo)
 {
     HILOG_INFO("%{public}s called.", __func__);
