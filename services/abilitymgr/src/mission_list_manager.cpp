@@ -449,12 +449,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         info.missionInfo.label = targetRecord->GetLabel();
     }
 
-<<<<<<< Updated upstream
-    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
-        targetMission->SetSpecifiedFlag(abilityRequest.specifiedFlag);
-=======
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED && targetRecord) {
->>>>>>> Stashed changes
         targetRecord->SetSpecifiedFlag(abilityRequest.specifiedFlag);
     }
 
