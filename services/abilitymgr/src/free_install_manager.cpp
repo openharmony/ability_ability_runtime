@@ -291,7 +291,7 @@ int FreeInstallManager::FreeInstallAbilityFromRemote(const Want &want, const spt
         dmsFreeInstallCbs_.push_back(info);
     }
 
-    auto result = manager->StartFreeInstall(info.want, info.userId, info.requestCode, nullptr);
+    auto result = StartFreeInstall(info.want, info.userId, info.requestCode, nullptr);
     if (result != ERR_OK) {
         HILOG_ERROR("StartFreeInstall failed, errCode: %{public}d", result);
         NotifyDmsCallback(info.want, result);
