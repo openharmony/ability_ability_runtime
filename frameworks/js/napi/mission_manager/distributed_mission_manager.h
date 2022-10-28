@@ -131,8 +131,6 @@ struct SyncRemoteMissionsContext {
     napi_ref callbackRef;
 };
 
-static int32_t ErrorCodeReturn(int32_t code);
-static std::string ErrorMessageReturn(int32_t code);
 bool SetSyncRemoteMissionsContext(const napi_env &env, const napi_value &value,
     SyncRemoteMissionsContext* context, std::string &errInfo);
 bool ProcessSyncInput(napi_env &env, napi_callback_info info, bool isStart,
