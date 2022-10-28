@@ -561,30 +561,36 @@ int32_t JsWantAgent::GetTriggerInfo(NativeEngine &engine, NativeValue *param, Tr
     int32_t code = -1;
     NativeValue *jsCode = objectParam->GetProperty("code");
     if (!ConvertFromJsValue(engine, jsCode, code)) {
+        HILOG_ERROR("GetTriggerInfo convert code error!");
         return ERR_NOT_OK;
     }
 
-    std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
-    if(objectParam->HasProperty("want")) {
+    std::shared_ptr<AAFwk::Want> want = nullptr;
+    if (objectParam->HasProperty("want")) {
         NativeValue *jsWant = objectParam->GetProperty("want");
+        want = std::make_shared<AAFwk::Want>();
         if (!UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(jsWant), *want)) {
+            HILOG_ERROR("GetTriggerInfo convert want error!");
             return ERR_NOT_OK;
         }
     }
 
     std::string permission = "";
-    if(objectParam->HasProperty("permission")) {
+    if (objectParam->HasProperty("permission")) {
         NativeValue *jsPermission = objectParam->GetProperty("permission");
         if (!ConvertFromJsValue(engine, jsPermission, permission)) {
+            HILOG_ERROR("GetTriggerInfo convert permission error!");
             return ERR_NOT_OK;
         }
     }
 
-    std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>();
-    if(objectParam->HasProperty("extraInfo")) {
+    std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
+    if (objectParam->HasProperty("extraInfo")) {
         NativeValue *jsExtraInfo = objectParam->GetProperty("extraInfo");
+        extraInfo = std::make_shared<AAFwk::WantParams>();
         if (!UnwrapWantParams(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(jsExtraInfo),
             *extraInfo)) {
+            HILOG_ERROR("GetTriggerInfo convert extraInfo error!");
             return ERR_NOT_OK;
         }
     }
