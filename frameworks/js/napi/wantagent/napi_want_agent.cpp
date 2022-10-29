@@ -576,7 +576,6 @@ int32_t JsWantAgent::GetTriggerInfo(NativeEngine &engine, NativeValue *param, Tr
     }
 
     std::string permission = "";
-    NativeValue *jsPermission = objectParam->GetProperty("permission");
     if (objectParam->HasProperty("permission")) {
         NativeValue *jsPermission = objectParam->GetProperty("permission");
         if (!ConvertFromJsValue(engine, jsPermission, permission)) {
