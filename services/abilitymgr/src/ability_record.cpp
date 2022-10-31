@@ -107,6 +107,14 @@ Token::~Token()
 std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
 {
     CHECK_POINTER_AND_RETURN(token, nullptr);
+
+    std::string descriptor = Str16ToStr8(token->GetObjectDescriptor());
+    if (descriptor != "ohos.aafwk.AbilityToken") {
+        HILOG_ERROR("Input token is not an AbilityToken, token->GetObjectDescriptor(): %{public}s",
+            descriptor.c_str());
+        return nullptr;
+    }
+
     // Double check if token is valid
     sptr<IAbilityToken> theToken = iface_cast<IAbilityToken>(token);
     if (!theToken) {
@@ -712,17 +720,17 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
     resourceMgr->UpdateResConfig(*resConfig);
 
-    if (abilityInfo_.resourcePath.empty() && abilityInfo_.hapPath.empty()) {
-        HILOG_WARN("Invalid app resource.");
-        return nullptr;
-    }
-
     std::string loadPath;
     if (system::GetBoolParameter(AbilityRuntime::Constants::COMPRESS_PROPERTY, false) &&
         !abilityInfo_.hapPath.empty()) {
         loadPath = abilityInfo_.hapPath;
     } else {
         loadPath = abilityInfo_.resourcePath;
+    }
+
+    if (loadPath.empty()) {
+        HILOG_WARN("Invalid app resource.");
+        return nullptr;
     }
 
     if (!resourceMgr->AddResource(loadPath.c_str())) {

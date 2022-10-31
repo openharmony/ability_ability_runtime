@@ -1087,9 +1087,11 @@ bool AppRunningRecord::GetTheModuleInfoNeedToUpdated(const std::string bundleNam
     if (moduleInfoVectorIter == hapModules_.end() || moduleInfoVectorIter->second.empty()) {
         return result;
     }
-    auto findCondition = [](const std::shared_ptr<ModuleRunningRecord> &record) {
+    std::string moduleName = moduleName_;
+    auto findCondition = [moduleName](const std::shared_ptr<ModuleRunningRecord> &record) {
         if (record) {
-            return record->GetModuleRecordState() == ModuleRecordState::INITIALIZED_STATE;
+            return (moduleName.empty() || (moduleName == record->GetModuleName())) &&
+                (record->GetModuleRecordState() == ModuleRecordState::INITIALIZED_STATE);
         }
         return false;
     };

@@ -60,7 +60,8 @@ constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/libark_debugger.z.so";
 #endif
 
 constexpr char TIMER_TASK[] = "uv_timer_task";
-static constexpr char MERGE_ABC_PATH[] = "/data/storage/el1/bundle/entry/ets/modules.abc";
+constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
+constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 
 class ArkJsRuntime : public JsRuntime {
 public:
@@ -138,7 +139,16 @@ public:
                     return result;
                 }
             } else {
-                if (!runtimeExtractor->GetFileBuffer(MERGE_ABC_PATH, outStream)) {
+                std::string mergeAbcPath;
+                if (vm_ && !moduleName_.empty()) {
+                    mergeAbcPath = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
+                    panda::JSNApi::SetAssetPath(vm_, mergeAbcPath);
+                } else {
+                    HILOG_ERROR("vm is nullptr or moduleName is hole");
+                    return result;
+                }
+
+                if (!runtimeExtractor->GetFileBuffer(mergeAbcPath, outStream)) {
                     HILOG_ERROR("Get Module abc file failed");
                     return result;
                 }
@@ -275,7 +285,13 @@ private:
     bool Initialize(const Runtime::Options& options) override
     {
         if (preloaded_) {
-            panda::JSNApi::postFork(vm_);
+            panda::RuntimeOption postOption;
+            postOption.SetBundleName(options.bundleName);
+            if (!options.arkNativeFilePath.empty()) {
+                std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
+                postOption.SetAnDir(sandBoxAnFilePath);
+            }
+            panda::JSNApi::postFork(vm_, postOption);
             nativeEngine_->ReinitUVLoop();
         } else {
             panda::RuntimeOption pandaOption;
@@ -291,23 +307,16 @@ private:
             pandaOption.SetLogLevel(panda::RuntimeOption::LOG_LEVEL::INFO);
             pandaOption.SetLogBufPrint(PrintVmLog);
 
-            // Fix a problem that if vm will crash if preloaded
-            if (options.preload) {
-                pandaOption.SetEnableAsmInterpreter(false);
-            } else {
-                bool asmInterpreterEnabled = OHOS::system::GetBoolParameter("persist.ark.asminterpreter", true);
-                std::string asmOpcodeDisableRange = OHOS::system::GetParameter("persist.ark.asmopcodedisablerange", "");
-                pandaOption.SetEnableAsmInterpreter(asmInterpreterEnabled);
-                pandaOption.SetAsmOpcodeDisableRange(asmOpcodeDisableRange);
-            }
+            bool asmInterpreterEnabled = OHOS::system::GetBoolParameter("persist.ark.asminterpreter", true);
+            std::string asmOpcodeDisableRange = OHOS::system::GetParameter("persist.ark.asmopcodedisablerange", "");
+            pandaOption.SetEnableAsmInterpreter(asmInterpreterEnabled);
+            pandaOption.SetAsmOpcodeDisableRange(asmOpcodeDisableRange);
+            // aot related
             bool aotEnabled = OHOS::system::GetBoolParameter("persist.ark.aot", true);
             pandaOption.SetEnableAOT(aotEnabled);
             bool profileEnabled = OHOS::system::GetBoolParameter("persist.ark.profile", false);
             pandaOption.SetEnableProfile(profileEnabled);
-            std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
-            pandaOption.SetAnDir(sandBoxAnFilePath);
             pandaOption.SetProfileDir(SANDBOX_ARK_PROIFILE_PATH);
-            HILOG_DEBUG("JSRuntime::Initialize ArkNative file path = %{public}s", options.arkNativeFilePath.c_str());
             vm_ = panda::JSNApi::CreateJSVM(pandaOption);
             if (vm_ == nullptr) {
                 return false;
@@ -551,7 +560,7 @@ bool JsRuntime::Initialize(const Options& options)
             moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second);
         }
     }
-
+    bindSourceMaps_ = std::make_unique<ModSourceMap>(options.bundleCodeDir, options.isStageModel);
     if (!options.preload) {
         InitTimerModule(*nativeEngine_, *globalObj);
         InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion);
@@ -612,6 +621,13 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(
     HILOG_DEBUG("JsRuntime::LoadModule(%{public}s, %{private}s, %{private}s, %{public}s)",
         moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
     HandleScope handleScope(*this);
+
+    std::string path = moduleName;
+    auto pos = path.find("::");
+    if (pos != std::string::npos) {
+        path.erase(pos, path.size() - pos);
+        moduleName_ = path;
+    }
 
     NativeValue* classValue = nullptr;
 
@@ -689,7 +705,8 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
                 return result;
             }
         } else {
-            if (!runtimeExtractor->GetFileBuffer(MERGE_ABC_PATH, outStream)) {
+            std::string mergeAbcPath = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
+            if (!runtimeExtractor->GetFileBuffer(mergeAbcPath, outStream)) {
                 HILOG_ERROR("Get Module abc file failed");
                 return result;
             }
