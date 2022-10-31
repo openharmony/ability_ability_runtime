@@ -720,7 +720,7 @@ NativeValue* JsWantAgent::WrapWantAgent(NativeEngine &engine, const std::shared_
     NativeObject *nativeObject = reinterpret_cast<NativeObject*>(result->GetInterface(NativeObject::INTERFACE_ID));
     NativeFinalize nativeFinalize = [](NativeEngine* engine, void* data, void* hint) {};
 
-    nativeObject->SetNativePointer((void *)wantAgent.get(), nativeFinalize, nullptr);
+    nativeObject->SetNativePointer(reinterpret_cast<void*>(wantAgent.get()), nativeFinalize, nullptr);
     return result;
 }
 
@@ -757,9 +757,10 @@ NativeValue* JsWantAgent::OnGetWantAgent(NativeEngine &engine, NativeCallbackInf
         return RetErrMsg(engine, lastParam, ret);
     }
 
-    AsyncTask::CompleteCallback complete = [obj = this, parasobj = spParas](NativeEngine &engine,
+    AsyncTask::CompleteCallback complete = [weak = weak_from_this(), parasobj = spParas](NativeEngine &engine,
         AsyncTask &task, int32_t status) {
         HILOG_DEBUG("OnGetWantAgent AsyncTask is called");
+        auto self = weak.lock();
         std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>(parasobj->extraInfo);
         WantAgentInfo wantAgentInfo(parasobj->requestCode,
                                     static_cast<WantAgentConstant::OperationType>(parasobj->operationType),
@@ -773,7 +774,7 @@ NativeValue* JsWantAgent::OnGetWantAgent(NativeEngine &engine, NativeCallbackInf
         if (wantAgent == nullptr) {
             HILOG_INFO("GetWantAgent instance is nullptr...");
         }
-        task.Resolve(engine, obj->WrapWantAgent(engine, wantAgent));
+        task.Resolve(engine, self->WrapWantAgent(engine, wantAgent));
     };
 
     NativeValue *result = nullptr;
@@ -863,9 +864,10 @@ NativeValue* JsWantAgent::OnNapiGetWantAgent(NativeEngine &engine, NativeCallbac
         return engine.CreateUndefined();
     }
 
-    AsyncTask::CompleteCallback complete = [obj = this, parasobj = spParas](NativeEngine &engine,
+    AsyncTask::CompleteCallback complete = [weak = weak_from_this(), parasobj = spParas](NativeEngine &engine,
         AsyncTask &task, int32_t status) {
         HILOG_DEBUG("OnNapiGetWantAgent AsyncTask is called");
+        auto self = weak.lock();
         std::shared_ptr<AAFwk::WantParams> extraInfo = std::make_shared<AAFwk::WantParams>(parasobj->extraInfo);
         WantAgentInfo wantAgentInfo(parasobj->requestCode,
                                     static_cast<WantAgentConstant::OperationType>(parasobj->operationType),
@@ -879,7 +881,7 @@ NativeValue* JsWantAgent::OnNapiGetWantAgent(NativeEngine &engine, NativeCallbac
         if (wantAgent == nullptr) {
             HILOG_INFO("GetWantAgent instance is nullptr...");
         }
-        task.ResolveWithNoError(engine, obj->WrapWantAgent(engine, wantAgent));
+        task.ResolveWithNoError(engine, self->WrapWantAgent(engine, wantAgent));
     };
 
     NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;

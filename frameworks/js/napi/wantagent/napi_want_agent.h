@@ -74,7 +74,7 @@ struct WantAgentWantsParas {
     AAFwk::WantParams extraInfo = {};
 };
 
-class JsWantAgent final {
+class JsWantAgent : public std::enable_shared_from_this<JsWantAgent> {
 public:
     JsWantAgent() = default;
     ~JsWantAgent() = default;
