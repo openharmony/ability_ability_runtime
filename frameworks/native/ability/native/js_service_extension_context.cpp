@@ -201,7 +201,7 @@ private:
         return true;
     }
 
-    NativeValue* OnStartAbilityByCall(NativeEngine& engine, NativeCallbackInfo& info)
+    NativeValue* OnStartAbilityByCall(NativeEngine& engine, const NativeCallbackInfo& info)
     {
         HILOG_INFO("OnStartAbilityByCall is called.");
         if (info.argc < ARGC_ONE) {
@@ -216,12 +216,6 @@ private:
         }
 
         std::shared_ptr<StartAbilityByCallParameters> calls = std::make_shared<StartAbilityByCallParameters>();
-        if (calls == nullptr) {
-            HILOG_ERROR("calls create error");
-            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
-            return engine.CreateUndefined();
-        }
-
         NativeValue* retsult = nullptr;
         calls->callerCallBack = std::make_shared<CallerCallBack>();
         calls->callerCallBack->SetCallBack(GetCallBackDone(calls));
@@ -254,7 +248,7 @@ private:
         return retsult;
     }
 
-    bool CheckStartAbilityByCallInputParam(NativeEngine& engine, NativeCallbackInfo& info, AAFwk::Want& want)
+    bool CheckStartAbilityByCallInputParam(NativeEngine& engine, const NativeCallbackInfo& info, AAFwk::Want& want)
     {
         if (!CheckWantParam(engine, info.argv[INDEX_ZERO], want)) {
             return false;
@@ -770,7 +764,7 @@ private:
         return result;
     }
 
-    NativeValue* OnStopExtensionAbilityWithAccount(NativeEngine& engine, NativeCallbackInfo& info)
+    NativeValue* OnStopExtensionAbilityWithAccount(NativeEngine& engine, const NativeCallbackInfo& info)
     {
         HILOG_INFO("OnStopExtensionAbilityWithAccount is called.");
         if (info.argc < ARGC_TWO) {
