@@ -109,13 +109,16 @@ const std::string BUNDLE_NAME_SCREENSHOT = "com.huawei.ohos.screenshot";
 const std::string BUNDLE_NAME_SERVICE_TEST = "com.amsst.stserviceabilityclient";
 const std::string BUNDLE_NAME_SINGLE_TEST = "com.singleusermodel.actssingleusertest";
 const std::string BUNDLE_NAME_FREEINSTALL_TEST = "com.example.qianyiyingyong.hmservice";
+const std::string BUNDLE_NAME_FREEINSTALL_SEC_TEST = "com.open.harmony.startAbility";
 const std::string BUNDLE_NAME_APP_SELECT_TEST = "com.example.appselectortest";
 const std::string BUNDLE_NAME_APP_SELECTPC_TEST = "com.example.appselectorpctest";
+const std::string BUNDLE_NAME_USERS_SYSTEM_TEST = "com.acts.actsinterfacemultiuserstest";
 const std::string BUNDLE_NAME_SINGLE_USER_TEST = "com.singleusermodel.actssingleusertest";
 const std::string BUNDLE_NAME_MUTIUSER_TEST = "com.acts.actsinterfacemultiusersextensiontest";
 const std::string BUNDLE_NAME_PER_THRID_TEST = "com.example.actsabilitypermissionthirdtest";
 const std::string BUNDLE_NAME_SERVICE_SERVER_TEST = "com.amsst.stserviceabilityserver";
 const std::string BUNDLE_NAME_SERVICE_SERVER2_TEST = "com.amsst.stserviceabilityserversecond";
+const std::string BUNDLE_NAME_APPSELECT_SERVER_TEST = "bserviceabilityrelyhap";
 
 // White list
 const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_DEVICE_TEST,
@@ -128,12 +131,15 @@ const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_DEVI
                                                                 BUNDLE_NAME_SERVICE_TEST,
                                                                 BUNDLE_NAME_SINGLE_TEST,
                                                                 BUNDLE_NAME_FREEINSTALL_TEST,
+                                                                BUNDLE_NAME_FREEINSTALL_SEC_TEST,
                                                                 BUNDLE_NAME_APP_SELECT_TEST,
                                                                 BUNDLE_NAME_APP_SELECTPC_TEST,
+                                                                BUNDLE_NAME_USERS_SYSTEM_TEST,
                                                                 BUNDLE_NAME_SINGLE_USER_TEST,
                                                                 BUNDLE_NAME_MUTIUSER_TEST,
                                                                 BUNDLE_NAME_PER_THRID_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER_TEST,
+                                                                BUNDLE_NAME_APPSELECT_SERVER_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER2_TEST };
 const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_SETTINGSDATA,
                                                                     BUNDLE_NAME_MESSAGE_DATA,
@@ -338,7 +344,8 @@ bool AbilityManagerService::Init()
 
     SubscribeBackgroundTask();
     DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
-    InitStartupFlag();
+    auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
+    handler_->PostTask(initStartupFlagTask, "InitStartupFlag");
 
     interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
@@ -1662,7 +1669,13 @@ int AbilityManagerService::DisconnectLocalAbility(const sptr<IAbilityConnection>
 {
     HILOG_INFO("Disconnect local ability begin.");
     CHECK_POINTER_AND_RETURN(connectManager_, ERR_NO_INIT);
-    return connectManager_->DisconnectAbilityLocked(connect);
+    if (connectManager_->DisconnectAbilityLocked(connect) == ERR_OK) {
+        return ERR_OK;
+    }
+    // If current connectManager_ does not exist connect, then try connectManagerU0
+    auto connectManagerU0 = GetConnectManagerByUserId(U0_USER_ID);
+    CHECK_POINTER_AND_RETURN(connectManagerU0, ERR_NO_INIT);
+    return connectManagerU0->DisconnectAbilityLocked(connect);
 }
 
 int AbilityManagerService::DisconnectRemoteAbility(const sptr<IRemoteObject> &connect)
@@ -5285,7 +5298,11 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return ERR_OK;
     }
+
     auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
+    if (extensionType == AppExecFwk::ExtensionAbilityType::WINDOW) {
+        return ERR_OK;
+    }
     const std::string fileAccessPermission = "ohos.permission.FILE_ACCESS_MANAGER";
     if (extensionType == AppExecFwk::ExtensionAbilityType::FILEACCESS_EXTENSION &&
         AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(fileAccessPermission)) {
