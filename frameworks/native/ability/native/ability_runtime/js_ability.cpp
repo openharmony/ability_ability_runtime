@@ -409,9 +409,8 @@ void JsAbility::OnForeground(const Want &want)
 void JsAbility::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    Ability::OnBackground();
-
     CallObjectMethod("onBackground");
+    Ability::OnBackground();
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
