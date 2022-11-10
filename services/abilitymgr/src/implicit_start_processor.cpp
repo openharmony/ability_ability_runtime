@@ -90,9 +90,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     }
 
     HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose.");
-    Want want = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos);
-    want.SetType(request.want.GetType());
-    want.SetParam(URI, request.want.GetStringParam(URI));
+    Want want = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want);
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     return abilityMgr->StartAbility(want);
 }
