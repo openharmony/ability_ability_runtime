@@ -3203,7 +3203,6 @@ bool NapiJsContext::DataInit(NativeEngine &engine)
     return true;
 }
 
-
 NativeValue* NapiJsContext::OnRequestPermissionsFromUser(NativeEngine &engine, NativeCallbackInfo &info)
 {
     HILOG_DEBUG("called");
