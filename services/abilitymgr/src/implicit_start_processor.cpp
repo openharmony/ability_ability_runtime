@@ -24,7 +24,6 @@
 namespace OHOS {
 namespace AAFwk {
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
-const std::string URI = "uri";
 
 const std::vector<std::string> ImplicitStartProcessor::blackList = {
     std::vector<std::string>::value_type(BLACK_ACTION_SELECT_DATA),
