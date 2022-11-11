@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_ABILITY_UTIL_H
 
 #include <string>
+#include <unordered_set>
 
 #include "ability_config.h"
 #include "ability_manager_errors.h"
