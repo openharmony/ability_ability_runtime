@@ -17,7 +17,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-ErrCode StaticSubscriberProxy::OnReceiveEvent(CommonEventData* inData)
+ErrCode StaticSubscriberProxy::OnReceiveEvent(CommonEventData* data)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -27,7 +27,7 @@ ErrCode StaticSubscriberProxy::OnReceiveEvent(CommonEventData* inData)
         return ERR_INVALID_VALUE;
     }
 
-    data.WriteParcelable(inData);
+    data.WriteParcelable(data);
 
     int32_t st = Remote()->SendRequest(COMMAND_ON_RECEIVE_EVENT, data, reply, option);
     if (st != ERR_NONE) {
