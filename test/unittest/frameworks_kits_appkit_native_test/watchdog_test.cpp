@@ -101,7 +101,7 @@ HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_IsReportEvent_0002, Function | Medium
  */
 HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0001, Function | MediumTest | Level3)
 {
-    // be ready for reportEvent
+    // be ready for ReportEvent
     watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::
         system_clock::now().time_since_epoch()).count() - TEST_INTERVAL_TIME;
     std::shared_ptr<ApplicationInfo> application = std::make_shared<ApplicationInfo>();
@@ -110,7 +110,7 @@ HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0001, Function | MediumTe
 
     watchdog_->isSixSecondEvent_.store(true);
 
-    watchdog_->reportEvent();
+    watchdog_->ReportEvent();
     EXPECT_TRUE(1);
 }
 
@@ -122,7 +122,7 @@ HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0001, Function | MediumTe
  */
 HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0002, Function | MediumTest | Level3)
 {
-    // be ready for reportEvent
+    // be ready for ReportEvent
     watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::
         system_clock::now().time_since_epoch()).count() - TEST_INTERVAL_TIME;
     std::shared_ptr<ApplicationInfo> application = std::make_shared<ApplicationInfo>();
@@ -131,7 +131,7 @@ HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0002, Function | MediumTe
 
     watchdog_->isSixSecondEvent_.store(false);
 
-    watchdog_->reportEvent();
+    watchdog_->ReportEvent();
     EXPECT_TRUE(1);
 }
 }  // namespace AppExecFwk
