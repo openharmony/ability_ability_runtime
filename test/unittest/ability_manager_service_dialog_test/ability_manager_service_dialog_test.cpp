@@ -85,5 +85,5 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0100, TestSize.Lev
     EXPECT_EQ(ret, ERR_IMPLICIT_START_ABILITY_FAIL);
     HILOG_INFO("AbilityMgrServiceDialog_0100 end");
 }
-}  // namespace AppExecFwk
+}  // namespace AAFwk
 }  // namespace OHOS
