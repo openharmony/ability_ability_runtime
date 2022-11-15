@@ -169,6 +169,7 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
         aObj["icon"] = std::to_string(aInfo.iconId);
         aObj["bundle"] = aInfo.bundleName;
         aObj["ability"] = aInfo.abilityName;
+        aObj["module"] = aInfo.moduleName;
         hapListObj.emplace_back(aObj);
     }
     jsonObject["hapList"] = hapListObj;
