@@ -150,7 +150,7 @@ public:
      *
      * @param level Indicates the memory trim level, which shows the current memory usage status.
      */
-    void ScheduleMemoryLevel(int level) override;
+    void ScheduleMemoryLevel(const int level) override;
 
     /**
      *
@@ -439,7 +439,7 @@ private:
 
     bool Timer();
     bool WaitForDuration(uint32_t duration);
-    void reportEvent();
+    void ReportEvent();
     bool IsStopWatchdog();
 
     class MainHandler : public EventHandler {
