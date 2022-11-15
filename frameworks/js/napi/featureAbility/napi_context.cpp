@@ -69,7 +69,7 @@ static Ability* GetJSAbilityObject(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
     return ability;
 }
 
@@ -148,11 +148,11 @@ napi_value SetShowOnLockScreenPromise(napi_env env, ShowOnLockScreenCB *cbData)
         HILOG_ERROR("%{public}s, param == nullptr.", __func__);
         return nullptr;
     }
-    napi_value resourceName = 0;
+    napi_value resourceName = nullptr;
     napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName);
 
     napi_deferred deferred;
-    napi_value promise = 0;
+    napi_value promise = nullptr;
     napi_create_promise(env, &deferred, &promise);
     cbData->cbBase.deferred = deferred;
 
@@ -195,7 +195,7 @@ napi_value NAPI_SetDisplayOrientationWrap(napi_env env, napi_callback_info info,
     HILOG_DEBUG("%{public}s called.", __func__);
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
-    napi_value jsthis = 0;
+    napi_value jsthis = nullptr;
     void *data = nullptr;
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
@@ -363,10 +363,10 @@ napi_value SetWakeUpScreenPromise(napi_env env, SetWakeUpScreenCB *cbData)
         HILOG_ERROR("%{public}s, param == nullptr.", __func__);
         return nullptr;
     }
-    napi_value resourceName = 0;
+    napi_value resourceName = nullptr;
     napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName);
     napi_deferred deferred;
-    napi_value promise = 0;
+    napi_value promise = nullptr;
     napi_create_promise(env, &deferred, &promise);
     cbData->cbBase.deferred = deferred;
 
@@ -435,7 +435,7 @@ static napi_value SetWakeUpScreenWrap(napi_env env, napi_callback_info info, Set
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     cbData->cbBase.ability = ability;
     napi_value ret = nullptr;
@@ -557,7 +557,7 @@ napi_value NAPI_VerifySelfPermissionWrap(napi_env env, napi_callback_info info, 
     HILOG_INFO("%{public}s called.", __func__);
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
-    napi_value jsthis = 0;
+    napi_value jsthis = nullptr;
     void *data = nullptr;
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
@@ -675,10 +675,10 @@ void RequestPermissionsFromUserCompleteAsyncCallbackWork(napi_env env, napi_stat
     }
 
     if (asyncCallbackInfo->error_code != NAPI_ERR_NO_ERROR) {
-        napi_value callback = 0;
-        napi_value undefined = 0;
+        napi_value callback = nullptr;
+        napi_value undefined = nullptr;
         napi_get_undefined(env, &undefined);
-        napi_value callResult = 0;
+        napi_value callResult = nullptr;
         napi_value revParam[ARGS_TWO] = {nullptr};
 
         revParam[PARAM0] = GetCallbackErrorValue(env, asyncCallbackInfo->error_code);
@@ -704,7 +704,7 @@ napi_value NAPI_RequestPermissionsFromUserWrap(
     HILOG_DEBUG("%{public}s called.", __func__);
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
-    napi_value jsthis = 0;
+    napi_value jsthis = nullptr;
     void *data = nullptr;
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
@@ -724,12 +724,12 @@ napi_value NAPI_RequestPermissionsFromUserWrap(
         return ExecuteAsyncCallbackWork(env, asyncCallbackInfo, &asyncParamEx);
     } else {
         HILOG_DEBUG("%{public}s called. promise.", __func__);
-        napi_deferred deferred = 0;
-        napi_value promise = 0;
+        napi_deferred deferred = nullptr;
+        napi_value promise = nullptr;
         NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
         asyncCallbackInfo->cbInfo.deferred = deferred;
 
-        napi_value resourceName = 0;
+        napi_value resourceName = nullptr;
         NAPI_CALL(env, napi_create_string_latin1(env, "NAPI_RequestPermissionsFromUserPromise",
             NAPI_AUTO_LENGTH, &resourceName));
         NAPI_CALL(env,
@@ -1006,7 +1006,7 @@ napi_value NAPI_VerifyPermissionWrap(napi_env env, napi_callback_info info, Asyn
     HILOG_INFO("%{public}s called.", __func__);
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
-    napi_value jsthis = 0;
+    napi_value jsthis = nullptr;
     void *data = nullptr;
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
@@ -1220,7 +1220,7 @@ AppInfoCB *CreateAppInfoCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     AppInfoCB *appInfoCB = new (std::nothrow) AppInfoCB;
     if (appInfoCB == nullptr) {
@@ -1265,7 +1265,7 @@ napi_value NAPI_GetBundleNameWrap(napi_env env, napi_callback_info info, AsyncJS
     HILOG_INFO("%{public}s called", __func__);
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
-    napi_value jsthis = 0;
+    napi_value jsthis = nullptr;
     void *data = nullptr;
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
@@ -1488,7 +1488,7 @@ ProcessInfoCB *CreateProcessInfoCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     ProcessInfoCB *processInfoCB = new (std::nothrow) ProcessInfoCB;
     if (processInfoCB == nullptr) {
@@ -1514,7 +1514,7 @@ ElementNameCB *CreateElementNameCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     ElementNameCB *elementNameCB = new (std::nothrow) ElementNameCB;
     if (elementNameCB == nullptr) {
@@ -1530,7 +1530,7 @@ ElementNameCB *CreateElementNameCBInfo(napi_env env)
     return elementNameCB;
 }
 
-napi_value WrapElementName(napi_env env, ElementNameCB *elementNameCB)
+napi_value WrapElementName(napi_env env, const ElementNameCB *elementNameCB)
 {
     HILOG_INFO("%{public}s, called.", __func__);
     if (elementNameCB == nullptr) {
@@ -1733,7 +1733,7 @@ ProcessNameCB *CreateProcessNameCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     ProcessNameCB *processNameCB = new (std::nothrow) ProcessNameCB;
     if (processNameCB == nullptr) {
@@ -1769,7 +1769,7 @@ void GetProcessNameExecuteCB(napi_env env, void *data)
     HILOG_INFO("NAPI_GetProcessName, worker pool thread execute end.");
 }
 
-napi_value WrapProcessName(napi_env env, ProcessNameCB *processNameCB)
+napi_value WrapProcessName(napi_env env, const ProcessNameCB *processNameCB)
 {
     HILOG_INFO("%{public}s, called.", __func__);
     if (processNameCB == nullptr) {
@@ -1924,7 +1924,7 @@ CallingBundleCB *CreateCallingBundleCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     CallingBundleCB *callingBundleCB = new (std::nothrow) CallingBundleCB;
     if (callingBundleCB == nullptr) {
@@ -1960,7 +1960,7 @@ void GetCallingBundleExecuteCB(napi_env env, void *data)
     HILOG_INFO("NAPI_GetCallingBundle, worker pool thread execute end.");
 }
 
-napi_value WrapCallingBundle(napi_env env, CallingBundleCB *callingBundleCB)
+napi_value WrapCallingBundle(napi_env env, const CallingBundleCB *callingBundleCB)
 {
     HILOG_INFO("%{public}s, called.", __func__);
     if (callingBundleCB == nullptr) {
@@ -2116,7 +2116,7 @@ GetOrCreateLocalDirCB *CreateGetOrCreateLocalDirCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     GetOrCreateLocalDirCB *getOrCreateLocalDirCB = new (std::nothrow) GetOrCreateLocalDirCB;
     if (getOrCreateLocalDirCB == nullptr) {
@@ -2159,7 +2159,7 @@ void GetOrCreateLocalDirExecuteCB(napi_env env, void *data)
     HILOG_INFO("NAPI_GetOrCreateLocalDir, worker pool thread execute end.");
 }
 
-napi_value WrapGetOrCreateLocalDir(napi_env env, GetOrCreateLocalDirCB *getOrCreateLocalDirCB)
+napi_value WrapGetOrCreateLocalDir(napi_env env, const GetOrCreateLocalDirCB *getOrCreateLocalDirCB)
 {
     HILOG_INFO("%{public}s, called.", __func__);
     if (getOrCreateLocalDirCB == nullptr) {
@@ -2466,7 +2466,7 @@ DatabaseDirCB *CreateGetDatabaseDirCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     DatabaseDirCB *getDatabaseDirCB = new (std::nothrow) DatabaseDirCB;
     if (getDatabaseDirCB == nullptr) {
@@ -2564,7 +2564,7 @@ PreferencesDirCB *CreateGetPreferencesDirCBInfo(napi_env env)
     NAPI_CALL(env, napi_get_named_property(env, global, "ability", &abilityObj));
 
     Ability *ability = nullptr;
-    NAPI_CALL(env, napi_get_value_external(env, abilityObj, (void **)&ability));
+    NAPI_CALL(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability)));
 
     PreferencesDirCB *getPreferencesDirCB = new (std::nothrow) PreferencesDirCB;
     if (getPreferencesDirCB == nullptr) {
@@ -3180,19 +3180,19 @@ NativeValue* NapiJsContext::JsGetExternalCacheDir(NativeEngine *engine, NativeCa
 bool NapiJsContext::DataInit(NativeEngine &engine)
 {
     HILOG_DEBUG("called");
-    napi_value global = 0;
-    napi_value abilityObj = 0;
+    napi_value global = nullptr;
+    napi_value abilityObj = nullptr;
     auto env = reinterpret_cast<napi_env>(&engine);
     HILOG_INFO("Get Ability to start");
     NAPI_CALL_BASE(env, napi_get_global(env, &global), false);
     NAPI_CALL_BASE(env, napi_get_named_property(env, global, "ability", &abilityObj), false);
-    NAPI_CALL_BASE(env, napi_get_value_external(env, abilityObj, (void **)&ability_), false);
+    NAPI_CALL_BASE(env, napi_get_value_external(env, abilityObj, reinterpret_cast<void **>(&ability_)), false);
     HILOG_INFO("Get Ability to done");
 
     return true;
 }
 
-void NapiJsContext::JsGetSelfPermissionsState(PermissionRequestTask &&task, 
+void NapiJsContext::JsGetSelfPermissionsState(PermissionRequestTask &&task,
     const std::vector<std::string> &permissionList, std::vector<int> &permissionsState)
 {
     HILOG_DEBUG("%{public}s called", __func__);
@@ -3204,7 +3204,7 @@ void NapiJsContext::JsGetSelfPermissionsState(PermissionRequestTask &&task,
         permState.state = -1;
         permList.emplace_back(permState);
     }
-    HILOG_DEBUG("permList size: %{public}zu, permissions size: %{public}zu.", 
+    HILOG_DEBUG("permList size: %{public}zu, permissions size: %{public}zu.",
         permList.size(), permissionList.size());
 
     auto ret = AccessTokenKit::GetSelfPermissionsState(permList);
@@ -3219,7 +3219,7 @@ void NapiJsContext::JsGetSelfPermissionsState(PermissionRequestTask &&task,
         permissionsState.emplace_back(permState.state);
     }
     HILOG_DEBUG("permissions size: %{public}zu. permissionsState size: %{public}zu",
-         permissionList.size(), permissionsState.size());
+        permissionList.size(), permissionsState.size());
 
     if (ret != TypePermissionOper::DYNAMIC_OPER) {
         HILOG_DEBUG("No dynamic popup required.");
@@ -3698,14 +3698,20 @@ NativeValue* NapiJsContext::OnSetDisplayOrientation(NativeEngine &engine, Native
         HILOG_ERROR("input params int error");
         return engine.CreateUndefined();
     }
-    auto complete = [obj = this, orientation]
+
+    int32_t maxRange = 3;
+    if (orientation < 0 || orientation > maxRange) {
+        HILOG_ERROR("wrong parameter orientation : %{public}d", orientation);
+        return engine.CreateNull();
+    }
+    auto complete = [obj = this, orientationData = orientation]
         (NativeEngine &engine, AsyncTask &task, int32_t status) {
         if (obj->ability_ == nullptr) {
             task.Reject(engine,
                 CreateJsError(engine, static_cast<int32_t>(NAPI_ERR_ACE_ABILITY), "get ability error"));
             return;
         }
-        obj->ability_->SetDisplayOrientation(orientation);
+        obj->ability_->SetDisplayOrientation(orientationData);
         task.Resolve(engine, CreateJsValue(engine, 1));
     };
 

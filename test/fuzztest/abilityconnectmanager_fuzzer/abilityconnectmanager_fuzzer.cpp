@@ -32,6 +32,7 @@ namespace OHOS {
 namespace {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr uint8_t ENABLE = 2;
+constexpr size_t U32_AT_SIZE = 4;
 class AbilityConnectCallback : public AbilityConnectionStub {
 public:
     AbilityConnectCallback() = default;
@@ -50,7 +51,8 @@ uint32_t GetU32Data(const char* ptr)
     return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
 }
 
-std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord() {
+std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord()
+{
     sptr<Token> token = nullptr;
     AbilityRequest abilityRequest;
     abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
@@ -127,7 +129,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityConnectManager->StartRootLauncher(abilityRecord);
     abilityConnectManager->HandleStopTimeoutTask(abilityRecord);
     AbilityConnectManager::ConnectListType connectlist;
-    abilityConnectManager->HandleDisconnectTask(connectlist);
     abilityConnectManager->HandleTerminateDisconnectTask(connectlist);
     abilityConnectManager->DispatchInactive(abilityRecord, intParam);
     abilityConnectManager->DispatchTerminate(abilityRecord);
@@ -173,8 +174,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     /* Validate the length of size */
-    if (size == 0 || size > OHOS::FOO_MAX_LEN) {
-        std::cout << "invalid size" << std::endl;
+    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return 0;
     }
 

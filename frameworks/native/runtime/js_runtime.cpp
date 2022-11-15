@@ -15,13 +15,14 @@
 
 #include "js_runtime.h"
 
-#include <atomic>
 #include <cerrno>
 #include <climits>
 #include <cstdlib>
+#include <regex>
+
+#include <atomic>
 #include <sys/epoll.h>
 #include <unistd.h>
-#include <regex>
 
 #include "ability_constants.h"
 #include "connect_server_manager.h"
@@ -88,7 +89,7 @@ public:
     void StartDebugMode(bool needBreakPoint) override
     {
         if (vm_ == nullptr) {
-            HILOG_ERROR("virtual machine does not exist");
+            HILOG_ERROR("Virtual machine does not exist");
             return;
         }
 
@@ -293,6 +294,7 @@ private:
             }
             panda::JSNApi::postFork(vm_, postOption);
             nativeEngine_->ReinitUVLoop();
+            panda::JSNApi::SetLoop(vm_, nativeEngine_->GetUVLoop());
         } else {
             panda::RuntimeOption pandaOption;
             int arkProperties = OHOS::system::GetIntParameter<int>("persist.ark.properties", -1);

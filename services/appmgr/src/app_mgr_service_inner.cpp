@@ -1640,18 +1640,38 @@ void AppMgrServiceInner::GetRunningProcessInfoByToken(
     const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info)
 {
     HILOG_INFO("%{public}s called", __func__);
+    if (!CheckGetRunningInfoPermission()) {
+        return;
+    }
+
+    appRunningManager_->GetRunningProcessInfoByToken(token, info);
+}
+
+void AppMgrServiceInner::GetRunningProcessInfoByAccessTokenID(
+    const uint32_t accessTokenId, AppExecFwk::RunningProcessInfo &info) const
+{
+    HILOG_INFO("%{public}s called", __func__);
+    if (!CheckGetRunningInfoPermission()) {
+        return;
+    }
+
+    appRunningManager_->GetRunningProcessInfoByAccessTokenID(accessTokenId, info);
+}
+
+bool AppMgrServiceInner::CheckGetRunningInfoPermission() const
+{
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is nullptr");
-        return;
+        return false;
     }
 
     auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
     if (!isPerm) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
-        return;
+        return false;
     }
 
-    appRunningManager_->GetRunningProcessInfoByToken(token, info);
+    return true;
 }
 
 void AppMgrServiceInner::LoadResidentProcess(const std::vector<AppExecFwk::BundleInfo> &infos)
@@ -2367,7 +2387,8 @@ int AppMgrServiceInner::GetAbilityRecordsByProcessID(const int pid, std::vector<
     return ERR_OK;
 }
 
-int AppMgrServiceInner::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application)
+int AppMgrServiceInner::GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application,
+    bool &debug)
 {
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
@@ -2387,6 +2408,7 @@ int AppMgrServiceInner::GetApplicationInfoByProcessID(const int pid, AppExecFwk:
         return ERR_NO_INIT;
     }
     application = *info;
+    debug = appRecord->IsDebugApp();
     return ERR_OK;
 }
 
