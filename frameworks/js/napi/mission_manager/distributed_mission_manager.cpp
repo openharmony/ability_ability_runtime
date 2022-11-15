@@ -232,7 +232,7 @@ void StartSyncRemoteMissionsAsyncWork(napi_env env, const napi_value resourceNam
         [](napi_env env, napi_status status, void* data) {
             SyncRemoteMissionsContext* syncContext = (SyncRemoteMissionsContext*)data;
             // set result
-            napi_value result[2] = { 0 };
+            napi_value result[2] = { nullptr };
             napi_get_undefined(env, &result[1]);
             if (syncContext->result == 0) {
                 napi_get_undefined(env, &result[0]);
@@ -303,7 +303,7 @@ void StopSyncRemoteMissionsAsyncWork(napi_env env, napi_value resourceName,
         [](napi_env env, napi_status status, void* data) {
             SyncRemoteMissionsContext* syncContext = (SyncRemoteMissionsContext*)data;
             // set result
-            napi_value result[2] = { 0 };
+            napi_value result[2] = { nullptr };
             napi_get_undefined(env, &result[1]);
             if (syncContext->result == 0) {
                 napi_get_undefined(env, &result[0]);
@@ -424,7 +424,7 @@ void RegisterMissionCallbackCompletedCB(napi_env env, napi_status status, void *
     HILOG_INFO("%{public}s called.", __func__);
     auto registerMissionCB = static_cast<RegisterMissionCB *>(data);
     // set result
-    napi_value result[2] = { 0 };
+    napi_value result[2] = { nullptr };
     napi_get_undefined(env, &result[1]);
     if (registerMissionCB->result == 0) {
         napi_get_undefined(env, &result[0]);
@@ -765,7 +765,7 @@ void UvWorkNotifySnapshot(uv_work_t *work, int status)
         delete work;
         return;
     }
-    napi_value result[2] = {0};
+    napi_value result[2] = {nullptr};
     result[0] =
         WrapString(registerMissionCB->cbBase.cbInfo.env, registerMissionCB->deviceId.c_str(), "deviceId");
     result[1] =
@@ -836,7 +836,7 @@ void UvWorkNotifyNetDisconnect(uv_work_t *work, int status)
         delete work;
         return;
     }
-    napi_value result[2] = {0};
+    napi_value result[2] = {nullptr};
     result[0] =
         WrapString(registerMissionCB->cbBase.cbInfo.env, registerMissionCB->deviceId.c_str(), "deviceId");
     HILOG_INFO("UvWorkNotifyNetDisconnect, state = %{public}d", registerMissionCB->state);
@@ -919,7 +919,7 @@ void UnRegisterMissionPromiseCompletedCB(napi_env env, napi_status status, void 
     HILOG_INFO("%{public}s called.", __func__);
     auto registerMissionCB = (RegisterMissionCB*)data;
     // set result
-    napi_value result[2] = { 0 };
+    napi_value result[2] = { nullptr };
     napi_get_undefined(env, &result[1]);
     if (registerMissionCB->result == 0) {
         napi_get_undefined(env, &result[0]);
@@ -1133,7 +1133,7 @@ void ContinueAbilityCallbackCompletedCB(napi_env env, napi_status status, void *
     HILOG_INFO("%{public}s called.", __func__);
     auto continueAbilityCB = static_cast<ContinueAbilityCB *>(data);
     // set result
-    napi_value result[2] = { 0 };
+    napi_value result[2] = { nullptr };
     napi_get_undefined(env, &result[1]);
     if (continueAbilityCB->result == 0) {
         napi_get_undefined(env, &result[0]);
@@ -1461,8 +1461,8 @@ static napi_module missionModule = {
     .nm_filename = nullptr,
     .nm_register_func = DistributedMissionManagerExport,
     .nm_modname = "distributedMissionManager",
-    .nm_priv = ((void*)0),
-    .reserved = {0}
+    .nm_priv = ((void*)nullptr),
+    .reserved = {nullptr}
 };
 
 extern "C" __attribute__((constructor)) void AbilityRegister()
