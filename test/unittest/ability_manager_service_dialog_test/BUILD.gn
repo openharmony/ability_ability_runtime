@@ -21,9 +21,7 @@ ohos_unittest("ability_manager_service_dialog_test") {
 
   include_dirs = []
 
-  sources = [
-    "ability_manager_service_dialog_test.cpp",
-  ]
+  sources = [ "ability_manager_service_dialog_test.cpp" ]
 
   configs = [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
