@@ -43,7 +43,7 @@ void AbilityMgrServiceDialogTest::SetUpTestCase(void) {}
 
 void AbilityMgrServiceDialogTest::TearDownTestCase(void) {}
 
-void AbilityMgrServiceDialogTest::SetUp() 
+void AbilityMgrServiceDialogTest::SetUp()
 {
     int testCode = 123;
     abilityRequest_.requestCode = testCode;
