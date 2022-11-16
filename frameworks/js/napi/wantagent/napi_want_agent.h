@@ -51,13 +51,13 @@ const uint8_t NUMBER_OF_PARAMETERS_NINE = 9;
 class TriggerCompleteCallBack;
 
 struct CallbackInfo {
-    std::shared_ptr<WantAgent> wantAgent = nullptr;
+    WantAgent *wantAgent = nullptr;
     NativeEngine *engine = nullptr;
     std::unique_ptr<NativeReference> nativeRef = nullptr;
 };
 
 struct TriggerReceiveDataWorker {
-    std::shared_ptr<WantAgent> wantAgent;
+    WantAgent *wantAgent;
     AAFwk::Want want;
     int resultCode;
     std::string resultData;
@@ -91,7 +91,7 @@ public:
     static NativeValue* NapiTrigger(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* NapiGetWantAgent(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* NapiGetOperationType(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue* WrapWantAgent(NativeEngine &engine, const std::shared_ptr<WantAgent> &wantAgent);
+    static NativeValue* WrapWantAgent(NativeEngine &engine, WantAgent *wantAgent);
     static void UnwrapWantAgent(NativeEngine &engine, NativeValue *jsParam, void** result);
 
 private:
@@ -123,7 +123,7 @@ public:
     void OnSendFinished(const AAFwk::Want &want, int resultCode, const std::string &resultData,
         const AAFwk::WantParams &resultExtras) override;
     void SetCallbackInfo(NativeEngine &engine, NativeReference *ref);
-    void SetWantAgentInstance(const std::shared_ptr<WantAgent> &wantAgent);
+    void SetWantAgentInstance(WantAgent *wantAgent);
 
 private:
     CallbackInfo triggerCompleteInfo_;

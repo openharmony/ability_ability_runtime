@@ -59,7 +59,7 @@ void TriggerCompleteCallBack::SetCallbackInfo(NativeEngine &engine, NativeRefere
     triggerCompleteInfo_.nativeRef.reset(ref);
 }
 
-void TriggerCompleteCallBack::SetWantAgentInstance(const std::shared_ptr<WantAgent> &wantAgent)
+void TriggerCompleteCallBack::SetWantAgentInstance(WantAgent *wantAgent)
 {
     triggerCompleteInfo_.wantAgent = wantAgent;
 }
@@ -579,7 +579,7 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(NativeEngine &engine, NativeCallback
 
     NativeReference *ref = engine.CreateReference(info.argv[ARGC_TWO], 1);
     triggerObj->SetCallbackInfo(engine, ref);
-    triggerObj->SetWantAgentInstance(wantAgent);
+    triggerObj->SetWantAgentInstance(pWantAgent);
 
     return BUSINESS_ERROR_CODE_OK;
 }
@@ -712,7 +712,7 @@ int32_t JsWantAgent::GetWantAgentParam(NativeEngine &engine, NativeCallbackInfo 
     return BUSINESS_ERROR_CODE_OK;
 }
 
-NativeValue* JsWantAgent::WrapWantAgent(NativeEngine &engine, const std::shared_ptr<WantAgent> &wantAgent)
+NativeValue* JsWantAgent::WrapWantAgent(NativeEngine &engine, WantAgent *wantAgent)
 {
     HILOG_DEBUG("WrapWantAgent called.");
     NativeCallback callback = [](NativeEngine *engine, NativeCallbackInfo *info) -> NativeValue* {
@@ -723,9 +723,14 @@ NativeValue* JsWantAgent::WrapWantAgent(NativeEngine &engine, const std::shared_
     NativeValue *result = engine.CreateInstance(wantAgentClass, nullptr, 0);
 
     NativeObject *nativeObject = reinterpret_cast<NativeObject*>(result->GetInterface(NativeObject::INTERFACE_ID));
-    NativeFinalize nativeFinalize = [](NativeEngine* engine, void* data, void* hint) {};
+    NativeFinalize nativeFinalize = [](NativeEngine* engine, void* data, void* hint) {
+        HILOG_DEBUG("delete wantAgent.");
+        auto wantAgent = static_cast<WantAgent*>(data);
+        delete wantAgent;
+        wantAgent = nullptr;
+    };
 
-    nativeObject->SetNativePointer(reinterpret_cast<void*>(wantAgent.get()), nativeFinalize, nullptr);
+    nativeObject->SetNativePointer(reinterpret_cast<void*>(wantAgent), nativeFinalize, nullptr);
     return result;
 }
 
@@ -775,11 +780,17 @@ NativeValue* JsWantAgent::OnGetWantAgent(NativeEngine &engine, NativeCallbackInf
 
         auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
         std::shared_ptr<WantAgent> wantAgent = WantAgentHelper::GetWantAgent(context, wantAgentInfo);
-
+        WantAgent *pWantAgent = nullptr;
         if (wantAgent == nullptr) {
-            HILOG_INFO("GetWantAgent instance is nullptr...");
+            HILOG_INFO("wantAgent is nullptr...");
+        } else {
+            pWantAgent = new WantAgent(wantAgent->GetPendingWant());
         }
-        task.Resolve(engine, self->WrapWantAgent(engine, wantAgent));
+
+        if (pWantAgent == nullptr) {
+            HILOG_INFO("pWantAgent is nullptr...");
+        }
+        task.Resolve(engine, self->WrapWantAgent(engine, pWantAgent));
     };
 
     NativeValue *result = nullptr;
@@ -882,11 +893,17 @@ NativeValue* JsWantAgent::OnNapiGetWantAgent(NativeEngine &engine, NativeCallbac
 
         auto context = OHOS::AbilityRuntime::Context::GetApplicationContext();
         std::shared_ptr<WantAgent> wantAgent = WantAgentHelper::GetWantAgent(context, wantAgentInfo);
-
+        WantAgent *pWantAgent = nullptr;
         if (wantAgent == nullptr) {
-            HILOG_INFO("GetWantAgent instance is nullptr...");
+            HILOG_INFO("wantAgent is nullptr...");
+        } else {
+            pWantAgent = new WantAgent(wantAgent->GetPendingWant());
         }
-        task.ResolveWithNoError(engine, self->WrapWantAgent(engine, wantAgent));
+
+        if (pWantAgent == nullptr) {
+            HILOG_INFO("pWantAgent is nullptr...");
+        }
+        task.ResolveWithNoError(engine, self->WrapWantAgent(engine, pWantAgent));
     };
 
     NativeValue *lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
