@@ -1017,8 +1017,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 NativeFunction* fuc = AbilityRuntime::ConvertNativeValueTo<NativeFunction>(value);
                 error = fuc->GetSourceCodeInfo(errorPos);
             }
-            summary += error + "Stacktrace:\n" + OHOS::AbilityRuntime::ModSourceMap::TranslateBySourceMap
-                (errorStack, bindSourceMaps, BundleCodeDir);
+            summary += error + "Stacktrace:\n" + OHOS::AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack,
+                bindSourceMaps, BundleCodeDir);
             ApplicationDataManager::GetInstance().NotifyUnhandledException(summary);
             time_t timet;
             time(&timet);
