@@ -138,7 +138,8 @@ void AppSpawnMsgWrapper::DumpMsg() const
     }
     HILOG_INFO("************AppSpawnMsg*************");
     HILOG_INFO("uid: %{public}d, gid: %{public}d, procName: %{public}s", msg_->uid, msg_->gid, msg_->processName);
-    HILOG_INFO("Assembling accessTokenIdEx :%{public}" PRIu64,msg_->accessTokenIdEx);
+    std::string accessTokenIdExString = static_cast<std::string>(msg_->accessTokenIdEx);
+    HILOG_INFO("Assembling accessTokenIdEx :%{public}s",accessTokenIdExString);
     HILOG_INFO("************************************");
 }
 
