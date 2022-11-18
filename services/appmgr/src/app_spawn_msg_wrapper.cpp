@@ -85,6 +85,7 @@ bool AppSpawnMsgWrapper::AssembleMsg(const AppSpawnStartMsg &startMsg)
     }
 
     isValid_ = true;
+    HILOG_INFO("Assembling accessTokenIdEx to App_Spawn");
     DumpMsg();
     return isValid_;
 }
