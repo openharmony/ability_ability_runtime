@@ -85,7 +85,6 @@ bool AppSpawnMsgWrapper::AssembleMsg(const AppSpawnStartMsg &startMsg)
     }
 
     isValid_ = true;
-    HILOG_INFO("Assembling accessTokenIdEx to App_Spawn");
     DumpMsg();
     return isValid_;
 }
@@ -139,6 +138,7 @@ void AppSpawnMsgWrapper::DumpMsg() const
     }
     HILOG_INFO("************AppSpawnMsg*************");
     HILOG_INFO("uid: %{public}d, gid: %{public}d, procName: %{public}s", msg_->uid, msg_->gid, msg_->processName);
+    HILOG_INFO("Assembling accessTokenIdEx  %{public}d to App_Spawn", msg_->accessTokenIdEx);
     HILOG_INFO("************************************");
 }
 
