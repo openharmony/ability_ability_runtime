@@ -1,0 +1,76 @@
+{
+  "string": [
+    {
+      "name": "entry_desc",
+      "value": "description"
+    },
+    {
+      "name": "SelectorServiceExtAbility_desc",
+      "value": "SelectorDialog"
+    },
+    {
+      "name": "SelectorServiceExtAbility_label",
+      "value": "SelectorDialog"
+    },
+    {
+      "name": "TipsServiceExtAbility_desc",
+      "value": "TipsDialog"
+    },
+    {
+      "name": "TipsServiceExtAbility_label",
+      "value": "TipsDialog"
+    },
+    {
+      "name": "NotificationServiceExtAbility_desc",
+      "value": "NotificationDialog"
+    },
+    {
+      "name": "NotificationServiceExtAbility_label",
+      "value": "NotificationDialog"
+    },
+    {
+      "name": "message_title_anr",
+      "value": "no response"
+    },
+    {
+      "name": "message_titleList_anr",
+      "value": "The app is not responding, if you close the app, you may lose recent data, and the app may respond if you keep waiting."
+    },
+    {
+      "name": "message_waiting_anr",
+      "value": "Wait"
+    },
+    {
+      "name": "message_close_anr",
+      "value": "Close"
+    },
+    {
+      "name": "message_title_selector",
+      "value": "Open with the following options"
+    },
+    {
+      "name": "message_cancel_selector",
+      "value": "Cancel"
+    },
+    {
+      "name": "message_title_tips",
+      "value": "Cannot open this file"
+    },
+    {
+      "name": "message_close_tips",
+      "value": "Got it"
+    },
+    {
+      "name": "if_allow_to_publish_notification",
+      "value": "Do you allow the app to publish notification?"
+    },
+    {
+      "name": "allow",
+      "value": "allow"
+    },
+    {
+      "name": "ban",
+      "value": "ban"
+    }
+  ]
+}
