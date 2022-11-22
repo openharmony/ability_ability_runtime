@@ -29,22 +29,6 @@
       "value": "NotificationDialog"
     },
     {
-      "name": "message_title_anr",
-      "value": "未响应"
-    },
-    {
-      "name": "message_titleList_anr",
-      "value": "应用未响应，如果您关闭应用，可能丢失最近的数据，如果您继续等待，应用可能会响应。"
-    },
-    {
-      "name": "message_waiting_anr",
-      "value": "等待响应"
-    },
-    {
-      "name": "message_close_anr",
-      "value": "关闭应用"
-    },
-    {
       "name": "message_title_selector",
       "value": "使用以下方式打开"
     },

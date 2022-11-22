@@ -29,22 +29,6 @@
       "value": "NotificationDialog"
     },
     {
-      "name": "message_title_anr",
-      "value": "no response"
-    },
-    {
-      "name": "message_titleList_anr",
-      "value": "The app is not responding, if you close the app, you may lose recent data, and the app may respond if you keep waiting."
-    },
-    {
-      "name": "message_waiting_anr",
-      "value": "Wait"
-    },
-    {
-      "name": "message_close_anr",
-      "value": "Close"
-    },
-    {
       "name": "message_title_selector",
       "value": "Open with the following options"
     },
