@@ -1238,7 +1238,7 @@ int AbilityManagerService::TerminateAbilityWithFlag(const sptr<IRemoteObject> &t
     return missionListManager->TerminateAbility(abilityRecord, resultCode, resultWant, flag);
 }
 
-int AbilityManagerService::SendResultToAbility(int requestCode, int resultCode, Want &resultWant)
+int AbilityManagerService::SendResultToAbility(int32_t requestCode, int32_t resultCode, Want &resultWant)
 {
     HILOG_INFO("%{public}s", __func__);
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
@@ -4166,7 +4166,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
         want = record->GetWant();
         want.SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true);
         
-        HiSysEvent::Write(HiSysEvent::Domain::AAFWK, "APP_RECOVERY", HiSysEvent::EventType::BEHAVIOR,
+        HiSysEventWrite(HiSysEvent::Domain::AAFWK, "APP_RECOVERY", HiSysEvent::EventType::BEHAVIOR,
             "APP_UID", record->GetUid(),
             "VERSION_CODE", std::to_string(appInfo.versionCode),
             "VERSION_NAME", appInfo.versionName,
@@ -5418,12 +5418,18 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
     }
     
     AppExecFwk::RunningProcessInfo processInfo;
-    auto callerAccessToken = IPCSkeleton::GetCallingTokenID();
-    DelayedSingleton<AppScheduler>::GetInstance()->
-        GetRunningProcessInfoByAccessTokenID(callerAccessToken, processInfo);
-    if (processInfo.processName_.empty()) {
-        HILOG_ERROR("Can not find caller application by token, callerToken: %{private}d.", callerAccessToken);
-        return ERR_INVALID_VALUE;
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility) {
+        DelayedSingleton<AppScheduler>::GetInstance()->
+            GetRunningProcessInfoByToken(callerAbility->GetToken(), processInfo);
+    } else {
+        auto callerAccessToken = IPCSkeleton::GetCallingTokenID();
+        DelayedSingleton<AppScheduler>::GetInstance()->
+            GetRunningProcessInfoByAccessTokenID(callerAccessToken, processInfo);
+        if (processInfo.processName_.empty()) {
+            HILOG_ERROR("Can not find caller application by token, callerToken: %{private}d.", callerAccessToken);
+            return ERR_INVALID_VALUE;
+        }
     }
 
     if (backgroundJudgeFlag_) {
