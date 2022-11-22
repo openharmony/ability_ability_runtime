@@ -71,7 +71,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime::Constants;
-std::shared_ptr<OHOSApplication> MainThread::applicationForDump_ = nullptr;
+std::weak_ptr<OHOSApplication> MainThread::applicationForDump_;
 std::shared_ptr<EventHandler> MainThread::signalHandler_ = nullptr;
 static std::shared_ptr<MixStackDumper> mixStackDumper_ = nullptr;
 namespace {
@@ -118,6 +118,7 @@ void AppMgrDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 
 MainThread::MainThread()
 {
+    HILOG_INFO("MainThread::MainThread call constructor.");
 #ifdef ABILITY_LIBRARY_LOADER
     fileEntries_.clear();
     nativeFileEntries_.clear();
@@ -127,6 +128,7 @@ MainThread::MainThread()
 
 MainThread::~MainThread()
 {
+    HILOG_INFO("MainThread::MainThread call destructor.");
 #ifdef ABILITY_LIBRARY_LOADER
     CloseAbilityLibrary();
 #endif  // ABILITY_LIBRARY_LOADER
@@ -888,7 +890,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
     applicationForDump_ = application_;
     mixStackDumper_ = std::make_shared<MixStackDumper>();
-    mixStackDumper_->InstallDumpHandler(applicationForDump_, signalHandler_);
+    mixStackDumper_->InstallDumpHandler(application_, signalHandler_);
 
     // init resourceManager.
     HILOG_DEBUG("MainThread handle launch application, CreateResourceManager Start.");
@@ -949,7 +951,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     applicationContext->InitApplicationContext();
     application_->SetApplicationContext(applicationContext);
     std::string BundleCodeDir = applicationContext->GetBundleCodeDir();
-    AbilityRuntime::Runtime::Options options;
     if (isStageBased) {
         // Create runtime
         AbilityRuntime::Runtime::Options options;
@@ -1008,15 +1009,21 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 return;
             }
             auto& bindSourceMaps = (static_cast<AbilityRuntime::JsRuntime&>(*
-                (weak->application_->GetRuntime()))).GetSourceMap();
-
+                (appThread->application_->GetRuntime()))).GetSourceMap();
             // bindRuntime.bindSourceMaps lazy loading
-            summary += "Stacktrace:\n" + OHOS::AbilityRuntime::ModSourceMap::TranslateBySourceMap
-                (errorStack, bindSourceMaps, BundleCodeDir);
+            auto errorPos = ModSourceMap::GetErrorPos(errorStack);
+            std::string error;
+            if (obj != nullptr) {
+                NativeValue* value = obj->GetProperty("errorfunc");
+                NativeFunction* fuc = AbilityRuntime::ConvertNativeValueTo<NativeFunction>(value);
+                error = fuc->GetSourceCodeInfo(errorPos);
+            }
+            summary += error + "Stacktrace:\n" + OHOS::AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack,
+                bindSourceMaps, BundleCodeDir);
             ApplicationDataManager::GetInstance().NotifyUnhandledException(summary);
             time_t timet;
             time(&timet);
-            OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
+            HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
                 OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
                 EVENT_KEY_PACKAGE_NAME, bundleName,
                 EVENT_KEY_VERSION, std::to_string(versionCode),
@@ -1036,22 +1043,44 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         jsEngine.RegisterUncaughtExceptionHandler(uncaughtTask);
         application_->SetRuntime(std::move(runtime));
 
-        AbilityLoader::GetInstance().RegisterAbility("Ability", [application = application_]() {
-            return Ability::Create(application->GetRuntime());
+        std::weak_ptr<OHOSApplication> wpApplication = application_;
+        AbilityLoader::GetInstance().RegisterAbility("Ability",
+            [wpApplication]() -> Ability* {
+            auto app = wpApplication.lock();
+            if (app != nullptr) {
+                return Ability::Create(app->GetRuntime());
+            }
+            HILOG_ERROR("AbilityLoader::GetAbilityByName failed.");
+            return nullptr;
         });
 #ifdef SUPPORT_GRAPHICS
-        AbilityLoader::GetInstance().RegisterExtension("FormExtension", [application = application_]() {
-            return AbilityRuntime::FormExtension::Create(application->GetRuntime());
+        AbilityLoader::GetInstance().RegisterExtension("FormExtension",
+            [wpApplication]() -> AbilityRuntime::Extension* {
+            auto app = wpApplication.lock();
+            if (app != nullptr) {
+                return AbilityRuntime::FormExtension::Create(app->GetRuntime());
+            }
+            HILOG_ERROR("AbilityLoader::GetExtensionByName failed: FormExtension");
+            return nullptr;
         });
 #endif
-        AbilityLoader::GetInstance().RegisterExtension("StaticSubscriberExtension", [application = application_]() {
-            return AbilityRuntime::StaticSubscriberExtension::Create(application->GetRuntime());
+        AbilityLoader::GetInstance().RegisterExtension("StaticSubscriberExtension",
+            [wpApplication]() -> AbilityRuntime::Extension* {
+            auto app = wpApplication.lock();
+            if (app != nullptr) {
+                return AbilityRuntime::StaticSubscriberExtension::Create(app->GetRuntime());
+            }
+            HILOG_ERROR("AbilityLoader::GetExtensionByName failed: StaticSubscriberExtension");
+            return nullptr;
         });
+
+        if (application_ != nullptr) {
 #ifdef __aarch64__
-        LoadAllExtensions("system/lib64/extensionability");
+        LoadAllExtensions("system/lib64/extensionability", wpApplication);
 #else
-        LoadAllExtensions("system/lib/extensionability");
+        LoadAllExtensions("system/lib/extensionability", wpApplication);
 #endif
+        }
     }
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
@@ -1090,14 +1119,18 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     std::thread(&OHOS::NWeb::PreDnsInThread).detach();
 
     // start nwebspawn process
-    std::thread([nwebApp = application_, nwebMgr = appMgr_] {
-        if (nwebApp == nullptr || nwebMgr == nullptr) {
-            HILOG_ERROR("HandleLaunchApplication nwebApp or nwebMgr is null");
+    std::weak_ptr<OHOSApplication> weakApp = application_;
+    wptr<IAppMgr> weakMgr = appMgr_;
+    std::thread([weakApp, weakMgr] {
+        auto app = weakApp.lock();
+        auto appmgr = weakMgr.promote();
+        if (app == nullptr || appmgr == nullptr) {
+            HILOG_ERROR("HandleLaunchApplication app or appmgr is null");
             return;
         }
-        std::string nwebPath = nwebApp->GetAppContext()->GetCacheDir() + "/web";
+        std::string nwebPath = app->GetAppContext()->GetCacheDir() + "/web";
         if (access(nwebPath.c_str(), F_OK) != -1) {
-            nwebMgr->PreStartNWebSpawnProcess();
+            appmgr->PreStartNWebSpawnProcess();
         }
     }).detach();
 #endif
@@ -1177,13 +1210,9 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
     appMgr_->AddAbilityStageDone(applicationImpl_->GetRecordId());
 }
 
-void MainThread::LoadAllExtensions(const std::string &filePath)
+void MainThread::LoadAllExtensions(const std::string &filePath, std::weak_ptr<OHOSApplication> wpApplication)
 {
     HILOG_DEBUG("LoadAllExtensions.filePath:%{public}s", filePath.c_str());
-    if (application_ == nullptr) {
-        HILOG_ERROR("application launch failed");
-        return;
-    }
     // scan all extensions in path
     std::vector<std::string> extensionFiles;
     ScanDir(filePath, extensionFiles);
@@ -1223,8 +1252,14 @@ void MainThread::LoadAllExtensions(const std::string &filePath)
 
         extensionTypeMap.insert(std::pair<int32_t, std::string>(type, extensionName));
         HILOG_INFO("Success load extension type: %{public}d, name:%{public}s", type, extensionName.c_str());
-        AbilityLoader::GetInstance().RegisterExtension(extensionName, [application = application_, file]() {
-            return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str()).Create(application->GetRuntime());
+        AbilityLoader::GetInstance().RegisterExtension(extensionName,
+            [wpApplication, file]() -> AbilityRuntime::Extension* {
+            auto app = wpApplication.lock();
+            if (app != nullptr) {
+                return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str()).Create(app->GetRuntime());
+            }
+            HILOG_ERROR("AbilityLoader::GetExtensionByName failed.");
+            return nullptr;
         });
     }
     application_->SetExtensionTypeMap(extensionTypeMap);
@@ -1662,9 +1697,10 @@ void MainThread::HandleSignal(int signal)
 void MainThread::HandleDumpHeap(bool isPrivate)
 {
     HILOG_DEBUG("Dump heap start.");
-    if (applicationForDump_ != nullptr && applicationForDump_->GetRuntime() != nullptr) {
+    auto app = applicationForDump_.lock();
+    if (app != nullptr && app->GetRuntime() != nullptr) {
         HILOG_DEBUG("Send dump heap to ark start.");
-        applicationForDump_->GetRuntime()->DumpHeapSnapshot(isPrivate);
+        app->GetRuntime()->DumpHeapSnapshot(isPrivate);
     }
 }
 
@@ -1719,8 +1755,9 @@ void MainThread::MainHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::P
 {
     auto eventId = event->GetInnerEventId();
     if (eventId == CHECK_MAIN_THREAD_IS_ALIVE) {
-        if (mainThreadObj_ != nullptr) {
-            mainThreadObj_->CheckMainThreadIsAlive();
+        auto mt = mainThreadObj_.promote();
+        if (mt != nullptr) {
+            mt->CheckMainThreadIsAlive();
         }
     }
 }
