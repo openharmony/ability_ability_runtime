@@ -237,42 +237,6 @@ void AsyncTask::RejectWithCustomize(NativeEngine& engine, NativeValue* error, Na
     HILOG_DEBUG("AsyncTask::RejectWithCustomize is called end.");
 }
 
-void AsyncTask::ResolveWithCustomize(NativeEngine& engine, NativeValue* error, NativeValue* value)
-{
-    HILOG_DEBUG("AsyncTask::ResolveWithCustomize is called");
-    if (deferred_) {
-        deferred_->Resolve(value);
-        deferred_.reset();
-    }
-    if (callbackRef_) {
-        NativeValue* argv[] = {
-            error,
-            value,
-        };
-        engine.CallFunction(engine.CreateUndefined(), callbackRef_->Get(), argv, ArraySize(argv));
-        callbackRef_.reset();
-    }
-    HILOG_DEBUG("AsyncTask::ResolveWithCustomize is called end.");
-}
-
-void AsyncTask::RejectWithCustomize(NativeEngine& engine, NativeValue* error, NativeValue* value)
-{
-    HILOG_DEBUG("AsyncTask::RejectWithCustomize is called");
-    if (deferred_) {
-        deferred_->Reject(error);
-        deferred_.reset();
-    }
-    if (callbackRef_) {
-        NativeValue* argv[] = {
-            error,
-            value,
-        };
-        engine.CallFunction(engine.CreateUndefined(), callbackRef_->Get(), argv, ArraySize(argv));
-        callbackRef_.reset();
-    }
-    HILOG_DEBUG("AsyncTask::RejectWithCustomize is called end.");
-}
-
 void AsyncTask::Execute(NativeEngine* engine, void* data)
 {
     if (engine == nullptr || data == nullptr) {
