@@ -845,6 +845,10 @@ int64_t AppMgrServiceInner::SystemTimeMillisecond()
 
 std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetAppRunningRecordByPid(const pid_t pid) const
 {
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager nullptr!");
+        return nullptr;
+    }
     return appRunningManager_->GetAppRunningRecordByPid(pid);
 }
 
@@ -2407,7 +2411,7 @@ void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_
         packageName = %{public}s, processName = %{public}s, msg = %{public}s",
         eventName.c_str(), uid, pid, packageName.c_str(), processName.c_str(), msg.c_str());
 
-    OHOS::HiviewDFX::HiSysEvent::Write(
+    HiSysEventWrite(
         OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK,
         eventName,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
