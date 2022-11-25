@@ -377,6 +377,14 @@ public:
         GTEST_LOG_(INFO) << "MockJsNativeEngine::GetScopeManager called";
         return nullptr;
     }
+    NativeValue* CreateNativeBindingObject(void* detach, void* attach)
+    {
+        return nullptr;
+    }
+    NativeValue* CreateNBObject(DetachCallback detach, AttachCallback attach)
+    {
+        return nullptr;
+    }
 };
 
 #endif /* MOCK_JS_NATIVE_ENGINE_H */
