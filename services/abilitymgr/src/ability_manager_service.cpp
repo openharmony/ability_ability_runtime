@@ -3003,6 +3003,11 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
         abilityWant.SetElementName(extensionAbilityInfo.bundleName, extensionAbilityInfo.name);
     }
 
+#ifdef SUPPORT_GRAPHICS
+    // wait BOOT_ANIMATION_STARTED to start LAUNCHER
+    WaitParameter(BOOTEVENT_BOOT_ANIMATION_STARTED.c_str(), "true", amsConfigResolver_->GetBootAnimationTimeoutTime());
+#endif
+
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
     (void)StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
 }
