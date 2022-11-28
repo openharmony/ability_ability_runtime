@@ -46,17 +46,17 @@ public:
     void SetUp() override;
     void TearDown() override;
 
-    void InitAppInfo(const std::string &deviceName, const std::string &abilityName,
-        const std::string &appName, const std::string &bundleName, const std::string &moduleName);
+    void InitAppInfo(const std::string& deviceName, const std::string& abilityName,
+        const std::string& appName, const std::string& bundleName, const std::string& moduleName);
 
 public:
     std::shared_ptr<AbilityInfo> abilityInfo_;
     std::shared_ptr<ApplicationInfo> applicationInfo_;
 };
 
-void AppMgrServiceInnerTest::InitAppInfo(const std::string &deviceName,
-    const std::string &abilityName, const std::string &appName, const std::string &bundleName,
-    const std::string &moduleName)
+void AppMgrServiceInnerTest::InitAppInfo(const std::string& deviceName,
+    const std::string& abilityName, const std::string& appName, const std::string& bundleName,
+    const std::string& moduleName)
 {
     ApplicationInfo applicationInfo;
     applicationInfo.name = appName;
@@ -2500,8 +2500,8 @@ HWTEST_F(AppMgrServiceInnerTest, UpdateConfiguration_001, TestSize.Level0)
     appMgrServiceInner->UpdateConfiguration(config);
 
     auto appRunningRecordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
-    for (const auto &item : appRunningRecordMap) {
-        const auto &appRecord = item.second;
+    for (const auto& item : appRunningRecordMap) {
+        const auto& appRecord = item.second;
         if (appRecord) {
             appRecord->appLifeCycleDeal_ = nullptr;
         }
