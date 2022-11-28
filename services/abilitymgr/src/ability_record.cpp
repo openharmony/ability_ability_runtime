@@ -1963,21 +1963,22 @@ void AbilityRecord::SetStartToForeground(const bool flag)
     isStartToForeground_ = flag;
 }
 
-bool AbilityRecord::CallRequest()
+void AbilityRecord::CallRequest() const
 {
     HILOG_INFO("Call Request.");
-    CHECK_POINTER_RETURN_BOOL(scheduler_);
-    CHECK_POINTER_RETURN_BOOL(callContainer_);
+    CHECK_POINTER(scheduler_);
 
-    // sync call request
-    sptr<IRemoteObject> callStub = scheduler_->CallRequest();
-    if (!callStub) {
-        HILOG_ERROR("call request failed, callstub is nullptr.");
+    // Async call request
+    scheduler_->CallRequest();
+}
+
+bool AbilityRecord::CallRequestDone(const sptr<IRemoteObject> &callStub) const
+{
+    if (!callContainer_->CallRequestDone(callStub)) {
+        HILOG_ERROR("Call request failed.");
         return false;
     }
-
-    // complete call request
-    return callContainer_->CallRequestDone(callStub);
+    return true;
 }
 
 ResolveResultType AbilityRecord::Resolve(const AbilityRequest &abilityRequest)
