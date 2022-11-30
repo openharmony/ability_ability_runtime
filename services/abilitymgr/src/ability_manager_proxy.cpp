@@ -2177,7 +2177,7 @@ int AbilityManagerProxy::StartAbilityByCall(
     return reply.ReadInt32();
 }
 
-void AbilityManagerProxy::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub)
+void AbilityManagerProxy::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -2203,7 +2203,10 @@ void AbilityManagerProxy::CallRequestDone(const sptr<IRemoteObject> &token, cons
         HILOG_ERROR("WriteRemoteObject fail, write callStub fail.");
         return;
     }
-
+    if (Remote() == nullptr) {
+        HILOG_ERROR("Call request done fail, Remote() is nullptr.");
+        return;
+    }
     auto error = Remote()->SendRequest(IAbilityManager::CALL_REQUEST_DONE, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);

@@ -124,7 +124,7 @@ int MockServiceAbilityManagerService::TerminateAbilityByCaller(const sptr<IRemot
 }
 
 void MockServiceAbilityManagerService::CallRequestDone(
-    const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub)
+    const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
     return;
 }
