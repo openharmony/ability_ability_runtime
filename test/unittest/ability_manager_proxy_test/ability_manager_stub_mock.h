@@ -206,7 +206,7 @@ public:
     {
         return 0;
     }
-    void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub) override
+    void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub) override
     {
         return;
     }

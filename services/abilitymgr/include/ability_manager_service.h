@@ -542,7 +542,7 @@ public:
      * @param token, ability's token.
      * @param callStub, ability's callee.
      */
-    void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub) override;
+    void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub) override;
 
     /**
      * Release the call between Ability, disconnect session with common ability.

@@ -5541,7 +5541,7 @@ bool AbilityManagerService::GetStartUpNewRuleFlag() const
     return startUpNewRule_;
 }
 
-void AbilityManagerService::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub)
+void AbilityManagerService::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER(abilityRecord);
