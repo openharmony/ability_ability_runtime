@@ -15,13 +15,14 @@
 
 #include "js_runtime.h"
 
-#include <atomic>
 #include <cerrno>
 #include <climits>
 #include <cstdlib>
+#include <regex>
+
+#include <atomic>
 #include <sys/epoll.h>
 #include <unistd.h>
-#include <regex>
 
 #include "ability_constants.h"
 #include "connect_server_manager.h"
@@ -88,7 +89,7 @@ public:
     void StartDebugMode(bool needBreakPoint) override
     {
         if (vm_ == nullptr) {
-            HILOG_ERROR("virtual machine does not exist");
+            HILOG_ERROR("Virtual machine does not exist");
             return;
         }
 
@@ -279,7 +280,7 @@ private:
 
     void FinishPreload() override
     {
-        panda::JSNApi::preFork(vm_);
+        panda::JSNApi::PreFork(vm_);
     }
 
     bool Initialize(const Runtime::Options& options) override
@@ -291,7 +292,7 @@ private:
                 std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
                 postOption.SetAnDir(sandBoxAnFilePath);
             }
-            panda::JSNApi::postFork(vm_, postOption);
+            panda::JSNApi::PostFork(vm_, postOption);
             nativeEngine_->ReinitUVLoop();
             panda::JSNApi::SetLoop(vm_, nativeEngine_->GetUVLoop());
         } else {
@@ -308,15 +309,10 @@ private:
             pandaOption.SetLogLevel(panda::RuntimeOption::LOG_LEVEL::INFO);
             pandaOption.SetLogBufPrint(PrintVmLog);
 
-            // Fix a problem that if vm will crash if preloaded
-            if (options.preload) {
-                pandaOption.SetEnableAsmInterpreter(false);
-            } else {
-                bool asmInterpreterEnabled = OHOS::system::GetBoolParameter("persist.ark.asminterpreter", true);
-                std::string asmOpcodeDisableRange = OHOS::system::GetParameter("persist.ark.asmopcodedisablerange", "");
-                pandaOption.SetEnableAsmInterpreter(asmInterpreterEnabled);
-                pandaOption.SetAsmOpcodeDisableRange(asmOpcodeDisableRange);
-            }
+            bool asmInterpreterEnabled = OHOS::system::GetBoolParameter("persist.ark.asminterpreter", true);
+            std::string asmOpcodeDisableRange = OHOS::system::GetParameter("persist.ark.asmopcodedisablerange", "");
+            pandaOption.SetEnableAsmInterpreter(asmInterpreterEnabled);
+            pandaOption.SetAsmOpcodeDisableRange(asmOpcodeDisableRange);
 
             // aot related
             bool aotEnabled = OHOS::system::GetBoolParameter("persist.ark.aot", true);

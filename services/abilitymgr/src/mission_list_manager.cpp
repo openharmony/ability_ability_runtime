@@ -367,12 +367,12 @@ bool MissionListManager::HandleReusedMissionAndAbility(const AbilityRequest &abi
         targetRecord->SetIsNewWant(true);
     }
     /* No need to update condition:
-        *      1. not start by call
-        *      2. start by call, but call to background again
-        * Need to update condition:
-        *      1. start by call, but this time is not start by call
-        *      2. start by call, and call to foreground again
-        */
+     *      1. not start by call
+     *      2. start by call, but call to background again
+     * Need to update condition:
+     *      1. start by call, but this time is not start by call
+     *      2. start by call, and call to foreground again
+     */
     if (!(targetMission->IsStartByCall()
         && (!CallTypeFilter(startMethod) ||
             abilityRequest.want.GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)))) {
@@ -725,9 +725,6 @@ int MissionListManager::MinimizeAbilityLocked(const std::shared_ptr<AbilityRecor
 
     abilityRecord->SetMinimizeReason(fromUser);
     MoveToBackgroundTask(abilityRecord);
-    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
-        UpdateMissionTimeStamp(abilityRecord);
-    }
 
     return ERR_OK;
 }
@@ -1050,9 +1047,6 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         abilityRecord->SetMinimizeReason(true);
         MoveToBackgroundTask(abilityRecord);
-        if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD) {
-            UpdateMissionTimeStamp(abilityRecord);
-        }
     } else if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
         HILOG_DEBUG("not continuous startup.");
         abilityRecord->SetPendingState(AbilityState::INITIAL);
@@ -1313,7 +1307,7 @@ void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityR
         return;
     }
 
-    if (!needTopAbility->IsForeground() && !needTopAbility->IsMinimizeFromUser()) {
+    if (!needTopAbility->IsForeground() && !needTopAbility->IsMinimizeFromUser() && needTopAbility->IsReady()) {
         HILOG_DEBUG("%{public}s is need to foreground.", elementName.GetURI().c_str());
         abilityRecord->SetNextAbilityRecord(needTopAbility);
     }
@@ -2049,16 +2043,6 @@ sptr<IRemoteObject> MissionListManager::GetAbilityTokenByMissionId(int32_t missi
     return defaultStandardList_->GetAbilityTokenByMissionId((missionId));
 }
 
-void MissionListManager::UpdateMissionTimeStamp(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    auto mission = abilityRecord->GetMission();
-    if (!mission) {
-        return;
-    }
-    std::string curTime = GetCurrentTime();
-    DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionTimeStamp(mission->GetMissionId(), curTime);
-}
-
 void MissionListManager::PostStartWaitingAbility()
 {
     auto self(shared_from_this());
@@ -2638,6 +2622,13 @@ void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std
             }
             ability->SetWant(abilityRequest.want);
             ability->SetIsNewWant(true);
+            if (abilityRequest.IsContinuation()) {
+                ability->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
+            } else if (abilityRequest.IsAppRecovery()) {
+                ability->SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
+            } else {
+                ability->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
+            }
 
             auto isCallerFromLauncher = (callerAbility && callerAbility->IsLauncherAbility());
             MoveMissionToFront(mission->GetMissionId(), isCallerFromLauncher);

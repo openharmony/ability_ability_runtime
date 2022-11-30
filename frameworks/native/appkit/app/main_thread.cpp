@@ -73,6 +73,7 @@ namespace AppExecFwk {
 using namespace OHOS::AbilityRuntime::Constants;
 std::shared_ptr<OHOSApplication> MainThread::applicationForDump_ = nullptr;
 std::shared_ptr<EventHandler> MainThread::signalHandler_ = nullptr;
+std::shared_ptr<MainThread::MainHandler> MainThread::mainHandler_ = nullptr;
 static std::shared_ptr<MixStackDumper> mixStackDumper_ = nullptr;
 namespace {
 constexpr int32_t DELIVERY_TIME = 200;
@@ -1650,10 +1651,19 @@ void MainThread::HandleSignal(int signal)
 void MainThread::HandleDumpHeap(bool isPrivate)
 {
     HILOG_DEBUG("Dump heap start.");
-    if (applicationForDump_ != nullptr && applicationForDump_->GetRuntime() != nullptr) {
-        HILOG_DEBUG("Send dump heap to ark start.");
-        applicationForDump_->GetRuntime()->DumpHeapSnapshot(isPrivate);
+    if (mainHandler_ == nullptr) {
+        HILOG_ERROR("HandleDumpHeap failed, mainHandler is nullptr");
+        return;
     }
+
+    auto task = [isPrivate] {
+        if (applicationForDump_ == nullptr || applicationForDump_->GetRuntime() == nullptr) {
+            HILOG_ERROR("runtime is nullptr.");
+            return;
+        }
+        applicationForDump_->GetRuntime()->DumpHeapSnapshot(isPrivate);
+    };
+    mainHandler_->PostTask(task);
 }
 
 void MainThread::Start()
@@ -1936,12 +1946,12 @@ void MainThread::CheckMainThreadIsAlive()
 #endif  // ABILITY_LIBRARY_LOADER
 
 int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
-    const sptr<IQuickFixCallback> &callback)
+    const sptr<IQuickFixCallback> &callback, const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("ScheduleNotifyLoadRepairPatch function called.");
     wptr<MainThread> weak = this;
-    auto task = [weak, bundleName, callback]() {
+    auto task = [weak, bundleName, callback, recordId]() {
         auto appThread = weak.promote();
         if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
             HILOG_ERROR("ScheduleNotifyLoadRepairPatch, parameter is nullptr.");
@@ -1960,7 +1970,7 @@ int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
             HILOG_DEBUG("ScheduleNotifyLoadRepairPatch, There's no hqfFile need to load.");
         }
 
-        callback->OnLoadPatchDone(ret ? NO_ERROR : ERR_INVALID_OPERATION);
+        callback->OnLoadPatchDone(ret ? NO_ERROR : ERR_INVALID_OPERATION, recordId);
     };
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
         HILOG_ERROR("ScheduleNotifyLoadRepairPatch, Post task failed.");
@@ -1970,19 +1980,19 @@ int32_t MainThread::ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
     return NO_ERROR;
 }
 
-int32_t MainThread::ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &callback)
+int32_t MainThread::ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &callback, const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
     wptr<MainThread> weak = this;
-    auto task = [weak, callback]() {
+    auto task = [weak, callback, recordId]() {
         auto appThread = weak.promote();
         if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
             HILOG_ERROR("parameter is nullptr.");
             return;
         }
         auto ret = appThread->application_->NotifyHotReloadPage();
-        callback->OnReloadPageDone(ret ? NO_ERROR : ERR_INVALID_OPERATION);
+        callback->OnReloadPageDone(ret ? NO_ERROR : ERR_INVALID_OPERATION, recordId);
     };
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
         HILOG_ERROR("Post task failed.");
@@ -2014,39 +2024,33 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
         return false;
     }
 
-    std::vector<HqfInfo> hqfInfos = bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
-    HILOG_INFO("[%{public}s] has %{public}zu hqf.", bundleName.c_str(), hqfInfos.size());
-    for (auto hqfInfo : hqfInfos) {
-        std::string moduleName = hqfInfo.moduleName;
-        std::string resolvedHapPath;
-        for (auto hapInfo : bundleInfo.hapModuleInfos) {
-            if (hapInfo.moduleName != moduleName) {
-                continue;
-            }
+    for (auto hapInfo : bundleInfo.hapModuleInfos) {
+        if ((processInfo_ != nullptr) && (processInfo_->GetProcessName() == hapInfo.process) &&
+            (!hapInfo.hqfInfo.hqfFilePath.empty())) {
+            std::string resolvedHapPath;
             std::string hapPath = AbilityRuntime::GetLoadPath(hapInfo.hapPath);
             auto position = hapPath.rfind('/');
             if (position != std::string::npos) {
-                resolvedHapPath = hapPath.erase(position) + FILE_SEPARATOR + moduleName;
+                resolvedHapPath = hapPath.erase(position) + FILE_SEPARATOR + hapInfo.moduleName;
             }
-            break;
+            std::string resolvedHqfFile(AbilityRuntime::GetLoadPath(hapInfo.hqfInfo.hqfFilePath));
+            HILOG_INFO("bundleName: %{public}s, moduleName: %{public}s, processName: %{private}s, "
+                "hqf file: %{private}s, hap path: %{private}s.", bundleName.c_str(), hapInfo.moduleName.c_str(),
+                hapInfo.process.c_str(), resolvedHqfFile.c_str(), resolvedHapPath.c_str());
+            fileMap.push_back(std::pair<std::string, std::string>(resolvedHqfFile, resolvedHapPath));
         }
-
-        std::string resolvedHqfFile(AbilityRuntime::GetLoadPath(hqfInfo.hqfFilePath));
-        HILOG_INFO("bundleName: %{public}s, moduleName: %{public}s, hqf file: %{private}s, hap path: %{private}s.",
-            bundleName.c_str(), moduleName.c_str(), resolvedHqfFile.c_str(), resolvedHapPath.c_str());
-        fileMap.push_back(std::pair<std::string, std::string>(resolvedHqfFile, resolvedHapPath));
     }
 
     return true;
 }
 
 int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName,
-    const sptr<IQuickFixCallback> &callback)
+    const sptr<IQuickFixCallback> &callback, const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("ScheduleNotifyUnLoadRepairPatch function called.");
     wptr<MainThread> weak = this;
-    auto task = [weak, bundleName, callback]() {
+    auto task = [weak, bundleName, callback, recordId]() {
         auto appThread = weak.promote();
         if (appThread == nullptr || appThread->application_ == nullptr || callback == nullptr) {
             HILOG_ERROR("ScheduleNotifyUnLoadRepairPatch, parameter is nullptr.");
@@ -2064,7 +2068,7 @@ int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleNam
             HILOG_DEBUG("ScheduleNotifyUnLoadRepairPatch, There's no hqfFile need to unload.");
         }
 
-        callback->OnUnloadPatchDone(ret ? NO_ERROR : ERR_INVALID_OPERATION);
+        callback->OnUnloadPatchDone(ret ? NO_ERROR : ERR_INVALID_OPERATION, recordId);
     };
     if (mainHandler_ == nullptr || !mainHandler_->PostTask(task)) {
         HILOG_ERROR("ScheduleNotifyUnLoadRepairPatch, Post task failed.");

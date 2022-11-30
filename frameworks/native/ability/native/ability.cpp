@@ -266,7 +266,7 @@ void Ability::OnStop()
     }
 #ifdef SUPPORT_GRAPHICS
     (void)Rosen::DisplayManager::GetInstance().UnregisterDisplayListener(abilityDisplayListener_);
-    auto&& window = GetWindow();
+    auto && window = GetWindow();
     if (window != nullptr) {
         HILOG_DEBUG("Call UnregisterDisplayMoveListener");
         window->UnregisterDisplayMoveListener(abilityDisplayMoveListener_);
@@ -508,14 +508,14 @@ void Ability::OnConfigurationUpdated(const Configuration &configuration)
     HILOG_DEBUG("%{public}s called.", __func__);
 }
 
-void Ability::OnConfigurationUpdatedNotify(const Configuration &changeConfiguration)
+void Ability::OnConfigurationUpdatedNotify(const Configuration &configuration)
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
 
     std::string language;
     std::string colormode;
     std::string hasPointerDevice;
-    InitConfigurationProperties(changeConfiguration, language, colormode, hasPointerDevice);
+    InitConfigurationProperties(configuration, language, colormode, hasPointerDevice);
     // Notify ResourceManager
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
@@ -550,7 +550,7 @@ void Ability::OnConfigurationUpdatedNotify(const Configuration &changeConfigurat
         abilityContext_->SetConfiguration(application_->GetConfiguration());
     }
     // Notify Ability Subclass
-    OnConfigurationUpdated(changeConfiguration);
+    OnConfigurationUpdated(configuration);
     HILOG_DEBUG("%{public}s Notify Ability Subclass.", __func__);
 }
 
@@ -953,7 +953,7 @@ void Ability::DispatchLifecycleOnForeground(const Want &want)
         HILOG_ERROR("Ability::OnForeground error. abilityLifecycleExecutor_ == nullptr.");
         return;
     }
-    if (abilityInfo_->isStageBasedModel) {
+    if (abilityInfo_ != nullptr && abilityInfo_->isStageBasedModel) {
         abilityLifecycleExecutor_->DispatchLifecycleState(AbilityLifecycleExecutor::LifecycleState::FOREGROUND_NEW);
     } else {
         abilityLifecycleExecutor_->DispatchLifecycleState(AbilityLifecycleExecutor::LifecycleState::INACTIVE);

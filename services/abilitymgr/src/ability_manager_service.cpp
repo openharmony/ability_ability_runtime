@@ -335,11 +335,7 @@ bool AbilityManagerService::Init()
 #ifdef SUPPORT_GRAPHICS
     DelayedSingleton<SystemDialogScheduler>::GetInstance()->SetDeviceType(amsConfigResolver_->GetDeviceType());
     implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
-    anrListener_ = std::make_shared<ApplicationAnrListener>();
-    MMI::InputManager::GetInstance()->SetAnrObserver(anrListener_);
-    WaitParameter(BOOTEVENT_BOOT_ANIMATION_STARTED.c_str(), "true", amsConfigResolver_->GetBootAnimationTimeoutTime());
 #endif
-    anrDisposer_ = std::make_shared<AppNoResponseDisposer>(amsConfigResolver_->GetANRTimeOutTime());
 
     interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
@@ -1248,7 +1244,7 @@ int AbilityManagerService::TerminateAbilityWithFlag(const sptr<IRemoteObject> &t
     return missionListManager->TerminateAbility(abilityRecord, resultCode, resultWant, flag);
 }
 
-int AbilityManagerService::SendResultToAbility(int requestCode, int resultCode, Want &resultWant)
+int AbilityManagerService::SendResultToAbility(int32_t requestCode, int32_t resultCode, Want &resultWant)
 {
     HILOG_INFO("%{public}s", __func__);
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
@@ -3014,6 +3010,11 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
         abilityWant.SetElementName(extensionAbilityInfo.bundleName, extensionAbilityInfo.name);
     }
 
+#ifdef SUPPORT_GRAPHICS
+    // wait BOOT_ANIMATION_STARTED to start LAUNCHER
+    WaitParameter(BOOTEVENT_BOOT_ANIMATION_STARTED.c_str(), "true", amsConfigResolver_->GetBootAnimationTimeoutTime());
+#endif
+
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
     (void)StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
 }
@@ -3626,6 +3627,9 @@ void AbilityManagerService::StartResidentApps()
 
     DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos);
     if (!bundleInfos.empty()) {
+#ifdef SUPPORT_GRAPHICS
+        WaitParameter(BOOTEVENT_BOOT_ANIMATION_STARTED.c_str(), "true", amsConfigResolver_->GetBootAnimationTimeoutTime());
+#endif
         DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
     }
 }
@@ -4431,12 +4435,18 @@ int AbilityManagerService::SendANRProcessID(int pid)
     }
 
     AppExecFwk::ApplicationInfo appInfo;
+    bool debug;
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
-    if (appScheduler->GetApplicationInfoByProcessID(pid, appInfo) == ERR_OK) {
+    if (appScheduler->GetApplicationInfoByProcessID(pid, appInfo, debug) == ERR_OK) {
         auto it = appRecoveryHistory_.find(appInfo.uid);
         if (it != appRecoveryHistory_.end()) {
             return ERR_OK;
         }
+    }
+
+    if (debug) {
+        HILOG_ERROR("SendANRProcessID error, debug mode.");
+        return ERR_INVALID_VALUE;
     }
 
     auto sysDialog = DelayedSingleton<SystemDialogScheduler>::GetInstance();
@@ -5416,30 +5426,25 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
         return ERR_OK;
     }
 
-    // Temp, solve FormIssue
-    if (abilityRequest.callerToken == nullptr) {
-        auto callerUid = IPCSkeleton::GetCallingUid();
-        auto bms = GetBundleManager();
-        CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
-        std::string callerBundleName;
-        bool ret = IN_PROCESS_CALL(bms->GetBundleNameForUid(callerUid, callerBundleName));
-        if (!ret) {
-            HILOG_ERROR("Can not find bundleName by callerUid: %{private}d.", callerUid);
+    if (AbilityUtil::IsStartFreeInstall(abilityRequest.want)) {
+        isBackgroundCall = false;
+        return ERR_OK;
+    }
+
+    AppExecFwk::RunningProcessInfo processInfo;
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility) {
+        DelayedSingleton<AppScheduler>::GetInstance()->
+            GetRunningProcessInfoByToken(callerAbility->GetToken(), processInfo);
+    } else {
+        auto callerPid = IPCSkeleton::GetCallingPid();
+        DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
+        if (processInfo.processName_.empty()) {
+            HILOG_ERROR("Can not find caller application by callerPid, callerPid: %{private}d.", callerPid);
             return ERR_INVALID_VALUE;
-        } else if (callerBundleName == BUNDLE_NAME_LAUNCHER) {
-            auto callerToken = IPCSkeleton::GetCallingTokenID();
-            HILOG_INFO("Temp, just for solve FormIssue, callerUid: %{private}d  callerToken: %{private}d.",
-                callerUid, callerToken);
-            isBackgroundCall = false;
-            return ERR_OK;
         }
     }
 
-    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    CHECK_POINTER_AND_RETURN(callerAbility, ERR_INVALID_VALUE);
-    AppExecFwk::RunningProcessInfo processInfo;
-    DelayedSingleton<AppScheduler>::GetInstance()->
-        GetRunningProcessInfoByToken(callerAbility->GetToken(), processInfo);
     if (backgroundJudgeFlag_) {
         isBackgroundCall = processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOREGROUND &&
             !processInfo.isFocused;
