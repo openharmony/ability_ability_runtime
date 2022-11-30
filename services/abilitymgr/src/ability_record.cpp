@@ -1974,6 +1974,7 @@ void AbilityRecord::CallRequest() const
 
 bool AbilityRecord::CallRequestDone(const sptr<IRemoteObject> &callStub) const
 {
+    CHECK_POINTER_RETURN_BOOL(callContainer_);
     if (!callContainer_->CallRequestDone(callStub)) {
         HILOG_ERROR("Call request failed.");
         return false;
