@@ -88,7 +88,7 @@ public:
 
     int TerminateAbilityByCaller(const sptr<IRemoteObject>& callerToken, int requestCode) override;
 
-    void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject> callStub) override;
+    void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
 
     int ReleaseCall(const sptr<IAbilityConnection>& connect, const AppExecFwk::ElementName& element) override;
 

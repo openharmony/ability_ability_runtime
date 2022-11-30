@@ -703,7 +703,7 @@ ErrCode AbilityManagerClient::StartAbilityByCall(
     return abms->StartAbilityByCall(want, connect, callToken);
 }
 
-void AbilityManagerClient::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub)
+void AbilityManagerClient::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);

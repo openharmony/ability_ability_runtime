@@ -91,7 +91,7 @@ int MockAbilityDelegatorStub::StartAbilityByCall(
 }
 
 void MockAbilityDelegatorStub::CallRequestDone(
-    const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub)
+    const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
     return;
 }
@@ -285,7 +285,7 @@ int MockAbilityDelegatorStub2::StartAbilityByCall(
 }
 
 void MockAbilityDelegatorStub2::CallRequestDone(
-    const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub)
+    const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
 {
     return;
 }

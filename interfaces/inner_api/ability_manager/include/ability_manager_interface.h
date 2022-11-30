@@ -479,7 +479,7 @@ public:
      * @param token, ability's token.
      * @param callStub, ability's callee.
      */
-    virtual void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> callStub) {};
+    virtual void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub) {};
 
     /**
      * Release the call between Ability, disconnect session with common ability.
