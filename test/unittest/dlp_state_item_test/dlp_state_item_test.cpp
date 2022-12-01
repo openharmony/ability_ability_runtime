@@ -17,12 +17,10 @@
 #include "ability_info.h"
 #include "want.h"
 #include "application_info.h"
-#define private public
-#include "dlp_state_item.h"
-#undef private
+#include "ability_record.h"
 
 #define private public
-#include "ability_record.h"
+#include "dlp_state_item.h"
 #undef private
 
 using namespace testing::ext;
