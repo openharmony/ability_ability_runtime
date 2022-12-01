@@ -21,7 +21,7 @@
 #include "dlp_state_item.h"
 #undef private
 
-#define protected public
+#define private public
 #include "ability_record.h"
 #undef private
 
