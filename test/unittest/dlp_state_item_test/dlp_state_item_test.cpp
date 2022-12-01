@@ -18,10 +18,7 @@
 #include "want.h"
 #include "application_info.h"
 #include "ability_record.h"
-
-#define private public
 #include "dlp_state_item.h"
-#undef private
 
 using namespace testing::ext;
 namespace OHOS {
