@@ -51,7 +51,7 @@ void DlpStateItemTest::TearDown()
 
 /*
  * Feature: DLP State Item
- * Function: AddDlpConnectionState AddDlpConnectionState 
+ * Function: AddDlpConnectionState AddDlpConnectionState
  * SubFunction: HandleDlpConnectionState
  * FunctionPoints:DLP State Item HandleDlpConnectionState
  * EnvConditions: NA
@@ -78,7 +78,7 @@ HWTEST_F(DlpStateItemTest, dlp_state_item_test_handle_001, TestSize.Level1)
 /*
  * Feature: DLP State Item
  * Function: GetOpenedAbilitySize
- * SubFunction: 
+ * SubFunction: NA
  * FunctionPoints:DLP State Item GetOpenedAbilitySize
  * EnvConditions: NA
  * CaseDescription: Verify GetOpenedAbilitySize
