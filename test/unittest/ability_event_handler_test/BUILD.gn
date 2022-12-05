@@ -22,9 +22,9 @@ ohos_unittest("ability_event_handler_test") {
   include_dirs = []
 
   sources = [
-    "ability_event_handler_test.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
-    ]
+    "ability_event_handler_test.cpp",
+  ]
 
   configs = [
     "${ability_runtime_services_path}/abilitymgr:abilityms_config",
@@ -49,9 +49,9 @@ ohos_unittest("ability_event_handler_test") {
     "ability_base:want",
     "ability_base:zuri",
     "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
-    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
