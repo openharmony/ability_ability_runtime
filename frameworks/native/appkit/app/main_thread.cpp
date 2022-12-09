@@ -130,6 +130,9 @@ MainThread::MainThread()
 MainThread::~MainThread()
 {
     HILOG_INFO("MainThread::MainThread call destructor.");
+    if (watchdog_ != nullptr) {
+        watchdog_->Stop();
+    }
 #ifdef ABILITY_LIBRARY_LOADER
     CloseAbilityLibrary();
 #endif  // ABILITY_LIBRARY_LOADER
