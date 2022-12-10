@@ -78,8 +78,6 @@ using OHOS::Security::AccessToken::AccessTokenKit;
 namespace OHOS {
 namespace AAFwk {
 namespace {
-const int32_t SYSTEM_UID = 1000;
-
 const std::string ARGS_USER_ID = "-u";
 const std::string ARGS_CLIENT = "-c";
 const std::string ILLEGAL_INFOMATION = "The arguments are illegal and you can enter '-h' for help.";
@@ -118,6 +116,59 @@ const std::string BUNDLE_NAME_PER_THRID_TEST = "com.example.actsabilitypermissio
 const std::string BUNDLE_NAME_SERVICE_SERVER_TEST = "com.amsst.stserviceabilityserver";
 const std::string BUNDLE_NAME_SERVICE_SERVER2_TEST = "com.amsst.stserviceabilityserversecond";
 const std::string BUNDLE_NAME_APPSELECT_SERVER_TEST = "bserviceabilityrelyhap";
+// New XTS white list
+const std::string BUNDLE_NAME_ABILITY_USER_TEST = "com.example.actsabilityusertest";
+const std::string BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE_TEST = "com.ohos.st.formstatenotifyinvisibletest";
+const std::string BUNDLE_NAME_FORM_STRESS_TEST = "com.ohos.st.formstresstest";
+const std::string BUNDLE_NAME_FORM_RELEASE_TEST = "com.ohos.st.formreleasetest";
+const std::string BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE2_TEST = "com.ohos.st.formstatenotifyinvisibletest2";
+const std::string BUNDLE_NAME_FORM_STATE_NOTIFY_VISIBLE_TEST = "com.ohos.st.formstatenotifyvisibletest";
+const std::string BUNDLE_NAME_FORM_STATE_DISABLE_TEST = "com.ohos.st.formstatedisabletest";
+const std::string BUNDLE_NAME_FORM_STATE_ENABLE_TEST = "com.ohos.st.formstateenabletest";
+const std::string BUNDLE_NAME_FORM_UPDATE_REFRESH_TEST = "com.ohos.st.formupdaterefreshtest";
+const std::string BUNDLE_NAME_FORM_DELETE_TEST = "com.ohos.st.formdeletetest";
+const std::string BUNDLE_NAME_FORM_ACQUIRE_TEST = "com.ohos.st.formacquiretest";
+const std::string BUNDLE_NAME_FORM_ACQUIRE2_TEST = "com.ohos.st.formacquiretest2";
+const std::string BUNDLE_NAME_FORM_DYNAMIC_REFRESH_TEST = "com.ohos.st.formdynamicrefreshtest";
+const std::string BUNDLE_NAME_HMS_SERVICE_TEST = "com.example.myapplication.hmservice";
+const std::string BUNDLE_NAME_PACKAGE_MAG_TEST = "com.open.harmony.packagemag";
+const std::string BUNDLE_NAME_ACTS_MULTIUSER_EXTENSION_TEST = "com.acts.actsinterfacemultiusersextensionthirdtest";
+const std::string BUNDLE_NAME_TEST_API_TEST = "com.example.testapi";
+const std::string BUNDLE_NAME_APPLICATION_INFO_TEST = "com.example.applicationinfo";
+const std::string BUNDLE_NAME_FEATURE_ABILITY_TEST = "com.example.actsfeatureabilitytest";
+const std::string BUNDLE_NAME_GET_APP_CONTEXT_STAGE_B_TEST = "com.example.actsgetappcontextstagebtest";
+const std::string BUNDLE_NAME_GET_CUR_TOP_ABILITY_B_TEST = "com.example.actsgetcurrenttopabilitystagebtest";
+const std::string BUNDLE_NAME_GET_CUR_TOP_ABILITY_A_TEST = "com.example.actsgetcurrenttopabilitystageatest";
+const std::string BUNDLE_NAME_GET_APP_CONTEXT_TEST = "com.example.actsgetappcontexttest";
+const std::string BUNDLE_NAME_GET_ABILITY_STATE_TEST = "com.example.actsgetabilitystatestagetest";
+const std::string BUNDLE_NAME_GET_APP_CONTEXT_STAGE_A_TEST = "com.example.actsgetappcontextstageatest";
+const std::string BUNDLE_NAME_KILL_PROCESS_WITH_ACCOUNT_TEST = "com.acts.killprocesswithaccount";
+const std::string BUNDLE_NAME_ABILITY_PERMISSION_TEST = "com.example.actsabilitypermissiontest";
+const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_C_TEST = "com.example.amsabilitymultiinstanceappc";
+const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_TEST = "com.example.abilitymultiinstance";
+const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_E_TEST = "com.example.amsabilitymultiinstanceappe";
+const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_A_TEST = "com.example.amsabilitymultiinstanceappa";
+const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_B_TEST = "com.example.amsabilitymultiinstanceappb";
+const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_D_TEST = "com.example.amsabilitymultiinstanceappd";
+const std::string BUNDLE_NAME_AA_PRINT_TEST = "com.example.aacommandprintsynctest";
+const std::string BUNDLE_NAME_AA_COMMAND_TEST = "com.example.aacommandtest";
+const std::string BUNDLE_NAME_AA_PRINT_ONE_TEST = "com.example.aacommandprintonetest";
+const std::string BUNDLE_NAME_ON_OFF_SCREEN_TEST = "com.example.actsonandoffscreentest";
+const std::string BUNDLE_NAME_SUPPORT_FUNC_HAP_TEST = "com.example.supportfunctionhaptest";
+const std::string BUNDLE_NAME_PROCESS_MULTI_INSTANCE_TEST = "com.example.processmultiinstance";
+const std::string BUNDLE_NAME_ABILITY_MONITOR_TEST = "com.example.abilitymonitortest";
+const std::string BUNDLE_NAME_GET_DISPLAY_ID_TEST = "com.example.actsgetdisplayidtest";
+const std::string BUNDLE_NAME_START_ABILITY_FOR_RESULT_TEST = "com.example.startabilityforresult";
+const std::string BUNDLE_NAME_STAGE_APP_CONTEXT_TEST = "com.example.stageappcontexttest";
+const std::string BUNDLE_NAME_STAGE_CONTEXT_PROPERTE_TEST = "com.example.stagecontextpropertiestest";
+const std::string BUNDLE_NAME_NEW_WANT_HAP_TEST = "com.example.newwanthap";
+const std::string BUNDLE_NAME_NEW_WANT_HAP_API7_TEST = "com.example.newwanthapapi7";
+const std::string BUNDLE_NAME_NEW_WANT_HAP_A_TEST = "com.example.newwanthapa";
+const std::string BUNDLE_NAME_NEW_WANT_TEST = "com.example.newwanttest";
+const std::string BUNDLE_NAME_API_COVER_HAP_TEST = "com.example.apicoverhaptest";
+const std::string BUNDLE_NAME_LIFE_CYCLE_TEST = "com.example.lifecycletest";
+const std::string BUNDLE_NAME_LIFE_CYCLE_XTS_TEST = "com.example.lifecycle_xts";
+const std::string BUNDLE_NAME_WINDOW_STAGE_LIFE_CYCLE_TEST = "com.example.windowstagelifecycle_xts";
 
 // White list
 const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_DEVICE_TEST,
@@ -138,7 +189,59 @@ const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_DEVI
                                                                 BUNDLE_NAME_PER_THRID_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER_TEST,
                                                                 BUNDLE_NAME_APPSELECT_SERVER_TEST,
-                                                                BUNDLE_NAME_SERVICE_SERVER2_TEST };
+                                                                BUNDLE_NAME_SERVICE_SERVER2_TEST,
+                                                                BUNDLE_NAME_ABILITY_USER_TEST,
+                                                                BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE_TEST,
+                                                                BUNDLE_NAME_FORM_STRESS_TEST,
+                                                                BUNDLE_NAME_FORM_RELEASE_TEST,
+                                                                BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE2_TEST,
+                                                                BUNDLE_NAME_FORM_STATE_NOTIFY_VISIBLE_TEST,
+                                                                BUNDLE_NAME_FORM_STATE_DISABLE_TEST,
+                                                                BUNDLE_NAME_FORM_STATE_ENABLE_TEST,
+                                                                BUNDLE_NAME_FORM_UPDATE_REFRESH_TEST,
+                                                                BUNDLE_NAME_FORM_DELETE_TEST,
+                                                                BUNDLE_NAME_FORM_ACQUIRE_TEST,
+                                                                BUNDLE_NAME_FORM_ACQUIRE2_TEST,
+                                                                BUNDLE_NAME_FORM_DYNAMIC_REFRESH_TEST,
+                                                                BUNDLE_NAME_HMS_SERVICE_TEST,
+                                                                BUNDLE_NAME_PACKAGE_MAG_TEST,
+                                                                BUNDLE_NAME_ACTS_MULTIUSER_EXTENSION_TEST,
+                                                                BUNDLE_NAME_TEST_API_TEST,
+                                                                BUNDLE_NAME_APPLICATION_INFO_TEST,
+                                                                BUNDLE_NAME_FEATURE_ABILITY_TEST,
+                                                                BUNDLE_NAME_GET_APP_CONTEXT_STAGE_B_TEST,
+                                                                BUNDLE_NAME_GET_CUR_TOP_ABILITY_B_TEST,
+                                                                BUNDLE_NAME_GET_CUR_TOP_ABILITY_A_TEST,
+                                                                BUNDLE_NAME_GET_APP_CONTEXT_TEST,
+                                                                BUNDLE_NAME_GET_ABILITY_STATE_TEST,
+                                                                BUNDLE_NAME_GET_APP_CONTEXT_STAGE_A_TEST,
+                                                                BUNDLE_NAME_KILL_PROCESS_WITH_ACCOUNT_TEST,
+                                                                BUNDLE_NAME_ABILITY_PERMISSION_TEST,
+                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_C_TEST,
+                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_TEST,
+                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_E_TEST,
+                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_A_TEST,
+                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_B_TEST,
+                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_D_TEST,
+                                                                BUNDLE_NAME_AA_PRINT_TEST,
+                                                                BUNDLE_NAME_AA_COMMAND_TEST,
+                                                                BUNDLE_NAME_AA_PRINT_ONE_TEST,
+                                                                BUNDLE_NAME_ON_OFF_SCREEN_TEST,
+                                                                BUNDLE_NAME_SUPPORT_FUNC_HAP_TEST,
+                                                                BUNDLE_NAME_PROCESS_MULTI_INSTANCE_TEST,
+                                                                BUNDLE_NAME_ABILITY_MONITOR_TEST,
+                                                                BUNDLE_NAME_GET_DISPLAY_ID_TEST,
+                                                                BUNDLE_NAME_START_ABILITY_FOR_RESULT_TEST,
+                                                                BUNDLE_NAME_STAGE_APP_CONTEXT_TEST,
+                                                                BUNDLE_NAME_STAGE_CONTEXT_PROPERTE_TEST,
+                                                                BUNDLE_NAME_NEW_WANT_HAP_TEST,
+                                                                BUNDLE_NAME_NEW_WANT_HAP_API7_TEST,
+                                                                BUNDLE_NAME_NEW_WANT_HAP_A_TEST,
+                                                                BUNDLE_NAME_NEW_WANT_TEST,
+                                                                BUNDLE_NAME_API_COVER_HAP_TEST,
+                                                                BUNDLE_NAME_LIFE_CYCLE_TEST,
+                                                                BUNDLE_NAME_LIFE_CYCLE_XTS_TEST,
+                                                                BUNDLE_NAME_WINDOW_STAGE_LIFE_CYCLE_TEST };
 const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_TELE_DATA,
                                                                     BUNDLE_NAME_CONTACTS_DATA,
                                                                     BUNDLE_NAME_DEVICE_TEST };
@@ -823,7 +926,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     }
 
 #ifdef SUPPORT_GRAPHICS
-    if (!CheckWindowMode(startOptions.GetWindowMode(), abilityInfo.windowModes)) {
+    if (abilityInfo.isStageBasedModel && !CheckWindowMode(startOptions.GetWindowMode(), abilityInfo.windowModes)) {
         return ERR_AAFWK_INVALID_WINDOW_MODE;
     }
 #endif
@@ -1197,6 +1300,10 @@ int AbilityManagerService::TerminateAbilityWithFlag(const sptr<IRemoteObject> &t
 
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (!JudgeSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
     int result = JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
     if (result != ERR_OK) {
         HILOG_ERROR("%{public}s JudgeAbilityVisibleControl error.", __func__);
@@ -1366,6 +1473,9 @@ int AbilityManagerService::TerminateAbilityByCaller(const sptr<IRemoteObject> &c
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (!JudgeSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
 #ifdef SUPPORT_GRAPHICS
     if (IsSystemUiApp(abilityRecord->GetAbilityInfo())) {
         HILOG_ERROR("System ui not allow terminate.");
@@ -1433,6 +1543,10 @@ int AbilityManagerService::MinimizeAbility(const sptr<IRemoteObject> &token, boo
 
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (!JudgeSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
     int result = JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
     if (result != ERR_OK) {
         HILOG_ERROR("%{public}s JudgeAbilityVisibleControl error.", __func__);
@@ -3026,7 +3140,8 @@ int AbilityManagerService::GenerateAbilityRequest(
     request.callerToken = callerToken;
     request.startSetting = nullptr;
 
-    if (IPCSkeleton::GetCallingUid() == SYSTEM_UID) {
+    auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyMissionPermission();
+    if (isPerm) {
         sptr<IRemoteObject> abilityInfoCallback = want.GetRemoteObject("abilityInfoCallback");
         if (abilityInfoCallback != nullptr) {
             request.abilityInfoCallback = abilityInfoCallback;
@@ -3167,6 +3282,9 @@ int AbilityManagerService::TerminateAbilityResult(const sptr<IRemoteObject> &tok
 
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (!JudgeSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
     int result = JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
     if (result != ERR_OK) {
         HILOG_ERROR("%{public}s JudgeAbilityVisibleControl error.", __func__);
@@ -5570,6 +5688,23 @@ int AbilityManagerService::AddStartControlParam(Want &want, const sptr<IRemoteOb
     }
     want.SetParam(DMS_IS_CALLER_BACKGROUND, isCallerBackground);
     return ERR_OK;
+}
+
+bool AbilityManagerService::JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (isSaCall) {
+        return true;
+    }
+
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
+    if (callingTokenId != tokenID) {
+        HILOG_ERROR("Is not self, not enabled");
+        return false;
+    }
+
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
