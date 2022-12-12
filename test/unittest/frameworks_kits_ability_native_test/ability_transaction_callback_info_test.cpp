@@ -45,7 +45,7 @@ HWTEST_F(AbilityTransactionCallbackInfoTest, AaFwk_AbilityTransactionCallbackInf
 {
     GTEST_LOG_(INFO) << "AaFwk_AbilityTransactionCallbackInfoTest_Call_0100 start";
 
-    AbilityTransactionCallbackInfo *callbackInfo = AbilityTransactionCallbackInfo::Create();
+    auto* callbackInfo = AbilityTransactionCallbackInfo<>::Create();
     EXPECT_NE(callbackInfo, nullptr);
     g_count = 0;
     auto asyncCallback = []() {
@@ -60,7 +60,7 @@ HWTEST_F(AbilityTransactionCallbackInfoTest, AaFwk_AbilityTransactionCallbackInf
     EXPECT_EQ(g_count, 0);
     callbackInfo->Call();
     EXPECT_EQ(g_count, PUSH_COUNT);
-    AbilityTransactionCallbackInfo::Destroy(callbackInfo);
+    AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
     GTEST_LOG_(INFO) << "AaFwk_AbilityTransactionCallbackInfoTest_Call_0100 end";
 }
 }  // namespace AppExecFwk
