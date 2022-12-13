@@ -3285,6 +3285,17 @@ int AbilityManagerService::KillProcess(const std::string &bundleName)
     return ERR_OK;
 }
 
+int AbilityManagerService::KillProcessSelf()
+{
+    HILOG_DEBUG("Kill process by self");
+ 
+    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationSelf();
+    if (ret != ERR_OK) {
+        return KILL_PROCESS_FAILED;
+    }
+    return ERR_OK;
+}
+
 int AbilityManagerService::ClearUpApplicationData(const std::string &bundleName)
 {
     HILOG_DEBUG("ClearUpApplicationData, bundleName: %{public}s", bundleName.c_str());
@@ -5407,6 +5418,11 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
     HILOG_DEBUG("The caller has permission to resolve the call proxy of common ability.");
 
     return ERR_OK;
+}
+
+bool AbilityManagerService::VerifyCallingPermission(const std::string &permissionName)
+{
+    return AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(permissionName);
 }
 
 int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall)

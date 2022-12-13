@@ -102,6 +102,12 @@ public:
         return (me != nullptr) ? me->OnkillProcessByBundleName(*engine, *info) : nullptr;
     }
 
+    static NativeValue* KillProcessSelf(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsAppManager* me = CheckParamsAndGetThis<JsAppManager>(engine, info);
+        return (me != nullptr) ? me->OnkillProcessSelf(*engine, *info) : nullptr;
+    }
+
     static NativeValue* ClearUpApplicationData(NativeEngine* engine, NativeCallbackInfo* info)
     {
         JsAppManager* me = CheckParamsAndGetThis<JsAppManager>(engine, info);
@@ -371,6 +377,44 @@ private:
         return result;
     }
 
+    NativeValue* OnkillProcessSelf(NativeEngine &engine, const NativeCallbackInfo &info)
+    {
+        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        int32_t errCode = 0;
+
+        // only support 0 or 1 params
+        if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE) {
+            HILOG_ERROR("Not enough params");
+            errCode = ERR_NOT_OK;
+        }
+
+        HILOG_INFO("kill self process");
+        AsyncTask::CompleteCallback complete =
+            [abilityManager = abilityManager_, errCode](NativeEngine& engine, AsyncTask& task,
+                int32_t status) {
+            if (errCode != 0) {
+                task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
+                return;
+            }
+            if (abilityManager == nullptr) {
+                HILOG_WARN("abilityManager nullptr");
+                task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "abilityManager nullptr"));
+                return;
+            }
+            auto ret = abilityManager->KillProcessSelf();
+            if (ret == 0) {
+                task.Resolve(engine, CreateJsValue(engine, ret));
+            } else {
+                task.Reject(engine, CreateJsError(engine, ret, "kill process by self failed."));
+            }
+        };
+
+        NativeValue* result = nullptr;
+        AsyncTask::Schedule("JSAppManager::OnkillProcessSelf",
+            engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
+        return result;
+    }
+
     NativeValue* OnClearUpApplicationData(NativeEngine &engine, const NativeCallbackInfo &info)
     {
         HILOG_INFO("%{public}s is called", __FUNCTION__);
@@ -580,6 +624,8 @@ NativeValue* JsAppManagerInit(NativeEngine* engine, NativeValue* exportObj)
         JsAppManager::KillProcessWithAccount);
     BindNativeFunction(*engine, *object, "killProcessesByBundleName", moduleName,
         JsAppManager::KillProcessesByBundleName);
+    BindNativeFunction(*engine, *object, "killProcessSelf", moduleName,
+        JsAppManager::killProcessSelf);
     BindNativeFunction(*engine, *object, "clearUpApplicationData", moduleName,
         JsAppManager::ClearUpApplicationData);
     BindNativeFunction(*engine, *object, "getAppMemorySize", moduleName,
