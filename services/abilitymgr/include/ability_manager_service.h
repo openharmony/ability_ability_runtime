@@ -719,7 +719,8 @@ public:
      * @param componentInterception, component interception.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int SetComponentInterception(const sptr<AppExecFwk::IComponentInterception> &componentInterception) override;
+    virtual int SetComponentInterception(
+        const sptr<AppExecFwk::IComponentInterception> &componentInterception) override;
 
     bool IsAbilityControllerStart(const Want &want, const std::string &bundleName);
 
