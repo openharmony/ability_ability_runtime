@@ -36,13 +36,11 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-
-protected:
-
 };
 
 void ConnectCallbackStubTest::SetUpTestCase(void)
 {}
+
 void ConnectCallbackStubTest::TearDownTestCase(void)
 {}
 
