@@ -37,13 +37,11 @@ public:
     static void TearDownTestCase(void);
     void SetUp();
     void TearDown();
-
-protected:
-
 };
 
 void ConnectCallbackProxyTest::SetUpTestCase(void)
 {}
+
 void ConnectCallbackProxyTest::TearDownTestCase(void)
 {}
 
