@@ -421,7 +421,9 @@ private:
      */
     void PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t messageId);
 
-    bool IsAbilityNeedRestart(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void PostRestartResidentTask(const AbilityRequest &abilityRequest);
+
+    bool IsAbilityNeedKeepAlive(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     std::shared_ptr<AbilityRecord> GetAbilityRecordByEventId(int64_t eventId);
     void HandleInactiveTimeout(const std::shared_ptr<AbilityRecord> &ability);
@@ -436,6 +438,7 @@ private:
     RecipientMapType recipientMap_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     int userId_;
+    std::vector<AbilityRequest> restartResidentTaskList_;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };

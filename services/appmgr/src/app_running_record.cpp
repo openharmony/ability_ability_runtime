@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "ability_manager_service.h"
 #include "app_running_record.h"
 #include "app_mgr_service_inner.h"
 #include "hitrace_meter.h"
@@ -230,7 +231,15 @@ void AppRunningRecord::SetState(const ApplicationState state)
         HILOG_ERROR("Invalid application state");
         return;
     }
+    if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
+        restartResidentProcCount_ = RESTART_RESIDENT_PROCESS_MAX_TIMES;
+    }
     curState_ = state;
+}
+
+void AppRunningRecord::SetRestartTimeMillis(const int64_t restartTimeMillis)
+{
+    restartTimeMillis_ = restartTimeMillis;
 }
 
 const std::list<std::shared_ptr<ApplicationInfo>> AppRunningRecord::GetAppInfoList()
@@ -1142,7 +1151,20 @@ int AppRunningRecord::GetRestartResidentProcCount() const
 
 bool AppRunningRecord::CanRestartResidentProc()
 {
-    return (restartResidentProcCount_ > 0);
+    struct timespec t;
+    t.tv_sec = 0;
+    t.tv_nsec = 0;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    int64_t systemTimeMillis = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS);
+    int restartIntervalTime = 0; 
+    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+    if (abilityMgr) {
+        abilityMgr->GetRestartIntervalTime(restartIntervalTime);
+    }
+    if ((restartResidentProcCount_ >= 0) || ((systemTimeMillis - restartTimeMillis_) > restartIntervalTime)) {
+        return true;
+    }
+    return false;
 }
 
 void AppRunningRecord::GetBundleNames(std::vector<std::string> &bundleNames)

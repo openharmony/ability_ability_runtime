@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
+#include "ability_manager_service.h"
 #include "application_state_observer_stub.h"
 #include "datetime_ex.h"
 #include "hilog_wrapper.h"
@@ -1533,17 +1534,30 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     }
 
     if (appRecord->IsKeepAliveApp()) {
-        appRecord->DecRestartResidentProcCount();
+        auto restartProcess = [appRecord, innerService = shared_from_this()]() {
+            innerService->RestartResidentProcess(appRecord);
+        };
         if (appRecord->CanRestartResidentProc()) {
-            auto restartProcess = [appRecord, innerService = shared_from_this()]() {
-                innerService->RestartResidentProcess(appRecord);
-            };
-
             if (!eventHandler_) {
                 HILOG_ERROR("eventHandler_ is nullptr");
                 return;
             }
             eventHandler_->PostTask(restartProcess, "RestartResidentProcess");
+        } else {
+            auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
+                return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
+            };
+            auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(), findRestartResidentTask);
+            if (findIter != restartResedentTaskList_.end()) {
+                return;
+            }
+            restartResedentTaskList_.emplace_back(appRecord);
+            int restartIntervalTime = 0; 
+            auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+            if (abilityMgr) {
+                abilityMgr->GetRestartIntervalTime(restartIntervalTime);
+            }
+            eventHandler_->PostTask(restartProcess, "RestartResidentProcessDelay", restartIntervalTime);
         }
     }
 }
@@ -1817,7 +1831,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
 
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModules(appInfo, info.hapModuleInfos);
-    HILOG_INFO("StartEmptyResidentProcess oK pid : [%{public}d], ", appRecord->GetPriorityObject()->GetPid());
+    HILOG_INFO("StartEmptyResidentProcess of pid : [%{public}d], ", appRecord->GetPriorityObject()->GetPid());
 }
 
 bool AppMgrServiceInner::CheckRemoteClient()
@@ -1841,6 +1855,23 @@ bool AppMgrServiceInner::CheckRemoteClient()
 
 void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord)
 {
+    if (appRecord->GetRestartResidentProcCount() == RESTART_RESIDENT_PROCESS_MAX_TIMES) {
+        struct timespec t;
+        t.tv_sec = 0;
+        t.tv_nsec = 0;
+        clock_gettime(CLOCK_MONOTONIC, &t);
+        appRecord->SetRestartTimeMillis(static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS));
+    }
+    appRecord->DecRestartResidentProcCount();
+
+    auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
+        return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
+    };
+    auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(), findRestartResidentTask);
+    if (findIter != restartResedentTaskList_.end()) {
+        restartResedentTaskList_.erase(findIter);
+    }
+
     if (!CheckRemoteClient() || !appRecord || !appRunningManager_) {
         HILOG_ERROR("restart resident process failed!");
         return;
