@@ -558,7 +558,10 @@ public:
      * @param componentInterception, component interception.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int SetComponentInterception(const sptr<AppExecFwk::IComponentInterception> &componentInterception) {};
+    virtual int SetComponentInterception(const sptr<AppExecFwk::IComponentInterception> &componentInterception)
+    {
+        return 0;
+    }
 
     /**
      * Is user a stability test.
