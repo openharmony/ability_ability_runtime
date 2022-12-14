@@ -86,6 +86,7 @@ public:
     int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     MOCK_METHOD1(KillProcess, int(const std::string& bundleName));
+    MOCK_METHOD0(KillProcessSelf, int());
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
     MOCK_METHOD2(
         GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken));
