@@ -779,7 +779,7 @@ HWTEST_F(ContinuationTest, continue_manager_OnContinueAndGetContent_001, TestSiz
 HWTEST_F(ContinuationTest, continue_manager_OnContinueAndGetContent_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "continue_manager_OnContinueAndGetContent_002 start";
-    EXPECT_CALL(*mockAbility_, OnContinue(_)).Times(1).WillOnce(Return(ContinuationManager::OnContinueResult::REJECT));
+    EXPECT_CALL(*mockAbility_, OnContinue(_)).Times(1).WillOnce(Return(ContinuationManager::OnContinueResult::Reject));
     std::weak_ptr<ContinuationManager> continuationManager = continuationManager_;
     std::weak_ptr<Ability> abilityTmp = mockAbility_;
     auto continuationHandler = std::make_shared<ContinuationHandler>(continuationManager, abilityTmp);
