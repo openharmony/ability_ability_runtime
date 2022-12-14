@@ -553,7 +553,7 @@ int32_t AppMgrServiceInner::KillApplicationSelf()
     }
 
     auto callerPid = IPCSkeleton::GetCallingPid();
-    auto appRecord = GetAppRunningRecordByPid(callerpid);
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
     auto bundleName = appRecord->GetBundleName();
     int result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();

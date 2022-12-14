@@ -735,8 +735,6 @@ public:
      */
     virtual int SendANRProcessID(int pid) override;
 
-
-
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * Block ability manager service.
