@@ -222,11 +222,13 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
             targetService->SetLauncherRoot();
             targetService->SetKeepAlive();
             targetService->SetRestartTime(abilityRequest.restartTime);
-            targetService->SetRestarting(abilityRequest.restart, abilityRequest.restartCount);
+            targetService->SetRestarting(abilityRequest.restart);
+            targetService->SetRestartCount(abilityRequest.restartCount);
         } else if (IsAbilityNeedKeepAlive(targetService)) {
             targetService->SetKeepAlive();
             targetService->SetRestartTime(abilityRequest.restartTime);
-            targetService->SetRestarting(abilityRequest.restart, abilityRequest.restartCount);
+            targetService->SetRestarting(abilityRequest.restart);
+            targetService->SetRestartCount(abilityRequest.restartCount);
         }
         serviceMap_.emplace(element.GetURI(), targetService);
         isLoadedAbility = false;
@@ -1165,6 +1167,7 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
     requestInfo.appInfo = abilityRecord->GetApplicationInfo();
     requestInfo.restartTime = abilityRecord->GetRestartTime();
     requestInfo.restart = true;
+    abilityRecord->SetRestarting(true);
 
     if (currentUserId != userId_ &&
         abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
@@ -1173,7 +1176,7 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
     }
 
     if (abilityRecord->GetAbilityInfo().name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
-        requestInfo.restartCount = abilityRecord->GetRestartCount() - 1;
+        requestInfo.restartCount = abilityRecord->GetRestartCount();
         HILOG_DEBUG("restart root launcher, number:%{public}d", requestInfo.restartCount);
         StartAbilityLocked(requestInfo);
         return;
@@ -1181,7 +1184,7 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
 
     // restart other resident ability
     if (abilityRecord->CanRestartResident()) {
-        requestInfo.restartCount = abilityRecord->GetRestartCount() - 1;
+        requestInfo.restartCount = abilityRecord->GetRestartCount();
         StartAbilityLocked(requestInfo);
     } else {
         auto findRestartResidentTask = [requestInfo](const AbilityRequest &abilityRequest) {

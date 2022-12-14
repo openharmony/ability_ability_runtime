@@ -261,7 +261,7 @@ void QuickFixManagerApplyTask::HandlePatchDeployed()
         auto service = quickFixMgrService_.promote();
         if (service == nullptr) {
             HILOG_ERROR("Quick fix service is nullptr.");
-            NotifyApplyStatus(QUICK_FIX_NOTIFY_UNLOAD_PATCH_FAILED);
+            NotifyApplyStatus(QUICK_FIX_INVALID_PARAM);
             RemoveSelf();
             return;
         }
@@ -371,6 +371,10 @@ void QuickFixManagerApplyTask::PostSwitchQuickFixTask()
 void QuickFixManagerApplyTask::PostDeleteQuickFixTask()
 {
     auto callback = new (std::nothrow) QuickFixManagerStatusCallback(shared_from_this());
+    if (callback == nullptr) {
+        HILOG_ERROR("callback is nullptr.");
+        return;
+    }
     std::weak_ptr<QuickFixManagerApplyTask> thisWeakPtr(weak_from_this());
     auto deleteTask = [thisWeakPtr, callback]() {
         auto applyTask = thisWeakPtr.lock();
