@@ -437,7 +437,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcessSelf();
+    virtual int KillProcesSelf();
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
