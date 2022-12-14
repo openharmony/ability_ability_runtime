@@ -68,7 +68,7 @@ public:
     int GetMaxRestartNum(bool isRootLauncher) const;
 
     /**
-     * Get the interval time after restart out of the max number of restart 
+     * Get the interval time after restart out of the max number of restart.
      */
     int GetRestartIntervalTime() const;
 

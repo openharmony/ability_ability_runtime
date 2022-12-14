@@ -1156,7 +1156,7 @@ bool AppRunningRecord::CanRestartResidentProc()
     t.tv_nsec = 0;
     clock_gettime(CLOCK_MONOTONIC, &t);
     int64_t systemTimeMillis = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS);
-    int restartIntervalTime = 0; 
+    int restartIntervalTime = 0;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     if (abilityMgr) {
         abilityMgr->GetRestartIntervalTime(restartIntervalTime);

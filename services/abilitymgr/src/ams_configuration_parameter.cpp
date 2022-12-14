@@ -126,7 +126,8 @@ int AmsConfigurationParameter::LoadAppConfigurationForStartUpService(nlohmann::j
             Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::APP_NOT_RESPONSE_PROCESS_TIMEOUT_TIME).get<int>();
         amsTime_ =
             Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::AMS_TIMEOUT_TIME).get<int>();
-        maxRootLauncherRestartNum_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::ROOT_LAUNCHER_RESTART_MAX).get<int>();
+        maxRootLauncherRestartNum_ =
+            Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::ROOT_LAUNCHER_RESTART_MAX).get<int>();
         maxResidentRestartNum_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::RESIDENT_RESTART_MAX).get<int>();
         restartIntervalTime_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::RESTART_INTERVAL_TIME).get<int>();
         deviceType_ = Object.at(AmsConfig::SERVICE_ITEM_AMS).at(AmsConfig::DEVICE_TYPE).get<std::string>();

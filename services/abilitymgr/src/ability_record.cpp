@@ -262,9 +262,10 @@ bool AbilityRecord::CanRestartRootLauncher()
 
 bool AbilityRecord::CanRestartResident()
 {
-    HILOG_ERROR("[DongLin]isKeepAlive: %{public}d, isRestarting: %{public}d, restartCount: %{public}d", isKeepAlive_, isRestarting_, restartCount_);
+    HILOG_DEBUG("isKeepAlive: %{public}d, isRestarting: %{public}d, restartCount: %{public}d",
+        isKeepAlive_, isRestarting_, restartCount_);
     if (isKeepAlive_ && isRestarting_ && (restartCount_ < 0)) {
-        int restartIntervalTime = 0;        
+        int restartIntervalTime = 0;
         auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
         if (abilityMgr) {
             abilityMgr->GetRestartIntervalTime(restartIntervalTime);
@@ -274,7 +275,6 @@ bool AbilityRecord::CanRestartResident()
             return false;
         }
     }
-    HILOG_ERROR("[DongLin]CanRestartResident: true");
     return true;
 }
 
@@ -1834,7 +1834,6 @@ void AbilityRecord::SetRestarting(const bool isRestart)
 {
     isRestarting_ = isRestart;
     HILOG_DEBUG("SetRestarting: %{public}d", isRestarting_);
-    HILOG_DEBUG("[DongLin]isRestart: %{public}d, isKeepAlive: %{public}d", isRestarting_, isKeepAlive_);
     if ((isLauncherRoot_ && IsLauncherAbility()) || isKeepAlive_) {
         restartCount_ = isRestart ? (--restartCount_) : restartMax_;
         HILOG_INFO("root launcher or resident process's restart count: %{public}d", restartCount_);
@@ -2171,10 +2170,10 @@ void AbilityRecord::DumpSys(std::vector<std::string> &info, bool isClient)
     std::string isKeepAlive = isKeepAlive_ ? "true" : "false";
     dumpInfo = "        isKeepAlive: " + isKeepAlive;
     info.push_back(dumpInfo);
-    // if (isLauncherRoot_ && abilityInfo_.isStageBasedModel) {
+    if (isLauncherRoot_ && abilityInfo_.isStageBasedModel) {
         dumpInfo = "        can restart num #" + std::to_string(restartCount_);
         info.push_back(dumpInfo);
-    // }
+    }
     const std::vector<std::string> params;
     DumpClientInfo(info, params, isClient);
 }

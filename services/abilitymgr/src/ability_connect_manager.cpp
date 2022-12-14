@@ -673,7 +673,8 @@ void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilit
                 requestInfo.want.GetElement().GetModuleName() == abilityRequest.want.GetElement().GetModuleName() &&
                 requestInfo.want.GetElement().GetAbilityName() == abilityRequest.want.GetElement().GetAbilityName());
         };
-        auto findIter = find_if(connectManager->restartResidentTaskList_.begin(), connectManager->restartResidentTaskList_.end(), findRestartResidentTask);
+        auto findIter = find_if(connectManager->restartResidentTaskList_.begin(),
+            connectManager->restartResidentTaskList_.end(), findRestartResidentTask);
         if (findIter != connectManager->restartResidentTaskList_.end()) {
             connectManager->restartResidentTaskList_.erase(findIter);
         }
@@ -791,7 +792,7 @@ void AbilityConnectManager::StartRootLauncher(const std::shared_ptr<AbilityRecor
     requestInfo.want = abilityRecord->GetWant();
     requestInfo.abilityInfo = abilityRecord->GetAbilityInfo();
     requestInfo.appInfo = abilityRecord->GetApplicationInfo();
-    requestInfo.restartTime = abilityRecord->GetRestartTime(); 
+    requestInfo.restartTime = abilityRecord->GetRestartTime();
     requestInfo.restart = true;
     requestInfo.restartCount = abilityRecord->GetRestartCount() - 1;
 
@@ -1188,7 +1189,8 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
                 requestInfo.want.GetElement().GetModuleName() == abilityRequest.want.GetElement().GetModuleName() &&
                 requestInfo.want.GetElement().GetAbilityName() == abilityRequest.want.GetElement().GetAbilityName());
         };
-        auto findIter = find_if(restartResidentTaskList_.begin(), restartResidentTaskList_.end(), findRestartResidentTask);
+        auto findIter = find_if(restartResidentTaskList_.begin(), restartResidentTaskList_.end(),
+            findRestartResidentTask);
         if (findIter != restartResidentTaskList_.end()) {
             return;
         }

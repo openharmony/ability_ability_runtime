@@ -1547,12 +1547,13 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
             auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
                 return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
             };
-            auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(), findRestartResidentTask);
+            auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(),
+                findRestartResidentTask);
             if (findIter != restartResedentTaskList_.end()) {
                 return;
             }
             restartResedentTaskList_.emplace_back(appRecord);
-            int restartIntervalTime = 0; 
+            int restartIntervalTime = 0;
             auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
             if (abilityMgr) {
                 abilityMgr->GetRestartIntervalTime(restartIntervalTime);
