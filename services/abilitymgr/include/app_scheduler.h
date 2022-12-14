@@ -218,7 +218,6 @@ public:
      */
     int KillApplicationSelf();
 
-
     /**
      * kill the application by uid
      *
