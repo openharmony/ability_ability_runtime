@@ -5420,11 +5420,6 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
     return ERR_OK;
 }
 
-bool AbilityManagerService::VerifyCallingPermission(const std::string &permissionName)
-{
-    return AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(permissionName);
-}
-
 int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall)
 {
     if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {

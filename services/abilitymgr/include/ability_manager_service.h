@@ -437,7 +437,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcessSelf() override;
+    virtual int KillProcessSelf();
 
     /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
@@ -1125,14 +1125,6 @@ private:
      * @return Returns whether the caller is allowed to start Ability by call.
      */
     int CheckStartByCallPermission(const AbilityRequest &abilityRequest);
-
-     /**
-     * Check if application is allowed to excute code file.
-     *
-     * @param abilityRequest, abilityRequest.
-     * @return Returns whether the caller is allowed to start Ability by call.
-     */
-    int VerifyCallingPermission(const std::string &permissionName);
 
     /**
      * Judge if Caller-Application is in background state.
