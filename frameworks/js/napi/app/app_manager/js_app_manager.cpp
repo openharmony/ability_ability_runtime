@@ -625,7 +625,7 @@ NativeValue* JsAppManagerInit(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "killProcessesByBundleName", moduleName,
         JsAppManager::KillProcessesByBundleName);
     BindNativeFunction(*engine, *object, "killProcessSelf", moduleName,
-        JsAppManager::killProcessSelf);
+        JsAppManager::KillProcessSelf);
     BindNativeFunction(*engine, *object, "clearUpApplicationData", moduleName,
         JsAppManager::ClearUpApplicationData);
     BindNativeFunction(*engine, *object, "getAppMemorySize", moduleName,
