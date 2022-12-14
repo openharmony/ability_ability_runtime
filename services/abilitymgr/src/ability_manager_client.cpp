@@ -364,7 +364,7 @@ ErrCode AbilityManagerClient::KillProcessSelf()
     HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->KillProcessSelf(bundleName);
+    return abms->KillProcessSelf();
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
