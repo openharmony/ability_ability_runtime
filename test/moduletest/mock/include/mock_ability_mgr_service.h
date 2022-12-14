@@ -58,6 +58,7 @@ public:
     MOCK_METHOD2(StopServiceAbility, int(const Want&, int32_t userId));
     MOCK_METHOD1(GetMissionIdByToken, int32_t(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(KillProcess, int(const std::string&));
+    MOCK_METHOD0(KillProcessSelf, int());
     MOCK_METHOD2(UninstallApp, int(const std::string&, int32_t));
     MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option));
     MOCK_METHOD2(
