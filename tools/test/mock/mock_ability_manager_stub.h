@@ -63,7 +63,7 @@ public:
 
     MOCK_METHOD2(TerminateAbilityByCaller, int(const sptr<IRemoteObject>& callerToken, int requestCode));
     MOCK_METHOD1(KillProcess, int(const std::string& bundleName));
-    MOCK_METHOD0(KillProcessSelf, int());
+    MOCK_METHOD0(KillProcessBySelf, int());
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
 
     MOCK_METHOD2(

@@ -52,6 +52,7 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[ACQUIRE_DATA_ABILITY] = &AbilityManagerStub::AcquireDataAbilityInner;
     requestFuncMap_[RELEASE_DATA_ABILITY] = &AbilityManagerStub::ReleaseDataAbilityInner;
     requestFuncMap_[KILL_PROCESS] = &AbilityManagerStub::KillProcessInner;
+    requestFuncMap_[KILL_PROCESS_SELF] = &AbilityManagerStub::KillProcessBySelfInner;
     requestFuncMap_[UNINSTALL_APP] = &AbilityManagerStub::UninstallAppInner;
     requestFuncMap_[START_ABILITY] = &AbilityManagerStub::StartAbilityInner;
     requestFuncMap_[START_ABILITY_ADD_CALLER] = &AbilityManagerStub::StartAbilityAddCallerInner;
@@ -335,6 +336,16 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
 {
     std::string bundleName = Str16ToStr8(data.ReadString16());
     int result = KillProcess(bundleName);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("remove stack error");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::KillProcessBySelfInner(MessageParcel &data, MessageParcel &reply)
+{
+    int result = KillProcessBySelf();
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("remove stack error");
         return ERR_INVALID_VALUE;

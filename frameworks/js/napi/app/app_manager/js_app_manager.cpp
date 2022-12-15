@@ -102,10 +102,10 @@ public:
         return (me != nullptr) ? me->OnkillProcessByBundleName(*engine, *info) : nullptr;
     }
 
-    static NativeValue* KillProcessSelf(NativeEngine* engine, NativeCallbackInfo* info)
+    static NativeValue* KillProcessBySelf(NativeEngine* engine, NativeCallbackInfo* info)
     {
         JsAppManager* me = CheckParamsAndGetThis<JsAppManager>(engine, info);
-        return (me != nullptr) ? me->OnkillProcessSelf(*engine, *info) : nullptr;
+        return (me != nullptr) ? me->OnkillProcessBySelf(*engine, *info) : nullptr;
     }
 
     static NativeValue* ClearUpApplicationData(NativeEngine* engine, NativeCallbackInfo* info)
@@ -377,7 +377,7 @@ private:
         return result;
     }
 
-    NativeValue* OnkillProcessSelf(NativeEngine &engine, const NativeCallbackInfo &info)
+    NativeValue* OnkillProcessBySelf(NativeEngine &engine, const NativeCallbackInfo &info)
     {
         HILOG_INFO("%{public}s is called", __FUNCTION__);
         int32_t errCode = 0;
@@ -401,7 +401,7 @@ private:
                 task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "abilityManager nullptr"));
                 return;
             }
-            auto ret = abilityManager->KillProcessSelf();
+            auto ret = abilityManager->KillProcessBySelf();
             if (ret == 0) {
                 task.Resolve(engine, CreateJsValue(engine, ret));
             } else {
@@ -410,7 +410,7 @@ private:
         };
 
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnkillProcessSelf",
+        AsyncTask::Schedule("JSAppManager::OnkillProcessBySelf",
             engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
         return result;
     }
@@ -624,8 +624,8 @@ NativeValue* JsAppManagerInit(NativeEngine* engine, NativeValue* exportObj)
         JsAppManager::KillProcessWithAccount);
     BindNativeFunction(*engine, *object, "killProcessesByBundleName", moduleName,
         JsAppManager::KillProcessesByBundleName);
-    BindNativeFunction(*engine, *object, "killProcessSelf", moduleName,
-        JsAppManager::KillProcessSelf);
+    BindNativeFunction(*engine, *object, "killProcessBySelf", moduleName,
+        JsAppManager::KillProcessBySelf);
     BindNativeFunction(*engine, *object, "clearUpApplicationData", moduleName,
         JsAppManager::ClearUpApplicationData);
     BindNativeFunction(*engine, *object, "getAppMemorySize", moduleName,

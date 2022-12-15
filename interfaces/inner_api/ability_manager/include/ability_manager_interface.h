@@ -379,7 +379,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcessSelf() = 0;
+    virtual int KillProcessBySelf() = 0;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -866,6 +866,9 @@ public:
 
         // stop extension ability (61)
         STOP_EXTENSION_ABILITY,
+
+        // kill process itself (62)
+        KILL_PROCESS_SELF,
 
         // ipc id 1001-2000 for DMS
         // ipc id for starting ability (1001)
