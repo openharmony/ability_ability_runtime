@@ -1027,6 +1027,24 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_KillProcess_001, TestSize.
     EXPECT_EQ(res, NO_ERROR);
 }
 
+/*
+ * Feature: AbilityManagerService
+ * Function: KillProcessSelf
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService KillProcessSelf
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of KillProcessSelf
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_KillProcessSelf_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    auto res = proxy_->KillProcessSelf();
+    EXPECT_EQ(IAbilityManager::KILL_PROCESS_SELF, mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
 #ifdef ABILITY_COMMAND_FOR_TEST
 /*
  * Feature: AbilityManagerService

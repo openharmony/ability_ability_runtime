@@ -592,6 +592,17 @@ HWTEST_F(AbilityManagerClientTest, KillProcess_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AbilityManagerClient_KillProcessSelf_0100
+ * @tc.desc: KillProcessSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientTest, KillProcessSelf_0100, TestSize.Level1)
+{
+    auto result = client_->KillProcessSelf();
+    EXPECT_EQ(ERR_OK, result);
+}
+
+/**
  * @tc.name: AbilityManagerClient_GetPendingWantUid_0100
  * @tc.desc: GetPendingWantUid
  * @tc.type: FUNC
