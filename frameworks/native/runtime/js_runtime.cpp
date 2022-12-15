@@ -136,6 +136,8 @@ public:
                 }
                 runtimeExtractor->SetRuntimeFlag(true);
                 runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
+                ExtractorUtil::AddExtractor(hapPath, runtimeExtractor);
+                panda::JSNApi::LoadAotFile(vm_, hapPath);
             } else {
                 runtimeExtractor = runtimeExtractorMap_.at(hapPath);
             }
@@ -223,9 +225,13 @@ public:
             buffer.assign(outStr.begin(), outStr.end());
             HILOG_DEBUG("LoadRepairPatch, LoadPatch, patchFile: %{private}s, baseFile: %{private}s.",
                 patchFile.c_str(), baseFile.c_str());
-            bool ret = panda::JSNApi::LoadPatch(vm_, patchFile, buffer.data(), buffer.size(), baseFile);
-            if (!ret) {
-                HILOG_ERROR("LoadRepairPatch, LoadPatch failed.");
+            auto ret = panda::JSNApi::LoadPatch(vm_, patchFile, buffer.data(), buffer.size(), baseFile);
+            if (ret != panda::JSNApi::PatchErrorCode::SUCCESS) {
+                if (ret == panda::JSNApi::PatchErrorCode::FILE_NOT_EXECUTED) {
+                    HILOG_WARN("LoadPatch when base file didn't execute.");
+                    continue;
+                }
+                HILOG_ERROR("LoadPatch failed with %{public}d.", static_cast<int32_t>(ret));
                 return false;
             }
             HILOG_DEBUG("LoadRepairPatch, Load patch %{private}s succeed.", patchFile.c_str());
@@ -258,10 +264,9 @@ public:
         for (const auto &fileName : fileNames) {
             std::string patchFile = hqfFile + "/" + fileName;
             HILOG_DEBUG("UnLoadRepairPatch, UnloadPatch, patchFile: %{private}s.", patchFile.c_str());
-            bool ret = panda::JSNApi::UnloadPatch(vm_, patchFile);
-            if (!ret) {
-                HILOG_ERROR("UnLoadRepairPatch, UnLoadPatch failed.");
-                return false;
+            auto ret = panda::JSNApi::UnloadPatch(vm_, patchFile);
+            if (ret != panda::JSNApi::PatchErrorCode::SUCCESS) {
+                HILOG_WARN("UnLoadPatch failed with %{public}d.", static_cast<int32_t>(ret));
             }
             HILOG_DEBUG("UnLoadRepairPatch, UnLoad patch %{private}s succeed.", patchFile.c_str());
         }
@@ -341,8 +346,10 @@ private:
             }
             runtimeExtractor->SetRuntimeFlag(true);
             runtimeExtractorMap_.insert(make_pair(options.hapPath, runtimeExtractor));
+            ExtractorUtil::AddExtractor(options.hapPath, runtimeExtractor);
             panda::JSNApi::SetHostResolveBufferTracker(
                 vm_, JsModuleReader(options.bundleName, options.hapPath, runtimeExtractor));
+            panda::JSNApi::LoadAotFile(vm_, options.hapPath);
         }
         isBundle_ = options.isBundle;
         panda::JSNApi::SetBundle(vm_, options.isBundle);
@@ -483,7 +490,7 @@ std::unique_ptr<Runtime> JsRuntime::Create(const Runtime::Options& options)
 std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(NativeEngine* engine,
     const std::string& moduleName, NativeValue* const* argv, size_t argc)
 {
-    HILOG_INFO("JsRuntime::LoadSystemModule(%{public}s)", moduleName.c_str());
+    HILOG_DEBUG("JsRuntime::LoadSystemModule(%{public}s)", moduleName.c_str());
     if (engine == nullptr) {
         HILOG_INFO("JsRuntime::LoadSystemModule: invalid engine.");
         return std::unique_ptr<NativeReference>();
@@ -703,6 +710,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
             }
             runtimeExtractor->SetRuntimeFlag(true);
             runtimeExtractorMap_.insert(make_pair(hapPath, runtimeExtractor));
+            ExtractorUtil::AddExtractor(hapPath, runtimeExtractor);
         } else {
             runtimeExtractor = runtimeExtractorMap_.at(hapPath);
         }
