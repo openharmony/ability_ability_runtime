@@ -3285,7 +3285,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName)
     return ERR_OK;
 }
 
-int AbilityManagerService::KillProcessSelf()
+int AbilityManagerService::KillProcessBySelf()
 {
     HILOG_DEBUG("Kill process by self");
  

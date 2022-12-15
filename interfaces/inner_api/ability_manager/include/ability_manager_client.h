@@ -346,7 +346,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode KillProcessSelf();
+    ErrCode KillProcessBySelf();
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**

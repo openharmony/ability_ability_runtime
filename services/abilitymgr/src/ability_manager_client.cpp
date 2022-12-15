@@ -359,12 +359,12 @@ ErrCode AbilityManagerClient::KillProcess(const std::string &bundleName)
     return abms->KillProcess(bundleName);
 }
 
-ErrCode AbilityManagerClient::KillProcessSelf()
+ErrCode AbilityManagerClient::KillProcessBySelf()
 {
     HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->KillProcessSelf();
+    return abms->KillProcessBySelf();
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

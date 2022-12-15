@@ -321,7 +321,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcessSelf() override;
+    virtual int KillProcessBySelf() override;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**

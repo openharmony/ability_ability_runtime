@@ -164,7 +164,7 @@ public:
         return 0;
     }
 
-    virtual int KillProcessSelf()
+    virtual int KillProcessBySelf()
     {
         return 0;
     }

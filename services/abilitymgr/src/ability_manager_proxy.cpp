@@ -998,7 +998,7 @@ int AbilityManagerProxy::KillProcess(const std::string &bundleName)
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::KillProcessSelf()
+int AbilityManagerProxy::KillProcessBySelf()
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1007,7 +1007,7 @@ int AbilityManagerProxy::KillProcessSelf()
     if (!WriteInterfaceToken(data)) {
         return INNER_ERR;
     }
-    int error = Remote()->SendRequest(IAbilityManager::KILL_PROCESS, data, reply, option);
+    int error = Remote()->SendRequest(IAbilityManager::KILL_PROCESS_SELF, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
         return error;
