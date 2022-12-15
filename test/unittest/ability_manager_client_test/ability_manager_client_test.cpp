@@ -592,13 +592,13 @@ HWTEST_F(AbilityManagerClientTest, KillProcess_0100, TestSize.Level1)
 }
 
 /**
- * @tc.name: AbilityManagerClient_KillProcessSelf_0100
- * @tc.desc: KillProcessSelf
+ * @tc.name: AbilityManagerClient_KillProcessBySelf_0100
+ * @tc.desc: KillProcessBySelf
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerClientTest, KillProcessSelf_0100, TestSize.Level1)
+HWTEST_F(AbilityManagerClientTest, KillProcessBySelf_0100, TestSize.Level1)
 {
-    auto result = client_->KillProcessSelf();
+    auto result = client_->KillProcessBySelf();
     EXPECT_EQ(ERR_OK, result);
 }
 
