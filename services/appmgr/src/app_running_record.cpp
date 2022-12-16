@@ -232,7 +232,10 @@ void AppRunningRecord::SetState(const ApplicationState state)
         return;
     }
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
-        restartResidentProcCount_ = RESTART_RESIDENT_PROCESS_MAX_TIMES;
+        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+        if (abilityMgr) {
+            abilityMgr->GetMaxRestartNum(restartResidentProcCount_, isLauncherApp_);
+        }
     }
     curState_ = state;
 }
@@ -1383,7 +1386,7 @@ void AppRunningRecord::SetRequestProcCode(int32_t requestProcCode)
 
  int32_t AppRunningRecord::GetRequestProcCode() const
  {
-     return requestProcCode_;
+    return requestProcCode_;
  }
 
 }  // namespace AppExecFwk

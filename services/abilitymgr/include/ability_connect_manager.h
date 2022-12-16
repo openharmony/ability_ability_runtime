@@ -329,6 +329,7 @@ private:
     void HandleStopTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleTerminateDisconnectTask(const ConnectListType& connectlist);
     void HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void HandleRestartResidentTask(const AbilityRequest &abilityRequest);
 
     /**
      * IsAbilityConnected.
