@@ -32,6 +32,7 @@
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 #include "bundle_mgr_proxy.h"
+#include "ability_mgr_proxy.h"
 #include "configuration_convertor.h"
 
 namespace OHOS {
@@ -418,6 +419,23 @@ sptr<AppExecFwk::IBundleMgr> ContextImpl::GetBundleManager() const
     return bms;
 }
 
+sptr<AppExecFwk::IAbilityManager> ContextImpl::GetAbilityManager() const
+{
+    HILOG_DEBUG("ContextImpl::GetAbilityManager");
+    auto instance = OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
+    if (instance == nullptr) {
+        HILOG_ERROR("failed to get SysMrgClient instance");
+        return nullptr;
+    }
+    auto abilityObj = instance->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    if (abilityObj == nullptr) {
+        HILOG_ERROR("failed to get ability manager service");
+        return nullptr;
+    }
+    sptr<AppExecFwk::IAbilityManager> ams = iface_cast<AppExecFwk::IAbilityManager>(abilityObj);
+    return ams;
+}
+
 void ContextImpl::SetApplicationInfo(const std::shared_ptr<AppExecFwk::ApplicationInfo> &info)
 {
     if (info == nullptr) {
@@ -546,6 +564,14 @@ void ContextImpl::CreateDirIfNotExist(const std::string& dirPath, const mode_t& 
 void ContextImpl::SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config)
 {
     config_ = config;
+}
+
+ErrCode ContextImpl::KillProcessBySelf()
+{
+    HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->KillProcessBySelf();
 }
 
 std::shared_ptr<AppExecFwk::Configuration> ContextImpl::GetConfiguration() const

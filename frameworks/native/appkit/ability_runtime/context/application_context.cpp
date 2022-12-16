@@ -294,6 +294,11 @@ std::string ApplicationContext::GetFilesDir()
     return (contextImpl_ != nullptr) ? contextImpl_->GetFilesDir() : "";
 }
 
+std::string ApplicationContext::KillApplioationBySelf()
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->KillApplioationBySelf() : "";
+}
+
 bool ApplicationContext::IsUpdatingConfigurations()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->IsUpdatingConfigurations() : false;
