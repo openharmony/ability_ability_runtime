@@ -62,7 +62,7 @@ public:
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
     std::string GetFilesDir() override;
-    std::string KillApplioationBySelf() override;
+    std::string KillApplioationBySelf();
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;
     std::string GetDatabaseDir() override;
