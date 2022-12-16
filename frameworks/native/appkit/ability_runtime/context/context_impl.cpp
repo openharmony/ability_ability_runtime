@@ -432,8 +432,8 @@ sptr<AppExecFwk::IAbilityManager> ContextImpl::GetAbilityManager() const
         HILOG_ERROR("failed to get ability manager service");
         return nullptr;
     }
-    sptr<AppExecFwk::IAbilityManager> ams = iface_cast<AppExecFwk::IAbilityManager>(abilityObj);
-    return ams;
+    sptr<AppExecFwk::IAbilityManager> abms = iface_cast<AppExecFwk::IAbilityManager>(abilityObj);
+    return abms;
 }
 
 void ContextImpl::SetApplicationInfo(const std::shared_ptr<AppExecFwk::ApplicationInfo> &info)
