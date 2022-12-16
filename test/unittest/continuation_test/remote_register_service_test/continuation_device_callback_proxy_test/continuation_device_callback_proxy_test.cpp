@@ -27,9 +27,9 @@ using namespace testing::ext;
 using namespace testing;
 using namespace std::chrono;
 
-namespace OHOS{
-namespace AppExecFwk{
-class ContinuationDeviceCallbackProxyTest : public testing::Test{
+namespace OHOS {
+namespace AppExecFwk {
+class ContinuationDeviceCallbackProxyTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -53,8 +53,7 @@ void ContinuationDeviceCallbackProxyTest::TearDown(void)
 {
 }
 
-class MoclCallback : public IContinuationDeviceCallback
-{
+class MoclCallback : public IContinuationDeviceCallback {
 public:
     MoclCallback() {};
     virtual ~MoclCallback() {};
@@ -105,7 +104,8 @@ HWTEST_F(ContinuationDeviceCallbackProxyTest, AppExecFwk_ContinuationDeviceCallb
 * @tc.name: Disconnect
 * @tc.desc: Verify function Disconnect pointer callback normal
 */
-HWTEST_F(ContinuationDeviceCallbackProxyTest, AppExecFwk_ContinuationDeviceCallbackProxy_Disconnect_001, TestSize.Level1)
+HWTEST_F(
+    ContinuationDeviceCallbackProxyTest, AppExecFwk_ContinuationDeviceCallbackProxy_Disconnect_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_ContinuationDeviceCallbackProxy_Disconnect_001 start.";
     std::shared_ptr<MoclCallback> callback = std::make_shared<MoclCallback>();
@@ -123,7 +123,8 @@ HWTEST_F(ContinuationDeviceCallbackProxyTest, AppExecFwk_ContinuationDeviceCallb
 * @tc.name: Disconnect
 * @tc.desc: Verify function Disconnect pointer callback empty
 */
-HWTEST_F(ContinuationDeviceCallbackProxyTest, AppExecFwk_ContinuationDeviceCallbackProxy_Disconnect_002, TestSize.Level1)
+HWTEST_F(
+    ContinuationDeviceCallbackProxyTest, AppExecFwk_ContinuationDeviceCallbackProxy_Disconnect_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_ContinuationDeviceCallbackProxy_Disconnect_002 start.";
     std::shared_ptr<MoclCallback> callback = nullptr;
