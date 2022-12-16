@@ -25,8 +25,7 @@ using namespace testing::ext;
 using namespace testing;
 namespace OHOS {
 namespace AAFwk {
-namespace
-{
+namespace {
     constexpr int32_t ONE = 1;
     constexpr int32_t NEGATIVE = -1;
 }
