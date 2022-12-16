@@ -38,10 +38,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace {
-const int RESTART_RESIDENT_PROCESS_MAX_TIMES = 3;
-const int64_t RESTART_RESIDENT_APP_MAX_INTERVAL_MILLISECOND = 120000;
-}
 class AbilityRunningRecord;
 class AppMgrServiceInner;
 class AppRunningRecord;
@@ -633,7 +629,7 @@ private:
     std::string mainBundleName_;
     bool isLauncherApp_;
     std::string mainAppName_;
-    int restartResidentProcCount_ = RESTART_RESIDENT_PROCESS_MAX_TIMES;
+    int restartResidentProcCount_ = 0;
     bool isSpecifiedAbility_ = false;
     AAFwk::Want SpecifiedWant_;
     std::string moduleName_;

@@ -667,20 +667,12 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
 
 void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilityRequest)
 {
+    HILOG_INFO("PostRestartResidentTask start.");
     CHECK_POINTER(eventHandler_);
     std::string taskName = std::string("RestartResident_") + std::string(abilityRequest.abilityInfo.name);
     auto task = [abilityRequest, connectManager = shared_from_this()]() {
-        auto findRestartResidentTask = [abilityRequest](const AbilityRequest &requestInfo) {
-            return (requestInfo.want.GetElement().GetBundleName() == abilityRequest.want.GetElement().GetBundleName() &&
-                requestInfo.want.GetElement().GetModuleName() == abilityRequest.want.GetElement().GetModuleName() &&
-                requestInfo.want.GetElement().GetAbilityName() == abilityRequest.want.GetElement().GetAbilityName());
-        };
-        auto findIter = find_if(connectManager->restartResidentTaskList_.begin(),
-            connectManager->restartResidentTaskList_.end(), findRestartResidentTask);
-        if (findIter != connectManager->restartResidentTaskList_.end()) {
-            connectManager->restartResidentTaskList_.erase(findIter);
-        }
-        connectManager->StartAbilityLocked(abilityRequest);
+        CHECK_POINTER(connectManager);
+        connectManager->HandleRestartResidentTask(abilityRequest);
     };
     int restartIntervalTime = 0;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
@@ -688,6 +680,21 @@ void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilit
         abilityMgr->GetRestartIntervalTime(restartIntervalTime);
     }
     eventHandler_->PostTask(task, taskName, restartIntervalTime);
+    HILOG_INFO("PostRestartResidentTask end.");
+}
+
+void AbilityConnectManager::HandleRestartResidentTask(const AbilityRequest &abilityRequest)
+{
+    auto findRestartResidentTask = [abilityRequest](const AbilityRequest &requestInfo) {
+        return (requestInfo.want.GetElement().GetBundleName() == abilityRequest.want.GetElement().GetBundleName() &&
+            requestInfo.want.GetElement().GetModuleName() == abilityRequest.want.GetElement().GetModuleName() &&
+            requestInfo.want.GetElement().GetAbilityName() == abilityRequest.want.GetElement().GetAbilityName());
+    };
+    auto findIter = find_if(restartResidentTaskList_.begin(), restartResidentTaskList_.end(), findRestartResidentTask);
+    if (findIter != restartResidentTaskList_.end()) {
+        restartResidentTaskList_.erase(findIter);
+    }
+    StartAbilityLocked(abilityRequest);
 }
 
 void AbilityConnectManager::PostTimeOutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t messageId)
@@ -1195,6 +1202,7 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
         auto findIter = find_if(restartResidentTaskList_.begin(), restartResidentTaskList_.end(),
             findRestartResidentTask);
         if (findIter != restartResidentTaskList_.end()) {
+            HILOG_WARN("The restart task has been registered.");
             return;
         }
         restartResidentTaskList_.emplace_back(requestInfo);

@@ -236,6 +236,10 @@ int AbilityRecord::LoadAbility()
         HILOG_ERROR("Resident restart is out of max count.");
         return ERR_INVALID_VALUE;
     }
+    
+    if (isRestarting_) {
+        restartTime_ = AbilityUtil::SystemTimeMillis();
+    }
 
     sptr<Token> callerToken_ = nullptr;
     if (!callerList_.empty() && callerList_.back()) {
@@ -270,6 +274,7 @@ bool AbilityRecord::CanRestartResident()
         if (abilityMgr) {
             abilityMgr->GetRestartIntervalTime(restartIntervalTime);
         }
+        HILOG_DEBUG("restartTime: %{public}lld, now: %{public}lld, intervalTine:%{public}d", restartTime_, AbilityUtil::SystemTimeMillis(), restartIntervalTime);
         if ((AbilityUtil::SystemTimeMillis() - restartTime_) < restartIntervalTime) {
             HILOG_ERROR("Resident restart is out of max count");
             return false;
@@ -1838,9 +1843,6 @@ void AbilityRecord::SetRestarting(const bool isRestart)
         restartCount_ = isRestart ? (--restartCount_) : restartMax_;
         HILOG_INFO("root launcher or resident process's restart count: %{public}d", restartCount_);
     }
-    if (isRestart) {
-        restartTime_ = AbilityUtil::SystemTimeMillis();
-    }
 }
 
 void AbilityRecord::SetRestarting(const bool isRestart, int32_t canRestartCount)
@@ -1851,9 +1853,6 @@ void AbilityRecord::SetRestarting(const bool isRestart, int32_t canRestartCount)
     if ((isLauncherRoot_ && IsLauncherAbility()) || isKeepAlive_) {
         restartCount_ = isRestart ? canRestartCount : restartMax_;
         HILOG_INFO("root launcher or resident process's restart count: %{public}d", restartCount_);
-    }
-    if (isRestart) {
-        restartTime_ = AbilityUtil::SystemTimeMillis();
     }
 }
 
