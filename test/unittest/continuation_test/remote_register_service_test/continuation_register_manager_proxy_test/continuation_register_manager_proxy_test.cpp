@@ -64,7 +64,7 @@ public:
     MoclConnectCallback() {};
     virtual ~MoclConnectCallback() {};
 
-    virtual void OnResult(int result) override
+    void OnResult(int result) override
     {
         onresult_ = true;
     };
@@ -77,7 +77,7 @@ public:
     MoclRequest() {};
     virtual ~MoclRequest() {};
 
-    virtual void Execute() override
+    void Execute() override
     {
         execute_ = true;
     };
@@ -108,7 +108,7 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRegisterManagerProxy_
     const std::string bundleName = "";
     ExtraParams parameter;
     std::shared_ptr<IContinuationDeviceCallback> deviceCallback = nullptr;
-    auto pContinuationRequestRegister = 
+    auto pContinuationRequestRegister =
         std::make_shared<ContinuationRequestRegister>(bundleName, parameter, deviceCallback);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestRegister->SetContinuationConnector(nullptr);
@@ -130,7 +130,7 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRegisterManagerProxy_
     std::shared_ptr<Context> context;
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
     std::shared_ptr<IContinuationDeviceCallback> deviceCallback = nullptr;
-    auto pContinuationRequestRegister = 
+    auto pContinuationRequestRegister =
         std::make_shared<ContinuationRequestRegister>(bundleName, parameter, deviceCallback);
     pContinuationRequestRegister->SetContinuationConnector(continuatinConnector);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
@@ -153,7 +153,7 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRegisterManagerProxy_
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     std::shared_ptr<IContinuationDeviceCallback> deviceCallback = nullptr;
-    auto pContinuationRequestRegister = 
+    auto pContinuationRequestRegister =
         std::make_shared<ContinuationRequestRegister>(bundleName, parameter, deviceCallback);
     pContinuationRequestRegister->SetContinuationConnector(continuatinConnector);
     pContinuationRequestRegister->SetRequestCallback(requestCallback);
@@ -169,8 +169,8 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRegisterManagerProxy_
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUnRegister_Execute_001, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
-    auto pContinuationRequestUnRegister = std::make_shared<ContinuationRequestUnRegister>(token_);
+    constexpr int32_t token = 0;
+    auto pContinuationRequestUnRegister = std::make_shared<ContinuationRequestUnRegister>(token);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestUnRegister->SetContinuationConnector(nullptr);
     pContinuationRequestUnRegister->SetRequestCallback(requestCallback);
@@ -186,10 +186,10 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUnRegister_Exe
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUnRegister_Execute_002, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
+    constexpr int32_t token = 0;
     std::shared_ptr<Context> context;
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
-    auto pContinuationRequestUnRegister = std::make_shared<ContinuationRequestUnRegister>(token_);
+    auto pContinuationRequestUnRegister = std::make_shared<ContinuationRequestUnRegister>(token);
     pContinuationRequestUnRegister->SetContinuationConnector(continuatinConnector);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestUnRegister->SetRequestCallback(nullptr);
@@ -205,10 +205,10 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUnRegister_Exe
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUnRegister_Execute_003, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
+    constexpr int32_t token = 0;
     std::shared_ptr<Context> context;
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
-    auto pContinuationRequestUnRegister = std::make_shared<ContinuationRequestUnRegister>(token_);
+    auto pContinuationRequestUnRegister = std::make_shared<ContinuationRequestUnRegister>(token);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestUnRegister->SetContinuationConnector(continuatinConnector);
     pContinuationRequestUnRegister->SetRequestCallback(requestCallback);
@@ -224,11 +224,11 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUnRegister_Exe
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUpdateConnectStatus_Execute_001, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
-    const std::string deviceId_ = "";
-    constexpr int32_t status_ = 0;
-    auto pContinuationRequestUpdateConnectStatus = 
-        std::make_shared<ContinuationRequestUpdateConnectStatus>(token_, deviceId_, status_);
+    constexpr int32_t token = 0;
+    const std::string deviceId = "";
+    constexpr int32_t status = 0;
+    auto pContinuationRequestUpdateConnectStatus =
+        std::make_shared<ContinuationRequestUpdateConnectStatus>(token, deviceId, status);
     pContinuationRequestUpdateConnectStatus->SetContinuationConnector(nullptr);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestUpdateConnectStatus->SetRequestCallback(requestCallback);
@@ -244,13 +244,13 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUpdateConnectS
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUpdateConnectStatus_Execute_002, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
-    const std::string deviceId_ = "";
-    constexpr int32_t status_ = 0;
+    constexpr int32_t token = 0;
+    const std::string deviceId = "";
+    constexpr int32_t status = 0;
     std::shared_ptr<Context> context;
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
-    auto pContinuationRequestUpdateConnectStatus = 
-        std::make_shared<ContinuationRequestUpdateConnectStatus>(token_, deviceId_, status_);
+    auto pContinuationRequestUpdateConnectStatus =
+        std::make_shared<ContinuationRequestUpdateConnectStatus>(token, deviceId, status);
     pContinuationRequestUpdateConnectStatus->SetContinuationConnector(continuatinConnector);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestUpdateConnectStatus->SetRequestCallback(nullptr);
@@ -266,13 +266,13 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUpdateConnectS
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUpdateConnectStatus_Execute_003, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
-    const std::string deviceId_ = "";
-    constexpr int32_t status_ = 0;
+    constexpr int32_t token = 0;
+    const std::string deviceId = "";
+    constexpr int32_t status = 0;
     std::shared_ptr<Context> context;
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
-    auto pContinuationRequestUpdateConnectStatus = 
-        std::make_shared<ContinuationRequestUpdateConnectStatus>(token_, deviceId_, status_);
+    auto pContinuationRequestUpdateConnectStatus =
+        std::make_shared<ContinuationRequestUpdateConnectStatus>(token, deviceId, status);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestUpdateConnectStatus->SetContinuationConnector(continuatinConnector);
     pContinuationRequestUpdateConnectStatus->SetRequestCallback(requestCallback);
@@ -288,9 +288,9 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestUpdateConnectS
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestShowDeviceList_Execute_001, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
-    ExtraParams parameter_;
-    auto pContinuationRequestShowDeviceList = std::make_shared<ContinuationRequestShowDeviceList>(token_, parameter_);
+    constexpr int32_t token = 0;
+    ExtraParams parameter;
+    auto pContinuationRequestShowDeviceList = std::make_shared<ContinuationRequestShowDeviceList>(token, parameter);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestShowDeviceList->SetContinuationConnector(nullptr);
     pContinuationRequestShowDeviceList->SetRequestCallback(requestCallback);
@@ -306,13 +306,13 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestShowDeviceList
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestShowDeviceList_Execute_002, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
-    ExtraParams parameter_;
+    constexpr int32_t token = 0;
+    ExtraParams parameter;
     std::shared_ptr<Context> context;
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
-    auto pContinuationRequestShowDeviceList = 
-        std::make_shared<ContinuationRequestShowDeviceList>(token_, parameter_);
+    auto pContinuationRequestShowDeviceList =
+        std::make_shared<ContinuationRequestShowDeviceList>(token, parameter);
     pContinuationRequestShowDeviceList->SetContinuationConnector(continuatinConnector);
     pContinuationRequestShowDeviceList->SetRequestCallback(nullptr);
     EXPECT_TRUE(!requestCallback->onresult_);
@@ -327,12 +327,12 @@ HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestShowDeviceList
  */
 HWTEST_F(ContinuationRegisterManagerProxyTest, ContinuationRequestShowDeviceList_Execute_003, TestSize.Level1)
 {
-    constexpr int32_t token_ = 0;
-    ExtraParams parameter_;
+    constexpr int32_t token = 0;
+    ExtraParams parameter;
     std::shared_ptr<Context> context;
     sptr<ContinuationConnector> continuatinConnector = new (std::nothrow) ContinuationConnector(context);
-    auto pContinuationRequestShowDeviceList = 
-        std::make_shared<ContinuationRequestShowDeviceList>(token_, parameter_);
+    auto pContinuationRequestShowDeviceList =
+        std::make_shared<ContinuationRequestShowDeviceList>(token, parameter);
     std::shared_ptr<MoclConnectCallback> requestCallback = std::make_shared<MoclConnectCallback>();
     pContinuationRequestShowDeviceList->SetContinuationConnector(continuatinConnector);
     pContinuationRequestShowDeviceList->SetRequestCallback(requestCallback);
