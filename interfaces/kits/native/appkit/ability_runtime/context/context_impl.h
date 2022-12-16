@@ -20,6 +20,7 @@
 
 #include "configuration.h"
 #include "bundle_mgr_interface.h"
+#include "ability_manager_interface.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
