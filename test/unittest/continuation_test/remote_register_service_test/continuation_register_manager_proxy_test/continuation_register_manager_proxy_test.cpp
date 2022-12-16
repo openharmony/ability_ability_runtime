@@ -49,6 +49,7 @@ public:
 
 void ContinuationRegisterManagerProxyTest::SetUpTestCase(void)
 {}
+
 void ContinuationRegisterManagerProxyTest::TearDownTestCase(void)
 {}
 
