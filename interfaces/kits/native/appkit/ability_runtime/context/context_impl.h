@@ -168,6 +168,14 @@ public:
     sptr<AppExecFwk::IBundleMgr> GetBundleManager() const;
 
     /**
+    * @brief Obtains an IAbilityManager instance.
+    * You can use this instance to obtain information about the ability.
+    *
+    * @return Returns an IAbilityManager instance.
+    */
+    sptr<AppExecFwk::IAbilityManager> GetAbilityManager() const;
+
+    /**
      * @brief Set ApplicationInfo
      *
      * @param info ApplicationInfo instance.
@@ -238,6 +246,13 @@ public:
      * @return token The token which the is launched by app.
      */
     void SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config);
+
+    /**
+     * @brief Kill process itself
+     *
+     * @return error code
+     */
+    ErrCode KillProcessBySelf();
 
     /**
      * @brief Get the token witch the app launched.
