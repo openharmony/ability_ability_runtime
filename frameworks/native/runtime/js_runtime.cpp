@@ -28,6 +28,7 @@
 #include "connect_server_manager.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "event_handler.h"
+#include "extract_resource_manager.h"
 #include "file_path_utils.h"
 #include "hdc_register.h"
 #include "hilog_wrapper.h"
@@ -139,6 +140,11 @@ public:
                 ExtractorUtil::AddExtractor(loadPath, extractor);
                 extractor->SetRuntimeFlag(true);
                 panda::JSNApi::LoadAotFile(vm_, hapPath);
+                auto resourceManager =
+                    AbilityBase::ExtractResourceManager::GetExtractResourceManager().GetGlobalObject();
+                if (resourceManager) {
+                    resourceManager->AddResource(loadPath.c_str());
+                }
             }
             if (isBundle_) {
                 if (!extractor->GetFileBuffer(srcPath, outStream)) {
@@ -580,7 +586,7 @@ bool JsRuntime::Initialize(const Options& options)
     bindSourceMaps_ = std::make_unique<ModSourceMap>(options.bundleCodeDir, options.isStageModel);
     if (!options.preload) {
         InitTimerModule(*nativeEngine_, *globalObj);
-        InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion);
+        InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion, options.bundleName);
     }
 
     preloaded_ = options.preload;
@@ -715,6 +721,10 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
         if (newCreate) {
             extractor->SetRuntimeFlag(true);
             ExtractorUtil::AddExtractor(loadPath, extractor);
+            auto resourceManager = AbilityBase::ExtractResourceManager::GetExtractResourceManager().GetGlobalObject();
+            if (resourceManager) {
+                resourceManager->AddResource(loadPath.c_str());
+            }
         }
         if (isBundle_) {
             if (!extractor->GetFileBuffer(srcPath, outStream)) {
