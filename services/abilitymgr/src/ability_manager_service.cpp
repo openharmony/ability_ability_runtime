@@ -3399,17 +3399,6 @@ void AbilityManagerService::GetMaxRestartNum(int &max)
     }
 }
 
-int AbilityManagerService::KillProcessBySelf()
-{
-    HILOG_DEBUG("Kill process by self");
- 
-    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationSelf();
-    if (ret != ERR_OK) {
-        return KILL_PROCESS_FAILED;
-    }
-    return ERR_OK;
-}
-
 int AbilityManagerService::ClearUpApplicationData(const std::string &bundleName)
 {
     HILOG_DEBUG("ClearUpApplicationData, bundleName: %{public}s", bundleName.c_str());
