@@ -244,7 +244,7 @@ public:
      *
      * @return error code
      */
-    ErrCode KillProcessBySelf();
+    void KillProcessBySelf();
 
     /**
      * @brief Get the token witch the app launched.
