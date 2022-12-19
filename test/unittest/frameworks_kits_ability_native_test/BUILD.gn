@@ -1361,12 +1361,9 @@ group("unittest") {
     ":data_ability_operation_test",
     ":data_ability_result_test",
     ":data_uri_utils_test",
-<<<<<<< HEAD
-    ":form_extension_test",
-=======
     ":distributed_client_test",
     ":extension_test",
->>>>>>> 4f1907e80dca0b5ec5e8390427837ade48d1dea3
+    ":form_extension_test",
     ":new_ability_impl_test",
     ":pac_map_test",
     ":service_ability_impl_test",
