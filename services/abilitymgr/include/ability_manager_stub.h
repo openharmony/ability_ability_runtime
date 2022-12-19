@@ -80,7 +80,6 @@ private:
     int AcquireDataAbilityInner(MessageParcel &data, MessageParcel &reply);
     int ReleaseDataAbilityInner(MessageParcel &data, MessageParcel &reply);
     int KillProcessInner(MessageParcel &data, MessageParcel &reply);
-    int KillProcessBySelfInner(MessageParcel &data, MessageParcel &reply);
     int UninstallAppInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StartExtensionAbilityInner(MessageParcel &data, MessageParcel &reply);

@@ -459,8 +459,9 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
 
     HILOG_INFO("kill self process");
     AsyncTask::CompleteCallback complete =
-        [errCode](NativeEngine& engine, AsyncTask& task,
+        [applicationContext_, errCode](NativeEngine& engine, AsyncTask& task,
             int32_t status) {
+        auto applicationContext = applicationContext_.lock();
         if (errCode != 0) {
             task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
             return;
