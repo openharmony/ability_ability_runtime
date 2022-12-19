@@ -549,7 +549,7 @@ void ContextImpl::SetConfiguration(const std::shared_ptr<AppExecFwk::Configurati
     config_ = config;
 }
 
-void KillProcessBySelf()
+void ContextImpl::KillProcessBySelf()
 {
     HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     std::unique_ptr<AppExecFwk::AppMgrClient> appMgrClient;
