@@ -433,13 +433,6 @@ public:
     virtual int KillProcess(const std::string &bundleName) override;
 
     /**
-     * Kill the process Itself.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int KillProcessBySelf() override;
-
-    /**
      * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
      * clear the application data.
      *

@@ -465,7 +465,7 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
             return;
         }
         auto ret = applicationContext->KillProcessBySelf();
-        if (ret == 0) {
+        if (ret == ERR_OK) {
             task.Resolve(engine, CreateJsValue(engine, ret));
         } else {
             task.Reject(engine, CreateJsError(engine, ret, "kill process by self failed."));

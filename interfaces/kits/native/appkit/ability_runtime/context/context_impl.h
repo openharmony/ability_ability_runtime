@@ -20,7 +20,6 @@
 
 #include "configuration.h"
 #include "bundle_mgr_interface.h"
-#include "ability_manager_interface.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -167,14 +166,6 @@ public:
     * @return Returns an IBundleMgr instance.
     */
     sptr<AppExecFwk::IBundleMgr> GetBundleManager() const;
-
-    /**
-    * @brief Obtains an IAbilityManager instance.
-    * You can use this instance to obtain information about the ability.
-    *
-    * @return Returns an IAbilityManager instance.
-    */
-    sptr<AppExecFwk::IAbilityManager> GetAbilityManager() const;
 
     /**
      * @brief Set ApplicationInfo

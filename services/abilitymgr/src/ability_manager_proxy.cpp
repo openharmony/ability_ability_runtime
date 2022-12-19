@@ -998,23 +998,6 @@ int AbilityManagerProxy::KillProcess(const std::string &bundleName)
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::KillProcessBySelf()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-    int error = Remote()->SendRequest(IAbilityManager::KILL_PROCESS_SELF, data, reply, option);
-    if (error != NO_ERROR) {
-        HILOG_ERROR("Send request error: %{public}d", error);
-        return error;
-    }
-    return reply.ReadInt32();
-}
-
 #ifdef ABILITY_COMMAND_FOR_TEST
 int AbilityManagerProxy::ForceTimeoutForTest(const std::string &abilityName, const std::string &state)
 {

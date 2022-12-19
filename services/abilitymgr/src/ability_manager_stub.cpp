@@ -52,7 +52,6 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[ACQUIRE_DATA_ABILITY] = &AbilityManagerStub::AcquireDataAbilityInner;
     requestFuncMap_[RELEASE_DATA_ABILITY] = &AbilityManagerStub::ReleaseDataAbilityInner;
     requestFuncMap_[KILL_PROCESS] = &AbilityManagerStub::KillProcessInner;
-    requestFuncMap_[KILL_PROCESS_SELF] = &AbilityManagerStub::KillProcessBySelfInner;
     requestFuncMap_[UNINSTALL_APP] = &AbilityManagerStub::UninstallAppInner;
     requestFuncMap_[START_ABILITY] = &AbilityManagerStub::StartAbilityInner;
     requestFuncMap_[START_ABILITY_ADD_CALLER] = &AbilityManagerStub::StartAbilityAddCallerInner;
