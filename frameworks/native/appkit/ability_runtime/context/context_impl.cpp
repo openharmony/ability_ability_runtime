@@ -549,18 +549,12 @@ void ContextImpl::SetConfiguration(const std::shared_ptr<AppExecFwk::Configurati
     config_ = config;
 }
 
-ErrCode KillProcessBySelf()
+void KillProcessBySelf()
 {
     HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
-    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     std::unique_ptr<AppExecFwk::AppMgrClient> appMgrClient;
-    int ret = (int)appMgrClient->KillApplicationSelf();
-    if (ret != ERR_OK) {
-        HILOG_ERROR("Fail to kill application.");
-        return INNER_ERR;
-    }
-
-    return ERR_OK;
+    appMgrClient->KillApplicationSelf();
+    return;
 }
 
 std::shared_ptr<AppExecFwk::Configuration> ContextImpl::GetConfiguration() const
