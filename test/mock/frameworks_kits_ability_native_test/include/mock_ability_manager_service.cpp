@@ -150,11 +150,6 @@ int MockAbilityManagerService::KillProcess(const std::string& bundleName)
     return 0;
 }
 
-int MockAbilityManagerService::KillProcessBySelf()
-{
-    return 0;
-}
-
 int MockAbilityManagerService::UninstallApp(const std::string& bundleName, int32_t uid)
 {
     return 0;

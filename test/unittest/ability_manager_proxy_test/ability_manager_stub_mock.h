@@ -164,11 +164,6 @@ public:
         return 0;
     }
 
-    virtual int KillProcessBySelf()
-    {
-        return 0;
-    }
-
     virtual int UninstallApp(const std::string& bundleName, int32_t uid)
     {
         return 0;
