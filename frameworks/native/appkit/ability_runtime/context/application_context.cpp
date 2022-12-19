@@ -294,9 +294,11 @@ std::string ApplicationContext::GetFilesDir()
     return (contextImpl_ != nullptr) ? contextImpl_->GetFilesDir() : "";
 }
 
-ErrCode ApplicationContext::KillProcessBySelf()
+void ApplicationContext::KillProcessBySelf()
 {
-    return (contextImpl_ != nullptr) ? contextImpl_->KillProcessBySelf() : INNER_ERR;
+    if (contextImpl_ != nullptr) {
+        contextImpl_-contextImpl_->KillProcessBySelf();
+    }
 }
 
 bool ApplicationContext::IsUpdatingConfigurations()

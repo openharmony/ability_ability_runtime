@@ -30,6 +30,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr char APPLICATION_CONTEXT_NAME[] = "__application_context_ptr__";
+constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
@@ -453,7 +454,7 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
     // only support 0 or 1 params
     if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE) {
         HILOG_ERROR("Not enough params");
-        errCode = ERR_NOT_OK;
+        errCode = -1;
     }
 
     HILOG_INFO("kill self process");
@@ -465,7 +466,7 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
             return;
         }
         auto ret = applicationContext->KillProcessBySelf();
-        if (ret == ERR_OK) {
+        if (ret == 0) {
             task.Resolve(engine, CreateJsValue(engine, ret));
         } else {
             task.Reject(engine, CreateJsError(engine, ret, "kill process by self failed."));
@@ -475,7 +476,7 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JSAppManager::OnkillProcessBySelf",
         engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
-    return result;
+    return engine.CreateUndefined();
 }
 
 void JsApplicationContextUtils::Finalizer(NativeEngine *engine, void *data, void *hint)

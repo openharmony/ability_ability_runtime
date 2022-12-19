@@ -62,7 +62,6 @@ public:
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
     std::string GetFilesDir() override;
-    std::string KillApplioationBySelf();
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;
     std::string GetDatabaseDir() override;
@@ -75,6 +74,7 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() const override;
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
+    void KillProcessBySelf();
 
     void InitApplicationContext();
     void AttachContextImpl(const std::shared_ptr<ContextImpl> &contextImpl);

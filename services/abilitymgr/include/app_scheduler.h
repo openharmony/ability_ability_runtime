@@ -213,12 +213,6 @@ public:
     int KillApplication(const std::string &bundleName);
 
     /**
-     * kill self
-     *
-     */
-    int KillApplicationSelf();
-
-    /**
      * kill the application by uid
      *
      * @param bundleName name of bundle.

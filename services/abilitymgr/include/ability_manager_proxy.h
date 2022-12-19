@@ -316,13 +316,6 @@ public:
      */
     virtual int KillProcess(const std::string &bundleName) override;
 
-    /**
-     * Kill the process itself immediately.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int KillProcessBySelf() override;
-
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * force timeout ability.
