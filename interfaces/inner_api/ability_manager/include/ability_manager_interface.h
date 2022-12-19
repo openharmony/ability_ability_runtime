@@ -871,9 +871,6 @@ public:
 
         // stop extension ability (61)
         STOP_EXTENSION_ABILITY,
-
-        // kill process itself (62)
-        KILL_PROCESS_SELF,
         
         SET_COMPONENT_INTERCEPTION,
 
