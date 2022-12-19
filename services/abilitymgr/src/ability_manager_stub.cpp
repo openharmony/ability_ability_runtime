@@ -343,16 +343,6 @@ int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &rep
     return NO_ERROR;
 }
 
-int AbilityManagerStub::KillProcessBySelfInner(MessageParcel &data, MessageParcel &reply)
-{
-    int result = KillProcessBySelf();
-    if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("remove stack error");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
 int AbilityManagerStub::ClearUpApplicationDataInner(MessageParcel &data, MessageParcel &reply)
 {
     std::string bundleName = Str16ToStr8(data.ReadString16());

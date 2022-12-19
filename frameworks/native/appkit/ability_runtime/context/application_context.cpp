@@ -297,7 +297,7 @@ std::string ApplicationContext::GetFilesDir()
 void ApplicationContext::KillProcessBySelf()
 {
     if (contextImpl_ != nullptr) {
-        contextImpl_-contextImpl_->KillProcessBySelf();
+        contextImpl_->KillProcessBySelf();
     }
 }
 
