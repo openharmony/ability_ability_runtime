@@ -64,6 +64,7 @@ ohos_source_set("appmgr_test_source") {
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
+
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -264,7 +265,7 @@ group("unittest") {
     "ability_business_error_test:unittest",
     "ability_connect_callback_proxy_test:unittest",
     "ability_connect_callback_stub_test:unittest",
-    "ability_connect_manage_test:unittest",
+    "ability_connect_manager_test:unittest",
     "ability_event_handler_test:unittest",
     "ability_extension_base_test:unittest",
     "ability_extension_context_test:unittest",
@@ -278,6 +279,7 @@ group("unittest") {
     "ability_manager_service_dialog_test:unittest",
     "ability_manager_service_test:unittest",
     "ability_manager_stub_test:unittest",
+    "ability_manager_test:unittest",
     "ability_record_dump_test:unittest",
     "ability_record_test:unittest",
     "ability_running_info_test:unittest",
@@ -382,6 +384,7 @@ group("unittest") {
     "start_options_test:unittest",
     "stop_user_callback_proxy_test:unittest",
     "stop_user_callback_stub_test:unittest",
+    "sys_mgr_client_test:unittest",
     "system_ability_token_callback_stub_test:unittest",
     "task_data_persistence_mgr_test:unittest",
     "trigger_Info_test:unittest",
