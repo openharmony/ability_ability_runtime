@@ -150,8 +150,6 @@ public:
 
     int KillProcess(const std::string& bundleName) override;
 
-    int KillProcessBySelf() override;
-
     int UninstallApp(const std::string& bundleName, int32_t uid) override;
 
     int TerminateAbilityByCaller(const sptr<IRemoteObject>& callerToken, int requestCode) override
