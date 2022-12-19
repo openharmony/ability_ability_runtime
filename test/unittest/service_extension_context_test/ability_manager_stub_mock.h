@@ -76,7 +76,6 @@ public:
     {
         return 0;
     }
-
     int CloseAbility(const sptr<IRemoteObject>& token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want* resultWant = nullptr) override
     {
@@ -360,4 +359,5 @@ public:
 };
 }  // namespace AAFwk
 }  // namespace OHOS
+
 #endif
