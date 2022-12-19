@@ -3399,31 +3399,6 @@ void AbilityManagerService::GetMaxRestartNum(int &max)
     }
 }
 
-int AbilityManagerService::KillProcess(const std::string &bundleName)
-{
-    HILOG_DEBUG("Kill process, bundleName: %{public}s", bundleName.c_str());
-    auto bms = GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, KILL_PROCESS_FAILED);
-    int32_t userId = GetUserId();
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!IN_PROCESS_CALL(
-        bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
-        HILOG_ERROR("Failed to get bundle info when kill process.");
-        return GET_BUNDLE_INFO_FAILED;
-    }
-
-    if (bundleInfo.isKeepAlive) {
-        HILOG_ERROR("Can not kill keep alive process.");
-        return KILL_PROCESS_KEEP_ALIVE;
-    }
-
-    int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName);
-    if (ret != ERR_OK) {
-        return KILL_PROCESS_FAILED;
-    }
-    return ERR_OK;
-}
-
 int AbilityManagerService::KillProcessBySelf()
 {
     HILOG_DEBUG("Kill process by self");
