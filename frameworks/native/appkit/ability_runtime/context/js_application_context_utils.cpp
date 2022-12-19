@@ -456,22 +456,16 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
         HILOG_ERROR("Not enough params");
         errCode = -1;
     }
-
+    auto applicationContext = applicationContext_.lock();
     HILOG_INFO("kill self process");
     AsyncTask::CompleteCallback complete =
-        [applicationContext_, errCode](NativeEngine& engine, AsyncTask& task,
+        [applicationContext, errCode](NativeEngine& engine, AsyncTask& task,
             int32_t status) {
-        auto applicationContext = applicationContext_.lock();
         if (errCode != 0) {
             task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
             return;
         }
-        auto ret = applicationContext->KillProcessBySelf();
-        if (ret == 0) {
-            task.Resolve(engine, CreateJsValue(engine, ret));
-        } else {
-            task.Reject(engine, CreateJsError(engine, ret, "kill process by self failed."));
-        }
+        applicationContext->KillProcessBySelf();
     };
 
     NativeValue* result = nullptr;

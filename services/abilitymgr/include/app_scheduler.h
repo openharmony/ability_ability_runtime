@@ -20,6 +20,7 @@
 #include <unordered_set>
 
 #include "ability_info.h"
+#include "appmgr/app_mgr_client.h"
 #include "appmgr/app_state_callback_host.h"
 #include "appmgr/start_specified_ability_response_stub.h"
 #include "application_info.h"
