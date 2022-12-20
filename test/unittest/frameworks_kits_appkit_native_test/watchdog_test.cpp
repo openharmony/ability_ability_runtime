@@ -98,8 +98,8 @@ HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_IsReportEvent_0002, Function | Medium
 
 /**
  * @tc.number: AppExecFwk_Watchdog_ReportEvent_0001
- * @tc.name: ReportEvent
- * @tc.desc: Test ReportEvent.
+ * @tc.name: reportEvent
+ * @tc.desc: Test reportEvent.
  * @tc.require: I5UL6H
  */
 HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0001, Function | MediumTest | Level3)
@@ -119,8 +119,8 @@ HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0001, Function | MediumTe
 
 /**
  * @tc.number: AppExecFwk_Watchdog_ReportEvent_0002
- * @tc.name: ReportEvent
- * @tc.desc: Test ReportEvent.
+ * @tc.name: reportEvent
+ * @tc.desc: Test reportEvent.
  * @tc.require: I5UL6H
  */
 HWTEST_F(WatchdogTest, AppExecFwk_Watchdog_ReportEvent_0002, Function | MediumTest | Level3)
@@ -368,36 +368,36 @@ HWTEST_F(WatchdogTest, WatchdogTest_Timer_004, TestSize.Level1)
 
 /**
  * @tc.number: WatchdogTest_ReportEvent_003
- * @tc.name: ReportEvent
- * @tc.desc: Verify that function ReportEvent.
+ * @tc.name: reportEvent
+ * @tc.desc: Verify that function reportEvent.
  */
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_003, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_001 start";
-    watchdog_->ReportEvent();
+    watchdog_->reportEvent();
     EXPECT_TRUE(watchdog_->lastWatchTime_ != 0);
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_001 end";
 }
 
 /**
  * @tc.number: WatchdogTest_ReportEvent_004
- * @tc.name: ReportEvent
- * @tc.desc: Verify that function ReportEvent.
+ * @tc.name: reportEvent
+ * @tc.desc: Verify that function reportEvent.
  */
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_002 start";
     watchdog_->lastWatchTime_ =
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    watchdog_->ReportEvent();
+    watchdog_->reportEvent();
     EXPECT_TRUE(watchdog_->applicationInfo_ == nullptr);
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_002 end";
 }
 
 /**
  * @tc.number: WatchdogTest_ReportEvent_005
- * @tc.name: ReportEvent
- * @tc.desc: Verify that function ReportEvent.
+ * @tc.name: reportEvent
+ * @tc.desc: Verify that function reportEvent.
  */
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_005, TestSize.Level1)
 {
@@ -406,7 +406,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_005, TestSize.Level1)
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     watchdog_->applicationInfo_ = std::make_shared<ApplicationInfo>();
     watchdog_->needReport_ = false;
-    watchdog_->ReportEvent();
+    watchdog_->reportEvent();
     EXPECT_TRUE(watchdog_->applicationInfo_ != nullptr);
     EXPECT_TRUE(watchdog_->needReport_ == false);
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_003 end";
@@ -414,8 +414,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_005, TestSize.Level1)
 
 /**
  * @tc.number: WatchdogTest_ReportEvent_006
- * @tc.name: ReportEvent
- * @tc.desc: Verify that function ReportEvent.
+ * @tc.name: reportEvent
+ * @tc.desc: Verify that function reportEvent.
  */
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_006, TestSize.Level1)
 {
@@ -424,7 +424,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_006, TestSize.Level1)
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     watchdog_->applicationInfo_ = std::make_shared<ApplicationInfo>();
     watchdog_->isSixSecondEvent_ = true;
-    watchdog_->ReportEvent();
+    watchdog_->reportEvent();
     EXPECT_TRUE(watchdog_->applicationInfo_ != nullptr);
     EXPECT_TRUE(watchdog_->needReport_ == false);
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_004 end";
@@ -432,8 +432,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_006, TestSize.Level1)
 
 /**
  * @tc.number: WatchdogTest_ReportEvent_007
- * @tc.name: ReportEvent
- * @tc.desc: Verify that function ReportEvent.
+ * @tc.name: reportEvent
+ * @tc.desc: Verify that function reportEvent.
  */
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_007, TestSize.Level1)
 {
@@ -441,7 +441,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_007, TestSize.Level1)
     watchdog_->lastWatchTime_ =
         std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     watchdog_->applicationInfo_ = std::make_shared<ApplicationInfo>();
-    watchdog_->ReportEvent();
+    watchdog_->reportEvent();
     EXPECT_TRUE(watchdog_->applicationInfo_ != nullptr);
     EXPECT_TRUE(watchdog_->isSixSecondEvent_ == true);
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_005 end";
