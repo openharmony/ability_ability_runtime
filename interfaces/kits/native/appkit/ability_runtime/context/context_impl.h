@@ -20,6 +20,7 @@
 
 #include "configuration.h"
 #include "bundle_mgr_interface.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

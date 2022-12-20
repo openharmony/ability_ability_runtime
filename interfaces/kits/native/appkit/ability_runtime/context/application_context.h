@@ -23,6 +23,7 @@
 #include "context.h"
 #include "context_impl.h"
 #include "environment_callback.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -75,7 +76,7 @@ public:
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
     void KillProcessBySelf();
-    ErrCode GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
+    ErrCode GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
 
     void InitApplicationContext();
     void AttachContextImpl(const std::shared_ptr<ContextImpl> &contextImpl);
