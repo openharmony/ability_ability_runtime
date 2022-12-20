@@ -301,6 +301,11 @@ void ApplicationContext::KillProcessBySelf()
     }
 }
 
+ErrCode ApplicationContext::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetProcessRunningInformation(info) : nullptr;
+}
+
 bool ApplicationContext::IsUpdatingConfigurations()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->IsUpdatingConfigurations() : false;
