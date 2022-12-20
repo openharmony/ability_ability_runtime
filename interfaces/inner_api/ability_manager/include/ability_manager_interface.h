@@ -871,7 +871,7 @@ public:
 
         // stop extension ability (61)
         STOP_EXTENSION_ABILITY,
-        
+
         SET_COMPONENT_INTERCEPTION,
 
         // ipc id 1001-2000 for DMS

@@ -557,6 +557,14 @@ void ContextImpl::KillProcessBySelf()
     return;
 }
 
+void ContextImpl::GetProcessRunningInformation(const AppExecFwk::RunningProcessInfo &info)
+{
+    HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
+    std::unique_ptr<AppExecFwk::AppMgrClient> appMgrClient;
+    appMgrClient->GetProcessRunningInformation(info);
+    return;
+}
+
 std::shared_ptr<AppExecFwk::Configuration> ContextImpl::GetConfiguration() const
 {
     return config_;

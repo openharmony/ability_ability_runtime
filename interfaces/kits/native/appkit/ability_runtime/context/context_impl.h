@@ -247,6 +247,13 @@ public:
     void KillProcessBySelf();
 
     /**
+     * @brief Get running informationfor cuirrent process
+     *
+     * @return error code
+     */
+    void GetProcessRunningInformation(const AppExecFwk::RunningProcessInfo &info);
+
+    /**
      * @brief Get the token witch the app launched.
      *
      * @return token The token which the is launched by app.

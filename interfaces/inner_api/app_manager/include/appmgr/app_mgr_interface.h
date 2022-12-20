@@ -127,6 +127,15 @@ public:
     virtual int GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId) = 0;
 
     /**
+     * GetProcessRunningInformation, call GetProcessRunningInformation() through proxy project.
+     * Obtains information about current application process which is running on the device.
+     *
+     * @param info, app name in Application record.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int GetProcessRunningInformation(RunningProcessInfo &info) = 0;
+
+    /**
      * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
      * Notify abilities background the current memory level.
      *
