@@ -173,10 +173,8 @@ ohos_shared_library("appkit_native") {
 ohos_shared_library("app_context") {
   include_dirs = [
     "${ability_base_kits_path}/extractortool/include",
-    "${ability_runtime_path}/interfaces/kits/native/ability/native/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
-    "${ability_runtime_services_path}/appmgr/include",
   ]
 
   configs = [ ":appkit_config" ]
@@ -194,16 +192,13 @@ ohos_shared_library("app_context") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  deps = [
-    "${ability_runtime_innerkits_path}/app_manager:app_manager",
-  ]
+  deps = []
 
   public_deps =
       [ "${global_path}/resource_management/frameworks/resmgr:global_resmgr" ]
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:zuri",
     "ability_runtime:ability_deps_wrapper",
     "ability_runtime:app_manager",
     "ability_runtime:runtime",
