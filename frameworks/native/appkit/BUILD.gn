@@ -194,7 +194,9 @@ ohos_shared_library("app_context") {
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  deps = []
+  deps = [
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
+  ]
 
   public_deps =
       [ "${global_path}/resource_management/frameworks/resmgr:global_resmgr" ]
@@ -229,7 +231,6 @@ ohos_shared_library("app_context_utils") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/app",
-    "${ability_runtime_services_path}/appmgr/include",
   ]
 
   configs = [ ":appkit_config" ]
