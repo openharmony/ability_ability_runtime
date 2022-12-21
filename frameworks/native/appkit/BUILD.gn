@@ -175,6 +175,7 @@ ohos_shared_library("app_context") {
     "${ability_base_kits_path}/extractortool/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
     "${ability_runtime_path}/interfaces/kits/native/appkit/app",
+    "${ability_runtime_services_path}/appmgr/include",
   ]
 
   configs = [ ":appkit_config" ]
