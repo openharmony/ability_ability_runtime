@@ -188,6 +188,7 @@ ohos_shared_library("app_context") {
     "${ability_runtime_native_path}/appkit/ability_runtime/context/context_impl.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/environment_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/sys_mgr_client.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_running_info.cpp",
   ]
   cflags = []
   if (target_cpu == "arm") {
@@ -235,6 +236,7 @@ ohos_shared_library("app_context_utils") {
   public_configs = [ ":appkit_public_config" ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_running_info.cpp",
     "ability_runtime/context/js_application_context_utils.cpp",
     "ability_runtime/context/js_context_utils.cpp",
     "ability_runtime/context/js_hap_module_info_utils.cpp",
