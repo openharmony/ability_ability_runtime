@@ -247,7 +247,7 @@ int32_t AppMgrStub::HandleGetProcessRunningInformation(MessageParcel &data, Mess
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::vector<RunningProcessInfo> info;
-    auto result = GetProcessRunningInformation(&info);
+    auto result = GetProcessRunningInformation(info);
     reply.WriteInt32(info.size());
     for (auto &it : info) {
         if (!reply.WriteParcelable(&it)) {
