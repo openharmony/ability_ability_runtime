@@ -31,6 +31,7 @@
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
 #include "iquick_fix_callback.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
