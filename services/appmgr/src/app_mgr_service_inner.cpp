@@ -736,7 +736,7 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &info)
+int32_t AppMgrServiceInner::GetProcessRunningInformation(std::vector<RunningProcessInfo> &info)
 {
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is nullptr");
