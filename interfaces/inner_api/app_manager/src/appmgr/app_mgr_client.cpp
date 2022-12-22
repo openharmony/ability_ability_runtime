@@ -323,7 +323,7 @@ AppMgrResultCode AppMgrClient::GetProcessRunningInfosByUserId(std::vector<Runnin
 /**
  *Get Running information of current running process.
  */
-AppMgrResultCode AppManagerClient::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
+AppMgrResultCode AppMgrClient::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
