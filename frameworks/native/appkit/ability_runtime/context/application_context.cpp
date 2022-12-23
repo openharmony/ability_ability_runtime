@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "hilog_wrapper.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
