@@ -23,7 +23,6 @@
 #include "context.h"
 #include "context_impl.h"
 #include "environment_callback.h"
-#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
