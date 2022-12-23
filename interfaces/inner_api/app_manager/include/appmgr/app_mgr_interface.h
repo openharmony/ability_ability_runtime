@@ -134,7 +134,7 @@ public:
      * @param info, app name in Application record.
      * @return ERR_OK ,return back success，others fail.
      */
-    virtual int GetProcessRunningInformation(RunningProcessInfo &info) = 0;
+    virtual int GetProcessRunningInformation(std::vector<RunningProcessInfo> &info) = 0;
 
     /**
      * NotifyMemoryLevel, call NotifyMemoryLevel() through proxy project.
