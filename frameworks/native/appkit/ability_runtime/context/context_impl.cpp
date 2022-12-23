@@ -33,6 +33,7 @@
 #include "system_ability_definition.h"
 #include "bundle_mgr_proxy.h"
 #include "configuration_convertor.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
