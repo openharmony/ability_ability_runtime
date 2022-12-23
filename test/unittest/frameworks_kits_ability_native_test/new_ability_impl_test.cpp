@@ -132,26 +132,7 @@ HWTEST_F(NewAbilityImplTest, AaFwk_NewAbilityImpl_HandleAbilityTransaction_0200,
 HWTEST_F(NewAbilityImplTest, AaFwk_NewAbilityImpl_HandleAbilityTransaction_0300, Level1)
 {
     GTEST_LOG_(INFO) << "AaFwk_NewAbilityImpl_HandleAbilityTransaction_0300 start";
-
-    std::shared_ptr<OHOSApplication> application = std::make_shared<OHOSApplication>();
-    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    abilityInfo->name = "newAbility";
-    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
-
-    std::shared_ptr<EventRunner> eventRunner = EventRunner::Create(abilityInfo->name);
-    std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(eventRunner);
-
-    std::shared_ptr<Ability> ability;
-    MockNewAbility* newAbility = new (std::nothrow) MockNewAbility();
-    EXPECT_NE(newAbility, nullptr);
-    if (newAbility != nullptr) {
-        ability.reset(newAbility);
-    }
-
-    std::shared_ptr<ContextDeal> contextDeal = std::make_shared<ContextDeal>();
-    newAbilityImpl_->Init(application, record, ability, handler, token, contextDeal);
-
+    newAbilityImpl_->ability_ = std::make_shared<Ability>();
     Want want;
     AAFwk::LifeCycleStateInfo state;
     state.state = ABILITY_STATE_BACKGROUND_NEW;
