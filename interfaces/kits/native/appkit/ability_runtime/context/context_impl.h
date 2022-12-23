@@ -20,9 +20,11 @@
 
 #include "configuration.h"
 #include "bundle_mgr_interface.h"
-#include "running_process_info.h"
 
 namespace OHOS {
+namespace AppExecFwk {
+struct RunningProcessInfo;
+}
 namespace AbilityRuntime {
 class ContextImpl : public Context, public std::enable_shared_from_this<ContextImpl> {
 public:
