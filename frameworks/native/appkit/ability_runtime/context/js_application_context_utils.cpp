@@ -107,7 +107,7 @@ private:
     NativeValue* OnGetArea(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateModuleContext(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetApplicationContext(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* CreateJsProcessRunningInfo(NativeEngine& engine, const AppExecFwk::RunningProcessInfo &info);
+    NativeValue* CreateJsProcessRunningInfo(NativeEngine &engine, const AppExecFwk::RunningProcessInfo &info);
     std::shared_ptr<ApplicationContext> keepApplicationContext_;
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
     std::shared_ptr<JsEnvironmentCallback> envCallback_;
