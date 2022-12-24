@@ -504,7 +504,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
         return engine.CreateUndefined();
     }
     HILOG_INFO("Get Process Info");
-    AsyncTask::CompleteCallback complete =
+    auto complete =
         [applicationContext, this](NativeEngine& engine, AsyncTask& task,
             int32_t status) {
             AppExecFwk::RunningProcessInfo processInfo;
@@ -524,7 +524,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
     return result;
 }
 
-NativeValue* CreateJsProcessRunningInfo(NativeEngine& engine,
+NativeValue* JsApplicationContextUtils::CreateJsProcessRunningInfo(NativeEngine &engine,
     const AppExecFwk::RunningProcessInfo &info)
 {
     NativeValue* objValue = engine.CreateObject();
