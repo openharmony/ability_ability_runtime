@@ -246,13 +246,10 @@ int32_t AppMgrStub::HandleGetProcessRunningInfosByUserId(MessageParcel &data, Me
 int32_t AppMgrStub::HandleGetProcessRunningInformation(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    std::vector<RunningProcessInfo> info;
+    RunningProcessInfo info;
     auto result = GetProcessRunningInformation(info);
-    reply.WriteInt32(info.size());
-    for (auto &it : info) {
-        if (!reply.WriteParcelable(&it)) {
-            return ERR_INVALID_VALUE;
-        }
+    if (!reply.WriteParcelable(&info)) {
+        return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {
         return ERR_INVALID_VALUE;
