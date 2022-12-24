@@ -547,18 +547,6 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundl
         HILOG_ERROR("The process corresponding to the package name did not start");
         return result;
     }
-
-    auto callerPid = IPCSkeleton::GetCallingPid();
-    auto appRecord = GetAppRunningRecordByPid(callerPid);
-    auto bundleName = appRecord->GetBundleName();
-    int result = ERR_OK;
-    int64_t startTime = SystemTimeMillisecond();
-    std::list<pid_t> pids;
-
-    if (!appRunningManager_->ProcessExitByBundleName(bundleName, pids)) {
-        HILOG_INFO("The process corresponding to the package name did not start");
-        return result;
-    }
     if (WaitForRemoteProcessExit(pids, startTime)) {
         HILOG_INFO("The remote process exited successfully ");
         NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
@@ -785,7 +773,7 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.isKeepAlive = appRecord->IsKeepAliveApp();
     info.isFocused = appRecord->GetFocusFlag();
     info.startTimeMillis_ = appRecord->GetAppStartTime();
-    appRecord->GetBundleNames(runningProcessInfo.bundleNames);
+    appRecord->GetBundleNames(info.bundleNames);
 }
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
