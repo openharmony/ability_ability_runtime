@@ -302,7 +302,7 @@ int32_t AppMgrService::GetProcessRunningInfosByUserId(std::vector<RunningProcess
     return appMgrServiceInner_->GetProcessRunningInfosByUserId(info, userId);
 }
 
-int32_t AppMgrService::GetProcessRunningInformation(std::vector<RunningProcessInfo> &info)
+int32_t AppMgrService::GetProcessRunningInformation(RunningProcessInfo &info)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
