@@ -39,7 +39,6 @@ public:
     MOCK_METHOD1(StartupResidentProcess, void(const std::vector<AppExecFwk::BundleInfo>& bundleInfos));
     MOCK_METHOD1(NotifyMemoryLevel, int(int32_t level));
     MOCK_METHOD2(GetProcessRunningInfosByUserId, int(std::vector<RunningProcessInfo>& info, int32_t userId));
-    MOCK_METHOD1(GetProcessRunningInformation, int(std::vector<RunningProcessInfo>& info));
     MOCK_METHOD4(StartUserTestProcess, int(const AAFwk::Want& want, const sptr<IRemoteObject>& observer,
         const BundleInfo& bundleInfo, int32_t userId));
     MOCK_METHOD3(FinishUserTest, int(const std::string& msg, const int64_t& resultCode,
@@ -112,6 +111,10 @@ public:
     };
     virtual int32_t ClearUpApplicationData(const std::string& appName) override
     {
+        return 0;
+    }
+
+    virtual int GetProcessRunningInformation(RunningProcessInfo &info){
         return 0;
     }
 
