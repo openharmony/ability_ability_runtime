@@ -268,7 +268,7 @@ int32_t AppMgrProxy::GetProcessRunningInfosByUserId(std::vector<RunningProcessIn
     return result;
 }
 
-int32_t AppMgrProxy::GetProcessRunningInformation(std::vector<RunningProcessInfo> &info)
+int32_t AppMgrProxy::GetProcessRunningInformation(RunningProcessInfo &info)
 {
     MessageParcel data;
     MessageParcel reply;

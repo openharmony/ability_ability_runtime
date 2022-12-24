@@ -477,28 +477,7 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
         return errCode;
     }
 
-    int result = ERR_OK;
-    int64_t startTime = SystemTimeMillisecond();
-    std::list<pid_t> pids;
-
-    if (!appRunningManager_->ProcessExitByBundleName(bundleName, pids)) {
-        HILOG_INFO("The process corresponding to the package name did not start");
-        return result;
-    }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        HILOG_INFO("The remote process exited successfully ");
-        NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-        return result;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter);
-        if (result < 0) {
-            HILOG_ERROR("KillApplication failed for bundleName:%{public}s pid:%{public}d", bundleName.c_str(), *iter);
-            return result;
-        }
-    }
-    NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-    return result;
+    return KillApplicationByBundleName(bundleName);
 }
 
 int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, const int uid)
@@ -774,16 +753,22 @@ void AppMgrServiceInner::GetRunningProcesses(const std::shared_ptr<AppRunningRec
     std::vector<RunningProcessInfo> &info)
 {
     RunningProcessInfo runningProcessInfo;
-    runningProcessInfo.processName_ = appRecord->GetProcessName();
-    runningProcessInfo.pid_ = appRecord->GetPriorityObject()->GetPid();
-    runningProcessInfo.uid_ = appRecord->GetUid();
-    runningProcessInfo.state_ = static_cast<AppProcessState>(appRecord->GetState());
-    runningProcessInfo.isContinuousTask = appRecord->IsContinuousTask();
-    runningProcessInfo.isKeepAlive = appRecord->IsKeepAliveApp();
-    runningProcessInfo.isFocused = appRecord->GetFocusFlag();
-    runningProcessInfo.startTimeMillis_ = appRecord->GetAppStartTime();
-    appRecord->GetBundleNames(runningProcessInfo.bundleNames);
+    GetRunningProcess(appRecord, RunningProcessInfo);
     info.emplace_back(runningProcessInfo);
+}
+
+void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningProcessInfo &info)
+{
+    info.processName_ = appRecord->GetProcessName();
+    info.pid_ = appRecord->GetPriorityObject()->GetPid();
+    info.uid_ = appRecord->GetUid();
+    info.state_ = static_cast<AppProcessState>(appRecord->GetState());
+    info.isContinuousTask = appRecord->IsContinuousTask();
+    info.isKeepAlive = appRecord->IsKeepAliveApp();
+    info.isFocused = appRecord->GetFocusFlag();
+    info.startTimeMillis_ = appRecord->GetAppStartTime();
+    appRecord->GetBundleNames(runningProcessInfo.bundleNames);
 }
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
