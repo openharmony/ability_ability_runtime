@@ -281,8 +281,7 @@ int32_t AppMgrProxy::GetProcessRunningInformation(RunningProcessInfo &info)
     }
     std::unique_ptr<RunningProcessInfo> infoReply(reply.ReadParcelable<RunningProcessInfo>());
     info = *infoReply;
-    int result = reply.ReadInt32();
-    return result;
+    return reply.ReadInt32();
 }
 
 int32_t AppMgrProxy::NotifyMemoryLevel(int32_t level)

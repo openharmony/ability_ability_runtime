@@ -552,18 +552,15 @@ void ContextImpl::SetConfiguration(const std::shared_ptr<AppExecFwk::Configurati
 
 void ContextImpl::KillProcessBySelf()
 {
-    HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
     appMgrClient->KillApplicationSelf();
-    return;
 }
 
 int32_t ContextImpl::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
 {
-    HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
     auto result = appMgrClient->GetProcessRunningInformation(info);
-    HILOG_INFO("result is %{public}d.", result);
+    HILOG_DEBUG("result is %{public}d.", result);
     return result;
 }
 
