@@ -42,7 +42,6 @@ public:
     MOCK_METHOD1(IsBackgroundRunningRestricted, int(const std::string& bundleName));
     MOCK_METHOD1(GetAllRunningProcesses, int(std::vector<RunningProcessInfo>& info));
     MOCK_METHOD2(GetProcessRunningInfosByUserId, int(std::vector<RunningProcessInfo>& info, int32_t userId));
-    MOCK_METHOD1(GetProcessRunningInformation, int(std::vector<RunningProcessInfo>& info));
     MOCK_METHOD0(GetAmsMgr, sptr<IAmsMgr>());
     MOCK_METHOD1(GetAppFreezingTime, void(int& time));
     MOCK_METHOD1(SetAppFreezingTime, void(int time));
@@ -81,6 +80,10 @@ public:
 
     virtual int FinishUserTest(const std::string& msg, const int64_t& resultCode, const std::string& bundleName)
     {
+        return 0;
+    }
+
+    virtual int GetProcessRunningInformation(RunningProcessInfo &info){
         return 0;
     }
 
