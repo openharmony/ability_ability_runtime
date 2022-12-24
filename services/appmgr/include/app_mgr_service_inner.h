@@ -775,6 +775,8 @@ private:
 
     bool CheckGetRunningInfoPermission() const;
 
+    int32_t KillApplicationByBundleName(const std::string &bundleName);
+
 private:
     /**
      * Notify application status.

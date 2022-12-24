@@ -534,6 +534,23 @@ int32_t AppMgrServiceInner::KillApplicationSelf()
     auto callerPid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(callerPid);
     auto bundleName = appRecord->GetBundleName();
+    return KillApplicationByBundleName(bundleName);
+}
+
+int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundleName)
+{
+    int result = ERR_OK;
+    int64_t startTime = SystemTimeMillisecond();
+    std::list<pid_t> pids;
+
+    if (!appRunningManager_->ProcessExitByBundleName(bundleName, pids)) {
+        HILOG_ERROR("The process corresponding to the package name did not start");
+        return result;
+    }
+
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    auto bundleName = appRecord->GetBundleName();
     int result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
     std::list<pid_t> pids;
