@@ -555,7 +555,8 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundl
     for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
         result = KillProcessByPid(*iter);
         if (result < 0) {
-            HILOG_ERROR("KillApplicationSelf is failed for bundleName:%{public}s, pid: %{public}d", bundleName.c_str(), *iter);
+            HILOG_ERROR("KillApplicationSelf is failed for bundleName:%{public}s, pid: %{public}d",
+                bundleName.c_str(), *iter);
             return result;
         }
     }

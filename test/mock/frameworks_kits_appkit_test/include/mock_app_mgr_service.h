@@ -114,7 +114,8 @@ public:
         return 0;
     }
 
-    virtual int GetProcessRunningInformation(RunningProcessInfo &info){
+    virtual int GetProcessRunningInformation(RunningProcessInfo &info)
+    {
         return 0;
     }
 

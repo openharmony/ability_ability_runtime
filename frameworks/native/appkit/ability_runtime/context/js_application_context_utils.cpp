@@ -451,8 +451,8 @@ NativeValue *JsApplicationContextUtils::KillProcessBySelf(NativeEngine *engine, 
 
 NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine, NativeCallbackInfo &info)
 {
-    auto applicationContext = appli cationContext_.lock();
-    if(!applicationContext){
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
         HILOG_WARN("applicationContext if already released");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
         return engine.CreateUndefined();
@@ -466,7 +466,7 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
     }
     HILOG_DEBUG("kill self process");
     AsyncTask::CompleteCallback complete =
-        [applicationContext](NativeEngine& engine, AsyncTask& task,int32_t status) {
+        [applicationContext](NativeEngine& engine, AsyncTask& task, int32_t status) {
             applicationContext->KillProcessBySelf();
             task.Resolve(engine, engine.CreateUndefined());
     };
@@ -487,7 +487,7 @@ NativeValue *JsApplicationContextUtils::GetProcessRunningInformation(NativeEngin
 NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEngine &engine, NativeCallbackInfo &info)
 {
     auto applicationContext = applicationContext_.lock();
-    if(!applicationContext){
+    if (!applicationContext) {
         HILOG_WARN("applicationContext if already released");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
         return engine.CreateUndefined();
