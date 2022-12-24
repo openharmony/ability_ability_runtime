@@ -444,7 +444,6 @@ NativeValue *JsApplicationContextUtils::OnGetBundleCodeDir(NativeEngine &engine,
 
 NativeValue *JsApplicationContextUtils::KillProcessBySelf(NativeEngine *engine, NativeCallbackInfo *info)
 {
-    HILOG_INFO("JsApplicationContextUtils::KillProcessBySelf is called");
     JsApplicationContextUtils *me =
         CheckParamsAndGetThis<JsApplicationContextUtils>(engine, info, APPLICATION_CONTEXT_NAME);
     return me != nullptr ? me->OnKillProcessBySelf(*engine, *info) : nullptr;
@@ -452,8 +451,7 @@ NativeValue *JsApplicationContextUtils::KillProcessBySelf(NativeEngine *engine, 
 
 NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine, NativeCallbackInfo &info)
 {
-    HILOG_INFO("%{public}s is called", __FUNCTION__);
-    auto applicationContext = applicationContext_.lock();
+    auto applicationContext = appli cationContext_.lock();
     if(!applicationContext){
         HILOG_WARN("applicationContext if already released");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
@@ -466,7 +464,7 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return engine.CreateUndefined();
     }
-    HILOG_INFO("kill self process");
+    HILOG_DEBUG("kill self process");
     AsyncTask::CompleteCallback complete =
         [applicationContext](NativeEngine& engine, AsyncTask& task,int32_t status) {
             applicationContext->KillProcessBySelf();
@@ -481,7 +479,6 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
 
 NativeValue *JsApplicationContextUtils::GetProcessRunningInformation(NativeEngine *engine, NativeCallbackInfo *info)
 {
-    HILOG_INFO("JsApplicationContextUtils::GetProcessRunningInformation is called");
     JsApplicationContextUtils *me =
         CheckParamsAndGetThis<JsApplicationContextUtils>(engine, info, APPLICATION_CONTEXT_NAME);
     return me != nullptr ? me->OnGetProcessRunningInformation(*engine, *info) : nullptr;
@@ -489,7 +486,6 @@ NativeValue *JsApplicationContextUtils::GetProcessRunningInformation(NativeEngin
 
 NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEngine &engine, NativeCallbackInfo &info)
 {
-    HILOG_INFO("%{public}s is called", __FUNCTION__);
     auto applicationContext = applicationContext_.lock();
     if(!applicationContext){
         HILOG_WARN("applicationContext if already released");
@@ -503,7 +499,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return engine.CreateUndefined();
     }
-    HILOG_INFO("Get Process Info");
+    HILOG_DEBUG("Get Process Info");
     auto complete =
         [applicationContext, this](NativeEngine& engine, AsyncTask& task,
             int32_t status) {
@@ -513,7 +509,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
                 task.Resolve(engine, this->CreateJsProcessRunningInfo(engine, processInfo));
             } else {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
-                    "Get mission infos failed."));
+                    "Get process infos failed."));
             }
     };
 

@@ -548,7 +548,7 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundl
         return result;
     }
     if (WaitForRemoteProcessExit(pids, startTime)) {
-        HILOG_INFO("The remote process exited successfully ");
+        HILOG_DEBUG("The remote process exited successfully ");
         NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
         return result;
     }
