@@ -1642,6 +1642,7 @@ int AbilityManagerService::ConnectAbilityCommon(
         if (!IsComponentInterceptionStart(abilityWant, callerToken, 0, 0, abilityRequest)) {
             return ERR_OK;
         }
+        abilityWant.RemoveParam("abilityConnectionObj");
 
         bool queryResult = IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(uri, validUserId, extensionInfo));
         if (!queryResult || extensionInfo.name.empty() || extensionInfo.bundleName.empty()) {
