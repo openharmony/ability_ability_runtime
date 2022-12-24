@@ -510,7 +510,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
             AppExecFwk::RunningProcessInfo processInfo;
             auto ret = applicationContext->GetProcessRunningInformation(processInfo);
             if (ret == 0) {
-                task.Resolve(engine, CreateJsProcessRunningInfo(engine, processInfo));
+                task.Resolve(engine, this->CreateJsProcessRunningInfo(engine, processInfo));
             } else {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                     "Get mission infos failed."));
