@@ -75,7 +75,7 @@ public:
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
     void KillProcessBySelf();
-    ErrCode GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
+    int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
 
     void InitApplicationContext();
     void AttachContextImpl(const std::shared_ptr<ContextImpl> &contextImpl);

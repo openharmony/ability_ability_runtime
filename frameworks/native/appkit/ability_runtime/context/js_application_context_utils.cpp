@@ -25,6 +25,7 @@
 #include "js_hap_module_info_utils.h"
 #include "js_resource_manager_utils.h"
 #include "js_runtime_utils.h"
+#include "running_process_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -106,6 +107,8 @@ private:
     NativeValue* OnGetArea(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateModuleContext(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetApplicationContext(NativeEngine& engine, NativeCallbackInfo& info);
+    NativeValue* CreateJsProcessRunningInfo(NativeEngine& engine,
+        const AppExecFwk::RunningProcessInfo &info);
     std::shared_ptr<ApplicationContext> keepApplicationContext_;
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
     std::shared_ptr<JsEnvironmentCallback> envCallback_;
@@ -451,26 +454,29 @@ NativeValue *JsApplicationContextUtils::KillProcessBySelf(NativeEngine *engine, 
 NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine, NativeCallbackInfo &info)
 {
     HILOG_INFO("%{public}s is called", __FUNCTION__);
-    int32_t errCode = 0;
+    auto applicationContext = applicationContext_.lock();
+    if(!applicationContext){
+        HILOG_WARN("applicationContext if already released");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
+        return engine.CreateUndefined();
+    }
 
     // only support 0 or 1 params
     if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE) {
         HILOG_ERROR("Not enough params");
-        errCode = -1;
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined;
     }
-    auto applicationContext = applicationContext_.lock();
     HILOG_INFO("kill self process");
     AsyncTask::CompleteCallback complete =
-        [applicationContext, errCode](NativeEngine& engine, AsyncTask& task,
-            int32_t status) {
-        if (errCode != 0) {
-            task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
-            return;
-        }
-        applicationContext->KillProcessBySelf();
+        [applicationContext](NativeEngine& engine, AsyncTask& task,int32_t status) {
+            applicationContext->KillProcessBySelf();
+            task.Resolve(engine, engine.CreateUndefined());
     };
+    NativeValue* lastParam = (info.argc = ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
+    NativeValue* result = nullptr;
     AsyncTask::Schedule("JSAppManager::OnkillProcessBySelf",
-        engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
+        engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return engine.CreateUndefined();
 }
 
@@ -485,28 +491,30 @@ NativeValue *JsApplicationContextUtils::GetProcessRunningInformation(NativeEngin
 NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEngine &engine, NativeCallbackInfo &info)
 {
     HILOG_INFO("%{public}s is called", __FUNCTION__);
-    int32_t errCode = 0;
+    auto applicationContext = applicationContext_.lock();
+    if(!applicationContext){
+        HILOG_WARN("applicationContext if already released");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
+        return engine.CreateUndefined();
+    }
 
     // only support 0 or 1 params
     if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE) {
         HILOG_ERROR("Not enough params");
-        errCode = -1;
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined;
     }
-    auto applicationContext = applicationContext_.lock();
     HILOG_INFO("Get Process Info");
     AsyncTask::CompleteCallback complete =
-        [applicationContext, errCode](NativeEngine& engine, AsyncTask& task,
+        [applicationContext, this](NativeEngine& engine, AsyncTask& task,
             int32_t status) {
-            if (errCode != 0) {
-                task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
-                return;
-            }
-            AAFwk::AbilityRunningInfo info;
-            auto ret = applicationContext->GetProcessRunningInformation(&info);
+            AppExecFwk::RunningProcessInfo processInfo;
+            auto ret = applicationContext->GetProcessRunningInformation(processInfo);
             if (ret == 0) {
-                task.Resolve(engine, CreateJsProcessRunningInfoArray(engine, infos));
+                task.Resolve(engine, CreateJsProcessRunningInfo(engine, processInfo));
             } else {
-                task.Reject(engine, CreateJsError(engine, ret, "Get mission infos failed."));
+                task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
+                    "Get mission infos failed."));
             }
     };
 
@@ -515,6 +523,23 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
     AsyncTask::Schedule("JSAppManager::OnGetProcessRunningInformation",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
+}
+
+NativeValue* CreateJsProcessRunningInfo(NativeEngine& engine,
+    const AppExecFwk::RunningProcessInfo &info)
+{
+    NativeValue* objValue = engine.CreateObject();
+    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+
+    object->SetProperty("processName", CreateJsValue(engine, info.processName_));
+    object->SetProperty("pid", CreateJsValue(engine, info.pid_));
+    object->SetProperty("uid", CreateJsValue(engine, info.uid_));
+    object->SetProperty("bundleNames", CreateJsValue(engine, info.state_));
+    object->SetProperty("state", CreateJsValue(engine, info.state_));
+    object->SetProperty("isContinuousTask", CreateJsValue(engine, info.isContinuousTask_));
+    object->SetProperty("isKeepAlive", CreateJsValue(engine, info.isKeepAlive_));
+    object->SetProperty("isFocused", CreateJsValue(engine, info.isFocused_));
+    return objValue;
 }
 
 void JsApplicationContextUtils::Finalizer(NativeEngine *engine, void *data, void *hint)

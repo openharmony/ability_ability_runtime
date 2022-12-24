@@ -254,7 +254,7 @@ public:
      *
      * @return error code
      */
-    void GetProcessRunningInformation(const AppExecFwk::RunningProcessInfo &info);
+    int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
 
     /**
      * @brief Get the token witch the app launched.
