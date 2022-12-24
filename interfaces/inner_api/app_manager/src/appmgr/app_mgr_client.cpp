@@ -320,9 +320,6 @@ AppMgrResultCode AppMgrClient::GetProcessRunningInfosByUserId(std::vector<Runnin
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-/**
- *Get Running information of current running process.
- */
 AppMgrResultCode AppMgrClient::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
