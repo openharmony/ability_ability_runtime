@@ -555,7 +555,7 @@ int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundl
     for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
         result = KillProcessByPid(*iter);
         if (result < 0) {
-            HILOG_ERROR("KillApplicationSelf is fail, pid:%{public}d", callerPid);
+            HILOG_ERROR("KillApplicationSelf is failed for bundleName:%{public}d, pid: %{public}d", bundleName.c_str(), *iter);
             return result;
         }
     }
@@ -719,7 +719,7 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::GetProcessRunningInformation(std::vector<RunningProcessInfo> &info)
+int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &info)
 {
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is nullptr");
@@ -758,7 +758,7 @@ void AppMgrServiceInner::GetRunningProcesses(const std::shared_ptr<AppRunningRec
     std::vector<RunningProcessInfo> &info)
 {
     RunningProcessInfo runningProcessInfo;
-    GetRunningProcess(appRecord, RunningProcessInfo);
+    GetRunningProcess(appRecord, runningProcessInfo);
     info.emplace_back(runningProcessInfo);
 }
 
