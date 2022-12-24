@@ -107,8 +107,7 @@ private:
     NativeValue* OnGetArea(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateModuleContext(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetApplicationContext(NativeEngine& engine, NativeCallbackInfo& info);
-    NativeValue* CreateJsProcessRunningInfo(NativeEngine& engine,
-        const AppExecFwk::RunningProcessInfo &info);
+    NativeValue* CreateJsProcessRunningInfo(NativeEngine& engine, const AppExecFwk::RunningProcessInfo &info);
     std::shared_ptr<ApplicationContext> keepApplicationContext_;
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
     std::shared_ptr<JsEnvironmentCallback> envCallback_;
@@ -465,7 +464,7 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
     if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE) {
         HILOG_ERROR("Not enough params");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return engine.CreateUndefined;
+        return engine.CreateUndefined();
     }
     HILOG_INFO("kill self process");
     AsyncTask::CompleteCallback complete =
@@ -502,7 +501,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
     if (info.argc != ARGC_ZERO && info.argc != ARGC_ONE) {
         HILOG_ERROR("Not enough params");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
-        return engine.CreateUndefined;
+        return engine.CreateUndefined();
     }
     HILOG_INFO("Get Process Info");
     AsyncTask::CompleteCallback complete =
@@ -534,11 +533,11 @@ NativeValue* CreateJsProcessRunningInfo(NativeEngine& engine,
     object->SetProperty("processName", CreateJsValue(engine, info.processName_));
     object->SetProperty("pid", CreateJsValue(engine, info.pid_));
     object->SetProperty("uid", CreateJsValue(engine, info.uid_));
-    object->SetProperty("bundleNames", CreateJsValue(engine, info.state_));
+    object->SetProperty("bundleNames", CreateNativeArray(engine, info.bundleNames));
     object->SetProperty("state", CreateJsValue(engine, info.state_));
-    object->SetProperty("isContinuousTask", CreateJsValue(engine, info.isContinuousTask_));
-    object->SetProperty("isKeepAlive", CreateJsValue(engine, info.isKeepAlive_));
-    object->SetProperty("isFocused", CreateJsValue(engine, info.isFocused_));
+    object->SetProperty("isContinuousTask", CreateJsValue(engine, info.isContinuousTask));
+    object->SetProperty("isKeepAlive", CreateJsValue(engine, info.isKeepAlive));
+    object->SetProperty("isFocused", CreateJsValue(engine, info.isFocused));
     return objValue;
 }
 
