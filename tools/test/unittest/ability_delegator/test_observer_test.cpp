@@ -127,7 +127,7 @@ HWTEST_F(TestObserverTest, Test_Observer_Test_0400, Function | MediumTest | Leve
 
 /**
  * @tc.number: Test_Observer_Test_0500
- * @tc.name: WaitForFinish
+ * @tc.name: TestStatus
  * @tc.desc: Verify the TestStatus.
  */
 HWTEST_F(TestObserverTest, Test_Observer_Test_0500, Function | MediumTest | Level1)
