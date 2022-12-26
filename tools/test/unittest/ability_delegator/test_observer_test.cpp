@@ -134,6 +134,5 @@ HWTEST_F(TestObserverTest, Test_Observer_Test_0500, Function | MediumTest | Leve
 {
     HILOG_INFO("Test_Observer_Test_0500 is called");
     TestObserver observer;
-    observer.isFinished_ = false;
     observer.TestStatus(MSG.c_str(), RESULT_CODE);
 }
