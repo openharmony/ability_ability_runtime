@@ -1172,7 +1172,7 @@ private:
 
     void RecoverAbilityRestart(const Want &want);
 
-    AAFWK::EventInfo BuildEventInfo(const Want &want, int32_t userId);
+    AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
 
     void InitStartupFlag();
 
