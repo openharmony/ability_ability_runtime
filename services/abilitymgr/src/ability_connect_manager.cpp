@@ -222,12 +222,10 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
             targetService->SetLauncherRoot();
             targetService->SetKeepAlive();
             targetService->SetRestartTime(abilityRequest.restartTime);
-            targetService->SetRestarting(abilityRequest.restart);
             targetService->SetRestartCount(abilityRequest.restartCount);
         } else if (IsAbilityNeedKeepAlive(targetService)) {
             targetService->SetKeepAlive();
             targetService->SetRestartTime(abilityRequest.restartTime);
-            targetService->SetRestarting(abilityRequest.restart);
             targetService->SetRestartCount(abilityRequest.restartCount);
         }
         serviceMap_.emplace(element.GetURI(), targetService);
@@ -679,12 +677,14 @@ void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilit
     if (abilityMgr) {
         abilityMgr->GetRestartIntervalTime(restartIntervalTime);
     }
+    HILOG_DEBUG("PostRestartResidentTask, time:%{public}d", restartIntervalTime);
     eventHandler_->PostTask(task, taskName, restartIntervalTime);
     HILOG_INFO("PostRestartResidentTask end.");
 }
 
 void AbilityConnectManager::HandleRestartResidentTask(const AbilityRequest &abilityRequest)
 {
+    HILOG_INFO("HandleRestartResidentTask start.");
     auto findRestartResidentTask = [abilityRequest](const AbilityRequest &requestInfo) {
         return (requestInfo.want.GetElement().GetBundleName() == abilityRequest.want.GetElement().GetBundleName() &&
             requestInfo.want.GetElement().GetModuleName() == abilityRequest.want.GetElement().GetModuleName() &&
@@ -1168,6 +1168,7 @@ void AbilityConnectManager::HandleAbilityDiedTask(
 
 void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
 {
+    HILOG_INFO("Restart ability");
     AbilityRequest requestInfo;
     requestInfo.want = abilityRecord->GetWant();
     requestInfo.abilityInfo = abilityRecord->GetAbilityInfo();
@@ -1192,6 +1193,7 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
     // restart other resident ability
     if (abilityRecord->CanRestartResident()) {
         requestInfo.restartCount = abilityRecord->GetRestartCount();
+        requestInfo.restartTime = AbilityUtil::SystemTimeMillis();
         StartAbilityLocked(requestInfo);
     } else {
         auto findRestartResidentTask = [requestInfo](const AbilityRequest &abilityRequest) {

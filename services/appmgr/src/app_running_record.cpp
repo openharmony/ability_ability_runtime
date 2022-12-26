@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "ability_manager_service.h"
 #include "app_running_record.h"
 #include "app_mgr_service_inner.h"
 #include "hitrace_meter.h"
@@ -232,9 +231,10 @@ void AppRunningRecord::SetState(const ApplicationState state)
         return;
     }
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
-        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-        if (abilityMgr) {
-            abilityMgr->GetMaxRestartNum(restartResidentProcCount_, isLauncherApp_);
+        auto serviceInner = appMgrServiceInner_.lock();
+        if (serviceInner) {
+            serviceInner->GetMaxRestartNum(restartResidentProcCount_, isLauncherApp_);
+            HILOG_ERROR("[DongLin]SetRestartResidentProcCount %{public}d", restartResidentProcCount_);
         }
     }
     curState_ = state;
@@ -1160,9 +1160,9 @@ bool AppRunningRecord::CanRestartResidentProc()
     clock_gettime(CLOCK_MONOTONIC, &t);
     int64_t systemTimeMillis = static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS);
     int restartIntervalTime = 0;
-    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (abilityMgr) {
-        abilityMgr->GetRestartIntervalTime(restartIntervalTime);
+    auto serviceInner = appMgrServiceInner_.lock();
+    if (serviceInner) {
+        serviceInner->GetRestartIntervalTime(restartIntervalTime);
     }
     if ((restartResidentProcCount_ >= 0) || ((systemTimeMillis - restartTimeMillis_) > restartIntervalTime)) {
         return true;
