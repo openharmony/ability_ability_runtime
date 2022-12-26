@@ -2784,10 +2784,6 @@ HWTEST_F(AbilityImplTest, AaFwk_AbilityImpl_AfterFocusedCommon_0200, TestSize.Le
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_AfterFocusedCommon_0200 start";
     std::shared_ptr<MockPageAbility> pMocKPageAbility = std::make_shared<MockPageAbility>();
     std::shared_ptr<Ability> ability = pMocKPageAbility;
-    // std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
-    // std::shared_ptr<ContextDeal> contextDeal = std::make_shared<ContextDeal>();
-    // contextDeal->SetAbilityInfo(abilityInfo);
-    // ability->AttachBaseContext(contextDeal);
     AbilityImpl_->ability_ = ability;
     AbilityImpl_->AfterFocusedCommon(true);
     GTEST_LOG_(INFO) << "AaFwk_AbilityImpl_AfterFocusedCommon_0200 end";
