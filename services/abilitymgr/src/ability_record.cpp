@@ -274,7 +274,8 @@ bool AbilityRecord::CanRestartResident()
         if (abilityMgr) {
             abilityMgr->GetRestartIntervalTime(restartIntervalTime);
         }
-        HILOG_DEBUG("restartTime: %{public}lld, now: %{public}lld, intervalTine:%{public}d", restartTime_, AbilityUtil::SystemTimeMillis(), restartIntervalTime);
+        HILOG_DEBUG("restartTime: %{public}lld, now: %{public}lld, intervalTine:%{public}d",
+            restartTime_, AbilityUtil::SystemTimeMillis(), restartIntervalTime);
         if ((AbilityUtil::SystemTimeMillis() - restartTime_) < restartIntervalTime) {
             HILOG_ERROR("Resident restart is out of max count");
             return false;

@@ -108,7 +108,7 @@ private:
     bool nonConfigFile_ {false};
     int maxRootLauncherRestartNum_ = 0;
     int maxResidentRestartNum_ = 0;
-    int restartIntervalTime_ {12000};
+    int restartIntervalTime_ {120000};
     std::string orientation_ {""};
     int missionSaveTime_ {12 * 60 * 60 * 1000};
     int anrTime_ {5000};

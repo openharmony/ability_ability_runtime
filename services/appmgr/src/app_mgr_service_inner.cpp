@@ -21,7 +21,6 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
-#include "ability_manager_service.h"
 #include "application_state_observer_stub.h"
 #include "datetime_ex.h"
 #include "hilog_wrapper.h"
@@ -126,6 +125,8 @@ void AppMgrServiceInner::Init()
     AddWatchParameter();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
     InitFocusListener();
+    amsConfigResolver_ = std::make_shared<AAFwk::AmsConfigurationParameter>();
+    amsConfigResolver_->Parse();
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
@@ -327,10 +328,8 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
     appRecord->LaunchApplication(*configuration_);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
     int restartResidentProcCount = 0;
-    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-    if (abilityMgr) {
-        bool isRootLauncher = appRecord->IsLauncherApp();
-        abilityMgr->GetMaxRestartNum(restartResidentProcCount, isRootLauncher);
+    if (amsConfigResolver_ != nullptr) {
+        restartResidentProcCount = amsConfigResolver_->GetMaxRestartNum(false);
     }
     appRecord->SetRestartResidentProcCount(restartResidentProcCount);
 
@@ -1547,11 +1546,10 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
             }
             restartResedentTaskList_.emplace_back(appRecord);
             int restartIntervalTime = 0;
-            auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-            if (abilityMgr) {
-                abilityMgr->GetRestartIntervalTime(restartIntervalTime);
+            if (amsConfigResolver_ != nullptr) {
+                restartIntervalTime = amsConfigResolver_->GetRestartIntervalTime();
             }
-            HILOG_INFO("PostRestartResidentProcessDelayTask");
+            HILOG_INFO("PostRestartResidentProcessDelayTask, delay time: %{public}d", restartIntervalTime);
             eventHandler_->PostTask(restartProcess, "RestartResidentProcessDelay", restartIntervalTime);
         }
     }
@@ -2964,6 +2962,20 @@ int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleNam
     }
 
     return appRunningManager_->NotifyUnLoadRepairPatch(bundleName, callback);
+}
+
+void AppMgrServiceInner::GetRestartIntervalTime(int &restartIntervalTime)
+{
+    if (amsConfigResolver_) {
+        restartIntervalTime = amsConfigResolver_->GetRestartIntervalTime();
+    }
+}
+
+void AppMgrServiceInner::GetMaxRestartNum(int &max, bool isRootLauncher)
+{
+    if (amsConfigResolver_) {
+        max = amsConfigResolver_->GetMaxRestartNum(isRootLauncher);
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
