@@ -66,7 +66,7 @@ HWTEST_F(AbilityImplFactoryTest, Ability_Impl_Factory_MakeAbilityImplObject_0100
     EXPECT_TRUE(result == nullptr);
     GTEST_LOG_(INFO) << "Ability_Impl_Factory_MakeAbilityImplObject_0100 end";
 }
-
+#ifdef SUPPORT_GRAPHICS
 /**
  * @tc.number: Ability_Impl_Factory_MakeAbilityImplObject_0200
  * @tc.name: MakeAbilityImplObject
@@ -98,7 +98,7 @@ HWTEST_F(AbilityImplFactoryTest, Ability_Impl_Factory_MakeAbilityImplObject_0300
     EXPECT_TRUE(result != nullptr);
     GTEST_LOG_(INFO) << "Ability_Impl_Factory_MakeAbilityImplObject_0300 end";
 }
-
+#endif
 /**
  * @tc.number: Ability_Impl_Factory_MakeAbilityImplObject_0400
  * @tc.name: MakeAbilityImplObject
