@@ -637,12 +637,6 @@ void AbilityConnectManager::LoadAbility(const std::shared_ptr<AbilityRecord> &ab
         return;
     }
 
-    if (!abilityRecord->CanRestartResident()) {
-        HILOG_ERROR("Resident restart is out of max count.");
-        RemoveServiceAbility(abilityRecord);
-        return;
-    }
-
     PostTimeOutTask(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
 
     sptr<Token> token = abilityRecord->GetToken();

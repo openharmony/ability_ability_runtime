@@ -38,7 +38,6 @@ ohos_unittest("AmsAppRunningRecordTest") {
   }
   deps = [
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
-    "${ability_runtime_path}/services/abilitymgr:abilityms_target",
     "${ability_runtime_services_path}/appmgr:libappms",
     "//third_party/googletest:gmock_main",
   ]
@@ -46,7 +45,6 @@ ohos_unittest("AmsAppRunningRecordTest") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
-    "ability_runtime:ability_manager",
     "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",

@@ -231,11 +231,6 @@ int AbilityRecord::LoadAbility()
         HILOG_ERROR("Root launcher restart is out of max count.");
         return ERR_INVALID_VALUE;
     }
-
-    if (!CanRestartResident()) {
-        HILOG_ERROR("Resident restart is out of max count.");
-        return ERR_INVALID_VALUE;
-    }
     
     if (isRestarting_) {
         restartTime_ = AbilityUtil::SystemTimeMillis();

@@ -36,14 +36,12 @@ ohos_fuzztest("RegisterApplicationStateObserverFuzzTest") {
 
   deps = [
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
-    "${ability_runtime_path}/services/abilitymgr:abilityms_target",
     "${ability_runtime_services_path}/appmgr:libappms",
   ]
 
   external_deps = [
     "ability_base:base",
     "ability_runtime:ability_deps_wrapper",
-    "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",

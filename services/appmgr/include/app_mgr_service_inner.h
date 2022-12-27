@@ -34,7 +34,6 @@
 #include "app_scheduler_interface.h"
 #include "app_spawn_client.h"
 #include "app_task_info.h"
-#include "ams_configuration_parameter.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -567,9 +566,6 @@ public:
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
 
-    void GetRestartIntervalTime(int &restartIntervalTime);
-    void GetMaxRestartNum(int &max, bool isRootLauncher);
-
 private:
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount,
@@ -798,7 +794,6 @@ private:
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
     sptr<WindowFocusChangedListener> focusListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
-    std::shared_ptr<AAFwk::AmsConfigurationParameter> amsConfigResolver_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
