@@ -199,6 +199,7 @@ struct AbilityRequest {
     bool restart = false;
     int32_t restartCount = -1;
     int64_t restartTime = 0;
+    bool startRecent = false;
 
     // call ability
     int callerUid = -1;

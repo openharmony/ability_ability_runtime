@@ -418,6 +418,7 @@ void JsAbility::OnForeground(const Want &want)
 void JsAbility::OnBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("OnBackground begin, ability is %{public}s.", GetAbilityName().c_str());
     CallObjectMethod("onBackground");
 
     Ability::OnBackground();
@@ -432,6 +433,7 @@ void JsAbility::OnBackground()
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnAbilityBackground(jsAbilityObj_);
     }
+    HILOG_DEBUG("OnBackground end, ability is %{public}s.", GetAbilityName().c_str());
 }
 
 std::unique_ptr<NativeReference> JsAbility::CreateAppWindowStage()
@@ -896,7 +898,16 @@ std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> JsAbility::CreateADelegat
 {
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
     property->token_          = GetAbilityContext()->GetToken();
-    property->name_           = GetAbilityName();
+    if (GetApplicationInfo() == nullptr || GetApplicationInfo()->bundleName.empty()) {
+        property->name_ = GetAbilityName();
+    } else {
+        std::string::size_type pos = GetAbilityName().find(GetApplicationInfo()->bundleName);
+        if (pos == std::string::npos || pos != 0) {
+            property->name_ = GetApplicationInfo()->bundleName + "." + GetAbilityName();
+        } else {
+            property->name_ = GetAbilityName();
+        }
+    }
     property->lifecycleState_ = GetState();
     property->object_         = jsAbilityObj_;
 

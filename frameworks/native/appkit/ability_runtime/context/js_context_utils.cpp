@@ -17,11 +17,13 @@
 
 #include "ability_runtime_error_util.h"
 #include "hilog_wrapper.h"
+#include "ipc_skeleton.h"
 #include "js_application_context_utils.h"
 #include "js_data_struct_converter.h"
 #include "js_hap_module_info_utils.h"
 #include "js_resource_manager_utils.h"
 #include "js_runtime_utils.h"
+#include "tokenid_kit.h"
 #include "application_context.h"
 
 namespace OHOS {
@@ -71,6 +73,7 @@ private:
     NativeValue* OnSwitchArea(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetArea(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateModuleContext(NativeEngine& engine, NativeCallbackInfo& info);
+    bool CheckCallerIsSystemApp();
 
     std::shared_ptr<Context> keepContext_;
 };
@@ -146,6 +149,12 @@ NativeValue* JsBaseContext::CreateModuleContext(NativeEngine* engine, NativeCall
 
 NativeValue* JsBaseContext::OnCreateModuleContext(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    if (!CheckCallerIsSystemApp()) {
+        HILOG_ERROR("This application is not system-app, can not use system-api");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        return engine.CreateUndefined();
+    }
+
     auto context = context_.lock();
     if (!context) {
         HILOG_WARN("context is already released");
@@ -200,7 +209,7 @@ NativeValue* JsBaseContext::OnCreateModuleContext(NativeEngine& engine, NativeCa
     nativeObj->SetNativePointer(
         workContext,
         [](NativeEngine *, void *data, void *) {
-            HILOG_INFO("Finalizer for weak_ptr module context is called");
+            HILOG_DEBUG("Finalizer for weak_ptr module context is called");
             delete static_cast<std::weak_ptr<Context> *>(data);
         },
         nullptr);
@@ -353,6 +362,12 @@ NativeValue* JsBaseContext::OnGetBundleCodeDir(NativeEngine& engine, NativeCallb
 
 NativeValue* JsBaseContext::OnCreateBundleContext(NativeEngine& engine, NativeCallbackInfo& info)
 {
+    if (!CheckCallerIsSystemApp()) {
+        HILOG_ERROR("This application is not system-app, can not use system-api");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        return engine.CreateUndefined();
+    }
+
     if (info.argc == 0) {
         HILOG_ERROR("Not enough params");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -399,7 +414,7 @@ NativeValue* JsBaseContext::OnCreateBundleContext(NativeEngine& engine, NativeCa
     nativeObj->SetNativePointer(
         workContext,
         [](NativeEngine *, void *data, void *) {
-            HILOG_INFO("Finalizer for weak_ptr bundle context is called");
+            HILOG_DEBUG("Finalizer for weak_ptr bundle context is called");
             delete static_cast<std::weak_ptr<Context> *>(data);
         },
         nullptr);
@@ -442,11 +457,20 @@ NativeValue* JsBaseContext::OnGetApplicationContext(NativeEngine& engine, Native
     nativeObj->SetNativePointer(
         workContext,
         [](NativeEngine *, void *data, void *) {
-            HILOG_INFO("Finalizer for weak_ptr application context is called");
+            HILOG_DEBUG("Finalizer for weak_ptr application context is called");
             delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
         },
         nullptr);
     return contextObj;
+}
+
+bool JsBaseContext::CheckCallerIsSystemApp()
+{
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        return false;
+    }
+    return true;
 }
 } // namespace
 
@@ -478,7 +502,7 @@ NativeValue* AttachBaseContext(NativeEngine* engine, void* value, void* hint)
     auto workContext = new (std::nothrow) std::weak_ptr<Context>(ptr);
     nObject->SetNativePointer(workContext,
         [](NativeEngine *, void *data, void *) {
-            HILOG_INFO("Finalizer for weak_ptr base context is called");
+            HILOG_DEBUG("Finalizer for weak_ptr base context is called");
             delete static_cast<std::weak_ptr<Context> *>(data);
         }, nullptr);
     return contextObj;
