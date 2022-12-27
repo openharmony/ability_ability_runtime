@@ -552,13 +552,13 @@ void ContextImpl::SetConfiguration(const std::shared_ptr<AppExecFwk::Configurati
 
 void ContextImpl::KillProcessBySelf()
 {
-    auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     appMgrClient->KillApplicationSelf();
 }
 
 int32_t ContextImpl::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
 {
-    auto appMgrClient = std::make_unique<AppExecFwk::AppMgrClient>();
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     auto result = appMgrClient->GetProcessRunningInformation(info);
     HILOG_DEBUG("result is %{public}d.", result);
     return result;
