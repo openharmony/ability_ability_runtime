@@ -27,7 +27,6 @@ ohos_unittest("AmsMgrStubTest") {
   sources = [ "ams_mgr_stub_test.cpp" ]
 
   deps = [
-    "${ability_runtime_path}/services/abilitymgr:abilityms_target",
     "${ability_runtime_services_path}/appmgr:libappms",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
@@ -35,7 +34,6 @@ ohos_unittest("AmsMgrStubTest") {
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",

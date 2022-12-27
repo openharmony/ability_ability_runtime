@@ -82,6 +82,9 @@ constexpr int32_t USER_SCALE = 200000;
 
 constexpr int32_t BASE_USER_RANGE = 200000;
 
+constexpr int32_t MAX_RESTART_COUNT = 3;
+constexpr int32_t RESTART_INTERVAL_TIME = 120000;
+
 constexpr ErrCode APPMGR_ERR_OFFSET = ErrCodeOffset(SUBSYS_APPEXECFWK, 0x01);
 constexpr ErrCode ERR_ALREADY_EXIST_RENDER = APPMGR_ERR_OFFSET + 100; // error code for already exist render.
 const std::string EVENT_NAME_LIFECYCLE_TIMEOUT = "APP_LIFECYCLE_TIMEOUT";
@@ -125,8 +128,6 @@ void AppMgrServiceInner::Init()
     AddWatchParameter();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
     InitFocusListener();
-    amsConfigResolver_ = std::make_shared<AAFwk::AmsConfigurationParameter>();
-    amsConfigResolver_->Parse();
 }
 
 AppMgrServiceInner::~AppMgrServiceInner()
@@ -327,10 +328,7 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
 
     appRecord->LaunchApplication(*configuration_);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
-    int restartResidentProcCount = 0;
-    if (amsConfigResolver_ != nullptr) {
-        restartResidentProcCount = amsConfigResolver_->GetMaxRestartNum(false);
-    }
+    int restartResidentProcCount = MAX_RESTART_COUNT;
     appRecord->SetRestartResidentProcCount(restartResidentProcCount);
 
     // There is no ability when the empty resident process starts
@@ -1545,12 +1543,8 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
                 return;
             }
             restartResedentTaskList_.emplace_back(appRecord);
-            int restartIntervalTime = 0;
-            if (amsConfigResolver_ != nullptr) {
-                restartIntervalTime = amsConfigResolver_->GetRestartIntervalTime();
-            }
-            HILOG_INFO("PostRestartResidentProcessDelayTask, delay time: %{public}d", restartIntervalTime);
-            eventHandler_->PostTask(restartProcess, "RestartResidentProcessDelay", restartIntervalTime);
+            HILOG_INFO("PostRestartResidentProcessDelayTask.");
+            eventHandler_->PostTask(restartProcess, "RestartResidentProcessDelayTask", RESTART_INTERVAL_TIME);
         }
     }
 }
@@ -2962,20 +2956,6 @@ int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleNam
     }
 
     return appRunningManager_->NotifyUnLoadRepairPatch(bundleName, callback);
-}
-
-void AppMgrServiceInner::GetRestartIntervalTime(int &restartIntervalTime)
-{
-    if (amsConfigResolver_) {
-        restartIntervalTime = amsConfigResolver_->GetRestartIntervalTime();
-    }
-}
-
-void AppMgrServiceInner::GetMaxRestartNum(int &max, bool isRootLauncher)
-{
-    if (amsConfigResolver_) {
-        max = amsConfigResolver_->GetMaxRestartNum(isRootLauncher);
-    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

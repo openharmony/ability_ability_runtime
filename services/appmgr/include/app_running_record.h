@@ -635,7 +635,7 @@ private:
     std::string moduleName_;
     bool isDebugApp_ = false;
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
-    int64_t restartTimeMillis_ = 0; // The time of first trying app restart
+    int64_t restartTimeMillis_ = 0; // The time of last trying app restart
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
