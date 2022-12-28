@@ -32,7 +32,6 @@
 #include "mock_ability_connect_callback.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
-#include "os_account_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -328,7 +327,7 @@ HWTEST_F(AbilityTimeoutModuleTest, OnAbilityDied_001, TestSize.Level1)
     EXPECT_TRUE(lauList != nullptr);
 
     int maxRestart = -1;
-    abilityMs_->GetMaxRestartNum(maxRestart);
+    abilityMs_->GetMaxRestartNum(maxRestart, true);
     EXPECT_TRUE(maxRestart > -1);
 
     // add rootlauncher to abilityMs.
@@ -369,7 +368,7 @@ HWTEST_F(AbilityTimeoutModuleTest, OnAbilityDied_002, TestSize.Level1)
     EXPECT_TRUE(lauList != nullptr);
 
     int maxRestart = -1;
-    abilityMs_->GetMaxRestartNum(maxRestart);
+    abilityMs_->GetMaxRestartNum(maxRestart, true);
     EXPECT_TRUE(maxRestart > -1);
 
     // add rootlauncher to abilityMs.
@@ -415,7 +414,7 @@ HWTEST_F(AbilityTimeoutModuleTest, OnAbilityDied_003, TestSize.Level1)
     EXPECT_TRUE(lauList != nullptr);
 
     int maxRestart = -1;
-    abilityMs_->GetMaxRestartNum(maxRestart);
+    abilityMs_->GetMaxRestartNum(maxRestart, true);
     EXPECT_TRUE(maxRestart > -1);
 
     // add rootlauncher to abilityMs.
