@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "application_state_observer_stub.h"
 #include "datetime_ex.h"
@@ -58,6 +59,12 @@ using namespace OHOS::Rosen;
 using namespace OHOS::Security;
 
 namespace {
+#define CHECK_CALLER_IS_SYSTEM_APP                                                             \
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) { \
+        HILOG_ERROR("The caller is not system-app, can not use system-api");                   \
+        return AAFwk::ERR_NOT_SYSTEM_APP;                                                             \
+    }
+
 // NANOSECONDS mean 10^9 nano second
 constexpr int64_t NANOSECONDS = 1000000000;
 // MICROSECONDS mean 10^6 milli second
@@ -81,6 +88,9 @@ constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
 
 constexpr int32_t BASE_USER_RANGE = 200000;
+
+constexpr int32_t MAX_RESTART_COUNT = 3;
+constexpr int32_t RESTART_INTERVAL_TIME = 120000;
 
 constexpr ErrCode APPMGR_ERR_OFFSET = ErrCodeOffset(SUBSYS_APPEXECFWK, 0x01);
 constexpr ErrCode ERR_ALREADY_EXIST_RENDER = APPMGR_ERR_OFFSET + 100; // error code for already exist render.
@@ -325,7 +335,8 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
 
     appRecord->LaunchApplication(*configuration_);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
-    appRecord->SetRestartResidentProcCount(RESTART_RESIDENT_PROCESS_MAX_TIMES);
+    int restartResidentProcCount = MAX_RESTART_COUNT;
+    appRecord->SetRestartResidentProcCount(restartResidentProcCount);
 
     // There is no ability when the empty resident process starts
     // The status of all resident processes is ready
@@ -477,28 +488,7 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
         return errCode;
     }
 
-    int result = ERR_OK;
-    int64_t startTime = SystemTimeMillisecond();
-    std::list<pid_t> pids;
-
-    if (!appRunningManager_->ProcessExitByBundleName(bundleName, pids)) {
-        HILOG_INFO("The process corresponding to the package name did not start");
-        return result;
-    }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        HILOG_INFO("The remote process exited successfully ");
-        NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-        return result;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter);
-        if (result < 0) {
-            HILOG_ERROR("KillApplication failed for bundleName:%{public}s pid:%{public}d", bundleName.c_str(), *iter);
-            return result;
-        }
-    }
-    NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-    return result;
+    return KillApplicationByBundleName(bundleName);
 }
 
 int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, const int uid)
@@ -553,21 +543,35 @@ int32_t AppMgrServiceInner::KillApplicationSelf()
     }
 
     auto callerPid = IPCSkeleton::GetCallingPid();
-    if (!appRunningManager_->ProcessExitByPid(callerPid)) {
-        HILOG_INFO("The callerPid is invalid");
-        return ERR_OK;
-    }
-    std::list<pid_t> pids;
-    pids.push_back(callerPid);
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    auto bundleName = appRecord->GetBundleName();
+    return KillApplicationByBundleName(bundleName);
+}
+
+int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundleName)
+{
+    int result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
+    std::list<pid_t> pids;
+
+    if (!appRunningManager_->ProcessExitByBundleName(bundleName, pids)) {
+        HILOG_ERROR("The process corresponding to the package name did not start");
+        return result;
+    }
     if (WaitForRemoteProcessExit(pids, startTime)) {
-        HILOG_INFO("The remote process exited successfully");
-        return ERR_OK;
+        HILOG_DEBUG("The remote process exited successfully ");
+        NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
+        return result;
     }
-    int result = KillProcessByPid(callerPid);
-    if (result < 0) {
-        HILOG_ERROR("KillApplication is fail, pid: %{public}d", callerPid);
+    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
+        result = KillProcessByPid(*iter);
+        if (result < 0) {
+            HILOG_ERROR("KillApplicationSelf is failed for bundleName:%{public}s, pid: %{public}d",
+                bundleName.c_str(), *iter);
+            return result;
+        }
     }
+    NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
     return result;
 }
 
@@ -577,9 +581,9 @@ int32_t AppMgrServiceInner::KillApplicationByUserId(const std::string &bundleNam
         HILOG_ERROR("appRunningManager_ is nullptr");
         return ERR_NO_INIT;
     }
-
-    if (VerifyAccountPermission(AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES, userId) ==
-        ERR_PERMISSION_DENIED) {
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (VerifyAccountPermission(
+        AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES, userId) == ERR_PERMISSION_DENIED) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         return ERR_PERMISSION_DENIED;
     }
@@ -727,6 +731,18 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &info)
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    GetRunningProcess(appRecord, info);
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
 {
     HILOG_INFO("AppMgrServiceInner start");
@@ -754,16 +770,22 @@ void AppMgrServiceInner::GetRunningProcesses(const std::shared_ptr<AppRunningRec
     std::vector<RunningProcessInfo> &info)
 {
     RunningProcessInfo runningProcessInfo;
-    runningProcessInfo.processName_ = appRecord->GetProcessName();
-    runningProcessInfo.pid_ = appRecord->GetPriorityObject()->GetPid();
-    runningProcessInfo.uid_ = appRecord->GetUid();
-    runningProcessInfo.state_ = static_cast<AppProcessState>(appRecord->GetState());
-    runningProcessInfo.isContinuousTask = appRecord->IsContinuousTask();
-    runningProcessInfo.isKeepAlive = appRecord->IsKeepAliveApp();
-    runningProcessInfo.isFocused = appRecord->GetFocusFlag();
-    runningProcessInfo.startTimeMillis_ = appRecord->GetAppStartTime();
-    appRecord->GetBundleNames(runningProcessInfo.bundleNames);
+    GetRunningProcess(appRecord, runningProcessInfo);
     info.emplace_back(runningProcessInfo);
+}
+
+void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningProcessInfo &info)
+{
+    info.processName_ = appRecord->GetProcessName();
+    info.pid_ = appRecord->GetPriorityObject()->GetPid();
+    info.uid_ = appRecord->GetUid();
+    info.state_ = static_cast<AppProcessState>(appRecord->GetState());
+    info.isContinuousTask = appRecord->IsContinuousTask();
+    info.isKeepAlive = appRecord->IsKeepAliveApp();
+    info.isFocused = appRecord->GetFocusFlag();
+    info.startTimeMillis_ = appRecord->GetAppStartTime();
+    appRecord->GetBundleNames(info.bundleNames);
 }
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
@@ -1518,17 +1540,28 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     }
 
     if (appRecord->IsKeepAliveApp()) {
-        appRecord->DecRestartResidentProcCount();
+        auto restartProcess = [appRecord, innerService = shared_from_this()]() {
+            innerService->RestartResidentProcess(appRecord);
+        };
         if (appRecord->CanRestartResidentProc()) {
-            auto restartProcess = [appRecord, innerService = shared_from_this()]() {
-                innerService->RestartResidentProcess(appRecord);
-            };
-
             if (!eventHandler_) {
                 HILOG_ERROR("eventHandler_ is nullptr");
                 return;
             }
             eventHandler_->PostTask(restartProcess, "RestartResidentProcess");
+        } else {
+            auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
+                return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
+            };
+            auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(),
+                findRestartResidentTask);
+            if (findIter != restartResedentTaskList_.end()) {
+                HILOG_WARN("The restart app task has been registered.");
+                return;
+            }
+            restartResedentTaskList_.emplace_back(appRecord);
+            HILOG_INFO("PostRestartResidentProcessDelayTask.");
+            eventHandler_->PostTask(restartProcess, "RestartResidentProcessDelayTask", RESTART_INTERVAL_TIME);
         }
     }
 }
@@ -1802,7 +1835,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
 
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModules(appInfo, info.hapModuleInfos);
-    HILOG_INFO("StartEmptyResidentProcess oK pid : [%{public}d], ", appRecord->GetPriorityObject()->GetPid());
+    HILOG_INFO("StartEmptyResidentProcess of pid : [%{public}d], ", appRecord->GetPriorityObject()->GetPid());
 }
 
 bool AppMgrServiceInner::CheckRemoteClient()
@@ -1826,6 +1859,25 @@ bool AppMgrServiceInner::CheckRemoteClient()
 
 void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord)
 {
+    if (appRecord == nullptr) {
+        HILOG_ERROR("Restart resident process failed, the appRecord is nullptr.");
+        return;
+    }
+    struct timespec t;
+    t.tv_sec = 0;
+    t.tv_nsec = 0;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    appRecord->SetRestartTimeMillis(static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS));
+    appRecord->DecRestartResidentProcCount();
+
+    auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
+        return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
+    };
+    auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(), findRestartResidentTask);
+    if (findIter != restartResedentTaskList_.end()) {
+        restartResedentTaskList_.erase(findIter);
+    }
+
     if (!CheckRemoteClient() || !appRecord || !appRunningManager_) {
         HILOG_ERROR("restart resident process failed!");
         return;
@@ -1880,18 +1932,21 @@ void AppMgrServiceInner::NotifyAppStatusByCallerUid(const std::string &bundleNam
 int32_t AppMgrServiceInner::RegisterApplicationStateObserver(
     const sptr<IApplicationStateObserver> &observer, const std::vector<std::string> &bundleNameList)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     return DelayedSingleton<AppStateObserverManager>::GetInstance()->RegisterApplicationStateObserver(
         observer, bundleNameList);
 }
 
 int32_t AppMgrServiceInner::UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer)
 {
+    CHECK_CALLER_IS_SYSTEM_APP;
     return DelayedSingleton<AppStateObserverManager>::GetInstance()->UnregisterApplicationStateObserver(observer);
 }
 
 int32_t AppMgrServiceInner::GetForegroundApplications(std::vector<AppStateData> &list)
 {
     HILOG_INFO("%{public}s, begin.", __func__);
+    CHECK_CALLER_IS_SYSTEM_APP;
     auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
     if (!isPerm) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
@@ -2221,6 +2276,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         HILOG_ERROR("appRunningManager_ is null");
         return ERR_INVALID_VALUE;
     }
+    CHECK_CALLER_IS_SYSTEM_APP;
 
     auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateConfigurationPerm();
     if (ret != ERR_OK) {
