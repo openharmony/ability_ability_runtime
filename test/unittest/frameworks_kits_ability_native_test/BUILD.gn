@@ -1547,6 +1547,68 @@ ohos_unittest("ability_local_record_test") {
   ]
 }
 
+ohos_unittest("reverse_continuation_scheduler_replica_proxy_test") {
+  module_out_path = module_output_path
+
+  sources = [ "reverse_continuation_scheduler_replica_proxy_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:continuation_ipc",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
+    "${multimodalinput_path}/frameworks/proxy:libmmi-common",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+  ]
+}
+
+ohos_unittest("reverse_continuation_scheduler_replica_stub_test") {
+  module_out_path = module_output_path
+
+  sources = [ "reverse_continuation_scheduler_replica_stub_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_native_path}/ability/native:abilitykit_native",
+    "${ability_runtime_native_path}/ability/native:continuation_ipc",
+    "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_native_path}/appkit:appkit_native",
+    "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
+    "${multimodalinput_path}/frameworks/proxy:libmmi-common",
+    "//third_party/googletest:gmock_main",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "c_utils:utils",
+    "hitrace_native:hitrace_meter",
+    "hiviewdfx_hilog_native:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+  ]
+}
+
 ohos_unittest("ability_connection_manager_test") {
   module_out_path = module_output_path
   sources = [
@@ -1686,6 +1748,8 @@ group("unittest") {
     ":pac_map_test",
     ":reserse_continuation_scheduler_primary_proxy_test",
     ":reserse_continuation_scheduler_primary_stub_test",
+    ":reverse_continuation_scheduler_replica_proxy_test",
+    ":reverse_continuation_scheduler_replica_stub_test",
     ":service_ability_impl_test",
     ":task_handler_client_test",
   ]
