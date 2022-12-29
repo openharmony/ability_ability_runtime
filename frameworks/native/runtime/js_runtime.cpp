@@ -753,9 +753,15 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
 bool JsRuntime::RunSandboxScript(const std::string& path, const std::string& hapPath)
 {
     std::string fileName;
-    if (!MakeFilePath(codePath_, path, fileName)) {
-        HILOG_ERROR("Failed to make module file path: %{private}s", path.c_str());
-        return false;
+    if (!hapPath.empty()) {
+        fileName.append(codePath_).append(Constants::FILE_SEPARATOR).append(path);
+        std::regex pattern(std::string(Constants::FILE_DOT) + std::string(Constants::FILE_SEPARATOR));
+        fileName = std::regex_replace(fileName, pattern, "");
+    } else {
+        if (!MakeFilePath(codePath_, path, fileName)) {
+            HILOG_ERROR("Failed to make module file path: %{private}s", path.c_str());
+            return false;
+        }
     }
 
     if (!RunScript(fileName, hapPath)) {

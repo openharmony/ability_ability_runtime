@@ -976,8 +976,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             }
         }
         if (!findEntryHapModuleInfo) {
-            HILOG_ERROR("HandleLaunchApplication find entry hap module info failed!");
-            return;
+            HILOG_WARN("HandleLaunchApplication find entry hap module info failed!");
+            entryHapModuleInfo = bundleInfo.hapModuleInfos.back();
         }
         moduelJson = entryHapModuleInfo.isModuleJson;
         isStageBased = entryHapModuleInfo.isStageBasedModel;
