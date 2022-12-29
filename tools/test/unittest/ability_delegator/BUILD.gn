@@ -135,6 +135,8 @@ group("unittest") {
   deps = [
     ":ability_command_test",
     ":shell_command_result_test",
+    ":test_observer_proxy_test",
+    ":test_observer_stub_test",
     ":test_observer_test",
   ]
 }
