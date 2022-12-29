@@ -1887,6 +1887,7 @@ ohos_unittest("ability_runtime_test") {
     "napi:ace_napi",
   ]
 }
+
 ###############################################################################
 
 group("unittest") {
