@@ -172,7 +172,7 @@ struct AssetHelper final {
 
         AppExecFwk::BundleInfo bundleInfo;
         auto getInfoResult = bundleMgrProxy->GetBundleInfoV9(bundleName_,
-                static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo, 100);
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo, 100);
         if (getInfoResult != 0) {
             HILOG_ERROR("GetBundleInfo failed through %{private}s.", bundleName_.c_str());
             return false;
