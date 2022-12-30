@@ -1624,7 +1624,7 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_ExecuteBatch_0400, Funct
     ability->AttachBaseContext(contextDeal);
 
     std::vector<std::shared_ptr<DataAbilityOperation>> operations;
-
+    dataabilityimpl->ExecuteBatch(operations);
     EXPECT_TRUE(true);
     sleep(1);
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_ExecuteBatch_0400 end";
