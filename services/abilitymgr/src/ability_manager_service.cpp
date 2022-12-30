@@ -810,6 +810,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         AAFWK::EventReport::SendAbilityEvent(AAFWK::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
+    UpdateCallerInfo(abilityRequest.want);
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
@@ -956,7 +957,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         return ERR_AAFWK_INVALID_WINDOW_MODE;
     }
 #endif
-
+    UpdateCallerInfo(abilityRequest.want);
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
