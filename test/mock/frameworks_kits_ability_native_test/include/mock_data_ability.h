@@ -130,7 +130,7 @@ public:
     }
 
     virtual std::vector<std::shared_ptr<DataAbilityResult>> ExecuteBatch(
-    const std::vector<std::shared_ptr<DataAbilityOperation>> &operations)
+        const std::vector<std::shared_ptr<DataAbilityOperation>> &operations)
     {
         GTEST_LOG_(INFO) << "MockDataAbility::ExecuteBatch called";
         std::vector<std::shared_ptr<DataAbilityResult>> results;
