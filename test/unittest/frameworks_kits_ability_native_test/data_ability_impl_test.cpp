@@ -457,7 +457,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_OpenFile_0200, Function 
     GTEST_LOG_(INFO) << "AaFwk_DataAbilityImplTest_OpenFile_0200 end";
 }
 
-
 /**
  * @tc.number: AaFwk_DataAbilityImplTest_OpenFile_0300
  * @tc.name: OpenFile
@@ -1127,7 +1126,6 @@ HWTEST_F(DataAbilityImplTest, AaFwk_DataAbilityImplTest_GetPermissionInfo_0400, 
     std::shared_ptr<Ability> ability = std::make_shared<MockDataAbility>();
     std::shared_ptr<ContextDeal> contextDeal = std::make_shared<ContextDeal>();
     dataabilityimpl->Init(application, record, ability, handler, token, contextDeal);
-
 
     Uri uri("\nullptr");
     const std::string permissionType = "r";
