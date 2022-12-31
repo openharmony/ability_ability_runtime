@@ -327,7 +327,6 @@ ohos_unittest("mix_stack_dumper_test") {
   ]
 
   sources = [
-    "${ability_runtime_native_path}/appkit/app/mix_stack_dumper.cpp",
     "mix_stack_dumper_test.cpp",
   ]
 

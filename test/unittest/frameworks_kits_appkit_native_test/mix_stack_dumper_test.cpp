@@ -174,7 +174,7 @@ HWTEST_F(MixStackDumperTest, MixStackDumperTest002, Function | MediumTest | Leve
         "libappkit_native.z.so", "mix_stack_dumper_test",
     };
     int length = sizeof(keywords) / sizeof(keywords[0]);
-    EXPECT_FALSE(CheckMixStackKeyWords(testFile, keywords, length));
+    EXPECT_TRUE(CheckMixStackKeyWords(testFile, keywords, length));
 }
 
 /**
