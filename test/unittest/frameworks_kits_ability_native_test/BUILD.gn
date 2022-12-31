@@ -1774,6 +1774,7 @@ group("unittest") {
     ":ability_transaction_callback_info_test",
     ":ability_window_test",
     ":continuation_test",
+    ":data_ability_helper_impl_test",
     ":data_ability_helper_test",
     ":data_ability_impl_file_secondpart_test",
     ":data_ability_impl_file_test",
