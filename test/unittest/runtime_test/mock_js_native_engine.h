@@ -159,8 +159,10 @@ public:
 
     MOCK_METHOD2(CreateError, NativeValue* (NativeValue*, NativeValue*));
 
-    void CallInitTaskFunc(NativeEngine* engine, NativeValue* func) override
-    {}
+    bool CallInitTaskFunc(NativeEngine* engine, NativeValue* func) override
+    {
+        return false;
+    }
 
     NativeValue* CallFunction(
         NativeValue* thisVar, NativeValue* function, NativeValue* const* argv, size_t argc) override
