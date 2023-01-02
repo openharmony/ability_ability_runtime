@@ -32,8 +32,8 @@ std::vector<uint8_t> JsModuleReader::operator()(const std::string& hapPath) cons
     }
     std::string realHapPath = std::string(ABS_CODE_PATH) + hapPath + std::string(HAP_SUFFIX);
     bool newCreate = false;
-    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
-    if (extractor == nullptr) {
+    std::string loadPath = ExtractorUtil::GetLoadFilePath(realHapPath);
+    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);    if (extractor == nullptr) {
         HILOG_ERROR("realHapPath %{private}s GetExtractor failed", realHapPath.c_str());
         return buffer;
     }
@@ -41,7 +41,6 @@ std::vector<uint8_t> JsModuleReader::operator()(const std::string& hapPath) cons
     size_t len = 0;
     if (!extractor->ExtractToBufByName(MERGE_ABC_PATH, dataPtr, len)) {
         HILOG_ERROR("get mergeAbc fileBuffer failed");
-        return buffer;
     }
     buffer.assign(dataPtr.get(), dataPtr.get() + len);
     return buffer;
