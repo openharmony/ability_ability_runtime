@@ -1276,6 +1276,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
         if (nextAbilityRecord) {
             nextAbilityRecord->SetPreAbilityRecord(abilityRecord);
 #ifdef SUPPORT_GRAPHICS
+            nextAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
             nextAbilityRecord->ProcessForegroundAbility(abilityRecord);
         } else {
             if (!abilityRecord->IsClearMissionFlag()) {
