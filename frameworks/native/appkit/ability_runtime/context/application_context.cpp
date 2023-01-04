@@ -297,7 +297,6 @@ std::string ApplicationContext::GetFilesDir()
 
 void ApplicationContext::KillProcessBySelf()
 {
-    HILOG_DEBUG("9999 ApplicationContext::KillProcessBySelf");
     if (contextImpl_ != nullptr) {
         contextImpl_->KillProcessBySelf();
     }
