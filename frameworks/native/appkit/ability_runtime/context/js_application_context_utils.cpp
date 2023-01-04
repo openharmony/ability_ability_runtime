@@ -483,7 +483,6 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
     HILOG_DEBUG("kill self process");
     applicationContext->KillProcessBySelf();
     AsyncTask::CompleteCallback complete = [](NativeEngine& engine, AsyncTask& task, int32_t status) {
-        HILOG_DEBUG("kill self process start");
         task.Resolve(engine, engine.CreateUndefined());
     };
     NativeValue* lastParam = (info.argc = ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
@@ -516,18 +515,20 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
         return engine.CreateUndefined();
     }
     HILOG_DEBUG("Get Process Info");
-    auto complete =
-        [applicationContext, this](NativeEngine& engine, AsyncTask& task,
-            int32_t status) {
-            AppExecFwk::RunningProcessInfo processInfo;
-            auto ret = applicationContext->GetProcessRunningInformation(processInfo);
-            if (ret == 0) {
-                HILOG_DEBUG("Get Process Info Success");
-                task.Resolve(engine, this->CreateJsProcessRunningInfo(engine, processInfo));
-            } else {
-                task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
-                    "Get process infos failed."));
-            }
+    auto complete = [applicationContext, this](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        if (!applicationContext) {
+            task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
+                "applicationContext if already released."));
+            return;
+        }
+        AppExecFwk::RunningProcessInfo processInfo;
+        auto ret = applicationContext->GetProcessRunningInformation(processInfo);
+        if (ret == 0) {
+            task.Resolve(engine, this->CreateJsProcessRunningInfo(engine, processInfo));
+        } else {
+            task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
+                "Get process infos failed."));
+        }
     };
 
     NativeValue* lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
