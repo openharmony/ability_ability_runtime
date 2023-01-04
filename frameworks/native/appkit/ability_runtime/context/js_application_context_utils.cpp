@@ -509,7 +509,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
     HILOG_DEBUG("Get Process Info");
     auto complete = [applicationContext = applicationContext_](NativeEngine& engine, AsyncTask& task, int32_t status) {
         auto context = applicationContext.lock();
-        if (!contextt) {
+        if (!context) {
             task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST,
                 "applicationContext if already released."));
             return;
