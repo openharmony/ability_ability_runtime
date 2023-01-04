@@ -112,7 +112,7 @@ class ApplicationContext {
     }
 
     killProcessesBySelf() {
-        this.__context_impl__.killProcessBySelf()
+        this.__context_impl__.killProcessesBySelf()
     }
 
     getProcessRunningInformation() {
