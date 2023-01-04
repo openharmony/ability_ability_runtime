@@ -1036,7 +1036,7 @@ NativeValue *CreateJsApplicationContext(NativeEngine &engine, std::shared_ptr<Ap
     BindNativeFunction(engine, *object, "off", MD_NAME, JsApplicationContextUtils::Off);
     BindNativeFunction(engine, *object, "getApplicationContext", MD_NAME,
         JsApplicationContextUtils::GetApplicationContext);
-    BindNativeFunction(engine, *object, "killProcessBySelf", MD_NAME,
+    BindNativeFunction(engine, *object, "killProcessesBySelf", MD_NAME,
         JsApplicationContextUtils::KillProcessBySelf);
     BindNativeFunction(engine, *object, "getProcessRunningInformation", MD_NAME,
         JsApplicationContextUtils::GetProcessRunningInformation);
