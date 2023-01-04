@@ -51,7 +51,7 @@ public:
     {
         return true;
     }
-    bool RunScript(const std::string& path, const std::string& hapPath) override
+    bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false) override
     {
         return true;
     }
@@ -60,7 +60,8 @@ public:
         return true;
     }
     void Deinitialize() {}
-    NativeValue* LoadJsBundle(const std::string& path, const std::string& hapPath) override
+    NativeValue* LoadJsBundle(
+        const std::string& path, const std::string& hapPath, bool useCommonChunk = false) override
     {
         return nullptr;
     }
