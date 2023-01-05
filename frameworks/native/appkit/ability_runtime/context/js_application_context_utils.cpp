@@ -482,13 +482,13 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
                 return;
             }
             context->KillProcessBySelf();
-            task.Resolve(engine, engine.CreateUndefined());
+            task.ResolveWithNoError(engine, engine.CreateUndefined());
         };
     NativeValue* lastParam = (info.argc = ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
     NativeValue* result = nullptr;
     AsyncTask::Schedule("JSAppManager::OnkillProcessBySelf",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return engine.CreateUndefined();
+    return result;
 }
 
 NativeValue *JsApplicationContextUtils::GetProcessRunningInformation(NativeEngine *engine, NativeCallbackInfo *info)
@@ -527,7 +527,7 @@ NativeValue *JsApplicationContextUtils::OnGetProcessRunningInformation(NativeEng
             object->SetProperty("isContinuousTask", CreateJsValue(engine, processInfo.isContinuousTask));
             object->SetProperty("isKeepAlive", CreateJsValue(engine, processInfo.isKeepAlive));
             object->SetProperty("isFocused", CreateJsValue(engine, processInfo.isFocused));
-            task.Resolve(engine, objValue);
+            task.ResolveWithNoError(engine, objValue);
         } else {
             task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Get process infos failed."));

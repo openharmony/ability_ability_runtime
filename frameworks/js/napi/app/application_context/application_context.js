@@ -115,8 +115,16 @@ class ApplicationContext {
         this.__context_impl__.killProcessesBySelf()
     }
 
+    killProcessesBySelf(callback) {
+        this.__context_impl__.killProcessesBySelf(callback)
+    }
+
     getProcessRunningInformation() {
         return this.__context_impl__.getProcessRunningInformation()
+    }
+
+    getProcessRunningInformation(callback) {
+        return this.__context_impl__.getProcessRunningInformation(callback)
     }
 
     set area(mode) {
