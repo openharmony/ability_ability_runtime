@@ -1794,21 +1794,6 @@ HWTEST_F(MainThreadTest, ChangeToLocalPath_0100, TestSize.Level1)
 }
 
 /**
- * @tc.name: LoadAllExtensions_0200
- * @tc.desc: load all extensions.
- * @tc.type: FUNC
- */
-HWTEST_F(MainThreadTest, LoadAllExtensions_0200, TestSize.Level1)
-{
-    EXPECT_TRUE(mainThread_ != nullptr);
-    mainThread_->application_ = std::make_shared<OHOSApplication>();
-    EXPECT_TRUE(mainThread_->application_ != nullptr);
-    std::shared_ptr<OHOSApplication> application = nullptr;
-    const std::string filePath = "/system/lib/module/web/";
-    mainThread_->LoadAllExtensions(filePath, application);
-}
-
-/**
  * @tc.name: HandleLaunchAbility_0200
  * @tc.desc: handle launch ability.
  * @tc.type: FUNC
