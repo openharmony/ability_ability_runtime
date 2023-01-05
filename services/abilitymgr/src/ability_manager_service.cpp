@@ -3410,7 +3410,7 @@ int AbilityManagerService::StopServiceAbility(const Want &want, int32_t userId)
     int32_t validUserId = GetValidUserId(userId);
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
-        return ERR_INVALID_VALUE;
+        return ERR_CROSS_USER;
     }
 
     AbilityRequest abilityRequest;
@@ -4031,7 +4031,7 @@ int AbilityManagerService::StartAbilityByCall(
     int32_t callerUserId = GetValidUserId(DEFAULT_INVAL_VALUE);
     if (!JudgeMultiUserConcurrency(callerUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
-        return ERR_INVALID_VALUE;
+        return ERR_CROSS_USER;
     }
 
     AbilityRequest abilityRequest;
