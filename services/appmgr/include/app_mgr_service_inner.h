@@ -540,6 +540,8 @@ public:
 
     void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
 
+    void TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
+
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
     /**
      * Notify application status.
@@ -720,8 +722,6 @@ private:
     void SetBundleManager(sptr<IBundleMgr> bundleManager);
 
     void HandleTerminateApplicationTimeOut(const int64_t eventId);
-
-    void TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void HandleAddAbilityStageTimeOut(const int64_t eventId);
 
