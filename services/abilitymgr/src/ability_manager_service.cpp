@@ -704,6 +704,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
     }
 
@@ -850,6 +851,7 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
     }
 
@@ -1106,6 +1108,7 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
     }
 
@@ -1619,6 +1622,7 @@ int AbilityManagerService::ConnectAbilityCommon(
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
     }
 
@@ -4013,6 +4017,7 @@ int AbilityManagerService::StartAbilityByCall(
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
     }
 
