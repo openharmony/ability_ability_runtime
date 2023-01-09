@@ -267,7 +267,7 @@ void ModuleRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, con
         auto serviceInner = appMgrServiceInner_.lock();
         auto appRunningRecord = appRunningRecord_.lock();
         if (serviceInner) {
-            serviceInner->ClearAppRunningData(appRunningRecord, true);
+            serviceInner->TerminateApplication(appRunningRecord);
         }
     }
 

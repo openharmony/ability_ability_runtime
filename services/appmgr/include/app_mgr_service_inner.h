@@ -721,6 +721,8 @@ private:
 
     void HandleTerminateApplicationTimeOut(const int64_t eventId);
 
+    void TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
+
     void HandleAddAbilityStageTimeOut(const int64_t eventId);
 
     void ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr);
