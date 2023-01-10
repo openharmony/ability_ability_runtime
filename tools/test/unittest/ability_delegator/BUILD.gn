@@ -164,20 +164,20 @@ if (accessibility_enable) {
     configs = [ ":tools_ability_delegator_config" ]
 
     sources = [
-      "//foundation/ability/ability_runtime/tools/aa/src/accessibility_ability_command.cpp",
-      "//foundation/ability/ability_runtime/tools/aa/src/accessibility_ability_utils.cpp",
+      "${ability_runtime_path}/tools/aa/src/accessibility_ability_command.cpp",
+      "${ability_runtime_path}/tools/aa/src/accessibility_ability_utils.cpp",
       "accessibility_ability_command_test.cpp",
     ]
 
     deps = [
       "${ability_runtime_path}/tools/aa:tools_aa_source_set",
-      "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
       "//third_party/googletest:gtest_main",
     ]
 
     external_deps = [
       "ability_base:configuration",
       "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken",
       "accessibility:accessibilityclient",
       "accessibility:accessibilityconfig",
       "bundle_framework:appexecfwk_base",
