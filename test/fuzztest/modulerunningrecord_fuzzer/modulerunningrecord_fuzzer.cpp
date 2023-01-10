@@ -87,6 +87,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     AppExecFwk::AbilityState state = AppExecFwk::AbilityState::ABILITY_STATE_READY;
     moduleRecord.OnAbilityStateChanged(record, state);
     bool isForce = *data % ENABLE;
+    std::shared_ptr<AppRunningRecord> appRunningRecord;
+    moduleRecord.TerminateAbility(appRunningRecord, token, isForce);
     moduleRecord.AbilityTerminated(token);
     moduleRecord.GetAbilityByTerminateLists(token);
     uint32_t msg = GetU32Data(data);
