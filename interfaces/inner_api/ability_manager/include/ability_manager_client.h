@@ -340,14 +340,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode KillProcess(const std::string &bundleName);
-
-    /**
-     * Kill the process itself immediately.
-     *
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode KillProcessSelf();
-
+    
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * Force ability timeout.
