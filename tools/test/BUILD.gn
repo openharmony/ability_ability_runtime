@@ -32,4 +32,5 @@ group("unittest") {
   deps = [ "unittest/aa:unittest" ]
   deps += [ "unittest/ability_delegator:unittest" ]
   deps += [ "unittest/ability_tool:unittest" ]
+  deps += [ "unittest/system_time:unittest" ]
 }

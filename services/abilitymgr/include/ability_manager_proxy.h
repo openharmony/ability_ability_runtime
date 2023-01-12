@@ -422,6 +422,14 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) override;
 
     /**
+     * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
+     *
+     * @param token, ability's token.
+     * @param callStub, ability's callee.
+     */
+    void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub) override;
+
+    /**
      * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
@@ -466,6 +474,12 @@ public:
      */
     virtual int SetAbilityController(const sptr<AppExecFwk::IAbilityController> &abilityController,
         bool imAStabilityTest) override;
+
+    virtual int SetComponentInterception(
+        const sptr<AppExecFwk::IComponentInterception> &componentInterception) override;
+
+    virtual int32_t SendResultToAbilityByToken(const Want &want, const sptr<IRemoteObject> &abilityToken,
+        int32_t requestCode, int32_t resultCode, int32_t userId) override;
 
     /**
      * Is user a stability test.

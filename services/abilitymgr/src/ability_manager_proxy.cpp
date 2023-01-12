@@ -2177,6 +2177,43 @@ int AbilityManagerProxy::StartAbilityByCall(
     return reply.ReadInt32();
 }
 
+void AbilityManagerProxy::CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (token == nullptr) {
+        HILOG_ERROR("Call request done fail, ability token is nullptr.");
+        return;
+    }
+    if (callStub == nullptr) {
+        HILOG_ERROR("Call request done fail, callStub is nullptr.");
+        return;
+    }
+
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        HILOG_ERROR("WriteRemoteObject fail, write token fail.");
+        return;
+    }
+    if (!data.WriteRemoteObject(callStub)) {
+        HILOG_ERROR("WriteRemoteObject fail, write callStub fail.");
+        return;
+    }
+    if (Remote() == nullptr) {
+        HILOG_ERROR("Call request done fail, Remote() is nullptr.");
+        return;
+    }
+    auto error = Remote()->SendRequest(IAbilityManager::CALL_REQUEST_DONE, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return;
+    }
+}
+
 int AbilityManagerProxy::ReleaseCall(
     const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
 {
@@ -2250,6 +2287,68 @@ int AbilityManagerProxy::SetAbilityController(const sptr<AppExecFwk::IAbilityCon
         return ERR_INVALID_VALUE;
     }
     auto error = Remote()->SendRequest(IAbilityManager::SET_ABILITY_CONTROLLER, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int AbilityManagerProxy::SetComponentInterception(const sptr<AppExecFwk::IComponentInterception> &componentInterception)
+{
+    if (!componentInterception) {
+        HILOG_ERROR("componentInterception nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteRemoteObject(componentInterception->AsObject())) {
+        HILOG_ERROR("componentInterception write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    auto error = Remote()->SendRequest(IAbilityManager::SET_COMPONENT_INTERCEPTION, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::SendResultToAbilityByToken(const Want &want, const sptr<IRemoteObject> &abilityToken,
+    int32_t requestCode, int32_t resultCode, int32_t userId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        HILOG_ERROR("want write failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteRemoteObject(abilityToken)) {
+        HILOG_ERROR("observer write failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(requestCode)) {
+        HILOG_ERROR("requestCode write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteInt32(resultCode)) {
+        HILOG_ERROR("resultCode write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOG_ERROR("userId write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    auto error = Remote()->SendRequest(IAbilityManager::SEND_ABILITY_RESULT_BY_TOKEN, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
         return error;

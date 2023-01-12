@@ -208,6 +208,7 @@ struct AbilityRequest {
 
     std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
     std::string specifiedFlag;
+    sptr<IRemoteObject> abilityInfoCallback = nullptr;
 
     AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
 
@@ -770,7 +771,7 @@ public:
 
     void SetLaunchReason(const LaunchReason &reason);
     void SetLastExitReason(const LastExitReason &reason);
-    void ContinueAbility(const std::string& deviceId, uint32_t versionCode);
+    void ContinueAbility(const std::string &deviceId, uint32_t versionCode);
     void NotifyContinuationResult(int32_t result);
     std::shared_ptr<MissionList> GetOwnedMissionList() const;
 
@@ -789,11 +790,12 @@ public:
 
     // new version
     ResolveResultType Resolve(const AbilityRequest &abilityRequest);
-    bool ReleaseCall(const sptr<IAbilityConnection>& connect);
+    bool ReleaseCall(const sptr<IAbilityConnection> &connect);
     bool IsNeedToCallRequest() const;
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
-    bool CallRequest();
+    void CallRequest() const;
+    bool CallRequestDone(const sptr<IRemoteObject> &callStub) const;
     bool IsStartToBackground() const;
     void SetStartToBackground(const bool flag);
     bool IsStartToForeground() const;

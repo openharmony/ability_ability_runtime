@@ -431,8 +431,7 @@ public:
 
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
 
-    void GetRunningProcessInfoByAccessTokenID(
-        const uint32_t accessTokenId, AppExecFwk::RunningProcessInfo &info) const;
+    void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
 
 	 /**
      * UpdateConfiguration, ANotify application update system environment changes.
@@ -531,6 +530,8 @@ public:
     int VerifyAccountPermission(const std::string &permissionName, const int userId) const;
 
     void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
+
+    void TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
     /**

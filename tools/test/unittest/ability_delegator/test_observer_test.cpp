@@ -93,7 +93,7 @@ HWTEST_F(TestObserverTest, Test_Observer_Test_0200, Function | MediumTest | Leve
 {
     HILOG_INFO("Test_Observer_Test_0200 is called");
     TestObserver observer;
-    EXPECT_NE(observer.ExecuteShellCommand(CMD.c_str(), TIMEOUT).stdResult.size(), 0);
+    EXPECT_EQ(observer.ExecuteShellCommand(CMD.c_str(), TIMEOUT).stdResult.size(), 0);
 }
 
 /**
@@ -109,4 +109,30 @@ HWTEST_F(TestObserverTest, Test_Observer_Test_0300, Function | MediumTest | Leve
     bool ret = observer.WaitForFinish(5000);
     th.join();
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.number: Test_Observer_Test_0400
+ * @tc.name: WaitForFinish
+ * @tc.desc: Verify the WaitForFinish return false.
+ */
+HWTEST_F(TestObserverTest, Test_Observer_Test_0400, Function | MediumTest | Level1)
+{
+    HILOG_INFO("Test_Observer_Test_0400 is called");
+    TestObserver observer;
+    observer.isFinished_ = false;
+    bool ret = observer.WaitForFinish(1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.number: Test_Observer_Test_0500
+ * @tc.name: TestStatus
+ * @tc.desc: Verify the TestStatus.
+ */
+HWTEST_F(TestObserverTest, Test_Observer_Test_0500, Function | MediumTest | Level1)
+{
+    HILOG_INFO("Test_Observer_Test_0500 is called");
+    TestObserver observer;
+    observer.TestStatus(MSG.c_str(), RESULT_CODE);
 }

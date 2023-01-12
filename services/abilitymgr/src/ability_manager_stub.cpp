@@ -74,11 +74,11 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[STOP_SYNC_MISSIONS] = &AbilityManagerStub::StopSyncRemoteMissionsInner;
 #ifdef ABILITY_COMMAND_FOR_TEST
     requestFuncMap_[FORCE_TIMEOUT] = &AbilityManagerStub::ForceTimeoutForTestInner;
-    requestFuncMap_[ABILITY_RECOVERY] = &AbilityManagerStub::ScheduleRecoverAbilityInner;
-    requestFuncMap_[ABILITY_RECOVERY_ENABLE] = &AbilityManagerStub::EnableRecoverAbilityInner;
 #endif
     requestFuncMap_[FREE_INSTALL_ABILITY_FROM_REMOTE] = &AbilityManagerStub::FreeInstallAbilityFromRemoteInner;
     requestFuncMap_[CONNECT_ABILITY_WITH_TYPE] = &AbilityManagerStub::ConnectAbilityWithTypeInner;
+    requestFuncMap_[ABILITY_RECOVERY] = &AbilityManagerStub::ScheduleRecoverAbilityInner;
+    requestFuncMap_[ABILITY_RECOVERY_ENABLE] = &AbilityManagerStub::EnableRecoverAbilityInner;
 }
 
 void AbilityManagerStub::SecondStepInit()
@@ -109,6 +109,7 @@ void AbilityManagerStub::SecondStepInit()
     requestFuncMap_[MOVE_MISSION_TO_FRONT] = &AbilityManagerStub::MoveMissionToFrontInner;
     requestFuncMap_[MOVE_MISSION_TO_FRONT_BY_OPTIONS] = &AbilityManagerStub::MoveMissionToFrontByOptionsInner;
     requestFuncMap_[START_CALL_ABILITY] = &AbilityManagerStub::StartAbilityByCallInner;
+    requestFuncMap_[CALL_REQUEST_DONE] = &AbilityManagerStub::CallRequestDoneInner;
     requestFuncMap_[RELEASE_CALL_ABILITY] = &AbilityManagerStub::ReleaseCallInner;
     requestFuncMap_[START_USER] = &AbilityManagerStub::StartUserInner;
     requestFuncMap_[STOP_USER] = &AbilityManagerStub::StopUserInner;
@@ -150,6 +151,8 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[REGISTER_WMS_HANDLER] = &AbilityManagerStub::RegisterWindowManagerServiceHandlerInner;
     requestFuncMap_[COMPLETEFIRSTFRAMEDRAWING] = &AbilityManagerStub::CompleteFirstFrameDrawingInner;
 #endif
+    requestFuncMap_[SET_COMPONENT_INTERCEPTION] = &AbilityManagerStub::SetComponentInterceptionInner;
+    requestFuncMap_[SEND_ABILITY_RESULT_BY_TOKEN] = &AbilityManagerStub::SendResultToAbilityByTokenInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -1043,6 +1046,14 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     return NO_ERROR;
 }
 
+int AbilityManagerStub::CallRequestDoneInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    sptr<IRemoteObject> callStub = data.ReadRemoteObject();
+    CallRequestDone(token, callStub);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::ReleaseCallInner(MessageParcel &data, MessageParcel &reply)
 {
     auto callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
@@ -1246,6 +1257,39 @@ int AbilityManagerStub::SetAbilityControllerInner(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 
+int AbilityManagerStub::SetComponentInterceptionInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AppExecFwk::IComponentInterception> componentInterception =
+        iface_cast<AppExecFwk::IComponentInterception>(data.ReadRemoteObject());
+    if (componentInterception == nullptr) {
+        HILOG_ERROR("AbilityManagerStub: SetComponentInterceptionInner readParcelable failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = SetComponentInterception(componentInterception);
+    HILOG_INFO("AbilityManagerStub: SetComponentInterceptionInner result = %{public}d", result);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("SetComponentInterceptionInner failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::SendResultToAbilityByTokenInner(MessageParcel &data, MessageParcel &reply)
+{
+    Want *want = data.ReadParcelable<Want>();
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> abilityToken = data.ReadRemoteObject();
+    int32_t requestCode = data.ReadInt32();
+    int32_t resultCode = data.ReadInt32();
+    int32_t userId = data.ReadInt32();
+    int32_t result = SendResultToAbilityByToken(*want, abilityToken, requestCode, resultCode, userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::IsRunningInStabilityTestInner(MessageParcel &data, MessageParcel &reply)
 {
     bool result = IsRunningInStabilityTest();
@@ -1411,30 +1455,6 @@ int AbilityManagerStub::BlockAppServiceInner(MessageParcel &data, MessageParcel 
     }
     return NO_ERROR;
 }
-
-int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (!token) {
-        HILOG_ERROR("EnableRecoverAbilityInner read ability token failed.");
-        return ERR_NULL_OBJECT;
-    }
-    EnableRecoverAbility(token);
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (!token) {
-        HILOG_ERROR("ScheduleRecoverAbility read ability token failed.");
-        return ERR_NULL_OBJECT;
-    }
-
-    int reason = data.ReadInt32();
-    ScheduleRecoverAbility(token, reason);
-    return NO_ERROR;
-}
 #endif
 
 int AbilityManagerStub::FreeInstallAbilityFromRemoteInner(MessageParcel &data, MessageParcel &reply)
@@ -1483,6 +1503,30 @@ int AbilityManagerStub::UpdateMissionSnapShotInner(MessageParcel &data, MessageP
         return ERR_NULL_OBJECT;
     }
     UpdateMissionSnapShot(token);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        HILOG_ERROR("EnableRecoverAbilityInner read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+    EnableRecoverAbility(token);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        HILOG_ERROR("ScheduleRecoverAbility read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    int reason = data.ReadInt32();
+    ScheduleRecoverAbility(token, reason);
     return NO_ERROR;
 }
 

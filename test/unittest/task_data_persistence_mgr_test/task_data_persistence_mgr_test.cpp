@@ -45,7 +45,7 @@ void TaskDataPersistenceMgrTest::TearDown(void)
  * Feature: TaskDataPersistenceMgr
  * Function: LoadAllMissionInfo
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage LoadAllMissionInfo
+ * FunctionPoints: TaskDataPersistenceMgr LoadAllMissionInfo
  * EnvConditions: NA
  * CaseDescription: Verify LoadAllMissionInfo
  */
@@ -61,7 +61,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, LoadAllMissionInfo_001, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: SaveMissionInfo
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage SaveMissionInfo
+ * FunctionPoints: TaskDataPersistenceMgr SaveMissionInfo
  * EnvConditions: NA
  * CaseDescription: Verify SaveMissionInfo
  */
@@ -77,7 +77,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, SaveMissionInfo_001, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: SaveMissionInfo
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage SaveMissionInfo
+ * FunctionPoints: TaskDataPersistenceMgr SaveMissionInfo
  * EnvConditions: NA
  * CaseDescription: Verify SaveMissionInfo
  */
@@ -95,7 +95,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, SaveMissionInfo_002, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: DeleteMissionInfo
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage DeleteMissionInfo
+ * FunctionPoints: TaskDataPersistenceMgr DeleteMissionInfo
  * EnvConditions: NA
  * CaseDescription: Verify DeleteMissionInfo
  */
@@ -111,7 +111,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, DeleteMissionInfo_001, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: DeleteMissionInfo
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage DeleteMissionInfo
+ * FunctionPoints: TaskDataPersistenceMgr DeleteMissionInfo
  * EnvConditions: NA
  * CaseDescription: Verify DeleteMissionInfo
  */
@@ -129,7 +129,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, DeleteMissionInfo_002, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: RemoveUserDir
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage RemoveUserDir
+ * FunctionPoints: TaskDataPersistenceMgr RemoveUserDir
  * EnvConditions: NA
  * CaseDescription: Verify RemoveUserDir
  */
@@ -137,15 +137,19 @@ HWTEST_F(TaskDataPersistenceMgrTest, RemoveUserDir_001, TestSize.Level1)
 {
     auto taskDataPersistenceMgr = std::make_shared<TaskDataPersistenceMgr>();
     int32_t userId = 0;
+    const std::string TASK_DATA_FILE_BASE_PATH = "/data/service/el1/public/AbilityManagerService";
+    const std::string path = TASK_DATA_FILE_BASE_PATH + "/" + std::to_string(userId);
+    int err = mkdir(path.c_str(), 0777);
+    EXPECT_EQ(err, 0);
     bool res = taskDataPersistenceMgr->RemoveUserDir(userId);
-    EXPECT_FALSE(res);
+    EXPECT_TRUE(res);
 }
 
 /*
  * Feature: TaskDataPersistenceMgr
  * Function: RemoveUserDir
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage RemoveUserDir
+ * FunctionPoints: TaskDataPersistenceMgr RemoveUserDir
  * EnvConditions: NA
  * CaseDescription: Verify RemoveUserDir
  */
@@ -161,7 +165,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, RemoveUserDir_002, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: SaveMissionSnapshot
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage SaveMissionSnapshot
+ * FunctionPoints: TaskDataPersistenceMgr SaveMissionSnapshot
  * EnvConditions: NA
  * CaseDescription: Verify SaveMissionSnapshot
  */
@@ -178,7 +182,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, SaveMissionSnapshot_001, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: SaveMissionSnapshot
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage SaveMissionSnapshot
+ * FunctionPoints: TaskDataPersistenceMgr SaveMissionSnapshot
  * EnvConditions: NA
  * CaseDescription: Verify SaveMissionSnapshot
  */
@@ -197,7 +201,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, SaveMissionSnapshot_002, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: GetSnapshot
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage GetSnapshot
+ * FunctionPoints: TaskDataPersistenceMgr GetSnapshot
  * EnvConditions: NA
  * CaseDescription: Verify GetSnapshot
  */
@@ -213,7 +217,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, GetSnapshot_001, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: GetSnapshot
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage GetSnapshot
+ * FunctionPoints: TaskDataPersistenceMgr GetSnapshot
  * EnvConditions: NA
  * CaseDescription: Verify GetSnapshot
  */
@@ -231,7 +235,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, GetSnapshot_002, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: GetMissionSnapshot
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage GetMissionSnapshot
+ * FunctionPoints: TaskDataPersistenceMgr GetMissionSnapshot
  * EnvConditions: NA
  * CaseDescription: Verify GetMissionSnapshot
  */
@@ -249,7 +253,7 @@ HWTEST_F(TaskDataPersistenceMgrTest, GetMissionSnapshot_001, TestSize.Level1)
  * Feature: TaskDataPersistenceMgr
  * Function: GetMissionSnapshot
  * SubFunction: NA
- * FunctionPoints: MissionDataStorage GetMissionSnapshot
+ * FunctionPoints: TaskDataPersistenceMgr GetMissionSnapshot
  * EnvConditions: NA
  * CaseDescription: Verify GetMissionSnapshot
  */

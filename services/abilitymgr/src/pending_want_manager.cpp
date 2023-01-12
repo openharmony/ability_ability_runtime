@@ -48,11 +48,13 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
     HILOG_INFO("PendingWantManager::GetWantSender begin.");
 
     std::lock_guard<std::recursive_mutex> locker(mutex_);
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall && apl != AbilityUtil::SYSTEM_BASIC && apl != AbilityUtil::SYSTEM_CORE) {
-        if (callingUid != uid) {
-            HILOG_ERROR("is not allowed to send");
-            return nullptr;
+    if (wantSenderInfo.type != static_cast<int32_t>(OperationType::SEND_COMMON_EVENT)) {
+        auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+        if (!isSaCall && apl != AbilityUtil::SYSTEM_BASIC && apl != AbilityUtil::SYSTEM_CORE) {
+            if (callingUid != uid) {
+                HILOG_ERROR("is not allowed to send");
+                return nullptr;
+            }
         }
     }
 
@@ -97,7 +99,6 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
         }
         MakeWantSenderCanceledLocked(*ref);
         wantRecords_.erase(ref->GetKey());
-        return nullptr;
     }
 
     if (!needCreate) {
@@ -220,8 +221,8 @@ int32_t PendingWantManager::DeviceIdDetermine(
     std::string localDeviceId;
     DelayedSingleton<AbilityManagerService>::GetInstance()->GetLocalDeviceId(localDeviceId);
     if (want.GetElement().GetDeviceID() == "" || want.GetElement().GetDeviceID() == localDeviceId) {
-        result = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(
-            want, callerToken, requestCode, callerUid));
+        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(
+            want, callerToken, requestCode, callerUid);
         if (result != ERR_OK && result != START_ABILITY_WAITING) {
             HILOG_ERROR("%{public}s:result != ERR_OK && result != START_ABILITY_WAITING.", __func__);
         }

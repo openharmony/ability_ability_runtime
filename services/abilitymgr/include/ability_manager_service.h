@@ -537,6 +537,14 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) override;
 
     /**
+     * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
+     *
+     * @param token, ability's token.
+     * @param callStub, ability's callee.
+     */
+    void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub) override;
+
+    /**
      * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
@@ -706,6 +714,18 @@ public:
      */
     virtual int DoAbilityBackground(const sptr<IRemoteObject> &token, uint32_t flag) override;
 
+    /**
+     * Set component interception.
+     *
+     * @param componentInterception, component interception.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int SetComponentInterception(
+        const sptr<AppExecFwk::IComponentInterception> &componentInterception) override;
+
+    virtual int32_t SendResultToAbilityByToken(const Want &want, const sptr<IRemoteObject> &abilityToken,
+        int32_t requestCode, int32_t resultCode, int32_t userId) override;
+
     bool IsAbilityControllerStart(const Want &want, const std::string &bundleName);
 
     bool IsAbilityControllerForeground(const std::string &bundleName);
@@ -713,6 +733,9 @@ public:
     bool IsAbilityControllerStartById(int32_t missionId);
 
     void GrantUriPermission(const Want &want, int32_t validUserId, uint32_t targetTokenId);
+
+    bool IsComponentInterceptionStart(const Want &want, const sptr<IRemoteObject> &callerToken,
+        int requestCode, int componentStatus, AbilityRequest &request);
 
     /**
      * Send not response process ID to ability manager service.
@@ -1017,6 +1040,7 @@ private:
     std::shared_ptr<MissionListManager> GetListManagerByToken(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByToken(const sptr<IRemoteObject> &token);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByToken(const sptr<IRemoteObject> &token);
+    bool JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     int32_t GetValidUserId(const int32_t userId);
 
@@ -1152,9 +1176,13 @@ private:
 
     void RecoverAbilityRestart(const Want &want);
 
-    AAFWK::EventInfo BuildEventInfo(const Want &want, int32_t userId);
+    AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
 
     void InitStartupFlag();
+
+    void UpdateAbilityRequestInfo(const sptr<Want> &want, AbilityRequest &request);
+
+    int GetTopAbility(sptr<IRemoteObject> &token, bool needVerify);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
@@ -1185,6 +1213,7 @@ private:
     bool controllerIsAStabilityTest_ = false;
     std::recursive_mutex globalLock_;
     std::shared_mutex managersMutex_;
+    sptr<AppExecFwk::IComponentInterception> componentInterception_ = nullptr;
 
     std::multimap<std::string, std::string> timeoutMap_;
 

@@ -29,6 +29,7 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
+constexpr uint32_t DELAY_NOTIFY_LABEL_TIME = 30; // 30ms
 constexpr uint32_t SCENE_FLAG_KEYGUARD = 1;
 constexpr char EVENT_KEY_UID[] = "UID";
 constexpr char EVENT_KEY_PID[] = "PID";
@@ -231,9 +232,7 @@ void MissionListManager::StartWaitingAbility()
     HILOG_INFO("%{public}s was called.", __func__);
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     auto topAbility = GetCurrentTopAbilityLocked();
-    CHECK_POINTER(topAbility);
-
-    if (topAbility->IsAbilityState(FOREGROUNDING)) {
+    if (topAbility != nullptr && topAbility->IsAbilityState(FOREGROUNDING)) {
         HILOG_INFO("Top ability is foregrounding, must return for start waiting again.");
         return;
     }
@@ -314,6 +313,12 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
         if (targetAbilityRecord->GetAbilityInfo().applicationInfo.isLauncherApp) {
             targetAbilityRecord->SetLauncherRoot();
         }
+    }
+
+    sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
+        = iface_cast<AppExecFwk::IAbilityInfoCallback> (abilityRequest.abilityInfoCallback);
+    if (abilityInfoCallback != nullptr) {
+        abilityInfoCallback->NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest.want);
     }
 
 #ifdef SUPPORT_GRAPHICS
@@ -433,6 +438,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
         targetMission = std::make_shared<Mission>(info.missionInfo.id, targetRecord,
             info.missionName, info.startMethod);
+        targetMission->SetLockedState(info.missionInfo.lockedState);
         targetRecord->SetMission(targetMission);
         targetRecord->SetOwnerMissionUserId(userId_);
     } else {
@@ -623,8 +629,8 @@ std::shared_ptr<Mission> MissionListManager::GetReusedSpecifiedMission(const Abi
         }
     }
 
-    // default single list
-    if ((reUsedMission = defaultSingleList_->GetSpecifiedMission(missionName, flag)) != nullptr) {
+    // default standard list
+    if ((reUsedMission = defaultStandardList_->GetSpecifiedMission(missionName, flag)) != nullptr) {
         return reUsedMission;
     }
 
@@ -958,6 +964,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUNDING)) {
+        PostStartWaitingAbility();
         HILOG_ERROR("DispatchForeground Ability transition life state error. expect %{public}d, actual %{public}d",
             AbilityState::FOREGROUNDING,
             abilityRecord->GetAbilityState());
@@ -1026,15 +1033,7 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
             listenerController_->NotifyMissionMovedToFront(mission->GetMissionId());
         }
     }
-
-    auto self(shared_from_this());
-    auto startWaitingAbilityTask = [self]() { self->StartWaitingAbility(); };
-
-    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
-    CHECK_POINTER_LOG(handler, "Fail to get AbilityEventHandler.");
-
-    /* PostTask to trigger start Ability from waiting queue */
-    handler->PostTask(startWaitingAbilityTask, "startWaitingAbility");
+    PostStartWaitingAbility();
     TerminatePreviousAbility(abilityRecord);
 
     // new version. started by caller, scheduler call request
@@ -1166,6 +1165,9 @@ int MissionListManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &a
     // save result to caller AbilityRecord
     if (resultWant != nullptr) {
         abilityRecord->SaveResultToCallers(resultCode, resultWant);
+    } else {
+        Want want;
+        abilityRecord->SaveResultToCallers(resultCode, &want);
     }
 
     return TerminateAbilityLocked(abilityRecord, flag);
@@ -1204,10 +1206,12 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
     // 1. if the ability was foreground, first should find wether there is other ability foreground
     if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING)) {
         HILOG_DEBUG("current ability is active");
+        abilityRecord->SetPendingState(AbilityState::BACKGROUND);
         auto nextAbilityRecord = abilityRecord->GetNextAbilityRecord();
         if (nextAbilityRecord) {
             nextAbilityRecord->SetPreAbilityRecord(abilityRecord);
 #ifdef SUPPORT_GRAPHICS
+            nextAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
             nextAbilityRecord->ProcessForegroundAbility(abilityRecord);
         } else {
             if (!abilityRecord->IsClearMissionFlag()) {
@@ -1307,7 +1311,7 @@ void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityR
         return;
     }
 
-    if (!needTopAbility->IsForeground() && !needTopAbility->IsMinimizeFromUser()) {
+    if (!needTopAbility->IsForeground() && !needTopAbility->IsMinimizeFromUser() && needTopAbility->IsReady()) {
         HILOG_DEBUG("%{public}s is need to foreground.", elementName.GetURI().c_str());
         abilityRecord->SetNextAbilityRecord(needTopAbility);
     }
@@ -1594,9 +1598,35 @@ void  MissionListManager::NotifyMissionCreated(const std::shared_ptr<AbilityReco
     auto mission = abilityRecord->GetMission();
     if (mission && mission->NeedNotify() && listenerController_ &&
         !(abilityRecord->GetAbilityInfo().excludeFromMissions)) {
-        listenerController_->NotifyMissionCreated(abilityRecord->GetMissionId());
+        auto missionId = abilityRecord->GetMissionId();
+        listenerController_->NotifyMissionCreated(missionId);
         mission->SetNotifyLabel(false);
+
+        if (mission->NeedNotifyUpdateLabel()) {
+            PostMissionLabelUpdateTask(missionId);
+            mission->SetNeedNotifyUpdateLabel(false);
+        }
     }
+}
+
+void MissionListManager::PostMissionLabelUpdateTask(int missionId) const
+{
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+    if (handler == nullptr) {
+        HILOG_ERROR("Fail to get EventHandler, do not post mission label update message.");
+        return;
+    }
+
+    std::weak_ptr<MissionListenerController> wpController = listenerController_;
+    auto task = [wpController, missionId] {
+        auto controller = wpController.lock();
+        if (controller == nullptr) {
+            HILOG_ERROR("controller is nullptr.");
+            return;
+        }
+        controller->NotifyMissionLabelUpdated(missionId);
+    };
+    handler->PostTask(task, "NotifyMissionLabelUpdated.", DELAY_NOTIFY_LABEL_TIME);
 }
 
 void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId)
@@ -1768,6 +1798,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
 
     HandleForegroundTimeout(abilityRecord, isInvalidMode);
     TerminatePreviousAbility(abilityRecord);
+    PostStartWaitingAbility();
 }
 
 void MissionListManager::HandleTimeoutAndResumeAbility(const std::shared_ptr<AbilityRecord> &timeOutAbilityRecord,
@@ -2006,6 +2037,7 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
 
     auto abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     mission = std::make_shared<Mission>(innerMissionInfo.missionInfo.id, abilityRecord, innerMissionInfo.missionName);
+    mission->SetLockedState(innerMissionInfo.missionInfo.lockedState);
     abilityRecord->SetMission(mission);
     abilityRecord->SetOwnerMissionUserId(userId_);
     std::shared_ptr<MissionList> newMissionList = std::make_shared<MissionList>();
@@ -2213,6 +2245,15 @@ int MissionListManager::SetMissionLabel(const sptr<IRemoteObject> &token, const 
         return -1;
     }
 
+    // store label if not notify mission created.
+    auto abilityRecord = GetAbilityRecordByToken(token);
+    if (abilityRecord) {
+        auto mission = abilityRecord->GetMission();
+        if (mission && mission->NeedNotify()) {
+            mission->SetNeedNotifyUpdateLabel(true);
+        }
+    }
+
     auto ret = DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionLabel(missionId, label);
     if (ret == 0 && listenerController_) {
         listenerController_->NotifyMissionLabelUpdated(missionId);
@@ -2315,12 +2356,23 @@ void MissionListManager::PostCancelStartingWindowTask(const std::shared_ptr<Abil
 
 void MissionListManager::Dump(std::vector<std::string> &info)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::list<std::shared_ptr<MissionList>> currentMissionListsBackup;
+    std::shared_ptr<MissionList> defaultStandardListBackup;
+    std::shared_ptr<MissionList> defaultSingleListBackup;
+    std::shared_ptr<MissionList> launcherListBackup;
+    {
+        std::lock_guard<std::recursive_mutex> guard(managerLock_);
+        currentMissionListsBackup = currentMissionLists_;
+        defaultStandardListBackup = defaultStandardList_;
+        defaultSingleListBackup = defaultSingleList_;
+        launcherListBackup = launcherList_;
+    }
+
     std::string dumpInfo = "User ID #" + std::to_string(userId_);
     info.push_back(dumpInfo);
     dumpInfo = " current mission lists:{";
     info.push_back(dumpInfo);
-    for (const auto& missionList : currentMissionLists_) {
+    for (const auto& missionList : currentMissionListsBackup) {
         if (missionList) {
             missionList->Dump(info);
         }
@@ -2330,24 +2382,24 @@ void MissionListManager::Dump(std::vector<std::string> &info)
 
     dumpInfo = " default stand mission list:{";
     info.push_back(dumpInfo);
-    if (defaultStandardList_) {
-        defaultStandardList_->Dump(info);
+    if (defaultStandardListBackup) {
+        defaultStandardListBackup->Dump(info);
     }
     dumpInfo = " }";
     info.push_back(dumpInfo);
 
     dumpInfo = " default single mission list:{";
     info.push_back(dumpInfo);
-    if (defaultSingleList_) {
-        defaultSingleList_->Dump(info);
+    if (defaultSingleListBackup) {
+        defaultSingleListBackup->Dump(info);
     }
     dumpInfo = " }";
     info.push_back(dumpInfo);
 
     dumpInfo = " launcher mission list:{";
     info.push_back(dumpInfo);
-    if (launcherList_) {
-        launcherList_->Dump(info);
+    if (launcherListBackup) {
+        launcherListBackup->Dump(info);
     }
     dumpInfo = " }";
     info.push_back(dumpInfo);
@@ -2356,34 +2408,55 @@ void MissionListManager::Dump(std::vector<std::string> &info)
 void MissionListManager::DumpMissionListByRecordId(
     std::vector<std::string> &info, bool isClient, int32_t abilityRecordId, const std::vector<std::string> &params)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::list<std::shared_ptr<MissionList>> currentMissionListsBackup;
+    std::shared_ptr<MissionList> defaultStandardListBackup;
+    std::shared_ptr<MissionList> defaultSingleListBackup;
+    std::shared_ptr<MissionList> launcherListBackup;
+    {
+        std::lock_guard<std::recursive_mutex> guard(managerLock_);
+        currentMissionListsBackup = currentMissionLists_;
+        defaultStandardListBackup = defaultStandardList_;
+        defaultSingleListBackup = defaultSingleList_;
+        launcherListBackup = launcherList_;
+    }
+
     std::string dumpInfo = "User ID #" + std::to_string(userId_);
     info.push_back(dumpInfo);
-    for (const auto& missionList : currentMissionLists_) {
-        if (missionList && missionList != launcherList_) {
+    for (const auto& missionList : currentMissionListsBackup) {
+        if (missionList && missionList != launcherListBackup) {
             HILOG_INFO("missionList begin to call DumpMissionListByRecordId %{public}s", __func__);
             missionList->DumpStateByRecordId(info, isClient, abilityRecordId, params);
         }
     }
 
-    if (defaultStandardList_) {
+    if (defaultStandardListBackup) {
         HILOG_INFO("defaultStandardList begin to call DumpMissionListByRecordId %{public}s", __func__);
-        defaultStandardList_->DumpStateByRecordId(info, isClient, abilityRecordId, params);
+        defaultStandardListBackup->DumpStateByRecordId(info, isClient, abilityRecordId, params);
     }
 
-    if (defaultSingleList_) {
+    if (defaultSingleListBackup) {
         HILOG_INFO("defaultSingleList begin to call DumpMissionListByRecordId %{public}s", __func__);
-        defaultSingleList_->DumpStateByRecordId(info, isClient, abilityRecordId, params);
+        defaultSingleListBackup->DumpStateByRecordId(info, isClient, abilityRecordId, params);
     }
 
-    if (launcherList_) {
+    if (launcherListBackup) {
         HILOG_INFO("launcherList begin to call DumpMissionListByRecordId %{public}s", __func__);
-        launcherList_->DumpStateByRecordId(info, isClient, abilityRecordId, params);
+        launcherListBackup->DumpStateByRecordId(info, isClient, abilityRecordId, params);
     }
 }
 void MissionListManager::DumpMissionList(std::vector<std::string> &info, bool isClient, const std::string &args)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::list<std::shared_ptr<MissionList>> currentMissionListsBackup;
+    std::shared_ptr<MissionList> defaultStandardListBackup;
+    std::shared_ptr<MissionList> defaultSingleListBackup;
+    std::shared_ptr<MissionList> launcherListBackup;
+    {
+        std::lock_guard<std::recursive_mutex> guard(managerLock_);
+        currentMissionListsBackup = currentMissionLists_;
+        defaultStandardListBackup = defaultStandardList_;
+        defaultSingleListBackup = defaultSingleList_;
+        launcherListBackup = launcherList_;
+    }
 
     if (args.size() != 0 &&
         args != "NORMAL" &&
@@ -2399,7 +2472,7 @@ void MissionListManager::DumpMissionList(std::vector<std::string> &info, bool is
     if (args.size() == 0 || args == "NORMAL") {
         dumpInfo = "  Current mission lists:";
         info.push_back(dumpInfo);
-        for (const auto& missionList : currentMissionLists_) {
+        for (const auto& missionList : currentMissionListsBackup) {
             if (missionList) {
                 missionList->DumpList(info, isClient);
             }
@@ -2409,23 +2482,23 @@ void MissionListManager::DumpMissionList(std::vector<std::string> &info, bool is
     if (args.size() == 0 || args == "DEFAULT_STANDARD") {
         dumpInfo = "  default stand mission list:";
         info.push_back(dumpInfo);
-        if (defaultStandardList_) {
-            defaultStandardList_->DumpList(info, isClient);
+        if (defaultStandardListBackup) {
+            defaultStandardListBackup->DumpList(info, isClient);
         }
     }
 
     if (args.size() == 0 || args == "DEFAULT_SINGLE") {
         dumpInfo = "  default single mission list:";
         info.push_back(dumpInfo);
-        if (defaultSingleList_) {
-            defaultSingleList_->DumpList(info, isClient);
+        if (defaultSingleListBackup) {
+            defaultSingleListBackup->DumpList(info, isClient);
         }
     }
     if (args.size() == 0 || args == "LAUNCHER") {
         dumpInfo = "  launcher mission list:";
         info.push_back(dumpInfo);
-        if (launcherList_) {
-            launcherList_->DumpList(info, isClient);
+        if (launcherListBackup) {
+            launcherListBackup->DumpList(info, isClient);
         }
     }
 }
@@ -2558,9 +2631,8 @@ int MissionListManager::ResolveAbility(
 
     if (targetAbility->IsReady()) {
         HILOG_DEBUG("targetAbility is ready, directly scheduler call request.");
-        if (targetAbility->CallRequest()) {
-            return ResolveResultType::OK_HAS_REMOTE_OBJ;
-        }
+        targetAbility->CallRequest();
+        return ResolveResultType::OK_HAS_REMOTE_OBJ;
     }
 
     HILOG_DEBUG("targetAbility need to call request after lifecycle.");

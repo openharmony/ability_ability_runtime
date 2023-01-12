@@ -29,6 +29,7 @@
 #include "hitrace_meter.h"
 #include "image_source.h"
 #include "errors.h"
+#include "event_report.h"
 #include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
 #include "parameters.h"
@@ -57,6 +58,7 @@ const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
 const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 const std::string COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
+const std::string NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
 const uint32_t RELEASE_STARTING_BG_TIMEOUT = 15000; // release starting window resource timeout.
 int64_t AbilityRecord::abilityRecordId = 0;
 int64_t AbilityRecord::g_abilityRecordEventId_ = 0;
@@ -270,7 +272,8 @@ bool AbilityRecord::CanRestartResident()
             abilityMgr->GetRestartIntervalTime(restartIntervalTime);
         }
         HILOG_DEBUG("restartTime: %{public}lld, now: %{public}lld, intervalTine:%{public}d",
-            restartTime_, AbilityUtil::SystemTimeMillis(), restartIntervalTime);
+            static_cast<unsigned long long>(restartTime_),
+            static_cast<unsigned long long>(AbilityUtil::SystemTimeMillis()), restartIntervalTime);
         if ((AbilityUtil::SystemTimeMillis() - restartTime_) < restartIntervalTime) {
             HILOG_ERROR("Resident restart is out of max count");
             return false;
@@ -336,6 +339,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
 
 std::string AbilityRecord::GetLabel()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::string strLabel = applicationInfo_.label;
 
     if (abilityInfo_.resourcePath.empty()) {
@@ -499,9 +503,13 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     } else {
         HILOG_INFO("SUPPORT_GRAPHICS: to load ability.");
         lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-        StartingWindowTask(isRecent, true, abilityRequest, startOptions);
-        AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
-        PostCancelStartingWindowColdTask();
+        auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+        auto needStartingWindow = abilityRequest.want.GetBoolParam(NEED_STARTINGWINDOW, true);
+        if (!isSaCall || needStartingWindow) {
+            StartingWindowTask(isRecent, true, abilityRequest, startOptions);
+            AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
+            PostCancelStartingWindowColdTask();
+        }
         LoadAbility();
     }
 }
@@ -737,6 +745,7 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
 
 std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResourceManager() const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     UErrorCode status = U_ZERO_ERROR;
     icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -768,6 +777,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
 std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (resourceMgr == nullptr) {
         HILOG_WARN("%{public}s resource manager does not exist.", __func__);
         return nullptr;
@@ -894,6 +904,7 @@ void AbilityRecord::GetColdStartingWindowResource(std::shared_ptr<Media::PixelMa
 void AbilityRecord::InitColdStartingWindowResource(
     const std::shared_ptr<Global::Resource::ResourceManager> &resourceMgr)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!resourceMgr) {
         HILOG_ERROR("invalid resourceManager.");
         return;
@@ -956,7 +967,16 @@ int AbilityRecord::TerminateAbility()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Schedule terminate ability to AppMs, ability:%{public}s.", abilityInfo_.name.c_str());
     HandleDlpClosed();
-    return DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
+    AAFwk::EventInfo eventInfo;
+    eventInfo.bundleName = GetAbilityInfo().bundleName;
+    eventInfo.abilityName = GetAbilityInfo().name;
+    AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    eventInfo.errCode = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
+    if (eventInfo.errCode != ERR_OK) {
+        AAFwk::EventReport::SendAbilityEvent(
+            AAFwk::EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    }
+    return eventInfo.errCode;
 }
 
 const AppExecFwk::AbilityInfo &AbilityRecord::GetAbilityInfo() const
@@ -2010,21 +2030,23 @@ void AbilityRecord::SetStartToForeground(const bool flag)
     isStartToForeground_ = flag;
 }
 
-bool AbilityRecord::CallRequest()
+void AbilityRecord::CallRequest() const
 {
     HILOG_INFO("Call Request.");
-    CHECK_POINTER_RETURN_BOOL(scheduler_);
-    CHECK_POINTER_RETURN_BOOL(callContainer_);
+    CHECK_POINTER(scheduler_);
 
-    // sync call request
-    sptr<IRemoteObject> callStub = scheduler_->CallRequest();
-    if (!callStub) {
-        HILOG_ERROR("call request failed, callstub is nullptr.");
+    // Async call request
+    scheduler_->CallRequest();
+}
+
+bool AbilityRecord::CallRequestDone(const sptr<IRemoteObject> &callStub) const
+{
+    CHECK_POINTER_RETURN_BOOL(callContainer_);
+    if (!callContainer_->CallRequestDone(callStub)) {
+        HILOG_ERROR("Call request failed.");
         return false;
     }
-
-    // complete call request
-    return callContainer_->CallRequestDone(callStub);
+    return true;
 }
 
 ResolveResultType AbilityRecord::Resolve(const AbilityRequest &abilityRequest)
