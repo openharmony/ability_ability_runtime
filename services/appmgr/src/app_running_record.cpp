@@ -400,6 +400,11 @@ void AppRunningRecord::AddAbilityStage()
 
 void AppRunningRecord::AddAbilityStageBySpecifiedAbility(const std::string &bundleName)
 {
+    if (!eventHandler_) {
+        HILOG_ERROR("eventHandler_ is nullptr");
+        return;
+    }
+
     HapModuleInfo hapModuleInfo;
     if (GetTheModuleInfoNeedToUpdated(bundleName, hapModuleInfo)) {
         if (!eventHandler_->HasInnerEvent(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG)) {
@@ -612,7 +617,7 @@ std::shared_ptr<ModuleRunningRecord> AppRunningRecord::GetModuleRecordByModuleNa
 void AppRunningRecord::StateChangedNotifyObserver(
     const std::shared_ptr<AbilityRunningRecord> &ability, const int32_t state, bool isAbility)
 {
-    if (!ability) {
+    if (!ability || ability->GetAbilityInfo() == nullptr) {
         HILOG_ERROR("ability is null");
         return;
     }
@@ -627,8 +632,7 @@ void AppRunningRecord::StateChangedNotifyObserver(
     abilityStateData.abilityType = static_cast<int32_t>(ability->GetAbilityInfo()->type);
     abilityStateData.isFocused = ability->GetFocusFlag();
 
-    if (isAbility && ability->GetAbilityInfo() != nullptr &&
-        ability->GetAbilityInfo()->type == AbilityType::EXTENSION) {
+    if (isAbility && ability->GetAbilityInfo()->type == AbilityType::EXTENSION) {
         HILOG_INFO("extension type, not notify any more.");
         return;
     }
@@ -899,7 +903,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true);
-    moduleRecord->TerminateAbility(token, isForce);
+    moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
 }
 
 void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
@@ -1205,6 +1209,12 @@ void AppRunningRecord::ScheduleAcceptWantDone()
 {
     HILOG_INFO("Schedule accept want done. bundle %{public}s and eventId %{public}d", mainBundleName_.c_str(),
         static_cast<int>(eventId_));
+
+    if (!eventHandler_) {
+        HILOG_ERROR("eventHandler_ is nullptr");
+        return;
+    }
+
     eventHandler_->RemoveEvent(AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG, eventId_);
 }
 
@@ -1360,6 +1370,26 @@ bool AppRunningRecord::GetFocusFlag() const
 int64_t AppRunningRecord::GetAppStartTime() const
 {
     return startTimeMillis_;
+}
+
+void AppRunningRecord::SetRequestProcCode(int32_t requestProcCode)
+{
+    requestProcCode_ = requestProcCode;
+}
+
+int32_t AppRunningRecord::GetRequestProcCode() const
+{
+    return requestProcCode_;
+}
+
+void AppRunningRecord::SetProcessChangeReason(ProcessChangeReason reason)
+{
+    processChangeReason_ = reason;
+}
+
+ProcessChangeReason AppRunningRecord::GetProcessChangeReason() const
+{
+    return processChangeReason_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

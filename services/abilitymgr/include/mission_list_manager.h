@@ -29,6 +29,7 @@
 #include "snapshot.h"
 #include "start_options.h"
 #include "want.h"
+#include "iability_info_callback.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -369,6 +370,8 @@ public:
     int SetMissionIcon(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &icon);
 
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) const;
+
+    void PostMissionLabelUpdateTask(int missionId) const;
 
 private:
     Closure GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const;

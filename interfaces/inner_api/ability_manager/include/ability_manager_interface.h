@@ -27,6 +27,7 @@
 #include "ability_start_setting.h"
 #include "extension_running_info.h"
 #include "iability_controller.h"
+#include "icomponent_interception.h"
 #include "mission_listener_interface.h"
 #include "mission_info.h"
 #include "mission_snapshot.h"
@@ -474,6 +475,14 @@ public:
         const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) = 0;
 
     /**
+     * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
+     *
+     * @param token, ability's token.
+     * @param callStub, ability's callee.
+     */
+    virtual void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub) {};
+
+    /**
      * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
@@ -542,6 +551,23 @@ public:
      */
     virtual int SetAbilityController(const sptr<AppExecFwk::IAbilityController> &abilityController,
         bool imAStabilityTest) = 0;
+
+    /**
+     * Set component interception.
+     *
+     * @param componentInterception, component interception.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int SetComponentInterception(const sptr<AppExecFwk::IComponentInterception> &componentInterception)
+    {
+        return 0;
+    }
+
+    virtual int32_t SendResultToAbilityByToken(const Want &want, const sptr<IRemoteObject> &abilityToken,
+        int32_t requestCode, int32_t resultCode, int32_t userId)
+    {
+        return 0;
+    }
 
     /**
      * Is user a stability test.
@@ -852,6 +878,10 @@ public:
         // stop extension ability (61)
         STOP_EXTENSION_ABILITY,
 
+        SET_COMPONENT_INTERCEPTION,
+
+        SEND_ABILITY_RESULT_BY_TOKEN,
+
         // ipc id 1001-2000 for DMS
         // ipc id for starting ability (1001)
         START_ABILITY = 1001,
@@ -926,6 +956,8 @@ public:
         RELEASE_CALL_ABILITY,
 
         CONNECT_ABILITY_WITH_TYPE,
+
+        CALL_REQUEST_DONE,
 
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,

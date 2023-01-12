@@ -135,6 +135,7 @@ private:
 
 	// for new version ability (call ability)
     int StartAbilityByCallInner(MessageParcel &data, MessageParcel &reply);
+    int CallRequestDoneInner(MessageParcel &data, MessageParcel &reply);
     int ReleaseCallInner(MessageParcel &data, MessageParcel &reply);
     int StartUserInner(MessageParcel &data, MessageParcel &reply);
     int StopUserInner(MessageParcel &data, MessageParcel &reply);
@@ -149,6 +150,8 @@ private:
     int SendANRProcessIDInner(MessageParcel &data, MessageParcel &reply);
 
     int SetAbilityControllerInner(MessageParcel &data, MessageParcel &reply);
+    int SetComponentInterceptionInner(MessageParcel &data, MessageParcel &reply);
+    int SendResultToAbilityByTokenInner(MessageParcel &data, MessageParcel &reply);
 
     int StartUserTestInner(MessageParcel &data, MessageParcel &reply);
     int FinishUserTestInner(MessageParcel &data, MessageParcel &reply);
@@ -185,10 +188,9 @@ private:
     int BlockAmsServiceInner(MessageParcel &data, MessageParcel &reply);
     int BlockAbilityInner(MessageParcel &data, MessageParcel &reply);
     int BlockAppServiceInner(MessageParcel &data, MessageParcel &reply);
+    #endif
     int EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
-    #endif
-
     int GetTopAbilityInner(MessageParcel &data, MessageParcel &reply);
     int DumpAbilityInfoDoneInner(MessageParcel &data, MessageParcel &reply);
 };

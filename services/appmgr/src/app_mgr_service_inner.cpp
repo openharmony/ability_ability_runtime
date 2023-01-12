@@ -174,6 +174,7 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord,
             appInfo->uid, appInfo->bundleName, bundleIndex);
     } else {
+        appRecord->SetRequestProcCode((want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0));
         StartAbility(token, preToken, abilityInfo, appRecord, hapModuleInfo, want);
     }
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
@@ -297,14 +298,14 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
         LaunchApplication(appRecord);
     }
     appRecord->RegisterAppDeathRecipient();
-    AAFWK::EventInfo eventInfo;
+    AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.bundleName = applicationInfo->name;
     eventInfo.versionName = applicationInfo->versionName;
     eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
-    AAFWK::EventReport::SendAppEvent(AAFWK::APP_ATTACH, HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_ATTACH, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
@@ -343,14 +344,14 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
         return;
     }
     appRecord->LaunchPendingAbilities();
-    AAFWK::EventInfo eventInfo;
+    AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.bundleName = applicationInfo->name;
     eventInfo.versionName = applicationInfo->versionName;
     eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
-    AAFWK::EventReport::SendAppEvent(AAFWK::APP_LAUNCH, HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_LAUNCH, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 void AppMgrServiceInner::AddAbilityStageDone(const int32_t recordId)
@@ -375,7 +376,6 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     ApplicationState appState = appRecord->GetState();
     if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
-        appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
         bool needNotifyApp = appRunningManager_->IsApplicationFirstForeground(*appRecord);
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND, needNotifyApp);
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
@@ -387,15 +387,14 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     // push the foregrounded app front of RecentAppList.
     PushAppFront(recordId);
     HILOG_INFO("application is foregrounded");
-    AAFWK::EventInfo eventInfo;
+    AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.bundleName = applicationInfo->name;
     eventInfo.versionName = applicationInfo->versionName;
     eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
-    AAFWK::EventReport::SendAppEvent(AAFWK::APP_FOREGROUND,
-        HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_FOREGROUND, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
@@ -417,15 +416,14 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
     }
 
     HILOG_INFO("application is backgrounded");
-    AAFWK::EventInfo eventInfo;
+    AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.bundleName = applicationInfo->name;
     eventInfo.versionName = applicationInfo->versionName;
     eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
-    AAFWK::EventReport::SendAppEvent(AAFWK::APP_BACKGROUND,
-        HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_BACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
@@ -452,17 +450,18 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     }
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
     appRecord->RemoveAppDeathRecipient();
+    appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_APP_TERMINATED);
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_TERMINATED, false);
     appRunningManager_->RemoveAppRunningRecordById(recordId);
     RemoveAppFromRecentListById(recordId);
-    AAFWK::EventInfo eventInfo;
+    AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.bundleName = applicationInfo->name;
     eventInfo.versionName = applicationInfo->versionName;
     eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
-    AAFWK::EventReport::SendAppEvent(AAFWK::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
 
     HILOG_INFO("application is terminated");
@@ -777,6 +776,18 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
         HILOG_INFO("kill pid %{public}d", pid);
         ret = kill(pid, SIGNAL_KILL);
     }
+    AAFwk::EventInfo eventInfo;
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        return ret;
+    }
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
+    eventInfo.bundleName = applicationInfo->name;
+    eventInfo.versionName = applicationInfo->versionName;
+    eventInfo.versionCode = applicationInfo->versionCode;
+    eventInfo.processName = appRecord->GetProcessName();
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
     return ret;
 }
 
@@ -883,6 +894,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(con
         }
         appRecord->SetAppIndex(want->GetIntParam(DLP_PARAMS_INDEX, 0));
         appRecord->SetSecurityFlag(want->GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
+        appRecord->SetRequestProcCode(want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0));
     }
 
     if (preToken) {
@@ -1265,6 +1277,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetAppRunningRecordByAppRe
 void AppMgrServiceInner::OnAppStateChanged(
     const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state, bool needNotifyApp)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!appRecord) {
         HILOG_ERROR("OnAppStateChanged come, app record is null");
         return;
@@ -1335,17 +1348,16 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     }
 
     auto userId = GetUserIdByUid(uid);
-    AppSpawnStartMsg startMsg;
-    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    BundleInfo bundleInfo;
     bool bundleMgrResult;
     if (bundleIndex == 0) {
-        bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleInfos(AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES,
-            bundleInfos, userId));
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetBundleInfo");
+        bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleInfo(bundleName,
+            BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
     } else {
-        BundleInfo bundleInfo;
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetSandboxBundleInfo");
         bundleMgrResult = (IN_PROCESS_CALL(bundleMgr_->GetSandboxBundleInfo(bundleName,
             bundleIndex, userId, bundleInfo)) == 0);
-        bundleInfos.emplace_back(bundleInfo);
     }
 
     if (!bundleMgrResult) {
@@ -1353,26 +1365,24 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         return;
     }
 
-    auto isExist = [&bundleName, &uid](const AppExecFwk::BundleInfo &bundleInfo) {
-        return bundleInfo.name == bundleName && bundleInfo.uid == uid;
-    };
-    auto bundleInfoIter = std::find_if(bundleInfos.begin(), bundleInfos.end(), isExist);
-    if (bundleInfoIter == bundleInfos.end()) {
-        HILOG_ERROR("Get target fail.");
-        return;
-    }
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
-    auto token = (*bundleInfoIter).applicationInfo.accessTokenId;
-    int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET);
-    if (result != Security::AccessToken::PERMISSION_GRANTED) {
-        setAllowInternet = 1;
-        allowInternet = 0;
+    auto token = bundleInfo.applicationInfo.accessTokenId;
+    {
+        // Add TRACE
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
+        int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET);
+        if (result != Security::AccessToken::PERMISSION_GRANTED) {
+            setAllowInternet = 1;
+            allowInternet = 0;
+        }
     }
-    startMsg.uid = (*bundleInfoIter).uid;
-    startMsg.gid = (*bundleInfoIter).gid;
-    startMsg.accessTokenId = (*bundleInfoIter).applicationInfo.accessTokenId;
-    startMsg.apl = (*bundleInfoIter).applicationInfo.appPrivilegeLevel;
+
+    AppSpawnStartMsg startMsg;
+    startMsg.uid = bundleInfo.uid;
+    startMsg.gid = bundleInfo.gid;
+    startMsg.accessTokenId = bundleInfo.applicationInfo.accessTokenId;
+    startMsg.apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     startMsg.bundleName = bundleName;
     startMsg.renderParam = RENDER_PARAM;
     startMsg.flags = startFlags;
@@ -1387,6 +1397,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         HILOG_ERROR("GetBundleGids is fail");
         return;
     }
+
     startMsg.procName = processName;
     startMsg.soPath = SO_PATH;
 
@@ -1503,6 +1514,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     if (appInfo && upmClient) {
         upmClient->RemoveUriPermission(appInfo->accessTokenId);
     }
+    appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_REMOTE_DIED);
 
     for (const auto &item : appRecord->GetAbilities()) {
         const auto &abilityRecord = item.second;
@@ -1560,6 +1572,7 @@ void AppMgrServiceInner::RemoveAppFromRecentListById(const int32_t recordId)
 void AppMgrServiceInner::AddAppToRecentList(
     const std::string &appName, const std::string &processName, const pid_t pid, const int32_t recordId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     appProcessManager_->AddAppToRecentList(appName, processName, pid, recordId);
 }
 
@@ -1651,12 +1664,18 @@ void AppMgrServiceInner::HandleTerminateApplicationTimeOut(const int64_t eventId
         return;
     }
     auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
+    TerminateApplication(appRecord);
+}
+
+void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
     if (!appRecord) {
         HILOG_ERROR("appRecord is nullptr");
         return;
     }
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
     appRecord->RemoveAppDeathRecipient();
+    appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_APP_TERMINATED_TIMEOUT);
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_TERMINATED, false);
     pid_t pid = appRecord->GetPriorityObject()->GetPid();
     if (pid > 0) {
@@ -1710,15 +1729,14 @@ void AppMgrServiceInner::GetRunningProcessInfoByToken(
     appRunningManager_->GetRunningProcessInfoByToken(token, info);
 }
 
-void AppMgrServiceInner::GetRunningProcessInfoByAccessTokenID(
-    const uint32_t accessTokenId, AppExecFwk::RunningProcessInfo &info) const
+void AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const
 {
     HILOG_INFO("%{public}s called", __func__);
     if (!CheckGetRunningInfoPermission()) {
         return;
     }
 
-    appRunningManager_->GetRunningProcessInfoByAccessTokenID(accessTokenId, info);
+    appRunningManager_->GetRunningProcessInfoByPid(pid, info);
 }
 
 bool AppMgrServiceInner::CheckGetRunningInfoPermission() const
