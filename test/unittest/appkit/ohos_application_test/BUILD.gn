@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
+import("../../../../ability_runtime.gni")
 
 config("coverage_flags") {
   if (ability_runtime_feature_coverage) {
@@ -32,8 +32,6 @@ ohos_unittest("ohos_application_test") {
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_test_path}/mock/frameworks_kits_runtime_test/",
     "${ability_runtime_test_path}/mock/frameworks_kits_appkit_native_test/include",
-    "//base/notification/distributed_notification_service/frameworks/core/test/unittest/mock",
-    "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include",
   ]
 
   sources = [ "ohos_application_test.cpp" ]
@@ -52,7 +50,7 @@ ohos_unittest("ohos_application_test") {
   deps = [
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:appkit_native",
-    "//foundation/ability/ability_runtime/frameworks/native/ability/native:abilitykit_native",
+    "../../../../frameworks/native/ability/native:abilitykit_native",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
