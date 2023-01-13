@@ -727,6 +727,9 @@ int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &inf
     }
     auto callerPid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if(!appRecord) {
+        HiLOG_ERROR("no such appRecord, callerPid:%{public}d", callerPid);
+    }
     GetRunningProcess(appRecord, info);
     return ERR_OK;
 }
