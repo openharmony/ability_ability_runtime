@@ -33,7 +33,9 @@
 #include "configuration_convertor.h"
 #include "context_deal.h"
 #include "context_impl.h"
+#include "extension_ability_info.h"
 #include "extension_module_loader.h"
+#include "extract_resource_manager.h"
 #include "file_path_utils.h"
 #include "hilog_wrapper.h"
 #ifdef SUPPORT_GRAPHICS
@@ -144,11 +146,7 @@ void SetNativeLibPath(const BundleInfo &bundleInfo, AbilityRuntime::Runtime::Opt
 
 #define ACEABILITY_LIBRARY_LOADER
 #ifdef ABILITY_LIBRARY_LOADER
-#ifdef _ARM64_
-    const std::string acelibdir("/system/lib64/libace.z.so");
-#else
-    const std::string acelibdir("/system/lib/libace.z.so");
-#endif
+    const std::string acelibdir("libace.z.so");
 #endif
 
 /**
@@ -814,20 +812,18 @@ bool MainThread::CheckForHandleLaunchApplication(const AppLaunchData &appLaunchD
 }
 
 bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
-    BundleInfo& bundleInfo, const Configuration &config)
+    const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const std::string &bundleName,
+    bool multiProjects, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    bool isStageBased = bundleInfo.hapModuleInfos.empty() ? false : bundleInfo.hapModuleInfos.back().isStageBasedModel;
-    if (isStageBased && bundleInfo.applicationInfo.multiProjects) {
+    bool isStageBased = entryHapModuleInfo.isStageBasedModel;
+    if (isStageBased && multiProjects) {
         HILOG_INFO("MainThread::InitResourceManager for multiProjects.");
     } else {
-        std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleInfo.name);
-        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
-            std::string loadPath =  (system::GetBoolParameter(AbilityRuntime::Constants::COMPRESS_PROPERTY, false) &&
-                !hapModuleInfo.hapPath.empty()) ? hapModuleInfo.hapPath : hapModuleInfo.resourcePath;
-            if (loadPath.empty()) {
-                continue;
-            }
+        std::regex pattern(std::string(ABS_CODE_PATH) + std::string(FILE_SEPARATOR) + bundleName);
+        std::string loadPath =
+            (!entryHapModuleInfo.hapPath.empty()) ? entryHapModuleInfo.hapPath : entryHapModuleInfo.resourcePath;
+        if (!loadPath.empty()) {
             loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH));
             HILOG_DEBUG("ModuleResPath: %{public}s", loadPath.c_str());
             if (!resourceManager->AddResource(loadPath.c_str())) {
@@ -920,6 +916,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         LoadAbilityLibrary(localPaths);
         LoadNativeLiabrary(appInfo.nativeLibraryPath);
     }
+    if (appInfo.needAppDetail) {
+        HILOG_DEBUG("MainThread::handleLaunchApplication %{public}s need add app detail ability library path",
+            bundleName.c_str());
+        LoadAppDetailAbilityLibrary(appInfo.appDetailAbilityLibraryPath);
+    }
     LoadAppLibrary();
 
     ProcessInfo processInfo = appLaunchData.GetProcessInfo();
@@ -943,15 +944,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     mixStackDumper_ = std::make_shared<MixStackDumper>();
     mixStackDumper_->InstallDumpHandler(application_, signalHandler_);
 
-    // init resourceManager.
-    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager Start.");
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
-    if (resourceManager == nullptr) {
-        HILOG_ERROR("MainThread::handleLaunchApplication create resourceManager failed");
-        return;
-    }
-    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager End.");
-
     sptr<IBundleMgr> bundleMgr = contextDeal->GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOG_ERROR("MainThread::handleLaunchApplication GetBundleManager is nullptr");
@@ -961,10 +953,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     BundleInfo bundleInfo;
     bool queryResult;
     if (appLaunchData.GetAppIndex() != 0) {
+        HILOG_INFO("GetSandboxBundleInfo, bundleName = %{public}s", appInfo.bundleName.c_str());
         queryResult = (bundleMgr->GetSandboxBundleInfo(appInfo.bundleName,
             appLaunchData.GetAppIndex(), UNSPECIFIED_USERID, bundleInfo) == 0);
     } else {
-        queryResult = bundleMgr->GetBundleInfo(appInfo.bundleName, BundleFlag::GET_BUNDLE_DEFAULT,
+        HILOG_INFO("GetBundleInfo, bundleName = %{public}s", appInfo.bundleName.c_str());
+        queryResult = bundleMgr->GetBundleInfo(appInfo.bundleName, BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO,
             bundleInfo, UNSPECIFIED_USERID);
     }
 
@@ -975,9 +969,22 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     bool moduelJson = false;
     bool isStageBased = false;
+    bool findEntryHapModuleInfo = false;
+    AppExecFwk::HapModuleInfo entryHapModuleInfo;
     if (!bundleInfo.hapModuleInfos.empty()) {
-        moduelJson = bundleInfo.hapModuleInfos.back().isModuleJson;
-        isStageBased = bundleInfo.hapModuleInfos.back().isStageBasedModel;
+        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+            if (hapModuleInfo.moduleType == AppExecFwk::ModuleType::ENTRY) {
+                findEntryHapModuleInfo = true;
+                entryHapModuleInfo = hapModuleInfo;
+                break;
+            }
+        }
+        if (!findEntryHapModuleInfo) {
+            HILOG_WARN("HandleLaunchApplication find entry hap module info failed!");
+            entryHapModuleInfo = bundleInfo.hapModuleInfos.back();
+        }
+        moduelJson = entryHapModuleInfo.isModuleJson;
+        isStageBased = entryHapModuleInfo.isStageBasedModel;
     }
     if (isStageBased) {
         AppRecovery::GetInstance().InitApplicationInfo(GetMainHandler(), GetApplicationInfo());
@@ -985,32 +992,24 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     HILOG_INFO("stageBased:%{public}d moduleJson:%{public}d size:%{public}zu",
         isStageBased, moduelJson, bundleInfo.hapModuleInfos.size());
 
-    HILOG_DEBUG("MainThread handle launch application, InitResourceManager Start.");
-    if (!InitResourceManager(resourceManager, bundleInfo, config)) {
-        HILOG_ERROR("MainThread::handleLaunchApplication InitResourceManager failed");
-        return;
-    }
-    HILOG_DEBUG("MainThread handle launch application, InitResourceManager End.");
-
     // create contextImpl
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
-    contextImpl->SetResourceManager(resourceManager);
     contextImpl->SetApplicationInfo(std::make_shared<ApplicationInfo>(appInfo));
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
         std::make_shared<AbilityRuntime::ApplicationContext>();
     applicationContext->AttachContextImpl(contextImpl);
     applicationContext->InitApplicationContext();
     application_->SetApplicationContext(applicationContext);
-    std::string BundleCodeDir = applicationContext->GetBundleCodeDir();
     if (isStageBased) {
         // Create runtime
+        auto hapPath = entryHapModuleInfo.hapPath;
         AbilityRuntime::Runtime::Options options;
         options.bundleName = appInfo.bundleName;
         options.codePath = LOCAL_CODE_PATH;
-        options.hapPath = bundleInfo.hapModuleInfos.back().hapPath;
+        options.hapPath = hapPath;
         options.eventRunner = mainHandler_->GetEventRunner();
         options.loadAce = true;
-        options.isBundle = (bundleInfo.hapModuleInfos.back().compileMode != AppExecFwk::CompileMode::ES_MODULE);
+        options.isBundle = (entryHapModuleInfo.compileMode != AppExecFwk::CompileMode::ES_MODULE);
         options.isDebugVersion = bundleInfo.applicationInfo.debug;
         options.arkNativeFilePath = bundleInfo.applicationInfo.arkNativeFilePath;
         SetNativeLibPath(bundleInfo, options);
@@ -1023,7 +1022,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         auto bundleName = appInfo.bundleName;
         auto versionCode = appInfo.versionCode;
         wptr<MainThread> weak = this;
-        auto uncaughtTask = [weak, bundleName, versionCode, BundleCodeDir](NativeValue* v) {
+        auto uncaughtTask = [weak, bundleName, versionCode, hapPath](NativeValue* v) {
             HILOG_INFO("Js uncaught exception callback come.");
             auto appThread = weak.promote();
             if (appThread == nullptr) {
@@ -1055,7 +1054,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 error = fuc->GetSourceCodeInfo(errorPos);
             }
             summary += error + "Stacktrace:\n" + OHOS::AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack,
-                bindSourceMaps, BundleCodeDir);
+                bindSourceMaps, hapPath);
             time_t timet;
             time(&timet);
             HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, "JS_ERROR",
@@ -1111,20 +1110,42 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
         if (application_ != nullptr) {
 #ifdef __aarch64__
-        LoadAllExtensions("system/lib64/extensionability", wpApplication);
+        LoadAllExtensions(jsEngine, "system/lib64/extensionability", bundleInfo);
 #else
-        LoadAllExtensions("system/lib/extensionability", wpApplication);
+        LoadAllExtensions(jsEngine, "system/lib/extensionability", bundleInfo);
 #endif
         }
+        std::shared_ptr<NativeEngine> nativeEngine(&jsEngine);
+        idleTime_ = std::make_shared<IdleTime>(mainHandler_, nativeEngine);
+        idleTime_->Start();
     }
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
     if (usertestInfo) {
-        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, bundleInfo)) {
+        if (!PrepareAbilityDelegator(usertestInfo, isStageBased, entryHapModuleInfo)) {
             HILOG_ERROR("Failed to prepare ability delegator");
             return;
         }
     }
+
+    // init resourceManager.
+    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager Start.");
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    if (resourceManager == nullptr) {
+        HILOG_ERROR("MainThread::handleLaunchApplication create resourceManager failed");
+        return;
+    }
+    HILOG_DEBUG("MainThread handle launch application, CreateResourceManager End.");
+
+    HILOG_DEBUG("MainThread handle launch application, InitResourceManager Start.");
+    if (!InitResourceManager(resourceManager, entryHapModuleInfo, bundleInfo.name,
+        bundleInfo.applicationInfo.multiProjects, config)) {
+        HILOG_ERROR("MainThread::handleLaunchApplication InitResourceManager failed");
+        return;
+    }
+    HILOG_DEBUG("MainThread handle launch application, InitResourceManager End.");
+    contextImpl->SetResourceManager(resourceManager);
+    AbilityBase::ExtractResourceManager::GetExtractResourceManager().SetGlobalObject(resourceManager);
 
     contextDeal->initResourceManager(resourceManager);
     contextDeal->SetApplicationContext(application_);
@@ -1245,9 +1266,11 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
     appMgr_->AddAbilityStageDone(applicationImpl_->GetRecordId());
 }
 
-void MainThread::LoadAllExtensions(const std::string &filePath, std::weak_ptr<OHOSApplication> wpApplication)
+void MainThread::LoadAllExtensions(NativeEngine &nativeEngine, const std::string &filePath,
+    const BundleInfo &bundleInfo)
 {
-    HILOG_DEBUG("LoadAllExtensions.filePath:%{public}s", filePath.c_str());
+    HILOG_DEBUG("LoadAllExtensions.filePath:%{public}s, extensionInfo size = %{public}d", filePath.c_str(), static_cast<int32_t>(bundleInfo.extensionInfos.size()));
+
     // scan all extensions in path
     std::vector<std::string> extensionFiles;
     ScanDir(filePath, extensionFiles);
@@ -1255,6 +1278,8 @@ void MainThread::LoadAllExtensions(const std::string &filePath, std::weak_ptr<OH
         HILOG_ERROR("no extension files.");
         return;
     }
+
+    std::map<OHOS::AppExecFwk::ExtensionAbilityType, std::set<std::string>> extensionBlacklist;
     std::map<int32_t, std::string> extensionTypeMap;
     for (auto file : extensionFiles) {
         HILOG_DEBUG("Begin load extension file:%{public}s", file.c_str());
@@ -1286,10 +1311,12 @@ void MainThread::LoadAllExtensions(const std::string &filePath, std::weak_ptr<OH
         std::string extensionName = it->second;
 
         extensionTypeMap.insert(std::pair<int32_t, std::string>(type, extensionName));
+        extensionConfigMgr_->AddBlackListItem(extensionName, type);
         HILOG_DEBUG("Success load extension type: %{public}d, name:%{public}s", type, extensionName.c_str());
+        std::weak_ptr<OHOSApplication> wApp = application_;
         AbilityLoader::GetInstance().RegisterExtension(extensionName,
-            [wpApplication, file]() -> AbilityRuntime::Extension* {
-            auto app = wpApplication.lock();
+            [wApp, file]() -> AbilityRuntime::Extension* {
+            auto app = wApp.lock();
             if (app != nullptr) {
                 return AbilityRuntime::ExtensionModuleLoader::GetLoader(file.c_str()).Create(app->GetRuntime());
             }
@@ -1298,10 +1325,11 @@ void MainThread::LoadAllExtensions(const std::string &filePath, std::weak_ptr<OH
         });
     }
     application_->SetExtensionTypeMap(extensionTypeMap);
+    extensionConfigMgr_->UpdateBlackListToEngine(nativeEngine);
 }
 
 bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
-    BundleInfo& bundleInfo)
+    const AppExecFwk::HapModuleInfo &entryHapModuleInfo)
 {
     HILOG_DEBUG("enter, isStageBased = %{public}d", isStageBased);
     if (!record) {
@@ -1321,14 +1349,14 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         AbilityRuntime::Runtime::Options options;
         options.codePath = LOCAL_CODE_PATH;
         options.eventRunner = mainHandler_->GetEventRunner();
-        options.hapPath = bundleInfo.hapModuleInfos.back().hapPath;
+        options.hapPath = entryHapModuleInfo.hapPath;
         options.loadAce = false;
         options.isStageModel = false;
-        if (bundleInfo.hapModuleInfos.empty() || bundleInfo.hapModuleInfos.front().abilityInfos.empty()) {
+        if (entryHapModuleInfo.abilityInfos.empty()) {
             HILOG_ERROR("Failed to abilityInfos");
             return false;
         }
-        bool isFaJsModel = bundleInfo.hapModuleInfos.front().abilityInfos.front().srcLanguage == "js" ? true : false;
+        bool isFaJsModel = entryHapModuleInfo.abilityInfos.front().srcLanguage == "js" ? true : false;
         static auto runtime = AbilityRuntime::Runtime::Create(options);
         auto testRunner = TestRunner::Create(runtime, args, isFaJsModel);
         if (testRunner == nullptr) {
@@ -1387,6 +1415,7 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
 
     mainThreadState_ = MainThreadState::RUNNING;
     std::shared_ptr<AbilityRuntime::Context> stageContext = application_->AddAbilityStage(abilityRecord);
+    UpdateProcessExtensionType(abilityRecord);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
     AbilityThread::AbilityThreadMain(application_, abilityRecord, stageContext);
 #else
@@ -1694,6 +1723,7 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
     mainHandler_ = std::make_shared<MainHandler>(runner, this);
     watchdog_ = std::make_shared<Watchdog>();
     signalHandler_ = std::make_shared<EventHandler>(EventRunner::Create(SIGNAL_HANDLER));
+    extensionConfigMgr_ = std::make_unique<AbilityRuntime::ExtensionConfigMgr>();
     wptr<MainThread> weak = this;
     auto task = [weak]() {
         auto appThread = weak.promote();
@@ -1709,6 +1739,7 @@ void MainThread::Init(const std::shared_ptr<EventRunner> &runner)
     TaskTimeoutDetected(runner);
 
     watchdog_->Init(mainHandler_);
+    extensionConfigMgr_->Init();
     HILOG_DEBUG("MainThread:Init end.");
 }
 
@@ -1903,6 +1934,43 @@ void MainThread::LoadAppLibrary()
     }
     HILOG_DEBUG("end.");
 #endif  // APPLICATION_LIBRARY_LOADER
+}
+
+void MainThread::LoadAppDetailAbilityLibrary(std::string &nativeLibraryPath)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+#ifdef ABILITY_LIBRARY_LOADER
+    HILOG_DEBUG("LoadAppDetailAbilityLibrary try to scanDir %{public}s", nativeLibraryPath.c_str());
+    std::vector<std::string> fileEntries;
+    if (!ScanDir(nativeLibraryPath, fileEntries)) {
+        HILOG_WARN("scanDir %{public}s not exits", nativeLibraryPath.c_str());
+    }
+    if (fileEntries.empty()) {
+        HILOG_WARN("No ability library");
+        return;
+    }
+    char resolvedPath[PATH_MAX] = {0};
+    void *handleAbilityLib = nullptr;
+    for (const auto& fileEntry : fileEntries) {
+        if (fileEntry.empty() || fileEntry.size() >= PATH_MAX) {
+            continue;
+        }
+        if (realpath(fileEntry.c_str(), resolvedPath) == nullptr) {
+            HILOG_ERROR("Failed to get realpath, errno = %{public}d", errno);
+            continue;
+        }
+
+        handleAbilityLib = dlopen(resolvedPath, RTLD_NOW | RTLD_GLOBAL);
+        if (handleAbilityLib == nullptr) {
+            HILOG_ERROR("Fail to dlopen %{public}s, [%{public}s]",
+                resolvedPath, dlerror());
+            exit(-1);
+        }
+        HILOG_INFO("Success to dlopen %{public}s", fileEntry.c_str());
+        handleAbilityLib_.emplace_back(handleAbilityLib);
+    }
+    HILOG_DEBUG("LoadAppDetailAbilityLibrary end.");
+#endif // ABILITY_LIBRARY_LOADER
 }
 
 /**
@@ -2160,6 +2228,26 @@ int32_t MainThread::ScheduleNotifyUnLoadRepairPatch(const std::string &bundleNam
     }
 
     return NO_ERROR;
+}
+
+void MainThread::UpdateProcessExtensionType(const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
+{
+    auto &runtime = application_->GetRuntime();
+    if (!runtime) {
+        HILOG_ERROR("Get runtime failed");
+        return;
+    }
+    if (!abilityRecord) {
+        HILOG_ERROR("abilityRecord is nullptr");
+        return;
+    }
+    auto &abilityInfo = abilityRecord->GetAbilityInfo();
+    if (!abilityInfo) {
+        HILOG_ERROR("Get abilityInfo failed");
+        return;
+    }
+    runtime->UpdateExtensionType(static_cast<int32_t>(abilityInfo->extensionAbilityType));
+    HILOG_INFO("UpdateExtensionType, type = %{public}d", static_cast<int32_t>(abilityInfo->extensionAbilityType));
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

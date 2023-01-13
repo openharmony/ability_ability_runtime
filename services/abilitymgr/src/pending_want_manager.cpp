@@ -48,11 +48,13 @@ sptr<IWantSender> PendingWantManager::GetWantSender(int32_t callingUid, int32_t 
     HILOG_INFO("PendingWantManager::GetWantSender begin.");
 
     std::lock_guard<std::recursive_mutex> locker(mutex_);
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall && apl != AbilityUtil::SYSTEM_BASIC && apl != AbilityUtil::SYSTEM_CORE) {
-        if (callingUid != uid) {
-            HILOG_ERROR("is not allowed to send");
-            return nullptr;
+    if (wantSenderInfo.type != static_cast<int32_t>(OperationType::SEND_COMMON_EVENT)) {
+        auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+        if (!isSaCall && apl != AbilityUtil::SYSTEM_BASIC && apl != AbilityUtil::SYSTEM_CORE) {
+            if (callingUid != uid) {
+                HILOG_ERROR("is not allowed to send");
+                return nullptr;
+            }
         }
     }
 
@@ -107,7 +109,8 @@ sptr<IWantSender> PendingWantManager::GetWantSenderLocked(const int32_t callingU
     }
 
     sptr<PendingWantRecord> rec =
-        new (std::nothrow) PendingWantRecord(shared_from_this(), uid, callerToken, pendingKey);
+        new (std::nothrow) PendingWantRecord(shared_from_this(), uid, IPCSkeleton::GetCallingTokenID(),
+        callerToken, pendingKey);
     if (rec != nullptr) {
         rec->SetCallerUid(callingUid);
         pendingKey->SetCode(PendingRecordIdCreate());
@@ -272,7 +275,7 @@ int32_t PendingWantManager::PendingWantStartAbilitys(const std::vector<WantsInfo
 }
 
 int32_t PendingWantManager::PendingWantPublishCommonEvent(
-    const Want &want, const SenderInfo &senderInfo, int32_t callerUid)
+    const Want &want, const SenderInfo &senderInfo, int32_t callerUid, int32_t callerTokenId)
 {
     HILOG_INFO("%{public}s:begin.", __func__);
 
@@ -295,8 +298,8 @@ int32_t PendingWantManager::PendingWantPublishCommonEvent(
         WantParams wantParams = {};
         pendingWantCommonEvent->SetWantParams(wantParams);
     }
-    bool result = DelayedSingleton<EventFwk::CommonEvent>::GetInstance()->PublishCommonEvent(
-        eventData, eventPublishData, pendingWantCommonEvent, callerUid);
+    bool result = IN_PROCESS_CALL(DelayedSingleton<EventFwk::CommonEvent>::GetInstance()->PublishCommonEvent(
+        eventData, eventPublishData, pendingWantCommonEvent, callerUid, callerTokenId));
     return ((result == true) ? ERR_OK : (-1));
 }
 
