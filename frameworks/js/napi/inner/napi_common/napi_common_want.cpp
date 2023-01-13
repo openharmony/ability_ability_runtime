@@ -910,7 +910,7 @@ void HandleNapiObject(napi_env env, napi_value param, napi_value jsProValue, std
     if (IsSpecialObject(env, param, strProName, FD, napi_number)) {
         HandleFdObject(env, param, strProName, wantParams);
     } else if (IsSpecialObject(env, param, strProName, REMOTE_OBJECT, napi_object)) {
-        HandleRemoteObject(env, param, strProName, wantParams);
+        HILOG_WARN("REMOTE_OBJECT is FORIBBED IN WANT.");
     } else {
         bool isArray = false;
         if (napi_is_array(env, jsProValue, &isArray) == napi_ok) {

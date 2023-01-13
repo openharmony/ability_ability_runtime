@@ -29,6 +29,7 @@
 #include "hitrace_meter.h"
 #include "image_source.h"
 #include "errors.h"
+#include "event_report.h"
 #include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
 #include "parameters.h"
@@ -271,7 +272,8 @@ bool AbilityRecord::CanRestartResident()
             abilityMgr->GetRestartIntervalTime(restartIntervalTime);
         }
         HILOG_DEBUG("restartTime: %{public}lld, now: %{public}lld, intervalTine:%{public}d",
-            restartTime_, AbilityUtil::SystemTimeMillis(), restartIntervalTime);
+            static_cast<unsigned long long>(restartTime_),
+            static_cast<unsigned long long>(AbilityUtil::SystemTimeMillis()), restartIntervalTime);
         if ((AbilityUtil::SystemTimeMillis() - restartTime_) < restartIntervalTime) {
             HILOG_ERROR("Resident restart is out of max count");
             return false;
@@ -337,6 +339,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
 
 std::string AbilityRecord::GetLabel()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::string strLabel = applicationInfo_.label;
 
     if (abilityInfo_.resourcePath.empty()) {
@@ -742,6 +745,7 @@ sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo(const Abi
 
 std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResourceManager() const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     UErrorCode status = U_ZERO_ERROR;
     icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
@@ -751,8 +755,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     resourceMgr->UpdateResConfig(*resConfig);
 
     std::string loadPath;
-    if (system::GetBoolParameter(AbilityBase::Constants::COMPRESS_PROPERTY, false) &&
-        !abilityInfo_.hapPath.empty()) {
+    if (!abilityInfo_.hapPath.empty()) {
         loadPath = abilityInfo_.hapPath;
     } else {
         loadPath = abilityInfo_.resourcePath;
@@ -773,6 +776,7 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
 std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windowIconId,
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (resourceMgr == nullptr) {
         HILOG_WARN("%{public}s resource manager does not exist.", __func__);
         return nullptr;
@@ -781,8 +785,7 @@ std::shared_ptr<Media::PixelMap> AbilityRecord::GetPixelMap(const uint32_t windo
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
     std::unique_ptr<Media::ImageSource> imageSource;
-    if (system::GetBoolParameter(AbilityBase::Constants::COMPRESS_PROPERTY, false) &&
-        !abilityInfo_.hapPath.empty()) { // hap is not unzip
+    if (!abilityInfo_.hapPath.empty()) { // hap is not unzip
         std::unique_ptr<uint8_t[]> iconOut;
         size_t len;
         if (resourceMgr->GetMediaDataById(windowIconId, len, iconOut) != Global::Resource::RState::SUCCESS) {
@@ -899,6 +902,7 @@ void AbilityRecord::GetColdStartingWindowResource(std::shared_ptr<Media::PixelMa
 void AbilityRecord::InitColdStartingWindowResource(
     const std::shared_ptr<Global::Resource::ResourceManager> &resourceMgr)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!resourceMgr) {
         HILOG_ERROR("invalid resourceManager.");
         return;
@@ -961,7 +965,16 @@ int AbilityRecord::TerminateAbility()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Schedule terminate ability to AppMs, ability:%{public}s.", abilityInfo_.name.c_str());
     HandleDlpClosed();
-    return DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
+    AAFwk::EventInfo eventInfo;
+    eventInfo.bundleName = GetAbilityInfo().bundleName;
+    eventInfo.abilityName = GetAbilityInfo().name;
+    AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    eventInfo.errCode = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
+    if (eventInfo.errCode != ERR_OK) {
+        AAFwk::EventReport::SendAbilityEvent(
+            AAFwk::EventName::TERMINATE_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    }
+    return eventInfo.errCode;
 }
 
 const AppExecFwk::AbilityInfo &AbilityRecord::GetAbilityInfo() const

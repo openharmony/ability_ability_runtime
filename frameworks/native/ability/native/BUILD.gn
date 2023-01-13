@@ -153,7 +153,6 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_caller_complex.cpp",
     "${ability_runtime_native_path}/ability/native/ability_thread.cpp",
-    "${ability_runtime_native_path}/ability/native/ability_transaction_callback_info.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_manager.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/reverse_continuation_scheduler_primary.cpp",
@@ -165,6 +164,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/data_uri_utils.cpp",
     "${ability_runtime_native_path}/ability/native/distributed_ability_runtime/distributed_client.cpp",
     "${ability_runtime_native_path}/ability/native/extension.cpp",
+    "${ability_runtime_native_path}/ability/native/extension_config_mgr.cpp",
     "${ability_runtime_native_path}/ability/native/extension_impl.cpp",
     "${ability_runtime_native_path}/ability/native/extension_module_loader.cpp",
     "${ability_runtime_native_path}/ability/native/js_extension_common.cpp",
@@ -192,6 +192,7 @@ ohos_shared_library("abilitykit_native") {
 
   deps = [
     ":continuation_ipc",
+    ":extension_blacklist_config",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -519,4 +520,14 @@ ohos_shared_library("ability_business_error") {
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
+}
+
+ohos_prebuilt_etc("extension_blacklist_config.json") {
+  source = "etc/extension_blacklist_config.json"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+group("extension_blacklist_config") {
+  deps = [ ":extension_blacklist_config.json" ]
 }

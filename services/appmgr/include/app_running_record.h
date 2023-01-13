@@ -545,10 +545,14 @@ public:
 
     int64_t GetAppStartTime() const;
 
-    void SetRestartTimeMillis(const int64_t restartTimeMills);
+    void SetRestartTimeMillis(const int64_t restartTimeMillis);
     void SetRequestProcCode(int32_t requestProcCode);
 
     int32_t GetRequestProcCode() const;
+
+    void SetProcessChangeReason(ProcessChangeReason reason);
+
+    ProcessChangeReason GetProcessChangeReason() const;
 
 private:
     /**
@@ -648,6 +652,7 @@ private:
     int32_t appIndex_ = 0;
     bool securityFlag_ = false;
     int32_t requestProcCode_;
+    ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

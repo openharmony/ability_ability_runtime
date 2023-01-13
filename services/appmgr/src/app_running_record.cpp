@@ -903,7 +903,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true);
-    moduleRecord->TerminateAbility(token, isForce);
+    moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
 }
 
 void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
@@ -1382,5 +1382,14 @@ int32_t AppRunningRecord::GetRequestProcCode() const
     return requestProcCode_;
 }
 
+void AppRunningRecord::SetProcessChangeReason(ProcessChangeReason reason)
+{
+    processChangeReason_ = reason;
+}
+
+ProcessChangeReason AppRunningRecord::GetProcessChangeReason() const
+{
+    return processChangeReason_;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

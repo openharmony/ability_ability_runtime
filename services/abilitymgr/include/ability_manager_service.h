@@ -58,6 +58,8 @@ namespace OHOS {
 namespace AAFwk {
 enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 const int32_t BASE_USER_RANGE = 200000;
+const int32_t U0_USER_ID = 0;
+constexpr int32_t INVALID_USER_ID = -1;
 using OHOS::AppExecFwk::IAbilityController;
 class PendingWantManager;
 /**
@@ -722,6 +724,9 @@ public:
     virtual int SetComponentInterception(
         const sptr<AppExecFwk::IComponentInterception> &componentInterception) override;
 
+    virtual int32_t SendResultToAbilityByToken(const Want &want, const sptr<IRemoteObject> &abilityToken,
+        int32_t requestCode, int32_t resultCode, int32_t userId) override;
+
     bool IsAbilityControllerStart(const Want &want, const std::string &bundleName);
 
     bool IsAbilityControllerForeground(const std::string &bundleName);
@@ -1172,15 +1177,22 @@ private:
 
     void RecoverAbilityRestart(const Want &want);
 
-    AAFWK::EventInfo BuildEventInfo(const Want &want, int32_t userId);
+    AAFwk::EventInfo BuildEventInfo(const Want &want, int32_t userId);
 
     int CheckDlpForExtension(
         const Want &want, const sptr<IRemoteObject> &callerToken,
-        int32_t userId, AAFWK::EventInfo &eventInfo, const std::string &eventName);
+        int32_t userId, AAFwk::EventInfo &eventInfo, const EventName &eventName);
 
     void InitStartupFlag();
 
     void UpdateAbilityRequestInfo(const sptr<Want> &want, AbilityRequest &request);
+
+    inline bool IsCrossUserCall(int32_t userId)
+    {
+        return (userId != INVALID_USER_ID && userId != U0_USER_ID && userId != GetUserId());
+    }
+
+    int GetTopAbility(sptr<IRemoteObject> &token, bool needVerify);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
