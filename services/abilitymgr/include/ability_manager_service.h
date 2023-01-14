@@ -563,7 +563,8 @@ public:
 
     void OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord);
     void OnCallConnectDied(std::shared_ptr<CallRecord> callRecord);
-    void GetMaxRestartNum(int &max);
+    void GetMaxRestartNum(int &max, bool isRootLauncher);
+    void GetRestartIntervalTime(int &restartIntervalTime);
     void HandleLoadTimeOut(int64_t eventId);
     void HandleActiveTimeOut(int64_t eventId);
     void HandleInactiveTimeOut(int64_t eventId);
@@ -1180,6 +1181,8 @@ private:
     void InitStartupFlag();
 
     void UpdateAbilityRequestInfo(const sptr<Want> &want, AbilityRequest &request);
+
+    int GetTopAbility(sptr<IRemoteObject> &token, bool needVerify);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
