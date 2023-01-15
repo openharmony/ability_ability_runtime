@@ -2302,7 +2302,8 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_001, TestSize.Level
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     Want want;
     want.SetFlags(1);
-    abilityRecord->GrantUriPermission(want);
+    int32_t userId = 101;
+    abilityRecord->GrantUriPermission(want, userId);
 }
 
 /*

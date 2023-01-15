@@ -549,42 +549,6 @@ HWTEST_F(AbilityManagerServiceTest, StopExtensionAbility_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: GrantUriPermission
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GrantUriPermission
- */
-HWTEST_F(AbilityManagerServiceTest, GrantUriPermission_001, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerServiceTest GrantUriPermission_001 start");
-    Want want;
-    want.SetFlags(4);
-    abilityMs_->GrantUriPermission(want, 100);
-
-    want.SetFlags(1);
-    abilityMs_->GrantUriPermission(want, 100);
-    HILOG_INFO("AbilityManagerServiceTest GrantUriPermission_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: GrantUriPermission
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService GrantUriPermission
- */
-HWTEST_F(AbilityManagerServiceTest, GrantUriPermission_002, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerServiceTest GrantUriPermission_002 start");
-    Want want;
-    want.SetFlags(4);
-    abilityMs_->GrantUriPermission(want, 100, 1);
-
-    want.SetFlags(1);
-    abilityMs_->GrantUriPermission(want, 100, 1);
-    HILOG_INFO("AbilityManagerServiceTest GrantUriPermission_002 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: TerminateAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService TerminateAbility

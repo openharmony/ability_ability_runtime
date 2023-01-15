@@ -824,6 +824,8 @@ public:
     void SetPendingState(AbilityState state);
     AbilityState GetPendingState() const;
 
+    void RemoveUriPermission() const;
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
 
@@ -841,8 +843,10 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
-    void GrantUriPermission(const Want &want);
-    int GetCurrentAccountId();
+    void GrantUriPermissionForResult(const Want &want) const;
+    void GrantUriPermission(const Want &want, int32_t userId) const;
+    void GrantUriPermission(const Want &want, int32_t userId, uint32_t targetTokenId) const;
+    int32_t GetCurrentAccountId() const;
 
     /**
      * add system ability caller record
