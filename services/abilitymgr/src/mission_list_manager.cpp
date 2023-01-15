@@ -1775,6 +1775,7 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t eventId)
         return;
     }
     HILOG_DEBUG("Ability timeout ,msg:%{public}d,name:%{public}s", msgId, abilityRecord->GetAbilityInfo().name.c_str());
+    abilityRecord->RemoveUriPermission();
 
 #ifdef SUPPORT_GRAPHICS
     if (abilityRecord->IsStartingWindow()) {
