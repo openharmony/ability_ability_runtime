@@ -245,6 +245,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/js/napi/dialog_request_info/include",
+              "header_files": [
+                "request_info.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/js/napi/dialog_request_info:dialog_request_info"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/",
               "header_files": [
                 "extension_context.h"
@@ -258,8 +267,16 @@
               "header_files": [
                 "quick_fix_manager_client.h"
               ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/quick_fix:quickfix_manager"
           },
-          "name": "//foundation/ability/ability_runtime/interfaces/inner_api/quick_fix:quickfix_manager"
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/dataobs_manager/",
+              "header_files": [
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/dataobs_manager:dataobs_manager"
           }
         ],
         "test": [

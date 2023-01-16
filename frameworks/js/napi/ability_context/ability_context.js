@@ -41,6 +41,10 @@ class AbilityContext extends Context {
         return this.__context_impl__.startAbility(want, options, callback)
     }
 
+    startRecentAbility(want, options, callback) {
+        return this.__context_impl__.startRecentAbility(want, options, callback)
+    }
+
     startAbilityWithAccount(want, accountId, options, callback) {
         return this.__context_impl__.startAbilityWithAccount(want, accountId, options, callback)
     }
@@ -141,6 +145,10 @@ class AbilityContext extends Context {
 
     setMissionIcon(icon, callback) {
         return this.__context_impl__.setMissionIcon(icon, callback)
+    }
+
+    requestDialogService(want, resultCallback) {
+        return this.__context_impl__.requestDialogService(want, resultCallback)
     }
 }
 
