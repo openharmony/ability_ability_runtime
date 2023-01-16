@@ -72,11 +72,11 @@ public:
     /**
      * @brief Set a creator function.
      *
-     * @param creator The function for create a datashare extension ability.
+     * @param creator The function for create a service-extension ability.
      */
     static void SetCreator(const CreatorFunc& creator);
 private:
-    static CreatorFunc creator_;    
+    static CreatorFunc creator_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
