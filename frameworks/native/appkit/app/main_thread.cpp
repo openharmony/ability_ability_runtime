@@ -1186,14 +1186,13 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             return;
         }
         std::string nwebPath = app->GetAppContext()->GetCacheDir() + "/web";
-        if (access(nwebPath.c_str(), F_OK) != -1) {
+        bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
+        if (!isFirstStartUpWeb) {
             appmgr->PreStartNWebSpawnProcess();
         }
-    }).detach();
 
-    std::string nwebPath = application_->GetAppContext()->GetCacheDir() + "/web";
-    bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
-    OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, application_->GetAppContext()->GetBundleCodeDir());
+        OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, app->GetAppContext()->GetBundleCodeDir());
+    }).detach();
 #endif
 
     HILOG_DEBUG("MainThread::handleLaunchApplication called end.");
