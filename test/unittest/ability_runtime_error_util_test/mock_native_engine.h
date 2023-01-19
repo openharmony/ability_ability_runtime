@@ -159,6 +159,11 @@ public:
         return nullptr;
     }
 
+    bool CallInitTaskFunc(NativeEngine* engine, NativeValue* func) override
+    {
+        return false;
+    }
+
     NativeValue* CreatePromise(NativeDeferred** deferred) override
     {
         return nullptr;
@@ -346,6 +351,9 @@ public:
     {}
 
     void NotifyApplicationState(bool inBackground) override
+    {}
+
+    void NotifyIdleTime(int idleMicroSec) override
     {}
 
     void NotifyMemoryPressure(bool inHighMemoryPressure = false) override

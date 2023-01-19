@@ -69,6 +69,12 @@ NativeValue* JsAbilityContext::StartAbility(NativeEngine* engine, NativeCallback
     return (me != nullptr) ? me->OnStartAbility(*engine, *info) : nullptr;
 }
 
+NativeValue* JsAbilityContext::StartRecentAbility(NativeEngine* engine, NativeCallbackInfo* info)
+{
+    JsAbilityContext* me = CheckParamsAndGetThis<JsAbilityContext>(engine, info);
+    return (me != nullptr) ? me->OnStartAbility(*engine, *info, true) : nullptr;
+}
+
 NativeValue* JsAbilityContext::StartAbilityWithAccount(NativeEngine* engine, NativeCallbackInfo* info)
 {
     JsAbilityContext* me = CheckParamsAndGetThis<JsAbilityContext>(engine, info);
@@ -167,7 +173,7 @@ NativeValue* JsAbilityContext::IsTerminating(NativeEngine* engine, NativeCallbac
     return (me != nullptr) ? me->OnIsTerminating(*engine, *info) : nullptr;
 }
 
-NativeValue* JsAbilityContext::OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info)
+NativeValue* JsAbilityContext::OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info, bool isStartRecent)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("OnStartAbility is called.");
@@ -190,6 +196,12 @@ NativeValue* JsAbilityContext::OnStartAbility(NativeEngine& engine, NativeCallba
             reinterpret_cast<napi_value>(info.argv[1]), startOptions);
         unwrapArgc++;
     }
+
+    if (isStartRecent) {
+        HILOG_INFO("OnStartRecentAbility is called");
+        want.SetParam(Want::PARAM_RESV_START_RECENT, true);
+    }
+
     AsyncTask::CompleteCallback complete =
         [weak = context_, want, startOptions, unwrapArgc](NativeEngine& engine, AsyncTask& task, int32_t status) {
             auto context = weak.lock();
@@ -738,13 +750,12 @@ NativeValue* JsAbilityContext::OnConnectAbility(NativeEngine& engine, NativeCall
     } else {
         g_serialNumber = 0;
     }
-    HILOG_INFO("%{public}s not find connection, make new one", __func__);
+
     AsyncTask::CompleteCallback complete =
         [weak = context_, want, connection, connectId](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            HILOG_INFO("OnConnectAbility begin");
             auto context = weak.lock();
             if (!context) {
-                HILOG_WARN("Connect ability failed, context is released.");
+                HILOG_ERROR("Connect ability failed, context is released.");
                 task.Reject(engine, CreateJsError(engine, 1, "Context is released"));
                 return;
             }
@@ -800,14 +811,12 @@ NativeValue* JsAbilityContext::OnConnectAbilityWithAccount(NativeEngine& engine,
     } else {
         g_serialNumber = 0;
     }
-    HILOG_INFO("%{public}s not find connection, make new one", __func__);
     AsyncTask::CompleteCallback complete =
         [weak = context_, want, accountId, connection, connectId](
             NativeEngine& engine, AsyncTask& task, int32_t status) {
-                HILOG_INFO("OnConnectAbilityWithAccount begin");
                 auto context = weak.lock();
                 if (!context) {
-                    HILOG_WARN("context is released");
+                    HILOG_ERROR("context is released");
                     task.Reject(engine, CreateJsError(engine, 1, "Context is released"));
                     return;
                 }
@@ -1164,6 +1173,8 @@ NativeValue* CreateJsAbilityContext(NativeEngine& engine, std::shared_ptr<Abilit
         JsAbilityContext::RequestPermissionsFromUser);
     BindNativeFunction(engine, *object, "restoreWindowStage", moduleName, JsAbilityContext::RestoreWindowStage);
     BindNativeFunction(engine, *object, "isTerminating", moduleName, JsAbilityContext::IsTerminating);
+    BindNativeFunction(engine, *object, "startRecentAbility", moduleName,
+        JsAbilityContext::StartRecentAbility);
 
 #ifdef SUPPORT_GRAPHICS
     BindNativeFunction(engine, *object, "setMissionLabel", moduleName, JsAbilityContext::SetMissionLabel);

@@ -87,7 +87,6 @@ private:
     NativeValue* OnGetArea(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnCreateModuleContext(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnGetApplicationContext(NativeEngine& engine, NativeCallbackInfo& info);
-    bool CheckCallerIsSystemApp();
     static void BindNativeApplicationContext(NativeEngine &engine, NativeObject* object);
 
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
