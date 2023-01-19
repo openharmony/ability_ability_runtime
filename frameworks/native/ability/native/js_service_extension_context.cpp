@@ -72,6 +72,12 @@ public:
         return (me != nullptr) ? me->OnStartAbility(*engine, *info) : nullptr;
     }
 
+    static NativeValue* StartRecentAbility(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsServiceExtensionContext* me = CheckParamsAndGetThis<JsServiceExtensionContext>(engine, info);
+        return (me != nullptr) ? me->OnStartAbility(*engine, *info, true) : nullptr;
+    }
+
     static NativeValue* StartAbilityByCall(NativeEngine* engine, NativeCallbackInfo* info)
     {
         JsServiceExtensionContext* me = CheckParamsAndGetThis<JsServiceExtensionContext>(engine, info);
@@ -134,7 +140,7 @@ public:
 
 private:
     std::weak_ptr<ServiceExtensionContext> context_;
-    NativeValue* OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info)
+    NativeValue* OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info, bool isStartRecent = false)
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
         HILOG_INFO("OnStartAbility is called");
@@ -150,6 +156,11 @@ private:
         if (!CheckStartAbilityInputParam(engine, info, want, startOptions, unwrapArgc)) {
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
+        }
+
+        if (isStartRecent) {
+            HILOG_INFO("OnStartRecentAbility is called");
+            want.SetParam(Want::PARAM_RESV_START_RECENT, true);
         }
 
         AsyncTask::CompleteCallback complete =
@@ -451,7 +462,6 @@ private:
 
     NativeValue* OnConnectAbility(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        HILOG_INFO("OnConnectAbility is called");
         HILOG_INFO("Connect ability called.");
         // Check params count
         if (info.argc < ARGC_TWO) {
@@ -470,10 +480,9 @@ private:
         int64_t connectId = connection->GetConnectionId();
         AsyncTask::CompleteCallback complete =
             [weak = context_, want, connection, connectId](NativeEngine& engine, AsyncTask& task, int32_t status) {
-                HILOG_INFO("OnConnectAbility begin");
                 auto context = weak.lock();
                 if (!context) {
-                    HILOG_WARN("context is released");
+                    HILOG_ERROR("context is released");
                     task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "Context is released"));
                     return;
                 }
@@ -514,10 +523,9 @@ private:
         AsyncTask::CompleteCallback complete =
             [weak = context_, want, accountId, connection, connectId](
                 NativeEngine& engine, AsyncTask& task, int32_t status) {
-                    HILOG_INFO("OnConnectAbilityWithAccount begin");
                     auto context = weak.lock();
                     if (!context) {
-                        HILOG_WARN("context is released");
+                        HILOG_ERROR("context is released");
                         task.Reject(engine, CreateJsError(engine, ERROR_CODE_ONE, "Context is released"));
                         return;
                     }
@@ -874,6 +882,8 @@ NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_p
         JsServiceExtensionContext::StopServiceExtensionAbility);
     BindNativeFunction(engine, *object, "stopServiceExtensionAbilityWithAccount", moduleName,
         JsServiceExtensionContext::StopServiceExtensionAbilityWithAccount);
+    BindNativeFunction(engine, *object, "startRecentAbility", moduleName,
+        JsServiceExtensionContext::StartRecentAbility);
 
     return objValue;
 }

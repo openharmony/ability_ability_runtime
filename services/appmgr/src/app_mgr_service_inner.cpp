@@ -21,36 +21,35 @@
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
-#include "application_state_observer_stub.h"
-#include "datetime_ex.h"
-#include "hilog_wrapper.h"
-#include "perf_profile.h"
+#include "app_mem_info.h"
 #include "app_mgr_service.h"
 #include "app_process_data.h"
 #include "app_state_observer_manager.h"
+#include "application_state_observer_stub.h"
 #include "bundle_constants.h"
-#include "hitrace_meter.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "datetime_ex.h"
+#include "event_report.h"
+#include "hilog_wrapper.h"
 #include "hisysevent.h"
+#include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "itest_observer.h"
-#include "parameter.h"
-#include "parameters.h"
-#include "permission_constants.h"
-#include "permission_verification.h"
-#include "system_ability_definition.h"
 #ifdef SUPPORT_GRAPHICS
 #include "locale_config.h"
 #endif
+#include "parameter.h"
+#include "parameters.h"
+#include "perf_profile.h"
+#include "permission_constants.h"
+#include "permission_verification.h"
+#include "system_ability_definition.h"
 #include "uri_permission_manager_client.h"
-#include "event_report.h"
-#include "hisysevent.h"
-#include "app_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -81,6 +80,9 @@ constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
 
 constexpr int32_t BASE_USER_RANGE = 200000;
+
+constexpr int32_t MAX_RESTART_COUNT = 3;
+constexpr int32_t RESTART_INTERVAL_TIME = 120000;
 
 constexpr ErrCode APPMGR_ERR_OFFSET = ErrCodeOffset(SUBSYS_APPEXECFWK, 0x01);
 constexpr ErrCode ERR_ALREADY_EXIST_RENDER = APPMGR_ERR_OFFSET + 100; // error code for already exist render.
@@ -171,7 +173,11 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord,
             appInfo->uid, appInfo->bundleName, bundleIndex);
     } else {
-        appRecord->SetRequestProcCode((want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0));
+        int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
+        if (requestProcCode != 0 && appRecord->GetRequestProcCode() == 0) {
+            appRecord->SetRequestProcCode(requestProcCode);
+            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessReused(appRecord);
+        }
         StartAbility(token, preToken, abilityInfo, appRecord, hapModuleInfo, want);
     }
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
@@ -325,7 +331,8 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
 
     appRecord->LaunchApplication(*configuration_);
     appRecord->SetState(ApplicationState::APP_STATE_READY);
-    appRecord->SetRestartResidentProcCount(RESTART_RESIDENT_PROCESS_MAX_TIMES);
+    int restartResidentProcCount = MAX_RESTART_COUNT;
+    appRecord->SetRestartResidentProcCount(restartResidentProcCount);
 
     // There is no ability when the empty resident process starts
     // The status of all resident processes is ready
@@ -476,28 +483,7 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
         return errCode;
     }
 
-    int result = ERR_OK;
-    int64_t startTime = SystemTimeMillisecond();
-    std::list<pid_t> pids;
-
-    if (!appRunningManager_->ProcessExitByBundleName(bundleName, pids)) {
-        HILOG_INFO("The process corresponding to the package name did not start");
-        return result;
-    }
-    if (WaitForRemoteProcessExit(pids, startTime)) {
-        HILOG_INFO("The remote process exited successfully ");
-        NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-        return result;
-    }
-    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
-        result = KillProcessByPid(*iter);
-        if (result < 0) {
-            HILOG_ERROR("KillApplication failed for bundleName:%{public}s pid:%{public}d", bundleName.c_str(), *iter);
-            return result;
-        }
-    }
-    NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
-    return result;
+    return KillApplicationByBundleName(bundleName);
 }
 
 int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, const int uid)
@@ -552,21 +538,39 @@ int32_t AppMgrServiceInner::KillApplicationSelf()
     }
 
     auto callerPid = IPCSkeleton::GetCallingPid();
-    if (!appRunningManager_->ProcessExitByPid(callerPid)) {
-        HILOG_INFO("The callerPid is invalid");
-        return ERR_OK;
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord, callerPid:%{public}d", callerPid);
+        return ERR_INVALID_VALUE;
     }
-    std::list<pid_t> pids;
-    pids.push_back(callerPid);
+    auto bundleName = appRecord->GetBundleName();
+    return KillApplicationByBundleName(bundleName);
+}
+
+int32_t AppMgrServiceInner::KillApplicationByBundleName(const std::string &bundleName)
+{
+    int result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
+    std::list<pid_t> pids;
+
+    if (!appRunningManager_->ProcessExitByBundleName(bundleName, pids)) {
+        HILOG_ERROR("The process corresponding to the package name did not start");
+        return result;
+    }
     if (WaitForRemoteProcessExit(pids, startTime)) {
-        HILOG_INFO("The remote process exited successfully");
-        return ERR_OK;
+        HILOG_DEBUG("The remote process exited successfully ");
+        NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
+        return result;
     }
-    int result = KillProcessByPid(callerPid);
-    if (result < 0) {
-        HILOG_ERROR("KillApplication is fail, pid: %{public}d", callerPid);
+    for (auto iter = pids.begin(); iter != pids.end(); ++iter) {
+        result = KillProcessByPid(*iter);
+        if (result < 0) {
+            HILOG_ERROR("KillApplicationSelf is failed for bundleName:%{public}s, pid: %{public}d",
+                bundleName.c_str(), *iter);
+            return result;
+        }
     }
+    NotifyAppStatus(bundleName, EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
     return result;
 }
 
@@ -726,6 +730,22 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &info)
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord, callerPid:%{public}d", callerPid);
+        return ERR_INVALID_VALUE;
+    }
+    GetRunningProcess(appRecord, info);
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
 {
     HILOG_INFO("AppMgrServiceInner start");
@@ -753,16 +773,22 @@ void AppMgrServiceInner::GetRunningProcesses(const std::shared_ptr<AppRunningRec
     std::vector<RunningProcessInfo> &info)
 {
     RunningProcessInfo runningProcessInfo;
-    runningProcessInfo.processName_ = appRecord->GetProcessName();
-    runningProcessInfo.pid_ = appRecord->GetPriorityObject()->GetPid();
-    runningProcessInfo.uid_ = appRecord->GetUid();
-    runningProcessInfo.state_ = static_cast<AppProcessState>(appRecord->GetState());
-    runningProcessInfo.isContinuousTask = appRecord->IsContinuousTask();
-    runningProcessInfo.isKeepAlive = appRecord->IsKeepAliveApp();
-    runningProcessInfo.isFocused = appRecord->GetFocusFlag();
-    runningProcessInfo.startTimeMillis_ = appRecord->GetAppStartTime();
-    appRecord->GetBundleNames(runningProcessInfo.bundleNames);
+    GetRunningProcess(appRecord, runningProcessInfo);
     info.emplace_back(runningProcessInfo);
+}
+
+void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningProcessInfo &info)
+{
+    info.processName_ = appRecord->GetProcessName();
+    info.pid_ = appRecord->GetPriorityObject()->GetPid();
+    info.uid_ = appRecord->GetUid();
+    info.state_ = static_cast<AppProcessState>(appRecord->GetState());
+    info.isContinuousTask = appRecord->IsContinuousTask();
+    info.isKeepAlive = appRecord->IsKeepAliveApp();
+    info.isFocused = appRecord->GetFocusFlag();
+    info.startTimeMillis_ = appRecord->GetAppStartTime();
+    appRecord->GetBundleNames(info.bundleNames);
 }
 
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
@@ -1529,17 +1555,28 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     }
 
     if (appRecord->IsKeepAliveApp()) {
-        appRecord->DecRestartResidentProcCount();
+        auto restartProcess = [appRecord, innerService = shared_from_this()]() {
+            innerService->RestartResidentProcess(appRecord);
+        };
         if (appRecord->CanRestartResidentProc()) {
-            auto restartProcess = [appRecord, innerService = shared_from_this()]() {
-                innerService->RestartResidentProcess(appRecord);
-            };
-
             if (!eventHandler_) {
                 HILOG_ERROR("eventHandler_ is nullptr");
                 return;
             }
             eventHandler_->PostTask(restartProcess, "RestartResidentProcess");
+        } else {
+            auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
+                return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
+            };
+            auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(),
+                findRestartResidentTask);
+            if (findIter != restartResedentTaskList_.end()) {
+                HILOG_WARN("The restart app task has been registered.");
+                return;
+            }
+            restartResedentTaskList_.emplace_back(appRecord);
+            HILOG_INFO("PostRestartResidentProcessDelayTask.");
+            eventHandler_->PostTask(restartProcess, "RestartResidentProcessDelayTask", RESTART_INTERVAL_TIME);
         }
     }
 }
@@ -1743,12 +1780,6 @@ bool AppMgrServiceInner::CheckGetRunningInfoPermission() const
 void AppMgrServiceInner::LoadResidentProcess(const std::vector<AppExecFwk::BundleInfo> &infos)
 {
     HILOG_INFO("%{public}s called", __func__);
-    pid_t callingPid = IPCSkeleton::GetCallingPid();
-    pid_t pid = getpid();
-    if (callingPid != pid) {
-        HILOG_ERROR("%{public}s: Not SA call.", __func__);
-        return;
-    }
 
     HILOG_INFO("bundle info size: [%{public}zu]", infos.size());
     StartResidentProcess(infos, -1, true);
@@ -1819,7 +1850,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
 
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModules(appInfo, info.hapModuleInfos);
-    HILOG_INFO("StartEmptyResidentProcess oK pid : [%{public}d], ", appRecord->GetPriorityObject()->GetPid());
+    HILOG_INFO("StartEmptyResidentProcess of pid : [%{public}d], ", appRecord->GetPriorityObject()->GetPid());
 }
 
 bool AppMgrServiceInner::CheckRemoteClient()
@@ -1843,6 +1874,25 @@ bool AppMgrServiceInner::CheckRemoteClient()
 
 void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord> appRecord)
 {
+    if (appRecord == nullptr) {
+        HILOG_ERROR("Restart resident process failed, the appRecord is nullptr.");
+        return;
+    }
+    struct timespec t;
+    t.tv_sec = 0;
+    t.tv_nsec = 0;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    appRecord->SetRestartTimeMillis(static_cast<int64_t>(((t.tv_sec) * NANOSECONDS + t.tv_nsec) / MICROSECONDS));
+    appRecord->DecRestartResidentProcCount();
+
+    auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
+        return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
+    };
+    auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(), findRestartResidentTask);
+    if (findIter != restartResedentTaskList_.end()) {
+        restartResedentTaskList_.erase(findIter);
+    }
+    
     if (!CheckRemoteClient() || !appRecord || !appRunningManager_) {
         HILOG_ERROR("restart resident process failed!");
         return;
@@ -2553,6 +2603,12 @@ int AppMgrServiceInner::PreStartNWebSpawnProcess(const pid_t hostPid)
     auto nwebSpawnClient = remoteClientManager_->GetNWebSpawnClient();
     if (!nwebSpawnClient) {
         HILOG_ERROR("nwebSpawnClient is null");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto appRecord = appRunningManager_->GetAppRunningRecordByRenderPid(hostPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such app Record, pid:%{public}d", hostPid);
         return ERR_INVALID_VALUE;
     }
 

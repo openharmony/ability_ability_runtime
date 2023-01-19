@@ -230,10 +230,10 @@ void Ability::OnStart(const Want &want)
             auto resourceManager = GetResourceManager();
             if (resourceManager != nullptr) {
                 resourceManager->GetResConfig(*resConfig);
-                resConfig->SetScreenDensity(ConvertDensity(density));
+                resConfig->SetScreenDensity(density);
                 resConfig->SetDirection(ConvertDirection(height, width));
                 resourceManager->UpdateResConfig(*resConfig);
-                HILOG_DEBUG("%{public}s Notify ResourceManager, Density: %{public}d, Direction: %{public}d.", __func__,
+                HILOG_DEBUG("%{public}s Notify ResourceManager, Density: %{public}f, Direction: %{public}d.", __func__,
                     resConfig->GetScreenDensity(), resConfig->GetDirection());
             }
         }
@@ -290,7 +290,7 @@ void Ability::OnStop()
     HILOG_DEBUG("%{public}s end", __func__);
 }
 
-void Ability::OnStop(AbilityTransactionCallbackInfo *callbackInfo, bool &isAsyncCallback)
+void Ability::OnStop(AbilityTransactionCallbackInfo<> *callbackInfo, bool &isAsyncCallback)
 {
     isAsyncCallback = false;
     OnStop();
@@ -334,6 +334,7 @@ void Ability::OnActive()
     eventInfo.bundleName = abilityInfo_->bundleName;
     eventInfo.moduleName = abilityInfo_->moduleName;
     eventInfo.abilityName = abilityInfo_->name;
+    eventInfo.abilityType = static_cast<int32_t>(abilityInfo_->type);
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONACTIVE,
         HiSysEventType::BEHAVIOR, eventInfo);
     HILOG_DEBUG("%{public}s end.", __func__);
@@ -1940,10 +1941,10 @@ void Ability::OnChange(Rosen::DisplayId displayId)
         auto resourceManager = GetResourceManager();
         if (resourceManager != nullptr) {
             resourceManager->GetResConfig(*resConfig);
-            resConfig->SetScreenDensity(ConvertDensity(density));
+            resConfig->SetScreenDensity(density);
             resConfig->SetDirection(ConvertDirection(height, width));
             resourceManager->UpdateResConfig(*resConfig);
-            HILOG_INFO("%{public}s Notify ResourceManager, Density: %{public}d, Direction: %{public}d.", __func__,
+            HILOG_INFO("%{public}s Notify ResourceManager, Density: %{public}f, Direction: %{public}d.", __func__,
                 resConfig->GetScreenDensity(), resConfig->GetDirection());
         }
     }
@@ -1997,10 +1998,10 @@ void Ability::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
         auto resourceManager = GetResourceManager();
         if (resourceManager != nullptr) {
             resourceManager->GetResConfig(*resConfig);
-            resConfig->SetScreenDensity(ConvertDensity(density));
+            resConfig->SetScreenDensity(density);
             resConfig->SetDirection(ConvertDirection(height, width));
             resourceManager->UpdateResConfig(*resConfig);
-            HILOG_INFO("%{public}s Notify ResourceManager, Density: %{public}d, Direction: %{public}d.", __func__,
+            HILOG_INFO("%{public}s Notify ResourceManager, Density: %{public}f, Direction: %{public}d.", __func__,
                 resConfig->GetScreenDensity(), resConfig->GetDirection());
         }
     }
