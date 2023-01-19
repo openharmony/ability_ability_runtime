@@ -75,8 +75,9 @@ public:
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
 
-    void InitApplicationContext();
     void AttachContextImpl(const std::shared_ptr<ContextImpl> &contextImpl);
+
+    static std::shared_ptr<ApplicationContext> GetInstance();
 
     // unused
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;
