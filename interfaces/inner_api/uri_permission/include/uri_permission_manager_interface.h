@@ -37,6 +37,16 @@ public:
     virtual void GrantUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID fromTokenId,
         const Security::AccessToken::AccessTokenID targetTokenId) = 0;
+    
+    /**
+     * @brief Authorize the uri permission of fromTokenId to targetTokenId.
+     *
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param targetTokenId The user of uri.
+     */
+    virtual void GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+        const Security::AccessToken::AccessTokenID targetTokenId) = 0;
 
     /**
      * @brief Check whether the tokenId has URI permissions.
@@ -65,6 +75,8 @@ public:
 
         // ipc id for RemoveUriPermission
         ON_REMOVE_URI_PERMISSION,
+
+        ON_GRANT_URI_PERMISSION_FROM_SELF,
     };
 };
 }  // namespace AAFwk

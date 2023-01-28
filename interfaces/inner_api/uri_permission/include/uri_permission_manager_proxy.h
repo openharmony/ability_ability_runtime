@@ -29,6 +29,8 @@ public:
     virtual void GrantUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID fromTokenId,
         const Security::AccessToken::AccessTokenID targetTokenId) override;
+    virtual void GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+        const Security::AccessToken::AccessTokenID targetTokenId) override;
 
     virtual bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override;

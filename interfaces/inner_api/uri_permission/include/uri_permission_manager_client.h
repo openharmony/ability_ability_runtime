@@ -41,6 +41,16 @@ public:
      */
     void GrantUriPermission(const Uri &uri, unsigned int flag, const Security::AccessToken::AccessTokenID fromTokenId,
         const Security::AccessToken::AccessTokenID targetTokenId);
+    
+    /**
+     * @brief Authorize the uri permission from self to targetTokenId.
+     *
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param targetTokenId The user of uri.
+     */
+    void GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+        const Security::AccessToken::AccessTokenID targetTokenId);
 
     /**
      * @brief Check whether the tokenId has URI permissions.
