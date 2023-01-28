@@ -22,6 +22,8 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "os_account_manager_wrapper.h"
+#include "permission_constants.h"
+#include "permission_verification.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
 #include "want.h"
@@ -38,6 +40,13 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         HILOG_DEBUG("caller tokenType is not native, verify failure.");
+        return;
+    }
+
+    auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
+    if (!permission) {
+        HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
         return;
     }
 
