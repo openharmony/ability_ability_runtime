@@ -1123,7 +1123,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         std::string nwebPath = nwebApp->GetAppContext()->GetCacheDir() + "/web";
         bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
         if (!isFirstStartUpWeb) {
-            appmgr->PreStartNWebSpawnProcess();
+            nwebMgr->PreStartNWebSpawnProcess();
         }
         OHOS::NWeb::NWebHelper::TryPreReadLib(isFirstStartUpWeb, nwebApp->GetAppContext()->GetBundleCodeDir());
     }).detach();
