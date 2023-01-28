@@ -32,6 +32,16 @@ void UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int
     }
 }
 
+void UriPermissionManagerClient::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+    const Security::AccessToken::AccessTokenID targetTokenId)
+{
+    HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermissionFromSelf is called.");
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr) {
+        uriPermMgr->GrantUriPermission(uri, flag, targetTokenId, targetTokenId);
+    }
+}
+
 bool UriPermissionManagerClient::VerifyUriPermission(const Uri &uri, unsigned int flag,
     const Security::AccessToken::AccessTokenID tokenId)
 {
