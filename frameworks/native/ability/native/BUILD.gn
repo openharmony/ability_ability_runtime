@@ -267,7 +267,7 @@ ohos_shared_library("abilitykit_native") {
     ]
   }
 
-  #version_script = "libabilitykit_native.map"
+  # version_script = "libabilitykit_native.map"
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
