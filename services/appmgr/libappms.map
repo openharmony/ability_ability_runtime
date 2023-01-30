@@ -32,6 +32,7 @@
       *RemoteClientManager*;
       *RenderRecord*;
       *WindowFocusChangedListener*;
+      *AppMgrService*;
     };
   local:
     *;
