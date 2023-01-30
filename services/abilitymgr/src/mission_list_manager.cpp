@@ -2759,6 +2759,7 @@ void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std
 
             auto isCallerFromLauncher = (callerAbility && callerAbility->IsLauncherAbility());
             MoveMissionToFront(mission->GetMissionId(), isCallerFromLauncher);
+            NotifyRestartSpecifiedAbility(abilityRequest, ability->GetToken());
             return;
         }
     }
@@ -2766,6 +2767,19 @@ void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std
     abilityRequest.specifiedFlag = flag;
     NotifyStartSpecifiedAbility(abilityRequest, want);
     StartAbilityLocked(currentTopAbility, callerAbility, abilityRequest);
+}
+
+void MissionListManager::NotifyRestartSpecifiedAbility(AbilityRequest &request, const sptr<IRemoteObject> &token)
+{
+    if (request.abilityInfoCallback == nullptr) {
+        return;
+    }
+    sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
+        = iface_cast<AppExecFwk::IAbilityInfoCallback> (request.abilityInfoCallback);
+    if (abilityInfoCallback != nullptr) {
+        HILOG_DEBUG("%{public}s called.", __func__);
+        abilityInfoCallback->NotifyRestartSpecifiedAbility(token);
+    }
 }
 
 void MissionListManager::NotifyStartSpecifiedAbility(AbilityRequest &abilityRequest, const AAFwk::Want &want)
