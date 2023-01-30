@@ -71,6 +71,7 @@
       *ExtensionRunningInfo*;
       *StopUserCallbackStub*;
       *UserItem*;
+      *WantReceiverStub*;
     };
   local:
     *;
