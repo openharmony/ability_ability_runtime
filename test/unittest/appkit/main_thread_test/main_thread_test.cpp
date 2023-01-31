@@ -36,7 +36,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace AppExecFwk {
-constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 class QuickFixCallbackImpl : public AppExecFwk::QuickFixCallbackStub {
 public:
     QuickFixCallbackImpl() = default;
