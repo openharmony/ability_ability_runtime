@@ -1099,6 +1099,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             HILOG_ERROR("AbilityLoader::GetExtensionByName failed: FormExtension");
             return nullptr;
         });
+        AddExtensionBlockItem("FormExtension", static_cast<int32_t>(ExtensionAbilityType::FORM));
 #endif
         AbilityLoader::GetInstance().RegisterExtension("StaticSubscriberExtension",
             [wpApplication]() -> AbilityRuntime::Extension* {
@@ -1109,6 +1110,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             HILOG_ERROR("AbilityLoader::GetExtensionByName failed: StaticSubscriberExtension");
             return nullptr;
         });
+        AddExtensionBlockItem("StaticSubscriberExtension",
+            static_cast<int32_t>(ExtensionAbilityType::STATICSUBSCRIBER));
 
         if (application_ != nullptr) {
 #ifdef __aarch64__
@@ -1275,6 +1278,9 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine, const std::string
     const BundleInfo &bundleInfo)
 {
     HILOG_DEBUG("LoadAllExtensions.filePath:%{public}s, extensionInfo size = %{public}d", filePath.c_str(), static_cast<int32_t>(bundleInfo.extensionInfos.size()));
+    if (!extensionConfigMgr_) {
+        return;
+    }
 
     // scan all extensions in path
     std::vector<std::string> extensionFiles;
@@ -1316,7 +1322,7 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine, const std::string
         std::string extensionName = it->second;
 
         extensionTypeMap.insert(std::pair<int32_t, std::string>(type, extensionName));
-        extensionConfigMgr_->AddBlackListItem(extensionName, type);
+        AddExtensionBlockItem(extensionName, type);
         HILOG_DEBUG("Success load extension type: %{public}d, name:%{public}s", type, extensionName.c_str());
         std::weak_ptr<OHOSApplication> wApp = application_;
         AbilityLoader::GetInstance().RegisterExtension(extensionName,
@@ -1330,7 +1336,7 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine, const std::string
         });
     }
     application_->SetExtensionTypeMap(extensionTypeMap);
-    extensionConfigMgr_->UpdateBlackListToEngine(nativeEngine);
+    UpdateEngineExtensionBlockList(nativeEngine);
 }
 
 bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
@@ -2253,6 +2259,22 @@ void MainThread::UpdateProcessExtensionType(const std::shared_ptr<AbilityLocalRe
     }
     runtime->UpdateExtensionType(static_cast<int32_t>(abilityInfo->extensionAbilityType));
     HILOG_INFO("UpdateExtensionType, type = %{public}d", static_cast<int32_t>(abilityInfo->extensionAbilityType));
+}
+
+void MainThread::AddExtensionBlockItem(const std::string &extensionName, int32_t type)
+{
+    if (!extensionConfigMgr_) {
+        return;
+    }
+    extensionConfigMgr_->AddBlockListItem(extensionName, type);
+}
+
+void MainThread::UpdateEngineExtensionBlockList(NativeEngine &nativeEngine)
+{
+    if (!extensionConfigMgr_) {
+        return;
+    }
+    extensionConfigMgr_->UpdateBlockListToEngine(nativeEngine);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
