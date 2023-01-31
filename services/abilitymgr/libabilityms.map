@@ -72,6 +72,11 @@
       *StopUserCallbackStub*;
       *UserItem*;
       *WantReceiverStub*;
+      *CallRecord*;
+      *ContainerManagerClient*;
+      *WantReceiverProxy*;
+      *WantSenderProxy*;
+      *WantSenderStub*;
     };
   local:
     *;
