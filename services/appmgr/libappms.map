@@ -15,7 +15,6 @@
   global:
     extern "C++" {
       *AbilityRunningRecord*;
-      *AmsEventHandler*;
       *AmsMgrScheduler*;
       *AppDeathRecipient*;
       *AppLifeCycleDeal*;
@@ -33,6 +32,7 @@
       *RenderRecord*;
       *WindowFocusChangedListener*;
       *AppMgrService*;
+      *AMSEventHandler*;
     };
   local:
     *;
