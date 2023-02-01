@@ -2274,8 +2274,8 @@ void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, uint32_
         auto&& scheme = uri.GetScheme();
         HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
         // only support file scheme
-        if (scheme != "file") {
-            HILOG_WARN("only support file uri.");
+        if (scheme != "file" && scheme != "dataShare") {
+            HILOG_WARN("only support file or dataShare uri.");
             continue;
         }
         auto&& authority = uri.GetAuthority();

@@ -36,18 +36,16 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     const Security::AccessToken::AccessTokenID fromTokenId, const Security::AccessToken::AccessTokenID targetTokenId)
 {
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
+    HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId); 
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        HILOG_DEBUG("caller tokenType is not native, verify failure.");
-        return;
-    }
-
-    auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(
-        AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
-    if (!permission) {
-        HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
-        return;
+        HILOG_DEBUG("caller tokenType is not native, verifying proxy authorization permission");
+        auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(  
+            AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
+        if (!permission) {
+            HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
+            return;
+        }
     }
 
     if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
@@ -90,16 +88,34 @@ void UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, un
 {
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
-    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        HILOG_DEBUG("caller tokenType is not native, verify failure.");
-        return;
-    }
 
     if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: The param flag is invalid.");
         return;
     }
+
+    auto bms = ConnectBundleManager();
+    Uri uri_inner = uri;
+    auto&& scheme = uri_inner.GetScheme();
+    HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
+    // only support file or dataShare scheme
+    if (scheme != "file" && scheme != "dataShare") {
+        HILOG_WARN("only support file or dataShare uri.");
+        return;
+    }
+    auto&& authority = uri_inner.GetAuthority();
+    HILOG_INFO("uri authority is %{public}s.", authority.c_str());
+    AppExecFwk::BundleInfo uriBundleInfo;
+    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
+        HILOG_WARN("To fail to get bundle info according to uri.");
+        return;
+    }
+    if (uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
+        HILOG_ERROR("the uri does not belong to caller.");
+        return;
+    }
+
     unsigned int tmpFlag = 0;
     if (flag & Want::FLAG_AUTH_WRITE_URI_PERMISSION) {
         tmpFlag = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
