@@ -2261,35 +2261,13 @@ void AbilityRecord::GrantUriPermissionForResult(const Want &want) const
 
 void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, uint32_t targetTokenId) const
 {
-    auto bms = AbilityUtil::GetBundleManager();
-    CHECK_POINTER_IS_NULLPTR(bms);
     auto&& uriStr = want.GetUri().ToString();
     auto&& uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
     uriVec.emplace_back(uriStr);
     auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    auto fromTokenId = IPCSkeleton::GetCallingTokenID();
-    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     for (auto&& str : uriVec) {
         Uri uri(str);
-        auto&& scheme = uri.GetScheme();
-        HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
-        // only support file scheme
-        if (scheme != "file" && scheme != "dataShare") {
-            HILOG_WARN("only support file or dataShare uri.");
-            continue;
-        }
-        auto&& authority = uri.GetAuthority();
-        HILOG_INFO("uri authority is %{public}s.", authority.c_str());
-        AppExecFwk::BundleInfo uriBundleInfo;
-        if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
-            HILOG_WARN("To fail to get bundle info according to uri.");
-            continue;
-        }
-        if (uriBundleInfo.applicationInfo.accessTokenId != fromTokenId) {
-            HILOG_ERROR("the uri does not belong to caller.");
-            continue;
-        }
-        IN_PROCESS_CALL_WITHOUT_RET(upmClient->GrantUriPermission(uri, want.GetFlags(), fromTokenId, targetTokenId));
+        IN_PROCESS_CALL_WITHOUT_RET(upmClient->GrantUriPermissionFromSelf(uri, want.GetFlags(), targetTokenId));
     }
 }
 
