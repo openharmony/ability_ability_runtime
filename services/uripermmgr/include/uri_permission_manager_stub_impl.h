@@ -31,6 +31,7 @@ struct GrantInfo {
     unsigned int flag;
     const unsigned int fromTokenId;
     const unsigned int targetTokenId;
+    unsigned int autoremove;
 };
 class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
                                      public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
