@@ -73,6 +73,11 @@ int UriPermissionManagerStub::OnRemoteRequest(
             RemoveUriPermission(tokenId);
             break;
         }
+        case UriPermMgrCmd::ON_REMOVE_URI_PERMISSION_MANUALLY : {
+            auto tokenId = data.ReadInt32();
+            RemoveUriPermissionManually(tokenId);
+            break;
+        }
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }

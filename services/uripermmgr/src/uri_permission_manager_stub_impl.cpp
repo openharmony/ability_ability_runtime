@@ -193,6 +193,26 @@ void UriPermissionManagerStubImpl::RemoveUriPermission(const Security::AccessTok
     }
 }
 
+void UriPermissionManagerStubImpl::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
+{
+    std::lock_guard<std::mutex> guard(mutex_);
+    for (auto iter = uriMap_.begin(); iter != uriMap_.end();) {
+        auto& list = iter->second;
+        for (auto it = list.begin(); it != list.end(); it++) {
+            if (it->targetTokenId == tokenId) {
+                HILOG_INFO("Erase an info form list.");
+                list.erase(it);
+                break;
+            }
+        }
+        if (list.size() == 0) {
+            uriMap_.erase(iter++);
+        } else {
+            iter++;
+        }
+    }
+}
+
 sptr<AppExecFwk::IBundleMgr> UriPermissionManagerStubImpl::ConnectBundleManager()
 {
     HILOG_DEBUG("%{public}s is called.", __func__);
