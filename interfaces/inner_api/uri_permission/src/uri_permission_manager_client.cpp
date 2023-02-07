@@ -62,6 +62,15 @@ void UriPermissionManagerClient::RemoveUriPermission(const Security::AccessToken
     }
 }
 
+void UriPermissionManagerClient::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
+{
+    HILOG_DEBUG("UriPermissionManagerClient::RemoveUriPermission is called.");
+    auto uriPermMgr = ConnectUriPermService();
+    if (uriPermMgr) {
+        uriPermMgr->RemoveUriPermissionManually(tokenId);
+    }
+}
+
 sptr<IUriPermissionManager> UriPermissionManagerClient::ConnectUriPermService()
 {
     HILOG_DEBUG("UriPermissionManagerClient::ConnectUriPermService is called.");

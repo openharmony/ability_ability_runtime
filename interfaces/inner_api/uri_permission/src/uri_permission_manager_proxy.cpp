@@ -135,5 +135,25 @@ void UriPermissionManagerProxy::RemoveUriPermission(const Security::AccessToken:
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
     }
 }
+
+void UriPermissionManagerProxy::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
+{
+    HILOG_DEBUG("UriPermissionManagerProxy::RemoveUriPermissionManually is called.");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
+        HILOG_ERROR("Write interface token failed.");
+        return;
+    }
+    if (!data.WriteInt32(tokenId)) {
+        HILOG_ERROR("Write AccessTokenID failed.");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REMOVE_URI_PERMISSION_MANUALLY, data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("SendRequest fail, error: %{public}d", error);
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS

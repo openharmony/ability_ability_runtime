@@ -63,11 +63,18 @@ public:
     bool VerifyUriPermission(const Uri &uri, unsigned int flag, const Security::AccessToken::AccessTokenID tokenId);
 
     /**
-     * @brief Clear user's uri authorization record.
+     * @brief Clear user's uri authorization record with auto remove flag.
      *
      * @param tokenId A tokenId of an application.
      */
     void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId);
+
+    /**
+     * @brief Clear user's uri authorization record.
+     *
+     * @param tokenId A tokenId of an application.
+     */
+    void RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId);
 
 private:
     sptr<IUriPermissionManager> ConnectUriPermService();

@@ -48,6 +48,7 @@ public:
         const Security::AccessToken::AccessTokenID tokenId) override;
 
     void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
+    void RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override;
 
 private:
     sptr<AppExecFwk::IBundleMgr> ConnectBundleManager();

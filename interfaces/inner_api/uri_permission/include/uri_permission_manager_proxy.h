@@ -36,6 +36,7 @@ public:
         const Security::AccessToken::AccessTokenID tokenId) override;
 
     virtual void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
+    virtual void RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override;
 
 private:
     static inline BrokerDelegator<UriPermissionManagerProxy> delegator_;

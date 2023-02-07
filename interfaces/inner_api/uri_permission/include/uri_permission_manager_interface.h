@@ -60,11 +60,18 @@ public:
         const Security::AccessToken::AccessTokenID tokenId) = 0;
 
     /**
-     * @brief Clear user's uri authorization record.
+     * @brief Clear user's uri authorization record with autoremove flag.
      *
      * @param tokenId A tokenId of an application.
      */
     virtual void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) = 0;
+
+    /**
+     * @brief Clear user's uri authorization record.
+     *
+     * @param tokenId A tokenId of an application.
+     */
+    virtual void RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) = 0;
 
     enum UriPermMgrCmd {
         // ipc id for GrantUriPermission
@@ -75,6 +82,8 @@ public:
 
         // ipc id for RemoveUriPermission
         ON_REMOVE_URI_PERMISSION,
+
+        ON_REMOVE_URI_PERMISSION_MANUALLY,
 
         ON_GRANT_URI_PERMISSION_FROM_SELF,
     };

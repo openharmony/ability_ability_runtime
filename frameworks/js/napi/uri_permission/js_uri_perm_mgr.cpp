@@ -46,6 +46,12 @@ public:
         return (me != nullptr) ? me->OnGrantUriPermissionFromSelf(*engine, *info) : nullptr;
     }
 
+    static NativeValue* RemoveUriPermission(NativeEngine* engine, NativeCallbackInfo* info)
+    {
+        JsUriPermMgr* me = CheckParamsAndGetThis<JsUriPermMgr>(engine, info);
+        return (me != nullptr) ? me->OnRemoveUriPermission(*engine, *info) : nullptr;
+    }
+
 private:
     NativeValue* OnGrantUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
     {
@@ -169,6 +175,50 @@ private:
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return engine.CreateUndefined();
     }
+
+    NativeValue* OnRemoveUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        constexpr int32_t argCountOne = 1;
+        constexpr int32_t argCountTwo = 2;
+        // only support 3 or 4 params (4 parameter and 1 optional callback)
+        if (info.argc != argCountOne && info.argc != argCountTwo) {
+            HILOG_ERROR("Invalid arguments");
+            ThrowTooFewParametersError(engine);
+            return engine.CreateUndefined();
+        }
+        std::vector<std::shared_ptr<NativeReference>> args;
+        for (size_t i = 0; i < info.argc; ++i) {
+            args.emplace_back(engine.CreateReference(info.argv[i], 1));
+        }
+        HILOG_DEBUG("Remove Uri Permission start");
+
+        AsyncTask::CompleteCallback complete =
+        [args, argCountOne, argCountTwo](NativeEngine& engine, AsyncTask& task, int32_t status) {    
+            if (args.size() != argCountOne && args.size() != argCountTwo) {
+                HILOG_ERROR("Wrong number of parameters.");
+                task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));
+                return;
+            }
+
+            std::string uriStr;
+            int tokenId = 0;
+            if (!ConvertFromJsValue(engine, args[0]->Get(), tokenId)) {
+                HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
+                task.Reject(engine, CreateJsError(engine, -1, "targetAccessTokenId conversion failed."));
+                return;
+            }
+
+            Uri uri(uriStr);
+            AAFwk::UriPermissionManagerClient::GetInstance()->RemoveUriPermissionManually(tokenId);
+            task.Resolve(engine, CreateJsValue(engine, 0));
+        };
+
+        NativeValue* lastParam = (info.argc == argCountTwo) ? info.argv[argCountOne] : nullptr;
+        NativeValue* result = nullptr;
+        AsyncTask::Schedule("JsUriPermMgr::OnRemoveUriPermission",
+            engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
+        return engine.CreateUndefined();
+    }
 };
 
 NativeValue* CreateJsUriPermMgr(NativeEngine* engine, NativeValue* exportObj)
@@ -192,6 +242,7 @@ NativeValue* CreateJsUriPermMgr(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "grantUriPermission", moduleName, JsUriPermMgr::GrantUriPermission);
     BindNativeFunction(*engine, *object, "grantUriPermissionFromSelf",
         moduleName, JsUriPermMgr::GrantUriPermissionFromSelf);
+    BindNativeFunction(*engine, *object, "RemoveUriPermission", moduleName, JsUriPermMgr::RemoveUriPermission);
     return engine->CreateUndefined();
 }
 }  // namespace AbilityRuntime
