@@ -34,7 +34,7 @@
         "type": "service"
       }
     ],
-    "meta": [
+    "metadata": [
       {
         "name": "ArkTSPartialUpdate",
         "value": "false" 
