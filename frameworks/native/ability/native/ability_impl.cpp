@@ -608,13 +608,13 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
             owner->notifyForegroundByAbility_ = false;
             needNotifyAMS = true;
         } else {
-            HILOG_DEBUG("Notify foreground invalid mode by window, but client's foreground is running.");
+            HILOG_DEBUG("Notify foreground by window, but client's foreground is running.");
             owner->notifyForegroundByWindow_ = true;
         }
     }
 
     if (needNotifyAMS) {
-        HILOG_DEBUG("Stage mode ability, window after foreground, notify ability manager service.");
+        HILOG_INFO("Stage mode ability, window after foreground, notify ability manager service.");
         PacMap restoreData;
         AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
             AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
@@ -630,7 +630,7 @@ void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
         return;
     }
 
-    HILOG_DEBUG("new version ability, window after background.");
+    HILOG_INFO("UIAbility, window after background.");
     PacMap restoreData;
     AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
         AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
@@ -656,27 +656,28 @@ void AbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
     HILOG_DEBUG("%{public}s end.", __func__);
 }
 
-void AbilityImpl::WindowLifeCycleImpl::ForegroundFailed()
+void AbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
     PacMap restoreData;
-    AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
-        AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_FAILED, restoreData);
-}
+    if (type == static_cast<int32_t>(OHOS::Rosen::WMError::WM_ERROR_INVALID_OPERATION)) {
+        HILOG_DEBUG("window was freezed.");
+        AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
+            AbilityLifeCycleState::ABILITY_STATE_WINDOW_FREEZED, restoreData);
+    } else if (type == static_cast<int32_t>(OHOS::Rosen::WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE)) {
+        auto owner = owner_.lock();
+        if (owner == nullptr || !owner->IsStageBasedModel()) {
+            HILOG_ERROR("Not stage mode ability or abilityImpl is nullptr.");
+            return;
+        }
 
-void AbilityImpl::WindowLifeCycleImpl::ForegroundInvalidMode()
-{
-    HILOG_DEBUG("%{public}s begin.", __func__);
-    auto owner = owner_.lock();
-    if (owner == nullptr || !owner->IsStageBasedModel()) {
-        HILOG_ERROR("Not stage mode ability or abilityImpl is nullptr.");
-        return;
+        HILOG_DEBUG("The ability is stage mode, schedule foreground invalid mode.");
+        AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
+            AbilityLifeCycleState::ABILITY_STATE_INVALID_WINDOW_MODE, restoreData);
+    } else {
+        AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
+            AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_FAILED, restoreData);
     }
-
-    HILOG_DEBUG("The ability is stage mode, schedule foreground invalid mode.");
-    PacMap restoreData;
-    AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
-        AbilityLifeCycleState::ABILITY_STATE_INVALID_WINDOW_MODE, restoreData);
 }
 
 void AbilityImpl::Foreground(const Want &want)
@@ -700,7 +701,7 @@ void AbilityImpl::Foreground(const Want &want)
         notifyForegroundByAbility_ = true;
     }
     abilityLifecycleCallbacks_->OnAbilityForeground(ability_);
-    HILOG_DEBUG("%{public}s end.", __func__);
+    HILOG_INFO("%{public}s end.", __func__);
 }
 
 void AbilityImpl::Background()
@@ -719,7 +720,7 @@ void AbilityImpl::Background()
         lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND;
     }
     abilityLifecycleCallbacks_->OnAbilityBackground(ability_);
-    HILOG_DEBUG("%{public}s end.", __func__);
+    HILOG_INFO("%{public}s end.", __func__);
 }
 
 void AbilityImpl::DoKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)

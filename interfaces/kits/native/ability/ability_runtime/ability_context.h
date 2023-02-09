@@ -175,17 +175,6 @@ public:
     virtual ErrCode CloseAbility() = 0;
 
     /**
-     * @brief Requests certain permissions from the system.
-     * This method is called for permission request. This is an asynchronous method. When it is executed,
-     * the task will be called back.
-     *
-     * @param permissions Indicates the list of permissions to be requested. This parameter cannot be null.
-     * @param task The callback or promise fo js interface.
-     */
-    virtual void RequestPermissionsFromUser(NativeEngine& engine, const std::vector<std::string> &permissions,
-        int requestCode, PermissionRequestTask &&task) = 0;
-
-    /**
      * @brief Get ContentStorage.
      *
      * @return Returns the ContentStorage.
@@ -233,6 +222,8 @@ public:
      * @return Returns ERR_OK if success.
      */
     virtual ErrCode RequestDialogService(NativeEngine &engine, AAFwk::Want &want, RequestDialogResultTask &&task) = 0;
+
+    virtual ErrCode GetMissionId(int32_t &missionId) = 0;
 
 #ifdef SUPPORT_GRAPHICS
     /**

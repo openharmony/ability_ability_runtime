@@ -16,6 +16,7 @@
 #include "service_extension.h"
 
 #include "ability_loader.h"
+#include "configuration_utils.h"
 #include "connection_manager.h"
 #include "hilog_wrapper.h"
 #include "js_service_extension.h"
@@ -25,11 +26,23 @@
 namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
+
+CreatorFunc ServiceExtension::creator_ = nullptr;
+void ServiceExtension::SetCreator(const CreatorFunc& creator)
+{
+    creator_ = creator;
+}
+
 ServiceExtension* ServiceExtension::Create(const std::unique_ptr<Runtime>& runtime)
 {
     if (!runtime) {
         return new ServiceExtension();
     }
+
+    if (creator_) {
+        return creator_(runtime);
+    }
+
     HILOG_INFO("ServiceExtension::Create runtime");
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
@@ -63,5 +76,21 @@ std::shared_ptr<ServiceExtensionContext> ServiceExtension::CreateAndInitContext(
     }
     return context;
 }
+
+void ServiceExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)
+{
+    Extension::OnConfigurationUpdated(configuration);
+
+    auto context = GetContext();
+    if (context == nullptr) {
+        HILOG_ERROR("Context is invalid.");
+        return;
+    }
+
+    auto configUtils = std::make_shared<ConfigurationUtils>();
+    if (configUtils) {
+        configUtils->UpdateConfigToResourceManager(configuration, context->GetResourceManager());
+    }
 }
-}
+} // namespace AbilityRuntime
+} // namespace OHOS

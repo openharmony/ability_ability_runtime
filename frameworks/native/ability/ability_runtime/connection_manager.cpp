@@ -47,7 +47,7 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
 {
     if (connectCaller == nullptr || connectCallback == nullptr) {
         HILOG_ERROR("connectCaller or connectCallback is nullptr.");
-        return ERR_INVALID_VALUE;
+        return AAFwk::ERR_INVALID_CALLER;
     }
 
     AppExecFwk::ElementName connectReceiver = want.GetElement();
@@ -55,6 +55,7 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
         (connectReceiver.GetBundleName() + ":" + connectReceiver.GetAbilityName()).c_str());
 
     sptr<AbilityConnection> abilityConnection;
+    std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     auto item = std::find_if(abilityConnections_.begin(), abilityConnections_.end(),
         [&connectCaller, &connectReceiver](const std::map<ConnectionInfo,
             std::vector<sptr<AbilityConnectCallback>>>::value_type& obj) {
@@ -78,7 +79,7 @@ ErrCode ConnectionManager::ConnectAbilityInner(const sptr<IRemoteObject>& connec
         } else {
             HILOG_ERROR("AbilityConnection has disconnected, erase it.");
             abilityConnections_.erase(item);
-            return ERR_INVALID_VALUE;
+            return AAFwk::INVALID_CONNECTION_STATE;
         }
     } else {
         return CreateConnection(connectCaller, want, accountId, connectCallback, connectReceiver);
@@ -93,12 +94,13 @@ ErrCode ConnectionManager::CreateConnection(const sptr<IRemoteObject>& connectCa
     sptr<AbilityConnection> abilityConnection = new AbilityConnection();
     if (abilityConnection == nullptr) {
         HILOG_ERROR("create connedction failed.");
-        return ERR_INVALID_VALUE;
+        return AAFwk::ERR_INVALID_CALLER;
     }
     abilityConnection->AddConnectCallback(connectCallback);
     abilityConnection->SetConnectionState(CONNECTION_STATE_CONNECTING);
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(
         want, abilityConnection, connectCaller, accountId);
+    std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     if (ret == ERR_OK) {
         ConnectionInfo connectionInfo(connectCaller, connectReceiver, abilityConnection);
         std::vector<sptr<AbilityConnectCallback>> callbacks;
@@ -115,12 +117,12 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
 {
     if (connectCaller == nullptr || connectCallback == nullptr) {
         HILOG_ERROR("connectCaller or connectCallback is nullptr.");
-        return ERR_INVALID_VALUE;
+        return AAFwk::ERR_INVALID_CALLER;
     }
 
     HILOG_DEBUG("connectReceiver: %{public}s.",
         (connectReceiver.GetBundleName() + ":" + connectReceiver.GetAbilityName()).c_str());
-
+    std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     auto item = std::find_if(abilityConnections_.begin(), abilityConnections_.end(),
         [&connectCaller, &connectReceiver](
             const std::map<ConnectionInfo, std::vector<sptr<AbilityConnectCallback>>>::value_type& obj) {
@@ -155,7 +157,7 @@ ErrCode ConnectionManager::DisconnectAbility(const sptr<IRemoteObject>& connectC
         }
     } else {
         HILOG_ERROR("not find conn exist.");
-        return ERR_INVALID_VALUE;
+        return AAFwk::CONNECTION_NOT_EXIST;
     }
 }
 
@@ -166,7 +168,7 @@ bool ConnectionManager::DisconnectCaller(const sptr<IRemoteObject>& connectCalle
         HILOG_ERROR("connectCaller is nullptr.");
         return false;
     }
-
+    std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     HILOG_DEBUG("abilityConnectionsSize:%{public}zu.", abilityConnections_.size());
 
     bool isDisconnect = false;
@@ -193,6 +195,7 @@ bool ConnectionManager::DisconnectCaller(const sptr<IRemoteObject>& connectCalle
 
 bool ConnectionManager::DisconnectReceiver(const AppExecFwk::ElementName& connectReceiver)
 {
+    std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     HILOG_DEBUG("abilityConnectionsSize:%{public}zu, bundleName:%{public}s, abilityName:%{public}s.",
         abilityConnections_.size(), connectReceiver.GetBundleName().c_str(),
         connectReceiver.GetAbilityName().c_str());
