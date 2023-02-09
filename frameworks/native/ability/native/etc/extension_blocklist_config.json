@@ -1,7 +1,13 @@
 {
-    "blacklist": {
+    "blocklist": {
         "ServiceExtension": [],
-        "FormExtension": [],
+        "FormExtension": [
+            "ability.particleAbility",
+            "resourceschedule.backgroundTaskManager",
+            "multimedia.camera",
+            "multimedia.audio",
+            "multimedia.media"
+        ],
         "FileAccessExtension": [],
         "BackupExtension": [],
         "EnterpriseAdminExtension": [],

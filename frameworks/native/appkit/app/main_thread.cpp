@@ -99,6 +99,8 @@ const std::string SIGNAL_HANDLER = "SignalHandler";
 constexpr char EXTENSION_PARAMS_TYPE[] = "type";
 constexpr char EXTENSION_PARAMS_NAME[] = "name";
 
+constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
+
 void SetNativeLibPath(const BundleInfo &bundleInfo, AbilityRuntime::Runtime::Options &options)
 {
     std::string patchNativeLibraryPath = bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath;
@@ -845,7 +847,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     } else {
         HILOG_INFO("LocaleInfo is nullptr.");
     }
-
+#endif
     std::string colormode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     HILOG_DEBUG("Colormode is %{public}s.", colormode.c_str());
     resConfig->SetColorMode(ConvertColorMode(colormode));
@@ -853,7 +855,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     std::string hasPointerDevice = config.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     HILOG_DEBUG("HasPointerDevice is %{public}s.", hasPointerDevice.c_str());
     resConfig->SetInputDevice(ConvertHasPointerDevice(hasPointerDevice));
-#endif
+
     std::string deviceType = config.GetItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
     HILOG_DEBUG("deviceType is %{public}s <---->  %{public}d.", deviceType.c_str(), ConvertDeviceType(deviceType));
     resConfig->SetDeviceType(ConvertDeviceType(deviceType));
@@ -908,10 +910,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     std::string mediaDataAbility("com.ohos.medialibrary.medialibrarydata");
     std::string telephonyDataAbility("com.ohos.telephonydataability");
     std::string fusionSearchAbility("com.ohos.FusionSearch");
+    std::string formRenderExtensionAbility("com.ohos.formrenderservice");
     auto appInfo = appLaunchData.GetApplicationInfo();
     auto bundleName = appInfo.bundleName;
     if (bundleName == contactsDataAbility || bundleName == mediaDataAbility || bundleName == telephonyDataAbility
-        || bundleName == fusionSearchAbility) {
+        || bundleName == fusionSearchAbility || bundleName == formRenderExtensionAbility) {
         std::vector<std::string> localPaths;
         ChangeToLocalPath(bundleName, appInfo.moduleSourceDirs, localPaths);
         LoadAbilityLibrary(localPaths);
@@ -997,9 +1000,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
     contextImpl->SetApplicationInfo(std::make_shared<ApplicationInfo>(appInfo));
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
-        std::make_shared<AbilityRuntime::ApplicationContext>();
+        AbilityRuntime::ApplicationContext::GetInstance();
     applicationContext->AttachContextImpl(contextImpl);
-    applicationContext->InitApplicationContext();
     application_->SetApplicationContext(applicationContext);
     if (isStageBased) {
         // Create runtime
@@ -1013,6 +1015,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.isBundle = (entryHapModuleInfo.compileMode != AppExecFwk::CompileMode::ES_MODULE);
         options.isDebugVersion = bundleInfo.applicationInfo.debug;
         options.arkNativeFilePath = bundleInfo.applicationInfo.arkNativeFilePath;
+        options.uid = bundleInfo.applicationInfo.uid;
         SetNativeLibPath(bundleInfo, options);
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
@@ -1098,6 +1101,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             HILOG_ERROR("AbilityLoader::GetExtensionByName failed: FormExtension");
             return nullptr;
         });
+        AddExtensionBlockItem("FormExtension", static_cast<int32_t>(ExtensionAbilityType::FORM));
 #endif
         AbilityLoader::GetInstance().RegisterExtension("StaticSubscriberExtension",
             [wpApplication]() -> AbilityRuntime::Extension* {
@@ -1108,12 +1112,14 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             HILOG_ERROR("AbilityLoader::GetExtensionByName failed: StaticSubscriberExtension");
             return nullptr;
         });
+        AddExtensionBlockItem("StaticSubscriberExtension",
+            static_cast<int32_t>(ExtensionAbilityType::STATICSUBSCRIBER));
 
         if (application_ != nullptr) {
-#ifdef __aarch64__
-        LoadAllExtensions(jsEngine, "system/lib64/extensionability", bundleInfo);
+#ifdef APP_USE_ARM
+            LoadAllExtensions(jsEngine, "system/lib/extensionability", bundleInfo);
 #else
-        LoadAllExtensions(jsEngine, "system/lib/extensionability", bundleInfo);
+            LoadAllExtensions(jsEngine, "system/lib64/extensionability", bundleInfo);
 #endif
         }
         std::shared_ptr<NativeEngine> nativeEngine(&jsEngine);
@@ -1273,7 +1279,11 @@ void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)
 void MainThread::LoadAllExtensions(NativeEngine &nativeEngine, const std::string &filePath,
     const BundleInfo &bundleInfo)
 {
-    HILOG_DEBUG("LoadAllExtensions.filePath:%{public}s, extensionInfo size = %{public}d", filePath.c_str(), static_cast<int32_t>(bundleInfo.extensionInfos.size()));
+    HILOG_DEBUG("LoadAllExtensions.filePath:%{public}s, extensionInfo size = %{public}d", filePath.c_str(),
+        static_cast<int32_t>(bundleInfo.extensionInfos.size()));
+    if (!extensionConfigMgr_) {
+        return;
+    }
 
     // scan all extensions in path
     std::vector<std::string> extensionFiles;
@@ -1315,7 +1325,7 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine, const std::string
         std::string extensionName = it->second;
 
         extensionTypeMap.insert(std::pair<int32_t, std::string>(type, extensionName));
-        extensionConfigMgr_->AddBlackListItem(extensionName, type);
+        AddExtensionBlockItem(extensionName, type);
         HILOG_DEBUG("Success load extension type: %{public}d, name:%{public}s", type, extensionName.c_str());
         std::weak_ptr<OHOSApplication> wApp = application_;
         AbilityLoader::GetInstance().RegisterExtension(extensionName,
@@ -1329,7 +1339,7 @@ void MainThread::LoadAllExtensions(NativeEngine &nativeEngine, const std::string
         });
     }
     application_->SetExtensionTypeMap(extensionTypeMap);
-    extensionConfigMgr_->UpdateBlackListToEngine(nativeEngine);
+    UpdateEngineExtensionBlockList(nativeEngine);
 }
 
 bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &record, bool isStageBased,
@@ -1413,6 +1423,11 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     auto& runtime = application_->GetRuntime();
     auto appInfo = application_->GetApplicationInfo();
     auto want = abilityRecord->GetWant();
+    if (appInfo == nullptr) {
+        HILOG_ERROR("appInfo is nullptr");
+        return;
+    }
+
     if (runtime && appInfo && want && appInfo->debug) {
         runtime->StartDebugMode(want->GetBoolParam("debugApp", false));
     }
@@ -1621,16 +1636,6 @@ void MainThread::HandleTerminateApplication()
         HILOG_ERROR("MainThread::handleTerminateApplication failed. runner->Run failed ret = %{public}d", ret);
     }
     SetRunnerStarted(false);
-
-#ifdef ABILITY_LIBRARY_LOADER
-    CloseAbilityLibrary();
-#endif  // ABILITY_LIBRARY_LOADER
-#ifdef APPLICATION_LIBRARY_LOADER
-    if (handleAppLib_ != nullptr) {
-        dlclose(handleAppLib_);
-        handleAppLib_ = nullptr;
-    }
-#endif  // APPLICATION_LIBRARY_LOADER
     appMgr_->ApplicationTerminated(applicationImpl_->GetRecordId());
     HILOG_DEBUG("MainThread::handleTerminateApplication called end.");
 }
@@ -2252,6 +2257,22 @@ void MainThread::UpdateProcessExtensionType(const std::shared_ptr<AbilityLocalRe
     }
     runtime->UpdateExtensionType(static_cast<int32_t>(abilityInfo->extensionAbilityType));
     HILOG_INFO("UpdateExtensionType, type = %{public}d", static_cast<int32_t>(abilityInfo->extensionAbilityType));
+}
+
+void MainThread::AddExtensionBlockItem(const std::string &extensionName, int32_t type)
+{
+    if (!extensionConfigMgr_) {
+        return;
+    }
+    extensionConfigMgr_->AddBlockListItem(extensionName, type);
+}
+
+void MainThread::UpdateEngineExtensionBlockList(NativeEngine &nativeEngine)
+{
+    if (!extensionConfigMgr_) {
+        return;
+    }
+    extensionConfigMgr_->UpdateBlockListToEngine(nativeEngine);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

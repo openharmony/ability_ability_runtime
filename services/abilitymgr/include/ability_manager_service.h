@@ -738,6 +738,8 @@ public:
     bool IsComponentInterceptionStart(const Want &want, const sptr<IRemoteObject> &callerToken,
         int requestCode, int componentStatus, AbilityRequest &request);
 
+    void NotifyHandleMoveAbility(const sptr<IRemoteObject> &abilityToken, int code);
+
     /**
      * Send not response process ID to ability manager service.
      * @param pid The not response process ID.
@@ -832,6 +834,8 @@ public:
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason) override;
 
     bool GetStartUpNewRuleFlag() const;
+
+    std::shared_ptr<AbilityRecord> GetFocusAbility();
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1191,8 +1195,6 @@ private:
     {
         return (userId != INVALID_USER_ID && userId != U0_USER_ID && userId != GetUserId());
     }
-
-    int GetTopAbility(sptr<IRemoteObject> &token, bool needVerify);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

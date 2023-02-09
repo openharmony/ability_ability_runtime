@@ -53,10 +53,8 @@ class Mission;
 class MissionList;
 class CallContainer;
 
-const std::string ABILITY_TOKEN_NAME = "AbilityToken";
-const std::string LINE_SEPARATOR = "\n";
-
-const std::string LAUNCHER_BUNDLE_NAME = "com.ohos.launcher";
+constexpr const char* ABILITY_TOKEN_NAME = "AbilityToken";
+constexpr const char* LAUNCHER_BUNDLE_NAME = "com.ohos.launcher";
 
 /**
  * @class Token
@@ -691,8 +689,6 @@ public:
      */
     void Dump(std::vector<std::string> &info);
 
-    void DumpSys(std::vector<std::string> &info, bool isClient = false);
-
     void DumpClientInfo(std::vector<std::string> &info, const std::vector<std::string> &params,
         bool isClient = false, bool dumpConfig = true) const;
 
@@ -823,6 +819,11 @@ public:
 
     void SetPendingState(AbilityState state);
     AbilityState GetPendingState() const;
+
+    bool IsNeedBackToOtherMissionStack();
+    void SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack);
+    std::shared_ptr<AbilityRecord> GetOtherMissionStackAbilityRecord() const;
+    void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
@@ -977,6 +978,9 @@ private:
     uint32_t bgColor_ = 0;
     std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;
 #endif
+
+    bool isNeedBackToOtherMissionStack_ = false;
+    std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA
 };
 }  // namespace AAFwk
 }  // namespace OHOS
