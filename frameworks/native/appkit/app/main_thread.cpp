@@ -1296,7 +1296,6 @@ void MainThread::HandleUpdateApplicationInfoInstalled(const ApplicationInfo &app
         HILOG_ERROR("appMgr_ is nullptr");
         return;
     }
-
 }
 
 void MainThread::HandleAbilityStage(const HapModuleInfo &abilityStage)

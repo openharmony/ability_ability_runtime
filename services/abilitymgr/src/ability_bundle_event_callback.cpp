@@ -44,7 +44,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
             HILOG_INFO("%{public}s, bundle changed, bundleName: %{public}s", __func__, bundleName.c_str());
             sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
             if (sharedThis) {
-                sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid); // 更新上下文信息
+                sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid);
             }
         };
         eventHandler_->PostTask(task);

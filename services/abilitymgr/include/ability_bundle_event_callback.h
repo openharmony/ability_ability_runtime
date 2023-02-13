@@ -27,7 +27,7 @@ namespace AAFwk {
 /**
  * @brief This class is a callback class that will be registered to BundleManager.
  * This class will be called by BundleManager when install, uninstall, updates of haps happens,
- * and executes corresponding functionalities of ams.
+ * and executes corresponding functionalities of ability manager.
  */
 class AbilityBundleEventCallback : public AppExecFwk::BundleEventCallbackHost {
 public:
@@ -51,7 +51,6 @@ private:
     DISALLOW_COPY_AND_MOVE(AbilityBundleEventCallback);
     AbilityEventUtil abilityEventHelper_;
     std::shared_ptr<AbilityEventHandler> eventHandler_ = nullptr;
-
 };
 } // namespace OHOS
 } // namespace AAFwk

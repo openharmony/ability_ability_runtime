@@ -229,7 +229,7 @@ public:
      * @brief update the application info after new module installed.
      *
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
-     * 
+     *
      */
     void UpdateApplicationInfoInstalled(const AppExecFwk::ApplicationInfo &appInfo);
 
