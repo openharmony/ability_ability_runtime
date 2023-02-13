@@ -31,12 +31,9 @@ namespace AAFwk {
  */
 class AbilityBundleEventCallback : public AppExecFwk::BundleEventCallbackHost {
 public:
-    AbilityBundleEventCallback() : eventHandler_(nullptr) {}
+    AbilityBundleEventCallback();
+    explicit AbilityBundleEventCallback(std::shared_ptr<AbilityEventHandler> eventHandler);
 
-    explicit AbilityBundleEventCallback(std::shared_ptr<AbilityEventHandler> eventHandler)
-    {
-        eventHandler_ = eventHandler;
-    }
     ~AbilityBundleEventCallback() = default;
 
     /**

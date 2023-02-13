@@ -17,6 +17,14 @@
 
 namespace OHOS {
 namespace AAFwk {
+AbilityBundleEventCallback::AbilityBundleEventCallback() : eventHandler_(nullptr) {}
+
+AbilityBundleEventCallback::AbilityBundleEventCallback(std::shared_ptr<AbilityEventHandler> eventHandler)
+{
+    eventHandler_ = eventHandler;
+}
+
+
 void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData eventData)
 {
     // env check
