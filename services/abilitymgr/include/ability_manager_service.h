@@ -53,6 +53,7 @@
 #include "system_dialog_scheduler.h"
 #endif
 #include "event_report.h"
+#include "ability_bundle_event_callback.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -1205,6 +1206,7 @@ private:
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
     std::shared_ptr<AbilityConnectManager> connectManager_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
+    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ = nullptr;
     std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
     std::shared_ptr<DataAbilityManager> dataAbilityManager_;
     std::shared_ptr<DataAbilityManager> systemDataAbilityManager_;
