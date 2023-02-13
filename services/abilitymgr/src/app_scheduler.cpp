@@ -106,7 +106,7 @@ int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearM
     return ERR_OK;
 }
 
-int AppScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, int32_t uid)
+int AppScheduler::UpdateApplicationInfoInstalled(const std::string &bundleName, const int32_t uid)
 {
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     HILOG_DEBUG("Start to update the application info after new module installed.");

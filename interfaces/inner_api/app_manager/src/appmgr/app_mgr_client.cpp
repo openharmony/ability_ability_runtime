@@ -249,12 +249,6 @@ AppMgrResultCode AppMgrClient::UpdateApplicationInfoInstalled(const std::string 
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
 
-AppMgrResultCode AppMgrClient::UpdateApplicationInfoInstalledDone()
-{
-    HILOG_INFO("%{public}s, start!", __func__);
-    return AppMgrResultCode::RESULT_OK;
-}
-
 AppMgrResultCode AppMgrClient::KillApplication(const std::string &bundleName)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());

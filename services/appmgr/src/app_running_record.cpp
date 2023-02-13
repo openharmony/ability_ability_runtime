@@ -393,11 +393,6 @@ void AppRunningRecord::UpdateApplicationInfoInstalled(const ApplicationInfo &app
     appLifeCycleDeal_->UpdateApplicationInfoInstalled(appInfo);
 }
 
-void AppRunningRecord::UpdateApplicationInfoInstalledDone()
-{
-    HILOG_INFO("UpdateApplicationInfoInstalled done");
-}
-
 void AppRunningRecord::AddAbilityStage()
 {
     if (!isStageBasedModel_) {

@@ -309,7 +309,6 @@ public:
      * @return
      */
     void UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
-    void UpdateApplicationInfoInstalledDone();
 
     /**
      * LaunchAbility, Notify application to launch ability.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
 {
     // env check
     if (eventHandler_ == nullptr) {
-        HILOG_ERROR("%{public}s failed, eventHandler_ is nullptr", __func__);
+        HILOG_ERROR("OnReceiveEvent failed, eventHandler_ is nullptr");
         return;
     }
     const Want& want = eventData.GetWant();
@@ -31,17 +31,18 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     int uid = want.GetIntParam(KEY_UID, 0);
     // verify data
     if (action.empty() || bundleName.empty()) {
-        HILOG_ERROR("%{public}s failed, empty action/bundleName", __func__);
+        HILOG_ERROR("OnReceiveEvent failed, empty action/bundleName");
         return;
     }
-    HILOG_INFO("%{public}s, action:%{public}s.", __func__, action.c_str());
+    HILOG_DEBUG("OnReceiveEvent, action:%{public}s.", action.c_str());
 
     wptr<AbilityBundleEventCallback> weakThis = this;
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED ||
-        action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
-        // install or update
+        action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED ||
+        action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
+        // install or update or uninstall module/bundle
         auto task = [weakThis, bundleName, uid]() {
-            HILOG_INFO("%{public}s, bundle changed, bundleName: %{public}s", __func__, bundleName.c_str());
+            HILOG_DEBUG("OnReceiveEvent, bundle changed, bundleName: %{public}s", bundleName.c_str());
             sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
             if (sharedThis) {
                 sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid);
