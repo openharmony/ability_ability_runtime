@@ -74,6 +74,8 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "container_manager_client.h"
 
+#include "ability_bundle_event_callback.h"
+
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
 
@@ -327,7 +329,8 @@ bool AbilityManagerService::Init()
 
     // Register abilityBundleEventCallback to receive hap updates
     HILOG_INFO("Register abilityBundleEventCallback to receive hap updates.");
-    abilityBundleEventCallback_ = new (std::nothrow) AbilityBundleEventCallback(handler_);
+    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
+        new (std::nothrow) AbilityBundleEventCallback(handler_);
     CHECK_POINTER_RETURN_BOOL(abilityBundleEventCallback_);
     auto bms = GetBundleManager();
     CHECK_POINTER_RETURN_BOOL(bms);

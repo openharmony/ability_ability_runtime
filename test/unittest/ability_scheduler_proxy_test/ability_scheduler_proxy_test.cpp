@@ -17,7 +17,6 @@
 #include "ability_scheduler_proxy.h"
 #include "ability_scheduler_stub.h"
 #include "ability_scheduler_mock.h"
-#include "ability_bundle_event_callback.h"
 #include "pac_map.h"
 
 using namespace testing::ext;
