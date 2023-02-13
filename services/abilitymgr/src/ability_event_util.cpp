@@ -22,7 +22,7 @@ namespace AAFwk {
 
 void AbilityEventUtil::HandleModuleInfoUpdated(const std::string &bundleName, const int uid)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    HILOG_DEBUG("HandleModuleInfoUpdated start.");
     DelayedSingleton<AppScheduler>::GetInstance()->UpdateApplicationInfoInstalled(bundleName, uid);
 }
 

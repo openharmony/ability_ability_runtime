@@ -486,7 +486,7 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
 
     int32_t result = VerifyProcessPermission();
     if (result != ERR_OK) {
-        HILOG_ERROR("%{public}s: Permission verification failed", __func__);
+        HILOG_ERROR("Permission verification failed");
         return result;
     }
 
@@ -510,11 +510,10 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
         return ERR_INVALID_OPERATION;
     }
 
-    HILOG_INFO("uid value is %{public}d", uid);
+    HILOG_DEBUG("uid value is %{public}d", uid);
     result = appRunningManager_->ProcessUpdateApplicationInfoInstalled(appInfo);
     if (result != ERR_OK) {
         HILOG_INFO("The process corresponding to the package name did not start");
-        return result;
     }
 
     return result;
