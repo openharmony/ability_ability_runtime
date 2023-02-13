@@ -502,10 +502,9 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
     }
     auto userId = GetUserIdByUid(uid);
     ApplicationInfo appInfo;
-    HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetBundleInfo");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetApplicationInfo");
     bool bundleMgrResult = bundleMgr_->GetApplicationInfo(bundleName,
         ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo);
-
     if (!bundleMgrResult) {
         HILOG_ERROR("GetApplicationInfo is fail");
         return ERR_INVALID_OPERATION;

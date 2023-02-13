@@ -568,7 +568,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
  * @brief update the application info after new module installed.
  *
  * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
- * 
+ *
  */
 void OHOSApplication::UpdateApplicationInfoInstalled(const AppExecFwk::ApplicationInfo &appInfo)
 {

@@ -176,7 +176,7 @@ public:
      * @brief update the application info after new module installed.
      *
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
-     * 
+     *
      */
     void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo) override;
 
@@ -288,7 +288,7 @@ private:
      * @brief update the application info after new module installed.
      *
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
-     * 
+     *
      */
     void HandleUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 

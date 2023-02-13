@@ -35,7 +35,8 @@ void AppLifeCycleDeal::LaunchApplication(const AppLaunchData &launchData, const 
     }
 }
 
-void AppLifeCycleDeal::UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo) {
+void AppLifeCycleDeal::UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+{
     if (!appThread_) {
         HILOG_ERROR("appThread_ is nullptr");
         return;

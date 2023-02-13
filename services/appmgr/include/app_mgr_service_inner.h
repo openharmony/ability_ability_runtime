@@ -203,7 +203,7 @@ public:
      * @param  uid, uid.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid); 
+    virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid);
 
     /**
      * KillApplication, kill the application.

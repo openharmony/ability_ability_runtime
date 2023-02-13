@@ -188,13 +188,14 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
     int32_t result = ERR_OK;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord) {
-            auto appInfoList = appRecord->GetAppInfoList();
-            for (auto iter : appInfoList) {
-                if (iter->bundleName == appInfo.bundleName) {
-                    appRecord->UpdateApplicationInfoInstalled(appInfo);
-                    break;
-                }
+        if (!appRecord) {
+            continue;
+        }
+        auto appInfoList = appRecord->GetAppInfoList();
+        for (auto iter : appInfoList) {
+            if (iter->bundleName == appInfo.bundleName) {
+                appRecord->UpdateApplicationInfoInstalled(appInfo);
+                break;
             }
         }
     }

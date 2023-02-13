@@ -91,7 +91,7 @@ public:
      * update the application info after new module installed.
      *
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
-     * 
+     *
      * @return
      */
     virtual void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo &) override;

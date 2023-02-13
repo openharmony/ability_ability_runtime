@@ -403,7 +403,8 @@ int32_t AmsMgrProxy::UpdateApplicationInfoInstalled(const std::string &bundleNam
         return ERR_FLATTEN_OBJECT;
     }
     int32_t ret =
-        remote->SendRequest(static_cast<uint32_t>(IAmsMgr::Message::UPDATE_APPLICATION_INFO_INSTALLED), data, reply, option);
+        remote->SendRequest(static_cast<uint32_t>(IAmsMgr::Message::UPDATE_APPLICATION_INFO_INSTALLED),
+        data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
         return ret;

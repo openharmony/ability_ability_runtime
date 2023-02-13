@@ -152,7 +152,7 @@ public:
      * @brief update the application info after new module installed.
      *
      * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
-     * 
+     *
      */
     int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 
