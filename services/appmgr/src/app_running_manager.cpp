@@ -190,12 +190,11 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
         const auto &appRecord = item.second;
         if (appRecord) {
             auto appInfoList = appRecord->GetAppInfoList();
-            auto isExist = [&bundleName, &uid](const std::shared_ptr<ApplicationInfo> &tmpAppInfo) {
-                return tmpAppInfo->bundleName == bundleName && tmpAppInfo->uid == uid;
-            };
-            auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-            if (iter != appInfoList.end()) {
-                appRecord->UpdateApplicationInfoInstalled(appInfo);
+            for (auto iter : appInfoList) {
+                if (iter->bundleName == appInfo.bundleName) {
+                    appRecord->UpdateApplicationInfoInstalled(appInfo);
+                    break;
+                }
             }
         }
     }
