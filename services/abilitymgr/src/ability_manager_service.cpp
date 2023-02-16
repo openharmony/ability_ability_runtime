@@ -74,6 +74,8 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "container_manager_client.h"
 
+#include "ability_bundle_event_callback.h"
+
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
 
@@ -111,12 +113,6 @@ const std::string BUNDLE_NAME_NOTE = "com.ohos.note";
 const std::string BUNDLE_NAME_PHOTO = "com.ohos.photos";
 const std::string BUNDLE_NAME_SCREENSHOT = "com.huawei.ohos.screenshot";
 const std::string BUNDLE_NAME_SERVICE_TEST = "com.amsst.stserviceabilityclient";
-const std::string BUNDLE_NAME_FREEINSTALL_TEST = "com.example.qianyiyingyong.hmservice";
-const std::string BUNDLE_NAME_FREEINSTALL_SEC_TEST = "com.open.harmony.startAbility";
-const std::string BUNDLE_NAME_USERS_SYSTEM_TEST = "com.acts.actsinterfacemultiuserstest";
-const std::string BUNDLE_NAME_USERS_THIRD_SYSTEM_TEST = "com.acts.actsinterfacemultiusersthirdtest";
-const std::string BUNDLE_NAME_MUTIUSER_TEST = "com.acts.actsinterfacemultiusersextensiontest";
-const std::string BUNDLE_NAME_PER_THRID_TEST = "com.example.actsabilitypermissionthirdtest";
 const std::string BUNDLE_NAME_SERVICE_SERVER_TEST = "com.amsst.stserviceabilityserver";
 const std::string BUNDLE_NAME_SERVICE_SERVER2_TEST = "com.amsst.stserviceabilityserversecond";
 
@@ -127,12 +123,6 @@ const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_DEVI
                                                                 BUNDLE_NAME_PHOTO,
                                                                 BUNDLE_NAME_SCREENSHOT,
                                                                 BUNDLE_NAME_SERVICE_TEST,
-                                                                BUNDLE_NAME_FREEINSTALL_TEST,
-                                                                BUNDLE_NAME_FREEINSTALL_SEC_TEST,
-                                                                BUNDLE_NAME_USERS_SYSTEM_TEST,
-                                                                BUNDLE_NAME_USERS_THIRD_SYSTEM_TEST,
-                                                                BUNDLE_NAME_MUTIUSER_TEST,
-                                                                BUNDLE_NAME_PER_THRID_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER2_TEST };
 const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_TELE_DATA,
@@ -337,6 +327,19 @@ bool AbilityManagerService::Init()
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     handler_->PostTask(initStartupFlagTask, "InitStartupFlag");
 
+    // Register abilityBundleEventCallback to receive hap updates
+    HILOG_INFO("Register abilityBundleEventCallback to receive hap updates.");
+    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
+        new (std::nothrow) AbilityBundleEventCallback(handler_);
+    auto bms = GetBundleManager();
+    if (bms && abilityBundleEventCallback_) {
+        bool re = bms->RegisterBundleEventCallback(abilityBundleEventCallback_);
+        if (!re) {
+            HILOG_ERROR("RegisterBundleEventCallback failed!");
+        }
+    } else {
+        HILOG_ERROR("Get BundleManager or abilieyBundleEventCallback failed!");
+    }
     HILOG_INFO("Init success.");
     return true;
 }
@@ -501,7 +504,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
     }
-    GrantUriPermission(want, validUserId);
 
     auto type = abilityInfo.type;
     if (type == AppExecFwk::AbilityType::DATA) {
@@ -842,7 +844,6 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_WOULD_BLOCK;
     }
-    GrantUriPermission(want, validUserId);
     abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
     abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
     auto missionListManager = GetListManagerByUserId(oriValidUserId);
@@ -910,8 +911,6 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
             return result;
         }
     }
-
-    GrantUriPermission(want, validUserId);
 
     UpdateCallerInfo(abilityRequest.want);
     return ERR_OK;
@@ -1137,60 +1136,6 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
         EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
     }
     return eventInfo.errCode;
-}
-
-
-void AbilityManagerService::GrantUriPermission(const Want &want, int32_t validUserId)
-{
-    if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
-        HILOG_DEBUG("Do not call uriPermissionMgr.");
-        return;
-    }
-
-    HILOG_DEBUG("AbilityManagerService::GrantUriPermission is called.");
-    auto bms = GetBundleManager();
-    CHECK_POINTER_IS_NULLPTR(bms);
-
-    auto bundleName = want.GetBundle();
-    AppExecFwk::BundleInfo bundleInfo;
-    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, bundleInfo, validUserId))) {
-        HILOG_ERROR("Get bundle info failed.");
-        return;
-    }
-
-    auto targetTokenId = bundleInfo.applicationInfo.accessTokenId;
-    GrantUriPermission(want, validUserId, targetTokenId);
-}
-
-void AbilityManagerService::GrantUriPermission(const Want &want, int32_t validUserId, uint32_t targetTokenId)
-{
-    auto bms = GetBundleManager();
-    CHECK_POINTER_IS_NULLPTR(bms);
-    auto uriStr = want.GetUri().ToString();
-    auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
-    uriVec.emplace_back(uriStr);
-    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    auto fromTokenId = IPCSkeleton::GetCallingTokenID();
-    AppExecFwk::ExtensionAbilityInfo info;
-    for (auto str : uriVec) {
-        if (!IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(str, validUserId, info))) {
-            HILOG_WARN("Not found ExtensionAbilityInfo according to the uri.");
-            continue;
-        }
-        if (info.type != AppExecFwk::ExtensionAbilityType::FILESHARE) {
-            HILOG_WARN("The upms only open to FILESHARE. The type is %{public}u.", info.type);
-            HILOG_WARN("BundleName: %{public}s, AbilityName: %{public}s.", info.bundleName.c_str(), info.name.c_str());
-            continue;
-        }
-        if (fromTokenId != info.applicationInfo.accessTokenId) {
-            HILOG_WARN("Only the uri of this application can be authorized.");
-            continue;
-        }
-
-        Uri uri(str);
-        IN_PROCESS_CALL_WITHOUT_RET(upmClient->GrantUriPermission(uri, want.GetFlags(), fromTokenId, targetTokenId));
-    }
 }
 
 int AbilityManagerService::TerminateAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant)
@@ -1662,11 +1607,6 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
-    }
-
-    if (!VerifyUriPermission(abilityRequest, want)) {
-        HILOG_ERROR("The uri has not granted.");
-        return ERR_INVALID_OPERATION;
     }
 
     auto type = abilityInfo.type;
@@ -4960,7 +4900,7 @@ int AbilityManagerService::CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abi
 
     // verify permission if 'permission' is not empty
     if (abilityInfo.permissions.empty() ||
-        AccessTokenKit::VerifyAccessToken(tokenId, PermissionConstants::PERMISSION_START_INVISIBLE_ABILITY)) {
+        AccessTokenKit::VerifyAccessToken(tokenId, PermissionConstants::PERMISSION_START_INVISIBLE_ABILITY) == ERR_OK) {
         return AppExecFwk::Constants::PERMISSION_GRANTED;
     }
 
@@ -4979,26 +4919,6 @@ bool AbilityManagerService::IsNeedTimeoutForTest(const std::string &abilityName,
 {
     for (auto iter = timeoutMap_.begin(); iter != timeoutMap_.end(); iter++) {
         if (iter->first == state && iter->second == abilityName) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool AbilityManagerService::VerifyUriPermission(const AbilityRequest &abilityRequest, const Want &want)
-{
-    if (abilityRequest.abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::FILESHARE) {
-        HILOG_DEBUG("Only FILESHARE need to Verify uri permission.");
-        return true;
-    }
-    auto uriStr = want.GetUri().ToString();
-    auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
-    uriVec.emplace_back(uriStr);
-    auto targetTokenId = IPCSkeleton::GetCallingTokenID();
-    auto uriPermMgrClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    for (auto str : uriVec) {
-        Uri uri(str);
-        if (uriPermMgrClient->VerifyUriPermission(uri, want.GetFlags(), targetTokenId)) {
             return true;
         }
     }

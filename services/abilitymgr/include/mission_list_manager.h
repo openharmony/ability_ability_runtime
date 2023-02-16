@@ -50,7 +50,7 @@ public:
      * @param abilityRequest, the request of the service ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int StartAbility(const AbilityRequest &abilityRequest);
+    int StartAbility(AbilityRequest &abilityRequest);
 
     /**
      * MinimizeAbility, minimize the special ability.
@@ -462,6 +462,7 @@ private:
         const AbilityRequest &abilityRequest) const;
     void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
     void NotifyRestartSpecifiedAbility(AbilityRequest &request, const sptr<IRemoteObject> &token);
+    void ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const;
 
     int userId_;
     mutable std::recursive_mutex managerLock_;

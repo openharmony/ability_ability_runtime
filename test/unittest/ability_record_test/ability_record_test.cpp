@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #define private public
 #define protected public
-#include "ability_manager_service.h"
 #include "ability_record.h"
 #undef private
 #undef protected
@@ -69,12 +68,9 @@ void AbilityRecordTest::SetUpTestCase(void)
 {
     OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->RegisterSystemAbility(
         OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, new BundleMgrService());
-    OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->OnStart();
-    handler_ = DelayedSingleton<AbilityManagerService>::GetInstance()->handler_;
 }
 void AbilityRecordTest::TearDownTestCase(void)
 {
-    OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->OnStop();
     OHOS::DelayedSingleton<SaMgrClient>::DestroyInstance();
 }
 
@@ -998,121 +994,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_004, TestSi
  * EnvConditions: NA
  * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
  */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_005, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    std::shared_ptr<AbilityRecord> callerAbility = GetAbilityRecord();
-    sptr<IWindowManagerServiceHandler> wmsHandler = new MockWMSHandler();
-    uint32_t sceneFlag = 0;
-    DelayedSingleton<AbilityManagerService>::GetInstance()->wmsHandler_ = wmsHandler;
-    EXPECT_EQ(DelayedSingleton<AbilityManagerService>::GetInstance()->GetWMSHandler(), wmsHandler);
-    abilityRecord->want_.SetParam(DEBUG_APP, true);
-    abilityRecord->currentState_ = AbilityState::BACKGROUND;
-    abilityRecord->ProcessForegroundAbility(callerAbility, sceneFlag);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: NotifyAnimationFromTerminatingAbility
- * SubFunction: NotifyAnimationFromTerminatingAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord NotifyAnimationFromTerminatingAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_NotifyAnimationFromTerminatingAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    bool flag = false;
-    sptr<IWindowManagerServiceHandler> wmsHandler = new MockWMSHandler();
-    DelayedSingleton<AbilityManagerService>::GetInstance()->wmsHandler_ = wmsHandler;
-    abilityRecord->NotifyAnimationFromTerminatingAbility(nullptr, flag);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: NotifyAnimationFromTerminatingAbility
- * SubFunction: NotifyAnimationFromTerminatingAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord NotifyAnimationFromTerminatingAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_NotifyAnimationFromTerminatingAbility_002, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    sptr<IWindowManagerServiceHandler> wmsHandler = new MockWMSHandler();
-    DelayedSingleton<AbilityManagerService>::GetInstance()->wmsHandler_ = wmsHandler;
-    abilityRecord->NotifyAnimationFromTerminatingAbility();
-}
-
-/*
- * Feature: AbilityRecord
- * Function: NotifyAnimationFromTerminatingAbility
- * SubFunction: NotifyAnimationFromTerminatingAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord NotifyAnimationFromTerminatingAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_NotifyAnimationFromTerminatingAbility_003, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    DelayedSingleton<AbilityManagerService>::GetInstance()->wmsHandler_ = nullptr;
-    abilityRecord->NotifyAnimationFromTerminatingAbility();
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ProcessForegroundAbility
- * SubFunction: ProcessForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_006, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    bool isRecent = false;
-    AbilityRequest abilityRequest;
-    std::shared_ptr<StartOptions> startOptions = nullptr ;
-    std::shared_ptr<AbilityRecord> callerAbility;
-    uint32_t sceneFlag = 1;
-    abilityRecord->isReady_ = true;
-    DelayedSingleton<AbilityManagerService>::GetInstance()->handler_ = nullptr;
-    abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ProcessForegroundAbility
- * SubFunction: ProcessForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_007, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    bool isRecent = false;
-    AbilityRequest abilityRequest;
-    std::shared_ptr<StartOptions> startOptions = nullptr ;
-    std::shared_ptr<AbilityRecord> callerAbility;
-    uint32_t sceneFlag = 1;
-    DelayedSingleton<AbilityManagerService>::GetInstance()->handler_ = handler_;
-    abilityRecord->isReady_ = true;
-    abilityRecord->currentState_ = AbilityState::FOREGROUND;
-    abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
-    isRecent = true;
-    abilityRecord->currentState_ = AbilityState::BACKGROUND;
-    abilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility, sceneFlag);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: ProcessForegroundAbility
- * SubFunction: ProcessForegroundAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord ProcessForegroundAbility
- */
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ProcessForegroundAbility_008, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
@@ -1202,40 +1083,6 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_SetShowWhenLocked_001, TestSize.Leve
     abilityInfo.metaData.customizeData.push_back(data2);
     info->isShowWhenLocked_ = false;
     abilityRecord->SetShowWhenLocked(abilityInfo, info);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: NotifyAnimationFromRecentTask
- * SubFunction: NotifyAnimationFromRecentTask
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord NotifyAnimationFromRecentTask
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_NotifyAnimationFromRecentTask_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    std::shared_ptr<StartOptions> startOptions = std::make_shared<StartOptions>();
-    std::shared_ptr<Want> want = std::make_shared<Want>();
-    DelayedSingleton<AbilityManagerService>::GetInstance()->handler_ = nullptr;
-    abilityRecord->NotifyAnimationFromRecentTask(startOptions, want);
-}
-
-/*
- * Feature: AbilityRecord
- * Function: NotifyAnimationFromStartingAbility
- * SubFunction: NotifyAnimationFromStartingAbility
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription: Verify AbilityRecord NotifyAnimationFromStartingAbility
- */
-HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_NotifyAnimationFromStartingAbility_001, TestSize.Level1)
-{
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
-    std::shared_ptr<AbilityRecord> callerAbility = GetAbilityRecord();
-    AbilityRequest abilityRequest;
-    DelayedSingleton<AbilityManagerService>::GetInstance()->handler_ = handler_;
-    abilityRecord->NotifyAnimationFromStartingAbility(callerAbility, abilityRequest);
 }
 
 /*
@@ -2254,8 +2101,100 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_001, TestSize.Level
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     Want want;
+    int32_t userId = 100;
+    uint32_t targetTokenId = 1;
+    abilityRecord->GrantUriPermission(want, userId, targetTokenId);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GrantUriPermission
+ * SubFunction: GrantUriPermission
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GrantUriPermission
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_002, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
     want.SetFlags(1);
-    abilityRecord->GrantUriPermission(want);
+    want.SetUri("datashare://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
+    int32_t userId = 100;
+    uint32_t targetTokenId = 1;
+    abilityRecord->GrantUriPermission(want, userId, targetTokenId);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GrantUriPermission
+ * SubFunction: GrantUriPermission
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GrantUriPermission
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_003, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    want.SetFlags(1);
+    want.SetUri("file://com.example.mock/data/storage/el2/base/haps/entry/files/test_A.txt");
+    int32_t userId = 100;
+    uint32_t targetTokenId = 1;
+    abilityRecord->GrantUriPermission(want, userId, targetTokenId);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GrantUriPermission
+ * SubFunction: GrantUriPermission
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GrantUriPermission
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_004, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    Want want;
+    want.SetFlags(1);
+    want.SetUri("file://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
+    int32_t userId = 100;
+    uint32_t targetTokenId = 1;
+    abilityRecord->GrantUriPermission(want, userId, targetTokenId);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: GrantUriPermission
+ * SubFunction: GrantUriPermission
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord GrantUriPermission
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_GrantUriPermission_005, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    uint32_t targetTokenId = 56;
+    abilityRecord->SetCallerAccessTokenId(targetTokenId);
+    Want want;
+    want.SetFlags(1);
+    want.SetUri("file://ohos.samples.clock/data/storage/el2/base/haps/entry/files/test_A.txt");
+    int32_t userId = 100;
+    abilityRecord->GrantUriPermission(want, userId, targetTokenId);
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: RemoveUriPermission
+ * SubFunction: RemoveUriPermission
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord RemoveUriPermission
+ */
+HWTEST_F(AbilityRecordTest, AbilityRecord_RemoveUriPermission_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    abilityRecord->RemoveUriPermission();
 }
 
 /*
