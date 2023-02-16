@@ -477,6 +477,48 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     HILOG_INFO("application is terminated");
 }
 
+int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+
+    int32_t result = VerifyProcessPermission();
+    if (result != ERR_OK) {
+        HILOG_ERROR("Permission verification failed");
+        return result;
+    }
+
+    if (remoteClientManager_ == nullptr) {
+        HILOG_ERROR("remoteClientManager_ fail");
+        return ERR_NO_INIT;
+    }
+
+    auto bundleMgr_ = remoteClientManager_->GetBundleManager();
+    if (bundleMgr_ == nullptr) {
+        HILOG_ERROR("GetBundleManager fail");
+        return ERR_NO_INIT;
+    }
+    auto userId = GetUserIdByUid(uid);
+    ApplicationInfo appInfo;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetApplicationInfo");
+    bool bundleMgrResult = bundleMgr_->GetApplicationInfo(bundleName,
+        ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo);
+    if (!bundleMgrResult) {
+        HILOG_ERROR("GetApplicationInfo is fail");
+        return ERR_INVALID_OPERATION;
+    }
+
+    HILOG_DEBUG("uid value is %{public}d", uid);
+    result = appRunningManager_->ProcessUpdateApplicationInfoInstalled(appInfo);
+    if (result != ERR_OK) {
+        HILOG_INFO("The process corresponding to the package name did not start");
+    }
+
+    return result;
+}
+
 int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
 {
     if (!appRunningManager_) {
@@ -488,6 +530,16 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
     if (errCode != ERR_OK) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         return errCode;
+    }
+
+    // PERMISSION_CLEAN_BACKGROUND_PROCESSES is normal now, need be controlled.
+    // verify self before kill process
+    auto isSACall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!isSACall && (!appRecord || appRecord->GetBundleName() != bundleName)) {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
     }
 
     return KillApplicationByBundleName(bundleName);
@@ -504,6 +556,16 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
     if (errCode != ERR_OK) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         return errCode;
+    }
+
+    // PERMISSION_CLEAN_BACKGROUND_PROCESSES is normal now, need be controlled.
+    // verify self before kill process
+    auto isSACall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!isSACall && (!appRecord || appRecord->GetBundleName() != bundleName)) {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
     }
 
     int result = ERR_OK;
@@ -1537,13 +1599,6 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     }
 
     FinishUserTestLocked("App died", -1, appRecord);
-
-    // clear uri permission
-    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    auto appInfo = appRecord->GetApplicationInfo();
-    if (appInfo && upmClient) {
-        upmClient->RemoveUriPermission(appInfo->accessTokenId);
-    }
     appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_REMOTE_DIED);
 
     for (const auto &item : appRecord->GetAbilities()) {
@@ -2794,6 +2849,11 @@ uint32_t AppMgrServiceInner::BuildStartFlags(const AAFwk::Want &want, const Abil
     if (abilityInfo.extensionAbilityType == ExtensionAbilityType::BACKUP) {
         startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::BACKUP_EXTENSION);
     }
+
+    if (abilityInfo.applicationInfo.debug) {
+        startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::DEBUGGABLE);
+    }
+
     return startFlags;
 }
 
