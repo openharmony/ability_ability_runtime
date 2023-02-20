@@ -16,6 +16,7 @@
 #include "napi_common_want.h"
 
 #include "hilog_wrapper.h"
+#include "ipc_skeleton.h"
 #include "napi_common_util.h"
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
@@ -27,6 +28,7 @@
 #include "long_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
+#include "tokenid_kit.h"
 #include "zchar_wrapper.h"
 #include "remote_object_wrapper.h"
 #include "want_params_wrapper.h"
@@ -56,6 +58,10 @@ void InnerInitWantOptionsData(std::map<std::string, unsigned int> &flagMap)
     flagMap.emplace("installOnDemand", Want::FLAG_INSTALL_ON_DEMAND);
     flagMap.emplace("abilitySliceForwardResult", Want::FLAG_ABILITYSLICE_FORWARD_RESULT);
     flagMap.emplace("installWithBackgroundMode", Want::FLAG_INSTALL_WITH_BACKGROUND_MODE);
+    flagMap.emplace("abilityContinuationReversible", Want::FLAG_ABILITY_CONTINUATION_REVERSIBLE);
+    flagMap.emplace("abilityClearMission", Want::FLAG_ABILITY_CLEAR_MISSION);
+    flagMap.emplace("abilityNewMission", Want::FLAG_ABILITY_NEW_MISSION);
+    flagMap.emplace("abilityMissionTop", Want::FLAG_ABILITY_MISSION_TOP);
 }
 
 napi_value WrapElementName(napi_env env, const ElementName &elementName)
@@ -910,8 +916,12 @@ void HandleNapiObject(napi_env env, napi_value param, napi_value jsProValue, std
     if (IsSpecialObject(env, param, strProName, FD, napi_number)) {
         HandleFdObject(env, param, strProName, wantParams);
     } else if (IsSpecialObject(env, param, strProName, REMOTE_OBJECT, napi_object)) {
-        HILOG_WARN("REMOTE_OBJECT is FORIBBED IN WANT.");
-        // HandleRemoteObject(env, param, strProName, wantParams);
+        auto selfToken = IPCSkeleton::GetSelfTokenID();
+        if (Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+            HandleRemoteObject(env, param, strProName, wantParams);
+        } else {
+            HILOG_WARN("not system app, REMOTE_OBJECT is FORIBBED IN WANT.");
+        }
     } else {
         bool isArray = false;
         if (napi_is_array(env, jsProValue, &isArray) == napi_ok) {

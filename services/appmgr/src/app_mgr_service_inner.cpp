@@ -22,36 +22,35 @@
 
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
-#include "application_state_observer_stub.h"
-#include "datetime_ex.h"
-#include "hilog_wrapper.h"
-#include "perf_profile.h"
+#include "app_mem_info.h"
 #include "app_mgr_service.h"
 #include "app_process_data.h"
 #include "app_state_observer_manager.h"
+#include "application_state_observer_stub.h"
 #include "bundle_constants.h"
-#include "hitrace_meter.h"
 #include "common_event.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "datetime_ex.h"
+#include "event_report.h"
+#include "hilog_wrapper.h"
 #include "hisysevent.h"
+#include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "itest_observer.h"
-#include "parameter.h"
-#include "parameters.h"
-#include "permission_constants.h"
-#include "permission_verification.h"
-#include "system_ability_definition.h"
 #ifdef SUPPORT_GRAPHICS
 #include "locale_config.h"
 #endif
+#include "parameter.h"
+#include "parameters.h"
+#include "perf_profile.h"
+#include "permission_constants.h"
+#include "permission_verification.h"
+#include "system_ability_definition.h"
 #include "uri_permission_manager_client.h"
-#include "event_report.h"
-#include "hisysevent.h"
-#include "app_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -181,7 +180,11 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         StartProcess(abilityInfo->applicationName, processName, startFlags, appRecord,
             appInfo->uid, appInfo->bundleName, bundleIndex);
     } else {
-        appRecord->SetRequestProcCode((want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0));
+        int32_t requestProcCode = (want == nullptr) ? 0 : want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
+        if (requestProcCode != 0 && appRecord->GetRequestProcCode() == 0) {
+            appRecord->SetRequestProcCode(requestProcCode);
+            DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessReused(appRecord);
+        }
         StartAbility(token, preToken, abilityInfo, appRecord, hapModuleInfo, want);
     }
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
@@ -474,6 +477,48 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     HILOG_INFO("application is terminated");
 }
 
+int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+
+    int32_t result = VerifyProcessPermission();
+    if (result != ERR_OK) {
+        HILOG_ERROR("Permission verification failed");
+        return result;
+    }
+
+    if (remoteClientManager_ == nullptr) {
+        HILOG_ERROR("remoteClientManager_ fail");
+        return ERR_NO_INIT;
+    }
+
+    auto bundleMgr_ = remoteClientManager_->GetBundleManager();
+    if (bundleMgr_ == nullptr) {
+        HILOG_ERROR("GetBundleManager fail");
+        return ERR_NO_INIT;
+    }
+    auto userId = GetUserIdByUid(uid);
+    ApplicationInfo appInfo;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetApplicationInfo");
+    bool bundleMgrResult = bundleMgr_->GetApplicationInfo(bundleName,
+        ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo);
+    if (!bundleMgrResult) {
+        HILOG_ERROR("GetApplicationInfo is fail");
+        return ERR_INVALID_OPERATION;
+    }
+
+    HILOG_DEBUG("uid value is %{public}d", uid);
+    result = appRunningManager_->ProcessUpdateApplicationInfoInstalled(appInfo);
+    if (result != ERR_OK) {
+        HILOG_INFO("The process corresponding to the package name did not start");
+    }
+
+    return result;
+}
+
 int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
 {
     if (!appRunningManager_) {
@@ -485,6 +530,16 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
     if (errCode != ERR_OK) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         return errCode;
+    }
+
+    // PERMISSION_CLEAN_BACKGROUND_PROCESSES is normal now, need be controlled.
+    // verify self before kill process
+    auto isSACall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!isSACall && (!appRecord || appRecord->GetBundleName() != bundleName)) {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
     }
 
     return KillApplicationByBundleName(bundleName);
@@ -501,6 +556,16 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
     if (errCode != ERR_OK) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
         return errCode;
+    }
+
+    // PERMISSION_CLEAN_BACKGROUND_PROCESSES is normal now, need be controlled.
+    // verify self before kill process
+    auto isSACall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!isSACall && (!appRecord || appRecord->GetBundleName() != bundleName)) {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
     }
 
     int result = ERR_OK;
@@ -543,6 +608,10 @@ int32_t AppMgrServiceInner::KillApplicationSelf()
 
     auto callerPid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord, callerPid:%{public}d", callerPid);
+        return ERR_INVALID_VALUE;
+    }
     auto bundleName = appRecord->GetBundleName();
     return KillApplicationByBundleName(bundleName);
 }
@@ -738,6 +807,10 @@ int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &inf
     }
     auto callerPid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord, callerPid:%{public}d", callerPid);
+        return ERR_INVALID_VALUE;
+    }
     GetRunningProcess(appRecord, info);
     return ERR_OK;
 }
@@ -1526,13 +1599,6 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     }
 
     FinishUserTestLocked("App died", -1, appRecord);
-
-    // clear uri permission
-    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    auto appInfo = appRecord->GetApplicationInfo();
-    if (appInfo && upmClient) {
-        upmClient->RemoveUriPermission(appInfo->accessTokenId);
-    }
     appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_REMOTE_DIED);
 
     for (const auto &item : appRecord->GetAbilities()) {
@@ -1683,6 +1749,11 @@ void AppMgrServiceInner::HandleTerminateApplicationTimeOut(const int64_t eventId
         return;
     }
     auto appRecord = appRunningManager_->GetAppRunningRecord(eventId);
+    TerminateApplication(appRecord);
+}
+
+void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
     if (!appRecord) {
         HILOG_ERROR("appRecord is nullptr");
         return;
@@ -1772,12 +1843,6 @@ bool AppMgrServiceInner::CheckGetRunningInfoPermission() const
 void AppMgrServiceInner::LoadResidentProcess(const std::vector<AppExecFwk::BundleInfo> &infos)
 {
     HILOG_INFO("%{public}s called", __func__);
-    pid_t callingPid = IPCSkeleton::GetCallingPid();
-    pid_t pid = getpid();
-    if (callingPid != pid) {
-        HILOG_ERROR("%{public}s: Not SA call.", __func__);
-        return;
-    }
 
     HILOG_INFO("bundle info size: [%{public}zu]", infos.size());
     StartResidentProcess(infos, -1, true);
@@ -2608,6 +2673,12 @@ int AppMgrServiceInner::PreStartNWebSpawnProcess(const pid_t hostPid)
         return ERR_INVALID_VALUE;
     }
 
+    auto appRecord = appRunningManager_->GetAppRunningRecordByPid(hostPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such app Record, pid:%{public}d", hostPid);
+        return ERR_INVALID_VALUE;
+    }
+
     ErrCode errCode = nwebSpawnClient->PreStartNWebSpawnProcess();
     if (FAILED(errCode)) {
         HILOG_ERROR("failed to spawn new render process, errCode %{public}08x", errCode);
@@ -2778,6 +2849,11 @@ uint32_t AppMgrServiceInner::BuildStartFlags(const AAFwk::Want &want, const Abil
     if (abilityInfo.extensionAbilityType == ExtensionAbilityType::BACKUP) {
         startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::BACKUP_EXTENSION);
     }
+
+    if (abilityInfo.applicationInfo.debug) {
+        startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::DEBUGGABLE);
+    }
+
     return startFlags;
 }
 

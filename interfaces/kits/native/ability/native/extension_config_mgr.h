@@ -26,7 +26,7 @@
 
 namespace OHOS::AbilityRuntime {
 namespace ExtensionConfigItem {
-    constexpr char ITEM_NAME_BLACKLIST[] = "blacklist";
+    constexpr char ITEM_NAME_BLOCKLIST[] = "blocklist";
 }
 
 /**
@@ -40,35 +40,35 @@ public:
 
     /**
      * @brief ExtensionConfigMgr initialization
-     * 
+     *
      */
     void Init();
 
     /**
      * @brief Update bundle extension information
-     * 
+     *
      * @param engine JS NativeEngine
      */
     void UpdateBundleExtensionInfo(NativeEngine &engine, AppExecFwk::BundleInfo &bundleInfo);
 
     /**
-     * @brief Add extension blacklist item
-     * 
+     * @brief Add extension blocklist item
+     *
      * @param name Extension name
      * @param type Extension type
      */
-    void AddBlackListItem(const std::string &name, int32_t type);
+    void AddBlockListItem(const std::string &name, int32_t type);
 
     /**
-     * @brief Update extension blacklist to native engine
-     * 
+     * @brief Update extension blocklist to native engine
+     *
      * @param engine JS NativeEngine
      */
-    void UpdateBlackListToEngine(NativeEngine &engine);
+    void UpdateBlockListToEngine(NativeEngine &engine);
 
 private:
-    std::unordered_map<std::string, std::unordered_set<std::string>> blacklistConfig_;
-    std::unordered_map<int32_t, std::unordered_set<std::string>> extensionBlacklist_;
+    std::unordered_map<std::string, std::unordered_set<std::string>> blocklistConfig_;
+    std::unordered_map<int32_t, std::unordered_set<std::string>> extensionBlocklist_;
 };
 } // namespace OHOS::AbilityRuntime
 

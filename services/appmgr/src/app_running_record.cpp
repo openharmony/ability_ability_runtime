@@ -379,6 +379,20 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     appLifeCycleDeal_->LaunchApplication(launchData, config);
 }
 
+void AppRunningRecord::UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
+{
+    if (!isStageBasedModel_) {
+        HILOG_INFO("Current version than supports !");
+        return;
+    }
+
+    if (appLifeCycleDeal_ == nullptr) {
+        HILOG_ERROR("appLifeCycleDeal_ is null");
+        return;
+    }
+    appLifeCycleDeal_->UpdateApplicationInfoInstalled(appInfo);
+}
+
 void AppRunningRecord::AddAbilityStage()
 {
     if (!isStageBasedModel_) {
@@ -903,7 +917,7 @@ void AppRunningRecord::TerminateAbility(const sptr<IRemoteObject> &token, const 
 
     auto abilityRecord = GetAbilityRunningRecordByToken(token);
     StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true);
-    moduleRecord->TerminateAbility(token, isForce);
+    moduleRecord->TerminateAbility(shared_from_this(), token, isForce);
 }
 
 void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)

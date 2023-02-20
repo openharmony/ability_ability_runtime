@@ -196,6 +196,15 @@ public:
      */
     virtual void AbilityTerminated(const sptr<IRemoteObject> &token);
 
+     /**
+     * UpdateApplicationInfoInstalled, update the application info after new module installed.
+     *
+     * @param bundleName, bundle name in Application record.
+     * @param  uid, uid.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid);
+
     /**
      * KillApplication, kill the application.
      *
@@ -539,6 +548,8 @@ public:
     int VerifyAccountPermission(const std::string &permissionName, const int userId) const;
 
     void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
+
+    void TerminateApplication(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
     /**

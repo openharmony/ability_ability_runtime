@@ -23,6 +23,7 @@
 #undef private
 
 #include "ability_record.h"
+#include "mission_info_mgr.h"
 
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
@@ -103,13 +104,21 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     // fuzz for MissionListManager
     auto missionListManager = std::make_shared<MissionListManager>(intParam);
-    missionListManager->Init();
+    auto launcherList = std::make_shared<MissionList>(MissionListType::LAUNCHER);
+    missionListManager->launcherList_ = launcherList;
+    missionListManager->defaultStandardList_ = std::make_shared<MissionList>(MissionListType::DEFAULT_STANDARD);
+    missionListManager->defaultSingleList_ = std::make_shared<MissionList>(MissionListType::DEFAULT_SINGLE);
+    missionListManager->currentMissionLists_.push_front(launcherList);
+    if (!missionListManager->listenerController_) {
+        missionListManager->listenerController_ = std::make_shared<MissionListenerController>();
+    }
+    DelayedSingleton<MissionInfoMgr>::GetInstance()->Init(intParam);
     AbilityRequest abilityRequest;
     missionListManager->OnTimeOut(uint32Param, int64Param);
     missionListManager->HandleLoadTimeout(abilityRecord);
-    missionListManager->HandleForegroundTimeout(abilityRecord, boolParam);
-    missionListManager->CompleteForegroundFailed(abilityRecord, boolParam);
-    missionListManager->HandleTimeoutAndResumeAbility(abilityRecord, boolParam);
+    missionListManager->HandleForegroundTimeout(abilityRecord);
+    missionListManager->CompleteForegroundFailed(abilityRecord, OHOS::AAFwk::AbilityState::INITIAL);
+    missionListManager->HandleTimeoutAndResumeAbility(abilityRecord);
     missionListManager->DelayedResumeTimeout(abilityRecord);
     missionListManager->BackToCaller(abilityRecord);
     missionListManager->MoveToTerminateList(abilityRecord);
@@ -163,13 +172,14 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::list<std::shared_ptr<AbilityRecord>> foregroundList;
     missionListManager->GetAllForegroundAbilities(foregroundList);
     missionListManager->GetForegroundAbilities(missionList, foregroundList);
-    missionListManager->RemoveMissionLocked(int32Param, boolParam);
     missionListManager->IsExcludeFromMissions(mission);
 #ifdef ABILITY_COMMAND_FOR_TEST
     missionListManager->BlockAbility(int32Param);
 #endif
     std::vector<sptr<IRemoteObject>> tokens;
     missionListManager->SetMissionANRStateByTokens(tokens);
+    missionListManager->listenerController_ = nullptr;
+    missionListManager->RemoveMissionLocked(int32Param, boolParam);
 
     return true;
 }

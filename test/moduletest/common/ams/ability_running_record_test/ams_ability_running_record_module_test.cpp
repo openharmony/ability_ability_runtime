@@ -131,6 +131,9 @@ public:
     void ScheduleAbilityStage(const HapModuleInfo&) override
     {}
 
+    void ScheduleUpdateApplicationInfoInstalled(const ApplicationInfo&) override
+    {}
+
     void ScheduleAcceptWant(const AAFwk::Want& want, const std::string& moduleName) override
     {}
 
@@ -279,7 +282,7 @@ HWTEST_F(AmsAbilityRunningRecordModuleTest, AddAbilityRunningRecord_002, TestSiz
         EXPECT_TRUE(caseAbilityRunningRecord == nullptr);
         caseAbilityRunningRecord = moduleRecord->GetAbilityRunningRecord(ABILITY_RECORD_NAME + "_" + std::to_string(i));
         EXPECT_EQ(caseAbilityRunningRecord, appRunningRecord->GetAbilityRunningRecordByToken(token));
-        EXPECT_EQ(caseAbilityRunningRecord->GetState(), AbilityState::ABILITY_STATE_BEGIN);
+        EXPECT_EQ(caseAbilityRunningRecord->GetState(), AbilityState::ABILITY_STATE_CREATE);
     }
     HILOG_INFO("AddAbilityRunningRecord_002 end");
 }
@@ -353,7 +356,7 @@ HWTEST_F(AmsAbilityRunningRecordModuleTest, UpdateAbilityRunningRecord_002, Test
         caseAbilityRunningRecord = moduleRecord->GetAbilityRunningRecord(ABILITY_RECORD_NAME + "_" + std::to_string(i));
         EXPECT_EQ(caseAbilityRunningRecord, appRunningRecord->GetAbilityRunningRecordByToken(token));
         appRunningRecord->UpdateAbilityState(token, AbilityState::ABILITY_STATE_END);
-        EXPECT_EQ(caseAbilityRunningRecord->GetState(), AbilityState::ABILITY_STATE_BEGIN);
+        EXPECT_EQ(caseAbilityRunningRecord->GetState(), AbilityState::ABILITY_STATE_CREATE);
     }
     HILOG_INFO("UpdateAbilityRunningRecord_002 end");
 }
