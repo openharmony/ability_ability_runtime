@@ -36,7 +36,7 @@ ohos_shared_library("libupms") {
 
   sources = libupms_sources
 
- deps = [
+  deps = [
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_services_path}/common:perm_verification",
   ]
