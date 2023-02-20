@@ -102,6 +102,8 @@ public:
         EXPECT_TRUE(Cleaned_);
     }
 
+    MOCK_METHOD2(UpdateApplicationInfoInstalled, int(const std::string&, const int uid));
+
     MOCK_METHOD1(KillApplication, int(const std::string& appName));
     MOCK_METHOD2(KillApplicationByUid, int(const std::string&, const int uid));
 
@@ -166,7 +168,7 @@ public:
         }
         AppProcessData processData;
         processData.pid = 1;
-        processData.appState = ApplicationState::APP_STATE_BEGIN;
+        processData.appState = ApplicationState::APP_STATE_CREATE;
         callback_->OnAppStateChanged(processData);
     }
 
@@ -175,7 +177,7 @@ public:
         if (!callback_) {
             return;
         }
-        AbilityState st = AbilityState::ABILITY_STATE_BEGIN;
+        AbilityState st = AbilityState::ABILITY_STATE_CREATE;
         callback_->OnAbilityRequestDone(token, st);
     }
 

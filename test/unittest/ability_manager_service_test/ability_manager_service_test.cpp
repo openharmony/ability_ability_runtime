@@ -753,7 +753,7 @@ HWTEST_F(AbilityManagerServiceTest, ConnectLocalAbility_001, TestSize.Level1)
     HILOG_INFO("AbilityManagerServiceTest ConnectLocalAbility_001 start");
     Want want;
     ExtensionAbilityType extensionType = ExtensionAbilityType::SERVICE;
-    EXPECT_EQ(abilityMs_->ConnectLocalAbility(want, 0, nullptr, nullptr, extensionType), RESOLVE_ABILITY_ERR);
+    EXPECT_EQ(abilityMs_->ConnectLocalAbility(want, 100, nullptr, nullptr, extensionType), ERR_CROSS_USER);
     HILOG_INFO("AbilityManagerServiceTest ConnectLocalAbility_001 end");
 }
 
@@ -1684,7 +1684,7 @@ HWTEST_F(AbilityManagerServiceTest, StopServiceAbility_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest StopServiceAbility_001 start");
     Want want;
-    EXPECT_EQ(abilityMs_->StopServiceAbility(want, 100), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->StopServiceAbility(want, 100), ERR_CROSS_USER);
     HILOG_INFO("AbilityManagerServiceTest StopServiceAbility_001 end");
 }
 
@@ -2748,25 +2748,6 @@ HWTEST_F(AbilityManagerServiceTest, IsNeedTimeoutForTest_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: VerifyUriPermission
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService VerifyUriPermission
- */
-HWTEST_F(AbilityManagerServiceTest, VerifyUriPermission_001, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerServiceTest VerifyUriPermission_001 start");
-    AbilityRequest abilityRequest;
-    Want want;
-    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::SERVICE;
-    EXPECT_TRUE(abilityMs_->VerifyUriPermission(abilityRequest, want));
-
-    abilityRequest.abilityInfo.extensionAbilityType = ExtensionAbilityType::FILESHARE;
-    EXPECT_FALSE(abilityMs_->VerifyUriPermission(abilityRequest, want));
-    HILOG_INFO("AbilityManagerServiceTest VerifyUriPermission_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: GetValidDataAbilityUri
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetValidDataAbilityUri
@@ -3038,6 +3019,48 @@ HWTEST_F(AbilityManagerServiceTest, AddStartControlParam_001, TestSize.Level1)
     MyFlag::flag_ = 0;
     EXPECT_EQ(abilityMs_->AddStartControlParam(want, nullptr), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest AddStartControlParam_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: IsCrossUserCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsCrossUserCall
+ */
+HWTEST_F(AbilityManagerServiceTest, IsCrossUserCall_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest IsCrossUserCall_001 start");
+    int32_t userId = -1;
+    EXPECT_EQ(abilityMs_->IsCrossUserCall(userId), false);
+    HILOG_INFO("AbilityManagerServiceTest IsCrossUserCall_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: IsCrossUserCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsCrossUserCall
+ */
+HWTEST_F(AbilityManagerServiceTest, IsCrossUserCall_002, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest IsCrossUserCall_002 start");
+    int32_t userId = 0;
+    EXPECT_EQ(abilityMs_->IsCrossUserCall(userId), false);
+    HILOG_INFO("AbilityManagerServiceTest IsCrossUserCall_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: IsCrossUserCall
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService IsCrossUserCall
+ */
+HWTEST_F(AbilityManagerServiceTest, IsCrossUserCall_003, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest IsCrossUserCall_003 start");
+    int32_t userId = 10;
+    EXPECT_EQ(abilityMs_->IsCrossUserCall(userId), true);
+    HILOG_INFO("AbilityManagerServiceTest IsCrossUserCall_003 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

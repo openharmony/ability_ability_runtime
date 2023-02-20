@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_APP_MGR_H
-#define OHOS_ABILITY_RUNTIME_APP_MGR_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_DIALOG_REQUEST_H
+#define OHOS_ABILITY_RUNTIME_JS_DIALOG_REQUEST_H
 
-#include <js_native_api.h>
-
-#include "ability_manager_interface.h"
-#include "hilog_wrapper.h"
-#include "napi/native_api.h"
-#include "napi/native_common.h"
 #include "native_engine/native_engine.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-NativeValue* JsAppMgrInit(NativeEngine *engine, NativeValue *exportObj);
+NativeValue* JsDialogRequestInit(NativeEngine* engine, NativeValue* exportObj);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
-
-#endif  // OHOS_ABILITY_RUNTIME_APP_MGR_H
+#endif // OHOS_ABILITY_RUNTIME_JS_DIALOG_REQUEST_H

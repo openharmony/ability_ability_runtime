@@ -302,6 +302,15 @@ public:
     void AddAbilityStageDone();
 
     /**
+     * update the application info after new module installed.
+     *
+     * @param appInfo The latest application info obtained from bms for update abilityRuntimeContext.
+     *
+     * @return
+     */
+    void UpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
+
+    /**
      * LaunchAbility, Notify application to launch ability.
      *
      * @param ability, the ability record.
@@ -545,7 +554,7 @@ public:
 
     int64_t GetAppStartTime() const;
 
-    void SetRestartTimeMillis(const int64_t restartTimeMills);
+    void SetRestartTimeMillis(const int64_t restartTimeMillis);
     void SetRequestProcCode(int32_t requestProcCode);
 
     int32_t GetRequestProcCode() const;
@@ -651,7 +660,7 @@ private:
     AppSpawnStartMsg startMsg_;
     int32_t appIndex_ = 0;
     bool securityFlag_ = false;
-    int32_t requestProcCode_;
+    int32_t requestProcCode_ = 0;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
 };
 }  // namespace AppExecFwk

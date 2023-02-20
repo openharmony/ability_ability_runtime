@@ -47,6 +47,12 @@ config("ability_config") {
     defines += [ "_ARM64_" ]
   }
 
+  if (target_cpu == "arm64") {
+    defines += [ "APP_USE_ARM64" ]
+  } else if (target_cpu == "arm") {
+    defines += [ "APP_USE_ARM" ]
+  }
+
   if (ability_runtime_graphics) {
     include_dirs += [ "${form_fwk_path}/interfaces/inner_api/include" ]
     defines += [ "SUPPORT_GRAPHICS" ]
@@ -153,6 +159,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_caller_complex.cpp",
     "${ability_runtime_native_path}/ability/native/ability_thread.cpp",
+    "${ability_runtime_native_path}/ability/native/configuration_utils.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_manager.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/reverse_continuation_scheduler_primary.cpp",
@@ -192,7 +199,7 @@ ohos_shared_library("abilitykit_native") {
 
   deps = [
     ":continuation_ipc",
-    ":extension_blacklist_config",
+    ":extension_blocklist_config",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -220,6 +227,7 @@ ohos_shared_library("abilitykit_native") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "ipc:ipc_napi_common",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "relational_store:rdb_data_share_adapter",
@@ -271,6 +279,8 @@ ohos_shared_library("abilitykit_native") {
       "${windowmanager_path}/wm:libwm",
     ]
   }
+
+  version_script = "libabilitykit_native.map"
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -306,7 +316,6 @@ ohos_shared_library("form_extension") {
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
       "hiviewdfx_hilog_native:libhilog",
-      "ipc_js:rpc",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
     ]
@@ -344,7 +353,7 @@ ohos_shared_library("service_extension") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "ipc_js:rpc",
+    "ipc:ipc_napi_common",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
   ]
@@ -382,7 +391,6 @@ ohos_shared_library("static_subscriber_extension") {
     "common_event_service:cesfwk_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "ipc_js:rpc",
   ]
 
   subsystem_name = "ability"
@@ -487,7 +495,6 @@ ohos_shared_library("service_extension_module") {
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "ipc_js:rpc",
     "napi:ace_napi",
     "resource_management:global_resmgr",
   ]
@@ -522,12 +529,45 @@ ohos_shared_library("ability_business_error") {
   part_name = "ability_runtime"
 }
 
-ohos_prebuilt_etc("extension_blacklist_config.json") {
-  source = "etc/extension_blacklist_config.json"
+config("dialog_request_callback_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/dialog_request_callback" ]
+}
+
+config("dialog_request_callback_public_config") {
+  visibility = [ ":*" ]
+  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/dialog_request_callback" ]
+}
+
+ohos_shared_library("dialog_request_callback") {
+  sources = [
+    "${ability_runtime_native_path}/ability/native/dialog_request_callback/dialog_request_callback_proxy.cpp",
+    "${ability_runtime_native_path}/ability/native/dialog_request_callback/dialog_request_callback_stub.cpp",
+  ]
+
+  configs = [
+    ":dialog_request_callback_config",
+    "${ability_runtime_services_path}/common:common_config",
+  ]
+
+  public_configs = [ ":dialog_request_callback_public_config" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+    "ipc:ipc_core",
+  ]
+
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
 
-group("extension_blacklist_config") {
-  deps = [ ":extension_blacklist_config.json" ]
+ohos_prebuilt_etc("extension_blocklist_config.json") {
+  source = "etc/extension_blocklist_config.json"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+group("extension_blocklist_config") {
+  deps = [ ":extension_blocklist_config.json" ]
 }

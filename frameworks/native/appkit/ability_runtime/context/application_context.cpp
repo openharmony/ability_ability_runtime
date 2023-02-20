@@ -25,10 +25,15 @@ namespace AbilityRuntime {
 std::vector<std::shared_ptr<AbilityLifecycleCallback>> ApplicationContext::callbacks_;
 std::vector<std::shared_ptr<EnvironmentCallback>> ApplicationContext::envCallbacks_;
 
-void ApplicationContext::InitApplicationContext()
+std::shared_ptr<ApplicationContext> ApplicationContext::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(Context::contextMutex_);
-    applicationContext_ = shared_from_this();
+    if (applicationContext_ == nullptr) {
+        std::lock_guard<std::mutex> lock_l(Context::contextMutex_);
+        if (applicationContext_ == nullptr) {
+            applicationContext_ = std::make_shared<ApplicationContext>();
+        }
+    }
+    return applicationContext_;
 }
 
 void ApplicationContext::AttachContextImpl(const std::shared_ptr<ContextImpl> &contextImpl)
@@ -258,6 +263,13 @@ std::shared_ptr<Context> ApplicationContext::CreateModuleContext(const std::stri
 std::shared_ptr<AppExecFwk::ApplicationInfo> ApplicationContext::GetApplicationInfo() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetApplicationInfo() : nullptr;
+}
+
+void ApplicationContext::SetApplicationInfo(const std::shared_ptr<AppExecFwk::ApplicationInfo> &info)
+{
+    if (contextImpl_ != nullptr) {
+        contextImpl_->SetApplicationInfo(info);
+    }
 }
 
 std::shared_ptr<Global::Resource::ResourceManager> ApplicationContext::GetResourceManager() const

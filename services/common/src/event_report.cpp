@@ -30,6 +30,7 @@ const std::string EVENT_KEY_ERROR_CODE = "ERROR_CODE";
 const std::string EVENT_KEY_BUNDLE_NAME = "BUNDLE_NAME";
 const std::string EVENT_KEY_MODULE_NAME = "MODULE_NAME";
 const std::string EVENT_KEY_ABILITY_NAME = "ABILITY_NAME";
+const std::string EVENT_KEY_ABILITY_TYPE = "ABILITY_TYPE";
 const std::string EVENT_KEY_VERSION_NAME = "VERSION_NAME";
 const std::string EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 const std::string EVENT_KEY_PROCESS_NAME = "PROCESS_NAME";
@@ -60,6 +61,7 @@ const std::map<EventName, std::string> eventNameToStrMap_ = {
     std::map<EventName, std::string>::value_type(EventName::ACQUIREFORMSTATE_FORM, "ACQUIREFORMSTATE_FORM"),
     std::map<EventName, std::string>::value_type(EventName::MESSAGE_EVENT_FORM, "MESSAGE_EVENT_FORM"),
     std::map<EventName, std::string>::value_type(EventName::ROUTE_EVENT_FORM, "ROUTE_EVENT_FORM"),
+    std::map<EventName, std::string>::value_type(EventName::BACKGROUND_EVENT_FORM, "BACKGROUND_EVENT_FORM"),
     std::map<EventName, std::string>::value_type(EventName::RELEASE_FORM, "RELEASE_FORM"),
     std::map<EventName, std::string>::value_type(EventName::DELETE_INVALID_FORM, "DELETE_INVALID_FORM"),
     std::map<EventName, std::string>::value_type(EventName::SET_NEXT_REFRESH_TIME_FORM, "SET_NEXT_REFRESH_TIME_FORM"),
@@ -132,7 +134,6 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
             break;
         case EventName::ABILITY_ONFOREGROUND:
         case EventName::ABILITY_ONBACKGROUND:
-        case EventName::ABILITY_ONACTIVE:
         case EventName::ABILITY_ONINACTIVE:
             HiSysEventWrite(
                 HiSysEvent::Domain::AAFWK,
@@ -141,6 +142,16 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
                 EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
                 EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
                 EVENT_KEY_ABILITY_NAME, eventInfo.abilityName);
+            break;
+        case EventName::ABILITY_ONACTIVE:
+            HiSysEventWrite(
+                HiSysEvent::Domain::AAFWK,
+                name,
+                type,
+                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
+                EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
+                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
+                EVENT_KEY_ABILITY_TYPE, eventInfo.abilityType);
             break;
         default:
             break;
@@ -226,6 +237,7 @@ void EventReport::SendFormEvent(const EventName &eventName, HiSysEventType type,
             break;
         case EventName::ADD_FORM:
         case EventName::REQUEST_FORM:
+        case EventName::BACKGROUND_EVENT_FORM:
         case EventName::ROUTE_EVENT_FORM:
             HiSysEventWrite(
                 HiSysEvent::Domain::AAFWK,

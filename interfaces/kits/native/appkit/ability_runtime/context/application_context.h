@@ -56,6 +56,7 @@ public:
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const override;
+    void SetApplicationInfo(const std::shared_ptr<AppExecFwk::ApplicationInfo> &info);
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
     std::string GetBundleCodePath() const override;
     std::string GetBundleCodeDir() override;
@@ -77,8 +78,9 @@ public:
     void KillProcessBySelf();
     int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
 
-    void InitApplicationContext();
     void AttachContextImpl(const std::shared_ptr<ContextImpl> &contextImpl);
+
+    static std::shared_ptr<ApplicationContext> GetInstance();
 
     // unused
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;

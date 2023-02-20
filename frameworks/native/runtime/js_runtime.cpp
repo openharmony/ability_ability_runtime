@@ -60,10 +60,10 @@ constexpr uint8_t SYSCAP_MAX_SIZE = 64;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
-#if defined(_ARM64_)
-constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/libark_debugger.z.so";
-#else
+#ifdef APP_USE_ARM
 constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/libark_debugger.z.so";
+#else
+constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/libark_debugger.z.so";
 #endif
 
 constexpr char TIMER_TASK[] = "uv_timer_task";
@@ -167,7 +167,7 @@ public:
             }
         }
 
-        auto func = [&](std::string modulePath, std::string abcPath) {
+        auto func = [&](std::string modulePath, const std::string abcPath) {
             std::ostringstream outStream;
             if (!extractor->GetFileBuffer(modulePath, outStream)) {
                 HILOG_ERROR("Get abc file failed");
@@ -328,18 +328,23 @@ private:
                 std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
                 postOption.SetAnDir(sandBoxAnFilePath);
             }
+            bool profileEnabled = OHOS::system::GetBoolParameter("ark.profile", false);
+            postOption.SetEnableProfile(profileEnabled);
             panda::JSNApi::PostFork(vm_, postOption);
             nativeEngine_->ReinitUVLoop();
             panda::JSNApi::SetLoop(vm_, nativeEngine_->GetUVLoop());
         } else {
             panda::RuntimeOption pandaOption;
             int arkProperties = OHOS::system::GetIntParameter<int>("persist.ark.properties", -1);
+            std::string bundleName = OHOS::system::GetParameter("persist.ark.arkbundlename", "");
             size_t gcThreadNum = OHOS::system::GetUintParameter<size_t>("persist.ark.gcthreads", 7);
             size_t longPauseTime = OHOS::system::GetUintParameter<size_t>("persist.ark.longpausetime", 40);
             pandaOption.SetArkProperties(arkProperties);
+            pandaOption.SetArkBundleName(bundleName);
             pandaOption.SetGcThreadNum(gcThreadNum);
             pandaOption.SetLongPauseTime(longPauseTime);
-            HILOG_INFO("ArkJSRuntime::Initialize ark properties = %{public}d", arkProperties);
+            HILOG_INFO("ArkJSRuntime::Initialize ark properties = %{public}d bundlename = %{public}s",
+	            arkProperties, bundleName.c_str());
             pandaOption.SetGcType(panda::RuntimeOption::GC_TYPE::GEN_GC);
             pandaOption.SetGcPoolSize(DEFAULT_GC_POOL_SIZE);
             pandaOption.SetLogLevel(panda::RuntimeOption::LOG_LEVEL::INFO);
@@ -352,8 +357,6 @@ private:
             // aot related
             bool aotEnabled = OHOS::system::GetBoolParameter("persist.ark.aot", true);
             pandaOption.SetEnableAOT(aotEnabled);
-            bool profileEnabled = OHOS::system::GetBoolParameter("persist.ark.profile", false);
-            pandaOption.SetEnableProfile(profileEnabled);
             pandaOption.SetProfileDir(SANDBOX_ARK_PROIFILE_PATH);
             vm_ = panda::JSNApi::CreateJSVM(pandaOption);
             if (vm_ == nullptr) {
@@ -365,7 +368,6 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            panda::JSNApi::SetHostResolvePathTracker(vm_, JsModuleSearcher(options.bundleName));
             bool newCreate = false;
             std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
             std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
@@ -573,7 +575,13 @@ bool JsRuntime::Initialize(const Options& options)
         }
 #ifdef SUPPORT_GRAPHICS
         if (options.loadAce) {
-            OHOS::Ace::DeclarativeModulePreloader::Preload(*nativeEngine_);
+            // ArkTsCard start
+            if (options.isUnique) {
+                OHOS::Ace::DeclarativeModulePreloader::PreloadCard(*nativeEngine_);
+            } else {
+                OHOS::Ace::DeclarativeModulePreloader::Preload(*nativeEngine_);
+            }
+            // ArkTsCard end
         }
 #endif
     }
@@ -606,8 +614,13 @@ bool JsRuntime::Initialize(const Options& options)
     }
     bindSourceMaps_ = std::make_unique<ModSourceMap>(options.bundleCodeDir, options.isStageModel);
     if (!options.preload) {
-        InitTimerModule(*nativeEngine_, *globalObj);
-        InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion, options.bundleName);
+        if (options.isUnique) {
+            HILOG_INFO("Not supported TimerModule when form render");
+        } else {
+            InitTimerModule(*nativeEngine_, *globalObj);
+        }
+
+        InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion);
     }
 
     nativeEngine_->RegisterPermissionCheck(PermissionCheckFunc);
