@@ -81,6 +81,7 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     }
 
     auto uriStr = uri.ToString();
+    auto storageMgrProxy = ConnectStorageManager();
     auto ret = storageMgrProxy->CreateShareFile(uriStr, targetTokenId, tmpFlag);
     if (ret != 0 && ret != -EEXIST) {
         HILOG_ERROR("storageMgrProxy failed to CreateShareFile.");
