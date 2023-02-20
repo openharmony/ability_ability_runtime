@@ -67,8 +67,7 @@ ohos_static_library("libupms_static") {
 
   sources = libupms_sources
 
-  deps =
-      [ "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr" ]
+  deps = [ "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr" ]
 
   external_deps = [
     "ability_base:want",
