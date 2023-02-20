@@ -239,10 +239,6 @@ int AbilityRecord::LoadAbility()
         return ERR_INVALID_VALUE;
     }
 
-<<<<<<< HEAD
-    GrantUriPermission(want_, GetCurrentAccountId());
-=======
->>>>>>> main/master
     if (isRestarting_) {
         restartTime_ = AbilityUtil::SystemTimeMillis();
     }
