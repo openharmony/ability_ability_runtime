@@ -987,7 +987,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         queryResult = (bundleMgr->GetBundleInfoForSelf(
             (static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE)), bundleInfo) == ERR_OK);
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY)), bundleInfo) == ERR_OK);
     }
 
     if (!queryResult) {
@@ -2195,7 +2198,12 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     }
 
     BundleInfo bundleInfo;
-    if (!bundleMgr->GetBundleInfo(bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo)) {
+    if (bundleMgr->GetBundleInfoForSelf(
+        (static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT) +
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
+        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO)), bundleInfo) != ERR_OK) {
         HILOG_ERROR("Get bundle info of %{public}s failed.", bundleName.c_str());
         return false;
     }
