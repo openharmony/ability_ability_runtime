@@ -71,7 +71,7 @@ void MissionListManager::Init()
     DelayedSingleton<MissionInfoMgr>::GetInstance()->Init(userId_);
 }
 
-int MissionListManager::StartAbility(const AbilityRequest &abilityRequest)
+int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 {
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (IsReachToLimitLocked(abilityRequest)) {
@@ -100,6 +100,7 @@ int MissionListManager::StartAbility(const AbilityRequest &abilityRequest)
             element.c_str(), AbilityRecord::ConvertAbilityState(state).c_str());
     }
 
+    abilityRequest.callerAccessTokenId = IPCSkeleton::GetCallingTokenID();
     return StartAbility(currentTopAbility, callerAbility, abilityRequest);
 }
 
@@ -192,6 +193,7 @@ int MissionListManager::MoveMissionToFront(int32_t missionId, bool isCallerFromL
         HILOG_ERROR("get target ability record failed, missionId: %{public}d", missionId);
         return MOVE_MISSION_FAILED;
     }
+    targetAbilityRecord->SetIsNewWant(false);
     targetAbilityRecord->RemoveWindowMode();
     if (startOptions != nullptr) {
         targetAbilityRecord->SetWindowMode(startOptions->GetWindowMode());
@@ -1292,6 +1294,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
     // remove AbilityRecord out of stack
     RemoveTerminatingAbility(abilityRecord, flag);
     abilityRecord->SendResultToCallers();
+    abilityRecord->RemoveUriPermission();
 
     // 1. if the ability was foreground, first should find wether there is other ability foreground
     if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING)) {
@@ -1806,6 +1809,7 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t eventId)
         return;
     }
     HILOG_DEBUG("Ability timeout ,msg:%{public}d,name:%{public}s", msgId, abilityRecord->GetAbilityInfo().name.c_str());
+    abilityRecord->RemoveUriPermission();
 
 #ifdef SUPPORT_GRAPHICS
     if (abilityRecord->IsStartingWindow()) {
@@ -2416,6 +2420,27 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
         mgr->UpdateMissionSnapshot(abilityRecord);
     };
     handler->PostTask(task, "FirstFrameDrawing");
+    auto preloadTask = [owner = weak_from_this(), abilityRecord] {
+        auto mgr = owner.lock();
+        if (mgr == nullptr) {
+            HILOG_ERROR("MissionListManager is nullptr.");
+            return;
+        }
+        mgr->ProcessPreload(abilityRecord);
+    };
+    handler->PostTask(preloadTask);
+}
+
+void MissionListManager::ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const
+{
+    auto bms = AbilityUtil::GetBundleManager();
+    CHECK_POINTER(bms);
+    auto abilityInfo = record->GetAbilityInfo();
+    Want want;
+    want.SetElementName(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
+    auto uid = record->GetUid();
+    want.SetParam("uid", uid);
+    bms->ProcessPreload(want);
 }
 
 Closure MissionListManager::GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const
