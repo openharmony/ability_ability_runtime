@@ -29,16 +29,29 @@
 
 namespace OHOS {
 namespace AAFwk {
-const bool REGISTER_RESULT =
-    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<DataObsMgrService>::GetInstance().get());
+#define Check()                                                                                 \
+do {                                                                                            \
+    if (handler_ == nullptr) {                                                                  \
+        HILOG_ERROR("handler is nullptr");                                                      \
+        return DATAOBS_SERVICE_HANDLER_IS_NULL;                                                 \
+    }                                                                                           \
+                                                                                                \
+    if (dataObsMgrInner_ == nullptr) {                                                          \
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");                                             \
+        return DATAOBS_SERVICE_INNER_IS_NULL;                                                   \
+    }                                                                                           \
+} while (0)
 
 DataObsMgrService::DataObsMgrService()
     : SystemAbility(DATAOBS_MGR_SERVICE_SA_ID, true),
       eventLoop_(nullptr),
       handler_(nullptr),
+      eventLoopExt_(nullptr),
+      handlerExt_(nullptr),
       state_(DataObsServiceRunningState::STATE_NOT_START)
 {
     dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
+    dataObsMgrInnerExt_ = std::make_shared<DataObsMgrInnerExt>();
 }
 
 DataObsMgrService::~DataObsMgrService()
@@ -50,18 +63,17 @@ void DataObsMgrService::OnStart()
         HILOG_INFO("Dataobs Manager Service has already started.");
         return;
     }
-    HILOG_INFO("Dataobs Manager Service started.");
     if (!Init()) {
         HILOG_ERROR("failed to init service.");
         return;
     }
     state_ = DataObsServiceRunningState::STATE_RUNNING;
     eventLoop_->Run();
+    eventLoopExt_->Run();
     /* Publish service maybe failed, so we need call this function at the last,
      * so it can't affect the TDD test program */
-    bool ret = Publish(DelayedSingleton<DataObsMgrService>::GetInstance().get());
-    if (!ret) {
-        HILOG_ERROR("DataObsMgrService::Init Publish failed!");
+    if (Publish(DelayedSingleton<DataObsMgrService>::GetInstance().get())) {
+        HILOG_ERROR("Init Publish failed!");
         return;
     }
 
@@ -76,9 +88,14 @@ bool DataObsMgrService::Init()
     }
 
     handler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
-    dataObsMgrInner_->SetHandler(handler_);
 
-    HILOG_INFO("init success");
+    eventLoopExt_ = AppExecFwk::EventRunner::Create("DataObsMgrService");
+    if (eventLoopExt_ == nullptr) {
+        return false;
+    }
+
+    handlerExt_ = std::make_shared<AppExecFwk::EventHandler>(eventLoopExt_);
+
     return true;
 }
 
@@ -87,6 +104,8 @@ void DataObsMgrService::OnStop()
     HILOG_INFO("stop service");
     eventLoop_.reset();
     handler_.reset();
+    eventLoopExt_.reset();
+    handlerExt_.reset();
     state_ = DataObsServiceRunningState::STATE_NOT_START;
 }
 
@@ -97,109 +116,115 @@ DataObsServiceRunningState DataObsMgrService::QueryServiceState() const
 
 int DataObsMgrService::RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
 {
-    HILOG_INFO("DataObsMgrService::RegisterObserver called start");
     if (dataObserver == nullptr) {
-        HILOG_ERROR("DataObsMgrService::RegisterObserver failed!. dataObserver is nullptr");
+        HILOG_ERROR("dataObserver is nullptr");
         return DATA_OBSERVER_IS_NULL;
     }
 
-    if (handler_ == nullptr) {
-        HILOG_ERROR("DataObsMgrService::RegisterObserver failed!. handler is nullptr");
-        return DATAOBS_SERVICE_HANDLER_IS_NULL;
-    }
+    Check();
 
-    if (dataObsMgrInner_ == nullptr) {
-        HILOG_ERROR("DataObsMgrService::RegisterObserver failed!. dataObsMgrInner_ is nullptr");
-        return DATAOBS_SERVICE_INNER_IS_NULL;
-    }
-
-    if (dataObsMgrInner_->CheckNeedLimmit()) {
-        return DATAOBS_SERVICE_TASK_LIMMIT;
-    }
-
-    if (dataObsMgrInner_->CheckRegisteFull(uri)) {
-        HILOG_ERROR("The number of subscribers for this uri has reached the upper limit.");
-        return DATAOBS_SERVICE_OBS_LIMMIT;
-    }
-
-    std::function<void()> registerObserverFunc =
-        std::bind(&DataObsMgrInner::HandleRegisterObserver, dataObsMgrInner_, uri, dataObserver);
-
-    dataObsMgrInner_->AtomicAddTaskCount();
-    bool ret = handler_->PostTask(registerObserverFunc);
-    if (!ret) {
-        dataObsMgrInner_->AtomicSubTaskCount();
-        HILOG_ERROR("DataObsMgrService::RegisterObserver PostTask error");
+    auto status = dataObsMgrInner_->HandleRegisterObserver(uri, dataObserver);
+    if (status != NO_ERROR) {
+        HILOG_ERROR("Observer register failed : %{public}d", status);
         return DATAOBS_SERVICE_POST_TASK_FAILED;
     }
-    HILOG_INFO("DataObsMgrService::RegisterObserver called end");
     return NO_ERROR;
 }
 
 int DataObsMgrService::UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
 {
-    HILOG_INFO("DataObsMgrService::UnregisterObserver called start");
     if (dataObserver == nullptr) {
-        HILOG_ERROR("DataObsMgrService::UnregisterObserver failed!. dataObserver is nullptr");
+        HILOG_ERROR("dataObserver is nullptr");
         return DATA_OBSERVER_IS_NULL;
     }
 
-    if (handler_ == nullptr) {
-        HILOG_ERROR("DataObsMgrService::UnregisterObserver failed!. handler is nullptr");
-        return DATAOBS_SERVICE_HANDLER_IS_NULL;
-    }
+    Check();
 
-    if (dataObsMgrInner_ == nullptr) {
-        HILOG_ERROR("DataObsMgrService::UnregisterObserver failed!. dataObsMgrInner_ is nullptr");
-        return DATAOBS_SERVICE_INNER_IS_NULL;
-    }
-
-    if (dataObsMgrInner_->CheckNeedLimmit()) {
-        return DATAOBS_SERVICE_TASK_LIMMIT;
-    }
-
-    std::function<void()> unregisterObserverFunc =
-        std::bind(&DataObsMgrInner::HandleUnregisterObserver, dataObsMgrInner_, uri, dataObserver);
-
-    dataObsMgrInner_->AtomicAddTaskCount();
-    bool ret = handler_->PostSyncTask(unregisterObserverFunc);
-    if (!ret) {
-        dataObsMgrInner_->AtomicSubTaskCount();
-        HILOG_ERROR("DataObsMgrService::UnregisterObserver PostTask error");
+    auto status = dataObsMgrInner_->HandleUnregisterObserver(uri, dataObserver);
+    if (!status) {
+        HILOG_ERROR("Observer unregister failed : %{public}d", status);
         return DATAOBS_SERVICE_POST_TASK_FAILED;
     }
-    HILOG_INFO("DataObsMgrService::UnregisterObserver called end");
     return NO_ERROR;
 }
 
 int DataObsMgrService::NotifyChange(const Uri &uri)
 {
-    HILOG_INFO("DataObsMgrService::NotifyChange called start");
-    if (handler_ == nullptr) {
-        HILOG_ERROR("DataObsMgrService::NotifyChange failed!. handler is nullptr");
-        return DATAOBS_SERVICE_HANDLER_IS_NULL;
+    Check();
+
+    {
+        std::lock_guard<std::mutex> lck(taskCountMutex_);
+        if (taskCount_ >= taskCountMax_) {
+            HILOG_ERROR("The number of task has reached the upper limit");
+            return DATAOBS_SERVICE_TASK_LIMMIT;
+        }
+        ++taskCount_;
     }
 
-    if (dataObsMgrInner_ == nullptr) {
-        HILOG_ERROR("DataObsMgrService::NotifyChange failed!. dataObsMgrInner_ is nullptr");
-        return DATAOBS_SERVICE_INNER_IS_NULL;
-    }
+    bool ret = handler_->PostTask([this, &uri]() {
+        dataObsMgrInner_->HandleNotifyChange(uri);
+        std::lock_guard<std::mutex> lck(taskCountMutex_);
+        taskCount_--;
+    });
 
-    if (dataObsMgrInner_->CheckNeedLimmit()) {
-        return DATAOBS_SERVICE_TASK_LIMMIT;
-    }
-
-    std::function<void()> notifyChangeFunc = std::bind(&DataObsMgrInner::HandleNotifyChange, dataObsMgrInner_, uri);
-
-    dataObsMgrInner_->AtomicAddTaskCount();
-    bool ret = handler_->PostTask(notifyChangeFunc);
     if (!ret) {
-        dataObsMgrInner_->AtomicSubTaskCount();
-        HILOG_ERROR("DataObsMgrService::NotifyChange PostTask error");
+        HILOG_ERROR("Post NotifyChange fail");
         return DATAOBS_SERVICE_POST_TASK_FAILED;
     }
-    HILOG_INFO("DataObsMgrService::NotifyChange called end");
+
     return NO_ERROR;
+}
+
+Status DataObsMgrService::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+    bool isDescendants)
+{
+    if (dataObserver == nullptr) {
+        HILOG_ERROR("dataObserver is nullptr");
+        return DATA_OBSERVER_IS_NULL;
+    }
+
+    Check();
+
+    auto innerUri = uri;
+    return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, isDescendants);
+}
+
+Status DataObsMgrService::UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
+{
+    if (dataObserver == nullptr) {
+        HILOG_ERROR("dataObserver is nullptr");
+        return DATA_OBSERVER_IS_NULL;
+    }
+
+    Check();
+
+    return dataObsMgrInnerExt_->HandleUnregisterObserver(dataObserver);
+}
+
+Status DataObsMgrService::NotifyChangeExt(const std::list<Uri> &uris)
+{
+    Check();
+
+    {
+        std::lock_guard<std::mutex> lck(taskCountExtMutex_);
+        if (taskCountExt_ >= taskCountMax_) {
+            HILOG_ERROR("The number of task has reached the upper limit");
+            return DATAOBS_SERVICE_TASK_LIMMIT;
+        }
+        ++taskCountExt_;
+    }
+
+    bool ret = handler_->PostTask([this, &uris]() {
+        dataObsMgrInnerExt_->HandleNotifyChange(uris);
+        std::lock_guard<std::mutex> lck(taskCountExtMutex_);
+        --taskCountExt_;
+    });
+
+    if (!ret) {
+        HILOG_ERROR("Post NotifyChangeExt fail");
+        return DATAOBS_SERVICE_POST_TASK_FAILED;
+    }
+    return SUCCESS;
 }
 
 int DataObsMgrService::Dump(int fd, const std::vector<std::u16string>& args)
@@ -211,7 +236,7 @@ int DataObsMgrService::Dump(int fd, const std::vector<std::u16string>& args)
         HILOG_ERROR("%{public}s, dprintf error.", __func__);
         return DATAOBS_HIDUMP_ERROR;
     }
-    return ERR_OK;
+    return SUCCESS;
 }
 
 void DataObsMgrService::Dump(const std::vector<std::u16string>& args, std::string& result) const

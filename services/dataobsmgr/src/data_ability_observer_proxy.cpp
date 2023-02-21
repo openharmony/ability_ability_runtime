@@ -33,7 +33,7 @@ void DataAbilityObserverProxy::OnChange()
 {
     auto remote = Remote();
     if (remote == nullptr) {
-        HILOG_ERROR("%{public}s remote is nullptr", __func__);
+        HILOG_ERROR("remote is nullptr");
         return;
     }
 
@@ -42,14 +42,55 @@ void DataAbilityObserverProxy::OnChange()
     OHOS::MessageOption option;
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
-        HILOG_ERROR("%{public}s data.WriteInterfaceToken(GetDescriptor()) return false", __func__);
+        HILOG_ERROR("data.WriteInterfaceToken(GetDescriptor()) return false");
         return;
     }
 
     int result = remote->SendRequest(IDataAbilityObserver::DATA_ABILITY_OBSERVER_CHANGE, data, reply, option);
     if (result != ERR_NONE) {
-        HILOG_ERROR("%{public}s SendRequest error, result=%{public}d", __func__, result);
+        HILOG_ERROR("SendRequest error, result=%{public}d", result);
     }
 }
+
+/**
+ * @brief Called back to notify that the data being observed has changed.
+ *
+ * @param uris Indicates the path of the data to operate.
+ */
+void DataAbilityObserverProxy::OnChangeExt(std::list<Uri> uris)
+{
+    auto remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote is nullptr");
+        return;
+    }
+
+    OHOS::MessageParcel data;
+    OHOS::MessageParcel reply;
+    OHOS::MessageOption option;
+
+    if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
+        HILOG_ERROR("data.WriteInterfaceToken(GetDescriptor()) return false");
+        return;
+    }
+
+    if (!data.WriteInt32(static_cast<int>(uris.size()))) {
+        HILOG_ERROR("write uris size error.");
+        return;
+    }
+
+    for (auto const &uri : uris) {
+        if (!data.WriteParcelable(&uri)) {
+            HILOG_ERROR("write uri error.");
+            return;
+        }
+    }
+
+    int result = remote->SendRequest(IDataAbilityObserver::DATA_ABILITY_OBSERVER_CHANGE_EXT, data, reply, option);
+    if (result != ERR_NONE) {
+        HILOG_ERROR("SendRequest error, result=%{public}d", result);
+    }
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
