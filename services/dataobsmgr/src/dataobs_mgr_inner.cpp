@@ -29,9 +29,8 @@ int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, const sptr<IDataAbil
 {
     std::lock_guard<std::mutex> lock_l(innerMutex_);
 
-    ObsPairType obsPair;
-    GetObsListFromMap(uri, obsPair);
-    if (obsPair->second.size() > obs_max_) {
+    auto [obsPair, flag] =obsmap_.try_emplace(uri.ToString(), std::list<sptr<IDataAbilityObserver>>());
+    if (!flag && obsPair->second.size() > obs_max_) {
         HILOG_ERROR("The number of subscribers for this uri : %{public}s has reached the upper limit.",
             Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_OBS_LIMMIT;
@@ -55,8 +54,8 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, const sptr<IDataAb
 {
     std::lock_guard<std::mutex> lock_l(innerMutex_);
 
-    ObsPairType obsPair;
-    if (!GetObsListFromMap(uri, obsPair)) {
+    auto obsPair = obsmap_.find(uri.ToString());
+    if (obsPair == obsmap_.end()) {
         HILOG_WARN("no obs on this uri : %{public}s", Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
@@ -89,8 +88,8 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
 {
     std::lock_guard<std::mutex> lock_l(innerMutex_);
 
-    ObsPairType obsPair;
-    if (!GetObsListFromMap(uri, obsPair)) {
+    auto obsPair = obsmap_.find(uri.ToString());
+    if (obsPair == obsmap_.end()) {
         HILOG_WARN("there is no obs on the uri : %{public}s", Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
@@ -104,17 +103,6 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
     HILOG_DEBUG("called end on the uri : %{public}s,obs num: %{public}zu", Anonymous(uri.ToString()).c_str(),
         obsPair->second.size());
     return NO_ERROR;
-}
-
-bool DataObsMgrInner::GetObsListFromMap(const Uri &uri, ObsPairType &obsPair)
-{
-    auto it = obsmap_.find(uri.ToString());
-    if (it == obsmap_.end()) {
-        return false;
-    }
-
-    obsPair = it;
-    return true;
 }
 
 void DataObsMgrInner::AddObsDeathRecipient(const sptr<IDataAbilityObserver> &dataObserver)

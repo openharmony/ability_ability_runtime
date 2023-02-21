@@ -25,8 +25,6 @@
 
 #include "data_ability_observer_interface.h"
 #include "event_handler.h"
-#include "iremote_object.h"
-#include "refbase.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -34,7 +32,6 @@ using EventHandler = OHOS::AppExecFwk::EventHandler;
 class DataObsMgrInner : public std::enable_shared_from_this<DataObsMgrInner> {
 public:
     using ObsMapType = std::map<std::string, std::list<sptr<IDataAbilityObserver>>>;
-    using ObsPairType = ObsMapType::iterator;
     using ObsRecipientMapType = std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>>;
 
     DataObsMgrInner();
@@ -46,7 +43,6 @@ public:
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
-    bool GetObsListFromMap(const Uri &uri, ObsPairType &obsPair);
     void AddObsDeathRecipient(const sptr<IDataAbilityObserver> &dataObserver);
     void RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver);
     void RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver);

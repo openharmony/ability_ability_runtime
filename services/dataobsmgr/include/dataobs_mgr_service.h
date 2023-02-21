@@ -88,8 +88,6 @@ private:
 
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> handler_;
-    std::shared_ptr<EventRunner> eventLoopExt_;
-    std::shared_ptr<EventHandler> handlerExt_;
 
     DataObsServiceRunningState state_;
 

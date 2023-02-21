@@ -33,7 +33,6 @@ namespace AAFwk {
 using Uri = OHOS::Uri;
 using ObsListType = std::list<sptr<IDataAbilityObserver>>;
 using ObsRecipientMapType = OHOS::AAFwk::DataObsMgrInner::ObsRecipientMapType;
-using ObsPairType = DataObsMgrInner::ObsPairType;
 class DataObsMgrInnerTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -264,8 +263,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_GetRemoveObsListFromMap_ObsExistIn
         new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub2));
 
     dataObsMgrInner_->HandleRegisterObserver(uri, callback2);
-    ObsPairType obsPair;
-    dataObsMgrInner_->GetObsListFromMap(uri, obsPair);
+    auto obsPair = dataObsMgrInner_->obsmap_.find(uri.ToString());
     EXPECT_EQ((std::size_t)2, obsPair->second.size());
     EXPECT_EQ(true, dataObsMgrInner_->ObsExistInMap(callback));
     EXPECT_EQ(true, dataObsMgrInner_->ObsExistInMap(callback2));
@@ -273,14 +271,14 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_GetRemoveObsListFromMap_ObsExistIn
     dataObsMgrInner_->RemoveObsFromMap(callback->AsObject());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback));
     obsPair->second.clear();
-    dataObsMgrInner_->GetObsListFromMap(uri, obsPair);
+    obsPair = dataObsMgrInner_->obsmap_.find(uri.ToString());
     EXPECT_EQ((std::size_t)1, obsPair->second.size());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback));
 
     dataObsMgrInner_->RemoveObsFromMap(callback2->AsObject());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback2));
     obsPair->second.clear();
-    dataObsMgrInner_->GetObsListFromMap(uri, obsPair);
+    obsPair = dataObsMgrInner_->obsmap_.find(uri.ToString());
     EXPECT_EQ((std::size_t)0, obsPair->second.size());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback2));
 }

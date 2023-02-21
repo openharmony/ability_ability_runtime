@@ -29,6 +29,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+const bool REGISTER_RESULT =
+    SystemAbility::MakeAndRegisterAbility(DelayedSingleton<DataObsMgrService>::GetInstance().get());
+
 #define Check()                                                                                 \
 do {                                                                                            \
     if (handler_ == nullptr) {                                                                  \
@@ -46,8 +49,6 @@ DataObsMgrService::DataObsMgrService()
     : SystemAbility(DATAOBS_MGR_SERVICE_SA_ID, true),
       eventLoop_(nullptr),
       handler_(nullptr),
-      eventLoopExt_(nullptr),
-      handlerExt_(nullptr),
       state_(DataObsServiceRunningState::STATE_NOT_START)
 {
     dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
@@ -69,15 +70,14 @@ void DataObsMgrService::OnStart()
     }
     state_ = DataObsServiceRunningState::STATE_RUNNING;
     eventLoop_->Run();
-    eventLoopExt_->Run();
     /* Publish service maybe failed, so we need call this function at the last,
      * so it can't affect the TDD test program */
-    if (Publish(DelayedSingleton<DataObsMgrService>::GetInstance().get())) {
+    if (!Publish(DelayedSingleton<DataObsMgrService>::GetInstance().get())) {
         HILOG_ERROR("Init Publish failed!");
         return;
     }
 
-    HILOG_INFO("Ability Manager Service start success.");
+    HILOG_INFO("Dataobs Manager Service start success.");
 }
 
 bool DataObsMgrService::Init()
@@ -89,13 +89,6 @@ bool DataObsMgrService::Init()
 
     handler_ = std::make_shared<AppExecFwk::EventHandler>(eventLoop_);
 
-    eventLoopExt_ = AppExecFwk::EventRunner::Create("DataObsMgrService");
-    if (eventLoopExt_ == nullptr) {
-        return false;
-    }
-
-    handlerExt_ = std::make_shared<AppExecFwk::EventHandler>(eventLoopExt_);
-
     return true;
 }
 
@@ -104,8 +97,6 @@ void DataObsMgrService::OnStop()
     HILOG_INFO("stop service");
     eventLoop_.reset();
     handler_.reset();
-    eventLoopExt_.reset();
-    handlerExt_.reset();
     state_ = DataObsServiceRunningState::STATE_NOT_START;
 }
 
