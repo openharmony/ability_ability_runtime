@@ -135,7 +135,7 @@ Status DataObsMgrClient::RegisterObserverExt(const Uri &uri, const sptr<IDataAbi
         }
     }
     sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
-    return dataObsManger->RegisterObserverExt(uri, dataObserver,isDescendants);
+    return dataObsManger->RegisterObserverExt(uri, dataObserver, isDescendants);
 }
 
 Status DataObsMgrClient::UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)

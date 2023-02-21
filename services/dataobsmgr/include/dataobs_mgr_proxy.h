@@ -73,7 +73,8 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver, bool isDescendants);
+    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+        bool isDescendants);
 
     /**
      * Deregisters dataObserver used for DataObsMgr specified

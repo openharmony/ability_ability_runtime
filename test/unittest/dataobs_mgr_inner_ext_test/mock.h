@@ -45,7 +45,7 @@ public:
     void Wait()
     {
         std::unique_lock<std::mutex> lck(mtx_);
-        while(!flag_){
+        while (!flag_) {
             cv_.wait(lck);
         }
     }
@@ -63,17 +63,6 @@ private:
     std::mutex mtx_;
     std::condition_variable cv_;
     bool flag_ = false;
-};
-
-using EventHandler = OHOS::AppExecFwk::EventHandler;
-class MockEventHandle:public EventHandler{
-public:
-    bool PostTask(const Callback &callback, const std::string &name = std::string(), int64_t delayTime = 0,
-        Priority priority = Priority::LOW)
-    {
-        return true;
-//        return SendEvent(InnerEvent::Get(callback, name), delayTime, priority);
-    }
 };
 
 }  // namespace AAFwk

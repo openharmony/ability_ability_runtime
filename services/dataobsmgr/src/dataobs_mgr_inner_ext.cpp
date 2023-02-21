@@ -32,8 +32,8 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, const sptr<IDataAbil
     if (!AddObsDeathRecipient(dataObserver->AsObject())) {
         return ADD_OBS_DEATH_RECIPIENT_FAILED;
     }
-    auto node = nodes_.emplace(uri.GetAuthority(), std::make_shared<Node>(uri.GetAuthority())).first;
-    std::vector<std::string> path;
+    auto node = nodes_.emplace(uri.GetScheme(), std::make_shared<Node>(uri.GetScheme())).first;
+    std::vector<std::string> path = { uri.GetAuthority() };
     uri.GetPathSegments(path);
     uint32_t index = 0;
     if (!node->second->AddObserver(path, index, dataObserver, isDescendants)) {
@@ -46,12 +46,12 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, const sptr<IDataAbil
 
 Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
 {
-    std::vector<std::string> path;
-    uri.GetPathSegments(path);
     uint32_t index = 0;
     uint32_t rmNum = 0;
     std::lock_guard<std::mutex> node_lock(mutex_);
-    auto node = nodes_.find(uri.GetAuthority());
+    auto node = nodes_.find(uri.GetScheme());
+    std::vector<std::string> path = { uri.GetAuthority() };
+    uri.GetPathSegments(path);
     if (node == nodes_.end()) {
         HILOG_WARN("No observers for the uri: %{public}s.", Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
@@ -85,13 +85,13 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const std::list<Uri> &uris)
     uint32_t index = 0;
     {
         std::lock_guard<std::mutex> node_lock(mutex_);
-        //GetPathSegments是非const 只能这种方式遍历
         for (auto uri : uris) {
-            path.clear();
-            uri.GetPathSegments(path);
-            index = 0;
-            auto node = nodes_.find(uri.GetAuthority());
+            auto node = nodes_.find(uri.GetScheme());
             if (node != nodes_.end()) {
+                path.clear();
+                path.emplace_back(uri.GetAuthority());
+                uri.GetPathSegments(path);
+                index = 0;
                 node->second->GetObs(path, index, obsMap, uri);
             }
         }

@@ -166,7 +166,6 @@ int DataObsMgrService::NotifyChange(const Uri &uri)
         std::lock_guard<std::mutex> lck(taskCountMutex_);
         taskCount_--;
     });
-
     if (!ret) {
         HILOG_ERROR("Post NotifyChange fail");
         return DATAOBS_SERVICE_POST_TASK_FAILED;
@@ -219,7 +218,6 @@ Status DataObsMgrService::NotifyChangeExt(const std::list<Uri> &uris)
         std::lock_guard<std::mutex> lck(taskCountExtMutex_);
         --taskCountExt_;
     });
-
     if (!ret) {
         HILOG_ERROR("Post NotifyChangeExt fail");
         return DATAOBS_SERVICE_POST_TASK_FAILED;

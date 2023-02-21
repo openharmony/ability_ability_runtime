@@ -51,7 +51,7 @@ private:
         bool fuzzySub;
     };
 
-    using ObsMapType = std::map<sptr<IDataAbilityObserver>,std::list<Uri>>;
+    using ObsMapType = std::map<sptr<IDataAbilityObserver>, std::list<Uri>>;
     using EntryListType = std::list<std::shared_ptr<Entry>>;
     using DeathRecipientRef = std::pair<sptr<IRemoteObject::DeathRecipient>, uint32_t>;
 
