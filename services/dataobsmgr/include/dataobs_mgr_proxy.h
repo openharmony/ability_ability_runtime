@@ -18,6 +18,7 @@
 
 #include "dataobs_mgr_interface.h"
 #include "iremote_proxy.h"
+#include "dataobs_mgr_errors.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -62,6 +63,35 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int NotifyChange(const Uri &uri);
+
+    /**
+     * Registers an observer to DataObsMgr specified by the given Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     * @param isDescendants, Indicates the Whether to note the change of descendants.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver, bool isDescendants);
+
+    /**
+     * Deregisters dataObserver used for DataObsMgr specified
+     *
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver);
+
+    /**
+     * Notifies the registered observers of a change to the data resource specified by Uris.
+     *
+     * @param uris, Indicates the paths of the data to operate.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status NotifyChangeExt(const std::list<Uri> &uris);
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

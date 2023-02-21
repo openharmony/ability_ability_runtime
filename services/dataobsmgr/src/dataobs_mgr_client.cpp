@@ -53,13 +53,13 @@ DataObsMgrClient::~DataObsMgrClient()
 ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
 {
     if (remoteObject_ == nullptr) {
-        ErrCode err = Connect();
-        if (err != ERR_OK) {
+        Status err = Connect();
+        if (err != SUCCESS) {
             return DATAOBS_SERVICE_NOT_CONNECTED;
         }
     }
-    sptr<IDataObsMgr> doms = iface_cast<IDataObsMgr>(remoteObject_);
-    return doms->RegisterObserver(uri, dataObserver);
+    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
+    return dataObsManger->RegisterObserver(uri, dataObserver);
 }
 
 /**
@@ -73,13 +73,13 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, const sptr<IDataAbili
 ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
 {
     if (remoteObject_ == nullptr) {
-        ErrCode err = Connect();
-        if (err != ERR_OK) {
+        Status err = Connect();
+        if (err != SUCCESS) {
             return DATAOBS_SERVICE_NOT_CONNECTED;
         }
     }
-    sptr<IDataObsMgr> doms = iface_cast<IDataObsMgr>(remoteObject_);
-    return doms->UnregisterObserver(uri, dataObserver);
+    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
+    return dataObsManger->UnregisterObserver(uri, dataObserver);
 }
 
 /**
@@ -92,25 +92,25 @@ ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, const sptr<IDataAbi
 ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
 {
     if (remoteObject_ == nullptr) {
-        ErrCode err = Connect();
-        if (err != ERR_OK) {
+        Status err = Connect();
+        if (err != SUCCESS) {
             return DATAOBS_SERVICE_NOT_CONNECTED;
         }
     }
-    sptr<IDataObsMgr> doms = iface_cast<IDataObsMgr>(remoteObject_);
-    return doms->NotifyChange(uri);
+    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
+    return dataObsManger->NotifyChange(uri);
 }
 
 /**
  * Connect dataobs manager service.
  *
- * @return Returns ERR_OK on success, others on failure.
+ * @return Returns SUCCESS on success, others on failure.
  */
-ErrCode DataObsMgrClient::Connect()
+Status DataObsMgrClient::Connect()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (remoteObject_ != nullptr) {
-        return ERR_OK;
+        return SUCCESS;
     }
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
@@ -122,8 +122,44 @@ ErrCode DataObsMgrClient::Connect()
         HILOG_ERROR("%{private}s:fail to connect DataObsMgrService", __func__);
         return GET_DATAOBS_SERVICE_FAILED;
     }
-    HILOG_DEBUG("connect DataObsMgrService success");
-    return ERR_OK;
+    return SUCCESS;
+}
+
+Status DataObsMgrClient::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+    bool isDescendants)
+{
+    if (remoteObject_ == nullptr) {
+        Status err = Connect();
+        if (err != SUCCESS) {
+            return DATAOBS_SERVICE_NOT_CONNECTED;
+        }
+    }
+    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
+    return dataObsManger->RegisterObserverExt(uri, dataObserver,isDescendants);
+}
+
+Status DataObsMgrClient::UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
+{
+    if (remoteObject_ == nullptr) {
+        Status err = Connect();
+        if (err != SUCCESS) {
+            return DATAOBS_SERVICE_NOT_CONNECTED;
+        }
+    }
+    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
+    return dataObsManger->UnregisterObserverExt(dataObserver);
+}
+
+Status DataObsMgrClient::NotifyChangeExt(const std::list<Uri> &uris)
+{
+    if (remoteObject_ == nullptr) {
+        Status err = Connect();
+        if (err != SUCCESS) {
+            return DATAOBS_SERVICE_NOT_CONNECTED;
+        }
+    }
+    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
+    return dataObsManger->NotifyChangeExt(uris);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -66,13 +66,41 @@ public:
      */
     ErrCode NotifyChange(const Uri &uri);
 
+    /**
+     * Registers an observer to DataObsMgr specified by the given Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver, bool isDescendants);
+
+    /**
+     * Deregisters observers used for DataObsMgr specified.
+     *
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    Status UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver);
+
+    /**
+     * Notifies the registered observers of a change to the data resource specified by Uris.
+     *
+     * @param uris, Indicates the paths of the data to operate.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    Status NotifyChangeExt(const std::list<Uri> &uris);
+
 private:
     /**
      * Connect dataobs manager service.
      *
-     * @return Returns ERR_OK on success, others on failure.
+     * @return Returns SUCCESS on success, others on failure.
      */
-    ErrCode Connect();
+    Status Connect();
 
     static std::mutex mutex_;
     static std::shared_ptr<DataObsMgrClient> instance_;

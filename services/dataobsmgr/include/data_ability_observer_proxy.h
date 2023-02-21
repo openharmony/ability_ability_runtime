@@ -25,12 +25,20 @@ class DataAbilityObserverProxy : public IRemoteProxy<IDataAbilityObserver> {
 public:
     explicit DataAbilityObserverProxy(const sptr<IRemoteObject> &remote);
     virtual ~DataAbilityObserverProxy();
+
     /**
      * @brief Called back to notify that the data being observed has changed.
      *
      * @param uri Indicates the path of the data to operate.
      */
     void OnChange() override;
+
+    /**
+     * @brief Called back to notify that the data being observed has changed.
+     *
+     * @param uris Indicates the path of the data to operate.
+     */
+    void OnChangeExt(std::list<Uri> uris) override;
 
 private:
     static inline BrokerDelegator<DataAbilityObserverProxy> delegator_;
