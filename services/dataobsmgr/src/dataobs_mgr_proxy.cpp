@@ -53,7 +53,7 @@ int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, const sptr<IDataAb
     }
 
     auto error = Remote()->SendRequest(IDataObsMgr::REGISTER_OBSERVER, data, reply, option);
-    if (error != 0) {
+    if (error != NO_ERROR) {
         HILOG_ERROR("register observer fail, error: %d", error);
         return error;
     }
