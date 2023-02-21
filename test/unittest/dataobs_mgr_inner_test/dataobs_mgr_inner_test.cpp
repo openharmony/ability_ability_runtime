@@ -19,20 +19,21 @@
 #include "uri.h"
 #define private public
 #include "data_ability_observer_proxy.h"
-#include "dataobs_mgr_inner.h"
 #include "dataobs_mgr_errors.h"
+#include "dataobs_mgr_inner.h"
 #include "mock_data_ability_observer_stub.h"
 
 using namespace OHOS;
 using namespace testing::ext;
 using namespace testing;
 
-using Uri = OHOS::Uri;
-using ObsListType = OHOS::AAFwk::DataObsMgrInner::ObsListType;
-using ObsRecipientMapType = OHOS::AAFwk::DataObsMgrInner::ObsRecipientMapType;
 
 namespace OHOS {
 namespace AAFwk {
+using Uri = OHOS::Uri;
+using ObsListType = std::list<sptr<IDataAbilityObserver>>;
+using ObsRecipientMapType = OHOS::AAFwk::DataObsMgrInner::ObsRecipientMapType;
+using ObsPairType = DataObsMgrInner::ObsPairType;
 class DataObsMgrInnerTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -41,16 +42,13 @@ public:
     void TearDown();
     std::shared_ptr<DataObsMgrInner> dataObsMgrInner_ = nullptr;
 };
-void DataObsMgrInnerTest::SetUpTestCase(void)
-{}
-void DataObsMgrInnerTest::TearDownTestCase(void)
-{}
+void DataObsMgrInnerTest::SetUpTestCase(void) {}
+void DataObsMgrInnerTest::TearDownTestCase(void) {}
 void DataObsMgrInnerTest::SetUp()
 {
     std::shared_ptr<DataObsMgrInner> dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
 }
-void DataObsMgrInnerTest::TearDown()
-{}
+void DataObsMgrInnerTest::TearDown() {}
 
 /*
  * Feature: DataObsMgrInner
@@ -245,48 +243,6 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0300, TestSize.
 
 /*
  * Feature: DataObsMgrInner
- * Function: Unregister function test
- * SubFunction: CheckRegisteFull
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription:NA
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_CheckRegisteFull_0100, TestSize.Level1)
-{
-    std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
-    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    ObsListType obsList;
-    while (obsList.size() < dataObsMgrInner->obs_max_) {
-        obsList.push_back(nullptr);
-    }
-    dataObsMgrInner->obsmap_.emplace(uri.ToString(), obsList);
-    bool res = dataObsMgrInner->CheckRegisteFull(uri);
-    EXPECT_TRUE(res);
-}
-
-/*
- * Feature: DataObsMgrInner
- * Function: Unregister function test
- * SubFunction: CheckRegisteFull
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription:NA
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_CheckRegisteFull_0200, TestSize.Level1)
-{
-    std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
-    Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
-    sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
-    ObsListType obsList;
-    obsList.push_back(callback);
-    dataObsMgrInner->obsmap_.emplace(uri.ToString(), obsList);
-    bool res = dataObsMgrInner->CheckRegisteFull(uri);
-    EXPECT_FALSE(res);
-}
-
-/*
- * Feature: DataObsMgrInner
  * Function: GetObsListFromMap/RemoveObsFromMap/ObsExistInMap function test
  * SubFunction: NA
  * FunctionPoints: NA
@@ -308,24 +264,24 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_GetRemoveObsListFromMap_ObsExistIn
         new (std::nothrow) DataAbilityObserverProxy(mockDataAbilityObserverStub2));
 
     dataObsMgrInner_->HandleRegisterObserver(uri, callback2);
-    ObsListType obslist;
-    dataObsMgrInner_->GetObsListFromMap(uri, obslist);
-    EXPECT_EQ((std::size_t)2, obslist.size());
+    ObsPairType obsPair;
+    dataObsMgrInner_->GetObsListFromMap(uri, obsPair);
+    EXPECT_EQ((std::size_t)2, obsPair->second.size());
     EXPECT_EQ(true, dataObsMgrInner_->ObsExistInMap(callback));
     EXPECT_EQ(true, dataObsMgrInner_->ObsExistInMap(callback2));
 
     dataObsMgrInner_->RemoveObsFromMap(callback->AsObject());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback));
-    obslist.clear();
-    dataObsMgrInner_->GetObsListFromMap(uri, obslist);
-    EXPECT_EQ((std::size_t)1, obslist.size());
+    obsPair->second.clear();
+    dataObsMgrInner_->GetObsListFromMap(uri, obsPair);
+    EXPECT_EQ((std::size_t)1, obsPair->second.size());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback));
 
     dataObsMgrInner_->RemoveObsFromMap(callback2->AsObject());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback2));
-    obslist.clear();
-    dataObsMgrInner_->GetObsListFromMap(uri, obslist);
-    EXPECT_EQ((std::size_t)0, obslist.size());
+    obsPair->second.clear();
+    dataObsMgrInner_->GetObsListFromMap(uri, obsPair);
+    EXPECT_EQ((std::size_t)0, obsPair->second.size());
     EXPECT_EQ(false, dataObsMgrInner_->ObsExistInMap(callback2));
 }
 
@@ -359,46 +315,6 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_AddRemove_ObsDeathRecipient_0100, 
 
     dataObsMgrInner_->recipientMap_.clear();
     dataObsMgrInner_->RemoveObsDeathRecipient(callback->AsObject());
-}
-
-/*
- * Feature: DataObsMgrInner
- * Function: Unregister function test
- * SubFunction: OnCallBackDied
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription:NA
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_OnCallBackDied_0100, TestSize.Level1)
-{
-    std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
-    dataObsMgrInner->OnCallBackDied(nullptr);
-
-    sptr<IRemoteObject> remoteObject;
-    wptr<IRemoteObject> remote(remoteObject);
-    dataObsMgrInner->SetHandler(nullptr);
-    dataObsMgrInner->OnCallBackDied(remote);
-
-    auto handler = std::make_shared<EventHandler>(AppExecFwk::EventRunner::Create());
-    dataObsMgrInner->SetHandler(handler);
-    dataObsMgrInner->OnCallBackDied(remote);
-}
-
-/*
- * Feature: DataObsMgrInner
- * Function: Unregister function test
- * SubFunction: HandleCallBackDiedTask
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription:NA
- */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleCallBackDiedTask_0100, TestSize.Level1)
-{
-    std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
-    dataObsMgrInner->HandleCallBackDiedTask(nullptr);
-
-    sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
-    dataObsMgrInner->OnCallBackDied(observer);
 }
 
 /*
