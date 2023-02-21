@@ -75,7 +75,8 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver, bool isDescendants)
+    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+        bool isDescendants)
     {
         return SUCCESS;
     }

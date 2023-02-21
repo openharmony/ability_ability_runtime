@@ -47,7 +47,6 @@ int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, const sptr<IDataAb
         HILOG_ERROR("register observer fail, dataObserver is nullptr");
         return INVALID_PARAM;
     }
-
     if (!data.WriteRemoteObject(dataObserver->AsObject())) {
         HILOG_ERROR("register observer fail, dataObserver error");
         return INVALID_PARAM;
@@ -115,7 +114,8 @@ int32_t DataObsManagerProxy::NotifyChange(const Uri &uri)
     return static_cast<Status>(reply.ReadInt32());
 }
 
-Status DataObsManagerProxy::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver, bool isDescendants)
+Status DataObsManagerProxy::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+    bool isDescendants)
 {
     MessageParcel data;
     MessageParcel reply;

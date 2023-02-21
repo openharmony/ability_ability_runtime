@@ -345,7 +345,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0100, Tes
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase1 = "dataability://Authority1/com.domainname.dataability.persondata";
-    std::string uriBase2 = "dataability://Authority2/com.domainname.dataability.persondata";
+    std::string uriBase2 = "datashare://Authority2/com.domainname.dataability.persondata";
 
     Uri uri1(uriBase1 + "/Person1");
     Uri uri12(uriBase1 + "/Person1/2");
@@ -439,11 +439,11 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0300, Tes
     EXPECT_EQ(dataObsMgrInnerExt->obsRecipientMap_.size(), 1);
 
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri13, observer), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->obsRecipientMap_.size(),1);
+    EXPECT_EQ(dataObsMgrInnerExt->obsRecipientMap_.size(), 1);
     dataObsMgrInnerExt->HandleNotifyChange({ uri13 });
 
     EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri134, observer), SUCCESS);
-    EXPECT_EQ(dataObsMgrInnerExt->obsRecipientMap_.size(),0);
+    EXPECT_EQ(dataObsMgrInnerExt->obsRecipientMap_.size(), 0);
     EXPECT_TRUE(dataObsMgrInnerExt->nodes_.empty());
     EXPECT_EQ(observer->onChangeCall_, 2);
     EXPECT_EQ(observer2->onChangeCall_, 1);
@@ -468,24 +468,24 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RegisterAndUnRegister_0100, TestSi
     sptr<MockDataAbilityObserverStub> observer2(new (std::nothrow) MockDataAbilityObserverStub());
 
     RegisterObserverUtil(dataObsMgrInnerExt, uri1, observer1, 50, false);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1,observer1, false),DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1,observer1, true),DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1,observer2, false),DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1,observer2, true),DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, false), DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer1, true), DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer2, false), DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri1, observer2, true), DATAOBS_SERVICE_OBS_LIMMIT);
 
     RegisterObserverUtil(dataObsMgrInnerExt, uri2, observer2, 30, false);
     RegisterObserverUtil(dataObsMgrInnerExt, uri2, observer1, 20, true);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2,observer1, false),DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2,observer1, true),DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2,observer2, true),DATAOBS_SERVICE_OBS_LIMMIT);
-    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2,observer2, false),DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer1, false), DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer1, true), DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer2, true), DATAOBS_SERVICE_OBS_LIMMIT);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri2, observer2, false), DATAOBS_SERVICE_OBS_LIMMIT);
 
     dataObsMgrInnerExt->HandleNotifyChange({ uri1, uri2 });
-    EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1,observer1),SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri1, observer1), SUCCESS);
     dataObsMgrInnerExt->HandleNotifyChange({ uri1, uri2 });
-    EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2,observer1),SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2, observer1), SUCCESS);
     dataObsMgrInnerExt->HandleNotifyChange({ uri1, uri2 });
-    EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2,observer2),SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleUnregisterObserver(uri2, observer2), SUCCESS);
     dataObsMgrInnerExt->HandleNotifyChange({ uri1, uri2 });
     EXPECT_EQ(observer1->onChangeCall_, 90);
     EXPECT_EQ(observer2->onChangeCall_, 90);

@@ -54,7 +54,8 @@ public:
     virtual int RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver) override;
     virtual int UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver) override;
     virtual int NotifyChange(const Uri &uri) override;
-    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver, bool isDescendants) override;
+    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+        bool isDescendants) override;
     virtual Status UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver) override;
     virtual Status NotifyChangeExt(const std::list<Uri> &uris) override;
 
