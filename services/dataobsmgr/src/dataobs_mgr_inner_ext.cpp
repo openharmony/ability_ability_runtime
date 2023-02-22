@@ -83,17 +83,15 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const std::list<Uri> &uris)
     ObsMapType obsMap;
     std::vector<std::string> path;
     uint32_t index = 0;
-    {
-        std::lock_guard<std::mutex> node_lock(mutex_);
-        for (auto uri : uris) {
-            auto node = nodes_.find(uri.GetScheme());
-            if (node != nodes_.end()) {
-                path.clear();
-                path.emplace_back(uri.GetAuthority());
-                uri.GetPathSegments(path);
-                index = 0;
-                node->second->GetObs(path, index, obsMap, uri);
-            }
+    std::lock_guard<std::mutex> node_lock(mutex_);
+    for (auto uri : uris) {
+        auto node = nodes_.find(uri.GetScheme());
+        if (node != nodes_.end()) {
+            path.clear();
+            path.emplace_back(uri.GetAuthority());
+            uri.GetPathSegments(path);
+            index = 0;
+            node->second->GetObs(path, index, obsMap, uri);
         }
     }
     if (obsMap.empty()) {
@@ -163,14 +161,12 @@ void DataObsMgrInnerExt::OnCallBackDied(const wptr<IRemoteObject> &remote)
         return;
     }
     uint32_t rmNum = 0;
-    {
-        std::lock_guard<std::mutex> node_lock(mutex_);
-        for (auto node = nodes_.begin(); node != nodes_.end();) {
-            if (node->second->RemoveObserver(dataObserver, rmNum)) {
-                nodes_.erase(node++);
-            } else {
-                node++;
-            }
+    std::lock_guard<std::mutex> node_lock(mutex_);
+    for (auto node = nodes_.begin(); node != nodes_.end();) {
+        if (node->second->RemoveObserver(dataObserver, rmNum)) {
+            nodes_.erase(node++);
+        } else {
+            node++;
         }
     }
     RemoveObsDeathRecipient(dataObserver, rmNum, true);
