@@ -29,8 +29,8 @@ JsFreeInstallObserver::JsFreeInstallObserver(NativeEngine& engine) : engine_(eng
 
 JsFreeInstallObserver::~JsFreeInstallObserver() = default;
 
-void JsFreeInstallObserver::OnInstallFinished(const std::string bundleName, const std::string abilityName,
-    const std::string startTime, int resultCode)
+void JsFreeInstallObserver::OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+    const std::string &startTime, const int &resultCode)
 {
     HILOG_DEBUG("OnInstallFinished come.");
     wptr<JsFreeInstallObserver> jsObserver = this;
@@ -48,16 +48,19 @@ void JsFreeInstallObserver::OnInstallFinished(const std::string bundleName, cons
         std::move(execute), std::move(complete)));
 }
 
-void JsFreeInstallObserver::HandleOnInstallFinished(const std::string bundleName, const std::string abilityName,
-    const std::string startTime, int resultCode)
+void JsFreeInstallObserver::HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+    const std::string &startTime, const int &resultCode)
 {
     HILOG_DEBUG("HandleOnInstallFinished begin.");
     for (auto it = jsObserverObjectList_.begin(); it != jsObserverObjectList_.end();) {
         if ((it->bundleName == bundleName) && (it->abilityName == abilityName) && (it->startTime == startTime)) {
+            if (it->callback == nullptr) {
+                continue;
+            }
             NativeValue* value = (it->callback)->Get();
             NativeValue* argv[] = { CreateJsErrorByNativeErr(engine_, resultCode) };
             CallJsFunction(value, argv, ARGC_ONE);
-            jsObserverObjectList_.erase(it);
+            it = jsObserverObjectList_.erase(it);
             HILOG_DEBUG("the size of jsObserverObjectList_:%{public}d", jsObserverObjectList_.size());
         } else {
             it++;
@@ -75,7 +78,8 @@ void JsFreeInstallObserver::CallJsFunction(NativeValue* value, NativeValue* cons
     engine_.CallFunction(value, value, argv, argc);
 }
 
-void JsFreeInstallObserver::AddJsObserverObject(const std::string bundleName, const std::string abilityName, const std::string startTime, NativeValue* jsObserverObject)
+void JsFreeInstallObserver::AddJsObserverObject(const std::string &bundleName, const std::string &abilityName,
+    const std::string &startTime, NativeValue* jsObserverObject)
 {
     HILOG_INFO("AddJsObserverObject begin.");
     if (jsObserverObject == nullptr) {
