@@ -55,8 +55,7 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_OnRemoteRequest_01
 {
     GTEST_LOG_(INFO) << "AaFwk_DataObsManagerStubTest_OnRemoteRequest_0100 start";
     std::shared_ptr<MockDataObsMgrStub> dataobs = std::make_shared<MockDataObsMgrStub>();
-    const int testVal = static_cast<int>(TEST_RETVAL_ONREMOTEREQUEST);
-    uint32_t code = IDataObsMgr::NOTIFY_CHANGE + 1;
+    uint32_t code = IDataObsMgr::TRANS_BUTT + 1;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -68,7 +67,7 @@ HWTEST_F(DataObsManagerStubTest, AaFwk_DataObsManagerStubTest_OnRemoteRequest_01
 
     const int retval = dataobs->OnRemoteRequest(code, data, reply, option);
 
-    EXPECT_EQ(testVal, retval);
+    EXPECT_EQ(-1, retval);
     GTEST_LOG_(INFO) << "AaFwk_DataObsManagerStubTest_OnRemoteRequest_0100 end";
 }
 

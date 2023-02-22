@@ -86,22 +86,23 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, const sptr<IDataAb
 
 int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
 {
+    std::list<sptr<IDataAbilityObserver>> obsList;
     std::lock_guard<std::mutex> lock_l(innerMutex_);
-
     auto obsPair = obsmap_.find(uri.ToString());
     if (obsPair == obsmap_.end()) {
         HILOG_WARN("there is no obs on the uri : %{public}s", Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
+    obsList = obsPair->second;
 
-    for (auto obs : obsPair->second) {
+    for (auto &obs : obsList) {
         if (obs != nullptr) {
             obs->OnChange();
         }
     }
 
     HILOG_DEBUG("called end on the uri : %{public}s,obs num: %{public}zu", Anonymous(uri.ToString()).c_str(),
-        obsPair->second.size());
+        obsList.size());
     return NO_ERROR;
 }
 
@@ -162,15 +163,15 @@ void DataObsMgrInner::OnCallBackDied(const wptr<IRemoteObject> &remote)
 void DataObsMgrInner::RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver)
 {
     for (auto iter = obsmap_.begin(); iter != obsmap_.end();) {
-        auto &obsPair = iter->second;
-        for (auto it = obsPair.begin(); it != obsPair.end(); it++) {
+        auto &obsList = iter->second;
+        for (auto it = obsList.begin(); it != obsList.end(); it++) {
             if ((*it)->AsObject() == dataObserver) {
                 HILOG_DEBUG("Erase an observer form list.");
-                obsPair.erase(it);
+                obsList.erase(it);
                 break;
             }
         }
-        if (obsPair.size() == 0) {
+        if (obsList.size() == 0) {
             obsmap_.erase(iter++);
         } else {
             iter++;
