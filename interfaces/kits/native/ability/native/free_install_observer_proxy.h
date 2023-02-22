@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_FREE_INSTALL_OBSERVER_STUB_H
-#define OHOS_ABILITY_RUNTIME_FREE_INSTALL_OBSERVER_STUB_H
+#ifndef OHOS_ABILITY_RUNTIME_FREE_INSTALL_OBSERVER_PROXY_H
+#define OHOS_ABILITY_RUNTIME_FREE_INSTALL_OBSERVER_PROXY_H
 
 #include "free_install_observer_interface.h"
 #include "iremote_proxy.h"
@@ -29,12 +29,13 @@ public:
     /**
      * OnInstallFinished, return free install result.
      *
-     * @param bundleName, free install bundleName
-     * @param abilityName, free install abilityName
-     * @param startTime, free install start request time
+     * @param bundleName Free install bundleName.
+     * @param abilityName Free install abilityName.
+     * @param startTime Free install start request time.
+     * @param resultCode The result of this free install.
      */
-    virtual void OnInstallFinished(const std::string bundleName, const std::string abilityName,
-        const std::string startTime, int resultCode) override;
+    virtual void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+        const std::string &startTime, const int &resultCode) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<FreeInstallObserverProxy> delegator_;
@@ -42,4 +43,4 @@ private:
 } // namespace AbilityRuntime
 } // namespace OHOS
 
-#endif // OHOS_ABILITY_RUNTIME_FREE_INSTALL_OBSERVER_STUB_H
+#endif // OHOS_ABILITY_RUNTIME_FREE_INSTALL_OBSERVER_PROXY_H
