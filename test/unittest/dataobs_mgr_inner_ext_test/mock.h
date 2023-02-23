@@ -20,9 +20,10 @@
 #include "semaphore_ex.h"
 #include "data_ability_observer_stub.h"
 #include "event_handler.h"
+#include "dataobs_mgr_inner_ext.h"
 
 namespace OHOS {
-namespace DataObsMgrInnerTest {
+namespace DataObsMgrInnerExtTest {
 class MockDataAbilityObserverStub : public AAFwk::DataAbilityObserverStub {
 public:
     void OnChange()
@@ -33,6 +34,9 @@ public:
     {
         onChangeCall_ += uris.size();
         uris_ = uris;
+        if (func) {
+            func();
+        }
     }
 
     void ReSet()
@@ -40,7 +44,6 @@ public:
         onChangeCall_.store(0);
         uris_.clear();
     }
-    //MOCK_METHOD0(OnChange, void());
 
     void Wait()
     {
@@ -63,6 +66,7 @@ private:
     std::mutex mtx_;
     std::condition_variable cv_;
     bool flag_ = false;
+    std::function<void(void)> func;
 };
 
 }  // namespace AAFwk

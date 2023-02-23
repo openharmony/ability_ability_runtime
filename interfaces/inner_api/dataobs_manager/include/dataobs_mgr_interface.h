@@ -73,7 +73,7 @@ public:
      * @param dataObserver, Indicates the IDataAbilityObserver object.
      * @param isDescendants, Indicates the Whether to note the change of descendants.
      *
-     * @return Returns ERR_OK on success, others on failure.
+     * @return Returns SUCCESS on success, others on failure.
      */
     virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
         bool isDescendants)
@@ -86,7 +86,7 @@ public:
      *
      * @param dataObserver, Indicates the IDataAbilityObserver object.
      *
-     * @return Returns ERR_OK on success, others on failure.
+     * @return Returns SUCCESS on success, others on failure.
      */
     virtual Status UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
     {
@@ -98,7 +98,7 @@ public:
      *
      * @param uris, Indicates the paths of the data to operate.
      *
-     * @return Returns ERR_OK on success, others on failure.
+     * @return Returns SUCCESS on success, others on failure.
      */
     virtual Status NotifyChangeExt(const std::list<Uri> &uris)
     {

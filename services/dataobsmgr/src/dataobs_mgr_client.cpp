@@ -52,11 +52,8 @@ DataObsMgrClient::~DataObsMgrClient()
  */
 ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
 {
-    if (remoteObject_ == nullptr) {
-        Status err = Connect();
-        if (err != SUCCESS) {
-            return DATAOBS_SERVICE_NOT_CONNECTED;
-        }
+    if (Connect() != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
     return dataObsManger->RegisterObserver(uri, dataObserver);
@@ -72,11 +69,8 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, const sptr<IDataAbili
  */
 ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
 {
-    if (remoteObject_ == nullptr) {
-        Status err = Connect();
-        if (err != SUCCESS) {
-            return DATAOBS_SERVICE_NOT_CONNECTED;
-        }
+    if (Connect() != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
     return dataObsManger->UnregisterObserver(uri, dataObserver);
@@ -91,11 +85,8 @@ ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, const sptr<IDataAbi
  */
 ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
 {
-    if (remoteObject_ == nullptr) {
-        Status err = Connect();
-        if (err != SUCCESS) {
-            return DATAOBS_SERVICE_NOT_CONNECTED;
-        }
+    if (Connect() != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
     return dataObsManger->NotifyChange(uri);
@@ -128,11 +119,8 @@ Status DataObsMgrClient::Connect()
 Status DataObsMgrClient::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
     bool isDescendants)
 {
-    if (remoteObject_ == nullptr) {
-        Status err = Connect();
-        if (err != SUCCESS) {
-            return DATAOBS_SERVICE_NOT_CONNECTED;
-        }
+    if (Connect() != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
     return dataObsManger->RegisterObserverExt(uri, dataObserver, isDescendants);
@@ -140,11 +128,8 @@ Status DataObsMgrClient::RegisterObserverExt(const Uri &uri, const sptr<IDataAbi
 
 Status DataObsMgrClient::UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
 {
-    if (remoteObject_ == nullptr) {
-        Status err = Connect();
-        if (err != SUCCESS) {
-            return DATAOBS_SERVICE_NOT_CONNECTED;
-        }
+    if (Connect() != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
     return dataObsManger->UnregisterObserverExt(dataObserver);
@@ -152,11 +137,8 @@ Status DataObsMgrClient::UnregisterObserverExt(const sptr<IDataAbilityObserver> 
 
 Status DataObsMgrClient::NotifyChangeExt(const std::list<Uri> &uris)
 {
-    if (remoteObject_ == nullptr) {
-        Status err = Connect();
-        if (err != SUCCESS) {
-            return DATAOBS_SERVICE_NOT_CONNECTED;
-        }
+    if (Connect() != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
     }
     sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
     return dataObsManger->NotifyChangeExt(uris);
