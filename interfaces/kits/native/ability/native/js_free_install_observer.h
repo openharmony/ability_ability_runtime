@@ -37,21 +37,31 @@ public:
     explicit JsFreeInstallObserver(NativeEngine& engine);
     ~JsFreeInstallObserver();
 
-    void OnInstallFinished(const std::string bundleName, const std::string abilityName,
-        const std::string startTime, int resultCode) override;
+    /**
+     * OnInstallFinished, return free install result.
+     *
+     * @param bundleName Free install bundleName.
+     * @param abilityName Free install abilityName.
+     * @param startTime Free install start request time.
+     * @param resultCode The result of this free install.
+     */
+    void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+        const std::string &startTime, const int &resultCode) override;
 
     /**
      * @brief Use for context to add an callback into the observer.
      *
-     * @param object The object about diffierent requests and callback.
+     * @param bundleName The bundleName of want.
+     * @param abilityName The abilityName of want.
+     * @param startTime The startTime that want requested.
      * @param jsObserverObject The js object instance.
      */
-    void AddJsObserverObject(const std::string bundleName, const std::string abilityName,
-        const std::string startTime, NativeValue* jsObserverObject);
+    void AddJsObserverObject(const std::string &bundleName, const std::string &abilityName,
+        const std::string &startTime, NativeValue* jsObserverObject);
 private:
     void CallJsFunction(NativeValue* value, NativeValue* const *argv, size_t argc);
-    void HandleOnInstallFinished(const std::string bundleName, const std::string abilityName,
-        const std::string startTime, int resultCode);
+    void HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+        const std::string &startTime, const int &resultCode);
     NativeEngine& engine_;
     std::vector<JsFreeInstallObserverObject> jsObserverObjectList_;
 };

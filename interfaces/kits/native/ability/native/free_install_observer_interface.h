@@ -28,12 +28,13 @@ public:
     /**
      * OnInstallFinished, return free install result.
      *
-     * @param bundleName, free install bundleName
-     * @param abilityName, free install abilityName
-     * @param startTime, free install start request time
+     * @param bundleName Free install bundleName.
+     * @param abilityName Free install abilityName.
+     * @param startTime Free install start request time.
+     * @param resultCode The result of this free install.
      */
-    virtual void OnInstallFinished(const std::string bundleName, const std::string abilityName,
-        const std::string startTime, int resultCode) = 0;
+    virtual void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+        const std::string &startTime, const int &resultCode) = 0;
 
     enum {
         ON_INSTALL_FINISHED = 1,
