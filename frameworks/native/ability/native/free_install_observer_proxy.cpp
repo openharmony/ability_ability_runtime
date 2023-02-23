@@ -33,8 +33,8 @@ bool FreeInstallObserverProxy::WriteInterfaceToken(MessageParcel &data)
     return true;
 }
 
-void FreeInstallObserverProxy::OnInstallFinished(const std::string bundleName, const std::string abilityName,
-    const std::string startTime, int resultCode)
+void FreeInstallObserverProxy::OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+    const std::string &startTime, const int &resultCode)
 {
     MessageParcel data;
     MessageParcel reply;
