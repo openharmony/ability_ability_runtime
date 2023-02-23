@@ -75,9 +75,9 @@ private:
     void RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver, uint32_t num, bool isForce = false);
     static std::string Anonymous(const std::string &name);
 
-    static constexpr uint32_t obs_max_ = 50;
+    static constexpr uint32_t OBS_NUM_MAX = 50;
 
-    std::mutex node_mutex_;
+    std::mutex nodeMutex_;
     std::map<std::string, std::shared_ptr<Node>> nodes_;
     std::map<sptr<IRemoteObject>, DeathRecipientRef> obsRecipientMap_;
 };
