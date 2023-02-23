@@ -87,7 +87,13 @@ void AtomicServiceStatusCallbackProxy::OnRemoteInstallFinished(int resultCode, c
         return;
     }
 
-    int error = Remote()->SendRequest(ON_REMOTE_FREE_INSTALL_DONE, data, reply, option);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote() is NULL");
+        return;
+    }
+
+    int error = remote->SendRequest(ON_REMOTE_FREE_INSTALL_DONE, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("OnFinished fail, error: %{public}d", error);
         return;
@@ -110,7 +116,13 @@ void AtomicServiceStatusCallbackProxy::OnRemoveTimeoutTask(const Want &want)
         return;
     }
 
-    int error = Remote()->SendRequest(ON_REMOVE_TIMEOUT_TASK, data, reply, option);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote() is NULL");
+        return;
+    }
+
+    int error = remote->SendRequest(ON_REMOVE_TIMEOUT_TASK, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("OnFinished fail, error: %{public}d", error);
         return;

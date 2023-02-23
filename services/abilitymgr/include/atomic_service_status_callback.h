@@ -31,7 +31,7 @@ class FreeInstallManager;
  */
 class AtomicServiceStatusCallback : public AtomicServiceStatusCallbackStub {
 public:
-    explicit AtomicServiceStatusCallback(const std::weak_ptr<FreeInstallManager> &server, bool isAsync);
+    AtomicServiceStatusCallback(const std::weak_ptr<FreeInstallManager> &server, bool isAsync);
     virtual ~AtomicServiceStatusCallback() = default;
 
     /**

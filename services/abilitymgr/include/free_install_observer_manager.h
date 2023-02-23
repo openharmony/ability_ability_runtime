@@ -33,21 +33,19 @@ public:
 
     int32_t RemoveObserver(const sptr<IFreeInstallObserver> &observer);
 
-    void OnInstallFinished(const std::string bundleName, const std::string abilityName,
-        const std::string startTime, int resultCode);
+    void OnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+        const std::string &startTime, const int &resultCode);
 
 private:
-    bool ObserverExist(const sptr<IFreeInstallObserver> &observer);
-    void AddObserverDeathRecipient(const sptr<IFreeInstallObserver> &observer);
-    void RemoveObserverDeathRecipient(const sptr<IFreeInstallObserver> &observer);
+    bool ObserverExistLocked(const sptr<IFreeInstallObserver> &observer);
 
     void OnObserverDied(const wptr<IRemoteObject> &remote);
 
-    void HandleOnInstallFinished(const std::string bundleName, const std::string abilityName,
-        const std::string startTime, int resultCode);
+    void HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
+        const std::string &startTime, const int &resultCode);
 
     std::mutex observerLock_;
-    std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> recipientMap_;
+    sptr<IRemoteObject::DeathRecipient> deathRecipient_;
     std::vector<sptr<IFreeInstallObserver>> observerList_;
 };
 
