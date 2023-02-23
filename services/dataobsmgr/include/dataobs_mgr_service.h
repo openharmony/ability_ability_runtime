@@ -80,7 +80,7 @@ private:
     void ShowHelp(std::string& result) const;
 
 private:
-    static constexpr std::uint32_t taskCountMax_ = 50;
+    static constexpr std::uint32_t TASK_COUNT_MAX = 50;
     std::uint32_t taskCount_ = 0;
     std::mutex taskCountMutex_;
     std::uint32_t taskCountExt_ = 0;

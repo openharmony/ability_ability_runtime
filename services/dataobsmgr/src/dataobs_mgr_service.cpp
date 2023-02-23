@@ -145,7 +145,7 @@ int DataObsMgrService::NotifyChange(const Uri &uri)
 
     {
         std::lock_guard<std::mutex> lck(taskCountMutex_);
-        if (taskCount_ >= taskCountMax_) {
+        if (taskCount_ >= TASK_COUNT_MAX) {
             HILOG_ERROR("The number of task has reached the upper limit");
             return DATAOBS_SERVICE_TASK_LIMMIT;
         }
@@ -197,7 +197,7 @@ Status DataObsMgrService::NotifyChangeExt(const std::list<Uri> &uris)
 
     {
         std::lock_guard<std::mutex> lck(taskCountExtMutex_);
-        if (taskCountExt_ >= taskCountMax_) {
+        if (taskCountExt_ >= TASK_COUNT_MAX) {
             HILOG_ERROR("The number of task has reached the upper limit");
             return DATAOBS_SERVICE_TASK_LIMMIT;
         }

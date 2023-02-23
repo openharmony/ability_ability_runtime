@@ -30,7 +30,7 @@ int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, const sptr<IDataAbil
     std::lock_guard<std::mutex> lock_l(innerMutex_);
 
     auto [obsPair, flag] =obsmap_.try_emplace(uri.ToString(), std::list<sptr<IDataAbilityObserver>>());
-    if (!flag && obsPair->second.size() > obs_max_) {
+    if (!flag && obsPair->second.size() > OBS_NUM_MAX) {
         HILOG_ERROR("The number of subscribers for this uri : %{public}s has reached the upper limit.",
             Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_OBS_LIMMIT;
@@ -184,7 +184,7 @@ void DataObsMgrInner::RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver)
 
 bool DataObsMgrInner::ObsExistInMap(const sptr<IDataAbilityObserver> &dataObserver)
 {
-    for (auto &[key,value] : obsmap_) {
+    for (auto &[key, value] : obsmap_) {
         auto obs = std::find(value.begin(), value.end(), dataObserver);
         if (obs != value.end()) {
             return true;

@@ -28,7 +28,7 @@ DataObsMgrInnerExt::~DataObsMgrInnerExt() {}
 Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
     bool isDescendants)
 {
-    std::lock_guard<std::mutex> node_lock(node_mutex_);
+    std::lock_guard<std::mutex> node_lock(nodeMutex_);
     if (!AddObsDeathRecipient(dataObserver->AsObject())) {
         return ADD_OBS_DEATH_RECIPIENT_FAILED;
     }
@@ -48,7 +48,7 @@ Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, const sptr<IDataAb
 {
     uint32_t index = 0;
     uint32_t rmNum = 0;
-    std::lock_guard<std::mutex> node_lock(node_mutex_);
+    std::lock_guard<std::mutex> node_lock(nodeMutex_);
     auto node = nodes_.find(uri.GetScheme());
     std::vector<std::string> path = { uri.GetAuthority() };
     uri.GetPathSegments(path);
@@ -66,7 +66,7 @@ Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, const sptr<IDataAb
 Status DataObsMgrInnerExt::HandleUnregisterObserver(const sptr<IDataAbilityObserver> &dataObserver)
 {
     uint32_t rmNum = 0;
-    std::lock_guard<std::mutex> node_lock(node_mutex_);
+    std::lock_guard<std::mutex> node_lock(nodeMutex_);
     for (auto node = nodes_.begin(); node != nodes_.end();) {
         if (node->second->RemoveObserver(dataObserver, rmNum)) {
             nodes_.erase(node++);
@@ -84,7 +84,7 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const std::list<Uri> &uris)
     std::vector<std::string> path;
     uint32_t index = 0;
     {
-        std::lock_guard<std::mutex> node_lock(node_mutex_);
+        std::lock_guard<std::mutex> node_lock(nodeMutex_);
         for (auto uri : uris) {
             auto node = nodes_.find(uri.GetScheme());
             if (node != nodes_.end()) {
@@ -163,7 +163,7 @@ void DataObsMgrInnerExt::OnCallBackDied(const wptr<IRemoteObject> &remote)
         return;
     }
     uint32_t rmNum = 0;
-    std::lock_guard<std::mutex> node_lock(node_mutex_);
+    std::lock_guard<std::mutex> node_lock(nodeMutex_);
     for (auto node = nodes_.begin(); node != nodes_.end();) {
         if (node->second->RemoveObserver(dataObserver, rmNum)) {
             nodes_.erase(node++);
@@ -205,7 +205,7 @@ bool DataObsMgrInnerExt::Node::AddObserver(const std::vector<std::string> &path,
     const sptr<IDataAbilityObserver> &dataObserver, bool fuzzySub)
 {
     if (path.size() == index) {
-        if (entrys_.size() >= obs_max_) {
+        if (entrys_.size() >= OBS_NUM_MAX) {
             return false;
         }
         entrys_.emplace_back(std::make_shared<Entry>(dataObserver, fuzzySub));
