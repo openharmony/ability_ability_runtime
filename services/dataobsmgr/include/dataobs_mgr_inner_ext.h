@@ -77,7 +77,7 @@ private:
 
     static constexpr uint32_t obs_max_ = 50;
 
-    std::mutex mutex_;
+    std::mutex node_mutex_;
     std::map<std::string, std::shared_ptr<Node>> nodes_;
     std::map<sptr<IRemoteObject>, DeathRecipientRef> obsRecipientMap_;
 };

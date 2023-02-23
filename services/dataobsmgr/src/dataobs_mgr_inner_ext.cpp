@@ -28,7 +28,7 @@ DataObsMgrInnerExt::~DataObsMgrInnerExt() {}
 Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
     bool isDescendants)
 {
-    std::lock_guard<std::mutex> node_lock(mutex_);
+    std::lock_guard<std::mutex> node_lock(node_mutex_);
     if (!AddObsDeathRecipient(dataObserver->AsObject())) {
         return ADD_OBS_DEATH_RECIPIENT_FAILED;
     }
@@ -48,7 +48,7 @@ Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, const sptr<IDataAb
 {
     uint32_t index = 0;
     uint32_t rmNum = 0;
-    std::lock_guard<std::mutex> node_lock(mutex_);
+    std::lock_guard<std::mutex> node_lock(node_mutex_);
     auto node = nodes_.find(uri.GetScheme());
     std::vector<std::string> path = { uri.GetAuthority() };
     uri.GetPathSegments(path);
@@ -66,7 +66,7 @@ Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, const sptr<IDataAb
 Status DataObsMgrInnerExt::HandleUnregisterObserver(const sptr<IDataAbilityObserver> &dataObserver)
 {
     uint32_t rmNum = 0;
-    std::lock_guard<std::mutex> node_lock(mutex_);
+    std::lock_guard<std::mutex> node_lock(node_mutex_);
     for (auto node = nodes_.begin(); node != nodes_.end();) {
         if (node->second->RemoveObserver(dataObserver, rmNum)) {
             nodes_.erase(node++);
@@ -83,15 +83,17 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const std::list<Uri> &uris)
     ObsMapType obsMap;
     std::vector<std::string> path;
     uint32_t index = 0;
-    std::lock_guard<std::mutex> node_lock(mutex_);
-    for (auto uri : uris) {
-        auto node = nodes_.find(uri.GetScheme());
-        if (node != nodes_.end()) {
-            path.clear();
-            path.emplace_back(uri.GetAuthority());
-            uri.GetPathSegments(path);
-            index = 0;
-            node->second->GetObs(path, index, obsMap, uri);
+    {
+        std::lock_guard<std::mutex> node_lock(node_mutex_);
+        for (auto uri : uris) {
+            auto node = nodes_.find(uri.GetScheme());
+            if (node != nodes_.end()) {
+                path.clear();
+                path.emplace_back(uri.GetAuthority());
+                uri.GetPathSegments(path);
+                index = 0;
+                node->second->GetObs(path, index, obsMap, uri);
+            }
         }
     }
     if (obsMap.empty()) {
@@ -161,7 +163,7 @@ void DataObsMgrInnerExt::OnCallBackDied(const wptr<IRemoteObject> &remote)
         return;
     }
     uint32_t rmNum = 0;
-    std::lock_guard<std::mutex> node_lock(mutex_);
+    std::lock_guard<std::mutex> node_lock(node_mutex_);
     for (auto node = nodes_.begin(); node != nodes_.end();) {
         if (node->second->RemoveObserver(dataObserver, rmNum)) {
             nodes_.erase(node++);

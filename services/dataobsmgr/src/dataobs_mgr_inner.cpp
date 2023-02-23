@@ -77,8 +77,8 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, const sptr<IDataAb
         obsmap_.erase(obsPair);
     }
 
-    if (!ObsExistInMap(*obs)) {
-        RemoveObsDeathRecipient((*obs)->AsObject());
+    if (!ObsExistInMap(dataObserver)) {
+        RemoveObsDeathRecipient(dataObserver->AsObject());
     }
 
     return NO_ERROR;
@@ -88,12 +88,14 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
 {
     std::list<sptr<IDataAbilityObserver>> obsList;
     std::lock_guard<std::mutex> lock_l(innerMutex_);
-    auto obsPair = obsmap_.find(uri.ToString());
-    if (obsPair == obsmap_.end()) {
-        HILOG_WARN("there is no obs on the uri : %{public}s", Anonymous(uri.ToString()).c_str());
-        return NO_OBS_FOR_URI;
+    {
+        auto obsPair = obsmap_.find(uri.ToString());
+        if (obsPair == obsmap_.end()) {
+            HILOG_WARN("there is no obs on the uri : %{public}s", Anonymous(uri.ToString()).c_str());
+            return NO_OBS_FOR_URI;
+        }
+        obsList = obsPair->second;
     }
-    obsList = obsPair->second;
 
     for (auto &obs : obsList) {
         if (obs != nullptr) {
@@ -182,10 +184,9 @@ void DataObsMgrInner::RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver)
 
 bool DataObsMgrInner::ObsExistInMap(const sptr<IDataAbilityObserver> &dataObserver)
 {
-    for (auto &obsCallback : obsmap_) {
-        auto &obsPair = obsCallback.second;
-        auto obs = std::find(obsPair.begin(), obsPair.end(), dataObserver);
-        if (obs != obsPair.end()) {
+    for (auto &[key,value] : obsmap_) {
+        auto obs = std::find(value.begin(), value.end(), dataObserver);
+        if (obs != value.end()) {
             return true;
         }
     }

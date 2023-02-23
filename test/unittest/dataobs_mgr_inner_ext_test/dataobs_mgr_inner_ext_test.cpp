@@ -31,9 +31,9 @@ using namespace testing;
 using Uri = OHOS::Uri;
 
 namespace OHOS {
-namespace DataObsMgrInnerTest {
+namespace DataObsMgrInnerExtTest {
 using namespace AAFwk;
-class DataObsMgrInnerTest : public testing::Test {
+class DataObsMgrInnerExtTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
@@ -46,12 +46,12 @@ public:
     bool UrisEqual(std::list<Uri> uri1, std::list<Uri> uri2);
 };
 
-void DataObsMgrInnerTest::SetUpTestCase(void) {}
-void DataObsMgrInnerTest::TearDownTestCase(void) {}
-void DataObsMgrInnerTest::SetUp() {}
-void DataObsMgrInnerTest::TearDown() {}
+void DataObsMgrInnerExtTest::SetUpTestCase(void) {}
+void DataObsMgrInnerExtTest::TearDownTestCase(void) {}
+void DataObsMgrInnerExtTest::SetUp() {}
+void DataObsMgrInnerExtTest::TearDown() {}
 
-void DataObsMgrInnerTest::RegisterObserverUtil(std::shared_ptr<DataObsMgrInnerExt> &dataObsMgrInnerExt, Uri &uri,
+void DataObsMgrInnerExtTest::RegisterObserverUtil(std::shared_ptr<DataObsMgrInnerExt> &dataObsMgrInnerExt, Uri &uri,
     const sptr<IDataAbilityObserver> &callback, uint32_t times, bool isFuzzy)
 {
     while (times-- > 0) {
@@ -59,7 +59,7 @@ void DataObsMgrInnerTest::RegisterObserverUtil(std::shared_ptr<DataObsMgrInnerEx
     }
 }
 
-bool DataObsMgrInnerTest::UrisEqual(std::list<Uri> uri1, std::list<Uri> uri2)
+bool DataObsMgrInnerExtTest::UrisEqual(std::list<Uri> uri1, std::list<Uri> uri2)
 {
     if (uri1.size() != uri2.size()) {
         return false;
@@ -87,7 +87,7 @@ bool DataObsMgrInnerTest::UrisEqual(std::list<Uri> uri1, std::list<Uri> uri2)
  * EnvConditions: NA
  * CaseDescription:Register one non-fuzzy observer one times
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0100, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0100, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority/com.domainname.dataability.persondata";
@@ -117,7 +117,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0100, TestS
  * EnvConditions: NA
  * CaseDescription:Register one non-fuzzy observer mutiple times
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0200, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0200, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority/com.domainname.dataability.persondata";
@@ -150,7 +150,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0200, TestS
 * EnvConditions: NA
 * CaseDescription:Register mutiple non-fuzzy observer mutiple times
 */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0300, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0300, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority/com.domainname.dataability.persondata";
@@ -196,7 +196,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0300, TestS
  *           2   4
  *          3
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0400, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0400, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority/com.domainname.dataability.persondata";
@@ -229,7 +229,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0400, TestS
  *           2   4 <-2*obs
  *          3     5
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0500, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0500, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority/com.domainname.dataability.persondata";
@@ -264,7 +264,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0500, TestS
  *           2   4 <-obs2
  *    obs1->3     5
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0600, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0600, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority/com.domainname.dataability.persondata";
@@ -304,7 +304,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0600, TestS
  *         2   4 <-obs2(fuzzy and nofuzzy)
  *        3     5
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0700, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0700, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority/com.domainname.dataability.persondata";
@@ -341,7 +341,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0700, TestS
  * EnvConditions: NA
  * CaseDescription:UnRegister observer
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0100, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_0100, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase1 = "dataability://Authority1/com.domainname.dataability.persondata";
@@ -376,7 +376,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0100, Tes
  * EnvConditions: NA
  * CaseDescription:UnRegister one observers mutiple times
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0200, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_0200, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
@@ -407,7 +407,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0200, Tes
  *           2   3<-2*obs1、obs2
  *        obs1->4 5<-obs2
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0300, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserver_0300, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
@@ -457,7 +457,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserver_0300, Tes
  * EnvConditions: NA
  * CaseDescription:Register and UnRegister when observers over limmit
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RegisterAndUnRegister_0100, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_RegisterAndUnRegister_0100, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
@@ -502,7 +502,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RegisterAndUnRegister_0100, TestSi
  *   10、20->2   3<-15*obs1+15*obs2
  *     20*obs1->4 5<-25*obs1+5*obs2
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserverAll_0100, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleUnregisterObserverAll_0100, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
@@ -549,7 +549,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleUnregisterObserverAll_0100, 
  * EnvConditions: NA
  * CaseDescription:DeathRecipient
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_DeathRecipient_0100, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_DeathRecipient_0100, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
@@ -601,7 +601,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_DeathRecipient_0100, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription:DeathRecipient when dataObsMgrInnerExt release
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_DeathRecipient_0200, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_DeathRecipient_0200, TestSize.Level1)
 {
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
     Uri uri(uriBase + "/Person1");
@@ -628,7 +628,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_DeathRecipient_0200, TestSize.Leve
  * EnvConditions: NA
  * CaseDescription:Add obs death recipient over max
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_AddObsDeathRecipientOverMax_0800, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_AddObsDeathRecipientOverMax_0800, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
@@ -652,7 +652,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_AddObsDeathRecipientOverMax_0800, 
  * EnvConditions: NA
  * CaseDescription:HandleRegisterObserver muti threads
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0800, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0800, TestSize.Level1)
 {
     std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
     std::vector<Uri> uris;
@@ -693,5 +693,34 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleRegisterObserver_0800, TestS
     EXPECT_EQ(observer2->onChangeCall_, 10);
 }
 
-} // namespace DataObsMgrInnerTest
+/*
+ * Feature: DataObsMgrInnerExt
+ * Function: HandleNotifyChange test
+ * SubFunction: 0100
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription:RegisterObserver when NotifyChange
+ */
+HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleNotifyChange_0100, TestSize.Level1)
+{
+    std::shared_ptr<DataObsMgrInnerExt> dataObsMgrInnerExt = std::make_shared<DataObsMgrInnerExt>();
+    std::string uriBase = "dataability://Authority1/com.domainname.dataability.persondata";
+    Uri uri(uriBase + "/Person");
+    auto sch = uri.GetScheme();
+
+    sptr<MockDataAbilityObserverStub> observer1 = (new (std::nothrow) MockDataAbilityObserverStub());
+    sptr<MockDataAbilityObserverStub> observer2 = (new (std::nothrow) MockDataAbilityObserverStub());
+    dataObsMgrInnerExt->HandleRegisterObserver(uri, observer1);
+
+    observer1->func = [&dataObsMgrInnerExt, &observer2, &uri]() {
+        EXPECT_EQ(dataObsMgrInnerExt->HandleRegisterObserver(uri, observer2), SUCCESS);
+    };
+    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ uri }), SUCCESS);
+    EXPECT_EQ(observer1->onChangeCall_, 1);
+    observer1->func = nullptr;
+    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ uri }), SUCCESS);
+    EXPECT_EQ(observer2->onChangeCall_, 1);
+}
+
+} // namespace DataObsMgrInnerExtTest
 } // namespace OHOS
