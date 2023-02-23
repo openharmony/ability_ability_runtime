@@ -53,10 +53,10 @@ public:
     /**
      * OnRemoveTimeoutTask, BMS has connected AG.
      *
-     * @param want, installed ability
+     * @param want, the want of the ability to free install.
      */
     virtual void OnRemoveTimeoutTask(const Want &want) = 0;
-    
+
 protected:
     enum IAtomicServiceStatusCallbackCmd {
         ON_FREE_INSTALL_DONE = 0,
