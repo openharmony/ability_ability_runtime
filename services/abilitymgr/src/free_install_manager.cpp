@@ -92,7 +92,7 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
         std::lock_guard<std::mutex> lock(freeInstallListLock_);
         freeInstallList_.push_back(info);
     }
-    sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this(), false);
+    sptr<AtomicServiceStatusCallback> callback = new AtomicServiceStatusCallback(weak_from_this(), isAsync);
     auto bms = AbilityUtil::GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
     AppExecFwk::AbilityInfo abilityInfo = {};
