@@ -244,7 +244,99 @@ napi_value ParticleAbilityInit(napi_env env, napi_value exports)
     };
     napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties);
 
-    return exports;
+    return reinterpret_cast<napi_value>(JsParticleAbilityInit(reinterpret_cast<NativeEngine*>(env),
+        reinterpret_cast<NativeValue*>(exports)));
+}
+
+void JsParticleAbility::Finalizer(NativeEngine *engine, void *data, void *hint)
+{
+    HILOG_INFO("JsWantAgent::Finalizer is called");
+    std::unique_ptr<JsParticleAbility>(static_cast<JsParticleAbility*>(data));
+}
+
+NativeValue* JsParticleAbility::PAConnectAbility(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsParticleAbility *me = CheckParamsAndGetThis<JsParticleAbility>(engine, info);
+    return (me != nullptr) ? me->JsConnectAbility(*engine, *info, AbilityType::UNKNOWN) : nullptr;
+}
+
+NativeValue* JsParticleAbility::PADisConnectAbility(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsParticleAbility *me = CheckParamsAndGetThis<JsParticleAbility>(engine, info);
+    return (me != nullptr) ? me->JsDisConnectAbility(*engine, *info, AbilityType::UNKNOWN) : nullptr;
+}
+
+NativeValue* JsParticleAbility::PAStartAbility(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsParticleAbility *me = CheckParamsAndGetThis<JsParticleAbility>(engine, info);
+    return (me != nullptr) ? me->JsStartAbility(*engine, *info, AbilityType::UNKNOWN) : nullptr;
+}
+
+NativeValue* JsParticleAbility::PATerminateAbility(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsParticleAbility *me = CheckParamsAndGetThis<JsParticleAbility>(engine, info);
+    return (me != nullptr) ? me->JsTerminateAbility(*engine, *info) : nullptr;
+}
+
+Ability* JsParticleAbility::GetAbility(napi_env env)
+{
+    napi_status ret;
+    napi_value global = 0;
+    const napi_extended_error_info *errorInfo = nullptr;
+    ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        napi_get_last_error_info(env, &errorInfo);
+        HILOG_ERROR("JsParticleAbility::GetAbility, get_global=%{public}d err:%{public}s",
+            ret, errorInfo->error_message);
+        return nullptr;
+    }
+    napi_value abilityObj = 0;
+    ret = napi_get_named_property(env, global, "ability", &abilityObj);
+    if (ret != napi_ok) {
+        napi_get_last_error_info(env, &errorInfo);
+        HILOG_ERROR("JsParticleAbility::GetAbility, get_named_property=%{public}d err:%{public}s",
+            ret, errorInfo->error_message);
+        return nullptr;
+    }
+    Ability* ability = nullptr;
+    ret = napi_get_value_external(env, abilityObj, (void **)&ability);
+    if (ret != napi_ok) {
+        napi_get_last_error_info(env, &errorInfo);
+        HILOG_ERROR("JsParticleAbility::GetAbility, get_value_external=%{public}d err:%{public}s",
+            ret, errorInfo->error_message);
+        return nullptr;
+    }
+    return ability;
+}
+
+NativeValue* JsParticleAbilityInit(NativeEngine *engine, NativeValue *exportObj)
+{
+    HILOG_DEBUG("JsParticleAbility is called");
+
+    if (engine == nullptr || exportObj == nullptr) {
+        HILOG_ERROR("engine or exportObj null");
+        return nullptr;
+    }
+
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(exportObj);
+    if (object == nullptr) {
+        HILOG_ERROR("object null");
+        return nullptr;
+    }
+
+    std::unique_ptr<JsParticleAbility> jsParticleAbility = std::make_unique<JsParticleAbility>();
+    jsParticleAbility->ability_ = jsParticleAbility->GetAbility(reinterpret_cast<napi_env>(engine));
+    object->SetNativePointer(jsParticleAbility.release(), JsParticleAbility::Finalizer, nullptr);
+
+    HILOG_DEBUG("JsParticleAbility BindNativeFunction called");
+    const char *moduleName = "JsParticleAbility";
+    BindNativeFunction(*engine, *object, "connectAbility", moduleName, JsParticleAbility::PAConnectAbility);
+    BindNativeFunction(*engine, *object, "disconnectAbility", moduleName, JsParticleAbility::PADisConnectAbility);
+    BindNativeFunction(*engine, *object, "startAbility", moduleName, JsParticleAbility::PAStartAbility);
+    BindNativeFunction(*engine, *object, "terminateSelf", moduleName, JsParticleAbility::PATerminateAbility);
+
+    HILOG_DEBUG("JsParticleAbility end");
+    return exportObj;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
