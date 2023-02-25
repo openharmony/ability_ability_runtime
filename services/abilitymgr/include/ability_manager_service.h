@@ -123,14 +123,46 @@ public:
     /**
      * Starts a new ability with specific start options.
      *
-     * @param want, the want of the ability to start.
+     * @param want the want of the ability to start.
      * @param startOptions Indicates the options used to start.
-     * @param callerToken, caller ability token.
-     * @param userId, Designation User ID.
+     * @param callerToken caller ability token.
+     * @param userId Designation User ID.
      * @param requestCode the resultCode of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbility(
+        const Want &want,
+        const StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE) override;
+
+    /**
+     * Starts a new ability using the original caller information.
+     *
+     * @param want the want of the ability to start.
+     * @param callerToken caller ability token.
+     * @param userId Designation User ID.
+     * @param requestCode the resultCode of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityAsCaller(
+            const Want &want,
+            const sptr<IRemoteObject> &callerToken,
+            int32_t userId = DEFAULT_INVAL_VALUE,
+            int requestCode = DEFAULT_INVAL_VALUE) override;
+
+    /**
+     * Starts a new ability using the original caller information.
+     *
+     * @param want the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param callerToken caller ability token.
+     * @param userId Designation User ID.
+     * @param requestCode the resultCode of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityAsCaller(
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,
@@ -577,7 +609,16 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int requestCode,
         int callerUid = DEFAULT_INVAL_VALUE,
-        int32_t userId = DEFAULT_INVAL_VALUE);
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        bool isStartAsCaller = false);
+
+    int StartAbilityForOptionInner(
+        const Want &want,
+        const StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken,
+        int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        bool isStartAsCaller = false);
 
     int CheckPermission(const std::string &bundleName, const std::string &permission);
 
@@ -733,10 +774,10 @@ public:
 
     bool IsAbilityControllerStartById(int32_t missionId);
 
-    void GrantUriPermission(const Want &want, int32_t validUserId, uint32_t targetTokenId);
-
     bool IsComponentInterceptionStart(const Want &want, const sptr<IRemoteObject> &callerToken,
         int requestCode, int componentStatus, AbilityRequest &request);
+
+    void NotifyHandleMoveAbility(const sptr<IRemoteObject> &abilityToken, int code);
 
     /**
      * Send not response process ID to ability manager service.
@@ -832,6 +873,8 @@ public:
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason) override;
 
     bool GetStartUpNewRuleFlag() const;
+
+    std::shared_ptr<AbilityRecord> GetFocusAbility();
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -962,7 +1005,7 @@ private:
     int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
     int PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId);
-    void UpdateCallerInfo(Want& want);
+    void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
@@ -1063,8 +1106,6 @@ private:
     std::map<uint32_t, DumpSysFuncType> dumpsysFuncMap_;
 
     int CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abilityInfo);
-    void GrantUriPermission(const Want &want, int32_t validUserId);
-    bool VerifyUriPermission(const AbilityRequest &abilityRequest, const Want &want);
 
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
@@ -1191,8 +1232,6 @@ private:
     {
         return (userId != INVALID_USER_ID && userId != U0_USER_ID && userId != GetUserId());
     }
-
-    int GetTopAbility(sptr<IRemoteObject> &token, bool needVerify);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

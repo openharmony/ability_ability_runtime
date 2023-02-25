@@ -17,8 +17,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 
-#include "uri_permission_manager_stub_impl.h"
+#include "uri_permission_manager_stub.h"
 #include "message_parcel.h"
 #include "securec.h"
 
@@ -30,6 +31,26 @@ constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 const std::u16string ABILITYMGR_INTERFACE_TOKEN = u"ohos.aafwk.UriPermissionManager";
 }
+
+class UriPermissionManagerStubFuzzTest : public UriPermissionManagerStub {
+public:
+    UriPermissionManagerStubFuzzTest() = default;
+    virtual ~UriPermissionManagerStubFuzzTest()
+    {}
+    bool GrantUriPermission(const Uri &uri, unsigned int flag,
+        const Security::AccessToken::AccessTokenID fromTokenId,
+        const Security::AccessToken::AccessTokenID targetTokenId) override
+    {
+        return true;
+    }
+    bool VerifyUriPermission(const Uri &uri, unsigned int flag,
+        const Security::AccessToken::AccessTokenID tokenId) override
+    {
+        return true;
+    }
+    void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
+    {}
+};
 
 uint32_t GetU32Data(const char* ptr)
 {
@@ -47,7 +68,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     parcel.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    sptr<UriPermissionManagerStubImpl> uripermissionMgr = new UriPermissionManagerStubImpl();
+    sptr<UriPermissionManagerStub> uripermissionMgr = new UriPermissionManagerStubFuzzTest();
     uripermissionMgr->OnRemoteRequest(code, parcel, reply, option);
 
     return true;
