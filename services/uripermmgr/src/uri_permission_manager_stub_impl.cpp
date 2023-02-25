@@ -33,7 +33,7 @@ namespace AAFwk {
 const int32_t DEFAULT_USER_ID = 0;
 using TokenId = Security::AccessToken::AccessTokenID;
 
-void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
+bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
     const TokenId fromTokenId, const TokenId targetTokenId)
 {
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
@@ -49,7 +49,7 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
 
     if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: The param flag is invalid.");
-        return;
+        return false;
     }
     unsigned int tmpFlag = 0;
     if (flag & Want::FLAG_AUTH_WRITE_URI_PERMISSION) {
@@ -78,14 +78,17 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     if (scheme != "file" && scheme != "dataShare") {
         HILOG_WARN("only support file or dataShare uri.");
         return;
+    auto storageMgrProxy = ConnectStorageManager();
+    if (storageMgrProxy == nullptr) {
+        HILOG_ERROR("ConnectStorageManager failed");
+        return false;
     }
 
     auto uriStr = uri.ToString();
-    auto storageMgrProxy = ConnectStorageManager();
     auto ret = storageMgrProxy->CreateShareFile(uriStr, targetTokenId, tmpFlag);
     if (ret != 0 && ret != -EEXIST) {
         HILOG_ERROR("storageMgrProxy failed to CreateShareFile.");
-        return;
+        return false;
     }
     std::lock_guard<std::mutex> guard(mutex_);
     auto search = uriMap_.find(uriStr);
@@ -101,7 +104,7 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     if (search == uriMap_.end()) {
         std::list<GrantInfo> infoList = { info };
         uriMap_.emplace(uriStr, infoList);
-        return;
+        return true;
     }
     auto& infoList = search->second;
     for (auto& item : infoList) {
@@ -111,10 +114,11 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
                 item.flag = tmpFlag;
             }
             HILOG_INFO("uri permission has granted, not to grant again.");
-            return;
+            return true;
         }
     }
     infoList.emplace_back(info);
+    return true;
 }
 
 void UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
