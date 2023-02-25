@@ -477,6 +477,48 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     HILOG_INFO("application is terminated");
 }
 
+int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+
+    int32_t result = VerifyProcessPermission();
+    if (result != ERR_OK) {
+        HILOG_ERROR("Permission verification failed");
+        return result;
+    }
+
+    if (remoteClientManager_ == nullptr) {
+        HILOG_ERROR("remoteClientManager_ fail");
+        return ERR_NO_INIT;
+    }
+
+    auto bundleMgr_ = remoteClientManager_->GetBundleManager();
+    if (bundleMgr_ == nullptr) {
+        HILOG_ERROR("GetBundleManager fail");
+        return ERR_NO_INIT;
+    }
+    auto userId = GetUserIdByUid(uid);
+    ApplicationInfo appInfo;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetApplicationInfo");
+    bool bundleMgrResult = bundleMgr_->GetApplicationInfo(bundleName,
+        ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo);
+    if (!bundleMgrResult) {
+        HILOG_ERROR("GetApplicationInfo is fail");
+        return ERR_INVALID_OPERATION;
+    }
+
+    HILOG_DEBUG("uid value is %{public}d", uid);
+    result = appRunningManager_->ProcessUpdateApplicationInfoInstalled(appInfo);
+    if (result != ERR_OK) {
+        HILOG_INFO("The process corresponding to the package name did not start");
+    }
+
+    return result;
+}
+
 int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
 {
     if (!appRunningManager_) {
@@ -484,10 +526,10 @@ int32_t AppMgrServiceInner::KillApplication(const std::string &bundleName)
         return ERR_NO_INIT;
     }
 
-    auto errCode = VerifyProcessPermission();
-    if (errCode != ERR_OK) {
-        HILOG_ERROR("%{public}s: Permission verification failed", __func__);
-        return errCode;
+    auto result = VerifyProcessPermission(bundleName);
+    if (result != ERR_OK) {
+        HILOG_ERROR("Permission verification failed.");
+        return result;
     }
 
     return KillApplicationByBundleName(bundleName);
@@ -500,13 +542,13 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
         return ERR_NO_INIT;
     }
 
-    auto errCode = VerifyProcessPermission();
-    if (errCode != ERR_OK) {
-        HILOG_ERROR("%{public}s: Permission verification failed", __func__);
-        return errCode;
+    auto result = VerifyProcessPermission(bundleName);
+    if (result != ERR_OK) {
+        HILOG_ERROR("Permission verification failed.");
+        return result;
     }
 
-    int result = ERR_OK;
+    result = ERR_OK;
     int64_t startTime = SystemTimeMillisecond();
     std::list<pid_t> pids;
     if (remoteClientManager_ == nullptr) {
@@ -1394,6 +1436,13 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         return;
     }
 
+    HspList hspList;
+    ErrCode ret = bundleMgr_->GetBaseSharedPackageInfos(bundleName, userId, hspList);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("GetBaseSharedPackageInfos failed: %d", ret);
+        return;
+    }
+
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
     auto token = bundleInfo.applicationInfo.accessTokenId;
@@ -1418,6 +1467,8 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.bundleIndex = bundleIndex;
     startMsg.setAllowInternet = setAllowInternet;
     startMsg.allowInternet = allowInternet;
+    startMsg.hspList = hspList;
+
     HILOG_DEBUG("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",
         startMsg.apl.c_str(), bundleName.c_str(), startFlags);
 
@@ -1537,13 +1588,6 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     }
 
     FinishUserTestLocked("App died", -1, appRecord);
-
-    // clear uri permission
-    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    auto appInfo = appRecord->GetApplicationInfo();
-    if (appInfo && upmClient) {
-        upmClient->RemoveUriPermission(appInfo->accessTokenId);
-    }
     appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_REMOTE_DIED);
 
     for (const auto &item : appRecord->GetAbilities()) {
@@ -2556,6 +2600,65 @@ int AppMgrServiceInner::VerifyProcessPermission() const
     return isCallingPerm ? ERR_OK : ERR_PERMISSION_DENIED;
 }
 
+int AppMgrServiceInner::VerifyProcessPermission(const std::string &bundleName) const
+{
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+    if (isSaCall || isShellCall) {
+        return ERR_OK;
+    }
+
+    if (VerifyAPL()) {
+        return ERR_OK;
+    }
+
+    auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES);
+    if (isCallingPerm) {
+        auto callerPid = IPCSkeleton::GetCallingPid();
+        auto appRecord = GetAppRunningRecordByPid(callerPid);
+        if (!appRecord || appRecord->GetBundleName() != bundleName) {
+            HILOG_ERROR("Permission verification failed.");
+            return ERR_PERMISSION_DENIED;
+        }
+    } else {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
+    }
+    
+    return ERR_OK;
+}
+
+int AppMgrServiceInner::VerifyProcessPermission(const sptr<IRemoteObject> &token) const
+{
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (isSaCall) {
+        return ERR_OK;
+    }
+
+    if (VerifyAPL()) {
+        return ERR_OK;
+    }
+
+    auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES);
+    if (isCallingPerm) {
+        auto callerUid = IPCSkeleton::GetCallingUid();
+        auto appRecord = GetAppRunningRecordByAbilityToken(token);
+        if (!appRecord || appRecord->GetUid() != callerUid) {
+            HILOG_ERROR("Permission verification failed.");
+            return ERR_PERMISSION_DENIED;
+        }
+    } else {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
+    }
+    
+    return ERR_OK;
+}
+
 bool AppMgrServiceInner::VerifyAPL() const
 {
     if (!appRunningManager_) {
@@ -2618,7 +2721,7 @@ int AppMgrServiceInner::PreStartNWebSpawnProcess(const pid_t hostPid)
         return ERR_INVALID_VALUE;
     }
 
-    auto appRecord = appRunningManager_->GetAppRunningRecordByRenderPid(hostPid);
+    auto appRecord = appRunningManager_->GetAppRunningRecordByPid(hostPid);
     if (!appRecord) {
         HILOG_ERROR("no such app Record, pid:%{public}d", hostPid);
         return ERR_INVALID_VALUE;
@@ -2794,6 +2897,14 @@ uint32_t AppMgrServiceInner::BuildStartFlags(const AAFwk::Want &want, const Abil
     if (abilityInfo.extensionAbilityType == ExtensionAbilityType::BACKUP) {
         startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::BACKUP_EXTENSION);
     }
+
+    if (abilityInfo.applicationInfo.debug) {
+        startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::DEBUGGABLE);
+    }
+    if (abilityInfo.applicationInfo.asanEnabled) {
+	startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::ASANENABLED);
+    }
+
     return startFlags;
 }
 

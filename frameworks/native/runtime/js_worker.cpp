@@ -46,6 +46,8 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr int64_t ASSET_FILE_MAX_SIZE = 32 * 1024 * 1024;
+const std::string BUNDLE_NAME_FLAG = "@bundle:";
+const std::string CACHE_DIRECTORY = "el2";
 #ifdef APP_USE_ARM
 constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/libark_debugger.z.so";
 #else
@@ -104,13 +106,29 @@ struct AssetHelper final {
     using Extractor = AbilityBase::Extractor;
     using ExtractorUtil = AbilityBase::ExtractorUtil;
     using BundleMgrProxy = AppExecFwk::BundleMgrProxy;
-    explicit AssetHelper(const std::string& codePath, bool isDebugVersion, const std::string& bundleName,
-                         const int32_t& uid)
-        : codePath_(codePath), isDebugVersion_(isDebugVersion), bundleName_(bundleName), uid_(uid)
+    explicit AssetHelper(const std::string& codePath, bool isDebugVersion, bool isBundle)
+              : codePath_(codePath), isDebugVersion_(isDebugVersion), isBundle_(isBundle)
     {
         if (!codePath_.empty() && codePath.back() != '/') {
             codePath_.append("/");
         }
+    }
+
+    std::string NormalizedFileName(const std::string& fileName) const
+    {
+        std::string normalizedFilePath;
+        size_t index = 0;
+        index = fileName.find_last_of(".");
+        // 1.1 end with file name
+        // 1.2 end with file name and file type
+        if (index == std::string::npos) {
+            HILOG_DEBUG("uri end without file type");
+            normalizedFilePath = fileName + ".abc";
+        } else {
+            HILOG_DEBUG("uri end with file type");
+            normalizedFilePath = fileName.substr(0, index) + ".abc";
+        }
+        return normalizedFilePath;
     }
 
     void operator()(const std::string& uri, std::vector<uint8_t>& content, std::string &ami) const
@@ -121,22 +139,66 @@ struct AssetHelper final {
         }
 
         HILOG_INFO("RegisterAssetFunc called, uri: %{private}s", uri.c_str());
-        size_t index = uri.find_last_of(".");
-        if (index == std::string::npos) {
-            HILOG_ERROR("Invalid uri");
-            return;
-        }
+        std::string realPath;
+        std::string filePath;
 
-        std::string filePath = uri.substr(0, index) + ".abc";
-        ami = codePath_ + filePath;
-        HILOG_INFO("Get asset, ami: %{private}s", ami.c_str());
-        std::string flag = "el2";
-        if (ami.find(flag) != std::string::npos) {
-            if (!ReadAmiData(ami, content)) {
-                HILOG_ERROR("Get asset content by ami failed.");
+        // 1. compilemode is jsbundle
+        // 2. compilemode is esmodule
+        if (isBundle_) {
+            // 1.1 start with @bundle:bundlename/modulename
+            // 1.2 start with /modulename
+            // 1.3 start with modulename
+            HILOG_DEBUG("The application is packaged using jsbundle mode.");
+            if (uri.find(BUNDLE_NAME_FLAG) == 0) {
+                size_t index = 0;
+                HILOG_DEBUG("uri start with @bundle:");
+                index = uri.find_first_of("/");
+                realPath = uri.substr(index + 1);
+            } else if (uri.find_first_of("/") == 0) {
+                HILOG_DEBUG("uri start with /modulename");
+                realPath = uri.substr(1);
+            } else {
+                HILOG_DEBUG("uri start with modulename");
+                realPath = uri;
             }
-        } else if (!ReadFilePathData(filePath, content)) {
-            HILOG_ERROR("Get asset content by filepath failed.");
+
+            filePath = NormalizedFileName(realPath);
+            ami = codePath_ + filePath;
+            HILOG_DEBUG("Get asset, ami: %{private}s", ami.c_str());
+            if (ami.find(CACHE_DIRECTORY) != std::string::npos) {
+                if (!ReadAmiData(ami, content)) {
+                    HILOG_ERROR("Get asset content by ami failed.");
+                }
+            } else if (!ReadFilePathData(filePath, content)) {
+                HILOG_ERROR("Get asset content by filepath failed.");
+            }
+        } else {
+            // 2.1 start with @bundle:bundlename/modulename
+            // 2.2 start with /modulename
+            // 2.3 start with modulename
+            HILOG_DEBUG("The application is packaged using esmodule mode.");
+            if (uri.find(BUNDLE_NAME_FLAG) == 0) {
+                HILOG_DEBUG("uri start with @bundle:");
+                size_t fileNamePos = uri.find_last_of("/");
+                realPath = uri.substr(fileNamePos + 1);
+                if (realPath.find_last_of(".") != std::string::npos) {
+                    ami = NormalizedFileName(uri);
+                } else {
+                    ami = uri;
+                }
+                HILOG_DEBUG("Get asset, ami: %{private}s", ami.c_str());
+                return;
+            } else if (uri.find_first_of("/") == 0) {
+                HILOG_DEBUG("uri start with /modulename");
+                realPath = uri.substr(1);
+            } else {
+                HILOG_DEBUG("uri start with modulename");
+                realPath = uri;
+            }
+
+            filePath = NormalizedFileName(realPath);
+            ami = codePath_ + filePath;
+            HILOG_DEBUG("Get asset, ami: %{private}s", ami.c_str());
         }
     }
 
@@ -155,7 +217,7 @@ struct AssetHelper final {
             return nullptr;
         }
 
-        HILOG_INFO("get bundle manager proxy success.");
+        HILOG_DEBUG("get bundle manager proxy success.");
         return iface_cast<BundleMgrProxy>(remoteObject);
     }
 
@@ -188,20 +250,6 @@ struct AssetHelper final {
 
     bool ReadFilePathData(const std::string& filePath, std::vector<uint8_t>& content) const
     {
-        bool newCreate = false;
-        size_t fileLen = 0;
-        size_t pos = 0;
-        std::string fileSrc = filePath;
-        while (pos == 0) {
-            pos = fileSrc.find('/');
-            if (pos == 0) {
-                fileSrc = fileSrc.substr(1);
-            }
-        }
-        if (bundleName_.empty()) {
-            HILOG_ERROR("BundleName is nullptr.");
-            return false;
-        }
         auto bundleMgrProxy = GetBundleMgrProxy();
         if (!bundleMgrProxy) {
             HILOG_ERROR("bundle mgr proxy is nullptr.");
@@ -209,15 +257,10 @@ struct AssetHelper final {
         }
 
         AppExecFwk::BundleInfo bundleInfo;
-        int32_t userId = uid_ / BASE_USER_RANGE;
-        if (userId < 0) {
-            HILOG_ERROR("get userId failed.");
-            return false;
-        }
-        auto getInfoResult = bundleMgrProxy->GetBundleInfoV9(bundleName_,
-            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo, userId);
+        auto getInfoResult = bundleMgrProxy->GetBundleInfoForSelf(
+                     static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
         if (getInfoResult != 0) {
-            HILOG_ERROR("GetBundleInfo failed through %{private}s.", bundleName_.c_str());
+            HILOG_ERROR("GetBundleInfoForSelf failed.");
             return false;
         }
         if (bundleInfo.hapModuleInfos.size() == 0) {
@@ -225,13 +268,15 @@ struct AssetHelper final {
             return false;
         }
         std::string newHapPath;
+        size_t pos = filePath.find('/');
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
-            if (hapModuleInfo.moduleName == fileSrc.substr(0, pos)) {
+            if (hapModuleInfo.moduleName == filePath.substr(0, pos)) {
                 newHapPath = hapModuleInfo.hapPath;
                 break;
             }
         }
 
+        bool newCreate = false;
         std::string loadPath = ExtractorUtil::GetLoadFilePath(newHapPath);
         std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
         if (extractor == nullptr) {
@@ -239,8 +284,9 @@ struct AssetHelper final {
             return false;
         }
         std::unique_ptr<uint8_t[]> dataPtr = nullptr;
-        std::string realfilePath = fileSrc.substr(pos + 1);
-        HILOG_INFO("Get asset, realfilePath: %{private}s", realfilePath.c_str());
+        std::string realfilePath = filePath.substr(pos + 1);
+        size_t fileLen = 0;
+        HILOG_DEBUG("Get asset, realfilePath: %{private}s", realfilePath.c_str());
         if (!extractor->ExtractToBufByName(realfilePath, dataPtr, fileLen)) {
             HILOG_ERROR("get mergeAbc fileBuffer failed");
             return false;
@@ -255,8 +301,7 @@ struct AssetHelper final {
 
     std::string codePath_;
     bool isDebugVersion_ = false;
-    std::string bundleName_;
-    int32_t uid_;
+    bool isBundle_ = true;
 };
 
 int32_t GetContainerId()
@@ -283,12 +328,11 @@ ContainerScope::UpdateCurrent(-1);
 }
 }
 
-void InitWorkerModule(NativeEngine& engine, const std::string& codePath,
-    bool isDebugVersion, const std::string& bundleName, const int32_t& uid)
+void InitWorkerModule(NativeEngine& engine, const std::string& codePath, bool isDebugVersion, bool isBundle)
 {
     engine.SetInitWorkerFunc(InitWorkerFunc);
     engine.SetOffWorkerFunc(OffWorkerFunc);
-    engine.SetGetAssetFunc(AssetHelper(codePath, isDebugVersion, bundleName, uid));
+    engine.SetGetAssetFunc(AssetHelper(codePath, isDebugVersion, isBundle));
 
     engine.SetGetContainerScopeIdFunc(GetContainerId);
     engine.SetInitContainerScopeFunc(UpdateContainerScope);

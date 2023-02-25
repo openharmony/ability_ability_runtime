@@ -74,6 +74,8 @@
 #endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "container_manager_client.h"
 
+#include "ability_bundle_event_callback.h"
+
 using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
 
@@ -104,155 +106,15 @@ const std::string BUNDLE_NAME_LAUNCHER = "com.ohos.launcher";
 const std::string BUNDLE_NAME_SYSTEMUI = "com.ohos.systemui";
 const std::string BUNDLE_NAME_SETTINGSDATA = "com.ohos.settingsdata";
 const std::string BUNDLE_NAME_DEVICE_TEST = "com.ohos.devicetest";
-const std::string BUNDLE_NAME_INPUTMETHOD_TEST = "com.acts.inputmethodtest";
-const std::string BUNDLE_NAME_TELE_DATA = "com.ohos.telephonydataability";
-const std::string BUNDLE_NAME_CONTACTS_DATA = "com.ohos.contactsdataability";
-const std::string BUNDLE_NAME_NOTE = "com.ohos.note";
-const std::string BUNDLE_NAME_PHOTO = "com.ohos.photos";
-const std::string BUNDLE_NAME_SCREENSHOT = "com.huawei.ohos.screenshot";
 const std::string BUNDLE_NAME_SERVICE_TEST = "com.amsst.stserviceabilityclient";
-const std::string BUNDLE_NAME_SINGLE_TEST = "com.singleusermodel.actssingleusertest";
-const std::string BUNDLE_NAME_FREEINSTALL_TEST = "com.example.qianyiyingyong.hmservice";
-const std::string BUNDLE_NAME_FREEINSTALL_SEC_TEST = "com.open.harmony.startAbility";
-const std::string BUNDLE_NAME_APP_SELECT_TEST = "com.example.appselectortest";
-const std::string BUNDLE_NAME_APP_SELECTPC_TEST = "com.example.appselectorpctest";
-const std::string BUNDLE_NAME_USERS_SYSTEM_TEST = "com.acts.actsinterfacemultiuserstest";
-const std::string BUNDLE_NAME_USERS_THIRD_SYSTEM_TEST = "com.acts.actsinterfacemultiusersthirdtest";
-const std::string BUNDLE_NAME_SINGLE_USER_TEST = "com.singleusermodel.actssingleusertest";
-const std::string BUNDLE_NAME_MUTIUSER_TEST = "com.acts.actsinterfacemultiusersextensiontest";
-const std::string BUNDLE_NAME_PER_THRID_TEST = "com.example.actsabilitypermissionthirdtest";
 const std::string BUNDLE_NAME_SERVICE_SERVER_TEST = "com.amsst.stserviceabilityserver";
 const std::string BUNDLE_NAME_SERVICE_SERVER2_TEST = "com.amsst.stserviceabilityserversecond";
-const std::string BUNDLE_NAME_APPSELECT_SERVER_TEST = "bserviceabilityrelyhap";
-// New XTS white list
-const std::string BUNDLE_NAME_ABILITY_USER_TEST = "com.example.actsabilityusertest";
-const std::string BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE_TEST = "com.ohos.st.formstatenotifyinvisibletest";
-const std::string BUNDLE_NAME_FORM_STRESS_TEST = "com.ohos.st.formstresstest";
-const std::string BUNDLE_NAME_FORM_RELEASE_TEST = "com.ohos.st.formreleasetest";
-const std::string BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE2_TEST = "com.ohos.st.formstatenotifyinvisibletest2";
-const std::string BUNDLE_NAME_FORM_STATE_NOTIFY_VISIBLE_TEST = "com.ohos.st.formstatenotifyvisibletest";
-const std::string BUNDLE_NAME_FORM_STATE_DISABLE_TEST = "com.ohos.st.formstatedisabletest";
-const std::string BUNDLE_NAME_FORM_STATE_ENABLE_TEST = "com.ohos.st.formstateenabletest";
-const std::string BUNDLE_NAME_FORM_UPDATE_REFRESH_TEST = "com.ohos.st.formupdaterefreshtest";
-const std::string BUNDLE_NAME_FORM_DELETE_TEST = "com.ohos.st.formdeletetest";
-const std::string BUNDLE_NAME_FORM_ACQUIRE_TEST = "com.ohos.st.formacquiretest";
-const std::string BUNDLE_NAME_FORM_ACQUIRE2_TEST = "com.ohos.st.formacquiretest2";
-const std::string BUNDLE_NAME_FORM_DYNAMIC_REFRESH_TEST = "com.ohos.st.formdynamicrefreshtest";
-const std::string BUNDLE_NAME_HMS_SERVICE_TEST = "com.example.myapplication.hmservice";
-const std::string BUNDLE_NAME_PACKAGE_MAG_TEST = "com.open.harmony.packagemag";
-const std::string BUNDLE_NAME_ACTS_MULTIUSER_EXTENSION_TEST = "com.acts.actsinterfacemultiusersextensionthirdtest";
-const std::string BUNDLE_NAME_TEST_API_TEST = "com.example.testapi";
-const std::string BUNDLE_NAME_APPLICATION_INFO_TEST = "com.example.applicationinfo";
-const std::string BUNDLE_NAME_FEATURE_ABILITY_TEST = "com.example.actsfeatureabilitytest";
-const std::string BUNDLE_NAME_GET_APP_CONTEXT_STAGE_B_TEST = "com.example.actsgetappcontextstagebtest";
-const std::string BUNDLE_NAME_GET_CUR_TOP_ABILITY_B_TEST = "com.example.actsgetcurrenttopabilitystagebtest";
-const std::string BUNDLE_NAME_GET_CUR_TOP_ABILITY_A_TEST = "com.example.actsgetcurrenttopabilitystageatest";
-const std::string BUNDLE_NAME_GET_APP_CONTEXT_TEST = "com.example.actsgetappcontexttest";
-const std::string BUNDLE_NAME_GET_ABILITY_STATE_TEST = "com.example.actsgetabilitystatestagetest";
-const std::string BUNDLE_NAME_GET_APP_CONTEXT_STAGE_A_TEST = "com.example.actsgetappcontextstageatest";
-const std::string BUNDLE_NAME_KILL_PROCESS_WITH_ACCOUNT_TEST = "com.acts.killprocesswithaccount";
-const std::string BUNDLE_NAME_ABILITY_PERMISSION_TEST = "com.example.actsabilitypermissiontest";
-const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_C_TEST = "com.example.amsabilitymultiinstanceappc";
-const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_TEST = "com.example.abilitymultiinstance";
-const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_E_TEST = "com.example.amsabilitymultiinstanceappe";
-const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_A_TEST = "com.example.amsabilitymultiinstanceappa";
-const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_B_TEST = "com.example.amsabilitymultiinstanceappb";
-const std::string BUNDLE_NAME_ABILITY_MULTI_INSTANCE_D_TEST = "com.example.amsabilitymultiinstanceappd";
-const std::string BUNDLE_NAME_AA_PRINT_TEST = "com.example.aacommandprintsynctest";
-const std::string BUNDLE_NAME_AA_COMMAND_TEST = "com.example.aacommandtest";
-const std::string BUNDLE_NAME_AA_PRINT_ONE_TEST = "com.example.aacommandprintonetest";
-const std::string BUNDLE_NAME_ON_OFF_SCREEN_TEST = "com.example.actsonandoffscreentest";
-const std::string BUNDLE_NAME_SUPPORT_FUNC_HAP_TEST = "com.example.supportfunctionhaptest";
-const std::string BUNDLE_NAME_PROCESS_MULTI_INSTANCE_TEST = "com.example.processmultiinstance";
-const std::string BUNDLE_NAME_ABILITY_MONITOR_TEST = "com.example.abilitymonitortest";
-const std::string BUNDLE_NAME_GET_DISPLAY_ID_TEST = "com.example.actsgetdisplayidtest";
-const std::string BUNDLE_NAME_START_ABILITY_FOR_RESULT_TEST = "com.example.startabilityforresult";
-const std::string BUNDLE_NAME_STAGE_APP_CONTEXT_TEST = "com.example.stageappcontexttest";
-const std::string BUNDLE_NAME_STAGE_CONTEXT_PROPERTE_TEST = "com.example.stagecontextpropertiestest";
-const std::string BUNDLE_NAME_NEW_WANT_HAP_TEST = "com.example.newwanthap";
-const std::string BUNDLE_NAME_NEW_WANT_HAP_API7_TEST = "com.example.newwanthapapi7";
-const std::string BUNDLE_NAME_NEW_WANT_HAP_A_TEST = "com.example.newwanthapa";
-const std::string BUNDLE_NAME_NEW_WANT_TEST = "com.example.newwanttest";
-const std::string BUNDLE_NAME_API_COVER_HAP_TEST = "com.example.apicoverhaptest";
-const std::string BUNDLE_NAME_LIFE_CYCLE_TEST = "com.example.lifecycletest";
-const std::string BUNDLE_NAME_LIFE_CYCLE_XTS_TEST = "com.example.lifecycle_xts";
-const std::string BUNDLE_NAME_WINDOW_STAGE_LIFE_CYCLE_TEST = "com.example.windowstagelifecycle_xts";
 
 // White list
-const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_DEVICE_TEST,
-                                                                BUNDLE_NAME_INPUTMETHOD_TEST,
-                                                                BUNDLE_NAME_NOTE,
-                                                                BUNDLE_NAME_PHOTO,
-                                                                BUNDLE_NAME_SCREENSHOT,
-                                                                BUNDLE_NAME_SERVICE_TEST,
-                                                                BUNDLE_NAME_SINGLE_TEST,
-                                                                BUNDLE_NAME_FREEINSTALL_TEST,
-                                                                BUNDLE_NAME_FREEINSTALL_SEC_TEST,
-                                                                BUNDLE_NAME_APP_SELECT_TEST,
-                                                                BUNDLE_NAME_APP_SELECTPC_TEST,
-                                                                BUNDLE_NAME_USERS_SYSTEM_TEST,
-                                                                BUNDLE_NAME_USERS_THIRD_SYSTEM_TEST,
-                                                                BUNDLE_NAME_SINGLE_USER_TEST,
-                                                                BUNDLE_NAME_MUTIUSER_TEST,
-                                                                BUNDLE_NAME_PER_THRID_TEST,
+const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_SERVICE_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER_TEST,
-                                                                BUNDLE_NAME_APPSELECT_SERVER_TEST,
-                                                                BUNDLE_NAME_SERVICE_SERVER2_TEST,
-                                                                BUNDLE_NAME_ABILITY_USER_TEST,
-                                                                BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE_TEST,
-                                                                BUNDLE_NAME_FORM_STRESS_TEST,
-                                                                BUNDLE_NAME_FORM_RELEASE_TEST,
-                                                                BUNDLE_NAME_FORM_STATE_NOTIFY_INVISIBLE2_TEST,
-                                                                BUNDLE_NAME_FORM_STATE_NOTIFY_VISIBLE_TEST,
-                                                                BUNDLE_NAME_FORM_STATE_DISABLE_TEST,
-                                                                BUNDLE_NAME_FORM_STATE_ENABLE_TEST,
-                                                                BUNDLE_NAME_FORM_UPDATE_REFRESH_TEST,
-                                                                BUNDLE_NAME_FORM_DELETE_TEST,
-                                                                BUNDLE_NAME_FORM_ACQUIRE_TEST,
-                                                                BUNDLE_NAME_FORM_ACQUIRE2_TEST,
-                                                                BUNDLE_NAME_FORM_DYNAMIC_REFRESH_TEST,
-                                                                BUNDLE_NAME_HMS_SERVICE_TEST,
-                                                                BUNDLE_NAME_PACKAGE_MAG_TEST,
-                                                                BUNDLE_NAME_ACTS_MULTIUSER_EXTENSION_TEST,
-                                                                BUNDLE_NAME_TEST_API_TEST,
-                                                                BUNDLE_NAME_APPLICATION_INFO_TEST,
-                                                                BUNDLE_NAME_FEATURE_ABILITY_TEST,
-                                                                BUNDLE_NAME_GET_APP_CONTEXT_STAGE_B_TEST,
-                                                                BUNDLE_NAME_GET_CUR_TOP_ABILITY_B_TEST,
-                                                                BUNDLE_NAME_GET_CUR_TOP_ABILITY_A_TEST,
-                                                                BUNDLE_NAME_GET_APP_CONTEXT_TEST,
-                                                                BUNDLE_NAME_GET_ABILITY_STATE_TEST,
-                                                                BUNDLE_NAME_GET_APP_CONTEXT_STAGE_A_TEST,
-                                                                BUNDLE_NAME_KILL_PROCESS_WITH_ACCOUNT_TEST,
-                                                                BUNDLE_NAME_ABILITY_PERMISSION_TEST,
-                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_C_TEST,
-                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_TEST,
-                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_E_TEST,
-                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_A_TEST,
-                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_B_TEST,
-                                                                BUNDLE_NAME_ABILITY_MULTI_INSTANCE_D_TEST,
-                                                                BUNDLE_NAME_AA_PRINT_TEST,
-                                                                BUNDLE_NAME_AA_COMMAND_TEST,
-                                                                BUNDLE_NAME_AA_PRINT_ONE_TEST,
-                                                                BUNDLE_NAME_ON_OFF_SCREEN_TEST,
-                                                                BUNDLE_NAME_SUPPORT_FUNC_HAP_TEST,
-                                                                BUNDLE_NAME_PROCESS_MULTI_INSTANCE_TEST,
-                                                                BUNDLE_NAME_ABILITY_MONITOR_TEST,
-                                                                BUNDLE_NAME_GET_DISPLAY_ID_TEST,
-                                                                BUNDLE_NAME_START_ABILITY_FOR_RESULT_TEST,
-                                                                BUNDLE_NAME_STAGE_APP_CONTEXT_TEST,
-                                                                BUNDLE_NAME_STAGE_CONTEXT_PROPERTE_TEST,
-                                                                BUNDLE_NAME_NEW_WANT_HAP_TEST,
-                                                                BUNDLE_NAME_NEW_WANT_HAP_API7_TEST,
-                                                                BUNDLE_NAME_NEW_WANT_HAP_A_TEST,
-                                                                BUNDLE_NAME_NEW_WANT_TEST,
-                                                                BUNDLE_NAME_API_COVER_HAP_TEST,
-                                                                BUNDLE_NAME_LIFE_CYCLE_TEST,
-                                                                BUNDLE_NAME_LIFE_CYCLE_XTS_TEST,
-                                                                BUNDLE_NAME_WINDOW_STAGE_LIFE_CYCLE_TEST };
-const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_TELE_DATA,
-                                                                    BUNDLE_NAME_CONTACTS_DATA,
-                                                                    BUNDLE_NAME_DEVICE_TEST };
+                                                                BUNDLE_NAME_SERVICE_SERVER2_TEST };
+const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_DEVICE_TEST };
 } // namespace
 
 using namespace std::chrono;
@@ -452,6 +314,19 @@ bool AbilityManagerService::Init()
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     handler_->PostTask(initStartupFlagTask, "InitStartupFlag");
 
+    // Register abilityBundleEventCallback to receive hap updates
+    HILOG_INFO("Register abilityBundleEventCallback to receive hap updates.");
+    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
+        new (std::nothrow) AbilityBundleEventCallback(handler_);
+    auto bms = GetBundleManager();
+    if (bms && abilityBundleEventCallback_) {
+        bool re = bms->RegisterBundleEventCallback(abilityBundleEventCallback_);
+        if (!re) {
+            HILOG_ERROR("RegisterBundleEventCallback failed!");
+        }
+    } else {
+        HILOG_ERROR("Get BundleManager or abilieyBundleEventCallback failed!");
+    }
     HILOG_INFO("Init success.");
     return true;
 }
@@ -523,8 +398,34 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
     return ret;
 }
 
+int AbilityManagerService::StartAbilityAsCaller(const Want &want, const sptr<IRemoteObject> &callerToken,
+    int32_t userId, int requestCode)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto flags = want.GetFlags();
+    EventInfo eventInfo = BuildEventInfo(want, userId);
+    EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+    if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
+        HILOG_ERROR("StartAbility with continuation flags is not allowed!");
+        eventInfo.errCode = ERR_INVALID_VALUE;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return ERR_INVALID_CONTINUATION_FLAG;
+    }
+
+    HILOG_INFO("Start ability come, ability is %{public}s, userId is %{public}d",
+        want.GetElement().GetAbilityName().c_str(), userId);
+
+    int32_t ret = StartAbilityInner(want, callerToken, requestCode, -1, userId, true);
+    if (ret != ERR_OK) {
+        eventInfo.errCode = ret;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+    }
+    return ret;
+}
+
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
-    int requestCode, int callerUid, int32_t userId)
+    int requestCode, int callerUid, int32_t userId, bool isStartAsCaller)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     {
@@ -616,7 +517,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
     }
-    GrantUriPermission(want, validUserId);
 
     auto type = abilityInfo.type;
     if (type == AppExecFwk::AbilityType::DATA) {
@@ -648,7 +548,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
 
-    UpdateCallerInfo(abilityRequest.want);
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+    }
+
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
         auto connectManager = GetConnectManagerByUserId(validUserId);
         if (!connectManager) {
@@ -704,6 +609,9 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
+        eventInfo.errCode = result;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 
@@ -818,7 +726,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
-    UpdateCallerInfo(abilityRequest.want);
+    UpdateCallerInfo(abilityRequest.want, callerToken);
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
@@ -830,8 +738,22 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
 int AbilityManagerService::StartAbility(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
+    HILOG_DEBUG("Start ability with startOptions.");
+    return StartAbilityForOptionInner(want, startOptions, callerToken, userId, requestCode, false);
+}
+
+int AbilityManagerService::StartAbilityAsCaller(const Want &want, const StartOptions &startOptions,
+    const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
+{
+    HILOG_DEBUG("Start ability as caller with startOptions.");
+    CHECK_CALLER_IS_SYSTEM_APP;
+    return StartAbilityForOptionInner(want, startOptions, callerToken, userId, requestCode, true);
+}
+
+int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const StartOptions &startOptions,
+    const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode, bool isStartAsCaller)
+{
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Start ability options.");
     if (IsCrossUserCall(userId)) {
         CHECK_CALLER_IS_SYSTEM_APP;
     }
@@ -856,6 +778,9 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
+        eventInfo.errCode = result;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 
@@ -955,7 +880,6 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_WOULD_BLOCK;
     }
-    GrantUriPermission(want, validUserId);
     abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
     abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
     auto missionListManager = GetListManagerByUserId(oriValidUserId);
@@ -971,7 +895,11 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
         return ERR_AAFWK_INVALID_WINDOW_MODE;
     }
 #endif
-    UpdateCallerInfo(abilityRequest.want);
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+    }
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
@@ -1024,15 +952,16 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
         }
     }
 
-    GrantUriPermission(want, validUserId);
-
-    UpdateCallerInfo(abilityRequest.want);
+    UpdateCallerInfo(abilityRequest.want, nullptr);
     return ERR_OK;
 }
 
 void AbilityManagerService::SubscribeBackgroundTask()
 {
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+    if (bgtaskObserver_) {
+        return ;
+    }
     bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
     auto subscribeBackgroundTask = [aams = shared_from_this()]() {
         int attemptNums = 0;
@@ -1118,6 +1047,9 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
+        eventInfo.errCode = result;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 
@@ -1246,60 +1178,6 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
         EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
     }
     return eventInfo.errCode;
-}
-
-
-void AbilityManagerService::GrantUriPermission(const Want &want, int32_t validUserId)
-{
-    if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
-        HILOG_DEBUG("Do not call uriPermissionMgr.");
-        return;
-    }
-
-    HILOG_DEBUG("AbilityManagerService::GrantUriPermission is called.");
-    auto bms = GetBundleManager();
-    CHECK_POINTER_IS_NULLPTR(bms);
-
-    auto bundleName = want.GetBundle();
-    AppExecFwk::BundleInfo bundleInfo;
-    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, bundleInfo, validUserId))) {
-        HILOG_ERROR("Get bundle info failed.");
-        return;
-    }
-
-    auto targetTokenId = bundleInfo.applicationInfo.accessTokenId;
-    GrantUriPermission(want, validUserId, targetTokenId);
-}
-
-void AbilityManagerService::GrantUriPermission(const Want &want, int32_t validUserId, uint32_t targetTokenId)
-{
-    auto bms = GetBundleManager();
-    CHECK_POINTER_IS_NULLPTR(bms);
-    auto uriStr = want.GetUri().ToString();
-    auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
-    uriVec.emplace_back(uriStr);
-    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    auto fromTokenId = IPCSkeleton::GetCallingTokenID();
-    AppExecFwk::ExtensionAbilityInfo info;
-    for (auto str : uriVec) {
-        if (!IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(str, validUserId, info))) {
-            HILOG_WARN("Not found ExtensionAbilityInfo according to the uri.");
-            continue;
-        }
-        if (info.type != AppExecFwk::ExtensionAbilityType::FILESHARE) {
-            HILOG_WARN("The upms only open to FILESHARE. The type is %{public}u.", info.type);
-            HILOG_WARN("BundleName: %{public}s, AbilityName: %{public}s.", info.bundleName.c_str(), info.name.c_str());
-            continue;
-        }
-        if (fromTokenId != info.applicationInfo.accessTokenId) {
-            HILOG_WARN("Only the uri of this application can be authorized.");
-            continue;
-        }
-
-        Uri uri(str);
-        IN_PROCESS_CALL_WITHOUT_RET(upmClient->GrantUriPermission(uri, want.GetFlags(), fromTokenId, targetTokenId));
-    }
 }
 
 int AbilityManagerService::TerminateAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant)
@@ -1625,12 +1503,17 @@ int AbilityManagerService::ConnectAbilityCommon(
     auto result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::CONNECT_SERVICE_ERROR);
     if (result != ERR_OK) {
         HILOG_ERROR("CheckDlpForExtension error.");
+        eventInfo.errCode = result;
+        EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
+        eventInfo.errCode = result;
+        EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
 
@@ -1770,11 +1653,6 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
-    }
-
-    if (!VerifyUriPermission(abilityRequest, want)) {
-        HILOG_ERROR("The uri has not granted.");
-        return ERR_INVALID_OPERATION;
     }
 
     auto type = abilityInfo.type;
@@ -2380,11 +2258,6 @@ int32_t AbilityManagerService::GetMissionIdByToken(const sptr<IRemoteObject> &to
     HILOG_INFO("request GetMissionIdByToken.");
     if (!token) {
         HILOG_ERROR("token is invalid.");
-        return -1;
-    }
-
-    if (IPCSkeleton::GetCallingPid() != getpid()) {
-        HILOG_ERROR("%{public}s: Only support same process call.", __func__);
         return -1;
     }
 
@@ -3171,9 +3044,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
 
     auto func = []() {
         auto client = ContainerManagerClient::GetInstance();
-        if (client == nullptr) {
-            HILOG_ERROR("%{public}s get ContainerManagerClient null", __func__);
-        } else {
+        if (client != nullptr) {
             client->NotifyBootComplete(0);
             HILOG_INFO("StartSystemApplication NotifyBootComplete");
         }
@@ -3977,7 +3848,8 @@ int32_t AbilityManagerService::GetMissionIdByAbilityToken(const sptr<IRemoteObje
         HILOG_ERROR("abilityRecord is Null.");
         return -1;
     }
-    if (!JudgeSelfCalled(abilityRecord)) {
+
+    if (!JudgeSelfCalled(abilityRecord) && (IPCSkeleton::GetCallingPid() != getpid())) {
         return -1;
     }
     auto userId = abilityRecord->GetOwnerMissionUserId();
@@ -4032,6 +3904,7 @@ int AbilityManagerService::StartAbilityByCall(
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
     if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
     }
 
@@ -4080,6 +3953,7 @@ int AbilityManagerService::StartAbilityByCall(
         HILOG_ERROR("currentMissionListManager_ is Null. curentUserId=%{public}d", GetUserId());
         return ERR_INVALID_VALUE;
     }
+    UpdateCallerInfo(abilityRequest.want, callerToken);
     ReportEventToSuspendManager(abilityRequest.abilityInfo);
     return currentMissionListManager_->ResolveLocked(abilityRequest);
 }
@@ -4230,8 +4104,6 @@ int AbilityManagerService::GetAbilityRunningInfos(std::vector<AbilityRunningInfo
     }
 
     currentMissionListManager_->GetAbilityRunningInfos(info, isPerm);
-    connectManager_->GetAbilityRunningInfos(info, isPerm);
-    dataAbilityManager_->GetAbilityRunningInfos(info, isPerm);
     UpdateFocusState(info);
 
     return ERR_OK;
@@ -4245,7 +4117,7 @@ void AbilityManagerService::UpdateFocusState(std::vector<AbilityRunningInfo> &in
 
 #ifdef SUPPORT_GRAPHICS
     sptr<IRemoteObject> token;
-    int ret = GetTopAbility(token);
+    int ret = IN_PROCESS_CALL(GetTopAbility(token));
     if (ret != ERR_OK || token == nullptr) {
         return;
     }
@@ -4858,13 +4730,8 @@ int AbilityManagerService::FinishUserTest(
 
 int AbilityManagerService::GetTopAbility(sptr<IRemoteObject> &token)
 {
-    return GetTopAbility(token, true);
-}
-
-int AbilityManagerService::GetTopAbility(sptr<IRemoteObject> &token, bool needVerify)
-{
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (needVerify && !isSaCall) {
+    if (!isSaCall) {
         HILOG_ERROR("Permission verification failed");
         return CHECK_PERMISSION_FAILED;
     }
@@ -4894,12 +4761,14 @@ int AbilityManagerService::DelegatorDoAbilityForeground(const sptr<IRemoteObject
         return ERR_INVALID_VALUE;
     }
 
+    NotifyHandleMoveAbility(token, 0);
     return DelegatorMoveMissionToFront(missionId);
 }
 
 int AbilityManagerService::DelegatorDoAbilityBackground(const sptr<IRemoteObject> &token)
 {
     HILOG_DEBUG("enter");
+    NotifyHandleMoveAbility(token, 1);
     return MinimizeAbility(token, true);
 }
 
@@ -4974,7 +4843,7 @@ int AbilityManagerService::DelegatorMoveMissionToFront(int32_t missionId)
     return currentMissionListManager_->MoveMissionToFront(missionId);
 }
 
-void AbilityManagerService::UpdateCallerInfo(Want& want)
+void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
 {
     int32_t tokenId = (int32_t)IPCSkeleton::GetCallingTokenID();
     int32_t callerUid = IPCSkeleton::GetCallingUid();
@@ -4982,6 +4851,15 @@ void AbilityManagerService::UpdateCallerInfo(Want& want)
     want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
     want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
     want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (!abilityRecord) {
+        HILOG_WARN("%{public}s caller abilityRecord is null.", __func__);
+        want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, std::string(" "));
+    } else {
+        std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+        want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    }
 }
 
 bool AbilityManagerService::JudgeMultiUserConcurrency(const int32_t userId)
@@ -5071,7 +4949,7 @@ int AbilityManagerService::CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abi
 
     // verify permission if 'permission' is not empty
     if (abilityInfo.permissions.empty() ||
-        AccessTokenKit::VerifyAccessToken(tokenId, PermissionConstants::PERMISSION_START_INVISIBLE_ABILITY)) {
+        AccessTokenKit::VerifyAccessToken(tokenId, PermissionConstants::PERMISSION_START_INVISIBLE_ABILITY) == ERR_OK) {
         return AppExecFwk::Constants::PERMISSION_GRANTED;
     }
 
@@ -5090,26 +4968,6 @@ bool AbilityManagerService::IsNeedTimeoutForTest(const std::string &abilityName,
 {
     for (auto iter = timeoutMap_.begin(); iter != timeoutMap_.end(); iter++) {
         if (iter->first == state && iter->second == abilityName) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool AbilityManagerService::VerifyUriPermission(const AbilityRequest &abilityRequest, const Want &want)
-{
-    if (abilityRequest.abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::FILESHARE) {
-        HILOG_DEBUG("Only FILESHARE need to Verify uri permission.");
-        return true;
-    }
-    auto uriStr = want.GetUri().ToString();
-    auto uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
-    uriVec.emplace_back(uriStr);
-    auto targetTokenId = IPCSkeleton::GetCallingTokenID();
-    auto uriPermMgrClient = AAFwk::UriPermissionManagerClient::GetInstance();
-    for (auto str : uriVec) {
-        Uri uri(str);
-        if (uriPermMgrClient->VerifyUriPermission(uri, want.GetFlags(), targetTokenId)) {
             return true;
         }
     }
@@ -5227,7 +5085,7 @@ AppExecFwk::ElementName AbilityManagerService::GetTopAbility()
     AppExecFwk::ElementName elementName = {};
 #ifdef SUPPORT_GRAPHICS
     sptr<IRemoteObject> token;
-    int ret = GetTopAbility(token, false);
+    int ret = IN_PROCESS_CALL(GetTopAbility(token));
     if (ret) {
         return elementName;
     }
@@ -5731,7 +5589,14 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
         auto callerPid = IPCSkeleton::GetCallingPid();
         DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
         if (processInfo.processName_.empty() && !AAFwk::PermissionVerification::GetInstance()->IsGatewayCall()) {
-            HILOG_ERROR("Can not find caller application by callerPid, callerPid: %{private}d.", callerPid);
+            HILOG_DEBUG("Can not find caller application by callerPid: %{private}d.", callerPid);
+            if (AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+                PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND)) {
+                HILOG_DEBUG("Caller has PERMISSION_START_ABILITIES_FROM_BACKGROUND, PASS.");
+                isBackgroundCall = false;
+                return ERR_OK;
+            }
+            HILOG_ERROR("Caller does not have PERMISSION_START_ABILITIES_FROM_BACKGROUND, REJECT.");
             return ERR_INVALID_VALUE;
         }
     }
@@ -5936,6 +5801,13 @@ bool AbilityManagerService::IsComponentInterceptionStart(const Want &want, const
     return true;
 }
 
+void AbilityManagerService::NotifyHandleMoveAbility(const sptr<IRemoteObject> &abilityToken, int code)
+{
+    if (componentInterception_ != nullptr) {
+        componentInterception_->NotifyHandleMoveAbility(abilityToken, code);
+    }
+}
+
 void AbilityManagerService::UpdateAbilityRequestInfo(const sptr<Want> &want, AbilityRequest &request)
 {
     if (want == nullptr) {
@@ -5969,6 +5841,31 @@ int32_t AbilityManagerService::SendResultToAbilityByToken(const Want &want, cons
     abilityRecord->SetResult(std::make_shared<AbilityResult>(requestCode, resultCode, want));
     abilityRecord->SendResult();
     return ERR_OK;
+}
+
+std::shared_ptr<AbilityRecord> AbilityManagerService::GetFocusAbility()
+{
+#ifdef SUPPORT_GRAPHICS
+    sptr<IRemoteObject> token;
+    if (!wmsHandler_) {
+        HILOG_ERROR("wmsHandler_ is nullptr.");
+        return nullptr;
+    }
+
+    wmsHandler_->GetFocusWindow(token);
+    if (!token) {
+        HILOG_ERROR("token is nullptr");
+        return nullptr;
+    }
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (!abilityRecord) {
+        HILOG_ERROR("abilityRecord is nullptr.");
+    }
+    return abilityRecord;
+#endif
+
+    return nullptr;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

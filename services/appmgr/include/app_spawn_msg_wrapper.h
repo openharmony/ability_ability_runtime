@@ -22,9 +22,13 @@
 
 #include "nocopyable.h"
 #include "client_socket.h"
+#include "shared_package/base_shared_package_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
+using AppSpawnMsg = AppSpawn::ClientSocket::AppProperty;
+using HspList = std::vector<BaseSharedPackageInfo>;
+
 struct AppSpawnStartMsg {
     int32_t uid;
     int32_t gid;
@@ -44,15 +48,16 @@ struct AppSpawnStartMsg {
     uint8_t reserved1;
     uint8_t reserved2;
     uint64_t accessTokenIdEx;
+    HspList hspList; // list of harmony shared package
 };
-
-using AppSpawnMsg = AppSpawn::ClientSocket::AppProperty;
 
 constexpr auto LEN_PID = sizeof(pid_t);
 struct StartFlags {
     static const int COLD_START = 0;
     static const int BACKUP_EXTENSION = 1;
     static const int DLP_MANAGER = 2;
+    static const int DEBUGGABLE = 3;
+    static const int ASANENABLED = 4;
 };
 
 union AppSpawnPidMsg {
@@ -108,6 +113,14 @@ public:
         return isValid_ ? sizeof(AppSpawnMsg) : 0;
     }
 
+    /**
+     * Get function, return hsp list string
+    */
+    const std::string& GetHspListStr() const
+    {
+        return hspListStr;
+    }
+
 private:
     /**
      * Verify message.
@@ -132,6 +145,7 @@ private:
     bool isValid_ = false;
     // because AppSpawnMsg's size is uncertain, so should use raw pointer.
     AppSpawnMsg *msg_ = nullptr;
+    std::string hspListStr;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

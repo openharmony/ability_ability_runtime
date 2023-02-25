@@ -105,6 +105,7 @@ config("abilityms_config") {
 }
 
 ohos_shared_library("abilityms") {
+  shlib_type = "sa"
   sources = abilityms_files
   sources += [ "src/sa_mgr_client.cpp" ]
   cflags_cc = []
@@ -130,6 +131,7 @@ ohos_shared_library("abilityms") {
     "ability_runtime:connection_obs_manager",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
@@ -181,6 +183,7 @@ ohos_shared_library("abilityms") {
     ]
   }
 
+  version_script = "libabilityms.map"
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }

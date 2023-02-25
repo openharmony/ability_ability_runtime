@@ -55,6 +55,9 @@ public:
     ErrCode StartAbility(const AAFwk::Want &want, int requestCode) override;
     ErrCode StartAbilityWithAccount(const AAFwk::Want &want, int accountId, int requestCode) override;
     ErrCode StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions, int requestCode) override;
+    ErrCode StartAbilityAsCaller(const AAFwk::Want &want, int requestCode) override;
+    ErrCode StartAbilityAsCaller(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions,
+        int requestCode) override;
     ErrCode StartAbilityWithAccount(
         const AAFwk::Want &want, int accountId, const AAFwk::StartOptions &startOptions, int requestCode) override;
     ErrCode StartAbilityForResult(const AAFwk::Want &want, int requestCode, RuntimeTask &&task) override;
@@ -170,6 +173,8 @@ public:
 
     ErrCode RequestDialogService(NativeEngine &engine, AAFwk::Want &want, RequestDialogResultTask &&task) override;
 
+    ErrCode GetMissionId(int32_t &missionId) override;
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Set mission label of this ability.
@@ -207,6 +212,7 @@ private:
     sptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
+    int32_t missionId_ = -1;
 
     static void ResultCallbackJSThreadWorker(uv_work_t* work, int status);
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);

@@ -45,6 +45,11 @@ config("appkit_config") {
   if (target_cpu == "arm64") {
     defines += [ "_ARM64_" ]
   }
+  if (target_cpu == "arm64") {
+    defines += [ "APP_USE_ARM64" ]
+  } else if (target_cpu == "arm") {
+    defines += [ "APP_USE_ARM" ]
+  }
 
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
@@ -132,9 +137,7 @@ ohos_shared_library("appkit_native") {
     "ability_runtime:ability_manager",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_manager",
-    "ability_runtime:form_extension",
     "ability_runtime:runtime",
-    "ability_runtime:static_subscriber_extension",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
@@ -160,7 +163,7 @@ ohos_shared_library("appkit_native") {
     defines += [ "SUPPORT_ASAN" ]
   }
 
-  if ("${product_name}" == "rk3568" || "${product_name}" == "m40") {
+  if (defined(global_parts_info.web_webview)) {
     public_deps += [ "//base/web/webview/ohos_adapter:nweb_ohos_adapter" ]
 
     include_dirs += [ "//base/web/webview/ohos_adapter/interfaces" ]

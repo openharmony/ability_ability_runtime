@@ -28,6 +28,7 @@
 #include "connection_state_manager.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
+#include "in_process_call_wrapper.h"
 #include "errors.h"
 #include "event_report.h"
 #include "hilog_wrapper.h"
@@ -78,6 +79,7 @@ const std::map<AbilityState, std::string> AbilityRecord::stateToStrMap = {
     std::map<AbilityState, std::string>::value_type(BACKGROUNDING, "BACKGROUNDING"),
     std::map<AbilityState, std::string>::value_type(FOREGROUND_FAILED, "FOREGROUND_FAILED"),
     std::map<AbilityState, std::string>::value_type(FOREGROUND_INVALID_MODE, "FOREGROUND_INVALID_MODE"),
+    std::map<AbilityState, std::string>::value_type(FOREGROUND_WINDOW_FREEZED, "FOREGROUND_WINDOW_FREEZED"),
 };
 const std::map<AppState, std::string> AbilityRecord::appStateToStrMap_ = {
     std::map<AppState, std::string>::value_type(AppState::BEGIN, "BEGIN"),
@@ -98,6 +100,8 @@ const std::map<AbilityLifeCycleState, AbilityState> AbilityRecord::convertStateM
     std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_FOREGROUND_FAILED, FOREGROUND_FAILED),
     std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_INVALID_WINDOW_MODE,
         FOREGROUND_INVALID_MODE),
+    std::map<AbilityLifeCycleState, AbilityState>::value_type(ABILITY_STATE_WINDOW_FREEZED,
+        FOREGROUND_WINDOW_FREEZED),
 };
 
 Token::Token(std::weak_ptr<AbilityRecord> abilityRecord) : abilityRecord_(abilityRecord)
@@ -167,6 +171,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     CHECK_POINTER_AND_RETURN(abilityRecord, nullptr);
     abilityRecord->SetUid(abilityRequest.uid);
     abilityRecord->SetAppIndex(abilityRequest.want.GetIntParam(DLP_INDEX, 0));
+    abilityRecord->SetCallerAccessTokenId(abilityRequest.callerAccessTokenId);
     if (!abilityRecord->Init()) {
         HILOG_ERROR("failed to init new ability record");
         return nullptr;
@@ -233,7 +238,7 @@ int AbilityRecord::LoadAbility()
         HILOG_ERROR("Root launcher restart is out of max count.");
         return ERR_INVALID_VALUE;
     }
-    
+
     if (isRestarting_) {
         restartTime_ = AbilityUtil::SystemTimeMillis();
     }
@@ -442,6 +447,7 @@ void AbilityRecord::SetAbilityTransitionInfo(sptr<AbilityTransitionInfo>& info) 
     info->minWindowWidth_ = abilityInfo_.minWindowWidth;
     info->maxWindowHeight_ = abilityInfo_.maxWindowHeight;
     info->minWindowHeight_ = abilityInfo_.minWindowHeight;
+    info->orientation_ = abilityInfo_.orientation;
 }
 
 sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo()
@@ -478,6 +484,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetWant().GetElement().GetURI();
     HILOG_DEBUG("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
+    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.accessTokenId);
 
     if (isReady_) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
@@ -559,6 +566,7 @@ void AbilityRecord::SetAbilityTransitionInfo(const AppExecFwk::AbilityInfo &abil
     info->abilityName_ = abilityInfo.name;
     info->bundleName_ = abilityInfo.bundleName;
     info->windowModes_ = abilityInfo.windowModes;
+    info->orientation_ = abilityInfo.orientation;
     SetShowWhenLocked(abilityInfo, info);
 }
 
@@ -1266,8 +1274,8 @@ void AbilityRecord::SendResult()
     std::lock_guard<std::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     CHECK_POINTER(result_);
+    GrantUriPermission(result_->resultWant_, GetCurrentAccountId(), applicationInfo_.accessTokenId);
     scheduler_->SendResult(result_->requestCode_, result_->resultCode_, result_->resultWant_);
-    GrantUriPermission(result_->resultWant_);
     // reset result to avoid send result next time
     result_.reset();
 }
@@ -1606,21 +1614,25 @@ void AbilityRecord::Dump(std::vector<std::string> &info)
     info.push_back(dumpInfo);
     std::shared_ptr<AbilityRecord> preAbility = GetPreAbilityRecord();
     if (preAbility == nullptr) {
-        dumpInfo = "        previous ability app name [NULL]" + LINE_SEPARATOR;
+        dumpInfo = "        previous ability app name [NULL]";
+        dumpInfo.append("\n");
         dumpInfo += "        previous ability file name [NULL]";
     } else {
         dumpInfo =
-            "        previous ability app name [" + preAbility->GetAbilityInfo().applicationName + "]" + LINE_SEPARATOR;
+            "        previous ability app name [" + preAbility->GetAbilityInfo().applicationName + "]";
+        dumpInfo.append("\n");
         dumpInfo += "        previous ability file name [" + preAbility->GetAbilityInfo().name + "]";
     }
     info.push_back(dumpInfo);
     std::shared_ptr<AbilityRecord> nextAbility = GetNextAbilityRecord();
     if (nextAbility == nullptr) {
-        dumpInfo = "        next ability app name [NULL]" + LINE_SEPARATOR;
+        dumpInfo = "        next ability app name [NULL]";
+        dumpInfo.append("\n");
         dumpInfo += "        next ability file name [NULL]";
     } else {
         dumpInfo =
-            "        next ability app name [" + nextAbility->GetAbilityInfo().applicationName + "]" + LINE_SEPARATOR;
+            "        next ability app name [" + nextAbility->GetAbilityInfo().applicationName + "]";
+        dumpInfo.append("\n");
         dumpInfo += "        next ability main name [" + nextAbility->GetAbilityInfo().name + "]";
     }
     info.push_back(dumpInfo);
@@ -1744,6 +1756,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         return;
     }
 
+    RemoveUriPermission();
     if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
         auto schedulerObject = scheduler_->AsObject();
         if (schedulerObject != nullptr) {
@@ -2028,11 +2041,12 @@ void AbilityRecord::SetStartToForeground(const bool flag)
     isStartToForeground_ = flag;
 }
 
-void AbilityRecord::CallRequest() const
+void AbilityRecord::CallRequest()
 {
     HILOG_INFO("Call Request.");
     CHECK_POINTER(scheduler_);
 
+    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.accessTokenId);
     // Async call request
     scheduler_->CallRequest();
 }
@@ -2137,60 +2151,6 @@ int32_t AbilityRecord::GetOwnerMissionUserId()
     return ownerMissionUserId_;
 }
 
-void AbilityRecord::DumpSys(std::vector<std::string> &info, bool isClient)
-{
-    std::string dumpInfo = "      AbilityRecord ID #" + std::to_string(recordId_);
-    info.push_back(dumpInfo);
-    dumpInfo = "        app name [" + GetAbilityInfo().applicationName + "]";
-    info.push_back(dumpInfo);
-    dumpInfo = "        main name [" + GetAbilityInfo().name + "]";
-    info.push_back(dumpInfo);
-    dumpInfo = "        bundle name [" + GetAbilityInfo().bundleName + "]";
-    info.push_back(dumpInfo);
-    std::string typeStr;
-    GetAbilityTypeString(typeStr);
-    dumpInfo = "        ability type [" + typeStr + "]";
-    info.push_back(dumpInfo);
-    std::shared_ptr<AbilityRecord> preAbility = GetPreAbilityRecord();
-    if (preAbility == nullptr) {
-        dumpInfo = "        previous ability app name [NULL]" + LINE_SEPARATOR;
-        dumpInfo += "        previous ability file name [NULL]";
-    } else {
-        dumpInfo =
-            "        previous ability app name [" + preAbility->GetAbilityInfo().applicationName + "]" + LINE_SEPARATOR;
-        dumpInfo += "        previous ability file name [" + preAbility->GetAbilityInfo().name + "]";
-    }
-    info.push_back(dumpInfo);
-    std::shared_ptr<AbilityRecord> nextAbility = GetNextAbilityRecord();
-    if (nextAbility == nullptr) {
-        dumpInfo = "        next ability app name [NULL]" + LINE_SEPARATOR;
-        dumpInfo += "        next ability file name [NULL]";
-    } else {
-        dumpInfo =
-            "        next ability app name [" + nextAbility->GetAbilityInfo().applicationName + "]" + LINE_SEPARATOR;
-        dumpInfo += "        next ability main name [" + nextAbility->GetAbilityInfo().name + "]";
-    }
-    info.push_back(dumpInfo);
-    dumpInfo = "        state #" + AbilityRecord::ConvertAbilityState(GetAbilityState()) + "  start time [" +
-               std::to_string(startTime_) + "]";
-    info.push_back(dumpInfo);
-    dumpInfo = "        app state #" + AbilityRecord::ConvertAppState(appState_);
-    info.push_back(dumpInfo);
-    dumpInfo = "        ready #" + std::to_string(isReady_) + "  window attached #" +
-               std::to_string(isWindowAttached_) + "  launcher #" + std::to_string(isLauncherAbility_);
-    info.push_back(dumpInfo);
-
-    std::string isKeepAlive = isKeepAlive_ ? "true" : "false";
-    dumpInfo = "        isKeepAlive: " + isKeepAlive;
-    info.push_back(dumpInfo);
-    if (isLauncherRoot_ && abilityInfo_.isStageBasedModel) {
-        dumpInfo = "        can restart num #" + std::to_string(restartCount_);
-        info.push_back(dumpInfo);
-    }
-    const std::vector<std::string> params;
-    DumpClientInfo(info, params, isClient);
-}
-
 void AbilityRecord::DumpClientInfo(std::vector<std::string> &info, const std::vector<std::string> &params,
     bool isClient, bool dumpConfig) const
 {
@@ -2242,17 +2202,56 @@ void AbilityRecord::DumpAbilityInfoDone(std::vector<std::string> &infos)
     dumpCondition_.notify_all();
 }
 
-void AbilityRecord::GrantUriPermission(const Want &want)
+void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, uint32_t targetTokenId)
 {
-    HILOG_DEBUG("AbilityRecord::GrantUriPermission is called.");
-    auto flags = want.GetFlags();
-    if (flags & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) {
-        HILOG_INFO("Want to grant r/w permission of the uri");
-        auto targetTokenId = abilityInfo_.applicationInfo.accessTokenId;
-        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
-        if (abilityMgr) {
-            abilityMgr->GrantUriPermission(want, GetCurrentAccountId(), targetTokenId);
+    if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
+        HILOG_WARN("Do not call uriPermissionMgr.");
+        return;
+    }
+
+    auto bms = AbilityUtil::GetBundleManager();
+    CHECK_POINTER_IS_NULLPTR(bms);
+    auto&& uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    HILOG_DEBUG("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
+    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
+    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+    auto fromTokenId = IPCSkeleton::GetCallingTokenID();
+    for (auto&& str : uriVec) {
+        Uri uri(str);
+        auto&& scheme = uri.GetScheme();
+        HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
+        // only support file scheme
+        if (scheme != "file") {
+            HILOG_WARN("only support file uri.");
+            continue;
         }
+        auto&& authority = uri.GetAuthority();
+        HILOG_INFO("uri authority is %{public}s.", authority.c_str());
+        AppExecFwk::BundleInfo uriBundleInfo;
+        if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
+            HILOG_WARN("To fail to get bundle info according to uri.");
+            continue;
+        }
+        if (uriBundleInfo.applicationInfo.accessTokenId != fromTokenId &&
+            uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_) {
+            HILOG_ERROR("the uri does not belong to caller.");
+            continue;
+        }
+        auto ret = IN_PROCESS_CALL(upmClient->GrantUriPermission(uri, want.GetFlags(),
+            callerAccessTokenId_, targetTokenId));
+        if (ret) {
+            isGrantedUriPermission_ = true;
+        }
+    }
+}
+
+void AbilityRecord::RemoveUriPermission()
+{
+    if (isGrantedUriPermission_) {
+        HILOG_DEBUG("To remove uri permission.");
+        auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
+        upmClient->RemoveUriPermission(applicationInfo_.accessTokenId);
+        isGrantedUriPermission_ = false;
     }
 }
 
@@ -2278,7 +2277,7 @@ void AbilityRecord::HandleDlpClosed()
     }
 }
 
-int AbilityRecord::GetCurrentAccountId()
+int32_t AbilityRecord::GetCurrentAccountId() const
 {
     std::vector<int32_t> osActiveAccountIds;
     ErrCode ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
@@ -2326,5 +2325,25 @@ int AbilityRecord::BlockAbility()
     return ERR_NO_INIT;
 }
 #endif
+
+bool AbilityRecord::IsNeedBackToOtherMissionStack()
+{
+    return isNeedBackToOtherMissionStack_;
+}
+
+void AbilityRecord::SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack)
+{
+    isNeedBackToOtherMissionStack_ = isNeedBackToOtherMissionStack;
+}
+
+std::shared_ptr<AbilityRecord> AbilityRecord::GetOtherMissionStackAbilityRecord() const
+{
+    return otherMissionStackAbilityRecord_.lock();
+}
+
+void AbilityRecord::SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    otherMissionStackAbilityRecord_ = abilityRecord;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
