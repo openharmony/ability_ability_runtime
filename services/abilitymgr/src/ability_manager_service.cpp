@@ -315,6 +315,7 @@ bool AbilityManagerService::Init()
     interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
     interceptorExecuter_->AddInterceptor(std::make_shared<ControlInterceptor>());
+    interceptorExecuter_->AddInterceptor(std::make_shared<EcologicalRuleInterceptor>());
 
     auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
     handler_->PostTask(startResidentAppsTask, "StartResidentApps");
@@ -484,6 +485,11 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         if (!localWant.GetDeviceId().empty()) {
             localWant.SetDeviceId("");
         }
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+        }
         int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken);
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
@@ -515,6 +521,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (result != ERR_OK) {
         HILOG_ERROR("Generate ability request local error.");
         return result;
+    }
+
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -556,12 +568,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
                 abilityInfo.bundleName.c_str(), result);
             return result;
         }
-    }
-
-    if (!isStartAsCaller) {
-        UpdateCallerInfo(abilityRequest.want, callerToken);
-    } else {
-        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
     }
 
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
@@ -802,7 +808,13 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        int32_t ret = freeInstallManager_->StartFreeInstall(want, validUserId, requestCode, callerToken);
+        Want localWant = want;
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+        }
+        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken);
         if (ret != ERR_OK) {
             HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
             return ret;
@@ -846,6 +858,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return result;
     }
 
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+    }
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     HILOG_DEBUG("userId : %{public}d, singleton is : %{public}d",
@@ -905,11 +922,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return ERR_AAFWK_INVALID_WINDOW_MODE;
     }
 #endif
-    if (!isStartAsCaller) {
-        UpdateCallerInfo(abilityRequest.want, callerToken);
-    } else {
-        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
-    }
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
