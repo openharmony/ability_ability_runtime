@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -792,6 +792,16 @@ private:
 
     int32_t KillApplicationByBundleName(const std::string &bundleName);
 
+    bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void SendProcessExitEvent(pid_t pid);
+
+    void SendProcessExitEventTask(pid_t pid, time_t exitTime, int32_t count);
+
+    int32_t ConvertExtensionAbilityType(ExtensionAbilityType extensionAbilityType);
+
+    int32_t ConvertAbilityType(AbilityType type, ExtensionAbilityType extensionAbilityType);
+
 private:
     /**
      * Notify application status.
@@ -821,6 +831,27 @@ private:
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
     sptr<WindowFocusChangedListener> focusListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
+
+    const int32_t UNKNOWN_TYPE = 0;
+    const int32_t FA_PAGE = 1;
+    const int32_t FA_SERVICE = 2;
+    const int32_t FA_DATA = 3;
+    const int32_t EXTENSION_FORM = 5;
+    const int32_t EXTENSION_WORK_SCHEDULER = 6;
+    const int32_t EXTENSION_INPUTMETHOD = 7;
+    const int32_t EXTENSION_SERVICE = 8;
+    const int32_t EXTENSION_ACCESSIBILITY = 9;
+    const int32_t EXTENSION_DATASHARE = 10;
+    const int32_t EXTENSION_FILESHARE = 11;
+    const int32_t EXTENSION_STATICSUBSCRIBER = 12;
+    const int32_t EXTENSION_WALLPAPER = 13;
+    const int32_t EXTENSION_BACKUP = 14;
+    const int32_t EXTENSION_WINDOW = 15;
+    const int32_t EXTENSION_ENTERPRISE_ADMIN = 16;
+    const int32_t EXTENSION_FILEACCESS_EXTENSION = 17;
+    const int32_t EXTENSION_THUMBNAIL = 18;
+    const int32_t EXTENSION_PREVIEW = 19;
+    const int32_t EXTENSION_UNSPECIFIED = UNKNOWN_TYPE;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -1,4 +1,4 @@
-#  Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+#  Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -224,3 +224,17 @@ APP_RECOVERY:
   VERSION_NAME: {type: STRING, desc: version name}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
   ABILITY_NAME: {type: STRING, desc: ability name}
+
+PROCESS_START:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: app, desc: application process startup event reporting}
+  STARTUP_TIME: {type: INT64, desc: process start time}
+  STARTUP_TYPE: {type: INT32, desc: process start type}
+  CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
+  CALLER_UID: {type: INT32, desc: caller uid}
+  CALLER_PROCESS_NAME: {type: STRING, desc: caller process name}
+
+PROCESS_EXIT:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: app, desc: application process exit event reporting}
+  EXIT_TIME: {type: INT64, desc: process exit time}
+  EXIT_RESULT: {type: INT32, desc: process exit result}
+  EXIT_PID: {type: INT32, desc: pid}
