@@ -33,8 +33,9 @@ public:
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param fromTokenId The owner of uri.
      * @param targetTokenId The user of uri.
+     * @return Returns true if the authorization is successful, otherwise returns false.
      */
-    virtual void GrantUriPermission(const Uri &uri, unsigned int flag,
+    virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID fromTokenId,
         const Security::AccessToken::AccessTokenID targetTokenId) = 0;
     
@@ -44,8 +45,9 @@ public:
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetTokenId The user of uri.
+     * @return Returns true if the authorization is successful, otherwise returns false.
      */
-    virtual void GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+    virtual bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID targetTokenId) = 0;
 
     /**
@@ -63,15 +65,17 @@ public:
      * @brief Clear user's uri authorization record with autoremove flag.
      *
      * @param tokenId A tokenId of an application.
+     * @return Returns true if the remove is successful, otherwise returns false.
      */
-    virtual void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) = 0;
+    virtual bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) = 0;
 
     /**
      * @brief Clear user's uri authorization record.
      *
      * @param tokenId A tokenId of an application.
+     * @return Returns true if the remove is successful, otherwise returns false.
      */
-    virtual void RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) = 0;
+    virtual bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) = 0;
 
     enum UriPermMgrCmd {
         // ipc id for GrantUriPermission

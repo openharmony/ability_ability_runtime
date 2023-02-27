@@ -22,7 +22,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-void UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
+bool UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
     const Security::AccessToken::AccessTokenID fromTokenId, const Security::AccessToken::AccessTokenID targetTokenId)
 {
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermission is called.");
@@ -32,7 +32,7 @@ void UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int
     }
 }
 
-void UriPermissionManagerClient::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+bool UriPermissionManagerClient::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
     const Security::AccessToken::AccessTokenID targetTokenId)
 {
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermissionFromSelf is called.");
@@ -53,7 +53,7 @@ bool UriPermissionManagerClient::VerifyUriPermission(const Uri &uri, unsigned in
     return false;
 }
 
-void UriPermissionManagerClient::RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId)
+bool UriPermissionManagerClient::RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
     HILOG_DEBUG("UriPermissionManagerClient::RemoveUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();
@@ -62,7 +62,7 @@ void UriPermissionManagerClient::RemoveUriPermission(const Security::AccessToken
     }
 }
 
-void UriPermissionManagerClient::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
+bool UriPermissionManagerClient::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
 {
     HILOG_DEBUG("UriPermissionManagerClient::RemoveUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();

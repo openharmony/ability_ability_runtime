@@ -39,7 +39,7 @@ public:
      * @param fromTokenId The owner of uri.
      * @param targetTokenId The user of uri.
      */
-    void GrantUriPermission(const Uri &uri, unsigned int flag, const Security::AccessToken::AccessTokenID fromTokenId,
+    bool GrantUriPermission(const Uri &uri, unsigned int flag, const Security::AccessToken::AccessTokenID fromTokenId,
         const Security::AccessToken::AccessTokenID targetTokenId);
     
     /**
@@ -49,7 +49,7 @@ public:
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetTokenId The user of uri.
      */
-    void GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+    bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID targetTokenId);
 
     /**
@@ -67,14 +67,14 @@ public:
      *
      * @param tokenId A tokenId of an application.
      */
-    void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId);
+    bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId);
 
     /**
      * @brief Clear user's uri authorization record.
      *
      * @param tokenId A tokenId of an application.
      */
-    void RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId);
+    bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId);
 
 private:
     sptr<IUriPermissionManager> ConnectUriPermService();
