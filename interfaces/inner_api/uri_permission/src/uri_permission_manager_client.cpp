@@ -64,7 +64,6 @@ bool UriPermissionManagerClient::RemoveUriPermission(const Security::AccessToken
     }
     return false;
 }
-}
 
 bool UriPermissionManagerClient::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
 {

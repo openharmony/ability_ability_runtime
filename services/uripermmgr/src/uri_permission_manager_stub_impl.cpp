@@ -78,6 +78,7 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     if (scheme != "file" && scheme != "dataShare") {
         HILOG_WARN("only support file or dataShare uri.");
         return false;
+    }
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
         HILOG_ERROR("ConnectStorageManager failed");
