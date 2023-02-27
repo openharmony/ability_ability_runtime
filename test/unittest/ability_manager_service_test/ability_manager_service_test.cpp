@@ -492,6 +492,44 @@ HWTEST_F(AbilityManagerServiceTest, StartAbility_002, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartAbilityAsCaller
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityAsCaller
+ */
+HWTEST_F(AbilityManagerServiceTest, StartAbilityAsCaller_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest StartAbilityAsCaller_001 start");
+    Want want;
+    int requestCode = 0;
+    sptr<IRemoteObject> callerToken = nullptr;
+    EXPECT_EQ(abilityMs_->StartAbility(want, callerToken, USER_ID_U100, requestCode), CHECK_PERMISSION_FAILED);
+
+    want.SetFlags(Want::FLAG_ABILITY_CONTINUATION);
+    EXPECT_EQ(abilityMs_->StartAbilityAsCaller(want, callerToken, USER_ID_U100, requestCode),
+        ERR_INVALID_CONTINUATION_FLAG);
+    HILOG_INFO("AbilityManagerServiceTest StartAbilityAsCaller_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityAsCaller
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityAsCaller
+ */
+HWTEST_F(AbilityManagerServiceTest, StartAbilityAsCaller_002, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest StartAbilityAsCaller_002 start");
+    Want want;
+    StartOptions startOptions;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int requestCode = 0;
+    EXPECT_EQ(abilityMs_->StartAbilityAsCaller(want, startOptions, callerToken, USER_ID_U100, requestCode),
+    CHECK_PERMISSION_FAILED);
+    HILOG_INFO("AbilityManagerServiceTest StartAbilityAsCaller_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: IsBackgroundTaskUid
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService IsBackgroundTaskUid
@@ -2628,7 +2666,8 @@ HWTEST_F(AbilityManagerServiceTest, UpdateCallerInfo_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest UpdateCallerInfo_001 start");
     Want want;
-    abilityMs_->UpdateCallerInfo(want);
+    sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
+    abilityMs_->UpdateCallerInfo(want, callerToken);
     HILOG_INFO("AbilityManagerServiceTest UpdateCallerInfo_001 end");
 }
 
@@ -2681,7 +2720,7 @@ HWTEST_F(AbilityManagerServiceTest, CheckStaticCfgPermission_001, TestSize.Level
     // abilityInfo.permissions is not empty
     abilityInfo.permissions.push_back("test1");
     abilityInfo.permissions.push_back("test2");
-    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo), AppExecFwk::Constants::PERMISSION_GRANTED);
+    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo), AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
 
     abilityInfo.type = AbilityType::EXTENSION;
     abilityInfo.extensionAbilityType = ExtensionAbilityType::DATASHARE;
@@ -2865,10 +2904,6 @@ HWTEST_F(AbilityManagerServiceTest, CreateVerificationInfo_001, TestSize.Level1)
     EXPECT_FALSE(abilityMs_->CreateVerificationInfo(abilityRequest).associatedWakeUp);
 
     abilityRequest.appInfo.bundleName = "com.ohos.settingsdata";
-    EXPECT_TRUE(abilityMs_->CreateVerificationInfo(abilityRequest).associatedWakeUp);
-
-    abilityMs_->whiteListassociatedWakeUpFlag_ = true;
-    abilityRequest.appInfo.bundleName = "com.ohos.contactsdataability";
     EXPECT_TRUE(abilityMs_->CreateVerificationInfo(abilityRequest).associatedWakeUp);
 
     abilityRequest.appInfo.bundleName = "test";

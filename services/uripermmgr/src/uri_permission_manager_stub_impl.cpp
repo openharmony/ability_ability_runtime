@@ -78,10 +78,13 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     if (scheme != "file" && scheme != "dataShare") {
         HILOG_WARN("only support file or dataShare uri.");
         return false;
+    auto storageMgrProxy = ConnectStorageManager();
+    if (storageMgrProxy == nullptr) {
+        HILOG_ERROR("ConnectStorageManager failed");
+        return false;
     }
 
     auto uriStr = uri.ToString();
-    auto storageMgrProxy = ConnectStorageManager();
     auto ret = storageMgrProxy->CreateShareFile(uriStr, targetTokenId, tmpFlag);
     if (ret != 0 && ret != -EEXIST) {
         HILOG_ERROR("storageMgrProxy failed to CreateShareFile.");
