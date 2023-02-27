@@ -37,11 +37,11 @@ public:
     UriPermissionManagerStubFuzzTest() = default;
     virtual ~UriPermissionManagerStubFuzzTest()
     {}
-    void GrantUriPermission(const Uri &uri, unsigned int flag,
+    bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID fromTokenId,
         const Security::AccessToken::AccessTokenID targetTokenId) override
     {}
-    void GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+    bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID targetTokenId) override
     {}
     bool VerifyUriPermission(const Uri &uri, unsigned int flag,
@@ -49,9 +49,9 @@ public:
     {
         return true;
     }
-    void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
+    bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
     {}
-    void RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override
+    bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override
     {}
 };
 
