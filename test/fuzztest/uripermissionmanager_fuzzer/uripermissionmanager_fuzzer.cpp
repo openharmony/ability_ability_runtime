@@ -40,19 +40,27 @@ public:
     bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID fromTokenId,
         const Security::AccessToken::AccessTokenID targetTokenId) override
-    {}
+    {
+        return true;
+    }
     bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID targetTokenId) override
-    {}
+    {
+        return true;
+    }
     bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override
     {
         return true;
     }
     bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
-    {}
+    {
+        return true;
+    }
     bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override
-    {}
+    {
+        return true;
+    }
 };
 
 uint32_t GetU32Data(const char* ptr)
