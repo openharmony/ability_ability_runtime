@@ -38,7 +38,10 @@ int UriPermissionManagerStub::OnRemoteRequest(
             auto flag = data.ReadInt32();
             auto fromTokenId = data.ReadInt32();
             auto targetTokenId = data.ReadInt32();
-            GrantUriPermission(*uri, flag, fromTokenId, targetTokenId);
+            if (!GrantUriPermission(*uri, flag, fromTokenId, targetTokenId)) {
+                errCode = ERR_INVALID_OPERATION;
+                HILOG_ERROR("To grant uri permission failed.");
+            }
             break;
         }
         case UriPermMgrCmd::ON_GRANT_URI_PERMISSION_FROM_SELF : {
@@ -49,8 +52,11 @@ int UriPermissionManagerStub::OnRemoteRequest(
                 break;
             }
             auto flag = data.ReadInt32();
-            auto targetTokenId = data.ReadInt32();
-            GrantUriPermissionFromSelf(*uri, flag, targetTokenId);
+            auto targetTokenId = data.ReadInt32();            
+            if (!GrantUriPermissionFromSelf(*uri, flag, targetTokenId)) {
+                errCode = ERR_INVALID_OPERATION;
+                HILOG_ERROR("To grant uri permission failed.");
+            }
             break;
         }
         case UriPermMgrCmd::ON_VERIFY_URI_PERMISSION : {
@@ -70,12 +76,18 @@ int UriPermissionManagerStub::OnRemoteRequest(
         }
         case UriPermMgrCmd::ON_REMOVE_URI_PERMISSION : {
             auto tokenId = data.ReadInt32();
-            RemoveUriPermission(tokenId);
+            if (!RemoveUriPermission(tokenId)) {
+                errCode = ERR_INVALID_OPERATION;
+                HILOG_ERROR("To grant uri permission failed.");
+            }
             break;
         }
         case UriPermMgrCmd::ON_REMOVE_URI_PERMISSION_MANUALLY : {
             auto tokenId = data.ReadInt32();
-            RemoveUriPermissionManually(tokenId);
+            if (RemoveUriPermissionManually(tokenId)) {
+                errCode = ERR_INVALID_OPERATION;
+                HILOG_ERROR("To grant uri permission failed.");
+            }
             break;
         }
         default:

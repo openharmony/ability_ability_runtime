@@ -115,7 +115,7 @@ private:
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnGrantUriPermission",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-        return engine.CreateUndefined();
+        return result;
     }
 
     NativeValue* OnGrantUriPermissionFromSelf(NativeEngine& engine, NativeCallbackInfo& info)
@@ -173,7 +173,7 @@ private:
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnGrantUriPermission",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-        return engine.CreateUndefined();
+        return result;
     }
 
     NativeValue* OnRemoveUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
@@ -217,7 +217,7 @@ private:
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnRemoveUriPermission",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-        return engine.CreateUndefined();
+        return result;
     }
 };
 

@@ -33,7 +33,7 @@ namespace AAFwk {
 const int32_t DEFAULT_USER_ID = 0;
 using TokenId = Security::AccessToken::AccessTokenID;
 
-void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
+bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
     const TokenId fromTokenId, const TokenId targetTokenId)
 {
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
@@ -44,12 +44,12 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
         AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
     if (!permission && (fromTokenId != callerTokenId)) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
-        return;
+        return false;
     }
 
     if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: The param flag is invalid.");
-        return;
+        return false;
     }
     unsigned int tmpFlag = 0;
     if (flag & Want::FLAG_AUTH_WRITE_URI_PERMISSION) {
@@ -66,18 +66,18 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
         HILOG_WARN("To fail to get bundle info according to uri.");
-        return;
+        return false;
     }
     if (uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
         HILOG_ERROR("the uri does not belong to caller.");
-        return;
+        return false;
     }
     auto&& scheme = uri_inner.GetScheme();
     HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
     // only support file or dataShare scheme
     if (scheme != "file" && scheme != "dataShare") {
         HILOG_WARN("only support file or dataShare uri.");
-        return;
+        return false;
     }
 
     auto uriStr = uri.ToString();
@@ -85,7 +85,7 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     auto ret = storageMgrProxy->CreateShareFile(uriStr, targetTokenId, tmpFlag);
     if (ret != 0 && ret != -EEXIST) {
         HILOG_ERROR("storageMgrProxy failed to CreateShareFile.");
-        return;
+        return false;
     }
     std::lock_guard<std::mutex> guard(mutex_);
     auto search = uriMap_.find(uriStr);
@@ -101,7 +101,7 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     if (search == uriMap_.end()) {
         std::list<GrantInfo> infoList = { info };
         uriMap_.emplace(uriStr, infoList);
-        return;
+        return true;
     }
     auto& infoList = search->second;
     for (auto& item : infoList) {
@@ -111,19 +111,20 @@ void UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
                 item.flag = tmpFlag;
             }
             HILOG_INFO("uri permission has granted, not to grant again.");
-            return;
+            return true;
         }
     }
     infoList.emplace_back(info);
+    return true;
 }
 
-void UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
+bool UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
     const Security::AccessToken::AccessTokenID targetTokenId)
 {
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
     
-    GrantUriPermission(uri, flag, callerTokenId, targetTokenId);
+    return GrantUriPermission(uri, flag, callerTokenId, targetTokenId);
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned int flag,
@@ -179,7 +180,7 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned 
     return false;
 }
 
-void UriPermissionManagerStubImpl::RemoveUriPermission(const TokenId tokenId)
+bool UriPermissionManagerStubImpl::RemoveUriPermission(const TokenId tokenId)
 {
     HILOG_DEBUG("Start to remove uri permission.");
     std::vector<std::string> uriList;
@@ -206,15 +207,16 @@ void UriPermissionManagerStubImpl::RemoveUriPermission(const TokenId tokenId)
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
         HILOG_ERROR("ConnectStorageManager failed");
-        return;
+        return false;
     }
 
     if (!uriList.empty()) {
         storageMgrProxy->DeleteShareFile(tokenId, uriList);
     }
+    return true;
 }
 
-void UriPermissionManagerStubImpl::RemoveUriPermissionManually(const TokenId tokenId)
+bool UriPermissionManagerStubImpl::RemoveUriPermissionManually(const TokenId tokenId)
 {
     HILOG_DEBUG("Start to remove uri permission manually.");
     std::vector<std::string> uriList;
@@ -241,12 +243,13 @@ void UriPermissionManagerStubImpl::RemoveUriPermissionManually(const TokenId tok
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
         HILOG_ERROR("ConnectStorageManager failed");
-        return;
+        return false;
     }
 
     if (!uriList.empty()) {
         storageMgrProxy->DeleteShareFile(tokenId, uriList);
     }
+    return true;
 }
 
 sptr<AppExecFwk::IBundleMgr> UriPermissionManagerStubImpl::ConnectBundleManager()
