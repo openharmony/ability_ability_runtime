@@ -368,17 +368,19 @@ private:
 
         if (!options.preload) {
             bundleName_ = options.bundleName;
-            bool newCreate = false;
-            std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
-            std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
-            if (!extractor) {
-                HILOG_ERROR("Get extractor failed. hapPath[%{private}s]", options.hapPath.c_str());
-                return false;
-            }
-            if (newCreate) {
-                ExtractorUtil::AddExtractor(loadPath, extractor);
-                extractor->SetRuntimeFlag(true);
-                panda::JSNApi::LoadAotFile(vm_, options.hapPath);
+            if (!options.hapPath.empty()) {
+                bool newCreate = false;
+                std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
+                std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
+                if (!extractor) {
+                    HILOG_ERROR("Get extractor failed. hapPath[%{private}s]", options.hapPath.c_str());
+                    return false;
+                }
+                if (newCreate) {
+                    ExtractorUtil::AddExtractor(loadPath, extractor);
+                    extractor->SetRuntimeFlag(true);
+                    panda::JSNApi::LoadAotFile(vm_, options.hapPath);
+                }
             }
         }
         isBundle_ = options.isBundle;
@@ -620,7 +622,7 @@ bool JsRuntime::Initialize(const Options& options)
             InitTimerModule(*nativeEngine_, *globalObj);
         }
 
-        InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion);
+        InitWorkerModule(*nativeEngine_, codePath_, options.isDebugVersion, options.isBundle);
     }
 
     nativeEngine_->RegisterPermissionCheck(PermissionCheckFunc);
