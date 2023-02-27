@@ -106,25 +106,15 @@ const std::string BUNDLE_NAME_LAUNCHER = "com.ohos.launcher";
 const std::string BUNDLE_NAME_SYSTEMUI = "com.ohos.systemui";
 const std::string BUNDLE_NAME_SETTINGSDATA = "com.ohos.settingsdata";
 const std::string BUNDLE_NAME_DEVICE_TEST = "com.ohos.devicetest";
-const std::string BUNDLE_NAME_TELE_DATA = "com.ohos.telephonydataability";
-const std::string BUNDLE_NAME_CONTACTS_DATA = "com.ohos.contactsdataability";
-const std::string BUNDLE_NAME_NOTE = "com.ohos.note";
-const std::string BUNDLE_NAME_PHOTO = "com.ohos.photos";
-const std::string BUNDLE_NAME_SCREENSHOT = "com.huawei.ohos.screenshot";
 const std::string BUNDLE_NAME_SERVICE_TEST = "com.amsst.stserviceabilityclient";
 const std::string BUNDLE_NAME_SERVICE_SERVER_TEST = "com.amsst.stserviceabilityserver";
 const std::string BUNDLE_NAME_SERVICE_SERVER2_TEST = "com.amsst.stserviceabilityserversecond";
 
 // White list
-const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_NOTE,
-                                                                BUNDLE_NAME_PHOTO,
-                                                                BUNDLE_NAME_SCREENSHOT,
-                                                                BUNDLE_NAME_SERVICE_TEST,
+const std::unordered_set<std::string> WHITE_LIST_NORMAL_SET = { BUNDLE_NAME_SERVICE_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER_TEST,
                                                                 BUNDLE_NAME_SERVICE_SERVER2_TEST };
-const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_TELE_DATA,
-                                                                    BUNDLE_NAME_CONTACTS_DATA,
-                                                                    BUNDLE_NAME_DEVICE_TEST };
+const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_DEVICE_TEST };
 } // namespace
 
 using namespace std::chrono;
@@ -315,28 +305,36 @@ bool AbilityManagerService::Init()
     interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
     interceptorExecuter_->AddInterceptor(std::make_shared<ControlInterceptor>());
+    interceptorExecuter_->AddInterceptor(std::make_shared<EcologicalRuleInterceptor>());
 
     auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
     handler_->PostTask(startResidentAppsTask, "StartResidentApps");
 
     SubscribeBackgroundTask();
-    DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
+    auto initConnectionStateManagerTask = []() {
+        DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
+    };
+    handler_->PostTask(initConnectionStateManagerTask, "InitConnectionStateManager");
+
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     handler_->PostTask(initStartupFlagTask, "InitStartupFlag");
 
     // Register abilityBundleEventCallback to receive hap updates
     HILOG_INFO("Register abilityBundleEventCallback to receive hap updates.");
-    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
-        new (std::nothrow) AbilityBundleEventCallback(handler_);
-    auto bms = GetBundleManager();
-    if (bms && abilityBundleEventCallback_) {
-        bool re = bms->RegisterBundleEventCallback(abilityBundleEventCallback_);
-        if (!re) {
-            HILOG_ERROR("RegisterBundleEventCallback failed!");
+    auto registerBundleEventCallbackTask = [aams = shared_from_this()]() {
+        sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
+            new (std::nothrow) AbilityBundleEventCallback(aams->handler_);
+        auto bms = aams->GetBundleManager(); 
+        if (bms && abilityBundleEventCallback_) {
+            bool re = bms->RegisterBundleEventCallback(abilityBundleEventCallback_);
+            if (!re) {
+                HILOG_ERROR("RegisterBundleEventCallback failed!");
+            }
+        } else {
+            HILOG_ERROR("Get BundleManager or abilieyBundleEventCallback failed!");
         }
-    } else {
-        HILOG_ERROR("Get BundleManager or abilieyBundleEventCallback failed!");
-    }
+    };
+    handler_->PostTask(registerBundleEventCallbackTask, "RegisterBundleEventCallback");
     HILOG_INFO("Init success.");
     return true;
 }
@@ -484,7 +482,11 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         if (!localWant.GetDeviceId().empty()) {
             localWant.SetDeviceId("");
         }
-        UpdateCallerInfo(localWant, callerToken);
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+        }
         return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
     }
 
@@ -512,6 +514,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (result != ERR_OK) {
         HILOG_ERROR("Generate ability request local error.");
         return result;
+    }
+
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -553,12 +561,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
                 abilityInfo.bundleName.c_str(), result);
             return result;
         }
-    }
-
-    if (!isStartAsCaller) {
-        UpdateCallerInfo(abilityRequest.want, callerToken);
-    } else {
-        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
     }
 
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
@@ -798,7 +800,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             return ERR_INVALID_VALUE;
         }
         Want localWant = want;
-        UpdateCallerInfo(localWant, callerToken);
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+        }
         return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
     }
     if (!JudgeMultiUserConcurrency(validUserId)) {
@@ -839,6 +845,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return result;
     }
 
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+    }
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     HILOG_DEBUG("userId : %{public}d, singleton is : %{public}d",
@@ -898,11 +909,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return ERR_AAFWK_INVALID_WINDOW_MODE;
     }
 #endif
-    if (!isStartAsCaller) {
-        UpdateCallerInfo(abilityRequest.want, callerToken);
-    } else {
-        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
-    }
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
