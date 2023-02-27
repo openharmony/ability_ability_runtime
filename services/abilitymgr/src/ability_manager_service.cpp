@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1124,6 +1124,7 @@ int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IR
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_VALUE;
     }
+    UpdateCallerInfo(abilityRequest.want, nullptr);
     HILOG_INFO("Start extension begin, name is %{public}s.", abilityInfo.name.c_str());
     eventInfo.errCode = connectManager->StartAbility(abilityRequest);
     if (eventInfo.errCode != ERR_OK) {
@@ -1588,6 +1589,7 @@ int AbilityManagerService::ConnectAbilityCommon(
         }
         return eventInfo.errCode;
     }
+    UpdateCallerInfo(abilityWant, nullptr);
 
     if (callerToken != nullptr && callerToken->GetObjectDescriptor() != u"ohos.aafwk.AbilityToken") {
         HILOG_INFO("%{public}s invalid Token.", __func__);
@@ -2375,6 +2377,7 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
     bool isNotHap = isSaCall || isShellCall;
+    UpdateCallerInfo(abilityRequest.want, nullptr);
     return dataAbilityManager->Acquire(abilityRequest, tryBind, callerToken, isNotHap);
 }
 
@@ -3499,6 +3502,7 @@ int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName
 
     auto begin = system_clock::now();
     AbilityRequest dataAbilityRequest;
+    UpdateCallerInfo(dataAbilityRequest.want, nullptr);
     dataAbilityRequest.appInfo = bundleInfo.applicationInfo;
     for (auto it = bundleInfo.abilityInfos.begin(); it != bundleInfo.abilityInfos.end(); ++it) {
         if (it->type != AppExecFwk::AbilityType::DATA) {
@@ -4864,12 +4868,14 @@ int AbilityManagerService::DelegatorMoveMissionToFront(int32_t missionId)
 
 void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
 {
-    int32_t tokenId = (int32_t)IPCSkeleton::GetCallingTokenID();
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
-    int32_t callerPid = IPCSkeleton::GetCallingPid();
-    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
-    want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
-    want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
+    if (!want.GetBoolParam(Want::PARAM_RESV_HAS_CALLER_INFO, false)) {
+        int32_t tokenId = (int32_t)IPCSkeleton::GetCallingTokenID();
+        int32_t callerUid = IPCSkeleton::GetCallingUid();
+        int32_t callerPid = IPCSkeleton::GetCallingPid();
+        want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
+        want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
+        want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
+    }
 
     auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!abilityRecord) {
