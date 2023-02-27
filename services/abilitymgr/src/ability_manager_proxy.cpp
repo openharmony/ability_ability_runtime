@@ -2827,7 +2827,7 @@ int AbilityManagerProxy::DumpAbilityInfoDone(std::vector<std::string> &infos, co
 int32_t AbilityManagerProxy::IsValidMissionIds(
     const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
 {
-    HILOG_INFO("IsValidMissionIds Call. Quert size is %{public}d", static_cast<int32_t>(missionIds.size()));
+    HILOG_INFO("IsValidMissionIds Call. Quert size is %{public}zu", (missionIds.size()));
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
