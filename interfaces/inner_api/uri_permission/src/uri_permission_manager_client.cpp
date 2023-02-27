@@ -39,8 +39,9 @@ bool UriPermissionManagerClient::GrantUriPermissionFromSelf(const Uri &uri, unsi
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermissionFromSelf is called.");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        uriPermMgr->GrantUriPermissionFromSelf(uri, flag, targetTokenId);
+        return uriPermMgr->GrantUriPermissionFromSelf(uri, flag, targetTokenId);
     }
+    return false;
 }
 
 bool UriPermissionManagerClient::VerifyUriPermission(const Uri &uri, unsigned int flag,
@@ -59,8 +60,10 @@ bool UriPermissionManagerClient::RemoveUriPermission(const Security::AccessToken
     HILOG_DEBUG("UriPermissionManagerClient::RemoveUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        uriPermMgr->RemoveUriPermission(tokenId);
+        return uriPermMgr->RemoveUriPermission(tokenId);
     }
+    return false;
+}
 }
 
 bool UriPermissionManagerClient::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
@@ -68,8 +71,9 @@ bool UriPermissionManagerClient::RemoveUriPermissionManually(const Security::Acc
     HILOG_DEBUG("UriPermissionManagerClient::RemoveUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        uriPermMgr->RemoveUriPermissionManually(tokenId);
+        return uriPermMgr->RemoveUriPermissionManually(tokenId);
     }
+    return false;
 }
 
 sptr<IUriPermissionManager> UriPermissionManagerClient::ConnectUriPermService()
