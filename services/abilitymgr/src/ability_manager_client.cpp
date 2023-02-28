@@ -1027,6 +1027,14 @@ void AbilityManagerClient::HandleDlpApp(Want &want)
 #endif // WITH_DLP
 }
 
+ErrCode AbilityManagerClient::AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
+{
+    HILOG_INFO("AddFreeInstallObserver begin.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->AddFreeInstallObserver(observer);
+}
+
 int32_t AbilityManagerClient::IsValidMissionIds(
     const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
 {

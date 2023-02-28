@@ -305,28 +305,36 @@ bool AbilityManagerService::Init()
     interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
     interceptorExecuter_->AddInterceptor(std::make_shared<ControlInterceptor>());
+    interceptorExecuter_->AddInterceptor(std::make_shared<EcologicalRuleInterceptor>());
 
     auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
     handler_->PostTask(startResidentAppsTask, "StartResidentApps");
 
     SubscribeBackgroundTask();
-    DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
+    auto initConnectionStateManagerTask = []() {
+        DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
+    };
+    handler_->PostTask(initConnectionStateManagerTask, "InitConnectionStateManager");
+
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     handler_->PostTask(initStartupFlagTask, "InitStartupFlag");
 
     // Register abilityBundleEventCallback to receive hap updates
     HILOG_INFO("Register abilityBundleEventCallback to receive hap updates.");
-    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
-        new (std::nothrow) AbilityBundleEventCallback(handler_);
-    auto bms = GetBundleManager();
-    if (bms && abilityBundleEventCallback_) {
-        bool re = bms->RegisterBundleEventCallback(abilityBundleEventCallback_);
-        if (!re) {
-            HILOG_ERROR("RegisterBundleEventCallback failed!");
+    auto registerBundleEventCallbackTask = [aams = shared_from_this()]() {
+        sptr<AbilityBundleEventCallback> abilityBundleEventCallback_ =
+            new (std::nothrow) AbilityBundleEventCallback(aams->handler_);
+        auto bms = aams->GetBundleManager(); 
+        if (bms && abilityBundleEventCallback_) {
+            bool re = bms->RegisterBundleEventCallback(abilityBundleEventCallback_);
+            if (!re) {
+                HILOG_ERROR("RegisterBundleEventCallback failed!");
+            }
+        } else {
+            HILOG_ERROR("Get BundleManager or abilieyBundleEventCallback failed!");
         }
-    } else {
-        HILOG_ERROR("Get BundleManager or abilieyBundleEventCallback failed!");
-    }
+    };
+    handler_->PostTask(registerBundleEventCallbackTask, "RegisterBundleEventCallback");
     HILOG_INFO("Init success.");
     return true;
 }
@@ -474,11 +482,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         if (!localWant.GetDeviceId().empty()) {
             localWant.SetDeviceId("");
         }
-        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken);
-        if (ret != ERR_OK) {
-            HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
-            return ret;
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_INFO("start as caller, skip UpdateCallerInfo!");
         }
+        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
     }
 
     if (!JudgeMultiUserConcurrency(validUserId)) {
@@ -505,6 +514,12 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (result != ERR_OK) {
         HILOG_ERROR("Generate ability request local error.");
         return result;
+    }
+
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -546,12 +561,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
                 abilityInfo.bundleName.c_str(), result);
             return result;
         }
-    }
-
-    if (!isStartAsCaller) {
-        UpdateCallerInfo(abilityRequest.want, callerToken);
-    } else {
-        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
     }
 
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
@@ -623,11 +632,9 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        int32_t ret = freeInstallManager_->StartFreeInstall(want, validUserId, requestCode, callerToken);
-        if (ret != ERR_OK) {
-            HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
-            return ret;
-        }
+        Want localWant = want;
+        UpdateCallerInfo(localWant, callerToken);
+        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
     }
 
     if (!JudgeMultiUserConcurrency(validUserId)) {
@@ -792,11 +799,13 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             HILOG_ERROR("can not start remote free install");
             return ERR_INVALID_VALUE;
         }
-        int32_t ret = freeInstallManager_->StartFreeInstall(want, validUserId, requestCode, callerToken);
-        if (ret != ERR_OK) {
-            HILOG_DEBUG("StartFreeInstall ret : %{public}d", ret);
-            return ret;
+        Want localWant = want;
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_INFO("start as caller, skip UpdateCallerInfo!");
         }
+        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
     }
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
@@ -836,6 +845,11 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return result;
     }
 
+    if (!isStartAsCaller) {
+        UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else {
+        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
+    }
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     HILOG_DEBUG("userId : %{public}d, singleton is : %{public}d",
@@ -895,11 +909,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return ERR_AAFWK_INVALID_WINDOW_MODE;
     }
 #endif
-    if (!isStartAsCaller) {
-        UpdateCallerInfo(abilityRequest.want, callerToken);
-    } else {
-        HILOG_INFO("start as caller, skip UpdateCallerInfo!");
-    }
     auto ret = missionListManager->StartAbility(abilityRequest);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
@@ -4851,22 +4860,30 @@ int AbilityManagerService::DelegatorMoveMissionToFront(int32_t missionId)
     return currentMissionListManager_->MoveMissionToFront(missionId);
 }
 
-void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
+void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken, bool isOverlay)
 {
-    int32_t tokenId = (int32_t)IPCSkeleton::GetCallingTokenID();
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
-    int32_t callerPid = IPCSkeleton::GetCallingPid();
-    want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
-    want.SetParam(Want::PARAM_RESV_CALLER_UID, callerUid);
-    want.SetParam(Want::PARAM_RESV_CALLER_PID, callerPid);
-
-    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (!abilityRecord) {
-        HILOG_WARN("%{public}s caller abilityRecord is null.", __func__);
-        want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, std::string(" "));
-    } else {
-        std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
-        want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+    int32_t tokenId = want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, 0);
+    int32_t callerUid = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, 0);
+    int32_t callerPid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, 0);
+    std::string callerBundleName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    if (tokenId == 0 || isOverlay) {
+        want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, (int32_t)IPCSkeleton::GetCallingTokenID());
+    }
+    if (callerUid == 0 || isOverlay) {
+        want.SetParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
+    }
+    if (callerPid == 0 || isOverlay) {
+        want.SetParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
+    }
+    if (callerBundleName == "" || callerBundleName == " " || isOverlay) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+        if (!abilityRecord) {
+            HILOG_WARN("%{public}s caller abilityRecord is null.", __func__);
+            want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, std::string(" "));
+        } else {
+            callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+            want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+        }
     }
 }
 
@@ -5874,6 +5891,15 @@ std::shared_ptr<AbilityRecord> AbilityManagerService::GetFocusAbility()
 #endif
 
     return nullptr;
+}
+
+int AbilityManagerService::AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
+{
+    if (freeInstallManager_ == nullptr) {
+        HILOG_ERROR("freeInstallManager_ is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    return freeInstallManager_->AddFreeInstallObserver(observer);
 }
 
 int32_t AbilityManagerService::IsValidMissionIds(
