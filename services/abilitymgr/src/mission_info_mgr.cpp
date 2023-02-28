@@ -139,9 +139,6 @@ bool MissionInfoMgr::UpdateMissionInfo(const InnerMissionInfo &missionInfo)
     missionInfoList_.erase(listIter);
     missionIdMap_.erase(id);
     return AddMissionInfo(missionInfo);
-
-    std::shared_ptr<MissionDataStorage> missionDataStorage;
-    missionDataStorage->SaveMissionInfo(missionInfo);
 }
 
 bool MissionInfoMgr::DeleteMissionInfo(int missionId)

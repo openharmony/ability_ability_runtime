@@ -2347,7 +2347,7 @@ void AbilityRecord::SetOtherMissionStackAbilityRecord(const std::shared_ptr<Abil
 }
 
 void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo){
-    if (hasRecoverInfo == true) {
+    if (hasRecoverInfo) {
         want_.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
     }
 }
