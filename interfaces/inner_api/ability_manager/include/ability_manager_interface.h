@@ -742,7 +742,7 @@ public:
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason) {};
 
     /**
-     * Called to update mission snapshot.
+     * Called to verify that the MissionId is valid.
      * @param missionIds Query mission list.
      * @param results Output parameters, return results up to 20 query results.
      * @return Returns ERR_OK on success, others on failure.
