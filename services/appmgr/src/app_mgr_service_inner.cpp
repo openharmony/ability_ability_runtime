@@ -2543,6 +2543,9 @@ int AppMgrServiceInner::VerifyProcessPermission(const std::string &bundleName) c
     auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES);
     if (isCallingPerm) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsGatewayCall()) {
+            return ERR_OK;
+        }
         auto callerPid = IPCSkeleton::GetCallingPid();
         auto appRecord = GetAppRunningRecordByPid(callerPid);
         if (!appRecord || appRecord->GetBundleName() != bundleName) {
@@ -2571,6 +2574,9 @@ int AppMgrServiceInner::VerifyProcessPermission(const sptr<IRemoteObject> &token
     auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES);
     if (isCallingPerm) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsGatewayCall()) {
+            return ERR_OK;
+        }
         auto callerUid = IPCSkeleton::GetCallingUid();
         auto appRecord = GetAppRunningRecordByAbilityToken(token);
         if (!appRecord || appRecord->GetUid() != callerUid) {
