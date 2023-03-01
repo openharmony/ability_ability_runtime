@@ -37,6 +37,17 @@ class IDataObsMgr : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.DataObsMgr")
 
+    enum {
+        TRANS_HEAD,
+        REGISTER_OBSERVER = TRANS_HEAD,
+        UNREGISTER_OBSERVER,
+        NOTIFY_CHANGE,
+        REGISTER_OBSERVER_EXT,
+        UNREGISTER_OBSERVER_EXT,
+        UNREGISTER_OBSERVER_ALL_EXT,
+        NOTIFY_CHANGE_EXT,
+        TRANS_BUTT,
+    };
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
      *
@@ -45,7 +56,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver) = 0;
+    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) = 0;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -55,7 +66,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver) = 0;
+    virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) = 0;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -75,11 +86,17 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
-        bool isDescendants)
-    {
-        return SUCCESS;
-    }
+    virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver, bool isDescendants) = 0;
+
+    /**
+     * Deregisters an observer used for DataObsMgr specified by the given Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) = 0;
 
     /**
      * Deregisters dataObserver used for DataObsMgr specified
@@ -88,34 +105,18 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
-    {
-        return SUCCESS;
-    }
+    virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) = 0;
+
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uris.
      *
-     * @param uris, Indicates the paths of the data to operate.
+     * @param changeInfo Indicates the info of the data to operate.
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status NotifyChangeExt(const std::list<Uri> &uris)
-    {
-        return SUCCESS;
-    }
+    virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) = 0;
 
-    enum {
-        TRANS_HEAD,
-        REGISTER_OBSERVER = TRANS_HEAD,
-        UNREGISTER_OBSERVER,
-        NOTIFY_CHANGE,
-        REGISTER_OBSERVER_EXT,
-        UNREGISTER_OBSERVER_EXT,
-        NOTIFY_CHANGE_EXT,
-        TRANS_NO_APPID_END,
-        TRANS_BUTT = TRANS_NO_APPID_END,
-    };
 };
 }  // namespace AAFwk
 }  // namespace OHOS

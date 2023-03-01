@@ -51,13 +51,14 @@ public:
     void OnStop() override;
     DataObsServiceRunningState QueryServiceState() const;
 
-    virtual int RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver) override;
-    virtual int UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver) override;
+    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
+    virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
     virtual int NotifyChange(const Uri &uri) override;
-    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+    virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
         bool isDescendants) override;
-    virtual Status UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver) override;
-    virtual Status NotifyChangeExt(const std::list<Uri> &uris) override;
+    virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
+    virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
+    virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
 
     /**
      * @brief DataObs hidumper.
@@ -81,10 +82,8 @@ private:
 
 private:
     static constexpr std::uint32_t TASK_COUNT_MAX = 50;
-    std::uint32_t taskCount_ = 0;
     std::mutex taskCountMutex_;
-    std::uint32_t taskCountExt_ = 0;
-    std::mutex taskCountExtMutex_;
+    std::uint32_t taskCount_ = 0;
 
     std::shared_ptr<EventRunner> eventLoop_;
     std::shared_ptr<EventHandler> handler_;

@@ -43,7 +43,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
 
-    virtual int RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver);
+    virtual int RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
 
     /**
      * Deregisters an observer used for DataObsMgr specified by the given Uri.
@@ -53,7 +53,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver);
+    virtual int UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uri.
@@ -62,7 +62,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int NotifyChange(const Uri &uri);
+    virtual int NotifyChange(const Uri &uri) override;
 
     /**
      * Registers an observer to DataObsMgr specified by the given Uri.
@@ -73,8 +73,18 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
-        bool isDescendants);
+    virtual Status RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
+        bool isDescendants) override;
+
+    /**
+     * Deregisters an observer used for DataObsMgr specified by the given Uri.
+     *
+     * @param uri, Indicates the path of the data to operate.
+     * @param dataObserver, Indicates the IDataAbilityObserver object.
+     *
+     * @return Returns SUCCESS on success, others on failure.
+     */
+    virtual Status UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver) override;
 
     /**
      * Deregisters dataObserver used for DataObsMgr specified
@@ -83,19 +93,20 @@ public:
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver);
+    virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) override;
 
     /**
      * Notifies the registered observers of a change to the data resource specified by Uris.
      *
-     * @param uris, Indicates the paths of the data to operate.
+     * @param changeInfo Indicates the info of the data to operate.
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    virtual Status NotifyChangeExt(const std::list<Uri> &uris);
+    virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    bool WriteParam(MessageParcel &data, const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
 
 private:
     static inline BrokerDelegator<DataObsManagerProxy> delegator_;

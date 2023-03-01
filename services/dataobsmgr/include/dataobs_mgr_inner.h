@@ -37,22 +37,21 @@ public:
     DataObsMgrInner();
     virtual ~DataObsMgrInner();
 
-    int HandleRegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver);
-    int HandleUnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver);
+    int HandleRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    int HandleUnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver);
     int HandleNotifyChange(const Uri &uri);
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
-    void AddObsDeathRecipient(const sptr<IDataAbilityObserver> &dataObserver);
-    void RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver);
-    void RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver);
-    bool ObsExistInMap(const sptr<IDataAbilityObserver> &dataObserver);
-    static std::string Anonymous(const std::string &name);
+    void AddObsDeathRecipient(sptr<IDataAbilityObserver> dataObserver);
+    void RemoveObsDeathRecipient(sptr<IRemoteObject> dataObserver);
+    void RemoveObsFromMap(sptr<IRemoteObject> dataObserver);
+    bool HaveRegistered(sptr<IDataAbilityObserver> dataObserver);
 
     static constexpr uint32_t OBS_NUM_MAX = 50;
     std::mutex innerMutex_;
-    ObsMapType obsmap_;
-    ObsRecipientMapType recipientMap_;
+    ObsMapType observers_;
+    ObsRecipientMapType obsRecipient_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

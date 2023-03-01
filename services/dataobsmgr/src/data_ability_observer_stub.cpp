@@ -33,7 +33,7 @@ DataAbilityObserverStub::~DataAbilityObserverStub() {}
 int DataAbilityObserverStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply,
     MessageOption &option)
 {
-    HILOG_DEBUG("cmd = %{public}d, flags= %{public}d,callingPid:%{public}u", code, option.GetFlags(),
+    HILOG_INFO("code: %{public}d, flags: %{public}d, callingPid:%{public}d", code, option.GetFlags(),
         IPCSkeleton::GetCallingPid());
     std::u16string descriptor = DataAbilityObserverStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
@@ -67,30 +67,16 @@ int32_t DataAbilityObserverStub::OnChangeInner(MessageParcel &data, MessageParce
  */
 int32_t DataAbilityObserverStub::OnChangeExtInner(MessageParcel &data, MessageParcel &reply)
 {
-    std::list<Uri> uris;
-    int32_t size = data.ReadInt32();
-    if (size < 0) {
-        HILOG_WARN("size = %{public}d", size);
+    ChangeInfo changeInfo;
+    if (!ChangeInfo::Unmarshalling(changeInfo, data)) {
         return IPC_STUB_INVALID_DATA_ERR;
     }
-
-    Uri *uri = nullptr;
-    for (int32_t i = 0; i < size; i++) {
-        uri = data.ReadParcelable<Uri>();
-        if (uri == nullptr) {
-            HILOG_ERROR("uri is nullptr");
-            return IPC_STUB_INVALID_DATA_ERR;
-        }
-        uris.emplace_back(*uri);
-    }
-    OnChangeExt(uris);
+    OnChangeExt(changeInfo);
     return ERR_NONE;
 }
 
 void DataObsCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    HILOG_WARN("recv DataObsCallbackRecipient death notice");
-
     if (handler_) {
         handler_(remote);
     }

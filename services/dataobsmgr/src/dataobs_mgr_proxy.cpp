@@ -24,13 +24,32 @@ namespace AAFwk {
 bool DataObsManagerProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(DataObsManagerProxy::GetDescriptor())) {
-        HILOG_ERROR("write interface token failed");
+        HILOG_ERROR("failed: write interface token error");
         return false;
     }
     return true;
 }
 
-int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+bool DataObsManagerProxy::WriteParam(MessageParcel &data, const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+{
+    if (!data.WriteString(uri.ToString())) {
+        HILOG_ERROR("failed: write uri error");
+        return false;
+    }
+
+    if (dataObserver == nullptr) {
+        HILOG_ERROR("failed: dataObserver is nullptr");
+        return false;
+    }
+
+    if (!data.WriteRemoteObject(dataObserver->AsObject())) {
+        HILOG_ERROR("failed: write dataObserver error");
+        return false;
+    }
+    return true;
+}
+
+int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -39,29 +58,22 @@ int32_t DataObsManagerProxy::RegisterObserver(const Uri &uri, const sptr<IDataAb
     if (!WriteInterfaceToken(data)) {
         return IPC_PARCEL_ERROR;
     }
-    if (!data.WriteParcelable(&uri)) {
-        HILOG_ERROR("register observer fail, uri error");
-        return INVALID_PARAM;
-    }
-    if (dataObserver == nullptr) {
-        HILOG_ERROR("register observer fail, dataObserver is nullptr");
-        return INVALID_PARAM;
-    }
-    if (!data.WriteRemoteObject(dataObserver->AsObject())) {
-        HILOG_ERROR("register observer fail, dataObserver error");
+
+    if (!WriteParam(data, uri, dataObserver)) {
         return INVALID_PARAM;
     }
 
     auto error = Remote()->SendRequest(IDataObsMgr::REGISTER_OBSERVER, data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("register observer fail, error: %d", error);
+        HILOG_ERROR("failed: error: %{public}d", error);
         return error;
     }
 
-    return static_cast<Status>(reply.ReadInt32());
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? res : IPC_ERROR;
 }
 
-int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -70,26 +82,18 @@ int32_t DataObsManagerProxy::UnregisterObserver(const Uri &uri, const sptr<IData
     if (!WriteInterfaceToken(data)) {
         return IPC_PARCEL_ERROR;
     }
-    if (!data.WriteParcelable(&uri)) {
-        HILOG_ERROR("unregister observer fail, uri error");
-        return INVALID_PARAM;
-    }
-    if (dataObserver == nullptr) {
-        HILOG_ERROR("unregister observer fail, dataObserver is nullptr");
-        return INVALID_PARAM;
-    }
 
-    if (!data.WriteRemoteObject(dataObserver->AsObject())) {
-        HILOG_ERROR("unregister observer fail, dataObserver error");
+    if (!WriteParam(data, uri, dataObserver)) {
         return INVALID_PARAM;
     }
 
     auto error = Remote()->SendRequest(IDataObsMgr::UNREGISTER_OBSERVER, data, reply, option);
     if (error != 0) {
-        HILOG_ERROR("unregister observer fail, error: %d", error);
+        HILOG_ERROR("failed: error: %{public}d", error);
         return error;
     }
-    return reply.ReadInt32();
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? res : IPC_ERROR;
 }
 
 int32_t DataObsManagerProxy::NotifyChange(const Uri &uri)
@@ -101,20 +105,22 @@ int32_t DataObsManagerProxy::NotifyChange(const Uri &uri)
     if (!WriteInterfaceToken(data)) {
         return IPC_PARCEL_ERROR;
     }
-    if (!data.WriteParcelable(&uri)) {
-        HILOG_ERROR("notifyChange fail, uri error");
+
+    if (!data.WriteString(uri.ToString())) {
+        HILOG_ERROR("failed: write uri error");
         return INVALID_PARAM;
     }
 
     auto error = Remote()->SendRequest(IDataObsMgr::NOTIFY_CHANGE, data, reply, option);
     if (error != 0) {
-        HILOG_ERROR("notifyChange fail, error: %d", error);
+        HILOG_ERROR("failed:: error: %{public}d", error);
         return IPC_ERROR;
     }
-    return static_cast<Status>(reply.ReadInt32());
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? res : IPC_ERROR;
 }
 
-Status DataObsManagerProxy::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+Status DataObsManagerProxy::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
     bool isDescendants)
 {
     MessageParcel data;
@@ -125,35 +131,48 @@ Status DataObsManagerProxy::RegisterObserverExt(const Uri &uri, const sptr<IData
         return IPC_PARCEL_ERROR;
     }
 
-    if (!data.WriteParcelable(&uri)) {
-        HILOG_ERROR("register observer fail, uri error");
-        return INVALID_PARAM;
-    }
-
-    if (dataObserver == nullptr) {
-        HILOG_ERROR("register observer fail, dataObserver is nullptr");
-        return INVALID_PARAM;
-    }
-
-    if (!data.WriteRemoteObject(dataObserver->AsObject())) {
-        HILOG_ERROR("register observer fail, dataObserver error");
+    if (!WriteParam(data, uri, dataObserver)) {
         return INVALID_PARAM;
     }
 
     if (!data.WriteBool(isDescendants)) {
-        HILOG_ERROR("register observer fail, isDescendants error");
+        HILOG_ERROR("failed: write isDescendants error");
         return INVALID_PARAM;
     }
 
     auto error = Remote()->SendRequest(IDataObsMgr::REGISTER_OBSERVER_EXT, data, reply, option);
     if (error != 0) {
-        HILOG_ERROR("register observer fail, error: %d", error);
+        HILOG_ERROR("failed: error: %{public}d", error);
         return IPC_ERROR;
     }
-    return static_cast<Status>(reply.ReadInt32());
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? static_cast<Status>(res) : IPC_ERROR;
 }
 
-Status DataObsManagerProxy::UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
+Status DataObsManagerProxy::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PARCEL_ERROR;
+    }
+
+    if (!WriteParam(data, uri, dataObserver)) {
+        return INVALID_PARAM;
+    }
+
+    auto error = Remote()->SendRequest(IDataObsMgr::UNREGISTER_OBSERVER_EXT, data, reply, option);
+    if (error != 0) {
+        HILOG_ERROR("failed: error: %{public}d", error);
+        return IPC_ERROR;
+    }
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? static_cast<Status>(res) : IPC_ERROR;
+}
+
+Status DataObsManagerProxy::UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -164,24 +183,25 @@ Status DataObsManagerProxy::UnregisterObserverExt(const sptr<IDataAbilityObserve
     }
 
     if (dataObserver == nullptr) {
-        HILOG_ERROR("unregister observer fail, dataObserver is nullptr");
+        HILOG_ERROR("failed: dataObserver is nullptr");
         return INVALID_PARAM;
     }
 
     if (!data.WriteRemoteObject(dataObserver->AsObject())) {
-        HILOG_ERROR("unregister observer fail, dataObserver error");
+        HILOG_ERROR("failed: write dataObserver error");
         return INVALID_PARAM;
     }
 
-    auto error = Remote()->SendRequest(IDataObsMgr::UNREGISTER_OBSERVER_EXT, data, reply, option);
+    auto error = Remote()->SendRequest(IDataObsMgr::UNREGISTER_OBSERVER_ALL_EXT, data, reply, option);
     if (error != 0) {
-        HILOG_ERROR("unregister observer fail, error: %d", error);
+        HILOG_ERROR("failed: error: %{public}d", error);
         return IPC_ERROR;
     }
-    return static_cast<Status>(reply.ReadInt32());
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? static_cast<Status>(res) : IPC_ERROR;
 }
 
-Status DataObsManagerProxy::NotifyChangeExt(const std::list<Uri> &uris)
+Status DataObsManagerProxy::NotifyChangeExt(const ChangeInfo &changeInfo)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -191,24 +211,18 @@ Status DataObsManagerProxy::NotifyChangeExt(const std::list<Uri> &uris)
         return IPC_PARCEL_ERROR;
     }
 
-    if (!data.WriteInt32(static_cast<int>(uris.size()))) {
-        HILOG_ERROR("notifyChange fail, uris error");
+    if (ChangeInfo::Marshalling(changeInfo, data)) {
+        HILOG_ERROR("failed: changeInfo marshalling error");
         return INVALID_PARAM;
-    }
-
-    for (const auto &uri : uris) {
-        if (!data.WriteParcelable(&uri)) {
-            HILOG_ERROR("notifyChange fail, uri error");
-            return INVALID_PARAM;
-        }
     }
 
     auto error = Remote()->SendRequest(IDataObsMgr::NOTIFY_CHANGE_EXT, data, reply, option);
     if (error != 0) {
-        HILOG_ERROR("notifyChange fail, error: %d", error);
+        HILOG_ERROR("failed: error: %{public}d", error);
         return IPC_ERROR;
     }
-    return static_cast<Status>(reply.ReadInt32());
+    int32_t res = IPC_ERROR;
+    return reply.ReadInt32(res) ? static_cast<Status>(res) : IPC_ERROR;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

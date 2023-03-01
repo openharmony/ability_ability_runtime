@@ -33,6 +33,7 @@ const DataObsManagerStub::RequestFuncType DataObsManagerStub::HANDLES[TRANS_BUTT
     &DataObsManagerStub::NotifyChangeInner,
     &DataObsManagerStub::RegisterObserverExtInner,
     &DataObsManagerStub::UnregisterObserverExtInner,
+    &DataObsManagerStub::UnregisterObserverExtALLInner,
     &DataObsManagerStub::NotifyChangeExtInner
 };
 
@@ -42,7 +43,7 @@ DataObsManagerStub::~DataObsManagerStub() {}
 
 int DataObsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    HILOG_INFO("cmd = %{public}d, flags= %{public}d,callingPid:%{public}u", code, option.GetFlags(),
+    HILOG_INFO("code: %{public}d, flags: %{public}d, callingPid:%{public}d", code, option.GetFlags(),
         IPCSkeleton::GetCallingPid());
     std::u16string descriptor = DataObsManagerStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
@@ -60,85 +61,91 @@ int DataObsManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
 
 int DataObsManagerStub::RegisterObserverInner(MessageParcel &data, MessageParcel &reply)
 {
-    Uri *uri = data.ReadParcelable<Uri>();
-    if (uri == nullptr) {
-        HILOG_ERROR("uri is nullptr");
-        return ERR_INVALID_VALUE;
+    Uri uri(data.ReadString());
+    if (uri.ToString().empty()) {
+        HILOG_ERROR("uri is invalid");
+        return IPC_STUB_INVALID_DATA_ERR;
     }
 
-    auto observer = iface_cast<IDataAbilityObserver>(data.ReadRemoteObject());
-    int32_t result = RegisterObserver(*uri, observer);
+    auto remote = data.ReadRemoteObject();
+    auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
+    int32_t result = RegisterObserver(uri, observer);
     reply.WriteInt32(result);
-    delete uri;
     return NO_ERROR;
 }
 
 int DataObsManagerStub::UnregisterObserverInner(MessageParcel &data, MessageParcel &reply)
 {
-    Uri *uri = data.ReadParcelable<Uri>();
-    if (uri == nullptr) {
-        HILOG_ERROR("uri is nullptr");
-        return ERR_INVALID_VALUE;
+    Uri uri(data.ReadString());
+    if (uri.ToString().empty()) {
+        HILOG_ERROR("uri is invalid");
+        return IPC_STUB_INVALID_DATA_ERR;
     }
 
-    auto observer = iface_cast<IDataAbilityObserver>(data.ReadRemoteObject());
-    int32_t result = UnregisterObserver(*uri, observer);
+    auto remote = data.ReadRemoteObject();
+    auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
+    int32_t result = UnregisterObserver(uri, observer);
     reply.WriteInt32(result);
-    delete uri;
     return NO_ERROR;
 }
 
 int DataObsManagerStub::NotifyChangeInner(MessageParcel &data, MessageParcel &reply)
 {
-    Uri *uri = data.ReadParcelable<Uri>();
-    if (uri == nullptr) {
-        HILOG_ERROR("uri is nullptr");
-        return ERR_INVALID_VALUE;
+    Uri uri(data.ReadString());
+    if (uri.ToString().empty()) {
+        HILOG_ERROR("uri is invalid");
+        return IPC_STUB_INVALID_DATA_ERR;
     }
 
-    int32_t result = NotifyChange(*uri);
+    int32_t result = NotifyChange(uri);
     reply.WriteInt32(result);
-    delete uri;
     return NO_ERROR;
 }
 
 int32_t DataObsManagerStub::RegisterObserverExtInner(MessageParcel &data, MessageParcel &reply)
 {
-    Uri *uri = data.ReadParcelable<Uri>();
-    if (uri == nullptr) {
-        HILOG_ERROR("uri is nullptr");
-        return INVALID_PARAM;
+    Uri uri(data.ReadString());
+    if (uri.ToString().empty()) {
+        HILOG_ERROR("uri is invalid");
+        return IPC_STUB_INVALID_DATA_ERR;
     }
-
-    auto observer = iface_cast<IDataAbilityObserver>(data.ReadRemoteObject());
+    auto remote = data.ReadRemoteObject();
+    auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
     bool isDescendants = data.ReadBool();
-    reply.WriteInt32(RegisterObserverExt(*uri, observer, isDescendants));
-    delete uri;
+    reply.WriteInt32(RegisterObserverExt(uri, observer, isDescendants));
     return SUCCESS;
 }
 
 int32_t DataObsManagerStub::UnregisterObserverExtInner(MessageParcel &data, MessageParcel &reply)
 {
-    auto observer = iface_cast<IDataAbilityObserver>(data.ReadRemoteObject());
+    Uri uri(data.ReadString());
+    if (uri.ToString().empty()) {
+        HILOG_ERROR("uri is invalid");
+        return IPC_STUB_INVALID_DATA_ERR;
+    }
+    auto remote = data.ReadRemoteObject();
+    auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
+
+    reply.WriteInt32(UnregisterObserverExt(uri, observer));
+    return SUCCESS;
+}
+
+int32_t DataObsManagerStub::UnregisterObserverExtALLInner(MessageParcel &data, MessageParcel &reply)
+{
+    auto remote = data.ReadRemoteObject();
+    auto observer = remote == nullptr ? nullptr : iface_cast<IDataAbilityObserver>(remote);
     reply.WriteInt32(UnregisterObserverExt(observer));
     return SUCCESS;
 }
 
 int32_t DataObsManagerStub::NotifyChangeExtInner(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t size = data.ReadInt32();
-    std::list<Uri> uris;
-    Uri *uri = nullptr;
-    for (int32_t i = 0; i < size; ++i) {
-        uri = data.ReadParcelable<Uri>();
-        if (uri == nullptr) {
-            HILOG_ERROR("uri is nullptr");
-            return INVALID_PARAM;
-        }
-        uris.emplace_back(*uri);
+    ChangeInfo changeInfo;
+    if (!ChangeInfo::Unmarshalling(changeInfo, data)) {
+        return IPC_STUB_INVALID_DATA_ERR;
     }
 
-    reply.WriteInt32(NotifyChangeExt(uris));
+    reply.WriteInt32(NotifyChangeExt(changeInfo));
     return SUCCESS;
 }
 }  // namespace AAFwk

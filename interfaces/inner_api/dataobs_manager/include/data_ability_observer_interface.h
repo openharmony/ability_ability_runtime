@@ -16,8 +16,7 @@
 #define OHOS_ABILITY_RUNTIME_DATA_ABILITY_OBSERVER_INTERFACE_H
 
 #include <iremote_broker.h>
-#include <list>
-#include "uri.h"
+#include "dataobs_mgr_changeinfo.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -29,8 +28,7 @@ public:
         TRANS_HEAD,
         DATA_ABILITY_OBSERVER_CHANGE = TRANS_HEAD,
         DATA_ABILITY_OBSERVER_CHANGE_EXT,
-        TRANS_NO_APPID_END,
-        TRANS_BUTT = TRANS_NO_APPID_END,
+        TRANS_BUTT,
     };
 
     /**
@@ -43,9 +41,9 @@ public:
     /**
      * @brief Called back to notify that the data being observed has changed.
      *
-     * @param uris Indicates the paths of the data to operate.
+     * @param changeInfo Indicates the info of the data to operate.
      */
-    virtual void OnChangeExt(std::list<Uri> uris)
+    virtual void OnChangeExt(const ChangeInfo &changeInfo)
     {
         return;
     }

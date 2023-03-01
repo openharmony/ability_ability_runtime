@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <thread>
 #include "dataobs_mgr_client.h"
 
 #include "hilog_wrapper.h"
@@ -50,13 +51,20 @@ DataObsMgrClient::~DataObsMgrClient()
  *
  * @return Returns ERR_OK on success, others on failure.
  */
-ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (Connect() != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
-    return dataObsManger->RegisterObserver(uri, dataObserver);
+    auto status = dataObsManger_->RegisterObserver(uri, dataObserver);
+    if (status != NO_ERROR) {
+        return status;
+    }
+    observers_.Compute(dataObserver, [&uri](const auto &key, auto &value) {
+        value.emplace_back(uri);
+        return true;
+    });
+    return status;
 }
 
 /**
@@ -67,13 +75,22 @@ ErrCode DataObsMgrClient::RegisterObserver(const Uri &uri, const sptr<IDataAbili
  *
  * @return Returns ERR_OK on success, others on failure.
  */
-ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+ErrCode DataObsMgrClient::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (Connect() != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
-    return dataObsManger->UnregisterObserver(uri, dataObserver);
+    auto status = dataObsManger_->UnregisterObserver(uri, dataObserver);
+    if (status != NO_ERROR) {
+        return status;
+    }
+    observers_.Compute(dataObserver, [&uri](const auto &key, auto &value) {
+        value.remove_if([&uri](const auto &val) {
+            return uri == val;
+        });
+        return !value.empty();
+    });
+    return status;
 }
 
 /**
@@ -88,8 +105,7 @@ ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
     if (Connect() != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
-    return dataObsManger->NotifyChange(uri);
+    return dataObsManger_->NotifyChange(uri);
 }
 
 /**
@@ -100,48 +116,120 @@ ErrCode DataObsMgrClient::NotifyChange(const Uri &uri)
 Status DataObsMgrClient::Connect()
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (remoteObject_ != nullptr) {
+
+    if(dataObsManger_ != nullptr){
         return SUCCESS;
     }
+
     sptr<ISystemAbilityManager> systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemManager == nullptr) {
-        HILOG_ERROR("%{private}s:fail to get Registry", __func__);
+        HILOG_ERROR("fail to get Registry");
         return GET_DATAOBS_SERVICE_FAILED;
     }
-    remoteObject_ = systemManager->GetSystemAbility(DATAOBS_MGR_SERVICE_SA_ID);
-    if (remoteObject_ == nullptr) {
-        HILOG_ERROR("%{private}s:fail to connect DataObsMgrService", __func__);
+
+    auto remoteObject = systemManager->GetSystemAbility(DATAOBS_MGR_SERVICE_SA_ID);
+    if (remoteObject == nullptr) {
+        HILOG_ERROR("fail to get systemAbility");
         return GET_DATAOBS_SERVICE_FAILED;
     }
+
+    dataObsManger_ = iface_cast<IDataObsMgr>(remoteObject);
+    if (dataObsManger_ == nullptr) {
+        HILOG_ERROR("fail to get IDataObsMgr");
+        return GET_DATAOBS_SERVICE_FAILED;
+    }
+    auto serviceDeathRecipient = new (std::nothrow) ServiceDeathRecipient(GetInstance());
+    dataObsManger_->AsObject()->AddDeathRecipient(serviceDeathRecipient);
     return SUCCESS;
 }
 
-Status DataObsMgrClient::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+Status DataObsMgrClient::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
     bool isDescendants)
 {
     if (Connect() != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
-    return dataObsManger->RegisterObserverExt(uri, dataObserver, isDescendants);
+    auto status = dataObsManger_->RegisterObserverExt(uri, dataObserver, isDescendants);
+    if (status != SUCCESS) {
+        return status;
+    }
+    observerExts_.Compute(dataObserver, [&uri, isDescendants](const auto &key, auto &value) {
+        value.emplace_back(uri, isDescendants);
+        return true;
+    });
+    return status;
 }
 
-Status DataObsMgrClient::UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
+Status DataObsMgrClient::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (Connect() != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
-    return dataObsManger->UnregisterObserverExt(dataObserver);
+    auto status = dataObsManger_->UnregisterObserverExt(uri, dataObserver);
+    if (status != SUCCESS) {
+        return status;
+    }
+    observerExts_.Compute(dataObserver, [&uri](const auto &key, auto &value) {
+        value.remove_if([&uri](const auto &param) {
+            return uri == param.uri;
+        });
+        return !value.empty();
+    });
+    return status;
 }
 
-Status DataObsMgrClient::NotifyChangeExt(const std::list<Uri> &uris)
+Status DataObsMgrClient::UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver)
 {
     if (Connect() != SUCCESS) {
         return DATAOBS_SERVICE_NOT_CONNECTED;
     }
-    sptr<IDataObsMgr> dataObsManger = iface_cast<IDataObsMgr>(remoteObject_);
-    return dataObsManger->NotifyChangeExt(uris);
+    auto status = dataObsManger_->UnregisterObserverExt(dataObserver);
+    if (status != SUCCESS) {
+        return status;
+    }
+    observerExts_.Erase(dataObserver);
+    return status;
+}
+
+Status DataObsMgrClient::NotifyChangeExt(const ChangeInfo &changeInfo)
+{
+    if (Connect() != SUCCESS) {
+        return DATAOBS_SERVICE_NOT_CONNECTED;
+    }
+    return dataObsManger_->NotifyChangeExt(changeInfo);
+}
+
+void DataObsMgrClient::ResetService()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    dataObsManger_ = nullptr;
+}
+
+void DataObsMgrClient::OnRemoteDied()
+{
+    std::this_thread::sleep_for(std::chrono::seconds(RESUB_INTERVAL));
+    ResetService();
+    if (Connect() != SUCCESS) {
+        return;
+    }
+
+    decltype(observers_) observers(std::move(observers_));
+    observers_.Clear();
+    observers.ForEach([this](const auto &key, const auto &value) {
+        for (const auto &uri : value) {
+            RegisterObserver(uri, key);
+        }
+        return false;
+    });
+
+    decltype(observerExts_) observerExts(std::move(observerExts_));
+    observerExts_.Clear();
+    observerExts.ForEach([this](const auto &key, const auto &value) {
+        for (const auto &param : value) {
+            RegisterObserverExt(param.uri, key, param.isDescendants);
+        }
+        return false;
+    });
 }
 }  // namespace AAFwk
 }  // namespace OHOS

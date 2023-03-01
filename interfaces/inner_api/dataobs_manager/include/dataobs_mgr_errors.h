@@ -50,7 +50,6 @@ enum Status : int32_t {
     IPC_PARCEL_ERROR,
     IPC_ERROR,
     INVALID_PARAM,
-    ADD_OBS_DEATH_RECIPIENT_FAILED,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

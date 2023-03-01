@@ -44,6 +44,7 @@ private:
     int32_t NotifyChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterObserverExtInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterObserverExtInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregisterObserverExtALLInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyChangeExtInner(MessageParcel &data, MessageParcel &reply);
 
     using RequestFuncType = int32_t (DataObsManagerStub::*)(MessageParcel &data, MessageParcel &reply);

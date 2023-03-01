@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,48 +38,56 @@ public:
     DataObsMgrInnerExt();
     virtual ~DataObsMgrInnerExt();
 
-    Status HandleRegisterObserver(Uri &uri, const sptr<IDataAbilityObserver> &dataObserver, bool isDescendants = false);
-    Status HandleUnregisterObserver(Uri &uri, const sptr<IDataAbilityObserver> &dataObserver);
-    Status HandleUnregisterObserver(const sptr<IDataAbilityObserver> &dataObserver);
-    Status HandleNotifyChange(const std::list<Uri> &uris);
+    Status HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver, bool isDescendants = false);
+    Status HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver);
+    Status HandleUnregisterObserver(sptr<IDataAbilityObserver> dataObserver);
+    Status HandleNotifyChange(const ChangeInfo &changeInfo);
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
-    struct Entry {
-        Entry(const sptr<IDataAbilityObserver> &obs, bool fuzz) : observer(obs), fuzzySub(fuzz) {}
-        sptr<IDataAbilityObserver> observer;
-        bool fuzzySub;
+    struct DeathRecipientRef{
+        DeathRecipientRef(sptr<IRemoteObject::DeathRecipient> deathRec) : deathRecipient(deathRec), ref(1) {}
+        sptr<IRemoteObject::DeathRecipient> deathRecipient;
+        std::atomic<uint32_t> ref;
     };
 
-    using ObsMapType = std::map<sptr<IDataAbilityObserver>, std::list<Uri>>;
-    using EntryListType = std::list<std::shared_ptr<Entry>>;
-    using DeathRecipientRef = std::pair<sptr<IRemoteObject::DeathRecipient>, uint32_t>;
+    struct Entry {
+        Entry(sptr<IDataAbilityObserver> obs, std::shared_ptr<DeathRecipientRef> deathRef, bool isDes)
+            : observer(obs), deathRecipientRef(deathRef), isDescendants(isDes)
+        {
+        }
+        sptr<IDataAbilityObserver> observer;
+        std::shared_ptr<DeathRecipientRef> deathRecipientRef;
+        bool isDescendants;
+    };
+
+    using ObsMap = std::map<sptr<IDataAbilityObserver>, std::list<Uri>>;
+    using EntryList = std::list<Entry>;
 
     class Node {
     public:
         Node(const std::string &name);
-        bool GetObs(const std::vector<std::string> &path, uint32_t &index, ObsMapType &obsMap, Uri &uri);
-        bool AddObserver(const std::vector<std::string> &path, uint32_t &index,
-            const sptr<IDataAbilityObserver> &dataObserver, bool isFuzzySub = false);
-        bool RemoveObserver(const std::vector<std::string> &path, uint32_t &index,
-            const sptr<IDataAbilityObserver> &dataObserver, uint32_t &num);
-        inline bool RemoveObserver(const sptr<IDataAbilityObserver> &dataObserver, uint32_t &num);
-        bool RemoveObserver(const sptr<IRemoteObject> &dataObserver, uint32_t &num);
+        void GetObs(const std::vector<std::string> &path, uint32_t index, Uri &uri, ObsMap &obsMap);
+        bool AddObserver(const std::vector<std::string> &path, uint32_t index, const Entry &entry);
+        bool RemoveObserver(const std::vector<std::string> &path, uint32_t index,
+            sptr<IDataAbilityObserver> dataObserver);
+        inline bool RemoveObserver(sptr<IDataAbilityObserver> dataObserver);
+        bool RemoveObserver(sptr<IRemoteObject> dataObserver);
+
     private:
         std::string name_;
-        EntryListType entrys_;
+        EntryList entrys_;
         std::map<std::string, std::shared_ptr<Node>> childrens_;
     };
 
-    bool AddObsDeathRecipient(const sptr<IRemoteObject> &dataObserver, uint32_t num = 1);
-    void RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver, uint32_t num, bool isForce = false);
-    static std::string Anonymous(const std::string &name);
+    std::shared_ptr<DeathRecipientRef> AddObsDeathRecipient(const sptr<IRemoteObject> &dataObserver);
+    void RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver, bool isForce = false);
 
     static constexpr uint32_t OBS_NUM_MAX = 50;
 
     std::mutex nodeMutex_;
-    std::map<std::string, std::shared_ptr<Node>> nodes_;
-    std::map<sptr<IRemoteObject>, DeathRecipientRef> obsRecipientMap_;
+    std::shared_ptr<Node> root_;
+    std::map<sptr<IRemoteObject>, std::shared_ptr<DeathRecipientRef>> obsRecipientRefs;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
