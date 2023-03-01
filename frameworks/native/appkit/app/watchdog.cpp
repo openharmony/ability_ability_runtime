@@ -147,10 +147,10 @@ void Watchdog::Timer()
         }
     }
     if (appMainHandler_ != nullptr) {
-        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE, EventQueue::Priority::HIGH);
+        appMainHandler_->SendEvent(CHECK_MAIN_THREAD_IS_ALIVE);
     }
-    int64_t now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::
-        steady_clock::now().time_since_epoch()).count();
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
     if ((now - lastWatchTime_) >= (CHECK_INTERVAL_TIME / RESET_RATIO)) {
         lastWatchTime_ = now;
     }
@@ -158,8 +158,8 @@ void Watchdog::Timer()
 
 void Watchdog::ReportEvent()
 {
-    int64_t now = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::
-        steady_clock::now().time_since_epoch()).count();
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
     if ((now - lastWatchTime_) > (RESET_RATIO * CHECK_INTERVAL_TIME) ||
         (now - lastWatchTime_) < (CHECK_INTERVAL_TIME / RESET_RATIO)) {
         HILOG_INFO("Thread may be blocked, do not report this time. currTime: %{public}llu, lastTime: %{public}llu",
@@ -184,10 +184,13 @@ void Watchdog::ReportEvent()
         eventType = "THREAD_BLOCK_3S";
         isSixSecondEvent_.store(true);
     }
+    
+    HILOG_DEBUG("Start dump message.");
     std::string msgContent = "App main thread is not response!";
     MainHandlerDumper handlerDumper;
     appMainHandler_->Dump(handlerDumper);
     msgContent += handlerDumper.GetDumpInfo();
+    HILOG_DEBUG("msgContent is %{public}s", msgContent.c_str());
 
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::AAFWK, eventType,
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_UID, applicationInfo_->uid,
@@ -204,7 +207,6 @@ void Watchdog::ReportEvent()
 
 void MainHandlerDumper::Dump(const std::string &message)
 {
-    HILOG_DEBUG("message is %{public}s", message.c_str());
     dumpInfo += message;
 }
 

@@ -640,6 +640,9 @@ void JsRuntime::Deinitialize()
 
     methodRequireNapiRef_.reset();
 
+    if (nativeEngine_ == nullptr) {
+        return;
+    }
     auto uvLoop = nativeEngine_->GetUVLoop();
     auto fd = uvLoop != nullptr ? uv_backend_fd(uvLoop) : -1;
     if (fd >= 0 && eventHandler_ != nullptr) {
@@ -647,6 +650,7 @@ void JsRuntime::Deinitialize()
     }
     RemoveTask(TIMER_TASK);
 
+    nativeEngine_->DeleteEngine();
     nativeEngine_.reset();
 }
 
@@ -875,6 +879,15 @@ void JsRuntime::UpdateExtensionType(int32_t extensionType)
         return;
     }
     moduleManager->SetProcessExtensionType(extensionType);
+}
+
+void JsRuntime::AllowCrossThreadExecution() const
+{
+    if (nativeEngine_ == nullptr) {
+        HILOG_ERROR("AllowCrossThreadExecution error, nativeEngine_ is nullptr");
+        return;
+    }
+    nativeEngine_->AllowCrossThreadExecution();
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
