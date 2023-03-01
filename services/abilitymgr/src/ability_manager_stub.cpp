@@ -1716,17 +1716,16 @@ int32_t AbilityManagerStub::IsValidMissionIdsInner(MessageParcel &data, MessageP
         results.clear();
     }
 
+    if (!reply.WriteInt32(err)) {
+        return ERR_INVALID_VALUE;
+    }
+
     reply.WriteInt32(static_cast<int32_t>(results.size()));
     for (auto &item : results) {
         if (!reply.WriteParcelable(&item)) {
             return ERR_INVALID_VALUE;
         }
     }
-
-    if (!reply.WriteInt32(err)) {
-        return ERR_INVALID_VALUE;
-    }
-
     return NO_ERROR;
 }
 }  // namespace AAFwk

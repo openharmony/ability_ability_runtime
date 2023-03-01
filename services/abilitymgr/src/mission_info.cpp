@@ -103,12 +103,11 @@ bool MissionVaildResult::Marshalling(Parcel &parcel) const
 
 MissionVaildResult *MissionVaildResult::Unmarshalling(Parcel &parcel)
 {
-    MissionVaildResult *info = new MissionVaildResult();
+    std::unique_ptr<MissionVaildResult> info = std::make_unique<MissionVaildResult>();
     if (!info->ReadFromParcel(parcel)) {
-        delete info;
-        info = nullptr;
+        return nullptr;
     }
-    return info;
+    return info.release();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

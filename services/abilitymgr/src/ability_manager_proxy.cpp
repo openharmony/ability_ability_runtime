@@ -3253,20 +3253,33 @@ int32_t AbilityManagerProxy::IsValidMissionIds(
         return INNER_ERR;
     }
 
-    if (!data.WriteInt32Vector(missionIds))
-    {
-        HILOG_ERROR("write missionIds size failed.");
+    constexpr int32_t MAX_COUNT = 20;
+    int32_t num = missionIds.size() > MAX_COUNT ? MAX_COUNT : missionIds.size();
+    data.WriteInt32(num);
+    for (auto i = 0; i < num; ++i) {
+        data.WriteInt32(missionIds.at(i));
+    }
+
+    auto remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote object is nullptr.");
         return INNER_ERR;
     }
 
-    auto error = Remote()->SendRequest(IAbilityManager::QUERY_MISSION_VAILD, data, reply, option);
+    auto error = remote->SendRequest(IAbilityManager::QUERY_MISSION_VAILD, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
         return error;
     }
 
+    auto resultCode = reply.ReadInt32();
+    if (resultCode != ERR_OK) {
+        HILOG_ERROR("Send request reply error: %{public}d", resultCode);
+        return resultCode;
+    }
+
     auto infoSize = reply.ReadInt32();
-    for (auto i = 0; i < infoSize; ++i) {
+    for (auto i = 0; i < infoSize && i < MAX_COUNT; ++i) {
         std::unique_ptr<MissionVaildResult> info(reply.ReadParcelable<MissionVaildResult>());
         if (!info) {
             HILOG_ERROR("Read Parcelable result infos failed.");
@@ -3275,7 +3288,7 @@ int32_t AbilityManagerProxy::IsValidMissionIds(
         results.emplace_back(*info);
     }
 
-    return reply.ReadInt32();
+    return resultCode;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

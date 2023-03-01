@@ -467,6 +467,8 @@ private:
     void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
     void NotifyRestartSpecifiedAbility(AbilityRequest &request, const sptr<IRemoteObject> &token);
     void ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const;
+    bool UpdateAbilityRecordLaunchReason(
+        const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetAbilityRecord);
 
     int userId_;
     mutable std::recursive_mutex managerLock_;
