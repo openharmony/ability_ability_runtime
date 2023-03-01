@@ -420,6 +420,8 @@ public:
 
     void UpdateRecoveryInfo(bool hasRecoverInfo);
 
+    bool GetRecoveryInfo();
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * check whether the ability 's window is attached.

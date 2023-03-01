@@ -25,6 +25,7 @@
 #include "hilog_wrapper.h"
 #include "hisysevent.h"
 #include "mission_info_mgr.h"
+#include "in_process_call_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -281,14 +282,7 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
         targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
     }
 
-    if (abilityRequest.IsContinuation()) {
-        targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
-    } else if (abilityRequest.IsAppRecovery()) {
-        targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
-    } else {
-        targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
-    }
-
+    UpdateAbilityRecordLaunchReason(abilityRequest, targetAbilityRecord);
     std::string srcAbilityId = "";
     if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
         std::string srcDeviceId = abilityRequest.want.GetStringParam(DMS_SRC_NETWORK_ID);
@@ -2826,14 +2820,7 @@ void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std
             }
             ability->SetWant(abilityRequest.want);
             ability->SetIsNewWant(true);
-            if (abilityRequest.IsContinuation()) {
-                ability->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
-            } else if (abilityRequest.IsAppRecovery()) {
-                ability->SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
-            } else {
-                ability->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
-            }
-
+            UpdateAbilityRecordLaunchReason(abilityRequest, ability);
             auto isCallerFromLauncher = (callerAbility && callerAbility->IsLauncherAbility());
             MoveMissionToFront(mission->GetMissionId(), isCallerFromLauncher);
             NotifyRestartSpecifiedAbility(abilityRequest, ability->GetToken());
@@ -3224,28 +3211,65 @@ int32_t MissionListManager::IsValidMissionIds(
     const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
 {
     constexpr int32_t searchCount = 20;
-    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    auto missionInfoMgr = DelayedSingleton<MissionInfoMgr>::GetInstance();
+    if (missionInfoMgr == nullptr) {
+        HILOG_ERROR("missionInfoMgr is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    auto bms = AbilityUtil::GetBundleManager();
+    if (bms == nullptr) {
+        HILOG_ERROR("bundleManager is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::string bundleName;
+    if (!IN_PROCESS_CALL(bms->GetBundleNameForUid(callerUid, bundleName))) {
+        HILOG_ERROR("get bundle name by uid error.");
+        return ERR_INVALID_VALUE;
+    }
+
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     for (auto i = 0; i < searchCount && i < static_cast<int32_t>(missionIds.size()); ++i) {
         MissionVaildResult missionResult = {};
         missionResult.missionId = missionIds.at(i);
-        auto mission = GetMissionById(missionResult.missionId);
-        if (mission == nullptr) {
+        InnerMissionInfo info;
+        if (missionInfoMgr->GetInnerMissionInfoById(missionResult.missionId, info) != ERR_OK) {
             results.push_back(missionResult);
             continue;
         }
 
-        auto record = mission->GetAbilityRecord();
-        if (record == nullptr) {
+        if (bundleName != info.bundleName) {
             results.push_back(missionResult);
             continue;
         }
 
-        missionResult.isVaild = (callerTokenId == record->GetApplicationInfo().accessTokenId);
         results.push_back(missionResult);
     }
 
     return ERR_OK;
+}
+
+bool MissionListManager::UpdateAbilityRecordLaunchReason(
+    const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("input record is nullptr.");
+        return false;
+    }
+
+    if (abilityRequest.IsContinuation()) {
+        abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
+        return true;
+    }
+
+    if (abilityRequest.IsAppRecovery() || abilityRecord->GetRecoveryInfo()) {
+        abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
+        return true;
+    }
+
+    abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

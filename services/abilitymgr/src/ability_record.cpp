@@ -2346,10 +2346,16 @@ void AbilityRecord::SetOtherMissionStackAbilityRecord(const std::shared_ptr<Abil
     otherMissionStackAbilityRecord_ = abilityRecord;
 }
 
-void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo){
+void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo)
+{
     if (hasRecoverInfo) {
         want_.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
     }
+}
+
+bool AbilityRecord::GetRecoveryInfo()
+{
+    return want_.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
