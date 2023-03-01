@@ -61,13 +61,13 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_RegisterObserver_0100, TestSize.
 
     MockDataObsMgrClient::GetInstance();
 
-    EXPECT_CALL(*((MockDataObsMgrService*)(DataObsMgrClient::GetInstance()->remoteObject_).GetRefPtr()),
+    EXPECT_CALL(*((MockDataObsMgrService*)(DataObsMgrClient::GetInstance()->dataObsManger_).GetRefPtr()),
         RegisterObserverCall(testing::_, testing::_))
         .Times(1);
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/25");
     MockDataObsMgrClient::GetInstance()->RegisterObserver(uri, dataAbilityObserverProxy);
 
-    testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->remoteObject_);
+    testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
     GTEST_LOG_(INFO) << "DataObsMgrClientTest_DataObsMgrClient_RegisterObserver_0100 end";
 }
 /*
@@ -88,14 +88,14 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_UnregisterObserver_0100, TestSiz
 
     MockDataObsMgrClient::GetInstance();
 
-    EXPECT_CALL(*((MockDataObsMgrService*)(DataObsMgrClient::GetInstance()->remoteObject_).GetRefPtr()),
+    EXPECT_CALL(*((MockDataObsMgrService*)(DataObsMgrClient::GetInstance()->dataObsManger_).GetRefPtr()),
         UnregisterObserverCall(testing::_, testing::_))
         .Times(1);
 
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/25");
     MockDataObsMgrClient::GetInstance()->UnregisterObserver(uri, dataAbilityObserverProxy);
 
-    testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->remoteObject_);
+    testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
     GTEST_LOG_(INFO) << "DataObsMgrClientTest_DataObsMgrClient_UnregisterObserver_0100 end";
 }
 
@@ -113,14 +113,14 @@ HWTEST_F(DataObsMgrClientTest, DataObsMgrClient_NotifyChange_0100, TestSize.Leve
 
     MockDataObsMgrClient::GetInstance()->Connect();
 
-    EXPECT_CALL(*((MockDataObsMgrService*)(DataObsMgrClient::GetInstance()->remoteObject_).GetRefPtr()),
+    EXPECT_CALL(*((MockDataObsMgrService*)(DataObsMgrClient::GetInstance()->dataObsManger_).GetRefPtr()),
         NotifyChangeCall(testing::_))
         .Times(1);
 
     Uri uri("dataability://device_id/com.domainname.dataability.persondata/person/25");
     MockDataObsMgrClient::GetInstance()->NotifyChange(uri);
 
-    testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->remoteObject_);
+    testing::Mock::AllowLeak(DataObsMgrClient::GetInstance()->dataObsManger_);
     GTEST_LOG_(INFO) << "DataObsMgrClientTest_DataObsMgrClient_NotifyChange_0100 end";
 }
 }  // namespace AAFwk

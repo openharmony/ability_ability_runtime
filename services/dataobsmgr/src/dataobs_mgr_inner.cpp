@@ -17,6 +17,7 @@
 #include "data_ability_observer_stub.h"
 #include "dataobs_mgr_errors.h"
 #include "hilog_wrapper.h"
+#include "common_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -25,20 +26,20 @@ DataObsMgrInner::DataObsMgrInner() {}
 
 DataObsMgrInner::~DataObsMgrInner() {}
 
-int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
-    std::lock_guard<std::mutex> lock_l(innerMutex_);
+    std::lock_guard<std::mutex> lock(innerMutex_);
 
-    auto [obsPair, flag] =obsmap_.try_emplace(uri.ToString(), std::list<sptr<IDataAbilityObserver>>());
+    auto [obsPair, flag] = observers_.try_emplace(uri.ToString(), std::list<sptr<IDataAbilityObserver>>());
     if (!flag && obsPair->second.size() > OBS_NUM_MAX) {
         HILOG_ERROR("The number of subscribers for this uri : %{public}s has reached the upper limit.",
-            Anonymous(uri.ToString()).c_str());
+            CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_OBS_LIMMIT;
     }
 
     for (auto obs = obsPair->second.begin(); obs != obsPair->second.end(); obs++) {
         if ((*obs)->AsObject() == dataObserver->AsObject()) {
-            HILOG_ERROR("the obs has registered on this uri : %{public}s", Anonymous(uri.ToString()).c_str());
+            HILOG_ERROR("the obs has registered on this uri : %{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
             return OBS_EXIST;
         }
     }
@@ -50,18 +51,18 @@ int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, const sptr<IDataAbil
     return NO_ERROR;
 }
 
-int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
-    std::lock_guard<std::mutex> lock_l(innerMutex_);
+    std::lock_guard<std::mutex> lock(innerMutex_);
 
-    auto obsPair = obsmap_.find(uri.ToString());
-    if (obsPair == obsmap_.end()) {
-        HILOG_WARN("no obs on this uri : %{public}s", Anonymous(uri.ToString()).c_str());
+    auto obsPair = observers_.find(uri.ToString());
+    if (obsPair == observers_.end()) {
+        HILOG_WARN("no obs on this uri : %{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
 
     HILOG_DEBUG("obs num is %{public}zu on this uri : %{public}s", obsPair->second.size(),
-        Anonymous(uri.ToString()).c_str());
+        CommonUtils::Anonymous(uri.ToString()).c_str());
     auto obs = obsPair->second.begin();
     for (; obs != obsPair->second.end(); obs++) {
         if ((*obs)->AsObject() == dataObserver->AsObject()) {
@@ -69,15 +70,15 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, const sptr<IDataAb
         }
     }
     if (obs == obsPair->second.end()) {
-        HILOG_WARN("no obs on this uri : %{public}s", Anonymous(uri.ToString()).c_str());
+        HILOG_WARN("no obs on this uri : %{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return NO_OBS_FOR_URI;
     }
     obsPair->second.remove(*obs);
     if (obsPair->second.empty()) {
-        obsmap_.erase(obsPair);
+        observers_.erase(obsPair);
     }
 
-    if (!ObsExistInMap(dataObserver)) {
+    if (!HaveRegistered(dataObserver)) {
         RemoveObsDeathRecipient(dataObserver->AsObject());
     }
 
@@ -87,11 +88,11 @@ int DataObsMgrInner::HandleUnregisterObserver(const Uri &uri, const sptr<IDataAb
 int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
 {
     std::list<sptr<IDataAbilityObserver>> obsList;
-    std::lock_guard<std::mutex> lock_l(innerMutex_);
+    std::lock_guard<std::mutex> lock(innerMutex_);
     {
-        auto obsPair = obsmap_.find(uri.ToString());
-        if (obsPair == obsmap_.end()) {
-            HILOG_WARN("there is no obs on the uri : %{public}s", Anonymous(uri.ToString()).c_str());
+        auto obsPair = observers_.find(uri.ToString());
+        if (obsPair == observers_.end()) {
+            HILOG_WARN("there is no obs on the uri : %{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
             return NO_OBS_FOR_URI;
         }
         obsList = obsPair->second;
@@ -103,19 +104,19 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
         }
     }
 
-    HILOG_DEBUG("called end on the uri : %{public}s,obs num: %{public}zu", Anonymous(uri.ToString()).c_str(),
+    HILOG_DEBUG("called end on the uri : %{public}s,obs num: %{public}zu", CommonUtils::Anonymous(uri.ToString()).c_str(),
         obsList.size());
     return NO_ERROR;
 }
 
-void DataObsMgrInner::AddObsDeathRecipient(const sptr<IDataAbilityObserver> &dataObserver)
+void DataObsMgrInner::AddObsDeathRecipient(sptr<IDataAbilityObserver> dataObserver)
 {
     if ((dataObserver == nullptr) || dataObserver->AsObject() == nullptr) {
         return;
     }
 
-    auto it = recipientMap_.find(dataObserver->AsObject());
-    if (it != recipientMap_.end()) {
+    auto it = obsRecipient_.find(dataObserver->AsObject());
+    if (it != obsRecipient_.end()) {
         HILOG_WARN("this death recipient has been added.");
         return;
     } else {
@@ -128,20 +129,20 @@ void DataObsMgrInner::AddObsDeathRecipient(const sptr<IDataAbilityObserver> &dat
                 }
             });
         dataObserver->AsObject()->AddDeathRecipient(deathRecipient);
-        recipientMap_.emplace(dataObserver->AsObject(), deathRecipient);
+        obsRecipient_.emplace(dataObserver->AsObject(), deathRecipient);
     }
 }
 
-void DataObsMgrInner::RemoveObsDeathRecipient(const sptr<IRemoteObject> &dataObserver)
+void DataObsMgrInner::RemoveObsDeathRecipient(sptr<IRemoteObject> dataObserver)
 {
     if (dataObserver == nullptr) {
         return;
     }
 
-    auto it = recipientMap_.find(dataObserver);
-    if (it != recipientMap_.end()) {
+    auto it = obsRecipient_.find(dataObserver);
+    if (it != obsRecipient_.end()) {
         it->first->RemoveDeathRecipient(it->second);
-        recipientMap_.erase(it);
+        obsRecipient_.erase(it);
         return;
     }
 }
@@ -152,7 +153,7 @@ void DataObsMgrInner::OnCallBackDied(const wptr<IRemoteObject> &remote)
     if (dataObserver == nullptr) {
         return;
     }
-    std::lock_guard<std::mutex> lock_l(innerMutex_);
+    std::lock_guard<std::mutex> lock(innerMutex_);
 
     if (dataObserver == nullptr) {
         HILOG_ERROR("dataObserver is nullptr.");
@@ -162,9 +163,9 @@ void DataObsMgrInner::OnCallBackDied(const wptr<IRemoteObject> &remote)
     RemoveObsFromMap(dataObserver);
 }
 
-void DataObsMgrInner::RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver)
+void DataObsMgrInner::RemoveObsFromMap(sptr<IRemoteObject> dataObserver)
 {
-    for (auto iter = obsmap_.begin(); iter != obsmap_.end();) {
+    for (auto iter = observers_.begin(); iter != observers_.end();) {
         auto &obsList = iter->second;
         for (auto it = obsList.begin(); it != obsList.end(); it++) {
             if ((*it)->AsObject() == dataObserver) {
@@ -174,7 +175,7 @@ void DataObsMgrInner::RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver)
             }
         }
         if (obsList.size() == 0) {
-            obsmap_.erase(iter++);
+            observers_.erase(iter++);
         } else {
             iter++;
         }
@@ -182,33 +183,15 @@ void DataObsMgrInner::RemoveObsFromMap(const sptr<IRemoteObject> &dataObserver)
     RemoveObsDeathRecipient(dataObserver);
 }
 
-bool DataObsMgrInner::ObsExistInMap(const sptr<IDataAbilityObserver> &dataObserver)
+bool DataObsMgrInner::HaveRegistered(sptr<IDataAbilityObserver> dataObserver)
 {
-    for (auto &[key, value] : obsmap_) {
+    for (auto &[key, value] : observers_) {
         auto obs = std::find(value.begin(), value.end(), dataObserver);
         if (obs != value.end()) {
             return true;
         }
     }
     return false;
-}
-
-std::string DataObsMgrInner::Anonymous(const std::string &name)
-{
-    static constexpr uint32_t HEAD_SIZE = 10;
-    static constexpr int32_t END_SIZE = 5;
-    static constexpr int32_t MIN_SIZE = HEAD_SIZE + END_SIZE + 3;
-    static constexpr const char *REPLACE_CHAIN = "***";
-    static constexpr const char *DEFAULT_ANONYMOUS = "******";
-    if (name.length() <= HEAD_SIZE) {
-        return DEFAULT_ANONYMOUS;
-    }
-
-    if (name.length() < MIN_SIZE) {
-        return (name.substr(0, HEAD_SIZE) + REPLACE_CHAIN);
-    }
-
-    return (name.substr(0, HEAD_SIZE) + REPLACE_CHAIN + name.substr(name.length() - END_SIZE, END_SIZE));
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -24,16 +24,17 @@
 
 namespace OHOS {
 namespace DataObsMgrInnerExtTest {
+using namespace AAFwk;
 class MockDataAbilityObserverStub : public AAFwk::DataAbilityObserverStub {
 public:
-    void OnChange()
+    void OnChange() override
     {
     }
 
-    void OnChangeExt(std::list<Uri> uris)
+    void OnChangeExt(const ChangeInfo &changeInfo) override
     {
-        onChangeCall_ += uris.size();
-        uris_ = uris;
+        onChangeCall_ += changeInfo.uris_.size();
+        changeInfo_ = changeInfo;
         if (func) {
             func();
         }
@@ -42,7 +43,7 @@ public:
     void ReSet()
     {
         onChangeCall_.store(0);
-        uris_.clear();
+        changeInfo_ = {};
     }
 
     void Wait()
@@ -62,7 +63,7 @@ public:
 
 private:
     std::atomic_int onChangeCall_ = 0;
-    std::list<Uri> uris_;
+    ChangeInfo changeInfo_;
     std::mutex mtx_;
     std::condition_variable cv_;
     bool flag_ = false;

@@ -55,9 +55,9 @@ void DataAbilityObserverProxy::OnChange()
 /**
  * @brief Called back to notify that the data being observed has changed.
  *
- * @param uris Indicates the path of the data to operate.
+ * @param changeInfo Indicates the info of the data to operate.
  */
-void DataAbilityObserverProxy::OnChangeExt(std::list<Uri> uris)
+void DataAbilityObserverProxy::OnChangeExt(const ChangeInfo &changeInfo)
 {
     auto remote = Remote();
     if (remote == nullptr) {
@@ -74,16 +74,9 @@ void DataAbilityObserverProxy::OnChangeExt(std::list<Uri> uris)
         return;
     }
 
-    if (!data.WriteInt32(static_cast<int>(uris.size()))) {
-        HILOG_ERROR("write uris size error.");
+    if (ChangeInfo::Marshalling(changeInfo, data)) {
+        HILOG_ERROR("changeInfo marshalling failed");
         return;
-    }
-
-    for (auto const &uri : uris) {
-        if (!data.WriteParcelable(&uri)) {
-            HILOG_ERROR("write uri error.");
-            return;
-        }
     }
 
     int result = remote->SendRequest(IDataAbilityObserver::DATA_ABILITY_OBSERVER_CHANGE_EXT, data, reply, option);

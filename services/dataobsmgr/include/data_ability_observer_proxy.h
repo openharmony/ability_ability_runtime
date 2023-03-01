@@ -36,9 +36,9 @@ public:
     /**
      * @brief Called back to notify that the data being observed has changed.
      *
-     * @param uris Indicates the path of the data to operate.
+     * @param changeInfo Indicates the info of the data to operate.
      */
-    void OnChangeExt(std::list<Uri> uris) override;
+    void OnChangeExt(const ChangeInfo &changeInfo) override;
 
 private:
     static inline BrokerDelegator<DataAbilityObserverProxy> delegator_;

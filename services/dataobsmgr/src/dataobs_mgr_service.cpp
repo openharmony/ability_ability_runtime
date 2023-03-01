@@ -105,7 +105,7 @@ DataObsServiceRunningState DataObsMgrService::QueryServiceState() const
     return state_;
 }
 
-int DataObsMgrService::RegisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver == nullptr) {
         HILOG_ERROR("dataObserver is nullptr");
@@ -122,7 +122,7 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, const sptr<IDataAbilityO
     return NO_ERROR;
 }
 
-int DataObsMgrService::UnregisterObserver(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver)
+int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver == nullptr) {
         HILOG_ERROR("dataObserver is nullptr");
@@ -154,6 +154,7 @@ int DataObsMgrService::NotifyChange(const Uri &uri)
 
     bool ret = handler_->PostTask([this, &uri]() {
         dataObsMgrInner_->HandleNotifyChange(uri);
+        dataObsMgrInnerExt_->HandleNotifyChange({ ChangeInfo::ChangeType::OTHER, { uri } });
         std::lock_guard<std::mutex> lck(taskCountMutex_);
         taskCount_--;
     });
@@ -165,7 +166,7 @@ int DataObsMgrService::NotifyChange(const Uri &uri)
     return NO_ERROR;
 }
 
-Status DataObsMgrService::RegisterObserverExt(const Uri &uri, const sptr<IDataAbilityObserver> &dataObserver,
+Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver,
     bool isDescendants)
 {
     if (dataObserver == nullptr) {
@@ -179,7 +180,20 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, const sptr<IDataAb
     return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, isDescendants);
 }
 
-Status DataObsMgrService::UnregisterObserverExt(const sptr<IDataAbilityObserver> &dataObserver)
+Status DataObsMgrService::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
+{
+    if (dataObserver == nullptr) {
+        HILOG_ERROR("dataObserver is nullptr");
+        return DATA_OBSERVER_IS_NULL;
+    }
+
+    Check();
+
+    auto innerUri = uri;
+    return dataObsMgrInnerExt_->HandleUnregisterObserver(innerUri, dataObserver);
+}
+
+Status DataObsMgrService::UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver == nullptr) {
         HILOG_ERROR("dataObserver is nullptr");
@@ -191,23 +205,26 @@ Status DataObsMgrService::UnregisterObserverExt(const sptr<IDataAbilityObserver>
     return dataObsMgrInnerExt_->HandleUnregisterObserver(dataObserver);
 }
 
-Status DataObsMgrService::NotifyChangeExt(const std::list<Uri> &uris)
+Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo)
 {
     Check();
 
     {
-        std::lock_guard<std::mutex> lck(taskCountExtMutex_);
-        if (taskCountExt_ >= TASK_COUNT_MAX) {
+        std::lock_guard<std::mutex> lck(taskCountMutex_);
+        if (taskCount_ >= TASK_COUNT_MAX) {
             HILOG_ERROR("The number of task has reached the upper limit");
             return DATAOBS_SERVICE_TASK_LIMMIT;
         }
-        ++taskCountExt_;
+        ++taskCount_;
     }
 
-    bool ret = handler_->PostTask([this, &uris]() {
-        dataObsMgrInnerExt_->HandleNotifyChange(uris);
-        std::lock_guard<std::mutex> lck(taskCountExtMutex_);
-        --taskCountExt_;
+    bool ret = handler_->PostTask([this, &changeInfo]() {
+        dataObsMgrInnerExt_->HandleNotifyChange(changeInfo);
+        for (auto &uri : changeInfo.uris_) {
+            dataObsMgrInner_->HandleNotifyChange(uri);
+        }
+        std::lock_guard<std::mutex> lck(taskCountMutex_);
+        --taskCount_;
     });
     if (!ret) {
         HILOG_ERROR("Post NotifyChangeExt fail");
