@@ -484,7 +484,15 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetWant().GetElement().GetURI();
     HILOG_DEBUG("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
-    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.accessTokenId);
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    HILOG_DEBUG("callerPid : %{public}u", callerUid);
+
+    auto bms = AbilityUtil::GetBundleManager();
+    std::string targetBundleName;
+    if(!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
+        HILOG_ERROR("Get targetBundleName name by uid failed.");
+    }
+    GrantUriPermission(want_, GetCurrentAccountId(), targetBundleName);
 
     if (isReady_) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
@@ -1197,7 +1205,7 @@ void AbilityRecord::Terminate(const Closure &task)
     // earlier than above actions.
     currentState_ = AbilityState::TERMINATING;
     lifecycleDeal_->Terminate(want_, lifeCycleStateInfo_);
-    RemoveUriPermission();
+    RevokeUriPermission();
 }
 
 void AbilityRecord::ConnectAbility()
@@ -1275,7 +1283,12 @@ void AbilityRecord::SendResult()
     std::lock_guard<std::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     CHECK_POINTER(result_);
-    GrantUriPermission(result_->resultWant_, GetCurrentAccountId(), applicationInfo_.accessTokenId);
+    auto bms = AbilityUtil::GetBundleManager();
+    std::string targetBundleName;
+    if(!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
+        HILOG_ERROR("Get targetBundleName name by uid failed.");
+    }
+    GrantUriPermission(result_->resultWant_, GetCurrentAccountId(), targetBundleName);
     scheduler_->SendResult(result_->requestCode_, result_->resultCode_, result_->resultWant_);
     // reset result to avoid send result next time
     result_.reset();
@@ -1757,7 +1770,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
         return;
     }
 
-    RemoveUriPermission();
+    RevokeUriPermission();
     if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
         auto schedulerObject = scheduler_->AsObject();
         if (schedulerObject != nullptr) {
@@ -2047,7 +2060,12 @@ void AbilityRecord::CallRequest()
     HILOG_INFO("Call Request.");
     CHECK_POINTER(scheduler_);
 
-    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.accessTokenId);
+    auto bms = AbilityUtil::GetBundleManager();
+    std::string targetBundleName;
+    if(!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
+        HILOG_ERROR("Get targetBundleName name by uid failed.");
+    }
+    GrantUriPermission(want_, GetCurrentAccountId(), targetBundleName);
     // Async call request
     scheduler_->CallRequest();
 }
@@ -2203,7 +2221,7 @@ void AbilityRecord::DumpAbilityInfoDone(std::vector<std::string> &infos)
     dumpCondition_.notify_all();
 }
 
-void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, uint32_t targetTokenId)
+void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, std::string targetBundleName)
 {
     if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("Do not call uriPermissionMgr.");
@@ -2217,6 +2235,11 @@ void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, uint32_
     auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     auto fromTokenId = IPCSkeleton::GetCallingTokenID();
+    auto fromUid = GetUid();
+    std::string fromBundleName;
+    if(!bms->GetBundleNameForUid(fromUid, fromBundleName)) {
+        HILOG_ERROR("Get fromBundleName name by uid failed.");
+    }
     for (auto&& str : uriVec) {
         Uri uri(str);
         auto&& scheme = uri.GetScheme();
@@ -2238,20 +2261,21 @@ void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, uint32_
             HILOG_ERROR("the uri does not belong to caller.");
             continue;
         }
+        int autoremove = 1;
         auto ret = IN_PROCESS_CALL(upmClient->GrantUriPermission(uri, want.GetFlags(),
-            callerAccessTokenId_, targetTokenId));
+            fromBundleName, targetBundleName, autoremove));
         if (ret) {
             isGrantedUriPermission_ = true;
         }
     }
 }
 
-void AbilityRecord::RemoveUriPermission()
+void AbilityRecord::RevokeUriPermission()
 {
     if (isGrantedUriPermission_) {
         HILOG_DEBUG("To remove uri permission.");
         auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-        upmClient->RemoveUriPermission(applicationInfo_.accessTokenId);
+        upmClient->RevokeUriPermission(applicationInfo_.accessTokenId);
         isGrantedUriPermission_ = false;
     }
 }

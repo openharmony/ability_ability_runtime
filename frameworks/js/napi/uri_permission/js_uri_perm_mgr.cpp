@@ -46,10 +46,10 @@ public:
         return (me != nullptr) ? me->OnGrantUriPermissionFromSelf(*engine, *info) : nullptr;
     }
 
-    static NativeValue* RemoveUriPermission(NativeEngine* engine, NativeCallbackInfo* info)
+    static NativeValue* RevokeUriPermission(NativeEngine* engine, NativeCallbackInfo* info)
     {
         JsUriPermMgr* me = CheckParamsAndGetThis<JsUriPermMgr>(engine, info);
-        return (me != nullptr) ? me->OnRemoveUriPermission(*engine, *info) : nullptr;
+        return (me != nullptr) ? me->OnRevokeUriPermission(*engine, *info) : nullptr;
     }
 
 private:
@@ -91,23 +91,24 @@ private:
                 return;
             }
 
-            int fromAccessTokenId = 0;
-            if (!ConvertFromJsValue(engine, args[2]->Get(), fromAccessTokenId)) {
+            std::string fromBundleName;
+            if (!ConvertFromJsValue(engine, args[2]->Get(), fromBundleName)) {
                 HILOG_ERROR("%{public}s called, the third parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "fromAccessTokenId conversion failed."));
+                task.Reject(engine, CreateJsError(engine, -1, "fromBundleName conversion failed."));
                 return;
             }
 
-            int targetAccessTokenId = 0;
-            if (!ConvertFromJsValue(engine, args[3]->Get(), targetAccessTokenId)) {
+            std::string targetBundleName;
+            if (!ConvertFromJsValue(engine, args[3]->Get(), targetBundleName)) {
                 HILOG_ERROR("%{public}s called, the fourth parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "targetAccessTokenId conversion failed."));
+                task.Reject(engine, CreateJsError(engine, -1, "targetBundleName conversion failed."));
                 return;
             }
 
             Uri uri(uriStr);
+            int autoremove = 0;
             AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermission(uri, flag,
-                fromAccessTokenId, targetAccessTokenId);
+                fromBundleName, targetBundleName, autoremove);
             task.Resolve(engine, CreateJsValue(engine, 0));
         };
 
@@ -156,19 +157,19 @@ private:
                 return;
             }
 
-            int targetAccessTokenId = 0;
-            if (!ConvertFromJsValue(engine, args[2]->Get(), targetAccessTokenId)) {
+            std::string targetBundleName;
+            if (!ConvertFromJsValue(engine, args[2]->Get(), targetBundleName)) {
                 HILOG_ERROR("%{public}s called, the fourth parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "targetAccessTokenId conversion failed."));
+                task.Reject(engine, CreateJsError(engine, -1, "targetBundleName conversion failed."));
                 return;
             }
+            
 
             Uri uri(uriStr);
             AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermissionFromSelf(uri,
-                flag, targetAccessTokenId);
+                flag, targetBundleName);
             task.Resolve(engine, CreateJsValue(engine, 0));
         };
-
         NativeValue* lastParam = (info.argc == argCountFour) ? info.argv[argCountThree] : nullptr;
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnGrantUriPermission",
@@ -176,7 +177,7 @@ private:
         return result;
     }
 
-    NativeValue* OnRemoveUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
+    NativeValue* OnRevokeUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
     {
         constexpr int32_t argCountOne = 1;
         constexpr int32_t argCountTwo = 2;
@@ -201,21 +202,26 @@ private:
             }
 
             std::string uriStr;
-            int tokenId = 0;
-            if (!ConvertFromJsValue(engine, args[0]->Get(), tokenId)) {
+            if (!ConvertFromJsValue(engine, args[0]->Get(), uriStr)) {
                 HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "targetAccessTokenId conversion failed."));
+                task.Reject(engine, CreateJsError(engine, -1, "uri conversion failed."));
+                return;
+            }
+            std::string bundleName;
+            if (!ConvertFromJsValue(engine, args[0]->Get(), bundleName)) {
+                HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
+                task.Reject(engine, CreateJsError(engine, -1, "BundleName conversion failed."));
                 return;
             }
 
             Uri uri(uriStr);
-            AAFwk::UriPermissionManagerClient::GetInstance()->RemoveUriPermissionManually(tokenId);
+            AAFwk::UriPermissionManagerClient::GetInstance()->RevokeUriPermissionManually(uri, bundleName);
             task.Resolve(engine, CreateJsValue(engine, 0));
         };
 
         NativeValue* lastParam = (info.argc == argCountTwo) ? info.argv[argCountOne] : nullptr;
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JsUriPermMgr::OnRemoveUriPermission",
+        AsyncTask::Schedule("JsUriPermMgr::OnRevokeUriPermission",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -242,7 +248,7 @@ NativeValue* CreateJsUriPermMgr(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "grantUriPermission", moduleName, JsUriPermMgr::GrantUriPermission);
     BindNativeFunction(*engine, *object, "grantUriPermissionFromSelf",
         moduleName, JsUriPermMgr::GrantUriPermissionFromSelf);
-    BindNativeFunction(*engine, *object, "RemoveUriPermission", moduleName, JsUriPermMgr::RemoveUriPermission);
+    BindNativeFunction(*engine, *object, "RevokeUriPermission", moduleName, JsUriPermMgr::RevokeUriPermission);
     return engine->CreateUndefined();
 }
 }  // namespace AbilityRuntime

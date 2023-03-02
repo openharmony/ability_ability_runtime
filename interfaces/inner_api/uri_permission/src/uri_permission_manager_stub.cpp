@@ -36,9 +36,10 @@ int UriPermissionManagerStub::OnRemoteRequest(
                 break;
             }
             auto flag = data.ReadInt32();
-            auto fromTokenId = data.ReadInt32();
-            auto targetTokenId = data.ReadInt32();
-            if (!GrantUriPermission(*uri, flag, fromTokenId, targetTokenId)) {
+            auto fromBundleName = data.ReadString();
+            auto targetBundleName = data.ReadString();
+            auto autoremove = data.ReadInt32();
+            if (!GrantUriPermission(*uri, flag, fromBundleName, targetBundleName, autoremove)) {
                 errCode = ERR_INVALID_OPERATION;
                 HILOG_ERROR("To grant uri permission failed.");
             }
@@ -52,8 +53,8 @@ int UriPermissionManagerStub::OnRemoteRequest(
                 break;
             }
             auto flag = data.ReadInt32();
-            auto targetTokenId = data.ReadInt32();            
-            if (!GrantUriPermissionFromSelf(*uri, flag, targetTokenId)) {
+            auto targetBundleName = data.ReadString();
+            if (!GrantUriPermissionFromSelf(*uri, flag, targetBundleName)) {
                 errCode = ERR_INVALID_OPERATION;
                 HILOG_ERROR("To grant uri permission failed.");
             }
@@ -74,19 +75,25 @@ int UriPermissionManagerStub::OnRemoteRequest(
             }
             break;
         }
-        case UriPermMgrCmd::ON_REMOVE_URI_PERMISSION : {
+        case UriPermMgrCmd::ON_REVOKE_URI_PERMISSION : {
             auto tokenId = data.ReadInt32();
-            if (!RemoveUriPermission(tokenId)) {
+            if (!RevokeUriPermission(tokenId)) {
                 errCode = ERR_INVALID_OPERATION;
-                HILOG_ERROR("To grant uri permission failed.");
+                HILOG_ERROR("To revoke uri permission failed.");
             }
             break;
         }
-        case UriPermMgrCmd::ON_REMOVE_URI_PERMISSION_MANUALLY : {
-            auto tokenId = data.ReadInt32();
-            if (RemoveUriPermissionManually(tokenId)) {
+        case UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY : {
+            std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
+            if (!uri) {
+                errCode = ERR_DEAD_OBJECT;
+                HILOG_ERROR("To read uri failed.");
+                break;
+            }
+            auto bundleName = data.ReadString();
+            if (RevokeUriPermissionManually(*uri, bundleName)) {
                 errCode = ERR_INVALID_OPERATION;
-                HILOG_ERROR("To grant uri permission failed.");
+                HILOG_ERROR("To revoke uri permission failed.");
             }
             break;
         }
