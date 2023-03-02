@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -625,6 +625,14 @@ public:
         int32_t userId, int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Add FreeInstall Observer
+     *
+     * @param observer the observer of ability free install start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
+
+    /**
      * Called when client complete dump.
      *
      * @param infos The dump info.
@@ -639,6 +647,15 @@ public:
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason) override;
+
+    /**
+     * Called to verify that the MissionId is valid.
+     * @param missionIds Query mission list.
+     * @param results Output parameters, return results up to 20 query results.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t IsValidMissionIds(
+        const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) override;
 
 private:
     template <typename T>

@@ -1436,6 +1436,13 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         return;
     }
 
+    HspList hspList;
+    ErrCode ret = bundleMgr_->GetBaseSharedPackageInfos(bundleName, userId, hspList);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("GetBaseSharedPackageInfos failed: %d", ret);
+        return;
+    }
+
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
     auto token = bundleInfo.applicationInfo.accessTokenId;
@@ -1460,6 +1467,8 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.bundleIndex = bundleIndex;
     startMsg.setAllowInternet = setAllowInternet;
     startMsg.allowInternet = allowInternet;
+    startMsg.hspList = hspList;
+
     HILOG_DEBUG("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",
         startMsg.apl.c_str(), bundleName.c_str(), startFlags);
 
@@ -2607,6 +2616,9 @@ int AppMgrServiceInner::VerifyProcessPermission(const std::string &bundleName) c
     auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES);
     if (isCallingPerm) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsGatewayCall()) {
+            return ERR_OK;
+        }
         auto callerPid = IPCSkeleton::GetCallingPid();
         auto appRecord = GetAppRunningRecordByPid(callerPid);
         if (!appRecord || appRecord->GetBundleName() != bundleName) {
@@ -2636,6 +2648,9 @@ int AppMgrServiceInner::VerifyProcessPermission(const sptr<IRemoteObject> &token
     auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_CLEAN_BACKGROUND_PROCESSES);
     if (isCallingPerm) {
+        if (AAFwk::PermissionVerification::GetInstance()->IsGatewayCall()) {
+            return ERR_OK;
+        }
         auto callerUid = IPCSkeleton::GetCallingUid();
         auto appRecord = GetAppRunningRecordByAbilityToken(token);
         if (!appRecord || appRecord->GetUid() != callerUid) {
@@ -2891,6 +2906,9 @@ uint32_t AppMgrServiceInner::BuildStartFlags(const AAFwk::Want &want, const Abil
 
     if (abilityInfo.applicationInfo.debug) {
         startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::DEBUGGABLE);
+    }
+    if (abilityInfo.applicationInfo.asanEnabled) {
+	startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::ASANENABLED);
     }
 
     return startFlags;

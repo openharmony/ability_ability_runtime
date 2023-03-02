@@ -48,6 +48,7 @@ abilityms_files = [
   "src/pending_want_manager.cpp",
   "src/pending_want_common_event.cpp",
   "src/ams_configuration_parameter.cpp",
+  "src/erms_mgr_interface.cpp",
   "src/image_info.cpp",
   "src/mission_snapshot.cpp",
 
@@ -86,6 +87,7 @@ abilityms_files = [
   "src/atomic_service_status_callback_stub.cpp",
   "src/atomic_service_status_callback.cpp",
   "src/free_install_manager.cpp",
+  "src/free_install_observer_manager.cpp",
 
   "src/background_task_observer.cpp",
   "src/resident_process_manager.cpp",

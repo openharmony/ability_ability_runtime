@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,7 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[FORCE_TIMEOUT] = &AbilityManagerStub::ForceTimeoutForTestInner;
 #endif
     requestFuncMap_[FREE_INSTALL_ABILITY_FROM_REMOTE] = &AbilityManagerStub::FreeInstallAbilityFromRemoteInner;
+    requestFuncMap_[ADD_FREE_INSTALL_OBSERVER] = &AbilityManagerStub::AddFreeInstallObserverInner;
     requestFuncMap_[CONNECT_ABILITY_WITH_TYPE] = &AbilityManagerStub::ConnectAbilityWithTypeInner;
     requestFuncMap_[ABILITY_RECOVERY] = &AbilityManagerStub::ScheduleRecoverAbilityInner;
     requestFuncMap_[ABILITY_RECOVERY_ENABLE] = &AbilityManagerStub::EnableRecoverAbilityInner;
@@ -155,6 +156,7 @@ void AbilityManagerStub::ThirdStepInit()
 #endif
     requestFuncMap_[SET_COMPONENT_INTERCEPTION] = &AbilityManagerStub::SetComponentInterceptionInner;
     requestFuncMap_[SEND_ABILITY_RESULT_BY_TOKEN] = &AbilityManagerStub::SendResultToAbilityByTokenInner;
+    requestFuncMap_[QUERY_MISSION_VAILD] = &AbilityManagerStub::IsValidMissionIdsInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -162,7 +164,7 @@ int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
     std::u16string descriptor = AbilityManagerStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        HILOG_INFO("local descriptor is not equal to remote");
+        HILOG_ERROR("local descriptor is not equal to remote");
         return ERR_INVALID_STATE;
     }
 
@@ -1531,6 +1533,18 @@ int AbilityManagerStub::FreeInstallAbilityFromRemoteInner(MessageParcel &data, M
     return NO_ERROR;
 }
 
+int AbilityManagerStub::AddFreeInstallObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AbilityRuntime::IFreeInstallObserver> observer =
+        iface_cast<AbilityRuntime::IFreeInstallObserver>(data.ReadRemoteObject());
+    int32_t result = AddFreeInstallObserver(observer);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::DumpAbilityInfoDoneInner(MessageParcel &data, MessageParcel &reply)
 {
     std::vector<std::string> infos;
@@ -1689,5 +1703,30 @@ int AbilityManagerStub::CompleteFirstFrameDrawingInner(MessageParcel &data, Mess
     return 0;
 }
 #endif
+
+int32_t AbilityManagerStub::IsValidMissionIdsInner(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("%{public}s is called.", __func__);
+    std::vector<int32_t> missionIds;
+    std::vector<MissionVaildResult> results;
+
+    data.ReadInt32Vector(&missionIds);
+    auto err = IsValidMissionIds(missionIds, results);
+    if (err != ERR_OK) {
+        results.clear();
+    }
+
+    if (!reply.WriteInt32(err)) {
+        return ERR_INVALID_VALUE;
+    }
+
+    reply.WriteInt32(static_cast<int32_t>(results.size()));
+    for (auto &item : results) {
+        if (!reply.WriteParcelable(&item)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    return NO_ERROR;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

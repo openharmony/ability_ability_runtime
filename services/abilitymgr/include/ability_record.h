@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -418,6 +418,10 @@ public:
      */
     bool IsReady() const;
 
+    void UpdateRecoveryInfo(bool hasRecoverInfo);
+
+    bool GetRecoveryInfo();
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * check whether the ability 's window is attached.
@@ -792,7 +796,7 @@ public:
     bool IsNeedToCallRequest() const;
     bool IsStartedByCall() const;
     void SetStartedByCall(const bool isFlag);
-    void CallRequest() const;
+    void CallRequest();
     bool CallRequestDone(const sptr<IRemoteObject> &callStub) const;
     bool IsStartToBackground() const;
     void SetStartToBackground(const bool flag);
@@ -825,7 +829,7 @@ public:
     void SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack);
     std::shared_ptr<AbilityRecord> GetOtherMissionStackAbilityRecord() const;
     void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void RemoveUriPermission() const;
+    void RemoveUriPermission();
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
@@ -844,7 +848,7 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
-    void GrantUriPermission(const Want &want, int32_t userId, uint32_t targetTokenId) const;
+    void GrantUriPermission(const Want &want, int32_t userId, uint32_t targetTokenId);
     int32_t GetCurrentAccountId() const;
 
     /**
@@ -985,6 +989,7 @@ private:
     std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;
 #endif
 
+    bool isGrantedUriPermission_ = false;
     uint32_t callerAccessTokenId_ = -1;
     bool isNeedBackToOtherMissionStack_ = false;
     std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA

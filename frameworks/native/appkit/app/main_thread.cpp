@@ -71,6 +71,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityBase::Constants;
+using HspList = std::vector<BaseSharedPackageInfo>;
 std::weak_ptr<OHOSApplication> MainThread::applicationForDump_;
 std::shared_ptr<EventHandler> MainThread::signalHandler_ = nullptr;
 std::shared_ptr<MainThread::MainHandler> MainThread::mainHandler_ = nullptr;
@@ -98,7 +99,7 @@ constexpr char EXTENSION_PARAMS_NAME[] = "name";
 
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 
-void SetNativeLibPath(const BundleInfo &bundleInfo, AbilityRuntime::Runtime::Options &options)
+void SetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AbilityRuntime::Runtime::Options &options)
 {
     std::string patchNativeLibraryPath = bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath;
     if (!patchNativeLibraryPath.empty()) {
@@ -139,6 +140,20 @@ void SetNativeLibPath(const BundleInfo &bundleInfo, AbilityRuntime::Runtime::Opt
 
         std::string libPath = LOCAL_CODE_PATH;
         libPath += (libPath.back() == '/') ? hapInfo.nativeLibraryPath : "/" + hapInfo.nativeLibraryPath;
+        options.appLibPaths[appLibPathKey].emplace_back(libPath);
+    }
+
+    for (auto &hspInfo : hspList) {
+        HILOG_DEBUG("bundle:%s, module:%s, nativeLibraryPath:%s", hspInfo.bundleName.c_str(),
+            hspInfo.moduleName.c_str(), hspInfo.nativeLibraryPath.c_str());
+        if (hspInfo.nativeLibraryPath.empty()) {
+            continue;
+        }
+
+        std::string appLibPathKey = hspInfo.bundleName + "/" + hspInfo.moduleName;
+        std::string libPath = LOCAL_CODE_PATH;
+        libPath = libPath.back() == '/' ? libPath : libPath + "/";
+        libPath += hspInfo.bundleName + "/" + hspInfo.nativeLibraryPath;
         options.appLibPaths[appLibPathKey].emplace_back(libPath);
     }
 }
@@ -987,7 +1002,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         queryResult = (bundleMgr->GetBundleInfoForSelf(
             (static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE)), bundleInfo) == ERR_OK);
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo) == ERR_OK);
     }
 
     if (!queryResult) {
@@ -1028,6 +1047,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     applicationContext->AttachContextImpl(contextImpl);
     application_->SetApplicationContext(applicationContext);
     if (isStageBased) {
+        HspList hspList;
+        ErrCode ret = bundleMgr->GetBaseSharedPackageInfos(appInfo.bundleName, UNSPECIFIED_USERID, hspList);
+        if (ret != ERR_OK) {
+            HILOG_ERROR("MainThread::HandleLaunchApplication GetBaseSharedPackageInfos failed: %d", ret);
+        }
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;
         AbilityRuntime::Runtime::Options options;
@@ -1040,7 +1064,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.isDebugVersion = bundleInfo.applicationInfo.debug;
         options.arkNativeFilePath = bundleInfo.applicationInfo.arkNativeFilePath;
         options.uid = bundleInfo.applicationInfo.uid;
-        SetNativeLibPath(bundleInfo, options);
+        SetNativeLibPath(bundleInfo, hspList, options);
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
             HILOG_ERROR("Failed to create runtime");
@@ -1122,8 +1146,22 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             LoadAllExtensions(jsEngine, "system/lib64/extensionability", bundleInfo);
 #endif
         }
-        std::shared_ptr<NativeEngine> nativeEngine(&jsEngine);
-        idleTime_ = std::make_shared<IdleTime>(mainHandler_, nativeEngine);
+
+        IdleTimeCallback callback = [wpApplication](int32_t idleTime) {
+            auto app = wpApplication.lock();
+            if (app == nullptr) {
+                HILOG_ERROR("app is nullptr.");
+                return;
+            }
+            auto &runtime = app->GetRuntime();
+            if (runtime == nullptr) {
+                HILOG_ERROR("runtime is nullptr.");
+                return;
+            }
+            auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+            nativeEngine.NotifyIdleTime(idleTime);
+        };
+        idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
         idleTime_->Start();
     }
 
@@ -2196,8 +2234,13 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
 
     BundleInfo bundleInfo;
     if (bundleMgr->GetBundleInfoForSelf(
-        (static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT) +
-        static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE)), bundleInfo) != ERR_OK) {
+        (static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo) != ERR_OK) {
         HILOG_ERROR("Get bundle info of %{public}s failed.", bundleName.c_str());
         return false;
     }
@@ -2205,12 +2248,7 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     for (auto hapInfo : bundleInfo.hapModuleInfos) {
         if ((processInfo_ != nullptr) && (processInfo_->GetProcessName() == hapInfo.process) &&
             (!hapInfo.hqfInfo.hqfFilePath.empty())) {
-            std::string resolvedHapPath;
-            std::string hapPath = AbilityBase::GetLoadPath(hapInfo.hapPath);
-            auto position = hapPath.rfind('/');
-            if (position != std::string::npos) {
-                resolvedHapPath = hapPath.erase(position) + FILE_SEPARATOR + hapInfo.moduleName;
-            }
+            std::string resolvedHapPath(AbilityBase::GetLoadPath(hapInfo.hapPath));
             std::string resolvedHqfFile(AbilityBase::GetLoadPath(hapInfo.hqfInfo.hqfFilePath));
             HILOG_INFO("bundleName: %{public}s, moduleName: %{public}s, processName: %{private}s, "
                 "hqf file: %{private}s, hap path: %{private}s.", bundleName.c_str(), hapInfo.moduleName.c_str(),
