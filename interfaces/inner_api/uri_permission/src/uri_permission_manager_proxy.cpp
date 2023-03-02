@@ -24,7 +24,7 @@ UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &
     : IRemoteProxy<IUriPermissionManager>(impl) {}
 
 bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID fromTokenId, const Security::AccessToken::AccessTokenID targetTokenId)
+    const std::string fromBundleName, const std::string targetBundleName, int autoremove)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::GrantUriPermission is called.");
     MessageParcel data;
@@ -40,12 +40,16 @@ bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int 
         HILOG_ERROR("Write flag failed.");
         return false;
     }
-    if (!data.WriteInt32(fromTokenId)) {
-        HILOG_ERROR("Write fromTokenId failed.");
+    if (!data.WriteString(fromBundleName)) {
+        HILOG_ERROR("Write fromBundleName failed.");
         return false;
     }
-    if (!data.WriteInt32(targetTokenId)) {
-        HILOG_ERROR("Write targetTokenId failed.");
+    if (!data.WriteString(targetBundleName)) {
+        HILOG_ERROR("Write targetBundleName failed.");
+        return false;
+    }
+    if (!data.WriteInt32(autoremove)) {
+        HILOG_ERROR("Write autoremove failed.");
         return false;
     }
     MessageParcel reply;
@@ -59,7 +63,7 @@ bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int 
 }
 
 bool UriPermissionManagerProxy::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID targetTokenId)
+    const std::string targetBundleName)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::GrantUriPermissionFromSelf is called.");
     MessageParcel data;
@@ -75,8 +79,8 @@ bool UriPermissionManagerProxy::GrantUriPermissionFromSelf(const Uri &uri, unsig
         HILOG_ERROR("Write flag failed.");
         return false;
     }
-    if (!data.WriteInt32(targetTokenId)) {
-        HILOG_ERROR("Write targetTokenId failed.");
+    if (!data.WriteString(targetBundleName)) {
+        HILOG_ERROR("Write targetBundleName failed.");
         return false;
     }
     MessageParcel reply;
@@ -120,9 +124,9 @@ bool UriPermissionManagerProxy::VerifyUriPermission(const Uri &uri, unsigned int
     return true;
 }
 
-bool UriPermissionManagerProxy::RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId)
+bool UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
-    HILOG_DEBUG("UriPermissionManagerProxy::RemoveUriPermission is called.");
+    HILOG_DEBUG("UriPermissionManagerProxy::RevokeUriPermission is called.");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
@@ -134,7 +138,7 @@ bool UriPermissionManagerProxy::RemoveUriPermission(const Security::AccessToken:
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REMOVE_URI_PERMISSION, data, reply, option);
+    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
         return false;
@@ -142,21 +146,25 @@ bool UriPermissionManagerProxy::RemoveUriPermission(const Security::AccessToken:
     return true;
 }
 
-bool UriPermissionManagerProxy::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
+bool UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
 {
-    HILOG_DEBUG("UriPermissionManagerProxy::RemoveUriPermissionManually is called.");
+    HILOG_DEBUG("UriPermissionManagerProxy::RevokeUriPermissionManually is called.");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
         return false;
     }
-    if (!data.WriteInt32(tokenId)) {
-        HILOG_ERROR("Write AccessTokenID failed.");
+    if (!data.WriteParcelable(&uri)) {
+        HILOG_ERROR("Write uri failed.");
+        return false;
+    }
+    if (!data.WriteString(bundleName)) {
+        HILOG_ERROR("Write bundleName failed.");
         return false;
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REMOVE_URI_PERMISSION_MANUALLY, data, reply, option);
+    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
         return false;

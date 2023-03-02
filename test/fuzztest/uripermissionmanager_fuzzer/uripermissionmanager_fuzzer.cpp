@@ -38,13 +38,14 @@ public:
     virtual ~UriPermissionManagerStubFuzzTest()
     {}
     bool GrantUriPermission(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID fromTokenId,
-        const Security::AccessToken::AccessTokenID targetTokenId) override
+        std::string fromBundleName,
+        std::string targetBundleName,
+        int autoremove) override
     {
         return true;
     }
     bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID targetTokenId) override
+        std::string targetBundleName) override
     {
         return true;
     }
@@ -53,11 +54,11 @@ public:
     {
         return true;
     }
-    bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
+    bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
     {
         return true;
     }
-    bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override
+    bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override
     {
         return true;
     }

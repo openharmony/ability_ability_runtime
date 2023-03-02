@@ -32,25 +32,26 @@ public:
     ~UriPermissionManagerClient() = default;
 
     /**
-     * @brief Authorize the uri permission of fromTokenId to targetTokenId.
+     * @brief Authorize the uri permission of fromBundleName to targetBundleName.
      *
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param fromTokenId The owner of uri.
-     * @param targetTokenId The user of uri.
+     * @param fromBundleName The owner of uri.
+     * @param targetBundleName The user of uri.
+     * @param autoremove the uri is temperarily or not
      */
-    bool GrantUriPermission(const Uri &uri, unsigned int flag, const Security::AccessToken::AccessTokenID fromTokenId,
-        const Security::AccessToken::AccessTokenID targetTokenId);
+    bool GrantUriPermission(const Uri &uri, unsigned int flag, const std::string fromBundleName,
+        const std::string targetBundleName, int autoremove);
     
     /**
-     * @brief Authorize the uri permission from self to targetTokenId.
+     * @brief Authorize the uri permission from self to targetBundleName.
      *
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param targetTokenId The user of uri.
+     * @param targetBundleName The user of uri.
      */
     bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID targetTokenId);
+        const std::string targetBundleName);
 
     /**
      * @brief Check whether the tokenId has URI permissions.
@@ -67,14 +68,15 @@ public:
      *
      * @param tokenId A tokenId of an application.
      */
-    bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId);
+    bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId);
 
     /**
      * @brief Clear user's uri authorization record.
-     *
-     * @param tokenId A tokenId of an application.
+     * 
+     * @param uri The file uri.
+     * @param BundleName A BundleName of an application.
      */
-    bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId);
+    bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName);
 
 private:
     sptr<IUriPermissionManager> ConnectUriPermService();

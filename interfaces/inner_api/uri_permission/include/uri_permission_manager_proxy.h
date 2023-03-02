@@ -27,16 +27,17 @@ public:
     virtual ~UriPermissionManagerProxy() = default;
 
     virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID fromTokenId,
-        const Security::AccessToken::AccessTokenID targetTokenId) override;
+        const std::string fromBundleName,
+        const std::string targetBundleName,
+        int autoremove) override;
     virtual bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID targetTokenId) override;
+        const std::string targetBundleName) override;
 
     virtual bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override;
 
-    virtual bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
-    virtual bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override;
+    virtual bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
+    virtual bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 
 private:
     static inline BrokerDelegator<UriPermissionManagerProxy> delegator_;

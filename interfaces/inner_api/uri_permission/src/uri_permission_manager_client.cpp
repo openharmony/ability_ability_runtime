@@ -23,23 +23,23 @@
 namespace OHOS {
 namespace AAFwk {
 bool UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID fromTokenId, const Security::AccessToken::AccessTokenID targetTokenId)
+    const std::string fromBundleName, const std::string targetBundleName, int autoremove)
 {
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermission(uri, flag, fromTokenId, targetTokenId);
+        return uriPermMgr->GrantUriPermission(uri, flag, fromBundleName, targetBundleName, autoremove);
     }
     return false;
 }
 
 bool UriPermissionManagerClient::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID targetTokenId)
+    const std::string targetBundleName)
 {
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermissionFromSelf is called.");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermissionFromSelf(uri, flag, targetTokenId);
+        return uriPermMgr->GrantUriPermissionFromSelf(uri, flag, targetBundleName);
     }
     return false;
 }
@@ -55,22 +55,22 @@ bool UriPermissionManagerClient::VerifyUriPermission(const Uri &uri, unsigned in
     return false;
 }
 
-bool UriPermissionManagerClient::RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId)
+bool UriPermissionManagerClient::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
-    HILOG_DEBUG("UriPermissionManagerClient::RemoveUriPermission is called.");
+    HILOG_DEBUG("UriPermissionManagerClient::RevokeUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->RemoveUriPermission(tokenId);
+        return uriPermMgr->RevokeUriPermission(tokenId);
     }
     return false;
 }
 
-bool UriPermissionManagerClient::RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId)
+bool UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
 {
-    HILOG_DEBUG("UriPermissionManagerClient::RemoveUriPermission is called.");
+    HILOG_DEBUG("UriPermissionManagerClient::RevokeUriPermissionManually is called.");
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->RemoveUriPermissionManually(tokenId);
+        return uriPermMgr->RevokeUriPermissionManually(uri, bundleName);
     }
     return false;
 }

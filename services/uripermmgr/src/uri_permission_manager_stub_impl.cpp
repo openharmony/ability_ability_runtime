@@ -34,10 +34,24 @@ const int32_t DEFAULT_USER_ID = 0;
 using TokenId = Security::AccessToken::AccessTokenID;
 
 bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const TokenId fromTokenId, const TokenId targetTokenId)
+    const std::string fromBundleName, const std::string targetBundleName, int autoremove)
 {
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId); 
+    HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
+
+    auto bms = ConnectBundleManager();
+    AppExecFwk::BundleInfo uriBundleInfo;
+    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(fromBundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
+        HILOG_WARN("To fail to get bundle info to fromBundleName.");
+        return false;
+    }
+    Security::AccessToken::AccessTokenID fromTokenId = uriBundleInfo.applicationInfo.accessTokenId;
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(targetBundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
+        HILOG_WARN("To fail to get bundle info to targetBundleName.");
+        return false;
+    }
+    Security::AccessToken::AccessTokenID targetTokenId = uriBundleInfo.applicationInfo.accessTokenId;
 
     // only uri with proxy authorization permission or from process itself can be granted
     auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(  
@@ -58,12 +72,10 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
         tmpFlag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     }
 
-    auto bms = ConnectBundleManager();
+    
     Uri uri_inner = uri;
     auto&& authority = uri_inner.GetAuthority();
     HILOG_INFO("uri authority is %{public}s.", authority.c_str());
-    AppExecFwk::BundleInfo uriBundleInfo;
-    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
         HILOG_WARN("To fail to get bundle info according to uri.");
         return false;
@@ -93,15 +105,15 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     }
     std::lock_guard<std::mutex> guard(mutex_);
     auto search = uriMap_.find(uriStr);
-    unsigned int autoremove = 0;
+    int autoremove_ = autoremove;
     // auto remove URI permission for clipboard
     Security::AccessToken::NativeTokenInfo nativeInfo;
     Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(fromTokenId, nativeInfo);
     HILOG_DEBUG("callerprocessName : %{public}s", nativeInfo.processName.c_str());
     if (nativeInfo.processName == "pasteboard_serv") {
-        autoremove = 1;
+        autoremove_ = 1;
     }
-    GrantInfo info = { tmpFlag, callerTokenId, targetTokenId, autoremove };
+    GrantInfo info = { tmpFlag, callerTokenId, targetTokenId, autoremove_ };
     if (search == uriMap_.end()) {
         std::list<GrantInfo> infoList = { info };
         uriMap_.emplace(uriStr, infoList);
@@ -123,12 +135,17 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
 }
 
 bool UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID targetTokenId)
+    const std::string targetBundleName)
 {
-    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
-    
-    return GrantUriPermission(uri, flag, callerTokenId, targetTokenId);
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    HILOG_DEBUG("callerPid : %{public}u", callerUid);
+    auto bms = ConnectBundleManager();
+    std::string callerBundleName;
+    if(!bms->GetBundleNameForUid(callerUid, callerBundleName)) {
+        HILOG_ERROR("Get caller bundle name by caller uid failed.");
+    }
+    int autoremove = 1;
+    return GrantUriPermission(uri, flag, callerBundleName, targetBundleName, autoremove);
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned int flag,
@@ -184,7 +201,7 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned 
     return false;
 }
 
-bool UriPermissionManagerStubImpl::RemoveUriPermission(const TokenId tokenId)
+bool UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
 {
     HILOG_DEBUG("Start to remove uri permission.");
     std::vector<std::string> uriList;
@@ -220,26 +237,34 @@ bool UriPermissionManagerStubImpl::RemoveUriPermission(const TokenId tokenId)
     return true;
 }
 
-bool UriPermissionManagerStubImpl::RemoveUriPermissionManually(const TokenId tokenId)
+bool UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
 {
     HILOG_DEBUG("Start to remove uri permission manually.");
+    auto bms = ConnectBundleManager();
+    AppExecFwk::BundleInfo uriBundleInfo;
+    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
+        HILOG_WARN("To fail to get bundle info to bundleName.");
+        return false;
+    }
+    Security::AccessToken::AccessTokenID tokenId = uriBundleInfo.applicationInfo.accessTokenId;
     std::vector<std::string> uriList;
     {
         std::lock_guard<std::mutex> guard(mutex_);
-        for (auto iter = uriMap_.begin(); iter != uriMap_.end();) {
-            auto& list = iter->second;
-            for (auto it = list.begin(); it != list.end(); it++) {
-                if (it->targetTokenId == tokenId) {
-                    HILOG_INFO("Erase an info form list.");
-                    list.erase(it);
-                    uriList.emplace_back(iter->first);
-                    break;
-                }
-            }
-            if (list.size() == 0) {
-                uriMap_.erase(iter++);
-            } else {
-                iter++;
+
+        auto uriStr = uri.ToString();
+        auto search = uriMap_.find(uriStr);
+        if (search == uriMap_.end()) {
+            HILOG_ERROR("URI does not exist on uri map.");
+            return false;
+        }
+        auto& list = search->second;
+        for (auto it = list.begin(); it != list.end(); it++) {
+            if (it->targetTokenId == tokenId) {
+                HILOG_INFO("Erase an info form list.");
+                list.erase(it);
+                uriList.emplace_back(search->first);
+                break;
             }
         }
     }

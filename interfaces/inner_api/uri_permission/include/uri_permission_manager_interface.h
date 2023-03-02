@@ -25,30 +25,32 @@ namespace AAFwk {
 class IUriPermissionManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ability.UriPermissionManager");
-
+    
     /**
-     * @brief Authorize the uri permission of fromTokenId to targetTokenId.
+     * @brief Authorize the uri permission of fromBundleName to targetBundleName.
      *
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param fromTokenId The owner of uri.
-     * @param targetTokenId The user of uri.
+     * @param fromBundleName The owner of uri.
+     * @param targetBundleName The user of uri.
+     * @param autoremove the uri is temperarily or not
      * @return Returns true if the authorization is successful, otherwise returns false.
      */
     virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID fromTokenId,
-        const Security::AccessToken::AccessTokenID targetTokenId) = 0;
+        const std::string fromBundleName,
+        const std::string targetBundleName,
+        int autoremove) = 0;
     
     /**
-     * @brief Authorize the uri permission of fromTokenId to targetTokenId.
+     * @brief Authorize the uri permission of self to targetBundleName.
      *
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param targetTokenId The user of uri.
+     * @param targetBundleName The user of uri.
      * @return Returns true if the authorization is successful, otherwise returns false.
      */
     virtual bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID targetTokenId) = 0;
+        const std::string targetBundleName) = 0;
 
     /**
      * @brief Check whether the tokenId has URI permissions.
@@ -67,15 +69,16 @@ public:
      * @param tokenId A tokenId of an application.
      * @return Returns true if the remove is successful, otherwise returns false.
      */
-    virtual bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) = 0;
+    virtual bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) = 0;
 
     /**
      * @brief Clear user's uri authorization record.
      *
-     * @param tokenId A tokenId of an application.
+     * @param uri The file uri.
+     * @param bundleName bundleName of an application.
      * @return Returns true if the remove is successful, otherwise returns false.
      */
-    virtual bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) = 0;
+    virtual bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) = 0;
 
     enum UriPermMgrCmd {
         // ipc id for GrantUriPermission
@@ -84,10 +87,10 @@ public:
         // ipc id for VerifyUriPermission
         ON_VERIFY_URI_PERMISSION,
 
-        // ipc id for RemoveUriPermission
-        ON_REMOVE_URI_PERMISSION,
+        // ipc id for RevokeUriPermission
+        ON_REVOKE_URI_PERMISSION,
 
-        ON_REMOVE_URI_PERMISSION_MANUALLY,
+        ON_REVOKE_URI_PERMISSION_MANUALLY,
 
         ON_GRANT_URI_PERMISSION_FROM_SELF,
     };

@@ -33,7 +33,7 @@ struct GrantInfo {
     unsigned int flag;
     const unsigned int fromTokenId;
     const unsigned int targetTokenId;
-    unsigned int autoremove;
+    int autoremove;
 };
 class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
                                      public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
@@ -41,16 +41,16 @@ public:
     UriPermissionManagerStubImpl() = default;
     virtual ~UriPermissionManagerStubImpl() = default;
 
-    bool GrantUriPermission(const Uri &uri, unsigned int flag, const Security::AccessToken::AccessTokenID fromTokenId,
-        const Security::AccessToken::AccessTokenID targetTokenId) override;
+    bool GrantUriPermission(const Uri &uri, unsigned int flag, const std::string fromBundleName,
+        const std::string targetBundleName, int autoremove) override;
     bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID targetTokenId) override;
+         const std::string targetBundleName) override;
 
     bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override;
 
-    bool RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
-    bool RemoveUriPermissionManually(const Security::AccessToken::AccessTokenID tokenId) override;
+    bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
+    bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 
 private:
     sptr<AppExecFwk::IBundleMgr> ConnectBundleManager();
