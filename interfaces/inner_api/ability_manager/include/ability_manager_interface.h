@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "ability_scheduler_interface.h"
 #include "ability_start_setting.h"
 #include "extension_running_info.h"
+#include "free_install_observer_interface.h"
 #include "iability_controller.h"
 #include "icomponent_interception.h"
 #include "mission_listener_interface.h"
@@ -734,12 +735,33 @@ public:
     }
 
     /**
+     * Add free install observer.
+     *
+     * @param observer, the observer of the ability to free install start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
+    {
+        return 0;
+    }
+
+    /**
      * Called to update mission snapshot.
      * @param token The target ability.
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) = 0;
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) {};
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason) {};
+
+    /**
+     * Called to verify that the MissionId is valid.
+     * @param missionIds Query mission list.
+     * @param results Output parameters, return results up to 20 query results.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t IsValidMissionIds(
+        const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) = 0;
+
     enum {
         // ipc id 1-1000 for kit
         // ipc id for terminating ability (1)
@@ -1044,10 +1066,13 @@ public:
 
         GET_TOP_ABILITY = 3000,
         FREE_INSTALL_ABILITY_FROM_REMOTE = 3001,
+        ADD_FREE_INSTALL_OBSERVER = 3002,
 
         // ipc id for app recovery(3010)
         ABILITY_RECOVERY = 3010,
         ABILITY_RECOVERY_ENABLE = 3011,
+
+        QUERY_MISSION_VAILD = 3012,
     };
 };
 }  // namespace AAFwk
