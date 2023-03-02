@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace AAFwk {
-class CommonUtils{
+class CommonUtils {
 public:
     static std::string Anonymous(const std::string &name)
     {

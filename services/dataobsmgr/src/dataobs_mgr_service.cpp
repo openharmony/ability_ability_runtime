@@ -32,19 +32,6 @@ namespace AAFwk {
 const bool REGISTER_RESULT =
     SystemAbility::MakeAndRegisterAbility(DelayedSingleton<DataObsMgrService>::GetInstance().get());
 
-#define Check()                                                                                 \
-do {                                                                                            \
-    if (handler_ == nullptr) {                                                                  \
-        HILOG_ERROR("handler is nullptr");                                                      \
-        return DATAOBS_SERVICE_HANDLER_IS_NULL;                                                 \
-    }                                                                                           \
-                                                                                                \
-    if (dataObsMgrInner_ == nullptr) {                                                          \
-        HILOG_ERROR("dataObsMgrInner_ is nullptr");                                             \
-        return DATAOBS_SERVICE_INNER_IS_NULL;                                                   \
-    }                                                                                           \
-} while (0)
-
 DataObsMgrService::DataObsMgrService()
     : SystemAbility(DATAOBS_MGR_SERVICE_SA_ID, true),
       eventLoop_(nullptr),
@@ -112,7 +99,10 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
         return DATA_OBSERVER_IS_NULL;
     }
 
-    Check();
+    if (dataObsMgrInner_ == nullptr) {
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        return DATAOBS_SERVICE_INNER_IS_NULL;
+    }
 
     auto status = dataObsMgrInner_->HandleRegisterObserver(uri, dataObserver);
     if (status != NO_ERROR) {
@@ -129,7 +119,10 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
         return DATA_OBSERVER_IS_NULL;
     }
 
-    Check();
+    if (dataObsMgrInner_ == nullptr) {
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        return DATAOBS_SERVICE_INNER_IS_NULL;
+    }
 
     auto status = dataObsMgrInner_->HandleUnregisterObserver(uri, dataObserver);
     if (!status) {
@@ -141,7 +134,15 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
 
 int DataObsMgrService::NotifyChange(const Uri &uri)
 {
-    Check();
+    if (handler_ == nullptr) {
+        HILOG_ERROR("handler is nullptr");
+        return DATAOBS_SERVICE_HANDLER_IS_NULL;
+    }
+
+    if (dataObsMgrInner_ == nullptr || dataObsMgrInnerExt_ == nullptr) {
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        return DATAOBS_SERVICE_INNER_IS_NULL;
+    }
 
     {
         std::lock_guard<std::mutex> lck(taskCountMutex_);
@@ -152,11 +153,12 @@ int DataObsMgrService::NotifyChange(const Uri &uri)
         ++taskCount_;
     }
 
-    bool ret = handler_->PostTask([this, &uri]() {
+    ChangeInfo changeInfo = { ChangeInfo::ChangeType::OTHER, { uri } };
+    bool ret = handler_->PostTask([this, &uri, &changeInfo]() {
         dataObsMgrInner_->HandleNotifyChange(uri);
-        dataObsMgrInnerExt_->HandleNotifyChange({ ChangeInfo::ChangeType::OTHER, { uri } });
+        dataObsMgrInnerExt_->HandleNotifyChange(changeInfo);
         std::lock_guard<std::mutex> lck(taskCountMutex_);
-        taskCount_--;
+        --taskCount_;
     });
     if (!ret) {
         HILOG_ERROR("Post NotifyChange fail");
@@ -174,7 +176,10 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
         return DATA_OBSERVER_IS_NULL;
     }
 
-    Check();
+    if (dataObsMgrInnerExt_ == nullptr) {
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        return DATAOBS_SERVICE_INNER_IS_NULL;
+    }
 
     auto innerUri = uri;
     return dataObsMgrInnerExt_->HandleRegisterObserver(innerUri, dataObserver, isDescendants);
@@ -187,7 +192,10 @@ Status DataObsMgrService::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilit
         return DATA_OBSERVER_IS_NULL;
     }
 
-    Check();
+    if (dataObsMgrInnerExt_ == nullptr) {
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        return DATAOBS_SERVICE_INNER_IS_NULL;
+    }
 
     auto innerUri = uri;
     return dataObsMgrInnerExt_->HandleUnregisterObserver(innerUri, dataObserver);
@@ -200,14 +208,25 @@ Status DataObsMgrService::UnregisterObserverExt(sptr<IDataAbilityObserver> dataO
         return DATA_OBSERVER_IS_NULL;
     }
 
-    Check();
+    if (dataObsMgrInnerExt_ == nullptr) {
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        return DATAOBS_SERVICE_INNER_IS_NULL;
+    }
 
     return dataObsMgrInnerExt_->HandleUnregisterObserver(dataObserver);
 }
 
 Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo)
 {
-    Check();
+    if (handler_ == nullptr) {
+        HILOG_ERROR("handler is nullptr");
+        return DATAOBS_SERVICE_HANDLER_IS_NULL;
+    }
+
+    if (dataObsMgrInner_ == nullptr || dataObsMgrInnerExt_ == nullptr) {
+        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        return DATAOBS_SERVICE_INNER_IS_NULL;
+    }
 
     {
         std::lock_guard<std::mutex> lck(taskCountMutex_);

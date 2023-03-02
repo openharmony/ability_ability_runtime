@@ -20,7 +20,7 @@ namespace OHOS {
 namespace AAFwk {
 bool ChangeInfo::Marshalling(const ChangeInfo &input, MessageParcel &data)
 {
-    if(!data.WriteUint32(static_cast<uint32_t>(input.changeType_))){
+    if (!data.WriteUint32(static_cast<uint32_t>(input.changeType_))) {
         return false;
     }
 
@@ -35,7 +35,7 @@ bool ChangeInfo::Marshalling(const ChangeInfo &input, MessageParcel &data)
         }
     }
 
-    if(!data.WriteUint32(input.size_)){
+    if (!data.WriteUint32(input.size_)) {
         return false;
     }
 
