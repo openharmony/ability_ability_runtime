@@ -51,6 +51,8 @@ Status DataObsMgrInnerExt::HandleRegisterObserver(Uri &uri, sptr<IDataAbilityObs
 Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver->AsObject() == nullptr) {
+        HILOG_ERROR("dataObserver is null, uri : %{public}s has reached the upper limit.",
+            CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATA_OBSERVER_IS_NULL;
     }
     std::lock_guard<std::mutex> lock(nodeMutex_);
@@ -66,6 +68,7 @@ Status DataObsMgrInnerExt::HandleUnregisterObserver(Uri &uri, sptr<IDataAbilityO
 Status DataObsMgrInnerExt::HandleUnregisterObserver(sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver->AsObject() == nullptr) {
+        HILOG_ERROR("dataObserver is null");
         return DATA_OBSERVER_IS_NULL;
     }
     std::lock_guard<std::mutex> lock(nodeMutex_);
@@ -91,6 +94,9 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo)
         }
     }
     if (changeRes.empty()) {
+        HILOG_ERROR("no obs for this uris, changeType:%{public}ud, num of uris:%{public}ud, data is "
+                    "nullptr:%{public}d, size:%{public}ud",
+            changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
         return NO_OBS_FOR_URI;
     }
     for (const auto &[obs, value] : changeRes) {
@@ -135,6 +141,8 @@ void DataObsMgrInnerExt::RemoveObsDeathRecipient(const sptr<IRemoteObject> &data
     }
 
     if (isForce || it->second->ref <= 1) {
+        HILOG_DEBUG("this observer deathRecipient will be remove, sum:%{public}ud",
+            it->second->ref.load(std::memory_order_relaxed));
         dataObserver->RemoveDeathRecipient(it->second->deathRecipient);
         obsRecipientRefs.erase(it);
         return;
@@ -143,6 +151,7 @@ void DataObsMgrInnerExt::RemoveObsDeathRecipient(const sptr<IRemoteObject> &data
 
 void DataObsMgrInnerExt::OnCallBackDied(const wptr<IRemoteObject> &remote)
 {
+    HILOG_DEBUG("this observer died");
     auto dataObserver = remote.promote();
     if (dataObserver == nullptr) {
         return;

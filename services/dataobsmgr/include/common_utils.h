@@ -24,7 +24,7 @@ class CommonUtils {
 public:
     static std::string Anonymous(const std::string &name)
     {
-        static constexpr uint32_t HEAD_SIZE = 10;
+        static constexpr uint32_t HEAD_SIZE = 6;
         static constexpr int32_t END_SIZE = 5;
         static constexpr int32_t MIN_SIZE = HEAD_SIZE + END_SIZE + 3;
         static constexpr const char *REPLACE_CHAIN = "***";

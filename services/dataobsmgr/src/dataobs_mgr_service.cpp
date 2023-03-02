@@ -26,6 +26,7 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "system_ability_definition.h"
+#include "common_utils.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -95,18 +96,19 @@ DataObsServiceRunningState DataObsMgrService::QueryServiceState() const
 int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver == nullptr) {
-        HILOG_ERROR("dataObserver is nullptr");
+        HILOG_ERROR("dataObserver is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATA_OBSERVER_IS_NULL;
     }
 
     if (dataObsMgrInner_ == nullptr) {
-        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        HILOG_ERROR("dataObsMgrInner_ is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
     auto status = dataObsMgrInner_->HandleRegisterObserver(uri, dataObserver);
     if (status != NO_ERROR) {
-        HILOG_ERROR("Observer register failed : %{public}d", status);
+        HILOG_ERROR("Observer register failed: %{public}d, uri:%{public}s", status,
+            CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_POST_TASK_FAILED;
     }
     return NO_ERROR;
@@ -115,18 +117,19 @@ int DataObsMgrService::RegisterObserver(const Uri &uri, sptr<IDataAbilityObserve
 int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver == nullptr) {
-        HILOG_ERROR("dataObserver is nullptr");
+        HILOG_ERROR("dataObserver is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATA_OBSERVER_IS_NULL;
     }
 
     if (dataObsMgrInner_ == nullptr) {
-        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        HILOG_ERROR("dataObsMgrInner_ is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
     auto status = dataObsMgrInner_->HandleUnregisterObserver(uri, dataObserver);
     if (!status) {
-        HILOG_ERROR("Observer unregister failed : %{public}d", status);
+        HILOG_ERROR("Observer unregister failed: %{public}d, uri:%{public}s", status,
+            CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_POST_TASK_FAILED;
     }
     return NO_ERROR;
@@ -135,19 +138,20 @@ int DataObsMgrService::UnregisterObserver(const Uri &uri, sptr<IDataAbilityObser
 int DataObsMgrService::NotifyChange(const Uri &uri)
 {
     if (handler_ == nullptr) {
-        HILOG_ERROR("handler is nullptr");
+        HILOG_ERROR("handler is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_HANDLER_IS_NULL;
     }
 
     if (dataObsMgrInner_ == nullptr || dataObsMgrInnerExt_ == nullptr) {
-        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        HILOG_ERROR("dataObsMgrInner_ is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
     {
         std::lock_guard<std::mutex> lck(taskCountMutex_);
         if (taskCount_ >= TASK_COUNT_MAX) {
-            HILOG_ERROR("The number of task has reached the upper limit");
+            HILOG_ERROR("The number of task has reached the upper limit, uri:%{public}s",
+                CommonUtils::Anonymous(uri.ToString()).c_str());
             return DATAOBS_SERVICE_TASK_LIMMIT;
         }
         ++taskCount_;
@@ -161,7 +165,7 @@ int DataObsMgrService::NotifyChange(const Uri &uri)
         --taskCount_;
     });
     if (!ret) {
-        HILOG_ERROR("Post NotifyChange fail");
+        HILOG_ERROR("Post NotifyChange fail, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_POST_TASK_FAILED;
     }
 
@@ -172,12 +176,14 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
     bool isDescendants)
 {
     if (dataObserver == nullptr) {
-        HILOG_ERROR("dataObserver is nullptr");
+        HILOG_ERROR("dataObserver is nullptr, uri:%{public}s, isDescendants:%{public}d",
+            CommonUtils::Anonymous(uri.ToString()).c_str(), isDescendants);
         return DATA_OBSERVER_IS_NULL;
     }
 
     if (dataObsMgrInnerExt_ == nullptr) {
-        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        HILOG_ERROR("dataObsMgrInner_ is nullptr, uri:%{public}s, isDescendants:%{public}d",
+            CommonUtils::Anonymous(uri.ToString()).c_str(), isDescendants);
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
@@ -188,12 +194,12 @@ Status DataObsMgrService::RegisterObserverExt(const Uri &uri, sptr<IDataAbilityO
 Status DataObsMgrService::UnregisterObserverExt(const Uri &uri, sptr<IDataAbilityObserver> dataObserver)
 {
     if (dataObserver == nullptr) {
-        HILOG_ERROR("dataObserver is nullptr");
+        HILOG_ERROR("dataObserver is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATA_OBSERVER_IS_NULL;
     }
 
     if (dataObsMgrInnerExt_ == nullptr) {
-        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        HILOG_ERROR("dataObsMgrInner_ is nullptr, uri:%{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
@@ -219,19 +225,25 @@ Status DataObsMgrService::UnregisterObserverExt(sptr<IDataAbilityObserver> dataO
 Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo)
 {
     if (handler_ == nullptr) {
-        HILOG_ERROR("handler is nullptr");
+        HILOG_ERROR("handler is nullptr, changeType:%{public}ud, num of uris:%{public}ud, data is "
+                    "nullptr:%{public}d, size:%{public}ud",
+            changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
         return DATAOBS_SERVICE_HANDLER_IS_NULL;
     }
 
     if (dataObsMgrInner_ == nullptr || dataObsMgrInnerExt_ == nullptr) {
-        HILOG_ERROR("dataObsMgrInner_ is nullptr");
+        HILOG_ERROR("dataObsMgrInner_ is nullptr, changeType:%{public}ud, num of uris:%{public}ud, data is "
+                    "nullptr:%{public}d, size:%{public}ud",
+            changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
         return DATAOBS_SERVICE_INNER_IS_NULL;
     }
 
     {
         std::lock_guard<std::mutex> lck(taskCountMutex_);
         if (taskCount_ >= TASK_COUNT_MAX) {
-            HILOG_ERROR("The number of task has reached the upper limit");
+            HILOG_ERROR("The number of task has reached the upper limit, changeType:%{public}ud, num of "
+                        "uris:%{public}ud, data is nullptr:%{public}d, size:%{public}ud",
+                changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
             return DATAOBS_SERVICE_TASK_LIMMIT;
         }
         ++taskCount_;
@@ -246,7 +258,9 @@ Status DataObsMgrService::NotifyChangeExt(const ChangeInfo &changeInfo)
         --taskCount_;
     });
     if (!ret) {
-        HILOG_ERROR("Post NotifyChangeExt fail");
+        HILOG_ERROR("Post NotifyChangeExt fail, changeType:%{public}ud, num of uris:%{public}ud, data is "
+                    "nullptr:%{public}d, size:%{public}ud",
+            changeInfo.changeType_, changeInfo.uris_.size(), changeInfo.data_ == nullptr, changeInfo.size_);
         return DATAOBS_SERVICE_POST_TASK_FAILED;
     }
     return SUCCESS;

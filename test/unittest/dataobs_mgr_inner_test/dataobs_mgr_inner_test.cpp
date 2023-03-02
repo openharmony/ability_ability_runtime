@@ -242,13 +242,13 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_HandleNotifyChange_0300, TestSize.
 
 /*
  * Feature: DataObsMgrInner
- * Function: GetObsListFromMap/RemoveObsFromMap/ObsExistInMap function test
+ * Function: GetObsListFromMap/RemoveObs/HaveRegistered function test
  * SubFunction: NA
  * FunctionPoints: NA
  * EnvConditions: NA
  * CaseDescription:NA
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_GetRemoveObsListFromMap_ObsExistInMap_0100, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObs_HaveRegistered_0100, TestSize.Level1)
 {
     if (dataObsMgrInner_ == nullptr) {
         return;
@@ -268,14 +268,14 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_GetRemoveObsListFromMap_ObsExistIn
     EXPECT_EQ(true, dataObsMgrInner_->HaveRegistered(callback));
     EXPECT_EQ(true, dataObsMgrInner_->HaveRegistered(callback2));
 
-    dataObsMgrInner_->RemoveObsFromMap(callback->AsObject());
+    dataObsMgrInner_->RemoveObs(callback->AsObject());
     EXPECT_EQ(false, dataObsMgrInner_->HaveRegistered(callback));
     obsPair->second.clear();
     obsPair = dataObsMgrInner_->observers_.find(uri.ToString());
     EXPECT_EQ((std::size_t)1, obsPair->second.size());
     EXPECT_EQ(false, dataObsMgrInner_->HaveRegistered(callback));
 
-    dataObsMgrInner_->RemoveObsFromMap(callback2->AsObject());
+    dataObsMgrInner_->RemoveObs(callback2->AsObject());
     EXPECT_EQ(false, dataObsMgrInner_->HaveRegistered(callback2));
     obsPair->second.clear();
     obsPair = dataObsMgrInner_->observers_.find(uri.ToString());
@@ -318,12 +318,12 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_AddRemove_ObsDeathRecipient_0100, 
 /*
  * Feature: DataObsMgrInner
  * Function: Unregister function test
- * SubFunction: RemoveObsFromMap
+ * SubFunction: RemoveObs
  * FunctionPoints: NA
  * EnvConditions: NA
  * CaseDescription:NA
  */
-HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObsFromMap_0100, TestSize.Level1)
+HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObs_0100, TestSize.Level1)
 {
     std::shared_ptr<DataObsMgrInner> dataObsMgrInner = std::make_shared<DataObsMgrInner>();
     std::string uri1 = "uri1";
@@ -339,7 +339,7 @@ HWTEST_F(DataObsMgrInnerTest, DataObsMgrInner_RemoveObsFromMap_0100, TestSize.Le
     obsList2.push_back(callback2);
     dataObsMgrInner->observers_.emplace(uri1, obsList1);
     dataObsMgrInner->observers_.emplace(uri2, obsList2);
-    dataObsMgrInner->RemoveObsFromMap(callback2->AsObject());
+    dataObsMgrInner->RemoveObs(callback2->AsObject());
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -67,7 +67,7 @@ void DataAbilityObserverProxy::OnChangeExt(const ChangeInfo &changeInfo)
 
     OHOS::MessageParcel data;
     OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     if (!data.WriteInterfaceToken(DataAbilityObserverProxy::GetDescriptor())) {
         HILOG_ERROR("data.WriteInterfaceToken(GetDescriptor()) return false");

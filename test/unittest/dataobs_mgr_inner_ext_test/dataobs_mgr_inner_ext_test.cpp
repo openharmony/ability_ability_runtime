@@ -755,7 +755,8 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0800,
 
     observer1->ReSet();
     observer2->ReSet();
-    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uris[2], uris[3] } }), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uris[2], uris[3] } }),
+        SUCCESS);
     EXPECT_EQ(observer1->onChangeCall_, 0);
     EXPECT_EQ(observer2->onChangeCall_, 10);
 }
