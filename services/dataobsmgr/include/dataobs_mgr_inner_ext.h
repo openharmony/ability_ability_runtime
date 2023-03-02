@@ -45,7 +45,7 @@ public:
     void OnCallBackDied(const wptr<IRemoteObject> &remote);
 
 private:
-    struct DeathRecipientRef{
+    struct DeathRecipientRef {
         DeathRecipientRef(sptr<IRemoteObject::DeathRecipient> deathRec) : deathRecipient(deathRec), ref(1) {}
         sptr<IRemoteObject::DeathRecipient> deathRecipient;
         std::atomic<uint32_t> ref;

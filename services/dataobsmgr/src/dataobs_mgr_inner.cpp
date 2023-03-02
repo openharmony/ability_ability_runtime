@@ -39,7 +39,8 @@ int DataObsMgrInner::HandleRegisterObserver(const Uri &uri, sptr<IDataAbilityObs
 
     for (auto obs = obsPair->second.begin(); obs != obsPair->second.end(); obs++) {
         if ((*obs)->AsObject() == dataObserver->AsObject()) {
-            HILOG_ERROR("the obs has registered on this uri : %{public}s", CommonUtils::Anonymous(uri.ToString()).c_str());
+            HILOG_ERROR("the obs has registered on this uri : %{public}s",
+                CommonUtils::Anonymous(uri.ToString()).c_str());
             return OBS_EXIST;
         }
     }
@@ -104,8 +105,8 @@ int DataObsMgrInner::HandleNotifyChange(const Uri &uri)
         }
     }
 
-    HILOG_DEBUG("called end on the uri : %{public}s,obs num: %{public}zu", CommonUtils::Anonymous(uri.ToString()).c_str(),
-        obsList.size());
+    HILOG_DEBUG("called end on the uri : %{public}s,obs num: %{public}zu",
+        CommonUtils::Anonymous(uri.ToString()).c_str(), obsList.size());
     return NO_ERROR;
 }
 

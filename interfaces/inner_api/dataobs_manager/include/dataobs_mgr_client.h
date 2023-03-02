@@ -114,8 +114,8 @@ private:
     Status Connect();
 
     void ResetService();
-
     void OnRemoteDied();
+    void ReRegister();
 
     class ServiceDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
@@ -127,6 +127,7 @@ private:
                 serviceClient->OnRemoteDied();
             }
         }
+
     private:
         std::weak_ptr<DataObsMgrClient> owner_;
     };
@@ -137,8 +138,8 @@ private:
     sptr<IDataObsMgr> dataObsManger_;
     ConcurrentMap<sptr<IDataAbilityObserver>, std::list<Uri>> observers_;
 
-    struct Param{
-        Param(const Uri &uri, bool isDescendants):uri(uri),isDescendants(isDescendants){};
+    struct Param {
+        Param(const Uri &uri, bool isDescendants) : uri(uri), isDescendants(isDescendants){};
         Uri uri;
         bool isDescendants;
     };

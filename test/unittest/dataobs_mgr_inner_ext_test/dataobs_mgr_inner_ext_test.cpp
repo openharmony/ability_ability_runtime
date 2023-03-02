@@ -44,7 +44,7 @@ public:
 
     bool UrisEqual(std::list<Uri> uri1, std::list<Uri> uri2);
 
-    bool ChangeInfoEqual(const ChangeInfo &changeInfo1, const ChangeInfo & changeInfo2);
+    bool ChangeInfoEqual(const ChangeInfo &changeInfo1, const ChangeInfo &changeInfo2);
 };
 
 void DataObsMgrInnerExtTest::SetUpTestCase(void) {}
@@ -747,7 +747,8 @@ HWTEST_F(DataObsMgrInnerExtTest, DataObsMgrInnerExt_HandleRegisterObserver_0800,
     observer1->Wait();
     observer2->Wait();
 
-    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uris[0], uris[1] } }), SUCCESS);
+    EXPECT_EQ(dataObsMgrInnerExt->HandleNotifyChange({ ChangeInfo::ChangeType::INSERT, { uris[0], uris[1] } }),
+        SUCCESS);
     EXPECT_EQ(observer1->onChangeCall_, 10);
     EXPECT_EQ(observer2->onChangeCall_, 10);
     dataObsMgrInnerExt->HandleUnregisterObserver(observer1);

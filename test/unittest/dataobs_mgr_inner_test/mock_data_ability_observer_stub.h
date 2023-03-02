@@ -24,6 +24,10 @@ namespace AAFwk {
 class MockDataAbilityObserverStub : public DataAbilityObserverStub {
 public:
     MOCK_METHOD0(OnChange, void());
+    void OnChangeExt(const ChangeInfo &changeInfo) override
+    {
+
+    }
 
     void Wait()
     {

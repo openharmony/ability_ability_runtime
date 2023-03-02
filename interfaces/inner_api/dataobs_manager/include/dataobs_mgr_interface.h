@@ -107,7 +107,6 @@ public:
      */
     virtual Status UnregisterObserverExt(sptr<IDataAbilityObserver> dataObserver) = 0;
 
-
     /**
      * Notifies the registered observers of a change to the data resource specified by Uris.
      *
@@ -116,7 +115,6 @@ public:
      * @return Returns SUCCESS on success, others on failure.
      */
     virtual Status NotifyChangeExt(const ChangeInfo &changeInfo) = 0;
-
 };
 }  // namespace AAFwk
 }  // namespace OHOS

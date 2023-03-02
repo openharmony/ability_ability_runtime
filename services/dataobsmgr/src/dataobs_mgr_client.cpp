@@ -117,7 +117,7 @@ Status DataObsMgrClient::Connect()
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
-    if(dataObsManger_ != nullptr){
+    if (dataObsManger_ != nullptr) {
         return SUCCESS;
     }
 
@@ -212,7 +212,11 @@ void DataObsMgrClient::OnRemoteDied()
     if (Connect() != SUCCESS) {
         return;
     }
+    ReRegister();
+}
 
+void DataObsMgrClient::ReRegister()
+{
     decltype(observers_) observers(std::move(observers_));
     observers_.Clear();
     observers.ForEach([this](const auto &key, const auto &value) {
