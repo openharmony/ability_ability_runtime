@@ -2350,6 +2350,7 @@ void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo)
 {
     if (hasRecoverInfo) {
         want_.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+        SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
     }
 }
 
