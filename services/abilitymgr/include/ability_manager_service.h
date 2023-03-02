@@ -1013,7 +1013,7 @@ private:
     int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
     int PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId);
-    void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken, bool isOverlay = false);
+    void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
 
     bool CheckIfOperateRemote(const Want &want);
     std::string AnonymizeDeviceId(const std::string& deviceId);
