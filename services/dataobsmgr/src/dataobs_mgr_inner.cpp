@@ -161,10 +161,10 @@ void DataObsMgrInner::OnCallBackDied(const wptr<IRemoteObject> &remote)
         return;
     }
 
-    RemoveObsFromMap(dataObserver);
+    RemoveObs(dataObserver);
 }
 
-void DataObsMgrInner::RemoveObsFromMap(sptr<IRemoteObject> dataObserver)
+void DataObsMgrInner::RemoveObs(sptr<IRemoteObject> dataObserver)
 {
     for (auto iter = observers_.begin(); iter != observers_.end();) {
         auto &obsList = iter->second;
@@ -176,7 +176,7 @@ void DataObsMgrInner::RemoveObsFromMap(sptr<IRemoteObject> dataObserver)
             }
         }
         if (obsList.size() == 0) {
-            observers_.erase(iter++);
+            iter = observers_.erase(iter);
         } else {
             iter++;
         }

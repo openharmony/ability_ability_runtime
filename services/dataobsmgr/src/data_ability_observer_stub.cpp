@@ -17,6 +17,8 @@
 
 #include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
+#include "common_utils.h"
+#include "string_ex.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -38,7 +40,9 @@ int DataAbilityObserverStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     std::u16string descriptor = DataAbilityObserverStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        HILOG_ERROR("local descriptor is not equal to remote");
+        HILOG_ERROR("local descriptor is not equal to remote, descriptor: %{public}s, remoteDescriptor: %{public}s",
+            CommonUtils::Anonymous(Str16ToStr8(descriptor)).c_str(),
+            CommonUtils::Anonymous(Str16ToStr8(remoteDescriptor)).c_str());
         return ERR_INVALID_STATE;
     }
 
