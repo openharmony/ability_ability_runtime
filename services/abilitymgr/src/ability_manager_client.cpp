@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "session_info.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "hitrace_meter.h"
@@ -187,6 +188,16 @@ ErrCode AbilityManagerClient::StartExtensionAbility(const Want &want, const sptr
     return abms->StartExtensionAbility(want, callerToken, userId, extensionType);
 }
 
+ErrCode AbilityManagerClient::StartUIExtensionAbility(const Want &want, const sptr<SessionInfo> &extensionSessionInfo,
+    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HILOG_INFO("StartUIExtensionAbility come, bundleName=%{public}s, abilityName=%{public}s, userId=%{public}d.",
+        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetBundleName().c_str(), userId);
+    return abms->StartUIExtensionAbility(want, extensionSessionInfo, userId, extensionType);
+}
+
 ErrCode AbilityManagerClient::StopExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
@@ -203,6 +214,15 @@ ErrCode AbilityManagerClient::TerminateAbility(const sptr<IRemoteObject> &token,
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("Terminate ability come.");
     return abms->TerminateAbility(token, resultCode, resultWant);
+}
+
+ErrCode AbilityManagerClient::TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
+    int resultCode, const Want *resultWant)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HILOG_INFO("Terminate ability come.");
+    return abms->TerminateUIExtensionAbility(extensionSessionInfo, resultCode, resultWant);
 }
 
 ErrCode AbilityManagerClient::TerminateAbility(const sptr<IRemoteObject> &callerToken, int requestCode)
@@ -235,6 +255,15 @@ ErrCode AbilityManagerClient::MinimizeAbility(const sptr<IRemoteObject> &token, 
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("Minimize ability, fromUser:%{public}d.", fromUser);
     return abms->MinimizeAbility(token, fromUser);
+}
+
+ErrCode AbilityManagerClient::MinimizeUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, bool fromUser)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HILOG_INFO("Minimize ui extension ability, fromUser:%{public}d.", fromUser);
+    return abms->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser);
 }
 
 ErrCode AbilityManagerClient::ConnectAbility(const Want &want, const sptr<IAbilityConnection> &connect, int32_t userId)
@@ -926,11 +955,11 @@ void AbilityManagerClient::EnableRecoverAbility(const sptr<IRemoteObject>& token
     return abms->EnableRecoverAbility(token);
 }
 
-void AbilityManagerClient::ScheduleRecoverAbility(const sptr<IRemoteObject>& token, int32_t reason)
+void AbilityManagerClient::ScheduleRecoverAbility(const sptr<IRemoteObject>& token, int32_t reason, const Want *want)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
-    return abms->ScheduleRecoverAbility(token, reason);
+    return abms->ScheduleRecoverAbility(token, reason, want);
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
@@ -1033,6 +1062,15 @@ ErrCode AbilityManagerClient::AddFreeInstallObserver(const sptr<AbilityRuntime::
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->AddFreeInstallObserver(observer);
+}
+
+int32_t AbilityManagerClient::IsValidMissionIds(
+    const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
+{
+    HILOG_INFO("IsValidMissionIds Call.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->IsValidMissionIds(missionIds, results);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

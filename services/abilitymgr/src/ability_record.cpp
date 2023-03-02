@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1960,6 +1960,11 @@ void AbilityRecord::SetMission(const std::shared_ptr<Mission> &mission)
     mission_ = mission;
 }
 
+void AbilityRecord::SetSessionInfo(sptr<SessionInfo> sessionInfo)
+{
+    sessionInfo_ = sessionInfo;
+}
+
 void AbilityRecord::SetMinimizeReason(bool fromUser)
 {
     minimizeReason_ = fromUser;
@@ -2344,6 +2349,18 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetOtherMissionStackAbilityRecord(
 void AbilityRecord::SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     otherMissionStackAbilityRecord_ = abilityRecord;
+}
+
+void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo)
+{
+    if (hasRecoverInfo) {
+        want_.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+    }
+}
+
+bool AbilityRecord::GetRecoveryInfo()
+{
+    return want_.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
