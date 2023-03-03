@@ -100,7 +100,7 @@ void AppMgrServiceInnerTest::TearDown()
 
 /**
  * @tc.name: SendProcessStartEvent_001
- * @tc.desc: Verify that the SendProcessStartEvent interface calls normally
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls abnormal parameter
  * @tc.type: FUNC
  */
 HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level0)
@@ -109,6 +109,19 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     EXPECT_FALSE(appMgrServiceInner->SendProcessStartEvent(nullptr));
+    HILOG_INFO("SendProcessStartEvent_001 end");
+}
+
+/**
+ * @tc.name: SendProcessStartEvent_002
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls just like a service called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level0)
+{
+    HILOG_INFO("SendProcessStartEvent_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
 
     BundleInfo bundleInfo;
     std::string processName = "test_processName";
@@ -117,7 +130,26 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level0)
         appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
     EXPECT_NE(appRecord, nullptr);
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    HILOG_INFO("SendProcessStartEvent_002 end");
+}
 
+/**
+ * @tc.name: SendProcessStartEvent_003
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level0)
+{
+    HILOG_INFO("SendProcessStartEvent_003 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_NE(appRecord, nullptr);
     std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
     std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
     std::shared_ptr<AbilityRunningRecord> abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token);
@@ -125,18 +157,130 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level0)
     std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
     appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    HILOG_INFO("SendProcessStartEvent_003 end");
+}
 
+/**
+ * @tc.name: SendProcessStartEvent_004
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level0)
+{
+    HILOG_INFO("SendProcessStartEvent_004 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::shared_ptr<AbilityRunningRecord> abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     std::shared_ptr<AbilityRunningRecord> abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token);
     moduleRunningRecord->abilities_[token] = abilityRecord;
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    HILOG_INFO("SendProcessStartEvent_004 end");
+}
 
+/**
+ * @tc.name: SendProcessStartEvent_005
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level0)
+{
+    HILOG_INFO("SendProcessStartEvent_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::shared_ptr<AbilityRunningRecord> abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityRunningRecord> abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    HILOG_INFO("SendProcessStartEvent_005 end");
+}
 
+/**
+ * @tc.name: SendProcessStartEvent_005
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level0)
+{
+    HILOG_INFO("SendProcessStartEvent_005 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::shared_ptr<AbilityRunningRecord> abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityRunningRecord> abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
     appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    HILOG_INFO("SendProcessStartEvent_005 end");
+}
 
+/**
+ * @tc.name: SendProcessStartEvent_006
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls like a application called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level0)
+{
+    HILOG_INFO("SendProcessStartEvent_006 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::shared_ptr<AbilityRunningRecord> abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityRunningRecord> abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
     auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
     auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
     if (iter == recordMap.end()) {
@@ -148,7 +292,50 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level0)
     appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
     appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
-    HILOG_INFO("SendProcessStartEvent_001 end");
+    HILOG_INFO("SendProcessStartEvent_006 end");
+}
+
+/**
+ * @tc.name: SendProcessStartEvent_007
+ * @tc.desc: Verify that the SendProcessStartEvent interface calls like a application called
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level0)
+{
+    HILOG_INFO("SendProcessStartEvent_007 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    BundleInfo bundleInfo;
+    std::string processName = "test_processName";
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    applicationInfo_->bundleName = "";
+    std::shared_ptr<AppRunningRecord> appRecord =
+        appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, bundleInfo);
+    EXPECT_NE(appRecord, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    std::shared_ptr<ModuleRunningRecord> moduleRunningRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);
+    std::shared_ptr<AbilityRunningRecord> abilityRecordEmpty = std::make_shared<AbilityRunningRecord>(nullptr, token);
+    moduleRunningRecord->abilities_[token] = abilityRecordEmpty;
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecordList = { moduleRunningRecord };
+    appRecord->hapModules_["moduleRecordList"] = moduleRecordList;
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityRunningRecord> abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, token);
+    moduleRunningRecord->abilities_[token] = abilityRecord;
+    appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
+    appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
+    auto &recordMap = appMgrServiceInner->appRunningManager_->appRunningRecordMap_;
+    auto iter = recordMap.find(IPCSkeleton::GetCallingPid());
+    if (iter == recordMap.end()) {
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    } else {
+        recordMap.erase(iter);
+        recordMap.insert({IPCSkeleton::GetCallingPid(), appRecord});
+    }
+    appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
+    appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
+    EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
+    HILOG_INFO("SendProcessStartEvent_007 end");
 }
 
 /**
@@ -200,56 +387,63 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_001, TestSize.Level0)
 }
 
 /**
- * @tc.name: ConvertAbilityType_001
- * @tc.desc: Verify that the ConvertAbilityType and ConvertExtensionAbilityType interface calls normally
+ * @tc.name: UpDateStartupType_001
+ * @tc.desc: Verify that the UpDateStartupType interface calls abnormal parameter
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, ConvertAbilityType_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_001, TestSize.Level0)
 {
-    HILOG_INFO("ConvertAbilityType_001 start");
+    HILOG_INFO("UpDateStartupType_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::UNKNOWN,
-        ExtensionAbilityType::UNSPECIFIED), appMgrServiceInner->UNKNOWN_TYPE);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::PAGE, ExtensionAbilityType::UNSPECIFIED),
-        appMgrServiceInner->FA_PAGE);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::SERVICE,
-        ExtensionAbilityType::UNSPECIFIED), appMgrServiceInner->FA_SERVICE);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::DATA, ExtensionAbilityType::UNSPECIFIED),
-        appMgrServiceInner->FA_DATA);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::FORM),
-        appMgrServiceInner->EXTENSION_FORM);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::WORK_SCHEDULER),
-        appMgrServiceInner->EXTENSION_WORK_SCHEDULER);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::INPUTMETHOD),
-        appMgrServiceInner->EXTENSION_INPUTMETHOD);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::SERVICE),
-        appMgrServiceInner->EXTENSION_SERVICE);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::ACCESSIBILITY),
-        appMgrServiceInner->EXTENSION_ACCESSIBILITY);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::DATASHARE),
-        appMgrServiceInner->EXTENSION_DATASHARE);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::FILESHARE),
-        appMgrServiceInner->EXTENSION_FILESHARE);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::STATICSUBSCRIBER),
-        appMgrServiceInner->EXTENSION_STATICSUBSCRIBER);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::WALLPAPER),
-        appMgrServiceInner->EXTENSION_WALLPAPER);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::BACKUP),
-        appMgrServiceInner->EXTENSION_BACKUP);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::WINDOW),
-        appMgrServiceInner->EXTENSION_WINDOW);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::ENTERPRISE_ADMIN),
-        appMgrServiceInner->EXTENSION_ENTERPRISE_ADMIN);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION,
-        ExtensionAbilityType::FILEACCESS_EXTENSION), appMgrServiceInner->EXTENSION_FILEACCESS_EXTENSION);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::THUMBNAIL),
-        appMgrServiceInner->EXTENSION_THUMBNAIL);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::PREVIEW),
-        appMgrServiceInner->EXTENSION_PREVIEW);
-    EXPECT_EQ(appMgrServiceInner->ConvertAbilityType(AbilityType::EXTENSION, ExtensionAbilityType::UNSPECIFIED),
-        appMgrServiceInner->EXTENSION_UNSPECIFIED);
-    HILOG_INFO("ConvertAbilityType_001 end");
+    int32_t abilityType = -1;
+    int32_t extensionType = -1;
+    appMgrServiceInner->UpDateStartupType(nullptr, abilityType, extensionType);
+    HILOG_INFO("UpDateStartupType_001 end");
+}
+
+/**
+ * @tc.name: UpDateStartupType_002
+ * @tc.desc: Verify that the UpDateStartupType interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_002, TestSize.Level0)
+{
+    HILOG_INFO("UpDateStartupType_002 start");
+    constexpr int32_t expectedVal = 3;
+    constexpr int32_t defaultVal = -1;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    auto info = std::make_shared<AbilityInfo>();
+    info->type = expectedVal;
+    int32_t abilityType = -1;
+    int32_t extensionType = -1;
+    appMgrServiceInner->UpDateStartupType(info, abilityType, extensionType);
+    EXPECT_EQ(expectedVal, abilityType);
+    EXPECT_EQ(defaultVal, extensionType);
+    HILOG_INFO("UpDateStartupType_002 end");
+}
+
+/**
+ * @tc.name: UpDateStartupType_003
+ * @tc.desc: Verify that the UpDateStartupType interface calls normally
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_003, TestSize.Level0)
+{
+    HILOG_INFO("UpDateStartupType_003 start");
+    constexpr int32_t expectedVal = 5;
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    auto info = std::make_shared<AbilityInfo>();
+    info->type = expectedVal;
+    info->extensionAbilityType = expectedVal;
+    int32_t abilityType = -1;
+    int32_t extensionType = -1;
+    appMgrServiceInner->UpDateStartupType(info, abilityType, extensionType);
+    EXPECT_EQ(expectedVal, abilityType);
+    EXPECT_EQ(expectedVal, extensionType);
+    HILOG_INFO("UpDateStartupType_003 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

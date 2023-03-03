@@ -1577,7 +1577,6 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
     AAFwk::EventInfo eventInfo;
     time_t currentTime;
     time(&currentTime);
-    eventInfo.abilityType = UNKNOWN_TYPE;
     eventInfo.time = currentTime;
     eventInfo.callerUid = appRecord->GetCallerUid() == -1 ? IPCSkeleton::GetCallingUid() : appRecord->GetCallerUid();
     if(!appRecord->GetAbilities().empty()) {
