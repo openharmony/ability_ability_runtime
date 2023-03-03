@@ -394,11 +394,14 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_001, TestSize.Level0)
 HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_001, TestSize.Level0)
 {
     HILOG_INFO("UpDateStartupType_001 start");
+    constexpr int32_t defaultVal = -1;
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     int32_t abilityType = -1;
     int32_t extensionType = -1;
     appMgrServiceInner->UpDateStartupType(nullptr, abilityType, extensionType);
+    EXPECT_EQ(defaultVal, abilityType);
+    EXPECT_EQ(defaultVal, extensionType);
     HILOG_INFO("UpDateStartupType_001 end");
 }
 
@@ -415,7 +418,7 @@ HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_002, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     auto info = std::make_shared<AbilityInfo>();
-    info->type = expectedVal;
+    info->type = static_cast<AbilityType>(expectedVal);
     int32_t abilityType = -1;
     int32_t extensionType = -1;
     appMgrServiceInner->UpDateStartupType(info, abilityType, extensionType);
@@ -436,8 +439,8 @@ HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_003, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
     auto info = std::make_shared<AbilityInfo>();
-    info->type = expectedVal;
-    info->extensionAbilityType = expectedVal;
+    info->type = static_cast<AbilityType>(expectedVal);
+    info->extensionAbilityType = static_cast<ExtensionAbilityType>(expectedVal);
     int32_t abilityType = -1;
     int32_t extensionType = -1;
     appMgrServiceInner->UpDateStartupType(info, abilityType, extensionType);
