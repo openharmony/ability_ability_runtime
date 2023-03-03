@@ -103,7 +103,7 @@ void AppMgrServiceInnerTest::TearDown()
  * @tc.desc: Verify that the SendProcessStartEvent interface calls abnormal parameter
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level1)
 {
     HILOG_INFO("SendProcessStartEvent_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -117,7 +117,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_001, TestSize.Level0)
  * @tc.desc: Verify that the SendProcessStartEvent interface calls just like a service called
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level1)
 {
     HILOG_INFO("SendProcessStartEvent_002 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -138,7 +138,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_002, TestSize.Level0)
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level1)
 {
     HILOG_INFO("SendProcessStartEvent_003 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -165,7 +165,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_003, TestSize.Level0)
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level1)
 {
     HILOG_INFO("SendProcessStartEvent_004 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -195,7 +195,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_004, TestSize.Level0)
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level1)
 {
     HILOG_INFO("SendProcessStartEvent_005 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -222,13 +222,13 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level0)
 }
 
 /**
- * @tc.name: SendProcessStartEvent_005
+ * @tc.name: SendProcessStartEvent_006
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a service called
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level1)
 {
-    HILOG_INFO("SendProcessStartEvent_005 start");
+    HILOG_INFO("SendProcessStartEvent_006 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
@@ -250,17 +250,17 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_005, TestSize.Level0)
     appRecord->SetCallerTokenId(IPCSkeleton::GetCallingTokenID());
     appRecord->SetCallerUid(IPCSkeleton::GetCallingUid());
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
-    HILOG_INFO("SendProcessStartEvent_005 end");
+    HILOG_INFO("SendProcessStartEvent_006 end");
 }
 
 /**
- * @tc.name: SendProcessStartEvent_006
+ * @tc.name: SendProcessStartEvent_007
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a application called
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level1)
 {
-    HILOG_INFO("SendProcessStartEvent_006 start");
+    HILOG_INFO("SendProcessStartEvent_007 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
@@ -292,17 +292,17 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_006, TestSize.Level0)
     appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
     appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
-    HILOG_INFO("SendProcessStartEvent_006 end");
+    HILOG_INFO("SendProcessStartEvent_007 end");
 }
 
 /**
- * @tc.name: SendProcessStartEvent_007
+ * @tc.name: SendProcessStartEvent_008
  * @tc.desc: Verify that the SendProcessStartEvent interface calls like a application called
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_008, TestSize.Level1)
 {
-    HILOG_INFO("SendProcessStartEvent_007 start");
+    HILOG_INFO("SendProcessStartEvent_008 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
@@ -335,7 +335,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level0)
     appRecord->GetPriorityObject()->pid_ = IPCSkeleton::GetCallingPid();
     appRecord->SetCallerPid(IPCSkeleton::GetCallingPid());
     EXPECT_TRUE(appMgrServiceInner->SendProcessStartEvent(appRecord));
-    HILOG_INFO("SendProcessStartEvent_007 end");
+    HILOG_INFO("SendProcessStartEvent_008 end");
 }
 
 /**
@@ -343,7 +343,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessStartEvent_007, TestSize.Level0)
  * @tc.desc: Verify that the SendProcessExitEventTask interface calls normally
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEventTask_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEventTask_001, TestSize.Level1)
 {
     HILOG_INFO("SendProcessExitEventTask_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -376,7 +376,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEventTask_001, TestSize.Level0)
  * @tc.desc: Verify that the SendProcessExitEvent interface calls normally
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_001, TestSize.Level1)
 {
     HILOG_INFO("SendProcessExitEvent_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
@@ -391,7 +391,7 @@ HWTEST_F(AppMgrServiceInnerTest, SendProcessExitEvent_001, TestSize.Level0)
  * @tc.desc: Verify that the UpDateStartupType interface calls abnormal parameter
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_001, TestSize.Level1)
 {
     HILOG_INFO("UpDateStartupType_001 start");
     constexpr int32_t defaultVal = -1;
@@ -410,7 +410,7 @@ HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_001, TestSize.Level0)
  * @tc.desc: Verify that the UpDateStartupType interface calls normally
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_002, TestSize.Level1)
 {
     HILOG_INFO("UpDateStartupType_002 start");
     constexpr int32_t expectedVal = 3;
@@ -432,7 +432,7 @@ HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_002, TestSize.Level0)
  * @tc.desc: Verify that the UpDateStartupType interface calls normally
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_003, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, UpDateStartupType_003, TestSize.Level1)
 {
     HILOG_INFO("UpDateStartupType_003 start");
     constexpr int32_t expectedVal = 5;
