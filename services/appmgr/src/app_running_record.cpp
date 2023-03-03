@@ -174,7 +174,7 @@ const std::string &AppRunningRecord::GetBundleName() const
     return mainBundleName_;
 }
 
-int32_t AppRunningRecord::GetCallerPid()
+int32_t AppRunningRecord::GetCallerPid() const
 {
     return callerPid_;
 }
@@ -184,7 +184,7 @@ void AppRunningRecord::SetCallerPid(int32_t pid)
     callerPid_ = pid;
 }
 
-int32_t AppRunningRecord::GetCallerUid()
+int32_t AppRunningRecord::GetCallerUid() const
 {
     return callerUid_;
 }
@@ -194,7 +194,7 @@ void AppRunningRecord::SetCallerUid(int32_t uid)
     callerUid_ = uid;
 }
 
-int32_t AppRunningRecord::GetCallerTokenId()
+int32_t AppRunningRecord::GetCallerTokenId() const
 {
     return callerTokenId_;
 }

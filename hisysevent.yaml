@@ -229,7 +229,8 @@ APP_RECOVERY:
 PROCESS_START:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: app, desc: application process startup event reporting}
   STARTUP_TIME: {type: INT64, desc: process start time}
-  STARTUP_TYPE: {type: INT32, desc: process start type}
+  STARTUP_ABILITY_TYPE: {type: INT32, desc: process start ability type}
+  STARTUP_EXTENSION_TYPE: {type: INT32, desc: process start extension type}
   CALLER_BUNDLE_NAME: {type: STRING, desc: caller bundle name}
   CALLER_UID: {type: INT32, desc: caller uid}
   CALLER_PROCESS_NAME: {type: STRING, desc: caller process name}
