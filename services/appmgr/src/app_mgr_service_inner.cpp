@@ -1559,12 +1559,12 @@ void AppMgrServiceInner::UpDateStartupType(
     }
 
     HILOG_DEBUG("bundleName:%{public}s, abilityName:%{public}s", info->bundleName.c_str(), info->name.c_str());
-    abilityType = info->type;
+    abilityType = static_cast<int32_t>(info->type);
     if (info->type != AbilityType::EXTENSION) {
         return;
     }
 
-    extensionType = info->extensionAbilityType
+    extensionType = static_cast<int32_t>(info->extensionAbilityType);
 }
 
 bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord)

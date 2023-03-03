@@ -798,7 +798,7 @@ private:
 
     void SendProcessExitEventTask(pid_t pid, time_t exitTime, int32_t count);
 
-    void UpDateStartupType(const std::shared_ptr<AbilityInfo> info, int32_t &abilityType, int32_t &extensionType);
+    void UpDateStartupType(const std::shared_ptr<AbilityInfo> &info, int32_t &abilityType, int32_t &extensionType);
 
 private:
     /**
