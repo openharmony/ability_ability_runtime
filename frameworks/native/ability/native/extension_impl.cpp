@@ -359,25 +359,12 @@ void ExtensionImpl::Background()
 
 void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterForeground()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterForeground called.");
-    auto owner = owner_.lock();
-    if (owner) {
-        AAFwk::Want want = *(owner->extension_->GetLaunchWant());
-        owner->Foreground(want);
-    }
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterForeground end.");
 }
 
 void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterBackground()
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterBackground called.");
-    auto owner = owner_.lock();
-    if (owner) {
-        owner->Background();
-    }
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterBackground end.");
 }
 
 void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterActive()
