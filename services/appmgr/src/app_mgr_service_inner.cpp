@@ -129,63 +129,6 @@ AppMgrServiceInner::AppMgrServiceInner()
       configuration_(std::make_shared<Configuration>())
 {}
 
-int32_t AppMgrServiceInner::ConvertExtensionAbilityType(ExtensionAbilityType extensionAbilityType)
-{
-    switch (extensionAbilityType)
-    {
-    case ExtensionAbilityType::FORM:
-        return EXTENSION_FORM;
-    case ExtensionAbilityType::WORK_SCHEDULER:
-        return EXTENSION_WORK_SCHEDULER;
-    case ExtensionAbilityType::INPUTMETHOD:
-        return EXTENSION_INPUTMETHOD;
-    case ExtensionAbilityType::SERVICE:
-        return EXTENSION_SERVICE;
-    case ExtensionAbilityType::ACCESSIBILITY:
-        return EXTENSION_ACCESSIBILITY;
-    case ExtensionAbilityType::DATASHARE:
-        return EXTENSION_DATASHARE;
-    case ExtensionAbilityType::FILESHARE:
-        return EXTENSION_FILESHARE;
-    case ExtensionAbilityType::STATICSUBSCRIBER:
-        return EXTENSION_STATICSUBSCRIBER;
-    case ExtensionAbilityType::WALLPAPER:
-        return EXTENSION_WALLPAPER;
-    case ExtensionAbilityType::BACKUP:
-        return EXTENSION_BACKUP;
-    case ExtensionAbilityType::WINDOW:
-        return EXTENSION_WINDOW;
-    case ExtensionAbilityType::ENTERPRISE_ADMIN:
-        return EXTENSION_ENTERPRISE_ADMIN;
-    case ExtensionAbilityType::FILEACCESS_EXTENSION:
-        return EXTENSION_FILEACCESS_EXTENSION;
-    case ExtensionAbilityType::THUMBNAIL:
-        return EXTENSION_THUMBNAIL;
-    case ExtensionAbilityType::PREVIEW:
-        return EXTENSION_PREVIEW;
-    case ExtensionAbilityType::UNSPECIFIED:
-        return EXTENSION_UNSPECIFIED;
-    default:
-        return EXTENSION_UNSPECIFIED;
-    }
-}
-
-int32_t AppMgrServiceInner::ConvertAbilityType(AbilityType type, ExtensionAbilityType extensionAbilityType)
-{
-    switch (type) {
-        case AbilityType::EXTENSION:
-            return ConvertExtensionAbilityType(extensionAbilityType);
-        case AbilityType::PAGE:
-            return FA_PAGE;
-        case AbilityType::SERVICE:
-            return FA_SERVICE;
-        case AbilityType::DATA:
-            return FA_DATA;
-        default:
-            return UNKNOWN_TYPE;
-    }
-}
-
 void AppMgrServiceInner::Init()
 {
     InitGlobalConfiguration();
@@ -1608,6 +1551,22 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     SendProcessStartEvent(appRecord);
 }
 
+void AppMgrServiceInner::UpDateStartupType(
+    const std::shared_ptr<AbilityInfo> &info, int32_t &abilityType, int32_t &extensionType)
+{
+    if (info == nullptr) {
+        return;
+    }
+
+    HILOG_DEBUG("bundleName:%{public}s, abilityName:%{public}s", info->bundleName.c_str(), info->name.c_str());
+    abilityType = info->type;
+    if (info->type != AbilityType::EXTENSION) {
+        return;
+    }
+
+    extensionType = info->extensionAbilityType
+}
+
 bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     if (!appRecord) {
@@ -1623,11 +1582,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
     eventInfo.callerUid = appRecord->GetCallerUid() == -1 ? IPCSkeleton::GetCallingUid() : appRecord->GetCallerUid();
     if(!appRecord->GetAbilities().empty()) {
         auto abilityinfo = appRecord->GetAbilities().begin()->second->GetAbilityInfo();
-        if (abilityinfo != nullptr) {
-            eventInfo.abilityType = ConvertAbilityType(abilityinfo->type, abilityinfo->extensionAbilityType);
-            HILOG_INFO("abilityBundleName:%{public}s, abilityName:%{public}s",
-                abilityinfo->bundleName.c_str(), abilityinfo->name.c_str());
-        }
+        UpDateStartupType(abilityinfo, eventInfo.abilityType, eventInfo.extensionType);
     } else {
         HILOG_INFO("Abilities nullptr!");
     }

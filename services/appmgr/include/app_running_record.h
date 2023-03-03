@@ -106,7 +106,7 @@ public:
      *
      * @return Returns app record CallerPid.
      */
-    int32_t GetCallerPid();
+    int32_t GetCallerPid() const;
 
     /**
      * @brief Setting the Caller pid.
@@ -120,7 +120,7 @@ public:
      *
      * @return Returns app record CallerUid.
      */
-    int32_t GetCallerUid();
+    int32_t GetCallerUid() const;
 
     /**
      * @brief Setting the Caller uid.
@@ -134,7 +134,7 @@ public:
      *
      * @return Returns app record CallerTokenId.
      */
-    int32_t GetCallerTokenId();
+    int32_t GetCallerTokenId() const;
 
     /**
      * @brief Setting the Caller tokenId.

@@ -36,7 +36,8 @@ const std::string EVENT_KEY_VERSION_CODE = "VERSION_CODE";
 const std::string EVENT_KEY_PROCESS_NAME = "PROCESS_NAME";
 const std::string EVENT_KEY_EXTENSION_TYPE = "EXTENSION_TYPE";
 const std::string EVENT_KEY_STARTUP_TIME = "STARTUP_TIME";
-const std::string EVENT_KEY_STARTUP_TYPE = "STARTUP_TYPE";
+const std::string EVENT_KEY_STARTUP_ABILITY_TYPE = "STARTUP_ABILITY_TYPE";
+const std::string EVENT_KEY_STARTUP_EXTENSION_TYPE = "STARTUP_EXTENSION_TYPE";
 const std::string EVENT_KEY_CALLER_BUNDLE_NAME = "CALLER_BUNDLE_NAME";
 const std::string EVENT_KEY_CALLER_UID = "CALLER_UID";
 const std::string EVENT_KEY_CALLER_PROCESS_NAME = "CALLER_PROCESS_NAME";
@@ -86,6 +87,7 @@ const std::map<EventName, std::string> eventNameToStrMap_ = {
 void EventReport::SendAppEvent(const EventName &eventName, HiSysEventType type,
     const EventInfo& eventInfo)
 {
+    constexpr int32_t defaultVal = -1;
     std::string name = ConvertEventName(eventName);
     if (name == "INVALIDEVENTNAME") {
         HILOG_ERROR("invalid eventName");
@@ -93,15 +95,28 @@ void EventReport::SendAppEvent(const EventName &eventName, HiSysEventType type,
     }
     switch (eventName) {
         case EventName::PROCESS_START:
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_STARTUP_TIME, eventInfo.time,
-                EVENT_KEY_STARTUP_TYPE, eventInfo.abilityType,
-                EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_CALLER_UID, eventInfo.callerUid,
-                EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.processName);
+            if (eventInfo.extensionType == defaultVal) {
+                HiSysEventWrite(
+                    HiSysEvent::Domain::AAFWK,
+                    name,
+                    type,
+                    EVENT_KEY_STARTUP_TIME, eventInfo.time,
+                    EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
+                    EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.bundleName,
+                    EVENT_KEY_CALLER_UID, eventInfo.callerUid,
+                    EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.processName);
+            } else {
+                HiSysEventWrite(
+                    HiSysEvent::Domain::AAFWK,
+                    name,
+                    type,
+                    EVENT_KEY_STARTUP_TIME, eventInfo.time,
+                    EVENT_KEY_STARTUP_ABILITY_TYPE, eventInfo.abilityType,
+                    EVENT_KEY_STARTUP_EXTENSION_TYPE, eventInfo.extensionType,
+                    EVENT_KEY_CALLER_BUNDLE_NAME, eventInfo.bundleName,
+                    EVENT_KEY_CALLER_UID, eventInfo.callerUid,
+                    EVENT_KEY_CALLER_PROCESS_NAME, eventInfo.processName);
+            }
             break;
         case EventName::PROCESS_EXIT:
             HiSysEventWrite(
