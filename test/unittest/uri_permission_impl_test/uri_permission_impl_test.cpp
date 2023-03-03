@@ -94,8 +94,6 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_003, TestSize.Level1)
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     Uri uri(uriStr);
     unsigned int flag = 2;
-    uint32_t fromTokenId = 2;
-    uint32_t targetTokenId = 3;
     MockSystemAbilityManager::isNullptr = false;
     std::string fromBundleName = "name1";
     std::string targetBundleName = "name2";
@@ -173,7 +171,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_006, TestSize.Level1)
     Uri uri(uriStr);
     MockSystemAbilityManager::isNullptr = false;
     unsigned int flag = 2;
-    upms->GrantUriPermission(uri, flag, fromTokenId, targetTokenId, autoremove);
+    upms->GrantUriPermission(uri, flag, fromBundleName, targetBundleName, autoremove);
     MockSystemAbilityManager::isNullptr = true;
 }
 
@@ -200,7 +198,7 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_007, TestSize.Level1)
     MockSystemAbilityManager::isNullptr = false;
     unsigned int flag = 2;
     uint32_t tokenId = 4;
-    upms->GrantUriPermission(uri, flag, fromTokenId, targetTokenId, autoremove);
+    upms->GrantUriPermission(uri, flag, fromBundleName, targetBundleName, autoremove);
     MockSystemAbilityManager::isNullptr = true;
 }
 
