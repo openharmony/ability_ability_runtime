@@ -48,7 +48,7 @@ public:
      * @param stateInfo, The lifecycle state to be transformed
      */
     void ScheduleAbilityTransaction(const Want &want, const LifeCycleStateInfo &stateInfo,
-        sptr<SessionInfo> sessionInfo) override;
+        sptr<SessionInfo> sessionInfo = nullptr) override;
 
     /*
      * SendResult, Send result to app when ability is terminated with result want.
