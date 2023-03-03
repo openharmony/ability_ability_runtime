@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,6 +50,9 @@
 
 namespace OHOS {
 namespace AAFwk {
+
+class SessionInfo;
+
 constexpr const char* ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
 const int DEFAULT_INVAL_VALUE = -1;
 const int DELAY_LOCAL_FREE_INSTALL_TIMEOUT = 40000;
@@ -181,6 +184,24 @@ public:
     }
 
     /**
+     * Start ui extension ability with want, send want to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param extensionSessionInfo the extension session info of the ability to start.
+     * @param userId, Designation User ID.
+     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartUIExtensionAbility(
+        const Want &want,
+        const sptr<SessionInfo> &extensionSessionInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED)
+    {
+        return 0;
+    }
+
+    /**
      * Stop extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to stop.
@@ -225,6 +246,20 @@ public:
         const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant = nullptr) = 0;
 
     /**
+     * TerminateUIExtensionAbility, terminate the special ui extension ability.
+     *
+     * @param extensionSessionInfo the extension session info of the ability to terminate.
+     * @param resultCode, the resultCode of the ui extension ability to terminate.
+     * @param resultWant, the Want of the ui extension ability to return.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
+        int resultCode, const Want *resultWant = nullptr)
+    {
+        return 0;
+    }
+
+    /**
      * SendResultToAbility, send the result to ability.
      *
      * @param requestCode, the requestCode of the ability to terminate.
@@ -265,6 +300,19 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int MinimizeAbility(const sptr<IRemoteObject> &token, bool fromUser = false) = 0;
+
+    /**
+     * MinimizeUIExtensionAbility, minimize the special ui extension ability.
+     *
+     * @param extensionSessionInfo the extension session info of the ability to minimize.
+     * @param fromUser mark the minimize operation source.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int MinimizeUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
+        bool fromUser = false)
+    {
+        return 0;
+    };
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -751,7 +799,18 @@ public:
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) = 0;
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) {};
-    virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason) {};
+    virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
+        const Want *want = nullptr) {};
+
+    /**
+     * Called to verify that the MissionId is valid.
+     * @param missionIds Query mission list.
+     * @param results Output parameters, return results up to 20 query results.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t IsValidMissionIds(
+        const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) = 0;
+
     enum {
         // ipc id 1-1000 for kit
         // ipc id for terminating ability (1)
@@ -1007,11 +1066,20 @@ public:
 
         CONNECT_ABILITY_WITH_TYPE,
 
+        // start ui extension ability
+        START_UI_EXTENSION_ABILITY,
+
         CALL_REQUEST_DONE,
 
         START_ABILITY_AS_CALLER_BY_TOKEN,
 
         START_ABILITY_AS_CALLER_FOR_OPTIONS,
+
+        // ipc id for minimize ui extension ability
+        MINIMIZE_UI_EXTENSION_ABILITY,
+
+        // ipc id for terminating ui extension ability
+        TERMINATE_UI_EXTENSION_ABILITY,
 
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
@@ -1061,6 +1129,8 @@ public:
         // ipc id for app recovery(3010)
         ABILITY_RECOVERY = 3010,
         ABILITY_RECOVERY_ENABLE = 3011,
+
+        QUERY_MISSION_VAILD = 3012,
     };
 };
 }  // namespace AAFwk
