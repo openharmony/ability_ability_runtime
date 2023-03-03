@@ -197,7 +197,6 @@ HWTEST_F(UriPermissionImplTest, Upms_GrantUriPermission_007, TestSize.Level1)
     Uri uri(uriStr);
     MockSystemAbilityManager::isNullptr = false;
     unsigned int flag = 2;
-    uint32_t tokenId = 4;
     upms->GrantUriPermission(uri, flag, fromBundleName, targetBundleName, autoremove);
     MockSystemAbilityManager::isNullptr = true;
 }
