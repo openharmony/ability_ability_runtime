@@ -1580,7 +1580,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
     time(&currentTime);
     eventInfo.time = currentTime;
     eventInfo.callerUid = appRecord->GetCallerUid() == -1 ? IPCSkeleton::GetCallingUid() : appRecord->GetCallerUid();
-    if(!appRecord->GetAbilities().empty()) {
+    if (!appRecord->GetAbilities().empty()) {
         auto abilityinfo = appRecord->GetAbilities().begin()->second->GetAbilityInfo();
         UpDateStartupType(abilityinfo, eventInfo.abilityType, eventInfo.extensionType);
     } else {
@@ -1596,7 +1596,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
         eventInfo.bundleName = "";
         eventInfo.processName = nativeTokenInfo.processName;
     } else {
-        if (callerAppRecord->GetBundleName().empty()){
+        if (callerAppRecord->GetBundleName().empty()) {
             eventInfo.bundleName = callerAppRecord->GetName();
         } else {
             eventInfo.bundleName = callerAppRecord->GetBundleName();
@@ -1717,7 +1717,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
     }
 
-    if(appRecord->GetPriorityObject() != nullptr) {
+    if (appRecord->GetPriorityObject() != nullptr) {
         SendProcessExitEvent(appRecord->GetPriorityObject()->GetPid());
     }
 
