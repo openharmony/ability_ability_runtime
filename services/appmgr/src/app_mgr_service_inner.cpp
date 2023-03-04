@@ -15,6 +15,7 @@
 
 #include "app_mgr_service_inner.h"
 
+#include <cinttypes>
 #include <csignal>
 #include <securec.h>
 #include <sys/stat.h>
