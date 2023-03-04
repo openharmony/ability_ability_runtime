@@ -593,7 +593,7 @@ void AppMgrServiceInner::SendProcessExitEventTask(pid_t pid, time_t exitTime, in
         eventInfo.exitResult = EXIT_SUCESS;
         eventInfo.pid = pid;
         AAFwk::EventReport::SendAppEvent(AAFwk::EventName::PROCESS_EXIT, HiSysEventType::BEHAVIOR, eventInfo);
-        HILOG_INFO("%{public}s. time : %{public}lld, exitResult : %{public}d, pid : %{public}d",
+        HILOG_INFO("%{public}s. time : %{public}" PRId64 ", exitResult : %{public}d, pid : %{public}d",
             __func__, eventInfo.time, eventInfo.exitResult, eventInfo.pid);
         return;
     }
@@ -604,7 +604,7 @@ void AppMgrServiceInner::SendProcessExitEventTask(pid_t pid, time_t exitTime, in
         eventInfo.exitResult = EXIT_FAILED;
         eventInfo.pid = pid;
         AAFwk::EventReport::SendAppEvent(AAFwk::EventName::PROCESS_EXIT, HiSysEventType::BEHAVIOR, eventInfo);
-        HILOG_INFO("%{public}s. time : %{public}lld, exitResult : %{public}d, pid : %{public}d",
+        HILOG_INFO("%{public}s. time : %{public}" PRId64 ", exitResult : %{public}d, pid : %{public}d",
             __func__, eventInfo.time, eventInfo.exitResult, eventInfo.pid);
         return;
     }
