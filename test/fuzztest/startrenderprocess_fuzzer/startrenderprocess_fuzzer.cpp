@@ -48,7 +48,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 
     if (appMgrClient->StartRenderProcess(renderParam, ipcFd, sharedFd, crashFd,
                                          renderPid) != 0) {
-      return false;
+        return false;
     }
 
     return true;

@@ -26,7 +26,7 @@ public:
     MockRenderScheduler() = default;
     virtual ~MockRenderScheduler() = default;
 
-    MOCK_METHOD2(NotifyBrowserFd,
+    MOCK_METHOD3(NotifyBrowserFd,
                  void(int32_t ipcFd, int32_t sharedFd, int32_t crashFd));
     MOCK_METHOD0(AsObject, sptr<IRemoteObject>());
 };

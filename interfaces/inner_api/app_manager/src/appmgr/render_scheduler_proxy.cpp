@@ -35,7 +35,8 @@ bool RenderSchedulerProxy::WriteInterfaceToken(MessageParcel &data)
 }
 
 void RenderSchedulerProxy::NotifyBrowserFd(int32_t ipcFd, int32_t sharedFd,
-                                           int32_t crashFd) {
+                                           int32_t crashFd)
+{
     HILOG_DEBUG("NotifyBrowserFd start");
     MessageParcel data;
     MessageParcel reply;
