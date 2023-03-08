@@ -129,7 +129,7 @@ private:
         HILOG_DEBUG("Grant Uri Permission start");
 
         AsyncTask::CompleteCallback complete =
-        [args, argCountFour, argCountThree](NativeEngine& engine, AsyncTask& task, int32_t status) {    
+        [args, argCountFour, argCountThree](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (args.size() != argCountThree && args.size() != argCountFour) {
                 HILOG_ERROR("Wrong number of parameters.");
                 task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));
@@ -187,7 +187,7 @@ private:
         HILOG_DEBUG("Remove Uri Permission start");
 
         AsyncTask::CompleteCallback complete =
-        [args, argCountOne, argCountTwo](NativeEngine& engine, AsyncTask& task, int32_t status) {    
+        [args, argCountOne, argCountTwo](NativeEngine& engine, AsyncTask& task, int32_t status) {
             if (args.size() != argCountOne && args.size() != argCountTwo) {
                 HILOG_ERROR("Wrong number of parameters.");
                 task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));

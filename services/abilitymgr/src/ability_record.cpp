@@ -489,7 +489,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 
     auto bms = AbilityUtil::GetBundleManager();
     std::string targetBundleName;
-    if(!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
+    if (!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
         HILOG_ERROR("Get targetBundleName name by uid failed.");
     }
     GrantUriPermission(want_, GetCurrentAccountId(), targetBundleName);
@@ -1285,7 +1285,7 @@ void AbilityRecord::SendResult()
     CHECK_POINTER(result_);
     auto bms = AbilityUtil::GetBundleManager();
     std::string targetBundleName;
-    if(!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
+    if (!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
         HILOG_ERROR("Get targetBundleName name by uid failed.");
     }
     GrantUriPermission(result_->resultWant_, GetCurrentAccountId(), targetBundleName);
@@ -2062,7 +2062,7 @@ void AbilityRecord::CallRequest()
 
     auto bms = AbilityUtil::GetBundleManager();
     std::string targetBundleName;
-    if(!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
+    if (!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
         HILOG_ERROR("Get targetBundleName name by uid failed.");
     }
     GrantUriPermission(want_, GetCurrentAccountId(), targetBundleName);
