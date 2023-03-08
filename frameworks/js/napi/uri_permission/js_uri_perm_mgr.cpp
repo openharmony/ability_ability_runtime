@@ -157,7 +157,6 @@ private:
                 return;
             }
             
-
             Uri uri(uriStr);
             AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermissionFromSelf(uri,
                 flag, targetBundleName);

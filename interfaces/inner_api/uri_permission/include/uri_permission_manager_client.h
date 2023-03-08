@@ -71,7 +71,7 @@ public:
 
     /**
      * @brief Clear user's uri authorization record.
-     * 
+     *
      * @param uri The file uri.
      * @param BundleName A BundleName of an application.
      */
