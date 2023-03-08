@@ -68,6 +68,10 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
     }
 
     startSpecifiedAbilityResponse_ = new (std::nothrow) StartSpecifiedAbilityResponse();
+    if (startSpecifiedAbilityResponse_ == nullptr) {
+        HILOG_ERROR("startSpecifiedAbilityResponse_ is nullptr.");
+        return false;
+    }
     appMgrClient_->RegisterStartSpecifiedAbilityResponse(startSpecifiedAbilityResponse_);
 
     HILOG_INFO("success to ConnectAppMgrService");
@@ -83,7 +87,8 @@ int AppScheduler::LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemo
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
-    int ret = static_cast<int>(appMgrClient_->LoadAbility(token, preToken, abilityInfo, applicationInfo, want));
+    int ret = static_cast<int>(IN_PROCESS_CALL(
+        appMgrClient_->LoadAbility(token, preToken, abilityInfo, applicationInfo, want)));
     if (ret != ERR_OK) {
         HILOG_ERROR("AppScheduler fail to LoadAbility. ret %d", ret);
         return INNER_ERR;
@@ -98,7 +103,7 @@ int AppScheduler::TerminateAbility(const sptr<IRemoteObject> &token, bool clearM
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
     /* because the errcode type of AppMgr Client API will be changed to int,
      * so must to covert the return result  */
-    int ret = static_cast<int>(appMgrClient_->TerminateAbility(token, clearMissionFlag));
+    int ret = static_cast<int>(IN_PROCESS_CALL(appMgrClient_->TerminateAbility(token, clearMissionFlag)));
     if (ret != ERR_OK) {
         HILOG_ERROR("AppScheduler fail to TerminateAbility. ret %d", ret);
         return INNER_ERR;
@@ -111,7 +116,8 @@ void AppScheduler::MoveToForeground(const sptr<IRemoteObject> &token)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Start to move the ability to foreground.");
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->UpdateAbilityState(token, AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND);
+    IN_PROCESS_CALL_WITHOUT_RET(
+        appMgrClient_->UpdateAbilityState(token, AppExecFwk::AbilityState::ABILITY_STATE_FOREGROUND));
 }
 
 void AppScheduler::MoveToBackground(const sptr<IRemoteObject> &token)
@@ -119,21 +125,22 @@ void AppScheduler::MoveToBackground(const sptr<IRemoteObject> &token)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Move the app to background.");
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->UpdateAbilityState(token, AppExecFwk::AbilityState::ABILITY_STATE_BACKGROUND);
+    IN_PROCESS_CALL_WITHOUT_RET(
+        appMgrClient_->UpdateAbilityState(token, AppExecFwk::AbilityState::ABILITY_STATE_BACKGROUND));
 }
 
 void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject> &token, const AppExecFwk::AbilityState state)
 {
     HILOG_DEBUG("UpdateAbilityState.");
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->UpdateAbilityState(token, state);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->UpdateAbilityState(token, state));
 }
 
 void AppScheduler::UpdateExtensionState(const sptr<IRemoteObject> &token, const AppExecFwk::ExtensionState state)
 {
     HILOG_DEBUG("UpdateExtensionState.");
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->UpdateExtensionState(token, state);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->UpdateExtensionState(token, state));
 }
 
 void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
@@ -141,7 +148,8 @@ void AppScheduler::AbilityBehaviorAnalysis(const sptr<IRemoteObject> &token, con
 {
     HILOG_DEBUG("Ability behavior analysis.");
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState);
+    IN_PROCESS_CALL_WITHOUT_RET(
+        appMgrClient_->AbilityBehaviorAnalysis(token, preToken, visibility, perceptibility, connectionState));
 }
 
 void AppScheduler::KillProcessByAbilityToken(const sptr<IRemoteObject> &token)
@@ -228,13 +236,13 @@ int AppScheduler::ClearUpApplicationData(const std::string &bundleName)
 void AppScheduler::AttachTimeOut(const sptr<IRemoteObject> &token)
 {
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->AbilityAttachTimeOut(token);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->AbilityAttachTimeOut(token));
 }
 
 void AppScheduler::PrepareTerminate(const sptr<IRemoteObject> &token)
 {
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->PrepareTerminate(token);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->PrepareTerminate(token));
 }
 
 void AppScheduler::OnAppStateChanged(const AppExecFwk::AppProcessData &appData)
@@ -275,7 +283,7 @@ void AppScheduler::StartupResidentProcess(const std::vector<AppExecFwk::BundleIn
 void AppScheduler::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo)
 {
     CHECK_POINTER(appMgrClient_);
-    appMgrClient_->StartSpecifiedAbility(want, abilityInfo);
+    IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->StartSpecifiedAbility(want, abilityInfo));
 }
 
 void StartSpecifiedAbilityResponse::OnAcceptWantResponse(
@@ -385,7 +393,7 @@ int AppScheduler::BlockAppService()
 {
     HILOG_INFO("[%{public}s(%{public}s)] enter", __FILE__, __FUNCTION__);
     CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    auto ret = static_cast<int>(appMgrClient_->BlockAppService());
+    auto ret = static_cast<int>(IN_PROCESS_CALL(appMgrClient_->BlockAppService()));
     if (ret != ERR_OK) {
         HILOG_ERROR("BlockAppService failed.");
         return INNER_ERR;
