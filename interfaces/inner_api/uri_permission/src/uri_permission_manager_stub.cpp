@@ -36,10 +36,9 @@ int UriPermissionManagerStub::OnRemoteRequest(
                 break;
             }
             auto flag = data.ReadInt32();
-            auto fromBundleName = data.ReadString();
             auto targetBundleName = data.ReadString();
             auto autoremove = data.ReadInt32();
-            if (!GrantUriPermission(*uri, flag, fromBundleName, targetBundleName, autoremove)) {
+            if (!GrantUriPermission(*uri, flag, targetBundleName, autoremove)) {
                 errCode = ERR_INVALID_OPERATION;
                 HILOG_ERROR("To grant uri permission failed.");
             }

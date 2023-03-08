@@ -51,10 +51,9 @@ HWTEST_F(UriPermissionTest, Upms_GrantUriPermission_001, TestSize.Level1)
     auto uriStr = "file://com.example.test/data/storage/el2/base/haps/entry/files/test_A.txt";
     Uri uri(uriStr);
     unsigned int flag = 1;
-    std::string fromBundleName = "name1";
     std::string targetBundleName = "name2";
     int autoremove = 1;
-    upms->GrantUriPermission(uri, flag, fromBundleName, targetBundleName, autoremove);
+    upms->GrantUriPermission(uri, flag, targetBundleName, autoremove);
 }
 
 /*

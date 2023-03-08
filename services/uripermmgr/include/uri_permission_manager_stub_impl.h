@@ -41,7 +41,7 @@ public:
     UriPermissionManagerStubImpl() = default;
     virtual ~UriPermissionManagerStubImpl() = default;
 
-    bool GrantUriPermission(const Uri &uri, unsigned int flag, const std::string fromBundleName,
+    bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName, int autoremove) override;
     bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
          const std::string targetBundleName) override;

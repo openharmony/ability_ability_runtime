@@ -24,7 +24,7 @@ UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &
     : IRemoteProxy<IUriPermissionManager>(impl) {}
 
 bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const std::string fromBundleName, const std::string targetBundleName, int autoremove)
+    const std::string targetBundleName, int autoremove)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::GrantUriPermission is called.");
     MessageParcel data;
@@ -38,10 +38,6 @@ bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int 
     }
     if (!data.WriteInt32(flag)) {
         HILOG_ERROR("Write flag failed.");
-        return false;
-    }
-    if (!data.WriteString(fromBundleName)) {
-        HILOG_ERROR("Write fromBundleName failed.");
         return false;
     }
     if (!data.WriteString(targetBundleName)) {

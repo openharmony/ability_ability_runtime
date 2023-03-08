@@ -34,29 +34,40 @@ const int32_t DEFAULT_USER_ID = 0;
 using TokenId = Security::AccessToken::AccessTokenID;
 
 bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const std::string fromBundleName, const std::string targetBundleName, int autoremove)
+    const std::string targetBundleName, int autoremove)
 {
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
-
     auto bms = ConnectBundleManager();
-    AppExecFwk::BundleInfo uriBundleInfo;
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(fromBundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
-        HILOG_WARN("To fail to get bundle info to fromBundleName.");
+
+    AppExecFwk::BundleInfo uriBundleInfo;
+    Uri uri_inner = uri;
+    auto&& authority = uri_inner.GetAuthority();
+    HILOG_INFO("uri authority is %{public}s.", authority.c_str());
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
+        HILOG_WARN("To fail to get bundle info according to uri.");
         return false;
     }
     Security::AccessToken::AccessTokenID fromTokenId = uriBundleInfo.applicationInfo.accessTokenId;
+    HILOG_DEBUG("fromTokenId : %{public}u", fromTokenId);
+
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(targetBundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
         HILOG_WARN("To fail to get bundle info to targetBundleName.");
         return false;
     }
     Security::AccessToken::AccessTokenID targetTokenId = uriBundleInfo.applicationInfo.accessTokenId;
+    HILOG_DEBUG("targetTokenId : %{public}u  %{public}s", targetTokenId, targetBundleName.c_str());
 
     // only uri with proxy authorization permission or from process itself can be granted
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID());
+    bool nativeToken = false;
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        nativeToken = true;
+    }
     auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(  
         AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
-    if (!permission && (fromTokenId != callerTokenId)) {
+    if (!nativeToken && !permission && (fromTokenId != callerTokenId)) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
         return false;
     }
@@ -73,17 +84,7 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     }
 
     
-    Uri uri_inner = uri;
-    auto&& authority = uri_inner.GetAuthority();
-    HILOG_INFO("uri authority is %{public}s.", authority.c_str());
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
-        HILOG_WARN("To fail to get bundle info according to uri.");
-        return false;
-    }
-    if (uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
-        HILOG_ERROR("the uri does not belong to caller.");
-        return false;
-    }
+    
     auto&& scheme = uri_inner.GetScheme();
     HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
     // only support file or dataShare scheme
@@ -138,14 +139,29 @@ bool UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, un
     const std::string targetBundleName)
 {
     auto callerUid = IPCSkeleton::GetCallingUid();
+    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerPid : %{public}u", callerUid);
     auto bms = ConnectBundleManager();
+    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+    AppExecFwk::BundleInfo uriBundleInfo;
+    Uri uri_inner = uri;
+    auto&& authority = uri_inner.GetAuthority();
+    HILOG_INFO("uri authority is %{public}s.", authority.c_str());
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
+        HILOG_WARN("To fail to get bundle info according to uri.");
+        return false;
+    }
+
+    if (uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
+        HILOG_ERROR("the uri does not belong to caller.");
+        return false;
+    }
     std::string callerBundleName;
     if(!bms->GetBundleNameForUid(callerUid, callerBundleName)) {
         HILOG_ERROR("Get caller bundle name by caller uid failed.");
     }
     int autoremove = 1;
-    return GrantUriPermission(uri, flag, callerBundleName, targetBundleName, autoremove);
+    return GrantUriPermission(uri, flag, targetBundleName, autoremove);
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned int flag,

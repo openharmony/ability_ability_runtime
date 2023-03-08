@@ -91,13 +91,6 @@ private:
                 return;
             }
 
-            std::string fromBundleName;
-            if (!ConvertFromJsValue(engine, args[2]->Get(), fromBundleName)) {
-                HILOG_ERROR("%{public}s called, the third parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "fromBundleName conversion failed."));
-                return;
-            }
-
             std::string targetBundleName;
             if (!ConvertFromJsValue(engine, args[3]->Get(), targetBundleName)) {
                 HILOG_ERROR("%{public}s called, the fourth parameter is invalid.", __func__);
@@ -108,7 +101,7 @@ private:
             Uri uri(uriStr);
             int autoremove = 0;
             AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermission(uri, flag,
-                fromBundleName, targetBundleName, autoremove);
+                targetBundleName, autoremove);
             task.Resolve(engine, CreateJsValue(engine, 0));
         };
 

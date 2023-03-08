@@ -32,15 +32,14 @@ public:
     ~UriPermissionManagerClient() = default;
 
     /**
-     * @brief Authorize the uri permission of fromBundleName to targetBundleName.
+     * @brief Authorize the uri permission of to targetBundleName.
      *
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param fromBundleName The owner of uri.
      * @param targetBundleName The user of uri.
      * @param autoremove the uri is temperarily or not
      */
-    bool GrantUriPermission(const Uri &uri, unsigned int flag, const std::string fromBundleName,
+    bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName, int autoremove);
     
     /**
