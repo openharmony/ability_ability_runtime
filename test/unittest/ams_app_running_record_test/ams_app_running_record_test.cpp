@@ -1938,7 +1938,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetPid_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 0, host);
+        new RenderRecord(hostPid, renderParam, 0, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     pid_t pid = 0;
     renderRecord->SetPid(pid);
@@ -1959,7 +1959,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetHostUid_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 0, host);
+        new RenderRecord(hostPid, renderParam, 0, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     int32_t uid = 1;
     renderRecord->SetHostUid(uid);
@@ -1980,7 +1980,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetHostBundleName_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 0, host);
+        new RenderRecord(hostPid, renderParam, 0, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     std::string hostBundleName = "testhostBundleName";
     renderRecord->SetHostBundleName(hostBundleName);
@@ -2001,7 +2001,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetRenderParam_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 0, host);
+        new RenderRecord(hostPid, renderParam, 0, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     EXPECT_EQ(renderRecord->GetRenderParam(), renderParam);
 }
@@ -2020,7 +2020,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetIpcFd_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 1, 0, host);
+        new RenderRecord(hostPid, renderParam, 1, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     EXPECT_EQ(renderRecord->GetIpcFd(), 1);
 }
@@ -2039,7 +2039,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetSharedFd_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 1, host);
+        new RenderRecord(hostPid, renderParam, 0, 1, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     EXPECT_EQ(renderRecord->GetSharedFd(), 1);
 }
@@ -2058,7 +2058,7 @@ HWTEST_F(AmsAppRunningRecordTest, GetHostRecord_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 1, host);
+        new RenderRecord(hostPid, renderParam, 0, 1, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     EXPECT_EQ(renderRecord->GetHostRecord(), host);
 }
@@ -2077,7 +2077,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetScheduler_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 0, host);
+        new RenderRecord(hostPid, renderParam, 0, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     sptr<IRenderScheduler> scheduler;
     renderRecord->SetScheduler(scheduler);
@@ -2098,7 +2098,7 @@ HWTEST_F(AmsAppRunningRecordTest, SetDeathRecipient_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 0, host);
+        new RenderRecord(hostPid, renderParam, 0, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     sptr<AppDeathRecipient> recipient;
     renderRecord->SetDeathRecipient(recipient);
@@ -2119,7 +2119,7 @@ HWTEST_F(AmsAppRunningRecordTest, RegisterDeathRecipient_001, TestSize.Level1)
     std::string renderParam = "test_render_param";
     std::shared_ptr<AppRunningRecord> host;
     RenderRecord* renderRecord =
-        new RenderRecord(hostPid, renderParam, 0, 0, host);
+        new RenderRecord(hostPid, renderParam, 0, 0, 0, host);
     EXPECT_NE(renderRecord, nullptr);
     renderRecord->RegisterDeathRecipient();
 
