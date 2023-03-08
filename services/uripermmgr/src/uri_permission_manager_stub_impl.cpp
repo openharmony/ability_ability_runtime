@@ -41,6 +41,11 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     auto bms = ConnectBundleManager();
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
 
+    if (bms == nullptr) {
+        HILOG_WARN("Failed to get bms.");
+        return false;
+    }
+
     AppExecFwk::BundleInfo uriBundleInfo;
     Uri uri_inner = uri;
     auto&& authority = uri_inner.GetAuthority();
@@ -82,8 +87,6 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     } else {
         tmpFlag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     }
-
-    
     
     auto&& scheme = uri_inner.GetScheme();
     HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
@@ -142,6 +145,10 @@ bool UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, un
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerPid : %{public}u", callerUid);
     auto bms = ConnectBundleManager();
+    if (bms == nullptr) {
+        HILOG_WARN("Failed to get bms.");
+        return false;
+    }
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     AppExecFwk::BundleInfo uriBundleInfo;
     Uri uri_inner = uri;
@@ -257,6 +264,10 @@ bool UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, c
 {
     HILOG_DEBUG("Start to remove uri permission manually.");
     auto bms = ConnectBundleManager();
+    if (bms == nullptr) {
+        HILOG_WARN("Failed to get bms.");
+        return false;
+    }
     AppExecFwk::BundleInfo uriBundleInfo;
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
