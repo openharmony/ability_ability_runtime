@@ -2797,40 +2797,73 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_001, TestSize.Level0)
     pid_t hostPid1 = 1;
     std::string renderParam = "test_renderParam";
     pid_t renderPid = 0;
-    int ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 0, renderPid);
+    int ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 0, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 0, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 1, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 0, 1, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 0, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 0, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 1, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, "", 1, 1, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 0, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 0, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 1, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 0, 1, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 0, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 0, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 0, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 1, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid, renderParam, 1, 1, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 0, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 0, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 1, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 0, 1, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 0, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 0, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 1, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, "", 1, 1, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 0, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 0, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 1, 0, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
-    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, renderPid);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 0, 1, 1, renderPid);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 0, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 0, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, 0, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, 1, renderPid);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     HILOG_INFO("StartRenderProcess_001 end");
 }
 
@@ -2893,7 +2926,7 @@ HWTEST_F(AppMgrServiceInnerTest, AttachRenderProcess_001, TestSize.Level0)
 
     sptr<MockRenderScheduler> mockRenderScheduler = new (std::nothrow) MockRenderScheduler();
     EXPECT_CALL(*mockRenderScheduler, AsObject()).Times(1);
-    EXPECT_CALL(*mockRenderScheduler, NotifyBrowserFd(1, 1)).Times(1);
+    EXPECT_CALL(*mockRenderScheduler, NotifyBrowserFd(1, 1, 1)).Times(1);
     appMgrServiceInner->AttachRenderProcess(pid, mockRenderScheduler);
 
     BundleInfo bundleInfo;

@@ -722,6 +722,7 @@ HWTEST_F(AppMgrServiceTest, StartRenderProcess_002, TestSize.Level0)
     int32_t ipcFd = 1;
     int32_t sharedFd = 1;
     pid_t renderPid = 1;
+    int32_t crashFd = 1;
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrService->appMgrServiceInner_);
     int32_t res = appMgrService->StartRenderProcess(renderParam, ipcFd, sharedFd, crashFd, renderPid);

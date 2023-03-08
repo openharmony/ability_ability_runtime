@@ -592,7 +592,8 @@ int AppMgrClient::PreStartNWebSpawnProcess()
 
 int AppMgrClient::StartRenderProcess(const std::string &renderParam,
                                      int32_t ipcFd, int32_t sharedFd,
-                                     int32_t crashFd, pid_t &renderPid) {
+                                     int32_t crashFd, pid_t &renderPid)
+{
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         return service->StartRenderProcess(renderParam, ipcFd, sharedFd, crashFd,

@@ -627,7 +627,8 @@ int AppMgrProxy::PreStartNWebSpawnProcess()
 
 int AppMgrProxy::StartRenderProcess(const std::string &renderParam,
                                     int32_t ipcFd, int32_t sharedFd,
-                                    int32_t crashFd, pid_t &renderPid) {
+                                    int32_t crashFd, pid_t &renderPid)
+{
     if (renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 || crashFd <= 0) {
         HILOG_ERROR("Invalid params, renderParam:%{private}s, ipcFd:%{public}d, "
                     "sharedFd:%{public}d, crashFd:%{public}d",
