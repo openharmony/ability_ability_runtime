@@ -1604,7 +1604,8 @@ HWTEST_F(AppMgrServiceInnerTest, RemoveAppFromRecentList_001, TestSize.Level0)
 
     pid_t pid = 123;
     std::string renderParam = "test_renderParam";
-    std::shared_ptr<RenderRecord> renderRecord = RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
+    std::shared_ptr<RenderRecord> renderRecord =
+        RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
     appRecord->SetRenderRecord(renderRecord);
     appMgrServiceInner->AddAppToRecentList(appName1, processName1, pid, 0);
     appRecord->SetKeepAliveAppState(true, true);
@@ -1680,7 +1681,8 @@ HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_001, TestSize.Level0)
 
     pid_t pid = 123;
     std::string renderParam = "test_renderParam";
-    std::shared_ptr<RenderRecord> renderRecord1 = RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
+    std::shared_ptr<RenderRecord> renderRecord1 =
+        RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
     appRecord->SetRenderRecord(renderRecord1);
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
