@@ -703,7 +703,8 @@ HWTEST_F(AppMgrServiceTest, StartRenderProcess_001, TestSize.Level0)
     pid_t renderPid = 1;
     int32_t crashFd = 1;
     appMgrService->SetInnerService(nullptr);
-    int32_t res = appMgrService->StartRenderProcess(renderParam, ipcFd, sharedFd, crashFd, renderPid);
+    int32_t res = appMgrService->StartRenderProcess(
+        renderParam, ipcFd, sharedFd, crashFd, renderPid);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
@@ -725,7 +726,8 @@ HWTEST_F(AppMgrServiceTest, StartRenderProcess_002, TestSize.Level0)
     int32_t crashFd = 1;
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrService->appMgrServiceInner_);
-    int32_t res = appMgrService->StartRenderProcess(renderParam, ipcFd, sharedFd, crashFd, renderPid);
+    int32_t res = appMgrService->StartRenderProcess(
+        renderParam, ipcFd, sharedFd, crashFd, renderPid);
     EXPECT_NE(res, ERR_INVALID_OPERATION);
 }
 
