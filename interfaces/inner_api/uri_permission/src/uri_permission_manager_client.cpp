@@ -23,12 +23,13 @@
 namespace OHOS {
 namespace AAFwk {
 bool UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const std::string fromBundleName, const std::string targetBundleName, int autoremove)
+    const std::string targetBundleName, int autoremove)
 {
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermission is called.");
+    HILOG_DEBUG("argetBundleName :%{public}s", targetBundleName.c_str());
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermission(uri, flag, fromBundleName, targetBundleName, autoremove);
+        return uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, autoremove);
     }
     return false;
 }

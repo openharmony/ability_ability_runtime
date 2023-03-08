@@ -2235,11 +2235,6 @@ void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, std::st
     auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     auto fromTokenId = IPCSkeleton::GetCallingTokenID();
-    auto fromUid = GetUid();
-    std::string fromBundleName;
-    if(!bms->GetBundleNameForUid(fromUid, fromBundleName)) {
-        HILOG_ERROR("Get fromBundleName name by uid failed.");
-    }
     for (auto&& str : uriVec) {
         Uri uri(str);
         auto&& scheme = uri.GetScheme();
@@ -2263,7 +2258,7 @@ void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, std::st
         }
         int autoremove = 1;
         auto ret = IN_PROCESS_CALL(upmClient->GrantUriPermission(uri, want.GetFlags(),
-            fromBundleName, targetBundleName, autoremove));
+            targetBundleName, autoremove));
         if (ret) {
             isGrantedUriPermission_ = true;
         }

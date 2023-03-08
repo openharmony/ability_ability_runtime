@@ -27,7 +27,6 @@ public:
     virtual ~UriPermissionManagerProxy() = default;
 
     virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
-        const std::string fromBundleName,
         const std::string targetBundleName,
         int autoremove) override;
     virtual bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
