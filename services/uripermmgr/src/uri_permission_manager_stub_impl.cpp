@@ -65,7 +65,7 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         nativeToken = true;
     }
-    auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(  
+    auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
     if (!nativeToken && !permission && (fromTokenId != callerTokenId)) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
@@ -157,7 +157,7 @@ bool UriPermissionManagerStubImpl::GrantUriPermissionFromSelf(const Uri &uri, un
         return false;
     }
     std::string callerBundleName;
-    if(!bms->GetBundleNameForUid(callerUid, callerBundleName)) {
+    if (!bms->GetBundleNameForUid(callerUid, callerBundleName)) {
         HILOG_ERROR("Get caller bundle name by caller uid failed.");
     }
     int autoremove = 1;
