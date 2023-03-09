@@ -174,7 +174,7 @@ private:
         constexpr int32_t argCountThree = 3;
         constexpr int32_t argCountTwo = 2;
         // only support 2 or 3 params (2 parameter and 1 optional callback)
-        if (info.argc != argCountThre && info.argc != argCountTwo) {
+        if (info.argc != argCountThree && info.argc != argCountTwo) {
             HILOG_ERROR("Invalid arguments");
             ThrowTooFewParametersError(engine);
             return engine.CreateUndefined();
