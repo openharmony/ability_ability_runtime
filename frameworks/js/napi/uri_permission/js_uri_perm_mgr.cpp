@@ -56,9 +56,9 @@ private:
     NativeValue* OnGrantUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
     {
         constexpr int32_t argCountFour = 4;
-        constexpr int32_t argCountFive = 5;
-        // only support 4 or 5 params (4 parameter and 1 optional callback)
-        if (info.argc != argCountFive && info.argc != argCountFour) {
+        constexpr int32_t argCountThree = 3;
+        // only support 3 or 4 params (3 parameter and 1 optional callback)
+        if (info.argc != argCountThree && info.argc != argCountFour) {
             HILOG_ERROR("Invalid arguments");
             ThrowTooFewParametersError(engine);
             return engine.CreateUndefined();
@@ -70,8 +70,8 @@ private:
         HILOG_DEBUG("Grant Uri Permission start");
 
         AsyncTask::CompleteCallback complete =
-        [args, argCountFour, argCountFive](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (args.size() != argCountFive && args.size() != argCountFour) {
+        [args, argCountFour, argCountThree](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (args.size() != argCountThree && args.size() != argCountFour) {
                 HILOG_ERROR("Wrong number of parameters.");
                 task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));
                 return;
@@ -105,7 +105,7 @@ private:
             task.Resolve(engine, CreateJsValue(engine, 0));
         };
 
-        NativeValue* lastParam = (info.argc == argCountFive) ? info.argv[argCountFour] : nullptr;
+        NativeValue* lastParam = (info.argc == argCountFour) ? info.argv[argCountThree] : nullptr;
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnGrantUriPermission",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
@@ -171,10 +171,10 @@ private:
 
     NativeValue* OnRevokeUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        constexpr int32_t argCountOne = 1;
+        constexpr int32_t argCountThree = 3;
         constexpr int32_t argCountTwo = 2;
-        // only support 3 or 4 params (4 parameter and 1 optional callback)
-        if (info.argc != argCountOne && info.argc != argCountTwo) {
+        // only support 2 or 3 params (2 parameter and 1 optional callback)
+        if (info.argc != argCountThre && info.argc != argCountTwo) {
             HILOG_ERROR("Invalid arguments");
             ThrowTooFewParametersError(engine);
             return engine.CreateUndefined();
@@ -186,8 +186,8 @@ private:
         HILOG_DEBUG("Remove Uri Permission start");
 
         AsyncTask::CompleteCallback complete =
-        [args, argCountOne, argCountTwo](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (args.size() != argCountOne && args.size() != argCountTwo) {
+        [args, argCountThree, argCountTwo](NativeEngine& engine, AsyncTask& task, int32_t status) {
+            if (args.size() != argCountThree && args.size() != argCountTwo) {
                 HILOG_ERROR("Wrong number of parameters.");
                 task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));
                 return;
@@ -211,7 +211,7 @@ private:
             task.Resolve(engine, CreateJsValue(engine, 0));
         };
 
-        NativeValue* lastParam = (info.argc == argCountTwo) ? info.argv[argCountOne] : nullptr;
+        NativeValue* lastParam = (info.argc == argCountThree) ? info.argv[argCountTwo] : nullptr;
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnRevokeUriPermission",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
