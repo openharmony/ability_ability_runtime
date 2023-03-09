@@ -240,7 +240,7 @@ NativeValue* CreateJsUriPermMgr(NativeEngine* engine, NativeValue* exportObj)
     BindNativeFunction(*engine, *object, "grantUriPermission", moduleName, JsUriPermMgr::GrantUriPermission);
     BindNativeFunction(*engine, *object, "grantUriPermissionFromSelf",
         moduleName, JsUriPermMgr::GrantUriPermissionFromSelf);
-    BindNativeFunction(*engine, *object, "RevokeUriPermission", moduleName, JsUriPermMgr::RevokeUriPermission);
+    BindNativeFunction(*engine, *object, "revokeUriPermission", moduleName, JsUriPermMgr::RevokeUriPermission);
     return engine->CreateUndefined();
 }
 }  // namespace AbilityRuntime
