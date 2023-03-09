@@ -146,6 +146,10 @@ bool UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, cons
 {
     HILOG_DEBUG("UriPermissionManagerProxy::RevokeUriPermissionManually is called.");
     MessageParcel data;
+    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
+        HILOG_ERROR("Write interface token failed.");
+        return false;
+    }
     if (!data.WriteParcelable(&uri)) {
         HILOG_ERROR("Write uri failed.");
         return false;

@@ -200,7 +200,7 @@ private:
                 return;
             }
             std::string bundleName;
-            if (!ConvertFromJsValue(engine, args[0]->Get(), bundleName)) {
+            if (!ConvertFromJsValue(engine, args[1]->Get(), bundleName)) {
                 HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
                 task.Reject(engine, CreateJsError(engine, -1, "BundleName conversion failed."));
                 return;
