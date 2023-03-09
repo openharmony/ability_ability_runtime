@@ -5669,7 +5669,8 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
         return CheckCallerPermissionOldRule(abilityRequest);
     }
 
-    if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+    if (AAFwk::PermissionVerification::GetInstance()->IsSACall() ||
+        AAFwk::PermissionVerification::GetInstance()->IsGatewayCall()) {
         return ERR_OK;
     }
 
