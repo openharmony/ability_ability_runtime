@@ -45,14 +45,12 @@ bool UriPermissionManagerClient::VerifyUriPermission(const Uri &uri, unsigned in
     return false;
 }
 
-bool UriPermissionManagerClient::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
+void UriPermissionManagerClient::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
     HILOG_DEBUG("UriPermissionManagerClient::RevokeUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->RevokeUriPermission(tokenId);
-    }
-    return false;
+    uriPermMgr->RevokeUriPermission(tokenId);
+    return;
 }
 
 bool UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)

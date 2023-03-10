@@ -33,7 +33,7 @@ public:
     virtual bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override;
 
-    virtual bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
+    virtual void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
     virtual bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 
 private:

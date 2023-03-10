@@ -56,7 +56,7 @@ public:
      * @param tokenId A tokenId of an application.
      * @return Returns true if the remove is successful, otherwise returns false.
      */
-    virtual bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) = 0;
+    virtual void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) = 0;
 
     /**
      * @brief Clear user's uri authorization record.
