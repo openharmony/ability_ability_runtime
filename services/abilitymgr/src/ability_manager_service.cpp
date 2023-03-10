@@ -530,7 +530,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     HILOG_DEBUG("userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
-    result = CheckStaticCfgPermission(abilityInfo);
+    result = CheckStaticCfgPermission(abilityInfo, isStartAsCaller,
+        abilityRequest.want.GetParam(Want::PARAM_RESV_CALLER_TOKEN));
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
@@ -686,7 +687,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     HILOG_DEBUG("userId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
-    result = CheckStaticCfgPermission(abilityInfo);
+    result = CheckStaticCfgPermission(abilityInfo, false, -1);
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         eventInfo.errCode = result;
@@ -868,7 +869,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     HILOG_DEBUG("userId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
-    result = CheckStaticCfgPermission(abilityInfo);
+    result = CheckStaticCfgPermission(abilityInfo, isStartAsCaller,
+        abilityRequest.want.GetParam(Want::PARAM_RESV_CALLER_TOKEN)););
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         eventInfo.errCode = result;
@@ -958,7 +960,7 @@ int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityReq
         return ERR_WRONG_INTERFACE_CALL;
     }
 
-    auto result = CheckStaticCfgPermission(abilityInfo);
+    auto result = CheckStaticCfgPermission(abilityInfo, false, -1);
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
@@ -1834,7 +1836,7 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     HILOG_DEBUG("validUserId : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
-    result = CheckStaticCfgPermission(abilityInfo);
+    result = CheckStaticCfgPermission(abilityInfo, false, -1);
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
@@ -2518,7 +2520,7 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
         abilityRequest.appInfo.name.c_str(), abilityRequest.appInfo.bundleName.c_str(),
         abilityRequest.abilityInfo.name.c_str());
 
-    if (CheckStaticCfgPermission(abilityRequest.abilityInfo) != AppExecFwk::Constants::PERMISSION_GRANTED) {
+    if (CheckStaticCfgPermission(abilityRequest.abilityInfo, false, -1) != AppExecFwk::Constants::PERMISSION_GRANTED) {
         if (!VerificationAllToken(callerToken)) {
             HILOG_INFO("VerificationAllToken fail");
             return nullptr;
@@ -5133,7 +5135,8 @@ int AbilityManagerService::ForceTimeoutForTest(const std::string &abilityName, c
 }
 #endif
 
-int AbilityManagerService::CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abilityInfo)
+int AbilityManagerService::CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abilityInfo, bool isStartAsCaller,
+    int32_t callerTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
@@ -5142,7 +5145,13 @@ int AbilityManagerService::CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abi
         return AppExecFwk::Constants::PERMISSION_GRANTED;
     }
 
-    auto tokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t tokenId;
+    if (isStartAsCaller) {
+        tokenId = callerTokenId;
+    } else {
+        tokenId = IPCSkeleton::GetCallingTokenID();
+    }
+
     if (abilityInfo.applicationInfo.accessTokenId == tokenId) {
         return ERR_OK;
     }
