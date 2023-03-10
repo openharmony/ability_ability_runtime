@@ -531,7 +531,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
     result = CheckStaticCfgPermission(abilityInfo, isStartAsCaller,
-        abilityRequest.want.GetParam(Want::PARAM_RESV_CALLER_TOKEN));
+        abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN));
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         return ERR_STATIC_CFG_PERMISSION;
@@ -870,7 +870,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
     result = CheckStaticCfgPermission(abilityInfo, isStartAsCaller,
-        abilityRequest.want.GetParam(Want::PARAM_RESV_CALLER_TOKEN)););
+        abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN)););
     if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
         HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
         eventInfo.errCode = result;
