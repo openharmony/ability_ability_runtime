@@ -61,10 +61,7 @@ int UriPermissionManagerStub::OnRemoteRequest(
         }
         case UriPermMgrCmd::ON_REVOKE_URI_PERMISSION : {
             auto tokenId = data.ReadInt32();
-            if (!RevokeUriPermission(tokenId)) {
-                errCode = ERR_INVALID_OPERATION;
-                HILOG_ERROR("To revoke uri permission failed.");
-            }
+            RevokeUriPermission(tokenId);
             break;
         }
         case UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY : {

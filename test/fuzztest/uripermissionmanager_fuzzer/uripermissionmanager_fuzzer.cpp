@@ -48,9 +48,9 @@ public:
     {
         return true;
     }
-    bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
+    void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
     {
-        return true;
+        return;
     }
     bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override
     {

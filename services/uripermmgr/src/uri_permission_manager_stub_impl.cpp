@@ -191,7 +191,7 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned 
     return false;
 }
 
-bool UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
+void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
 {
     HILOG_DEBUG("Start to remove uri permission.");
     std::vector<std::string> uriList;
@@ -218,13 +218,13 @@ bool UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
         HILOG_ERROR("ConnectStorageManager failed");
-        return false;
+        return;
     }
 
     if (!uriList.empty()) {
         storageMgrProxy->DeleteShareFile(tokenId, uriList);
     }
-    return true;
+    return;
 }
 
 bool UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)

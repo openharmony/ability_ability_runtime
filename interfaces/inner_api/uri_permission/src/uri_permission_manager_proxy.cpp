@@ -89,7 +89,7 @@ bool UriPermissionManagerProxy::VerifyUriPermission(const Uri &uri, unsigned int
     return true;
 }
 
-bool UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
+void UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::RevokeUriPermission is called.");
     MessageParcel data;
@@ -106,9 +106,8 @@ bool UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken:
     int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
-        return false;
     }
-    return true;
+    return;
 }
 
 bool UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)

@@ -57,7 +57,7 @@ public:
      *
      * @param tokenId A tokenId of an application.
      */
-    bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId);
+    void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId);
 
     /**
      * @brief Clear user's uri authorization record.

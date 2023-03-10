@@ -46,7 +46,7 @@ public:
     bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override;
 
-    bool RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
+    void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
     bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 
 private:
