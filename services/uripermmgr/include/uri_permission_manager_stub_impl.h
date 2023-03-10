@@ -56,6 +56,7 @@ private:
     void ClearBMSProxy();
     void ClearSMProxy();
     bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
+        Security::AccessToken::AccessTokenID callerTokenId,
         Security::AccessToken::AccessTokenID fromTokenId,
         Security::AccessToken::AccessTokenID targetTokenId,
         int autoremove);

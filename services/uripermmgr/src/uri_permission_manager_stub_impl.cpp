@@ -81,10 +81,11 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
         HILOG_WARN("only support file or dataShare uri.");
         return false;
     }
-    return GrantUriPermissionImpl(uri, tmpFlag, fromTokenId, targetTokenId, autoremove);
+    return GrantUriPermissionImpl(uri, tmpFlag, callerTokenId, fromTokenId, targetTokenId, autoremove);
 }
 
-bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
+bool UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
+        Security::AccessToken::AccessTokenID callerTokenId,
         Security::AccessToken::AccessTokenID fromTokenId,
         Security::AccessToken::AccessTokenID targetTokenId,
         int autoremove)
@@ -109,7 +110,7 @@ bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
     if (nativeInfo.processName == "pasteboard_serv") {
         autoremove = 1;
     }
-    GrantInfo info = { tmpFlag, fromTokenId, targetTokenId, autoremove_ };
+    GrantInfo info = { Flag, fromTokenId, targetTokenId, autoremove };
     if (search == uriMap_.end()) {
         std::list<GrantInfo> infoList = { info };
         uriMap_.emplace(uriStr, infoList);
@@ -118,9 +119,9 @@ bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
     auto& infoList = search->second;
     for (auto& item : infoList) {
         if (item.fromTokenId == fromTokenId && item.targetTokenId == targetTokenId) {
-            if ((tmpFlag & item.flag) == 0) {
+            if ((Flag & item.flag) == 0) {
                 HILOG_INFO("Update uri r/w permission.");
-                item.flag = tmpFlag;
+                item.flag = Flag;
             }
             HILOG_INFO("uri permission has granted, not to grant again.");
             return true;
