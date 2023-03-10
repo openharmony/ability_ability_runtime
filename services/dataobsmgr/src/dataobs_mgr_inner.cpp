@@ -192,7 +192,9 @@ void DataObsMgrInner::AddObsDeathRecipient(const sptr<IDataAbilityObserver> &dat
                     dataObsMgrInner->OnCallBackDied(remote);
                 }
             });
-            dataObserver->AsObject()->AddDeathRecipient(deathRecipient);
+            if (!dataObserver->AsObject()->AddDeathRecipient(deathRecipient)) {
+                HILOG_ERROR("AddDeathRecipient failed.");
+            }
             recipientMap_.emplace(dataObserver->AsObject(), deathRecipient);
     }
 }
