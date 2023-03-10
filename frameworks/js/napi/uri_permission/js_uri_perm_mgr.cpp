@@ -53,50 +53,45 @@ private:
         constexpr int32_t argCountThree = 3;
         // only support 3 or 4 params (3 parameter and 1 optional callback)
         if (info.argc != argCountThree && info.argc != argCountFour) {
-            HILOG_ERROR("Invalid arguments");
-            ThrowTooFewParametersError(engine);
+            HILOG_ERROR("The number of parameter is invalid.");
+            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
             return engine.CreateUndefined();
-        }
-        std::vector<std::shared_ptr<NativeReference>> args;
-        for (size_t i = 0; i < info.argc; ++i) {
-            args.emplace_back(engine.CreateReference(info.argv[i], 1));
         }
         HILOG_DEBUG("Grant Uri Permission start");
 
+        std::string uriStr;
+        if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
+            reinterpret_cast<napi_value>(info.argv[0]), uriStr)) {
+            HILOG_ERROR("The uriStr is invalid.");
+            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            return engine.CreateUndefined();
+        }
+        int flag = 0;
+        if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(reinterpret_cast<napi_env>(&engine),
+            reinterpret_cast<napi_value>(info.argv[1]), flag)) {
+            HILOG_ERROR("The flag is invalid.");
+            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            return engine.CreateUndefined();
+        }
+        std::string targetBundleName;
+        if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(reinterpret_cast<napi_env>(&engine),
+            reinterpret_cast<napi_value>(info.argv[2]), targetBundleName)) {
+            HILOG_ERROR("The flag is invalid.");
+            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            return engine.CreateUndefined();
+        }
+
         AsyncTask::CompleteCallback complete =
-        [args, argCountFour, argCountThree](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (args.size() != argCountThree && args.size() != argCountFour) {
-                HILOG_ERROR("Wrong number of parameters.");
-                task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));
-                return;
-            }
-
-            std::string uriStr;
-            if (!ConvertFromJsValue(engine, args[0]->Get(), uriStr)) {
-                HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "uri conversion failed."));
-                return;
-            }
-
-            int flag = 0;
-            if (!ConvertFromJsValue(engine, args[1]->Get(), flag)) {
-                HILOG_ERROR("%{public}s called, the second parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "flag conversion failed."));
-                return;
-            }
-
-            std::string targetBundleName;
-            if (!ConvertFromJsValue(engine, args[3]->Get(), targetBundleName)) {
-                HILOG_ERROR("%{public}s called, the fourth parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "targetBundleName conversion failed."));
-                return;
-            }
-
+        [uriStr, flag, targetBundleName](NativeEngine& engine, AsyncTask& task, int32_t status) {
             Uri uri(uriStr);
             int autoremove = 0;
-            AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermission(uri, flag,
+            auto errCode = AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermission(uri, flag,
                 targetBundleName, autoremove);
-            task.Resolve(engine, CreateJsValue(engine, 0));
+            if (errCode == true) {
+                task.ResolveWithNoError(engine, CreateJsApplicationQuickFixInfo(engine, quickFixInfo));
+            } else {
+                task.Reject(engine, CreateJsErrorByErrorCode(engine, 201));
+            }
         };
 
         NativeValue* lastParam = (info.argc == argCountFour) ? info.argv[argCountThree] : nullptr;
@@ -116,36 +111,31 @@ private:
             ThrowTooFewParametersError(engine);
             return engine.CreateUndefined();
         }
-        std::vector<std::shared_ptr<NativeReference>> args;
-        for (size_t i = 0; i < info.argc; ++i) {
-            args.emplace_back(engine.CreateReference(info.argv[i], 1));
+        std::string uriStr;
+        if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
+            reinterpret_cast<napi_value>(info.argv[0]), uriStr)) {
+            HILOG_ERROR("The uriStr is invalid.");
+            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            return engine.CreateUndefined();
         }
-        HILOG_DEBUG("Remove Uri Permission start");
+        std::string bundleName;
+        if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(reinterpret_cast<napi_env>(&engine),
+            reinterpret_cast<napi_value>(info.argv[1]), bundleName)) {
+            HILOG_ERROR("The flag is invalid.");
+            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            return engine.CreateUndefined();
+        }
 
         AsyncTask::CompleteCallback complete =
-        [args, argCountThree, argCountTwo](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (args.size() != argCountThree && args.size() != argCountTwo) {
-                HILOG_ERROR("Wrong number of parameters.");
-                task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));
-                return;
-            }
-
-            std::string uriStr;
-            if (!ConvertFromJsValue(engine, args[0]->Get(), uriStr)) {
-                HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "uri conversion failed."));
-                return;
-            }
-            std::string bundleName;
-            if (!ConvertFromJsValue(engine, args[1]->Get(), bundleName)) {
-                HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "BundleName conversion failed."));
-                return;
-            }
-
+        [uriStr, bundleName](NativeEngine& engine, AsyncTask& task, int32_t status) {
             Uri uri(uriStr);
-            AAFwk::UriPermissionManagerClient::GetInstance()->RevokeUriPermissionManually(uri, bundleName);
-            task.Resolve(engine, CreateJsValue(engine, 0));
+            auto errCode = AAFwk::UriPermissionManagerClient::GetInstance()->RevokeUriPermissionManually(uri,
+                bundleName);
+            if (errCode == true) {
+                task.ResolveWithNoError(engine, CreateJsApplicationQuickFixInfo(engine, quickFixInfo));
+            } else {
+                task.Reject(engine, CreateJsErrorByErrorCode(engine, 201));
+            }
         };
 
         NativeValue* lastParam = (info.argc == argCountThree) ? info.argv[argCountTwo] : nullptr;
