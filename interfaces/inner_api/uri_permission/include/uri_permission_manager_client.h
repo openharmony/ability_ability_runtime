@@ -41,16 +41,6 @@ public:
      */
     bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName, int autoremove);
-    
-    /**
-     * @brief Authorize the uri permission from self to targetBundleName.
-     *
-     * @param uri The file uri.
-     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param targetBundleName The user of uri.
-     */
-    bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName);
 
     /**
      * @brief Check whether the tokenId has URI permissions.

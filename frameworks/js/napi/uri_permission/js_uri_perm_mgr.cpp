@@ -40,12 +40,6 @@ public:
         return (me != nullptr) ? me->OnGrantUriPermission(*engine, *info) : nullptr;
     }
 
-    static NativeValue* GrantUriPermissionFromSelf(NativeEngine* engine, NativeCallbackInfo* info)
-    {
-        JsUriPermMgr* me = CheckParamsAndGetThis<JsUriPermMgr>(engine, info);
-        return (me != nullptr) ? me->OnGrantUriPermissionFromSelf(*engine, *info) : nullptr;
-    }
-
     static NativeValue* RevokeUriPermission(NativeEngine* engine, NativeCallbackInfo* info)
     {
         JsUriPermMgr* me = CheckParamsAndGetThis<JsUriPermMgr>(engine, info);
@@ -105,63 +99,6 @@ private:
             task.Resolve(engine, CreateJsValue(engine, 0));
         };
 
-        NativeValue* lastParam = (info.argc == argCountFour) ? info.argv[argCountThree] : nullptr;
-        NativeValue* result = nullptr;
-        AsyncTask::Schedule("JsUriPermMgr::OnGrantUriPermission",
-            engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-        return result;
-    }
-
-    NativeValue* OnGrantUriPermissionFromSelf(NativeEngine& engine, NativeCallbackInfo& info)
-    {
-        constexpr int32_t argCountThree = 3;
-        constexpr int32_t argCountFour = 4;
-        // only support 3 or 4 params (4 parameter and 1 optional callback)
-        if (info.argc != argCountThree && info.argc != argCountFour) {
-            HILOG_ERROR("Invalid arguments");
-            ThrowTooFewParametersError(engine);
-            return engine.CreateUndefined();
-        }
-        std::vector<std::shared_ptr<NativeReference>> args;
-        for (size_t i = 0; i < info.argc; ++i) {
-            args.emplace_back(engine.CreateReference(info.argv[i], 1));
-        }
-        HILOG_DEBUG("Grant Uri Permission start");
-
-        AsyncTask::CompleteCallback complete =
-        [args, argCountFour, argCountThree](NativeEngine& engine, AsyncTask& task, int32_t status) {
-            if (args.size() != argCountThree && args.size() != argCountFour) {
-                HILOG_ERROR("Wrong number of parameters.");
-                task.Reject(engine, CreateJsError(engine, -1, "Wrong number of parameters."));
-                return;
-            }
-
-            std::string uriStr;
-            if (!ConvertFromJsValue(engine, args[0]->Get(), uriStr)) {
-                HILOG_ERROR("%{public}s called, the first parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "uri conversion failed."));
-                return;
-            }
-
-            int flag = 0;
-            if (!ConvertFromJsValue(engine, args[1]->Get(), flag)) {
-                HILOG_ERROR("%{public}s called, the second parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "flag conversion failed."));
-                return;
-            }
-
-            std::string targetBundleName;
-            if (!ConvertFromJsValue(engine, args[2]->Get(), targetBundleName)) {
-                HILOG_ERROR("%{public}s called, the fourth parameter is invalid.", __func__);
-                task.Reject(engine, CreateJsError(engine, -1, "targetBundleName conversion failed."));
-                return;
-            }
-            
-            Uri uri(uriStr);
-            AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermissionFromSelf(uri,
-                flag, targetBundleName);
-            task.Resolve(engine, CreateJsValue(engine, 0));
-        };
         NativeValue* lastParam = (info.argc == argCountFour) ? info.argv[argCountThree] : nullptr;
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnGrantUriPermission",
@@ -238,8 +175,6 @@ NativeValue* CreateJsUriPermMgr(NativeEngine* engine, NativeValue* exportObj)
 
     const char *moduleName = "JsUriPermMgr";
     BindNativeFunction(*engine, *object, "grantUriPermission", moduleName, JsUriPermMgr::GrantUriPermission);
-    BindNativeFunction(*engine, *object, "grantUriPermissionFromSelf",
-        moduleName, JsUriPermMgr::GrantUriPermissionFromSelf);
     BindNativeFunction(*engine, *object, "revokeUriPermission", moduleName, JsUriPermMgr::RevokeUriPermission);
     return engine->CreateUndefined();
 }

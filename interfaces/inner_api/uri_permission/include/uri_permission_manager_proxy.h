@@ -29,8 +29,6 @@ public:
     virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName,
         int autoremove) override;
-    virtual bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName) override;
 
     virtual bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override;

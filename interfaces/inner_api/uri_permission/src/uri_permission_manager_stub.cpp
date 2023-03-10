@@ -44,21 +44,6 @@ int UriPermissionManagerStub::OnRemoteRequest(
             }
             break;
         }
-        case UriPermMgrCmd::ON_GRANT_URI_PERMISSION_FROM_SELF : {
-            std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
-            if (!uri) {
-                errCode = ERR_DEAD_OBJECT;
-                HILOG_ERROR("To read uri failed.");
-                break;
-            }
-            auto flag = data.ReadInt32();
-            auto targetBundleName = data.ReadString();
-            if (!GrantUriPermissionFromSelf(*uri, flag, targetBundleName)) {
-                errCode = ERR_INVALID_OPERATION;
-                HILOG_ERROR("To grant uri permission failed.");
-            }
-            break;
-        }
         case UriPermMgrCmd::ON_VERIFY_URI_PERMISSION : {
             std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
             if (!uri) {

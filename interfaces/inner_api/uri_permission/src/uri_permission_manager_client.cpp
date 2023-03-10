@@ -34,17 +34,6 @@ bool UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int
     return false;
 }
 
-bool UriPermissionManagerClient::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-    const std::string targetBundleName)
-{
-    HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermissionFromSelf is called.");
-    auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->GrantUriPermissionFromSelf(uri, flag, targetBundleName);
-    }
-    return false;
-}
-
 bool UriPermissionManagerClient::VerifyUriPermission(const Uri &uri, unsigned int flag,
     const Security::AccessToken::AccessTokenID tokenId)
 {

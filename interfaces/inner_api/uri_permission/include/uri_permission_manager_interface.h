@@ -38,17 +38,6 @@ public:
     virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName,
         int autoremove) = 0;
-    
-    /**
-     * @brief Authorize the uri permission of self to targetBundleName.
-     *
-     * @param uri The file uri.
-     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param targetBundleName The user of uri.
-     * @return Returns true if the authorization is successful, otherwise returns false.
-     */
-    virtual bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName) = 0;
 
     /**
      * @brief Check whether the tokenId has URI permissions.
@@ -89,8 +78,6 @@ public:
         ON_REVOKE_URI_PERMISSION,
 
         ON_REVOKE_URI_PERMISSION_MANUALLY,
-
-        ON_GRANT_URI_PERMISSION_FROM_SELF,
     };
 };
 }  // namespace AAFwk

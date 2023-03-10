@@ -43,11 +43,6 @@ public:
     {
         return true;
     }
-    bool GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-        std::string targetBundleName) override
-    {
-        return true;
-    }
     bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override
     {
