@@ -36,8 +36,7 @@ public:
      * @return Returns true if the authorization is successful, otherwise returns false.
      */
     virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName,
-        int autoremove) = 0;
+        const std::string targetBundleName, int autoremove) = 0;
 
     /**
      * @brief Check whether the tokenId has URI permissions.

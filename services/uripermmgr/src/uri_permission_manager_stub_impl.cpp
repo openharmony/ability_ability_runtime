@@ -81,7 +81,7 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
         HILOG_WARN("only support file or dataShare uri.");
         return false;
     }
-    return GrantUriPermissionImpl(uri, tmpFlag, fromTokenId, targetTokenId);
+    return GrantUriPermissionImpl(uri, tmpFlag, fromTokenId, targetTokenId, autoremove);
 }
 
 bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
@@ -102,13 +102,12 @@ bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
     }
     std::lock_guard<std::mutex> guard(mutex_);
     auto search = uriMap_.find(uriStr);
-    int autoremove_ = autoremove;
     // auto remove URI permission for clipboard
     Security::AccessToken::NativeTokenInfo nativeInfo;
-    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(fromTokenId, nativeInfo);
+    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
     HILOG_DEBUG("callerprocessName : %{public}s", nativeInfo.processName.c_str());
     if (nativeInfo.processName == "pasteboard_serv") {
-        autoremove_ = 1;
+        autoremove = 1;
     }
     GrantInfo info = { tmpFlag, fromTokenId, targetTokenId, autoremove_ };
     if (search == uriMap_.end()) {
