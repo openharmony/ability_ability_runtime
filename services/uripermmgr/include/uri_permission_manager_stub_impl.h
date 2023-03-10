@@ -55,6 +55,10 @@ private:
     int GetCurrentAccountId();
     void ClearBMSProxy();
     void ClearSMProxy();
+    bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
+        Security::AccessToken::AccessTokenID fromTokenId,
+        Security::AccessToken::AccessTokenID targetTokenId,
+        int autoremove);
 
     class BMSOrSMDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
