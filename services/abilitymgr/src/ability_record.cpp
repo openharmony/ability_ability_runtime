@@ -487,12 +487,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     auto callerUid = IPCSkeleton::GetCallingUid();
     HILOG_DEBUG("callerPid : %{public}u", callerUid);
 
-    auto bms = AbilityUtil::GetBundleManager();
-    std::string targetBundleName;
-    if (!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
-        HILOG_ERROR("Get targetBundleName name by uid failed.");
-    }
-    GrantUriPermission(want_, GetCurrentAccountId(), targetBundleName);
+    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.bundleName);
 
     if (isReady_) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
@@ -1283,12 +1278,7 @@ void AbilityRecord::SendResult()
     std::lock_guard<std::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     CHECK_POINTER(result_);
-    auto bms = AbilityUtil::GetBundleManager();
-    std::string targetBundleName;
-    if (!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
-        HILOG_ERROR("Get targetBundleName name by uid failed.");
-    }
-    GrantUriPermission(result_->resultWant_, GetCurrentAccountId(), targetBundleName);
+    GrantUriPermission(result_->resultWant_, GetCurrentAccountId(), applicationInfo_.bundleName);
     scheduler_->SendResult(result_->requestCode_, result_->resultCode_, result_->resultWant_);
     // reset result to avoid send result next time
     result_.reset();
@@ -2060,12 +2050,7 @@ void AbilityRecord::CallRequest()
     HILOG_INFO("Call Request.");
     CHECK_POINTER(scheduler_);
 
-    auto bms = AbilityUtil::GetBundleManager();
-    std::string targetBundleName;
-    if (!bms->GetBundleNameForUid(applicationInfo_.uid, targetBundleName)) {
-        HILOG_ERROR("Get targetBundleName name by uid failed.");
-    }
-    GrantUriPermission(want_, GetCurrentAccountId(), targetBundleName);
+    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.bundleName);
     // Async call request
     scheduler_->CallRequest();
 }
