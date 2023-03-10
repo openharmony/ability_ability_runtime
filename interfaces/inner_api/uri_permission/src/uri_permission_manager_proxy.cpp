@@ -95,11 +95,11 @@ void UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken:
     MessageParcel data;
     if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
-        return false;
+        return;
     }
     if (!data.WriteInt32(tokenId)) {
         HILOG_ERROR("Write AccessTokenID failed.");
-        return false;
+        return;
     }
     MessageParcel reply;
     MessageOption option;
