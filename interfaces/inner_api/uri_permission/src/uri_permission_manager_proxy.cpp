@@ -55,7 +55,7 @@ bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int 
         HILOG_ERROR("SendRequest fial, error: %{public}d", error);
         return false;
     }
-    return true;
+    return reply.ReadBool();
 }
 
 bool UriPermissionManagerProxy::VerifyUriPermission(const Uri &uri, unsigned int flag,
@@ -133,7 +133,7 @@ bool UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, cons
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
         return false;
     }
-    return true;
+    return reply.ReadBool();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

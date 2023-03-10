@@ -72,7 +72,7 @@ int UriPermissionManagerStub::OnRemoteRequest(
                 break;
             }
             auto bundleName = data.ReadString();
-            if (RevokeUriPermissionManually(*uri, bundleName)) {
+            if (!RevokeUriPermissionManually(*uri, bundleName)) {
                 errCode = ERR_INVALID_OPERATION;
                 HILOG_ERROR("To revoke uri permission failed.");
             }
