@@ -58,37 +58,6 @@ bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int 
     return true;
 }
 
-bool UriPermissionManagerProxy::GrantUriPermissionFromSelf(const Uri &uri, unsigned int flag,
-    const std::string targetBundleName)
-{
-    HILOG_DEBUG("UriPermissionManagerProxy::GrantUriPermissionFromSelf is called.");
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
-        HILOG_ERROR("Write interface token failed.");
-        return false;
-    }
-    if (!data.WriteParcelable(&uri)) {
-        HILOG_ERROR("Write uri failed.");
-        return false;
-    }
-    if (!data.WriteInt32(flag)) {
-        HILOG_ERROR("Write flag failed.");
-        return false;
-    }
-    if (!data.WriteString(targetBundleName)) {
-        HILOG_ERROR("Write targetBundleName failed.");
-        return false;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_GRANT_URI_PERMISSION_FROM_SELF, data, reply, option);
-    if (error != ERR_OK) {
-        HILOG_ERROR("SendRequest fial, error: %{public}d", error);
-        return false;
-    }
-    return true;
-}
-
 bool UriPermissionManagerProxy::VerifyUriPermission(const Uri &uri, unsigned int flag,
     const Security::AccessToken::AccessTokenID tokenId)
 {
