@@ -64,7 +64,6 @@ private:
             return engine.CreateUndefined();
         }
         HILOG_DEBUG("Grant Uri Permission start");
-
         std::string uriStr;
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[0]), uriStr)) {
@@ -86,7 +85,6 @@ private:
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
-
         AsyncTask::CompleteCallback complete =
         [uriStr, flag, targetBundleName](NativeEngine& engine, AsyncTask& task, int32_t status) {
             Uri uri(uriStr);
@@ -94,7 +92,7 @@ private:
                 targetBundleName, 0);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            } 
+            }
             if (errCode == PERMISSION_ERROR) {
                 task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
             }
@@ -103,7 +101,6 @@ private:
                 "Internal Error."));
             }
         };
-
         NativeValue* lastParam = (info.argc == argCountFour) ? info.argv[argCountThree] : nullptr;
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnGrantUriPermission",
@@ -143,7 +140,7 @@ private:
                 bundleName);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            } 
+            }
             if (errCode == INTERNAL_ERROR) {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Internal Error."));
