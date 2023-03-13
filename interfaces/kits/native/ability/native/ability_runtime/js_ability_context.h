@@ -103,7 +103,7 @@ private:
     static NativeValue* WrapAbilityResult(NativeEngine& engine, const int& resultCode, const AAFwk::Want& want);
     void InheritWindowMode(AAFwk::Want &want);
     static NativeValue* WrapRequestDialogResult(NativeEngine& engine, int32_t resultCode);
-    void AddFreeInstallObserver(NativeEngine& engine, const AAFwk::Want &want, NativeValue* callback);
+    void AddFreeInstallObserver(NativeEngine& engine, const AAFwk::Want &want, NativeValue* callback, bool isAbilityResult = false);
 
     std::weak_ptr<AbilityContext> context_;
     int curRequestCode_ = 0;
