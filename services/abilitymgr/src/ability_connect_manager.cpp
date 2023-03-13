@@ -619,16 +619,26 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromSer
     return nullptr;
 }
 
-std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordBySessionToken(
-    const sptr<Rosen::ISession> sessionToken)
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordBySessionInfo(
+    const sptr<SessionInfo> &sessionInfo)
 {
     std::lock_guard<std::recursive_mutex> guard(Lock_);
-    auto IsMatch = [sessionToken](auto service) {
+    CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);
+    sptr<Rosen::ISession> sessionToken = sessionInfo->sessionToken;
+    CHECK_POINTER_AND_RETURN(sessionToken, nullptr);
+    std::string descriptor = Str16ToStr8(sessionToken->GetDescriptor());
+    if (descriptor != "OHOS.ISession") {
+        HILOG_ERROR("Input token is not a sessionToken, token->GetDescriptor(): %{public}s",
+            descriptor.c_str());
+        return nullptr;
+    }
+
+    auto IsMatch = [sessionInfo](auto service) {
         if (!service.second || !service.second->GetSessionInfo()) {
             return false;
         }
-        sptr<Rosen::ISession> srcSessionToken = service.second->GetSessionInfo()->sessionToken;
-        return srcSessionToken == sessionToken;
+        uint64_t srcPersistentId = service.second->GetSessionInfo()->persistentId;
+        return srcPersistentId == sessionInfo->persistentId;
     };
     auto serviceRecord = std::find_if(serviceMap_.begin(), serviceMap_.end(), IsMatch);
     if (serviceRecord != serviceMap_.end()) {
@@ -1010,9 +1020,11 @@ void AbilityConnectManager::RemoveConnectionRecordFromMap(const std::shared_ptr<
 void AbilityConnectManager::RemoveServiceAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
-    auto&& element = abilityRecord->GetWant().GetElement().GetURI();
-    HILOG_DEBUG("Remove service(%{public}s) from terminating map.", element.c_str());
-    terminatingExtensionMap_.erase(element);
+    auto& abilityInfo = abilityRecord->GetAbilityInfo();
+    AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name,
+        abilityInfo.moduleName);
+    HILOG_DEBUG("Remove service(%{public}s) from terminating map.", element.GetURI().c_str());
+    terminatingExtensionMap_.erase(element.GetURI());
 }
 
 void AbilityConnectManager::AddConnectDeathRecipient(const sptr<IAbilityConnection> &connect)
@@ -1558,11 +1570,14 @@ void AbilityConnectManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord>
         ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
 }
 
-void AbilityConnectManager::MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord) {
+void AbilityConnectManager::MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord)
+{
     CHECK_POINTER(abilityRecord);
-    auto&& element = abilityRecord->GetWant().GetElement().GetURI();
-    terminatingExtensionMap_.emplace(element, abilityRecord);
-    serviceMap_.erase(element);
+    auto& abilityInfo = abilityRecord->GetAbilityInfo();
+    AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name,
+        abilityInfo.moduleName);
+    terminatingExtensionMap_.emplace(element.GetURI(), abilityRecord);
+    serviceMap_.erase(element.GetURI());
 }
 }  // namespace AAFwk
 }  // namespace OHOS

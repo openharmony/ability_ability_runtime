@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,6 +174,36 @@ const std::string &AppRunningRecord::GetBundleName() const
     return mainBundleName_;
 }
 
+int32_t AppRunningRecord::GetCallerPid() const
+{
+    return callerPid_;
+}
+
+void AppRunningRecord::SetCallerPid(int32_t pid)
+{
+    callerPid_ = pid;
+}
+
+int32_t AppRunningRecord::GetCallerUid() const
+{
+    return callerUid_;
+}
+
+void AppRunningRecord::SetCallerUid(int32_t uid)
+{
+    callerUid_ = uid;
+}
+
+int32_t AppRunningRecord::GetCallerTokenId() const
+{
+    return callerTokenId_;
+}
+
+void AppRunningRecord::SetCallerTokenId(int32_t tokenId)
+{
+    callerTokenId_ = tokenId;
+}
+
 bool AppRunningRecord::IsLauncherApp() const
 {
     return isLauncherApp_;
@@ -272,24 +302,6 @@ sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
     return (appLifeCycleDeal_ ? appLifeCycleDeal_->GetApplicationClient() : nullptr);
 }
 
-std::shared_ptr<AbilityRunningRecord> AppRunningRecord::GetAbilityRunningRecord(
-    const std::string &abilityName, const std::string &moduleName, int32_t ownerUserId) const
-{
-    HILOG_INFO("Get ability running record by ability name.");
-    auto moduleRecordList = GetAllModuleRecord();
-    for (const auto &moduleRecord : moduleRecordList) {
-        if (!moduleName.empty() && moduleRecord->GetModuleName() != moduleName) {
-            continue;
-        }
-        auto abilityRecord = moduleRecord->GetAbilityRunningRecord(abilityName, ownerUserId);
-        if (abilityRecord) {
-            return abilityRecord;
-        }
-    }
-
-    return nullptr;
-}
-
 std::shared_ptr<AbilityRunningRecord> AppRunningRecord::GetAbilityRunningRecord(const int64_t eventId) const
 {
     HILOG_INFO("Get ability running record by eventId.");
@@ -302,26 +314,6 @@ std::shared_ptr<AbilityRunningRecord> AppRunningRecord::GetAbilityRunningRecord(
     }
 
     return nullptr;
-}
-
-void AppRunningRecord::ClearAbility(const std::shared_ptr<AbilityRunningRecord> &record)
-{
-    if (!record) {
-        HILOG_ERROR("Param record is null");
-        return;
-    }
-
-    auto moduleRecord = GetModuleRunningRecordByToken(record->GetToken());
-    if (!moduleRecord) {
-        HILOG_ERROR("moduleRecord is not exit");
-        return;
-    }
-
-    moduleRecord->ClearAbility(record);
-
-    if (moduleRecord->GetAbilities().empty()) {
-        RemoveModuleRecord(moduleRecord);
-    }
 }
 
 void AppRunningRecord::RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &moduleRecord)
