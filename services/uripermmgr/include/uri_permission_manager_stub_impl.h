@@ -41,13 +41,13 @@ public:
     UriPermissionManagerStubImpl() = default;
     virtual ~UriPermissionManagerStubImpl() = default;
 
-    bool GrantUriPermission(const Uri &uri, unsigned int flag,
+    int GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName, int autoremove) override;
     bool VerifyUriPermission(const Uri &uri, unsigned int flag,
         const Security::AccessToken::AccessTokenID tokenId) override;
 
     void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
-    bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
+    int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 
 private:
     sptr<AppExecFwk::IBundleMgr> ConnectBundleManager();
@@ -55,7 +55,7 @@ private:
     int GetCurrentAccountId();
     void ClearBMSProxy();
     void ClearSMProxy();
-    bool GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
+    int GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
         Security::AccessToken::AccessTokenID callerTokenId,
         Security::AccessToken::AccessTokenID fromTokenId,
         Security::AccessToken::AccessTokenID targetTokenId,

@@ -20,42 +20,44 @@
 
 namespace OHOS {
 namespace AAFwk {
+const int32_t INTERNAL_ERROR = 16000050;
+
 UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<IUriPermissionManager>(impl) {}
 
-bool UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int flag,
+int UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int flag,
     const std::string targetBundleName, int autoremove)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::GrantUriPermission is called.");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     if (!data.WriteParcelable(&uri)) {
         HILOG_ERROR("Write uri failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     if (!data.WriteInt32(flag)) {
         HILOG_ERROR("Write flag failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     if (!data.WriteString(targetBundleName)) {
         HILOG_ERROR("Write targetBundleName failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     if (!data.WriteInt32(autoremove)) {
         HILOG_ERROR("Write autoremove failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     MessageParcel reply;
     MessageOption option;
     int error = Remote()->SendRequest(UriPermMgrCmd::ON_GRANT_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fial, error: %{public}d", error);
-        return false;
+        return INTERNAL_ERROR;
     }
-    return reply.ReadBool();
+    return reply.ReadInt32();
 }
 
 bool UriPermissionManagerProxy::VerifyUriPermission(const Uri &uri, unsigned int flag,
@@ -110,30 +112,30 @@ void UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken:
     return;
 }
 
-bool UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
+int UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::RevokeUriPermissionManually is called.");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     if (!data.WriteParcelable(&uri)) {
         HILOG_ERROR("Write uri failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     if (!data.WriteString(bundleName)) {
         HILOG_ERROR("Write bundleName failed.");
-        return false;
+        return INTERNAL_ERROR;
     }
     MessageParcel reply;
     MessageOption option;
     int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
-        return false;
+        return INTERNAL_ERROR;
     }
-    return reply.ReadBool();
+    return reply.ReadInt32();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

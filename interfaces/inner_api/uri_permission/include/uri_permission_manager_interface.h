@@ -35,7 +35,7 @@ public:
      * @param autoremove the uri is temperarily or not
      * @return Returns true if the authorization is successful, otherwise returns false.
      */
-    virtual bool GrantUriPermission(const Uri &uri, unsigned int flag,
+    virtual int GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName, int autoremove) = 0;
 
     /**
@@ -64,7 +64,7 @@ public:
      * @param bundleName bundleName of an application.
      * @return Returns true if the remove is successful, otherwise returns false.
      */
-    virtual bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) = 0;
+    virtual int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) = 0;
 
     enum UriPermMgrCmd {
         // ipc id for GrantUriPermission
