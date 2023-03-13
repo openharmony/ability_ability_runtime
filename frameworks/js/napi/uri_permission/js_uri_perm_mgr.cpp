@@ -25,9 +25,12 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-const int32_t INTERNAL_ERROR = 16000050;
-const int32_t PERMISSION_ERROR = 201;
-const int32_t ERR_OK = 0;
+constexpr int32_t INTERNAL_ERROR = 16000050;
+constexpr int32_t PERMISSION_ERROR = 201;
+constexpr int32_t ERR_OK = 0;
+constexpr int32_t argCountFour = 4;
+constexpr int32_t argCountThree = 3;
+constexpr int32_t argCountTwo = 2;
 class JsUriPermMgr {
 public:
     JsUriPermMgr() = default;
@@ -54,10 +57,6 @@ public:
 private:
     NativeValue* OnGrantUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        constexpr int32_t argCountFour = 4;
-        constexpr int32_t argCountThree = 3;
-        constexpr int32_t argTwo = 2;
-        // only support 3 or 4 params (3 parameter and 1 optional callback)
         if (info.argc != argCountThree && info.argc != argCountFour) {
             HILOG_ERROR("The number of parameter is invalid.");
             ThrowTooFewParametersError(engine);
@@ -80,7 +79,7 @@ private:
         }
         std::string targetBundleName;
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
-            reinterpret_cast<napi_value>(info.argv[argTwo]), targetBundleName)) {
+            reinterpret_cast<napi_value>(info.argv[argCountTwo]), targetBundleName)) {
             HILOG_ERROR("The flag is invalid.");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
@@ -110,8 +109,6 @@ private:
 
     NativeValue* OnRevokeUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
     {
-        constexpr int32_t argCountThree = 3;
-        constexpr int32_t argCountTwo = 2;
         // only support 2 or 3 params (2 parameter and 1 optional callback)
         if (info.argc != argCountThree && info.argc != argCountTwo) {
             HILOG_ERROR("Invalid arguments");
