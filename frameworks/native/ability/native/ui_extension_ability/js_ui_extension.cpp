@@ -181,8 +181,12 @@ void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> se
 
     Extension::OnStart(want, sessionInfo);
     if (sessionInfo) {
-        uiWindow_ = Ace::NG::UIWindow::CreateWindowScene(GetContext(),
+        uiWindow_ = Ace::NG::UIWindow::CreateWindowExtension(GetContext(),
             sessionInfo->sessionToken, sessionInfo->surfaceNode);
+        if (uiWindow_ == nullptr) {
+            HILOG_ERROR("JsUIExtension OnStart create ui window error.");
+            return;
+        }
         uiWindow_->RegisterSessionStageStateListener(sceneSessionStageListener_);
     } else {
         HILOG_DEBUG("JsUIExtension OnStart sessionInfo is nullptr.");
@@ -210,6 +214,12 @@ void JsUIExtension::OnStop()
     UIExtension::OnStop();
     HILOG_DEBUG("JsUIExtension OnStop begin.");
     CallObjectMethod("onDestroy");
+
+    if (uiWindow_ != nullptr) {
+        uiWindow_->Disconnect();
+    } else {
+        HILOG_ERROR("JsUIExtension::OnStop uiWindow is null.");
+    }
 
     auto context = GetContext();
     if (context == nullptr) {

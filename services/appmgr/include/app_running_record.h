@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -100,6 +100,48 @@ public:
      * @return Returns app record bundleName.
      */
     const std::string &GetBundleName() const;
+
+    /**
+     * @brief Obtains the app record CallerPid.
+     *
+     * @return Returns app record CallerPid.
+     */
+    int32_t GetCallerPid() const;
+
+    /**
+     * @brief Setting the Caller pid.
+     *
+     * @param CallerUid, the Caller pid.
+     */
+    void SetCallerPid(int32_t pid);
+
+    /**
+     * @brief Obtains the app record CallerUid.
+     *
+     * @return Returns app record CallerUid.
+     */
+    int32_t GetCallerUid() const;
+
+    /**
+     * @brief Setting the Caller uid.
+     *
+     * @param CallerUid, the Caller uid.
+     */
+    void SetCallerUid(int32_t uid);
+
+    /**
+     * @brief Obtains the app record CallerTokenId.
+     *
+     * @return Returns app record CallerTokenId.
+     */
+    int32_t GetCallerTokenId() const;
+
+    /**
+     * @brief Setting the Caller tokenId.
+     *
+     * @param CallerToken, the Caller tokenId.
+     */
+    void SetCallerTokenId(int32_t tokenId);
 
     /**
      * @brief Obtains the app record isLauncherApp flag.
@@ -225,32 +267,8 @@ public:
 
     std::shared_ptr<ModuleRunningRecord> GetModuleRunningRecordByTerminateLists(const sptr<IRemoteObject> &token) const;
 
-    // It can only used in SINGLETON mode.
-    /**
-     * GetAbilityRunningRecord, Get ability record by the ability Name.
-     *
-     * @param abilityName, the ability name.
-     * @param ownerUserId, the owner userId of this ability.
-     *
-     * @return the ability record.
-     */
-    std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(
-        const std::string &abilityName, const std::string &moduleName, int32_t ownerUserId = -1) const;
-
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId) const;
 
-    // Clear(remove) the specified ability record from the list
-
-    /**
-     * ClearAbility, Clear ability record by record info.
-     *
-     * @param record, the ability record.
-     *
-     * @return
-     */
-    void ClearAbility(const std::shared_ptr<AbilityRunningRecord> &record);
-
-    // Update the trim memory level value of this process
     /**
      * @brief Setting the Trim Memory Level.
      *
@@ -662,6 +680,9 @@ private:
     bool securityFlag_ = false;
     int32_t requestProcCode_ = 0;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
+    int32_t callerPid_ = -1;
+    int32_t callerUid_ = -1;
+    int32_t callerTokenId_ = -1;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
