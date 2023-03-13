@@ -30,9 +30,6 @@ public:
         const std::string targetBundleName,
         int autoremove) override;
 
-    virtual bool VerifyUriPermission(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID tokenId) override;
-
     virtual void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
     virtual int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 

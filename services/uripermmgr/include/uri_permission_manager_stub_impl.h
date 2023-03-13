@@ -43,8 +43,6 @@ public:
 
     int GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName, int autoremove) override;
-    bool VerifyUriPermission(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID tokenId) override;
 
     void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
     int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;

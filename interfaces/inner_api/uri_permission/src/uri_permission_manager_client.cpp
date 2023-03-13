@@ -35,17 +35,6 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
     return INTERNAL_ERROR;
 }
 
-bool UriPermissionManagerClient::VerifyUriPermission(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID tokenId)
-{
-    HILOG_DEBUG("UriPermissionManagerClient::VerifyUriPermission is called.");
-    auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->VerifyUriPermission(uri, flag, tokenId);
-    }
-    return false;
-}
-
 void UriPermissionManagerClient::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
     HILOG_DEBUG("UriPermissionManagerClient::RevokeUriPermission is called.");
