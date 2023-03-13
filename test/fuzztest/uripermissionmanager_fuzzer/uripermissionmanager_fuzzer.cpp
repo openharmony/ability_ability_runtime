@@ -43,11 +43,6 @@ public:
     {
         return 0;
     }
-    bool VerifyUriPermission(const Uri &uri, unsigned int flag,
-        const Security::AccessToken::AccessTokenID tokenId) override
-    {
-        return true;
-    }
     void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override
     {
         return;

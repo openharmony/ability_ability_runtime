@@ -42,21 +42,6 @@ int UriPermissionManagerStub::OnRemoteRequest(
             reply.WriteInt32(result);
             break;
         }
-        case UriPermMgrCmd::ON_VERIFY_URI_PERMISSION : {
-            std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
-            if (!uri) {
-                errCode = ERR_DEAD_OBJECT;
-                HILOG_ERROR("To read uri failed.");
-                break;
-            }
-            auto flag = data.ReadInt32();
-            auto tokenId = data.ReadInt32();
-            if (!VerifyUriPermission(*uri, flag, tokenId)) {
-                errCode = ERR_INVALID_OPERATION;
-                HILOG_ERROR("To check uri permission failed.");
-            }
-            break;
-        }
         case UriPermMgrCmd::ON_REVOKE_URI_PERMISSION : {
             auto tokenId = data.ReadInt32();
             RevokeUriPermission(tokenId);

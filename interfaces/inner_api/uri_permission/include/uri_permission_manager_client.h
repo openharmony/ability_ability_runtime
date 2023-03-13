@@ -43,16 +43,6 @@ public:
         const std::string targetBundleName, int autoremove);
 
     /**
-     * @brief Check whether the tokenId has URI permissions.
-     *
-     * @param uri The file uri.
-     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param tokenId The user of uri.
-     * @return Returns true if the verification is successful, otherwise returns false.
-     */
-    bool VerifyUriPermission(const Uri &uri, unsigned int flag, const Security::AccessToken::AccessTokenID tokenId);
-
-    /**
      * @brief Clear user's uri authorization record with auto remove flag.
      *
      * @param tokenId A tokenId of an application.

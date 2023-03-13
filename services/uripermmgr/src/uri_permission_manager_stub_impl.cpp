@@ -134,59 +134,6 @@ int UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigne
     return ERR_OK;
 }
 
-bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID tokenId)
-{
-    if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
-        HILOG_WARN("UriPermissionManagerStubImpl:::VerifyUriPermission: The param flag is invalid.");
-        return false;
-    }
-
-    auto bms = ConnectBundleManager();
-    auto uriStr = uri.ToString();
-    if (bms) {
-        AppExecFwk::ExtensionAbilityInfo info;
-        if (!IN_PROCESS_CALL(bms->QueryExtensionAbilityInfoByUri(uriStr, GetCurrentAccountId(), info))) {
-            HILOG_DEBUG("%{public}s, Fail to get extension info from bundle manager.", __func__);
-            return false;
-        }
-        if (info.type != AppExecFwk::ExtensionAbilityType::FILESHARE) {
-            HILOG_DEBUG("%{public}s, The upms only open to FILESHARE. The type is %{public}u.", __func__, info.type);
-            return false;
-        }
-
-        if (tokenId == info.applicationInfo.accessTokenId) {
-            HILOG_DEBUG("The uri belongs to this application.");
-            return true;
-        }
-    }
-
-    std::lock_guard<std::mutex> guard(mutex_);
-    auto search = uriMap_.find(uriStr);
-    if (search == uriMap_.end()) {
-        HILOG_DEBUG("This tokenID does not have permission for this uri.");
-        return false;
-    }
-
-    unsigned int tmpFlag = 0;
-    if (flag & Want::FLAG_AUTH_WRITE_URI_PERMISSION) {
-        tmpFlag = Want::FLAG_AUTH_WRITE_URI_PERMISSION;
-    } else {
-        tmpFlag = Want::FLAG_AUTH_READ_URI_PERMISSION;
-    }
-
-    for (const auto& item : search->second) {
-        if (item.targetTokenId == tokenId &&
-            (item.flag == Want::FLAG_AUTH_WRITE_URI_PERMISSION || item.flag == tmpFlag)) {
-            HILOG_DEBUG("This tokenID have permission for this uri.");
-            return true;
-        }
-    }
-
-    HILOG_DEBUG("The application does not have permission for this URI.");
-    return false;
-}
-
 void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
 {
     HILOG_DEBUG("Start to remove uri permission.");

@@ -60,37 +60,6 @@ int UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int f
     return reply.ReadInt32();
 }
 
-bool UriPermissionManagerProxy::VerifyUriPermission(const Uri &uri, unsigned int flag,
-    const Security::AccessToken::AccessTokenID tokenId)
-{
-    HILOG_DEBUG("UriPermissionManagerProxy::VerifyUriPermission is called.");
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
-        HILOG_ERROR("Write interface token failed.");
-        return false;
-    }
-    if (!data.WriteParcelable(&uri)) {
-        HILOG_ERROR("Write uri failed.");
-        return false;
-    }
-    if (!data.WriteInt32(flag)) {
-        HILOG_ERROR("Write flag failed.");
-        return false;
-    }
-    if (!data.WriteInt32(tokenId)) {
-        HILOG_ERROR("Write tokenId failed.");
-        return false;
-    }
-    MessageParcel reply;
-    MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_VERIFY_URI_PERMISSION, data, reply, option);
-    if (error != ERR_OK) {
-        HILOG_ERROR("SendRequest fial, error: %{public}d", error);
-        return false;
-    }
-    return true;
-}
-
 void UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::RevokeUriPermission is called.");
