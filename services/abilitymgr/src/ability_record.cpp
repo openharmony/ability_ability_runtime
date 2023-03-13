@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -299,7 +299,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     // earlier than above actions.
     currentState_ = AbilityState::FOREGROUNDING;
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
-    lifecycleDeal_->ForegroundNew(want_, lifeCycleStateInfo_);
+    lifecycleDeal_->ForegroundNew(want_, lifeCycleStateInfo_, sessionInfo_);
     lifeCycleStateInfo_.sceneFlag = 0;
     lifeCycleStateInfo_.sceneFlagBak = 0;
 
@@ -968,7 +968,7 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
     // schedule background after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     currentState_ = AbilityState::BACKGROUNDING;
-    lifecycleDeal_->BackgroundNew(want_, lifeCycleStateInfo_);
+    lifecycleDeal_->BackgroundNew(want_, lifeCycleStateInfo_, sessionInfo_);
 }
 
 int AbilityRecord::TerminateAbility()
@@ -1018,7 +1018,8 @@ void AbilityRecord::SetAbilityState(AbilityState state)
 
 void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 {
-    HILOG_INFO("%{public}s", __func__);
+    HILOG_INFO("bundle:%{public}s, ability: %{public}s", applicationInfo_.bundleName.c_str(),
+        abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     if (scheduler != nullptr) {
         if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
@@ -1041,8 +1042,8 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         scheduler_ = scheduler;
         lifecycleDeal_->SetScheduler(scheduler);
         auto schedulerObject = scheduler_->AsObject();
-        if (schedulerObject != nullptr) {
-            schedulerObject->AddDeathRecipient(schedulerDeathRecipient_);
+        if (schedulerObject == nullptr || !schedulerObject->AddDeathRecipient(schedulerDeathRecipient_)) {
+            HILOG_ERROR("AddDeathRecipient failed.");
         }
         pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
         HandleDlpAttached();
@@ -1054,6 +1055,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         if (scheduler_ != nullptr && schedulerDeathRecipient_ != nullptr) {
             auto schedulerObject = scheduler_->AsObject();
             if (schedulerObject != nullptr) {
+                HILOG_INFO("RemoveDeathRecipient");
                 schedulerObject->RemoveDeathRecipient(schedulerDeathRecipient_);
             }
         }
@@ -1177,7 +1179,7 @@ void AbilityRecord::Inactivate()
     // schedule inactive after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     currentState_ = AbilityState::INACTIVATING;
-    lifecycleDeal_->Inactivate(want_, lifeCycleStateInfo_);
+    lifecycleDeal_->Inactivate(want_, lifeCycleStateInfo_, sessionInfo_);
 }
 
 void AbilityRecord::Terminate(const Closure &task)
@@ -1964,6 +1966,11 @@ void AbilityRecord::SetMission(const std::shared_ptr<Mission> &mission)
     mission_ = mission;
 }
 
+void AbilityRecord::SetSessionInfo(sptr<SessionInfo> sessionInfo)
+{
+    sessionInfo_ = sessionInfo;
+}
+
 void AbilityRecord::SetMinimizeReason(bool fromUser)
 {
     minimizeReason_ = fromUser;
@@ -2349,6 +2356,19 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetOtherMissionStackAbilityRecord(
 void AbilityRecord::SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     otherMissionStackAbilityRecord_ = abilityRecord;
+}
+
+void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo)
+{
+    if (hasRecoverInfo) {
+        want_.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
+        SetLaunchReason(LaunchReason::LAUNCHREASON_APP_RECOVERY);
+    }
+}
+
+bool AbilityRecord::GetRecoveryInfo()
+{
+    return want_.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "ipc_skeleton.h"
 #include "lifecycle_deal.h"
 #include "lifecycle_state_info.h"
+#include "session_info.h"
 #include "uri.h"
 #include "want.h"
 #ifdef SUPPORT_GRAPHICS
@@ -188,6 +189,14 @@ enum AbilityCallType {
     START_SETTINGS_TYPE,
     START_EXTENSION_TYPE,
 };
+
+struct ComponentRequest {
+    sptr<IRemoteObject> callerToken = nullptr;
+    int requestCode = 0;
+    int componentStatus = 0;
+    int requestResult = 0;
+};
+
 struct AbilityRequest {
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
@@ -362,6 +371,11 @@ public:
         return scheduler_;
     }
 
+    inline sptr<SessionInfo> GetSessionInfo() const
+    {
+        return sessionInfo_;
+    }
+
     /**
      * get ability's token.
      *
@@ -417,6 +431,10 @@ public:
      * @return true : ready ,false: not ready
      */
     bool IsReady() const;
+
+    void UpdateRecoveryInfo(bool hasRecoverInfo);
+
+    bool GetRecoveryInfo();
 
 #ifdef SUPPORT_GRAPHICS
     /**
@@ -798,6 +816,7 @@ public:
     void SetStartToBackground(const bool flag);
     bool IsStartToForeground() const;
     void SetStartToForeground(const bool flag);
+    void SetSessionInfo(sptr<SessionInfo> sessionInfo);
     void SetMinimizeReason(bool fromUser);
     bool IsMinimizeFromUser() const;
     void SetClearMissionFlag(bool clearMissionFlag);
@@ -978,6 +997,9 @@ private:
     mutable bool isDumpTimeout_ = false;
     std::vector<std::string> dumpInfos_;
     std::atomic<AbilityState> pendingState_ = AbilityState::INITIAL;    // pending life state
+
+    // scene session
+    sptr<SessionInfo> sessionInfo_ = nullptr;
 
 #ifdef SUPPORT_GRAPHICS
     bool isStartingWindow_ = false;
