@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -532,7 +532,7 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
         if (search != savingSnapshot_.end()) {
             auto savingSnapshotTimeout = 100; // ms
             std::chrono::milliseconds timeout { savingSnapshotTimeout };
-            auto waitingCount = 5; 
+            auto waitingCount = 5;
             auto waitingNum = 0;
             while (waitSavingCondition_.wait_for(lock, timeout) == std::cv_status::no_timeout) {
                 ++waitingNum;
