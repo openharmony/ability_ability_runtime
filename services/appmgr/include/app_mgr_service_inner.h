@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@
 #include "running_process_info.h"
 #include "bundle_info.h"
 #include "istart_specified_ability_response.h"
+#include "shared/base_shared_bundle_info.h"
 
 #include "want.h"
 #include "window_focus_changed_listener.h"
@@ -283,6 +284,15 @@ public:
      */
     virtual int32_t NotifyMemoryLevel(int32_t level);
 
+    /**
+     * @brief Check whether the shared bundle is running.
+     *
+     * @param bundleName Shared bundle name.
+     * @param versionCode Shared bundle version code.
+     * @return Returns the shared bundle running result. The result is true if running, false otherwise.
+     */
+    virtual bool IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode);
+
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
         const sptr<IRemoteObject> &token,
         const sptr<IRemoteObject> &preToken,
@@ -347,13 +357,6 @@ public:
      * @param recordId, the application record.
      */
     virtual void AddAbilityStageDone(const int32_t recordId);
-
-    /**
-     * GetRecordMap, Get all the ability information in the application record.
-     *
-     * @return all the ability information in the application record.
-     */
-    std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> GetRecordMap() const;
 
     /**
      * GetAppRunningRecordByPid, Get process record by application pid.
@@ -546,6 +549,8 @@ public:
     int VerifyProcessPermission(const sptr<IRemoteObject> &token) const;
 
     int VerifyAccountPermission(const std::string &permissionName, const int userId) const;
+
+    int VerifyRequestPermission() const;
 
     void ClearAppRunningData(const std::shared_ptr<AppRunningRecord> &appRecord, bool containsApp);
 
@@ -792,6 +797,19 @@ private:
 
     int32_t KillApplicationByBundleName(const std::string &bundleName);
 
+    bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void SendProcessExitEvent(pid_t pid);
+
+    void SendProcessExitEventTask(pid_t pid, time_t exitTime, int32_t count);
+
+    void UpDateStartupType(const std::shared_ptr<AbilityInfo> &info, int32_t &abilityType, int32_t &extensionType);
+
+    void SetRunningSharedBundleList(const std::string &bundleName,
+        const std::vector<BaseSharedBundleInfo> baseSharedBundleInfoList);
+
+    void RemoveRunningSharedBundleList(const std::string &bundleName);
+
 private:
     /**
      * Notify application status.
@@ -821,6 +839,7 @@ private:
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
     sptr<WindowFocusChangedListener> focusListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
+    std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

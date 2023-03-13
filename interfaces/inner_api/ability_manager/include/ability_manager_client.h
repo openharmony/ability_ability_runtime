@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,7 +97,8 @@ public:
      * @param requestCode Ability request code.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE);
+    ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * StartAbility with want, send want to ability manager service.
@@ -190,6 +191,21 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
 
     /**
+     * Start ui extension ability with want, send want to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param extensionSessionInfo the extension session info of the ability to start.
+     * @param userId, Designation User ID.
+     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartUIExtensionAbility(
+        const Want &want,
+        const sptr<SessionInfo> &extensionSessionInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
+
+    /**
      * Stop extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to stop.
@@ -213,6 +229,17 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode TerminateAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant);
+
+    /**
+     * TerminateUIExtensionAbility with want, return want from ability manager service.
+     *
+     * @param extensionSessionInfo the extension session info of the ability to terminate.
+     * @param resultCode resultCode.
+     * @param Want Ability want returned.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
+        int resultCode = DEFAULT_INVAL_VALUE, const Want *resultWant = nullptr);
 
     /**
      * SendResultToAbility with want, return resultWant from ability manager service.
@@ -264,6 +291,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode MinimizeAbility(const sptr<IRemoteObject> &token, bool fromUser = false);
+
+    /**
+     * MinimizeUIExtensionAbility, minimize the special ui extension ability.
+     *
+     * @param extensionSessionInfo the extension session info of the ability to minimize.
+     * @param fromUser mark the minimize operation source.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MinimizeUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, bool fromUser = false);
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -827,7 +863,18 @@ public:
      */
     void UpdateMissionSnapShot(const sptr<IRemoteObject>& token);
     void EnableRecoverAbility(const sptr<IRemoteObject>& token);
-    void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason);
+    void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason, const Want *want = nullptr);
+    
+    ErrCode AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer);
+
+    /**
+     * Called to verify that the MissionId is valid.
+     * @param missionIds Query mission list.
+     * @param results Output parameters, return results up to 20 query results.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t IsValidMissionIds(const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results);
+
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

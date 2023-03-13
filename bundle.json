@@ -85,6 +85,7 @@
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:ability_thread",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:extension_module",
           "//foundation/ability/ability_runtime/frameworks/native/ability/native:static_subscriber_ipc",
+          "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_extension_module",
           "//foundation/ability/ability_runtime/frameworks/js/napi:napi_packages",
           "//foundation/ability/ability_runtime/frameworks/native/ability:ability_context_native",
           "//foundation/ability/ability_runtime/js_environment/frameworks/js_environment:js_environment",
@@ -139,6 +140,8 @@
                 "ability_manager_errors.h",
                 "ability_manager_interface.h",
                 "ability_scheduler_interface.h",
+                "erms_mgr_interface.h",
+                "erms_mgr_param.h",
                 "stop_user_callback.h",
                 "stop_user_callback_stub.h"
               ]
@@ -245,6 +248,14 @@
               "header_files": [
               ]
             },
+            "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:ui_extension"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/kits/native/ability/native/",
+              "header_files": [
+              ]
+            },
             "name": "//foundation/ability/ability_runtime/frameworks/native/ability/native:form_extension"
           },
           {
@@ -314,7 +325,8 @@
           "//foundation/ability/ability_runtime/test/moduletest:moduletest",
           "//foundation/ability/ability_runtime/test/benchmarktest:benchmarktest",
           "//foundation/ability/ability_runtime/test/fuzztest:fuzztest",
-          "//foundation/ability/ability_runtime/test/unittest:unittest"
+          "//foundation/ability/ability_runtime/test/unittest:unittest",
+          "//foundation/ability/ability_runtime/js_environment/test/unittest:unittest"
         ]
       }
   }

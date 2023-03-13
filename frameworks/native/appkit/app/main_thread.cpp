@@ -71,7 +71,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityBase::Constants;
-using HspList = std::vector<BaseSharedPackageInfo>;
+using HspList = std::vector<BaseSharedBundleInfo>;
 std::weak_ptr<OHOSApplication> MainThread::applicationForDump_;
 std::shared_ptr<EventHandler> MainThread::signalHandler_ = nullptr;
 std::shared_ptr<MainThread::MainHandler> MainThread::mainHandler_ = nullptr;
@@ -1048,9 +1048,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     application_->SetApplicationContext(applicationContext);
     if (isStageBased) {
         HspList hspList;
-        ErrCode ret = bundleMgr->GetBaseSharedPackageInfos(appInfo.bundleName, UNSPECIFIED_USERID, hspList);
+        ErrCode ret = bundleMgr->GetBaseSharedBundleInfos(appInfo.bundleName, hspList);
         if (ret != ERR_OK) {
-            HILOG_ERROR("MainThread::HandleLaunchApplication GetBaseSharedPackageInfos failed: %d", ret);
+            HILOG_ERROR("MainThread::HandleLaunchApplication GetBaseSharedBundleInfos failed: %d", ret);
         }
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;
@@ -1103,7 +1103,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             if (obj != nullptr) {
                 NativeValue* value = obj->GetProperty("errorfunc");
                 NativeFunction* fuc = AbilityRuntime::ConvertNativeValueTo<NativeFunction>(value);
-                error = fuc->GetSourceCodeInfo(errorPos);
+                if (fuc != nullptr) {
+                    error = fuc->GetSourceCodeInfo(errorPos);
+                }
             }
             summary += error + "Stacktrace:\n" + OHOS::AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack,
                 bindSourceMaps, hapPath);
@@ -1146,9 +1148,26 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             LoadAllExtensions(jsEngine, "system/lib64/extensionability", bundleInfo);
 #endif
         }
-        std::shared_ptr<NativeEngine> nativeEngine(&jsEngine);
-        idleTime_ = std::make_shared<IdleTime>(mainHandler_, nativeEngine);
+
+        IdleTimeCallback callback = [wpApplication](int32_t idleTime) {
+            auto app = wpApplication.lock();
+            if (app == nullptr) {
+                HILOG_ERROR("app is nullptr.");
+                return;
+            }
+            auto &runtime = app->GetRuntime();
+            if (runtime == nullptr) {
+                HILOG_ERROR("runtime is nullptr.");
+                return;
+            }
+            auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+            nativeEngine.NotifyIdleTime(idleTime);
+        };
+        idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
         idleTime_->Start();
+
+        IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
+        jsEngine.NotifyIdleStatusControl(cb);
     }
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
@@ -1570,6 +1589,12 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token)
         HILOG_ERROR("record->GetAbilityInfo() failed");
         return;
     }
+
+#ifdef SUPPORT_GRAPHICS
+    if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
+        AppRecovery::GetInstance().RemoveAbility(token);
+    }
+#endif
 
     abilityRecordMgr_->RemoveAbilityRecord(token);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
@@ -2234,12 +2259,7 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     for (auto hapInfo : bundleInfo.hapModuleInfos) {
         if ((processInfo_ != nullptr) && (processInfo_->GetProcessName() == hapInfo.process) &&
             (!hapInfo.hqfInfo.hqfFilePath.empty())) {
-            std::string resolvedHapPath;
-            std::string hapPath = AbilityBase::GetLoadPath(hapInfo.hapPath);
-            auto position = hapPath.rfind('/');
-            if (position != std::string::npos) {
-                resolvedHapPath = hapPath.erase(position) + FILE_SEPARATOR + hapInfo.moduleName;
-            }
+            std::string resolvedHapPath(AbilityBase::GetLoadPath(hapInfo.hapPath));
             std::string resolvedHqfFile(AbilityBase::GetLoadPath(hapInfo.hqfInfo.hqfFilePath));
             HILOG_INFO("bundleName: %{public}s, moduleName: %{public}s, processName: %{private}s, "
                 "hqf file: %{private}s, hap path: %{private}s.", bundleName.c_str(), hapInfo.moduleName.c_str(),
