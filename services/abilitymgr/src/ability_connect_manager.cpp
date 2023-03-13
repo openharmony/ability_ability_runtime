@@ -16,6 +16,7 @@
 #include "ability_connect_manager.h"
 
 #include <algorithm>
+#include <mutex>
 
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_errors.h"
@@ -616,15 +617,17 @@ void AbilityConnectManager::CompleteCommandAbility(std::shared_ptr<AbilityRecord
 
 void AbilityConnectManager::CompleteStartServiceReq(const std::string &serviceUri)
 {
-    std::unique_lock lock{startServiceReqListLock_, std::try_to_lock};
-    if (!lock.owns_lock()) {
-        lock.lock();
+    std::shared_ptr<std::list<OHOS::AAFwk::AbilityRequest>> reqList;
+    {
+        std::lock_guard<std::mutex> guard(startServiceReqListLock_);
+        auto it = startServiceReqList_.find(serviceUri);
+        if (it != startServiceReqList_.end()) {
+            reqList = it->second;
+            startServiceReqList_.erase(it);
+        }
     }
-    auto it = startServiceReqList_.find(serviceUri);
-    if (it != startServiceReqList_.end()) {
-        const auto reqList = it->second;
-        startServiceReqList_.erase(it);
-        lock.unlock();
+
+    if (reqList) {
         HILOG_INFO("Target service is already activating : %{public}zu", reqList->size());
         for (const auto &req: *reqList) {
             StartAbilityLocked(req);
