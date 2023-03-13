@@ -38,10 +38,8 @@ int UriPermissionManagerStub::OnRemoteRequest(
             auto flag = data.ReadInt32();
             auto targetBundleName = data.ReadString();
             auto autoremove = data.ReadInt32();
-            if (!GrantUriPermission(*uri, flag, targetBundleName, autoremove)) {
-                errCode = ERR_INVALID_OPERATION;
-                HILOG_ERROR("To grant uri permission failed.");
-            }
+            int result = GrantUriPermission(*uri, flag, targetBundleName, autoremove);
+            reply.WriteInt32(result);
             break;
         }
         case UriPermMgrCmd::ON_VERIFY_URI_PERMISSION : {
@@ -72,10 +70,8 @@ int UriPermissionManagerStub::OnRemoteRequest(
                 break;
             }
             auto bundleName = data.ReadString();
-            if (!RevokeUriPermissionManually(*uri, bundleName)) {
-                errCode = ERR_INVALID_OPERATION;
-                HILOG_ERROR("To revoke uri permission failed.");
-            }
+            int result = RevokeUriPermissionManually(*uri, bundleName);
+            reply.WriteInt32(result);
             break;
         }
         default:

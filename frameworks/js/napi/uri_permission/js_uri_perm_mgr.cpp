@@ -15,14 +15,19 @@
 
 #include "js_uri_perm_mgr.h"
 
+#include "ability_runtime_error_util.h"
 #include "hilog_wrapper.h"
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
+#include "napi_common_util.h"
 #include "uri.h"
 #include "uri_permission_manager_client.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+const int32_t INTERNAL_ERROR = 16000050;
+const int32_t PERMISSION_ERROR = 201;
+const int32_t ERR_OK = 0;
 class JsUriPermMgr {
 public:
     JsUriPermMgr() = default;
@@ -51,10 +56,11 @@ private:
     {
         constexpr int32_t argCountFour = 4;
         constexpr int32_t argCountThree = 3;
+        constexpr int32_t argTwo = 2;
         // only support 3 or 4 params (3 parameter and 1 optional callback)
         if (info.argc != argCountThree && info.argc != argCountFour) {
             HILOG_ERROR("The number of parameter is invalid.");
-            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            ThrowTooFewParametersError(engine);
             return engine.CreateUndefined();
         }
         HILOG_DEBUG("Grant Uri Permission start");
@@ -63,34 +69,38 @@ private:
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[0]), uriStr)) {
             HILOG_ERROR("The uriStr is invalid.");
-            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
         int flag = 0;
         if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[1]), flag)) {
             HILOG_ERROR("The flag is invalid.");
-            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
         std::string targetBundleName;
-        if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(reinterpret_cast<napi_env>(&engine),
-            reinterpret_cast<napi_value>(info.argv[2]), targetBundleName)) {
+        if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
+            reinterpret_cast<napi_value>(info.argv[argTwo]), targetBundleName)) {
             HILOG_ERROR("The flag is invalid.");
-            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
 
         AsyncTask::CompleteCallback complete =
         [uriStr, flag, targetBundleName](NativeEngine& engine, AsyncTask& task, int32_t status) {
             Uri uri(uriStr);
-            int autoremove = 0;
             auto errCode = AAFwk::UriPermissionManagerClient::GetInstance()->GrantUriPermission(uri, flag,
-                targetBundleName, autoremove);
-            if (errCode == true) {
-                task.ResolveWithNoError(engine, CreateJsApplicationQuickFixInfo(engine, quickFixInfo));
-            } else {
-                task.Reject(engine, CreateJsErrorByErrorCode(engine, 201));
+                targetBundleName, 0);
+            if (errCode == ERR_OK) {
+                task.ResolveWithNoError(engine, engine.CreateUndefined());
+            } 
+            if (errCode == PERMISSION_ERROR) {
+                task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
+            }
+            if (errCode == INTERNAL_ERROR) {
+                task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
+                "Internal Error."));
             }
         };
 
@@ -115,14 +125,14 @@ private:
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[0]), uriStr)) {
             HILOG_ERROR("The uriStr is invalid.");
-            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
         std::string bundleName;
-        if (!OHOS::AppExecFwk::UnwrapInt32FromJS2(reinterpret_cast<napi_env>(&engine),
+        if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[1]), bundleName)) {
             HILOG_ERROR("The flag is invalid.");
-            Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
 
@@ -131,10 +141,12 @@ private:
             Uri uri(uriStr);
             auto errCode = AAFwk::UriPermissionManagerClient::GetInstance()->RevokeUriPermissionManually(uri,
                 bundleName);
-            if (errCode == true) {
-                task.ResolveWithNoError(engine, CreateJsApplicationQuickFixInfo(engine, quickFixInfo));
-            } else {
-                task.Reject(engine, CreateJsErrorByErrorCode(engine, 201));
+            if (errCode == ERR_OK) {
+                task.ResolveWithNoError(engine, engine.CreateUndefined());
+            } 
+            if (errCode == INTERNAL_ERROR) {
+                task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
+                "Internal Error."));
             }
         };
 

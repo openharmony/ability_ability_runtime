@@ -31,19 +31,22 @@
 namespace OHOS {
 namespace AAFwk {
 const int32_t DEFAULT_USER_ID = 0;
+const int32_t INTERNAL_ERROR = 16000050;
+const int32_t PERMISSION_DENIED_ERROR = 201;
+const int32_t ERR_OK = 0;
 using TokenId = Security::AccessToken::AccessTokenID;
 
-bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
+int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
     const std::string targetBundleName, int autoremove)
 {
     if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: The param flag is invalid.");
-        return false;
+        return INTERNAL_ERROR;
     }
     auto bms = ConnectBundleManager();
     if (bms == nullptr) {
         HILOG_WARN("Failed to get bms.");
-        return false;
+        return INTERNAL_ERROR;
     }
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
     HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
@@ -53,12 +56,12 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     auto&& authority = uri_inner.GetAuthority();
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
         HILOG_WARN("To fail to get bundle info according to uri.");
-        return false;
+        return INTERNAL_ERROR;
     }
     Security::AccessToken::AccessTokenID fromTokenId = uriBundleInfo.applicationInfo.accessTokenId;
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(targetBundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
         HILOG_WARN("To fail to get bundle info to targetBundleName.");
-        return false;
+        return INTERNAL_ERROR;
     }
     Security::AccessToken::AccessTokenID targetTokenId = uriBundleInfo.applicationInfo.accessTokenId;
     // only uri with proxy authorization permission or from process itself can be granted
@@ -68,7 +71,7 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE &&
         !permission && (fromTokenId != callerTokenId)) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
-        return false;
+        return PERMISSION_DENIED_ERROR;
     }
     unsigned int tmpFlag = 0;
     if (flag & Want::FLAG_AUTH_WRITE_URI_PERMISSION) {
@@ -79,27 +82,27 @@ bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned i
     auto&& scheme = uri_inner.GetScheme();
     if (scheme != "file" && scheme != "dataShare") {
         HILOG_WARN("only support file or dataShare uri.");
-        return false;
+        return INTERNAL_ERROR;
     }
     return GrantUriPermissionImpl(uri, tmpFlag, callerTokenId, fromTokenId, targetTokenId, autoremove);
 }
 
-bool UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
-        Security::AccessToken::AccessTokenID callerTokenId,
-        Security::AccessToken::AccessTokenID fromTokenId,
-        Security::AccessToken::AccessTokenID targetTokenId,
-        int autoremove)
+int UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
+    Security::AccessToken::AccessTokenID callerTokenId,
+    Security::AccessToken::AccessTokenID fromTokenId,
+    Security::AccessToken::AccessTokenID targetTokenId,
+    int autoremove)
 {
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
         HILOG_ERROR("ConnectStorageManager failed");
-        return false;
+        return INTERNAL_ERROR;
     }
     auto uriStr = uri.ToString();
     auto ret = storageMgrProxy->CreateShareFile(uriStr, targetTokenId, flag);
     if (ret != 0 && ret != -EEXIST) {
         HILOG_ERROR("storageMgrProxy failed to CreateShareFile.");
-        return false;
+        return INTERNAL_ERROR;
     }
     std::lock_guard<std::mutex> guard(mutex_);
     auto search = uriMap_.find(uriStr);
@@ -110,25 +113,25 @@ bool UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsign
     if (nativeInfo.processName == "pasteboard_serv") {
         autoremove = 1;
     }
-    GrantInfo info = { Flag, fromTokenId, targetTokenId, autoremove };
+    GrantInfo info = { flag, fromTokenId, targetTokenId, autoremove };
     if (search == uriMap_.end()) {
         std::list<GrantInfo> infoList = { info };
         uriMap_.emplace(uriStr, infoList);
-        return true;
+        return ERR_OK;
     }
     auto& infoList = search->second;
     for (auto& item : infoList) {
         if (item.fromTokenId == fromTokenId && item.targetTokenId == targetTokenId) {
-            if ((Flag & item.flag) == 0) {
+            if ((flag & item.flag) == 0) {
                 HILOG_INFO("Update uri r/w permission.");
-                item.flag = Flag;
+                item.flag = flag;
             }
             HILOG_INFO("uri permission has granted, not to grant again.");
-            return true;
+            return ERR_OK;
         }
     }
     infoList.emplace_back(info);
-    return true;
+    return ERR_OK;
 }
 
 bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, unsigned int flag,
@@ -220,19 +223,19 @@ void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
     return;
 }
 
-bool UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
+int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
 {
     HILOG_DEBUG("Start to remove uri permission manually.");
     auto bms = ConnectBundleManager();
     if (bms == nullptr) {
         HILOG_WARN("Failed to get bms.");
-        return false;
+        return INTERNAL_ERROR;
     }
     AppExecFwk::BundleInfo uriBundleInfo;
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
         HILOG_WARN("To fail to get bundle info to bundleName.");
-        return false;
+        return INTERNAL_ERROR;
     }
     Security::AccessToken::AccessTokenID tokenId = uriBundleInfo.applicationInfo.accessTokenId;
     std::vector<std::string> uriList;
@@ -243,7 +246,7 @@ bool UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, c
         auto search = uriMap_.find(uriStr);
         if (search == uriMap_.end()) {
             HILOG_ERROR("URI does not exist on uri map.");
-            return false;
+            return INTERNAL_ERROR;
         }
         auto& list = search->second;
         for (auto it = list.begin(); it != list.end(); it++) {
@@ -259,13 +262,13 @@ bool UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, c
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
         HILOG_ERROR("ConnectStorageManager failed");
-        return false;
+        return INTERNAL_ERROR;
     }
 
     if (!uriList.empty()) {
         storageMgrProxy->DeleteShareFile(tokenId, uriList);
     }
-    return true;
+    return ERR_OK;
 }
 
 sptr<AppExecFwk::IBundleMgr> UriPermissionManagerStubImpl::ConnectBundleManager()

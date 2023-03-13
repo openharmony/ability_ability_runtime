@@ -39,7 +39,7 @@ public:
      * @param targetBundleName The user of uri.
      * @param autoremove the uri is temperarily or not
      */
-    bool GrantUriPermission(const Uri &uri, unsigned int flag,
+    int GrantUriPermission(const Uri &uri, unsigned int flag,
         const std::string targetBundleName, int autoremove);
 
     /**
@@ -65,7 +65,7 @@ public:
      * @param uri The file uri.
      * @param BundleName A BundleName of an application.
      */
-    bool RevokeUriPermissionManually(const Uri &uri, const std::string bundleName);
+    int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName);
 
 private:
     sptr<IUriPermissionManager> ConnectUriPermService();
