@@ -15,13 +15,12 @@
 
 #include "uri_permission_manager_proxy.h"
 
+#include "ability_manager_errors.h"
 #include "hilog_wrapper.h"
 #include "parcel.h"
 
 namespace OHOS {
 namespace AAFwk {
-const int32_t INTERNAL_ERROR = 16000050;
-
 UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<IUriPermissionManager>(impl) {}
 
@@ -32,30 +31,30 @@ int UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int f
     MessageParcel data;
     if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     if (!data.WriteParcelable(&uri)) {
         HILOG_ERROR("Write uri failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     if (!data.WriteInt32(flag)) {
         HILOG_ERROR("Write flag failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     if (!data.WriteString(targetBundleName)) {
         HILOG_ERROR("Write targetBundleName failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     if (!data.WriteInt32(autoremove)) {
         HILOG_ERROR("Write autoremove failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int error = Remote()->SendRequest(UriPermMgrCmd::ON_GRANT_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fial, error: %{public}d", error);
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     return reply.ReadInt32();
 }
@@ -86,22 +85,22 @@ int UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, const
     MessageParcel data;
     if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     if (!data.WriteParcelable(&uri)) {
         HILOG_ERROR("Write uri failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     if (!data.WriteString(bundleName)) {
         HILOG_ERROR("Write bundleName failed.");
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     MessageParcel reply;
     MessageOption option;
     int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
-        return INTERNAL_ERROR;
+        return INNER_ERR;
     }
     return reply.ReadInt32();
 }

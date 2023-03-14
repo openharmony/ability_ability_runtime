@@ -15,6 +15,7 @@
 
 #include "uri_permission_manager_client.h"
 
+#include "ability_manager_errors.h"
 #include "hilog_wrapper.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -22,7 +23,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-const int32_t INTERNAL_ERROR = 16000050;
 int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
     const std::string targetBundleName, int autoremove)
 {
@@ -32,14 +32,16 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
     if (uriPermMgr) {
         return uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, autoremove);
     }
-    return INTERNAL_ERROR;
+    return INNER_ERR;
 }
 
 void UriPermissionManagerClient::RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId)
 {
     HILOG_DEBUG("UriPermissionManagerClient::RevokeUriPermission is called.");
     auto uriPermMgr = ConnectUriPermService();
-    uriPermMgr->RevokeUriPermission(tokenId);
+    if (uriPermMgr) {
+        return uriPermMgr->RevokeUriPermission(tokenId);
+    }
     return;
 }
 
@@ -50,7 +52,7 @@ int UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, cons
     if (uriPermMgr) {
         return uriPermMgr->RevokeUriPermissionManually(uri, bundleName);
     }
-    return INTERNAL_ERROR;
+    return INNER_ERR;
 }
 
 sptr<IUriPermissionManager> UriPermissionManagerClient::ConnectUriPermService()
