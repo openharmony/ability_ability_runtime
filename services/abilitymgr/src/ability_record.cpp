@@ -484,8 +484,6 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetWant().GetElement().GetURI();
     HILOG_DEBUG("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
-    auto callerUid = IPCSkeleton::GetCallingUid();
-    HILOG_DEBUG("callerPid : %{public}u", callerUid);
 
     GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.bundleName);
 

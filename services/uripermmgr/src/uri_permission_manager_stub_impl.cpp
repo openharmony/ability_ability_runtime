@@ -43,29 +43,12 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: The param flag is invalid.");
         return INTERNAL_ERROR;
     }
-    auto bms = ConnectBundleManager();
-    if (bms == nullptr) {
-        HILOG_WARN("Failed to get bms.");
-        return INTERNAL_ERROR;
-    }
-    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    HILOG_DEBUG("callerTokenId : %{public}u", callerTokenId);
-    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    AppExecFwk::BundleInfo uriBundleInfo;
     Uri uri_inner = uri;
     auto&& authority = uri_inner.GetAuthority();
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
-        HILOG_WARN("To fail to get bundle info according to uri.");
-        return INTERNAL_ERROR;
-    }
-    Security::AccessToken::AccessTokenID fromTokenId = uriBundleInfo.applicationInfo.accessTokenId;
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(targetBundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
-        HILOG_WARN("To fail to get bundle info to targetBundleName.");
-        return INTERNAL_ERROR;
-    }
-    Security::AccessToken::AccessTokenID targetTokenId = uriBundleInfo.applicationInfo.accessTokenId;
-    // only uri with proxy authorization permission or from process itself can be granted
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID());
+    Security::AccessToken::AccessTokenID fromTokenId = GetTokenIdByBundleName(authority);
+    Security::AccessToken::AccessTokenID targetTokenId = GetTokenIdByBundleName(targetBundleName);
+    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
     if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE &&
@@ -84,11 +67,17 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
         HILOG_WARN("only support file or dataShare uri.");
         return INTERNAL_ERROR;
     }
-    return GrantUriPermissionImpl(uri, tmpFlag, callerTokenId, fromTokenId, targetTokenId, autoremove);
+    // auto remove URI permission for clipboard
+    Security::AccessToken::NativeTokenInfo nativeInfo;
+    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
+    HILOG_DEBUG("callerprocessName : %{public}s", nativeInfo.processName.c_str());
+    if (nativeInfo.processName == "pasteboard_serv") {
+        autoremove = 1;
+    }
+    return GrantUriPermissionImpl(uri, tmpFlag, fromTokenId, targetTokenId, autoremove);
 }
 
 int UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
-    Security::AccessToken::AccessTokenID callerTokenId,
     Security::AccessToken::AccessTokenID fromTokenId,
     Security::AccessToken::AccessTokenID targetTokenId,
     int autoremove)
@@ -106,13 +95,6 @@ int UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigne
     }
     std::lock_guard<std::mutex> guard(mutex_);
     auto search = uriMap_.find(uriStr);
-    // auto remove URI permission for clipboard
-    Security::AccessToken::NativeTokenInfo nativeInfo;
-    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
-    HILOG_DEBUG("callerprocessName : %{public}s", nativeInfo.processName.c_str());
-    if (nativeInfo.processName == "pasteboard_serv") {
-        autoremove = 1;
-    }
     GrantInfo info = { flag, fromTokenId, targetTokenId, autoremove };
     if (search == uriMap_.end()) {
         std::list<GrantInfo> infoList = { info };
@@ -173,18 +155,18 @@ void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
 int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
 {
     HILOG_DEBUG("Start to remove uri permission manually.");
-    auto bms = ConnectBundleManager();
-    if (bms == nullptr) {
-        HILOG_WARN("Failed to get bms.");
-        return INTERNAL_ERROR;
+    Uri uri_inner = uri;
+    auto&& authority = uri_inner.GetAuthority();
+    Security::AccessToken::AccessTokenID uriTokenId = GetTokenIdByBundleName(authority);
+    Security::AccessToken::AccessTokenID tokenId = GetTokenIdByBundleName(bundleName);
+    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
+    auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(
+        AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
+    if (!permission && (uriTokenId != callerTokenId) && (tokenId != callerTokenId)) {
+        HILOG_WARN("UriPermissionManagerStubImpl::RevokeUriPermission: No permission for revoke uri.");
+        return PERMISSION_DENIED_ERROR;
     }
-    AppExecFwk::BundleInfo uriBundleInfo;
-    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, uriBundleInfo, GetCurrentAccountId()))) {
-        HILOG_WARN("To fail to get bundle info to bundleName.");
-        return INTERNAL_ERROR;
-    }
-    Security::AccessToken::AccessTokenID tokenId = uriBundleInfo.applicationInfo.accessTokenId;
+
     std::vector<std::string> uriList;
     {
         std::lock_guard<std::mutex> guard(mutex_);
@@ -205,7 +187,6 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
             }
         }
     }
-
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
         HILOG_ERROR("ConnectStorageManager failed");
@@ -248,6 +229,20 @@ sptr<AppExecFwk::IBundleMgr> UriPermissionManagerStubImpl::ConnectBundleManager(
     }
     HILOG_DEBUG("%{public}s end.", __func__);
     return bundleManager_;
+}
+
+Security::AccessToken::AccessTokenID UriPermissionManagerStubImpl::GetTokenIdByBundleName(const std::string bundleName) {
+    auto bms = ConnectBundleManager();
+    if (bms == nullptr) {
+        HILOG_WARN("Failed to get bms.");
+        return INTERNAL_ERROR;
+    }
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, bundleInfo, GetCurrentAccountId()))) {
+        HILOG_WARN("To fail to get bundle info according to uri.");
+        return INTERNAL_ERROR;
+    }
+    return bundleInfo.applicationInfo.accessTokenId;
 }
 
 sptr<StorageManager::IStorageManager> UriPermissionManagerStubImpl::ConnectStorageManager()

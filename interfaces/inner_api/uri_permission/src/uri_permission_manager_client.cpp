@@ -27,7 +27,7 @@ int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int 
     const std::string targetBundleName, int autoremove)
 {
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermission is called.");
-    HILOG_DEBUG("argetBundleName :%{public}s", targetBundleName.c_str());
+    HILOG_DEBUG("targetBundleName :%{public}s", targetBundleName.c_str());
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
         return uriPermMgr->GrantUriPermission(uri, flag, targetBundleName, autoremove);

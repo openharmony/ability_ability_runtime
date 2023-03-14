@@ -78,7 +78,6 @@ void UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken:
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
     }
-    return;
 }
 
 int UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)

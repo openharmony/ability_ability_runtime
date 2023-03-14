@@ -54,10 +54,10 @@ private:
     void ClearBMSProxy();
     void ClearSMProxy();
     int GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
-        Security::AccessToken::AccessTokenID callerTokenId,
         Security::AccessToken::AccessTokenID fromTokenId,
         Security::AccessToken::AccessTokenID targetTokenId,
         int autoremove);
+    Security::AccessToken::AccessTokenID GetTokenIdByBundleName(const std::string bundleName);
 
     class BMSOrSMDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

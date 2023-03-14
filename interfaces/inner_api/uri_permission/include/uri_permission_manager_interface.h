@@ -25,7 +25,7 @@ namespace AAFwk {
 class IUriPermissionManager : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ability.UriPermissionManager");
-    
+
     /**
      * @brief Authorize the uri permission to targetBundleName.
      *
