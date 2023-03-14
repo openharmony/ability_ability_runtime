@@ -15,6 +15,7 @@
 
 #include "js_uri_perm_mgr.h"
 
+#include "ability_manager_errors.h"
 #include "ability_runtime_error_util.h"
 #include "hilog_wrapper.h"
 #include "js_error_utils.h"
@@ -25,8 +26,6 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-constexpr int32_t INTERNAL_ERROR = 16000050;
-constexpr int32_t PERMISSION_ERROR = 201;
 constexpr int32_t ERR_OK = 0;
 constexpr int32_t argCountFour = 4;
 constexpr int32_t argCountThree = 3;
@@ -91,9 +90,9 @@ private:
                 targetBundleName, 0);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            } else if (errCode == PERMISSION_ERROR) {
+            } else if (errCode == CHECK_PERMISSION_FAILED) {
                 task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
-            } else if (errCode == INTERNAL_ERROR) {
+            } else {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Internal Error."));
             }
@@ -135,9 +134,9 @@ private:
                 bundleName);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            } else if (errCode == PERMISSION_ERROR) {
+            } else if (errCode == CHECK_PERMISSION_FAILED) {
                 task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
-            }else if (errCode == INTERNAL_ERROR) {
+            } else {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Internal Error."));
             }
