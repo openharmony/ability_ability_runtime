@@ -237,6 +237,7 @@ Security::AccessToken::AccessTokenID UriPermissionManagerStubImpl::GetTokenIdByB
         HILOG_WARN("Failed to get bms.");
         return INTERNAL_ERROR;
     }
+    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     AppExecFwk::BundleInfo bundleInfo;
     if (!IN_PROCESS_CALL(bms->GetBundleInfo(bundleName, bundleFlag, bundleInfo, GetCurrentAccountId()))) {
         HILOG_WARN("To fail to get bundle info according to uri.");
