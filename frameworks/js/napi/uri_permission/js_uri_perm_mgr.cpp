@@ -90,7 +90,7 @@ private:
                 targetBundleName, 0);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            } else if (errCode == CHECK_PERMISSION_FAILED) {
+            } else if (errCode ==  AAFwk::CHECK_PERMISSION_FAILED) {
                 task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
             } else {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
@@ -134,7 +134,7 @@ private:
                 bundleName);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            } else if (errCode == CHECK_PERMISSION_FAILED) {
+            } else if (errCode == AAFwk::CHECK_PERMISSION_FAILED) {
                 task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
             } else {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
