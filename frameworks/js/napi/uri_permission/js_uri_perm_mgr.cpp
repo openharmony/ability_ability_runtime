@@ -91,11 +91,9 @@ private:
                 targetBundleName, 0);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            }
-            if (errCode == PERMISSION_ERROR) {
+            } else if (errCode == PERMISSION_ERROR) {
                 task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
-            }
-            if (errCode == INTERNAL_ERROR) {
+            } else if (errCode == INTERNAL_ERROR) {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Internal Error."));
             }
@@ -125,7 +123,7 @@ private:
         std::string bundleName;
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[1]), bundleName)) {
-            HILOG_ERROR("The flag is invalid.");
+            HILOG_ERROR("The bundleName is invalid.");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
@@ -137,8 +135,9 @@ private:
                 bundleName);
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
-            }
-            if (errCode == INTERNAL_ERROR) {
+            } else if (errCode == PERMISSION_ERROR) {
+                task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
+            }else if (errCode == INTERNAL_ERROR) {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Internal Error."));
             }
