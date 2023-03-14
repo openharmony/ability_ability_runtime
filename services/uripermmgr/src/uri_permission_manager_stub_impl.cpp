@@ -235,7 +235,7 @@ Security::AccessToken::AccessTokenID UriPermissionManagerStubImpl::GetTokenIdByB
     auto bms = ConnectBundleManager();
     if (bms == nullptr) {
         HILOG_WARN("Failed to get bms.");
-        return INTERNAL_ERROR;
+        return GET_BUNDLE_MANAGER_SERVICE_FAILED;
     }
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     AppExecFwk::BundleInfo bundleInfo;
