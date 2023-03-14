@@ -80,7 +80,7 @@ private:
         std::string targetBundleName;
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[argCountTwo]), targetBundleName)) {
-            HILOG_ERROR("The flag is invalid.");
+            HILOG_ERROR("The targetBundleName is invalid.");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
