@@ -25,7 +25,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 constexpr size_t ARGC_ONE = 1;
-JsErrorObserver::JsErrorObserver(NativeEngine& engine) : engine_(engine) {}
+JsErrorObserver::JsErrorObserver(NativeEngine &engine) : engine_(engine) {}
 
 JsErrorObserver::~JsErrorObserver() = default;
 
@@ -115,7 +115,7 @@ void JsErrorObserver::HandleException(const AppExecFwk::ErrorObject &errorObj)
     }
 }
 
-NativeValue* JsErrorObserver::CreateJsErrorObject(NativeEngine& engine, const AppExecFwk::ErrorObject &errorObj)
+NativeValue* JsErrorObserver::CreateJsErrorObject(NativeEngine &engine, const AppExecFwk::ErrorObject &errorObj)
 {
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
