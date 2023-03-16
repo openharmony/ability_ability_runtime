@@ -71,7 +71,9 @@ void MyObserver::OnExceptionObject(const AppExecFwk::ErrorObject &errorObj)
 {
     GTEST_LOG_(INFO) << "OnExceptionObject come, errorObj.name is " << errorObj.name <<
                         " errorObj.message is " << errorObj.message << " errorObj.stack is " << errorObj.stack;
-    ApplicationDataManagerTest::Flag = true;
+    EXPECT_STREQ("errorName", errorObj.name.c_str());
+    EXPECT_STREQ("errorMessage", errorObj.message.c_str());
+    EXPECT_STREQ("errorStack", errorObj.stack.c_str());
 }
 
 /**
