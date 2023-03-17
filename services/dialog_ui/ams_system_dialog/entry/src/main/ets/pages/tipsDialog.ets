@@ -17,7 +17,7 @@
 @Component
 struct TipsDialog {
   @State private deviceType: string = "phone";
-  @State private btn: object = { color: "#FFFFFF" }
+  @State private btn: Object = { color: "#FFFFFF" }
   private TAG = "TipsDialog_Page"
 
   aboutToAppear() {
