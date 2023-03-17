@@ -16,8 +16,8 @@
 @Entry
 @Component
 struct SelectorPcDialog {
-  @State private pcSelectorlist: object = {};
-  @State private hapList: object = [];
+  @State private pcSelectorlist: Object = {};
+  @State private hapList: Object[] = [];
   private TAG = "SelectorDialog_Pc_Page";
 
   aboutToAppear(): void {

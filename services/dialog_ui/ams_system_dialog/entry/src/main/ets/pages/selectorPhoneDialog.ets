@@ -42,7 +42,7 @@ class SelectorDataSource implements IDataSource {
 @Component
 struct SelectorPhoneDialog {
   private phoneShowData: SelectorDataSource = new SelectorDataSource([])
-  @State private selector: object = {
+  @State private selector: Object = {
     swiper: {
       height: "100vp",
       indicator: false,
@@ -54,7 +54,7 @@ struct SelectorPhoneDialog {
       marginTop: "20vp",
     }
   }
-  @State private hapList: object = [];
+  @State private hapList: Object[] = [];
   private TAG = "SelectorDialog_Phone_Page";
 
   aboutToAppear(): void {
