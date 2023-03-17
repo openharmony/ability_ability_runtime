@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
+interface Btn {
+  color:string
+}
+
 @Entry
 @Component
 struct TipsDialog {
   @State private deviceType: string = "phone";
-  @State private btn: Object = { color: "#FFFFFF" }
+  @State private btn: Btn = { color: "#FFFFFF" }
   private TAG = "TipsDialog_Page"
 
   aboutToAppear() {
