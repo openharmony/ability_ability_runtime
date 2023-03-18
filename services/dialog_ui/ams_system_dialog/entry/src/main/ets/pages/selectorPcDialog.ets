@@ -29,7 +29,7 @@ interface HapInfo {
 @Entry
 @Component
 struct SelectorPcDialog {
-  @State private pcSelectorlist: SelectorPc = {};
+  @State private pcSelectorlist: SelectorPc = { width: "100%", height: heightTotalVp + "vp"};
   @State private hapList: HapInfo[] = [];
   private TAG = "SelectorDialog_Pc_Page";
 
