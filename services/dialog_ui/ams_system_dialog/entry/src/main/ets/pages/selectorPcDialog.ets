@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-interface Selector {
+interface SelectorPc {
   width: string,
   height: string
 }
@@ -29,7 +29,7 @@ interface HapInfo {
 @Entry
 @Component
 struct SelectorPcDialog {
-  @State private pcSelectorlist: Selector = {};
+  @State private pcSelectorlist: SelectorPc = {};
   @State private hapList: HapInfo[] = [];
   private TAG = "SelectorDialog_Pc_Page";
 

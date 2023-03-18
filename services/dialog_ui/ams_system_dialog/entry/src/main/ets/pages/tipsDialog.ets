@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-interface Btn {
+interface TipBtn {
   color:string
 }
 
@@ -21,7 +21,7 @@ interface Btn {
 @Component
 struct TipsDialog {
   @State private deviceType: string = "phone";
-  @State private btn: Btn = { color: "#FFFFFF" }
+  @State private btn: TipBtn = { color: "#FFFFFF" }
   private TAG = "TipsDialog_Page"
 
   aboutToAppear() {
