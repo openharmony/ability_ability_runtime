@@ -13,11 +13,24 @@
  * limitations under the License.
  */
 
+interface Selector {
+  width: string,
+  height: string
+}
+
+interface HapInfo {
+  label: string,
+  icon: boolean,
+  bundle: string,
+  ability: string,
+  module: string
+}
+
 @Entry
 @Component
 struct SelectorPcDialog {
-  @State private pcSelectorlist: Object = {};
-  @State private hapList: Object[] = [];
+  @State private pcSelectorlist: Selector = {};
+  @State private hapList: HapInfo[] = [];
   private TAG = "SelectorDialog_Pc_Page";
 
   aboutToAppear(): void {

@@ -13,6 +13,31 @@
  * limitations under the License.
  */
 
+interface Swiper {
+  height: string,
+  indicator: boolean,
+  contentHeight: string,
+  gridColumns: string,
+  gridRows: string
+}
+
+interface Btn {
+  marginTop:string,
+}
+
+interface Selector {
+  swiper:Swiper,
+  btn: Btn
+}
+
+interface HapInfo {
+  label: string,
+  icon: boolean,
+  bundle: string,
+  ability: string,
+  module: string
+}
+
 class SelectorDataSource implements IDataSource {
   private list: string[] = []
   private listener: DataChangeListener
@@ -42,7 +67,7 @@ class SelectorDataSource implements IDataSource {
 @Component
 struct SelectorPhoneDialog {
   private phoneShowData: SelectorDataSource = new SelectorDataSource([])
-  @State private selector: Object = {
+  @State private selector: Selector = {
     swiper: {
       height: "100vp",
       indicator: false,
@@ -54,7 +79,7 @@ struct SelectorPhoneDialog {
       marginTop: "20vp",
     }
   }
-  @State private hapList: Object[] = [];
+  @State private hapList: HapInfo[] = [];
   private TAG = "SelectorDialog_Phone_Page";
 
   aboutToAppear(): void {
