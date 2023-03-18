@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-interface Swiper {
+interface SwiperPhone {
   height: string,
   indicator: boolean,
   contentHeight: string,
@@ -21,13 +21,13 @@ interface Swiper {
   gridRows: string
 }
 
-interface Btn {
+interface SelectorBtn {
   marginTop:string,
 }
 
-interface Selector {
-  swiper:Swiper,
-  btn: Btn
+interface SelectorPhone {
+  swiper:SwiperPhone,
+  btn: SelectorBtn
 }
 
 interface HapInfo {
@@ -67,7 +67,7 @@ class SelectorDataSource implements IDataSource {
 @Component
 struct SelectorPhoneDialog {
   private phoneShowData: SelectorDataSource = new SelectorDataSource([])
-  @State private selector: Selector = {
+  @State private selector: SelectorPhone = {
     swiper: {
       height: "100vp",
       indicator: false,
