@@ -77,15 +77,16 @@ constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
 constexpr int REGISTER_FOCUS_DELAY = 5000;
 const std::string CLASS_NAME = "ohos.app.MainThread";
 const std::string FUNC_NAME = "main";
-const std::string SO_PATH = "system/lib64/libmapleappkit.z.so";
 const std::string RENDER_PARAM = "invalidparam";
 const std::string COLD_START = "coldStart";
 const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
 const std::string PERMISSION_INTERNET = "ohos.permission.INTERNET";
+const std::string PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
+#define APP_ACCESS_BUNDLE_DIR 0x20
 
 constexpr int32_t BASE_USER_RANGE = 200000;
 
@@ -493,7 +494,7 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
         return ERR_NO_INIT;
     }
 
-    int32_t result = VerifyProcessPermission();
+    int32_t result = VerifyRequestPermission();
     if (result != ERR_OK) {
         HILOG_ERROR("Permission verification failed");
         return result;
@@ -1353,17 +1354,22 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetAppRunningRecordByAbili
     return appRunningManager_->GetAppRunningRecordByAbilityToken(abilityToken);
 }
 
+std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetTerminatingAppRunningRecord(
+    const sptr<IRemoteObject> &token) const
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr.");
+        return nullptr;
+    }
+    return appRunningManager_->GetTerminatingAppRunningRecord(token);
+}
+
 void AppMgrServiceInner::AbilityTerminated(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Terminate ability come.");
     if (!token) {
         HILOG_ERROR("Terminate ability error, token is null!");
-        return;
-    }
-
-    if (VerifyProcessPermission(token) != ERR_OK) {
-        HILOG_ERROR("Permission verify failed.");
         return;
     }
 
@@ -1466,7 +1472,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     if (bundleIndex == 0) {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetBundleInfo");
         bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleInfo(bundleName,
-            BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
+            BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION, bundleInfo, userId));
     } else {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetSandboxBundleInfo");
         bundleMgrResult = (IN_PROCESS_CALL(bundleMgr_->GetSandboxBundleInfo(bundleName,
@@ -1485,6 +1491,14 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         return;
     }
 
+    bool hasAccessBundleDirReq = std::any_of(bundleInfo.reqPermissions.begin(), bundleInfo.reqPermissions.end(),
+        [] (const auto &reqPermission) {
+            if (PERMISSION_ACCESS_BUNDLE_DIR == reqPermission) {
+                return true;
+            }
+
+            return false;
+        });
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
     auto token = bundleInfo.applicationInfo.accessTokenId;
@@ -1495,6 +1509,14 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         if (result != Security::AccessToken::PERMISSION_GRANTED) {
             setAllowInternet = 1;
             allowInternet = 0;
+        }
+
+        if (hasAccessBundleDirReq) {
+            int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_ACCESS_BUNDLE_DIR);
+            if (result != Security::AccessToken::PERMISSION_GRANTED) {
+                HILOG_ERROR("StartProcess PERMISSION_ACCESS_BUNDLE_DIR NOT GRANTED");
+                hasAccessBundleDirReq = false;
+            }
         }
     }
 
@@ -1510,6 +1532,9 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.setAllowInternet = setAllowInternet;
     startMsg.allowInternet = allowInternet;
     startMsg.hspList = hspList;
+    if (hasAccessBundleDirReq) {
+        startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
+    }
 
     HILOG_DEBUG("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",
         startMsg.apl.c_str(), bundleName.c_str(), startFlags);
@@ -1521,7 +1546,6 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     }
 
     startMsg.procName = processName;
-    startMsg.soPath = SO_PATH;
     startMsg.accessTokenIdEx = bundleInfo.applicationInfo.accessTokenIdEx;
 
     PerfProfile::GetInstance().SetAppForkStartTime(GetTickCount());
@@ -2849,7 +2873,7 @@ int AppMgrServiceInner::VerifyRequestPermission() const
     if (callerUid == ROOT_UID || callerUid == FOUNDATION_UID) {
         return ERR_OK;
     } else {
-        HILOG_ERROR("Permission verification failed.[DongLin]%{public}d", callerUid);
+        HILOG_ERROR("Permission verification failed, callerUid: %{public}d", callerUid);
         return ERR_PERMISSION_DENIED;
     }
 }
