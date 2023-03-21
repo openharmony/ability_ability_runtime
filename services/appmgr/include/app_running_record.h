@@ -613,6 +613,10 @@ private:
 
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record);
 
+    bool IsUpdateStateFromService();
+
+    void SetUpdateStateFromeService(bool isUpdateStateFromService);
+
 private:
     bool isKeepAliveApp_ = false;  // Only resident processes can be set to true, please choose carefully
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
@@ -662,6 +666,8 @@ private:
     bool securityFlag_ = false;
     int32_t requestProcCode_ = 0;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
+
+    bool isUpdateStateFromService_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -1408,5 +1408,15 @@ ProcessChangeReason AppRunningRecord::GetProcessChangeReason() const
 {
     return processChangeReason_;
 }
+
+bool AppRunningRecord::IsUpdateStateFromService()
+{
+    return isUpdateStateFromService_;
+}
+
+void AppRunningRecord::SetUpdateStateFromeService(bool isUpdateStateFromService)
+{
+    isUpdateStateFromService_ = isUpdateStateFromService;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
