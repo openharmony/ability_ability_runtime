@@ -1970,5 +1970,86 @@ HWTEST_F(MainThreadTest, Start_0100, TestSize.Level1)
     GTEST_LOG_(INFO) << "Wait main thread release.";
     testThread.join();
 }
+
+/**
+ * @tc.name: ChangeToLocalPath_0200
+ * @tc.desc: Main thread start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, ChangeToLocalPath_0200, TestSize.Level1)
+{
+    EXPECT_TRUE(mainThread_ != nullptr);
+    std::string bundleName = "com.ohos.demo";
+    std::string sourceDir = "/data/storage/el1/" + bundleName + "/";
+    std::string localPath = "";
+    mainThread_->ChangeToLocalPath(bundleName, sourceDir, localPath);
+    EXPECT_TRUE(localPath == "/data/storage/el1/");
+}
+
+/**
+ * @tc.name: GetRemoveOverlayPaths_0100
+ * @tc.desc: Main thread start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, GetRemoveOverlayPaths_0100, TestSize.Level1)
+{
+    EXPECT_TRUE(mainThread_ != nullptr);
+    std::vector<std::string> overlayPath = {
+        "test1",
+        "test2",
+        "test3"
+    };
+    std::vector<std::string> newOverlayPath = {
+        "test1",
+        "test3"
+    };
+    std::vector<std::string> result = mainThread_->GetRemoveOverlayPaths(overlayPath, newOverlayPath);
+    EXPECT_TRUE(result.size() == 1);
+    EXPECT_TRUE(result[0] == "test2");
+}
+
+/**
+ * @tc.name: GetRemoveOverlayPaths_0200
+ * @tc.desc: Main thread start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, GetRemoveOverlayPaths_0200, TestSize.Level1)
+{
+    EXPECT_TRUE(mainThread_ != nullptr);
+    std::vector<std::string> overlayPath = {};
+    std::vector<std::string> newOverlayPath = {
+        "test1",
+        "test3"
+    };
+    std::vector<std::string> result = mainThread_->GetRemoveOverlayPaths(overlayPath, newOverlayPath);
+    EXPECT_TRUE(result.size() == 0);
+}
+
+/**
+ * @tc.name: GetOverlayPaths_0100
+ * @tc.desc: Main thread start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, GetOverlayPaths_0100, TestSize.Level1)
+{
+    EXPECT_TRUE(mainThread_ != nullptr);
+    std::string bundleName = "com.ohos.demo";
+    std::string moduleName = "entry";
+    std::vector<std::string> overlayPath = {};
+    int result = GetOverlayPaths(bundleName, moduleName, overlayPath);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(overlayPath.size() == 0);
+}
+
+/**
+ * @tc.name: ResourceManager_0100
+ * @tc.desc: Main thread start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MainThreadTest, ResourceManager_0100, TestSize.Level1)
+{
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    EXPECT_TRUE(resourceManager != nullptr);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
