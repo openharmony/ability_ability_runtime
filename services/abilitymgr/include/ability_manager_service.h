@@ -625,8 +625,6 @@ public:
 
     void OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord);
     void OnCallConnectDied(std::shared_ptr<CallRecord> callRecord);
-    void GetMaxRestartNum(int &max, bool isRootLauncher);
-    void GetRestartIntervalTime(int &restartIntervalTime);
     void HandleLoadTimeOut(int64_t eventId);
     void HandleActiveTimeOut(int64_t eventId);
     void HandleInactiveTimeOut(int64_t eventId);
@@ -661,8 +659,6 @@ public:
     void GetAbilityRunningInfo(std::vector<AbilityRunningInfo> &info, std::shared_ptr<AbilityRecord> &abilityRecord);
     void GetExtensionRunningInfo(std::shared_ptr<AbilityRecord> &abilityRecord, const int32_t userId,
         std::vector<ExtensionRunningInfo> &info);
-
-    int GetMissionSaveTime() const;
 
     /**
      * generate ability request.
@@ -803,10 +799,9 @@ public:
 
     bool IsAbilityControllerStartById(int32_t missionId);
 
-    bool IsComponentInterceptionStart(const Want &want, const sptr<IRemoteObject> &callerToken,
-        int requestCode, int componentStatus, AbilityRequest &request);
+    bool IsComponentInterceptionStart(const Want &want, ComponentRequest &componentRequest, AbilityRequest &request);
 
-    void NotifyHandleMoveAbility(const sptr<IRemoteObject> &abilityToken, int code);
+    void NotifyHandleAbilityStateChange(const sptr<IRemoteObject> &abilityToken, int opCode);
 
     /**
      * Send not response process ID to ability manager service.
@@ -923,6 +918,15 @@ public:
 
     std::shared_ptr<AbilityRecord> GetFocusAbility();
 
+    /**
+     * Query whether the application of the specified PID and UID has been granted a certain permission
+     * @param permission
+     * @param pid Process id
+     * @param uid
+     * @return Returns ERR_OK if the current process has the permission, others on failure.
+     */
+    virtual int VerifyPermission(const std::string &permission, int pid, int uid) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -932,35 +936,13 @@ public:
     static constexpr uint32_t BACKGROUND_TIMEOUT_MSG = 6;
 
 #ifdef SUPPORT_ASAN
-    static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 150000; // ms
     static constexpr uint32_t LOAD_TIMEOUT = 150000;            // ms
     static constexpr uint32_t ACTIVE_TIMEOUT = 75000;          // ms
     static constexpr uint32_t INACTIVE_TIMEOUT = 7500;         // ms
-    static constexpr uint32_t TERMINATE_TIMEOUT = 150000;      // ms
-    static constexpr uint32_t CONNECT_TIMEOUT = 45000;         // ms
-    static constexpr uint32_t DISCONNECT_TIMEOUT = 7500;       // ms
-    static constexpr uint32_t COMMAND_TIMEOUT = 75000;         // ms
-    static constexpr uint32_t RESTART_TIMEOUT = 75000;         // ms
-    static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 7500;  // ms
-    static constexpr uint32_t FOREGROUND_TIMEOUT = 75000;   // ms
-    static constexpr uint32_t BACKGROUND_TIMEOUT = 45000;   // ms
-    static constexpr uint32_t DUMP_TIMEOUT = 15000;            // ms
-    static constexpr uint32_t KILL_TIMEOUT = 45000;           // ms
 #else
-    static constexpr uint32_t COLDSTART_LOAD_TIMEOUT = 10000; // ms
     static constexpr uint32_t LOAD_TIMEOUT = 10000;            // ms
     static constexpr uint32_t ACTIVE_TIMEOUT = 5000;          // ms
     static constexpr uint32_t INACTIVE_TIMEOUT = 500;         // ms
-    static constexpr uint32_t TERMINATE_TIMEOUT = 10000;      // ms
-    static constexpr uint32_t CONNECT_TIMEOUT = 3000;         // ms
-    static constexpr uint32_t DISCONNECT_TIMEOUT = 500;       // ms
-    static constexpr uint32_t COMMAND_TIMEOUT = 5000;         // ms
-    static constexpr uint32_t RESTART_TIMEOUT = 5000;         // ms
-    static constexpr uint32_t RESTART_ABILITY_TIMEOUT = 500;  // ms
-    static constexpr uint32_t FOREGROUND_TIMEOUT = 5000;   // ms
-    static constexpr uint32_t BACKGROUND_TIMEOUT = 3000;   // ms
-    static constexpr uint32_t DUMP_TIMEOUT = 1000;            // ms
-    static constexpr uint32_t KILL_TIMEOUT = 3000;           // ms
 #endif
 
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
@@ -990,6 +972,12 @@ public:
         KEY_DUMPSYS_PENDING,
         KEY_DUMPSYS_PROCESS,
         KEY_DUMPSYS_DATA,
+    };
+
+    enum {
+        ABILITY_MOVE_TO_FOREGROUND_CODE = 0,
+        ABILITY_MOVE_TO_BACKGROUND_CODE,
+        TERMINATE_ABILITY_CODE
     };
 
     friend class UserController;
@@ -1130,8 +1118,7 @@ private:
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByUserId(int32_t userId);
     std::shared_ptr<MissionListManager> GetListManagerByToken(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByToken(const sptr<IRemoteObject> &token);
-    std::shared_ptr<AbilityConnectManager> GetConnectManagerBySessionToken(
-        const sptr<Rosen::ISession> sessionToken);
+    std::shared_ptr<AbilityConnectManager> GetConnectManagerBySessionInfo(const sptr<SessionInfo> &sessionInfo);
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByToken(const sptr<IRemoteObject> &token);
     bool JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
@@ -1154,7 +1141,8 @@ private:
         const std::string& args, std::vector<std::string>& state, bool isClient, bool isUserID, int UserID);
     std::map<uint32_t, DumpSysFuncType> dumpsysFuncMap_;
 
-    int CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abilityInfo);
+    int CheckStaticCfgPermission(AppExecFwk::AbilityInfo &abilityInfo, bool isStartAsCaller,
+        uint32_t callerTokenId);
 
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
@@ -1239,6 +1227,8 @@ private:
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall);
 
+    bool IsDelegatorCall(const AppExecFwk::RunningProcessInfo &processInfo, const AbilityRequest &abilityRequest);
+
     /**
      *  Temporary, use old rule to check permission.
      *
@@ -1280,6 +1270,9 @@ private:
 
     void UpdateAbilityRequestInfo(const sptr<Want> &want, AbilityRequest &request);
 
+    ComponentRequest initComponentRequest(const sptr<IRemoteObject> &callerToken = nullptr,
+        const int requestCode = -1, const int componentStatus = 0);
+
     inline bool IsCrossUserCall(int32_t userId)
     {
         return (userId != INVALID_USER_ID && userId != U0_USER_ID && userId != GetUserId());
@@ -1299,7 +1292,6 @@ private:
     std::shared_ptr<DataAbilityManager> systemDataAbilityManager_;
     std::unordered_map<int, std::shared_ptr<PendingWantManager>> pendingWantManagers_;
     std::shared_ptr<PendingWantManager> pendingWantManager_;
-    std::shared_ptr<AmsConfigurationParameter> amsConfigResolver_;
     const static std::map<std::string, AbilityManagerService::DumpKey> dumpMap;
     const static std::map<std::string, AbilityManagerService::DumpsysKey> dumpsysMap;
     const static std::map<int32_t, AppExecFwk::SupportWindowMode> windowModeMap;

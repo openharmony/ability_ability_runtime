@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,12 +71,18 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace OHOS::AbilityBase::Constants;
-using HspList = std::vector<BaseSharedPackageInfo>;
+using HspList = std::vector<BaseSharedBundleInfo>;
 std::weak_ptr<OHOSApplication> MainThread::applicationForDump_;
 std::shared_ptr<EventHandler> MainThread::signalHandler_ = nullptr;
 std::shared_ptr<MainThread::MainHandler> MainThread::mainHandler_ = nullptr;
 static std::shared_ptr<MixStackDumper> mixStackDumper_ = nullptr;
 namespace {
+#ifdef APP_USE_ARM64
+constexpr char FORM_RENDER_LIB_PATH[] = "/system/lib64/libformrender.z.so";
+#else
+constexpr char FORM_RENDER_LIB_PATH[] = "/system/lib/libformrender.z.so";
+#endif
+
 constexpr int32_t DELIVERY_TIME = 200;
 constexpr int32_t DISTRIBUTE_TIME = 100;
 constexpr int32_t UNSPECIFIED_USERID = -2;
@@ -1048,9 +1054,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     application_->SetApplicationContext(applicationContext);
     if (isStageBased) {
         HspList hspList;
-        ErrCode ret = bundleMgr->GetBaseSharedPackageInfos(appInfo.bundleName, UNSPECIFIED_USERID, hspList);
+        ErrCode ret = bundleMgr->GetBaseSharedBundleInfos(appInfo.bundleName, hspList);
         if (ret != ERR_OK) {
-            HILOG_ERROR("MainThread::HandleLaunchApplication GetBaseSharedPackageInfos failed: %d", ret);
+            HILOG_ERROR("MainThread::HandleLaunchApplication GetBaseSharedBundleInfos failed: %d", ret);
         }
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;
@@ -1086,6 +1092,15 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
             std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
             std::string summary = "Error message:" + errorMsg + "\n";
+            const AppExecFwk::ErrorObject errorObj = {
+                .name = errorName,
+                .message = errorMsg,
+                .stack = errorStack
+            };
+            if (obj != nullptr && obj->HasProperty("code")) {
+                std::string errorCode = GetNativeStrFromJsTaggedObj(obj, "code");
+                summary += "Error code:" + errorCode + "\n";
+            }
             if (appThread->application_ == nullptr) {
                 HILOG_ERROR("appThread is nullptr, HandleLaunchApplication failde.");
                 return;
@@ -1120,7 +1135,8 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 EVENT_KEY_REASON, errorName,
                 EVENT_KEY_JSVM, JSVM_TYPE,
                 EVENT_KEY_SUMMARY, summary);
-            if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary)) {
+            if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
+                ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObj)) {
                 return;
             }
             // if app's callback has been registered, let app decide whether exit or not.
@@ -1165,6 +1181,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         };
         idleTime_ = std::make_shared<IdleTime>(mainHandler_, callback);
         idleTime_->Start();
+
+        IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
+        jsEngine.NotifyIdleStatusControl(cb);
     }
 
     auto usertestInfo = appLaunchData.GetUserTestInfo();
@@ -1270,16 +1289,28 @@ void MainThread::LoadNativeLiabrary(std::string &nativeLibraryPath)
 
     void *handleAbilityLib = nullptr;
     for (auto fileEntry : nativeFileEntries_) {
-        if (!fileEntry.empty()) {
-            handleAbilityLib = dlopen(fileEntry.c_str(), RTLD_NOW | RTLD_GLOBAL);
-            if (handleAbilityLib == nullptr) {
+        if (fileEntry.empty()) {
+            continue;
+        }
+        handleAbilityLib = dlopen(fileEntry.c_str(), RTLD_NOW | RTLD_GLOBAL);
+        if (handleAbilityLib == nullptr) {
+            if (fileEntry.find("libformrender.z.so") == std::string::npos) {
                 HILOG_ERROR("%{public}s Fail to dlopen %{public}s, [%{public}s]",
                     __func__, fileEntry.c_str(), dlerror());
                 exit(-1);
+            } else {
+                HILOG_DEBUG("Load libformrender.z.so from native lib path.");
+                handleAbilityLib = dlopen(FORM_RENDER_LIB_PATH, RTLD_NOW | RTLD_GLOBAL);
+                if (handleAbilityLib == nullptr) {
+                    HILOG_ERROR("%{public}s Fail to dlopen %{public}s, [%{public}s]",
+                        __func__, FORM_RENDER_LIB_PATH, dlerror());
+                    exit(-1);
+                }
+                fileEntry = FORM_RENDER_LIB_PATH;
             }
-            HILOG_DEBUG("%{public}s Success to dlopen %{public}s", __func__, fileEntry.c_str());
-            handleAbilityLib_.emplace_back(handleAbilityLib);
         }
+        HILOG_DEBUG("%{public}s Success to dlopen %{public}s", __func__, fileEntry.c_str());
+        handleAbilityLib_.emplace_back(handleAbilityLib);
     }
 #endif
 }
@@ -1421,6 +1452,7 @@ bool MainThread::PrepareAbilityDelegator(const std::shared_ptr<UserTestRecord> &
         options.hapPath = entryHapModuleInfo.hapPath;
         options.loadAce = false;
         options.isStageModel = false;
+        options.isTestFramework = true;
         if (entryHapModuleInfo.abilityInfos.empty()) {
             HILOG_ERROR("Failed to abilityInfos");
             return false;

@@ -625,12 +625,14 @@ int AppMgrProxy::PreStartNWebSpawnProcess()
     return 0;
 }
 
-int AppMgrProxy::StartRenderProcess(const std::string &renderParam, int32_t ipcFd,
-    int32_t sharedFd, pid_t &renderPid)
+int AppMgrProxy::StartRenderProcess(const std::string &renderParam,
+                                    int32_t ipcFd, int32_t sharedFd,
+                                    int32_t crashFd, pid_t &renderPid)
 {
-    if (renderParam.empty() || ipcFd <= 0 || sharedFd <= 0) {
-        HILOG_ERROR("Invalid params, renderParam:%{private}s, ipcFd:%{public}d, sharedFd:%{public}d",
-            renderParam.c_str(), ipcFd, sharedFd);
+    if (renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 || crashFd <= 0) {
+        HILOG_ERROR("Invalid params, renderParam:%{private}s, ipcFd:%{public}d, "
+                    "sharedFd:%{public}d, crashFd:%{public}d",
+                    renderParam.c_str(), ipcFd, sharedFd, crashFd);
         return -1;
     }
 
@@ -647,15 +649,21 @@ int AppMgrProxy::StartRenderProcess(const std::string &renderParam, int32_t ipcF
         return -1;
     }
 
-    if (!data.WriteFileDescriptor(ipcFd) || !data.WriteFileDescriptor(sharedFd)) {
-        HILOG_ERROR("want fd failed, ipcFd:%{public}d, sharedFd:%{public}d", ipcFd, sharedFd);
+    if (!data.WriteFileDescriptor(ipcFd) || !data.WriteFileDescriptor(sharedFd) ||
+        !data.WriteFileDescriptor(crashFd)) {
+        HILOG_ERROR("want fd failed, ipcFd:%{public}d, sharedFd:%{public}d, "
+                    "crashFd:%{public}d",
+                    ipcFd, sharedFd, crashFd);
         return -1;
     }
 
-    int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(IAppMgr::Message::START_RENDER_PROCESS), data, reply, option);
+    int32_t ret = Remote()->SendRequest(
+        static_cast<uint32_t>(IAppMgr::Message::START_RENDER_PROCESS), data,
+        reply, option);
     if (ret != NO_ERROR) {
-        HILOG_WARN("StartRenderProcess SendRequest is failed, error code: %{public}d", ret);
+        HILOG_WARN(
+            "StartRenderProcess SendRequest is failed, error code: %{public}d",
+            ret);
         return ret;
     }
 
@@ -1040,6 +1048,37 @@ int32_t AppMgrProxy::NotifyUnLoadRepairPatch(const std::string &bundleName, cons
     }
 
     return reply.ReadInt32();
+}
+
+bool AppMgrProxy::IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return false;
+    }
+    if (!data.WriteString(bundleName) || !data.WriteUint32(versionCode)) {
+        HILOG_ERROR("Write bundle name or version code failed.");
+        return false;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::IS_SHARED_BUNDLE_RUNNING),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
+        return false;
+    }
+
+    return reply.ReadBool();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

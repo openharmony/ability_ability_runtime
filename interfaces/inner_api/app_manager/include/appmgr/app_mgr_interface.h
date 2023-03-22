@@ -231,11 +231,13 @@ public:
      * @param renderParam, params passed to renderprocess.
      * @param ipcFd, ipc file descriptior for web browser and render process.
      * @param sharedFd, shared memory file descriptior.
+     * @param crashFd, crash signal file descriptior.
      * @param renderPid, created render pid.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartRenderProcess(const std::string &renderParam, int32_t ipcFd,
-        int32_t sharedFd, pid_t &renderPid) = 0;
+    virtual int StartRenderProcess(const std::string &renderParam,
+                                   int32_t ipcFd, int32_t sharedFd,
+                                   int32_t crashFd, pid_t &renderPid) = 0;
 
     /**
      * Render process call this to attach app manager service.
@@ -310,6 +312,15 @@ public:
     };
 #endif
 
+    /**
+     * @brief Check whether the shared bundle is running.
+     *
+     * @param bundleName Shared bundle name.
+     * @param versionCode Shared bundle version code.
+     * @return Returns the shared bundle running result. The result is true if running, false otherwise.
+     */
+    virtual bool IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode) = 0;
+
     // please add new message item to the bottom in order to prevent some unexpected BUG
     enum class Message {
         APP_ATTACH_APPLICATION = 0,
@@ -347,6 +358,7 @@ public:
         NOTIFY_UNLOAD_REPAIR_PATCH,
         PRE_START_NWEBSPAWN_PROCESS,
         APP_GET_PROCESS_RUNNING_INFORMATION,
+        IS_SHARED_BUNDLE_RUNNING,
     };
 };
 }  // namespace AppExecFwk

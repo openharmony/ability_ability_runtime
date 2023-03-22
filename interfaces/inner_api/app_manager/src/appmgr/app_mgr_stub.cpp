@@ -107,6 +107,8 @@ AppMgrStub::AppMgrStub()
 #endif
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::NOTIFY_UNLOAD_REPAIR_PATCH)] =
         &AppMgrStub::HandleNotifyUnLoadRepairPatch;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::IS_SHARED_BUNDLE_RUNNING)] =
+        &AppMgrStub::HandleIsSharedBundleRunning;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -426,8 +428,10 @@ int32_t AppMgrStub::HandleStartRenderProcess(MessageParcel &data, MessageParcel 
     std::string renderParam = data.ReadString();
     int32_t ipcFd = data.ReadFileDescriptor();
     int32_t sharedFd = data.ReadFileDescriptor();
+    int32_t crashFd = data.ReadFileDescriptor();
     int32_t renderPid = 0;
-    int32_t result = StartRenderProcess(renderParam, ipcFd, sharedFd, renderPid);
+    int32_t result =
+        StartRenderProcess(renderParam, ipcFd, sharedFd, crashFd, renderPid);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("write result error.");
         return ERR_INVALID_VALUE;
@@ -585,6 +589,19 @@ int32_t AppMgrStub::HandleNotifyUnLoadRepairPatch(MessageParcel &data, MessagePa
     auto callback = iface_cast<IQuickFixCallback>(data.ReadRemoteObject());
     auto ret = NotifyUnLoadRepairPatch(bundleName, callback);
     if (!reply.WriteInt32(ret)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsSharedBundleRunning(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("function called.");
+    std::string bundleName = data.ReadString();
+    uint32_t versionCode = data.ReadUint32();
+    bool result = IsSharedBundleRunning(bundleName, versionCode);
+    if (!reply.WriteBool(result)) {
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
