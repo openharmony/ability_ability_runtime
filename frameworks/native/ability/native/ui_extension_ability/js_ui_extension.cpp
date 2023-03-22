@@ -44,22 +44,23 @@ NativeValue *AttachUIExtensionContext(NativeEngine *engine, void *value, void *)
         HILOG_ERROR("invalid parameter.");
         return nullptr;
     }
+
     auto ptr = reinterpret_cast<std::weak_ptr<UIExtensionContext> *>(value)->lock();
     if (ptr == nullptr) {
         HILOG_ERROR("invalid context.");
         return nullptr;
     }
     NativeValue *object = JsUIExtensionContext::CreateJsUIExtensionContext(*engine, ptr);
+
     auto contextObj = JsRuntime::LoadSystemModuleByEngine(engine,
         "application.UIExtensionContext", &object, 1)->Get();
-
     if (contextObj == nullptr) {
         HILOG_ERROR("load context error.");
         return nullptr;
     }
-
     NativeObject *nObject = ConvertNativeValueTo<NativeObject>(contextObj);
     nObject->ConvertToNativeBindingObject(engine, DetachCallbackFunc, AttachUIExtensionContext, value, nullptr);
+    
     auto workContext = new (std::nothrow) std::weak_ptr<UIExtensionContext>(ptr);
     nObject->SetNativePointer(workContext,
         [](NativeEngine *, void *data, void *) {
@@ -181,8 +182,12 @@ void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> se
 
     Extension::OnStart(want, sessionInfo);
     if (sessionInfo) {
-        uiWindow_ = Ace::NG::UIWindow::CreateWindowScene(GetContext(),
+        uiWindow_ = Ace::NG::UIWindow::CreateWindowExtension(GetContext(),
             sessionInfo->sessionToken, sessionInfo->surfaceNode);
+        if (uiWindow_ == nullptr) {
+            HILOG_ERROR("JsUIExtension OnStart create ui window error.");
+            return;
+        }
         uiWindow_->RegisterSessionStageStateListener(sceneSessionStageListener_);
     } else {
         HILOG_DEBUG("JsUIExtension OnStart sessionInfo is nullptr.");
@@ -210,6 +215,12 @@ void JsUIExtension::OnStop()
     UIExtension::OnStop();
     HILOG_DEBUG("JsUIExtension OnStop begin.");
     CallObjectMethod("onDestroy");
+
+    if (uiWindow_ != nullptr) {
+        uiWindow_->Disconnect();
+    } else {
+        HILOG_ERROR("JsUIExtension::OnStop uiWindow is null.");
+    }
 
     auto context = GetContext();
     if (context == nullptr) {
