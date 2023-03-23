@@ -450,7 +450,7 @@ int32_t DistributedClient::StopRemoteExtensionAbility(const Want &want, int32_t 
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         HILOG_ERROR("StopRemoteExtensionAbility remote service null");
-        return ERR_NULL_OBJECT;
+        return INVALID_PARAMETERS_ERR;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
