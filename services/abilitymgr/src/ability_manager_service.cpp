@@ -6066,7 +6066,7 @@ bool AbilityManagerService::IsComponentInterceptionStart(const Want &want, Compo
         newWant.SetParam("abilityType", type);
         int32_t launchMode = static_cast<int32_t>(request.abilityInfo.launchMode);
         newWant.SetParam("launchMode", launchMode);
-        int32_t callType = static_cast<int32_t>(abilityRequest.callType);
+        int32_t callType = static_cast<int32_t>(request.callType);
         newWant.SetParam("callType", callType);
 
         HILOG_DEBUG("%{public}s", __func__);
