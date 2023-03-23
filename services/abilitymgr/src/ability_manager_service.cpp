@@ -1250,16 +1250,10 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
         HILOG_ERROR("%{public}s VerificationAllToken failed.", __func__);
-        eventInfo.errCode = ERR_INVALID_VALUE;
-        EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
-        return ERR_INVALID_CALLER;
-    }
-
-    if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
-        auto isSpecificSA = AAFwk::PermissionVerification::GetInstance()->
-            CheckSpecificSystemAbilityAccessPermission();
-        if (!isSpecificSA) {
+        if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission()) {
             HILOG_ERROR("VerificationAllToken failed.");
+            eventInfo.errCode = ERR_INVALID_VALUE;
+            EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
             return ERR_INVALID_CALLER;
         }
         HILOG_DEBUG("Caller is specific system ability.");
