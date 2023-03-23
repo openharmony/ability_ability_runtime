@@ -1254,12 +1254,30 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
         EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CALLER;
     }
+
+    if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
+        auto isSpecificSA = AAFwk::PermissionVerification::GetInstance()->
+            CheckSpecificSystemAbilityAccessPermission();
+        if (!isSpecificSA) {
+            HILOG_ERROR("VerificationAllToken failed.");
+            return ERR_INVALID_CALLER;
+        }
+        HILOG_DEBUG("Caller is specific system ability.");
+    }
+
     int32_t validUserId = GetValidUserId(userId);
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
         eventInfo.errCode = ERR_INVALID_VALUE;
         EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_CROSS_USER;
+    }
+
+    if(callerToken != nullptr && CheckIfOperateRemote(want)) {
+        auto callerUid = IPCSkeleton::GetCallingUid();
+        uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+        DistributedClient dmsClient;
+        return dmsClient.StopRemoteExtensionAbility(want, callerUid, accessToken, eventInfo.extensionType);
     }
 
     AbilityRequest abilityRequest;
