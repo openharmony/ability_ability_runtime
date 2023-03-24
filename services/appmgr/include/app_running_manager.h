@@ -147,7 +147,7 @@ public:
     *
     * @param pid, pid input.
     * @param mallocInfo, dynamic storage information output.
-    * 
+    *
     * @return Returns ERR_OK on success, others on failure.
     */
     int32_t DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
