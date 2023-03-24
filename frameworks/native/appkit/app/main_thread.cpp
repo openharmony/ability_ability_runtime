@@ -18,6 +18,7 @@
 #include <new>
 #include <regex>
 #include <unistd.h>
+#include <malloc.h>
 
 #include "constants.h"
 #include "ability_delegator.h"

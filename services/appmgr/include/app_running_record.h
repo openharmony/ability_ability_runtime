@@ -390,7 +390,7 @@ public:
      *
      * @param pid, pid input.
      * @param mallocInfo, dynamic storage information output.
-     * 
+     *
      * @return
      */
     void ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
