@@ -1777,6 +1777,27 @@ void MainThread::HandleMemoryLevel(int level)
 
 /**
  *
+ * @brief Get the application's memory allocation info.
+ *
+ * @param pid, pid input.
+ * @param mallocInfo, dynamic storage information output.
+ */
+void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
+{
+    struct mallinfo mi = mallinfo();
+    int usmblks = mi.usmblks; // 当前从分配器中分配的总的堆内存大小
+    int uordblks = mi.uordblks; // 当前已释放给分配器，分配缓存了未释放给系统的内存大小
+    int fordblks = mi.fordblks; // 当前未释放的大小
+    HILOG_DEBUG("the application's pid: %{public}i", pid);
+    HILOG_DEBUG("usmblks: %{public}i, uordblks: %{public}i, fordblks: %{public}i", usmblks, uordblks, fordblks);
+    pidInfo.clear();
+    pidInfo.push_back(usmblks);
+    pidInfo.push_back(uordblks);
+    pidInfo.push_back(fordblks);
+}
+
+/**
+ *
  * @brief send the new config to the application.
  *
  * @param config The updated config.
