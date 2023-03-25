@@ -83,9 +83,10 @@ public:
 
     /**
      * ScheduleHeapMemory, call ScheduleHeapMemory() through proxy project,
-     * Get the application's memory info.
+     * Get the application's memory allocation info.
      *
-     * @param pidInfo, contains the pid info and malloc info.
+     * @param pid, pid input.
+     * @param mallocInfo, dynamic storage information output.
      *
      * @return
      */
