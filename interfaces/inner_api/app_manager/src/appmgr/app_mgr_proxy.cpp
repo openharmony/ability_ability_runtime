@@ -314,8 +314,6 @@ int32_t AppMgrProxy::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocI
     HILOG_DEBUG("AppMgrProxy::DumpHeapMemory.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -325,6 +323,8 @@ int32_t AppMgrProxy::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocI
         HILOG_ERROR("Remote() is NULL");
         return ERR_NULL_OBJECT;
     }
+
+    MessageOption option(MessageOption::TF_SYNC);
     int32_t ret =
         remote->SendRequest(
             static_cast<uint32_t>(IAppMgr::Message::DUMP_HEAP_MEMORY_PROCESS), data, reply, option);
