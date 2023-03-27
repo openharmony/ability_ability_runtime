@@ -105,7 +105,7 @@ constexpr char EXTENSION_PARAMS_NAME[] = "name";
 
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 
-void SetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AbilityRuntime::Runtime::Options &options)
+void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths)
 {
     std::string patchNativeLibraryPath = bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath;
     if (!patchNativeLibraryPath.empty()) {
@@ -113,7 +113,7 @@ void SetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, Abil
         std::string patchLibPath = LOCAL_CODE_PATH;
         patchLibPath += (patchLibPath.back() == '/') ? patchNativeLibraryPath : "/" + patchNativeLibraryPath;
         HILOG_INFO("napi patch lib path = %{private}s", patchLibPath.c_str());
-        options.appLibPaths["default"].emplace_back(patchLibPath);
+        appLibPaths["default"].emplace_back(patchLibPath);
     }
 
     std::string nativeLibraryPath = bundleInfo.applicationInfo.nativeLibraryPath;
@@ -124,7 +124,7 @@ void SetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, Abil
         std::string libPath = LOCAL_CODE_PATH;
         libPath += (libPath.back() == '/') ? nativeLibraryPath : "/" + nativeLibraryPath;
         HILOG_INFO("napi lib path = %{private}s", libPath.c_str());
-        options.appLibPaths["default"].emplace_back(libPath);
+        appLibPaths["default"].emplace_back(libPath);
     }
 
     for (auto &hapInfo : bundleInfo.hapModuleInfos) {
@@ -141,12 +141,13 @@ void SetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, Abil
             std::string patchLibPath = LOCAL_CODE_PATH;
             patchLibPath += (patchLibPath.back() == '/') ? patchNativeLibraryPath : "/" + patchNativeLibraryPath;
             HILOG_INFO("name: %{public}s, patch lib path = %{private}s", hapInfo.name.c_str(), patchLibPath.c_str());
-            options.appLibPaths[appLibPathKey].emplace_back(patchLibPath);
+            appLibPaths[appLibPathKey].emplace_back(patchLibPath);
         }
 
         std::string libPath = LOCAL_CODE_PATH;
         libPath += (libPath.back() == '/') ? hapInfo.nativeLibraryPath : "/" + hapInfo.nativeLibraryPath;
-        options.appLibPaths[appLibPathKey].emplace_back(libPath);
+        HILOG_DEBUG("appLibPathKey: %{private}s, libPath: %{private}s", appLibPathKey.c_str(), libPath.c_str());
+        appLibPaths[appLibPathKey].emplace_back(libPath);
     }
 
     for (auto &hspInfo : hspList) {
@@ -160,7 +161,8 @@ void SetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, Abil
         std::string libPath = LOCAL_CODE_PATH;
         libPath = libPath.back() == '/' ? libPath : libPath + "/";
         libPath += hspInfo.bundleName + "/" + hspInfo.nativeLibraryPath;
-        options.appLibPaths[appLibPathKey].emplace_back(libPath);
+        HILOG_DEBUG("appLibPathKey: %{private}s, libPath: %{private}s", appLibPathKey.c_str(), libPath.c_str());
+        appLibPaths[appLibPathKey].emplace_back(libPath);
     }
 }
 } // namespace
@@ -1052,12 +1054,17 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         AbilityRuntime::ApplicationContext::GetInstance();
     applicationContext->AttachContextImpl(contextImpl);
     application_->SetApplicationContext(applicationContext);
+
+    HspList hspList;
+    ErrCode ret = bundleMgr->GetBaseSharedBundleInfos(appInfo.bundleName, hspList);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("GetBaseSharedBundleInfos failed: %{public}d", ret);
+    }
+    AppLibPathMap appLibPaths {};
+    GetNativeLibPath(bundleInfo, hspList, appLibPaths);
+    AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths);
+
     if (isStageBased) {
-        HspList hspList;
-        ErrCode ret = bundleMgr->GetBaseSharedBundleInfos(appInfo.bundleName, hspList);
-        if (ret != ERR_OK) {
-            HILOG_ERROR("MainThread::HandleLaunchApplication GetBaseSharedBundleInfos failed: %d", ret);
-        }
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;
         AbilityRuntime::Runtime::Options options;
@@ -1070,7 +1077,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.isDebugVersion = bundleInfo.applicationInfo.debug;
         options.arkNativeFilePath = bundleInfo.applicationInfo.arkNativeFilePath;
         options.uid = bundleInfo.applicationInfo.uid;
-        SetNativeLibPath(bundleInfo, hspList, options);
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
             HILOG_ERROR("Failed to create runtime");
