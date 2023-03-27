@@ -136,8 +136,8 @@ export default class SelectorServiceExtensionAbility extends extension {
             }
             await win.setBackgroundColor("#00000000");
             await win.show();
-        } catch {
-            console.error(TAG, "window create failed!");
+        } catch (e) {
+            console.error(TAG, "window create failed: " + JSON.stringify(e));
         }
     }
 };
