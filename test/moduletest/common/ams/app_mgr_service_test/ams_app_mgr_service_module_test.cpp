@@ -54,7 +54,7 @@ public:
     {}
     void ScheduleMemoryLevel(const int) override
     {}
-    void ScheduleHeapMemory(const int, OHOS:AppExecFwk:MallocInfo&) override
+    void ScheduleHeapMemory(const int, OHOS::AppExecFwk::MallocInfo&) override
     {}
     void ScheduleLaunchApplication(const AppLaunchData&, const Configuration&) override
     {}
