@@ -1789,12 +1789,10 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 #ifdef SUPPORT_GRAPHICS
     // notify winddow manager service the ability died
     handler->PostTask([ability = shared_from_this()]() {
-        auto wmsHandler = ability->GetWMSHandler();
-        HILOG_INFO("Ability on scheduler died nodify wms: %{public}d", bool(wmsHandler));
-        if (wmsHandler) {
+        if (ability->GetWMSHandler()) {
             sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
             ability->SetAbilityTransitionInfo(info);
-            wmsHandler->NotifyAnimationAbilityDied(info);
+            ability->GetWMSHandler()->NotifyAnimationAbilityDied(info);
         }
     });
 #endif
