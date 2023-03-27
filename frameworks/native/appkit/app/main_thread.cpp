@@ -488,6 +488,26 @@ void MainThread::ScheduleMemoryLevel(const int level)
 
 /**
  *
+ * @brief Get the application's memory allocation info.
+ *
+ * @param pid, pid input.
+ * @param mallocInfo, dynamic storage information output.
+ */
+void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
+{
+    struct mallinfo mi = mallinfo();
+    int usmblks = mi.usmblks; // 当前从分配器中分配的总的堆内存大小
+    int uordblks = mi.uordblks; // 当前已释放给分配器，分配缓存了未释放给系统的内存大小
+    int fordblks = mi.fordblks; // 当前未释放的大小
+    HILOG_DEBUG("The pid of the app we want to dump memory allocation information is: %{public}i", pid);
+    HILOG_DEBUG("usmblks: %{public}i, uordblks: %{public}i, fordblks: %{public}i", usmblks, uordblks, fordblks);
+    mallocInfo.usmblks = usmblks;
+    mallocInfo.uordblks = uordblks;
+    mallocInfo.fordblks = fordblks;
+}
+
+/**
+ *
  * @brief Schedule the application process exit safely.
  *
  */
@@ -1774,26 +1794,6 @@ void MainThread::HandleMemoryLevel(int level)
 
     application_->OnMemoryLevel(level);
     HILOG_DEBUG("MainThread::HandleMemoryLevel called end.");
-}
-
-/**
- *
- * @brief Get the application's memory allocation info.
- *
- * @param pid, pid input.
- * @param mallocInfo, dynamic storage information output.
- */
-void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
-{
-    struct mallinfo mi = mallinfo();
-    int usmblks = mi.usmblks; // 当前从分配器中分配的总的堆内存大小
-    int uordblks = mi.uordblks; // 当前已释放给分配器，分配缓存了未释放给系统的内存大小
-    int fordblks = mi.fordblks; // 当前未释放的大小
-    HILOG_DEBUG("The pid of the app we want to dump memory allocation information is: %{public}i", pid);
-    HILOG_DEBUG("usmblks: %{public}i, uordblks: %{public}i, fordblks: %{public}i", usmblks, uordblks, fordblks);
-    mallocInfo.usmblks = usmblks;
-    mallocInfo.uordblks = uordblks;
-    mallocInfo.fordblks = fordblks;
 }
 
 /**
