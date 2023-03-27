@@ -126,7 +126,6 @@ private:
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
-
         AsyncTask::CompleteCallback complete =
         [uriStr, bundleName](NativeEngine& engine, AsyncTask& task, int32_t status) {
             Uri uri(uriStr);
@@ -135,13 +134,13 @@ private:
             if (errCode == ERR_OK) {
                 task.ResolveWithNoError(engine, engine.CreateUndefined());
             } else if (errCode == AAFwk::CHECK_PERMISSION_FAILED) {
-                task.Reject(engine, CreateNoPermissionError(engine, "ohos.permission.PROXY_AUTHORIZATION_URI"));
+                task.Reject(engine, CreateNoPermissionError(engine,
+                    "Do not have permission ohos.permission.PROXY_AUTHORIZATION_URI"));
             } else {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Internal Error."));
             }
         };
-
         NativeValue* lastParam = (info.argc == argCountThree) ? info.argv[argCountTwo] : nullptr;
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JsUriPermMgr::OnRevokeUriPermission",

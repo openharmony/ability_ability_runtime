@@ -42,7 +42,6 @@ void UriPermissionManagerClient::RevokeUriPermission(const Security::AccessToken
     if (uriPermMgr) {
         return uriPermMgr->RevokeUriPermission(tokenId);
     }
-    return;
 }
 
 int UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)

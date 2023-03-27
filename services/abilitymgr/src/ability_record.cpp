@@ -1200,7 +1200,6 @@ void AbilityRecord::Terminate(const Closure &task)
     // earlier than above actions.
     currentState_ = AbilityState::TERMINATING;
     lifecycleDeal_->Terminate(want_, lifeCycleStateInfo_);
-    RevokeUriPermission();
 }
 
 void AbilityRecord::ConnectAbility()
