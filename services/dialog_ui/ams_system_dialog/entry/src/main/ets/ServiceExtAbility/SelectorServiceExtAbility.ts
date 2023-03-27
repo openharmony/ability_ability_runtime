@@ -119,6 +119,7 @@ export default class SelectorServiceExtensionAbility extends extension {
 
     private async createWindow(name: string, windowType: number, rect) {
         console.info(TAG, "create window");
+        console.info(TAG, "create window token: " + globalThis.abilityWant.parameters['ohos.aafwk.param.callerToken']);
         try {
             win = await window.create(globalThis.selectExtensionContext, name, windowType);
             await win.bindDialogTarget(globalThis.abilityWant.parameters['ohos.aafwk.param.callerToken'], () => {
