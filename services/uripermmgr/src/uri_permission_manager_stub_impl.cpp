@@ -62,7 +62,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
         tmpFlag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     }
     auto&& scheme = uri_inner.GetScheme();
-    if (scheme != "file" && scheme != "dataShare") {
+    if (scheme != "file") {
         HILOG_WARN("only support file or dataShare uri.");
         return INNER_ERR;
     }
@@ -118,6 +118,14 @@ int UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigne
 void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
 {
     HILOG_DEBUG("Start to remove uri permission.");
+    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeInfo;
+    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
+    HILOG_DEBUG("callerprocessName : %{public}s", nativeInfo.processName.c_str());
+    if (nativeInfo.processName != "fodundation") {
+        HILOG_ERROR("RevokeUriPermission can only be called by foundation");
+        return;
+    }
     std::vector<std::string> uriList;
     {
         std::lock_guard<std::mutex> guard(mutex_);
@@ -148,7 +156,6 @@ void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
     if (!uriList.empty()) {
         storageMgrProxy->DeleteShareFile(tokenId, uriList);
     }
-    return;
 }
 
 int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
