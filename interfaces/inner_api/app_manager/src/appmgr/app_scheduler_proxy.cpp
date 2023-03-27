@@ -149,6 +149,10 @@ void AppSchedulerProxy::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::
     }
 
     std::unique_ptr<MallocInfo> info(reply.ReadParcelable<MallocInfo>());
+    if (info == nullptr) {
+        HILOG_ERROR("MallocInfo ReadParcelable nullptr");
+        return;
+    }
     mallocInfo = *info;
 }
 

@@ -334,6 +334,10 @@ int32_t AppMgrProxy::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocI
     }
 
     std::unique_ptr<MallocInfo> info(reply.ReadParcelable<MallocInfo>());
+    if (info == nullptr) {
+        HILOG_ERROR("MallocInfo ReadParcelable nullptr");
+        return ERR_NULL_OBJECT;
+    }
     mallocInfo = *info;
     return ret;
 }
