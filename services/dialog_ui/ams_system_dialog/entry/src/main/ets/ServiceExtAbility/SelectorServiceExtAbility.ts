@@ -121,10 +121,10 @@ export default class SelectorServiceExtensionAbility extends extension {
 
     private async createWindow(name: string, windowType: number, rect) {
         console.info(TAG, "create window");
-        console.info(TAG, "create window token: " + globalThis.callerToken);
+        console.info(TAG, "create window token: " + globalThis.callerToken.value);
         try {
             win = await window.create(globalThis.selectExtensionContext, name, windowType);
-            await win.bindDialogTarget(globalThis.callerToken, () => {
+            await win.bindDialogTarget(globalThis.callerToken.value, () => {
                 win.destroyWindow();
                 winNum--;
                 if(winNum == 0) globalThis.selectExtensionContext.terminateSelf();
