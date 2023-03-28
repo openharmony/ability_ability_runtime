@@ -125,7 +125,9 @@ export default class SelectorServiceExtensionAbility extends extension {
             await win.bindDialogTarget(globalThis.callerToken.value, () => {
                 win.destroyWindow();
                 winNum--;
-                if(winNum == 0) globalThis.selectExtensionContext.terminateSelf();
+                if(winNum === 0) {
+                    globalThis.selectExtensionContext.terminateSelf();
+                }
             });
             await win.moveTo(rect.left, rect.top);
             await win.resetSize(rect.width, rect.height);
