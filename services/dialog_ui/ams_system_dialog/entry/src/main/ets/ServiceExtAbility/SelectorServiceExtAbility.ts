@@ -83,9 +83,11 @@ export default class SelectorServiceExtensionAbility extends extension {
         globalThis.abilityWant = want;
         globalThis.params = JSON.parse(want["parameters"]["params"]);
         globalThis.position = JSON.parse(want["parameters"]["position"]);
+        globalThis.callerToken = JSON.parse(want["parameters"]["callerToken"]);
         console.debug(TAG, "onRequest, want: " + JSON.stringify(want));
         console.debug(TAG, "onRequest, params: " + JSON.stringify(globalThis.params));
         console.debug(TAG, "onRequest, position: " + JSON.stringify(globalThis.position));
+        console.debug(TAG, "onRequest, callerToken: " + JSON.stringify(globalThis.callerToken));
 
         if (globalThis.params.deviceType == "phone") {
             await this.getPhoneShowHapList();
@@ -119,10 +121,10 @@ export default class SelectorServiceExtensionAbility extends extension {
 
     private async createWindow(name: string, windowType: number, rect) {
         console.info(TAG, "create window");
-        console.info(TAG, "create window token: " + globalThis.abilityWant.parameters['ohos.aafwk.param.callerToken']);
+        console.info(TAG, "create window token: " + globalThis.callerToken);
         try {
             win = await window.create(globalThis.selectExtensionContext, name, windowType);
-            await win.bindDialogTarget(globalThis.abilityWant.parameters['ohos.aafwk.param.callerToken'], () => {
+            await win.bindDialogTarget(globalThis.callerToken, () => {
                 win.destroyWindow();
                 winNum--;
                 if(winNum == 0) globalThis.selectExtensionContext.terminateSelf();
