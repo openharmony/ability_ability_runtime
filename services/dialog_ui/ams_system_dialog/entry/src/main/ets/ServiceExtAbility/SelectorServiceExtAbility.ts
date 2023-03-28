@@ -105,11 +105,12 @@ export default class SelectorServiceExtensionAbility extends extension {
                 win.destroy();
                 winNum--;
             }
-            if (deviceInfo.deviceType == "phone") {
+            /* if (deviceInfo.deviceType == "phone") {
                 this.createWindow("SelectorDialog" + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
             } else {
                 this.createWindow("SelectorDialog" + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);
-            }
+            } */
+            this.createWindow("SelectorDialog" + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);
             winNum++;
         })
     }
