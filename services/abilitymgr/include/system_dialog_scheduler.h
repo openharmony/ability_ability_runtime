@@ -67,7 +67,7 @@ public:
 
     bool GetANRDialogWant(int userId, int pid, AAFwk::Want &want);
     Want GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
-        int callerToken);
+        const sptr<IRemoteObject> &callerToken);
     Want GetTipsDialogWant();
 
     void SetDeviceType(const std::string &deviceType)
