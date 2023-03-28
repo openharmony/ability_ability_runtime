@@ -26,10 +26,12 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
 constexpr int32_t ERR_OK = 0;
 constexpr int32_t argCountFour = 4;
 constexpr int32_t argCountThree = 3;
 constexpr int32_t argCountTwo = 2;
+}
 class JsUriPermMgr {
 public:
     JsUriPermMgr() = default;
