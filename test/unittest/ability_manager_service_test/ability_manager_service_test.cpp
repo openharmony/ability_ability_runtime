@@ -32,6 +32,7 @@
 #include "connection_observer_errors.h"
 #include "hilog_wrapper.h"
 #include "sa_mgr_client.h"
+#include "softbus_bus_center.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
 #include "if_system_ability_manager.h"
