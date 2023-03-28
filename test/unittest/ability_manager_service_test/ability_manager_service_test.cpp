@@ -43,6 +43,16 @@ using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
 using OHOS::AppExecFwk::AbilityType;
 using OHOS::AppExecFwk::ExtensionAbilityType;
+bool testFlag = false;
+int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
+{
+    constexpr int32_t retError = -1;
+    constexpr int32_t retOK= 0;
+    if (testFlag) {
+        return retOK;
+    }
+    return retError;
+}
 namespace OHOS {
 namespace AAFwk {
 namespace {
