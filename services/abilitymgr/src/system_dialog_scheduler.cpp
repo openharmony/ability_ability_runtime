@@ -140,7 +140,7 @@ Want SystemDialogScheduler::GetTipsDialogWant()
 }
 
 Want SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
-int32_t callerToken)
+    int callerToken)
 {
     HILOG_DEBUG("GetSelectorDialogWant start");
     DialogPosition position;
