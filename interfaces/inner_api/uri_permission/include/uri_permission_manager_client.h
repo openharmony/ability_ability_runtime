@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,9 @@
 namespace OHOS {
 namespace AAFwk {
 using ClearProxyCallback = std::function<void()>;
-class UriPermissionManagerClient : public DelayedSingleton<UriPermissionManagerClient>,
-                                   public std::enable_shared_from_this<UriPermissionManagerClient> {
+class UriPermissionManagerClient : public std::enable_shared_from_this<UriPermissionManagerClient> {
 public:
+    static std::shared_ptr<UriPermissionManagerClient> GetInstance();
     UriPermissionManagerClient() = default;
     ~UriPermissionManagerClient() = default;
 
@@ -59,9 +59,14 @@ public:
      */
     void RemoveUriPermission(const Security::AccessToken::AccessTokenID tokenId);
 
+    void OnLoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
+    void OnLoadSystemAbilityFail();
 private:
     sptr<IUriPermissionManager> ConnectUriPermService();
     void ClearProxy();
+    bool LoadUriPermService();
+    void SetUriPermMgr(const sptr<IRemoteObject> &remoteObject);
+    sptr<IUriPermissionManager> GetUriPermMgr();
     DISALLOW_COPY_AND_MOVE(UriPermissionManagerClient);
 
     class UpmsDeathRecipient : public IRemoteObject::DeathRecipient {
@@ -75,7 +80,12 @@ private:
     };
 
 private:
+    static std::recursive_mutex recursiveMutex_;
+    static std::shared_ptr<UriPermissionManagerClient> instance_;
     std::mutex mutex_;
+    std::mutex saLoadMutex_;
+    std::condition_variable loadSaVariable_;
+    bool saLoadFinished_ = false;
     sptr<IUriPermissionManager> uriPermMgr_ = nullptr;
 };
 }  // namespace AAFwk
