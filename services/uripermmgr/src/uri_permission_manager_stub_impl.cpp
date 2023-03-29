@@ -34,6 +34,7 @@ using TokenId = Security::AccessToken::AccessTokenID;
 bool UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
     const TokenId fromTokenId, const TokenId targetTokenId)
 {
+    HILOG_INFO("UriPermissionManagerStubImpl::GrantUriPermission is called.");
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID());
     if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         HILOG_DEBUG("caller tokenType is not native, verify failure.");
