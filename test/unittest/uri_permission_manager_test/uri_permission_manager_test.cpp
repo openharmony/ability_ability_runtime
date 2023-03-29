@@ -47,7 +47,7 @@ void UriPermissionManagerTest::TearDown() {}
 HWTEST_F(UriPermissionManagerTest, ConnectUriPermService_001, TestSize.Level1)
 {
     auto upmc = std::make_shared<UriPermissionManagerClient>();
-    upmc->loadSaFinished_ = true;
+    upmc->saLoadFinished_ = true;
     auto ret = upmc->ConnectUriPermService();
     EXPECT_TRUE(ret == nullptr);
 }
@@ -104,7 +104,7 @@ HWTEST_F(UriPermissionManagerTest, LoadUriPermService_001, TestSize.Level1)
 HWTEST_F(UriPermissionManagerTest, LoadUriPermService_002, TestSize.Level1)
 {
     auto upmc = std::make_shared<UriPermissionManagerClient>();
-    upmc->loadSaFinished_ = true;
+    upmc->saLoadFinished_ = true;
     auto ret = upmc->LoadUriPermService();
     EXPECT_TRUE(ret);
 }
