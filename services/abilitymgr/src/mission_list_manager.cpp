@@ -37,12 +37,17 @@ constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
-constexpr int32_t MAX_INSTANCE_COUNT = 128;
+constexpr int32_t MAX_INSTANCE_COUNT = 512;
 constexpr uint64_t NANO_SECOND_PER_SEC = 1000000000; // ns
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const int DEFAULT_DMS_MISSION_ID = -1;
 const std::string DLP_INDEX = "ohos.dlp.params.index";
+#ifdef SUPPORT_ASAN
+const int KILL_TIMEOUT_MULTIPLE = 45;
+#else
+const int KILL_TIMEOUT_MULTIPLE = 3;
+#endif
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -72,12 +77,55 @@ void MissionListManager::Init()
     DelayedSingleton<MissionInfoMgr>::GetInstance()->Init(userId_);
 }
 
+std::shared_ptr<Mission> MissionListManager::FindEarliestMission() const
+{
+    // find the earliest mission of background abilityRecord
+    std::shared_ptr<Mission> earliestMission;
+    for (const auto& missionList : currentMissionLists_) {
+        if (!missionList) {
+            continue;
+        }
+        missionList->FindEarliestMission(earliestMission);
+    }
+    if (defaultStandardList_) {
+        defaultStandardList_->FindEarliestMission(earliestMission);
+    }
+    if (defaultSingleList_) {
+        defaultSingleList_->FindEarliestMission(earliestMission);
+    }
+    return earliestMission;
+}
+
+int32_t MissionListManager::GetMissionCount() const
+{
+    int32_t missionCount = 0;
+    for (const auto& missionList : currentMissionLists_) {
+        if (!missionList) {
+            continue;
+        }
+        missionCount += missionList->GetMissionCount();
+    }
+    if (defaultStandardList_) {
+        missionCount += defaultStandardList_->GetMissionCount();
+    }
+    if (defaultSingleList_) {
+        missionCount += defaultSingleList_->GetMissionCount();
+    }
+    return missionCount;
+}
+
 int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 {
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (IsReachToLimitLocked(abilityRequest)) {
-        HILOG_ERROR("already reach limit instance. limit is : %{public}d", MAX_INSTANCE_COUNT);
-        return ERR_REACH_UPPER_LIMIT;
+        auto oldestMission = FindEarliestMission();
+        if (oldestMission) {
+            if (TerminateAbility(oldestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE, nullptr, true) != ERR_OK) {
+                HILOG_ERROR("already reach limit instance. limit is : %{public}d, and terminate oldestAbility failed.",
+                    MAX_INSTANCE_COUNT);
+                return ERR_REACH_UPPER_LIMIT;
+            }
+        }
     }
 
     auto currentTopAbility = GetCurrentTopAbilityLocked();
@@ -327,11 +375,7 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
         }
     }
 
-    sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
-        = iface_cast<AppExecFwk::IAbilityInfoCallback> (abilityRequest.abilityInfoCallback);
-    if (abilityInfoCallback != nullptr) {
-        abilityInfoCallback->NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest.want);
-    }
+    NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest);
 
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<StartOptions> startOptions = nullptr;
@@ -860,7 +904,9 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
 
     auto taskName = std::to_string(abilityRecord->GetMissionId()) + "_cold";
     handler->RemoveTask(taskName);
+#ifdef SUPPORT_GRAPHICS
     abilityRecord->PostCancelStartingWindowHotTask();
+#endif
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
 
     return ERR_OK;
@@ -1480,7 +1526,8 @@ void MissionListManager::DelayCompleteTerminate(const std::shared_ptr<AbilityRec
         HILOG_INFO("emit delay complete terminate task.");
         self->CompleteTerminate(abilityRecord);
     };
-    handler->PostTask(timeoutTask, "DELAY_KILL_PROCESS", AbilityManagerService::KILL_TIMEOUT);
+    int killTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * KILL_TIMEOUT_MULTIPLE;
+    handler->PostTask(timeoutTask, "DELAY_KILL_PROCESS", killTimeout);
 }
 
 void MissionListManager::CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -2708,6 +2755,8 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
         defaultSingleList_->AddMissionToTop(targetMission);
     }
 
+    NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest);
+
     // new version started by call type
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
     if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
@@ -2878,10 +2927,14 @@ void MissionListManager::NotifyStartSpecifiedAbility(AbilityRequest &abilityRequ
         sptr<Want> extraParam = new (std::nothrow) Want();
         abilityInfoCallback->NotifyStartSpecifiedAbility(abilityRequest.callerToken, newWant,
             abilityRequest.requestCode, extraParam);
-        abilityRequest.want.SetParam(Want::PARAM_RESV_REQUEST_PROC_CODE,
-            extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0));
-        abilityRequest.want.SetParam(Want::PARAM_RESV_REQUEST_TOKEN_CODE,
-            extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_TOKEN_CODE, 0));
+        int32_t procCode = extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0);
+        if (procCode != 0) {
+            abilityRequest.want.SetParam(Want::PARAM_RESV_REQUEST_PROC_CODE, procCode);
+        }
+        int32_t tokenCode = extraParam->GetIntParam(Want::PARAM_RESV_REQUEST_TOKEN_CODE, 0);
+        if (tokenCode != 0) {
+            abilityRequest.want.SetParam(Want::PARAM_RESV_REQUEST_TOKEN_CODE, tokenCode);
+        }
     }
 }
 
@@ -2933,25 +2986,11 @@ bool MissionListManager::IsReachToLimitLocked(const AbilityRequest &abilityReque
         return false;
     }
 
-    int32_t totalCount = 0;
-    for (const auto& missionList : currentMissionLists_) {
-        if (!missionList) {
-            continue;
-        }
-
-        totalCount += missionList->GetMissionCountByUid(abilityRequest.uid);
-        if (totalCount >= MAX_INSTANCE_COUNT) {
-            return true;
-        }
-    }
-
-    totalCount += defaultStandardList_->GetMissionCountByUid(abilityRequest.uid);
-    if (totalCount >= MAX_INSTANCE_COUNT) {
+    auto missionCount = GetMissionCount();
+    if (missionCount == MAX_INSTANCE_COUNT) {
         return true;
     }
-
-    totalCount += defaultSingleList_->GetMissionCountByUid(abilityRequest.uid);
-    return totalCount >= MAX_INSTANCE_COUNT;
+    return false;
 }
 
 bool MissionListManager::MissionDmInitCallback::isInit_ = false;
@@ -3276,6 +3315,15 @@ bool MissionListManager::UpdateAbilityRecordLaunchReason(
 
     abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
     return true;
+}
+
+void MissionListManager::NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest)
+{
+    sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
+        = iface_cast<AppExecFwk::IAbilityInfoCallback> (abilityRequest.abilityInfoCallback);
+    if (abilityInfoCallback != nullptr) {
+        abilityInfoCallback->NotifyAbilityToken(token, abilityRequest.want);
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS

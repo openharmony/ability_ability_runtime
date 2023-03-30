@@ -77,15 +77,16 @@ constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
 constexpr int REGISTER_FOCUS_DELAY = 5000;
 const std::string CLASS_NAME = "ohos.app.MainThread";
 const std::string FUNC_NAME = "main";
-const std::string SO_PATH = "system/lib64/libmapleappkit.z.so";
 const std::string RENDER_PARAM = "invalidparam";
 const std::string COLD_START = "coldStart";
 const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
 const std::string PERMISSION_INTERNET = "ohos.permission.INTERNET";
+const std::string PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
+#define APP_ACCESS_BUNDLE_DIR 0x20
 
 constexpr int32_t BASE_USER_RANGE = 200000;
 
@@ -383,7 +384,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto appRecord = GetAppRunningRecordByAppRecordId(recordId);
-    if (!appRecord) {
+    if (!appRecord || !appRecord->IsUpdateStateFromService()) {
         HILOG_ERROR("get app record failed");
         return;
     }
@@ -398,6 +399,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         HILOG_WARN("app name(%{public}s), app state(%{public}d)!",
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appState));
     }
+    appRecord->SetUpdateStateFromService(false);
 
     // push the foregrounded app front of RecentAppList.
     PushAppFront(recordId);
@@ -416,7 +418,7 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto appRecord = GetAppRunningRecordByAppRecordId(recordId);
-    if (!appRecord) {
+    if (!appRecord || !appRecord->IsUpdateStateFromService()) {
         HILOG_ERROR("get app record failed");
         return;
     }
@@ -429,6 +431,7 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
         HILOG_WARN("app name(%{public}s), app state(%{public}d)!",
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appRecord->GetState()));
     }
+    appRecord->SetUpdateStateFromService(false);
 
     HILOG_INFO("application is backgrounded");
     AAFwk::EventInfo eventInfo;
@@ -493,7 +496,7 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
         return ERR_NO_INIT;
     }
 
-    int32_t result = VerifyProcessPermission();
+    int32_t result = VerifyRequestPermission();
     if (result != ERR_OK) {
         HILOG_ERROR("Permission verification failed");
         return result;
@@ -853,7 +856,8 @@ int32_t AppMgrServiceInner::NotifyMemoryLevel(int32_t level)
     HILOG_INFO("AppMgrServiceInner start");
 
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
+    auto isGatewayCall = AAFwk::PermissionVerification::GetInstance()->IsGatewayCall();
+    if (!isSaCall && !isGatewayCall) {
         HILOG_ERROR("callerToken not SA %{public}s", __func__);
         return ERR_INVALID_VALUE;
     }
@@ -1096,6 +1100,7 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
         return;
     }
 
+    appRecord->SetUpdateStateFromService(true);
     appRecord->UpdateAbilityState(token, state);
 }
 
@@ -1353,17 +1358,22 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetAppRunningRecordByAbili
     return appRunningManager_->GetAppRunningRecordByAbilityToken(abilityToken);
 }
 
+std::shared_ptr<AppRunningRecord> AppMgrServiceInner::GetTerminatingAppRunningRecord(
+    const sptr<IRemoteObject> &token) const
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr.");
+        return nullptr;
+    }
+    return appRunningManager_->GetTerminatingAppRunningRecord(token);
+}
+
 void AppMgrServiceInner::AbilityTerminated(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Terminate ability come.");
     if (!token) {
         HILOG_ERROR("Terminate ability error, token is null!");
-        return;
-    }
-
-    if (VerifyProcessPermission(token) != ERR_OK) {
-        HILOG_ERROR("Permission verify failed.");
         return;
     }
 
@@ -1466,7 +1476,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     if (bundleIndex == 0) {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetBundleInfo");
         bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleInfo(bundleName,
-            BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
+            BundleFlag::GET_BUNDLE_WITH_REQUESTED_PERMISSION, bundleInfo, userId));
     } else {
         HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetSandboxBundleInfo");
         bundleMgrResult = (IN_PROCESS_CALL(bundleMgr_->GetSandboxBundleInfo(bundleName,
@@ -1485,6 +1495,14 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         return;
     }
 
+    bool hasAccessBundleDirReq = std::any_of(bundleInfo.reqPermissions.begin(), bundleInfo.reqPermissions.end(),
+        [] (const auto &reqPermission) {
+            if (PERMISSION_ACCESS_BUNDLE_DIR == reqPermission) {
+                return true;
+            }
+
+            return false;
+        });
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
     auto token = bundleInfo.applicationInfo.accessTokenId;
@@ -1495,6 +1513,14 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         if (result != Security::AccessToken::PERMISSION_GRANTED) {
             setAllowInternet = 1;
             allowInternet = 0;
+        }
+
+        if (hasAccessBundleDirReq) {
+            int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_ACCESS_BUNDLE_DIR);
+            if (result != Security::AccessToken::PERMISSION_GRANTED) {
+                HILOG_ERROR("StartProcess PERMISSION_ACCESS_BUNDLE_DIR NOT GRANTED");
+                hasAccessBundleDirReq = false;
+            }
         }
     }
 
@@ -1510,6 +1536,9 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.setAllowInternet = setAllowInternet;
     startMsg.allowInternet = allowInternet;
     startMsg.hspList = hspList;
+    if (hasAccessBundleDirReq) {
+        startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
+    }
 
     HILOG_DEBUG("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",
         startMsg.apl.c_str(), bundleName.c_str(), startFlags);
@@ -1521,7 +1550,6 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     }
 
     startMsg.procName = processName;
-    startMsg.soPath = SO_PATH;
     startMsg.accessTokenIdEx = bundleInfo.applicationInfo.accessTokenIdEx;
 
     PerfProfile::GetInstance().SetAppForkStartTime(GetTickCount());
@@ -2266,7 +2294,11 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
     appRecord->SetUserTestInfo(testRecord);
 
     int32_t bundleIndex = want.GetIntParam(DLP_PARAMS_INDEX, 0);
-    StartProcess(appInfo->name, processName, 0, appRecord, appInfo->uid, appInfo->bundleName, bundleIndex);
+    uint32_t startFlags = 0x0;
+    if (info.applicationInfo.debug) {
+        startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::DEBUGGABLE);
+    }
+    StartProcess(appInfo->name, processName, startFlags, appRecord, appInfo->uid, appInfo->bundleName, bundleIndex);
 
     // If it is empty, the startup failed
     if (!appRecord) {
@@ -2563,9 +2595,8 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, hasPointerDevice);
 
     // Get DeviceType
-    std::string deviceType = system::GetParameter(AAFwk::GlobalConfigurationKey::DEVICE_TYPE,
-        ConfigurationInner::DEVICE_TYPE_DEFAULT);
-    HILOG_INFO("current deviceType is %{public}s", deviceType.c_str());
+    auto deviceType = GetDeviceType();
+    HILOG_INFO("current deviceType is %{public}s", deviceType);
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
 }
 
@@ -2849,7 +2880,7 @@ int AppMgrServiceInner::VerifyRequestPermission() const
     if (callerUid == ROOT_UID || callerUid == FOUNDATION_UID) {
         return ERR_OK;
     } else {
-        HILOG_ERROR("Permission verification failed.[DongLin]%{public}d", callerUid);
+        HILOG_ERROR("Permission verification failed, callerUid: %{public}d", callerUid);
         return ERR_PERMISSION_DENIED;
     }
 }
@@ -2884,12 +2915,14 @@ int AppMgrServiceInner::PreStartNWebSpawnProcess(const pid_t hostPid)
 }
 
 int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::string &renderParam,
-    int32_t ipcFd, int32_t sharedFd, pid_t &renderPid)
+    int32_t ipcFd, int32_t sharedFd, int32_t crashFd, pid_t &renderPid)
 {
     HILOG_INFO("start render process, hostPid:%{public}d", hostPid);
-    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0) {
-        HILOG_ERROR("invalid param: hostPid:%{public}d renderParam:%{private}s ipcFd:%{public}d sharedFd:%{public}d",
-            hostPid, renderParam.c_str(), ipcFd, sharedFd);
+    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 ||
+        crashFd <= 0) {
+        HILOG_ERROR("invalid param: hostPid:%{public}d renderParam:%{private}s "
+                    "ipcFd:%{public}d  crashFd:%{public}d sharedFd:%{public}d",
+                    hostPid, renderParam.c_str(), ipcFd, crashFd, sharedFd);
         return ERR_INVALID_VALUE;
     }
 
@@ -2911,7 +2944,7 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
         return ERR_ALREADY_EXIST_RENDER;
     }
 
-    renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, appRecord);
+    renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, appRecord);
     if (!renderRecord) {
         HILOG_ERROR("create render record failed, hostPid:%{public}d", hostPid);
         return ERR_INVALID_VALUE;
@@ -2959,7 +2992,9 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
     renderRecord->RegisterDeathRecipient();
 
     // notify fd to render process
-    scheduler->NotifyBrowserFd(renderRecord->GetIpcFd(), renderRecord->GetSharedFd());
+    scheduler->NotifyBrowserFd(renderRecord->GetIpcFd(),
+                               renderRecord->GetSharedFd(),
+                               renderRecord->GetCrashFd());
 }
 
 int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
