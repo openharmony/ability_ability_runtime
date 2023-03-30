@@ -15,9 +15,7 @@ import("//build/ohos.gni")
 import("../../js_environment.gni")
 
 config("js_environment_config") {
-  include_dirs = [
-    "${inner_api_path}"
-  ]
+  include_dirs = [ "${inner_api_path}" ]
 }
 
 config("public_js_environment_config") {
@@ -29,9 +27,9 @@ config("public_js_environment_config") {
 
 ohos_shared_library("js_environment") {
   sources = [
+    "${utils_path}/src/js_env_logger.cpp",
     "src/js_environment.cpp",
     "src/uncaught_exception_callback.cpp",
-    "${utils_path}/src/js_env_logger.cpp"
   ]
 
   configs = [
@@ -41,9 +39,7 @@ ohos_shared_library("js_environment") {
 
   public_configs = [ ":public_js_environment_config" ]
 
-  deps = [
-    "${arkui_path}/napi:ace_napi_ark",
-  ]
+  deps = [ "${arkui_path}/napi:ace_napi_ark" ]
 
   external_deps = [
     "ability_runtime:source_map",

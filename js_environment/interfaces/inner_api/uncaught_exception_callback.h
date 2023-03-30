@@ -18,11 +18,20 @@
 
 #include <string>
 
-#include "js_environment.h"
 #include "native_engine/native_engine.h"
+#include "source_map.h"
 
 namespace OHOS {
 namespace JsEnv {
+struct ErrorObject {
+    std::string name;
+    std::string message;
+    std::string stack;
+};
+struct UncaughtInfo {
+    std::string hapPath;
+    std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask;
+};
 template<class T>
 inline T* ConvertNativeValueTo(NativeValue* value)
 {
@@ -30,20 +39,11 @@ inline T* ConvertNativeValueTo(NativeValue* value)
 }
 class UncaughtExceptionCallback final {
 public:
-    // UncaughtExceptionCallback(const std::string hapPath,
-    //     std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask,
-    //     std::unique_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps) {
-        // hapPath_ = hapPath;
-        // uncaughtTask_ = uncaughtTask;
-        // bindSourceMaps_ = std::make_unique<AbilityRuntime::ModSourceMap>(*bindSourceMaps);
-        // bindSourceMaps_ = std::move(bindSourceMaps);
-    // };
-    UncaughtExceptionCallback(const std::string hapPath, 
-        std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask, 
+    UncaughtExceptionCallback(const std::string hapPath,
+        std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask,
         AbilityRuntime::ModSourceMap& bindSourceMaps) :
-    hapPath_(hapPath), uncaughtTask_(uncaughtTask), bindSourceMaps_(bindSourceMaps)
-    {}
-    
+    hapPath_(hapPath), uncaughtTask_(uncaughtTask), bindSourceMaps_(bindSourceMaps) {}
+
     virtual ~UncaughtExceptionCallback() {};
 
     void operator()(NativeValue* value);
@@ -52,7 +52,6 @@ public:
 private:
     std::string hapPath_;
     std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask_;
-    // std::unique_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps_;
     AbilityRuntime::ModSourceMap& bindSourceMaps_;
 };
 } // namespace JsEnv

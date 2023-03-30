@@ -36,14 +36,13 @@ std::string UncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(NativeObject*
     }
     size_t valueStrBufLength = valueStr->GetLength();
     size_t valueStrLength = 0;
-    char* valueCStr = new (std::nothrow) char[valueStrBufLength + 1];
+    auto valueCStr = std::make_unique<char[]>(valueStrBufLength + 1);
     if (valueCStr == nullptr) {
         JSENV_LOG_E("Failed to new valueCStr");
         return "";
     }
-    valueStr->GetCString(valueCStr, valueStrBufLength + 1, &valueStrLength);
-    std::string ret(valueCStr, valueStrLength);
-    delete []valueCStr;
+    valueStr->GetCString(valueCStr.get(), valueStrBufLength + 1, &valueStrLength);
+    std::string ret(valueCStr.get(), valueStrLength);
     JSENV_LOG_D("GetNativeStrFromJsTaggedObj Success %{public}s:%{public}s", key, ret.c_str());
     return ret;
 }
@@ -78,7 +77,8 @@ void UncaughtExceptionCallback::operator()(NativeValue* value)
             error = fuc->GetSourceCodeInfo(errorPos);
         }
     }
-    summary += error + "Stacktrace:\n" +AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack, bindSourceMaps_, hapPath_);
+    summary += error + "Stacktrace:\n" +
+        AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack, bindSourceMaps_, hapPath_);
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj);
     }

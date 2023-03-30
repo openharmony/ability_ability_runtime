@@ -600,9 +600,8 @@ void JsRuntime::SetAppLibPath(const std::map<std::string, std::vector<std::strin
 
 void JsRuntime::InitSourceMap(const Options& options)
 {
-    if (jsEnv_ != nullptr) {
-        jsEnv_->InitSourceMap(options.bundleCodeDir, options.isStageModel);
-    }
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->InitSourceMap(options.bundleCodeDir, options.isStageModel);
 }
 
 void JsRuntime::Deinitialize()
@@ -942,7 +941,7 @@ void JsRuntime::UpdateModuleNameAndAssetPath(const std::string& moduleName)
     panda::JSNApi::SetModuleName(vm, moduleName_);
 }
 
-void JsRuntime::RegisterUncaughtExceptionHandler(UncaughtInfo uncaughtInfo)
+void JsRuntime::RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo)
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->RegisterUncaughtExceptionHandler(uncaughtInfo);

@@ -18,6 +18,7 @@
 #include <new>
 #include <regex>
 #include <unistd.h>
+#include <malloc.h>
 
 #include "constants.h"
 #include "ability_delegator.h"
@@ -52,6 +53,7 @@
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
 #include "task_handler_client.h"
+#include "uncaught_exception_callback.h"
 #include "hisysevent.h"
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
@@ -487,6 +489,26 @@ void MainThread::ScheduleMemoryLevel(const int level)
 
 /**
  *
+ * @brief Get the application's memory allocation info.
+ *
+ * @param pid, pid input.
+ * @param mallocInfo, dynamic storage information output.
+ */
+void MainThread::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
+{
+    struct mallinfo mi = mallinfo();
+    int usmblks = mi.usmblks; // 当前从分配器中分配的总的堆内存大小
+    int uordblks = mi.uordblks; // 当前已释放给分配器，分配缓存了未释放给系统的内存大小
+    int fordblks = mi.fordblks; // 当前未释放的大小
+    HILOG_DEBUG("The pid of the app we want to dump memory allocation information is: %{public}i", pid);
+    HILOG_DEBUG("usmblks: %{public}i, uordblks: %{public}i, fordblks: %{public}i", usmblks, uordblks, fordblks);
+    mallocInfo.usmblks = usmblks;
+    mallocInfo.uordblks = uordblks;
+    mallocInfo.fordblks = fordblks;
+}
+
+/**
+ *
  * @brief Schedule the application process exit safely.
  *
  */
@@ -906,7 +928,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     return true;
 }
 
-static std::string GetNativeStrFromJsTaggedObj(NativeObject* obj, const char* key)
+[[maybe_unused]] static std::string GetNativeStrFromJsTaggedObj(NativeObject* obj, const char* key)
 {
     if (obj == nullptr) {
         HILOG_ERROR("Failed to get value from key:%{public}s, Null NativeObject", key);
@@ -1100,16 +1122,21 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 EVENT_KEY_REASON, errorObj.name,
                 EVENT_KEY_JSVM, JSVM_TYPE,
                 EVENT_KEY_SUMMARY, summary);
+            struct ErrorObject appExecErrorObj = {
+                .name = errorObj.name,
+                .message = errorObj.message,
+                .stack = errorObj.stack
+            };
             if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
-                ApplicationDataManager::GetInstance().NotifyExceptionObject(errorObj)) {
+                ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
                 return;
             }
             // if app's callback has been registered, let app decide whether exit or not.
             HILOG_ERROR("\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
                 bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
             appThread->ScheduleProcessSecurityExit();
-        }
-        runtime->RegisterUncaughtExceptionHandler(uncaughtInfo);
+        };
+        (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(uncaughtInfo);
         application_->SetRuntime(std::move(runtime));
 
         std::weak_ptr<OHOSApplication> wpApplication = application_;

@@ -106,17 +106,15 @@ void JsEnvironment::RemoveTask(const std::string& name)
     }
 }
 
-void JsEnvironment::InitSourceMap(const std::string bundleCodeDir, std::string isStageModel)
+void JsEnvironment::InitSourceMap(const std::string bundleCodeDir, bool isStageModel)
 {
-    bool isStage = (isStageModel == "true");
-    bindSourceMaps_ = std::make_unique<AbilityRuntime::ModSourceMap>(bundleCodeDir, isStage);
+    bindSourceMaps_ = std::make_unique<AbilityRuntime::ModSourceMap>(bundleCodeDir, isStageModel);
 }
 
 void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo)
 {
     if ((bindSourceMaps_ != nullptr) && (engine_ != nullptr)) {
         engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtInfo.hapPath,
-            // uncaughtInfo.uncaughtTask, std::move(bindSourceMaps_)));
             uncaughtInfo.uncaughtTask, *bindSourceMaps_));
     }
 }
