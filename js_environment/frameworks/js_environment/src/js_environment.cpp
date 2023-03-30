@@ -18,6 +18,7 @@
 #include "js_env_logger.h"
 #include "js_environment_impl.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
+#include "uncaught_exception_callback.h"
 
 namespace OHOS {
 namespace JsEnv {
@@ -102,6 +103,21 @@ void JsEnvironment::RemoveTask(const std::string& name)
 {
     if (impl_ != nullptr) {
         impl_->RemoveTask(name);
+    }
+}
+
+void JsEnvironment::InitSourceMap(const std::string bundleCodeDir, std::string isStageModel)
+{
+    bool isStage = (isStageModel == "true");
+    bindSourceMaps_ = std::make_unique<AbilityRuntime::ModSourceMap>(bundleCodeDir, isStage);
+}
+
+void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo)
+{
+    if ((bindSourceMaps_ != nullptr) && (engine_ != nullptr)) {
+        engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtInfo.hapPath,
+            // uncaughtInfo.uncaughtTask, std::move(bindSourceMaps_)));
+            uncaughtInfo.uncaughtTask, *bindSourceMaps_));
     }
 }
 } // namespace JsEnv

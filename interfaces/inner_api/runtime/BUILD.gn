@@ -87,6 +87,7 @@ ohos_shared_library("runtime") {
     "ability_base:string_utils",
     "ability_base:want",
     "ability_runtime:js_environment",
+    "ability_runtime:source_map",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -114,6 +115,31 @@ ohos_shared_library("runtime") {
       "napi:ace_container_scope",
     ]
   }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+config("source_map_config") {
+  include_dirs = [ "${ability_runtime_services_path}/common/include" ]
+}
+
+config("source_map_public_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_shared_library("source_map") {
+  sources = [ "${ability_runtime_native_path}/runtime/source_map.cpp" ]
+
+  configs = [ ":source_map_config" ]
+
+  public_configs = [ ":source_map_public_config" ]
+
+  external_deps = [
+    "ability_base:extractortool",
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
