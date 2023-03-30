@@ -20,10 +20,20 @@
 #include "ecmascript/napi/include/jsnapi.h"
 #include "js_environment_impl.h"
 #include "native_engine/native_engine.h"
+#include "source_map.h"
 
 namespace OHOS {
 namespace JsEnv {
 class JsEnvironmentImpl;
+struct ErrorObject {
+    std::string name;
+    std::string message;
+    std::string stack;
+};
+struct UncaughtInfo {
+    std::string hapPath;
+    std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask;
+};
 class JsEnvironment final {
 public:
     JsEnvironment() {}
@@ -52,15 +62,20 @@ public:
 
     void InitWorkerModule();
 
+    void InitSourceMap(std::string bundleCodeDir, std::string isStageModel);
+
     void InitSyscapModule();
 
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
 
     void RemoveTask(const std::string& name);
+
+    void RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo);
 private:
     std::shared_ptr<JsEnvironmentImpl> impl_ = nullptr;
     NativeEngine* engine_ = nullptr;
     panda::ecmascript::EcmaVM* vm_ = nullptr;
+    std::unique_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps_;
 };
 } // namespace JsEnv
 } // namespace OHOS

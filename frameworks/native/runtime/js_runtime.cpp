@@ -600,7 +600,9 @@ void JsRuntime::SetAppLibPath(const std::map<std::string, std::vector<std::strin
 
 void JsRuntime::InitSourceMap(const Options& options)
 {
-    bindSourceMaps_ = std::make_unique<ModSourceMap>(options.bundleCodeDir, options.isStageModel);
+    if (jsEnv_ != nullptr) {
+        jsEnv_->InitSourceMap(options.bundleCodeDir, options.isStageModel);
+    }
 }
 
 void JsRuntime::Deinitialize()
@@ -938,6 +940,12 @@ void JsRuntime::UpdateModuleNameAndAssetPath(const std::string& moduleName)
     std::string path = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
     panda::JSNApi::SetAssetPath(vm, path);
     panda::JSNApi::SetModuleName(vm, moduleName_);
+}
+
+void JsRuntime::RegisterUncaughtExceptionHandler(UncaughtInfo uncaughtInfo)
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->RegisterUncaughtExceptionHandler(uncaughtInfo);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
