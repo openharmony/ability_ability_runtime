@@ -48,7 +48,7 @@ bool testFlag = false;
 int32_t GetLocalNodeDeviceInfo(const char *pkgName, NodeBasicInfo *info)
 {
     constexpr int32_t retError = -1;
-    constexpr int32_t retOK= 0;
+    constexpr int32_t retOK = 0;
     if (testFlag) {
         return retOK;
     }

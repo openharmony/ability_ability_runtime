@@ -1267,7 +1267,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
         return ERR_CROSS_USER;
     }
 
-    if(callerToken != nullptr && CheckIfOperateRemote(want)) {
+    if (callerToken != nullptr && CheckIfOperateRemote(want)) {
         auto callerUid = IPCSkeleton::GetCallingUid();
         uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
         DistributedClient dmsClient;
