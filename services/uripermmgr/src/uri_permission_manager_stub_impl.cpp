@@ -63,7 +63,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
     }
     auto&& scheme = uri_inner.GetScheme();
     if (scheme != "file") {
-        HILOG_WARN("only support file or dataShare uri.");
+        HILOG_WARN("only support file uri.");
         return INNER_ERR;
     }
     // auto remove URI permission for clipboard
@@ -78,8 +78,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
 
 int UriPermissionManagerStubImpl::GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
     Security::AccessToken::AccessTokenID fromTokenId,
-    Security::AccessToken::AccessTokenID targetTokenId,
-    int autoremove)
+    Security::AccessToken::AccessTokenID targetTokenId, int autoremove)
 {
     auto storageMgrProxy = ConnectStorageManager();
     if (storageMgrProxy == nullptr) {
@@ -187,20 +186,20 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
         for (auto it = list.begin(); it != list.end(); it++) {
             if (it->targetTokenId == tokenId) {
                 HILOG_INFO("Erase an info form list.");
-                list.erase(it);
+                auto storageMgrProxy = ConnectStorageManager();
+                if (storageMgrProxy == nullptr) {
+                    HILOG_ERROR("ConnectStorageManager failed");
+                    return INNER_ERR;
+                }
                 uriList.emplace_back(search->first);
+                if (storageMgrProxy->DeleteShareFile(tokenId, uriList) == ERR_OK) {
+                    list.erase(it);
+                } else {
+                    HILOG_ERROR("DeleteShareFile failed");
+                }
                 break;
             }
         }
-    }
-    auto storageMgrProxy = ConnectStorageManager();
-    if (storageMgrProxy == nullptr) {
-        HILOG_ERROR("ConnectStorageManager failed");
-        return INNER_ERR;
-    }
-
-    if (!uriList.empty()) {
-        storageMgrProxy->DeleteShareFile(tokenId, uriList);
     }
     return ERR_OK;
 }
