@@ -38,6 +38,7 @@ class Extractor;
 
 namespace JsEnv {
 class JsEnvironment;
+struct UncaughtInfo;
 } // namespace JsEnv
 
 namespace AbilityRuntime {
@@ -90,7 +91,7 @@ public:
     bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
     bool UnLoadRepairPatch(const std::string& hqfFile) override;
     bool NotifyHotReloadPage() override;
-    void RegisterUncaughtExceptionHandler(UncaughtInfo uncaughtInfo);
+    void RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo);
 
     NativeEngine* GetNativeEnginePointer() const;
     panda::ecmascript::EcmaVM* GetEcmaVm() const;

@@ -21,19 +21,11 @@
 #include "js_environment_impl.h"
 #include "native_engine/native_engine.h"
 #include "source_map.h"
+#include "uncaught_exception_callback.h"
 
 namespace OHOS {
 namespace JsEnv {
 class JsEnvironmentImpl;
-struct ErrorObject {
-    std::string name;
-    std::string message;
-    std::string stack;
-};
-struct UncaughtInfo {
-    std::string hapPath;
-    std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask;
-};
 class JsEnvironment final {
 public:
     JsEnvironment() {}
@@ -62,7 +54,7 @@ public:
 
     void InitWorkerModule();
 
-    void InitSourceMap(std::string bundleCodeDir, std::string isStageModel);
+    void InitSourceMap(std::string bundleCodeDir, bool isStageModel);
 
     void InitSyscapModule();
 
