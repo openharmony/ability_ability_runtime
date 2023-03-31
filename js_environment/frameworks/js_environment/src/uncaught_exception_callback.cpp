@@ -24,26 +24,26 @@ namespace JsEnv {
 std::string UncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(NativeObject* obj, const char* key)
 {
     if (obj == nullptr) {
-        JSENV_LOG_E("Failed to get value from key:%{public}s, Null NativeObject", key);
+        JSENV_LOG_E("Failed to get value from key.");
         return "";
     }
 
     NativeValue* value = obj->GetProperty(key);
     NativeString* valueStr = JsEnv::ConvertNativeValueTo<NativeString>(value);
     if (valueStr == nullptr) {
-        JSENV_LOG_E("Failed to convert value from key:%{public}s", key);
+        JSENV_LOG_E("Failed to convert value from key.");
         return "";
     }
     size_t valueStrBufLength = valueStr->GetLength();
     size_t valueStrLength = 0;
     auto valueCStr = std::make_unique<char[]>(valueStrBufLength + 1);
     if (valueCStr == nullptr) {
-        JSENV_LOG_E("Failed to new valueCStr");
+        JSENV_LOG_E("Failed to new valueCStr.");
         return "";
     }
     valueStr->GetCString(valueCStr.get(), valueStrBufLength + 1, &valueStrLength);
     std::string ret(valueCStr.get(), valueStrLength);
-    JSENV_LOG_D("GetNativeStrFromJsTaggedObj Success %{public}s:%{public}s", key, ret.c_str());
+    JSENV_LOG_D("GetNativeStrFromJsTaggedObj Success.");
     return ret;
 }
 
@@ -67,7 +67,6 @@ void UncaughtExceptionCallback::operator()(NativeValue* value)
         JSENV_LOG_E("errorStack is empty");
         return;
     }
-    JSENV_LOG_I("JS Stack:\n%{public}s", errorStack.c_str());
     auto errorPos = AbilityRuntime::ModSourceMap::GetErrorPos(errorStack);
     std::string error;
     if (obj != nullptr) {
@@ -78,7 +77,7 @@ void UncaughtExceptionCallback::operator()(NativeValue* value)
         }
     }
     summary += error + "Stacktrace:\n" +
-        AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack, bindSourceMaps_, hapPath_);
+        AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack, *bindSourceMaps_, hapPath_);
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj);
     }

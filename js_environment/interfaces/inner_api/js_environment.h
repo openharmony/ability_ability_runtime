@@ -29,7 +29,7 @@ class JsEnvironmentImpl;
 class JsEnvironment final {
 public:
     JsEnvironment() {}
-    explicit JsEnvironment(std::shared_ptr<JsEnvironmentImpl> impl);
+    explicit JsEnvironment(std::unique_ptr<JsEnvironmentImpl> impl);
     ~JsEnvironment();
 
     bool Initialize(const panda::RuntimeOption& pandaOption, void* jsEngine);
@@ -54,7 +54,7 @@ public:
 
     void InitWorkerModule();
 
-    void InitSourceMap(std::string bundleCodeDir, bool isStageModel);
+    void InitSourceMap(const std::string& bundleCodeDir, bool isStageModel);
 
     void InitSyscapModule();
 
@@ -63,11 +63,12 @@ public:
     void RemoveTask(const std::string& name);
 
     void RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo);
+    bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
 private:
-    std::shared_ptr<JsEnvironmentImpl> impl_ = nullptr;
+    std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;
     NativeEngine* engine_ = nullptr;
     panda::ecmascript::EcmaVM* vm_ = nullptr;
-    std::unique_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps_;
+    std::shared_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps_;
 };
 } // namespace JsEnv
 } // namespace OHOS

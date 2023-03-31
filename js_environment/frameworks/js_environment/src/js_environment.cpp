@@ -22,7 +22,8 @@
 
 namespace OHOS {
 namespace JsEnv {
-JsEnvironment::JsEnvironment(std::shared_ptr<JsEnvironmentImpl> impl) : impl_(impl)
+
+JsEnvironment::JsEnvironment(std::unique_ptr<JsEnvironmentImpl> impl) : impl_(std::move(impl))
 {
     JSENV_LOG_D("Js environment costructor.");
 }
@@ -106,17 +107,31 @@ void JsEnvironment::RemoveTask(const std::string& name)
     }
 }
 
-void JsEnvironment::InitSourceMap(const std::string bundleCodeDir, bool isStageModel)
+void JsEnvironment::InitSourceMap(const std::string& bundleCodeDir, bool isStageModel)
 {
-    bindSourceMaps_ = std::make_unique<AbilityRuntime::ModSourceMap>(bundleCodeDir, isStageModel);
+    bindSourceMaps_ = std::make_shared<AbilityRuntime::ModSourceMap>(bundleCodeDir, isStageModel);
 }
 
 void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo)
 {
     if ((bindSourceMaps_ != nullptr) && (engine_ != nullptr)) {
         engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtInfo.hapPath,
-            uncaughtInfo.uncaughtTask, *bindSourceMaps_));
+            uncaughtInfo.uncaughtTask, bindSourceMaps_));
     }
+}
+
+bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* buffer, bool isBundle)
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return false;
+    }
+
+    if (buffer == nullptr) {
+        return engine_->RunScriptPath(path.c_str()) != nullptr;
+    }
+
+    return engine_->RunScriptBuffer(path.c_str(), *buffer, isBundle) != nullptr;
 }
 } // namespace JsEnv
 } // namespace OHOS

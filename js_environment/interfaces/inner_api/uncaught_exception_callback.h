@@ -41,8 +41,9 @@ class UncaughtExceptionCallback final {
 public:
     UncaughtExceptionCallback(const std::string hapPath,
         std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask,
-        AbilityRuntime::ModSourceMap& bindSourceMaps) :
-    hapPath_(hapPath), uncaughtTask_(uncaughtTask), bindSourceMaps_(bindSourceMaps) {}
+        std::shared_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps)
+        : hapPath_(hapPath), uncaughtTask_(uncaughtTask), bindSourceMaps_(bindSourceMaps)
+    {}
 
     virtual ~UncaughtExceptionCallback() {};
 
@@ -52,7 +53,7 @@ public:
 private:
     std::string hapPath_;
     std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask_;
-    AbilityRuntime::ModSourceMap& bindSourceMaps_;
+    std::shared_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps_;
 };
 } // namespace JsEnv
 } // namespace OHOS
