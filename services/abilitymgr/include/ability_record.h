@@ -412,20 +412,6 @@ public:
     std::shared_ptr<AbilityRecord> GetNextAbilityRecord() const;
 
     /**
-     * set event id.
-     *
-     * @param eventId
-     */
-    void SetEventId(int64_t eventId);
-
-    /**
-     * get event id.
-     *
-     * @return eventId
-     */
-    int64_t GetEventId() const;
-
-    /**
      * check whether the ability is ready.
      *
      * @return true : ready ,false: not ready
@@ -836,6 +822,10 @@ public:
     bool CanRestartResident();
 
     std::string GetLabel();
+    inline int64_t GetAbilityRecordId() const
+    {
+        return recordId_;
+    }
 
     void SetPendingState(AbilityState state);
     AbilityState GetPendingState() const;
@@ -844,7 +834,7 @@ public:
     void SetNeedBackToOtherMissionStack(bool isNeedBackToOtherMissionStack);
     std::shared_ptr<AbilityRecord> GetOtherMissionStackAbilityRecord() const;
     void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void RemoveUriPermission();
+    void RevokeUriPermission();
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut);
@@ -853,8 +843,6 @@ protected:
     std::unique_ptr<LifecycleDeal> lifecycleDeal_ = {};    // life manager used to schedule life
     AbilityState currentState_ = AbilityState::INITIAL;    // current life state
     Want want_ = {};                                       // want to start this ability
-    static int64_t g_abilityRecordEventId_;
-    int64_t eventId_ = 0;                                  // post event id
 
 private:
     /**
@@ -863,7 +851,7 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
-    void GrantUriPermission(const Want &want, int32_t userId, uint32_t targetTokenId);
+    void GrantUriPermission(const Want &want, int32_t userId, std::string targetBundleName);
     int32_t GetCurrentAccountId() const;
 
     /**

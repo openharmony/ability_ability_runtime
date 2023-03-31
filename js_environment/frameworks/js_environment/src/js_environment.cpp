@@ -14,16 +14,46 @@
  */
 
 #include "js_environment.h"
+
+#include "js_env_logger.h"
 #include "js_environment_impl.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS {
 namespace JsEnv {
-JsEnvironment::JsEnvironment(std::shared_ptr<JsEnvironmentImpl> impl) : impl_(impl)
+
+JsEnvironment::JsEnvironment(std::unique_ptr<JsEnvironmentImpl> impl) : impl_(std::move(impl))
 {
+    JSENV_LOG_D("Js environment costructor.");
 }
 
-void JsEnvironment::Initialize(const panda::RuntimeOption& options)
+JsEnvironment::~JsEnvironment()
 {
+    JSENV_LOG_D("Js environment destructor.");
+
+    if (engine_ != nullptr) {
+        engine_->DeleteEngine();
+        delete engine_;
+        engine_ = nullptr;
+    }
+
+    if (vm_ != nullptr) {
+        panda::JSNApi::DestroyJSVM(vm_);
+        vm_ = nullptr;
+    }
+}
+
+bool JsEnvironment::Initialize(const panda::RuntimeOption& pandaOption, void* jsEngine)
+{
+    JSENV_LOG_D("Js environment initialize.");
+    vm_ = panda::JSNApi::CreateJSVM(pandaOption);
+    if (vm_ == nullptr) {
+        JSENV_LOG_E("Create vm failed.");
+        return false;
+    }
+
+    engine_ = new ArkNativeEngine(vm_, jsEngine);
+    return true;
 }
 
 void JsEnvironment::StartDebuggger(bool needBreakPoint)
@@ -74,6 +104,20 @@ void JsEnvironment::RemoveTask(const std::string& name)
     if (impl_ != nullptr) {
         impl_->RemoveTask(name);
     }
+}
+
+bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* buffer, bool isBundle)
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return false;
+    }
+
+    if (buffer == nullptr) {
+        return engine_->RunScriptPath(path.c_str()) != nullptr;
+    }
+
+    return engine_->RunScriptBuffer(path.c_str(), *buffer, isBundle) != nullptr;
 }
 } // namespace JsEnv
 } // namespace OHOS
