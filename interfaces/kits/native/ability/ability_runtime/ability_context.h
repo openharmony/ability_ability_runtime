@@ -34,7 +34,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-using RuntimeTask = std::function<void(int, const AAFwk::Want&)>;
+using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 using PermissionRequestTask = std::function<void(const std::vector<std::string>&, const std::vector<int>&)>;
 using RequestDialogResultTask = std::function<void(int32_t resultCode)>;
 class LocalCallContainer;
@@ -202,6 +202,17 @@ public:
     virtual ErrCode TerminateSelf() = 0;
 
     virtual ErrCode CloseAbility() = 0;
+
+    /**
+     * @brief Requests certain permissions from the system.
+     * This method is called for permission request. This is an asynchronous method. When it is executed,
+     * the task will be called back.
+     *
+     * @param permissions Indicates the list of permissions to be requested. This parameter cannot be null.
+     * @param task The callback or promise fo js interface.
+     */
+    virtual void RequestPermissionsFromUser(NativeEngine& engine, const std::vector<std::string> &permissions,
+        int requestCode, PermissionRequestTask &&task) = 0;
 
     /**
      * @brief Get ContentStorage.
