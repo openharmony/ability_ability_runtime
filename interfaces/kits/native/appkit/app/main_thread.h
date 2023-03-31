@@ -33,6 +33,7 @@
 #include "ipc_singleton.h"
 #include "native_engine/native_engine.h"
 #include "overlay_event_subscriber.h"
+#include "overlay_module_info.h"
 #include "watchdog.h"
 #define ABILITY_LIBRARY_LOADER
 
@@ -497,13 +498,12 @@ private:
         const std::shared_ptr<Global::Resource::ResourceManager> &resourceManager, const std::string &bundleName,
         const std::string &moduleName, const std::string &loadPath);
 
-    int GetOverlayPaths(const std::string &bundleName, const std::string &moduleName, std::vector<std::string> overlayPaths);
+    int GetOverlayModuleInfos(const std::string &bundleName, const std::string &moduleName,
+        std::vector<std::string> overlayPaths);
 
-    std::vector<std::string> GetAddOverlayPaths(const std::vector<std::string> oldOverlayPath,
-        const std::vector<std::string> newOverlayPath);
+    std::vector<std::string> GetAddOverlayPaths(const std::vector<OverlayModuleInfo> overlayModuleInfos);
 
-    std::vector<std::string> GetRemoveOverlayPaths(const std::vector<std::string> oldOverlayPath,
-        const std::vector<std::string> newOverlayPath);
+    std::vector<std::string> GetRemoveOverlayPaths(const std::vector<OverlayModuleInfo> overlayModuleInfos);
 
     class MainHandler : public EventHandler {
     public:
@@ -565,6 +565,9 @@ private:
     void ChangeToLocalPath(const std::string &bundleName,
         const std::string &sourcDir, std::string &localPath);
 
+    void ChangeToOverlayPath(const std::vector<OverlayModuleInfo> &overlayModuleInfos,
+        std::vector<std::string> overlayPaths);
+
     /**
      *
      * @brief Close the ability library loaded.
@@ -600,7 +603,7 @@ private:
     std::vector<std::string> nativeFileEntries_;
     std::vector<void *> handleAbilityLib_;  // the handler of ACE Library.
     std::shared_ptr<IdleTime> idleTime_ = nullptr;
-    std::vector<std::string> overlayPaths_;
+    std::vector<OverlayModuleInfo> overlayModuleInfos_;
 #endif                                      // ABILITY_LIBRARY_LOADER
 #ifdef APPLICATION_LIBRARY_LOADER
     void *handleAppLib_ = nullptr;  // the handler of ACE Library.

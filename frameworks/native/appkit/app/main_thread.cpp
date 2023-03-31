@@ -48,7 +48,6 @@
 #include "js_runtime.h"
 #include "mix_stack_dumper.h"
 #include "ohos_application.h"
-#include "overlay_module_info.h"
 #include "parameters.h"
 #include "resource_manager.h"
 #include "runtime.h"
@@ -878,16 +877,18 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
             loadPath = std::regex_replace(loadPath, pattern, std::string(LOCAL_CODE_PATH));
             HILOG_DEBUG("ModuleResPath: %{public}s", loadPath.c_str());
             // getOverlayPath
-            auto res = GetOverlayPaths(bundleName, entryHapModuleInfo.moduleName, overlayPaths_);
+            auto res = GetOverlayModuleInfos(bundleName, entryHapModuleInfo.moduleName, overlayModuleInfos_);
             if (res != ERR_OK) {
                 HILOG_WARN("Get overlay paths from bms failed.");
             }
-            if (overlayPaths_.size() == 0) {
+            if (overlayModuleInfos_.size() == 0) {
                 if (!resourceManager->AddResource(loadPath.c_str())) {
                     HILOG_ERROR("AddResource failed");
                 }
             } else {
-                if (!resourceManager->AddResource(loadPath, overlayPaths_)) {
+                std::vector<std::string> overlayPaths;
+                ChangeToOverlayPath(overlayModuleInfos_, overlayPaths);
+                if (!resourceManager->AddResource(loadPath, overlayPaths)) {
                     HILOG_ERROR("AddResource failed");
                 }
                 // add listen overlay change
@@ -910,7 +911,6 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
                 HILOG_INFO("Overlay event subscriber register result is %{public}d", subResult);
             }
         }
-    
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -945,6 +945,7 @@ void MainThread::OnOverlayChanged(const EventFwk::CommonEventData &data,
     const std::shared_ptr<Global::Resource::ResourceManager> &resourceManager, const std::string &bundleName,
     const std::string &moduleName, const std::string &loadPath)
 {
+    HILOG_DEBUG("OnOverlayChanged begin.");
     if (mainHandler_ == nullptr) {
         HILOG_ERROR("mainHandler is nullptr.");
         return;
@@ -967,6 +968,7 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
     const std::shared_ptr<Global::Resource::ResourceManager> &resourceManager, const std::string &bundleName,
     const std::string &moduleName, const std::string &loadPath)
 {
+    HILOG_DEBUG("HandleOnOverlayChanged begin.")
     auto want = data.GetWant();
     std::string action = want.GetAction();
     if (action != OVERLAY_STATE_CHANGED) {
@@ -984,18 +986,20 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
             HILOG_ERROR("resourceManager is nullptr");
             return;
         }
-        std::vector<std::string> overlayHapPaths;
-        auto res = GetOverlayPaths(bundleName, moduleName, overlayHapPaths);
+        std::vector<OverlayModuleInfo> overlayModuleInfos;
+        std::vector<std::string> overlayPaths;
+        auto res = GetOverlayModuleInfos(bundleName, moduleName, overlayModuleInfos);
         if (res != ERR_OK) {
             return;
         }
         
         // 2.add overlay hapPath
-        if (loadPath.empty() || overlayHapPaths.size() == 0) {
+        if (loadPath.empty() || overlayModuleInfos.size() == 0) {
             HILOG_WARN("There is not any hapPath in overlayModuleInfo");
         } else {
-            resourceManager->AddResource(loadPath, GetAddOverlayPaths(overlayPaths_, overlayHapPaths));
-            overlayPaths_ = overlayHapPaths;
+            if (!resourceManager->AddResource(loadPath, GetAddOverlayPaths(overlayModuleInfos))) {
+                HILOG_ERROR("AddResource failed");
+            }
         }
     } else {
         // 1.get overlay hapPath
@@ -1003,8 +1007,8 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
             HILOG_ERROR("resourceManager is nullptr");
             return;
         }
-        std::vector<std::string> overlayHapPaths;
-        auto res = GetOverlayPaths(bundleName, moduleName, overlayHapPaths);
+        std::vector<OverlayModuleInfo> overlayModuleInfos;
+        auto res = GetOverlayPaths(bundleName, moduleName, overlayModuleInfos);
         if (res != ERR_OK) {
             return;
         }
@@ -1013,8 +1017,9 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
         if (loadPath.empty() || overlayHapPaths.size() == 0) {
             HILOG_WARN("There is not any hapPath in overlayModuleInfo");
         } else {
-            resourceManager->RemoveResource(loadPath, GetRemoveOverlayPaths(overlayPaths_, overlayHapPaths));
-            overlayPaths_ = overlayHapPaths;
+            if (!resourceManager->RemoveResource(loadPath, GetRemoveOverlayPaths(overlayModuleInfos))) {
+                HILOG_ERROR("RemoveResource failed");
+            }
         }
     }
 }
@@ -2484,7 +2489,8 @@ void MainThread::UpdateEngineExtensionBlockList(NativeEngine &nativeEngine)
     extensionConfigMgr_->UpdateBlockListToEngine(nativeEngine);
 }
 
-int MainThread::GetOverlayPaths(const std::string &bundleName, const std::string &moduleName, std::vector<std::string> overlayPaths)
+int MainThread::GetOverlayModuleInfos(const std::string &bundleName, const std::string &moduleName,
+    std::vector<OverlayModuleInfos> overlayModuleInfos)
 {
     sptr<AppExecFwk::IBundleMgr> bundleMgr = AAFwk::AbilityUtil::GetBundleManager();
     if (bundleMgr == nullptr) {
@@ -2504,25 +2510,25 @@ int MainThread::GetOverlayPaths(const std::string &bundleName, const std::string
         HILOG_ERROR("GetOverlayModuleInfo form bms failed.");
         return ret;
     }
+    std::sort(overlayModuleInfo.begin(), overlayModuleInfo.end(),
+        [](const OverlayModuleInfo& lhs, const OverlayModuleInfo& rhs) -> bool
+    {
+        return lhs.priority > rhs.priority;
+    });
     HILOG_DEBUG("GetOverlayPath end, the size of overlay is: %{public}d", overlayModuleInfo.size());
-    for (auto it : overlayModuleInfo) {
-        HILOG_ERROR("[DongLin] overlayPath: %{public}s", it.hapPath.c_str());
-        if (it.state != OverlayState::OVERLAY_ENABLE) {
-            continue;
-        }
-        std::string overlayPath;
-        ChangeToLocalPath(bundleName, it.hapPath, overlayPath);
-        overlayPaths.emplace_back(overlayPath);
-    }
     return ERR_OK;
 }
 
-std::vector<std::string> MainThread::GetAddOverlayPaths(const std::vector<std::string> oldOverlayPath,
-    const std::vector<std::string> newOverlayPath)
+std::vector<std::string> MainThread::GetAddOverlayPaths(const std::vector<OverlayModuleInfo> overlayModuleInfos)
 {
     std::vector<std::string> addPaths;
-    for (auto it : newOverlayPath) {
-        if (std::find(oldOverlayPath.begin(), oldOverlayPath.end(), it) == oldOverlayPath.end()) {
+    for (auto it : overlayModuleInfos) {
+        std::vector<OverlayModuleInfo>::iterator iter = std::find_if(
+            overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item){
+                return it.moduleName == iter.moduleName;
+            });
+        if (iter != overlayModuleInfos_.end() && it.state == OverlayState::OVERLAY_ENABLE) {
+            iter.state = it.state;
             addPaths.emplace_back(it);
         }
     }
@@ -2530,17 +2536,35 @@ std::vector<std::string> MainThread::GetAddOverlayPaths(const std::vector<std::s
     return addPaths;
 }
 
-std::vector<std::string> MainThread::GetRemoveOverlayPaths(const std::vector<std::string> oldOverlayPath,
-    const std::vector<std::string> newOverlayPath)
+std::vector<std::string> MainThread::GetRemoveOverlayPaths(const std::vector<OverlayModuleInfo> overlayModuleInfos)
 {
     std::vector<std::string> removePaths;
-    for (auto it : oldOverlayPath) {
-        if (std::find(newOverlayPath.begin(), newOverlayPath.end(), it) == newOverlayPath.end()) {
+    for (auto it : overlayModuleInfos) {
+        std::vector<OverlayModuleInfo>::iterator iter = std::find_if(
+            overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item){
+                return it.moduleName == iter.moduleName;
+            });
+        if (iter != overlayModuleInfos_.end() && it.state != OverlayState::OVERLAY_ENABLE) {
+            iter.state = it.state;
             removePaths.emplace_back(it);
         }
     }
 
     return removePaths;
+}
+
+void MainThread::ChangeToOverlayPath(const std::vector<OverlayModuleInfo> &overlayModuleInfos,
+    std::vector<std::string> overlayPaths);
+{
+    for (auto it : overlayModuleInfos) {
+        HILOG_DEBUG("overlayPath: %{private}s", it.hapPath.c_str());
+        if (it.state != OverlayState::OVERLAY_ENABLE) {
+            continue;
+        }
+        std::string overlayPath;
+        ChangeToLocalPath(bundleName, it.hapPath, overlayPath);
+        overlayPaths.emplace_back(overlayPath);
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
