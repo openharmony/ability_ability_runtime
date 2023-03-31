@@ -2036,8 +2036,8 @@ HWTEST_F(MainThreadTest, GetOverlayPaths_0100, TestSize.Level1)
     std::string bundleName = "com.ohos.demo";
     std::string moduleName = "entry";
     std::vector<std::string> overlayPath = {};
-    int result = GetOverlayPaths(bundleName, moduleName, overlayPath);
-    EXPECT_EQ(result, ERR_OK);
+    int result = mainThread_->GetOverlayPaths(bundleName, moduleName, overlayPath);
+    EXPECT_NE(result, ERR_OK);
     EXPECT_TRUE(overlayPath.size() == 0);
 }
 
