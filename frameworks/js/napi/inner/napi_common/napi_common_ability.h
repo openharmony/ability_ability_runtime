@@ -279,26 +279,6 @@ private:
 };
 
 /**
- * @brief connectAbility.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_ConnectAbilityCommon(napi_env env, napi_callback_info info, AbilityType abilityType);
-
-/**
- * @brief disconnectAbility.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_DisConnectAbilityCommon(napi_env env, napi_callback_info info, AbilityType abilityType);
-
-/**
  * @brief acquireDataAbilityHelper processing function.
  *
  * @param env The environment that the Node-API call is invoked under.

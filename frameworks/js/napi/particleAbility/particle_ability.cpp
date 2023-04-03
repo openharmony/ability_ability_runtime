@@ -20,8 +20,10 @@
 
 #include "hilog_wrapper.h"
 #include "napi_common_ability.h"
+#include "napi/native_api.h"
 #include "securec.h"
 
+using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 
@@ -140,34 +142,6 @@ napi_value NAPI_PAStopAbility(napi_env env, napi_callback_info info)
 }
 
 /**
- * @brief ParticleAbility NAPI method : connectAbility.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_PAConnectAbility(napi_env env, napi_callback_info info)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    return NAPI_ConnectAbilityCommon(env, info, AbilityType::UNKNOWN);
-}
-
-/**
- * @brief ParticleAbility NAPI method : disconnectAbility.
- *
- * @param env The environment that the Node-API call is invoked under.
- * @param info The callback info passed into the callback function.
- *
- * @return The return value from NAPI C++ to JS for the module.
- */
-napi_value NAPI_PADisConnectAbility(napi_env env, napi_callback_info info)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    return NAPI_DisConnectAbilityCommon(env, info, AbilityType::UNKNOWN);
-}
-
-/**
  * @brief FeatureAbility NAPI method : acquireDataAbilityHelper.
  *
  * @param env The environment that the Node-API call is invoked under.
@@ -235,8 +209,6 @@ napi_value ParticleAbilityInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getAbilityName", NAPI_PAGetAbilityName),
         DECLARE_NAPI_FUNCTION("startAbility", NAPI_PAStartAbility),
         DECLARE_NAPI_FUNCTION("stopAbility", NAPI_PAStopAbility),
-        DECLARE_NAPI_FUNCTION("connectAbility", NAPI_PAConnectAbility),
-        DECLARE_NAPI_FUNCTION("disconnectAbility", NAPI_PADisConnectAbility),
         DECLARE_NAPI_FUNCTION("acquireDataAbilityHelper", NAPI_PAAcquireDataAbilityHelper),
         DECLARE_NAPI_FUNCTION("startBackgroundRunning", NAPI_PAStartBackgroundRunning),
         DECLARE_NAPI_FUNCTION("cancelBackgroundRunning", NAPI_PACancelBackgroundRunning),
@@ -264,18 +236,6 @@ NativeValue* JsParticleAbility::PADisConnectAbility(NativeEngine *engine, Native
 {
     JsParticleAbility *me = CheckParamsAndGetThis<JsParticleAbility>(engine, info);
     return (me != nullptr) ? me->JsDisConnectAbility(*engine, *info, AbilityType::UNKNOWN) : nullptr;
-}
-
-NativeValue* JsParticleAbility::PAStartAbility(NativeEngine *engine, NativeCallbackInfo *info)
-{
-    JsParticleAbility *me = CheckParamsAndGetThis<JsParticleAbility>(engine, info);
-    return (me != nullptr) ? me->JsStartAbility(*engine, *info, AbilityType::UNKNOWN) : nullptr;
-}
-
-NativeValue* JsParticleAbility::PATerminateAbility(NativeEngine *engine, NativeCallbackInfo *info)
-{
-    JsParticleAbility *me = CheckParamsAndGetThis<JsParticleAbility>(engine, info);
-    return (me != nullptr) ? me->JsTerminateAbility(*engine, *info) : nullptr;
 }
 
 Ability* JsParticleAbility::GetAbility(napi_env env)
@@ -332,8 +292,6 @@ NativeValue* JsParticleAbilityInit(NativeEngine *engine, NativeValue *exportObj)
     const char *moduleName = "JsParticleAbility";
     BindNativeFunction(*engine, *object, "connectAbility", moduleName, JsParticleAbility::PAConnectAbility);
     BindNativeFunction(*engine, *object, "disconnectAbility", moduleName, JsParticleAbility::PADisConnectAbility);
-    BindNativeFunction(*engine, *object, "startAbility", moduleName, JsParticleAbility::PAStartAbility);
-    BindNativeFunction(*engine, *object, "terminateSelf", moduleName, JsParticleAbility::PATerminateAbility);
 
     HILOG_DEBUG("JsParticleAbility end");
     return exportObj;
