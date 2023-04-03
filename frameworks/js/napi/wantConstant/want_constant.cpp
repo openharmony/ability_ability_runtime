@@ -98,7 +98,10 @@ napi_value WantConstantInit(napi_env env, napi_value exports)
     SetNamedProperty(env, params, "ohos.dlp.params.abilityName", "DLP_PARAMS_ABILITY_NAME");
     SetNamedProperty(env, params, "ohos.dlp.params.index", "DLP_PARAMS_INDEX");
     SetNamedProperty(env, params, "ability.params.backToOtherMissionStack", "ABILITY_BACK_TO_OTHER_MISSION_STACK");
-    SetNamedProperty(env, params, "ability.params.AbilityRecoveryRestart", "ABILITY_RECOVERY_RESTART");
+    SetNamedProperty(env, params, "ohos.ability.params.abilityRecoveryRestart", "ABILITY_RECOVERY_RESTART");
+    SetNamedProperty(env, params, "ohos.extra.param.key.contentTitle", "CONTENT_TITLE_KEY");
+    SetNamedProperty(env, params, "ohos.extra.param.key.shareAbstract", "SHARE_ABSTRACT_KEY");
+    SetNamedProperty(env, params, "ohos.extra.param.key.shareUrl", "SHARE_URL_KEY");
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("Action", action),
         DECLARE_NAPI_PROPERTY("Entity", entity),
