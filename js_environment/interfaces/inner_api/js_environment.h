@@ -62,7 +62,7 @@ public:
 
     void RemoveTask(const std::string& name);
 
-    void RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo);
+    void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo);
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
 private:
     std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;

@@ -38,7 +38,7 @@ class Extractor;
 
 namespace JsEnv {
 class JsEnvironment;
-struct UncaughtInfo;
+struct UncaughtExceptionInfo;
 } // namespace JsEnv
 
 using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
@@ -95,7 +95,7 @@ public:
     bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
     bool UnLoadRepairPatch(const std::string& hqfFile) override;
     bool NotifyHotReloadPage() override;
-    void RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo);
+    void RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo);
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
 
     NativeEngine* GetNativeEnginePointer() const;

@@ -956,10 +956,10 @@ void JsRuntime::UpdateModuleNameAndAssetPath(const std::string& moduleName)
     panda::JSNApi::SetModuleName(vm, moduleName_);
 }
 
-void JsRuntime::RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo)
+void JsRuntime::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo)
 {
     CHECK_POINTER(jsEnv_);
-    jsEnv_->RegisterUncaughtExceptionHandler(uncaughtInfo);
+    jsEnv_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -34,6 +34,7 @@ std::string UncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(NativeObject*
         JSENV_LOG_E("Failed to convert value from key.");
         return "";
     }
+
     size_t valueStrBufLength = valueStr->GetLength();
     size_t valueStrLength = 0;
     auto valueCStr = std::make_unique<char[]>(valueStrBufLength + 1);
@@ -41,6 +42,7 @@ std::string UncaughtExceptionCallback::GetNativeStrFromJsTaggedObj(NativeObject*
         JSENV_LOG_E("Failed to new valueCStr.");
         return "";
     }
+
     valueStr->GetCString(valueCStr.get(), valueStrBufLength + 1, &valueStrLength);
     std::string ret(valueCStr.get(), valueStrLength);
     JSENV_LOG_D("GetNativeStrFromJsTaggedObj Success.");

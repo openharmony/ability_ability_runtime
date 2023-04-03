@@ -65,24 +65,22 @@ int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
 const int32_t SEND_RESULT_CANCELED = -1;
 const int VECTOR_SIZE = 2;
-#ifdef SUPPORT_ASAN
 const int COLDSTART_TIMEOUT_MULTIPLE = 150;
-const int LOAD_TIMEOUT_MULTIPLE = 150;
+const int TERMINATE_TIMEOUT_MULTIPLE = 150;
+const int LOAD_TIMEOUT_MULTIPLE = 50;
+#if SUPPORT_ASAN
 const int FOREGROUND_TIMEOUT_MULTIPLE = 75;
 const int BACKGROUND_TIMEOUT_MULTIPLE = 45;
 const int ACTIVE_TIMEOUT_MULTIPLE = 75;
-const int TERMINATE_TIMEOUT_MULTIPLE = 150;
 const int INACTIVE_TIMEOUT_MULTIPLE = 8;
 const int DUMP_TIMEOUT_MULTIPLE = 15;
 #else
-const int COLDSTART_TIMEOUT_MULTIPLE = 10;
-const int LOAD_TIMEOUT_MULTIPLE = 10;
 const int FOREGROUND_TIMEOUT_MULTIPLE = 5;
 const int BACKGROUND_TIMEOUT_MULTIPLE = 3;
 const int ACTIVE_TIMEOUT_MULTIPLE = 5;
-const int TERMINATE_TIMEOUT_MULTIPLE = 10;
 const int INACTIVE_TIMEOUT_MULTIPLE = 1;
 const int DUMP_TIMEOUT_MULTIPLE = 1;
+const int SHAREDATA_TIMEOUT_MULTIPLE = 5;
 #endif
 const std::map<AbilityState, std::string> AbilityRecord::stateToStrMap = {
     std::map<AbilityState, std::string>::value_type(INITIAL, "INITIAL"),
@@ -241,7 +239,9 @@ int AbilityRecord::LoadAbility()
     int coldStartTimeout =
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COLDSTART_TIMEOUT_MULTIPLE;
     int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
-    if (abilityInfo_.type != AppExecFwk::AbilityType::DATA) {
+    if (applicationInfo_.asanEnabled) {
+        SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, coldStartTimeout);
+    } else if (abilityInfo_.type != AppExecFwk::AbilityType::DATA) {
         auto delayTime = want_.GetBoolParam("coldStart", false) ? coldStartTimeout : loadTimeout;
         SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, delayTime);
     }
@@ -1218,6 +1218,16 @@ void AbilityRecord::Terminate(const Closure &task)
     lifecycleDeal_->Terminate(want_, lifeCycleStateInfo_);
 }
 
+void AbilityRecord::ShareData(const int32_t &uniqueId)
+{
+    HILOG_INFO("targetAbility start to share data with OriginAbility, ability:%{public}s.", abilityInfo_.name.c_str());
+    CHECK_POINTER(lifecycleDeal_);
+    int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * SHAREDATA_TIMEOUT_MULTIPLE;
+    SendEvent(AbilityManagerService::SHAREDATA_TIMEOUT_MSG, loadTimeout, uniqueId);
+    HILOG_INFO("sendEvent.");
+    lifecycleDeal_->ShareData(uniqueId);
+}
+
 void AbilityRecord::ConnectAbility()
 {
     HILOG_INFO("Connect ability.");
@@ -1805,13 +1815,21 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     handler->PostTask(uriTask);
 #ifdef SUPPORT_GRAPHICS
     // notify winddow manager service the ability died
-    handler->PostTask([ability = shared_from_this()]() {
-        if (ability->GetWMSHandler()) {
-            sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
-            ability->SetAbilityTransitionInfo(info);
-            ability->GetWMSHandler()->NotifyAnimationAbilityDied(info);
-        }
-    });
+    if (missionId_ != -1) {
+        auto task = [me = weak_from_this()]() {
+            auto self = me.lock();
+            if (self == nullptr) {
+                HILOG_ERROR("Ability is invalid.");
+                return;
+            }
+            if (self->GetWMSHandler()) {
+                sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
+                self->SetAbilityTransitionInfo(info);
+                self->GetWMSHandler()->NotifyAnimationAbilityDied(info);
+            }
+        };
+        handler->PostTask(task);
+    }
 #endif
     HandleDlpClosed();
 }
@@ -1867,7 +1885,7 @@ bool AbilityRecord::IsActiveState() const
             IsAbilityState(AbilityState::FOREGROUNDING));
 }
 
-void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut)
+void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param)
 {
     if (want_.GetBoolParam(DEBUG_APP, false)) {
         HILOG_INFO("Is debug mode, no need to handle time out.");
@@ -1875,8 +1893,8 @@ void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut)
     }
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER(handler);
-
-    handler->SendEvent(msg, recordId_, timeOut);
+    param = (param == -1) ? recordId_ : param;
+    handler->SendEvent(msg, param, timeOut);
 }
 
 void AbilityRecord::SetStartSetting(const std::shared_ptr<AbilityStartSetting> &setting)

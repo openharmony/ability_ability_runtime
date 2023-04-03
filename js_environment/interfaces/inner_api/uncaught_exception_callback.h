@@ -28,24 +28,27 @@ struct ErrorObject {
     std::string message;
     std::string stack;
 };
-struct UncaughtInfo {
+
+struct UncaughtExceptionInfo {
     std::string hapPath;
     std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask;
 };
+
 template<class T>
 inline T* ConvertNativeValueTo(NativeValue* value)
 {
     return (value != nullptr) ? static_cast<T*>(value->GetInterface(T::INTERFACE_ID)) : nullptr;
 }
+
 class UncaughtExceptionCallback final {
 public:
     UncaughtExceptionCallback(const std::string hapPath,
-        std::function<void(std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask,
+        std::function<void(const std::string summary, const JsEnv::ErrorObject errorObj)> uncaughtTask,
         std::shared_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps)
         : hapPath_(hapPath), uncaughtTask_(uncaughtTask), bindSourceMaps_(bindSourceMaps)
     {}
 
-    virtual ~UncaughtExceptionCallback() {};
+    UncaughtExceptionCallback() = default;
 
     void operator()(NativeValue* value);
 
