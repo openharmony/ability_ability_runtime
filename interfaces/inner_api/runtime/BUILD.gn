@@ -87,7 +87,6 @@ ohos_shared_library("runtime") {
     "ability_base:string_utils",
     "ability_base:want",
     "ability_runtime:js_environment",
-    "ability_runtime:source_map",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",

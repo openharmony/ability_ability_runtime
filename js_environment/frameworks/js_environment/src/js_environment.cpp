@@ -112,11 +112,11 @@ void JsEnvironment::InitSourceMap(const std::string& bundleCodeDir, bool isStage
     bindSourceMaps_ = std::make_shared<AbilityRuntime::ModSourceMap>(bundleCodeDir, isStageModel);
 }
 
-void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtInfo uncaughtInfo)
+void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo)
 {
     if ((bindSourceMaps_ != nullptr) && (engine_ != nullptr)) {
-        engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtInfo.hapPath,
-            uncaughtInfo.uncaughtTask, bindSourceMaps_));
+        engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtExceptionInfo.hapPath,
+            uncaughtExceptionInfo.uncaughtTask, bindSourceMaps_));
     }
 }
 
