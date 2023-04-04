@@ -40,7 +40,7 @@ std::shared_ptr<UriPermissionManagerClient> UriPermissionManagerClient::GetInsta
     return instance_;
 }
 
-bool UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
+int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
     const std::string targetBundleName, int autoremove)
 {
     HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermission is called.");
