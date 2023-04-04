@@ -1657,7 +1657,7 @@ int MissionListManager::ClearMissionLocked(int missionId, const std::shared_ptr<
     abilityRecord->SetTerminatingState();
     abilityRecord->SetClearMissionFlag(true);
     Want want;
-    abilityRecord->SaveResultToCallers(resultCode, &want);
+    abilityRecord->SaveResultToCallers(-1, &want);
     auto ret = TerminateAbilityLocked(abilityRecord, false);
     if (ret != ERR_OK) {
         HILOG_ERROR("clear mission error: %{public}d.", ret);
