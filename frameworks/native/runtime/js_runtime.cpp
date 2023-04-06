@@ -497,8 +497,6 @@ bool JsRuntime::Initialize(const Options& options)
                 return false;
             }
 
-            InitSourceMap(options);
-
             if (options.isUnique) {
                 HILOG_INFO("Not supported TimerModule when form render");
             } else {
@@ -508,7 +506,7 @@ bool JsRuntime::Initialize(const Options& options)
             InitWorkerModule(*nativeEngine, codePath_, options.isDebugVersion, options.isBundle);
         }
     }
-
+    InitSourceMap(options);
     preloaded_ = options.preload;
     return true;
 }
