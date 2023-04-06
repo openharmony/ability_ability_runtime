@@ -17,6 +17,7 @@
         "AccessibilityExtension": [],
         "InputMethodExtension": [],
         "WorkSchedulerExtension": [
+            "backgroundTaskManager",
             "resourceschedule.backgroundTaskManager",
             "multimedia.camera",
             "multimedia.audio",
