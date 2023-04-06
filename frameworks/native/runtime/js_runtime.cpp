@@ -49,6 +49,8 @@
 #include "parameters.h"
 #include "extractor.h"
 #include "systemcapability.h"
+#include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
+#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "declarative_module_preloader.h"
@@ -448,7 +450,7 @@ bool JsRuntime::Initialize(const Options& options)
         CHECK_POINTER_AND_RETURN(globalObj, false);
 
         if (!preloaded_) {
-            InitConsoleLogModule(*nativeEngine, *globalObj);
+            JsSysModule::Console::InitConsoleModule(reinterpret_cast<napi_env>(nativeEngine));
             InitSyscapModule(*nativeEngine, *globalObj);
 
             // Simple hook function 'isSystemplugin'
@@ -502,7 +504,7 @@ bool JsRuntime::Initialize(const Options& options)
             if (options.isUnique) {
                 HILOG_INFO("Not supported TimerModule when form render");
             } else {
-                InitTimerModule(*nativeEngine, *globalObj);
+                JsSysModule::Timer::RegisterTime(reinterpret_cast<napi_env>(nativeEngine));
             }
 
             InitWorkerModule(*nativeEngine, codePath_, options.isDebugVersion, options.isBundle);
@@ -615,7 +617,8 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
 
 void JsRuntime::InitSourceMap(const Options& options)
 {
-    bindSourceMaps_ = std::make_unique<ModSourceMap>(options.bundleCodeDir, options.isStageModel);
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->InitSourceMap(options.bundleCodeDir, options.isStageModel);
 }
 
 void JsRuntime::Deinitialize()
@@ -953,6 +956,12 @@ void JsRuntime::UpdateModuleNameAndAssetPath(const std::string& moduleName)
     std::string path = BUNDLE_INSTALL_PATH + moduleName_ + MERGE_ABC_PATH;
     panda::JSNApi::SetAssetPath(vm, path);
     panda::JSNApi::SetModuleName(vm, moduleName_);
+}
+
+void JsRuntime::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo)
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

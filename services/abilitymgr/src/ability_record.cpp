@@ -60,24 +60,31 @@ const std::string DLP_INDEX = "ohos.dlp.params.index";
 const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 const std::string COMPONENT_STARTUP_NEW_RULES = "component.startup.newRules";
 const std::string NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
+const std::string PARAMS_URI = "ability.verify.uri";
 const uint32_t RELEASE_STARTING_BG_TIMEOUT = 15000; // release starting window resource timeout.
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
 const int32_t SEND_RESULT_CANCELED = -1;
 const int VECTOR_SIZE = 2;
+const int LOAD_TIMEOUT_ASANENABLED = 150;
+const int TERMINATE_TIMEOUT_ASANENABLED = 150;
+#ifdef SUPPORT_ASAN
 const int COLDSTART_TIMEOUT_MULTIPLE = 150;
-const int TERMINATE_TIMEOUT_MULTIPLE = 150;
-const int LOAD_TIMEOUT_MULTIPLE = 50;
-#if SUPPORT_ASAN
+const int LOAD_TIMEOUT_MULTIPLE = 150;
 const int FOREGROUND_TIMEOUT_MULTIPLE = 75;
 const int BACKGROUND_TIMEOUT_MULTIPLE = 45;
 const int ACTIVE_TIMEOUT_MULTIPLE = 75;
+const int TERMINATE_TIMEOUT_MULTIPLE = 150;
 const int INACTIVE_TIMEOUT_MULTIPLE = 8;
 const int DUMP_TIMEOUT_MULTIPLE = 15;
+const int SHAREDATA_TIMEOUT_MULTIPLE = 75;
 #else
+const int COLDSTART_TIMEOUT_MULTIPLE = 10;
+const int LOAD_TIMEOUT_MULTIPLE = 10;
 const int FOREGROUND_TIMEOUT_MULTIPLE = 5;
 const int BACKGROUND_TIMEOUT_MULTIPLE = 3;
 const int ACTIVE_TIMEOUT_MULTIPLE = 5;
+const int TERMINATE_TIMEOUT_MULTIPLE = 10;
 const int INACTIVE_TIMEOUT_MULTIPLE = 1;
 const int DUMP_TIMEOUT_MULTIPLE = 1;
 const int SHAREDATA_TIMEOUT_MULTIPLE = 5;
@@ -240,7 +247,9 @@ int AbilityRecord::LoadAbility()
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COLDSTART_TIMEOUT_MULTIPLE;
     int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
     if (applicationInfo_.asanEnabled) {
-        SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, coldStartTimeout);
+        loadTimeout =
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_ASANENABLED;
+        SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout);
     } else if (abilityInfo_.type != AppExecFwk::AbilityType::DATA) {
         auto delayTime = want_.GetBoolParam("coldStart", false) ? coldStartTimeout : loadTimeout;
         SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, delayTime);
@@ -320,6 +329,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     currentState_ = AbilityState::FOREGROUNDING;
+    foregroundingTime_ = AbilityUtil::SystemTimeMillis();
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
     lifecycleDeal_->ForegroundNew(want_, lifeCycleStateInfo_, sessionInfo_);
     lifeCycleStateInfo_.sceneFlag = 0;
@@ -470,6 +480,7 @@ void AbilityRecord::SetAbilityTransitionInfo(sptr<AbilityTransitionInfo>& info) 
     info->maxWindowHeight_ = abilityInfo_.maxWindowHeight;
     info->minWindowHeight_ = abilityInfo_.minWindowHeight;
     info->orientation_ = abilityInfo_.orientation;
+    info->apiCompatibleVersion_ = abilityInfo_.applicationInfo.apiCompatibleVersion;
 }
 
 sptr<AbilityTransitionInfo> AbilityRecord::CreateAbilityTransitionInfo()
@@ -590,6 +601,7 @@ void AbilityRecord::SetAbilityTransitionInfo(const AppExecFwk::AbilityInfo &abil
     info->bundleName_ = abilityInfo.bundleName;
     info->windowModes_ = abilityInfo.windowModes;
     info->orientation_ = abilityInfo.orientation;
+    info->apiCompatibleVersion_ = abilityInfo.applicationInfo.apiCompatibleVersion;
     SetShowWhenLocked(abilityInfo, info);
 }
 
@@ -1208,6 +1220,10 @@ void AbilityRecord::Terminate(const Closure &task)
             int terminateTimeout =
                 AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_MULTIPLE;
             handler->PostTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
+        } else if (applicationInfo_.asanEnabled) {
+            int terminateTimeout =
+                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * TERMINATE_TIMEOUT_ASANENABLED;
+            handler->PostTask(task, "terminate_" + std::to_string(recordId_), terminateTimeout);
         } else {
             HILOG_INFO("Is debug mode, no need to handle time out.");
         }
@@ -1767,6 +1783,25 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
     DumpClientInfo(info, params, isClient);
 }
 
+void AbilityRecord::RemoveAbilityDeathRecipient() const
+{
+    if (scheduler_ == nullptr) {
+        HILOG_WARN("scheduler_ is invalid.");
+        return;
+    }
+
+    if (schedulerDeathRecipient_ == nullptr) {
+        HILOG_WARN("schedulerDeathRecipient_ is invalid.");
+        return;
+    }
+
+    auto schedulerObject = scheduler_->AsObject();
+    if (schedulerObject != nullptr) {
+        HILOG_INFO("RemoveDeathRecipient");
+        schedulerObject->RemoveDeathRecipient(schedulerDeathRecipient_);
+    }
+}
+
 void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 {
     HILOG_WARN("On scheduler died.");
@@ -1825,6 +1860,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
             if (self->GetWMSHandler()) {
                 sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
                 self->SetAbilityTransitionInfo(info);
+                HILOG_INFO("Notification WMS UIAbiltiy abnormal death.");
                 self->GetWMSHandler()->NotifyAnimationAbilityDied(info);
             }
         };
@@ -2253,17 +2289,21 @@ void AbilityRecord::DumpAbilityInfoDone(std::vector<std::string> &infos)
     dumpCondition_.notify_all();
 }
 
-void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, std::string targetBundleName)
+void AbilityRecord::GrantUriPermission(Want &want, int32_t userId, std::string targetBundleName)
 {
     if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("Do not call uriPermissionMgr.");
         return;
     }
-
     auto bms = AbilityUtil::GetBundleManager();
     CHECK_POINTER_IS_NULLPTR(bms);
-    auto&& uriStr = want.GetUri().ToString();
-    auto&& uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
+    if (IsDmsCall()) {
+        GrantDmsUriPermission(want, targetBundleName);
+        return;
+    }
+    std::vector<std::string> uriVec;
+    std::string uriStr = want.GetUri().ToString();
+    uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
     uriVec.emplace_back(uriStr);
     HILOG_DEBUG("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
     auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
@@ -2297,6 +2337,49 @@ void AbilityRecord::GrantUriPermission(const Want &want, int32_t userId, std::st
             isGrantedUriPermission_ = true;
         }
     }
+}
+
+bool AbilityRecord::IsDmsCall()
+{
+    auto fromTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(fromTokenId);
+    bool isNativeCall = tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE;
+    if (!isNativeCall) {
+        HILOG_INFO("Is not native call.");
+        return false;
+    }
+    AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(fromTokenId, nativeTokenInfo);
+    if (result == ERR_OK && nativeTokenInfo.processName == DMS_PROCESS_NAME) {
+        HILOG_INFO("Is dms ability call.");
+        return true;
+    }
+    return false;
+}
+
+void AbilityRecord::GrantDmsUriPermission(Want &want, std::string targetBundleName)
+{
+    std::vector<std::string> uriVec = want.GetStringArrayParam(PARAMS_URI);
+    HILOG_DEBUG("GrantDmsUriPermission uriVec size: %{public}zu", uriVec.size());
+    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
+    for (auto&& str : uriVec) {
+        Uri uri(str);
+        auto&& scheme = uri.GetScheme();
+        HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
+        // only support file scheme
+        if (scheme != "file") {
+            HILOG_WARN("only support file uri.");
+            continue;
+        }
+        int autoremove = 1;
+        auto ret = IN_PROCESS_CALL(upmClient->GrantUriPermission(uri, want.GetFlags(),
+            targetBundleName, autoremove));
+        if (ret) {
+            isGrantedUriPermission_ = true;
+        }
+    }
+    uriVec.clear();
+    want.SetParam(PARAMS_URI, uriVec);
 }
 
 void AbilityRecord::RevokeUriPermission()
