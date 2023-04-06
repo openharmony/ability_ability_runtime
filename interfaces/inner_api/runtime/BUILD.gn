@@ -92,6 +92,8 @@ ohos_shared_library("runtime") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
+    "ets_utils:console",
+    "ets_utils:timer",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
@@ -114,6 +116,31 @@ ohos_shared_library("runtime") {
       "napi:ace_container_scope",
     ]
   }
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
+config("source_map_config") {
+  include_dirs = [ "${ability_runtime_services_path}/common/include" ]
+}
+
+config("source_map_public_config") {
+  include_dirs = [ "include" ]
+}
+
+ohos_shared_library("source_map") {
+  sources = [ "${ability_runtime_native_path}/runtime/source_map.cpp" ]
+
+  configs = [ ":source_map_config" ]
+
+  public_configs = [ ":source_map_public_config" ]
+
+  external_deps = [
+    "ability_base:extractortool",
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
