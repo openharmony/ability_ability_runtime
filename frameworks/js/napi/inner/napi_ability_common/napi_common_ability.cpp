@@ -3254,7 +3254,7 @@ napi_value NAPI_StopAbilityCommon(napi_env env, napi_callback_info info, Ability
     return ret;
 }
 
-void NAPIAbilityConnection::AddConnectionCallback(const ConnectionCallback &callback)
+void NAPIAbilityConnection::AddConnectionCallback(std::shared_ptr<ConnectionCallback> callback)
 {
     std::lock_guard<std::mutex> guard(lock_);
     callbacks_.emplace_back(callback);
@@ -3289,26 +3289,36 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
     ConnectAbilityCB *connectAbilityCB = static_cast<ConnectAbilityCB *>(work->data);
     if (connectAbilityCB == nullptr) {
         HILOG_ERROR("UvWorkOnAbilityConnectDone, connectAbilityCB is null");
+        delete work;
         return;
+    }
+    CallbackInfo &cbInfo = connectAbilityCB->cbBase.cbInfo;
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(cbInfo.env, &scope);
+    if (scope == nullptr) {
+        HILOG_ERROR("napi_open_handle_scope failed");
+        delete connectAbilityCB;
+        delete work;
     }
     napi_value result[ARGS_TWO] = {nullptr};
     result[PARAM0] =
-        WrapElementName(connectAbilityCB->cbBase.cbInfo.env, connectAbilityCB->abilityConnectionCB.elementName);
+        WrapElementName(cbInfo.env, connectAbilityCB->abilityConnectionCB.elementName);
     napi_value jsRemoteObject = NAPI_ohos_rpc_CreateJsRemoteObject(
-        connectAbilityCB->cbBase.cbInfo.env, connectAbilityCB->abilityConnectionCB.connection);
+        cbInfo.env, connectAbilityCB->abilityConnectionCB.connection);
     result[PARAM1] = jsRemoteObject;
 
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
-    napi_get_undefined(connectAbilityCB->cbBase.cbInfo.env, &undefined);
+    napi_get_undefined(cbInfo.env, &undefined);
     napi_value callResult = nullptr;
-    napi_get_reference_value(connectAbilityCB->cbBase.cbInfo.env, connectAbilityCB->cbBase.cbInfo.callback, &callback);
+    napi_get_reference_value(cbInfo.env, cbInfo.callback, &callback);
 
     napi_call_function(
-        connectAbilityCB->cbBase.cbInfo.env, undefined, callback, ARGS_TWO, &result[PARAM0], &callResult);
-    if (connectAbilityCB->cbBase.cbInfo.callback != nullptr) {
-        napi_delete_reference(connectAbilityCB->cbBase.cbInfo.env, connectAbilityCB->cbBase.cbInfo.callback);
+        cbInfo.env, undefined, callback, ARGS_TWO, &result[PARAM0], &callResult);
+    if (cbInfo.callback != nullptr) {
+        napi_delete_reference(cbInfo.env, cbInfo.callback);
     }
+    napi_close_handle_scope(cbInfo.env, scope);
     if (connectAbilityCB != nullptr) {
         delete connectAbilityCB;
         connectAbilityCB = nullptr;
@@ -3320,7 +3330,7 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
     HILOG_INFO("UvWorkOnAbilityConnectDone, uv_queue_work end");
 }
 
-void NAPIAbilityConnection::HandleOnAbilityConnectDone(const ConnectionCallback &callback, int resultCode)
+void NAPIAbilityConnection::HandleOnAbilityConnectDone(ConnectionCallback &callback, int resultCode)
 {
     HILOG_INFO("%{public}s called.", __func__);  
     uv_loop_s *loop = nullptr;
@@ -3347,6 +3357,7 @@ void NAPIAbilityConnection::HandleOnAbilityConnectDone(const ConnectionCallback 
     }
     connectAbilityCB->cbBase.cbInfo.env = callback.env;
     connectAbilityCB->cbBase.cbInfo.callback = callback.connectCallbackRef;
+    callback.connectCallbackRef = nullptr;
     connectAbilityCB->abilityConnectionCB.elementName = element_;
     connectAbilityCB->abilityConnectionCB.resultCode = resultCode;
     connectAbilityCB->abilityConnectionCB.connection = serviceRemoteObject_;
@@ -3379,7 +3390,7 @@ void NAPIAbilityConnection::OnAbilityConnectDone(
     element_ = element;
     serviceRemoteObject_ = remoteObject;
     for (const auto &callback : callbacks_) {
-        HandleOnAbilityConnectDone(callback, resultCode);
+        HandleOnAbilityConnectDone(*callback, resultCode);
     }
     connectionState_ = CONNECTION_STATE_CONNECTED;
     HILOG_INFO("%{public}s, end.", __func__);    
@@ -3396,9 +3407,17 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
     ConnectAbilityCB *connectAbilityCB = static_cast<ConnectAbilityCB *>(work->data);
     if (connectAbilityCB == nullptr) {
         HILOG_ERROR("UvWorkOnAbilityDisconnectDone, connectAbilityCB is null");
+        delete work;
         return;
     }
     CallbackInfo &cbInfo = connectAbilityCB->cbBase.cbInfo;
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(cbInfo.env, &scope);
+    if (scope == nullptr) {
+        HILOG_ERROR("napi_open_handle_scope failed");
+        delete connectAbilityCB;
+        delete work;
+    }
     napi_value result = WrapElementName(cbInfo.env, connectAbilityCB->abilityConnectionCB.elementName);
     if (cbInfo.callback != nullptr) {
         napi_value callback = nullptr;
@@ -3410,6 +3429,7 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
         napi_delete_reference(cbInfo.env, cbInfo.callback);
         cbInfo.callback = nullptr;
     }
+    napi_close_handle_scope(cbInfo.env, scope);
 
     // release connect
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
@@ -3441,7 +3461,7 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
     HILOG_INFO("UvWorkOnAbilityDisconnectDone, uv_queue_work end");
 }
 
-void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(const ConnectionCallback &callback, int resultCode)
+void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(ConnectionCallback &callback, int resultCode)
 {
     HILOG_INFO("%{public}s called.", __func__);  
     uv_loop_s *loop = nullptr;
@@ -3469,6 +3489,7 @@ void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(const ConnectionCallba
 
     connectAbilityCB->cbBase.cbInfo.env = callback.env;
     connectAbilityCB->cbBase.cbInfo.callback = callback.disconnectCallbackRef;
+    callback.disconnectCallbackRef = nullptr;
     connectAbilityCB->abilityConnectionCB.elementName = element_;
     connectAbilityCB->abilityConnectionCB.resultCode = resultCode;
     work->data = static_cast<void *>(connectAbilityCB);
@@ -3494,7 +3515,7 @@ void NAPIAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementNam
     std::lock_guard<std::mutex> guard(lock_);
     element_ = element;
     for (const auto &callback : callbacks_) {
-        HandleOnAbilityDisconnectDone(callback, resultCode);
+        HandleOnAbilityDisconnectDone(*callback, resultCode);
     }
     connectionState_ = CONNECTION_STATE_DISCONNECTED;
     HILOG_INFO("%{public}s, end.", __func__);    
@@ -3969,13 +3990,11 @@ NativeValue* JsNapiCommon::JsConnectAbility(
         return engine.CreateUndefined();
     }
 
-    ConnectionCallback connectionCallback;
-    GenerateCallback(env, secondParam, connectionCallback);
+    auto connectionCallback = std::make_shared<ConnectionCallback>(env, secondParam);
     bool result = false;
     int32_t errorVal = static_cast<int32_t>(NAPI_ERR_NO_ERROR);
     int64_t id = 0;
     sptr<NAPIAbilityConnection> abilityConnection = nullptr;
-
     if (CheckAbilityType(abilityType)) {
         abilityConnection = FindConnectionLocked(want, id);
         if (abilityConnection) {
@@ -3987,7 +4006,7 @@ NativeValue* JsNapiCommon::JsConnectAbility(
             auto connectionState = abilityConnection->GetConnectionState();
             if (connectionState == CONNECTION_STATE_CONNECTED) {
                 HILOG_INFO("Ability is connected, callback to client.");
-                abilityConnection->HandleOnAbilityConnectDone(connectionCallback, ERR_OK);
+                abilityConnection->HandleOnAbilityConnectDone(*connectionCallback, ERR_OK);
                 return CreateJsValue(engine, id);
             } else if (connectionState == CONNECTION_STATE_CONNECTING) {
                 HILOG_INFO("Ability is connecting, just wait callback.");
@@ -4024,10 +4043,11 @@ NativeValue* JsNapiCommon::JsConnectAbility(
         }
         NAPI_CALL_BASE(env, napi_create_int32(env, errorCode, &resultVal), engine.CreateUndefined());
         NAPI_CALL_BASE(
-            env, napi_get_reference_value(env, connectionCallback.failedCallbackRef, &callback),
+            env, napi_get_reference_value(env, connectionCallback->failedCallbackRef, &callback),
             engine.CreateUndefined());
         NAPI_CALL_BASE(env, napi_call_function(env, undefined, callback, ARGS_ONE, &resultVal, &callResult),
             engine.CreateUndefined());
+        RemoveConnectionLocked(want);
     }
     return CreateJsValue(engine, id);
 }
@@ -4087,7 +4107,7 @@ NativeValue* JsNapiCommon::JsDisConnectAbility(
 }
 
 bool JsNapiCommon::CreateConnectionAndConnectAbilityLocked(
-    const ConnectionCallback &callback, const Want &want, int64_t &id)
+    std::shared_ptr<ConnectionCallback> callback, const Want &want, int64_t &id)
 {
     HILOG_DEBUG("Create new connection");
     // Create connection
@@ -4154,18 +4174,6 @@ void JsNapiCommon::RemoveConnectionLocked(const Want &want)
                    (abilityName == obj.first.want.GetElement().GetAbilityName());
         });
     connects_.erase(iter);
-}
-
-void JsNapiCommon::GenerateCallback(const napi_env &env, const napi_value &arg1, ConnectionCallback &callback)
-{
-    callback.env = env;
-    napi_value jsMethod = nullptr;
-    napi_get_named_property(env, arg1, "onConnect", &jsMethod);
-    napi_create_reference(env, jsMethod, 1, &callback.connectCallbackRef);
-    napi_get_named_property(env, arg1, "onDisconnect", &jsMethod);
-    napi_create_reference(env, jsMethod, 1, &callback.disconnectCallbackRef);
-    napi_get_named_property(env, arg1, "onFailed", &jsMethod);
-    napi_create_reference(env, jsMethod, 1, &callback.failedCallbackRef);
 }
 
 NativeValue* JsNapiCommon::JsGetContext(
