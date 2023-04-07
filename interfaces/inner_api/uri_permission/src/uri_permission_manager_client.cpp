@@ -43,7 +43,6 @@ std::shared_ptr<UriPermissionManagerClient> UriPermissionManagerClient::GetInsta
 int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
     const std::string targetBundleName, int autoremove)
 {
-    HILOG_DEBUG("UriPermissionManagerClient::GrantUriPermission is called.");
     HILOG_DEBUG("targetBundleName :%{public}s", targetBundleName.c_str());
     auto uriPermMgr = ConnectUriPermService();
     if (uriPermMgr) {
@@ -73,7 +72,7 @@ int UriPermissionManagerClient::RevokeUriPermissionManually(const Uri &uri, cons
 
 sptr<IUriPermissionManager> UriPermissionManagerClient::ConnectUriPermService()
 {
-    HILOG_INFO("UriPermissionManagerClient::ConnectUriPermService is called.");
+    HILOG_DEBUG("UriPermissionManagerClient::ConnectUriPermService is called.");
     auto uriPermMgr = GetUriPermMgr();
     if (uriPermMgr == nullptr) {
         if (!LoadUriPermService()) {
@@ -100,7 +99,7 @@ sptr<IUriPermissionManager> UriPermissionManagerClient::ConnectUriPermService()
 
 bool UriPermissionManagerClient::LoadUriPermService()
 {
-    HILOG_INFO("UriPermissionManagerClient::LoadUriPermService is called.");
+    HILOG_DEBUG("UriPermissionManagerClient::LoadUriPermService is called.");
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityMgr == nullptr) {
         HILOG_ERROR("Failed to get SystemAbilityManager.");

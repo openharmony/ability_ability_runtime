@@ -18,7 +18,6 @@
 
 #include <functional>
 
-#include "singleton.h"
 #include "uri.h"
 #include "uri_permission_manager_interface.h"
 
