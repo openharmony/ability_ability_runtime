@@ -232,8 +232,8 @@ struct ConnectionCallback {
         napi_create_reference(env, jsMethod, 1, &failedCallbackRef);
     }
     ConnectionCallback(ConnectionCallback &) = delete;
-    ConnectionCallback(ConnectionCallback &&other):
-        env(other.env), connectCallbackRef(other.connectCallbackRef),
+    ConnectionCallback(ConnectionCallback &&other)
+        : env(other.env), connectCallbackRef(other.connectCallbackRef),
         disconnectCallbackRef(other.disconnectCallbackRef), failedCallbackRef(other.failedCallbackRef)
     {
         other.env = nullptr;

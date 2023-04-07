@@ -3281,15 +3281,15 @@ size_t NAPIAbilityConnection::GetCallbackSize()
 void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
 {
     HILOG_INFO("UvWorkOnAbilityConnectDone, uv_queue_work");
+    std::unique_ptr<uv_work_t> managedWork(work);
     if (work == nullptr) {
         HILOG_ERROR("UvWorkOnAbilityConnectDone, work is null");
         return;
     }
     // JS Thread
-    ConnectAbilityCB *connectAbilityCB = static_cast<ConnectAbilityCB *>(work->data);
+    std::unique_ptr<ConnectAbilityCB> connectAbilityCB(static_cast<ConnectAbilityCB *>(work->data));
     if (connectAbilityCB == nullptr) {
         HILOG_ERROR("UvWorkOnAbilityConnectDone, connectAbilityCB is null");
-        delete work;
         return;
     }
     CallbackInfo &cbInfo = connectAbilityCB->cbBase.cbInfo;
@@ -3297,8 +3297,7 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
     napi_open_handle_scope(cbInfo.env, &scope);
     if (scope == nullptr) {
         HILOG_ERROR("napi_open_handle_scope failed");
-        delete connectAbilityCB;
-        delete work;
+        return;
     }
     napi_value result[ARGS_TWO] = {nullptr};
     result[PARAM0] =
@@ -3319,14 +3318,6 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
         napi_delete_reference(cbInfo.env, cbInfo.callback);
     }
     napi_close_handle_scope(cbInfo.env, scope);
-    if (connectAbilityCB != nullptr) {
-        delete connectAbilityCB;
-        connectAbilityCB = nullptr;
-    }
-    if (work != nullptr) {
-        delete work;
-        work = nullptr;
-    }
     HILOG_INFO("UvWorkOnAbilityConnectDone, uv_queue_work end");
 }
 
@@ -3399,15 +3390,15 @@ void NAPIAbilityConnection::OnAbilityConnectDone(
 void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
 {
     HILOG_INFO("UvWorkOnAbilityDisconnectDone, uv_queue_work");
+    std::unique_ptr<uv_work_t> managedWork(work);
     if (work == nullptr) {
         HILOG_ERROR("UvWorkOnAbilityDisconnectDone, work is null");
         return;
     }
     // JS Thread
-    ConnectAbilityCB *connectAbilityCB = static_cast<ConnectAbilityCB *>(work->data);
+    std::unique_ptr<ConnectAbilityCB> connectAbilityCB(static_cast<ConnectAbilityCB *>(work->data));
     if (connectAbilityCB == nullptr) {
         HILOG_ERROR("UvWorkOnAbilityDisconnectDone, connectAbilityCB is null");
-        delete work;
         return;
     }
     CallbackInfo &cbInfo = connectAbilityCB->cbBase.cbInfo;
@@ -3415,8 +3406,7 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
     napi_open_handle_scope(cbInfo.env, &scope);
     if (scope == nullptr) {
         HILOG_ERROR("napi_open_handle_scope failed");
-        delete connectAbilityCB;
-        delete work;
+        return;
     }
     napi_value result = WrapElementName(cbInfo.env, connectAbilityCB->abilityConnectionCB.elementName);
     if (cbInfo.callback != nullptr) {
@@ -3448,15 +3438,6 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
         // match deviceid & bundlename && abilityname
         connects_.erase(item);
         HILOG_INFO("UvWorkOnAbilityDisconnectDone erase connects_.size:%{public}zu", connects_.size());
-    }
-
-    if (connectAbilityCB != nullptr) {
-        delete connectAbilityCB;
-        connectAbilityCB = nullptr;
-    }
-    if (work != nullptr) {
-        delete work;
-        work = nullptr;
     }
     HILOG_INFO("UvWorkOnAbilityDisconnectDone, uv_queue_work end");
 }
