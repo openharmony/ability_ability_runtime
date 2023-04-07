@@ -1330,7 +1330,7 @@ private:
 
     static sptr<AbilityManagerService> instance_;
     int32_t uniqueId_ = 0;
-    std::map<int32_t, std::pair<int64_t, const sptr<IAcquireShareDataCallback>&>> iAcquireShareDataMap_;
+    std::map<int32_t, std::pair<int64_t, const sptr<IAcquireShareDataCallback>>> iAcquireShareDataMap_;
 
     // Component StartUp rule switch
     bool startUpNewRule_ = true;
@@ -1344,11 +1344,6 @@ private:
      *  FALSE: Determine the state by AppExecFwk::AppProcessState::APP_STATE_FOCUS.
      */
     bool backgroundJudgeFlag_ = true;
-    /** The applications in white list use old rule
-     *  TRUE: white list enable.
-     *  FALSE: white list unable.
-     */
-    bool whiteListNormalFlag_ = true;
     /** The applications in white list can associatedWakeUp
      *  TRUE: white list enable.
      *  FALSE: white list unable.

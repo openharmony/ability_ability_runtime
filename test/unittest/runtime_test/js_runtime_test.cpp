@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gtest/hwext/gtest-multithread.h>
 
 #define private public
 #define protected public
@@ -29,6 +30,7 @@
 
 using namespace testing;
 using namespace testing::ext;
+using namespace testing::mt;
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -579,6 +581,75 @@ HWTEST_F(JsRuntimeTest, JsRuntimeUpdateModuleNameAndAssetPathTest_0100, TestSize
     jsRuntime->UpdateModuleNameAndAssetPath(moduleName);
 
     HILOG_INFO("UpdateModuleNameAndAssetPath end");
+}
+
+/**
+ * @tc.name: JsRuntimeInitialize_0100
+ * @tc.desc: Initialize js runtime in multi thread.
+ * @tc.type: FUNC
+ * @tc.require: issueI6KODF
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeInitialize_0100, TestSize.Level0)
+{
+    HILOG_INFO("Running in multi-thread, using default thread number.");
+
+    auto task = []() {
+        HILOG_INFO("Running in thread %{public}d", gettid());
+        AbilityRuntime::Runtime::Options options;
+        options.loadAce = false;
+        options.preload = false;
+        options.isStageModel = false;
+
+        auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+        ASSERT_NE(jsRuntime, nullptr);
+        EXPECT_NE(jsRuntime->GetEcmaVm(), nullptr);
+        EXPECT_NE(jsRuntime->GetNativeEnginePointer(), nullptr);
+    };
+
+    GTEST_RUN_TASK(task);
+}
+
+/**
+ * @tc.name: JsRuntimeInitialize_0200
+ * @tc.desc: preload js runtime.
+ * @tc.type: FUNC
+ * @tc.require: issueI6KODF
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeInitialize_0200, TestSize.Level0)
+{
+	AbilityRuntime::Runtime::Options options;
+	options.preload = true;
+
+	auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+	ASSERT_NE(jsRuntime, nullptr);
+	EXPECT_NE(jsRuntime->GetEcmaVm(), nullptr);
+	EXPECT_NE(jsRuntime->GetNativeEnginePointer(), nullptr);
+
+	options.preload = false;
+	jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+	ASSERT_NE(jsRuntime, nullptr);
+	EXPECT_NE(jsRuntime->GetEcmaVm(), nullptr);
+	EXPECT_NE(jsRuntime->GetNativeEnginePointer(), nullptr);
+}
+
+/**
+ * @tc.name: RegisterQuickFixQueryFunc_0100
+ * @tc.desc: JsRuntime test for RegisterQuickFixQueryFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0100, TestSize.Level0)
+{
+    HILOG_INFO("RegisterQuickFixQueryFunc start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    EXPECT_TRUE(jsRuntime != nullptr);
+    std::string moudel = "<moudelName>";
+    std::string hqfFile = "<hqfFile>";
+    std::map<std::string, std::string> moduleAndPath;
+    moduleAndPath.insert(std::make_pair(moudel, hqfFile));
+    jsRuntime->RegisterQuickFixQueryFunc(moduleAndPath);
+    
+    HILOG_INFO("RegisterQuickFixQueryFunc end");
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
