@@ -39,7 +39,6 @@ public:
         if (impl_ == nullptr) {
             return "";
         }
-
         return impl_->TranslateBySourceMap(stackStr);
     }
 

@@ -21,6 +21,5 @@ std::string JsSourceMapOperatorImpl::TranslateBySourceMap(const std::string& sta
 {
     return AbilityRuntime::ModSourceMap::TranslateBySourceMap(stackStr, *bindSourceMaps_, hapPath_);
 }
-
 }  // namespace AbilityRuntime
 }  // namespace OHOS

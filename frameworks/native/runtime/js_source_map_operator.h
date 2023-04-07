@@ -21,11 +21,11 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-
 class JsSourceMapOperatorImpl : public JsEnv::SourceMapOperatorImpl {
 public:
-    JsSourceMapOperatorImpl(const std::string hapPath, std::shared_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps) :
-    hapPath_(hapPath), bindSourceMaps_(bindSourceMaps)
+    JsSourceMapOperatorImpl(const std::string hapPath,
+        std::shared_ptr<AbilityRuntime::ModSourceMap> bindSourceMaps)
+        : hapPath_(hapPath), bindSourceMaps_(bindSourceMaps)
     {}
 
     ~JsSourceMapOperatorImpl() = default;
