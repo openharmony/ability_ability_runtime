@@ -107,17 +107,19 @@ void JsEnvironment::RemoveTask(const std::string& name)
     }
 }
 
-void JsEnvironment::InitSourceMap(const std::string& bundleCodeDir, bool isStageModel)
+void JsEnvironment::InitSourceMap(const std::shared_ptr<SourceMapOperatorImpl> operatorImpl)
 {
-    bindSourceMaps_ = std::make_shared<AbilityRuntime::ModSourceMap>(bundleCodeDir, isStageModel);
+    sourceMapOperater_ = std::make_shared<SourceMapOperator>(operatorImpl);
 }
 
 void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo)
 {
-    if ((bindSourceMaps_ != nullptr) && (engine_ != nullptr)) {
-        engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtExceptionInfo.hapPath,
-            uncaughtExceptionInfo.uncaughtTask, bindSourceMaps_));
+    if (engine_ == nullptr) {
+        return;
     }
+
+    engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtExceptionInfo.uncaughtTask,
+        sourceMapOperater_));
 }
 
 bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* buffer, bool isBundle)

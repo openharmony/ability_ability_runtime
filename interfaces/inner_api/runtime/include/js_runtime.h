@@ -38,6 +38,7 @@ class Extractor;
 
 namespace JsEnv {
 class JsEnvironment;
+class SourceMapOperatorImpl;
 struct UncaughtExceptionInfo;
 } // namespace JsEnv
 
@@ -103,6 +104,8 @@ public:
 
     void UpdateModuleNameAndAssetPath(const std::string& moduleName);
 
+    void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperatorImpl> operatorImpl);
+
 private:
     void FinishPreload() override;
 
@@ -132,7 +135,6 @@ private:
     bool GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer);
     bool CreateJsEnv(const Options& options);
     void PreloadAce(const Options& options);
-    void InitSourceMap(const Options& options);
     bool InitLoop(const std::shared_ptr<AppExecFwk::EventRunner>& eventRunner);
     inline bool IsUseAbilityRuntime(const Options& options) const;
 };

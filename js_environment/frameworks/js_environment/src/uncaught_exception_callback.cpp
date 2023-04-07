@@ -69,6 +69,7 @@ void UncaughtExceptionCallback::operator()(NativeValue* value)
         JSENV_LOG_E("errorStack is empty");
         return;
     }
+
     auto errorPos = AbilityRuntime::ModSourceMap::GetErrorPos(errorStack);
     std::string error;
     if (obj != nullptr) {
@@ -78,8 +79,11 @@ void UncaughtExceptionCallback::operator()(NativeValue* value)
             error = fuc->GetSourceCodeInfo(errorPos);
         }
     }
-    summary += error + "Stacktrace:\n" +
-        AbilityRuntime::ModSourceMap::TranslateBySourceMap(errorStack, *bindSourceMaps_, hapPath_);
+    if (sourceMapOperater_ == nullptr) {
+        JSENV_LOG_E("sourceMapOperater_ is empty");
+        return;
+    }
+    summary += error + "Stacktrace:\n" + sourceMapOperater_->TranslateBySourceMap(errorStack);
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj);
     }
