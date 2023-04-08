@@ -302,6 +302,7 @@ bool AbilityManagerService::Init()
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
     interceptorExecuter_->AddInterceptor(std::make_shared<ControlInterceptor>());
     interceptorExecuter_->AddInterceptor(std::make_shared<EcologicalRuleInterceptor>());
+    interceptorExecuter_->AddInterceptor(std::make_shared<AbilityJumpInterceptor>());
 
     auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
     handler_->PostTask(startResidentAppsTask, "StartResidentApps");
@@ -414,7 +415,13 @@ int AbilityManagerService::StartAbilityAsCaller(const Want &want, const sptr<IRe
 
     HILOG_INFO("Start ability come, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
-
+    std::string callerPkg;
+    std::string targetPkg;
+    if (AbilityUtil::CheckJumpInterceptorWant(want, callerPkg, targetPkg)) {
+        HILOG_INFO("the call is from interceptor dialog, callerPkg:%{public}s, targetPkg:%{public}s",
+            callerPkg.c_str(), targetPkg.c_str());
+        AbilityUtil::AddAbilityJumpRuleToBms(callerPkg, targetPkg, GetUserId());
+    }
     int32_t ret = StartAbilityInner(want, callerToken, requestCode, -1, userId, true);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
