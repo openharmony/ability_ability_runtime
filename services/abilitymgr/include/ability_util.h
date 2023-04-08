@@ -30,6 +30,7 @@
 #include "permission_verification.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
+#include "app_jump_control_rule.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -206,6 +207,49 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     }
 
     return iface_cast<AppExecFwk::IEcologicalRuleManager>(remoteObject);
+}
+
+[[maybe_unused]] static bool ParseJumpInterceptorWant(Want &targetWant, const std::string callerPkg)
+{
+    if (callerPkg.empty()) {
+        HILOG_ERROR("%{public}s error, get empty callerPkg.", __func__);
+        return false;
+    }
+    targetWant.SetParam("interceptor_callerPkg", callerPkg);
+    return true;
+}
+
+[[maybe_unused]] static bool CheckJumpInterceptorWant(const Want &targetWant, std::string &callerPkg,
+    std::string &targetPkg)
+{
+    if (!targetWant.HasParameter("interceptor_callerPkg")) {
+        HILOG_ERROR("%{public}s error, the interceptor parameter invalid.", __func__);
+        return false;
+    }
+    callerPkg = targetWant.GetStringParam("interceptor_callerPkg");
+    targetPkg = targetWant.GetElement().GetBundleName();
+    return !callerPkg.empty() && !targetPkg.empty();
+}
+    
+[[maybe_unused]] static bool AddAbilityJumpRuleToBms(const std::string &callerPkg, const std::string &targetPkg,
+    int32_t userId)
+{
+    if (callerPkg.empty() || targetPkg.empty()) {
+        HILOG_ERROR("get invalid inputs");
+        return false;
+    }
+    auto bms = AbilityUtil::GetBundleManager();
+    if (!bms) {
+        HILOG_ERROR("GetBundleManager failed");
+        return false;
+    }
+    auto appControlMgr = bms->GetAppControlProxy();
+    if (appControlMgr == nullptr) {
+        HILOG_ERROR("Get appControlMgr failed");
+        return false;
+    }
+    int ret = IN_PROCESS_CALL(appControlMgr->ConfirmAppJumpControlRule(callerPkg, targetPkg, userId));
+    return ret == ERR_OK;
 }
 
 [[maybe_unused]] static bool HandleDlpApp(Want &want)

@@ -90,6 +90,12 @@ ErrCode AppControlProxy::GetAppRunningControlRule(
     return ERR_OK;
 }
 
+ErrCode GetAppJumpControlRule(const std::string &CallerBundleName, const std::string &TargetBundleName,
+        int32_t userId, AppJumpControlRuleResult &controlRuleResult)
+{
+    return ERR_OK;
+}
+
 ErrCode AppControlProxy::SetDisposedStatus(const std::string& appId, const Want& want)
 {
     return ERR_OK;
