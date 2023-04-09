@@ -35,7 +35,7 @@ struct VerificationInfo {
     PermissionVerification() = default;
     ~PermissionVerification() = default;
 
-    bool VerifyPermissionForTokenId(const int &tokenId, const std::string &permissionName) const;
+    bool VerifyPermissionByTokenId(const int &tokenId, const std::string &permissionName) const;
 
     bool VerifyCallingPermission(const std::string &permissionName) const;
 

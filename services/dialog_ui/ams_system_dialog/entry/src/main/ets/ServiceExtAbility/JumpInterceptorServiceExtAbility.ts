@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+import deviceInfo from '@ohos.deviceInfo';
+import display from '@ohos.display';
 import extension from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
-import display from '@ohos.display';
-import deviceInfo from '@ohos.deviceInfo';
 
 const TAG = "JumpInterceptorDialog_Service";
 
@@ -45,7 +45,7 @@ export default class JumpInterceptorServiceExtAbility extends extension {
                 top: globalThis.position.offsetY,
                 width: globalThis.position.width,
                 height: globalThis.position.height
-            }
+            };
             if (winNum > 1) {
                 win.destroy();
                 winNum--;
@@ -56,7 +56,7 @@ export default class JumpInterceptorServiceExtAbility extends extension {
                 this.createWindow("JumpInterceptorDialog" + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);
             }
             winNum++;
-        })
+        });
     }
 
     async getHapResource() {
@@ -65,18 +65,18 @@ export default class JumpInterceptorServiceExtAbility extends extension {
             globalThis.interceptor_callerBundleName,
             globalThis.interceptor_callerModuleName,
             globalThis.interceptor_callerLabelId
-        )
+        );
         globalThis.targetAppName = await this.loadAppName(
             globalThis.params.bundleName,
             globalThis.interceptor_targetModuleName,
             globalThis.interceptor_targetLabelId
-        )
+        );
         console.debug(TAG, "getHapResource load finished");
     }
 
     async loadAppName(bundleName: string, moduleName: string, labelId: number) {
         let moduleContext = globalThis.jumpInterceptorExtensionContext.createModuleContext(bundleName, moduleName);
-        let appName: string = ""
+        let appName: string = "";
         try {
             appName = await moduleContext.resourceManager.getString(labelId);
         } catch (error) {

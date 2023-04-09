@@ -13,25 +13,24 @@
  * limitations under the License.
  */
 
-#include "ability_interceptor.h"
-
 #include <chrono>
 
-#include "accesstoken_kit.h"
-#include "permission_constants.h"
-#include "permission_verification.h"
+#include "ability_interceptor.h"
 #include "ability_manager_errors.h"
-#include "app_running_control_rule_result.h"
+#include "accesstoken_kit.h"
 #include "app_jump_control_rule.h"
+#include "app_running_control_rule_result.h"
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundle_constants.h"
-#include "erms_mgr_param.h"
 #include "erms_mgr_interface.h"
+#include "erms_mgr_param.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
-#include "want.h"
+#include "permission_constants.h"
+#include "permission_verification.h"
 #include "system_dialog_scheduler.h"
+#include "want.h"
 namespace OHOS {
 namespace AAFwk {
 using ErmsCallerInfo = OHOS::AppExecFwk::ErmsParams::CallerInfo;
@@ -40,6 +39,11 @@ using ExperienceRule = OHOS::AppExecFwk::ErmsParams::ExperienceRule;
 const std::string ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTest";
 const std::string ACTION_MARKET_DISPOSED = "ohos.want.action.marketDisposed";
 const std::string PERMISSION_MANAGE_DISPOSED_APP_STATUS = "ohos.permission.MANAGE_DISPOSED_APP_STATUS";
+const std::string JUMP_DIALOG_CALLER_BUNDLE_NAME= "interceptor_callerBundleName";
+const std::string JUMP_DIALOG_CALLER_MODULE_NAME= "interceptor_callerModuleName";
+const std::string JUMP_DIALOG_CALLER_LABEL_ID= "interceptor_callerLabelId";
+const std::string JUMP_DIALOG_TARGET_MODULE_NAME= "interceptor_targetModuleName";
+const std::string JUMP_DIALOG_TARGET_LABEL_ID= "interceptor_targetLabelId";
 
 AbilityInterceptor::~AbilityInterceptor()
 {}
@@ -267,7 +271,7 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
         HILOG_ERROR("GetBundleNameForUid from bms fail.");
         return false;
     }
-    if (CheckIsJumpFromOrToSystemOrExemptApp(bms, controlRule, userId)) {
+    if (CheckIfIntercept(bms, controlRule, userId)) {
         HILOG_INFO("jump from or to system or exempt apps");
         return false;
     }
@@ -287,7 +291,7 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
     return controlRule.jumpMode != AppExecFwk::AbilityJumpMode::DIRECT;
 }
 
-bool AbilityJumpInterceptor::CheckIsJumpFromOrToSystemOrExemptApp(sptr<AppExecFwk::IBundleMgr> &bms,
+bool AbilityJumpInterceptor::CheckIfIntercept(sptr<AppExecFwk::IBundleMgr> &bms,
     AppExecFwk::AppJumpControlRule &controlRule, int32_t userId)
 {
     int callerUid = IPCSkeleton::GetCallingUid();
@@ -295,7 +299,7 @@ bool AbilityJumpInterceptor::CheckIsJumpFromOrToSystemOrExemptApp(sptr<AppExecFw
         HILOG_INFO("Jump From SystemApp, No need to intercept");
         return true;
     }
-    if (VerifyPermissionForBundleName(bms, controlRule.callerPkg,
+    if (VerifyPermissionByBundleName(bms, controlRule.callerPkg,
         PermissionConstants::PERMISSION_EXEMPT_AS_CALLER, userId)) {
         HILOG_INFO("Jump From exempt caller app, No need to intercept");
         return true;
@@ -305,7 +309,7 @@ bool AbilityJumpInterceptor::CheckIsJumpFromOrToSystemOrExemptApp(sptr<AppExecFw
         HILOG_INFO("Jump To SystemApp, No need to intercept");
         return true;
     }
-    if (VerifyPermissionForBundleName(bms, controlRule.targetPkg,
+    if (VerifyPermissionByBundleName(bms, controlRule.targetPkg,
         PermissionConstants::PERMISSION_EXEMPT_AS_TARGET, userId)) {
         HILOG_INFO("Jump From exempt target app, No need to intercept");
         return true;
@@ -314,7 +318,7 @@ bool AbilityJumpInterceptor::CheckIsJumpFromOrToSystemOrExemptApp(sptr<AppExecFw
     return false;
 }
 
-bool AbilityJumpInterceptor::VerifyPermissionForBundleName(sptr<AppExecFwk::IBundleMgr> &bms,
+bool AbilityJumpInterceptor::VerifyPermissionByBundleName(sptr<AppExecFwk::IBundleMgr> &bms,
     const std::string &bundleName, const std::string &permission, int32_t userId)
 {
     AppExecFwk::ApplicationInfo appInfo;
@@ -341,11 +345,11 @@ bool AbilityJumpInterceptor::LoadAppLabelInfo(sptr<AppExecFwk::IBundleMgr> &bms,
     AppExecFwk::ApplicationInfo targetAppInfo;
     result = IN_PROCESS_CALL(bms->GetApplicationInfo(controlRule.targetPkg,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, targetAppInfo));
-    want.SetParam("interceptor_callerBundleName", controlRule.callerPkg);
-    want.SetParam("interceptor_callerModuleName", callerAppInfo.labelResource.moduleName);
-    want.SetParam("interceptor_callerLabelId", callerAppInfo.labelId);
-    want.SetParam("interceptor_targetModuleName", targetAppInfo.labelResource.moduleName);
-    want.SetParam("interceptor_targetLabelId", targetAppInfo.labelId);
+    want.SetParam(JUMP_DIALOG_CALLER_BUNDLE_NAME, controlRule.callerPkg);
+    want.SetParam(JUMP_DIALOG_CALLER_MODULE_NAME, callerAppInfo.labelResource.moduleName);
+    want.SetParam(JUMP_DIALOG_CALLER_LABEL_ID, callerAppInfo.labelId);
+    want.SetParam(JUMP_DIALOG_TARGET_MODULE_NAME, targetAppInfo.labelResource.moduleName);
+    want.SetParam(JUMP_DIALOG_TARGET_LABEL_ID, targetAppInfo.labelId);
     return true;
 }
 } // namespace AAFwk

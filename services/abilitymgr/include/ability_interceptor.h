@@ -19,8 +19,8 @@
 #include "ability_util.h"
 #include "erms_mgr_param.h"
 #include "erms_mgr_interface.h"
-#include "want.h"
 #include "in_process_call_wrapper.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -75,9 +75,9 @@ public:
 private:
     bool CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, const Want &want, int32_t userId,
         AppExecFwk::AppJumpControlRule &controlRule);
-    bool CheckIsJumpFromOrToSystemOrExemptApp(sptr<AppExecFwk::IBundleMgr> &bms,
-        AppExecFwk::AppJumpControlRule &controlRule, int32_t userId);
-    bool VerifyPermissionForBundleName(sptr<AppExecFwk::IBundleMgr> &bms, const std::string &bundleName,
+    bool CheckIfIntercept(sptr<AppExecFwk::IBundleMgr> &bms, AppExecFwk::AppJumpControlRule &controlRule,
+        int32_t userId);
+    bool VerifyPermissionByBundleName(sptr<AppExecFwk::IBundleMgr> &bms, const std::string &bundleName,
         const std::string &permission, int32_t userId);
     bool LoadAppLabelInfo(sptr<AppExecFwk::IBundleMgr> &bms, Want &want, AppExecFwk::AppJumpControlRule &controlRule,
         int32_t userId);

@@ -90,34 +90,34 @@ ErrCode AppControlProxy::GetAppRunningControlRule(
     return ERR_OK;
 }
 
-ErrCode ConfirmAppJumpControlRule(const std::string &callerBundleName, const std::string &targetBundleName,
-    int32_t userId) 
+ErrCode AppControlProxy::ConfirmAppJumpControlRule(const std::string &callerBundleName,
+    const std::string &targetBundleName, int32_t userId)
 {
     return ERR_OK;
 }
 
-ErrCode AddAppJumpControlRule(const std::vector<AppJumpControlRule> &controlRules, int32_t userId) 
+ErrCode AppControlProxy::AddAppJumpControlRule(const std::vector<AppJumpControlRule> &controlRules, int32_t userId)
 {
     return ERR_OK;
 }
 
-ErrCode DeleteAppJumpControlRule(const std::vector<AppJumpControlRule> &controlRules, int32_t userId) 
+ErrCode AppControlProxy::DeleteAppJumpControlRule(const std::vector<AppJumpControlRule> &controlRules, int32_t userId)
 {
     return ERR_OK;
 }
 
-ErrCode DeleteRuleByCallerBundleName(const std::string &callerBundleName, int32_t userId) 
+ErrCode AppControlProxy::DeleteRuleByCallerBundleName(const std::string &callerBundleName, int32_t userId)
 {
     return ERR_OK;
 }
 
-ErrCode DeleteRuleByTargetBundleName(const std::string &targetBundleName, int32_t userId) 
+ErrCode AppControlProxy::DeleteRuleByTargetBundleName(const std::string &targetBundleName, int32_t userId)
 {
     return ERR_OK;
 }
 
-ErrCode GetAppJumpControlRule(const std::string &callerBundleName, const std::string &targetBundleName,
-    int32_t userId, AppJumpControlRule &controlRule) 
+ErrCode AppControlProxy::GetAppJumpControlRule(const std::string &callerBundleName,
+const std::string &targetBundleName, int32_t userId, AppJumpControlRule &controlRule)
 {
     return ERR_OK;
 }
