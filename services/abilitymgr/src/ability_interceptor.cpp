@@ -31,7 +31,6 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "system_dialog_scheduler.h"
-#include "tokenid_kit.h"
 #include "want.h"
 namespace OHOS {
 namespace AAFwk {
@@ -296,8 +295,8 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
 bool AbilityJumpInterceptor::CheckIfIntercept(sptr<AppExecFwk::IBundleMgr> &bms,
     AppExecFwk::AppJumpControlRule &controlRule, int32_t userId)
 {
-    auto callerToken = IPCSkeleton::GetSelfTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(callerToken)) {
+    int callerUid = IPCSkeleton::GetCallingUid();
+    if (bms->CheckIsSystemAppByUid(callerUid)) {
         HILOG_INFO("Jump From SystemApp, No need to intercept");
         return true;
     }
@@ -306,8 +305,8 @@ bool AbilityJumpInterceptor::CheckIfIntercept(sptr<AppExecFwk::IBundleMgr> &bms,
         HILOG_INFO("Jump From exempt caller app, No need to intercept");
         return true;
     }
-    auto targetoken = IPCSkeleton::GetSelfTokenID();
-    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(targetoken)) {
+    int targetUid = bms->GetUidByBundleName(controlRule.targetPkg, userId);
+    if (bms->CheckIsSystemAppByUid(targetUid)) {
         HILOG_INFO("Jump To SystemApp, No need to intercept");
         return true;
     }
