@@ -51,6 +51,7 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "os_account_manager_wrapper.h"
+#include "parameters.h"
 #include "permission_constants.h"
 #include "uri_permission_manager_client.h"
 #include "xcollie/watchdog.h"
@@ -302,7 +303,9 @@ bool AbilityManagerService::Init()
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
     interceptorExecuter_->AddInterceptor(std::make_shared<ControlInterceptor>());
     interceptorExecuter_->AddInterceptor(std::make_shared<EcologicalRuleInterceptor>());
-    interceptorExecuter_->AddInterceptor(std::make_shared<AbilityJumpInterceptor>());
+    if (OHOS::system::GetBoolParameter(OHOS::AppExecFwk::PARAMETER_APP_JUMP_INTERCEPTOR_ENABLE, false)) {
+        interceptorExecuter_->AddInterceptor(std::make_shared<AbilityJumpInterceptor>());
+    }
 
     auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
     handler_->PostTask(startResidentAppsTask, "StartResidentApps");
