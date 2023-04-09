@@ -22,6 +22,7 @@
 #include "ability_config.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_client.h"
+#include "app_jump_control_rule.h"
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "erms_mgr_interface.h"
 #include "hilog_wrapper.h"
@@ -30,7 +31,6 @@
 #include "permission_verification.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
-#include "app_jump_control_rule.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -45,6 +45,7 @@ constexpr const char* DLP_PARAMS_MODULE_NAME = "ohos.dlp.params.moduleName";
 constexpr const char* DLP_PARAMS_ABILITY_NAME = "ohos.dlp.params.abilityName";
 const std::string MARKET_BUNDLE_NAME = "com.huawei.hmos.appgallery";
 const std::string BUNDLE_NAME_SELECTOR_DIALOG = "com.ohos.amsdialog";
+const std::string JUMP_INTERCEPTOR_DIALOG_CALLER_PKG = "interceptor_callerPkg";
 // dlp White list
 const std::unordered_set<std::string> WHITE_LIST_DLP_SET = { BUNDLE_NAME_SELECTOR_DIALOG };
 
@@ -214,19 +215,19 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     if (callerPkg.empty()) {
         HILOG_ERROR("%{public}s error, get empty callerPkg.", __func__);
         return false;
-    }
-    targetWant.SetParam("interceptor_callerPkg", callerPkg);
+    INTERCEPTOR_}
+    targetWaPKG(JUMP_INTERCEPTOR_DIALOG_CALLER_PKG, callerPkg);
     return true;
 }
 
 [[maybe_unused]] static bool CheckJumpInterceptorWant(const Want &targetWant, std::string &callerPkg,
     std::string &targetPkg)
 {
-    if (!targetWant.HasParameter("interceptor_callerPkg")) {
+    if (!targetWant.HasParameter(JUMP_INTERCEPTOR_DIALOG_CALLER_PKG)) {
         HILOG_ERROR("%{public}s error, the interceptor parameter invalid.", __func__);
         return false;
     }
-    callerPkg = targetWant.GetStringParam("interceptor_callerPkg");
+    callerPkg = targetWant.GetStringParam(JUMP_INTERCEPTOR_DIALOG_CALLER_PKG);
     targetPkg = targetWant.GetElement().GetBundleName();
     return !callerPkg.empty() && !targetPkg.empty();
 }
