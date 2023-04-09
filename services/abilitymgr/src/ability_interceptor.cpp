@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "ability_interceptor.h"
+
 #include <chrono>
 
-#include "ability_interceptor.h"
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "app_jump_control_rule.h"
