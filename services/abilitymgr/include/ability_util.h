@@ -215,7 +215,7 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     if (callerPkg.empty()) {
         HILOG_ERROR("%{public}s error, get empty callerPkg.", __func__);
         return false;
-    INTERCEPTOR_}
+    }
     targetWaPKG(JUMP_INTERCEPTOR_DIALOG_CALLER_PKG, callerPkg);
     return true;
 }
