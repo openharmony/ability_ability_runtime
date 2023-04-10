@@ -25,7 +25,10 @@
 
 #include "native_engine/native_engine.h"
 #include "runtime.h"
-#include "source_map.h"
+
+namespace panda::ecmascript {
+class EcmaVM;
+} // namespace panda::ecmascript
 namespace OHOS {
 namespace AppExecFwk {
 class EventHandler;
@@ -45,7 +48,6 @@ using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
 
 namespace AbilityRuntime {
 class TimerTask;
-class ModSourceMap;
 
 inline void *DetachCallbackFunc(NativeEngine *engine, void *value, void *)
 {
@@ -61,15 +63,12 @@ public:
 
     static void SetAppLibPath(const AppLibPathMap& appLibPaths);
 
+    static bool ReadSourceMapData(const std::string& hapPath, std::string& content);
+
     JsRuntime();
     ~JsRuntime() override;
 
     NativeEngine& GetNativeEngine() const;
-
-    ModSourceMap& GetSourceMap() const
-    {
-        return *bindSourceMaps_;
-    }
 
     Language GetLanguage() const override
     {
@@ -119,7 +118,6 @@ private:
     bool debugMode_ = false;
     bool preloaded_ = false;
     bool isBundle_ = true;
-    std::unique_ptr<ModSourceMap> bindSourceMaps_;
     std::string codePath_;
     std::string moduleName_;
     std::unique_ptr<NativeReference> methodRequireNapiRef_;

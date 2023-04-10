@@ -115,8 +115,10 @@ void JsEnvironment::InitSourceMap(const std::shared_ptr<SourceMapOperatorImpl> o
 void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo)
 {
     if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
         return;
     }
+
     engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtExceptionInfo.uncaughtTask,
         sourceMapOperator_));
 }

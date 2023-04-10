@@ -14,12 +14,21 @@
  */
 
 #include "js_source_map_operator.h"
+#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 std::string JsSourceMapOperatorImpl::TranslateBySourceMap(const std::string& stackStr)
 {
-    return AbilityRuntime::ModSourceMap::TranslateBySourceMap(stackStr, *bindSourceMaps_, hapPath_);
+    if (bindSourceMaps_ == nullptr) {
+        HILOG_ERROR("Source map is invalid.");
+        return "";
+    }
+
+    std::string sourceMapData;
+    JsEnv::SourceMap::ReadSourceMapData(hapPath_, sourceMapData);
+    bindSourceMaps_->Init(isModular_, sourceMapData);
+    return bindSourceMaps_->TranslateBySourceMap(stackStr);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

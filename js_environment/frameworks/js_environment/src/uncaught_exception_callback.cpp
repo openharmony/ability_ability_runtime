@@ -69,8 +69,7 @@ void UncaughtExceptionCallback::operator()(NativeValue* value)
         JSENV_LOG_E("errorStack is empty");
         return;
     }
-
-    auto errorPos = AbilityRuntime::ModSourceMap::GetErrorPos(errorStack);
+    auto errorPos = SourceMap::GetErrorPos(errorStack);
     std::string error;
     if (obj != nullptr) {
         NativeValue* value = obj->GetProperty("errorfunc");

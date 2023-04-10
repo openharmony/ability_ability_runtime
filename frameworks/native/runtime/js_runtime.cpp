@@ -53,6 +53,7 @@
 #include "systemcapability.h"
 #include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
 #include "commonlibrary/ets_utils/js_sys_module/console/console.h"
+#include "source_map.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "declarative_module_preloader.h"
@@ -68,6 +69,7 @@ constexpr uint8_t SYSCAP_MAX_SIZE = 64;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
+const std::string MEGER_SOURCE_MAP_PATH = "ets/sourceMaps.map";
 #ifdef APP_USE_ARM
 constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/libark_debugger.z.so";
 #else
@@ -505,9 +507,9 @@ bool JsRuntime::Initialize(const Options& options)
                 HILOG_ERROR("Initialize loop failed.");
                 return false;
             }
-            auto bindSourceMaps =
-                std::make_shared<AbilityRuntime::ModSourceMap>(options.bundleCodeDir, options.isStageModel);
-            auto operatorImpl = std::make_shared<JsSourceMapOperatorImpl>(options.hapPath, bindSourceMaps);
+            auto bindSourceMaps = std::make_shared<JsEnv::SourceMap>();
+            bool isModular = !panda::JSNApi::IsBundle(vm);
+            auto operatorImpl = std::make_shared<JsSourceMapOperatorImpl>(options.hapPath, isModular, bindSourceMaps);
             InitSourceMap(operatorImpl);
 
             if (options.isUnique) {
@@ -628,6 +630,7 @@ void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperatorImpl
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitSourceMap(operatorImpl);
+    JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
 }
 
 void JsRuntime::Deinitialize()
@@ -979,6 +982,29 @@ void JsRuntime::RegisterQuickFixQueryFunc(const std::map<std::string, std::strin
     if (vm != nullptr) {
         panda::JSNApi::RegisterQuickFixQueryFunc(vm, JsQuickfixCallback(moduleAndPath));
     }
+}
+
+bool JsRuntime::ReadSourceMapData(const std::string& hapPath, std::string& content)
+{
+    if (hapPath.empty()) {
+        HILOG_ERROR("hapPath is empty");
+        return false;
+    }
+    bool newCreate = false;
+    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(
+        ExtractorUtil::GetLoadFilePath(hapPath), newCreate);
+    if (extractor == nullptr) {
+        HILOG_ERROR("hap's path: %{public}s, get extractor failed", hapPath.c_str());
+        return false;
+    }
+    std::unique_ptr<uint8_t[]> dataPtr = nullptr;
+    size_t len = 0;
+    if (!extractor->ExtractToBufByName(MEGER_SOURCE_MAP_PATH, dataPtr, len)) {
+        HILOG_ERROR("get mergeSourceMapData fileBuffer failed");
+        return false;
+    }
+    content = reinterpret_cast<char*>(dataPtr.get());
+    return true;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
