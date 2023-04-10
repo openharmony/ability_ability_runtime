@@ -519,6 +519,7 @@ bool JsRuntime::Initialize(const Options& options)
             InitWorkerModule(*nativeEngine, codePath_, options.isDebugVersion, options.isBundle);
         }
     }
+
     preloaded_ = options.preload;
     return true;
 }

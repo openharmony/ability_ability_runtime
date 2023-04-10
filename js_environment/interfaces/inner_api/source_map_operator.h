@@ -15,8 +15,8 @@
 
 #ifndef OHOS_ABILITY_JS_ENVIRONMENT_SOURCE_MAP_OPERATOR_H
 #define OHOS_ABILITY_JS_ENVIRONMENT_SOURCE_MAP_OPERATOR_H
-#include <string>
 #include <memory>
+#include <string>
 
 namespace OHOS {
 namespace JsEnv {
@@ -32,7 +32,7 @@ public:
     SourceMapOperator(std::shared_ptr<SourceMapOperatorImpl> impl) : impl_(impl)
     {}
 
-    virtual ~SourceMapOperator() = default;
+    ~SourceMapOperator() = default;
 
     std::string TranslateBySourceMap(const std::string& stackStr)
     {
