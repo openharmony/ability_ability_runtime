@@ -456,7 +456,7 @@ NativeValue *JsApplicationContextUtils::OnGetRunningProcessInformation(NativeEng
             object->SetProperty("isFocused", CreateJsValue(engine, processInfo.isFocused));
             NativeValue* arrayValue = engine.CreateArray(1);
             NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
-            array->SetElement(0, object);
+            array->SetElement(0, objValue);
             task.ResolveWithNoError(engine, arrayValue);
         } else {
             task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
