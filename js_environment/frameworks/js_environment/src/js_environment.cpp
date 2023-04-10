@@ -109,7 +109,7 @@ void JsEnvironment::RemoveTask(const std::string& name)
 
 void JsEnvironment::InitSourceMap(const std::shared_ptr<SourceMapOperatorImpl> operatorImpl)
 {
-    sourceMapOperater_ = std::make_shared<SourceMapOperator>(operatorImpl);
+    sourceMapOperator_ = std::make_shared<SourceMapOperator>(operatorImpl);
 }
 
 void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo)
@@ -117,9 +117,8 @@ void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInf
     if (engine_ == nullptr) {
         return;
     }
-
     engine_->RegisterUncaughtExceptionHandler(UncaughtExceptionCallback(uncaughtExceptionInfo.uncaughtTask,
-        sourceMapOperater_));
+        sourceMapOperator_));
 }
 
 bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* buffer, bool isBundle)
