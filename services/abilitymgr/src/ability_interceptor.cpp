@@ -319,7 +319,7 @@ bool AbilityJumpInterceptor::CheckIfExemptByBundleName(sptr<AppExecFwk::IBundleM
     AppExecFwk::ApplicationInfo appInfo;
     if (!IN_PROCESS_CALL(bms->GetApplicationInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
         userId, appInfo))) {
-        HILOG_INFO("VerifyPermission failed to get application info");
+        HILOG_ERROR("VerifyPermission failed to get application info");
         return false;
     }
     if (appInfo.isSystemApp) {
