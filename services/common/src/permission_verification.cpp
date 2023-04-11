@@ -26,6 +26,12 @@ namespace AAFwk {
 const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const std::string DMS_PROCESS_NAME = "distributedsched";
+
+bool PermissionVerification::VerifySystemAppByTokenId(uint64_t tokenId) const
+{
+    return Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
+
 bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const std::string &permissionName) const
 {
     HILOG_DEBUG("VerifyPermissionByTokenId permission %{public}s", permissionName.c_str());
