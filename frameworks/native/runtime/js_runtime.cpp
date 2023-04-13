@@ -607,7 +607,7 @@ bool JsRuntime::InitLoop(const std::shared_ptr<AppExecFwk::EventRunner>& eventRu
     return true;
 }
 
-void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
+void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp)
 {
     HILOG_DEBUG("Set library path.");
 
@@ -623,7 +623,7 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
     }
 
     for (const auto &appLibPath : appLibPaths) {
-        moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second);
+        moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second, isSystemApp);
     }
 }
 
