@@ -460,9 +460,10 @@ NativeValue *JsApplicationContextUtils::OnGetRunningProcessInformation(NativeEng
                 HILOG_ERROR("Initiate array failed.");
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                     "Initiate array failed."));
+            } else {
+                array->SetElement(0, objValue);
+                task.ResolveWithNoError(engine, arrayValue);
             }
-            array->SetElement(0, objValue);
-            task.ResolveWithNoError(engine, arrayValue);
         } else {
             task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR,
                 "Get process infos failed."));
