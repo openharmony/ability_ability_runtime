@@ -3566,7 +3566,7 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
 
 void NAPIAbilityConnection::HandleOnAbilityConnectDone(const ConnectionCallback &callback, int resultCode)
 {
-    HILOG_INFO("%{public}s called.", __func__);  
+    HILOG_INFO("%{public}s called.", __func__);
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(callback.env, &loop);
     if (loop == nullptr) {
@@ -3626,7 +3626,7 @@ void NAPIAbilityConnection::OnAbilityConnectDone(
         HandleOnAbilityConnectDone(callback, resultCode);
     }
     connectionState_ = CONNECTION_STATE_CONNECTED;
-    HILOG_INFO("%{public}s, end.", __func__);    
+    HILOG_INFO("%{public}s, end.", __func__);
 }
 
 void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
@@ -3687,7 +3687,7 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
 
 void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(const ConnectionCallback &callback, int resultCode)
 {
-    HILOG_INFO("%{public}s called.", __func__);  
+    HILOG_INFO("%{public}s called.", __func__);
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(callback.env, &loop);
     if (loop == nullptr) {
@@ -3741,7 +3741,7 @@ void NAPIAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementNam
         HandleOnAbilityDisconnectDone(callback, resultCode);
     }
     connectionState_ = CONNECTION_STATE_DISCONNECTED;
-    HILOG_INFO("%{public}s, end.", __func__);    
+    HILOG_INFO("%{public}s, end.", __func__);
 }
 
 /**
@@ -4526,9 +4526,9 @@ sptr<NAPIAbilityConnection> JsNapiCommon::FindConnectionLocked(const Want &want,
         HILOG_DEBUG("find connection exist");
         auto connection = iter->second;
         if (connection == nullptr) {
-           HILOG_ERROR("connection is nullptr"); 
-           connects_.erase(iter);
-           return nullptr;
+            HILOG_ERROR("connection is nullptr");
+            connects_.erase(iter);
+            return nullptr;
         }
         id = iter->first.id;
         return connection;
