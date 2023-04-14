@@ -80,6 +80,9 @@ int ServiceRouterMgrStub::HandleQueryBusinessAbilityInfos(MessageParcel &data, M
     }
     std::vector<BusinessAbilityInfo> infos;
     int ret = QueryBusinessAbilityInfos(*filter, infos);
+    if (filter != nullptr) {
+        delete filter;
+    }
     if (!reply.WriteInt32(ret)) {
         APP_LOGE("write ret failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
@@ -108,6 +111,9 @@ int ServiceRouterMgrStub::HandleQueryPurposeInfos(MessageParcel &data, MessagePa
     std::string purposeName = data.ReadString();
     std::vector<PurposeInfo> infos;
     int ret = QueryPurposeInfos(*want, purposeName, infos);
+    if (want != nullptr) {
+        delete want;
+    }
     if (!reply.WriteInt32(ret)) {
         APP_LOGE("write ret failed");
         return ERR_APPEXECFWK_PARCEL_ERROR;
