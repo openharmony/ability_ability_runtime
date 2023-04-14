@@ -24,12 +24,12 @@ group("srms") {
 ohos_sa_profile("srms_sa_profile") {
   sources = [ "404.xml" ]
 
-  part_name = "bundle_framework"
+  part_name = "ability_runtime"
 }
 
 ohos_prebuilt_etc("srms.cfg") {
   source = "srms.cfg"
   relative_install_dir = "init"
-  subsystem_name = "bundlemanager"
-  part_name = "bundle_framework"
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
 }

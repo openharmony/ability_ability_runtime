@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("../../srms.gni")
 
 group("srms_target") {
-    deps = [ ":libsrms" ]
+  deps = [ ":libsrms" ]
 }
 
 config("srms_config") {
