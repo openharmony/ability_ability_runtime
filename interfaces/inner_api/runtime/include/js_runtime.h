@@ -25,8 +25,10 @@
 
 #include "native_engine/native_engine.h"
 #include "runtime.h"
-#include "source_map.h"
 
+namespace panda::ecmascript {
+class EcmaVM;
+} // namespace panda::ecmascript
 namespace OHOS {
 namespace AppExecFwk {
 class EventHandler;
@@ -36,9 +38,16 @@ namespace AbilityBase {
 class Extractor;
 } // namespace AbilityBase
 
+namespace JsEnv {
+class JsEnvironment;
+class SourceMapOperatorImpl;
+struct UncaughtExceptionInfo;
+} // namespace JsEnv
+
+using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
+
 namespace AbilityRuntime {
 class TimerTask;
-class ModSourceMap;
 
 inline void *DetachCallbackFunc(NativeEngine *engine, void *value, void *)
 {
@@ -47,22 +56,19 @@ inline void *DetachCallbackFunc(NativeEngine *engine, void *value, void *)
 
 class JsRuntime : public Runtime {
 public:
-    static std::unique_ptr<Runtime> Create(const Options& options);
+    static std::unique_ptr<JsRuntime> Create(const Options& options);
 
     static std::unique_ptr<NativeReference> LoadSystemModuleByEngine(NativeEngine* engine,
         const std::string& moduleName, NativeValue* const* argv, size_t argc);
 
-    ~JsRuntime() override = default;
+    static void SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp = false);
 
-    NativeEngine& GetNativeEngine() const
-    {
-        return *nativeEngine_;
-    }
+    static bool ReadSourceMapData(const std::string& hapPath, std::string& content);
 
-    ModSourceMap& GetSourceMap() const
-    {
-        return *bindSourceMaps_;
-    }
+    JsRuntime();
+    ~JsRuntime() override;
+
+    NativeEngine& GetNativeEngine() const;
 
     Language GetLanguage() const override
     {
@@ -80,35 +86,57 @@ public:
     void NotifyApplicationState(bool isBackground) override;
 
     bool RunSandboxScript(const std::string& path, const std::string& hapPath);
-    virtual bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false) = 0;
+    bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false);
 
     void PreloadSystemModule(const std::string& moduleName) override;
     void UpdateExtensionType(int32_t extensionType) override;
-    void AllowCrossThreadExecution() const;
+    void StartDebugMode(bool needBreakPoint) override;
+    bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
+    bool UnLoadRepairPatch(const std::string& hqfFile) override;
+    bool NotifyHotReloadPage() override;
+    void RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo);
+    bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
 
-protected:
-    JsRuntime() = default;
+    NativeEngine* GetNativeEnginePointer() const;
+    panda::ecmascript::EcmaVM* GetEcmaVm() const;
 
-    virtual bool Initialize(const Options& options);
+    void UpdateModuleNameAndAssetPath(const std::string& moduleName);
+    void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) override;
+    static bool GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer);
+
+    void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperatorImpl> operatorImpl);
+
+private:
+    void FinishPreload() override;
+
+    bool Initialize(const Options& options);
     void Deinitialize();
 
-    virtual NativeValue* LoadJsBundle(const std::string& path, const std::string& hapPath, bool useCommonChunk = false);
-    virtual NativeValue* LoadJsModule(const std::string& path, const std::string& hapPath) = 0;
+    NativeValue* LoadJsBundle(const std::string& path, const std::string& hapPath, bool useCommonChunk = false);
+    NativeValue* LoadJsModule(const std::string& path, const std::string& hapPath);
 
-    bool isArkEngine_ = false;
     bool debugMode_ = false;
     bool preloaded_ = false;
     bool isBundle_ = true;
-    std::unique_ptr<NativeEngine> nativeEngine_;
-    std::unique_ptr<ModSourceMap> bindSourceMaps_;
     std::string codePath_;
     std::string moduleName_;
     std::unique_ptr<NativeReference> methodRequireNapiRef_;
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::unordered_map<std::string, NativeReference*> modules_;
+    std::shared_ptr<JsEnv::JsEnvironment> jsEnv_ = nullptr;
+
+    std::string bundleName_;
+    uint32_t instanceId_ = 0;
+
+    static std::atomic<bool> hasInstance;
 
 private:
-    bool GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer);
+    bool CreateJsEnv(const Options& options);
+    void PreloadAce(const Options& options);
+    bool InitLoop(const std::shared_ptr<AppExecFwk::EventRunner>& eventRunner);
+    inline bool IsUseAbilityRuntime(const Options& options) const;
+    bool StartDebugMode(const std::string& bundleName, bool needBreakPoint, uint32_t instanceId,
+        const DebuggerPostTask& debuggerPostTask = {});
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

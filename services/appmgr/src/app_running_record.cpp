@@ -30,27 +30,33 @@ constexpr int32_t RESTART_INTERVAL_TIME = 120000;
 int64_t AppRunningRecord::appEventId_ = 0;
 
 RenderRecord::RenderRecord(pid_t hostPid, const std::string &renderParam,
-    int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host)
-    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(ipcFd), sharedFd_(sharedFd), host_(host)
-{}
+                           int32_t ipcFd, int32_t sharedFd, int32_t crashFd,
+                           const std::shared_ptr<AppRunningRecord> &host)
+    : hostPid_(hostPid), renderParam_(renderParam), ipcFd_(ipcFd),
+      sharedFd_(sharedFd), crashFd_(crashFd), host_(host) {}
 
 RenderRecord::~RenderRecord()
 {
     close(sharedFd_);
     close(ipcFd_);
+    close(crashFd_);
 }
 
-std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
-    int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host)
+std::shared_ptr<RenderRecord> RenderRecord::CreateRenderRecord(
+    pid_t hostPid, const std::string &renderParam, int32_t ipcFd,
+    int32_t sharedFd, int32_t crashFd,
+    const std::shared_ptr<AppRunningRecord> &host)
 {
-    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 || !host) {
+    if (hostPid <= 0 || renderParam.empty() || ipcFd <= 0 || sharedFd <= 0 ||
+        crashFd <= 0 || !host) {
         return nullptr;
     }
 
-    auto renderRecord = std::make_shared<RenderRecord>(hostPid, renderParam, ipcFd, sharedFd, host);
+    auto renderRecord = std::make_shared<RenderRecord>(
+        hostPid, renderParam, ipcFd, sharedFd, crashFd, host);
     renderRecord->SetHostUid(host->GetUid());
     renderRecord->SetHostBundleName(host->GetBundleName());
-
+    renderRecord->SetProcessName(host->GetProcessName());
     return renderRecord;
 }
 
@@ -89,6 +95,16 @@ std::string RenderRecord::GetHostBundleName() const
     return hostBundleName_;
 }
 
+void RenderRecord::SetProcessName(const std::string &hostProcessName)
+{
+    processName_ = hostProcessName;
+}
+
+std::string RenderRecord::GetProcessName() const
+{
+    return processName_;
+}
+
 std::string RenderRecord::GetRenderParam() const
 {
     return renderParam_;
@@ -102,6 +118,16 @@ int32_t RenderRecord::GetIpcFd() const
 int32_t RenderRecord::GetSharedFd() const
 {
     return sharedFd_;
+}
+
+int32_t RenderRecord::GetCrashFd() const
+{
+    return crashFd_;
+}
+
+ProcessType RenderRecord::GetProcessType() const
+{
+    return processType_;
 }
 
 std::shared_ptr<AppRunningRecord> RenderRecord::GetHostRecord() const
@@ -128,8 +154,8 @@ void RenderRecord::RegisterDeathRecipient()
 {
     if (renderScheduler_ && deathRecipient_) {
         auto obj = renderScheduler_->AsObject();
-        if (obj) {
-            obj->AddDeathRecipient(deathRecipient_);
+        if (!obj || !obj->AddDeathRecipient(deathRecipient_)) {
+            HILOG_ERROR("AddDeathRecipient failed.");
         }
     }
 }
@@ -302,24 +328,6 @@ sptr<IAppScheduler> AppRunningRecord::GetApplicationClient() const
     return (appLifeCycleDeal_ ? appLifeCycleDeal_->GetApplicationClient() : nullptr);
 }
 
-std::shared_ptr<AbilityRunningRecord> AppRunningRecord::GetAbilityRunningRecord(
-    const std::string &abilityName, const std::string &moduleName, int32_t ownerUserId) const
-{
-    HILOG_INFO("Get ability running record by ability name.");
-    auto moduleRecordList = GetAllModuleRecord();
-    for (const auto &moduleRecord : moduleRecordList) {
-        if (!moduleName.empty() && moduleRecord->GetModuleName() != moduleName) {
-            continue;
-        }
-        auto abilityRecord = moduleRecord->GetAbilityRunningRecord(abilityName, ownerUserId);
-        if (abilityRecord) {
-            return abilityRecord;
-        }
-    }
-
-    return nullptr;
-}
-
 std::shared_ptr<AbilityRunningRecord> AppRunningRecord::GetAbilityRunningRecord(const int64_t eventId) const
 {
     HILOG_INFO("Get ability running record by eventId.");
@@ -332,26 +340,6 @@ std::shared_ptr<AbilityRunningRecord> AppRunningRecord::GetAbilityRunningRecord(
     }
 
     return nullptr;
-}
-
-void AppRunningRecord::ClearAbility(const std::shared_ptr<AbilityRunningRecord> &record)
-{
-    if (!record) {
-        HILOG_ERROR("Param record is null");
-        return;
-    }
-
-    auto moduleRecord = GetModuleRunningRecordByToken(record->GetToken());
-    if (!moduleRecord) {
-        HILOG_ERROR("moduleRecord is not exit");
-        return;
-    }
-
-    moduleRecord->ClearAbility(record);
-
-    if (moduleRecord->GetAbilities().empty()) {
-        RemoveModuleRecord(moduleRecord);
-    }
 }
 
 void AppRunningRecord::RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &moduleRecord)
@@ -571,6 +559,13 @@ void AppRunningRecord::ScheduleMemoryLevel(int32_t level)
 {
     if (appLifeCycleDeal_) {
         appLifeCycleDeal_->ScheduleMemoryLevel(level);
+    }
+}
+
+void AppRunningRecord::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
+{
+    if (appLifeCycleDeal_) {
+        appLifeCycleDeal_->ScheduleHeapMemory(pid, mallocInfo);
     }
 }
 
@@ -996,8 +991,8 @@ void AppRunningRecord::RegisterAppDeathRecipient() const
         return;
     }
     auto object = appLifeCycleDeal_->GetApplicationClient()->AsObject();
-    if (object) {
-        object->AddDeathRecipient(appDeathRecipient_);
+    if (!object || !object->AddDeathRecipient(appDeathRecipient_)) {
+        HILOG_ERROR("AddDeathRecipient failed.");
     }
 }
 
@@ -1228,6 +1223,21 @@ std::shared_ptr<UserTestRecord> AppRunningRecord::GetUserTestInfo()
     return userTestRecord_;
 }
 
+void AppRunningRecord::SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo)
+{
+    if (abilityInfo == nullptr) {
+        HILOG_ERROR("abilityInfo is nullptr");
+        return;
+    }
+    extensionType_ = abilityInfo->extensionAbilityType;
+    if (extensionType_ == ExtensionAbilityType::UNSPECIFIED) {
+        processType_ = ProcessType::NORMAL;
+        return;
+    }
+    processType_ = ProcessType::EXTENSION;
+    return;
+}
+
 void AppRunningRecord::SetSpecifiedAbilityFlagAndWant(
     const bool flag, const AAFwk::Want &want, const std::string &moduleName)
 {
@@ -1437,6 +1447,26 @@ void AppRunningRecord::SetProcessChangeReason(ProcessChangeReason reason)
 ProcessChangeReason AppRunningRecord::GetProcessChangeReason() const
 {
     return processChangeReason_;
+}
+
+bool AppRunningRecord::IsUpdateStateFromService()
+{
+    return isUpdateStateFromService_;
+}
+
+void AppRunningRecord::SetUpdateStateFromService(bool isUpdateStateFromService)
+{
+    isUpdateStateFromService_ = isUpdateStateFromService;
+}
+
+ExtensionAbilityType AppRunningRecord::GetExtensionType() const
+{
+    return extensionType_;
+}
+
+ProcessType AppRunningRecord::GetProcessType() const
+{
+    return processType_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

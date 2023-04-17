@@ -18,7 +18,10 @@
 
 #include <memory>
 #include "ecmascript/napi/include/jsnapi.h"
+#include "js_environment_impl.h"
 #include "native_engine/native_engine.h"
+#include "source_map_operator.h"
+#include "uncaught_exception_callback.h"
 
 namespace OHOS {
 namespace JsEnv {
@@ -26,12 +29,12 @@ class JsEnvironmentImpl;
 class JsEnvironment final {
 public:
     JsEnvironment() {}
-    explicit JsEnvironment(std::shared_ptr<JsEnvironmentImpl> impl);
-    ~JsEnvironment() = default;
+    explicit JsEnvironment(std::unique_ptr<JsEnvironmentImpl> impl);
+    ~JsEnvironment();
 
-    void Initialize(const panda::RuntimeOption& options);
+    bool Initialize(const panda::RuntimeOption& pandaOption, void* jsEngine);
 
-    std::shared_ptr<NativeEngine> GetNativeEngine() const
+    NativeEngine* GetNativeEngine() const
     {
         return engine_;
     }
@@ -51,15 +54,25 @@ public:
 
     void InitWorkerModule();
 
+    void InitSourceMap(const std::shared_ptr<SourceMapOperatorImpl> operatorImpl);
+
     void InitSyscapModule();
 
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
 
     void RemoveTask(const std::string& name);
+
+    void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo);
+    bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
+
+    bool StartDebugger(const char* libraryPath, bool needBreakPoint, uint32_t instanceId,
+        const DebuggerPostTask& debuggerPostTask = {});
+
 private:
-    std::shared_ptr<JsEnvironmentImpl> impl_ = nullptr;
-    std::shared_ptr<NativeEngine> engine_ = nullptr;
+    std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;
+    NativeEngine* engine_ = nullptr;
     panda::ecmascript::EcmaVM* vm_ = nullptr;
+    std::shared_ptr<SourceMapOperator> sourceMapOperator_ = nullptr;
 };
 } // namespace JsEnv
 } // namespace OHOS

@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +35,7 @@ bool AbilityConnectionProxy::WriteInterfaceToken(MessageParcel &data)
 void AbilityConnectionProxy::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
+    HILOG_INFO("OnAbilityConnectDone resultCode: %{public}d", resultCode);
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -70,6 +70,7 @@ void AbilityConnectionProxy::OnAbilityConnectDone(
 
 void AbilityConnectionProxy::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
+    HILOG_INFO("OnAbilityDisconnectDone resultCode: %{public}d", resultCode);
     int error;
     MessageParcel data;
     MessageParcel reply;
@@ -100,21 +101,21 @@ AbilityConnectionStub::~AbilityConnectionStub()
 int AbilityConnectionStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    HILOG_DEBUG("AbilityConnectionStub::OnRemoteRequest OnAbilityConnectDone called.");
+    HILOG_INFO("AbilityConnectionStub::OnRemoteRequest code: %{public}ud", code);
     std::u16string descriptor = AbilityConnectionStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        HILOG_INFO("Local descriptor is not equal to remote");
+        HILOG_ERROR("Local descriptor is not equal to remote");
         return ERR_INVALID_STATE;
     }
 
     auto element = data.ReadParcelable<AppExecFwk::ElementName>();
+    if (element == nullptr) {
+        HILOG_ERROR("callback stub receive element is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     switch (code) {
         case IAbilityConnection::ON_ABILITY_CONNECT_DONE: {
-            if (element == nullptr) {
-                HILOG_ERROR("callback stub receive element is nullptr");
-                return ERR_INVALID_VALUE;
-            }
             auto remoteObject = data.ReadRemoteObject();
             if (remoteObject == nullptr) {
                 HILOG_ERROR("callback stub receive remoteObject is nullptr");
@@ -127,12 +128,14 @@ int AbilityConnectionStub::OnRemoteRequest(
             return NO_ERROR;
         }
         case IAbilityConnection::ON_ABILITY_DISCONNECT_DONE: {
-            if (element == nullptr) {
-                HILOG_ERROR("callback stub receive element is nullptr");
-                return ERR_INVALID_VALUE;
-            }
             auto resultCode = data.ReadInt32();
             OnAbilityDisconnectDone(*element, resultCode);
+            delete element;
+            return NO_ERROR;
+        }
+        case IAbilityConnection::ON_REMOTE_STATE_CHANGED: {
+            int32_t abilityState = data.ReadInt32();
+            OnRemoteStateChanged(*element, abilityState);
             delete element;
             return NO_ERROR;
         }

@@ -15,6 +15,11 @@
 
 #ifndef OHOS_ABILITY_RUNTIME_NAPI_COMMON_ABILITY_H
 #define OHOS_ABILITY_RUNTIME_NAPI_COMMON_ABILITY_H
+
+#include <memory>
+#include <mutex>
+#include <list>
+
 #include "ability_connect_callback_stub.h"
 #include "ability_info.h"
 #include "ability_manager_errors.h"
@@ -24,8 +29,8 @@
 namespace OHOS {
 namespace AppExecFwk {
 const std::int32_t STR_MAX_SIZE = 128;
-
-napi_value *GetGlobalClassContext(void);
+napi_status SetGlobalClassContext(napi_env env, napi_value constructor);
+napi_value GetGlobalClassContext(napi_env env);
 
 napi_status SaveGlobalDataAbilityHelper(napi_env env, napi_value constructor);
 napi_value GetGlobalDataAbilityHelper(napi_env env);
@@ -206,19 +211,97 @@ napi_value GetContinueAbilityOptionsDeviceID(
 
 bool UnwrapAbilityStartSetting(napi_env env, napi_value param, AAFwk::AbilityStartSetting &setting);
 
+enum {
+    CONNECTION_STATE_DISCONNECTED = -1,
+
+    CONNECTION_STATE_CONNECTED = 0,
+
+    CONNECTION_STATE_CONNECTING = 1
+};
+
+struct ConnectionCallback {
+    ConnectionCallback(napi_env env, napi_value cbInfo)
+    {
+        this->env = env;
+        napi_value jsMethod = nullptr;
+        napi_get_named_property(env, cbInfo, "onConnect", &jsMethod);
+        napi_create_reference(env, jsMethod, 1, &connectCallbackRef);
+        napi_get_named_property(env, cbInfo, "onDisconnect", &jsMethod);
+        napi_create_reference(env, jsMethod, 1, &disconnectCallbackRef);
+        napi_get_named_property(env, cbInfo, "onFailed", &jsMethod);
+        napi_create_reference(env, jsMethod, 1, &failedCallbackRef);
+    }
+    ConnectionCallback(ConnectionCallback &) = delete;
+    ConnectionCallback(ConnectionCallback &&other)
+        : env(other.env), connectCallbackRef(other.connectCallbackRef),
+        disconnectCallbackRef(other.disconnectCallbackRef), failedCallbackRef(other.failedCallbackRef)
+    {
+        other.env = nullptr;
+        other.connectCallbackRef = nullptr;
+        other.disconnectCallbackRef = nullptr;
+        other.failedCallbackRef = nullptr;
+    }
+    const ConnectionCallback &operator=(ConnectionCallback &) = delete;
+    const ConnectionCallback &operator=(ConnectionCallback &&other)
+    {
+        Reset();
+        env = other.env;
+        connectCallbackRef = other.connectCallbackRef;
+        disconnectCallbackRef = other.disconnectCallbackRef;
+        failedCallbackRef = other.failedCallbackRef;
+        other.env = nullptr;
+        other.connectCallbackRef = nullptr;
+        other.disconnectCallbackRef = nullptr;
+        other.failedCallbackRef = nullptr;
+        return *this;
+    }
+    ~ConnectionCallback()
+    {
+        Reset();
+    }
+    void Reset()
+    {
+        if (env) {
+            if (connectCallbackRef) {
+                napi_delete_reference(env, connectCallbackRef);
+                connectCallbackRef = nullptr;
+            }
+            if (disconnectCallbackRef) {
+                napi_delete_reference(env, disconnectCallbackRef);
+                disconnectCallbackRef = nullptr;
+            }
+            if (failedCallbackRef) {
+                napi_delete_reference(env, failedCallbackRef);
+                failedCallbackRef = nullptr;
+            }
+            env = nullptr;
+        }
+    }
+
+    napi_env env = nullptr;
+    napi_ref connectCallbackRef = nullptr;
+    napi_ref disconnectCallbackRef = nullptr;
+    napi_ref failedCallbackRef = nullptr;
+};
+
 class NAPIAbilityConnection : public AAFwk::AbilityConnectionStub {
 public:
     void OnAbilityConnectDone(
         const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode) override;
     void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
-    void SetEnv(const napi_env &env);
-    void SetConnectCBRef(const napi_ref &ref);
-    void SetDisconnectCBRef(const napi_ref &ref);
+    void AddConnectionCallback(std::shared_ptr<ConnectionCallback> callback);
+    void HandleOnAbilityConnectDone(ConnectionCallback &callback, int resultCode);
+    void HandleOnAbilityDisconnectDone(ConnectionCallback &callback, int resultCode);
+    int GetConnectionState() const;
+    void SetConnectionState(int connectionState);
+    size_t GetCallbackSize();
 
 private:
-    napi_env env_;
-    napi_ref connectRef_;
-    napi_ref disconnectRef_;
+    std::list<std::shared_ptr<ConnectionCallback>> callbacks_;
+    AppExecFwk::ElementName element_;
+    sptr<IRemoteObject> serviceRemoteObject_ = nullptr;
+    int connectionState_ = CONNECTION_STATE_DISCONNECTED;
+    mutable std::mutex lock_;
 };
 
 /**
@@ -266,12 +349,12 @@ napi_value NAPI_CancelBackgroundRunningCommon(napi_env env, napi_callback_info i
 
 bool CheckAbilityType(const CBBase *cbBase);
 
-struct ConnecttionKey {
+struct ConnectionKey {
     Want want;
     int64_t id;
 };
 struct key_compare {
-    bool operator()(const ConnecttionKey &key1, const ConnecttionKey &key2) const
+    bool operator()(const ConnectionKey &key1, const ConnectionKey &key2) const
     {
         if (key1.id < key2.id) {
             return true;
@@ -279,7 +362,8 @@ struct key_compare {
         return false;
     }
 };
-static std::map<ConnecttionKey, sptr<NAPIAbilityConnection>, key_compare> connects_;
+static std::map<ConnectionKey, sptr<NAPIAbilityConnection>, key_compare> connects_;
+static std::recursive_mutex connectionsLock_;
 static int64_t serialNumber_ = 0;
 enum ErrorCode {
     NO_ERROR = 0,

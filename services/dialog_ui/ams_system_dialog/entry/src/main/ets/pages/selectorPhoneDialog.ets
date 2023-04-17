@@ -13,6 +13,31 @@
  * limitations under the License.
  */
 
+interface SwiperPhone {
+  height: string,
+  indicator: boolean,
+  contentHeight: string,
+  gridColumns: string,
+  gridRows: string
+}
+
+interface SelectorBtn {
+  marginTop:string,
+}
+
+interface SelectorPhone {
+  swiper:SwiperPhone,
+  btn: SelectorBtn
+}
+
+interface HapInfo {
+  label: string,
+  icon: boolean,
+  bundle: string,
+  ability: string,
+  module: string
+}
+
 class SelectorDataSource implements IDataSource {
   private list: string[] = []
   private listener: DataChangeListener
@@ -25,7 +50,7 @@ class SelectorDataSource implements IDataSource {
     return this.list.length
   }
 
-  getData(index: number): any {
+  getData(index: number): string {
     return this.list[index]
   }
 
@@ -42,7 +67,7 @@ class SelectorDataSource implements IDataSource {
 @Component
 struct SelectorPhoneDialog {
   private phoneShowData: SelectorDataSource = new SelectorDataSource([])
-  @State private selector: any = {
+  @State private selector: SelectorPhone = {
     swiper: {
       height: "100vp",
       indicator: false,
@@ -54,7 +79,7 @@ struct SelectorPhoneDialog {
       marginTop: "20vp",
     }
   }
-  @State private hapList: any = [];
+  @State private hapList: HapInfo[] = [];
   private TAG = "SelectorDialog_Phone_Page";
 
   aboutToAppear(): void {
@@ -65,6 +90,7 @@ struct SelectorPhoneDialog {
   }
 
   onSelectApp(item) {
+    console.log(this.TAG, "onSelectApp - start ");
     globalThis.abilityWant.bundleName = item.split("#")[0];
     globalThis.abilityWant.abilityName = item.split("#")[1];
     globalThis.abilityWant.moduleName = item.split("#")[4];
@@ -74,8 +100,8 @@ struct SelectorPhoneDialog {
         return;
       }
       console.log(this.TAG + " startAbility finish, data: " + JSON.stringify(data));
+      globalThis.selectExtensionContext.terminateSelf();
     });
-    globalThis.selectExtensionContext.terminateSelf();
   }
 
   getHapListStyle() {

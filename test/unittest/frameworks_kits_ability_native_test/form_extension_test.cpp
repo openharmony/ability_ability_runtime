@@ -20,6 +20,7 @@
 #include "form_extension.h"
 #undef private
 #undef protected
+#include "ability_handler.h"
 #include "mock_ability_token.h"
 #include "ohos_application.h"
 #include "runtime.h"
@@ -91,17 +92,17 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_0200, Function | MediumTest | L
 HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_0300, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_0300 start";
-    std::shared_ptr<AbilityLocalRecord> record;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+    sptr<IRemoteObject> token = new AppExecFwk::MockAbilityToken();
+    std::shared_ptr<AbilityLocalRecord> record = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
 
     std::shared_ptr<AppExecFwk::OHOSApplication> application = std::make_shared<AppExecFwk::OHOSApplication>();
-    sptr<IRemoteObject> token = nullptr;
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
         AbilityRuntime::ApplicationContext::GetInstance();
     applicationContext->AttachContextImpl(contextImpl);
     application->SetApplicationContext(applicationContext);
-    std::shared_ptr<AbilityHandler> handler;
-
+    std::shared_ptr<AppExecFwk::AbilityHandler> handler = std::make_shared<AppExecFwk::AbilityHandler>(nullptr);
     AbilityRuntime::Runtime::Options options;
     std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
     auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
@@ -178,6 +179,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_0700, Function | MediumTest | L
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_0700 start";
     AbilityRuntime::Runtime::Options options;
     std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+    ASSERT_NE(runtime, nullptr);
     auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
     int64_t formId = 0;
     formExtension->OnDestroy(formId);
@@ -194,6 +196,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_0800, Function | MediumTest | L
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_0800 start";
     AbilityRuntime::Runtime::Options options;
     std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+    ASSERT_NE(runtime, nullptr);
     auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
     int64_t formId = 0;
     std::string message;
@@ -211,6 +214,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_0900, Function | MediumTest | L
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_0900 start";
     AbilityRuntime::Runtime::Options options;
     std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+    ASSERT_NE(runtime, nullptr);
     auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
     int64_t formId = 0;
     formExtension->OnUpdate(formId);
@@ -227,6 +231,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_1000, Function | MediumTest | L
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_1000 start";
     AbilityRuntime::Runtime::Options options;
     std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+    ASSERT_NE(runtime, nullptr);
     auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
     int64_t formId = 0;
     formExtension->OnCastToNormal(formId);
@@ -243,6 +248,7 @@ HWTEST_F(FormExtensionTest, AaFwk_Form_Extension_1100, Function | MediumTest | L
     GTEST_LOG_(INFO) << "AaFwk_Form_Extension_1100 start";
     AbilityRuntime::Runtime::Options options;
     std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+    ASSERT_NE(runtime, nullptr);
     auto formExtension = AbilityRuntime::FormExtension::Create(runtime);
     std::map<int64_t, int32_t> formEventsMap;
     formExtension->OnVisibilityChange(formEventsMap);

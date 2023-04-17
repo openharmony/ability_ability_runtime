@@ -22,12 +22,12 @@
 
 #include "nocopyable.h"
 #include "client_socket.h"
-#include "shared_package/base_shared_package_info.h"
+#include "shared/base_shared_bundle_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 using AppSpawnMsg = AppSpawn::ClientSocket::AppProperty;
-using HspList = std::vector<BaseSharedPackageInfo>;
+using HspList = std::vector<BaseSharedBundleInfo>;
 
 struct AppSpawnStartMsg {
     int32_t uid;
@@ -40,7 +40,7 @@ struct AppSpawnStartMsg {
     std::string bundleName;
     std::string renderParam; // only nweb spawn need this param.
     int32_t pid;
-    int32_t code = 0; // 0: DEFAULT; 1: GET_RENDER_TERMINATION_STATUS
+    int32_t code = 0; // 0: DEFAULT; 1: GET_RENDER_TERMINATION_STATUS;
     uint32_t flags;
     int32_t bundleIndex;   // when dlp launch another app used, default is 0
     uint8_t setAllowInternet;
@@ -48,6 +48,7 @@ struct AppSpawnStartMsg {
     uint8_t reserved1;
     uint8_t reserved2;
     uint64_t accessTokenIdEx;
+    uint32_t hapFlags = 0; // whether is pre installed hap
     HspList hspList; // list of harmony shared package
 };
 

@@ -124,6 +124,8 @@ void AbilityManagerStub::SecondStepInit()
     requestFuncMap_[GET_MISSION_SNAPSHOT_INFO] = &AbilityManagerStub::GetMissionSnapshotInfoInner;
     requestFuncMap_[IS_USER_A_STABILITY_TEST] = &AbilityManagerStub::IsRunningInStabilityTestInner;
     requestFuncMap_[SEND_APP_NOT_RESPONSE_PROCESS_ID] = &AbilityManagerStub::SendANRProcessIDInner;
+    requestFuncMap_[ACQUIRE_SHARE_DATA] = &AbilityManagerStub::AcquireShareDataInner;
+    requestFuncMap_[SHARE_DATA_DONE] = &AbilityManagerStub::ShareDataDoneInner;
 #ifdef ABILITY_COMMAND_FOR_TEST
     requestFuncMap_[BLOCK_ABILITY] = &AbilityManagerStub::BlockAbilityInner;
     requestFuncMap_[BLOCK_AMS_SERVICE] = &AbilityManagerStub::BlockAmsServiceInner;
@@ -157,10 +159,12 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[START_UI_EXTENSION_ABILITY] = &AbilityManagerStub::StartUIExtensionAbilityInner;
     requestFuncMap_[MINIMIZE_UI_EXTENSION_ABILITY] = &AbilityManagerStub::MinimizeUIExtensionAbilityInner;
     requestFuncMap_[TERMINATE_UI_EXTENSION_ABILITY] = &AbilityManagerStub::TerminateUIExtensionAbilityInner;
+    requestFuncMap_[CONNECT_UI_EXTENSION_ABILITY] = &AbilityManagerStub::ConnectUIExtensionAbilityInner;
 #endif
     requestFuncMap_[SET_COMPONENT_INTERCEPTION] = &AbilityManagerStub::SetComponentInterceptionInner;
     requestFuncMap_[SEND_ABILITY_RESULT_BY_TOKEN] = &AbilityManagerStub::SendResultToAbilityByTokenInner;
     requestFuncMap_[QUERY_MISSION_VAILD] = &AbilityManagerStub::IsValidMissionIdsInner;
+    requestFuncMap_[VERIFY_PERMISSION] = &AbilityManagerStub::VerifyPermissionInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -591,6 +595,30 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     int32_t userId = data.ReadInt32();
     AppExecFwk::ExtensionAbilityType extensionType = static_cast<AppExecFwk::ExtensionAbilityType>(data.ReadInt32());
     int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId);
+    reply.WriteInt32(result);
+    if (want != nullptr) {
+        delete want;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::ConnectUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    Want *want = data.ReadParcelable<Want>();
+    if (want == nullptr) {
+        HILOG_ERROR("%{public}s, want is nullptr", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IAbilityConnection> callback = nullptr;
+    if (data.ReadBool()) {
+        callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
+    }
+    sptr<SessionInfo> sessionInfo = nullptr;
+    if (data.ReadBool()) {
+        sessionInfo = data.ReadParcelable<SessionInfo>();
+    }
+    int32_t userId = data.ReadInt32();
+    int32_t result = ConnectUIExtensionAbility(*want, callback, sessionInfo, userId);
     reply.WriteInt32(result);
     if (want != nullptr) {
         delete want;
@@ -1635,6 +1663,40 @@ int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 
+int AbilityManagerStub::AcquireShareDataInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t missionId = data.ReadInt32();
+    sptr<IAcquireShareDataCallback> shareData = iface_cast<IAcquireShareDataCallback>(data.ReadRemoteObject());
+    if (!shareData) {
+        HILOG_ERROR("shareData read failed.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = AcquireShareData(missionId, shareData);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::ShareDataDoneInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        HILOG_ERROR("ShareDataDone read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t resultCode = data.ReadInt32();
+    int32_t uniqueId = data.ReadInt32();
+    std::shared_ptr<WantParams> wantParam(data.ReadParcelable<WantParams>());
+    int32_t result = ShareDataDone(token, resultCode, uniqueId, *wantParam);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -1784,6 +1846,21 @@ int32_t AbilityManagerStub::IsValidMissionIdsInner(MessageParcel &data, MessageP
         if (!reply.WriteParcelable(&item)) {
             return ERR_INVALID_VALUE;
         }
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::VerifyPermissionInner(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("VerifyPermission call.");
+    std::string permission = data.ReadString();
+    int32_t pid = data.ReadInt32();
+    int32_t uid = data.ReadInt32();
+
+    auto result = VerifyPermission(permission, pid, uid);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("VerifyPermission failed.");
+        return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
 }
