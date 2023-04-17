@@ -97,7 +97,7 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0100, TestSize.Lev
 HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0200, TestSize.Level1)
 {
     HILOG_INFO("AbilityMgrServiceDialog_0200 start");
-    auto want = systemDialogScheduler_->GetTipsDialogWant();
+    auto want = systemDialogScheduler_->GetTipsDialogWant(nullptr);
     EXPECT_EQ(want.GetElement().GetBundleName(), "com.ohos.amsdialog");
     EXPECT_EQ(want.GetElement().GetAbilityName(), "TipsDialog");
     HILOG_INFO("AbilityMgrServiceDialog_0200 end");
@@ -113,7 +113,7 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0300, TestSize.Lev
     HILOG_INFO("AbilityMgrServiceDialog_0300 start");
     std::vector<DialogAppInfo> dialogAppInfos;
     Want targetWant;
-    auto want = systemDialogScheduler_->GetSelectorDialogWant(dialogAppInfos, targetWant);
+    auto want = systemDialogScheduler_->GetSelectorDialogWant(dialogAppInfos, targetWant, nullptr);
     EXPECT_EQ(want.GetElement().GetBundleName(), "com.ohos.amsdialog");
     EXPECT_EQ(want.GetElement().GetAbilityName(), "SelectorDialog");
     HILOG_INFO("AbilityMgrServiceDialog_0300 end");

@@ -35,6 +35,7 @@
 #include "app_lifecycle_deal.h"
 #include "module_running_record.h"
 #include "app_spawn_msg_wrapper.h"
+#include "app_malloc_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -48,13 +49,16 @@ class AppRunningRecord;
  */
 class RenderRecord {
 public:
-    RenderRecord(pid_t hostPid, const std::string &renderParam,
-        int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host);
+    RenderRecord(pid_t hostPid, const std::string &renderParam, int32_t ipcFd,
+                 int32_t sharedFd, int32_t crashFd,
+                 const std::shared_ptr<AppRunningRecord> &host);
 
     virtual ~RenderRecord();
 
-    static std::shared_ptr<RenderRecord> CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
-        int32_t ipcFd, int32_t sharedFd, const std::shared_ptr<AppRunningRecord> &host);
+    static std::shared_ptr<RenderRecord>
+    CreateRenderRecord(pid_t hostPid, const std::string &renderParam,
+                       int32_t ipcFd, int32_t sharedFd, int32_t crashFd,
+                       const std::shared_ptr<AppRunningRecord> &host);
 
     void SetPid(pid_t pid);
     pid_t GetPid() const ;
@@ -62,8 +66,11 @@ public:
     int32_t GetHostUid() const;
     std::string GetHostBundleName() const;
     std::string GetRenderParam() const;
+    std::string GetProcessName() const;
     int32_t GetIpcFd() const;
     int32_t GetSharedFd() const;
+    int32_t GetCrashFd() const;
+    ProcessType GetProcessType() const;
     std::shared_ptr<AppRunningRecord> GetHostRecord() const;
     sptr<IRenderScheduler> GetScheduler() const;
     void SetScheduler(const sptr<IRenderScheduler> &scheduler);
@@ -73,14 +80,18 @@ public:
 private:
     void SetHostUid(const int32_t hostUid);
     void SetHostBundleName(const std::string &hostBundleName);
+    void SetProcessName(const std::string &hostProcessName);
 
     pid_t pid_ = 0;
     pid_t hostPid_ = 0;
     int32_t hostUid_ = 0;
     std::string hostBundleName_;
     std::string renderParam_;
+    std::string processName_;
     int32_t ipcFd_ = 0;
     int32_t sharedFd_ = 0;
+    int32_t crashFd_ = 0;
+    ProcessType processType_ = ProcessType::RENDER;
     std::weak_ptr<AppRunningRecord> host_; // nweb host
     sptr<IRenderScheduler> renderScheduler_ = nullptr;
     sptr<AppDeathRecipient> deathRecipient_ = nullptr;
@@ -267,32 +278,8 @@ public:
 
     std::shared_ptr<ModuleRunningRecord> GetModuleRunningRecordByTerminateLists(const sptr<IRemoteObject> &token) const;
 
-    // It can only used in SINGLETON mode.
-    /**
-     * GetAbilityRunningRecord, Get ability record by the ability Name.
-     *
-     * @param abilityName, the ability name.
-     * @param ownerUserId, the owner userId of this ability.
-     *
-     * @return the ability record.
-     */
-    std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(
-        const std::string &abilityName, const std::string &moduleName, int32_t ownerUserId = -1) const;
-
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId) const;
 
-    // Clear(remove) the specified ability record from the list
-
-    /**
-     * ClearAbility, Clear ability record by record info.
-     *
-     * @param record, the ability record.
-     *
-     * @return
-     */
-    void ClearAbility(const std::shared_ptr<AbilityRunningRecord> &record);
-
-    // Update the trim memory level value of this process
     /**
      * @brief Setting the Trim Memory Level.
      *
@@ -402,6 +389,16 @@ public:
      * @return
      */
     void ScheduleMemoryLevel(int32_t level);
+
+    /**
+     * ScheduleHeapMemory, Get the application's memory allocation info.
+     *
+     * @param pid, pid input.
+     * @param mallocInfo, dynamic storage information output.
+     *
+     * @return
+     */
+    void ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
 
     /**
      * GetAbilityRunningRecordByToken, Obtaining the ability record through token.
@@ -544,6 +541,7 @@ public:
     void SetUserTestInfo(const std::shared_ptr<UserTestRecord> &record);
     std::shared_ptr<UserTestRecord> GetUserTestInfo();
 
+    void SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo);
     void SetSpecifiedAbilityFlagAndWant(const bool flag, const AAFwk::Want &want, const std::string &moduleName);
     bool IsStartSpecifiedAbility() const;
     void ScheduleAcceptWant(const std::string &moduleName);
@@ -604,6 +602,13 @@ public:
     void SetProcessChangeReason(ProcessChangeReason reason);
 
     ProcessChangeReason GetProcessChangeReason() const;
+
+    bool IsUpdateStateFromService();
+
+    void SetUpdateStateFromService(bool isUpdateStateFromService);
+
+    ExtensionAbilityType GetExtensionType() const;
+    ProcessType GetProcessType() const;
 
 private:
     /**
@@ -704,9 +709,13 @@ private:
     bool securityFlag_ = false;
     int32_t requestProcCode_ = 0;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
+
+    bool isUpdateStateFromService_ = false;
     int32_t callerPid_ = -1;
     int32_t callerUid_ = -1;
     int32_t callerTokenId_ = -1;
+    ProcessType processType_ = ProcessType::NORMAL;
+    ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -41,14 +41,25 @@ public:
      */
     virtual bool AllowComponentStart(const Want &want, const sptr<IRemoteObject> &callerToken,
         int requestCode, int componentStatus, sptr<Want> &extraParam) override;
-    
+
     /**
      * The system is trying to move ability to foreground/background.
      *
      * @param abilityToken Ability token.
-     * @param code the code of the ability to move.
+     * @param opCode the operation code of the ability.
      */
-    virtual void NotifyHandleMoveAbility(const sptr<IRemoteObject> &abilityToken, int code) override;
+    virtual void NotifyHandleAbilityStateChange(const sptr<IRemoteObject> &abilityToken, int opCode) override;
+
+    /**
+     * The system is trying to release call.
+     *
+     * @param connect Callback used to notify caller the result of connecting or disconnecting.
+     * @param element service ability's ElementName.
+     * @param extraParam The exra param of component to release.
+     * @return Return true when the call released, or false to reject.
+     */
+    virtual bool ReleaseCallInterception(const sptr<IRemoteObject> &connect, const AppExecFwk::ElementName &element,
+        sptr<Want> &extraParam) override;
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);

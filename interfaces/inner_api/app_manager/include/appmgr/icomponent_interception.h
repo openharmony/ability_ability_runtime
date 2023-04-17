@@ -48,13 +48,25 @@ public:
      * The system is trying to move ability to foreground/background.
      *
      * @param abilityToken Ability token.
-     * @param code the code of the ability to move.
+     * @param opCode the operation code of the ability.
      */
-    virtual void NotifyHandleMoveAbility(const sptr<IRemoteObject> &abilityToken, int code) = 0;
+    virtual void NotifyHandleAbilityStateChange(const sptr<IRemoteObject> &abilityToken, int opCode) = 0;
+
+    /**
+     * The system is trying to release call.
+     *
+     * @param connect Callback used to notify caller the result of connecting or disconnecting.
+     * @param element service ability's ElementName.
+     * @param extraParam The exra param of component to release.
+     * @return Return true when the call released, or false to reject.
+     */
+    virtual bool ReleaseCallInterception(const sptr<IRemoteObject> &connect, const AppExecFwk::ElementName &element,
+        sptr<Want> &extraParam) = 0;
 
     enum class Message {
         TRANSACT_ON_ALLOW_COMPONENT_START = 1,
         TRANSACT_ON_HANDLE_MOVE_ABILITY,
+        TRANSACT_ON_RELEASE_CALL,
     };
 };
 }  // namespace AppExecFwk

@@ -24,6 +24,11 @@
 namespace OHOS {
 namespace AAFwk {
 int64_t ConnectionRecord::connectRecordId = 0;
+#ifdef SUPPORT_ASAN
+const int DISCONNECT_TIMEOUT_MULTIPLE = 75;
+#else
+const int DISCONNECT_TIMEOUT_MULTIPLE = 1;
+#endif
 
 ConnectionRecord::ConnectionRecord(const sptr<IRemoteObject> &callerToken,
     const std::shared_ptr<AbilityRecord> &targetService, const sptr<IAbilityConnection> &connCallback)
@@ -82,7 +87,8 @@ void ConnectionRecord::ClearConnCallBack()
 int ConnectionRecord::DisconnectAbility()
 {
     if (state_ != ConnectionState::CONNECTED) {
-        HILOG_INFO("The connection has not established.");
+        HILOG_ERROR("The connection has not established, connectionState: %{public}d.",
+            static_cast<int32_t>(state_));
         return INVALID_CONNECTION_STATE;
     }
 
@@ -102,11 +108,15 @@ int ConnectionRecord::DisconnectAbility()
                 HILOG_ERROR("Disconnect ability timeout");
                 connectionRecord->DisconnectTimeout();
             };
-            handler->PostTask(disconnectTask, taskName, AbilityManagerService::DISCONNECT_TIMEOUT);
+            int disconnectTimeout =
+                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * DISCONNECT_TIMEOUT_MULTIPLE;
+            handler->PostTask(disconnectTask, taskName, disconnectTimeout);
         }
         /* schedule disconnect to target ability */
         targetService_->DisconnectAbility();
     } else {
+        HILOG_DEBUG("The current connection count is %{public}zu, no need to disconnect, just remove connection.",
+            connectNums);
         targetService_->RemoveConnectRecordFromList(shared_from_this());
         SetConnectState(ConnectionState::DISCONNECTED);
     }
@@ -126,10 +136,11 @@ void ConnectionRecord::CompleteConnect(int resultCode)
         abilityInfo.name, abilityInfo.moduleName);
     auto remoteObject = targetService_->GetConnRemoteObject();
     if (connCallback_) {
+        HILOG_DEBUG("OnAbilityConnectDone");
         connCallback_->OnAbilityConnectDone(element, remoteObject, resultCode);
     }
     DelayedSingleton<ConnectionStateManager>::GetInstance()->AddConnection(shared_from_this());
-    HILOG_INFO("result: %{public}d. connectstate:%{public}d.", resultCode, state_);
+    HILOG_INFO("result: %{public}d. connectState:%{public}d.", resultCode, state_);
 }
 
 void ConnectionRecord::CompleteDisconnect(int resultCode, bool isDied)
@@ -142,10 +153,11 @@ void ConnectionRecord::CompleteDisconnect(int resultCode, bool isDied)
     AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName,
         abilityInfo.name, abilityInfo.moduleName);
     if (connCallback_) {
+        HILOG_DEBUG("OnAbilityDisconnectDone");
         connCallback_->OnAbilityDisconnectDone(element, isDied ? (resultCode - 1) : resultCode);
     }
     DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveConnection(shared_from_this(), isDied);
-    HILOG_INFO("result: %{public}d. connectstate:%{public}d.", resultCode, state_);
+    HILOG_INFO("result: %{public}d. connectState:%{public}d.", resultCode, state_);
 }
 
 void ConnectionRecord::ScheduleDisconnectAbilityDone()

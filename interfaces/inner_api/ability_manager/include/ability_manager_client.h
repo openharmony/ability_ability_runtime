@@ -97,7 +97,8 @@ public:
      * @param requestCode Ability request code.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE);
+    ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * StartAbility with want, send want to ability manager service.
@@ -344,6 +345,18 @@ public:
      */
     ErrCode ConnectExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
         int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * Connect ui extension ability.
+     *
+     * @param want, special want for the ui extension ability.
+     * @param connect, callback used to notify caller the result of connecting or disconnecting.
+     * @param sessionInfo the extension session info of the ability to connect.
+     * @param userId, the extension runs in.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ConnectUIExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
+        const sptr<SessionInfo> &sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * DisconnectAbility, disconnect session with service ability.
@@ -863,9 +876,8 @@ public:
     void UpdateMissionSnapShot(const sptr<IRemoteObject>& token);
     void EnableRecoverAbility(const sptr<IRemoteObject>& token);
     void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason, const Want *want = nullptr);
-    
+
     ErrCode AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer);
-    
 
     /**
      * Called to verify that the MissionId is valid.
@@ -875,6 +887,33 @@ public:
      */
     int32_t IsValidMissionIds(const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results);
 
+    /**
+     * Query whether the application of the specified PID and UID has been granted a certain permission
+     * @param permission
+     * @param pid Process id
+     * @param uid
+     * @return Returns ERR_OK if the current process has the permission, others on failure.
+     */
+    ErrCode VerifyPermission(const std::string &permission, int pid, int uid);
+
+    /**
+     * Acquire the shared data.
+     * @param missionId The missionId of Target ability.
+     * @param The IAcquireShareDataCallback object.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode AcquireShareData(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData);
+    
+    /**
+     * Notify sharing data finished.
+     * @param resultCode The result of sharing data.
+     * @param uniqueId The uniqueId from request object.
+     * @param wantParam The params of acquiring sharing data from target ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ShareDataDone(
+        const sptr<IRemoteObject> &token, const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
+    
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

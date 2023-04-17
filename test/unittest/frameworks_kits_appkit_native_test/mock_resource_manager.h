@@ -38,6 +38,11 @@ bool AddResource(const std::string &path, const std::vector<std::string> &overla
     return true;
 }
 
+bool RemoveResource(const std::string &path, const std::vector<std::string> &overlayPaths)
+{
+    return true;
+}
+
 RState UpdateResConfig(ResConfig &resConfig)
 {
     return SUCCESS;
@@ -261,6 +266,30 @@ RState IsLoadHap(std::string& hapPath)
 }
 
 RState GetRawFileList(const std::string rawDirPath, std::vector<std::string>& rawfileList)
+{
+    return SUCCESS;
+}
+
+RState GetDrawableInfoById(uint32_t id, std::string &type, size_t &len,
+    std::unique_ptr<uint8_t[]> &outValue, uint32_t density = 0)
+{
+    return SUCCESS;
+}
+
+RState GetDrawableInfoByName(const char *name, std::string &type, size_t &len,
+    std::unique_ptr<uint8_t[]> &outValue, uint32_t density = 0)
+{
+    return SUCCESS;
+}
+
+RState GetStringFormatById(uint32_t id, std::string &outValue,
+    std::vector<std::tuple<ResourceManager::NapiValueType, std::string>> &jsParams)
+{
+    return SUCCESS;
+}
+
+RState GetStringFormatByName(const char *name, std::string &outValue,
+    std::vector<std::tuple<ResourceManager::NapiValueType, std::string>> &jsParams)
 {
     return SUCCESS;
 }

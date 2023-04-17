@@ -43,7 +43,6 @@ public:
         std::string bundleName;
         std::string codePath;
         std::string bundleCodeDir;
-        std::map<std::string, std::vector<std::string>> appLibPaths {};
         std::string hapPath;
         std::string arkNativeFilePath;
         std::shared_ptr<AppExecFwk::EventRunner> eventRunner;
@@ -52,6 +51,7 @@ public:
         bool isBundle = true;
         bool isDebugVersion = false;
         bool isStageModel = true;
+        bool isTestFramework = false;
         int32_t uid = -1;
         // ArkTsCard start
         bool isUnique = false;
@@ -77,6 +77,7 @@ public:
     virtual bool NotifyHotReloadPage() = 0;
     virtual bool UnLoadRepairPatch(const std::string& patchFile) = 0;
     virtual void UpdateExtensionType(int32_t extensionType) = 0;
+    virtual void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) = 0;
 
     Runtime(const Runtime&) = delete;
     Runtime(Runtime&&) = delete;

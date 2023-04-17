@@ -96,7 +96,13 @@ Ability *JsAbility::Create(const std::unique_ptr<Runtime> &runtime)
 
 JsAbility::JsAbility(JsRuntime &jsRuntime) : jsRuntime_(jsRuntime)
 {}
-JsAbility::~JsAbility() = default;
+JsAbility::~JsAbility()
+{
+    auto context = GetAbilityContext();
+    if (context) {
+        context->Unbind();
+    }
+}
 
 void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
     const std::shared_ptr<OHOSApplication> application, std::shared_ptr<AbilityHandler> &handler,
@@ -109,10 +115,10 @@ void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
         return;
     }
 #ifdef SUPPORT_GRAPHICS
-    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel
-        && abilityContext_ != nullptr) {
+    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel &&
+        abilityContext_ != nullptr) {
             AppExecFwk::AppRecovery::GetInstance().AddAbility(shared_from_this(), abilityContext_->GetAbilityInfo(),
-            abilityContext_->GetToken());
+                abilityContext_->GetToken());
     }
 #endif
     std::string srcPath(abilityInfo->package);
@@ -229,6 +235,34 @@ void JsAbility::OnStart(const Want &want)
     HILOG_DEBUG("OnStart end, ability is %{public}s.", GetAbilityName().c_str());
 }
 
+int32_t JsAbility::OnShare(WantParams &wantParam)
+{
+    HILOG_DEBUG("%{public}s begin", __func__);
+    HandleScope handleScope(jsRuntime_);
+    auto &nativeEngine = jsRuntime_.GetNativeEngine();
+    if (jsAbilityObj_ == nullptr) {
+        HILOG_ERROR("Failed to get AbilityStage object");
+        return ERR_INVALID_VALUE;
+    }
+    NativeValue *value = jsAbilityObj_->Get();
+    NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
+    if (obj == nullptr) {
+        HILOG_ERROR("Failed to get Ability object");
+        return ERR_INVALID_VALUE;
+    }
+
+    napi_value napiWantParams = OHOS::AppExecFwk::WrapWantParams(reinterpret_cast<napi_env>(&nativeEngine), wantParam);
+    NativeValue *jsWantParams = reinterpret_cast<NativeValue *>(napiWantParams);
+    NativeValue *argv[] = {
+        jsWantParams,
+    };
+    CallObjectMethod("onShare", argv, ArraySize(argv));
+    napi_value new_napiWantParams = reinterpret_cast<napi_value>(jsWantParams);
+    OHOS::AppExecFwk::UnwrapWantParams(reinterpret_cast<napi_env>(&nativeEngine), new_napiWantParams, wantParam);
+    HILOG_DEBUG("%{public}s end", __func__);
+    return ERR_OK;
+}
+
 void JsAbility::OnStop()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -320,6 +354,8 @@ void JsAbility::OnSceneCreated()
         HILOG_ERROR("Failed to create jsAppWindowStage object by LoadSystemModule");
         return;
     }
+
+    HandleScope handleScope(jsRuntime_);
     NativeValue *argv[] = {jsAppWindowStage->Get()};
     CallObjectMethod("onWindowStageCreate", argv, ArraySize(argv));
 
@@ -391,6 +427,10 @@ void JsAbility::OnForeground(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("OnForeground begin, ability is %{public}s.", GetAbilityName().c_str());
+    if (abilityInfo_) {
+        jsRuntime_.UpdateModuleNameAndAssetPath(abilityInfo_->moduleName);
+    }
+
     Ability::OnForeground(want);
 
     HandleScope handleScope(jsRuntime_);
