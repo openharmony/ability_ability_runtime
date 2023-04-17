@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 using Want = OHOS::AAFwk::Want;
 using AbilityConnectionStub = OHOS::AAFwk::AbilityConnectionStub;
+class CallerConnection;
 class LocalCallContainer : public AbilityConnectionStub {
 public:
     LocalCallContainer() = default;
@@ -38,18 +39,46 @@ public:
     void DumpCalls(std::vector<std::string> &info) const;
 
     virtual void OnAbilityConnectDone(
-        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int resultCode) override;
+        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code) override;
 
-    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode) override;
+    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
 
+    void SetCallLocalRecord(
+        const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
+    void SetMultipleCallLocalRecord(
+        const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
+
+    void OnCallStubDied(const wptr<IRemoteObject> &remote);
     void OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState) override;
 private:
     bool GetCallLocalRecord(
         const AppExecFwk::ElementName &elementName, std::shared_ptr<LocalCallRecord> &localCallRecord);
-    void OnCallStubDied(const wptr<IRemoteObject> &remote);
+    void OnSingletonCallStubDied(const wptr<IRemoteObject> &remote);
+    int32_t RemoveSingletonCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
+    int32_t RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
 
 private:
     std::map<std::string, std::shared_ptr<LocalCallRecord>> callProxyRecords_;
+    std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
+    std::set<sptr<CallerConnection>> connections_;
+};
+
+class CallerConnection : public AbilityConnectionStub {
+public:
+    CallerConnection() = default;
+    virtual ~CallerConnection() = default;
+
+    void SetRecordAndContainer(const std::shared_ptr<LocalCallRecord> &localCallRecord,
+        const sptr<IRemoteObject> &container);
+
+    virtual void OnAbilityConnectDone(
+        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code) override;
+
+    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
+
+private:
+    std::shared_ptr<LocalCallRecord> localCallRecord_;
+    wptr<LocalCallContainer> container_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

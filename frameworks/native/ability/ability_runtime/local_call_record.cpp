@@ -77,6 +77,8 @@ void LocalCallRecord::SetRemoteObject(const sptr<IRemoteObject>& call,
 
 void LocalCallRecord::AddCaller(const std::shared_ptr<CallerCallBack>& callback)
 {
+    std::shared_ptr<CallerCallBack> caller = callback;
+    caller->SetRecord(weak_from_this());
     callers_.emplace_back(callback);
 }
 
@@ -183,6 +185,26 @@ bool LocalCallRecord::IsSameObject(const sptr<IRemoteObject>& remote) const
     HILOG_DEBUG("LocalCallRecord::%{public}s the input object same as local object is %{public}s.",
         __func__, retVal ? "true" : "false");
     return retVal;
+}
+
+void LocalCallRecord::SetIsSingleton(bool flag)
+{
+    isSingleton_ = flag;
+}
+
+bool LocalCallRecord::IsSingletonRemote()
+{
+    return isSingleton_;
+}
+
+void LocalCallRecord::SetConnection(const sptr<IRemoteObject> &connect)
+{
+    connection_ = connect;
+}
+
+sptr<IRemoteObject> LocalCallRecord::GetConnection()
+{
+    return connection_.promote();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
