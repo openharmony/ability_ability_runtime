@@ -2762,7 +2762,11 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     // mission is first created, add mission to default call mission list.
     // other keep in current mission list.
     if (!targetMission->GetMissionList()) {
-        defaultSingleList_->AddMissionToTop(targetMission);
+        if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SINGLETON) {
+            defaultSingleList_->AddMissionToTop(targetMission);
+        } else {
+            defaultStandardList_->AddMissionToTop(targetMission);
+        }
     }
 
     NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest);
@@ -2806,7 +2810,16 @@ int MissionListManager::ReleaseCallLocked(
 
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
 
-    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecordByName(element);
+    auto abilityRecords = GetAbilityRecordsByName(element);
+    auto isExist = [connect] (const std::shared_ptr<AbilityRecord> &abilityRecord) {
+        return abilityRecord->IsExistConnection(connect);
+    };
+    auto findRecord = std::find_if(abilityRecords.begin(), abilityRecords.end(), isExist);
+    if (findRecord == abilityRecords.end()) {
+        HILOG_ERROR("not found ability record by callback");
+        return RELEASE_CALL_ABILITY_INNER_ERR;
+    }
+    auto abilityRecord = *findRecord;
     CHECK_POINTER_AND_RETURN(abilityRecord, RELEASE_CALL_ABILITY_INNER_ERR);
 
     if (!abilityRecord->ReleaseCall(connect)) {
@@ -2863,6 +2876,38 @@ std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByName(const 
     return defaultSingleList_->GetAbilityRecordByName(element);
 }
 
+std::vector<std::shared_ptr<AbilityRecord>> MissionListManager::GetAbilityRecordsByName(
+    const AppExecFwk::ElementName &element)
+{
+    std::vector<std::shared_ptr<AbilityRecord>> records;
+    for (auto missionList : currentMissionLists_) {
+        if (missionList != nullptr) {
+            missionList->GetAbilityRecordsByName(element, records);
+        }
+    }
+
+    // find in launcherMissionList_
+    if (launcherList_ != nullptr) {
+        launcherList_->GetAbilityRecordsByName(element, records);
+    }
+
+    // find in defaultStandardList_
+    if (defaultStandardList_ != nullptr) {
+        defaultStandardList_->GetAbilityRecordsByName(element, records);
+    }
+
+    if (!records.empty()) {
+        return records;
+    }
+
+    // find in default singlelist_
+    if (defaultSingleList_ != nullptr) {
+        defaultSingleList_->GetAbilityRecordsByName(element, records);
+    }
+    HILOG_DEBUG("records is %{public}s.", records.empty() ? "empty" : "not empty");
+    return records;
+}
+
 void MissionListManager::OnCallConnectDied(const std::shared_ptr<CallRecord> &callRecord)
 {
     HILOG_INFO("On callConnect died.");
@@ -2870,7 +2915,16 @@ void MissionListManager::OnCallConnectDied(const std::shared_ptr<CallRecord> &ca
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
 
     AppExecFwk::ElementName element = callRecord->GetTargetServiceName();
-    auto abilityRecord = GetAbilityRecordByName(element);
+    auto abilityRecords = GetAbilityRecordsByName(element);
+    auto isExist = [callRecord] (const std::shared_ptr<AbilityRecord> &abilityRecord) {
+        return abilityRecord->IsExistConnection(callRecord->GetConCallBack());
+    };
+    auto findRecord = std::find_if(abilityRecords.begin(), abilityRecords.end(), isExist);
+    if (findRecord == abilityRecords.end()) {
+        HILOG_ERROR("not found ability record by callback");
+        return;
+    }
+    auto abilityRecord = *findRecord;
     CHECK_POINTER(abilityRecord);
     abilityRecord->ReleaseCall(callRecord->GetConCallBack());
 }

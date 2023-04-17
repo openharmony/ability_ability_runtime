@@ -159,12 +159,15 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0100, Function | M
     want.SetElementName("DemoDeviceId", "DemoBundleName", "");
 
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    std::shared_ptr<CallerCallBack> callbackSec = std::make_shared<CallerCallBack>();
 
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
     localCallRecord->AddCaller(callback);
+    localCallRecord->AddCaller(callbackSec);
 
     callback->SetCallBack([](const sptr<IRemoteObject>&) {});
+    callbackSec->SetCallBack([](const sptr<IRemoteObject>&) {});
 
     std::string uri = elementName.GetURI();
     localCallContainer->callProxyRecords_.emplace(uri, localCallRecord);
@@ -191,6 +194,249 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0200, Function | M
 
     ErrCode ret = localCallContainer->ReleaseCall(callback);
     EXPECT_TRUE(ret == ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Local_Call_Container_Release_0300
+ * @tc.name: Release
+ * @tc.desc: Parameter 'callback' is nullptr, and Error 'ERR_INVALID_VALUE' returned.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0300, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    ErrCode ret = localCallContainer->ReleaseCall(nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Local_Call_Container_Release_0400
+ * @tc.name: Release
+ * @tc.desc: Parameter 'localCallRecord' is nullptr, and Error 'ERR_INVALID_VALUE' returned.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0400, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    ErrCode ret = localCallContainer->ReleaseCall(nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Local_Call_Container_Release_0700
+ * @tc.name: Release
+ * @tc.desc: Parameter 'connect' is nullptr, and Error 'ERR_INVALID_VALUE' returned.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0700, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> LocalCallRecordFirst = std::make_shared<LocalCallRecord>(elementName);
+    std::weak_ptr<LocalCallRecord> LocalCallRecordSec = LocalCallRecordFirst;
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetRecord(LocalCallRecordSec);
+    ErrCode ret = localCallContainer->ReleaseCall(callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Local_Call_Container_Release_0800
+ * @tc.name: Release
+ * @tc.desc: When 'localCallRecord' is an 'IsSingletonRemote', 
+ * remove 'localCallRecord' by 'RemoveSingletonCallLocalRecord', and return 'ERR_OK'.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0800, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> LocalCallRecordFirst = std::make_shared<LocalCallRecord>(elementName);
+    std::weak_ptr<LocalCallRecord> LocalCallRecordSec = LocalCallRecordFirst;
+    LocalCallRecordFirst->SetIsSingleton(true);
+    LocalCallRecordFirst->SetConnection(localCallContainer);
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetRecord(LocalCallRecordSec);
+    ErrCode ret = localCallContainer->ReleaseCall(callback);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: Local_Call_Container_Release_0900
+ * @tc.name: Release
+ * @tc.desc: Release record in multiple not found.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0900, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> LocalCallRecordFirst = std::make_shared<LocalCallRecord>(elementName);
+    std::weak_ptr<LocalCallRecord> LocalCallRecordSec = LocalCallRecordFirst;
+    LocalCallRecordFirst->SetConnection(localCallContainer);
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetRecord(LocalCallRecordSec);
+    ErrCode ret = localCallContainer->ReleaseCall(callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: Local_Call_Container_Release_1000
+ * @tc.name: Release
+ * @tc.desc: When 'element' doesn't have record, delete itself from 'multipleCallProxyRecords_'.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_1000, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> LocalCallRecordFirst = std::make_shared<LocalCallRecord>(elementName);
+    std::weak_ptr<LocalCallRecord> LocalCallRecordSec = LocalCallRecordFirst;
+    LocalCallRecordFirst->SetConnection(localCallContainer);
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetRecord(LocalCallRecordSec);
+    localCallContainer->SetMultipleCallLocalRecord(elementName, LocalCallRecordFirst);
+    ErrCode ret = localCallContainer->ReleaseCall(callback);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.number: Local_Call_Container_SetCallLocalRecord_1000
+ * @tc.name: SetCallLocalRecord
+ * @tc.desc: Set 'callProxyRecords_'.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetCallLocalRecord_0100, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    localCallContainer->SetCallLocalRecord(elementName, localCallRecord);
+    EXPECT_NE(
+        localCallContainer->callProxyRecords_.find(elementName.GetURI()),
+        localCallContainer->callProxyRecords_.end());
+}
+
+/**
+ * @tc.number: Local_Call_Container_SetMultipleCallLocalRecord_0100
+ * @tc.name: SetMultipleCallLocalRecord
+ * @tc.desc: Set 'multipleCallProxyRecords_'.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetMultipleCallLocalRecord_0100, Function | MediumTest | Level1)
+{
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecordFirst = std::make_shared<LocalCallRecord>(elementName);
+    constexpr int32_t COUNT_NUM = 1;
+    localCallContainer->SetMultipleCallLocalRecord(elementName, localCallRecordFirst);
+    EXPECT_EQ(
+        COUNT_NUM, localCallContainer->multipleCallProxyRecords_[elementName.GetURI()].count(localCallRecordFirst));
+
+    std::shared_ptr<LocalCallRecord> localCallRecordSecond = std::make_shared<LocalCallRecord>(elementName);
+    localCallContainer->SetMultipleCallLocalRecord(elementName, localCallRecordSecond);
+
+    EXPECT_EQ(
+        COUNT_NUM, localCallContainer->multipleCallProxyRecords_[elementName.GetURI()].count(localCallRecordSecond));
+}
+
+/**
+ * @tc.number: Local_Call_Container_SetRecordAndContainer_0100
+ * @tc.name: SetRecordAndContainer
+ * @tc.desc: Set 'container_' and 'localCallRecord_'.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetRecordAndContainer_0100, Function | MediumTest | Level1)
+{
+    sptr<CallerConnection> Container = new CallerConnection();
+    sptr<IRemoteObject> callRemoteObject =
+        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    Container->SetRecordAndContainer(localCallRecord,callRemoteObject);
+    EXPECT_EQ(Container->localCallRecord_, localCallRecord);
+    EXPECT_EQ(Container->container_, iface_cast<LocalCallContainer>(callRemoteObject));
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityConnectDone_0400
+ * @tc.name: OnAbilityConnectDone
+ * @tc.desc: OnAbilityConnectDone container is nullptr.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0400, Function | MediumTest | Level1)
+{
+    sptr<CallerConnection> Container = new CallerConnection();
+    sptr<IRemoteObject> callRemoteObject =
+        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    Container->OnAbilityConnectDone(elementName, callRemoteObject, 
+        static_cast<int32_t>(AppExecFwk::LaunchMode::SINGLETON));
+    EXPECT_EQ(nullptr,Container->container_.promote());
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityConnectDone_0500
+ * @tc.name: OnAbilityConnectDone
+ * @tc.desc: 'Code' is a Singleton.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0500, Function | MediumTest | Level1)
+{
+    sptr<CallerConnection> Connection = new CallerConnection();
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    Connection->container_ = localCallContainer;
+    constexpr int32_t code = 0;
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    Connection->localCallRecord_ = localCallRecord;
+    Connection->OnAbilityConnectDone(elementName, localCallContainer, code);
+    EXPECT_EQ(localCallContainer->callProxyRecords_[elementName.GetURI()], Connection->localCallRecord_);
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityConnectDone_0600
+ * @tc.name: OnAbilityConnectDone
+ * @tc.desc: 'Code' is not a Singleton.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0600, Function | MediumTest | Level1)
+{
+    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
+    callback->SetCallBack([](const sptr<IRemoteObject>&) {});
+    sptr<CallerConnection> Connection = new CallerConnection();
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    Connection->container_ = localCallContainer;
+    constexpr int32_t code = 1;
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    localCallRecord->AddCaller(callback);
+    Connection->localCallRecord_ = localCallRecord;
+    Connection->OnAbilityConnectDone(elementName, localCallContainer, code);
+    constexpr int32_t COUNT_NUM = 1;
+    EXPECT_EQ(Connection->container_->multipleCallProxyRecords_[elementName.GetURI()].
+        count(Connection->localCallRecord_),COUNT_NUM);
+    EXPECT_TRUE(callback->isCallBack_);
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0100
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone container is nullptr.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0100, Function | MediumTest | Level1)
+{
+    sptr<CallerConnection> Connection = new CallerConnection();
+    constexpr int32_t code = 0;
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    Connection->container_ = nullptr;
+    Connection->OnAbilityDisconnectDone(elementName, code);
+    EXPECT_EQ(Connection->container_, nullptr);
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnAbilityDisconnectDone_0200
+ * @tc.name: OnAbilityDisconnectDone
+ * @tc.desc: OnAbilityDisconnectDone container is not nullptr.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityDisconnectDone_0200, Function | MediumTest | Level1)
+{
+    sptr<CallerConnection> Connection = new CallerConnection();
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    constexpr int32_t code = 0;
+    Connection->container_ = localCallContainer;
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    Connection->OnAbilityDisconnectDone(elementName, code);
+    EXPECT_NE(Connection->container_, nullptr);
 }
 
 /**
@@ -304,98 +550,25 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_DumpCalls_0400, Function |
 }
 
 /**
- * @tc.number: Local_Call_Container_OnAbilityConnectDone_0100
- * @tc.name: OnAbilityConnectDone
- * @tc.desc: Local Call Container to process OnAbilityConnectDone, and the result is success resultCode == ERR_OK.
- */
-HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0100, Function | MediumTest | Level1)
-{
-    LocalCallContainer localCallContainer;
-
-    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
-    callback->SetCallBack([](const sptr<IRemoteObject>&) {});
-    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
-    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
-    localCallRecord->AddCaller(callback);
-    localCallRecord->callers_.emplace_back(callback);
-
-    std::string uri = elementName.GetURI();
-    localCallContainer.callProxyRecords_.emplace(uri, localCallRecord);
-
-    OHOS::sptr<OHOS::IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
-
-    localCallContainer.OnAbilityConnectDone(elementName, remoteObject, 0);
-    EXPECT_EQ(callback->isCallBack_, true);
-}
-
-/**
- * @tc.number: Local_Call_Container_OnAbilityConnectDone_0200
- * @tc.name: OnAbilityConnectDone
- * @tc.desc: Local Call Container to process OnAbilityConnectDone success when resultCode != ERR_OK.
- */
-HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0200, Function | MediumTest | Level1)
-{
-    LocalCallContainer localCallContainer;
-
-    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
-    callback->SetCallBack([](const sptr<IRemoteObject>&) {});
-    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
-    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
-    localCallRecord->AddCaller(callback);
-    localCallRecord->callers_.emplace_back(callback);
-
-    std::string uri = elementName.GetURI();
-    localCallContainer.callProxyRecords_.emplace(uri, localCallRecord);
-
-    OHOS::sptr<OHOS::IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
-
-    localCallContainer.OnAbilityConnectDone(elementName, remoteObject, -1);
-    EXPECT_EQ(callback->isCallBack_, true);
-}
-
-/**
- * @tc.number: Local_Call_Container_OnAbilityConnectDone_0300
- * @tc.name: OnAbilityConnectDone
- * @tc.desc: Local Call Container to process OnAbilityConnectDone fail because localCallRecord is null.
- */
-HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0300, Function | MediumTest | Level1)
-{
-    LocalCallContainer localCallContainer;
-
-    std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
-    EXPECT_EQ(callback->isCallBack_, false);
-    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
-    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
-    localCallRecord->AddCaller(callback);
-
-    OHOS::sptr<OHOS::IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
-
-    localCallContainer.OnAbilityConnectDone(elementName, remoteObject, 0);
-    EXPECT_EQ(callback->isCallBack_, false);
-}
-
-/**
  * @tc.number: Local_Call_Container_OnRemoteStateChanged_0100
  * @tc.name: OnRemoteStateChanged
  * @tc.desc: Local Call Container to process OnRemoteStateChanged, and the result is success resultCode == ERR_OK.
  */
 HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnRemoteStateChanged_0100, Function | MediumTest | Level1)
 {
-    LocalCallContainer localCallContainer;
-
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
     callback->SetCallBack([](const sptr<IRemoteObject>&) {});
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
     localCallRecord->AddCaller(callback);
-    localCallRecord->callers_.emplace_back(callback);
+    sptr<CallerConnection> Connection = new CallerConnection();
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    Connection->container_ = localCallContainer;
+    constexpr int32_t code = 1;
+    Connection->localCallRecord_ = localCallRecord;
+    Connection->OnAbilityConnectDone(elementName, localCallContainer, code);
 
-    std::string uri = elementName.GetURI();
-    localCallContainer.callProxyRecords_.emplace(uri, localCallRecord);
-    OHOS::sptr<OHOS::IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
-    localCallContainer.OnAbilityConnectDone(elementName, remoteObject, 0);
-
-    localCallContainer.OnRemoteStateChanged(elementName, 0);
+    localCallContainer->OnRemoteStateChanged(elementName, 0);
     EXPECT_EQ(callback->isCallBack_, true);
 }
 
@@ -406,21 +579,19 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnRemoteStateChanged_0100,
  */
 HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnRemoteStateChanged_0200, Function | MediumTest | Level1)
 {
-    LocalCallContainer localCallContainer;
-
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
     callback->SetCallBack([](const sptr<IRemoteObject>&) {});
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
     localCallRecord->AddCaller(callback);
-    localCallRecord->callers_.emplace_back(callback);
+    sptr<CallerConnection> Connection = new CallerConnection();
+    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    Connection->container_ = localCallContainer;
+    constexpr int32_t code = 1;
+    Connection->localCallRecord_ = localCallRecord;
+    Connection->OnAbilityConnectDone(elementName, localCallContainer, code);
 
-    std::string uri = elementName.GetURI();
-    localCallContainer.callProxyRecords_.emplace(uri, localCallRecord);
-    OHOS::sptr<OHOS::IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
-    localCallContainer.OnAbilityConnectDone(elementName, remoteObject, 0);
-
-    localCallContainer.OnRemoteStateChanged(elementName, -1);
+    localCallContainer->OnRemoteStateChanged(elementName, -1);
     EXPECT_EQ(callback->isCallBack_, true);
 }
 
@@ -465,7 +636,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_GetCallLocalRecord_0100, F
 }
 
 /**
- * @tc.number: Local_Call_Container_GetCallLocalRecord_0100
+ * @tc.number: Local_Call_Container_GetCallLocalRecord_0200
  * @tc.name: GetCallLocalRecord
  * @tc.desc: Local Call Container to process GetCallLocalRecord, and the result is fail
  *           because call proxy records is empty.
@@ -498,6 +669,66 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnCallStubDied_0100, Funct
 
     localCallContainer.OnCallStubDied(remote);
     EXPECT_TRUE(localCallContainer.callProxyRecords_.empty());
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnCallStubDied_0200
+ * @tc.name: OnCallStubDied
+ * @tc.desc: Delete records with empty remote in single instance.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnCallStubDied_0200, Function | MediumTest | Level1)
+{
+    LocalCallContainer localCallContainer;
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
+    wptr<IRemoteObject> remote(remoteObject);
+    const std::string strKey = elementName.GetURI();
+    localCallRecord->SetRemoteObject(remoteObject);
+    localCallContainer.callProxyRecords_.emplace(strKey, localCallRecord);
+    localCallContainer.OnCallStubDied(remote);
+    EXPECT_TRUE(localCallContainer.callProxyRecords_.empty());
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnCallStubDied_0300
+ * @tc.name: OnCallStubDied
+ * @tc.desc: Delete the record of the specified remote in multiple instances.
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnCallStubDied_0300, Function | MediumTest | Level1)
+{
+    LocalCallContainer localCallContainer;
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    AppExecFwk::ElementName elementNameSec("DemoDeviceIdSec", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecordSec = std::make_shared<LocalCallRecord>(elementNameSec);
+    localCallContainer.SetMultipleCallLocalRecord(elementName, localCallRecord);
+    localCallContainer.SetMultipleCallLocalRecord(elementNameSec, localCallRecordSec);
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
+    wptr<IRemoteObject> remote(remoteObject);
+    localCallRecordSec->SetRemoteObject(remoteObject);
+    localCallContainer.OnCallStubDied(remote);
+    EXPECT_FALSE(localCallContainer.multipleCallProxyRecords_.empty());
+}
+
+/**
+ * @tc.number: Local_Call_Container_OnCallStubDied_0400
+ * @tc.name: OnCallStubDied
+ * @tc.desc: Delete the specified remote in multiple instances
+ */
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnCallStubDied_0400, Function | MediumTest | Level1)
+{
+    LocalCallContainer localCallContainer;
+    AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
+    std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
+    std::shared_ptr<LocalCallRecord> localCallRecordSec = std::make_shared<LocalCallRecord>(elementName);
+    localCallContainer.SetMultipleCallLocalRecord(elementName, localCallRecord);
+    localCallContainer.SetMultipleCallLocalRecord(elementName, localCallRecordSec);
+    sptr<IRemoteObject> remoteObject = new (std::nothrow) MockServiceAbilityManagerService();
+    wptr<IRemoteObject> remote(remoteObject);
+    localCallRecordSec->SetRemoteObject(remoteObject);
+    localCallContainer.OnCallStubDied(remote);
+    EXPECT_FALSE(localCallContainer.multipleCallProxyRecords_.empty());
 }
 } // namespace AppExecFwk
 } // namespace OHOS
