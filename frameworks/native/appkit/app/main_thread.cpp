@@ -2532,7 +2532,7 @@ int MainThread::GetOverlayModuleInfos(const std::string &bundleName, const std::
     }
 
     auto overlayMgrProxy = bundleMgr->GetOverlayManagerProxy();
-    if (overlayMgrProxy ==  nullptr) {
+    if (overlayMgrProxy == nullptr) {
         HILOG_ERROR("GetOverlayManagerProxy failed.");
         return ERR_INVALID_VALUE;
     }
