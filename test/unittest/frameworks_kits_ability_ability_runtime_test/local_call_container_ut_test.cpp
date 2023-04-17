@@ -240,7 +240,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0700, Function | M
 /**
  * @tc.number: Local_Call_Container_Release_0800
  * @tc.name: Release
- * @tc.desc: When 'localCallRecord' is an 'IsSingletonRemote', 
+ * @tc.desc: When 'localCallRecord' is an 'IsSingletonRemote',
  * remove 'localCallRecord' by 'RemoveSingletonCallLocalRecord', and return 'ERR_OK'.
  */
 HWTEST_F(LocalCallContainerTest, Local_Call_Container_Release_0800, Function | MediumTest | Level1)
@@ -344,7 +344,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetRecordAndContainer_0100
         OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
-    Container->SetRecordAndContainer(localCallRecord,callRemoteObject);
+    Container->SetRecordAndContainer(localCallRecord, callRemoteObject);
     EXPECT_EQ(Container->localCallRecord_, localCallRecord);
     EXPECT_EQ(Container->container_, iface_cast<LocalCallContainer>(callRemoteObject));
 }
@@ -361,9 +361,9 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0400,
         OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
-    Container->OnAbilityConnectDone(elementName, callRemoteObject, 
+    Container->OnAbilityConnectDone(elementName, callRemoteObject,
         static_cast<int32_t>(AppExecFwk::LaunchMode::SINGLETON));
-    EXPECT_EQ(nullptr,Container->container_.promote());
+    EXPECT_EQ(nullptr, Container->container_.promote());
 }
 
 /**
@@ -404,7 +404,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0600,
     Connection->OnAbilityConnectDone(elementName, localCallContainer, code);
     constexpr int32_t COUNT_NUM = 1;
     EXPECT_EQ(Connection->container_->multipleCallProxyRecords_[elementName.GetURI()].
-        count(Connection->localCallRecord_),COUNT_NUM);
+        count(Connection->localCallRecord_), COUNT_NUM);
     EXPECT_TRUE(callback->isCallBack_);
 }
 
