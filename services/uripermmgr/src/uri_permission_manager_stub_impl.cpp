@@ -50,8 +50,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
     auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
-    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE &&
-        !permission && (fromTokenId != callerTokenId)) {
+    if (!permission && (fromTokenId != callerTokenId)) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: No permission for proxy authorization uri.");
         return CHECK_PERMISSION_FAILED;
     }
@@ -194,6 +193,9 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
                 uriList.emplace_back(search->first);
                 if (storageMgrProxy->DeleteShareFile(tokenId, uriList) == ERR_OK) {
                     list.erase(it);
+                    if (list.size() == 0) {
+                        uriMap_.erase(iter++);
+                    }
                     break;
                 } else {
                     HILOG_ERROR("DeleteShareFile failed");
