@@ -131,14 +131,17 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartAbility_0200, Functio
  */
 HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ReleaseCall_0100, Function | MediumTest | Level1)
 {
-    GTEST_LOG_(INFO) << "========Ability_Context_Impl_ReleaseCall_0100beagin==============.";
+    GTEST_LOG_(INFO) << "========Ability_Context_Impl_ReleaseCall_0100 beagin==============.";
 
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
     callback->SetCallBack([](const sptr<IRemoteObject>&) {});
+    std::shared_ptr<CallerCallBack> callbackSec = std::make_shared<CallerCallBack>();
+    callbackSec->SetCallBack([](const sptr<IRemoteObject>&) {});
 
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
     localCallRecord->AddCaller(callback);
+    localCallRecord->AddCaller(callbackSec);
 
     context_->localCallContainer_ = new (std::nothrow) LocalCallContainer();
     EXPECT_NE(context_->localCallContainer_, nullptr);
@@ -148,7 +151,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ReleaseCall_0100, Function
 
     ErrCode ret = context_->ReleaseCall(callback);
     EXPECT_TRUE(ret == ERR_OK);
-    GTEST_LOG_(INFO) << "========Ability_Context_Impl_ReleaseCall_0100end==============.";
+    GTEST_LOG_(INFO) << "========Ability_Context_Impl_ReleaseCall_0100 end==============.";
 }
 
 /**
