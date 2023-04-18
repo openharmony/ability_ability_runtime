@@ -47,7 +47,6 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
     Security::AccessToken::AccessTokenID fromTokenId = GetTokenIdByBundleName(authority);
     Security::AccessToken::AccessTokenID targetTokenId = GetTokenIdByBundleName(targetBundleName);
     auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(callerTokenId);
     auto permission = PermissionVerification::GetInstance()->VerifyCallingPermission(
         AAFwk::PermissionConstants::PERMISSION_PROXY_AUTHORIZATION_URI);
     if (!permission && (fromTokenId != callerTokenId)) {
@@ -194,7 +193,7 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
                 if (storageMgrProxy->DeleteShareFile(tokenId, uriList) == ERR_OK) {
                     list.erase(it);
                     if (list.size() == 0) {
-                        uriMap_.erase(iter++);
+                        uriMap_.erase(it);
                     }
                     break;
                 } else {
