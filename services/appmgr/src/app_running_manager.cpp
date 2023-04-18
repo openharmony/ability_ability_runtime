@@ -592,10 +592,11 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
 
 int32_t AppRunningManager::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
 {
+    auto iter = nullptr;
     {
         std::lock_guard<std::recursive_mutex> guard(lock_);
         HILOG_INFO("call %{public}s, current app size %{public}zu", __func__, appRunningRecordMap_.size());
-        auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
+        iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
             auto priorityObject = pair.second->GetPriorityObject();
             return priorityObject && priorityObject->GetPid() == pid;
         });
@@ -603,6 +604,9 @@ int32_t AppRunningManager::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
             HILOG_ERROR("No matching application was found.");
             return ERR_INVALID_VALUE;
         }
+    }
+    if (iter == nullptr) {
+        return ERR_INVALID_VALUE;
     }
     auto appRecord = iter->second;
     if (appRecord == nullptr) {
