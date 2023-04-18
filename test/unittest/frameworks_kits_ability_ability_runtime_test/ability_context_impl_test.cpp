@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1005,6 +1005,19 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_CreateModuleContext_0400, 
     std::string bundleName = "com.test.bundleName";
     auto ret = context_->CreateModuleContext(bundleName, moduleName);
     EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_ClearFailedCallStart_0100
+ * @tc.name: ClearFailedCallStart
+ * @tc.desc: clear failed call of startup execute normally
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ClearFailedCallStart_0100, Function | MediumTest | Level1)
+{
+    context_->ClearFailedCallStart(nullptr);
+    context_->localCallContainer_ = new (std::nothrow) LocalCallContainer();
+    context_->ClearFailedCallStart(nullptr);
+    EXPECT_NE(context_->localCallContainer_, nullptr);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
