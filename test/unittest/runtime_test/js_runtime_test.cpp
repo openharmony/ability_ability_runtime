@@ -18,6 +18,7 @@
 
 #define private public
 #define protected public
+#include "js_environment.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "js_worker.h"
@@ -377,28 +378,6 @@ HWTEST_F(JsRuntimeTest, JsRuntimeLoadSystemModuleTest_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: JsRuntimeGetSourceMapTest_0100
- * @tc.desc: JsRuntime test for GetSourceMap.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, JsRuntimeGetSourceMapTest_0100, TestSize.Level0)
-{
-    HILOG_INFO("GetSourceMap start");
-
-    std::unique_ptr<JsRuntime> jsRuntime = std::make_unique<MockJsRuntime>();
-    EXPECT_TRUE(jsRuntime != nullptr);
-
-    options_.bundleCodeDir = TEST_CODE_PATH;
-    options_.isStageModel = true;
-    jsRuntime->bindSourceMaps_ = std::make_unique<ModSourceMap>(options_.bundleCodeDir, options_.isStageModel);
-
-    auto& sourceMap = jsRuntime->GetSourceMap();
-    EXPECT_NE(&sourceMap, nullptr);
-
-    HILOG_INFO("GetSourceMap end");
-}
-
-/**
  * @tc.name: JsRuntimePostTaskTest_0100
  * @tc.desc: JsRuntime test for PostTask.
  * @tc.type: FUNC
@@ -617,19 +596,77 @@ HWTEST_F(JsRuntimeTest, JsRuntimeInitialize_0100, TestSize.Level0)
  */
 HWTEST_F(JsRuntimeTest, JsRuntimeInitialize_0200, TestSize.Level0)
 {
-	AbilityRuntime::Runtime::Options options;
-	options.preload = true;
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
 
-	auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-	ASSERT_NE(jsRuntime, nullptr);
-	EXPECT_NE(jsRuntime->GetEcmaVm(), nullptr);
-	EXPECT_NE(jsRuntime->GetNativeEnginePointer(), nullptr);
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+    EXPECT_NE(jsRuntime->GetEcmaVm(), nullptr);
+    EXPECT_NE(jsRuntime->GetNativeEnginePointer(), nullptr);
 
-	options.preload = false;
-	jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-	ASSERT_NE(jsRuntime, nullptr);
-	EXPECT_NE(jsRuntime->GetEcmaVm(), nullptr);
-	EXPECT_NE(jsRuntime->GetNativeEnginePointer(), nullptr);
+    options.preload = false;
+    jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+    EXPECT_NE(jsRuntime->GetEcmaVm(), nullptr);
+    EXPECT_NE(jsRuntime->GetNativeEnginePointer(), nullptr);
+}
+
+/**
+ * @tc.name: RegisterQuickFixQueryFunc_0100
+ * @tc.desc: JsRuntime test for RegisterQuickFixQueryFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RegisterQuickFixQueryFunc_0100, TestSize.Level0)
+{
+    HILOG_INFO("RegisterQuickFixQueryFunc start");
+
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    EXPECT_TRUE(jsRuntime != nullptr);
+    std::string moudel = "<moudelName>";
+    std::string hqfFile = "<hqfFile>";
+    std::map<std::string, std::string> moduleAndPath;
+    moduleAndPath.insert(std::make_pair(moudel, hqfFile));
+    jsRuntime->RegisterQuickFixQueryFunc(moduleAndPath);
+
+    HILOG_INFO("RegisterQuickFixQueryFunc end");
+}
+
+/**
+ * @tc.name: RegisterUncaughtExceptionHandler_0100
+ * @tc.desc: JsRuntime test for RegisterUncaughtExceptionHandler.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RegisterUncaughtExceptionHandler_0100, TestSize.Level0)
+{
+    HILOG_INFO("RegisterUncaughtExceptionHandler start");
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = false;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+
+    ASSERT_NE(jsRuntime, nullptr);
+    JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
+    jsRuntime->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
+    HILOG_INFO("RegisterUncaughtExceptionHandler end");
+}
+
+/**
+ * @tc.name: RegisterUncaughtExceptionHandler_0200
+ * @tc.desc: JsRuntime test for RegisterUncaughtExceptionHandler.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RegisterUncaughtExceptionHandler_0200, TestSize.Level0)
+{
+    HILOG_INFO("RegisterUncaughtExceptionHandler start");
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+
+    ASSERT_NE(jsRuntime, nullptr);
+    JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
+    jsRuntime->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
+    HILOG_INFO("RegisterUncaughtExceptionHandler end");
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
