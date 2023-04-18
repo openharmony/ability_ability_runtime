@@ -36,6 +36,8 @@ public:
 
     int ReleaseCall(const std::shared_ptr<CallerCallBack> &callback);
 
+    void ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback);
+
     void DumpCalls(std::vector<std::string> &info) const;
 
     virtual void OnAbilityConnectDone(

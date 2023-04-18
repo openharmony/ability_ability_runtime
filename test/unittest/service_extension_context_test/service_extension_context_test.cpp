@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -352,6 +352,21 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_TerminateAbility
     EXPECT_EQ(ret, ERR_OK);
     AAFwk::AbilityManagerClient::GetInstance()->proxy_ = nullptr;
     GTEST_LOG_(INFO) << "service_extension_context_TerminateAbility_002 end";
+}
+
+/**
+ * @tc.number: service_extension_context_ClearFailedCallStart_001
+ * @tc.name: ClearFailedCallStart
+ * @tc.desc: clear failed call of startup execute normally
+ */
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_ClearFailedCallStart_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallStart_001 start";
+    ServiceExtensionContext serviceExtensionContextTest;
+    serviceExtensionContextTest.ClearFailedCallStart(nullptr);
+    serviceExtensionContextTest.localCallContainer_ = new (std::nothrow) LocalCallContainer();
+    serviceExtensionContextTest.ClearFailedCallStart(nullptr);
+    GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallStart_001 end";
 }
 }
 }

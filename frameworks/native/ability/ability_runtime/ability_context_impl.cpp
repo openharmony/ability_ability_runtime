@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -590,6 +590,17 @@ ErrCode AbilityContextImpl::ReleaseCall(const std::shared_ptr<CallerCallBack>& c
     }
     HILOG_DEBUG("AbilityContextImpl::Release end.");
     return localCallContainer_->ReleaseCall(callback);
+}
+
+void AbilityContextImpl::ClearFailedCallStart(const std::shared_ptr<CallerCallBack>& callback)
+{
+    HILOG_DEBUG("AbilityContextImpl::clear begin.");
+    if (localCallContainer_ == nullptr) {
+        HILOG_ERROR("%{public}s failed, localCallContainer_ is nullptr.", __func__);
+        return;
+    }
+    HILOG_DEBUG("AbilityContextImpl::clear end.");
+    localCallContainer_->ClearFailedCallStart(callback);
 }
 
 void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback)
