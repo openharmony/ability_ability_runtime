@@ -65,7 +65,6 @@ private:
             ThrowTooFewParametersError(engine);
             return engine.CreateUndefined();
         }
-        HILOG_DEBUG("Grant Uri Permission start");
         std::string uriStr;
         if (!OHOS::AppExecFwk::UnwrapStringFromJS2(reinterpret_cast<napi_env>(&engine),
             reinterpret_cast<napi_value>(info.argv[0]), uriStr)) {
@@ -87,8 +86,7 @@ private:
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
-        auto selfToken = IPCSkeleton::GetSelfTokenID();
-        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
+        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetSelfTokenID())) {
             HILOG_ERROR("This application is not system-app, can not use system-api");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
             return engine.CreateUndefined();
