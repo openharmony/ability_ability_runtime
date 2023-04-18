@@ -76,6 +76,11 @@ class AbilityManagerService : public SystemAbility,
 public:
     void OnStart() override;
     void OnStop() override;
+
+    virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
+    virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
     ServiceRunningState QueryServiceState() const;
 
     /**
@@ -943,6 +948,8 @@ public:
      */
     virtual int VerifyPermission(const std::string &permission, int pid, int uid) override;
 
+    bool IsDmsAlive() const;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1171,6 +1178,8 @@ private:
 
     void SubscribeBackgroundTask();
 
+    void UnSubscribeBackgroundTask();
+
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
@@ -1296,6 +1305,11 @@ private:
         return (userId != INVALID_USER_ID && userId != U0_USER_ID && userId != GetUserId());
     }
 
+    bool CheckProxyComponent(const Want &want, const int result);
+
+    bool IsReleaseCallInterception(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element,
+        int &result);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
@@ -1324,6 +1338,7 @@ private:
     bool controllerIsAStabilityTest_ = false;
     std::recursive_mutex globalLock_;
     std::shared_mutex managersMutex_;
+    std::shared_mutex bgtaskObserverMutex_;
     sptr<AppExecFwk::IComponentInterception> componentInterception_ = nullptr;
 
     std::multimap<std::string, std::string> timeoutMap_;
@@ -1344,11 +1359,6 @@ private:
      *  FALSE: Determine the state by AppExecFwk::AppProcessState::APP_STATE_FOCUS.
      */
     bool backgroundJudgeFlag_ = true;
-    /** The applications in white list use old rule
-     *  TRUE: white list enable.
-     *  FALSE: white list unable.
-     */
-    bool whiteListNormalFlag_ = true;
     /** The applications in white list can associatedWakeUp
      *  TRUE: white list enable.
      *  FALSE: white list unable.
