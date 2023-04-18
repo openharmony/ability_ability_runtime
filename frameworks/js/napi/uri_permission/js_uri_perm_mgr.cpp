@@ -86,7 +86,8 @@ private:
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
-        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetSelfTokenID())) {
+        auto selfToken = IPCSkeleton::GetSelfTokenID();
+        if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {
             HILOG_ERROR("This application is not system-app, can not use system-api");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
             return engine.CreateUndefined();
