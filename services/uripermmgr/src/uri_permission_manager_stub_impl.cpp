@@ -193,7 +193,7 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
                 if (storageMgrProxy->DeleteShareFile(tokenId, uriList) == ERR_OK) {
                     list.erase(it);
                     if (list.size() == 0) {
-                        uriMap_.erase(it);
+                        uriMap_.erase(search);
                     }
                     break;
                 } else {
