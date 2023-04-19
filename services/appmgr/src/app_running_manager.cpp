@@ -605,9 +605,6 @@ int32_t AppRunningManager::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
             return ERR_INVALID_VALUE;
         }
     }
-    if (iter == nullptr) {
-        return ERR_INVALID_VALUE;
-    }
     auto appRecord = iter->second;
     if (appRecord == nullptr) {
         HILOG_ERROR("appRecord is nullptr.");
