@@ -237,6 +237,7 @@ void UserController::SetCurrentUserId(int32_t userId)
 {
     std::lock_guard<std::recursive_mutex> guard(userLock_);
     currentUserId_ = userId;
+    HILOG_DEBUG("set current userId: %{public}d", userId);
     DelayedSingleton<AppScheduler>::GetInstance()->SetCurrentUserId(userId);
 }
 

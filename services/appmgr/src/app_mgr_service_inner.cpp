@@ -3552,6 +3552,7 @@ void AppMgrServiceInner::SetCurrentUserId(const int32_t userId)
     if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
         return;
     }
+    HILOG_DEBUG("set current userId: %{public}d", userId);
     currentUserId_ = userId;
 }
 }  // namespace AppExecFwk
