@@ -286,7 +286,6 @@ void LocalCallContainer::SetCallLocalRecord(
 {
     HILOG_DEBUG("LocalCallContainer::SetCallLocalRecord called uri is %{private}s.", element.GetURI().c_str());
     const std::string strKey = element.GetURI();
-    callProxyRecords_.erase(strKey);
     callProxyRecords_.emplace(strKey, localCallRecord);
 }
 
