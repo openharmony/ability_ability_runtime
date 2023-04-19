@@ -49,7 +49,8 @@ constexpr const char* ERROR_MSG_FREE_INSTALL_TOO_BUSY =
 constexpr const char* ERROR_MSG_FREE_INSTALL_TIMEOUT = "Installation-free timed out.";
 constexpr const char* ERROR_MSG_FREE_INSTALL_OTHERS = "Installation-free is not allowed for other applications.";
 constexpr const char* ERROR_MSG_FREE_INSTALL_CROSS_DEVICE = "Cross-device installation-free is not supported.";
-constexpr const char* ERROR_MSG_URI_PERMISSION_NOT_FOUND = "Uri permission not found.";
+constexpr const char* ERROR_MSG_INVALID_URI_FLAG = "Invalid URI flag.";
+constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Invalid URI type, only support file Uri.";
 constexpr const char* ERROR_MSG_INVALID_CALLER = "The caller has been released.";
 constexpr const char* ERROR_MSG_NO_MISSION_ID = "The specified mission does not exist.";
 constexpr const char* ERROR_MSG_NO_MISSION_LISTENER = "Input error. The specified mission listener does not exist.";
@@ -80,7 +81,8 @@ static std::unordered_map<AbilityErrorCode, const char*> ERR_CODE_MAP = {
     { AbilityErrorCode::ERROR_CODE_FREE_INSTALL_TIMEOUT, ERROR_MSG_FREE_INSTALL_TIMEOUT },
     { AbilityErrorCode::ERROR_CODE_FREE_INSTALL_OTHERS, ERROR_MSG_FREE_INSTALL_OTHERS },
     { AbilityErrorCode::ERROR_CODE_FREE_INSTALL_CROSS_DEVICE, ERROR_MSG_FREE_INSTALL_CROSS_DEVICE },
-    { AbilityErrorCode::ERROR_CODE_URI_PERMISSION_NOT_FOUND, ERROR_MSG_URI_PERMISSION_NOT_FOUND },
+    { AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG, ERROR_MSG_INVALID_URI_FLAG },
+    { AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE, ERROR_MSG_INVALID_URI_TYPE },
     { AbilityErrorCode::ERROR_CODE_INVALID_CALLER, ERROR_MSG_INVALID_CALLER },
     { AbilityErrorCode::ERROR_CODE_NO_MISSION_ID, ERROR_MSG_NO_MISSION_ID },
     { AbilityErrorCode::ERROR_CODE_NO_MISSION_LISTENER, ERROR_MSG_NO_MISSION_LISTENER },
