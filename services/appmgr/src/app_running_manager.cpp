@@ -592,7 +592,7 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
 
 int32_t AppRunningManager::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo)
 {
-    const std::shared_ptr<AppRunningRecord> appRecord = nullptr;
+    const std::shared_ptr<AppRunningRecord> appRecord;
     {
         std::lock_guard<std::recursive_mutex> guard(lock_);
         HILOG_INFO("call %{public}s, current app size %{public}zu", __func__, appRunningRecordMap_.size());
