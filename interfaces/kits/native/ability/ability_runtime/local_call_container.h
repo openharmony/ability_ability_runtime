@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
 #define OHOS_ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
 
+#include "ability_context.h"
 #include "ability_connect_callback_stub.h"
 #include "ability_connect_callback_proxy.h"
 #include "local_call_record.h"
@@ -31,8 +32,8 @@ public:
     LocalCallContainer() = default;
     virtual ~LocalCallContainer() = default;
 
-    int StartAbilityByCallInner(
-        const Want &want, const std::shared_ptr<CallerCallBack> &callback, const sptr<IRemoteObject> &callerToken);
+    int StartAbilityByCallInner(const Want &want, const std::shared_ptr<CallerCallBack> &callback,
+        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE);
 
     int ReleaseCall(const std::shared_ptr<CallerCallBack> &callback);
 
@@ -53,14 +54,17 @@ public:
     void OnCallStubDied(const wptr<IRemoteObject> &remote);
     void OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState) override;
 private:
-    bool GetCallLocalRecord(
-        const AppExecFwk::ElementName &elementName, std::shared_ptr<LocalCallRecord> &localCallRecord);
+    bool GetCallLocalRecord(const AppExecFwk::ElementName &elementName,
+        std::shared_ptr<LocalCallRecord> &localCallRecord, int32_t accountId);
     void OnSingletonCallStubDied(const wptr<IRemoteObject> &remote);
     int32_t RemoveSingletonCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
     int32_t RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
+    int32_t GetCurrentUserId();
+    int32_t GetValidUserId(int32_t accountId);
 
 private:
-    std::map<std::string, std::shared_ptr<LocalCallRecord>> callProxyRecords_;
+    int32_t currentUserId_ = DEFAULT_INVAL_VALUE;
+    std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> callProxyRecords_;
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
     std::set<sptr<CallerConnection>> connections_;
 };

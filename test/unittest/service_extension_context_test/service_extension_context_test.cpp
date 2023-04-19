@@ -364,8 +364,10 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_ClearFailedCallS
     GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallStart_001 start";
     ServiceExtensionContext serviceExtensionContextTest;
     serviceExtensionContextTest.ClearFailedCallStart(nullptr);
+    EXPECT_EQ(serviceExtensionContextTest.localCallContainer_, nullptr);
     serviceExtensionContextTest.localCallContainer_ = new (std::nothrow) LocalCallContainer();
     serviceExtensionContextTest.ClearFailedCallStart(nullptr);
+    EXPECT_NE(serviceExtensionContextTest.localCallContainer_, nullptr);
     GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallStart_001 end";
 }
 }
