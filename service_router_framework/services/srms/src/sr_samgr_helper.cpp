@@ -27,7 +27,7 @@
 #include "system_ability_definition.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 SrSamgrHelper::SrSamgrHelper()
 {}
 
@@ -76,5 +76,5 @@ int32_t SrSamgrHelper::GetCurrentActiveUserId()
     return 0;
 #endif
 }
-} // namespace AppExecFwk
+} // namespace AbilityRuntime
 } // namespace OHOS

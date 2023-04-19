@@ -19,7 +19,7 @@
 #include "system_ability_definition.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 void ServiceRouterLoadCallback::OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
     const sptr<IRemoteObject> &remoteObject)
 {
@@ -40,5 +40,5 @@ void ServiceRouterLoadCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
     APP_LOGE("OnLoadSystemAbilitySuccess systemAbilityId: %{public}d", systemAbilityId);
     ServiceRouterMgrHelper::GetInstance().FinishStartSAFail();
 }
-} // namespace AppExecFwk
+} // namespace AbilityRuntime
 } // namespace OHOS

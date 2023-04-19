@@ -35,7 +35,7 @@
 #include "want.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 namespace {
 const std::string NAME_SERVICE_ROUTER_MGR_SERVICE = "ServiceRouterMgrService";
 const std::string TASK_NAME = "ServiceRouterUnloadTask";
@@ -187,5 +187,5 @@ int32_t ServiceRouterMgrService::ConnectUIExtensionAbility(const Want &want, con
     return IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->
         ConnectUIExtensionAbility(want, connect, sessionInfo, userId));
 }
-}  // namespace AppExecFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS

@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("../../../../srms.gni")
 
 ohos_shared_library("businessabilityrouter") {
-  include_dirs = [ "${kits_path}/js/common" ]
+  include_dirs = [ "${bundlefwk_kits_path}/js/common" ]
 
   defines = [
     "APP_LOG_TAG = \"ServiceRouterMgrService\"",
@@ -29,8 +29,8 @@ ohos_shared_library("businessabilityrouter") {
   configs = [ "${srms_services_path}:srms_config" ]
 
   deps = [
-    "${common_path}:libappexecfwk_common",
-    "${kits_path}/js/common:bundle_napi_common",
+    "${bundlefwk_common_path}:libappexecfwk_common",
+    "${bundlefwk_kits_path}/js/common:bundle_napi_common",
     "${srms_inner_api_path}:srms_fwk",
   ]
 

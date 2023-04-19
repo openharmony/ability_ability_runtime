@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_INFO_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_INFO_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_INFO_H
 
 #include <string>
 #include <vector>
@@ -22,7 +22,7 @@
 #include "parcel.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 enum class BusinessType {
     SHARE = 0,
     UNSPECIFIED = 255
@@ -85,6 +85,6 @@ struct PurposeInfo final : public Parcelable {
     virtual bool Marshalling(Parcel &parcel) const override;
     static PurposeInfo *Unmarshalling(Parcel &parcel);
 };
-} // AppExecFwk
+} // AbilityRuntime
 } // OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_INFO_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_INFO_H

@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_COMMON_EVENT_SUBSCRIBER_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_COMMON_EVENT_SUBSCRIBER_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_COMMON_EVENT_SUBSCRIBER_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_COMMON_EVENT_SUBSCRIBER_H
 
 #include "common_event_subscriber.h"
 #include "event_handler.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
+using namespace OHOS::AppExecFwk;
 class SrCommonEventSubscriber : public EventFwk::CommonEventSubscriber,
     public std::enable_shared_from_this<SrCommonEventSubscriber> {
 public:
@@ -41,6 +42,6 @@ public:
 private:
     std::shared_ptr<EventHandler> eventHandler_ = nullptr;
 };
-} // AppExecFwk
+} // AbilityRuntime
 } // OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_COMMON_EVENT_SUBSCRIBER_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_COMMON_EVENT_SUBSCRIBER_H

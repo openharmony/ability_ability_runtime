@@ -17,5 +17,5 @@ srms_inner_api_path =
     "${ability_runtime_path}/service_router_framework/interfaces/inner_api"
 srms_services_path =
     "${ability_runtime_path}/service_router_framework/services/srms"
-common_path = "${bundlefwk_path}/common"
-kits_path = "${bundlefwk_path}/interfaces/kits"
+bundlefwk_common_path = "${bundlefwk_path}/common"
+bundlefwk_kits_path = "${bundlefwk_path}/interfaces/kits"

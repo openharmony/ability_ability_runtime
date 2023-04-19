@@ -19,7 +19,7 @@
 #include "string_ex.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 bool AppInfo::ReadFromParcel(Parcel &parcel)
 {
     bundleName = Str16ToStr8(parcel.ReadString16());
@@ -180,5 +180,5 @@ PurposeInfo *PurposeInfo::Unmarshalling(Parcel &parcel)
     }
     return info;
 }
-} // namespace AppExecFwk
+} // namespace AbilityRuntime
 } // namespace OHOS

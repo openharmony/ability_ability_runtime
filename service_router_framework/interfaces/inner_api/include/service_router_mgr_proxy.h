@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MGR_PROXY_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MGR_PROXY_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MGR_PROXY_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MGR_PROXY_H
 
 #include "iremote_proxy.h"
 #include "service_router_mgr_interface.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 /**
  * @class ServiceRouterMgrProxy
  * ServiceRouterMgrProxy.
@@ -84,6 +84,6 @@ private:
 
     static inline BrokerDelegator<ServiceRouterMgrProxy> delegator_;
 };
-}  // namespace AAFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // namespace FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MGR_PROXY_H
+#endif // namespace OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MGR_PROXY_H

@@ -23,7 +23,7 @@
 #include "uri.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 namespace {
     const std::string SCHEME_SEPARATOR = "://";
     const std::string SCHEME_SERVICE_ROUTER = "servicerouter";
@@ -107,7 +107,7 @@ int32_t ServiceRouterDataMgr::QueryBusinessAbilityInfos(const BusinessAbilityFil
 {
     APP_LOGD("SRDM QueryBusinessAbilityInfos");
     BusinessType validType = GetBusinessType(filter);
-    if (validType != BusinessType::SHARE) {
+    if (validType == BusinessType::UNSPECIFIED) {
         APP_LOGE("SRDM QueryBusinessAbilityInfos, businessType is empty");
         return ERR_BUNDLE_MANAGER_PARAM_ERROR;
     }
@@ -146,7 +146,7 @@ int32_t ServiceRouterDataMgr::QueryPurposeInfos(const Want &want, const std::str
 
 BusinessType ServiceRouterDataMgr::GetBusinessType(const BusinessAbilityFilter &filter) const
 {
-    if (filter.businessType == BusinessType::SHARE) {
+    if (filter.businessType != BusinessType::UNSPECIFIED) {
         return filter.businessType;
     }
 

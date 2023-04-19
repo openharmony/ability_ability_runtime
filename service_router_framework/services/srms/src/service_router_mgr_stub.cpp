@@ -26,7 +26,7 @@
 #include "tokenid_kit.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 ServiceRouterMgrStub::ServiceRouterMgrStub()
 {
     APP_LOGD("ServiceRouterMgrStub instance is created");
@@ -227,5 +227,5 @@ bool ServiceRouterMgrStub::WriteParcelableVector(std::vector<T> &parcelableVecto
     }
     return true;
 }
-}  // namespace AAFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS

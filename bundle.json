@@ -321,7 +321,7 @@
               "header_files": [
               ]
             },
-          "name": "//foundation/ability/ability_runtime/interfaces/inner_api/dataobs_manager:dataobs_manager"
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/dataobs_manager:dataobs_manager"
           },
           {
             "header": {

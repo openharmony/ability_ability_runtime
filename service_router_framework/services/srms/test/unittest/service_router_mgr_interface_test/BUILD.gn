@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import("//build/test.gni")
-import("../../../../../srms.gni")
+import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
 module_output_path = "bundle_framework/serviceroutermanagerservice"
 
@@ -23,7 +23,7 @@ ohos_unittest("ServiceRouterMgrInterfaceTest") {
   sources = [ "srms_interface_test.cpp" ]
 
   deps = [
-    "${common_path}:libappexecfwk_common",
+    "${bundlefwk_common_path}:libappexecfwk_common",
     "${srms_inner_api_path}:srms_fwk",
   ]
 
@@ -43,10 +43,6 @@ ohos_unittest("ServiceRouterMgrInterfaceTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-  defines = []
-
-  external_deps += [ "os_account:os_account_innerkits" ]
-  defines += [ "ACCOUNT_ENABLE" ]
 }
 
 group("unittest") {

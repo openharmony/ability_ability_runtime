@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_ROUTER_DEATH_RECIPIENT_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_ROUTER_DEATH_RECIPIENT_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_ROUTER_DEATH_RECIPIENT_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_ROUTER_DEATH_RECIPIENT_H
 
 #include "iremote_object.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 class ServiceRouterDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
     ServiceRouterDeathRecipient()
@@ -27,6 +27,6 @@ public:
     virtual ~ServiceRouterDeathRecipient() = default;
     void OnRemoteDied(const wptr<IRemoteObject> &object) override;
 };
-}  // namespace AppExecFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_DEATH_RECIPIENT_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_DEATH_RECIPIENT_H
