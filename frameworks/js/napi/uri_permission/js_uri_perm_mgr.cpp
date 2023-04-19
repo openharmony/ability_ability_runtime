@@ -152,7 +152,7 @@ private:
             } else if (errCode == AAFwk::CHECK_PERMISSION_FAILED) {
                 task.Reject(engine, CreateNoPermissionError(engine,
                     "Do not have permission ohos.permission.PROXY_AUTHORIZATION_URI"));
-            } else if (errCode == AAFwk::AbilityErrorCode::ERROR_CODE_URI_PERMISSION_NOT_FOUND){
+            } else if (errCode == AbilityRuntime::AbilityErrorCode::ERROR_CODE_URI_PERMISSION_NOT_FOUND){
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_URI_PERMISSION_NOT_FOUND,
                 "Uri permission to revoke not found."));
             } else {
