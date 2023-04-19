@@ -70,7 +70,8 @@ public:
      *
      * @return Returns zero on success, others on failure.
      */
-    ErrCode StartAbilityByCall(const AAFwk::Want& want, const std::shared_ptr<CallerCallBack> &callback);
+    ErrCode StartAbilityByCall(const AAFwk::Want& want, const std::shared_ptr<CallerCallBack> &callback,
+        int32_t accountId = DEFAULT_INVAL_VALUE);
 
     /**
      * caller release by callback object

@@ -17,11 +17,12 @@
 
 #include "hilog_wrapper.h"
 #include "ability_manager_client.h"
+#include "os_account_manager_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-int LocalCallContainer::StartAbilityByCallInner(
-    const Want& want, const std::shared_ptr<CallerCallBack>& callback, const sptr<IRemoteObject>& callerToken)
+int LocalCallContainer::StartAbilityByCallInner(const Want& want, const std::shared_ptr<CallerCallBack>& callback,
+    const sptr<IRemoteObject>& callerToken, int32_t accountId)
 {
     HILOG_DEBUG("start ability by call.");
     if (callback == nullptr) {
@@ -37,14 +38,15 @@ int LocalCallContainer::StartAbilityByCallInner(
         HILOG_DEBUG("start ability by call, element:DeviceID is empty");
     }
     HILOG_DEBUG("start ability by call, element:%{public}s", want.GetElement().GetURI().c_str());
+    int32_t oriValidUserId = GetValidUserId(accountId);
     AppExecFwk::ElementName element = want.GetElement();
     std::shared_ptr<LocalCallRecord> localCallRecord;
-    if (!GetCallLocalRecord(element, localCallRecord)) {
+    if (!GetCallLocalRecord(element, localCallRecord, oriValidUserId)) {
         localCallRecord = std::make_shared<LocalCallRecord>(element);
+        localCallRecord->SetUserId(oriValidUserId);
+        HILOG_DEBUG("create local call record and set user id[%{public}d] to record", oriValidUserId);
     }
-    HILOG_DEBUG("start ability by call, localCallRecord->AddCaller(callback) begin");
     localCallRecord->AddCaller(callback);
-    HILOG_DEBUG("start ability by call, localCallRecord->AddCaller(callback) end");
     auto remote = localCallRecord->GetRemoteObject();
     // already finish call request.
     if (remote) {
@@ -65,7 +67,7 @@ int LocalCallContainer::StartAbilityByCallInner(
     connect->SetRecordAndContainer(localCallRecord, this->AsObject());
     HILOG_DEBUG("LocalCallContainer::StartAbilityByCallInner connections_.size is %{public}d",
         static_cast<int32_t>(connections_.size()));
-    auto retval = abilityClient->StartAbilityByCall(want, connect, callerToken);
+    auto retval = abilityClient->StartAbilityByCall(want, connect, callerToken, oriValidUserId);
     if (retval != ERR_OK) {
         ClearFailedCallStart(callback);
     }
@@ -150,7 +152,18 @@ int32_t LocalCallContainer::RemoveSingletonCallLocalRecord(std::shared_ptr<Local
         HILOG_ERROR("input params invalid value");
         return ERR_INVALID_VALUE;
     }
-    callProxyRecords_.erase(record->GetElementName().GetURI());
+
+    auto iterRecord = callProxyRecords_.find(record->GetElementName().GetURI());
+    if (iterRecord == callProxyRecords_.end()) {
+        HILOG_ERROR("release record in singleton not found.");
+        return ERR_INVALID_VALUE;
+    }
+
+    iterRecord->second.erase(record);
+    if (iterRecord->second.empty()) {
+        callProxyRecords_.erase(iterRecord);
+    }
+
     return ERR_OK;
 }
 
@@ -179,28 +192,30 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
 {
     HILOG_DEBUG("LocalCallContainer::DumpCalls called.");
     info.emplace_back("          caller connections:");
-    for (auto iter = callProxyRecords_.begin(); iter != callProxyRecords_.end(); iter++) {
-        std::string tempstr = "            LocalCallRecord";
-        tempstr += " ID #" + std::to_string(iter->second->GetRecordId()) + "\n";
-        tempstr += "              callee";
-        tempstr += " uri[" + iter->first + "]" + "\n";
-        tempstr += "              callers #" + std::to_string(iter->second->GetCallers().size());
-        bool flag = true;
-        for (auto& callBack : iter->second->GetCallers()) {
-            if (callBack != nullptr && !callBack->IsCallBack()) {
-                HILOG_INFO("%{public}s call back is not called.", __func__);
-                flag = false;
-                break;
+    for (auto &item : callProxyRecords_) {
+        for (auto &itemCall : item.second) {
+            std::string tempstr = "            LocalCallRecord";
+            tempstr += " ID #" + std::to_string(itemCall->GetRecordId()) + "\n";
+            tempstr += "              callee";
+            tempstr += " uri[" + item.first + "]" + "\n";
+            tempstr += "              callers #" + std::to_string(itemCall->GetCallers().size());
+            bool flag = true;
+            for (auto& callBack : itemCall->GetCallers()) {
+                if (callBack != nullptr && !callBack->IsCallBack()) {
+                    HILOG_INFO("%{public}s call back is not called.", __func__);
+                    flag = false;
+                    break;
+                }
             }
-        }
-        if (flag) {
-            HILOG_INFO("%{public}s state is REQUESTEND.", __func__);
-            tempstr += "  state #REQUESTEND";
-        } else {
-            HILOG_INFO("%{public}s state is REQUESTING.", __func__);
-            tempstr += "  state #REQUESTING";
-        }
-        info.emplace_back(tempstr);
+            if (flag) {
+                HILOG_INFO("%{public}s state is REQUESTEND.", __func__);
+                tempstr += "  state #REQUESTEND";
+            } else {
+                HILOG_INFO("%{public}s state is REQUESTING.", __func__);
+                tempstr += "  state #REQUESTING";
+            }
+            info.emplace_back(tempstr);
+            }
     }
     return;
 }
@@ -216,7 +231,7 @@ void LocalCallContainer::OnRemoteStateChanged(const AppExecFwk::ElementName &ele
 {
     HILOG_DEBUG("LocalCallContainer::OnRemoteStateChanged start %{public}s .", element.GetURI().c_str());
     std::shared_ptr<LocalCallRecord> localCallRecord;
-    if (GetCallLocalRecord(element, localCallRecord)) {
+    if (GetCallLocalRecord(element, localCallRecord, GetCurrentUserId())) {
         localCallRecord->NotifyRemoteStateChanged(abilityState);
         HILOG_DEBUG("call NotifyRemoteStateChanged.");
     }
@@ -226,7 +241,7 @@ void LocalCallContainer::OnRemoteStateChanged(const AppExecFwk::ElementName &ele
 }
 
 bool LocalCallContainer::GetCallLocalRecord(
-    const AppExecFwk::ElementName& elementName, std::shared_ptr<LocalCallRecord>& localCallRecord)
+    const AppExecFwk::ElementName& elementName, std::shared_ptr<LocalCallRecord>& localCallRecord, int32_t accountId)
 {
     for (auto pair : callProxyRecords_) {
         AppExecFwk::ElementName callElement;
@@ -237,9 +252,13 @@ bool LocalCallContainer::GetCallLocalRecord(
         // elementName in callProxyRecords_ has moduleName (sometimes not empty),
         // but the moduleName of input param elementName is usually empty.
         callElement.SetModuleName("");
-        if ((pair.first == elementName.GetURI() || callElement.GetURI() == elementName.GetURI()) && pair.second) {
-            localCallRecord = pair.second;
-            return true;
+        if ((pair.first == elementName.GetURI() || callElement.GetURI() == elementName.GetURI())) {
+            for (auto &itemCall : pair.second) {
+                if (itemCall != nullptr && itemCall->GetUserId() == accountId) {
+                    localCallRecord = itemCall;
+                    return true;
+                }
+            }
         }
     }
     return false;
@@ -249,22 +268,28 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
 {
     auto diedRemote = remote.promote();
     auto isExist = [&diedRemote](auto& record) {
-        return record.second->IsSameObject(diedRemote);
-    };
-
-    auto iter = std::find_if(callProxyRecords_.begin(), callProxyRecords_.end(), isExist);
-    if (iter != callProxyRecords_.end()) {
-        iter->second->OnCallStubDied(remote);
-        callProxyRecords_.erase(iter);
-        return;
-    }
-
-    auto isMultipleExit = [&diedRemote] (auto& record) {
         return record->IsSameObject(diedRemote);
     };
+
+    for (auto &item : callProxyRecords_) {
+        auto iter = std::find_if(item.second.begin(), item.second.end(), isExist);
+        if (iter == item.second.end()) {
+            continue;
+        }
+        HILOG_DEBUG("LocalCallContainer::OnCallStubDied singleton key[%{public}s]. notify died event",
+            item.first.c_str());
+        (*iter)->OnCallStubDied(remote);
+        item.second.erase(iter);
+        if (item.second.empty()) {
+            HILOG_DEBUG("LocalCallContainer::OnCallStubDied singleton key[%{public}s] empty.", item.first.c_str());
+            callProxyRecords_.erase(item.first);
+            break;
+        }
+    }
+
     for (auto &item : multipleCallProxyRecords_) {
         HILOG_DEBUG("LocalCallContainer::OnCallStubDied multiple key[%{public}s].", item.first.c_str());
-        auto iterMultiple = find_if(item.second.begin(), item.second.end(), isMultipleExit);
+        auto iterMultiple = find_if(item.second.begin(), item.second.end(), isExist);
         if (iterMultiple == item.second.end()) {
             continue;
         }
@@ -286,7 +311,14 @@ void LocalCallContainer::SetCallLocalRecord(
 {
     HILOG_DEBUG("LocalCallContainer::SetCallLocalRecord called uri is %{private}s.", element.GetURI().c_str());
     const std::string strKey = element.GetURI();
-    callProxyRecords_.emplace(strKey, localCallRecord);
+    auto iter = callProxyRecords_.find(strKey);
+    if (iter == callProxyRecords_.end()) {
+        std::set<std::shared_ptr<LocalCallRecord>> records = { localCallRecord };
+        callProxyRecords_.emplace(strKey, records);
+        return;
+    }
+
+    iter->second.emplace(localCallRecord);
 }
 
 void LocalCallContainer::SetMultipleCallLocalRecord(
@@ -350,6 +382,31 @@ void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &el
 
     container_->OnAbilityDisconnectDone(element, code);
     HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone end. code:%{public}d.", code);
+}
+
+int32_t LocalCallContainer::GetCurrentUserId()
+{
+    if (currentUserId_ == DEFAULT_INVAL_VALUE) {
+        auto osAccount = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance();
+        if (osAccount == nullptr) {
+            HILOG_ERROR("LocalCallContainer::GetCurrentUserId get osAccount is nullptr.");
+            return DEFAULT_INVAL_VALUE;
+        }
+
+        osAccount->GetOsAccountLocalIdFromProcess(currentUserId_);
+        HILOG_DEBUG("LocalCallContainer::GetCurrentUserId called. %{public}d", currentUserId_);
+    }
+
+    return currentUserId_;
+}
+
+int32_t LocalCallContainer::GetValidUserId(int32_t accountId)
+{
+    if (accountId < 0) {
+        return GetCurrentUserId();
+    }
+
+    return accountId;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
