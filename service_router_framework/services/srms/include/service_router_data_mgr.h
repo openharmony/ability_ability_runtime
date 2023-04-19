@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_DATA_MGR_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_DATA_MGR_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_DATA_MGR_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_DATA_MGR_H
 
 #include <map>
 #include <mutex>
@@ -30,7 +30,7 @@
 #include "want.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 class ServiceRouterDataMgr : public DelayedRefSingleton<ServiceRouterDataMgr> {
 public:
     using Want = OHOS::AAFwk::Want;
@@ -90,6 +90,6 @@ private:
     mutable std::mutex bundleInfoMutex_;
     std::map<std::string, InnerServiceInfo> innerServiceInfos_;
 };
-} // namespace AppExecFwk
+} // namespace AbilityRuntime
 } // namespace OHOS
-#endif // FFOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_DATA_MGR_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_DATA_MGR_H

@@ -16,7 +16,7 @@
 #include "inner_service_info.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 void InnerServiceInfo::FindBusinessAbilityInfos(const BusinessType &businessType,
     std::vector<BusinessAbilityInfo> &businessAbililtyInfos) const
 {
@@ -35,5 +35,5 @@ void InnerServiceInfo::FindPurposeInfos(const std::string &purposeName, std::vec
         }
     }
 }
-}  // namespace AppExecFwk
+} // namespace AbilityRuntime
 }  // namespace OHOS

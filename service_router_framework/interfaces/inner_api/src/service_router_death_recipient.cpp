@@ -18,11 +18,11 @@
 #include "service_router_mgr_helper.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 void ServiceRouterDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &object)
 {
     APP_LOGI("OnRemoteDied.");
     ServiceRouterMgrHelper::GetInstance().OnRemoteDiedHandle();
 }
-} // namespace AppExecFwk
+} // namespace AbilityRuntime
 } // namespace OHOS

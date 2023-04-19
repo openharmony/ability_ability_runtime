@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_MGR_SERVICE_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_MGR_SERVICE_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_MGR_SERVICE_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_MGR_SERVICE_H
 
 #include "event_runner.h"
 #include "event_handler.h"
@@ -26,7 +26,9 @@
 #include "want.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
+using namespace OHOS::AppExecFwk;
+
 /**
  * @class ServiceRouterMgrService
  * ServiceRouterMgrService provides a facility for managing ability life cycle.
@@ -111,6 +113,6 @@ private:
     std::shared_ptr<SrCommonEventSubscriber> eventSubscriber_ = nullptr;
     std::mutex delayTaskMutex_;
 };
-}  // namespace AAFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_MGR_SERVICE_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_MGR_SERVICE_H

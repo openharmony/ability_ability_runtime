@@ -21,7 +21,7 @@
 #include "want.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 SrCommonEventSubscriber::SrCommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscribeInfo)
     : EventFwk::CommonEventSubscriber(subscribeInfo)
 {
@@ -82,5 +82,5 @@ void SrCommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData &ev
         APP_LOGW("%{public}s warnning, invalid action.", __func__);
     }
 }
-} // AppExecFwk
+} // AbilityRuntime
 } // OHOS

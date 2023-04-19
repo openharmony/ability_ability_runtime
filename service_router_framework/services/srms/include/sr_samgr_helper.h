@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_SAMGR_HELPER_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_SAMGR_HELPER_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_SAMGR_HELPER_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_SAMGR_HELPER_H
 
 #include <singleton.h>
 
 #include "bundle_mgr_interface.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-using Want = OHOS::AAFwk::Want;
+namespace AbilityRuntime {
+using namespace OHOS::AppExecFwk;
 
 /**
  * @class SystemAbilityManager Helper
@@ -50,7 +50,7 @@ private:
     std::mutex bundleMgrMutex_;
     sptr<IBundleMgr> iBundleMgr_ = nullptr;
 };
-}  // namespace AppExecFwk
+} // namespace AbilityRuntime
 }  // namespace OHOS
 
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_SAMGR_HELPER_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SR_SAMGR_HELPER_H

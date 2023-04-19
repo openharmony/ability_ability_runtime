@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MANAGER_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MANAGER_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MANAGER_H
 
 #include <string>
 #include <vector>
@@ -27,8 +27,9 @@
 #include "want.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 using namespace OHOS::AAFwk;
+using namespace OHOS::AppExecFwk;
 constexpr const char* SERVICE_ROUTER_MANAGER_SERVICE_NAME = "ServiceRouterMgrService";
 const int DEFAULT_INVAL_VALUE = -1;
 
@@ -96,6 +97,6 @@ public:
         CONNECT_UI_EXTENSION = 3,
     };
 };
-}  // namespace AAFwk
+} // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MANAGER_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_MANAGER_H

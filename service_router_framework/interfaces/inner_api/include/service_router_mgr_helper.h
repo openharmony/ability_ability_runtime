@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_SA_HEALPER_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_SA_HEALPER_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_SA_HEALPER_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_SA_HEALPER_H
 
 #include <condition_variable>
 #include <mutex>
@@ -24,8 +24,7 @@
 #include "service_router_mgr_interface.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-using Want = OHOS::AAFwk::Want;
+namespace AbilityRuntime {
 
 /**
  * @class SystemAbilityManager Helper
@@ -59,6 +58,6 @@ private:
     sptr<ServiceRouterDeathRecipient> serviceDeathObserver_;
     sptr<IServiceRouterManager> routerMgr_ = nullptr;
 };
-}  // namespace AppExecFwk
+} // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_SA_HEALPER_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_SA_HEALPER_H

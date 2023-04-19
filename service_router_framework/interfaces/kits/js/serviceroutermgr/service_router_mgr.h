@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_KITS_JS_SERVICE_ROUTER_MGR_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_KITS_JS_SERVICE_ROUTER_MGR_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_KITS_JS_SERVICE_ROUTER_MGR_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_KITS_JS_SERVICE_ROUTER_MGR_H
 
 #include "base_cb_info.h"
 #include "napi/native_api.h"
@@ -23,7 +23,9 @@
 #include "service_info.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
+using BaseCallbackInfo = OHOS::AppExecFwk::BaseCallbackInfo;
+
 struct AbilityInfosCallbackInfo : public BaseCallbackInfo {
     explicit AbilityInfosCallbackInfo(napi_env napiEnv) : BaseCallbackInfo(napiEnv) {}
 
@@ -32,6 +34,6 @@ struct AbilityInfosCallbackInfo : public BaseCallbackInfo {
 };
 
 napi_value QueryBusinessAbilityInfos(napi_env env, napi_callback_info info);
-}  // namespace AppExecFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_KITS_JS_SERVICE_ROUTER_MGR_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_KITS_JS_SERVICE_ROUTER_MGR_H

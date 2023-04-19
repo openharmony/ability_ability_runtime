@@ -21,7 +21,7 @@
 #include "service_router_mgr_interface.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 ServiceRouterMgrProxy::ServiceRouterMgrProxy(const sptr<IRemoteObject> &object)
     : IRemoteProxy<IServiceRouterManager>(object)
 {
@@ -234,5 +234,5 @@ int32_t ServiceRouterMgrProxy::GetParcelableInfos(
     APP_LOGI("get parcelableInfos success");
     return OHOS::NO_ERROR;
 }
-}  // namespace AAFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS

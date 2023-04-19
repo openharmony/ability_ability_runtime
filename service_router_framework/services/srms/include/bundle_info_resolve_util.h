@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_UTIL_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_UTIL_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_UTIL_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_UTIL_H
 
 #include <string>
 #include <vector>
@@ -27,7 +27,7 @@
 #include "string_ex.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 namespace {
     static std::unordered_map<std::string, BusinessType> BUSINESS_TYPE_MAP = {
         {"share", BusinessType::SHARE}};
@@ -204,6 +204,6 @@ static std::string GetExtAbilityMetadataValue(const ExtensionAbilityInfo &extAbi
     return Constants::EMPTY_STRING;
 }
 }; // namespace ServiceRouterUtil
-} // namespace AppExecFwk
+} // namespace AbilityRuntime
 } // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_UTIL_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_SERVICE_ROUTER_UTIL_H

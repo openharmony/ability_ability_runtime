@@ -25,7 +25,7 @@
 #include "service_router_mgr.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
 {
     napi_status status;

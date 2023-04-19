@@ -34,8 +34,9 @@
 #include "system_ability_definition.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 using namespace OHOS::AAFwk;
+using namespace OHOS::AppExecFwk;
 namespace {
 const std::string PARAM_TYPE_CHECK_ERROR = "param type check error";
 const std::string TYPE_BUSINESS_AIBILITY_FILTER = "businessAbilityFilter";
@@ -167,6 +168,11 @@ static bool ParseBusinessAbilityInfo(napi_env env, napi_value args, BusinessAbil
     napi_get_named_property(env, args, URI, &prop);
     std::string uri = CommonFunc::GetStringFromNAPI(env, prop);
 
+    int32_t minType = static_cast<int32_t>(BusinessType::SHARE);
+    int32_t maxType = static_cast<int32_t>(BusinessType::SHARE);
+    if (businessType < minType || businessType > maxType) {
+        businessType = static_cast<int32_t>(BusinessType::UNSPECIFIED);
+    }
     filter.businessType = static_cast<BusinessType>(businessType);
     filter.mimeType = mimeType;
     filter.uri = uri;
@@ -253,5 +259,5 @@ napi_value QueryBusinessAbilityInfos(napi_env env, napi_callback_info info)
     callbackPtr.release();
     return promise;
 }
-} // AppExecFwk
+} // AbilityRuntime
 } // OHOS

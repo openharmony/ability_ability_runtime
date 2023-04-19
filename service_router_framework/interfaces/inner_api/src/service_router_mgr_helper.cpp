@@ -23,7 +23,7 @@
 #include "system_ability_definition.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 namespace {
 static const int LOAD_SA_TIMEOUT_MS = 60000;
 }
@@ -130,5 +130,5 @@ sptr<IServiceRouterManager> ServiceRouterMgrHelper::GetServiceRouterMgr()
     }
     return routerMgr;
 }
-} // namespace AppExecFwk
+} // namespace AbilityRuntime
 } // namespace OHOS

@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_LOAD_CALLBACK_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_LOAD_CALLBACK_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_LOAD_CALLBACK_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_LOAD_CALLBACK_H
 
 #include "system_ability_load_callback_stub.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
 class ServiceRouterLoadCallback : public SystemAbilityLoadCallbackStub {
 public:
     void OnLoadSystemAbilitySuccess(int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject) override;
     void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
 };
-}  // namespace AppExecFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_LOAD_CALLBACK_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_INCLUDE_SERVICE_ROUTER_LOAD_CALLBACK_H

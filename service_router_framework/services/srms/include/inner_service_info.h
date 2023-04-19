@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_INNER_BUNDLE_INFO_H
-#define FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_INNER_BUNDLE_INFO_H
+#ifndef OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_INNER_BUNDLE_INFO_H
+#define OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_INNER_BUNDLE_INFO_H
 
 #include "app_log_wrapper.h"
 #include "application_info.h"
@@ -24,7 +24,9 @@
 #include "want.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace AbilityRuntime {
+using namespace OHOS::AppExecFwk;
+
 class InnerServiceInfo {
 public:
     InnerServiceInfo() = default;
@@ -124,6 +126,6 @@ private:
     std::vector<BusinessAbilityInfo> businessAbilityInfos_;
     std::vector<PurposeInfo> purposeInfos_;
 };
-}  // namespace AppExecFwk
+} // namespace AbilityRuntime
 }  // namespace OHOS
-#endif // FOUNDATION_BUNDLEMANAGER_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_INNER_BUNDLE_INFO_H
+#endif // OHOS_ABILITY_RUNTIME_SERVICE_ROUTER_FRAMEWORK_SERVICES_INCLUDE_INNER_BUNDLE_INFO_H
