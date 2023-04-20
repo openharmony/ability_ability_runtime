@@ -2403,6 +2403,12 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
         HILOG_WARN("%{public}s get AbilityRecord by token failed.", __func__);
         return;
     }
+
+    if (abilityRecord->IsCompleteFirstFrameDrawing()) {
+        HILOG_DEBUG("First frame drawing has completed.");
+        return;
+    }
+    abilityRecord->SetCompleteFirstFrameDrawing(true);
     
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     if (handler == nullptr) {
