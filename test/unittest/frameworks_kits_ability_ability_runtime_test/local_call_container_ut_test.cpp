@@ -784,7 +784,8 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_ClearFailedCallStart_0400,
  * @tc.name: RemoveSingletonCallLocalRecord
  * @tc.desc: remove singleton call local record execute normally
  */
-HWTEST_F(LocalCallContainerTest, Local_Call_Container_RemoveSingletonCallLocalRecord_0100, Function | MediumTest | Level1)
+HWTEST_F(
+    LocalCallContainerTest, Local_Call_Container_RemoveSingletonCallLocalRecord_0100, Function | MediumTest | Level1)
 {
     constexpr int32_t USER_ID_U202 = 202;
     sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
@@ -807,7 +808,8 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_RemoveSingletonCallLocalRe
  * @tc.name: RemoveMultipleCallLocalRecord
  * @tc.desc: remove singleton call local record execute normally
  */
-HWTEST_F(LocalCallContainerTest, Local_Call_Container_RemoveMultipleCallLocalRecord_0100, Function | MediumTest | Level1)
+HWTEST_F(
+    LocalCallContainerTest, Local_Call_Container_RemoveMultipleCallLocalRecord_0100, Function | MediumTest | Level1)
 {
     sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");

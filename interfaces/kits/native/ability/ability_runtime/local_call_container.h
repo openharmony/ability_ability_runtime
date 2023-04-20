@@ -61,6 +61,7 @@ private:
     int32_t RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
     int32_t GetCurrentUserId();
     int32_t GetValidUserId(int32_t accountId);
+    bool IsExistCallBack(const std::vector<std::shared_ptr<CallerCallBack>> &callers);
 
 private:
     int32_t currentUserId_ = DEFAULT_INVAL_VALUE;
