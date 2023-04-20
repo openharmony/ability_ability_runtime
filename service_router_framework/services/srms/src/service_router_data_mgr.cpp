@@ -161,5 +161,5 @@ BusinessType ServiceRouterDataMgr::GetBusinessType(const BusinessAbilityFilter &
     }
     return BundleInfoResolveUtil::findBusinessType(uri.GetHost());
 }
-}  // namespace AppExecFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS

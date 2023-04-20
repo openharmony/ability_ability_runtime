@@ -27,6 +27,8 @@
 
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
+using namespace OHOS::AAFwk;
+using namespace OHOS::AbilityRuntime;
 
 namespace OHOS {
 namespace {

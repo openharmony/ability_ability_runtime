@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("../../../../srms.gni")
+import("//foundation/ability/ability_runtime/service_router_framework/srms.gni")
 
 ohos_shared_library("businessabilityrouter") {
   include_dirs = [ "${bundlefwk_kits_path}/js/common" ]
