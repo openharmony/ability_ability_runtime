@@ -188,6 +188,18 @@ int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(std::shared_ptr<LocalC
     return ERR_OK;
 }
 
+bool LocalCallContainer::IsExistCallBack(const std::vector<std::shared_ptr<CallerCallBack>> &callers)
+{
+    for (auto& callBack : callers) {
+        if (callBack != nullptr && !callBack->IsCallBack()) {
+            HILOG_INFO("%{public}s call back is not called.", __func__);
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
 {
     HILOG_DEBUG("LocalCallContainer::DumpCalls called.");
@@ -200,14 +212,7 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
             tempstr += " uri[" + item.first + "]" + "\n";
             tempstr += "              callers #" + std::to_string(itemCall->GetCallers().size());
             bool flag = true;
-            for (auto& callBack : itemCall->GetCallers()) {
-                if (callBack != nullptr && !callBack->IsCallBack()) {
-                    HILOG_INFO("%{public}s call back is not called.", __func__);
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
+            if (IsExistCallBack(itemCall->GetCallers())) {
                 HILOG_INFO("%{public}s state is REQUESTEND.", __func__);
                 tempstr += "  state #REQUESTEND";
             } else {
@@ -240,6 +245,8 @@ void LocalCallContainer::OnRemoteStateChanged(const AppExecFwk::ElementName &ele
     return;
 }
 
+
+
 bool LocalCallContainer::GetCallLocalRecord(
     const AppExecFwk::ElementName& elementName, std::shared_ptr<LocalCallRecord>& localCallRecord, int32_t accountId)
 {
@@ -252,12 +259,14 @@ bool LocalCallContainer::GetCallLocalRecord(
         // elementName in callProxyRecords_ has moduleName (sometimes not empty),
         // but the moduleName of input param elementName is usually empty.
         callElement.SetModuleName("");
-        if ((pair.first == elementName.GetURI() || callElement.GetURI() == elementName.GetURI())) {
-            for (auto &itemCall : pair.second) {
-                if (itemCall != nullptr && itemCall->GetUserId() == accountId) {
-                    localCallRecord = itemCall;
-                    return true;
-                }
+        if ((pair.first != elementName.GetURI() && callElement.GetURI() != elementName.GetURI())) {
+            continue;
+        }
+
+        for (auto &itemCall : pair.second) {
+            if (itemCall != nullptr && itemCall->GetUserId() == accountId) {
+                localCallRecord = itemCall;
+                return true;
             }
         }
     }
