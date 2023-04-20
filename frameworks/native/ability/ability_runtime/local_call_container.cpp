@@ -188,7 +188,7 @@ int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(std::shared_ptr<LocalC
     return ERR_OK;
 }
 
-bool LocalCallContainer::IsExistCallBack(const std::vector<std::shared_ptr<CallerCallBack>> &callers)
+bool LocalCallContainer::IsExistCallBack(const std::vector<std::shared_ptr<CallerCallBack>> &callers) const
 {
     for (auto& callBack : callers) {
         if (callBack != nullptr && !callBack->IsCallBack()) {
@@ -211,7 +211,6 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
             tempstr += "              callee";
             tempstr += " uri[" + item.first + "]" + "\n";
             tempstr += "              callers #" + std::to_string(itemCall->GetCallers().size());
-            bool flag = true;
             if (IsExistCallBack(itemCall->GetCallers())) {
                 HILOG_INFO("%{public}s state is REQUESTEND.", __func__);
                 tempstr += "  state #REQUESTEND";
@@ -244,8 +243,6 @@ void LocalCallContainer::OnRemoteStateChanged(const AppExecFwk::ElementName &ele
     HILOG_DEBUG("LocalCallContainer::OnRemoteStateChanged end. abilityState:%{public}d.", abilityState);
     return;
 }
-
-
 
 bool LocalCallContainer::GetCallLocalRecord(
     const AppExecFwk::ElementName& elementName, std::shared_ptr<LocalCallRecord>& localCallRecord, int32_t accountId)
