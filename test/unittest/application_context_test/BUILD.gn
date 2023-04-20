@@ -48,6 +48,7 @@ ohos_unittest("application_context_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "resource_management:global_resmgr",
   ]
 }
 
