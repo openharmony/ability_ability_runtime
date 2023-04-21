@@ -74,6 +74,11 @@ class AbilityManagerService : public SystemAbility,
 public:
     void OnStart() override;
     void OnStop() override;
+
+    virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
+    virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
     ServiceRunningState QueryServiceState() const;
 
     /**
@@ -1074,6 +1079,8 @@ private:
 
     void SubscribeBackgroundTask();
 
+    void UnSubscribeBackgroundTask();
+
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
@@ -1220,6 +1227,7 @@ private:
     bool controllerIsAStabilityTest_ = false;
     std::recursive_mutex globalLock_;
     std::shared_mutex managersMutex_;
+    std::shared_mutex bgtaskObserverMutex_;
     sptr<AppExecFwk::IComponentInterception> componentInterception_ = nullptr;
 
     std::multimap<std::string, std::string> timeoutMap_;
