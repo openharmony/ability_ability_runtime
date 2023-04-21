@@ -96,14 +96,14 @@ ErrCode ServiceExtensionContext::ReleaseCall(const std::shared_ptr<CallerCallBac
     return localCallContainer_->ReleaseCall(callback);
 }
 
-void ServiceExtensionContext::ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback) const
+void ServiceExtensionContext::ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback) const
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
     if (localCallContainer_ == nullptr) {
         HILOG_ERROR("%{public}s failed, localCallContainer_ is nullptr.", __func__);
         return;
     }
-    localCallContainer_->ClearFailedCallStart(callback);
+    localCallContainer_->ClearFailedCallConnection(callback);
 }
 
 ErrCode ServiceExtensionContext::ConnectAbility(

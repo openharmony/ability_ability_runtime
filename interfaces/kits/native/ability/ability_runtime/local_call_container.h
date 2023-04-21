@@ -36,7 +36,7 @@ public:
 
     int ReleaseCall(const std::shared_ptr<CallerCallBack> &callback);
 
-    void ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback);
+    void ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback);
 
     void DumpCalls(std::vector<std::string> &info) const;
 
@@ -56,8 +56,8 @@ private:
     bool GetCallLocalRecord(
         const AppExecFwk::ElementName &elementName, std::shared_ptr<LocalCallRecord> &localCallRecord);
     void OnSingletonCallStubDied(const wptr<IRemoteObject> &remote);
-    int32_t RemoveSingletonCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
-    int32_t RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
+    int32_t RemoveSingletonCallLocalRecord(const std::string &uri);
+    int32_t RemoveMultipleCallLocalRecord(const std::string &uri);
 
 private:
     std::map<std::string, std::shared_ptr<LocalCallRecord>> callProxyRecords_;
