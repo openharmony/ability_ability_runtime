@@ -57,7 +57,7 @@ private:
         const AppExecFwk::ElementName &elementName, std::shared_ptr<LocalCallRecord> &localCallRecord);
     void OnSingletonCallStubDied(const wptr<IRemoteObject> &remote);
     int32_t RemoveSingletonCallLocalRecord(const std::string &uri);
-    int32_t RemoveMultipleCallLocalRecord(const std::string &uri);
+    int32_t RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
 
 private:
     std::map<std::string, std::shared_ptr<LocalCallRecord>> callProxyRecords_;

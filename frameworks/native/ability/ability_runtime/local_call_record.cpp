@@ -75,7 +75,7 @@ void LocalCallRecord::SetRemoteObject(const sptr<IRemoteObject>& call,
     HILOG_DEBUG("SetRemoteObject2 complete.");
 }
 
-void LocalCallRecord::AddCaller(std::shared_ptr<CallerCallBack>& callback)
+void LocalCallRecord::AddCaller(const std::shared_ptr<CallerCallBack>& callback)
 {
     if (callback == nullptr) {
         HILOG_ERROR("input param is nullptr");

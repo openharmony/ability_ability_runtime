@@ -111,7 +111,7 @@ int LocalCallContainer::ReleaseCall(const std::shared_ptr<CallerCallBack>& callb
     if (localCallRecord->IsSingletonRemote()) {
         retval = RemoveSingletonCallLocalRecord(localCallRecord->GetElementName().GetURI());
     } else {
-        retval = RemoveMultipleCallLocalRecord(localCallRecord->GetElementName().GetURI());
+        retval = RemoveMultipleCallLocalRecord(localCallRecord);
     }
 
     if (retval != ERR_OK) {
@@ -157,9 +157,14 @@ int32_t LocalCallContainer::RemoveSingletonCallLocalRecord(const std::string &ur
     return ERR_OK;
 }
 
-int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(const std::string &uri)
+int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record)
 {
-    auto iterRecord = multipleCallProxyRecords_.find(uri);
+    if (record == nullptr) {
+        HILOG_ERROR("input params invalid value");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto iterRecord = multipleCallProxyRecords_.find(record->GetElementName().GetURI());
     if (iterRecord == multipleCallProxyRecords_.end()) {
         HILOG_ERROR("release record in multiple not found.");
         return ERR_INVALID_VALUE;
