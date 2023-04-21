@@ -592,15 +592,15 @@ ErrCode AbilityContextImpl::ReleaseCall(const std::shared_ptr<CallerCallBack>& c
     return localCallContainer_->ReleaseCall(callback);
 }
 
-void AbilityContextImpl::ClearFailedCallStart(const std::shared_ptr<CallerCallBack>& callback)
+void AbilityContextImpl::ClearFailedCallConnection(const std::shared_ptr<CallerCallBack>& callback)
 {
-    HILOG_DEBUG("AbilityContextImpl::clear begin.");
+    HILOG_DEBUG("AbilityContextImpl::Clear begin.");
     if (localCallContainer_ == nullptr) {
         HILOG_ERROR("%{public}s failed, localCallContainer_ is nullptr.", __func__);
         return;
     }
-    HILOG_DEBUG("AbilityContextImpl::clear end.");
-    localCallContainer_->ClearFailedCallStart(callback);
+    HILOG_DEBUG("AbilityContextImpl::Clear end.");
+    localCallContainer_->ClearFailedCallConnection(callback);
 }
 
 void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback)

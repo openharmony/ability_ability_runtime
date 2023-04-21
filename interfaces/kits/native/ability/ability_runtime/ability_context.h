@@ -241,13 +241,13 @@ public:
     virtual ErrCode ReleaseCall(const std::shared_ptr<CallerCallBack> &callback) = 0;
 
     /**
-     * clear failed call of startup by callback object
+     * clear failed call connection by callback object
      *
      * @param callback Indicates the callback object.
      *
      * @return void.
      */
-    virtual void ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback) = 0;
+    virtual void ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback) = 0;
 
     /**
      * @brief Get LocalCallContainer.

@@ -33,7 +33,7 @@ public:
 
     void SetRemoteObject(const sptr<IRemoteObject> &call);
     void SetRemoteObject(const sptr<IRemoteObject> &call, sptr<IRemoteObject::DeathRecipient> callRecipient);
-    void AddCaller(const std::shared_ptr<CallerCallBack> &callback);
+    void AddCaller(std::shared_ptr<CallerCallBack> &callback);
     bool RemoveCaller(const std::shared_ptr<CallerCallBack> &callback);
     void OnCallStubDied(const wptr<IRemoteObject> &remote);
     void NotifyRemoteStateChanged(int32_t abilityState);

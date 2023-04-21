@@ -155,13 +155,13 @@ public:
     ErrCode ReleaseCall(const std::shared_ptr<CallerCallBack> &callback) override;
 
     /**
-     * clear failed call of startup by callback object
+     * clear failed call connection by callback object
      *
      * @param callback Indicates the callback object.
      *
      * @return void.
      */
-    void ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback) override;
+    void ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback) override;
 
     /**
      * register ability callback

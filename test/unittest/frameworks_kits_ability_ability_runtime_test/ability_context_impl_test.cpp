@@ -1008,15 +1008,15 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_CreateModuleContext_0400, 
 }
 
 /**
- * @tc.number: Ability_Context_Impl_ClearFailedCallStart_0100
- * @tc.name: ClearFailedCallStart
- * @tc.desc: clear failed call of startup execute normally
+ * @tc.number: Ability_Context_Impl_ClearFailedCallConnection_0100
+ * @tc.name: ClearFailedCallConnection
+ * @tc.desc: clear failed call connection execute normally
  */
-HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ClearFailedCallStart_0100, Function | MediumTest | Level1)
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ClearFailedCallConnection_0100, Function | MediumTest | Level1)
 {
-    context_->ClearFailedCallStart(nullptr);
+    context_->ClearFailedCallConnection(nullptr);
     context_->localCallContainer_ = new (std::nothrow) LocalCallContainer();
-    context_->ClearFailedCallStart(nullptr);
+    context_->ClearFailedCallConnection(nullptr);
     EXPECT_NE(context_->localCallContainer_, nullptr);
 }
 } // namespace AppExecFwk

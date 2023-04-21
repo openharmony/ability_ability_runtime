@@ -732,27 +732,27 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnCallStubDied_0400, Funct
 }
 
 /**
- * @tc.number: Local_Call_Container_ClearFailedCallStart_0400
- * @tc.name: ClearFailedCallStart
- * @tc.desc: clear failed call of startup execute normally
+ * @tc.number: Local_Call_Container_ClearFailedCallConnection_0400
+ * @tc.name: ClearFailedCallConnection
+ * @tc.desc: clear failed call connection execute normally
  */
-HWTEST_F(LocalCallContainerTest, Local_Call_Container_ClearFailedCallStart_0400, Function | MediumTest | Level1)
+HWTEST_F(LocalCallContainerTest, Local_Call_Container_ClearFailedCallConnection_0400, Function | MediumTest | Level1)
 {
     constexpr int32_t COUNT_ZERO = 0;
     sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
-    localCallContainer->ClearFailedCallStart(nullptr);
+    localCallContainer->ClearFailedCallConnection(nullptr);
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
     callback->SetCallBack([](const sptr<IRemoteObject>&) {});
-    localCallContainer->ClearFailedCallStart(callback);
+    localCallContainer->ClearFailedCallConnection(callback);
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
     localCallRecord->AddCaller(callback);
-    localCallContainer->ClearFailedCallStart(callback);
+    localCallContainer->ClearFailedCallConnection(callback);
     sptr<CallerConnection> connect = new (std::nothrow) CallerConnection();
     connect->SetRecordAndContainer(localCallRecord, localCallContainer);
     localCallContainer->connections_.emplace(connect);
     EXPECT_NE(COUNT_ZERO, localCallContainer->connections_.size());
-    localCallContainer->ClearFailedCallStart(callback);
+    localCallContainer->ClearFailedCallConnection(callback);
     EXPECT_EQ(COUNT_ZERO, localCallContainer->connections_.size());
 }
 } // namespace AppExecFwk
