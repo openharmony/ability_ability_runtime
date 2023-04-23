@@ -4177,6 +4177,11 @@ void JsNapiCommon::RemoveAllCallbacksLocked()
     std::lock_guard<std::recursive_mutex> lock(connectionsLock_);
     for (auto it = connects_.begin(); it != connects_.end();) {
         auto connection = it->second;
+        if (!connection) {
+            HILOG_ERROR("connection is nullptr");
+            it = connects_.erase(it);
+            continue;
+        }
         connection->ReomveAllCallbacks(this);
         if (connection->GetCallbackSize() == 0) {
             it = connects_.erase(it);
