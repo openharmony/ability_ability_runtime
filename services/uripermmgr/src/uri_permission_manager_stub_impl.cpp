@@ -121,7 +121,7 @@ void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
     Security::AccessToken::NativeTokenInfo nativeInfo;
     Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
     HILOG_DEBUG("callerprocessName : %{public}s", nativeInfo.processName.c_str());
-    if (nativeInfo.processName != "fodundation") {
+    if (nativeInfo.processName != "foundation") {
         HILOG_ERROR("RevokeUriPermission can only be called by foundation");
         return;
     }
