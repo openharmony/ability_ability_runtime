@@ -169,9 +169,9 @@ ohos_shared_library("appkit_native") {
   }
 
   if (defined(global_parts_info.web_webview)) {
-    public_deps += [ "//base/web/webview/ohos_adapter:nweb_ohos_adapter" ]
+    public_deps += [ "${webview_path}/ohos_adapter:nweb_ohos_adapter" ]
 
-    include_dirs += [ "//base/web/webview/ohos_adapter/interfaces" ]
+    include_dirs += [ "${webview_path}/ohos_adapter/interfaces" ]
 
     external_deps += [ "webview:libnweb" ]
 
