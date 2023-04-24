@@ -60,7 +60,9 @@ private:
     int32_t RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
 
 private:
+    // used to store single instance call records
     std::map<std::string, std::shared_ptr<LocalCallRecord>> callProxyRecords_;
+    // used to store multi instance call records
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
     std::set<sptr<CallerConnection>> connections_;
 };

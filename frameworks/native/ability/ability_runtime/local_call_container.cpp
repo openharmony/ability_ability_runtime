@@ -349,14 +349,8 @@ void CallerConnection::OnAbilityConnectDone(
 
 void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code)
 {
-    HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone start %{public}s.", element.GetURI().c_str());
-    if (container_ == nullptr) {
-        HILOG_ERROR("CallerConnection::OnAbilityDisconnectDone container is nullptr.");
-        return;
-    }
-
-    container_->OnAbilityDisconnectDone(element, code);
-    HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone end. code:%{public}d.", code);
+    HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone start %{public}s %{public}d.",
+        element.GetURI().c_str(), code);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
