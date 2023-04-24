@@ -31,8 +31,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr int32_t ERR_OK = 0;
-constexpr int32_t ERROR_CODE_INVALID_URI_FLAG = 16000058;
-constexpr int32_t ERROR_CODE_INVALID_URI_TYPE = 16000059;
 constexpr int32_t argCountFour = 4;
 constexpr int32_t argCountThree = 3;
 constexpr int32_t argCountTwo = 2;

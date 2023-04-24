@@ -15,6 +15,7 @@
 
 #include "uri_permission_manager_stub_impl.h"
 
+#include "ability_business_error.h"
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "hilog_wrapper.h"
@@ -33,8 +34,6 @@ namespace OHOS {
 namespace AAFwk {
 const int32_t DEFAULT_USER_ID = 0;
 const int32_t ERR_OK = 0;
-constexpr int32_t ERROR_CODE_INVALID_URI_FLAG = 16000058;
-constexpr int32_t ERROR_CODE_INVALID_URI_TYPE = 16000059;
 using TokenId = Security::AccessToken::AccessTokenID;
 
 int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
@@ -42,7 +41,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
 {
     if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: The param flag is invalid.");
-        return ERROR_CODE_INVALID_URI_FLAG;
+        return AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG;
     }
     Uri uri_inner = uri;
     auto&& authority = uri_inner.GetAuthority();
@@ -64,7 +63,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
     auto&& scheme = uri_inner.GetScheme();
     if (scheme != "file") {
         HILOG_WARN("only support file uri.");
-        return ERROR_CODE_INVALID_URI_TYPE;
+        return AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE;
     }
     // auto remove URI permission for clipboard
     Security::AccessToken::NativeTokenInfo nativeInfo;
@@ -165,7 +164,7 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
     auto&& scheme = uri_inner.GetScheme();
     if (scheme != "file") {
         HILOG_WARN("only support file uri.");
-        return ERROR_CODE_INVALID_URI_TYPE;
+        return AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE;
     }
     Security::AccessToken::AccessTokenID uriTokenId = GetTokenIdByBundleName(authority);
     Security::AccessToken::AccessTokenID tokenId = GetTokenIdByBundleName(bundleName);
@@ -184,7 +183,7 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
         auto uriStr = uri.ToString();
         auto search = uriMap_.find(uriStr);
         if (search == uriMap_.end()) {
-            HILOG_ERROR("URI does not exist on uri map.");
+            HILOG_INFO("URI does not exist on uri map.");
             return ERR_OK;
         }
         auto& list = search->second;
