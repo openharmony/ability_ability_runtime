@@ -51,7 +51,6 @@
 #include "parameters.h"
 #include "extractor.h"
 #include "systemcapability.h"
-#include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
 #include "commonlibrary/ets_utils/js_sys_module/console/console.h"
 #include "source_map.h"
 
@@ -516,7 +515,7 @@ bool JsRuntime::Initialize(const Options& options)
             if (options.isUnique) {
                 HILOG_INFO("Not supported TimerModule when form render");
             } else {
-                JsSysModule::Timer::RegisterTime(reinterpret_cast<napi_env>(nativeEngine));
+                InitTimerModule(*nativeEngine, *globalObj);
             }
 
             InitWorkerModule(*nativeEngine, codePath_, options.isDebugVersion, options.isBundle);
@@ -607,7 +606,7 @@ bool JsRuntime::InitLoop(const std::shared_ptr<AppExecFwk::EventRunner>& eventRu
     return true;
 }
 
-void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
+void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp)
 {
     HILOG_DEBUG("Set library path.");
 
@@ -623,7 +622,7 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
     }
 
     for (const auto &appLibPath : appLibPaths) {
-        moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second);
+        moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second, isSystemApp);
     }
 }
 
@@ -1006,6 +1005,75 @@ bool JsRuntime::ReadSourceMapData(const std::string& hapPath, std::string& conte
     }
     content = reinterpret_cast<char*>(dataPtr.get());
     return true;
+}
+
+void JsRuntime::FreeNativeReference(std::unique_ptr<NativeReference> reference)
+{
+    FreeNativeReference(std::move(reference), nullptr);
+}
+
+void JsRuntime::FreeNativeReference(std::shared_ptr<NativeReference>&& reference)
+{
+    FreeNativeReference(nullptr, std::move(reference));
+}
+
+struct JsNativeReferenceDeleterObject {
+    std::unique_ptr<NativeReference> uniqueNativeRef_ = nullptr;
+    std::shared_ptr<NativeReference> sharedNativeRef_ = nullptr;
+};
+
+void JsRuntime::FreeNativeReference(std::unique_ptr<NativeReference> uniqueNativeRef,
+    std::shared_ptr<NativeReference>&& sharedNativeRef)
+{
+    if (uniqueNativeRef == nullptr && sharedNativeRef == nullptr) {
+        HILOG_WARN("native reference is invalid.");
+        return;
+    }
+
+    auto nativeEngine = GetNativeEnginePointer();
+    CHECK_POINTER(nativeEngine);
+    auto uvLoop = nativeEngine->GetUVLoop();
+    CHECK_POINTER(uvLoop);
+
+    auto work = new (std::nothrow) uv_work_t;
+    if (work == nullptr) {
+        HILOG_ERROR("new uv work failed.");
+        return;
+    }
+
+    auto cb = new (std::nothrow) JsNativeReferenceDeleterObject();
+    if (cb == nullptr) {
+        HILOG_ERROR("new deleter object failed.");
+        delete work;
+        work = nullptr;
+        return;
+    }
+
+    if (uniqueNativeRef != nullptr) {
+        cb->uniqueNativeRef_ = std::move(uniqueNativeRef);
+    }
+    if (sharedNativeRef != nullptr) {
+        cb->sharedNativeRef_ = std::move(sharedNativeRef);
+    }
+    work->data = reinterpret_cast<void*>(cb);
+    int ret = uv_queue_work(uvLoop, work, [](uv_work_t *work) {},
+    [](uv_work_t *work, int status) {
+        if (work != nullptr) {
+            if (work->data != nullptr) {
+                delete reinterpret_cast<JsNativeReferenceDeleterObject*>(work->data);
+                work->data = nullptr;
+            }
+            delete work;
+            work = nullptr;
+        }
+    });
+
+    if (ret != 0) {
+        delete reinterpret_cast<JsNativeReferenceDeleterObject*>(work->data);
+        work->data = nullptr;
+        delete work;
+        work = nullptr;
+    }
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
