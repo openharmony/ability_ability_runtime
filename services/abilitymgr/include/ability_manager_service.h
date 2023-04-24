@@ -76,6 +76,11 @@ class AbilityManagerService : public SystemAbility,
 public:
     void OnStart() override;
     void OnStop() override;
+
+    virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
+    virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
     ServiceRunningState QueryServiceState() const;
 
     /**
@@ -586,6 +591,11 @@ public:
 
     virtual int MoveMissionToFront(int32_t missionId, const StartOptions &startOptions) override;
 
+    virtual int MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId) override;
+
+    virtual int MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
+        std::vector<int32_t>& result) override;
+
     virtual int32_t GetMissionIdByToken(const sptr<IRemoteObject> &token) override;
 
     virtual int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
@@ -943,6 +953,8 @@ public:
      */
     virtual int VerifyPermission(const std::string &permission, int pid, int uid) override;
 
+    bool IsDmsAlive() const;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1171,6 +1183,8 @@ private:
 
     void SubscribeBackgroundTask();
 
+    void UnSubscribeBackgroundTask();
+
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
@@ -1329,6 +1343,7 @@ private:
     bool controllerIsAStabilityTest_ = false;
     std::recursive_mutex globalLock_;
     std::shared_mutex managersMutex_;
+    std::shared_mutex bgtaskObserverMutex_;
     sptr<AppExecFwk::IComponentInterception> componentInterception_ = nullptr;
 
     std::multimap<std::string, std::string> timeoutMap_;
