@@ -38,7 +38,6 @@ ohos_shared_library("libupms") {
 
   deps = [
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
-    "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_services_path}/common:perm_verification",
   ]
 
@@ -46,7 +45,6 @@ ohos_shared_library("libupms") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_deps_wrapper",
-    "ability_runtime:abilitykit_native",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
