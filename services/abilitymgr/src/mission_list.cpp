@@ -267,7 +267,7 @@ void MissionList::GetAbilityRecordsByName(
     const AppExecFwk::ElementName &element, std::vector<std::shared_ptr<AbilityRecord>> &records)
 {
     for (auto mission : missions_) {
-        if (mission) {
+        if (mission && mission->GetAbilityRecord() != nullptr) {
             const AppExecFwk::AbilityInfo &abilityInfo = mission->GetAbilityRecord()->GetAbilityInfo();
             AppExecFwk::ElementName localElement(abilityInfo.deviceId, abilityInfo.bundleName,
                 abilityInfo.name, abilityInfo.moduleName);

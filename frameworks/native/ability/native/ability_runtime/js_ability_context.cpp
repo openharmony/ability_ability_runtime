@@ -189,17 +189,17 @@ NativeValue* JsAbilityContext::IsTerminating(NativeEngine* engine, NativeCallbac
     return (me != nullptr) ? me->OnIsTerminating(*engine, *info) : nullptr;
 }
 
-void JsAbilityContext::ClearFailedCallStart(
-    const std::weak_ptr<AbilityContext>& weak, const std::shared_ptr<CallerCallBack> &callback)
+void JsAbilityContext::ClearFailedCallConnection(
+    const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback)
 {
     HILOG_DEBUG("clear failed call of startup is called.");
-    auto context = weak.lock();
+    auto context = abilityContext.lock();
     if (context == nullptr || callback == nullptr) {
         HILOG_ERROR("clear failed call of startup input param is nullptr.");
         return;
     }
 
-    context->ClearFailedCallStart(callback);
+    context->ClearFailedCallConnection(callback);
 }
 
 NativeValue* JsAbilityContext::OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info, bool isStartRecent)
@@ -476,7 +476,7 @@ NativeValue* JsAbilityContext::OnStartAbilityByCall(NativeEngine& engine, Native
         if (calldata->err != 0) {
             HILOG_ERROR("OnStartAbilityByCall callComplete err is %{public}d", calldata->err);
             task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
-            ClearFailedCallStart(weak, calldata->callerCallBack);
+            ClearFailedCallConnection(weak, calldata->callerCallBack);
             return;
         }
 

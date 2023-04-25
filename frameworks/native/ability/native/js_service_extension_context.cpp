@@ -149,17 +149,17 @@ public:
 private:
     std::weak_ptr<ServiceExtensionContext> context_;
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
-    static void ClearFailedCallStart(
-        const std::weak_ptr<ServiceExtensionContext>& weak, const std::shared_ptr<CallerCallBack> &callback)
+    static void ClearFailedCallConnection(
+        const std::weak_ptr<ServiceExtensionContext>& serviceContext, const std::shared_ptr<CallerCallBack> &callback)
     {
         HILOG_DEBUG("clear failed call of startup is called.");
-        auto context = weak.lock();
+        auto context = serviceContext.lock();
         if (context == nullptr || callback == nullptr) {
             HILOG_ERROR("clear failed call of startup input param is nullptr.");
             return;
         }
 
-        context->ClearFailedCallStart(callback);
+        context->ClearFailedCallConnection(callback);
     }
 
     void AddFreeInstallObserver(NativeEngine& engine, const AAFwk::Want &want, NativeValue* callback)
@@ -398,7 +398,7 @@ private:
             NativeEngine& engine, AsyncTask& task, int32_t) {
             if (calldata->err != 0) {
                 HILOG_ERROR("OnStartAbilityByCall callComplete err is %{public}d", calldata->err);
-                ClearFailedCallStart(weak, calldata->callerCallBack);
+                ClearFailedCallConnection(weak, calldata->callerCallBack);
                 task.Reject(engine, CreateJsError(engine, calldata->err, "callComplete err."));
                 return;
             }

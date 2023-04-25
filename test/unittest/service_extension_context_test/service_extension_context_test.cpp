@@ -355,20 +355,20 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_TerminateAbility
 }
 
 /**
- * @tc.number: service_extension_context_ClearFailedCallStart_001
- * @tc.name: ClearFailedCallStart
- * @tc.desc: clear failed call of startup execute normally
+ * @tc.number: service_extension_context_ClearFailedCallConnection_001
+ * @tc.name: ClearFailedCallConnection
+ * @tc.desc: clear failed call connection execute normally
  */
-HWTEST_F(ServiceExtensionContextTest, service_extension_context_ClearFailedCallStart_001, TestSize.Level1)
+HWTEST_F(ServiceExtensionContextTest, service_extension_context_ClearFailedCallConnection_001, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallStart_001 start";
+    GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallConnection_001 start";
     ServiceExtensionContext serviceExtensionContextTest;
-    serviceExtensionContextTest.ClearFailedCallStart(nullptr);
+    serviceExtensionContextTest.ClearFailedCallConnection(nullptr);
     EXPECT_EQ(serviceExtensionContextTest.localCallContainer_, nullptr);
-    serviceExtensionContextTest.localCallContainer_ = new (std::nothrow) LocalCallContainer();
-    serviceExtensionContextTest.ClearFailedCallStart(nullptr);
+    serviceExtensionContextTest.localCallContainer_ = std::make_shared<LocalCallContainer>();
+    serviceExtensionContextTest.ClearFailedCallConnection(nullptr);
     EXPECT_NE(serviceExtensionContextTest.localCallContainer_, nullptr);
-    GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallStart_001 end";
+    GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallConnection_001 end";
 }
 }
 }
