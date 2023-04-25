@@ -160,7 +160,8 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_StartAbilityInner_0500, Fu
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
     callback->SetCallBack([](const sptr<IRemoteObject>&) {});
     auto localCallRecord = std::make_shared<LocalCallRecord>(want.GetElement());
-    localCallRecord->remoteObject_ = localCallContainer;
+    sptr<CallerConnection> connect = new (std::nothrow) CallerConnection();
+    localCallRecord->remoteObject_ = connect;
     localCallContainer->SetCallLocalRecord(want.GetElement(), localCallRecord);
     ErrCode ret = localCallContainer->StartAbilityByCallInner(want, callback, nullptr);
     EXPECT_TRUE(ret == ERR_OK);
@@ -403,7 +404,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0500,
     constexpr int32_t code = 0;
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
     connect->localCallRecord_ = localCallRecord;
-    connect->OnAbilityConnectDone(elementName, localCallContainer, code);
+    connect->OnAbilityConnectDone(elementName, connect, code);
     std::shared_ptr<LocalCallRecord> resultPtr = nullptr;
     EXPECT_TRUE(localCallContainer->GetCallLocalRecord(elementName, resultPtr, localCallRecord->GetUserId()));
     EXPECT_EQ(resultPtr, localCallRecord);
@@ -427,7 +428,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnAbilityConnectDone_0600,
     localCallRecord->AddCaller(callback);
     connect->localCallRecord_ = localCallRecord;
     connect->OnAbilityConnectDone(elementName, connect, code);
-    constexpr int32_t COUNT_NUM = 1;
+    constexpr uint32_t COUNT_NUM = 1;
     EXPECT_EQ(connect->container_.lock()->multipleCallProxyRecords_[elementName.GetURI()].
         count(connect->localCallRecord_), COUNT_NUM);
     EXPECT_TRUE(callback->isCallBack_);
@@ -764,7 +765,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_OnCallStubDied_0400, Funct
  */
 HWTEST_F(LocalCallContainerTest, Local_Call_Container_ClearFailedCallConnection_0400, Function | MediumTest | Level1)
 {
-    constexpr int32_t COUNT_ZERO = 0;
+    constexpr uint32_t COUNT_ZERO = 0;
     auto localCallContainer = std::make_shared<LocalCallContainer>();
     localCallContainer->ClearFailedCallConnection(nullptr);
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
