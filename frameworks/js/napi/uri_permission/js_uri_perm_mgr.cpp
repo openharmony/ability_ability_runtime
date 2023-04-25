@@ -99,7 +99,7 @@ private:
             } else if (errCode == AAFwk::ERR_CODE_INVALID_URI_FLAG){
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_URI_FLAG,
                 "Invalid URI flag."));
-            } else if (errCode == AAFwk::ERROR_CODE_INVALID_URI_TYPE){
+            } else if (errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE){
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_URI_TYPE,
                 "Only support file URI."));
             } else {
@@ -146,7 +146,7 @@ private:
             } else if (errCode == AAFwk::CHECK_PERMISSION_FAILED) {
                 task.Reject(engine, CreateNoPermissionError(engine,
                     "Do not have permission ohos.permission.PROXY_AUTHORIZATION_URI"));
-            } else if (errCode == AAFwk::ERROR_CODE_INVALID_URI_TYPE)){
+            } else if (errCode == AAFwk::ERR_CODE_INVALID_URI_TYPE) {
                 task.Reject(engine, CreateJsError(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_URI_TYPE,
                 "Only support file URI."));
             } else {
