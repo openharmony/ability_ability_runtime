@@ -77,7 +77,7 @@ ErrCode ServiceExtensionContext::StartAbilityByCall(
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
     if (localCallContainer_ == nullptr) {
-        localCallContainer_ = new (std::nothrow) LocalCallContainer();
+        localCallContainer_ = std::make_shared<LocalCallContainer>();
         if (localCallContainer_ == nullptr) {
             HILOG_ERROR("%{public}s failed, localCallContainer_ is nullptr.", __func__);
             return ERR_INVALID_VALUE;

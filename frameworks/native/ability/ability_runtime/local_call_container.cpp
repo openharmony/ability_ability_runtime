@@ -70,7 +70,7 @@ int LocalCallContainer::StartAbilityByCallInner(
         return ERR_INVALID_VALUE;
     }
     connections_.emplace(connect);
-    connect->SetRecordAndContainer(localCallRecord, this->AsObject());
+    connect->SetRecordAndContainer(localCallRecord, shared_from_this());
     HILOG_DEBUG("LocalCallContainer::StartAbilityByCallInner connections_.size is %{public}zu", connections_.size());
     auto retval = abilityClient->StartAbilityByCall(want, connect, callerToken);
     if (retval != ERR_OK) {
@@ -208,26 +208,6 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
     return;
 }
 
-void LocalCallContainer::OnAbilityConnectDone(
-    const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int code)
-{}
-
-void LocalCallContainer::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int code)
-{}
-
-void LocalCallContainer::OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState)
-{
-    HILOG_DEBUG("LocalCallContainer::OnRemoteStateChanged start %{public}s .", element.GetURI().c_str());
-    std::shared_ptr<LocalCallRecord> localCallRecord;
-    if (GetCallLocalRecord(element, localCallRecord)) {
-        localCallRecord->NotifyRemoteStateChanged(abilityState);
-        HILOG_DEBUG("call NotifyRemoteStateChanged.");
-    }
-
-    HILOG_DEBUG("LocalCallContainer::OnRemoteStateChanged end. abilityState:%{public}d.", abilityState);
-    return;
-}
-
 bool LocalCallContainer::GetCallLocalRecord(
     const AppExecFwk::ElementName& elementName, std::shared_ptr<LocalCallRecord>& localCallRecord)
 {
@@ -308,14 +288,14 @@ void LocalCallContainer::SetMultipleCallLocalRecord(
 }
 
 void CallerConnection::SetRecordAndContainer(const std::shared_ptr<LocalCallRecord> &localCallRecord,
-    const sptr<IRemoteObject> &container)
+    const std::weak_ptr<LocalCallContainer> &container)
 {
     if (localCallRecord == nullptr) {
         HILOG_DEBUG("CallerConnection::SetRecordAndContainer input param is nullptr.");
         return;
     }
     localCallRecord_ = localCallRecord;
-    container_ = iface_cast<LocalCallContainer>(container);
+    container_ = container;
     localCallRecord_->SetConnection(this->AsObject());
 }
 
@@ -323,7 +303,7 @@ void CallerConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code)
 {
     HILOG_DEBUG("CallerConnection::OnAbilityConnectDone start %{public}s .", element.GetURI().c_str());
-    auto container = container_.promote();
+    auto container = container_.lock();
     if (container == nullptr || localCallRecord_ == nullptr) {
         HILOG_ERROR("CallerConnection::OnAbilityConnectDone container or record is nullptr.");
         return;
@@ -351,6 +331,21 @@ void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &el
 {
     HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone start %{public}s %{public}d.",
         element.GetURI().c_str(), code);
+}
+
+void CallerConnection::OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState)
+{
+    HILOG_DEBUG("CallerConnection::OnRemoteStateChanged start %{public}s .", element.GetURI().c_str());
+    std::shared_ptr<LocalCallRecord> localCallRecord;
+    if (localCallRecord_ == nullptr) {
+        HILOG_DEBUG("local call record is nullptr.");
+        return;
+    }
+
+    localCallRecord_->NotifyRemoteStateChanged(abilityState);
+
+    HILOG_DEBUG("CallerConnection::OnRemoteStateChanged end. abilityState:%{public}d.", abilityState);
+    return;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

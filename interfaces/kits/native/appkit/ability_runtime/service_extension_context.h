@@ -165,7 +165,7 @@ protected:
 
 private:
     static int ILLEGAL_REQUEST_CODE;
-    sptr<LocalCallContainer> localCallContainer_ = nullptr;
+    std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
 
     /**
      * @brief Get Current Ability Type

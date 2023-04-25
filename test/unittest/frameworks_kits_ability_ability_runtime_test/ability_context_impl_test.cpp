@@ -117,7 +117,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_StartAbility_0200, Functio
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
     callback->SetCallBack([](const sptr<IRemoteObject>&) {});
 
-    context_->localCallContainer_ = new (std::nothrow)LocalCallContainer();
+    context_->localCallContainer_ = std::make_shared<LocalCallContainer>();
     EXPECT_NE(context_->localCallContainer_, nullptr);
 
     ErrCode ret = context_->StartAbilityByCall(want, callback);
@@ -143,7 +143,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ReleaseCall_0100, Function
     localCallRecord->AddCaller(callback);
     localCallRecord->AddCaller(callbackSec);
 
-    context_->localCallContainer_ = new (std::nothrow) LocalCallContainer();
+    context_->localCallContainer_ = std::make_shared<LocalCallContainer>();
     EXPECT_NE(context_->localCallContainer_, nullptr);
 
     std::string uri = elementName.GetURI();
@@ -1015,7 +1015,7 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_CreateModuleContext_0400, 
 HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ClearFailedCallConnection_0100, Function | MediumTest | Level1)
 {
     context_->ClearFailedCallConnection(nullptr);
-    context_->localCallContainer_ = new (std::nothrow) LocalCallContainer();
+    context_->localCallContainer_ = std::make_shared<LocalCallContainer>();
     context_->ClearFailedCallConnection(nullptr);
     EXPECT_NE(context_->localCallContainer_, nullptr);
 }

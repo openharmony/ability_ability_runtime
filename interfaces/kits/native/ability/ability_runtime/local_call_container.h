@@ -26,7 +26,7 @@ namespace AbilityRuntime {
 using Want = OHOS::AAFwk::Want;
 using AbilityConnectionStub = OHOS::AAFwk::AbilityConnectionStub;
 class CallerConnection;
-class LocalCallContainer : public AbilityConnectionStub {
+class LocalCallContainer : public std::enable_shared_from_this<LocalCallContainer>{
 public:
     LocalCallContainer() = default;
     virtual ~LocalCallContainer() = default;
@@ -40,18 +40,13 @@ public:
 
     void DumpCalls(std::vector<std::string> &info) const;
 
-    virtual void OnAbilityConnectDone(
-        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code) override;
-
-    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
-
     void SetCallLocalRecord(
         const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
     void SetMultipleCallLocalRecord(
         const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
 
     void OnCallStubDied(const wptr<IRemoteObject> &remote);
-    void OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState) override;
+
 private:
     bool GetCallLocalRecord(
         const AppExecFwk::ElementName &elementName, std::shared_ptr<LocalCallRecord> &localCallRecord);
@@ -73,16 +68,17 @@ public:
     virtual ~CallerConnection() = default;
 
     void SetRecordAndContainer(const std::shared_ptr<LocalCallRecord> &localCallRecord,
-        const sptr<IRemoteObject> &container);
+        const std::weak_ptr<LocalCallContainer> &container);
 
-    virtual void OnAbilityConnectDone(
+    void OnAbilityConnectDone(
         const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code) override;
 
-    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
 
+    void OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState) override;
 private:
     std::shared_ptr<LocalCallRecord> localCallRecord_;
-    wptr<LocalCallContainer> container_;
+    std::weak_ptr<LocalCallContainer> container_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
