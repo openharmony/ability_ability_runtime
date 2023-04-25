@@ -15,7 +15,6 @@
 
 #include "uri_permission_manager_stub_impl.h"
 
-#include "ability_business_error.h"
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "hilog_wrapper.h"
@@ -41,7 +40,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
 {
     if ((flag & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         HILOG_WARN("UriPermissionManagerStubImpl::GrantUriPermission: The param flag is invalid.");
-        return AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_URI_FLAG;
+        return ERROR_CODE_INVALID_URI_FLAG;
     }
     Uri uri_inner = uri;
     auto&& authority = uri_inner.GetAuthority();
@@ -63,7 +62,7 @@ int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned in
     auto&& scheme = uri_inner.GetScheme();
     if (scheme != "file") {
         HILOG_WARN("only support file uri.");
-        return AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE;
+        return ERROR_CODE_INVALID_URI_TYPE;
     }
     // auto remove URI permission for clipboard
     Security::AccessToken::NativeTokenInfo nativeInfo;
@@ -164,7 +163,7 @@ int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, co
     auto&& scheme = uri_inner.GetScheme();
     if (scheme != "file") {
         HILOG_WARN("only support file uri.");
-        return AbilityRuntime::AbilityErrorCode::ERROR_CODE_INVALID_URI_TYPE;
+        return ERROR_CODE_INVALID_URI_TYPE;
     }
     Security::AccessToken::AccessTokenID uriTokenId = GetTokenIdByBundleName(authority);
     Security::AccessToken::AccessTokenID tokenId = GetTokenIdByBundleName(bundleName);
