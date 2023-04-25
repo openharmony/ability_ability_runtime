@@ -244,20 +244,20 @@ public:
     virtual ErrCode ReleaseCall(const std::shared_ptr<CallerCallBack> &callback) = 0;
 
     /**
-     * clear failed call of startup by callback object
+     * clear failed call connection by callback object
      *
      * @param callback Indicates the callback object.
      *
      * @return void.
      */
-    virtual void ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback) = 0;
+    virtual void ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback) = 0;
 
     /**
      * @brief Get LocalCallContainer.
      *
      * @return Returns the LocalCallContainer.
      */
-    virtual sptr<LocalCallContainer> GetLocalCallContainer() = 0;
+    virtual std::shared_ptr<LocalCallContainer> GetLocalCallContainer() = 0;
 
     virtual void SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config) = 0;
 

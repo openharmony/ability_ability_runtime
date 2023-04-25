@@ -126,7 +126,7 @@ public:
      *
      * @return Returns the LocalCallContainer.
      */
-    sptr<LocalCallContainer> GetLocalCallContainer() override
+    std::shared_ptr<LocalCallContainer> GetLocalCallContainer() override
     {
         return localCallContainer_;
     }
@@ -157,13 +157,13 @@ public:
     ErrCode ReleaseCall(const std::shared_ptr<CallerCallBack> &callback) override;
 
     /**
-     * clear failed call of startup by callback object
+     * clear failed call connection by callback object
      *
      * @param callback Indicates the callback object.
      *
      * @return void.
      */
-    void ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback) override;
+    void ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback) override;
 
     /**
      * register ability callback
@@ -220,7 +220,7 @@ private:
     std::map<int, RuntimeTask> resultCallbacks_;
     std::unique_ptr<NativeReference> contentStorage_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
-    sptr<LocalCallContainer> localCallContainer_ = nullptr;
+    std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
     int32_t missionId_ = -1;

@@ -79,8 +79,8 @@ private:
 #endif
 
 private:
-    static void ClearFailedCallStart(
-        const std::weak_ptr<AbilityContext>& weak, const std::shared_ptr<CallerCallBack> &callback);
+    static void ClearFailedCallConnection(
+        const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback);
     NativeValue* OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info, bool isStartRecent = false);
     NativeValue* OnStartAbilityAsCaller(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnStartAbilityWithAccount(NativeEngine& engine, NativeCallbackInfo& info);

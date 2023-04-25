@@ -43,6 +43,10 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, const std::sha
     std::shared_ptr<LocalCallRecord> localCallRecord;
     if (!GetCallLocalRecord(element, localCallRecord, oriValidUserId)) {
         localCallRecord = std::make_shared<LocalCallRecord>(element);
+        if (localCallRecord == nullptr) {
+            HILOG_ERROR("LocalCallContainer::StartAbilityByCallInner Create local call record failed");
+            return ERR_INVALID_VALUE;
+        }
         localCallRecord->SetUserId(oriValidUserId);
         HILOG_DEBUG("create local call record and set user id[%{public}d] to record", oriValidUserId);
     }
@@ -63,13 +67,16 @@ int LocalCallContainer::StartAbilityByCallInner(const Want& want, const std::sha
         return ERR_INVALID_VALUE;
     }
     sptr<CallerConnection> connect = new (std::nothrow) CallerConnection();
+    if (connect == nullptr) {
+        HILOG_ERROR("LocalCallContainer::StartAbilityByCallInner Create local call connection failed");
+        return ERR_INVALID_VALUE;
+    }
     connections_.emplace(connect);
-    connect->SetRecordAndContainer(localCallRecord, this->AsObject());
-    HILOG_DEBUG("LocalCallContainer::StartAbilityByCallInner connections_.size is %{public}d",
-        static_cast<int32_t>(connections_.size()));
+    connect->SetRecordAndContainer(localCallRecord, shared_from_this());
+    HILOG_DEBUG("LocalCallContainer::StartAbilityByCallInner connections_.size is %{public}zu", connections_.size());
     auto retval = abilityClient->StartAbilityByCall(want, connect, callerToken, oriValidUserId);
     if (retval != ERR_OK) {
-        ClearFailedCallStart(callback);
+        ClearFailedCallConnection(callback);
     }
     return retval;
 }
@@ -123,23 +130,23 @@ int LocalCallContainer::ReleaseCall(const std::shared_ptr<CallerCallBack>& callb
     return ERR_OK;
 }
 
-void LocalCallContainer::ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback)
+void LocalCallContainer::ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback)
 {
-    HILOG_DEBUG("LocalCallContainer::ClearFailedCallStart called");
+    HILOG_DEBUG("LocalCallContainer::ClearFailedCallConnection called");
     if (callback == nullptr) {
-        HILOG_ERROR("LocalCallContainer::ClearFailedCallStart callback is nullptr");
+        HILOG_ERROR("LocalCallContainer::ClearFailedCallConnection callback is nullptr");
         return;
     }
 
     auto localCallRecord = callback->GetRecord();
     if (localCallRecord == nullptr) {
-        HILOG_ERROR("LocalCallContainer::ClearFailedCallStart localCallRecord is nullptr");
+        HILOG_ERROR("LocalCallContainer::ClearFailedCallConnection localCallRecord is nullptr");
         return;
     }
 
     auto connect = iface_cast<CallerConnection>(localCallRecord->GetConnection());
     if (connect == nullptr) {
-        HILOG_ERROR("LocalCallContainer::ClearFailedCallStart connection conversion failed.");
+        HILOG_ERROR("LocalCallContainer::ClearFailedCallConnection connection conversion failed.");
         return;
     }
 
@@ -221,26 +228,6 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
             info.emplace_back(tempstr);
             }
     }
-    return;
-}
-
-void LocalCallContainer::OnAbilityConnectDone(
-    const AppExecFwk::ElementName& element, const sptr<IRemoteObject>& remoteObject, int code)
-{}
-
-void LocalCallContainer::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int code)
-{}
-
-void LocalCallContainer::OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState)
-{
-    HILOG_DEBUG("LocalCallContainer::OnRemoteStateChanged start %{public}s .", element.GetURI().c_str());
-    std::shared_ptr<LocalCallRecord> localCallRecord;
-    if (GetCallLocalRecord(element, localCallRecord, GetCurrentUserId())) {
-        localCallRecord->NotifyRemoteStateChanged(abilityState);
-        HILOG_DEBUG("call NotifyRemoteStateChanged.");
-    }
-
-    HILOG_DEBUG("LocalCallContainer::OnRemoteStateChanged end. abilityState:%{public}d.", abilityState);
     return;
 }
 
@@ -343,10 +330,14 @@ void LocalCallContainer::SetMultipleCallLocalRecord(
 }
 
 void CallerConnection::SetRecordAndContainer(const std::shared_ptr<LocalCallRecord> &localCallRecord,
-    const sptr<IRemoteObject> &container)
+    const std::weak_ptr<LocalCallContainer> &container)
 {
+    if (localCallRecord == nullptr) {
+        HILOG_DEBUG("CallerConnection::SetRecordAndContainer input param is nullptr.");
+        return;
+    }
     localCallRecord_ = localCallRecord;
-    container_ = iface_cast<LocalCallContainer>(container);
+    container_ = container;
     localCallRecord_->SetConnection(this->AsObject());
 }
 
@@ -354,9 +345,9 @@ void CallerConnection::OnAbilityConnectDone(
     const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code)
 {
     HILOG_DEBUG("CallerConnection::OnAbilityConnectDone start %{public}s .", element.GetURI().c_str());
-    auto container = container_.promote();
-    if (container == nullptr) {
-        HILOG_ERROR("CallerConnection::OnAbilityConnectDone container is nullptr.");
+    auto container = container_.lock();
+    if (container == nullptr || localCallRecord_ == nullptr) {
+        HILOG_ERROR("CallerConnection::OnAbilityConnectDone container or record is nullptr.");
         return;
     }
 
@@ -380,14 +371,23 @@ void CallerConnection::OnAbilityConnectDone(
 
 void CallerConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code)
 {
-    HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone start %{public}s.", element.GetURI().c_str());
-    if (container_ == nullptr) {
-        HILOG_ERROR("CallerConnection::OnAbilityDisconnectDone container is nullptr.");
+    HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone start %{public}s %{public}d.",
+        element.GetURI().c_str(), code);
+}
+
+void CallerConnection::OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState)
+{
+    HILOG_DEBUG("CallerConnection::OnRemoteStateChanged start %{public}s .", element.GetURI().c_str());
+    std::shared_ptr<LocalCallRecord> localCallRecord;
+    if (localCallRecord_ == nullptr) {
+        HILOG_DEBUG("local call record is nullptr.");
         return;
     }
 
-    container_->OnAbilityDisconnectDone(element, code);
-    HILOG_DEBUG("CallerConnection::OnAbilityDisconnectDone end. code:%{public}d.", code);
+    localCallRecord_->NotifyRemoteStateChanged(abilityState);
+
+    HILOG_DEBUG("CallerConnection::OnRemoteStateChanged end. abilityState:%{public}d.", abilityState);
+    return;
 }
 
 int32_t LocalCallContainer::GetCurrentUserId()

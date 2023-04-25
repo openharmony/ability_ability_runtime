@@ -27,7 +27,7 @@ namespace AbilityRuntime {
 using Want = OHOS::AAFwk::Want;
 using AbilityConnectionStub = OHOS::AAFwk::AbilityConnectionStub;
 class CallerConnection;
-class LocalCallContainer : public AbilityConnectionStub {
+class LocalCallContainer : public std::enable_shared_from_this<LocalCallContainer>{
 public:
     LocalCallContainer() = default;
     virtual ~LocalCallContainer() = default;
@@ -37,14 +37,9 @@ public:
 
     int ReleaseCall(const std::shared_ptr<CallerCallBack> &callback);
 
-    void ClearFailedCallStart(const std::shared_ptr<CallerCallBack> &callback);
+    void ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback);
 
     void DumpCalls(std::vector<std::string> &info) const;
-
-    virtual void OnAbilityConnectDone(
-        const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code) override;
-
-    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
 
     void SetCallLocalRecord(
         const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
@@ -52,7 +47,7 @@ public:
         const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
 
     void OnCallStubDied(const wptr<IRemoteObject> &remote);
-    void OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState) override;
+
 private:
     bool GetCallLocalRecord(const AppExecFwk::ElementName &elementName,
         std::shared_ptr<LocalCallRecord> &localCallRecord, int32_t accountId);
@@ -65,7 +60,9 @@ private:
 
 private:
     int32_t currentUserId_ = DEFAULT_INVAL_VALUE;
+    // used to store single instance call records
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> callProxyRecords_;
+    // used to store multi instance call records
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
     std::set<sptr<CallerConnection>> connections_;
 };
@@ -76,16 +73,17 @@ public:
     virtual ~CallerConnection() = default;
 
     void SetRecordAndContainer(const std::shared_ptr<LocalCallRecord> &localCallRecord,
-        const sptr<IRemoteObject> &container);
+        const std::weak_ptr<LocalCallContainer> &container);
 
-    virtual void OnAbilityConnectDone(
+    void OnAbilityConnectDone(
         const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject, int code) override;
 
-    virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int code) override;
 
+    void OnRemoteStateChanged(const AppExecFwk::ElementName &element, int32_t abilityState) override;
 private:
     std::shared_ptr<LocalCallRecord> localCallRecord_;
-    wptr<LocalCallContainer> container_;
+    std::weak_ptr<LocalCallContainer> container_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
