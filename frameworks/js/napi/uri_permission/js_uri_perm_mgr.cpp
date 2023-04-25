@@ -61,6 +61,7 @@ public:
 private:
     NativeValue* OnGrantUriPermission(NativeEngine& engine, NativeCallbackInfo& info)
     {
+        HILOG_DEBUG("Grant Uri Permission start");
         if (info.argc != argCountThree && info.argc != argCountFour) {
             HILOG_ERROR("The number of parameter is invalid.");
             ThrowTooFewParametersError(engine);
