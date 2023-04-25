@@ -254,7 +254,7 @@ public:
      *
      * @return Returns the LocalCallContainer.
      */
-    virtual sptr<LocalCallContainer> GetLocalCallContainer() = 0;
+    virtual std::shared_ptr<LocalCallContainer> GetLocalCallContainer() = 0;
 
     virtual void SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &config) = 0;
 

@@ -364,7 +364,7 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_ClearFailedCallC
     GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallConnection_001 start";
     ServiceExtensionContext serviceExtensionContextTest;
     serviceExtensionContextTest.ClearFailedCallConnection(nullptr);
-    serviceExtensionContextTest.localCallContainer_ = new (std::nothrow) LocalCallContainer();
+    serviceExtensionContextTest.localCallContainer_ = std::make_shared<LocalCallContainer>();
     serviceExtensionContextTest.ClearFailedCallConnection(nullptr);
     GTEST_LOG_(INFO) << "service_extension_context_ClearFailedCallConnection_001 end";
 }

@@ -126,7 +126,7 @@ public:
      *
      * @return Returns the LocalCallContainer.
      */
-    sptr<LocalCallContainer> GetLocalCallContainer() override
+    std::shared_ptr<LocalCallContainer> GetLocalCallContainer() override
     {
         return localCallContainer_;
     }
@@ -218,7 +218,7 @@ private:
     std::map<int, RuntimeTask> resultCallbacks_;
     std::unique_ptr<NativeReference> contentStorage_ = nullptr;
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
-    sptr<LocalCallContainer> localCallContainer_ = nullptr;
+    std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
     int32_t missionId_ = -1;
