@@ -599,8 +599,8 @@ void AbilityContextImpl::ClearFailedCallConnection(const std::shared_ptr<CallerC
         HILOG_ERROR("%{public}s failed, localCallContainer_ is nullptr.", __func__);
         return;
     }
-    HILOG_DEBUG("AbilityContextImpl::Clear end.");
     localCallContainer_->ClearFailedCallConnection(callback);
+    HILOG_DEBUG("AbilityContextImpl::Clear end.");
 }
 
 void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback)
