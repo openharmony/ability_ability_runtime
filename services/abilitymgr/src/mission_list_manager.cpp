@@ -3058,11 +3058,11 @@ bool MissionListManager::CheckLimit(const AbilityRequest &abilityRequest)
         auto earliestMission = FindEarliestMission();
         if (earliestMission) {
             if (TerminateAbility(earliestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE, nullptr, true) != ERR_OK) {
-                HILOG_ERROR("already reach limit instance. limit is : %{public}d, and terminate earliestAbility failed.",
+                HILOG_ERROR("already reach limit instance. limit: %{public}d, and terminate earliestAbility failed.",
                     MAX_INSTANCE_COUNT);
                 return true;
             }
-            HILOG_INFO("already reach limit instance. limit is : %{public}d, and terminate earliestAbility success.",
+            HILOG_INFO("already reach limit instance. limit: %{public}d, and terminate earliestAbility success.",
                 MAX_INSTANCE_COUNT);
         }
     }
