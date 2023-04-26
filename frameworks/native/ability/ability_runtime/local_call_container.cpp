@@ -234,6 +234,7 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
 bool LocalCallContainer::GetCallLocalRecord(
     const AppExecFwk::ElementName& elementName, std::shared_ptr<LocalCallRecord>& localCallRecord, int32_t accountId)
 {
+    HILOG_DEBUG("Get call local record by %{public}s and id %{public}d", elementName.GetURI().c_str(), accountId);
     for (auto pair : callProxyRecords_) {
         AppExecFwk::ElementName callElement;
         if (!callElement.ParseURI(pair.first)) {
@@ -408,11 +409,12 @@ int32_t LocalCallContainer::GetCurrentUserId()
 
 int32_t LocalCallContainer::GetValidUserId(int32_t accountId)
 {
-    if (accountId < 0) {
-        return GetCurrentUserId();
+    HILOG_DEBUG("LocalCallContainer::GetValidUserId is %{public}d", accountId);
+    if (accountId > 0 && accountId != GetCurrentUserId()) {
+        return accountId;
     }
 
-    return accountId;
+    return DEFAULT_INVAL_VALUE;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
