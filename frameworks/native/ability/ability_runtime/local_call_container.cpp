@@ -174,7 +174,7 @@ int32_t LocalCallContainer::RemoveSingletonCallLocalRecord(std::shared_ptr<Local
     return ERR_OK;
 }
 
-int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record)
+int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record)
 {
     if (record == nullptr) {
         HILOG_ERROR("input params invalid value");

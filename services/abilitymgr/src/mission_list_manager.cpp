@@ -522,13 +522,17 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
     }
 
     if (targetMission == nullptr) {
-    	if (CheckLimit()) {
+        if (CheckLimit()) {
             isReachToLimit = true;
             HILOG_ERROR("already reach to limit, not create new mission and ability.");
        	    return;
-    	}
+        }
         HILOG_DEBUG("Make new mission data.");
         targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+        if (targetRecord == nullptr) {
+            HILOG_ERROR("targetRecord is nullptr");
+            return;
+        }
         targetMission = std::make_shared<Mission>(info.missionInfo.id, targetRecord,
             info.missionName, info.startMethod);
         targetRecord->UpdateRecoveryInfo(info.hasRecoverInfo);
@@ -2509,6 +2513,12 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
         return;
     }
 
+    if (abilityRecord->IsCompleteFirstFrameDrawing()) {
+        HILOG_DEBUG("First frame drawing has completed.");
+        return;
+    }
+    abilityRecord->SetCompleteFirstFrameDrawing(true);
+
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     if (handler == nullptr) {
         HILOG_ERROR("Fail to get AbilityEventHandler.");
@@ -3082,11 +3092,11 @@ bool MissionListManager::CheckLimit()
         auto earliestMission = FindEarliestMission();
         if (earliestMission) {
             if (TerminateAbility(earliestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE, nullptr, true) != ERR_OK) {
-                HILOG_ERROR("already reach limit instance. limit is : %{public}d, and terminate earliestAbility fail.",
+                HILOG_ERROR("already reach limit instance. limit: %{public}d, and terminate earliestAbility failed.",
                     MAX_INSTANCE_COUNT);
                 return true;
             }
-            HILOG_INFO("already reach limit instance. limit is : %{public}d, and terminate earliestAbility success.",
+            HILOG_INFO("already reach limit instance. limit: %{public}d, and terminate earliestAbility success.",
                 MAX_INSTANCE_COUNT);
         }
     }
