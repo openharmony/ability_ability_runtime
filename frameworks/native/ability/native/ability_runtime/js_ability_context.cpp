@@ -428,10 +428,14 @@ NativeValue* JsAbilityContext::OnStartAbilityByCall(NativeEngine& engine, Native
             }
         } else if (info.argv[ARGC_ONE]->TypeOf() == NativeValueType::NATIVE_FUNCTION) {
             lastParam = info.argv[ARGC_ONE];
+        } else {
+            HILOG_ERROR("Failed, input param type invalid");
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return engine.CreateUndefined();
         }
     }
 
-    if (info.argc > ARGC_TWO) {
+    if (info.argc > ARGC_TWO && info.argv[ARGC_TWO]->TypeOf() == NativeValueType::NATIVE_FUNCTION) {
         lastParam = info.argv[ARGC_TWO];
     }
 
