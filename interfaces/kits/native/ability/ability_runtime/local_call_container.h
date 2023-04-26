@@ -52,8 +52,8 @@ private:
     bool GetCallLocalRecord(const AppExecFwk::ElementName &elementName,
         std::shared_ptr<LocalCallRecord> &localCallRecord, int32_t accountId);
     void OnSingletonCallStubDied(const wptr<IRemoteObject> &remote);
-    int32_t RemoveSingletonCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
-    int32_t RemoveMultipleCallLocalRecord(std::shared_ptr<LocalCallRecord> &record);
+    int32_t RemoveSingletonCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record);
+    int32_t RemoveMultipleCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record);
     int32_t GetCurrentUserId();
     int32_t GetValidUserId(int32_t accountId);
     bool IsExistCallBack(const std::vector<std::shared_ptr<CallerCallBack>> &callers) const;
