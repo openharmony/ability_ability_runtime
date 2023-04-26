@@ -67,8 +67,13 @@ void JsEnvironment::StopDebugger()
 
 void JsEnvironment::InitTimerModule()
 {
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid native engine.");
+        return;
+    }
+
     if (impl_ != nullptr) {
-        impl_->InitTimerModule();
+        impl_->InitTimerModule(engine_);
     }
 }
 

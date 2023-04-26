@@ -515,7 +515,7 @@ bool JsRuntime::Initialize(const Options& options)
             if (options.isUnique) {
                 HILOG_INFO("Not supported TimerModule when form render");
             } else {
-                InitTimerModule(*nativeEngine, *globalObj);
+                InitTimerModule();
             }
 
             InitWorkerModule(*nativeEngine, codePath_, options.isDebugVersion, options.isBundle);
@@ -1074,6 +1074,12 @@ void JsRuntime::FreeNativeReference(std::unique_ptr<NativeReference> uniqueNativ
         delete work;
         work = nullptr;
     }
+}
+
+void JsRuntime::InitTimerModule()
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->InitTimerModule();
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
