@@ -153,7 +153,7 @@ void LocalCallContainer::ClearFailedCallConnection(const std::shared_ptr<CallerC
     connections_.erase(connect);
 }
 
-int32_t LocalCallContainer::RemoveSingletonCallLocalRecord(std::shared_ptr<LocalCallRecord> &record)
+int32_t LocalCallContainer::RemoveSingletonCallLocalRecord(const std::shared_ptr<LocalCallRecord> &record)
 {
     if (record == nullptr) {
         HILOG_ERROR("input params invalid value");
