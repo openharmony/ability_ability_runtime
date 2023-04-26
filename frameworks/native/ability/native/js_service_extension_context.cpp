@@ -378,10 +378,14 @@ private:
             return false;
         }
 
-        if (info.argc > static_cast<size_t>(INDEX_ONE) &&
-            info.argv[INDEX_ONE]->TypeOf() == NativeValueType::NATIVE_NUMBER) {
-            if (!ConvertFromJsValue(engine, info.argv[1], accountId)) {
-                HILOG_ERROR("check input param accountId failed");
+        if (info.argc > static_cast<size_t>(INDEX_ONE)) {
+            if (info.argv[INDEX_ONE]->TypeOf() == NativeValueType::NATIVE_NUMBER) {
+                if (!ConvertFromJsValue(engine, info.argv[1], accountId)) {
+                    HILOG_ERROR("check input param accountId failed");
+                    return false;
+                }
+            } else {
+                HILOG_ERROR("input param type invalid");
                 return false;
             }
         }
