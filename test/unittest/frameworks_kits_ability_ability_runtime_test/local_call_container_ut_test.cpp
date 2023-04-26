@@ -154,7 +154,7 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_StartAbilityInner_0400, Fu
 HWTEST_F(LocalCallContainerTest, Local_Call_Container_StartAbilityInner_0500, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "Local_Call_Container_StartAbilityInner_0500 begain";
-    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
     Want want;
     want.SetElementName("", "DemoBundleNameB", "DemoAbilityNameB");
     std::shared_ptr<CallerCallBack> callback = std::make_shared<CallerCallBack>();
@@ -341,7 +341,6 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetCallLocalRecord_0100, F
  */
 HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetMultipleCallLocalRecord_0100, Function | MediumTest | Level1)
 {
-    // sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
     auto localCallContainer = std::make_shared<LocalCallContainer>();
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecordFirst = std::make_shared<LocalCallRecord>(elementName);
@@ -792,7 +791,7 @@ HWTEST_F(
     LocalCallContainerTest, Local_Call_Container_RemoveSingletonCallLocalRecord_0100, Function | MediumTest | Level1)
 {
     constexpr int32_t USER_ID_U202 = 202;
-    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecordNull = nullptr;
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
@@ -815,7 +814,7 @@ HWTEST_F(
 HWTEST_F(
     LocalCallContainerTest, Local_Call_Container_RemoveMultipleCallLocalRecord_0100, Function | MediumTest | Level1)
 {
-    sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
+    auto localCallContainer = std::make_shared<LocalCallContainer>();
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecordNull = nullptr;
     std::shared_ptr<LocalCallRecord> localCallRecord = std::make_shared<LocalCallRecord>(elementName);
