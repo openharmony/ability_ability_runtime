@@ -2838,7 +2838,6 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     return targetAbilityRecord->LoadAbility();
 }
 
-
 int MissionListManager::ReleaseCallLocked(
     const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
 {
