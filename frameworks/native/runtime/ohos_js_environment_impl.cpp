@@ -20,6 +20,7 @@
 #include "js_timer.h"
 #include "js_utils.h"
 
+#include "js_worker.h"
 namespace OHOS {
 namespace AbilityRuntime {
 OHOSJsEnvironmentImpl::OHOSJsEnvironmentImpl()
@@ -60,9 +61,17 @@ void OHOSJsEnvironmentImpl::InitConsoleModule(NativeEngine *engine)
     JsSysModule::Console::InitConsoleModule(reinterpret_cast<napi_env>(engine));
 }
 
-void OHOSJsEnvironmentImpl::InitWorkerModule()
+void OHOSJsEnvironmentImpl::InitWorkerModule(NativeEngine& engine, const std::string& codePath,
+    bool isDebugVersion, bool isBundle)
 {
     HILOG_DEBUG("called");
+    engine.SetInitWorkerFunc(InitWorkerFunc);
+    engine.SetOffWorkerFunc(OffWorkerFunc);
+    engine.SetGetAssetFunc(AssetHelper(codePath, isDebugVersion, isBundle));
+
+    engine.SetGetContainerScopeIdFunc(GetContainerId);
+    engine.SetInitContainerScopeFunc(UpdateContainerScope);
+    engine.SetFinishContainerScopeFunc(RestoreContainerScope);
 }
 
 void OHOSJsEnvironmentImpl::InitSyscapModule()
