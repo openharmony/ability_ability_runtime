@@ -2773,11 +2773,13 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 {
     HILOG_INFO("call ability.");
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
+
     // allow to start ability by called type without loading ui.
     if (!abilityRequest.IsCallType(AbilityCallType::CALL_REQUEST_TYPE)) {
         HILOG_ERROR("start ability not by call.");
         return ERR_INVALID_VALUE;
     }
+
     // Get target mission and ability record.
     std::shared_ptr<AbilityRecord> targetAbilityRecord;
     std::shared_ptr<Mission> targetMission;
@@ -2791,8 +2793,10 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
         HILOG_ERROR("Failed to get mission or record.");
         return ERR_INVALID_VALUE;
     }
+
     targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
     targetAbilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CALL);
+
     // mission is first created, add mission to default call mission list.
     // other keep in current mission list.
     if (!targetMission->GetMissionList()) {
@@ -2802,7 +2806,9 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
             defaultStandardList_->AddMissionToTop(targetMission);
         }
     }
+
     NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest);
+
     // new version started by call type
     auto ret = ResolveAbility(targetAbilityRecord, abilityRequest);
     if (ret == ResolveResultType::OK_HAS_REMOTE_OBJ) {
@@ -2816,16 +2822,22 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
         HILOG_ERROR("resolve failed, error: %{public}d.", RESOLVE_CALL_ABILITY_INNER_ERR);
         return RESOLVE_CALL_ABILITY_INNER_ERR;
     }
+
     // schedule target ability
-    HILOG_DEBUG("load ability record: %{public}s", targetAbilityRecord->GetWant().GetElement().GetURI().c_str());
+    std::string element = targetAbilityRecord->GetWant().GetElement().GetURI();
+    HILOG_DEBUG("load ability record: %{public}s", element.c_str());
+
     // flag the first ability.
-    if (!GetCurrentTopAbilityLocked()) {
+    auto currentTopAbility = GetCurrentTopAbilityLocked();
+    if (!currentTopAbility) {
         if (targetAbilityRecord->GetAbilityInfo().applicationInfo.isLauncherApp) {
             targetAbilityRecord->SetLauncherRoot();
         }
     }
+
     return targetAbilityRecord->LoadAbility();
 }
+
 
 int MissionListManager::ReleaseCallLocked(
     const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
