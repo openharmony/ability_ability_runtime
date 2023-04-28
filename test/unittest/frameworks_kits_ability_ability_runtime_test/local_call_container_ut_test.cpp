@@ -320,7 +320,6 @@ HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetCallLocalRecord_0100, F
  */
 HWTEST_F(LocalCallContainerTest, Local_Call_Container_SetMultipleCallLocalRecord_0100, Function | MediumTest | Level1)
 {
-    // sptr<LocalCallContainer> localCallContainer = new (std::nothrow)LocalCallContainer();
     auto localCallContainer = std::make_shared<LocalCallContainer>();
     AppExecFwk::ElementName elementName("DemoDeviceId", "DemoBundleName", "DemoAbilityName");
     std::shared_ptr<LocalCallRecord> localCallRecordFirst = std::make_shared<LocalCallRecord>(elementName);
