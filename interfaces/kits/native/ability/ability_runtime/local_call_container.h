@@ -27,7 +27,7 @@ namespace AbilityRuntime {
 using Want = OHOS::AAFwk::Want;
 using AbilityConnectionStub = OHOS::AAFwk::AbilityConnectionStub;
 class CallerConnection;
-class LocalCallContainer : public std::enable_shared_from_this<LocalCallContainer>{
+class LocalCallContainer : public std::enable_shared_from_this<LocalCallContainer> {
 public:
     LocalCallContainer() = default;
     virtual ~LocalCallContainer() = default;
