@@ -16,6 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
 #define OHOS_ABILITY_RUNTIME_LOCAL_CALL_CONTAINER_H
 
+#include <mutex>
+
 #include "ability_connect_callback_stub.h"
 #include "ability_connect_callback_proxy.h"
 #include "local_call_record.h"
@@ -26,7 +28,7 @@ namespace AbilityRuntime {
 using Want = OHOS::AAFwk::Want;
 using AbilityConnectionStub = OHOS::AAFwk::AbilityConnectionStub;
 class CallerConnection;
-class LocalCallContainer : public std::enable_shared_from_this<LocalCallContainer>{
+class LocalCallContainer : public std::enable_shared_from_this<LocalCallContainer> {
 public:
     LocalCallContainer() = default;
     virtual ~LocalCallContainer() = default;
@@ -60,6 +62,7 @@ private:
     // used to store multi instance call records
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
     std::set<sptr<CallerConnection>> connections_;
+    std::mutex mutex_;
 };
 
 class CallerConnection : public AbilityConnectionStub {

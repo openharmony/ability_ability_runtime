@@ -153,6 +153,7 @@ void LocalCallContainer::ClearFailedCallConnection(const std::shared_ptr<CallerC
 
 int32_t LocalCallContainer::RemoveSingletonCallLocalRecord(const std::string &uri)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     callProxyRecords_.erase(uri);
     return ERR_OK;
 }
@@ -164,6 +165,7 @@ int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(const std::shared_ptr<
         return ERR_INVALID_VALUE;
     }
 
+    std::lock_guard<std::mutex> lock(mutex_);
     auto iterRecord = multipleCallProxyRecords_.find(record->GetElementName().GetURI());
     if (iterRecord == multipleCallProxyRecords_.end()) {
         HILOG_ERROR("release record in multiple not found.");
@@ -182,6 +184,7 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
 {
     HILOG_DEBUG("LocalCallContainer::DumpCalls called.");
     info.emplace_back("          caller connections:");
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto iter = callProxyRecords_.begin(); iter != callProxyRecords_.end(); iter++) {
         std::string tempstr = "            LocalCallRecord";
         tempstr += " ID #" + std::to_string(iter->second->GetRecordId()) + "\n";
@@ -211,6 +214,7 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
 bool LocalCallContainer::GetCallLocalRecord(
     const AppExecFwk::ElementName& elementName, std::shared_ptr<LocalCallRecord>& localCallRecord)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     for (auto pair : callProxyRecords_) {
         AppExecFwk::ElementName callElement;
         if (!callElement.ParseURI(pair.first)) {
@@ -235,6 +239,7 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
         return record.second->IsSameObject(diedRemote);
     };
 
+    std::lock_guard<std::mutex> lock(mutex_);
     auto iter = std::find_if(callProxyRecords_.begin(), callProxyRecords_.end(), isExist);
     if (iter != callProxyRecords_.end() && iter->second != nullptr) {
         iter->second->OnCallStubDied(remote);
@@ -269,6 +274,7 @@ void LocalCallContainer::SetCallLocalRecord(
 {
     HILOG_DEBUG("LocalCallContainer::SetCallLocalRecord called uri is %{private}s.", element.GetURI().c_str());
     const std::string strKey = element.GetURI();
+    std::lock_guard<std::mutex> lock(mutex_);
     callProxyRecords_.emplace(strKey, localCallRecord);
 }
 
@@ -277,6 +283,7 @@ void LocalCallContainer::SetMultipleCallLocalRecord(
 {
     HILOG_DEBUG("LocalCallContainer::SetMultipleCallLocalRecord called uri is %{private}s.", element.GetURI().c_str());
     const std::string strKey = element.GetURI();
+    std::lock_guard<std::mutex> lock(mutex_);
     auto iter = multipleCallProxyRecords_.find(strKey);
     if (iter == multipleCallProxyRecords_.end()) {
         std::set<std::shared_ptr<LocalCallRecord>> records = { localCallRecord };
