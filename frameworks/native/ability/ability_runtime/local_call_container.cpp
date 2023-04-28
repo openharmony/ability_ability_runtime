@@ -180,7 +180,7 @@ int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(const std::shared_ptr<
     return ERR_OK;
 }
 
-void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
+void LocalCallContainer::DumpCalls(std::vector<std::string>& info)
 {
     HILOG_DEBUG("LocalCallContainer::DumpCalls called.");
     info.emplace_back("          caller connections:");

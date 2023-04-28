@@ -40,7 +40,7 @@ public:
 
     void ClearFailedCallConnection(const std::shared_ptr<CallerCallBack> &callback);
 
-    void DumpCalls(std::vector<std::string> &info) const;
+    void DumpCalls(std::vector<std::string> &info);
 
     void SetCallLocalRecord(
         const AppExecFwk::ElementName& element, const std::shared_ptr<LocalCallRecord> &localCallRecord);
