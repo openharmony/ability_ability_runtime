@@ -129,8 +129,8 @@ class ServiceExtensionContext extends ExtensionContext {
 
     startAbilityByCallWithAccount(want, accountId) {
         return new Promise(async (resolve, reject) => {
-            if (typeof want !== 'object' || want == null) {
-                console.log("ServiceExtensionContext::startAbilityByCall input param error");
+            if (typeof want !== 'object' || want == null || typeof accountId !== 'number') {
+                console.log("ServiceExtensionContext::startAbilityByCall With accountId input param error");
                 reject(new ParamError());
                 return;
             }
@@ -138,13 +138,13 @@ class ServiceExtensionContext extends ExtensionContext {
             try{
                 var callee = await this.__context_impl__.startAbilityByCall(want, accountId);
             } catch(error) {
-                console.log("ServiceExtensionContext::startAbilityByCall Obtain remoteObject failed");
+                console.log("ServiceExtensionContext::startAbilityByCall With accountId Obtain remoteObject failed");
                 reject(error);
                 return;
             }
 
             resolve(new Caller(callee));
-            console.log("ServiceExtensionContext::startAbilityByCall success");
+            console.log("ServiceExtensionContext::startAbilityByCall With accountId success");
             return;
         });
     }
