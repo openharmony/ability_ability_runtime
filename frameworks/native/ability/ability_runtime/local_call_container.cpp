@@ -195,7 +195,7 @@ int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(const std::shared_ptr<
     return ERR_OK;
 }
 
-bool LocalCallContainer::IsExistCallBack(const std::vector<std::shared_ptr<CallerCallBack>> &callers) const
+bool LocalCallContainer::IsCallBackCalled(const std::vector<std::shared_ptr<CallerCallBack>> &callers) const
 {
     for (auto& callBack : callers) {
         if (callBack != nullptr && !callBack->IsCallBack()) {
@@ -218,7 +218,7 @@ void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
             tempstr += "              callee";
             tempstr += " uri[" + item.first + "]" + "\n";
             tempstr += "              callers #" + std::to_string(itemCall->GetCallers().size());
-            if (IsExistCallBack(itemCall->GetCallers())) {
+            if (IsCallBackCalled(itemCall->GetCallers())) {
                 HILOG_INFO("%{public}s state is REQUESTEND.", __func__);
                 tempstr += "  state #REQUESTEND";
             } else {
