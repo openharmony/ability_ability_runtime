@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -203,6 +203,128 @@ HWTEST_F(QuickFixManagerApplyTaskTest, NotifyApplyStatus_0100, TestSize.Level1)
     applyTask->bundleVersionCode_ = 1;
     applyTask->patchVersionCode_ = 100;
     applyTask->NotifyApplyStatus(QUICK_FIX_OK);
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: UnloadQuickFixRevokeDeleteDone_0100
+ * @tc.desc: revoke quick fix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, UnloadQuickFixRevokeDeleteDone_0100, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    ASSERT_NE(applyTask, nullptr);
+    applyTask->bundleName_ = "testBundleName";
+    applyTask->bundleVersionCode_ = 1;
+    applyTask->patchVersionCode_ = 100;
+    applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
+    applyTask->UnloadQuickFixRevokeDeleteDone();
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: NotifySwitchCallbackTask_0100
+ * @tc.desc: revoke quick fix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, NotifySwitchCallbackTask_0100, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    ASSERT_NE(applyTask, nullptr);
+    applyTask->bundleName_ = "testBundleName";
+    applyTask->bundleVersionCode_ = 1;
+    applyTask->patchVersionCode_ = 100;
+    applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
+    applyTask->NotifySwitchCallbackTask();
+    EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: NotifyProcessDiedTask_0100
+ * @tc.desc: revoke quick fix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, NotifyProcessDiedTask_0100, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    ASSERT_NE(applyTask, nullptr);
+    applyTask->bundleName_ = "testBundleName";
+    applyTask->bundleVersionCode_ = 1;
+    applyTask->patchVersionCode_ = 100;
+    applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
+    applyTask->NotifyProcessDiedTask();
+    EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: HandleUnloadAppRunningQuickFixRevokeTask_0100
+ * @tc.desc: revoke quick fix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnloadAppRunningQuickFixRevokeTask_0100, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    ASSERT_NE(applyTask, nullptr);
+    applyTask->bundleName_ = "testBundleName";
+    applyTask->bundleVersionCode_ = 1;
+    applyTask->patchVersionCode_ = 100;
+    applyTask->isSoContained_ = true;
+    applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
+    applyTask->HandleUnloadAppRunningQuickFixRevokeTask();
+    EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: HandleUnloadAppRunningQuickFixRevokeTask_0200
+ * @tc.desc: revoke quick fix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnloadAppRunningQuickFixRevokeTask_0200, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    ASSERT_NE(applyTask, nullptr);
+    applyTask->bundleName_ = "testBundleName";
+    applyTask->bundleVersionCode_ = 1;
+    applyTask->patchVersionCode_ = 100;
+    applyTask->isSoContained_ = false;
+    applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
+    applyTask->HandleUnloadAppRunningQuickFixRevokeTask();
+    EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: HandleUnLoadNotifyAppUnload_0100
+ * @tc.desc: revoke quick fix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnLoadNotifyAppUnload_0100, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
+        quickFixMs_->eventHandler_, quickFixMs_);
+    ASSERT_NE(applyTask, nullptr);
+    applyTask->bundleName_ = "testBundleName";
+    applyTask->bundleVersionCode_ = 1;
+    applyTask->patchVersionCode_ = 100;
+    applyTask->isSoContained_ = false;
+    applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
+    applyTask->HandleUnLoadNotifyAppUnload();
+    EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
     HILOG_INFO("%{public}s end.", __func__);
 }
 } // namespace AppExecFwk
