@@ -35,7 +35,7 @@ struct ChangeInfo {
 
     ChangeType changeType_ = INVAILD;
     mutable std::list<Uri> uris_ = {};
-    const void *data_ = nullptr;
+    void *data_ = nullptr;
     uint32_t size_ = 0;
 };
 } // namespace AAFwk
