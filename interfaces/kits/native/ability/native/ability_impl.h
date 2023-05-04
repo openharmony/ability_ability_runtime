@@ -41,8 +41,7 @@ public:
     AbilityImpl() = default;
     virtual ~AbilityImpl() = default;
     virtual void Init(std::shared_ptr<OHOSApplication> &application, const std::shared_ptr<AbilityLocalRecord> &record,
-        std::shared_ptr<Ability> &ability, std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token,
-        std::shared_ptr<ContextDeal> &contextDeal);
+        std::shared_ptr<Ability> &ability, std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token);
 
     /**
      * @brief Connect the ability. and Calling information back to Ability.
@@ -435,9 +434,11 @@ protected:
     void Inactive();
 
     /**
-     * @brief SerUriString
+     * @brief SetUriString
+     * 
+     * @param uri the uri to set.
      */
-    void SerUriString(const std::string &uri);
+    void SetUriString(const std::string &uri);
 
     /**
      * @brief Set the LifeCycleStateInfo to the deal.
