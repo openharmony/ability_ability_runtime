@@ -644,7 +644,6 @@ config("ability_business_error_config") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
-    "${hiviewdfx_path}/adapter/utility/include/extra",
   ]
 }
 
@@ -659,6 +658,8 @@ ohos_shared_library("ability_business_error") {
   configs = [ ":ability_business_error_config" ]
 
   public_configs = [ ":ability_business_error_public_config" ]
+
+  external_deps = [ "c_utils:utils" ]
 
   subsystem_name = "ability"
   part_name = "ability_runtime"
