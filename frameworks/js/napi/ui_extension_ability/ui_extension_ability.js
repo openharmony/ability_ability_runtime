@@ -24,16 +24,17 @@ class UIExtensionAbility extends ExtensionAbility {
         console.log('onRequest, want:' + want.abilityName + ', startId:' + startId);
     }
 
-    onConnect(want) {
-        console.log('onConnect, want:' + want.abilityName);
-    }
-
-    onDisconnect(want) {
-        console.log('onDisconnect, want:' + want.abilityName);
+    onLoadContent() {
+        console.log('onLoadContent');
+        return "";
     }
 
     onDestroy() {
         console.log('onDestroy');
+    }
+
+    onConfigurationUpdate(config) {
+        console.log('onConfigurationUpdate');
     }
 }
 
