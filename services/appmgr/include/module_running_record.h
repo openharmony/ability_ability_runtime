@@ -20,6 +20,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <shared_mutex>
 #include "iremote_object.h"
 
 #include "ability_info.h"
@@ -162,6 +163,7 @@ private:
     ModuleRecordState GetState() const;
 
 private:
+    mutable std::shared_mutex abilitiesMutex_;
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> abilities_;
     std::map<const sptr<IRemoteObject>, std::shared_ptr<AbilityRunningRecord>> terminateAbilities_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
