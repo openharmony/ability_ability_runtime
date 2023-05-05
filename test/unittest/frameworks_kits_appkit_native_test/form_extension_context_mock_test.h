@@ -214,6 +214,15 @@ public:
     {
         return 0;
     }
+    ErrCode GetRunningFormInfos(std::vector<RunningFormInfo> &runningFormInfos) override
+    {
+        return ERR_OK;
+    }
+    ErrCode GetRunningFormInfosByBundleName(const std::string &bundleName,
+        std::vector<RunningFormInfo> &runningFormInfos) override
+    {
+        return ERR_OK;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
