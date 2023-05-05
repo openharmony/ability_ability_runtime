@@ -51,6 +51,7 @@ constexpr static char ABILITY_NAME[] = "Ability";
 constexpr static char ACE_ABILITY_NAME[] = "AceAbility";
 constexpr static char ACE_FORM_ABILITY_NAME[] = "AceFormAbility";
 constexpr static char FORM_EXTENSION[] = "FormExtension";
+constexpr static char UI_EXTENSION[] = "UIExtensionAbility";
 #endif
 constexpr static char BASE_SERVICE_EXTENSION[] = "ServiceExtension";
 constexpr static char STATIC_SUBSCRIBER_EXTENSION[] = "StaticSubscriberExtension";
@@ -61,7 +62,6 @@ constexpr static char WALLPAPER_EXTENSION[] = "WallpaperExtension";
 constexpr static char FILEACCESS_EXT_ABILITY[] = "FileAccessExtension";
 constexpr static char ENTERPRISE_ADMIN_EXTENSION[] = "EnterpriseAdminExtension";
 constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
-constexpr static char UI_EXTENSION[] = "UIExtensionAbility";
 
 /**
  * @brief Default constructor used to create a AbilityThread instance.
