@@ -29,17 +29,16 @@
             "nfc.cardEmulation",
             "nfc.controller",
             "nfc.tag",
+            "nfctech",
             "reminderAgent",
             "reminderAgentManager",
             "sensor",
+            "tagSession",
             "telephony.call",
             "wallpaper",
             "wifiext",
             "wifiManager",
-            "wifiManagerExt",
-            "geolocation",
-            "nfctech",
-            "tagSession"
+            "wifiManagerExt"
         ],
         "WorkSchedulerExtension": [
             "backgroundTaskManager",
