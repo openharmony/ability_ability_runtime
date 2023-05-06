@@ -554,11 +554,11 @@ void QuickFixManagerApplyTask::NotifyApplyStatus(int32_t resultCode)
         want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_QUICK_FIX_APPLY_RESULT);
         want.SetParam(APPLY_RESULT, QuickFixErrorUtil::GetErrorCode(resultCode));
         want.SetParam(APPLY_RESULT_INFO, QuickFixErrorUtil::GetErrorMessage(resultCode));
+        want.SetParam(BUNDLE_VERSION, bundleVersionCode_);
+        want.SetParam(PATCH_VERSION, patchVersionCode_);
     }
 
     want.SetParam(BUNDLE_NAME, bundleName_);
-    want.SetParam(BUNDLE_VERSION, bundleVersionCode_);
-    want.SetParam(PATCH_VERSION, patchVersionCode_);
 
     std::string moduleName = std::accumulate(moduleNames_.begin(), moduleNames_.end(), std::string(""),
         [moduleName = moduleNames_](const std::string &name, const std::string &str) {
