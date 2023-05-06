@@ -52,7 +52,6 @@
 
 #ifdef SUPPORT_GRAPHICS
 #include "display_type.h"
-#include "form_provider_client.h"
 #include "key_event.h"
 #endif
 
@@ -1727,22 +1726,6 @@ void Ability::OnTriggerEvent(const int64_t formId, const std::string &message)
 FormState Ability::OnAcquireFormState(const Want &want)
 {
     return FormState::DEFAULT;
-}
-
-sptr<IRemoteObject> Ability::GetFormRemoteObject()
-{
-    HILOG_DEBUG("%{public}s start", __func__);
-    if (providerRemoteObject_ == nullptr) {
-        sptr<FormProviderClient> providerClient = new (std::nothrow) FormProviderClient();
-        std::shared_ptr<Ability> thisAbility = this->shared_from_this();
-        if (thisAbility == nullptr) {
-            HILOG_ERROR("%{public}s failed, thisAbility is nullptr", __func__);
-        }
-        providerClient->SetOwner(thisAbility);
-        providerRemoteObject_ = providerClient->AsObject();
-    }
-    HILOG_DEBUG("%{public}s end", __func__);
-    return providerRemoteObject_;
 }
 
 void Ability::SetSceneListener(const sptr<Rosen::IWindowLifeCycle> &listener)
