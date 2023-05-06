@@ -400,6 +400,12 @@ public:
 
     void AllowCrossThreadExecution() const override
     {}
+
+    bool RunScriptBuffer(const std::string &path, std::unique_ptr<uint8_t[]> buffer,
+        size_t size, bool isBundle) override
+    {
+        return false;
+    }
 };
 
 #endif /* FOUNDATION_ABILITY_RUNTIME_MOCK_NATIVE_ENGINE_H */
