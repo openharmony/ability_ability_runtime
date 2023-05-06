@@ -18,6 +18,8 @@
         "InputMethodExtension": [
             "ability.featureAbility",
             "ability.particleAbility",
+            "account.distributedAccount",
+            "account.osAccount",
             "backgroundTaskManager",
             "bluetooth",
             "bluetoothManager",
