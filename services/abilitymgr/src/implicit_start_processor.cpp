@@ -32,6 +32,7 @@ using ErmsCallerInfo = OHOS::AppExecFwk::ErmsParams::CallerInfo;
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 const std::string STR_PC = "pc";
 const std::string TYPE_ONLY_MATCH_WILDCARD = "reserved/wildcard";
+const std::string SHOW_DEFAULT_PICKER_FLAG = "ohos.ability.params.showDefaultPicker";
 
 const std::vector<std::string> ImplicitStartProcessor::blackList = {
     std::vector<std::string>::value_type(BLACK_ACTION_SELECT_DATA),
