@@ -197,6 +197,28 @@ public:
             return ERR_INVALID_VALUE;
         }
     }
+    ErrCode GetRunningFormInfos(std::vector<RunningFormInfo> &runningFormInfos)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode GetRunningFormInfosByBundleName(const std::string &bundleName,
+        std::vector<RunningFormInfo> &runningFormInfos)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode RegisterFormAddObserverByBundle(const std::string bundleName,
+        const sptr<IRemoteObject> &callerToken)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode RegisterFormRemoveObserverByBundle(const std::string bundleName,
+        const sptr<IRemoteObject> &callerToken)
+    {
+        return ERR_OK;
+    }
 
     /**
      * @brief Lifecycle Update.
@@ -224,6 +246,16 @@ public:
      * @return Returns true if execute success, false otherwise.
      */
     int MessageEvent(const int64_t formId, const Want& want, const sptr<IRemoteObject>& callerToken)
+    {
+        return 0;
+    }
+
+    int32_t SetBackgroundFunction(const std::string method, const std::string params)
+    {
+        return ERR_OK;
+    };
+    int32_t AcquireFormData(int64_t formId, int64_t requestCode, const sptr<IRemoteObject> &callerToken,
+        AAFwk::WantParams &formData)
     {
         return 0;
     }

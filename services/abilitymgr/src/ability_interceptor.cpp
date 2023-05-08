@@ -17,6 +17,7 @@
 
 #include <chrono>
 
+#include "ability_info.h"
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "app_jump_control_rule.h"
@@ -40,11 +41,11 @@ using ExperienceRule = OHOS::AppExecFwk::ErmsParams::ExperienceRule;
 const std::string ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTest";
 const std::string ACTION_MARKET_DISPOSED = "ohos.want.action.marketDisposed";
 const std::string PERMISSION_MANAGE_DISPOSED_APP_STATUS = "ohos.permission.MANAGE_DISPOSED_APP_STATUS";
-const std::string JUMP_DIALOG_CALLER_BUNDLE_NAME= "interceptor_callerBundleName";
-const std::string JUMP_DIALOG_CALLER_MODULE_NAME= "interceptor_callerModuleName";
-const std::string JUMP_DIALOG_CALLER_LABEL_ID= "interceptor_callerLabelId";
-const std::string JUMP_DIALOG_TARGET_MODULE_NAME= "interceptor_targetModuleName";
-const std::string JUMP_DIALOG_TARGET_LABEL_ID= "interceptor_targetLabelId";
+const std::string JUMP_DIALOG_CALLER_BUNDLE_NAME = "interceptor_callerBundleName";
+const std::string JUMP_DIALOG_CALLER_MODULE_NAME = "interceptor_callerModuleName";
+const std::string JUMP_DIALOG_CALLER_LABEL_ID = "interceptor_callerLabelId";
+const std::string JUMP_DIALOG_TARGET_MODULE_NAME = "interceptor_targetModuleName";
+const std::string JUMP_DIALOG_TARGET_LABEL_ID = "interceptor_targetLabelId";
 
 AbilityInterceptor::~AbilityInterceptor()
 {}
@@ -156,7 +157,7 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
 
     auto ret = IN_PROCESS_CALL(appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule));
     if (ret != ERR_OK) {
-        HILOG_INFO("Get No AppRunningControlRule");
+        HILOG_DEBUG("Get No AppRunningControlRule");
         return false;
     }
     return true;
@@ -172,7 +173,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
 {
     bool isStartIncludeAtomicService = AbilityUtil::IsStartIncludeAtomicService(want, userId);
     if (!isStartIncludeAtomicService) {
-        HILOG_INFO("This startup does not contain atomic service, keep going.");
+        HILOG_DEBUG("This startup does not contain atomic service, keep going.");
         return ERR_OK;
     }
 
@@ -185,7 +186,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
         return ERR_OK;
     }
 
-    HILOG_INFO("check ecological rule success");
+    HILOG_DEBUG("check ecological rule success");
     if (rule.isAllow) {
         HILOG_ERROR("ecological rule is allow, keep going.");
         return ERR_OK;
@@ -205,7 +206,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
 
 bool EcologicalRuleInterceptor::CheckRule(const Want &want, ErmsCallerInfo &callerInfo, ExperienceRule &rule)
 {
-    HILOG_INFO("Enter Erms CheckRule.");
+    HILOG_DEBUG("Enter Erms CheckRule.");
     auto erms = AbilityUtil::CheckEcologicalRuleMgr();
     if (!erms) {
         HILOG_ERROR("CheckEcologicalRuleMgr failed.");
@@ -228,8 +229,11 @@ AbilityJumpInterceptor::~AbilityJumpInterceptor()
 
 ErrCode AbilityJumpInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground)
 {
-    int callerUid = IPCSkeleton::GetCallingUid();
-    bool isStartIncludeAtomicService = AbilityUtil::IsStartIncludeAtomicService(want, callerUid);
+    if (!isForeground) {
+        HILOG_INFO("This startup is not foreground, keep going.");
+        return ERR_OK;
+    }
+    bool isStartIncludeAtomicService = AbilityUtil::IsStartIncludeAtomicService(want, userId);
     if (isStartIncludeAtomicService) {
         HILOG_INFO("This startup contain atomic service, keep going.");
         return ERR_OK;
@@ -238,6 +242,13 @@ ErrCode AbilityJumpInterceptor::DoProcess(const Want &want, int requestCode, int
     auto bms = AbilityUtil::GetBundleManager();
     if (!bms) {
         HILOG_ERROR("GetBundleManager failed");
+        return ERR_OK;
+    }
+    AppExecFwk::AbilityInfo targetAbilityInfo;
+    IN_PROCESS_CALL_WITHOUT_RET(bms->QueryAbilityInfo(want,
+        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, targetAbilityInfo));
+    if (targetAbilityInfo.type != AppExecFwk::AbilityType::PAGE) {
+        HILOG_INFO("Target is not page Ability, keep going, abilityType:%{public}d", targetAbilityInfo.type);
         return ERR_OK;
     }
     AppExecFwk::AppJumpControlRule controlRule;
@@ -274,6 +285,10 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
     if (!result) {
         HILOG_ERROR("GetBundleNameForUid from bms fail.");
         return false;
+    }
+    if (controlRule.callerPkg.empty() || controlRule.targetPkg.empty()) {
+        HILOG_INFO("This startup is not explicitly, keep going.");
+        return false; 
     }
     if (controlRule.callerPkg == controlRule.targetPkg) {
         HILOG_INFO("jump within the same app.");
@@ -342,10 +357,10 @@ bool AbilityJumpInterceptor::LoadAppLabelInfo(sptr<AppExecFwk::IBundleMgr> &bms,
     AppExecFwk::AppJumpControlRule &controlRule, int32_t userId)
 {
     AppExecFwk::ApplicationInfo callerAppInfo;
-    int result = IN_PROCESS_CALL(bms->GetApplicationInfo(controlRule.callerPkg,
+    IN_PROCESS_CALL(bms->GetApplicationInfo(controlRule.callerPkg,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, callerAppInfo));
     AppExecFwk::ApplicationInfo targetAppInfo;
-    result = IN_PROCESS_CALL(bms->GetApplicationInfo(controlRule.targetPkg,
+    IN_PROCESS_CALL(bms->GetApplicationInfo(controlRule.targetPkg,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, targetAppInfo));
     want.SetParam(JUMP_DIALOG_CALLER_BUNDLE_NAME, controlRule.callerPkg);
     want.SetParam(JUMP_DIALOG_CALLER_MODULE_NAME, callerAppInfo.labelResource.moduleName);
