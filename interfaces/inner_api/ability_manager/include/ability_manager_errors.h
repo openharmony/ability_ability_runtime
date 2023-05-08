@@ -282,7 +282,7 @@ enum {
     /**
      * Result(2097204) for application abnormal.
      */
-    ERR_DISPOSED_STATUS,
+    ERR_APP_CONTROLLED,
 
     /**
      * Result(2097205) for invalid caller.
@@ -318,6 +318,11 @@ enum {
      * Result(2097211) for app jump interceptor.
      */
     ERR_APP_JUMP_INTERCEPTOR_STATUS,
+
+    /**
+     * Result(2097212) for edm application abnormal.
+     */
+    ERR_EDM_APP_CONTROLLED,
 };
 
 enum {
