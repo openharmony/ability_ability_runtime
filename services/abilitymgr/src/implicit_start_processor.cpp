@@ -150,8 +150,10 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    bool isShowDefaultPicker = false;
+    request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, isShowDefaultPicker);
     IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
-        request.want, abilityInfoFlag, userId, abilityInfos, extensionInfos));
+        request.want, abilityInfoFlag, userId, isShowDefaultPicker, abilityInfos, extensionInfos));
 
     HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu",
         abilityInfos.size(), extensionInfos.size());
