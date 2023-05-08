@@ -34,7 +34,7 @@ std::shared_ptr<UriPermissionManagerClient> UriPermissionManagerClient::GetInsta
     if (instance_ == nullptr) {
         std::lock_guard<std::recursive_mutex> lock_l(recursiveMutex_);
         if (instance_ == nullptr) {
-            instance_ = std::make_shared<UriPermissionManagerClient>();
+            instance_ = std::shared_ptr<UriPermissionManagerClient>(new UriPermissionManagerClient());
         }
     }
     return instance_;
