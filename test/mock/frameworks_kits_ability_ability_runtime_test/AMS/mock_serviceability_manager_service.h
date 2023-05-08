@@ -62,8 +62,8 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE) override;
 
-    int StartAbilityByCall(
-        const Want& want, const sptr<IAbilityConnection>& connect, const sptr<IRemoteObject>& callerToken);
+    int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
+        const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE);
 
     int TerminateAbility(
         const sptr<IRemoteObject>& token, int resultCode = -1, const Want* resultWant = nullptr) override;
@@ -139,6 +139,8 @@ public:
     MOCK_METHOD0(CleanAllMissions, int());
     MOCK_METHOD1(MoveMissionToFront, int(int32_t missionId));
     MOCK_METHOD2(MoveMissionToFront, int(int32_t missionId, const StartOptions& startOptions));
+    MOCK_METHOD2(MoveMissionsToForeground, int(const std::vector<int32_t>& missionIds, int32_t topMissionId));
+    MOCK_METHOD2(MoveMissionsToBackground, int(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result));
     MOCK_METHOD1(GetMissionIdByToken, int32_t(const sptr<IRemoteObject>& token));
     MOCK_METHOD2(AcquireShareData, int32_t(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData));
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,

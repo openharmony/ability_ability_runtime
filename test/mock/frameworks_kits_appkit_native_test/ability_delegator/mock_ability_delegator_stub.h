@@ -112,6 +112,8 @@ public:
     MOCK_METHOD0(CleanAllMissions, int());
     MOCK_METHOD1(MoveMissionToFront, int(int32_t missionId));
     MOCK_METHOD2(MoveMissionToFront, int(int32_t missionId, const StartOptions& startOptions));
+    MOCK_METHOD2(MoveMissionsToForeground, int(const std::vector<int32_t>& missionIds, int32_t topMissionId));
+    MOCK_METHOD2(MoveMissionsToBackground, int(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result));
     MOCK_METHOD1(ClearUpApplicationData, int(const std::string&));
     MOCK_METHOD1(GetAbilityRunningInfos, int(std::vector<AbilityRunningInfo>& info));
     MOCK_METHOD2(GetExtensionRunningInfos, int(int upperLimit, std::vector<ExtensionRunningInfo>& info));
@@ -128,8 +130,8 @@ public:
         const sptr<IRemoteMissionListener>& listener) override;
     int UnRegisterMissionListener(const std::string& deviceId,
         const sptr<IRemoteMissionListener>& listener) override;
-    int StartAbilityByCall(
-        const Want& want, const sptr<IAbilityConnection>& connect, const sptr<IRemoteObject>& callerToken) override;
+    int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
+        const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     int ReleaseCall(const sptr<IAbilityConnection>& connect,
         const AppExecFwk::ElementName& element) override;
@@ -257,6 +259,8 @@ public:
     MOCK_METHOD0(CleanAllMissions, int());
     MOCK_METHOD1(MoveMissionToFront, int(int32_t missionId));
     MOCK_METHOD2(MoveMissionToFront, int(int32_t missionId, const StartOptions& startOptions));
+    MOCK_METHOD2(MoveMissionsToForeground, int(const std::vector<int32_t>& missionIds, int32_t topMissionId));
+    MOCK_METHOD2(MoveMissionsToBackground, int(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result));
     MOCK_METHOD1(ClearUpApplicationData, int(const std::string&));
     MOCK_METHOD1(GetAbilityRunningInfos, int(std::vector<AbilityRunningInfo>& info));
     MOCK_METHOD2(GetExtensionRunningInfos, int(int upperLimit, std::vector<ExtensionRunningInfo>& info));
@@ -273,8 +277,8 @@ public:
         const sptr<IRemoteMissionListener>& listener) override;
     int UnRegisterMissionListener(const std::string& deviceId,
         const sptr<IRemoteMissionListener>& listener) override;
-    int StartAbilityByCall(
-        const Want& want, const sptr<IAbilityConnection>& connect, const sptr<IRemoteObject>& callerToken) override;
+    int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
+        const sptr<IRemoteObject>& callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
     void CallRequestDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& callStub) override;
     int ReleaseCall(const sptr<IAbilityConnection>& connect,
         const AppExecFwk::ElementName& element) override;

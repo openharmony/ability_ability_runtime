@@ -91,7 +91,7 @@ const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
 #define APP_ACCESS_BUNDLE_DIR 0x20
-#define OVERLAY_FLAG 0x40
+#define OVERLAY_FLAG 0x80
 
 constexpr int32_t BASE_USER_RANGE = 200000;
 
@@ -1662,8 +1662,8 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         std::vector<OverlayModuleInfo> overlayModuleInfo;
         HILOG_DEBUG("Check overlay app begin.");
         HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetOverlayModuleInfoForTarget");
-        auto ret = IN_PROCESS_CALL(overlayMgrProxy->GetOverlayModuleInfoForTarget(bundleName, "", overlayModuleInfo, userId));
-        if (ret == ERR_OK && overlayModuleInfo.size() != 0) {
+        auto targetRet = IN_PROCESS_CALL(overlayMgrProxy->GetOverlayModuleInfoForTarget(bundleName, "", overlayModuleInfo, userId));
+        if (targetRet == ERR_OK && overlayModuleInfo.size() != 0) {
             HILOG_DEBUG("Start an overlay app process.");
             startMsg.flags = startMsg.flags | OVERLAY_FLAG;
         }

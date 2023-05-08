@@ -435,37 +435,10 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
-     * @return
+     * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ClearUpApplicationData(const std::string &bundleName);
 
-    sptr<IWantSender> GetWantSender(const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken);
-
-    ErrCode SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo);
-
-    void CancelWantSender(const sptr<IWantSender> &sender);
-
-    ErrCode GetPendingWantUid(const sptr<IWantSender> &target, int32_t &uid);
-
-    ErrCode GetPendingWantUserId(const sptr<IWantSender> &target, int32_t &userId);
-
-    ErrCode GetPendingWantBundleName(const sptr<IWantSender> &target, std::string &bundleName);
-
-    ErrCode GetPendingWantCode(const sptr<IWantSender> &target, int32_t &code);
-
-    ErrCode GetPendingWantType(const sptr<IWantSender> &target, int32_t &type);
-
-    void RegisterCancelListener(const sptr<IWantSender> &sender, const sptr<IWantReceiver> &recevier);
-
-    void UnregisterCancelListener(const sptr<IWantSender> &sender, const sptr<IWantReceiver> &recevier);
-
-    ErrCode GetPendingRequestWant(const sptr<IWantSender> &target, std::shared_ptr<Want> &want);
-
-    ErrCode GetWantSenderInfo(const sptr<IWantSender> &target, std::shared_ptr<WantSenderInfo> &info);
-
-    ErrCode GetAppMemorySize();
-
-    bool IsRamConstrainedDevice();
     /**
      * ContinueMission, continue ability from mission center.
      *
@@ -621,6 +594,22 @@ public:
     ErrCode MoveMissionToFront(int32_t missionId, const StartOptions &startOptions);
 
     /**
+     * Move missions to front
+     * @param missionIds Ids of target missions
+     * @param topMissionId Indicate which mission will be moved to top, if set to -1, missions' order won't change
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId);
+
+    /**
+     * Move missions to background
+     * @param missionIds Ids of target missions
+     * @param result The result of move missions to background, and the array is sorted by zOrder
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MoveMissionsToBackground(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result);
+
+    /**
      * @brief Get mission id by ability token.
      *
      * @param token ability token.
@@ -643,10 +632,11 @@ public:
      *
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param accountId Indicates the account to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartAbilityByCall(
-        const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callToken);
+    ErrCode StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callToken, int32_t accountId = DEFAULT_INVAL_VALUE);
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
@@ -664,10 +654,29 @@ public:
      */
     ErrCode ReleaseCall(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element);
 
+    /**
+     * @brief Get the ability running information.
+     *
+     * @param info Ability running information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     ErrCode GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info);
 
+    /**
+     * @brief Get the extension running information.
+     *
+     * @param upperLimit The maximum limit of information wish to get.
+     * @param info Extension running information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     ErrCode GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info);
 
+    /**
+     * @brief Get running process information.
+     *
+     * @param info Running process information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     ErrCode GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info);
 
     /**
@@ -874,9 +883,29 @@ public:
      * @param token The target ability.
      */
     void UpdateMissionSnapShot(const sptr<IRemoteObject>& token);
+
+    /**
+     * @brief Enable recover ability.
+     *
+     * @param token Ability identify.
+     */
     void EnableRecoverAbility(const sptr<IRemoteObject>& token);
+
+    /**
+     * @brief Schedule recovery ability.
+     *
+     * @param token Ability identify.
+     * @param reason See AppExecFwk::StateReason.
+     * @param want Want information.
+     */
     void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason, const Want *want = nullptr);
 
+    /**
+     * @brief Add free install observer.
+     *
+     * @param observer Free install observer.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     ErrCode AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer);
 
     /**
@@ -903,7 +932,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode AcquireShareData(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData);
-    
+
     /**
      * Notify sharing data finished.
      * @param resultCode The result of sharing data.
@@ -913,7 +942,7 @@ public:
      */
     ErrCode ShareDataDone(
         const sptr<IRemoteObject> &token, const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
-    
+
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

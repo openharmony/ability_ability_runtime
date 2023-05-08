@@ -591,6 +591,11 @@ public:
 
     virtual int MoveMissionToFront(int32_t missionId, const StartOptions &startOptions) override;
 
+    virtual int MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId) override;
+
+    virtual int MoveMissionsToBackground(const std::vector<int32_t>& missionIds,
+        std::vector<int32_t>& result) override;
+
     virtual int32_t GetMissionIdByToken(const sptr<IRemoteObject> &token) override;
 
     virtual int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
@@ -605,10 +610,11 @@ public:
      *
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param accountId Indicates the account to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbilityByCall(
-        const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) override;
+    virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.

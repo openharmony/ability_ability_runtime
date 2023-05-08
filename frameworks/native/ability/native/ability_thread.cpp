@@ -72,33 +72,18 @@ AbilityThread::AbilityThread()
 
 AbilityThread::~AbilityThread()
 {
-    wptr<AbilityThread> weak = this;
-    auto task = [weak]() {
-        auto abilityThread = weak.promote();
-        if (abilityThread == nullptr) {
-            HILOG_ERROR("Ability thread is nullptr when destructor.");
-            return;
+    if (isExtension_) {
+        if (currentExtension_) {
+            currentExtension_.reset();
         }
-
-        if (abilityThread->isExtension_) {
-            HILOG_DEBUG("Destroy extension in main-thread");
-            if (abilityThread->currentExtension_) {
-                abilityThread->currentExtension_.reset();
-            }
-        } else {
-            HILOG_DEBUG("Destroy ability in main-thread");
-            if (abilityThread->currentAbility_) {
-                abilityThread->currentAbility_->DetachBaseContext();
-                abilityThread->currentAbility_.reset();
-            }
+    } else {
+        if (currentAbility_) {
+            currentAbility_->DetachBaseContext();
+            currentAbility_.reset();
         }
-
-        DelayedSingleton<AbilityImplFactory>::DestroyInstance();
-    };
-
-    if (abilityHandler_ != nullptr) {
-        abilityHandler_->PostSyncTask(task);
     }
+
+    DelayedSingleton<AbilityImplFactory>::DestroyInstance();
 }
 
 std::string AbilityThread::CreateAbilityName(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
@@ -771,7 +756,7 @@ void AbilityThread::ScheduleAbilityTransaction(const Want &want, const LifeCycle
     sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Schedule ability transaction, name is %{public}s, targeState is %{public}d, isNewWant is %{public}d.",
+    HILOG_INFO("name:%{public}s,targeState:%{public}d,isNewWant:%{public}d",
         want.GetElement().GetAbilityName().c_str(),
         lifeCycleStateInfo.state,
         lifeCycleStateInfo.isNewWant);
