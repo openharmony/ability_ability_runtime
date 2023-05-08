@@ -27,7 +27,6 @@ using ClearProxyCallback = std::function<void()>;
 class UriPermissionManagerClient : public std::enable_shared_from_this<UriPermissionManagerClient> {
 public:
     static std::shared_ptr<UriPermissionManagerClient> GetInstance();
-    UriPermissionManagerClient() = default;
     ~UriPermissionManagerClient() = default;
 
     /**
@@ -59,6 +58,7 @@ public:
     void OnLoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
     void OnLoadSystemAbilityFail();
 private:
+    UriPermissionManagerClient() = default;
     sptr<IUriPermissionManager> ConnectUriPermService();
     void ClearProxy();
     bool LoadUriPermService();
