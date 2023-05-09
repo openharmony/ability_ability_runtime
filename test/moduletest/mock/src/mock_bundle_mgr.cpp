@@ -171,7 +171,7 @@ bool BundleMgrService::CheckWantEntity(const AAFwk::Want& want, AbilityInfo& abi
     return false;
 }
 
-bool BundleMgrService::ImplicitQueryInfos(const Want& want, int32_t flags, int32_t userId,
+bool BundleMgrService::ImplicitQueryInfos(const Want& want, int32_t flags, int32_t userId, bool isReturnDefaultSetting,
     std::vector<AbilityInfo>& abilityInfos, std::vector<ExtensionAbilityInfo>& extensionInfos)
 {
     if (want.GetAction() == "ohos.want.action.viewData") {
