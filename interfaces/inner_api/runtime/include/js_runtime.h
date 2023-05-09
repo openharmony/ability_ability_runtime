@@ -102,7 +102,7 @@ public:
     bool StartDebugger(bool needBreakPoint, const DebuggerPostTask& debuggerPostTask = {});
     void StopDebugger();
     void InitConsoleModule();
-    bool LoadScript(const std::string& path, std::unique_ptr<uint8_t[]> buffer, size_t len, bool isBundle);
+    bool LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle);
 
     NativeEngine* GetNativeEnginePointer() const;
     panda::ecmascript::EcmaVM* GetEcmaVm() const;

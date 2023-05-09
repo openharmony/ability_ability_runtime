@@ -401,8 +401,7 @@ public:
     void AllowCrossThreadExecution() const override
     {}
 
-    bool RunScriptBuffer(const std::string &path, std::unique_ptr<uint8_t[]> buffer,
-        size_t size, bool isBundle) override
+    bool RunScriptBuffer(const std::string &path, uint8_t *buffer, size_t size, bool isBundle) override
     {
         return false;
     }
