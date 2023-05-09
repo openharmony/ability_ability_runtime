@@ -391,11 +391,11 @@ bool JsRuntime::LoadScript(const std::string& path, std::vector<uint8_t>* buffer
     return jsEnv_->LoadScript(path, buffer, isBundle);
 }
 
-bool JsRuntime::LoadScript(const std::string& path, std::unique_ptr<uint8_t[]> buffer, size_t len, bool isBundle)
+bool JsRuntime::LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle)
 {
     HILOG_DEBUG("function called.");
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
-    return jsEnv_->LoadScript(path, std::move(buffer), len, isBundle);
+    return jsEnv_->LoadScript(path, buffer, len, isBundle);
 }
 
 std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(NativeEngine* engine,
@@ -825,7 +825,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
             return false;
         }
 
-        return LoadScript(abcPath, std::move(dataPtr), len, isBundle_);
+        return LoadScript(abcPath, dataPtr.release(), len, isBundle_);
     };
 
     if (useCommonChunk) {

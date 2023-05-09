@@ -68,7 +68,7 @@ public:
 
     void StopDebugger();
 
-    bool LoadScript(const std::string& path, std::unique_ptr<uint8_t[]> buffer, size_t len, bool isBundle);
+    bool LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle);
 
 private:
     std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;
