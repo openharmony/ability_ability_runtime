@@ -556,15 +556,15 @@ void QuickFixManagerApplyTask::NotifyApplyStatus(int32_t resultCode)
         want.SetParam(APPLY_RESULT_INFO, QuickFixErrorUtil::GetErrorMessage(resultCode));
         want.SetParam(BUNDLE_VERSION, bundleVersionCode_);
         want.SetParam(PATCH_VERSION, patchVersionCode_);
+
+        std::string moduleName = std::accumulate(moduleNames_.begin(), moduleNames_.end(), std::string(""),
+            [moduleName = moduleNames_](const std::string &name, const std::string &str) {
+                return (str == moduleName.front()) ? (name + str) : (name + "," + str);
+            });
+        want.SetModuleName(moduleName);
     }
 
     want.SetParam(BUNDLE_NAME, bundleName_);
-
-    std::string moduleName = std::accumulate(moduleNames_.begin(), moduleNames_.end(), std::string(""),
-        [moduleName = moduleNames_](const std::string &name, const std::string &str) {
-            return (str == moduleName.front()) ? (name + str) : (name + "," + str);
-        });
-    want.SetModuleName(moduleName);
 
     EventFwk::CommonEventData commonData {want};
     EventFwk::CommonEventManager::PublishCommonEvent(commonData);
