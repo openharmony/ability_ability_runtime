@@ -151,10 +151,10 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
-    bool isReturnDefaultSetting = false;
-    request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, isReturnDefaultSetting);
+    bool withDefault = false;
+    request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault);
     IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
-        request.want, abilityInfoFlag, userId, isReturnDefaultSetting, abilityInfos, extensionInfos));
+        request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos));
 
     HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu",
         abilityInfos.size(), extensionInfos.size());
@@ -177,7 +177,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<std::string> infoNames;
     if (deviceType == STR_PC) {
         IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(implicitwant, abilityInfoFlag, userId,
-            isReturnDefaultSetting, implicitAbilityInfos, implicitExtensionInfos));
+            withDefault, implicitAbilityInfos, implicitExtensionInfos));
         if (implicitAbilityInfos.size() != 0 && request.want.GetType() != TYPE_ONLY_MATCH_WILDCARD) {
             for (auto implicitAbilityInfo : implicitAbilityInfos) {
                 infoNames.emplace_back(implicitAbilityInfo.bundleName + "#" +
@@ -191,7 +191,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         }
         if (deviceType == STR_PC) {
             auto isDefaultFlag = false;
-            if (isReturnDefaultSetting) {
+            if (withDefault) {
                 auto defaultMgr = GetDefaultAppProxy();
                 AppExecFwk::BundleInfo bundleInfo;
                 ErrCode ret =
