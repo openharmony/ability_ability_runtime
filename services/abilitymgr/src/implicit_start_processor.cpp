@@ -191,7 +191,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         }
         if (deviceType == STR_PC) {
             auto isDefaultFlag = false;
-            if (withDefault) {
+            if (!withDefault) {
                 auto defaultMgr = GetDefaultAppProxy();
                 AppExecFwk::BundleInfo bundleInfo;
                 ErrCode ret =
