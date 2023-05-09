@@ -190,20 +190,22 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
             continue;
         }
         if (deviceType == STR_PC) {
-            auto defaultMgr = GetDefaultAppProxy();
-            AppExecFwk::BundleInfo bundleInfo;
             auto isDefaultFlag = false;
-            ErrCode ret =
-                IN_PROCESS_CALL(defaultMgr->GetDefaultApplication(userId, request.want.GetType(), bundleInfo));
-            if (ret == ERR_OK) {
-                if (bundleInfo.abilityInfos.size() == 1) {
-                    HILOG_INFO("find default ability.");
-                    isDefaultFlag = true;
-                } else if (bundleInfo.extensionInfos.size() == 1) {
-                    HILOG_INFO("find default extension.");
-                    isDefaultFlag = true;
-                } else {
-                    HILOG_INFO("GetDefaultApplication failed.");
+            if (isReturnDefaultSetting) {
+                auto defaultMgr = GetDefaultAppProxy();
+                AppExecFwk::BundleInfo bundleInfo;
+                ErrCode ret =
+                    IN_PROCESS_CALL(defaultMgr->GetDefaultApplication(userId, request.want.GetType(), bundleInfo));
+                if (ret == ERR_OK) {
+                    if (bundleInfo.abilityInfos.size() == 1) {
+                        HILOG_INFO("find default ability.");
+                        isDefaultFlag = true;
+                    } else if (bundleInfo.extensionInfos.size() == 1) {
+                        HILOG_INFO("find default extension.");
+                        isDefaultFlag = true;
+                    } else {
+                        HILOG_INFO("GetDefaultApplication failed.");
+                    }
                 }
             }
             if (!isMoreHapList && !isDefaultFlag) {
