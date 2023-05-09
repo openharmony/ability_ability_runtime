@@ -176,8 +176,8 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::ExtensionAbilityInfo> implicitExtensionInfos;
     std::vector<std::string> infoNames;
     if (deviceType == STR_PC) {
-        IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
-            implicitwant, abilityInfoFlag, userId, implicitAbilityInfos, implicitExtensionInfos));
+        IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(implicitwant, abilityInfoFlag, userId,
+            isReturnDefaultSetting, implicitAbilityInfos, implicitExtensionInfos));
         if (implicitAbilityInfos.size() != 0 && request.want.GetType() != TYPE_ONLY_MATCH_WILDCARD) {
             for (auto implicitAbilityInfo : implicitAbilityInfos) {
                 infoNames.emplace_back(implicitAbilityInfo.bundleName + "#" +
