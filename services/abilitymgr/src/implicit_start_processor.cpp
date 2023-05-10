@@ -152,7 +152,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     bool withDefault = false;
-    withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault);
+    withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault) ? false : true;
     IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos));
 
@@ -191,7 +191,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         }
         if (deviceType == STR_PC) {
             auto isDefaultFlag = false;
-            if (!withDefault) {
+            if (withDefault) {
                 auto defaultMgr = GetDefaultAppProxy();
                 AppExecFwk::BundleInfo bundleInfo;
                 ErrCode ret =
