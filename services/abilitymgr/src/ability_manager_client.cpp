@@ -659,6 +659,13 @@ void AbilityManagerClient::CallRequestDone(const sptr<IRemoteObject> &token, con
     abms->CallRequestDone(token, callStub);
 }
 
+void AbilityManagerClient::GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    abms->GetAbilityTokenByCalleeObj(callStub, token);
+}
+
 ErrCode AbilityManagerClient::ReleaseCall(
     const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
 {
