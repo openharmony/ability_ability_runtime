@@ -200,6 +200,19 @@ public:
     }
 
     /**
+     * Start ui ability with want, send want to ability manager service.
+     *
+     * @param want the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param sessionInfo the session info of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions, sptr<SessionInfo> sessionInfo)
+    {
+        return 0;
+    }
+
+    /**
      * Stop extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to stop.
@@ -579,10 +592,11 @@ public:
      *
      * @param want, Special want for service type's ability.
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param accountId Indicates the account to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbilityByCall(
-        const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken) = 0;
+    virtual int StartAbilityByCall(const Want &want, const sptr<IAbilityConnection> &connect,
+        const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) = 0;
 
     /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
@@ -1143,6 +1157,8 @@ public:
 
         // ipc id for connect ui extension ability
         CONNECT_UI_EXTENSION_ABILITY,
+
+        START_UI_ABILITY_BY_SCB,
 
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
