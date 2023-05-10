@@ -209,7 +209,7 @@ bool LocalCallContainer::IsCallBackCalled(const std::vector<std::shared_ptr<Call
     return true;
 }
 
-void LocalCallContainer::DumpCalls(std::vector<std::string>& info) const
+void LocalCallContainer::DumpCalls(std::vector<std::string>& info)
 {
     HILOG_DEBUG("LocalCallContainer::DumpCalls called.");
     info.emplace_back("          caller connections:");
