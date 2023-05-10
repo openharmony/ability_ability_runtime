@@ -152,7 +152,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     bool withDefault = false;
-    request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault);
+    withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault);
     IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos));
 
