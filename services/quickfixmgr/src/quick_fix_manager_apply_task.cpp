@@ -747,7 +747,7 @@ QuickFixManagerApplyTask::TaskType QuickFixManagerApplyTask::GetTaskType()
 void QuickFixManagerApplyTask::PostRevokeQuickFixTask()
 {
     std::weak_ptr<QuickFixManagerApplyTask> thisWeakPtr(weak_from_this());
-    auto unloadTask = [thisWeakPtr] () {
+    auto revokeTask = [thisWeakPtr] () {
         auto applyTask = thisWeakPtr.lock();
         if (applyTask == nullptr) {
             HILOG_ERROR("Revoke task is nullptr.");
@@ -762,7 +762,7 @@ void QuickFixManagerApplyTask::PostRevokeQuickFixTask()
         applyTask->HandleRevokeQuickFixAppStopTask();
     };
 
-    if (eventHandler_ == nullptr || !eventHandler_->PostTask(unloadTask)) {
+    if (eventHandler_ == nullptr || !eventHandler_->PostTask(revokeTask)) {
         HILOG_ERROR("Post revoke task failed.");
     }
     PostTimeOutTask();
