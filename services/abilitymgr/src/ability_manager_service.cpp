@@ -3466,7 +3466,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
     } else {
         /* highest priority extension ability */
         HILOG_INFO("Start the highest priority extension ability. bundleName: %{public}s, ability:%{public}s",
-            extensionAbilityInfo.bundleName.c_str(), extens ionAbilityInfo.name.c_str());
+            extensionAbilityInfo.bundleName.c_str(), extensionAbilityInfo.name.c_str());
         abilityWant.SetElementName(extensionAbilityInfo.bundleName, extensionAbilityInfo.name);
     }
 
