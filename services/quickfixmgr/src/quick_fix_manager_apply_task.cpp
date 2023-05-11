@@ -116,7 +116,6 @@ public:
             } else {
                 applyTask_->NotifySwitchCallbackTask();
             }
-
         } while (0);
 
         if (ret != QUICK_FIX_OK) {
@@ -310,9 +309,10 @@ void QuickFixManagerApplyTask::RunRevoke()
 
 void QuickFixManagerApplyTask::InitUnLoadPatch(const std::string &bundleName, bool isSoContained)
 {
-    isRunning_ = GetRunningState();
     isSoContained_ = isSoContained;
     bundleName_ = bundleName;
+    HILOG_DEBUG("Function called. name:%{public}s and isSoContained:%{public}s", bundleName_.c_str(),
+        isSoContained_ ? "true" : "false");
 }
 
 void QuickFixManagerApplyTask::HandlePatchDeployed()
