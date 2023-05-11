@@ -755,6 +755,7 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixAppRunningTask()
     // so contained, reg app died
     if (isSoContained_) {
         RegAppStateObserver();
+        RemoveTimeoutTask();
         return;
     }
 
@@ -842,6 +843,7 @@ void QuickFixManagerApplyTask::NotifyProcessDiedTask()
     HILOG_DEBUG("Function called.");
     // app process died
     HandleRevokeQuickFixAppStopTask();
+    PostTimeOutTask();
 }
 
 void QuickFixManagerApplyTask::HandleRevokeQuickFixAppStopTask()
