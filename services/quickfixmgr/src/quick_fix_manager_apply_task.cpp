@@ -111,11 +111,16 @@ public:
                 break;
             }
 
-            if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX) {
+            if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_APPLY) {
                 applyTask_->HandlePatchSwitched();
-            } else {
-                applyTask_->NotifySwitchCallbackTask();
+                break;
+            } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
+                applyTask_->RevokeNotifySwitchCallbackTask();
+                break;
             }
+
+            ret = QUICK_FIX_SWICH_FAILED;
+            HILOG_ERROR("Switch quick fix invalid task type");
         } while (0);
 
         if (ret != QUICK_FIX_OK) {
@@ -141,11 +146,16 @@ public:
                 break;
             }
 
-            if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX)  {
+            if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_APPLY) {
                 applyTask_->HandlePatchDeleted();
-            } else {
+                break;
+            } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
                 applyTask_->RevokeQuickFixDeleteDone();
+                break;
             }
+
+            ret = QUICK_FIX_DELETE_FAILED;
+            HILOG_ERROR("Delete quick fix invalid task type");
         } while (0);
 
         if (ret != QUICK_FIX_OK) {
@@ -194,10 +204,12 @@ public:
 
         bool isRunning = applyTask_->GetRunningState();
         if (!isRunning) {
-            if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX) {
+            if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_APPLY) {
                 applyTask_->HandlePatchDeployed();
+            } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
+                applyTask_->RevokeNotifyProcessDiedTask();
             } else {
-                applyTask_->NotifyProcessDiedTask();
+                HILOG_WARN("Invalid task type");
             }
         }
 
@@ -242,11 +254,15 @@ public:
             return;
         }
 
-        if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX) {
+        if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_APPLY) {
             applyTask_->PostSwitchQuickFixTask();
-        } else {
-            applyTask_->NotifyDeleteCallbackTask();
+            return;
+        } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
+            applyTask_->RevokeNotifyDeleteCallbackTask();
+            return;
         }
+
+        HILOG_WARN("Invalid task type");
     }
 
     void OnReloadPageDone(int32_t resultCode, [[maybe_unused]] int32_t recordId) override
@@ -295,7 +311,7 @@ void QuickFixManagerApplyTask::Run(const std::vector<std::string> &quickFixFiles
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Run apply task.");
-    taskType_ = TaskType::QUICK_FIX;
+    taskType_ = TaskType::QUICK_FIX_APPLY;
     PostDeployQuickFixTask(quickFixFiles);
 }
 
@@ -311,7 +327,7 @@ void QuickFixManagerApplyTask::InitUnLoadPatch(const std::string &bundleName, bo
 {
     isSoContained_ = isSoContained;
     bundleName_ = bundleName;
-    HILOG_DEBUG("Function called. name:%{public}s and isSoContained:%{public}s", bundleName_.c_str(),
+    HILOG_INFO("Function called. name:%{public}s and isSoContained:%{public}s", bundleName_.c_str(),
         isSoContained_ ? "true" : "false");
 }
 
@@ -547,7 +563,7 @@ void QuickFixManagerApplyTask::NotifyApplyStatus(int32_t resultCode)
     HILOG_DEBUG("function called.");
 
     Want want;
-    if (GetTaskType() == TaskType::QUICK_FIX) {
+    if (GetTaskType() == TaskType::QUICK_FIX_APPLY) {
         want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_QUICK_FIX_APPLY_RESULT);
         want.SetParam(APPLY_RESULT, QuickFixErrorUtil::GetErrorCode(resultCode));
         want.SetParam(APPLY_RESULT_INFO, QuickFixErrorUtil::GetErrorMessage(resultCode));
@@ -559,10 +575,13 @@ void QuickFixManagerApplyTask::NotifyApplyStatus(int32_t resultCode)
                 return (str == moduleName.front()) ? (name + str) : (name + "," + str);
             });
         want.SetModuleName(moduleName);
-    } else {
+    } else if (GetTaskType() == TaskType::QUICK_FIX_REVOKE) {
         want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_QUICK_FIX_REVOKE_RESULT);
         want.SetParam(REVOKE_RESULT, QuickFixErrorUtil::GetErrorCode(resultCode));
         want.SetParam(REVOKE_RESULT_INFO, QuickFixErrorUtil::GetErrorMessage(resultCode));
+    } else {
+        HILOG_WARN("Invalid task type, Can not publish common event");
+        return;
     }
 
     want.SetParam(BUNDLE_NAME, bundleName_);
@@ -744,7 +763,7 @@ void QuickFixManagerApplyTask::PostRevokeQuickFixTask()
     };
 
     if (eventHandler_ == nullptr || !eventHandler_->PostTask(unloadTask)) {
-        HILOG_ERROR("Post deploy task failed.");
+        HILOG_ERROR("Post revoke task failed.");
     }
     PostTimeOutTask();
 }
@@ -760,26 +779,10 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixAppRunningTask()
     }
 
     // so not contained, switch to bms
-    sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) QuickFixUnloadTaskCallback(
-        shared_from_this());
-    if (bundleQfMgr_ == nullptr) {
-        HILOG_ERROR("Bundle quick fix manager is nullptr.");
-        NotifyApplyStatus(QUICK_FIX_BUNDLEMGR_INVALID);
-        RemoveSelf();
-        return;
-    }
-
-    auto ret = bundleQfMgr_->SwitchQuickFix(bundleName_, false, callback);
-    if (ret != ERR_OK) {
-        HILOG_ERROR("Switch quick fix failed with %{public}d.", ret);
-        NotifyApplyStatus(QUICK_FIX_SWICH_FAILED);
-        RemoveSelf();
-        return;
-    }
+    HandleRevokeQuickFixAppStopTask();
 }
 
-
-void QuickFixManagerApplyTask::NotifySwitchCallbackTask()
+void QuickFixManagerApplyTask::RevokeNotifySwitchCallbackTask()
 {
     HILOG_DEBUG("Function called.");
     // process is run, notify app unload patch
@@ -789,7 +792,7 @@ void QuickFixManagerApplyTask::NotifySwitchCallbackTask()
     }
 
     // call delete patch to bms
-    NotifyDeleteCallbackTask();
+    RevokeNotifyDeleteCallbackTask();
 }
 
 void QuickFixManagerApplyTask::HandleRevokeQuickFixNotifyAppUnload()
@@ -807,20 +810,20 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixNotifyAppUnload()
         new (std::nothrow) QuickFixUnloadNotifyCallback(shared_from_this());
     auto ret = appMgr_->NotifyUnLoadRepairPatch(bundleName_, callback);
     if (ret != 0) {
-        HILOG_ERROR("Notify app reload page failed.");
-        NotifyApplyStatus(QUICK_FIX_NOTIFY_RELOAD_PAGE_FAILED);
+        HILOG_ERROR("Notify app unload patch failed.");
+        NotifyApplyStatus(QUICK_FIX_NOTIFY_UNLOAD_PATCH_FAILED);
         RemoveSelf();
     }
 
     HILOG_DEBUG("Function end.");
 }
 
-void QuickFixManagerApplyTask::NotifyDeleteCallbackTask()
+void QuickFixManagerApplyTask::RevokeNotifyDeleteCallbackTask()
 {
     sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) QuickFixUnloadTaskCallback(
         shared_from_this());
     if (bundleQfMgr_ == nullptr) {
-        HILOG_ERROR("NotifyDeleteCallbackTask, Bundle quick fix manager is nullptr.");
+        HILOG_ERROR("Bundle quick fix manager is nullptr.");
         NotifyApplyStatus(QUICK_FIX_BUNDLEMGR_INVALID);
         RemoveSelf();
         return;
@@ -829,8 +832,8 @@ void QuickFixManagerApplyTask::NotifyDeleteCallbackTask()
     // call delete patch to bms
     auto ret = bundleQfMgr_->DeleteQuickFix(bundleName_, callback);
     if (ret != ERR_OK) {
-        HILOG_ERROR("NotifyDeleteCallbackTask, Delete quick fix failed with %{public}d.", ret);
-        NotifyApplyStatus(QUICK_FIX_SWICH_FAILED);
+        HILOG_ERROR("Delete quick fix failed with %{public}d.", ret);
+        NotifyApplyStatus(QUICK_FIX_DELETE_FAILED);
         RemoveSelf();
         return;
     }
@@ -838,7 +841,7 @@ void QuickFixManagerApplyTask::NotifyDeleteCallbackTask()
     HILOG_DEBUG("Function end.");
 }
 
-void QuickFixManagerApplyTask::NotifyProcessDiedTask()
+void QuickFixManagerApplyTask::RevokeNotifyProcessDiedTask()
 {
     HILOG_DEBUG("Function called.");
     // app process died
