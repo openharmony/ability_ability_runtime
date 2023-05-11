@@ -444,11 +444,11 @@ HWTEST_F(QuickFixManagerApplyTaskTest, RegAppStateObserver_0200, TestSize.Level1
 
 
 /**
- * @tc.name: UnloadQuickFixRevokeDeleteDone_0100
+ * @tc.name: RevokeQuickFixDeleteDone_0100
  * @tc.desc: revoke quick fix.
  * @tc.type: FUNC
  */
-HWTEST_F(QuickFixManagerApplyTaskTest, UnloadQuickFixRevokeDeleteDone_0100, TestSize.Level1)
+HWTEST_F(QuickFixManagerApplyTaskTest, RevokeQuickFixDeleteDone_0100, TestSize.Level1)
 {
     HILOG_INFO("%{public}s start.", __func__);
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
@@ -458,7 +458,7 @@ HWTEST_F(QuickFixManagerApplyTaskTest, UnloadQuickFixRevokeDeleteDone_0100, Test
     applyTask->bundleVersionCode_ = 1;
     applyTask->patchVersionCode_ = 100;
     applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
-    applyTask->UnloadQuickFixRevokeDeleteDone();
+    applyTask->RevokeQuickFixDeleteDone();
     HILOG_INFO("%{public}s end.", __func__);
 }
 
@@ -503,11 +503,11 @@ HWTEST_F(QuickFixManagerApplyTaskTest, NotifyProcessDiedTask_0100, TestSize.Leve
 }
 
 /**
- * @tc.name: HandleUnloadAppRunningQuickFixRevokeTask_0100
+ * @tc.name: HandleRevokeQuickFixAppRunningTask_0100
  * @tc.desc: revoke quick fix.
  * @tc.type: FUNC
  */
-HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnloadAppRunningQuickFixRevokeTask_0100, TestSize.Level1)
+HWTEST_F(QuickFixManagerApplyTaskTest, HandleRevokeQuickFixAppRunningTask_0100, TestSize.Level1)
 {
     HILOG_INFO("%{public}s start.", __func__);
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
@@ -518,17 +518,17 @@ HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnloadAppRunningQuickFixRevokeTask_
     applyTask->patchVersionCode_ = 100;
     applyTask->isSoContained_ = true;
     applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
-    applyTask->HandleUnloadAppRunningQuickFixRevokeTask();
+    applyTask->HandleRevokeQuickFixAppRunningTask();
     EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
     HILOG_INFO("%{public}s end.", __func__);
 }
 
 /**
- * @tc.name: HandleUnloadAppRunningQuickFixRevokeTask_0200
+ * @tc.name: HandleRevokeQuickFixAppRunningTask_0200
  * @tc.desc: revoke quick fix.
  * @tc.type: FUNC
  */
-HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnloadAppRunningQuickFixRevokeTask_0200, TestSize.Level1)
+HWTEST_F(QuickFixManagerApplyTaskTest, HandleRevokeQuickFixAppRunningTask_0200, TestSize.Level1)
 {
     HILOG_INFO("%{public}s start.", __func__);
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
@@ -539,17 +539,17 @@ HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnloadAppRunningQuickFixRevokeTask_
     applyTask->patchVersionCode_ = 100;
     applyTask->isSoContained_ = false;
     applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
-    applyTask->HandleUnloadAppRunningQuickFixRevokeTask();
+    applyTask->HandleRevokeQuickFixAppRunningTask();
     EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
     HILOG_INFO("%{public}s end.", __func__);
 }
 
 /**
- * @tc.name: HandleUnLoadNotifyAppUnload_0100
+ * @tc.name: HandleRevokeQuickFixNotifyAppUnload_0100
  * @tc.desc: revoke quick fix.
  * @tc.type: FUNC
  */
-HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnLoadNotifyAppUnload_0100, TestSize.Level1)
+HWTEST_F(QuickFixManagerApplyTaskTest, HandleRevokeQuickFixNotifyAppUnload_0100, TestSize.Level1)
 {
     HILOG_INFO("%{public}s start.", __func__);
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr_, appMgr_,
@@ -560,7 +560,7 @@ HWTEST_F(QuickFixManagerApplyTaskTest, HandleUnLoadNotifyAppUnload_0100, TestSiz
     applyTask->patchVersionCode_ = 100;
     applyTask->isSoContained_ = false;
     applyTask->taskType_ = QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE;
-    applyTask->HandleUnLoadNotifyAppUnload();
+    applyTask->HandleRevokeQuickFixNotifyAppUnload();
     EXPECT_EQ(applyTask->quickFixMgrService_.promote(), quickFixMs_);
     HILOG_INFO("%{public}s end.", __func__);
 }

@@ -71,7 +71,7 @@ const std::map<int32_t, std::string> EXTERNAL_ERR_MSG_MAP = {
     { ERR_QUICKFIX_LOAD_PATCH_FAILED,   "Load patch failed." },
     { ERR_QUICKFIX_UNLOAD_PATCH_FAILED, "Unload patch failed." },
     { ERR_QUICKFIX_INTERNAL_ERROR,      "Internal error." },
-    { ERR_QUICKFIX_DEPLOYING_TASK,      "The application has a deployment patch task that is being processed." },
+    { ERR_QUICKFIX_DEPLOYING_TASK,      "The application has a apply quick fix task that is being processed." },
 };
 } // namespace
 

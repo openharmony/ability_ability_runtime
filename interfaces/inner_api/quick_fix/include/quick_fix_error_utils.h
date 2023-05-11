@@ -83,7 +83,7 @@ enum {
     // Internal error.
     ERR_QUICKFIX_INTERNAL_ERROR = 18500008,
 
-    // The application has a deployment patch task that is being processed.
+    // The application has a apply quick fix task that is being processed.
     ERR_QUICKFIX_DEPLOYING_TASK = 18500009,
 };
 

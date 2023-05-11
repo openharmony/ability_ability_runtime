@@ -128,56 +128,63 @@ int32_t QuickFixManagerService::RevokeQuickFix(const std::string &bundleName)
         HILOG_ERROR("The caller is not system-app, can not use system-api");
         return QUICK_FIX_NOT_SYSTEM_APP;
     }
-    if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission() &&
+
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission() ||
         !AAFwk::PermissionVerification::GetInstance()->VerifyInstallBundlePermission()) {
         HILOG_ERROR("Permission verification failed");
         return QUICK_FIX_VERIFY_PERMISSION_FAILED;
     }
+
     if (CheckPatchTaskByBundleName(bundleName)) {
-        HILOG_ERROR("Permission verification failed");
+        HILOG_ERROR("Has a apply quick fix task");
         return QUICK_FIX_DEPLOYING_TASK;
     }
+
     auto bundleMgr = QuickFixUtil::GetBundleManagerProxy();
     if (bundleMgr == nullptr) {
         HILOG_ERROR("Failed to get bundle manager.");
         return QUICK_FIX_CONNECT_FAILED;
     }
+
     AppExecFwk::BundleInfo bundleInfo;
     if (!bundleMgr->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
         AppExecFwk::Constants::ANY_USERID)) {
         HILOG_ERROR("Get bundle info failed.");
         return QUICK_FIX_GET_BUNDLE_INFO_FAILED;
     }
-    auto patchExists = false;
-    auto isSoContained = false;
+
+    auto isSoContained = !bundleInfo.applicationInfo.appQuickFix.deployedAppqfInfo.nativeLibraryPath.empty();
+    auto patchExists = true;
     for (auto &item : bundleInfo.hapModuleInfos) {
         if (!item.hqfInfo.moduleName.empty()) {
-            patchExists = true;
-            if (!item.hqfInfo.nativeLibraryPath.empty()) {
-                isSoContained = true;
-                break;
-            }
+            patchExists = false;
+            break;
         }
     }
-    if (!patchExists) {
+
+    if (patchExists) {
         HILOG_ERROR("Patch does not exist.");
         return QUICK_FIX_GET_BUNDLE_INFO_FAILED;
     }
+
     auto appMgr = QuickFixUtil::GetAppManagerProxy();
     if (appMgr == nullptr) {
         HILOG_ERROR("App manager is nullptr.");
         return QUICK_FIX_CONNECT_FAILED;
     }
+
     auto bundleQfMgr = QuickFixUtil::GetBundleQuickFixMgrProxy();
     if (bundleQfMgr == nullptr) {
         HILOG_ERROR("Bundle quick fix manager is nullptr.");
         return QUICK_FIX_CONNECT_FAILED;
     }
+
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr, appMgr, eventHandler_, this);
     if (applyTask == nullptr) {
         HILOG_ERROR("Task connect failed.");
         return QUICK_FIX_CONNECT_FAILED;
     }
+
     applyTask->InitUnLoadPatch(bundleName, isSoContained);
     AddApplyTask(applyTask);
     applyTask->RunRevoke();
@@ -208,11 +215,11 @@ bool QuickFixManagerService::CheckPatchTaskByBundleName(const std::string &bundl
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto &item : applyTasks_) {
         if (item != nullptr && item->GetBundleName() == bundleName) {
-            HILOG_DEBUG("bundleName %{public}s not found in tasks.", bundleName.c_str());
             return true;
         }
     }
 
+    HILOG_DEBUG("bundleName %{public}s not found in tasks.", bundleName.c_str());
     return false;
 }
 }  // namespace AAFwk

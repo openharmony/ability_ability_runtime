@@ -96,7 +96,7 @@ sptr<IQuickFixManager> QuickFixManagerClient::GetQuickFixMgrProxy()
 
 int32_t QuickFixManagerClient::RevokeQuickFix(const std::string &bundleName)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("Function called.");
 
     auto quickFixMgr = GetQuickFixMgrProxy();
     if (quickFixMgr == nullptr) {
@@ -105,7 +105,7 @@ int32_t QuickFixManagerClient::RevokeQuickFix(const std::string &bundleName)
     }
 
     auto retval = quickFixMgr->RevokeQuickFix(bundleName);
-    HILOG_DEBUG("function call ernd retval is %{public}d.", retval);
+    HILOG_DEBUG("Function call end, retval is %{public}d.", retval);
     return retval;
 }
 
