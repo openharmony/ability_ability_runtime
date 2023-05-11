@@ -34,7 +34,7 @@ public:
     virtual ~QuickFixManagerApplyTask();
 
     enum TaskType {
-        QUICK_FIX,
+        QUICK_FIX_APPLY,
         QUICK_FIX_REVOKE,
     };
 
@@ -60,9 +60,9 @@ public:
     std::string GetBundleName();
     TaskType GetTaskType();
     void RevokeQuickFixDeleteDone();
-    void NotifySwitchCallbackTask();
-    void NotifyDeleteCallbackTask();
-    void NotifyProcessDiedTask();
+    void RevokeNotifySwitchCallbackTask();
+    void RevokeNotifyDeleteCallbackTask();
+    void RevokeNotifyProcessDiedTask();
 private:
     void PostDeployQuickFixTask(const std::vector<std::string> &quickFixFiles);
     void PostTimeOutTask();
