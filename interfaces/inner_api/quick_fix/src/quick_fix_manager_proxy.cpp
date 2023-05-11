@@ -117,22 +117,22 @@ int32_t QuickFixManagerProxy::GetApplyedQuickFixInfo(const std::string &bundleNa
 
 int32_t QuickFixManagerProxy::RevokeQuickFix(const std::string &bundleName)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("Function called.");
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(AAFwk::IQuickFixManager::GetDescriptor())) {
-        HILOG_ERROR("RevokeQuickFix, Write interface token failed.");
+        HILOG_ERROR("Write interface token failed.");
         return QUICK_FIX_WRITE_PARCEL_FAILED;
     }
 
     if (!data.WriteString(bundleName)) {
-        HILOG_ERROR("RevokeQuickFix, Write quick fix files failed.");
+        HILOG_ERROR("Write quick fix files failed.");
         return QUICK_FIX_WRITE_PARCEL_FAILED;
     }
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        HILOG_ERROR("RevokeQuickFix, Remote is nullptr.");
+        HILOG_ERROR("Remote is nullptr.");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
@@ -140,12 +140,12 @@ int32_t QuickFixManagerProxy::RevokeQuickFix(const std::string &bundleName)
     MessageOption option;
     auto ret = remote->SendRequest(QuickFixMgrCmd::ON_REVOKE_QUICK_FIX, data, reply, option);
     if (ret != 0) {
-        HILOG_ERROR("RevokeQuickFix, Send request failed with error %{public}d.", ret);
+        HILOG_ERROR("Send request failed with error %{public}d.", ret);
         return QUICK_FIX_SEND_REQUEST_FAILED;
     }
 
     auto retval = reply.ReadInt32();
-    HILOG_DEBUG("RevokeQuickFix finished with %{public}d.", retval);
+    HILOG_DEBUG("Finished with %{public}d.", retval);
     return retval;
 }
 }  // namespace AAFwk

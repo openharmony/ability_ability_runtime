@@ -59,7 +59,7 @@ public:
     void InitUnLoadPatch(const std::string &bundleName, bool isSoContained);
     std::string GetBundleName();
     TaskType GetTaskType();
-    void UnloadQuickFixRevokeDeleteDone();
+    void RevokeQuickFixDeleteDone();
     void NotifySwitchCallbackTask();
     void NotifyDeleteCallbackTask();
     void NotifyProcessDiedTask();
@@ -70,10 +70,10 @@ private:
     void PostNotifyUnloadRepairPatchTask();
     void PostNotifyHotReloadPageTask();
     void RegAppStateObserver();
-    void PostUnloadQuickFixRevokeTask();
-    void HandleUnloadAppRunningQuickFixRevokeTask();
-    void HandleUnLoadNotifyAppUnload();
-    void HandleUnloadAppStopQuickFixRevokeSwitchTask();
+    void PostRevokeQuickFixTask();
+    void HandleRevokeQuickFixAppRunningTask();
+    void HandleRevokeQuickFixNotifyAppUnload();
+    void HandleRevokeQuickFixAppStopTask();
 
     sptr<AppExecFwk::IQuickFixManager> bundleQfMgr_ = nullptr;
     sptr<AppExecFwk::IAppMgr> appMgr_ = nullptr;

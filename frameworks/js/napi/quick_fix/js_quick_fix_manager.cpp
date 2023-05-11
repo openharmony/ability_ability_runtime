@@ -172,19 +172,18 @@ private:
                 return;
             }
 
-            auto retCode = quickFixMgr->RevokeQuickFix(bundleName);
-            *retval = retCode;
-            HILOG_DEBUG("Revoke Quick Fix execute retval is {%{public}d}. code is {%{public}d}", *retval, retCode);
+            *retval = quickFixMgr->RevokeQuickFix(bundleName);
+            HILOG_DEBUG("Revoke quick fix execute retval is {%{public}d}.", *retval);
         };
 
         auto complete = [retval = errCode](NativeEngine &engine, AsyncTask &task, int32_t status) {
-            HILOG_DEBUG("Revoke Quick Fix complete called.");
+            HILOG_DEBUG("Revoke quick fix complete called.");
             if (*retval != AAFwk::ERR_OK) {
-                HILOG_ERROR("Revoke Quick Fix complete called.");
+                HILOG_ERROR("Revoke quick fix execution failed. retval is %{public}d", *retval);
                 task.Reject(engine, CreateJsErrorByErrorCode(engine, *retval));
                 return;
             }
-            HILOG_DEBUG("Revoke Quick Fix complete called ok.");
+            HILOG_DEBUG("Revoke quick fix complete called ok.");
             task.ResolveWithNoError(engine, engine.CreateUndefined());
         };
 
@@ -192,7 +191,7 @@ private:
         NativeValue *result = nullptr;
         AsyncTask::Schedule("JsQuickFixManager::OnRevokeQuickFix", engine,
             CreateAsyncTaskWithLastParam(engine, lastParam, std::move(execute), std::move(complete), &result));
-        HILOG_DEBUG("function finished.");
+        HILOG_DEBUG("Function finished.");
         return result;
     }
 };
