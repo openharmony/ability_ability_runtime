@@ -3466,7 +3466,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
     } else {
         /* highest priority extension ability */
         HILOG_INFO("Start the highest priority extension ability. bundleName: %{public}s, ability:%{public}s",
-            extensionAbilityInfo.bundleName.c_str(), extensionAbilityInfo.name.c_str());
+            extensionAbilityInfo.bundleName.c_str(), extens ionAbilityInfo.name.c_str());
         abilityWant.SetElementName(extensionAbilityInfo.bundleName, extensionAbilityInfo.name);
     }
 
@@ -3478,7 +3478,10 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
 #endif
 
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
-    (void)StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
+    StartOptions startOptions;
+    startOptions.SetWindowMode(1);
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    (void)StartAbility(abilityWant, startOptions, accessToken, userId, DEFAULT_INVAL_VALUE);
 }
 
 int AbilityManagerService::GenerateAbilityRequest(
