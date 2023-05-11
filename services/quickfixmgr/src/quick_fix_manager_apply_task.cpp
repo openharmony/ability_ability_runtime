@@ -169,12 +169,12 @@ private:
     std::shared_ptr<QuickFixManagerApplyTask> applyTask_;
 };
 
-class QuickFixUnloadTaskCallback : public QuickFixManagerStatusCallback {
+class RevokeQuickFixTaskCallback : public QuickFixManagerStatusCallback {
 public:
-    explicit QuickFixUnloadTaskCallback(std::shared_ptr<QuickFixManagerApplyTask> applyTask)
+    explicit RevokeQuickFixTaskCallback(std::shared_ptr<QuickFixManagerApplyTask> applyTask)
         : QuickFixManagerStatusCallback(applyTask)
     {}
-    virtual ~QuickFixUnloadTaskCallback() = default;
+    virtual ~RevokeQuickFixTaskCallback() = default;
 
     void OnPatchDeployed(const std::shared_ptr<AppExecFwk::QuickFixResult> &result) override
     {
@@ -283,13 +283,13 @@ private:
     std::shared_ptr<QuickFixManagerApplyTask> applyTask_;
 };
 
-class QuickFixUnloadNotifyCallback : public QuickFixNotifyCallback {
+class RevokeQuickFixNotifyCallback : public QuickFixNotifyCallback {
 public:
-    explicit QuickFixUnloadNotifyCallback(std::shared_ptr<QuickFixManagerApplyTask> applyTask)
+    explicit RevokeQuickFixNotifyCallback(std::shared_ptr<QuickFixManagerApplyTask> applyTask)
         : QuickFixNotifyCallback(applyTask)
     {}
 
-    virtual ~QuickFixUnloadNotifyCallback() = default;
+    virtual ~RevokeQuickFixNotifyCallback() = default;
 
     void OnLoadPatchDone(int32_t resultCode, [[maybe_unused]] int32_t recordId) override
     {
@@ -778,7 +778,7 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixAppRunningTask()
         return;
     }
 
-    // so not contained, switch to bms
+    // so not contained, call bms to switch
     HandleRevokeQuickFixAppStopTask();
 }
 
@@ -791,7 +791,7 @@ void QuickFixManagerApplyTask::RevokeNotifySwitchCallbackTask()
         return;
     }
 
-    // call delete patch to bms
+    // call bms to delete patch
     RevokeNotifyDeleteCallbackTask();
 }
 
@@ -807,7 +807,7 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixNotifyAppUnload()
 
     // app process run and wait callback
     sptr<AppExecFwk::IQuickFixCallback> callback =
-        new (std::nothrow) QuickFixUnloadNotifyCallback(shared_from_this());
+        new (std::nothrow) RevokeQuickFixNotifyCallback(shared_from_this());
     auto ret = appMgr_->NotifyUnLoadRepairPatch(bundleName_, callback);
     if (ret != 0) {
         HILOG_ERROR("Notify app unload patch failed.");
@@ -820,7 +820,7 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixNotifyAppUnload()
 
 void QuickFixManagerApplyTask::RevokeNotifyDeleteCallbackTask()
 {
-    sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) QuickFixUnloadTaskCallback(
+    sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) RevokeQuickFixTaskCallback(
         shared_from_this());
     if (bundleQfMgr_ == nullptr) {
         HILOG_ERROR("Bundle quick fix manager is nullptr.");
@@ -851,7 +851,7 @@ void QuickFixManagerApplyTask::RevokeNotifyProcessDiedTask()
 
 void QuickFixManagerApplyTask::HandleRevokeQuickFixAppStopTask()
 {
-    sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) QuickFixUnloadTaskCallback(
+    sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) RevokeQuickFixTaskCallback(
         shared_from_this());
     if (bundleQfMgr_ == nullptr) {
         HILOG_ERROR("Bundle quick fix manager is nullptr.");
