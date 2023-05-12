@@ -165,7 +165,7 @@ int32_t LocalCallContainer::RemoveMultipleCallLocalRecord(const std::shared_ptr<
         return ERR_INVALID_VALUE;
     }
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(multipleMutex_);
     auto iterRecord = multipleCallProxyRecords_.find(record->GetElementName().GetURI());
     if (iterRecord == multipleCallProxyRecords_.end()) {
         HILOG_ERROR("release record in multiple not found.");
@@ -239,17 +239,20 @@ void LocalCallContainer::OnCallStubDied(const wptr<IRemoteObject>& remote)
         return record.second->IsSameObject(diedRemote);
     };
 
-    std::lock_guard<std::mutex> lock(mutex_);
-    auto iter = std::find_if(callProxyRecords_.begin(), callProxyRecords_.end(), isExist);
-    if (iter != callProxyRecords_.end() && iter->second != nullptr) {
-        iter->second->OnCallStubDied(remote);
-        callProxyRecords_.erase(iter);
-        return;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto iter = std::find_if(callProxyRecords_.begin(), callProxyRecords_.end(), isExist);
+        if (iter != callProxyRecords_.end() && iter->second != nullptr) {
+            iter->second->OnCallStubDied(remote);
+            callProxyRecords_.erase(iter);
+            return;
+        }
     }
 
     auto isMultipleExit = [&diedRemote] (auto& record) {
         return record->IsSameObject(diedRemote);
     };
+    std::lock_guard<std::mutex> lock(multipleMutex_);
     for (auto &item : multipleCallProxyRecords_) {
         HILOG_DEBUG("LocalCallContainer::OnCallStubDied multiple key[%{public}s].", item.first.c_str());
         auto iterMultiple = find_if(item.second.begin(), item.second.end(), isMultipleExit);
@@ -283,7 +286,7 @@ void LocalCallContainer::SetMultipleCallLocalRecord(
 {
     HILOG_DEBUG("LocalCallContainer::SetMultipleCallLocalRecord called uri is %{private}s.", element.GetURI().c_str());
     const std::string strKey = element.GetURI();
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard<std::mutex> lock(multipleMutex_);
     auto iter = multipleCallProxyRecords_.find(strKey);
     if (iter == multipleCallProxyRecords_.end()) {
         std::set<std::shared_ptr<LocalCallRecord>> records = { localCallRecord };
