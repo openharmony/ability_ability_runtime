@@ -3479,7 +3479,7 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
 
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
     StartOptions startOptions;
-    startOptions.SetWindowMode(1);
+    startOptions.SetWindowMode(0);
     (void)StartAbility(abilityWant, startOptions, nullptr, userId, DEFAULT_INVAL_VALUE);
 }
 
