@@ -63,6 +63,7 @@ private:
     std::map<std::string, std::set<std::shared_ptr<LocalCallRecord>>> multipleCallProxyRecords_;
     std::set<sptr<CallerConnection>> connections_;
     std::mutex mutex_;
+    std::mutex multipleMutex_;
 };
 
 class CallerConnection : public AbilityConnectionStub {
