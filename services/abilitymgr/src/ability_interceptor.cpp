@@ -288,7 +288,7 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
     }
     if (controlRule.callerPkg.empty() || controlRule.targetPkg.empty()) {
         HILOG_INFO("This startup is not explicitly, keep going.");
-        return false; 
+        return false;
     }
     if (controlRule.callerPkg == controlRule.targetPkg) {
         HILOG_INFO("jump within the same app.");

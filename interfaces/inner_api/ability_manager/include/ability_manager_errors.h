@@ -330,7 +330,12 @@ enum {
     ERR_CODE_INVALID_URI_TYPE,
 
     /**
-     * Result(2097214) for edm application abnormal.
+     * Result(2097214) for start not self application.
+     */
+    ERR_NOT_SELF_APPLICATION,
+
+    /**
+     * Result(2097215) for edm application abnormal.
      */
     ERR_EDM_APP_CONTROLLED,
 };
