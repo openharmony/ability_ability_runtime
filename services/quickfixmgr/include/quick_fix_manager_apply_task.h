@@ -59,10 +59,10 @@ public:
     void InitUnLoadPatch(const std::string &bundleName, bool isSoContained);
     std::string GetBundleName();
     TaskType GetTaskType();
-    void RevokeQuickFixDeleteDone();
-    void RevokeNotifySwitchCallbackTask();
-    void RevokeNotifyDeleteCallbackTask();
-    void RevokeNotifyProcessDiedTask();
+    void HandleRevokePatchDeleted();
+    void HandleRevokePatchSwitched();
+    void PostRevokeQuickFixDeleteTask();
+    void PostRevokeQuickFixProcessDiedTask();
 private:
     void PostDeployQuickFixTask(const std::vector<std::string> &quickFixFiles);
     void PostTimeOutTask();
@@ -71,9 +71,9 @@ private:
     void PostNotifyHotReloadPageTask();
     void RegAppStateObserver();
     void PostRevokeQuickFixTask();
-    void HandleRevokeQuickFixAppRunningTask();
-    void HandleRevokeQuickFixNotifyAppUnload();
-    void HandleRevokeQuickFixAppStopTask();
+    void HandleRevokeQuickFixAppRunning();
+    void PostRevokeQuickFixNotifyUnloadPatchTask();
+    void HandleRevokeQuickFixAppStop();
 
     sptr<AppExecFwk::IQuickFixManager> bundleQfMgr_ = nullptr;
     sptr<AppExecFwk::IAppMgr> appMgr_ = nullptr;

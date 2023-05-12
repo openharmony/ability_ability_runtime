@@ -135,7 +135,7 @@ int32_t QuickFixManagerService::RevokeQuickFix(const std::string &bundleName)
         return QUICK_FIX_VERIFY_PERMISSION_FAILED;
     }
 
-    if (CheckPatchTaskByBundleName(bundleName)) {
+    if (CheckTaskRunningState(bundleName)) {
         HILOG_ERROR("Has a apply quick fix task");
         return QUICK_FIX_DEPLOYING_TASK;
     }
@@ -210,7 +210,7 @@ void QuickFixManagerService::RemoveApplyTask(std::shared_ptr<QuickFixManagerAppl
     }
 }
 
-bool QuickFixManagerService::CheckPatchTaskByBundleName(const std::string &bundleName)
+bool QuickFixManagerService::CheckTaskRunningState(const std::string &bundleName)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     for (auto &item : applyTasks_) {
