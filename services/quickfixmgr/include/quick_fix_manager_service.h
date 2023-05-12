@@ -78,7 +78,7 @@ public:
     void RemoveApplyTask(std::shared_ptr<QuickFixManagerApplyTask> applyTask);
 
 private:
-    bool CheckPatchTaskByBundleName(const std::string &bundleName);
+    bool CheckTaskRunningState(const std::string &bundleName);
     void AddApplyTask(std::shared_ptr<QuickFixManagerApplyTask> applyTask);
 
     static std::mutex mutex_;

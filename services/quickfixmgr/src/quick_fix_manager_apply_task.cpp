@@ -115,7 +115,7 @@ public:
                 applyTask_->HandlePatchSwitched();
                 break;
             } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
-                applyTask_->RevokeNotifySwitchCallbackTask();
+                applyTask_->HandleRevokePatchSwitched();
                 break;
             }
 
@@ -150,7 +150,7 @@ public:
                 applyTask_->HandlePatchDeleted();
                 break;
             } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
-                applyTask_->RevokeQuickFixDeleteDone();
+                applyTask_->HandleRevokePatchDeleted();
                 break;
             }
 
@@ -207,7 +207,7 @@ public:
             if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_APPLY) {
                 applyTask_->HandlePatchDeployed();
             } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
-                applyTask_->RevokeNotifyProcessDiedTask();
+                applyTask_->PostRevokeQuickFixProcessDiedTask();
             } else {
                 HILOG_WARN("Invalid task type");
             }
@@ -258,7 +258,7 @@ public:
             applyTask_->PostSwitchQuickFixTask();
             return;
         } else if (applyTask_->GetTaskType() == QuickFixManagerApplyTask::TaskType::QUICK_FIX_REVOKE) {
-            applyTask_->RevokeNotifyDeleteCallbackTask();
+            applyTask_->PostRevokeQuickFixDeleteTask();
             return;
         }
 
@@ -755,11 +755,11 @@ void QuickFixManagerApplyTask::PostRevokeQuickFixTask()
         }
 
         if (applyTask->GetRunningState()) {
-            applyTask->HandleRevokeQuickFixAppRunningTask();
+            applyTask->HandleRevokeQuickFixAppRunning();
             return;
         }
 
-        applyTask->HandleRevokeQuickFixAppStopTask();
+        applyTask->HandleRevokeQuickFixAppStop();
     };
 
     if (eventHandler_ == nullptr || !eventHandler_->PostTask(revokeTask)) {
@@ -768,7 +768,7 @@ void QuickFixManagerApplyTask::PostRevokeQuickFixTask()
     PostTimeOutTask();
 }
 
-void QuickFixManagerApplyTask::HandleRevokeQuickFixAppRunningTask()
+void QuickFixManagerApplyTask::HandleRevokeQuickFixAppRunning()
 {
     // process run
     // so contained, reg app died
@@ -779,23 +779,23 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixAppRunningTask()
     }
 
     // so not contained, call bms to switch
-    HandleRevokeQuickFixAppStopTask();
+    HandleRevokeQuickFixAppStop();
 }
 
-void QuickFixManagerApplyTask::RevokeNotifySwitchCallbackTask()
+void QuickFixManagerApplyTask::HandleRevokePatchSwitched()
 {
     HILOG_DEBUG("Function called.");
     // process is run, notify app unload patch
     if (GetRunningState()) {
-        HandleRevokeQuickFixNotifyAppUnload();
+        PostRevokeQuickFixNotifyUnloadPatchTask();
         return;
     }
 
     // call bms to delete patch
-    RevokeNotifyDeleteCallbackTask();
+    PostRevokeQuickFixDeleteTask();
 }
 
-void QuickFixManagerApplyTask::HandleRevokeQuickFixNotifyAppUnload()
+void QuickFixManagerApplyTask::PostRevokeQuickFixNotifyUnloadPatchTask()
 {
     // notify app process unload patch
     if (appMgr_ == nullptr) {
@@ -818,7 +818,7 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixNotifyAppUnload()
     HILOG_DEBUG("Function end.");
 }
 
-void QuickFixManagerApplyTask::RevokeNotifyDeleteCallbackTask()
+void QuickFixManagerApplyTask::PostRevokeQuickFixDeleteTask()
 {
     sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) RevokeQuickFixTaskCallback(
         shared_from_this());
@@ -841,15 +841,15 @@ void QuickFixManagerApplyTask::RevokeNotifyDeleteCallbackTask()
     HILOG_DEBUG("Function end.");
 }
 
-void QuickFixManagerApplyTask::RevokeNotifyProcessDiedTask()
+void QuickFixManagerApplyTask::PostRevokeQuickFixProcessDiedTask()
 {
     HILOG_DEBUG("Function called.");
     // app process died
-    HandleRevokeQuickFixAppStopTask();
+    HandleRevokeQuickFixAppStop();
     PostTimeOutTask();
 }
 
-void QuickFixManagerApplyTask::HandleRevokeQuickFixAppStopTask()
+void QuickFixManagerApplyTask::HandleRevokeQuickFixAppStop()
 {
     sptr<AppExecFwk::IQuickFixStatusCallback> callback = new (std::nothrow) RevokeQuickFixTaskCallback(
         shared_from_this());
@@ -871,7 +871,7 @@ void QuickFixManagerApplyTask::HandleRevokeQuickFixAppStopTask()
     HILOG_DEBUG("Function end.");
 }
 
-void QuickFixManagerApplyTask::RevokeQuickFixDeleteDone()
+void QuickFixManagerApplyTask::HandleRevokePatchDeleted()
 {
     NotifyApplyStatus(QUICK_FIX_OK);
     RemoveSelf();
