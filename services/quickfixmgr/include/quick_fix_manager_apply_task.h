@@ -87,7 +87,7 @@ private:
     bool isSoContained_ = false;
     AppExecFwk::QuickFixType type_ = AppExecFwk::QuickFixType::UNKNOWN;
     std::vector<std::string> moduleNames_;
-    TaskType taskType_ = TaskType::QUICK_FIX;
+    TaskType taskType_ = TaskType::QUICK_FIX_APPLY;
 };
 } // namespace AAFwk
 } // namespace OHOS
