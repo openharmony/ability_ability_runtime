@@ -457,7 +457,8 @@ void AbilityThread::Attach(
  * @param want  Indicates the structure containing lifecycle information about the ability.
  * @param lifeCycleStateInfo  Indicates the lifeCycleStateInfo.
  */
-void AbilityThread::HandleAbilityTransaction(const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo)
+void AbilityThread::HandleAbilityTransaction(const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo,
+    sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Handle ability transaction begin, name is %{public}s.", want.GetElement().GetAbilityName().c_str());
@@ -470,7 +471,7 @@ void AbilityThread::HandleAbilityTransaction(const Want &want, const LifeCycleSt
         lifeCycleStateInfo.caller.bundleName,
         lifeCycleStateInfo.caller.abilityName,
         lifeCycleStateInfo.caller.moduleName);
-    abilityImpl_->HandleAbilityTransaction(want, lifeCycleStateInfo);
+    abilityImpl_->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
     HILOG_DEBUG("Handle ability transaction success.");
 }
 
@@ -756,7 +757,7 @@ void AbilityThread::ScheduleAbilityTransaction(const Want &want, const LifeCycle
     sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Schedule ability transaction, name is %{public}s, targeState is %{public}d, isNewWant is %{public}d.",
+    HILOG_INFO("name:%{public}s,targeState:%{public}d,isNewWant:%{public}d",
         want.GetElement().GetAbilityName().c_str(),
         lifeCycleStateInfo.state,
         lifeCycleStateInfo.isNewWant);
@@ -775,7 +776,7 @@ void AbilityThread::ScheduleAbilityTransaction(const Want &want, const LifeCycle
         if (abilityThread->isExtension_) {
             abilityThread->HandleExtensionTransaction(want, lifeCycleStateInfo, sessionInfo);
         } else {
-            abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo);
+            abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
         }
     };
 
