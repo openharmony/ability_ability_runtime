@@ -154,7 +154,7 @@ HWTEST_F(QuickFixManagerServiceTest, RevokeQuickFix_0200, TestSize.Level1)
 
     std::string bundleName = "com.ohos.quickfix";
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, nullptr, nullptr, nullptr);
-    applyTask->InitUnLoadPatch(bundleName, true);
+    applyTask->InitRevokeTask(bundleName, true);
 
     auto ret = quickFixMs_->RevokeQuickFix(bundleName);
     EXPECT_EQ(ret, QUICK_FIX_DEPLOYING_TASK);
@@ -173,7 +173,7 @@ HWTEST_F(QuickFixManagerServiceTest, RevokeQuickFix_0300, TestSize.Level1)
 
     std::string bundleName = "test.bundle.name";
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(nullptr, nullptr, nullptr, nullptr);
-    applyTask->InitUnLoadPatch(bundleName, true);
+    applyTask->InitRevokeTask(bundleName, true);
 
     auto ret = quickFixMs_->RevokeQuickFix(bundleName);
     EXPECT_EQ(ret, QUICK_FIX_GET_BUNDLE_INFO_FAILED);
