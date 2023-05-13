@@ -1310,6 +1310,8 @@ private:
     bool IsReleaseCallInterception(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element,
         int &result);
 
+    std::string GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
