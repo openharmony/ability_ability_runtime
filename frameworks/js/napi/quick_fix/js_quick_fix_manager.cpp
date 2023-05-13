@@ -150,7 +150,7 @@ private:
     NativeValue *OnRevokeQuickFix(NativeEngine &engine, NativeCallbackInfo &info)
     {
         HILOG_DEBUG("called.");
-        if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
+        if (info.argc == ARGC_ZERO)
             HILOG_ERROR("The number of parameter is invalid.");
             Throw(engine, AAFwk::ERR_QUICKFIX_PARAM_INVALID);
             return engine.CreateUndefined();

@@ -56,7 +56,7 @@ public:
     void UnregAppStateObserver();
 
     void RunRevoke();
-    void InitUnLoadPatch(const std::string &bundleName, bool isSoContained);
+    void InitRevokeTask(const std::string &bundleName, bool isSoContained);
     std::string GetBundleName();
     TaskType GetTaskType();
     void HandleRevokePatchDeleted();

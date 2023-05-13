@@ -185,7 +185,7 @@ int32_t QuickFixManagerService::RevokeQuickFix(const std::string &bundleName)
         return QUICK_FIX_CONNECT_FAILED;
     }
 
-    applyTask->InitUnLoadPatch(bundleName, isSoContained);
+    applyTask->InitRevokeTask(bundleName, isSoContained);
     AddApplyTask(applyTask);
     applyTask->RunRevoke();
     HILOG_DEBUG("Function finished.");

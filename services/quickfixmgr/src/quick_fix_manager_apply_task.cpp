@@ -323,7 +323,7 @@ void QuickFixManagerApplyTask::RunRevoke()
     PostRevokeQuickFixTask();
 }
 
-void QuickFixManagerApplyTask::InitUnLoadPatch(const std::string &bundleName, bool isSoContained)
+void QuickFixManagerApplyTask::InitRevokeTask(const std::string &bundleName, bool isSoContained)
 {
     isSoContained_ = isSoContained;
     bundleName_ = bundleName;
