@@ -16,10 +16,12 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("connection_obs_manager_public_config") {
   visibility = [ ":*" ]
+  visibility +=
+      [ "${ability_runtime_test_path}/unittest/connection_observer_test/*" ]
   include_dirs = [
     "include",
     "${ability_runtime_services_path}/common/include",
-    "//utils/system/safwk/native/include",
+    "${safwk_path}/native/include",
     "${bundlefwk_inner_api_path}/appexecfwk_base/include",
   ]
   cflags = []
@@ -52,6 +54,7 @@ ohos_shared_library("connection_obs_manager") {
     "samgr:samgr_proxy",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }

@@ -62,14 +62,14 @@ int AbilityConnectManager::StartAbility(const AbilityRequest &abilityRequest, sp
 int AbilityConnectManager::TerminateAbility(const sptr<IRemoteObject> &token)
 {
     std::lock_guard<std::recursive_mutex> guard(Lock_);
-    auto abilityRecord = GetExtensionByTokenFromSeriveMap(token);
+    auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
     MoveToTerminatingMap(abilityRecord);
     return TerminateAbilityLocked(token);
 }
 
 int AbilityConnectManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &caller, int requestCode)
 {
-    HILOG_INFO("Terminate ability.");
+    HILOG_INFO("call");
     std::lock_guard<std::recursive_mutex> guard(Lock_);
 
     std::shared_ptr<AbilityRecord> targetAbility = nullptr;
@@ -106,14 +106,14 @@ int AbilityConnectManager::TerminateAbility(const std::shared_ptr<AbilityRecord>
 
 int AbilityConnectManager::StopServiceAbility(const AbilityRequest &abilityRequest)
 {
-    HILOG_INFO("Stop Service ability.");
+    HILOG_INFO("call");
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     return StopServiceAbilityLocked(abilityRequest);
 }
 
 int AbilityConnectManager::TerminateAbilityResult(const sptr<IRemoteObject> &token, int startId)
 {
-    HILOG_INFO("Terminate ability result.");
+    HILOG_INFO("call");
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     return TerminateAbilityResultLocked(token, startId);
 }
@@ -121,8 +121,7 @@ int AbilityConnectManager::TerminateAbilityResult(const sptr<IRemoteObject> &tok
 int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Start ability locked, ability_name: %{public}s",
-        abilityRequest.want.GetElement().GetURI().c_str());
+    HILOG_INFO("ability_name:%{public}s", abilityRequest.want.GetElement().GetURI().c_str());
 
     std::shared_ptr<AbilityRecord> targetService;
     bool isLoadedAbility = false;
@@ -132,6 +131,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     targetService->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
 
     targetService->SetSessionInfo(sessionInfo);
+    targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_EXTENSION);
 
     if (!isLoadedAbility) {
         LoadAbility(targetService);
@@ -141,7 +141,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
         CommandAbility(targetService);
     } else {
         HILOG_INFO("Target service is already activating.");
-        EnqueStartServiceReq(abilityRequest);
+        EnqueueStartServiceReq(abilityRequest);
         return ERR_OK;
     }
 
@@ -154,7 +154,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     return ERR_OK;
 }
 
-void AbilityConnectManager::EnqueStartServiceReq(const AbilityRequest &abilityRequest)
+void AbilityConnectManager::EnqueueStartServiceReq(const AbilityRequest &abilityRequest)
 {
     std::lock_guard guard(startServiceReqListLock_);
     auto abilityUri = abilityRequest.want.GetElement().GetURI();
@@ -210,10 +210,10 @@ int AbilityConnectManager::TerminateAbilityLocked(const sptr<IRemoteObject> &tok
 int AbilityConnectManager::TerminateAbilityResultLocked(const sptr<IRemoteObject> &token, int startId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Terminate ability result locked, startId: %{public}d", startId);
+    HILOG_INFO("startId: %{public}d", startId);
     CHECK_POINTER_AND_RETURN(token, ERR_INVALID_VALUE);
 
-    auto abilityRecord = GetExtensionByTokenFromSeriveMap(token);
+    auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
     if (abilityRecord->GetStartId() != startId) {
@@ -228,7 +228,7 @@ int AbilityConnectManager::TerminateAbilityResultLocked(const sptr<IRemoteObject
 int AbilityConnectManager::StopServiceAbilityLocked(const AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Stop service ability locked.");
+    HILOG_INFO("call");
     AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, abilityRequest.abilityInfo.bundleName,
         abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
     auto abilityRecord = GetServiceRecordByElementName(element.GetURI());
@@ -240,19 +240,12 @@ int AbilityConnectManager::StopServiceAbilityLocked(const AbilityRequest &abilit
     }
 
     if (!abilityRecord->GetConnectRecordList().empty()) {
-        HILOG_INFO("Target service has been connected. Post disconnect task.");
+        HILOG_INFO("Post disconnect task.");
         auto connectRecordList = abilityRecord->GetConnectRecordList();
         HandleTerminateDisconnectTask(connectRecordList);
     }
 
-    auto timeoutTask = [abilityRecord, connectManager = shared_from_this()]() {
-        HILOG_WARN("Disconnect ability terminate timeout.");
-        connectManager->HandleStopTimeoutTask(abilityRecord);
-    };
-
-    MoveToTerminatingMap(abilityRecord);
-    abilityRecord->Terminate(timeoutTask);
-
+    TerminateRecord(abilityRecord);
     return ERR_OK;
 }
 
@@ -303,7 +296,7 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken, sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Connect ability called, callee:%{public}s.", abilityRequest.want.GetElement().GetURI().c_str());
+    HILOG_INFO("callee:%{public}s.", abilityRequest.want.GetElement().GetURI().c_str());
     std::lock_guard<std::recursive_mutex> guard(Lock_);
 
     // 1. get target service ability record, and check whether it has been loaded.
@@ -335,24 +328,27 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
     }
     AddConnectDeathRecipient(connect);
     connectMap_.emplace(connect->AsObject(), connectRecordList);
+    targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_CONNECT_EXTENSION);
 
     // 5. load or connect ability
     int ret = ERR_OK;
     if (!isLoadedAbility) {
         LoadAbility(targetService);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE)) {
-        // this service ability has not first connect
+        // this service ability has connected already
         targetService->SetWant(abilityRequest.want);
         if (targetService->GetConnectRecordList().size() > 1) {
-            if (eventHandler_ != nullptr) {
+            if (eventHandler_ != nullptr && targetService->GetConnRemoteObject()) {
                 auto task = [connectRecord]() { connectRecord->CompleteConnect(ERR_OK); };
                 eventHandler_->PostTask(task);
+            } else {
+                HILOG_INFO("Target service is connecting, wait for callback");
             }
         } else {
             ConnectAbility(targetService);
         }
     } else {
-        HILOG_INFO("Target service ability is activating, just wait for callback");
+        HILOG_INFO("Target service is activating, wait for callback");
     }
 
     auto token = targetService->GetToken();
@@ -363,8 +359,13 @@ int AbilityConnectManager::ConnectAbilityLocked(const AbilityRequest &abilityReq
 
 int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect)
 {
+    return DisconnectAbilityLocked(connect, false);
+}
+
+int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect, bool force)
+{
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Disconnect ability begin.");
+    HILOG_INFO("call");
     std::lock_guard<std::recursive_mutex> guard(Lock_);
 
     // 1. check whether callback was connected.
@@ -376,34 +377,79 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
     }
 
     // 2. schedule disconnect to target service
+    int result = ERR_OK;
     for (auto &connectRecord : connectRecordList) {
         if (connectRecord) {
             auto abilityRecord = connectRecord->GetAbilityRecord();
             CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-            HILOG_INFO("Disconnect ability, abilityName: %{public}s, bundleName: %{public}s",
+            HILOG_INFO("abilityName: %{public}s, bundleName: %{public}s",
                 abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
             auto abilityMs = DelayedSingleton<AbilityManagerService>::GetInstance();
             CHECK_POINTER_AND_RETURN(abilityMs, GET_ABILITY_SERVICE_FAILED);
-            int result = abilityMs->JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
+            result = abilityMs->JudgeAbilityVisibleControl(abilityRecord->GetAbilityInfo());
             if (result != ERR_OK) {
                 HILOG_ERROR("Judge ability visible error.");
-                return result;
-            }
-            int ret = connectRecord->DisconnectAbility();
-            if (ret != ERR_OK) {
-                HILOG_ERROR("Disconnect ability fail , ret = %{public}d.", ret);
-                return ret;
+                break;
             }
 
-            if (connectRecord->GetConnectState() == ConnectionState::DISCONNECTED) {
-                HILOG_WARN("This record: %{public}d complete disconnect directly.", connectRecord->GetRecordId());
-                connectRecord->CompleteDisconnect(ERR_OK, false);
-                RemoveConnectionRecordFromMap(connectRecord);
+            if (force) {
+                DisconnectRecordForce(connectRecord);
+            } else {
+                result = DisconnectRecordNormal(connectRecord);
+            }
+
+            if (result != ERR_OK) {
+                HILOG_ERROR("Disconnect ability fail , ret = %{public}d.", result);
+                break;
             }
         }
     }
 
+    return result;
+}
+
+void AbilityConnectManager::TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord)
+{
+    auto timeoutTask = [abilityRecord, connectManager = shared_from_this()]() {
+        HILOG_WARN("Disconnect ability terminate timeout.");
+        connectManager->HandleStopTimeoutTask(abilityRecord);
+    };
+
+    MoveToTerminatingMap(abilityRecord);
+    abilityRecord->Terminate(timeoutTask);
+}
+
+int AbilityConnectManager::DisconnectRecordNormal(std::shared_ptr<ConnectionRecord> connectRecord)
+{
+    auto result = connectRecord->DisconnectAbility();
+    if (result != ERR_OK) {
+        HILOG_ERROR("Disconnect ability fail , ret = %{public}d.", result);
+        return result;
+    }
+
+    if (connectRecord->GetConnectState() == ConnectionState::DISCONNECTED) {
+        HILOG_WARN("This record: %{public}d complete disconnect directly.", connectRecord->GetRecordId());
+        connectRecord->CompleteDisconnect(ERR_OK, false);
+        RemoveConnectionRecordFromMap(connectRecord);
+    }
     return ERR_OK;
+}
+
+void AbilityConnectManager::DisconnectRecordForce(std::shared_ptr<ConnectionRecord> connectRecord)
+{
+    auto abilityRecord = connectRecord->GetAbilityRecord();
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("Disconnect force abilityRecord null");
+        return;
+    }
+    abilityRecord->RemoveConnectRecordFromList(connectRecord);
+    connectRecord->CompleteDisconnect(ERR_OK, true);
+    RemoveConnectionRecordFromMap(connectRecord);
+    if (abilityRecord->IsConnectListEmpty() && abilityRecord->GetStartId() == 0) {
+        HILOG_WARN("Force terminate ability record state: %{public}d.", abilityRecord->GetAbilityState());
+        TerminateRecord(abilityRecord);
+        RemoveServiceAbility(abilityRecord);
+    }
 }
 
 int AbilityConnectManager::AttachAbilityThreadLocked(
@@ -411,7 +457,7 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::recursive_mutex> guard(Lock_);
-    auto abilityRecord = GetExtensionByTokenFromSeriveMap(token);
+    auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     if (eventHandler_ != nullptr) {
         int recordId = abilityRecord->GetRecordId();
@@ -453,7 +499,7 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     std::string abilityState = AbilityRecord::ConvertAbilityState(static_cast<AbilityState>(targetState));
     std::shared_ptr<AbilityRecord> abilityRecord;
     if (static_cast<AbilityState>(targetState) == AbilityState::INACTIVE) {
-        abilityRecord = GetExtensionByTokenFromSeriveMap(token);
+        abilityRecord = GetExtensionByTokenFromServiceMap(token);
     } else if (static_cast<AbilityState>(targetState) == AbilityState::INITIAL) {
         abilityRecord = GetExtensionByTokenFromTerminatingMap(token);
     } else {
@@ -555,7 +601,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::recursive_mutex> guard(Lock_);
-    auto abilityRecord = GetExtensionByTokenFromSeriveMap(token);
+    auto abilityRecord = GetExtensionByTokenFromServiceMap(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, CONNECTION_NOT_EXIST);
 
     auto connect = abilityRecord->GetDisconnectingRecord();
@@ -582,12 +628,7 @@ int AbilityConnectManager::ScheduleDisconnectAbilityDoneLocked(const sptr<IRemot
     abilityRecord->RemoveConnectRecordFromList(connect);
     if (abilityRecord->IsConnectListEmpty() && abilityRecord->GetStartId() == 0) {
         HILOG_INFO("Service ability has no any connection, and not started , need terminate.");
-        auto timeoutTask = [abilityRecord, connectManager = shared_from_this()]() {
-            HILOG_WARN("Disconnect ability terminate timeout.");
-            connectManager->HandleStopTimeoutTask(abilityRecord);
-        };
-        MoveToTerminatingMap(abilityRecord);
-        abilityRecord->Terminate(timeoutTask);
+        TerminateRecord(abilityRecord);
     }
     RemoveConnectionRecordFromMap(connect);
 
@@ -665,7 +706,7 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByElementN
     return nullptr;
 }
 
-std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromSeriveMap(const sptr<IRemoteObject> &token)
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token)
 {
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     auto IsMatch = [token](auto service) {
@@ -809,7 +850,6 @@ void AbilityConnectManager::PostRestartResidentTask(const AbilityRequest &abilit
     }
     HILOG_DEBUG("PostRestartResidentTask, time:%{public}d", restartIntervalTime);
     eventHandler_->PostTask(task, taskName, restartIntervalTime);
-    HILOG_INFO("PostRestartResidentTask end.");
 }
 
 void AbilityConnectManager::HandleRestartResidentTask(const AbilityRequest &abilityRequest)
@@ -890,7 +930,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
         RemoveConnectionRecordFromMap(connectRecord);
     }
 
-    if (GetExtensionByTokenFromSeriveMap(abilityRecord->GetToken()) == nullptr) {
+    if (GetExtensionByTokenFromServiceMap(abilityRecord->GetToken()) == nullptr) {
         HILOG_ERROR("Timeojut ability record is not exist in service map.");
         return;
     }
@@ -1073,10 +1113,10 @@ void AbilityConnectManager::RemoveConnectionRecordFromMap(const std::shared_ptr<
         auto &connectList = connectCallback.second;
         auto connectRecord = std::find(connectList.begin(), connectList.end(), connection);
         if (connectRecord != connectList.end()) {
-            HILOG_INFO("Remove connrecord(%{public}d) from maplist.", (*connectRecord)->GetRecordId());
+            HILOG_INFO("connrecord(%{public}d)", (*connectRecord)->GetRecordId());
             connectList.remove(connection);
             if (connectList.empty()) {
-                HILOG_INFO("Remove connlist from map.");
+                HILOG_INFO("connlist");
                 sptr<IAbilityConnection> connect = iface_cast<IAbilityConnection>(connectCallback.first);
                 RemoveConnectDeathRecipient(connect);
                 connectMap_.erase(connectCallback.first);
@@ -1158,7 +1198,7 @@ void AbilityConnectManager::HandleCallBackDiedTask(const sptr<IRemoteObject> &co
         return;
     }
     sptr<IAbilityConnection> object = iface_cast<IAbilityConnection>(connect);
-    DisconnectAbilityLocked(object);
+    DisconnectAbilityLocked(object, true);
 }
 
 void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)
@@ -1287,6 +1327,7 @@ void AbilityConnectManager::HandleAbilityDiedTask(
     HILOG_INFO("Handle ability died task.");
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     CHECK_POINTER(abilityRecord);
+    abilityRecord->SetConnRemoteObject(nullptr);
     ConnectListType connlist = abilityRecord->GetConnectRecordList();
     for (auto &connectRecord : connlist) {
         HILOG_WARN("This record complete disconnect directly. recordId:%{public}d", connectRecord->GetRecordId());
@@ -1305,7 +1346,7 @@ void AbilityConnectManager::HandleAbilityDiedTask(
         return;
     }
 
-    if (GetExtensionByTokenFromSeriveMap(abilityRecord->GetToken()) == nullptr) {
+    if (GetExtensionByTokenFromServiceMap(abilityRecord->GetToken()) == nullptr) {
         HILOG_ERROR("Died ability record is not exist in service map.");
         return;
     }
@@ -1364,48 +1405,63 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
     }
 }
 
-void AbilityConnectManager::DumpState(std::vector<std::string> &info, bool isClient, const std::string &args) const
+void AbilityConnectManager::DumpState(std::vector<std::string> &info, bool isClient, const std::string &args)
 {
-    HILOG_INFO("DumpState args:%{public}s.", args.c_str());
+    HILOG_INFO("args:%{public}s.", args.c_str());
+    ServiceMapType serviceMapBack;
+    {
+        std::lock_guard<std::recursive_mutex> guard(Lock_);
+        serviceMapBack = serviceMap_;
+    }
     if (!args.empty()) {
-        auto it = std::find_if(serviceMap_.begin(), serviceMap_.end(), [&args](const auto &service) {
+        auto it = std::find_if(serviceMapBack.begin(), serviceMapBack.end(), [&args](const auto &service) {
             return service.first.compare(args) == 0;
         });
-        if (it != serviceMap_.end()) {
+        if (it != serviceMapBack.end()) {
             info.emplace_back("uri [ " + it->first + " ]");
-            it->second->DumpService(info, isClient);
+            if (it->second != nullptr) {
+                it->second->DumpService(info, isClient);
+            }
         } else {
             info.emplace_back(args + ": Nothing to dump.");
         }
     } else {
-        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
         info.emplace_back("  ExtensionRecords:");
-        for (auto &&service : serviceMap_) {
+        for (auto &&service : serviceMapBack) {
             info.emplace_back("    uri [" + service.first + "]");
-            service.second->DumpService(info, isClient);
+            if (service.second != nullptr) {
+                service.second->DumpService(info, isClient);
+            }
         }
     }
 }
 
 void AbilityConnectManager::DumpStateByUri(std::vector<std::string> &info, bool isClient, const std::string &args,
-    std::vector<std::string> &params) const
+    std::vector<std::string> &params)
 {
-    HILOG_INFO("DumpState args:%{public}s, params size: %{public}zu", args.c_str(), params.size());
-    auto it = std::find_if(serviceMap_.begin(), serviceMap_.end(), [&args](const auto &service) {
-        return service.first.compare(args) == 0;
-    });
-    if (it != serviceMap_.end()) {
-        info.emplace_back("uri [ " + it->first + " ]");
-        it->second->DumpService(info, params, isClient);
-    } else {
-        info.emplace_back(args + ": Nothing to dump.");
+    HILOG_INFO("args:%{public}s, params size: %{public}zu", args.c_str(), params.size());
+    std::shared_ptr<AbilityRecord> extensionAbilityRecord = nullptr;
+    {
+        std::lock_guard<std::recursive_mutex> guard(Lock_);
+        auto it = std::find_if(serviceMap_.begin(), serviceMap_.end(), [&args](const auto &service) {
+            return service.first.compare(args) == 0;
+        });
+        if (it != serviceMap_.end()) {
+            info.emplace_back("uri [ " + it->first + " ]");
+            extensionAbilityRecord = it->second;
+        } else {
+            info.emplace_back(args + ": Nothing to dump.");
+        }
+    }
+    if (extensionAbilityRecord != nullptr) {
+        extensionAbilityRecord->DumpService(info, params, isClient);
     }
 }
 
 void AbilityConnectManager::GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info,
     const int32_t userId, bool isPerm)
 {
-    HILOG_INFO("Get extension running info.");
+    HILOG_DEBUG("Get extension running info.");
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     auto mgr = shared_from_this();
     auto queryInfo = [&info, upperLimit, userId, isPerm, mgr](ServiceMapType::reference service) {
@@ -1430,7 +1486,7 @@ void AbilityConnectManager::GetExtensionRunningInfos(int upperLimit, std::vector
 
 void AbilityConnectManager::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm)
 {
-    HILOG_INFO("Query running ability infos.");
+    HILOG_DEBUG("call");
     std::lock_guard<std::recursive_mutex> guard(Lock_);
 
     auto queryInfo = [&info, isPerm](ServiceMapType::reference service) {
@@ -1463,16 +1519,16 @@ void AbilityConnectManager::GetExtensionRunningInfo(std::shared_ptr<AbilityRecor
     bool queryResult = IN_PROCESS_CALL(bms->QueryExtensionAbilityInfos(abilityRecord->GetWant(),
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos));
     if (queryResult) {
-        HILOG_INFO("Query Extension Ability Infos Success.");
+        HILOG_DEBUG("Success");
         auto abilityInfo = abilityRecord->GetAbilityInfo();
         auto isExist = [&abilityInfo](const AppExecFwk::ExtensionAbilityInfo &extensionInfo) {
-            HILOG_INFO("%{public}s, %{public}s", extensionInfo.bundleName.c_str(), extensionInfo.name.c_str());
+            HILOG_DEBUG("%{public}s, %{public}s", extensionInfo.bundleName.c_str(), extensionInfo.name.c_str());
             return extensionInfo.bundleName == abilityInfo.bundleName && extensionInfo.name == abilityInfo.name
                 && extensionInfo.applicationInfo.uid == abilityInfo.applicationInfo.uid;
         };
         auto infoIter = std::find_if(extensionInfos.begin(), extensionInfos.end(), isExist);
         if (infoIter != extensionInfos.end()) {
-            HILOG_INFO("Get target success.");
+            HILOG_DEBUG("Get target success.");
             extensionInfo.type = (*infoIter).type;
         }
     }
@@ -1513,15 +1569,14 @@ void AbilityConnectManager::StopAllExtensions()
             it++;
         }
     }
-    HILOG_INFO("StopAllExtensions end.");
 }
 
 int AbilityConnectManager::MinimizeUIExtensionAbility(const sptr<IRemoteObject> &token, bool fromUser)
 {
-    HILOG_INFO("Minimize ui extension ability, fromUser:%{public}d.", fromUser);
+    HILOG_INFO("fromUser:%{public}d.", fromUser);
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     // check if ability is in list to avoid user create fake token.
-    CHECK_POINTER_AND_RETURN_LOG(GetExtensionByTokenFromSeriveMap(token), INNER_ERR,
+    CHECK_POINTER_AND_RETURN_LOG(GetExtensionByTokenFromServiceMap(token), INNER_ERR,
         "Minimize ui extension ability fail, ability is not in mission list.");
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     return MinimizeUIExtensionAbilityLocked(abilityRecord, fromUser);
@@ -1534,8 +1589,7 @@ int AbilityConnectManager::MinimizeUIExtensionAbilityLocked(const std::shared_pt
         HILOG_ERROR("Minimize ui extension ability fail, ability record is null.");
         return ERR_INVALID_VALUE;
     }
-    HILOG_INFO("MinimizeUIExtensionAbilityLocked called, ability:%{public}s.",
-        abilityRecord->GetAbilityInfo().name.c_str());
+    HILOG_INFO("ability:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
 
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
         HILOG_ERROR("Fail to minimize ui extension ability, ability state is not foreground.");

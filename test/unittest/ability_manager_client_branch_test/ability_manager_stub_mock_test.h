@@ -158,7 +158,8 @@ public:
         return 0;
     }
 
-    virtual int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE)
+    virtual int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
+        const sptr<IRemoteObject> &token = nullptr)
     {
         return 0;
     }
@@ -176,6 +177,11 @@ public:
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token) override
     {
         return 0;
+    }
+
+    void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token) override
+    {
+        return;
     }
 
     int ClearUpApplicationData(const std::string& bundleName) override
@@ -299,6 +305,8 @@ public:
     MOCK_METHOD0(CleanAllMissions, int());
     MOCK_METHOD1(MoveMissionToFront, int(int32_t missionId));
     MOCK_METHOD2(MoveMissionToFront, int(int32_t missionId, const StartOptions& startOptions));
+    MOCK_METHOD2(MoveMissionsToForeground, int(const std::vector<int32_t>& missionIds, int32_t topMissionId));
+    MOCK_METHOD2(MoveMissionsToBackground, int(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result));
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
     MOCK_METHOD2(GetWantSenderInfo, int(const sptr<IWantSender>& target, std::shared_ptr<WantSenderInfo>& info));
     MOCK_METHOD1(GetAbilityRunningInfos, int(std::vector<AbilityRunningInfo>& info));
@@ -318,8 +326,8 @@ public:
         return 0;
     }
 
-    int StartAbilityByCall(
-        const Want& want, const sptr<IAbilityConnection>& connect, const sptr<IRemoteObject>& callerToken) override
+    int StartAbilityByCall(const Want& want, const sptr<IAbilityConnection>& connect,
+        const sptr<IRemoteObject>& callerToken, int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }

@@ -77,10 +77,14 @@ JsUIExtension* JsUIExtension::Create(const std::unique_ptr<Runtime>& runtime)
 JsUIExtension::JsUIExtension(JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) {}
 JsUIExtension::~JsUIExtension()
 {
+    HILOG_DEBUG("Js ui extension destructor.");
     auto context = GetContext();
     if (context) {
         context->Unbind();
     }
+
+    jsRuntime_.FreeNativeReference(std::move(jsObj_));
+    jsRuntime_.FreeNativeReference(std::move(shellContextRef_));
 }
 
 void JsUIExtension::Finalizer(NativeEngine* engine, void* data, void* hint)
@@ -187,8 +191,7 @@ void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> se
 
     Extension::OnStart(want, sessionInfo);
     if (sessionInfo) {
-        uiWindow_ = Ace::NG::UIWindow::CreateWindowExtension(GetContext(),
-            sessionInfo->sessionToken, sessionInfo->surfaceNode);
+        uiWindow_ = Ace::NG::UIWindow::CreateWindowExtension(GetContext(), sessionInfo->sessionToken);
         if (uiWindow_ == nullptr) {
             HILOG_ERROR("JsUIExtension OnStart create ui window error.");
             return;
