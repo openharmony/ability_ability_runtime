@@ -52,6 +52,7 @@ public:
         const AAFwk::WantParams& wantParams, int64_t requestCode, const bool& result));
     MOCK_METHOD2(OnRenderTaskDone, int32_t(int64_t formId, const Want &want));
     MOCK_METHOD2(OnStopRenderingTaskDone, int32_t(int64_t formId, const Want &want));
+    MOCK_METHOD2(OnAcquireDataResult, int32_t(const AAFwk::WantParams &wantParams, int64_t requestCode));
 };
 
 class FormExtensionProviderClientTest : public testing::Test {
@@ -392,6 +393,24 @@ HWTEST_F(FormExtensionProviderClientTest, formExtensionProviderClient_1500, Func
     EXPECT_CALL(*callback, OnAcquireStateResult(_, _, _, _)).Times(1).WillOnce(Return(0));
     formExtensionProviderClient.NotifyFormExtensionAcquireState(wantArg, provider, want, callback->AsObject());
     GTEST_LOG_(INFO) << "formExtensionProviderClient_1500 end";
+}
+
+/**
+ * @tc.number: formExtensionProviderClient_1600
+ * @tc.name: AcquireFormData
+ * @tc.desc: formSupplyCallback is nullptr, failed to verify AcquireFormData.
+ */
+HWTEST_F(FormExtensionProviderClientTest, formExtensionProviderClient_1600, Function | MediumTest | Level1)
+{
+    GTEST_LOG_(INFO) << "formExtensionProviderClient_1600 start";
+    int64_t formId = 0;
+    sptr<IRemoteObject> formSupplyCallback = nullptr;
+    int64_t requestCode = 0;
+    AbilityRuntime::FormExtensionProviderClient formExtensionProviderClient;
+    auto result = formExtensionProviderClient.AcquireFormData(
+        formId, formSupplyCallback, requestCode);
+    EXPECT_EQ(result, ERR_APPEXECFWK_FORM_INVALID_PARAM);
+    GTEST_LOG_(INFO) << "formExtensionProviderClient_1600 end";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
