@@ -129,7 +129,10 @@ ErrCode ControlInterceptor::DoProcess(const Want &want, int requestCode, int32_t
             }
         }
 #endif
-        return ERR_DISPOSED_STATUS;
+        if (controlRule.isEdm) {
+            return ERR_EDM_APP_CONTROLLED;
+        }
+        return ERR_APP_CONTROLLED;
     }
     return ERR_OK;
 }
@@ -285,7 +288,7 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
     }
     if (controlRule.callerPkg.empty() || controlRule.targetPkg.empty()) {
         HILOG_INFO("This startup is not explicitly, keep going.");
-        return false; 
+        return false;
     }
     if (controlRule.callerPkg == controlRule.targetPkg) {
         HILOG_INFO("jump within the same app.");

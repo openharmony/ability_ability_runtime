@@ -40,7 +40,7 @@ class Extractor;
 
 namespace JsEnv {
 class JsEnvironment;
-class SourceMapOperatorImpl;
+class SourceMapOperator;
 struct UncaughtExceptionInfo;
 } // namespace JsEnv
 
@@ -63,7 +63,7 @@ public:
 
     static void SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp = false);
 
-    static bool ReadSourceMapData(const std::string& hapPath, std::string& content);
+    static bool ReadSourceMapData(const std::string& hapPath, const std::string& sourceMapPath, std::string& content);
 
     JsRuntime();
     ~JsRuntime() override;
@@ -91,6 +91,7 @@ public:
     void PreloadSystemModule(const std::string& moduleName) override;
     void UpdateExtensionType(int32_t extensionType) override;
     void StartDebugMode(bool needBreakPoint) override;
+    void StopDebugMode();
     bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
     bool UnLoadRepairPatch(const std::string& hqfFile) override;
     bool NotifyHotReloadPage() override;
@@ -98,7 +99,11 @@ public:
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
     bool StartDebugMode(const std::string& bundleName, bool needBreakPoint, uint32_t instanceId,
         const DebuggerPostTask& debuggerPostTask = {});
+    bool StartDebugger(bool needBreakPoint, const DebuggerPostTask& debuggerPostTask = {});
+    bool StartDebugger(bool needBreakPoint, uint32_t instanceId, const DebuggerPostTask& debuggerPostTask = {});
+    void StopDebugger();
     void InitConsoleModule();
+    bool LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle);
 
     NativeEngine* GetNativeEnginePointer() const;
     panda::ecmascript::EcmaVM* GetEcmaVm() const;
@@ -107,7 +112,7 @@ public:
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) override;
     static bool GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer);
 
-    void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperatorImpl> operatorImpl);
+    void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorImpl);
     void FreeNativeReference(std::unique_ptr<NativeReference> reference);
     void FreeNativeReference(std::shared_ptr<NativeReference>&& reference);
 
@@ -129,12 +134,10 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
     std::unordered_map<std::string, NativeReference*> modules_;
     std::shared_ptr<JsEnv::JsEnvironment> jsEnv_ = nullptr;
-
-    std::string bundleName_;
     uint32_t instanceId_ = 0;
+    std::string bundleName_;
 
     static std::atomic<bool> hasInstance;
-
 private:
     bool CreateJsEnv(const Options& options);
     void PreloadAce(const Options& options);
