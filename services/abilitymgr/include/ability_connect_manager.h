@@ -175,7 +175,7 @@ public:
      */
     std::shared_ptr<AbilityRecord> GetServiceRecordBySessionInfo(const sptr<SessionInfo> &sessionInfo);
 
-    std::shared_ptr<AbilityRecord> GetExtensionByTokenFromSeriveMap(const sptr<IRemoteObject> &token);
+    std::shared_ptr<AbilityRecord> GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionByTokenFromTerminatingMap(const sptr<IRemoteObject> &token);
     ConnectListType GetConnectRecordListByCallback(sptr<IAbilityConnection> callback);
 
@@ -224,10 +224,10 @@ public:
      */
     void OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
 
-    void DumpState(std::vector<std::string> &info, bool isClient, const std::string &args = "") const;
+    void DumpState(std::vector<std::string> &info, bool isClient, const std::string &args = "");
 
     void DumpStateByUri(std::vector<std::string> &info, bool isClient, const std::string &args,
-        std::vector<std::string> &params) const;
+        std::vector<std::string> &params);
 
     void StopAllExtensions();
 
@@ -292,6 +292,16 @@ private:
      * @return Returns ERR_OK on success, others on failure.
      */
     int StopServiceAbilityLocked(const AbilityRequest &abilityRequest);
+
+    /**
+     * DisconnectAbilityLocked, disconnect session with callback.
+     *
+     * @param connect, Callback used to notify caller the result of connecting or disconnecting.
+     * @param force, Indicates forcing to disconnect and clear. For example, it is called when the source
+     * dies and the connection has not completed yet.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect, bool force);
 
     /**
      * LoadAbility.
@@ -451,11 +461,16 @@ private:
     /**
      * When a service is under starting, enque the request and handle it after the service starting completes
      */
-    void EnqueStartServiceReq(const AbilityRequest &abilityRequest);
+    void EnqueueStartServiceReq(const AbilityRequest &abilityRequest);
     /**
      * After the service starting completes, complete the request list
      */
     void CompleteStartServiceReq(const std::string &serviceUri);
+
+private:
+    void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);
+    int DisconnectRecordNormal(std::shared_ptr<ConnectionRecord> connectRecord);
+    void DisconnectRecordForce(std::shared_ptr<ConnectionRecord> connectRecord);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";

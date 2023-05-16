@@ -53,6 +53,7 @@ constexpr static char ACE_FORM_ABILITY_NAME[] = "AceFormAbility";
 constexpr static char FORM_EXTENSION[] = "FormExtension";
 #endif
 constexpr static char BASE_SERVICE_EXTENSION[] = "ServiceExtension";
+constexpr static char BASE_DRIVER_EXTENSION[] = "DriverExtension";
 constexpr static char STATIC_SUBSCRIBER_EXTENSION[] = "StaticSubscriberExtension";
 constexpr static char DATA_SHARE_EXT_ABILITY[] = "DataShareExtAbility";
 constexpr static char WORK_SCHEDULER_EXTENSION[] = "WorkSchedulerExtension";
@@ -72,33 +73,18 @@ AbilityThread::AbilityThread()
 
 AbilityThread::~AbilityThread()
 {
-    wptr<AbilityThread> weak = this;
-    auto task = [weak]() {
-        auto abilityThread = weak.promote();
-        if (abilityThread == nullptr) {
-            HILOG_ERROR("Ability thread is nullptr when destructor.");
-            return;
+    if (isExtension_) {
+        if (currentExtension_) {
+            currentExtension_.reset();
         }
-
-        if (abilityThread->isExtension_) {
-            HILOG_DEBUG("Destroy extension in main-thread");
-            if (abilityThread->currentExtension_) {
-                abilityThread->currentExtension_.reset();
-            }
-        } else {
-            HILOG_DEBUG("Destroy ability in main-thread");
-            if (abilityThread->currentAbility_) {
-                abilityThread->currentAbility_->DetachBaseContext();
-                abilityThread->currentAbility_.reset();
-            }
+    } else {
+        if (currentAbility_) {
+            currentAbility_->DetachBaseContext();
+            currentAbility_.reset();
         }
-
-        DelayedSingleton<AbilityImplFactory>::DestroyInstance();
-    };
-
-    if (abilityHandler_ != nullptr) {
-        abilityHandler_->PostSyncTask(task);
     }
+
+    DelayedSingleton<AbilityImplFactory>::DestroyInstance();
 }
 
 std::string AbilityThread::CreateAbilityName(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
@@ -156,6 +142,9 @@ std::string AbilityThread::CreateAbilityName(const std::shared_ptr<AbilityLocalR
 #endif
         if (abilityInfo->extensionAbilityType == ExtensionAbilityType::STATICSUBSCRIBER) {
             abilityName = STATIC_SUBSCRIBER_EXTENSION;
+        }
+        if (abilityInfo->extensionAbilityType == ExtensionAbilityType::DRIVER) {
+            abilityName = BASE_DRIVER_EXTENSION;
         }
         if (abilityInfo->extensionAbilityType == ExtensionAbilityType::DATASHARE) {
             abilityName = DATA_SHARE_EXT_ABILITY;
@@ -472,7 +461,8 @@ void AbilityThread::Attach(
  * @param want  Indicates the structure containing lifecycle information about the ability.
  * @param lifeCycleStateInfo  Indicates the lifeCycleStateInfo.
  */
-void AbilityThread::HandleAbilityTransaction(const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo)
+void AbilityThread::HandleAbilityTransaction(const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo,
+    sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Handle ability transaction begin, name is %{public}s.", want.GetElement().GetAbilityName().c_str());
@@ -485,7 +475,7 @@ void AbilityThread::HandleAbilityTransaction(const Want &want, const LifeCycleSt
         lifeCycleStateInfo.caller.bundleName,
         lifeCycleStateInfo.caller.abilityName,
         lifeCycleStateInfo.caller.moduleName);
-    abilityImpl_->HandleAbilityTransaction(want, lifeCycleStateInfo);
+    abilityImpl_->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
     HILOG_DEBUG("Handle ability transaction success.");
 }
 
@@ -771,7 +761,7 @@ void AbilityThread::ScheduleAbilityTransaction(const Want &want, const LifeCycle
     sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Schedule ability transaction, name is %{public}s, targeState is %{public}d, isNewWant is %{public}d.",
+    HILOG_INFO("name:%{public}s,targeState:%{public}d,isNewWant:%{public}d",
         want.GetElement().GetAbilityName().c_str(),
         lifeCycleStateInfo.state,
         lifeCycleStateInfo.isNewWant);
@@ -790,7 +780,7 @@ void AbilityThread::ScheduleAbilityTransaction(const Want &want, const LifeCycle
         if (abilityThread->isExtension_) {
             abilityThread->HandleExtensionTransaction(want, lifeCycleStateInfo, sessionInfo);
         } else {
-            abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo);
+            abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
         }
     };
 

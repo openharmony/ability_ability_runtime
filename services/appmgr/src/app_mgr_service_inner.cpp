@@ -87,6 +87,7 @@ const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
 const std::string PERMISSION_INTERNET = "ohos.permission.INTERNET";
 const std::string PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
+const std::string SUPPORT_ISOLATION_MODE = "supportIsolationMode";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -143,6 +144,7 @@ void AppMgrServiceInner::Init()
 {
     InitGlobalConfiguration();
     AddWatchParameter();
+    supportIsolationMode_ = OHOS::system::GetParameter(SUPPORT_ISOLATION_MODE, "false");
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
     InitFocusListener();
 }
@@ -159,7 +161,7 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         HILOG_ERROR("CheckLoadAbilityConditions failed");
         return;
     }
-    HILOG_INFO("AppMgrService start loading ability, name is %{public}s.", abilityInfo->name.c_str());
+    HILOG_INFO("load,name:%{public}s.", abilityInfo->name.c_str());
 
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is nullptr");
@@ -186,6 +188,12 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         if (!appRecord) {
             HILOG_ERROR("CreateAppRunningRecord failed, appRecord is nullptr");
             return;
+        }
+        auto callRecord = GetAppRunningRecordByAbilityToken(preToken);
+        if (callRecord != nullptr) {
+            auto launchReson = (want == nullptr) ? 0 : want->GetIntParam("ohos.ability.launch.reason", 0);
+            HILOG_INFO("req: %{public}d, proc: %{public}s, call:%{public}d,%{public}s", launchReson,
+                appInfo->name.c_str(), appRecord->GetCallerPid(), callRecord->GetBundleName().c_str());
         }
         uint32_t startFlags = (want == nullptr) ? 0 : BuildStartFlags(*want, *abilityInfo);
         int32_t bundleIndex = (want == nullptr) ? 0 : want->GetIntParam(DLP_PARAMS_INDEX, 0);
@@ -251,9 +259,17 @@ void AppMgrServiceInner::MakeProcessName(
         return;
     }
     // check after abilityInfo, because abilityInfo contains extension process.
-    if (hapModuleInfo.isStageBasedModel && !hapModuleInfo.process.empty()) {
+    if (hapModuleInfo.isStageBasedModel && !hapModuleInfo.process.empty()
+        && hapModuleInfo.process != appInfo->bundleName) {
         processName = hapModuleInfo.process;
-        HILOG_INFO("Stage mode, Make processName:%{public}s", processName.c_str());
+        HILOG_DEBUG("Stage mode, Make processName:%{public}s", processName.c_str());
+        return;
+    }
+    bool isRunInIsolationMode = CheckIsolationMode(hapModuleInfo);
+    if (hapModuleInfo.isStageBasedModel && isRunInIsolationMode) {
+        processName = appInfo->bundleName;
+        processName.append(":");
+        processName.append(hapModuleInfo.name);
         return;
     }
     if (!appInfo->process.empty()) {
@@ -261,6 +277,22 @@ void AppMgrServiceInner::MakeProcessName(
         return;
     }
     processName = appInfo->bundleName;
+}
+
+bool AppMgrServiceInner::CheckIsolationMode(const HapModuleInfo &hapModuleInfo) const
+{
+    IsolationMode isolationMode = hapModuleInfo.isolationMode;
+    if (supportIsolationMode_.compare("true") == 0) {
+        switch (isolationMode) {
+            case IsolationMode::ISOLATION_FIRST:
+                return true;
+            case IsolationMode::ISOLATION_ONLY:
+                return true;
+            default:
+                return false;
+        }
+    }
+    return false;
 }
 
 bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
@@ -274,7 +306,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     }
 
     auto userId = GetUserIdByUid(appInfo->uid);
-    HILOG_INFO("GetBundleAndHapInfo come, call bms GetBundleInfo and GetHapModuleInfo, userId is %{public}d", userId);
+    HILOG_INFO("call,userId:%{public}d", userId);
     bool bundleMgrResult;
     if (appIndex == 0) {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleInfo(appInfo->bundleName,
@@ -312,7 +344,7 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
         HILOG_ERROR("app client is null");
         return;
     }
-    HILOG_INFO("AppMgrService attach application come, pid is %{public}d.", pid);
+    HILOG_INFO("attach, pid:%{public}d.", pid);
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
         HILOG_ERROR("no such appRecord");
@@ -595,7 +627,7 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
     }
     HILOG_INFO("uid value is %{public}d", uid);
     if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids)) {
-        HILOG_INFO("The process corresponding to the package name did not start");
+        HILOG_INFO("not start");
         return result;
     }
     if (WaitForRemoteProcessExit(pids, startTime)) {
@@ -624,8 +656,8 @@ void AppMgrServiceInner::SendProcessExitEventTask(pid_t pid, time_t exitTime, in
         eventInfo.exitResult = EXIT_SUCESS;
         eventInfo.pid = pid;
         AAFwk::EventReport::SendAppEvent(AAFwk::EventName::PROCESS_EXIT, HiSysEventType::BEHAVIOR, eventInfo);
-        HILOG_INFO("%{public}s. time : %{public}" PRId64 ", exitResult : %{public}d, pid : %{public}d",
-            __func__, eventInfo.time, eventInfo.exitResult, eventInfo.pid);
+        HILOG_INFO("time : %{public}" PRId64 ", exitResult : %{public}d, pid : %{public}d",
+            eventInfo.time, eventInfo.exitResult, eventInfo.pid);
         return;
     }
 
@@ -635,8 +667,8 @@ void AppMgrServiceInner::SendProcessExitEventTask(pid_t pid, time_t exitTime, in
         eventInfo.exitResult = EXIT_FAILED;
         eventInfo.pid = pid;
         AAFwk::EventReport::SendAppEvent(AAFwk::EventName::PROCESS_EXIT, HiSysEventType::BEHAVIOR, eventInfo);
-        HILOG_INFO("%{public}s. time : %{public}" PRId64 ", exitResult : %{public}d, pid : %{public}d",
-            __func__, eventInfo.time, eventInfo.exitResult, eventInfo.pid);
+        HILOG_INFO("time : %{public}" PRId64 ", exitResult : %{public}d, pid : %{public}d",
+            eventInfo.time, eventInfo.exitResult, eventInfo.pid);
         return;
     }
 
@@ -2065,7 +2097,7 @@ void AppMgrServiceInner::HandleAddAbilityStageTimeOut(const int64_t eventId)
 void AppMgrServiceInner::GetRunningProcessInfoByToken(
     const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info)
 {
-    HILOG_INFO("%{public}s called", __func__);
+    HILOG_DEBUG("called");
     if (!CheckGetRunningInfoPermission()) {
         return;
     }
@@ -2075,7 +2107,7 @@ void AppMgrServiceInner::GetRunningProcessInfoByToken(
 
 void AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const
 {
-    HILOG_INFO("%{public}s called", __func__);
+    HILOG_DEBUG("called");
     if (!CheckGetRunningInfoPermission()) {
         return;
     }
@@ -2283,7 +2315,7 @@ int32_t AppMgrServiceInner::UnregisterApplicationStateObserver(const sptr<IAppli
 
 int32_t AppMgrServiceInner::GetForegroundApplications(std::vector<AppStateData> &list)
 {
-    HILOG_INFO("%{public}s, begin.", __func__);
+    HILOG_DEBUG("begin.");
     CHECK_CALLER_IS_SYSTEM_APP;
     auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
     if (!isPerm) {
@@ -2992,8 +3024,7 @@ int AppMgrServiceInner::VerifyAccountPermission(const std::string &permissionNam
         return ERR_OK;
     }
 
-    const int currentUserId = (int)(getuid() / Constants::BASE_USER_RANGE);
-    if (userId != currentUserId) {
+    if (userId != currentUserId_) {
         auto isCallingPermAccount = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
             AAFwk::PermissionConstants::PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS);
         if (!isCallingPermAccount) {
@@ -3181,7 +3212,7 @@ int AppMgrServiceInner::GetRenderProcessTerminationStatus(pid_t renderPid, int &
         HILOG_ERROR("failed to get render process termination status, errCode %{public}08x", errCode);
         return ERR_INVALID_VALUE;
     }
-    HILOG_INFO("Get render process termination status success, renderPid:%{public}d, status:%{public}d",
+    HILOG_DEBUG("Get render process termination status success, renderPid:%{public}d, status:%{public}d",
         renderPid, status);
     return 0;
 }
@@ -3533,6 +3564,15 @@ void AppMgrServiceInner::RemoveRunningSharedBundleList(const std::string &bundle
         return;
     }
     runningSharedBundleList_.erase(iterator);
+}
+
+void AppMgrServiceInner::SetCurrentUserId(const int32_t userId)
+{
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        return;
+    }
+    HILOG_DEBUG("set current userId: %{public}d", userId);
+    currentUserId_ = userId;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

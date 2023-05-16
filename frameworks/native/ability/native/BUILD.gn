@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,15 @@ import("//foundation/distributeddatamgr/relational_store/relational_store.gni")
 
 config("ability_config") {
   visibility = [ ":*" ]
+  visibility += [
+    "${ability_runtime_native_path}/ability/native/*",
+    "${ability_runtime_test_path}/*",
+    "${distributeddatamgr_path}/data_share/interfaces/inner_api/*",
+    "${imf_path}/frameworks/kits/extension/*",
+    "${print_fwk_path}/frameworks/kits/extension/*",
+    "${user_file_service_innerkits_path}/file_access/*",
+    "${wallpaper_mgr_path}/frameworks/kits/extension/*",
+  ]
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
@@ -61,6 +70,10 @@ config("ability_config") {
 
 config("ability_public_config") {
   visibility = [ ":*" ]
+  visibility += [
+    "${ability_runtime_napi_path}/inner/*",
+    "${ability_runtime_test_path}/fuzztest/*",
+  ]
   include_dirs = [
     "${ability_runtime_napi_path}/inner/napi_ability_common",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
@@ -92,28 +105,6 @@ config("ability_public_config") {
     ]
     defines = [ "SUPPORT_GRAPHICS" ]
   }
-}
-
-ohos_shared_library("static_subscriber_ipc") {
-  include_dirs =
-      [ "${ability_runtime_path}/interfaces/kits/native/ability/native" ]
-
-  sources = [
-    "${ability_runtime_native_path}/ability/native/static_subscriber_proxy.cpp",
-    "${ability_runtime_native_path}/ability/native/static_subscriber_stub.cpp",
-  ]
-
-  deps = []
-
-  external_deps = [
-    "ability_base:want",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "ipc:ipc_core",
-  ]
-
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
 }
 
 config("abilitykit_utils_public_config") {
@@ -185,6 +176,7 @@ ohos_shared_library("abilitykit_utils") {
     ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -224,6 +216,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/new_ability_impl.cpp",
     "${ability_runtime_native_path}/ability/native/recovery/ability_recovery.cpp",
     "${ability_runtime_native_path}/ability/native/recovery/app_recovery.cpp",
+    "${ability_runtime_native_path}/ability/native/recovery/app_recovery_parcel_allocator.cpp",
     "${ability_runtime_native_path}/ability/native/service_ability_impl.cpp",
     "${ability_runtime_native_path}/appkit/app/app_context.cpp",
     "${ability_runtime_native_path}/appkit/app/context_container.cpp",
@@ -253,6 +246,7 @@ ohos_shared_library("abilitykit_native") {
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
+    "ability_base:session_info",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_context_native",
@@ -269,11 +263,14 @@ ohos_shared_library("abilitykit_native") {
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
-    "input:libmmi-client",
     "ipc:ipc_core",
     "ipc:ipc_napi_common",
+    "ipc_js:rpc",
+    "napi:ace_napi",
     "relational_store:native_rdb",
+    "resource_management:global_resmgr",
     "samgr:samgr_proxy",
+    "window_manager:libwsutils",
   ]
 
   defines = []
@@ -292,24 +289,21 @@ ohos_shared_library("abilitykit_native") {
     ":abilitykit_utils",
     ":extensionkit_native",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "//base/notification/eventhandler/frameworks/eventhandler:libeventhandler",
-    "//base/startup/init/interfaces/innerkits:libbegetutil",
-    "//foundation/arkui/napi:ace_napi",
-    "//foundation/communication/ipc/interfaces/kits/js/napi:rpc",
+    "${eventhandler_path}/frameworks/eventhandler:libeventhandler",
+    "${init_path}/interfaces/innerkits:libbegetutil",
   ]
 
   if (ability_runtime_graphics) {
     include_dirs += []
     sources += [
       "${ability_runtime_native_path}/ability/native/ability_window.cpp",
-      "${ability_runtime_native_path}/ability/native/form_provider_client.cpp",
       "${ability_runtime_native_path}/ability/native/page_ability_impl.cpp",
     ]
     deps += [ "//third_party/icu/icu4c:shared_icuuc" ]
 
     external_deps += [
-      "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "input:libmmi-client",
       "multimedia_image_framework:image",
     ]
 
@@ -323,6 +317,7 @@ ohos_shared_library("abilitykit_native") {
     ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   version_script = "libabilitykit_native.map"
   subsystem_name = "ability"
   part_name = "ability_runtime"
@@ -398,6 +393,7 @@ ohos_shared_library("extensionkit_native") {
     ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -428,6 +424,7 @@ ohos_shared_library("ability_thread") {
     "ipc:ipc_core",
   ]
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -534,71 +531,7 @@ ohos_shared_library("service_extension") {
     "napi:ace_napi",
   ]
 
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-ohos_shared_library("static_subscriber_extension") {
-  include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime",
-  ]
-
-  sources = [
-    "${ability_runtime_native_path}/ability/native/js_static_subscriber_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/js_static_subscriber_extension_context.cpp",
-    "${ability_runtime_native_path}/ability/native/static_subscriber_extension.cpp",
-    "${ability_runtime_native_path}/ability/native/static_subscriber_stub_imp.cpp",
-    "${ability_runtime_native_path}/appkit/ability_runtime/static_subscriber_extension_context.cpp",
-  ]
-
-  deps = [
-    ":extensionkit_native",
-    ":static_subscriber_ipc",
-    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${ability_runtime_native_path}/appkit:app_context",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:runtime",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-  ]
-
-  subsystem_name = "ability"
-  part_name = "ability_runtime"
-}
-
-ohos_shared_library("static_subscriber_extension_module") {
-  include_dirs =
-      [ "${ability_runtime_path}/interfaces/kits/native/ability/native" ]
-
-  sources = [ "${ability_runtime_native_path}/ability/native/static_subscriber_extension_module_loader.cpp" ]
-
-  configs = [ ":ability_config" ]
-  public_configs = [ ":ability_public_config" ]
-
-  deps = [ ":static_subscriber_extension" ]
-
-  external_deps = [
-    "ability_base:configuration",
-    "ability_base:session_info",
-    "ace_engine:ace_uicontent",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "napi:ace_napi",
-  ]
-
-  relative_install_dir = "extensionability"
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -649,6 +582,7 @@ ohos_shared_library("continuation_ipc") {
 
   public_deps = []
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -679,6 +613,7 @@ ohos_shared_library("data_ability_helper") {
     "relational_store:rdb_data_ability_adapter",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -716,7 +651,6 @@ config("ability_business_error_config") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
-    "//base/hiviewdfx/hiview/adapter/utility/include/extra",
   ]
 }
 
@@ -732,6 +666,9 @@ ohos_shared_library("ability_business_error") {
 
   public_configs = [ ":ability_business_error_public_config" ]
 
+  external_deps = [ "c_utils:utils" ]
+
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -760,11 +697,13 @@ ohos_shared_library("dialog_request_callback") {
   public_configs = [ ":dialog_request_callback_public_config" ]
 
   external_deps = [
+    "ability_base:want",
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -782,7 +721,7 @@ group("extension_blocklist_config") {
 group("extension_module") {
   deps = [
     ":service_extension_module",
-    ":static_subscriber_extension_module",
+    ":ui_extension_module",
   ]
 
   if (ability_runtime_graphics) {
