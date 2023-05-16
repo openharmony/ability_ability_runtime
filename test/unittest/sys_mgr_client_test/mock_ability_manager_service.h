@@ -83,7 +83,8 @@ public:
         const std::string& args, std::vector<std::string>& state, bool isClient, bool isUserID, int UserID) override;
     int TerminateAbilityByCaller(const sptr<IRemoteObject>& callerToken, int requestCode) override;
     int TerminateAbilityResult(const sptr<IRemoteObject>& token, int startId) override;
-    int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE) override;
+    int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
+        const sptr<IRemoteObject> &token = nullptr) override;
 
     MOCK_METHOD1(KillProcess, int(const std::string& bundleName));
     MOCK_METHOD2(UninstallApp, int(const std::string& bundleName, int32_t uid));
@@ -124,6 +125,8 @@ public:
     MOCK_METHOD0(CleanAllMissions, int());
     MOCK_METHOD1(MoveMissionToFront, int(int32_t missionId));
     MOCK_METHOD2(MoveMissionToFront, int(int32_t missionId, const StartOptions& startOptions));
+    MOCK_METHOD2(MoveMissionsToForeground, int(const std::vector<int32_t>& missionIds, int32_t topMissionId));
+    MOCK_METHOD2(MoveMissionsToBackground, int(const std::vector<int32_t>& missionIds, std::vector<int32_t>& result));
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
     MOCK_METHOD2(SetMissionIcon, int(const sptr<IRemoteObject>& token,
         const std::shared_ptr<OHOS::Media::PixelMap>& icon));
@@ -131,8 +134,10 @@ public:
     MOCK_METHOD1(GetAbilityRunningInfos, int(std::vector<AbilityRunningInfo>& info));
     MOCK_METHOD2(GetExtensionRunningInfos, int(int upperLimit, std::vector<ExtensionRunningInfo>& info));
     MOCK_METHOD1(GetProcessRunningInfos, int(std::vector<AppExecFwk::RunningProcessInfo>& info));
-    MOCK_METHOD3(StartAbilityByCall, int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&));
+    MOCK_METHOD4(StartAbilityByCall,
+        int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&, int32_t));
     MOCK_METHOD1(GetMissionIdByToken, int32_t(const sptr<IRemoteObject>& token));
+    MOCK_METHOD2(GetAbilityTokenByCalleeObj, void(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token));
     MOCK_METHOD2(AcquireShareData, int32_t(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData));
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));

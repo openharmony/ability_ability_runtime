@@ -211,7 +211,7 @@ void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
 
 void AmsMgrScheduler::PrepareTerminate(const sptr<IRemoteObject> &token)
 {
-    HILOG_INFO("Notify AppMgrService to prepare to terminate the ability.");
+    HILOG_DEBUG("Notify AppMgrService to prepare to terminate the ability.");
     if (!IsReady()) {
         return;
     }
@@ -325,6 +325,14 @@ int AmsMgrScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Ap
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->GetApplicationInfoByProcessID(pid, application, debug);
+}
+
+void AmsMgrScheduler::SetCurrentUserId(const int32_t userId)
+{
+    if (!IsReady()) {
+        return;
+    }
+    amsMgrServiceInner_->SetCurrentUserId(userId);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

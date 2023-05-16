@@ -15,10 +15,11 @@
 
 #include "main_thread.h"
 
+#include <malloc.h>
 #include <new>
 #include <regex>
+#include <sys/prctl.h>
 #include <unistd.h>
-#include <malloc.h>
 
 #include "constants.h"
 #include "ability_delegator.h"
@@ -139,7 +140,10 @@ void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppL
         std::string appLibPathKey = hapInfo.bundleName + "/" + hapInfo.moduleName;
 
         // libraries in patch lib path has a higher priority when loading.
-        std::string patchNativeLibraryPath = hapInfo.hqfInfo.nativeLibraryPath;
+        if (hapInfo.isLibIsolated) {
+            patchNativeLibraryPath = hapInfo.hqfInfo.nativeLibraryPath;
+        }
+
         if (!patchNativeLibraryPath.empty()) {
             std::string patchLibPath = LOCAL_CODE_PATH;
             patchLibPath += (patchLibPath.back() == '/') ? patchNativeLibraryPath : "/" + patchNativeLibraryPath;
@@ -941,7 +945,7 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
                         return;
                     }
                     appThread->OnOverlayChanged(data, resourceManager, bundleName, moduleName, loadPath);
-                };       
+                };
                 auto subscriber = std::make_shared<OverlayEventSubscriber>(subscribeInfo, callback);
                 bool subResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber);
                 HILOG_INFO("Overlay event subscriber register result is %{public}d", subResult);
@@ -1022,7 +1026,7 @@ void MainThread::HandleOnOverlayChanged(const EventFwk::CommonEventData &data,
     if (res != ERR_OK) {
         return;
     }
-    
+
     // 2.add/remove overlay hapPath
     if (loadPath.empty() || overlayModuleInfos.size() == 0) {
         HILOG_WARN("There is not any hapPath in overlayModuleInfo");
@@ -1360,6 +1364,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             HILOG_ERROR("HandleLaunchApplication app or appmgr is null");
             return;
         }
+
+        if (prctl(PR_SET_NAME, "preStartNWeb") < 0) {
+            HILOG_WARN("Set thread name failed with %{public}d", errno);
+        }
+
         std::string nwebPath = app->GetAppContext()->GetCacheDir() + "/web";
         bool isFirstStartUpWeb = (access(nwebPath.c_str(), F_OK) != 0);
         if (!isFirstStartUpWeb) {
@@ -2520,8 +2529,7 @@ int MainThread::GetOverlayModuleInfos(const std::string &bundleName, const std::
         return ret;
     }
     std::sort(overlayModuleInfos.begin(), overlayModuleInfos.end(),
-        [](const OverlayModuleInfo& lhs, const OverlayModuleInfo& rhs) -> bool
-    {
+        [](const OverlayModuleInfo& lhs, const OverlayModuleInfo& rhs) -> bool {
         return lhs.priority > rhs.priority;
     });
     HILOG_DEBUG("GetOverlayPath end, the size of overlay is: %{public}zu", overlayModuleInfos.size());
@@ -2533,7 +2541,7 @@ std::vector<std::string> MainThread::GetAddOverlayPaths(const std::vector<Overla
     std::vector<std::string> addPaths;
     for (auto it : overlayModuleInfos) {
         auto iter = std::find_if(
-            overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item){
+            overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item) {
                 return it.moduleName == item.moduleName;
             });
         if ((iter != overlayModuleInfos_.end()) && (it.state == AppExecFwk::OverlayState::OVERLAY_ENABLE)) {
@@ -2551,7 +2559,7 @@ std::vector<std::string> MainThread::GetRemoveOverlayPaths(const std::vector<Ove
     std::vector<std::string> removePaths;
     for (auto it : overlayModuleInfos) {
         auto iter = std::find_if(
-            overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item){
+            overlayModuleInfos_.begin(), overlayModuleInfos_.end(), [it](OverlayModuleInfo item) {
                 return it.moduleName == item.moduleName;
             });
         if ((iter != overlayModuleInfos_.end()) && (it.state != AppExecFwk::OverlayState::OVERLAY_ENABLE)) {

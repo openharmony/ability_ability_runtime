@@ -535,7 +535,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_027, TestSize.Level1)
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
     const Want want;
-    auto res = proxy_->StopServiceAbility(want);
+    auto res = proxy_->StopServiceAbility(want, -1, nullptr);
 
     EXPECT_EQ(IAbilityManager::STOP_SERVICE_ABILITY, mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
@@ -1468,6 +1468,43 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_MoveMissionToFront_001, Te
     int32_t missionId = 1;
     auto res = proxy_->MoveMissionToFront(missionId);
     EXPECT_EQ(IAbilityManager::MOVE_MISSION_TO_FRONT, mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: MoveMissionsToForeground
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService MoveMissionsToForeground
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of MoveMissionsToForeground
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_MoveMissionsToForeground_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    auto res = proxy_->MoveMissionsToForeground({1, 2, 3}, 1);
+    EXPECT_EQ(IAbilityManager::MOVE_MISSIONS_TO_FOREGROUND, mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: MoveMissionsToBackground
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService MoveMissionsToBackground
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of MoveMissionsToBackground
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_MoveMissionsToBackground_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    std::vector<int32_t> rs;
+    auto res = proxy_->MoveMissionsToBackground({1, 2, 3}, rs);
+    EXPECT_EQ(IAbilityManager::MOVE_MISSIONS_TO_BACKGROUND, mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
 

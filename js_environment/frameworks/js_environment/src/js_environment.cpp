@@ -19,6 +19,7 @@
 #include "js_environment_impl.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "uncaught_exception_callback.h"
+#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
 
 namespace OHOS {
 namespace JsEnv {
@@ -57,32 +58,22 @@ bool JsEnvironment::Initialize(const panda::RuntimeOption& pandaOption, void* js
     return true;
 }
 
-void JsEnvironment::StartDebuggger(bool needBreakPoint)
-{
-}
-
-void JsEnvironment::StopDebugger()
-{
-}
-
 void JsEnvironment::InitTimerModule()
 {
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid native engine.");
+        return;
+    }
+
     if (impl_ != nullptr) {
-        impl_->InitTimerModule();
+        impl_->InitTimerModule(engine_);
     }
 }
 
-void JsEnvironment::InitConsoleLogModule()
+void JsEnvironment::InitWorkerModule(const std::string& codePath, bool isDebugVersion, bool isBundle)
 {
-    if (impl_ != nullptr) {
-        impl_->InitConsoleLogModule();
-    }
-}
-
-void JsEnvironment::InitWorkerModule()
-{
-    if (impl_ != nullptr) {
-        impl_->InitWorkerModule();
+    if (impl_ != nullptr && engine_ != nullptr) {
+        impl_->InitWorkerModule(*engine_, codePath, isDebugVersion, isBundle);
     }
 }
 
@@ -107,9 +98,17 @@ void JsEnvironment::RemoveTask(const std::string& name)
     }
 }
 
-void JsEnvironment::InitSourceMap(const std::shared_ptr<SourceMapOperatorImpl> operatorImpl)
+void JsEnvironment::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorObj)
 {
-    sourceMapOperator_ = std::make_shared<SourceMapOperator>(operatorImpl);
+    sourceMapOperator_ = operatorObj;
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return;
+    }
+    auto translateBySourceMapFunc = [&](const std::string& rawStack) {
+        return sourceMapOperator_->TranslateBySourceMap(rawStack);
+    };
+    engine_->RegisterTranslateBySourceMap(translateBySourceMapFunc);
 }
 
 void JsEnvironment::RegisterUncaughtExceptionHandler(JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo)
@@ -140,13 +139,34 @@ bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* bu
 bool JsEnvironment::StartDebugger(const char* libraryPath, bool needBreakPoint, uint32_t instanceId,
     const DebuggerPostTask& debuggerPostTask)
 {
-    if (vm_ == nullptr) {
-        JSENV_LOG_E("Invalid vm.");
-        return false;
+    if (vm_ != nullptr) {
+        return panda::JSNApi::StartDebugger(libraryPath, vm_, needBreakPoint, instanceId, debuggerPostTask);
+    }
+    return false;
+}
+
+void JsEnvironment::StopDebugger()
+{
+    if (vm_ != nullptr) {
+        (void)panda::JSNApi::StopDebugger(vm_);
+    }
+}
+
+void JsEnvironment::InitConsoleModule()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return;
     }
 
-    panda::JSNApi::StartDebugger(libraryPath, vm_, needBreakPoint, instanceId, debuggerPostTask);
-    return true;
+    if (impl_ != nullptr) {
+        impl_->InitConsoleModule(engine_);
+    }
+}
+
+bool JsEnvironment::LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle)
+{
+    return engine_->RunScriptBuffer(path.c_str(), buffer, len, isBundle);
 }
 } // namespace JsEnv
 } // namespace OHOS

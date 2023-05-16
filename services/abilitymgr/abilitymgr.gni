@@ -21,8 +21,6 @@ abilityms_files = [
   "src/ability_manager_service.cpp",
   "src/ability_manager_stub.cpp",
   "src/ability_manager_proxy.cpp",
-  "src/container_manager_proxy.cpp",
-  "src/container_manager_client.cpp",
   "src/ability_record.cpp",
   "src/ability_scheduler_stub.cpp",
   "src/ability_scheduler_proxy.cpp",
@@ -70,6 +68,7 @@ abilityms_files = [
   "src/remote_mission_listener_stub.cpp",
   "src/mission_list_manager.cpp",
   "src/mission_list.cpp",
+  "src/scene_board/ui_ability_lifecycle_manager.cpp",
 
   #connection observer
   "src/connection_observer_controller.cpp",

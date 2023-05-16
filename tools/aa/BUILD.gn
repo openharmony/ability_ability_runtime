@@ -98,13 +98,10 @@ ohos_executable("aa") {
       "src/accessibility_ability_utils.cpp",
     ]
 
-    deps += [
-      "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-      "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    ]
-
     external_deps += [
       "access_token:libaccesstoken_sdk",
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
       "accessibility:accessibility_common",
       "accessibility:accessibilityclient",
       "accessibility:accessibilityconfig",
@@ -119,8 +116,8 @@ ohos_executable("aa") {
   part_name = "ability_tools"
 }
 
-ohos_prebuilt_etc("shell_command_excutor_config.json") {
-  source = "resource/shell_command_excutor_config.json"
+ohos_prebuilt_etc("shell_command_executor_config.json") {
+  source = "resource/shell_command_executor_config.json"
   subsystem_name = "ability"
   part_name = "ability_tools"
 }
@@ -128,6 +125,6 @@ ohos_prebuilt_etc("shell_command_excutor_config.json") {
 group("tools_aa") {
   deps = [
     ":aa",
-    ":shell_command_excutor_config.json",
+    ":shell_command_executor_config.json",
   ]
 }
