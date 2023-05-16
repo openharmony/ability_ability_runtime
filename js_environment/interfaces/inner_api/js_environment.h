@@ -44,17 +44,13 @@ public:
         return vm_;
     }
 
-    void StartDebuggger(bool needBreakPoint);
-
-    void StopDebugger();
-
     void InitTimerModule();
 
     void InitConsoleLogModule();
 
     void InitWorkerModule(const std::string& codePath, bool isDebugVersion, bool isBundle);
 
-    void InitSourceMap(const std::shared_ptr<SourceMapOperatorImpl> operatorImpl);
+    void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorObj);
 
     void InitSyscapModule();
 
@@ -69,6 +65,10 @@ public:
         const DebuggerPostTask& debuggerPostTask = {});
 
     void InitConsoleModule();
+
+    void StopDebugger();
+
+    bool LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle);
 
 private:
     std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;

@@ -200,6 +200,19 @@ public:
     }
 
     /**
+     * Start ui ability with want, send want to ability manager service.
+     *
+     * @param want the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param sessionInfo the session info of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions, sptr<SessionInfo> sessionInfo)
+    {
+        return 0;
+    }
+
+    /**
      * Stop extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to stop.
@@ -258,6 +271,17 @@ public:
     }
 
     /**
+     *  CloseUIAbilityBySCB, close the special ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+    {
+        return 0;
+    }
+
+    /**
      * SendResultToAbility, send the result to ability.
      *
      * @param requestCode, the requestCode of the ability to terminate.
@@ -308,6 +332,17 @@ public:
      */
     virtual int MinimizeUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
         bool fromUser = false)
+    {
+        return 0;
+    };
+
+    /**
+     * MinimizeUIAbilityBySCB, minimize the special ui ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to minimize.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
     {
         return 0;
     };
@@ -463,9 +498,11 @@ public:
      * Destroys this Service ability by Want.
      *
      * @param want, Special want for service type's ability.
+     * @param token ability's token.
      * @return Returns true if this Service ability will be destroyed; returns false otherwise.
      */
-    virtual int StopServiceAbility(const Want &want, int32_t userId = DEFAULT_INVAL_VALUE) = 0;
+    virtual int StopServiceAbility(const Want &want, int32_t userId = DEFAULT_INVAL_VALUE,
+        const sptr<IRemoteObject> &token = nullptr) = 0;
 
     /**
      * Kill the process immediately.
@@ -755,6 +792,14 @@ public:
      * @return Returns -1 if do not find mission, otherwise return mission id.
      */
     virtual int32_t GetMissionIdByToken(const sptr<IRemoteObject> &token) = 0;
+
+    /**
+     * Get ability token by connect.
+     *
+     * @param token The token of ability.
+     * @param callStub The callee object.
+     */
+    virtual void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token) = 0;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -1145,6 +1190,14 @@ public:
         // ipc id for connect ui extension ability
         CONNECT_UI_EXTENSION_ABILITY,
 
+        START_UI_ABILITY_BY_SCB,
+
+        // ipc id for minimize ui ability by scb
+        MINIMIZE_UI_ABILITY_BY_SCB,
+
+        // ipc id for close ui ability by scb
+        CLOSE_UI_ABILITY_BY_SCB,
+
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
 
@@ -1202,6 +1255,8 @@ public:
 
         ACQUIRE_SHARE_DATA = 4001,
         SHARE_DATA_DONE = 4002,
+
+        GET_ABILITY_TOKEN = 5001,
     };
 };
 }  // namespace AAFwk
