@@ -18,7 +18,7 @@ config("dataobs_manager_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include/",
-    "//utils/system/safwk/native/include",
+    "${safwk_path}/native/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_services_path}/dataobsmgr/include",
     "${ability_base_kits_path}/uri/include",
@@ -53,6 +53,7 @@ ohos_shared_library("dataobs_manager") {
     "samgr:samgr_proxy",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }

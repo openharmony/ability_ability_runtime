@@ -129,7 +129,10 @@ ErrCode ControlInterceptor::DoProcess(const Want &want, int requestCode, int32_t
             }
         }
 #endif
-        return ERR_DISPOSED_STATUS;
+        if (controlRule.isEdm) {
+            return ERR_EDM_APP_CONTROLLED;
+        }
+        return ERR_APP_CONTROLLED;
     }
     return ERR_OK;
 }
@@ -154,7 +157,7 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
 
     auto ret = IN_PROCESS_CALL(appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule));
     if (ret != ERR_OK) {
-        HILOG_INFO("Get No AppRunningControlRule");
+        HILOG_DEBUG("Get No AppRunningControlRule");
         return false;
     }
     return true;
@@ -170,7 +173,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
 {
     bool isStartIncludeAtomicService = AbilityUtil::IsStartIncludeAtomicService(want, userId);
     if (!isStartIncludeAtomicService) {
-        HILOG_INFO("This startup does not contain atomic service, keep going.");
+        HILOG_DEBUG("This startup does not contain atomic service, keep going.");
         return ERR_OK;
     }
 
@@ -183,7 +186,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
         return ERR_OK;
     }
 
-    HILOG_INFO("check ecological rule success");
+    HILOG_DEBUG("check ecological rule success");
     if (rule.isAllow) {
         HILOG_ERROR("ecological rule is allow, keep going.");
         return ERR_OK;
@@ -203,7 +206,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
 
 bool EcologicalRuleInterceptor::CheckRule(const Want &want, ErmsCallerInfo &callerInfo, ExperienceRule &rule)
 {
-    HILOG_INFO("Enter Erms CheckRule.");
+    HILOG_DEBUG("Enter Erms CheckRule.");
     auto erms = AbilityUtil::CheckEcologicalRuleMgr();
     if (!erms) {
         HILOG_ERROR("CheckEcologicalRuleMgr failed.");
@@ -285,7 +288,7 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
     }
     if (controlRule.callerPkg.empty() || controlRule.targetPkg.empty()) {
         HILOG_INFO("This startup is not explicitly, keep going.");
-        return false; 
+        return false;
     }
     if (controlRule.callerPkg == controlRule.targetPkg) {
         HILOG_INFO("jump within the same app.");

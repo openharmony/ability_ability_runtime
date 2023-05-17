@@ -126,7 +126,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+    "${graphic_2d_path}/rosen/modules/render_service_client:librender_service_client",
   ]
 
   external_deps = [
@@ -178,6 +178,7 @@ ohos_shared_library("appkit_native") {
     defines += [ "NWEB" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -231,6 +232,7 @@ ohos_shared_library("app_context") {
     external_deps += [ "i18n:intl_util" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -281,6 +283,7 @@ ohos_shared_library("app_context_utils") {
     external_deps += [ "i18n:intl_util" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -294,7 +297,6 @@ ohos_shared_library("appkit_delegator") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/ability_delegator/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
-    "${multimodalinput_path}/frameworks/proxy:libmmi-client",
   ]
 
   configs = [ ":appkit_config" ]
@@ -337,13 +339,13 @@ ohos_shared_library("appkit_delegator") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
-
-  public_deps = [ "//foundation/arkui/napi:ace_napi" ]
+  public_deps = [ "${arkui_path}/napi:ace_napi" ]
 
   if (ability_runtime_graphics) {
     deps += [ "//third_party/icu/icu4c:shared_icuuc" ]
   }
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
@@ -364,6 +366,7 @@ ohos_shared_library("application_context_manager") {
 
   public_configs = [ ":application_context_manager_config" ]
 
+  innerapi_tags = [ "platformsdk_indirect" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }

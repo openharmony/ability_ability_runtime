@@ -292,7 +292,8 @@ public:
      * @param abilityRequest,create ability record.
      * @return Returns ability record ptr.
      */
-    static std::shared_ptr<AbilityRecord> CreateAbilityRecord(const AbilityRequest &abilityRequest);
+    static std::shared_ptr<AbilityRecord> CreateAbilityRecord(const AbilityRequest &abilityRequest,
+        sptr<SessionInfo> sessionInfo = nullptr);
 
     /**
      * Init ability record.
@@ -598,8 +599,7 @@ public:
      * send result object to caller ability thread.
      *
      */
-    void SendResult();
-
+    void SendResult(bool isSandboxApp = false);
     /**
      * send result object to caller ability.
      *
@@ -834,11 +834,6 @@ public:
         return recordId_;
     }
 
-    inline int64_t GetForegroundingTime() const
-    {
-        return foregroundingTime_;
-    }
-
     void SetPendingState(AbilityState state);
     AbilityState GetPendingState() const;
 
@@ -848,6 +843,7 @@ public:
     void SetOtherMissionStackAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void RevokeUriPermission();
     void RemoveAbilityDeathRecipient() const;
+    bool IsExistConnection(const sptr<IAbilityConnection> &connect);
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1);
@@ -864,7 +860,7 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
-    void GrantUriPermission(Want &want, int32_t userId, std::string targetBundleName);
+    void GrantUriPermission(Want &want, int32_t userId, std::string targetBundleName, bool isSandboxApp = false);
     void GrantDmsUriPermission(Want &want, std::string targetBundleName);
     bool IsDmsCall();
     int32_t GetCurrentAccountId() const;
@@ -934,7 +930,6 @@ private:
     std::weak_ptr<AbilityRecord> nextAbilityRecord_ = {};  // ability that started by this ability
     int64_t startTime_ = 0;                           // records first time of ability start
     int64_t restartTime_ = 0;                         // the time of last trying restart
-    int64_t foregroundingTime_ = 0;                   // the time of foregrounding to do
     bool isReady_ = false;                            // is ability thread attached?
     bool isWindowAttached_ = false;                   // Is window of this ability attached?
     bool isLauncherAbility_ = false;                  // is launcher?
