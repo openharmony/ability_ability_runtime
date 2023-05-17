@@ -16,26 +16,22 @@
 let ExtensionAbility = requireNapi('app.ability.ExtensionAbility');
 
 class UIExtensionAbility extends ExtensionAbility {
-    onCreate(want) {
-        console.log('onCreate, want:' + want.abilityName);
-    }
+  onCreate(want) {
+    console.log('onCreate, want:' + want.abilityName);
+  }
 
-    onRequest(want, startId) {
-        console.log('onRequest, want:' + want.abilityName + ', startId:' + startId);
-    }
+  onRequest(want, startId) {
+    console.log('onRequest, want:' + want.abilityName + ', startId:' + startId);
+  }
 
-    onLoadContent() {
-        console.log('onLoadContent');
-        return "";
-    }
+  onLoadContent() {
+    console.log('onLoadContent');
+    return "";
+  }
 
-    onDestroy() {
-        console.log('onDestroy');
-    }
-
-    onConfigurationUpdate(config) {
-        console.log('onConfigurationUpdate');
-    }
+  onDestroy() {
+    console.log('onDestroy');
+  }
 }
 
 export default UIExtensionAbility;

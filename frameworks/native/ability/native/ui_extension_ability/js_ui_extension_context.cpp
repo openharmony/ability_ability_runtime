@@ -248,7 +248,8 @@ bool JsUIExtensionContext::UnWrapWant(NativeEngine& engine, NativeValue* argv, A
     return AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(argv), want);
 }
 
-bool JsUIExtensionContext::UnWrapAbilityResult(NativeEngine& engine, NativeValue* argv, int& resultCode, AAFwk::Want& want)
+bool JsUIExtensionContext::UnWrapAbilityResult(NativeEngine& engine, NativeValue* argv, int& resultCode,
+    AAFwk::Want& want)
 {
     if (argv == nullptr) {
         HILOG_WARN("UnWrapAbilityResult argv == nullptr!");

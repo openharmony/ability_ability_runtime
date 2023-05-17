@@ -16,7 +16,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 config("uripermkit_public_config") {
   visibility = [ ":*" ]
-  visibility += [ "//foundation/ability/ability_runtime/test/unittest/*" ]
+  visibility += [ "${ability_runtime_test_path}/unittest/*" ]
   include_dirs = [ "include" ]
   cflags = []
   if (target_cpu == "arm") {
@@ -47,6 +47,7 @@ ohos_shared_library("uri_permission_mgr") {
     "storage_service:storage_manager_sa_proxy",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }

@@ -59,8 +59,9 @@ public:
         DumpSysState,
         void(const std::string& args, std::vector<std::string>& info, bool isClient, bool isUserID, int UserID));
     MOCK_METHOD2(TerminateAbilityResult, int(const sptr<IRemoteObject>&, int startId));
-    MOCK_METHOD2(StopServiceAbility, int(const Want&, int32_t userId));
+    MOCK_METHOD3(StopServiceAbility, int(const Want&, int32_t userId, const sptr<IRemoteObject> &token));
     MOCK_METHOD1(GetMissionIdByToken, int32_t(const sptr<IRemoteObject>& token));
+    MOCK_METHOD2(GetAbilityTokenByCalleeObj, void(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token));
     MOCK_METHOD1(KillProcess, int(const std::string&));
     MOCK_METHOD2(UninstallApp, int(const std::string&, int32_t));
     MOCK_METHOD4(OnRemoteRequest, int(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option));
@@ -108,7 +109,8 @@ public:
     MOCK_METHOD1(GetAbilityRunningInfos, int(std::vector<AbilityRunningInfo>& info));
     MOCK_METHOD2(GetExtensionRunningInfos, int(int upperLimit, std::vector<ExtensionRunningInfo>& info));
     MOCK_METHOD1(GetProcessRunningInfos, int(std::vector<AppExecFwk::RunningProcessInfo>& info));
-    MOCK_METHOD3(StartAbilityByCall, int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&));
+    MOCK_METHOD4(StartAbilityByCall,
+        int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&, int32_t));
     MOCK_METHOD2(AcquireShareData, int32_t(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData));
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
