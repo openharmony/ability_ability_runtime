@@ -517,6 +517,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_001, TestSize.Level1)
 {
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(uiAbilityLifecycleManager->MinimizeUIAbility(nullptr), ERR_INVALID_VALUE);
+    uiAbilityLifecycleManager.reset();
 }
 
 /**
@@ -530,6 +531,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_002, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
     EXPECT_EQ(uiAbilityLifecycleManager->MinimizeUIAbility(abilityRecord), ERR_OK);
+    uiAbilityLifecycleManager.reset();
 }
 
 /**
@@ -543,6 +545,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_003, TestSize.Level1)
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
     EXPECT_EQ(uiAbilityLifecycleManager->MinimizeUIAbility(abilityRecord), ERR_OK);
+    uiAbilityLifecycleManager.reset();
 }
 
 /**
@@ -632,7 +635,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_004, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0800
+ * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0500
  * @tc.desc: PrintTimeOutLog
  * @tc.type: FUNC
  */
@@ -647,7 +650,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_005, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0500
+ * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0600
  * @tc.desc: PrintTimeOutLog
  * @tc.type: FUNC
  */
@@ -662,7 +665,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_006, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0600
+ * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0700
  * @tc.desc: PrintTimeOutLog
  * @tc.type: FUNC
  */
@@ -677,7 +680,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_007, TestSize.Level1)
 }
 
 /**
- * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0700
+ * @tc.name: UIAbilityLifecycleManager_PrintTimeOutLog_0800
  * @tc.desc: PrintTimeOutLog
  * @tc.type: FUNC
  */
@@ -766,6 +769,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_001, TestSize.Level1)
     abilityRecord->SetTerminatingState();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
     EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord), ERR_OK);
+    uiAbilityLifecycleManager.reset();
 }
 
 /**
@@ -778,6 +782,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_002, TestSize.Level1)
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord), ERR_OK);
+    uiAbilityLifecycleManager.reset();
 }
 
 /**
