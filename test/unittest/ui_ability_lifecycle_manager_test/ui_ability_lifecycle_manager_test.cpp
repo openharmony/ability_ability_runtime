@@ -33,9 +33,6 @@ public:
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<AbilityRecord> InitAbilityRecord();
-
-protected:
-    std::shared_ptr<AbilityRecord> uiAbilityRecord_{ nullptr };
 };
 
 void UIAbilityLifecycleManagerTest::SetUpTestCase() {}
@@ -518,7 +515,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, HandleForegroundTimeoutOrFailed_002, Tes
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(uiAbilityLifecycleManager->MinimizeUIAbility(nullptr), ERR_INVALID_VALUE);
 }
 
@@ -529,7 +526,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_001, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
     EXPECT_EQ(uiAbilityLifecycleManager->MinimizeUIAbility(abilityRecord), ERR_OK);
@@ -542,7 +539,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_002, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_003, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
     EXPECT_EQ(uiAbilityLifecycleManager->MinimizeUIAbility(abilityRecord), ERR_OK);
@@ -555,7 +552,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MinimizeUIAbility_003, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, MoveToBackground_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     uiAbilityLifecycleManager->MoveToBackground(nullptr);
     uiAbilityLifecycleManager.reset();
@@ -568,7 +565,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MoveToBackground_001, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, MoveToBackground_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uiAbilityLifecycleManager->MoveToBackground(abilityRecord);
@@ -582,7 +579,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, MoveToBackground_002, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     uint32_t msgId = 0;
     uiAbilityLifecycleManager->PrintTimeOutLog(nullptr, msgId);
@@ -596,7 +593,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_001, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 0;
@@ -611,7 +608,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_002, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_003, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 1;
@@ -626,7 +623,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_003, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_004, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 2;
@@ -641,7 +638,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_004, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_005, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 3;
@@ -656,7 +653,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_005, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_006, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 4;
@@ -671,7 +668,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_006, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_007, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 5;
@@ -686,7 +683,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_007, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_008, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uint32_t msgId = 6;
@@ -701,7 +698,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, PrintTimeOutLog_008, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
@@ -716,7 +713,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_001, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUNDING);
@@ -732,7 +729,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_002, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_003, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUNDING);
@@ -748,7 +745,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_003, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_004, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUNDING);
@@ -764,7 +761,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteBackground_004, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetTerminatingState();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
@@ -778,7 +775,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_001, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     EXPECT_EQ(uiAbilityLifecycleManager->CloseUIAbility(abilityRecord), ERR_OK);
 }
@@ -790,7 +787,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CloseUIAbility_002, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, DelayCompleteTerminate_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     uiAbilityLifecycleManager->DelayCompleteTerminate(abilityRecord);
@@ -804,7 +801,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, DelayCompleteTerminate_001, TestSize.Lev
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CompleteTerminate_001, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
@@ -819,7 +816,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, CompleteTerminate_001, TestSize.Level1)
  */
 HWTEST_F(UIAbilityLifecycleManagerTest, CompleteTerminate_002, TestSize.Level1)
 {
-    auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
+    auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->SetAbilityState(AbilityState::TERMINATING);
