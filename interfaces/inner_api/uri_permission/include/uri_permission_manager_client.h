@@ -77,8 +77,7 @@ private:
     };
 
 private:
-    static std::recursive_mutex recursiveMutex_;
-    static std::shared_ptr<UriPermissionManagerClient> instance_;
+    static UriPermissionManagerClient instance_;
     std::mutex mutex_;
     std::mutex saLoadMutex_;
     std::condition_variable loadSaVariable_;
