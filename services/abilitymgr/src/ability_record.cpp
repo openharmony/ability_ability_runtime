@@ -1434,6 +1434,10 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
     int32_t callerUid, uint32_t accessToken, bool schedulerdied)
 {
     HILOG_INFO("call");
+    if (callerSystemAbilityRecord == nullptr) {
+        HILOG_ERROR("callerSystemAbilityRecord is nullptr");
+        return;
+    }
     int resultCode = callerSystemAbilityRecord->GetResultCode();
     Want resultWant = callerSystemAbilityRecord->GetResultWant();
     sptr<IRemoteObject> callerToken = callerSystemAbilityRecord->GetCallerToken();
