@@ -31,14 +31,8 @@ const std::string WRITE = "w";
 }
 using AbilityManagerClient = OHOS::AAFwk::AbilityManagerClient;
 using OHOS::Security::AccessToken::AccessTokenKit;
-/**
- * @brief Handling the life cycle switching of PageAbility.
- *
- * @param want Indicates the structure containing information about the ability.
- * @param targetState The life cycle state to switch to.
- *
- */
-void DataAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState)
+void DataAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState,
+    sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HILOG_INFO("DataAbilityImpl::sourceState:%{public}d; targetState: %{public}d; isNewWant: %{public}d",
         lifecycleState_,
@@ -52,7 +46,7 @@ void DataAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Li
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_ACTIVE: {
             if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL) {
-                SerUriString(targetState.caller.deviceId + "/" + targetState.caller.bundleName + "/" +
+                SetUriString(targetState.caller.deviceId + "/" + targetState.caller.bundleName + "/" +
                              targetState.caller.abilityName);
                 Start(want);
             } else {

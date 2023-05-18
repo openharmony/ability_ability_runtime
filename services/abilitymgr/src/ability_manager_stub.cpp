@@ -83,6 +83,8 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[CONNECT_ABILITY_WITH_TYPE] = &AbilityManagerStub::ConnectAbilityWithTypeInner;
     requestFuncMap_[ABILITY_RECOVERY] = &AbilityManagerStub::ScheduleRecoverAbilityInner;
     requestFuncMap_[ABILITY_RECOVERY_ENABLE] = &AbilityManagerStub::EnableRecoverAbilityInner;
+    requestFuncMap_[MINIMIZE_UI_ABILITY_BY_SCB] = &AbilityManagerStub::MinimizeUIAbilityBySCBInner;
+    requestFuncMap_[CLOSE_UI_ABILITY_BY_SCB] = &AbilityManagerStub::CloseUIAbilityBySCBInner;
 }
 
 void AbilityManagerStub::SecondStepInit()
@@ -128,6 +130,7 @@ void AbilityManagerStub::SecondStepInit()
     requestFuncMap_[SEND_APP_NOT_RESPONSE_PROCESS_ID] = &AbilityManagerStub::SendANRProcessIDInner;
     requestFuncMap_[ACQUIRE_SHARE_DATA] = &AbilityManagerStub::AcquireShareDataInner;
     requestFuncMap_[SHARE_DATA_DONE] = &AbilityManagerStub::ShareDataDoneInner;
+    requestFuncMap_[GET_ABILITY_TOKEN] = &AbilityManagerStub::GetAbilityTokenByCalleeObjInner;
 #ifdef ABILITY_COMMAND_FOR_TEST
     requestFuncMap_[BLOCK_ABILITY] = &AbilityManagerStub::BlockAbilityInner;
     requestFuncMap_[BLOCK_AMS_SERVICE] = &AbilityManagerStub::BlockAmsServiceInner;
@@ -150,6 +153,7 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[START_EXTENSION_ABILITY] = &AbilityManagerStub::StartExtensionAbilityInner;
     requestFuncMap_[STOP_EXTENSION_ABILITY] = &AbilityManagerStub::StopExtensionAbilityInner;
     requestFuncMap_[UPDATE_MISSION_SNAPSHOT] = &AbilityManagerStub::UpdateMissionSnapShotInner;
+    requestFuncMap_[UPDATE_MISSION_SNAPSHOT_FROM_WMS] = &AbilityManagerStub::UpdateMissionSnapShotFromWMSInner;
     requestFuncMap_[REGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::RegisterConnectionObserverInner;
     requestFuncMap_[UNREGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::UnregisterConnectionObserverInner;
     requestFuncMap_[GET_DLP_CONNECTION_INFOS] = &AbilityManagerStub::GetDlpConnectionInfosInner;
@@ -167,6 +171,7 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[SEND_ABILITY_RESULT_BY_TOKEN] = &AbilityManagerStub::SendResultToAbilityByTokenInner;
     requestFuncMap_[QUERY_MISSION_VAILD] = &AbilityManagerStub::IsValidMissionIdsInner;
     requestFuncMap_[VERIFY_PERMISSION] = &AbilityManagerStub::VerifyPermissionInner;
+    requestFuncMap_[START_UI_ABILITY_BY_SCB] = &AbilityManagerStub::StartUIAbilityBySCBInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -283,6 +288,17 @@ int AbilityManagerStub::MinimizeUIExtensionAbilityInner(MessageParcel &data, Mes
     }
     auto fromUser = data.ReadBool();
     int32_t result = MinimizeUIExtensionAbility(extensionSessionInfo, fromUser);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::MinimizeUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<SessionInfo> sessionInfo = nullptr;
+    if (data.ReadBool()) {
+        sessionInfo = data.ReadParcelable<SessionInfo>();
+    }
+    int32_t result = MinimizeUIAbilityBySCB(sessionInfo);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -645,7 +661,11 @@ int AbilityManagerStub::StopServiceAbilityInner(MessageParcel &data, MessageParc
         return ERR_INVALID_VALUE;
     }
     int32_t userId = data.ReadInt32();
-    int32_t result = StopServiceAbility(*want, userId);
+    sptr<IRemoteObject> token = nullptr;
+    if (data.ReadBool()) {
+        token = data.ReadRemoteObject();
+    }
+    int32_t result = StopServiceAbility(*want, userId, token);
     reply.WriteInt32(result);
     delete want;
     return NO_ERROR;
@@ -738,6 +758,17 @@ int AbilityManagerStub::StartAbilityForOptionsInner(MessageParcel &data, Message
     reply.WriteInt32(result);
     delete want;
     delete startOptions;
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::CloseUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<SessionInfo> sessionInfo = nullptr;
+    if (data.ReadBool()) {
+        sessionInfo = data.ReadParcelable<SessionInfo>();
+    }
+    int32_t result = CloseUIAbilityBySCB(sessionInfo);
+    reply.WriteInt32(result);
     return NO_ERROR;
 }
 
@@ -1216,6 +1247,27 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     return NO_ERROR;
 }
 
+int AbilityManagerStub::StartUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    std::unique_ptr<StartOptions> startOptions(data.ReadParcelable<StartOptions>());
+    if (startOptions == nullptr) {
+        HILOG_ERROR("startOptions is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<SessionInfo> sessionInfo = nullptr;
+    if (data.ReadBool()) {
+        sessionInfo = data.ReadParcelable<SessionInfo>();
+    }
+    int32_t result = StartUIAbilityBySCB(*want, *startOptions, sessionInfo);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::CallRequestDoneInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -1688,6 +1740,23 @@ int AbilityManagerStub::UpdateMissionSnapShotInner(MessageParcel &data, MessageP
     return NO_ERROR;
 }
 
+int AbilityManagerStub::UpdateMissionSnapShotFromWMSInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        HILOG_ERROR("read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
+    if (pixelMap == nullptr) {
+        HILOG_ERROR("read pixelMap failed.");
+        return ERR_NULL_OBJECT;
+    }
+    UpdateMissionSnapShot(token, pixelMap);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -1730,6 +1799,19 @@ int AbilityManagerStub::ShareDataDoneInner(MessageParcel &data, MessageParcel &r
         HILOG_ERROR("reply write failed.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::GetAbilityTokenByCalleeObjInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> callStub = data.ReadRemoteObject();
+    if (!callStub) {
+        HILOG_ERROR("GetAbilityToken read call stub failed.");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> result;
+    GetAbilityTokenByCalleeObj(callStub, result);
+    reply.WriteRemoteObject(result);
     return NO_ERROR;
 }
 

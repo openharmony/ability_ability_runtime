@@ -15,7 +15,7 @@
         "WallpaperExtension": [],
         "StaticSubscriberExtension": [],
         "AccessibilityExtension": [],
-        "InputMethodExtension": [
+        "InputMethodExtensionAbility": [
             "ability.featureAbility",
             "ability.particleAbility",
             "account.distributedAccount",
@@ -65,6 +65,7 @@
             "application.formHost",
             "application.formInfo",
             "application.formProvider"
-        ]
+        ],
+        "DriverExtension": []
     }
 }
