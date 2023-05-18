@@ -24,9 +24,9 @@
 namespace OHOS {
 namespace AAFwk {
 using ClearProxyCallback = std::function<void()>;
-class UriPermissionManagerClient : public std::enable_shared_from_this<UriPermissionManagerClient> {
+class UriPermissionManagerClient {
 public:
-    static std::shared_ptr<UriPermissionManagerClient> GetInstance();
+    static UriPermissionManagerClient& GetInstance();
     ~UriPermissionManagerClient() = default;
 
     /**
