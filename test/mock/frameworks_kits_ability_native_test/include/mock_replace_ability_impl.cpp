@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 void AbilityImpl::Init(std::shared_ptr<OHOSApplication>& application, const std::shared_ptr<AbilityLocalRecord>& record,
-    std::shared_ptr<Ability>& ability, std::shared_ptr<AbilityHandler>& handler, const sptr<IRemoteObject>& token,
-    std::shared_ptr<ContextDeal>& contextDeal)
+    std::shared_ptr<Ability>& ability, std::shared_ptr<AbilityHandler>& handler, const sptr<IRemoteObject>& token)
 {
     HILOG_INFO("AbilityImpl::init begin");
 
@@ -52,22 +51,16 @@ void AbilityImpl::Init(std::shared_ptr<OHOSApplication>& application, const std:
         return;
     }
 
-    if (contextDeal == nullptr) {
-        HILOG_ERROR("AbilityImpl::init failed, contextDeal is nullptr");
-        return;
-    }
-
     token_ = record->GetToken();
     record->SetAbilityImpl(shared_from_this());
     ability_ = ability;
     ability_->Init(record->GetAbilityInfo(), application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     abilityLifecycleCallbacks_ = application;
-    contextDeal_ = contextDeal;
     HILOG_INFO("AbilityImpl::init end");
 }
 
-void AbilityImpl::Start(const Want& want)
+void AbilityImpl::Start(const Want& want, sptr<AAFwk::SessionInfo> sessionInfos)
 {
     GTEST_LOG_(INFO) << "Mock AbilityImpl::Start called";
 }
@@ -97,7 +90,8 @@ void AbilityImpl::DispatchRestoreAbilityState(const PacMap& inState)
     GTEST_LOG_(INFO) << "Mock AbilityImpl::DispatchRestoreAbilityState called";
 }
 
-void AbilityImpl::HandleAbilityTransaction(const Want& want, const AAFwk::LifeCycleStateInfo& targetState)
+void AbilityImpl::HandleAbilityTransaction(const Want& want, const AAFwk::LifeCycleStateInfo& targetState,
+    sptr<AAFwk::SessionInfo> sessionInfo)
 {
     GTEST_LOG_(INFO) << "Mock AbilityImpl::HandleAbilityTransaction called";
 }

@@ -33,6 +33,10 @@ std::string GetInstanceMapMessage(const std::string& messageType, int32_t instan
     message.append(instanceName);
     message.append("\",\"tid\":");
     message.append(std::to_string(gettid()));
+    message.append(",\"apiType\":\"");
+    message.append("stageMode\"");
+    message.append(",\"language\":\"");
+    message.append("ets\"");
     message.append("}");
     return message;
 }
@@ -47,7 +51,9 @@ using StoreInspectorInfo = void (*)(const std::string&, const std::string&);
 using SetSwitchCallBack = void (*)(const std::function<void(bool)> &setStatus,
     const std::function<void(int32_t)> &createLayoutInfo, int32_t instanceId);
 using RemoveMessage = void (*)(int32_t);
-using WaitForDebugger = bool (*)();
+using WaitForConnection = bool (*)();
+
+std::mutex ConnectServerManager::instanceMutex_;
 
 ConnectServerManager::~ConnectServerManager()
 {
@@ -56,6 +62,7 @@ ConnectServerManager::~ConnectServerManager()
 
 ConnectServerManager& ConnectServerManager::Get()
 {
+    std::lock_guard<std::mutex> lock(instanceMutex_);
     static ConnectServerManager connectServerManager;
     return connectServerManager;
 }
@@ -102,9 +109,9 @@ bool ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
         return false;
     }
 
-    auto waitForDebugger = reinterpret_cast<WaitForDebugger>(dlsym(handlerConnectServerSo_, "WaitForDebugger"));
-    if (waitForDebugger == nullptr) {
-        HILOG_ERROR("ConnectServerManager::AddInstance failed to find symbol 'WaitForDebugger'");
+    auto waitForConnection = reinterpret_cast<WaitForConnection>(dlsym(handlerConnectServerSo_, "WaitForConnection"));
+    if (waitForConnection == nullptr) {
+        HILOG_ERROR("ConnectServerManager::AddInstance failed to find symbol 'WaitForConnection'");
         return false;
     }
 
@@ -129,7 +136,7 @@ bool ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
     // Get the message including information of new instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("addInstance", instanceId, instanceName);
 
-    if (waitForDebugger()) {
+    if (waitForConnection()) {
         // if not connected, message will be stored and sent later when "connected" coming.
         auto storeMessage = reinterpret_cast<StoreMessage>(dlsym(handlerConnectServerSo_, "StoreMessage"));
         if (storeMessage == nullptr) {
@@ -140,7 +147,7 @@ bool ConnectServerManager::AddInstance(int32_t instanceId, const std::string& in
         return false;
     }
 
-    // WaitForDebugger() means the connection state of the connect server
+    // WaitForConnection() means the connection state of the connect server
     auto sendMessage = reinterpret_cast<SendMessage>(dlsym(handlerConnectServerSo_, "SendMessage"));
     if (sendMessage == nullptr) {
         HILOG_ERROR("ConnectServerManager::AddInstance failed to find symbol 'SendMessage'");
@@ -173,16 +180,16 @@ void ConnectServerManager::RemoveInstance(int32_t instanceId)
         instanceMap_.erase(it);
     }
 
-    auto waitForDebugger = reinterpret_cast<WaitForDebugger>(dlsym(handlerConnectServerSo_, "WaitForDebugger"));
-    if (waitForDebugger == nullptr) {
-        HILOG_ERROR("ConnectServerManager::RemoveInstance failed to find symbol 'WaitForDebugger'");
+    auto waitForConnection = reinterpret_cast<WaitForConnection>(dlsym(handlerConnectServerSo_, "WaitForConnection"));
+    if (waitForConnection == nullptr) {
+        HILOG_ERROR("ConnectServerManager::RemoveInstance failed to find symbol 'WaitForConnection'");
         return;
     }
 
     // Get the message including information of deleted instance, which will be send to IDE.
     std::string message = GetInstanceMapMessage("destroyInstance", instanceId, instanceName);
 
-    if (waitForDebugger()) {
+    if (waitForConnection()) {
         auto removeMessage = reinterpret_cast<RemoveMessage>(dlsym(handlerConnectServerSo_, "RemoveMessage"));
         if (removeMessage == nullptr) {
             HILOG_ERROR("ConnectServerManager::RemoveInstance failed to find symbol 'RemoveMessage'");

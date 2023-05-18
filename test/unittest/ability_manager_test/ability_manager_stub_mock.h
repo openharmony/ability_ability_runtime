@@ -168,7 +168,8 @@ public:
         return 0;
     }
 
-    virtual int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE)
+    virtual int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
+        const sptr<IRemoteObject> &token = nullptr)
     {
         return 0;
     }
@@ -186,6 +187,11 @@ public:
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token) override
     {
         return 0;
+    }
+
+    void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token) override
+    {
+        return;
     }
 
     int ClearUpApplicationData(const std::string& bundleName) override

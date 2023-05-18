@@ -206,6 +206,16 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
 
     /**
+     * Start ui ability with want, send want to ability manager service.
+     *
+     * @param want the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param sessionInfo the session info of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions, sptr<SessionInfo> sessionInfo);
+
+    /**
      * Stop extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to stop.
@@ -240,6 +250,14 @@ public:
      */
     ErrCode TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
         int resultCode = DEFAULT_INVAL_VALUE, const Want *resultWant = nullptr);
+    
+    /**
+     *  CloseUIAbilityBySCB, close the special ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to terminate.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo);
 
     /**
      * SendResultToAbility with want, return resultWant from ability manager service.
@@ -300,6 +318,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode MinimizeUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, bool fromUser = false);
+
+    /**
+     * MinimizeUIAbilityBySCB, minimize the special ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to minimize.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo);
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -407,9 +433,10 @@ public:
      * Destroys this Service ability by Want.
      *
      * @param want, Special want for service type's ability.
+     * @param token ability's token.
      * @return Returns true if this Service ability will be destroyed; returns false otherwise.
      */
-    ErrCode StopServiceAbility(const Want &want);
+    ErrCode StopServiceAbility(const Want &want, const sptr<IRemoteObject> &token = nullptr);
 
     /**
      * Kill the process immediately.
@@ -647,6 +674,14 @@ public:
     void CallRequestDone(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &callStub);
 
     /**
+     * Get ability token by connect.
+     *
+     * @param token The token of ability.
+     * @param callStub The callee object.
+     */
+    void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token);
+
+    /**
      * Release the call between Ability, disconnect session with common ability.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
@@ -753,6 +788,14 @@ public:
      * @param abilityToken Indidate token of ability.
      */
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken);
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     * @param pixelMap The snapshot.
+     */
+    void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
+        const std::shared_ptr<OHOS::Media::PixelMap> &pixelMap);
 #endif
 
     /**

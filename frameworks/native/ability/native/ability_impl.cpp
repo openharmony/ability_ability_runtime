@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
+#include "scene_board_judgement.h"
 #include "values_bucket.h"
 
 namespace OHOS {
@@ -31,15 +32,14 @@ const std::string GRANTED_RESULT_KEY = "ohos.user.grant.permission.result";
 }
 
 void AbilityImpl::Init(std::shared_ptr<OHOSApplication> &application, const std::shared_ptr<AbilityLocalRecord> &record,
-    std::shared_ptr<Ability> &ability, std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token,
-    std::shared_ptr<ContextDeal> &contextDeal)
+    std::shared_ptr<Ability> &ability, std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("AbilityImpl::init begin");
     if ((token == nullptr) || (application == nullptr) || (handler == nullptr) || (record == nullptr) ||
-        ability == nullptr || contextDeal == nullptr) {
+        ability == nullptr) {
         HILOG_ERROR("AbilityImpl::init failed, token is nullptr, application is nullptr, handler is nullptr, record is "
-                 "nullptr, ability is nullptr, contextDeal is nullptr");
+                 "nullptr, ability is nullptr");
         return;
     }
 
@@ -51,18 +51,16 @@ void AbilityImpl::Init(std::shared_ptr<OHOSApplication> &application, const std:
     isStageBasedModel_ = info && info->isStageBasedModel;
 #ifdef SUPPORT_GRAPHICS
     if (info && info->type == AbilityType::PAGE) {
-        ability_->SetSceneListener(
-            sptr<WindowLifeCycleImpl>(new WindowLifeCycleImpl(token_, shared_from_this())));
+        ability_->SetSceneListener(sptr<WindowLifeCycleImpl>(new WindowLifeCycleImpl(token_, shared_from_this())));
     }
 #endif
     ability_->Init(record->GetAbilityInfo(), application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     abilityLifecycleCallbacks_ = application;
-    contextDeal_ = contextDeal;
     HILOG_DEBUG("AbilityImpl::init end");
 }
 
-void AbilityImpl::Start(const Want &want)
+void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
     if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
@@ -81,7 +79,7 @@ void AbilityImpl::Start(const Want &want)
     }
 #endif
     HILOG_DEBUG("AbilityImpl::Start");
-    ability_->OnStart(want);
+    ability_->OnStart(want, sessionInfo);
 #ifdef SUPPORT_GRAPHICS
     if ((ability_->GetAbilityInfo()->type == AppExecFwk::AbilityType::PAGE) &&
         (ability_->GetAbilityInfo()->isStageBasedModel)) {
@@ -252,7 +250,8 @@ void AbilityImpl::DispatchRestoreAbilityState(const PacMap &inState)
     HILOG_DEBUG("%{public}s end.", __func__);
 }
 
-void AbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState)
+void AbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState,
+    sptr<AAFwk::SessionInfo> sessionInfo)
 {}
 
 void AbilityImpl::HandleShareData(const int32_t &requestCode)
@@ -402,24 +401,24 @@ int AbilityImpl::BatchInsert(const Uri &uri, const std::vector<NativeRdb::Values
     return -1;
 }
 
-void AbilityImpl::SerUriString(const std::string &uri)
+void AbilityImpl::SetUriString(const std::string &uri)
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
-    if (contextDeal_ == nullptr) {
-        HILOG_ERROR("AbilityImpl::SerUriString contextDeal_ is nullptr");
+    if (ability_ == nullptr) {
+        HILOG_ERROR("AbilityImpl::SetUriString ability_ is nullptr");
         return;
     }
-    contextDeal_->SerUriString(uri);
+    ability_->SetUriString(uri);
     HILOG_DEBUG("%{public}s end.", __func__);
 }
 
 void AbilityImpl::SetLifeCycleStateInfo(const AAFwk::LifeCycleStateInfo &info)
 {
-    if (contextDeal_ == nullptr) {
-        HILOG_ERROR("AbilityImpl::SetLifeCycleStateInfo contextDeal_ is nullptr");
+    if (ability_ == nullptr) {
+        HILOG_ERROR("AbilityImpl::SetLifeCycleStateInfo ability_ is nullptr");
         return;
     }
-    contextDeal_->SetLifeCycleStateInfo(info);
+    ability_->SetLifeCycleStateInfo(info);
 }
 
 bool AbilityImpl::CheckAndRestore()
@@ -561,7 +560,7 @@ void AbilityImpl::AfterFocused()
 
 void AbilityImpl::AfterFocusedCommon(bool isFocused)
 {
-    if (!ability_ || !ability_->GetAbilityInfo() || !contextDeal_ || !handler_) {
+    if (!ability_ || !ability_->GetAbilityInfo() || !handler_) {
         HILOG_WARN("AbilityImpl::%{public}s failed", isFocused ? "AfterFocused" : "AfterUnFocused");
         return;
     }
@@ -591,19 +590,26 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
         return;
     }
 
-    auto task = [abilityImpl = shared_from_this(), want = *(ability_->GetWant()), contextDeal = contextDeal_,
-        focuseMode = isFocused]() {
-        auto info = contextDeal->GetLifeCycleStateInfo();
+    auto task = [abilityImpl = weak_from_this(), want = *(ability_->GetWant()), focuseMode = isFocused]() {
+        auto abilityImplS = abilityImpl.lock();
+        if (abilityImplS == nullptr) {
+            return;
+        }
+        auto ability = abilityImplS->ability_;
+        if (ability == nullptr) {
+            return;
+        }
+        AAFwk::LifeCycleStateInfo info = ability->GetLifeCycleStateInfo();
         if (focuseMode) {
             info.state = AbilityLifeCycleState::ABILITY_STATE_ACTIVE;
         } else {
             info.state = AbilityLifeCycleState::ABILITY_STATE_INACTIVE;
         }
         info.isNewWant = false;
-        abilityImpl->HandleAbilityTransaction(want, info);
+        abilityImplS->HandleAbilityTransaction(want, info);
     };
     handler_->PostTask(task);
-    HILOG_DEBUG("%{public}s end.", __func__);
+    HILOG_DEBUG("%{public}s end.");
 }
 
 void AbilityImpl::WindowLifeCycleImpl::AfterForeground()

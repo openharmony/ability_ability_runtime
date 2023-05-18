@@ -63,7 +63,8 @@ public:
     MOCK_METHOD1(ScheduleCommandAbilityDone, int(const sptr<IRemoteObject>& token));
     void DumpState(const std::string& args, std::vector<std::string>& state) override;
     MOCK_METHOD2(TerminateAbilityResult, int(const sptr<IRemoteObject>& token, int startId));
-    int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE) override;
+    int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
+        const sptr<IRemoteObject> &token = nullptr) override;
     MOCK_METHOD2(TerminateAbilityByCaller, int(const sptr<IRemoteObject>& callerToken, int requestCode));
     MOCK_METHOD1(MoveMissionToTop, int(int32_t missionId));
     MOCK_METHOD1(RemoveMission, int(int id));
@@ -154,6 +155,7 @@ public:
     int DoAbilityForeground(const sptr<IRemoteObject>& token, uint32_t flag);
     int DoAbilityBackground(const sptr<IRemoteObject>& token, uint32_t flag);
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token);
+    void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token);
     int BlockAmsService();
     int BlockAbility(int32_t abilityRecordId);
     int BlockAppService();
@@ -210,7 +212,8 @@ public:
     MOCK_METHOD1(ScheduleCommandAbilityDone, int(const sptr<IRemoteObject>& token));
     void DumpState(const std::string& args, std::vector<std::string>& state) override;
     MOCK_METHOD2(TerminateAbilityResult, int(const sptr<IRemoteObject>& token, int startId));
-    int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE) override;
+    int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
+        const sptr<IRemoteObject> &token = nullptr) override;
     MOCK_METHOD2(TerminateAbilityByCaller, int(const sptr<IRemoteObject>& callerToken, int requestCode));
     MOCK_METHOD1(MoveMissionToTop, int(int32_t missionId));
     MOCK_METHOD1(RemoveMission, int(int id));
@@ -301,6 +304,7 @@ public:
     int DoAbilityForeground(const sptr<IRemoteObject>& token, uint32_t flag);
     int DoAbilityBackground(const sptr<IRemoteObject>& token, uint32_t flag);
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token);
+    void GetAbilityTokenByCalleeObj(const sptr<IRemoteObject> &callStub, sptr<IRemoteObject> &token);
     int BlockAmsService();
     int BlockAbility(int32_t abilityRecordId);
     int BlockAppService();
