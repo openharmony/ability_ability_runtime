@@ -176,15 +176,15 @@ struct SelectorPhoneDialog {
                     this.onSelectApp(item)
                   })
                 }
-                .margin({ top: 80 })
+                .margin({ top: 85 })
               }, item => item)
             }
             .columnsTemplate(this.selector.swiper.gridColumns)
             .rowsTemplate(this.selector.swiper.gridRows)
             .columnsGap(12)
             .rowsGap(12)
-            .margin({ top: 10 })
-            .height(200)
+            .margin({ top: 30 })
+            .height(210)
           }, item => item)
         }
         .indicatorStyle({ color: "#bebdc0", selectedColor: "#ff326Ce9", size: 4 })
