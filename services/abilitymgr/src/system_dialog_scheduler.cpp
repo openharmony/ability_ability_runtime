@@ -276,7 +276,7 @@ const std::string SystemDialogScheduler::GetDialogPositionParams(const DialogPos
 
 void SystemDialogScheduler::InitDialogPosition(DialogType type, DialogPosition &position) const
 {
-    position.wideScreen = (deviceType_ != STR_PHONE) ? true : (deviceType_ != STR_DEFAULT);
+    position.wideScreen = (deviceType_ == STR_PHONE) ? false : (deviceType_ != STR_DEFAULT);
     position.align = ((deviceType_ == STR_PHONE) ? true : (deviceType_ == STR_DEFAULT)) ?
         DialogAlign::BOTTOM : DialogAlign::CENTER;
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
