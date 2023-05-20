@@ -27,10 +27,10 @@ namespace AAFwk {
 namespace {
 const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 } // namespace
-UriPermissionManagerClient UriPermissionManagerClient::instance_;
 UriPermissionManagerClient& UriPermissionManagerClient::GetInstance()
 {
-    return instance_;
+    static UriPermissionManagerClient instance;
+    return instance;
 }
 
 int UriPermissionManagerClient::GrantUriPermission(const Uri &uri, unsigned int flag,
