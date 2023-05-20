@@ -77,7 +77,6 @@ private:
     };
 
 private:
-    static UriPermissionManagerClient instance_;
     std::mutex mutex_;
     std::mutex saLoadMutex_;
     std::condition_variable loadSaVariable_;
