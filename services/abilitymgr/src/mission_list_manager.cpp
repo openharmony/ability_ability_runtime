@@ -1148,15 +1148,6 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
                 HILOG_WARN("Mission list mgr is invalid.");
                 return;
             }
-            if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
-                HILOG_INFO("Window was freezed.");
-                if (abilityRecord != nullptr) {
-                    abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
-                    DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
-                    selfObj->TerminatePreviousAbility(abilityRecord);
-                }
-                return;
-            }
             selfObj->CompleteForegroundFailed(abilityRecord, state);
         };
         handler->PostTask(task);
@@ -1982,7 +1973,17 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
         HILOG_ERROR("CompleteForegroundFailed, ability is nullptr.");
         return;
     }
-
+    if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
+        HILOG_INFO("Window was freezed.");
+        if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
+            HILOG_DEBUG("not continuous startup");
+            abilityRecord->SetPendingState(AbilityState::INITIAL);
+        }
+        abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
+        DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
+        selfObj->TerminatePreviousAbility(abilityRecord);
+        return;
+    }
 #ifdef SUPPORT_GRAPHICS
     if (state == AbilityState::FOREGROUND_INVALID_MODE) {
         abilityRecord->SetStartingWindow(false);
@@ -3483,6 +3484,25 @@ void MissionListManager::NotifyStartAbilityResult(const AbilityRequest &abilityR
     if (abilityInfoCallback != nullptr) {
         abilityInfoCallback->NotifyStartAbilityResult(abilityRequest.want, result);
     }
+}
+
+int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("DoAbilityForeground failed, ability record is null.");
+        return ERR_INVALID_VALUE;
+    }
+    if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
+        HILOG_DEBUG("pending state is FOREGROUND.");
+        abilityRecord->SetPendingState(AbilityState::FOREGROUND);
+        return ERR_OK;
+    } else {
+        HILOG_DEBUG("pending state is not FOREGROUND.");
+        abilityRecord->SetPendingState(AbilityState::FOREGROUND);
+    }
+    abilityRecord->ProcessForegroundAbility(flag);
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
