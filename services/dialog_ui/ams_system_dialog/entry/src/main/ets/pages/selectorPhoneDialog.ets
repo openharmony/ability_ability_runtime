@@ -156,7 +156,7 @@ struct SelectorPhoneDialog {
                     if (item.split("#")[2] != "") {
                       Text(item.split("#")[2])
                         .fontSize(16)
-                        .width(58)
+                        .width(80)
                         .height(23)
                         .textAlign(TextAlign.Center)
                         .alignSelf(ItemAlign.Center)
@@ -164,7 +164,7 @@ struct SelectorPhoneDialog {
                     } else {
                       Text(item.split("#")[0])
                         .fontSize(16)
-                        .width(58)
+                        .width(80)
                         .height(23)
                         .textAlign(TextAlign.Center)
                         .alignSelf(ItemAlign.Center)
