@@ -190,11 +190,15 @@ void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> se
     Extension::OnStart(want, sessionInfo);
     if (sessionInfo) {
         sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
-        option->SetWindowName(GetContext()->GetBundleName());
+        auto context = GetContext();
+        if (context == nullptr || context->GetAbilityInfo() == nullptr) {
+            HILOG_ERROR("Failed to get context");
+            return;
+        }
+        option->SetWindowName(context->GetBundleName() + context->GetAbilityInfo()->name);
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
         option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
         uiWindow_ = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
-
         if (uiWindow_ == nullptr) {
             HILOG_ERROR("JsUIExtension OnStart create ui window error.");
             return;

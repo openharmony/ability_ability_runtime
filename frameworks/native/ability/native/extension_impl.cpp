@@ -42,7 +42,7 @@ void ExtensionImpl::Init(std::shared_ptr<AppExecFwk::OHOSApplication> &applicati
     extension_ = extension;
     if (record->GetAbilityInfo() != nullptr &&
         record->GetAbilityInfo()->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI) {
-        extension_->SetEextensionWindowLifeCycleListener(
+        extension_->SetExtensionWindowLifeCycleListener(
             sptr<ExtensionWindowLifeCycleImpl>(new ExtensionWindowLifeCycleImpl(token_, shared_from_this())));
     }
     extension_->Init(record, application, handler, token);

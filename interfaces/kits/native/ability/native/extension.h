@@ -207,7 +207,7 @@ public:
 
     sptr<AAFwk::SessionInfo> GetSessionInfo();
 
-    void SetEextensionWindowLifeCycleListener(const sptr<Rosen::IWindowLifeCycle> &listener);
+    void SetExtensionWindowLifeCycleListener(const sptr<Rosen::IWindowLifeCycle> &listener);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
 protected:
