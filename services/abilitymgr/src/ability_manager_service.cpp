@@ -5488,7 +5488,7 @@ int AbilityManagerService::DoAbilityForeground(const sptr<IRemoteObject> &token,
     }
 
     CHECK_POINTER_AND_RETURN(currentMissionListManager_, ERR_NO_INIT);
-    return currentMissionListManager_->DoAbilityForeground(abilityRecord);
+    return currentMissionListManager_->DoAbilityForeground(abilityRecord, flag);
 }
 
 int AbilityManagerService::DoAbilityBackground(const sptr<IRemoteObject> &token, uint32_t flag)

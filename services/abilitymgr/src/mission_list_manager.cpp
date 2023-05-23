@@ -1981,7 +1981,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
         }
         abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
-        selfObj->TerminatePreviousAbility(abilityRecord);
+        TerminatePreviousAbility(abilityRecord);
         return;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -3486,7 +3486,7 @@ void MissionListManager::NotifyStartAbilityResult(const AbilityRequest &abilityR
     }
 }
 
-int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord)
+int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t flag)
 {
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (abilityRecord == nullptr) {
