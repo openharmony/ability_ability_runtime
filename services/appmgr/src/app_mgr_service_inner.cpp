@@ -1665,10 +1665,10 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
             allowInternet = 0;
 #ifdef APP_MGR_SERVICE_APPMS
             auto ret = SetInternetPermission(bundleInfo.uid, 0);
-            HILOG_INFO("SetInternetPermission, ret = %{public}d", ret);
+            HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
         } else {
             auto ret = SetInternetPermission(bundleInfo.uid, 1);
-            HILOG_INFO("SetInternetPermission, ret = %{public}d", ret);
+            HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
 #endif
         }
 
