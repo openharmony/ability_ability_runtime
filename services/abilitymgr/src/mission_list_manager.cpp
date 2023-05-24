@@ -1975,10 +1975,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     }
     if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
         HILOG_INFO("Window was freezed.");
-        if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
-            HILOG_DEBUG("not continuous startup");
-            abilityRecord->SetPendingState(AbilityState::INITIAL);
-        }
+        abilityRecord->SetPendingState(AbilityState::INITIAL);
         abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
         TerminatePreviousAbility(abilityRecord);
