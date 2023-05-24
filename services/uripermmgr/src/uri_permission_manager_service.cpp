@@ -75,6 +75,24 @@ bool UriPermissionManagerService::Init()
     if (impl_ == nullptr) {
         impl_ = new UriPermissionManagerStubImpl();
     }
+    handler_ = std::make_shared<AbilityEventHandler>(eventLoop_, weak_from_this());
+    CHECK_POINTER_RETURN_BOOL(handler_);
+    // Register UriBundleEventCallback to receive hap updates
+    HILOG_INFO("Register UriBundleEventCallback to receive hap updates.");
+    auto registerBundleEventCallbackTask = [upms = shared_from_this(), impl_]() {
+        sptr<UriBundleEventCallback> uriBundleEventCallback_ =
+            new (std::nothrow) UriBundleEventCallback(upms->handler_);
+        auto bms = impl_->ConnectBundleManager();
+        if (bms && uriBundleEventCallback_) {
+            bool re = bms->RegisterBundleEventCallback(uriBundleEventCallback_);
+            if (!re) {
+                HILOG_ERROR("RegisterBundleEventCallback failed!");
+            }
+        } else {
+            HILOG_ERROR("Get BundleManager or uriBundleEventCallback failed!");
+        }
+    };
+    handler_->PostTask(registerBundleEventCallbackTask, "RegisterBundleEventCallback");
     ready_ = true;
     return true;
 }

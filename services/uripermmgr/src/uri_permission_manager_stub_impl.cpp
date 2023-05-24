@@ -174,6 +174,51 @@ void UriPermissionManagerStubImpl::RevokeUriPermission(const TokenId tokenId)
     }
 }
 
+void UriPermissionManagerStubImpl::RevokeAllUriPermissions(const std::string bundleName)
+{
+    HILOG_DEBUG("Start to remove all uri permission for uninstalled app.");
+    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeInfo;
+    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
+    HILOG_DEBUG("callerprocessName : %{public}s", nativeInfo.processName.c_str());
+    if (nativeInfo.processName != "foundation") {
+        HILOG_ERROR("RevokeAllUriPermissions can only be called by foundation");
+        return;
+    }
+
+    ecurity::AccessToken::AccessTokenID tokenId = GetTokenIdByBundleName(bundleName);
+    std::vector<std::string> uriList;
+    {
+        std::lock_guard<std::mutex> guard(mutex_);
+        for (auto iter = uriMap_.begin(); iter != uriMap_.end();) {
+            auto& list = iter->second;
+            for (auto it = list.begin(); it != list.end(); it++) {
+                if (it->targetTokenId == tokenId) {
+                    HILOG_INFO("Erase an info form list.");
+                    list.erase(it);
+                    uriList.emplace_back(iter->first);
+                    break;
+                }
+            }
+            if (list.size() == 0) {
+                uriMap_.erase(iter++);
+            } else {
+                iter++;
+            }
+        }
+    }
+
+    auto storageMgrProxy = ConnectStorageManager();
+    if (storageMgrProxy == nullptr) {
+        HILOG_ERROR("ConnectStorageManager failed");
+        return;
+    }
+
+    if (!uriList.empty()) {
+        storageMgrProxy->DeleteShareFile(tokenId, uriList);
+    }
+}
+
 int UriPermissionManagerStubImpl::RevokeUriPermissionManually(const Uri &uri, const std::string bundleName)
 {
     HILOG_DEBUG("Start to remove uri permission manually.");
