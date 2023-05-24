@@ -46,6 +46,7 @@ public:
         const std::string targetBundleName, int autoremove) override;
 
     void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
+    void RevokeAllUriPermissions(const std::string bundleName);
     int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 
 private:
