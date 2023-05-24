@@ -22,7 +22,7 @@ group("srms") {
 }
 
 ohos_sa_profile("srms_sa_profile") {
-  sources = [ "service_router.json" ]
+  sources = [ "404.json" ]
 
   part_name = "ability_runtime"
 }
