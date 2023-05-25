@@ -186,7 +186,7 @@ void UriPermissionManagerStubImpl::RevokeAllUriPermissions(const std::string bun
         return;
     }
 
-    ecurity::AccessToken::AccessTokenID tokenId = GetTokenIdByBundleName(bundleName);
+    Security::AccessToken::AccessTokenID tokenId = GetTokenIdByBundleName(bundleName);
     std::vector<std::string> uriList;
     {
         std::lock_guard<std::mutex> guard(mutex_);
