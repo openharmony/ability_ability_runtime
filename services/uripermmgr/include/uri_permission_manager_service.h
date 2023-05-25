@@ -44,7 +44,6 @@ private:
     bool ready_ = false;
     bool registerToService_ = false;
     sptr<UriPermissionManagerStubImpl> impl_;
-    std::shared_ptr<AbilityEventHandler> handler_;
 
     DISALLOW_COPY_AND_MOVE(UriPermissionManagerService);
 };

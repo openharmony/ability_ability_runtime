@@ -48,10 +48,10 @@ public:
     void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
     void RevokeAllUriPermissions(const std::string bundleName);
     int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
+    sptr<AppExecFwk::IBundleMgr> ConnectBundleManager();
 
 private:
     sptr<AppExecFwk::IAppMgr> ConnectAppMgr();
-    sptr<AppExecFwk::IBundleMgr> ConnectBundleManager();
     sptr<StorageManager::IStorageManager> ConnectStorageManager();
     int GetCurrentAccountId();
     void ClearAppMgrProxy();
