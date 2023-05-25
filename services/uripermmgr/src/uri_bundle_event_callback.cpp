@@ -14,6 +14,7 @@
  */
 
 #include "uri_bundle_event_callback.h"
+#include "uri_permission_manager_stub_impl.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -32,8 +33,8 @@ void UriBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData even
 
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         HILOG_DEBUG("revoke URI permission when uninstall.");
-        auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-        upmClient->RevokeAllUriPermissions(bundleName);
+        auto upms = std::make_shared<UriPermissionManagerStubImpl>();
+        upms->RevokeAllUriPermissions(bundleName);
     }
 }
 
