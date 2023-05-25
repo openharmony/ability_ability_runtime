@@ -26,6 +26,7 @@
 #include "app_service_manager.h"
 #include "hilog_wrapper.h"
 #include "app_mem_info.h"
+#include "render_process_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -341,6 +342,19 @@ AppMgrResultCode AppMgrClient::GetProcessRunningInformation(AppExecFwk::RunningP
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         int32_t result = service->GetProcessRunningInformation(info);
+        if (result == ERR_OK) {
+            return AppMgrResultCode::RESULT_OK;
+        }
+        return AppMgrResultCode::ERROR_SERVICE_NOT_READY;
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+AppMgrResultCode AppMgrClient::GetAllRenderProcesses(std::vector<RenderProcessInfo> &info)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        int32_t result = service->GetAllRenderProcesses(info);
         if (result == ERR_OK) {
             return AppMgrResultCode::RESULT_OK;
         }
