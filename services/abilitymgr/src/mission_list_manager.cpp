@@ -584,6 +584,7 @@ void MissionListManager::BuildInnerMissionInfo(InnerMissionInfo &info, const std
     info.missionInfo.time = GetCurrentTime();
     info.missionInfo.iconPath = abilityRequest.appInfo.iconPath;
     info.missionInfo.want = abilityRequest.want;
+    info.missionInfo.unclearable = true; //todo: replace with abilityRequest.abilityInfo.unclearable when BMS is ready
     info.isTemporary = abilityRequest.abilityInfo.removeMissionAfterTerminate;
     if (abilityRequest.want.GetIntParam(DLP_INDEX, 0) != 0) {
         info.isTemporary = true;
@@ -1646,6 +1647,13 @@ int MissionListManager::ClearMission(int missionId)
         return ERR_INVALID_VALUE;
     }
 
+    MissionInfo missionInfo;
+    if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetMissionInfoById(
+        missionId, missionInfo) == 0 && (missionInfo.unclearable)) {
+        HILOG_WARN("mission is unclearable.");
+        return ERR_INVALID_VALUE;
+    }
+
     return ClearMissionLocked(missionId, mission);
 }
 
@@ -1709,6 +1717,13 @@ void MissionListManager::ClearAllMissionsLocked(std::list<std::shared_ptr<Missio
         auto mission = (*listIter);
         listIter++;
         if (!mission || mission->IsLockedState()) {
+            continue;
+        }
+
+        MissionInfo missionInfo;
+        if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetMissionInfoById(
+            mission->GetMissionId(), missionInfo) == 0 && (missionInfo.unclearable)) {
+            HILOG_WARN("mission is unclearable.");
             continue;
         }
 
