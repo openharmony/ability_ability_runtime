@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "uri_bundle_event_callback.h"
 
 namespace OHOS {
 namespace AAFwk {

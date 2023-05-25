@@ -14,7 +14,6 @@
  */
 
 #include "uri_bundle_event_callback.h"
-#include "uri_permission_manager_client.h"
 
 namespace OHOS {
 namespace AAFwk {
