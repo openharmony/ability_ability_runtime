@@ -28,9 +28,7 @@ namespace AAFwk {
  */
 class UriBundleEventCallback : public AppExecFwk::BundleEventCallbackHost {
 public:
-    UriBundleEventCallbackk();
-    explicit UriBundleEventCallback(std::shared_ptr<AbilityEventHandler> eventHandler);
-
+    UriBundleEventCallback();
     ~UriBundleEventCallback() = default;
 
     /**
@@ -40,10 +38,6 @@ public:
      * etc. More can be found from BundleCommonEventMgr::NotifyBundleStatus()
      */
     void OnReceiveEvent(const EventFwk::CommonEventData eventData) override;
-
-private:
-    DISALLOW_COPY_AND_MOVE(UriBundleEventCallbackk);
-    std::shared_ptr<AbilityEventHandler> eventHandler_ = nullptr;
 };
 } // namespace OHOS
 } // namespace AAFwk
