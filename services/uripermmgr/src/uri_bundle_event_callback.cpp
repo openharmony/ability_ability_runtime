@@ -19,11 +19,6 @@ namespace OHOS {
 namespace AAFwk {
 void UriBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData eventData)
 {
-    // env check
-    if (eventHandler_ == nullptr) {
-        HILOG_ERROR("OnReceiveEvent failed, eventHandler_ is nullptr");
-        return;
-    }
     const Want& want = eventData.GetWant();
     // action contains the change type of haps.
     std::string action = want.GetAction();

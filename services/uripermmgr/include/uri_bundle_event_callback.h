@@ -17,7 +17,6 @@
 #include "bundle_event_callback_host.h"
 #include "common_event_support.h"
 #include "hilog_wrapper.h"
-#include "uri_permission_manager_client.h"
 
 namespace OHOS {
 namespace AAFwk {
