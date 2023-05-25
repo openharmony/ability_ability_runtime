@@ -17,14 +17,6 @@
 
 namespace OHOS {
 namespace AAFwk {
-UriBundleEventCallback::UriBundleEventCallback() : eventHandler_(nullptr) {}
-
-UriBundleEventCallback::UriBundleEventCallback(std::shared_ptr<AbilityEventHandler> eventHandler)
-{
-    eventHandler_ = eventHandler;
-}
-
-
 void UriBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData eventData)
 {
     // env check
@@ -36,7 +28,6 @@ void UriBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData even
     // action contains the change type of haps.
     std::string action = want.GetAction();
     std::string bundleName = want.GetElement().GetBundleName();
-    int uid = want.GetIntParam(KEY_UID, 0);
     // verify data
     if (action.empty() || bundleName.empty()) {
         HILOG_ERROR("OnReceiveEvent failed, empty action/bundleName");
