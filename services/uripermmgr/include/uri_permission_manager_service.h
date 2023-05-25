@@ -16,7 +16,6 @@
 #ifndef OHOS_ABILITY_RUNTIME_URI_PERMISSION_MANAGER_SERVICE_H
 #define OHOS_ABILITY_RUNTIME_URI_PERMISSION_MANAGER_SERVICE_H
 
-#include "ability_event_handler.h"
 #include "singleton.h"
 #include "system_ability.h"
 #include "uri_permission_manager_stub_impl.h"
