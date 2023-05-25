@@ -27,7 +27,7 @@ namespace AAFwk {
  */
 class UriBundleEventCallback : public AppExecFwk::BundleEventCallbackHost {
 public:
-    UriBundleEventCallback();
+    UriBundleEventCallback() = default;;
     ~UriBundleEventCallback() = default;
 
     /**
