@@ -23,6 +23,7 @@
 
 #include "datetime_ex.h"
 #include "ipc_skeleton.h"
+#include "render_process_info.h"
 #include "system_ability_definition.h"
 
 #include "app_death_recipient.h"
@@ -318,6 +319,14 @@ int32_t AppMgrService::GetAllRunningProcesses(std::vector<RunningProcessInfo> &i
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->GetAllRunningProcesses(info);
+}
+
+int32_t AppMgrService::GetAllRenderProcesses(std::vector<RenderProcessInfo> &info)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetAllRenderProcesses(info);
 }
 
 int32_t AppMgrService::JudgeSandboxByPid(pid_t pid, bool &isSandbox)

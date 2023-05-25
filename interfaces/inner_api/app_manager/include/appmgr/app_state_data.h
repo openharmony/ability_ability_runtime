@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_APP_STATE_DATA_H
 
 #include <sys/types.h>
+#include <vector>
 
 #include "parcel.h"
 #include "iremote_object.h"
@@ -52,6 +53,7 @@ struct AppStateData : public Parcelable {
     int32_t state = 0;
     int32_t accessTokenId = 0;
     bool isFocused = false;
+    std::vector<int32_t> renderPids;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

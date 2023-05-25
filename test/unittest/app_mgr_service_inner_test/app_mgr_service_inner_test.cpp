@@ -1636,7 +1636,7 @@ HWTEST_F(AppMgrServiceInnerTest, RemoveAppFromRecentList_001, TestSize.Level0)
     std::string renderParam = "test_renderParam";
     std::shared_ptr<RenderRecord> renderRecord =
         RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     appMgrServiceInner->AddAppToRecentList(appName1, processName1, pid, 0);
     appRecord->SetKeepAliveAppState(true, true);
     appMgrServiceInner->RemoveAppFromRecentList(appName1, processName1);
@@ -1706,14 +1706,14 @@ HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_001, TestSize.Level0)
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
     std::shared_ptr<RenderRecord> renderRecord;
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
     pid_t pid = 123;
     std::string renderParam = "test_renderParam";
     std::shared_ptr<RenderRecord> renderRecord1 =
         RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
-    appRecord->SetRenderRecord(renderRecord1);
+    appRecord->AddRenderRecord(renderRecord1);
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
     appRecord->SetKeepAliveAppState(true, true);
@@ -2891,7 +2891,7 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_002, TestSize.Level0)
 
     std::shared_ptr<RenderRecord> renderRecord =
         RenderRecord::CreateRenderRecord(hostPid1, renderParam, 1, 1, 1, appRecord);
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, 1, renderPid);
     EXPECT_EQ(ret, 8454244);
 
@@ -2990,7 +2990,7 @@ HWTEST_F(AppMgrServiceInnerTest, AttachRenderProcess_001, TestSize.Level0)
         RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
     EXPECT_NE(renderRecord, nullptr);
     renderRecord->SetPid(pid);
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     appMgrServiceInner->AttachRenderProcess(pid, mockRenderScheduler);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
