@@ -76,8 +76,7 @@
             "json",
             "libuv",
             "icu",
-            "zlib",
-            "thirdparty_libjpeg-turbo"
+            "zlib"
           ]
       },
       "build": {
