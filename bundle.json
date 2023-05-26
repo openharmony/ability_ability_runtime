@@ -73,7 +73,11 @@
             "libjpeg-turbo",
             "node",
             "jsoncpp",
-            "json"
+            "json",
+            "libuv",
+            "icu",
+            "zlib",
+            "thirdparty_libjpeg-turbo"
           ]
       },
       "build": {
