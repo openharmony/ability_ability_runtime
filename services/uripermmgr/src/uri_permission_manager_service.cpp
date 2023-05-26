@@ -80,7 +80,7 @@ bool UriPermissionManagerService::Init()
     HILOG_INFO("Register UriBundleEventCallback to receive hap updates.");
     auto bms = impl_->ConnectBundleManager();
     sptr<UriBundleEventCallback> uriBundleEventCallback =
-        new (std::nothrow) UriBundleEventCallback();
+        new (std::nothrow) UriBundleEventCallback(impl_);
     if (bms && uriBundleEventCallback) {
         bool re = bms->RegisterBundleEventCallback(uriBundleEventCallback);
         if (!re) {
