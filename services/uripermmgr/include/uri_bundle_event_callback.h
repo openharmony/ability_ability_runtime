@@ -35,7 +35,7 @@ public:
      */
     void OnReceiveEvent(const EventFwk::CommonEventData eventData) override;
 private:
-    sptr<UriPermissionManagerStubImpl> upms;
+    sptr<UriPermissionManagerStubImpl> upms_;
 };
 } // namespace OHOS
 } // namespace AAFwk
