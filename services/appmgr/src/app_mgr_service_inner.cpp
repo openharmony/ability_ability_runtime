@@ -42,7 +42,6 @@
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "itest_observer.h"
-#include "render_process_info.h"
 #ifdef SUPPORT_GRAPHICS
 #include "locale_config.h"
 #endif
@@ -1013,16 +1012,16 @@ void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningReco
     if (renderRecordMap.empty()) {
         return;
     }
-    for (auto item : renderRecordMap) {
-        auto renderRecord = item.second;
+    for (auto iter : renderRecordMap) {
+        auto renderRecord = iter.second;
         if (renderRecord != nullptr) {
-            RenderProcessInfo runningProcessInfo;
-            runningProcessInfo.bundleName_ = renderRecord->GetHostBundleName();
-            runningProcessInfo.processName_ = renderRecord->GetProcessName();
-            runningProcessInfo.pid_ = renderRecord->GetPid();
-            runningProcessInfo.uid_ = renderRecord->GetUid();
-            runningProcessInfo.hostUid_ = renderRecord->GetHostUid();
-            info.emplace_back(runningProcessInfo);
+            RenderProcessInfo renderProcessInfo;
+            renderProcessInfo.bundleName_ = renderRecord->GetHostBundleName();
+            renderProcessInfo.processName_ = renderRecord->GetProcessName();
+            renderProcessInfo.pid_ = renderRecord->GetPid();
+            renderProcessInfo.uid_ = renderRecord->GetUid();
+            renderProcessInfo.hostUid_ = renderRecord->GetHostUid();
+            info.emplace_back(renderProcessInfo);
         }
     }
 }
@@ -1606,7 +1605,10 @@ AppProcessData AppMgrServiceInner::WrapAppProcessData(const std::shared_ptr<AppR
     auto renderRecordMap = appRecord->GetRenderRecordMap();
     if (!renderRecordMap.empty()) {
         for (auto iter : renderRecordMap) {
-            processData.renderPids.emplace_back(iter.second->GetPid());
+            auto renderRecord = iter.second;
+            if (renderRecord != nullptr) {
+                processData.renderPids.emplace_back(renderRecord->GetPid());
+            }
         }
     }
     return processData;
@@ -3178,10 +3180,12 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
 
     auto renderRecordMap = appRecord->GetRenderRecordMap();
     if (!renderRecordMap.empty()) {
-        for (auto it : renderRecordMap) {
-            HILOG_WARN("already exist render process,do not request again, renderPid:%{public}d", it.second->GetPid());
-            renderPid = it.second->GetPid();
-            return ERR_ALREADY_EXIST_RENDER;
+        for (auto iter : renderRecordMap) {
+            if (iter.second != nullptr) {
+                HILOG_WARN("already exist render process, renderPid:%{public}d", iter.second->GetPid());
+                renderPid = iter.second->GetPid();
+                return ERR_ALREADY_EXIST_RENDER;
+            }
         }
     }
 

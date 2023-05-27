@@ -665,6 +665,9 @@ std::shared_ptr<RenderRecord> AppRunningManager::OnRemoteRenderDied(const wptr<I
                 return false;
             }
             for (auto iter : renderRecordMap) {
+                if (iter.second == nullptr) {
+                    continue;
+                }
                 auto scheduler = iter.second->GetScheduler();
                 if (scheduler && scheduler->AsObject() == object) {
                     renderRecord = iter.second;

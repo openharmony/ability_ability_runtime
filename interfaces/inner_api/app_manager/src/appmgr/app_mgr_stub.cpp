@@ -26,7 +26,6 @@
 #include "hitrace_meter.h"
 #include "hilog_wrapper.h"
 #include "iapp_state_callback.h"
-#include "render_process_info.h"
 #include "want.h"
 #include "bundle_info.h"
 #include "app_malloc_info.h"

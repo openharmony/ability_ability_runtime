@@ -870,6 +870,20 @@ HWTEST_F(AppMgrServiceInnerTest, GetProcessRunningInfosByUserId_001, TestSize.Le
 }
 
 /**
+ * @tc.name: GetAllRenderProcesses_001
+ * @tc.desc: get all render processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllRenderProcesses_001, TestSize.Level0)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::vector<RenderProcessInfo> info;
+    appMgrServiceInner->GetAllRenderProcesses(info);
+}
+
+/**
  * @tc.name: NotifyMemoryLevel_001
  * @tc.desc: notify memory level.
  * @tc.type: FUNC

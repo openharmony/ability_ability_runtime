@@ -17,7 +17,6 @@
 #define OHOS_ABILITY_RUNTIME_APP_STATE_DATA_H
 
 #include <sys/types.h>
-#include <vector>
 
 #include "parcel.h"
 #include "iremote_object.h"

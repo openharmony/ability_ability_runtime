@@ -23,7 +23,6 @@
 
 #include "datetime_ex.h"
 #include "ipc_skeleton.h"
-#include "render_process_info.h"
 #include "system_ability_definition.h"
 
 #include "app_death_recipient.h"
