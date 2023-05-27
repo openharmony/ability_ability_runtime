@@ -1324,6 +1324,16 @@ void AppRunningRecord::AddRenderRecord(const std::shared_ptr<RenderRecord> &reco
     renderRecordMap_.emplace(record->GetUid(), record);
 }
 
+void AppRunningRecord::RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record)
+{
+    if (!record) {
+        HILOG_DEBUG("RemoveRenderRecord: record is null");
+        return;
+    }
+    std::lock_guard<std::mutex> renderRecordMapLock(renderRecordMapLock_);
+    renderRecordMap_.erase(record->GetUid());
+}
+
 std::shared_ptr<RenderRecord> AppRunningRecord::GetRenderRecordByPid(const pid_t pid)
 {
     std::lock_guard<std::mutex> renderRecordMapLock(renderRecordMapLock_);
@@ -1332,7 +1342,7 @@ std::shared_ptr<RenderRecord> AppRunningRecord::GetRenderRecordByPid(const pid_t
     }
     for (auto iter : renderRecordMap_) {
         auto renderRecord = iter.second;
-        if (renderRecord->GetPid() == pid) {
+        if (renderRecord && renderRecord->GetPid() == pid) {
             return renderRecord;
         }
     }
@@ -1343,16 +1353,6 @@ std::map<int32_t, std::shared_ptr<RenderRecord>> AppRunningRecord::GetRenderReco
 {
     std::lock_guard<std::mutex> renderRecordMapLock(renderRecordMapLock_);
     return renderRecordMap_;
-}
-
-void AppRunningRecord::RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record)
-{
-    if (!record) {
-        HILOG_DEBUG("RemoveRenderRecord: record is null");
-        return;
-    }
-    std::lock_guard<std::mutex> renderRecordMapLock(renderRecordMapLock_);
-    renderRecordMap_.erase(record->GetUid());
 }
 
 void AppRunningRecord::SetStartMsg(const AppSpawnStartMsg &msg)

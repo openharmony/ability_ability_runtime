@@ -35,7 +35,7 @@ bool RenderProcessInfo::ReadFromParcel(Parcel &parcel)
     uid_ = static_cast<int32_t>(uidData);
     int32_t hostUidData;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, hostUidData);
-    hostUid_ = static_cast<int32_t>(uidData);
+    hostUid_ = static_cast<int32_t>(hostUidData);
     return true;
 }
 

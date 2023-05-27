@@ -26,7 +26,6 @@
 #include "app_service_manager.h"
 #include "hilog_wrapper.h"
 #include "app_mem_info.h"
-#include "render_process_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {

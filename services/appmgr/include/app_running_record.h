@@ -555,9 +555,9 @@ public:
     bool IsDebugApp();
     void SetNativeDebug(bool isNativeDebug);
     void AddRenderRecord(const std::shared_ptr<RenderRecord> &record);
+    void RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record);
     std::shared_ptr<RenderRecord> GetRenderRecordByPid(const pid_t pid);
     std::map<int32_t, std::shared_ptr<RenderRecord>> GetRenderRecordMap();
-    void RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record);
     void SetStartMsg(const AppSpawnStartMsg &msg);
     AppSpawnStartMsg GetStartMsg();
 
