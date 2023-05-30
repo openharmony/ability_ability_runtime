@@ -694,7 +694,7 @@ void AbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
                 AbilityLifeCycleState::ABILITY_STATE_INVALID_WINDOW_MODE, restoreData);
             break;
         }
-        case type == static_cast<int32_t>(OHOS::Rosen::WMError::WM_DO_NOTHING): {
+        case static_cast<int32_t>(OHOS::Rosen::WMError::WM_DO_NOTHING): {
             AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
                 AbilityLifeCycleState::ABILITY_STATE_DO_NOTHING, restoreData);
             break;
