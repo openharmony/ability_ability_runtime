@@ -264,6 +264,15 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/uri_permission/include/",
+              "header_files": [
+                "uri_permission_manager_client.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/uri_permission:uri_permission_mgr"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/quick_fix/include/",
               "header_files": [
                 "quick_fix_manager_client.h"
