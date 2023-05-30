@@ -1098,7 +1098,8 @@ int MissionListManager::DispatchState(const std::shared_ptr<AbilityRecord> &abil
         }
         case AbilityState::FOREGROUND_FAILED:
         case AbilityState::FOREGROUND_INVALID_MODE:
-        case AbilityState::FOREGROUND_WINDOW_FREEZED: {
+        case AbilityState::FOREGROUND_WINDOW_FREEZED:
+        case AbilityState::FOREGROUND_DO_NOTHING: {
             return DispatchForeground(abilityRecord, false, static_cast<AbilityState>(state));
         }
         default: {
@@ -1971,13 +1972,26 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (abilityRecord == nullptr) {
         HILOG_ERROR("CompleteForegroundFailed, ability is nullptr.");
-        return;
+        return; 
     }
     if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
         HILOG_INFO("Window was freezed.");
         abilityRecord->SetPendingState(AbilityState::INITIAL);
         abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
+        TerminatePreviousAbility(abilityRecord);
+        return;
+    }
+    if (state == AbilityState::FOREGROUND_DO_NOTHING) {
+        HILOG_INFO("ForegroundFailed. WMS return do_nothing");
+        auto pendingState = abilityRecord->GetPendingState();
+        if (pendingState == AbilityState::BACKGROUND) {
+            abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
+            DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
+        } else if (pendingState == AbilityState::FOREGROUND) {
+            abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
+            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
+        }
         TerminatePreviousAbility(abilityRecord);
         return;
     }
