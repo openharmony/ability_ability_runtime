@@ -149,6 +149,8 @@ const std::string BOOTEVENT_APPFWK_READY = "bootevent.appfwk.ready";
 const std::string BOOTEVENT_BOOT_COMPLETED = "bootevent.boot.completed";
 const std::string BOOTEVENT_BOOT_ANIMATION_STARTED = "bootevent.bootanimation.started";
 const std::string NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
+const std::string PERMISSIONMGR_BUNDLE_NAME = "com.ohos.permissionmanager";
+const std::string PERMISSIONMGR_ABILITY_NAME = "com.ohos.permissionmanager.GrantAbility";
 const int DEFAULT_DMS_MISSION_ID = -1;
 const std::map<std::string, AbilityManagerService::DumpKey> AbilityManagerService::dumpMap = {
     std::map<std::string, AbilityManagerService::DumpKey>::value_type("--all", KEY_DUMP_ALL),
@@ -340,7 +342,7 @@ bool AbilityManagerService::Init()
                 HILOG_ERROR("RegisterBundleEventCallback failed!");
             }
         } else {
-            HILOG_ERROR("Get BundleManager or abilieyBundleEventCallback failed!");
+            HILOG_ERROR("Get BundleManager or abilityBundleEventCallback failed!");
         }
     };
     handler_->PostTask(registerBundleEventCallbackTask, "RegisterBundleEventCallback");
@@ -576,9 +578,27 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     auto type = abilityInfo.type;
     if (type == AppExecFwk::AbilityType::DATA) {
-        HILOG_ERROR("Cannot start data ability, use 'AcquireDataAbility()' instead.");
+        HILOG_ERROR("Cannot start data ability by start ability.");
         return ERR_WRONG_INTERFACE_CALL;
-    } else if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
+    } else if (type == AppExecFwk::AbilityType::EXTENSION) {
+        auto isSACall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+        auto isGatewayCall = AAFwk::PermissionVerification::GetInstance()->IsGatewayCall();
+        auto isSystemAppCall = AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall();
+        auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
+        auto isToPermissionMgr = IsTargetPermission(want);
+        if (!isSACall && !isGatewayCall && !isSystemAppCall && !isShellCall && !isToPermissionMgr) {
+            HILOG_ERROR("Cannot start extension by start ability, use startServiceExtensionAbility.");
+            return ERR_WRONG_INTERFACE_CALL;
+        }
+
+        if (isSystemAppCall || isToPermissionMgr) {
+            result = CheckCallServicePermission(abilityRequest);
+            if (result != ERR_OK) {
+                HILOG_ERROR("Check permission failed");
+                return result;
+            }
+        }
+    } else if (type == AppExecFwk::AbilityType::SERVICE) {
         HILOG_DEBUG("Check call service or extension permission, name is %{public}s.", abilityInfo.name.c_str());
         result = CheckCallServicePermission(abilityRequest);
         if (result != ERR_OK) {
@@ -736,7 +756,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
             return result;
         }
     }
-    
+
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     HILOG_DEBUG("userId : %{public}d, singleton is : %{public}d",
@@ -934,7 +954,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             return result;
         }
     }
-    
 
     if (!isStartAsCaller) {
         UpdateCallerInfo(abilityRequest.want, callerToken);
@@ -1010,6 +1029,128 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
     }
     return ret;
+}
+
+int32_t AbilityManagerService::RequestDialogService(const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto flags = want.GetFlags();
+    if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
+        HILOG_ERROR("RequestDialogService with continuation flags is not allowed!");
+        return ERR_INVALID_CONTINUATION_FLAG;
+    }
+
+    HILOG_INFO("request dialog service, target is %{public}s",want.GetElement().GetURI().c_str());
+    return RequestDialogServiceInner(want, callerToken, -1, -1);
+}
+
+int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const sptr<IRemoteObject> &callerToken,
+    int requestCode, int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (callerToken == nullptr || !VerificationAllToken(callerToken)) {
+        HILOG_WARN("caller is invalid.");
+        return ERR_INVALID_CALLER;
+    }
+
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "CHECK_DLP");
+        if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
+            !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
+            HILOG_ERROR("%{public}s: Permission verification failed.", __func__);
+            return CHECK_PERMISSION_FAILED;
+        }
+
+        if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
+            HILOG_ERROR("Cannot handle dlp by RequestDialogService.");
+            return ERR_WRONG_INTERFACE_CALL;
+        }
+    }
+
+    auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
+        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
+    if (result != ERR_OK) {
+        HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
+        return result;
+    }
+
+    int32_t oriValidUserId = GetValidUserId(userId);
+    int32_t validUserId = oriValidUserId;
+    if (!JudgeMultiUserConcurrency(validUserId)) {
+        HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
+        return ERR_CROSS_USER;
+    }
+
+    AbilityRequest abilityRequest;
+    result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
+    ComponentRequest componentRequest = initComponentRequest(callerToken, requestCode, result);
+    if (CheckProxyComponent(want, result) && !IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
+        return componentRequest.requestResult;
+    }
+    if (result != ERR_OK) {
+        HILOG_ERROR("Generate ability request local error when RequestDialogService.");
+        return result;
+    }
+    UpdateCallerInfo(abilityRequest.want, callerToken);
+
+    auto abilityInfo = abilityRequest.abilityInfo;
+    validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
+    HILOG_DEBUG("userId is : %{public}d, singleton is : %{public}d",
+        validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
+
+    result = CheckStaticCfgPermission(abilityInfo, false, -1);
+    if (result != AppExecFwk::Constants::PERMISSION_GRANTED) {
+        HILOG_ERROR("CheckStaticCfgPermission error, result is %{public}d.", result);
+        return ERR_STATIC_CFG_PERMISSION;
+    }
+
+    auto type = abilityInfo.type;
+    if (type == AppExecFwk::AbilityType::PAGE) {
+        result = CheckCallAbilityPermission(abilityRequest);
+        if (result != ERR_OK) {
+            HILOG_ERROR("Check permission failed");
+            return result;
+        }
+    } else if (type == AppExecFwk::AbilityType::EXTENSION &&
+        abilityInfo.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
+        HILOG_DEBUG("Check call ability permission, name is %{public}s.", abilityInfo.name.c_str());
+        result = CheckCallServicePermission(abilityRequest);
+        if (result != ERR_OK) {
+            HILOG_ERROR("Check permission failed");
+            return result;
+        }
+    } else {
+        HILOG_ERROR("RequestDialogService do not support other component.");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+
+    if (type == AppExecFwk::AbilityType::EXTENSION) {
+        auto connectManager = GetConnectManagerByUserId(validUserId);
+        if (!connectManager) {
+            HILOG_ERROR("connectManager is nullptr. userId=%{public}d", validUserId);
+            return ERR_INVALID_VALUE;
+        }
+        HILOG_DEBUG("request dialog service, start service extension,name is %{public}s.", abilityInfo.name.c_str());
+        ReportEventToSuspendManager(abilityInfo);
+        return connectManager->StartAbility(abilityRequest);
+    }
+
+    if (!IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
+        return componentRequest.requestResult;
+    }
+    if (!IsAbilityControllerStart(want, abilityInfo.bundleName)) {
+        HILOG_ERROR("IsAbilityControllerStart failed : %{public}s.", abilityInfo.bundleName.c_str());
+        return ERR_WOULD_BLOCK;
+    }
+    auto missionListManager = GetListManagerByUserId(oriValidUserId);
+    if (missionListManager == nullptr) {
+        HILOG_ERROR("missionListManager is nullptr. userId:%{public}d", validUserId);
+        return ERR_INVALID_VALUE;
+    }
+    ReportAbilitStartInfoToRSS(abilityInfo);
+    ReportEventToSuspendManager(abilityInfo);
+    HILOG_DEBUG("RequestDialogService, start ability, name is %{public}s.", abilityInfo.name.c_str());
+    return missionListManager->StartAbility(abilityRequest);
 }
 
 int AbilityManagerService::StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions,
@@ -5547,16 +5688,8 @@ int AbilityManagerService::DoAbilityForeground(const sptr<IRemoteObject> &token,
         return ERR_WOULD_BLOCK;
     }
 
-    if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
-        HILOG_DEBUG("pending state is FOREGROUND.");
-        abilityRecord->SetPendingState(AbilityState::FOREGROUND);
-        return ERR_OK;
-    } else {
-        HILOG_DEBUG("pending state is not FOREGROUND.");
-        abilityRecord->SetPendingState(AbilityState::FOREGROUND);
-    }
-    abilityRecord->ProcessForegroundAbility(flag);
-    return ERR_OK;
+    CHECK_POINTER_AND_RETURN(currentMissionListManager_, ERR_NO_INIT);
+    return currentMissionListManager_->DoAbilityForeground(abilityRecord, flag);
 }
 
 int AbilityManagerService::DoAbilityBackground(const sptr<IRemoteObject> &token, uint32_t flag)
@@ -5614,7 +5747,7 @@ std::string AbilityManagerService::GetBundleNameFromToken(const sptr<IRemoteObje
     } else {
         callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
     }
-    return callerBundleName;    
+    return callerBundleName;
 }
 
 bool AbilityManagerService::JudgeMultiUserConcurrency(const int32_t userId)
@@ -6183,6 +6316,7 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
     verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     HILOG_DEBUG("Call ServiceAbility or DataAbility, target bundleName: %{public}s.",
         abilityRequest.appInfo.bundleName.c_str());
     if (whiteListassociatedWakeUpFlag_ &&
@@ -6212,6 +6346,7 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
     verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
@@ -6274,6 +6409,7 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
     verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
@@ -6298,6 +6434,7 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
     verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
@@ -6371,6 +6508,16 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
         static_cast<int32_t>(processInfo.state_));
 
     return ERR_OK;
+}
+
+bool AbilityManagerService::IsTargetPermission(const Want &want) const
+{
+    if (want.GetElement().GetBundleName() == PERMISSIONMGR_BUNDLE_NAME &&
+        want.GetElement().GetAbilityName() == PERMISSIONMGR_ABILITY_NAME) {
+        return true;
+    }
+
+    return false;
 }
 
 inline bool AbilityManagerService::IsDelegatorCall(
