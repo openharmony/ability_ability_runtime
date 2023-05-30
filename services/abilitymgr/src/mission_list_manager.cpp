@@ -1986,13 +1986,10 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
         HILOG_INFO("ForegroundFailed. WMS return do_nothing");
         auto pendingState = abilityRecord->GetPendingState();
         if (pendingState == AbilityState::BACKGROUND) {
-            abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
         } else if (pendingState == AbilityState::FOREGROUND) {
-            abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
         }
-        TerminatePreviousAbility(abilityRecord);
         return;
     }
 #ifdef SUPPORT_GRAPHICS
