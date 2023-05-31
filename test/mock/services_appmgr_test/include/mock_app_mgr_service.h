@@ -75,6 +75,7 @@ public:
     MOCK_METHOD2(NotifyUnLoadRepairPatch, int32_t(const std::string& bundleName,
         const sptr<IQuickFixCallback>& callback));
     MOCK_METHOD2(IsSharedBundleRunning, bool(const std::string &bundleName, uint32_t versionCode));
+    MOCK_METHOD2(GetBundleNameByPid, int32_t(const int pid, std::string &bundleName));
 
     virtual int StartUserTestProcess(
         const AAFwk::Want& want, const sptr<IRemoteObject>& observer, const BundleInfo& bundleInfo, int32_t userId)
