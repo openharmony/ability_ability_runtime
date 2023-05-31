@@ -5060,7 +5060,7 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
     }
 
     {
-        std::lock_guard<std::recursive_mutex> guard(globalLock_);
+        std::lock_guard<std::mutex> guard(globalLock_);
         auto it = appRecoveryHistory_.find(record->GetUid());
         if (it == appRecoveryHistory_.end()) {
             appRecoveryHistory_.emplace(record->GetUid(), 0);
@@ -5119,7 +5119,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
 
     AAFwk::Want curWant;
     {
-        std::lock_guard<std::recursive_mutex> guard(globalLock_);
+        std::lock_guard<std::mutex> guard(globalLock_);
         auto type = record->GetAbilityInfo().type;
         if (type != AppExecFwk::AbilityType::PAGE) {
             HILOG_ERROR("%{public}s AppRecovery::only do recover for page ability.", __func__);
@@ -5422,7 +5422,7 @@ int AbilityManagerService::SetAbilityController(const sptr<IAbilityController> &
         return CHECK_PERMISSION_FAILED;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(globalLock_);
+    std::lock_guard<std::mutex> guard(globalLock_);
     abilityController_ = abilityController;
     controllerIsAStabilityTest_ = imAStabilityTest;
     HILOG_DEBUG("%{public}s, end", __func__);
@@ -5443,7 +5443,7 @@ int AbilityManagerService::SendANRProcessID(int pid)
     bool debug;
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (appScheduler->GetApplicationInfoByProcessID(pid, appInfo, debug) == ERR_OK) {
-        std::lock_guard<std::recursive_mutex> guard(globalLock_);
+        std::lock_guard<std::mutex> guard(globalLock_);
         auto it = appRecoveryHistory_.find(appInfo.uid);
         if (it != appRecoveryHistory_.end()) {
             return ERR_OK;
@@ -5471,7 +5471,7 @@ int AbilityManagerService::SendANRProcessID(int pid)
 
 bool AbilityManagerService::IsRunningInStabilityTest()
 {
-    std::lock_guard<std::recursive_mutex> guard(globalLock_);
+    std::lock_guard<std::mutex> guard(globalLock_);
     bool ret = abilityController_ != nullptr && controllerIsAStabilityTest_;
     HILOG_DEBUG("%{public}s, IsRunningInStabilityTest: %{public}d", __func__, ret);
     return ret;
@@ -5647,7 +5647,7 @@ int AbilityManagerService::DoAbilityForeground(const sptr<IRemoteObject> &token,
         return ERR_INVALID_VALUE;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(globalLock_);
+    std::lock_guard<std::mutex> guard(globalLock_);
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     if (!JudgeSelfCalled(abilityRecord)) {
@@ -6730,7 +6730,7 @@ int AbilityManagerService::SetComponentInterception(
         return CHECK_PERMISSION_FAILED;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(globalLock_);
+    std::lock_guard<std::mutex> guard(globalLock_);
     componentInterception_ = componentInterception;
     HILOG_DEBUG("%{public}s, end", __func__);
     return ERR_OK;
