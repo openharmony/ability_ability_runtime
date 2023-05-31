@@ -629,6 +629,15 @@ public:
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
 
+    /**
+     * get bundleName by pid.
+     *
+     * @param pid process id.
+     * @param bundleName Output parameters, return bundleName.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetBundleNameByPid(const int32_t pid, std::string &bundleName);
+
 private:
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount,

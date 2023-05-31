@@ -999,6 +999,28 @@ public:
 
     bool IsDmsAlive() const;
 
+    /**
+     * Upgrade app completed event.
+     * @param bundleName.
+     * @param uid.
+     */
+    void AppUpgradeCompleted(const std::string &bundleName, int32_t uid);
+
+    /**
+     * Record app exit reason.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RecordAppExitReason(Reason exitReason) override;
+
+    /**
+     * Force app exit and record exit reason.
+     * @param pid Process id .
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ForceExitApp(const int32_t pid, Reason exitReason) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1350,6 +1372,8 @@ private:
     bool CheckCallingTokenId(const std::string &bundleName, int32_t userId);
 
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);
+
+    void RecordAppExitReasonAtUpgrade(const AppExecFwk::BundleInfo &bundleInfo);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

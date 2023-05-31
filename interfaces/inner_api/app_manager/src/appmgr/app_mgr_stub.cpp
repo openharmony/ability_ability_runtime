@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleStartNativeProcessForDebugger;
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::JUDGE_SANDBOX_BY_PID)] =
         &AppMgrStub::HandleJudgeSandboxByPid;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_BUNDLE_NAME_BY_PID)] =
+        &AppMgrStub::HandleGetBundleNameByPid;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -655,6 +657,21 @@ int32_t AppMgrStub::HandleStartNativeProcessForDebugger(MessageParcel &data, Mes
     auto result = StartNativeProcessForDebugger(*want);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t pid = data.ReadInt32();
+    std::string bundleName;
+    auto result = GetBundleNameByPid(pid, bundleName);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    if (!reply.WriteString(bundleName)) {
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -712,6 +712,19 @@ int32_t AppMgrService::StartNativeProcessForDebugger(const AAFwk::Want &want)
         HILOG_ERROR("debuggablePipe fail to start native process.");
     }
     return ret;
+}
+
+int32_t AppMgrService::GetBundleNameByPid(const int32_t pid, std::string &bundleName)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetBundleNameByPid(pid, bundleName);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

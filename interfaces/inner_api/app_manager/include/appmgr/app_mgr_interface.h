@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -343,6 +343,15 @@ public:
 
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) = 0;
 
+    /**
+     * get bundleName by pid.
+     *
+     * @param pid process id.
+     * @param bundleName Output parameters, return bundleName.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName) = 0;
+
     // please add new message item to the bottom in order to prevent some unexpected BUG
     enum class Message {
         APP_ATTACH_APPLICATION = 0,
@@ -384,6 +393,7 @@ public:
         DUMP_HEAP_MEMORY_PROCESS,
         START_NATIVE_PROCESS_FOR_DEBUGGER,
         JUDGE_SANDBOX_BY_PID,
+        GET_BUNDLE_NAME_BY_PID,
     };
 };
 }  // namespace AppExecFwk

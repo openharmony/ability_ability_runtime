@@ -360,7 +360,7 @@ public:
 
     int32_t IsValidMissionIds(const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results);
 
-    int DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t flag);
+    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList);
 
 #ifdef SUPPORT_GRAPHICS
 public:
@@ -488,6 +488,9 @@ private:
     std::shared_ptr<AbilityRecord> GetAliveAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest);
     void NotifyStartAbilityResult(const AbilityRequest &abilityRequest, int result);
+
+    void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord);
+    LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
 
     int userId_;
     mutable std::recursive_mutex managerLock_;

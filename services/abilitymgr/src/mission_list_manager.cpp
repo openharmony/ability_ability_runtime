@@ -20,6 +20,7 @@
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "app_exit_reason_data_manager.h"
 #include "hitrace_meter.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
@@ -537,6 +538,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         targetMission->UpdateMissionTime(info.missionInfo.time);
         targetRecord->SetMission(targetMission);
         targetRecord->SetOwnerMissionUserId(userId_);
+        SetLastExitReason(targetRecord);
 
         // handle specified
         if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
@@ -3524,6 +3526,64 @@ int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abil
     }
     abilityRecord->ProcessForegroundAbility(flag);
     return ERR_OK;
+}
+
+void MissionListManager::GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList)
+{
+    for (auto missionList : currentMissionLists_) {
+        if (missionList != nullptr) {
+            std::vector<std::string> abilityNameList;
+            missionList->GetActiveAbilityList(bundleName, abilityNameList);
+            if (!abilityNameList.empty()) {
+                abilityList.insert(abilityList.end(), abilityNameList.begin(), abilityNameList.end());
+            }
+        }
+    }
+}
+
+void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr.");
+        return;
+    }
+
+    if (abilityRecord->GetAbilityInfo().bundleName.empty()) {
+        HILOG_ERROR("bundleName is empty.");
+        return;
+    }
+
+    Reason exitReason;
+    bool isSetReason;
+    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+        abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetAbilityInfo().name, isSetReason, exitReason);
+
+    if (isSetReason) {
+        abilityRecord->SetLastExitReason(CovertAppExitReasonToLastReason(exitReason));
+    }
+}
+
+LastExitReason MissionListManager::CovertAppExitReasonToLastReason(const Reason exitReason)
+{
+    switch (exitReason) {
+        case REASON_NORMAL:
+            return LASTEXITREASON_NORMAL;
+        case REASON_CPP_CRASH:
+            return LASTEXITREASON_CPP_CRASH;
+        case REASON_JS_ERROR:
+            return LASTEXITREASON_JS_ERROR;
+        case REASON_APP_FREEZE:
+            return LASTEXITREASON_APP_FREEZE;
+        case REASON_PERFORMANCE_CONTROL:
+            return LASTEXITREASON_PERFORMANCE_CONTROL;
+        case REASON_RESOURCE_CONTROL:
+            return LASTEXITREASON_RESOURCE_CONTROL;
+        case REASON_UPGRADE:
+            return LASTEXITREASON_UPGRADE;
+        case REASON_UNKNOWN:
+        default:
+            return LASTEXITREASON_UNKNOWN;
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
