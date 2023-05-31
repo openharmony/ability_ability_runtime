@@ -43,7 +43,7 @@
             "bundle_framework",
             "common",
             "common_event_service",
-            "data_object",
+            "c_utils",
             "dsoftbus",
             "eventhandler",
             "faultloggerd",
@@ -67,14 +67,16 @@
             "safwk",
             "samgr",
             "startup_l2",
-            "c_utils",
             "window_manager"
   ],
           "third_party": [
-            "libjpeg-turbo",
-            "node",
+            "icu",
+            "json",
             "jsoncpp",
-            "json"
+            "libjpeg-turbo",
+            "libuv",
+            "node",
+            "zlib"
           ]
       },
       "build": {
