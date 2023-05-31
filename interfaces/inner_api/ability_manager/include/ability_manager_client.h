@@ -997,6 +997,9 @@ public:
         const Want &want,
         const sptr<IRemoteObject> &callerToken);
 
+    ErrCode ForceExitApp(const int32_t pid, Reason exitReason);
+    ErrCode RecordAppExitReason(Reason exitReason);
+
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:

@@ -25,6 +25,7 @@
 #include "ability_running_info.h"
 #include "ability_scheduler_interface.h"
 #include "ability_start_setting.h"
+#include "ability_state.h"
 #include "extension_running_info.h"
 #include "free_install_observer_interface.h"
 #include "iability_controller.h"
@@ -937,6 +938,27 @@ public:
         return 0;
     }
 
+    /**
+     * Force app exit and record exit reason.
+     * @param pid Process id .
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ForceExitApp(const int32_t pid, Reason exitReason)
+    {
+        return 0;
+    }
+
+    /**
+     * Record app exit reason.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RecordAppExitReason(Reason exitReason)
+    {
+        return 0;
+    }
+
     enum {
         // ipc id 1-1000 for kit
         // ipc id for terminating ability (1)
@@ -1281,6 +1303,9 @@ public:
         SHARE_DATA_DONE = 4002,
 
         GET_ABILITY_TOKEN = 5001,
+
+        FORCE_EXIT_APP = 6001,
+        RECORD_APP_EXIT_REASON = 6002,
     };
 };
 }  // namespace AAFwk

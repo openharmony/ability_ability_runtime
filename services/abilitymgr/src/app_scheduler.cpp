@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -414,6 +414,17 @@ int AppScheduler::BlockAppService()
     return ERR_OK;
 }
 #endif
+
+int32_t AppScheduler::GetBundleNameByPid(const int pid, std::string &bundleName)
+{
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    HILOG_DEBUG("start.");
+    if (!IN_PROCESS_CALL(appMgrClient_->GetBundleNameByPid(pid, bundleName))) {
+        HILOG_ERROR("GetBundleNameByPid failed.");
+        return INNER_ERR;
+    }
+    return ERR_OK;
+}
 
 void AppScheduler::SetCurrentUserId(const int32_t userId)
 {

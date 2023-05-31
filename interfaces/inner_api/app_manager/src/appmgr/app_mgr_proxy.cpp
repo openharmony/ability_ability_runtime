@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1168,6 +1168,38 @@ int32_t AppMgrProxy::StartNativeProcessForDebugger(const AAFwk::Want &want)
     }
 
     return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteInt32(pid)) {
+        HILOG_ERROR("uid write failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    auto ret =
+        remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::GET_BUNDLE_NAME_BY_PID), data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_WARN("Send request failed with error code %{public}d.", ret);
+        return ret;
+    }
+    bundleName = reply.ReadString();
+    return ERR_NONE;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
