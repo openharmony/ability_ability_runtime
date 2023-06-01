@@ -1041,7 +1041,7 @@ int32_t AbilityManagerService::RequestDialogService(const Want &want, const sptr
         return ERR_INVALID_CONTINUATION_FLAG;
     }
 
-    HILOG_INFO("request dialog service, target is %{public}s",want.GetElement().GetURI().c_str());
+    HILOG_INFO("request dialog service, target is %{public}s", want.GetElement().GetURI().c_str());
     return RequestDialogServiceInner(want, callerToken, -1, -1);
 }
 
@@ -1336,6 +1336,33 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, Reason exitReason
 
     kill(pid, SIGKILL);
     return result;
+}
+
+int32_t AbilityManagerService::GetConfiguration(AppExecFwk::Configuration& config)
+{
+    auto appMgr = GetAppMgr();
+    if (appMgr == nullptr) {
+        HILOG_WARN("GetAppMgr failed");
+        return -1;
+    }
+
+    return appMgr->GetConfiguration(config);
+}
+
+OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AbilityManagerService::GetAppMgr()
+{
+    if (appMgr_) {
+        return appMgr_;
+    }
+
+    OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
+        OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManager) {
+        return nullptr;
+    }
+    OHOS::sptr<OHOS::IRemoteObject> object = systemAbilityManager->GetSystemAbility(OHOS::APP_MGR_SERVICE_ID);
+    appMgr_ = OHOS::iface_cast<OHOS::AppExecFwk::IAppMgr>(object);
+    return appMgr_;
 }
 
 int AbilityManagerService::CheckOptExtensionAbility(const Want &want, AbilityRequest &abilityRequest,
@@ -6761,7 +6788,7 @@ bool AbilityManagerService::IsComponentInterceptionStart(const Want &want, Compo
         if (callType == AbilityCallType::CALL_REQUEST_TYPE) {
             newWant.SetParam("abilityConnectionObj", request.connect->AsObject());
         }
-        int32_t tokenId = IPCSkeleton::GetCallingTokenID();
+        int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
         newWant.SetParam("accessTokenId", tokenId);
 
         HILOG_DEBUG("%{public}s", __func__);
