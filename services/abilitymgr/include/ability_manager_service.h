@@ -765,6 +765,9 @@ public:
     virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) override;
 
     sptr<IWindowManagerServiceHandler> GetWMSHandler() const;
+
+    virtual int PrepareTerminateAbility(const sptr<IRemoteObject> &token,
+        sptr<IPrepareTerminateCallback> &callback) override;
 #endif
 
     void ClearUserData(int32_t userId);
