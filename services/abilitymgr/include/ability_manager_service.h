@@ -1348,7 +1348,6 @@ private:
     bool IsReleaseCallInterception(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element,
         int &result);
 
-    std::string GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken);
     bool CheckCallingTokenId(const std::string &bundleName, int32_t userId);
 
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);
