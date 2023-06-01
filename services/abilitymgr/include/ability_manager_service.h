@@ -28,6 +28,7 @@
 #include "ability_event_handler.h"
 #include "ability_interceptor_executer.h"
 #include "ability_manager_stub.h"
+#include "app_mgr_interface.h"
 #include "app_scheduler.h"
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #include "background_task_observer.h"
@@ -955,6 +956,15 @@ public:
      * @param token The target ability.
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     * @param pixelMap The snapshot.
+     */
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
+        const std::shared_ptr<Media::PixelMap> &pixelMap) override;
+
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
@@ -967,6 +977,8 @@ public:
      */
     int32_t IsValidMissionIds(
         const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) override;
+
+    virtual int32_t RequestDialogService(const Want &want, const sptr<IRemoteObject> &callerToken) override;
 
     virtual int32_t AcquireShareData(
         const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData) override;
@@ -987,6 +999,8 @@ public:
     virtual int VerifyPermission(const std::string &permission, int pid, int uid) override;
 
     bool IsDmsAlive() const;
+
+    int32_t GetConfiguration(AppExecFwk::Configuration& config);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1090,6 +1104,9 @@ private:
     void InitGlobalConfiguration();
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+
+    sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
+
     int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
         const sptr<IRemoteObject> &callerToken);
     int ConnectLocalAbility(
@@ -1292,27 +1309,11 @@ private:
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall);
 
+    bool IsTargetPermission(const Want &want) const;
+
     bool IsDelegatorCall(const AppExecFwk::RunningProcessInfo &processInfo, const AbilityRequest &abilityRequest);
 
-    /**
-     *  Temporary, use old rule to check permission.
-     *
-     * @param abilityRequest, abilityRequest.
-     * @param isStartByCall, Indicates whether it is the StartAbilityByCall function call.
-     *                       TRUE: Is StartAbilityByCall function call.
-     *                       FALSE: Is other function call, such as StartAbility, ConnectAbility and so on.
-     * @return Returns ERR_OK on check success, others on check failure.
-     */
-    int CheckCallerPermissionOldRule(const AbilityRequest &abilityRequest, const bool isStartByCall = false);
-
-    /**
-     *  Temporary, judge is use new check-permission rule to start ability.
-     *
-     * @param abilityRequest, abilityRequest.
-     * @return Returns TRUE: Use new rule.
-     *                 FALSE: Use old rule.
-     */
-    bool IsUseNewStartUpRule(const AbilityRequest &abilityRequest);
+    bool IsAbilityVisible(const AbilityRequest &abilityRequest) const;
 
     bool CheckNewRuleSwitchState(const std::string &param);
 
@@ -1345,6 +1346,9 @@ private:
 
     bool CheckProxyComponent(const Want &want, const int result);
 
+    int32_t RequestDialogServiceInner(const Want &want, const sptr<IRemoteObject> &callerToken,
+        int requestCode, int32_t userId);
+
     bool IsReleaseCallInterception(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element,
         int &result);
 
@@ -1361,6 +1365,7 @@ private:
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
     std::shared_ptr<AbilityConnectManager> connectManager_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
+    sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
     std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
     std::shared_ptr<DataAbilityManager> dataAbilityManager_;
     std::shared_ptr<DataAbilityManager> systemDataAbilityManager_;
