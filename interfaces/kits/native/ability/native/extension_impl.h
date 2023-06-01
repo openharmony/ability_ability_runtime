@@ -18,7 +18,6 @@
 
 #include "extension.h"
 #include "lifecycle_state_info.h"
-#include "session/container/include/session_stage.h"
 
 namespace OHOS {
 class IRemoteObject;
@@ -171,11 +170,11 @@ private:
     sptr<IRemoteObject> token_;
     std::shared_ptr<Extension> extension_;
 
-class ExtensionSessionStateLifeCycleImpl : public Rosen::ISessionStageStateListener {
+class ExtensionWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
 public:
-    ExtensionSessionStateLifeCycleImpl(const sptr<IRemoteObject>& token, const std::shared_ptr<ExtensionImpl>& owner)
+    ExtensionWindowLifeCycleImpl(const sptr<IRemoteObject>& token, const std::shared_ptr<ExtensionImpl>& owner)
         : token_(token), owner_(owner) {}
-    virtual ~ExtensionSessionStateLifeCycleImpl() {}
+    virtual ~ExtensionWindowLifeCycleImpl() {}
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterActive() override;

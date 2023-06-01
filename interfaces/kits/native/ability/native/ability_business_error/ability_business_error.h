@@ -72,6 +72,12 @@ enum class AbilityErrorCode {
     // context is invalid.
     ERROR_CODE_INVALID_CONTEXT = 16000011,
 
+    // application is controlled.
+    ERROR_CODE_CONTROLLED = 16000012,
+
+    // edm application is controlled.
+    ERROR_CODE_EDM_CONTROLLED = 16000013,
+
     // ability wait start.
     ERROR_START_ABILITY_WAITTING = 16000017,
 
@@ -101,6 +107,9 @@ enum class AbilityErrorCode {
 
     // Uri type invalid, only support file uri currently.
     ERROR_CODE_INVALID_URI_TYPE = 16000059,
+
+    // Sandbox application can not grant URI permission.
+    ERROR_CODE_GRANT_URI_PERMISSION = 16000060,
 
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,

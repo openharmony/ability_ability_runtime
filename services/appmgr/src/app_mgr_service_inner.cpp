@@ -53,6 +53,9 @@
 #include "permission_verification.h"
 #include "system_ability_definition.h"
 #include "uri_permission_manager_client.h"
+#ifdef APP_MGR_SERVICE_APPMS
+#include "socket_permission.h"
+#endif
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -92,7 +95,6 @@ const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
 #define APP_ACCESS_BUNDLE_DIR 0x20
-#define OVERLAY_FLAG 0x80
 
 constexpr int32_t BASE_USER_RANGE = 200000;
 
@@ -300,6 +302,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     const std::shared_ptr<ApplicationInfo> &appInfo, BundleInfo &bundleInfo, HapModuleInfo &hapModuleInfo,
     int32_t appIndex) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto bundleMgr_ = remoteClientManager_->GetBundleManager();
     if (bundleMgr_ == nullptr) {
         HILOG_ERROR("GetBundleManager fail");
@@ -368,11 +371,13 @@ void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppSched
 
 void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!appRecord) {
         HILOG_ERROR("appRecord is null");
         return;
     }
+    std::string connector = "##";
+    std::string traceName = __PRETTY_FUNCTION__ + connector + appRecord->GetApplicationInfo()->name;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, traceName);
 
     if (!configuration_) {
         HILOG_ERROR("configuration_ is null");
@@ -1661,6 +1666,13 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         if (result != Security::AccessToken::PERMISSION_GRANTED) {
             setAllowInternet = 1;
             allowInternet = 0;
+#ifdef APP_MGR_SERVICE_APPMS
+            auto ret = SetInternetPermission(bundleInfo.uid, 0);
+            HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
+        } else {
+            auto ret = SetInternetPermission(bundleInfo.uid, 1);
+            HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
+#endif
         }
 
         if (hasAccessBundleDirReq) {
@@ -1687,18 +1699,6 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.hapFlags = bundleInfo.isPreInstallApp ? 1 : 0;
     if (hasAccessBundleDirReq) {
         startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
-    }
-
-    auto overlayMgrProxy = bundleMgr_->GetOverlayManagerProxy();
-    if (overlayMgrProxy !=  nullptr) {
-        std::vector<OverlayModuleInfo> overlayModuleInfo;
-        HILOG_DEBUG("Check overlay app begin.");
-        HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetOverlayModuleInfoForTarget");
-        auto targetRet = IN_PROCESS_CALL(overlayMgrProxy->GetOverlayModuleInfoForTarget(bundleName, "", overlayModuleInfo, userId));
-        if (targetRet == ERR_OK && overlayModuleInfo.size() != 0) {
-            HILOG_DEBUG("Start an overlay app process.");
-            startMsg.flags = startMsg.flags | OVERLAY_FLAG;
-        }
     }
 
     HILOG_DEBUG("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",

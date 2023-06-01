@@ -153,6 +153,7 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[START_EXTENSION_ABILITY] = &AbilityManagerStub::StartExtensionAbilityInner;
     requestFuncMap_[STOP_EXTENSION_ABILITY] = &AbilityManagerStub::StopExtensionAbilityInner;
     requestFuncMap_[UPDATE_MISSION_SNAPSHOT] = &AbilityManagerStub::UpdateMissionSnapShotInner;
+    requestFuncMap_[UPDATE_MISSION_SNAPSHOT_FROM_WMS] = &AbilityManagerStub::UpdateMissionSnapShotFromWMSInner;
     requestFuncMap_[REGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::RegisterConnectionObserverInner;
     requestFuncMap_[UNREGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::UnregisterConnectionObserverInner;
     requestFuncMap_[GET_DLP_CONNECTION_INFOS] = &AbilityManagerStub::GetDlpConnectionInfosInner;
@@ -166,6 +167,7 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[TERMINATE_UI_EXTENSION_ABILITY] = &AbilityManagerStub::TerminateUIExtensionAbilityInner;
     requestFuncMap_[CONNECT_UI_EXTENSION_ABILITY] = &AbilityManagerStub::ConnectUIExtensionAbilityInner;
 #endif
+    requestFuncMap_[REQUEST_DIALOG_SERVICE] = &AbilityManagerStub::HandleRequestDialogService;
     requestFuncMap_[SET_COMPONENT_INTERCEPTION] = &AbilityManagerStub::SetComponentInterceptionInner;
     requestFuncMap_[SEND_ABILITY_RESULT_BY_TOKEN] = &AbilityManagerStub::SendResultToAbilityByTokenInner;
     requestFuncMap_[QUERY_MISSION_VAILD] = &AbilityManagerStub::IsValidMissionIdsInner;
@@ -1739,6 +1741,23 @@ int AbilityManagerStub::UpdateMissionSnapShotInner(MessageParcel &data, MessageP
     return NO_ERROR;
 }
 
+int AbilityManagerStub::UpdateMissionSnapShotFromWMSInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (token == nullptr) {
+        HILOG_ERROR("read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
+    if (pixelMap == nullptr) {
+        HILOG_ERROR("read pixelMap failed.");
+        return ERR_NULL_OBJECT;
+    }
+    UpdateMissionSnapShot(token, pixelMap);
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -1747,6 +1766,28 @@ int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessagePa
         return ERR_NULL_OBJECT;
     }
     EnableRecoverAbility(token);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::HandleRequestDialogService(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    if (!callerToken) {
+        HILOG_ERROR("callerToken is invalid.");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t result = RequestDialogService(*want, callerToken);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 

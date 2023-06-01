@@ -25,6 +25,7 @@
 #include "ability_util.h"
 #include "accesstoken_kit.h"
 #include "bundle_mgr_client.h"
+#include "configuration_convertor.h"
 #include "connection_state_manager.h"
 #include "hitrace_meter.h"
 #include "image_source.h"
@@ -803,6 +804,15 @@ std::shared_ptr<Global::Resource::ResourceManager> AbilityRecord::CreateResource
     icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
     resConfig->SetLocaleInfo(locale);
 
+    AppExecFwk::Configuration cfg;
+    if (DelayedSingleton<AbilityManagerService>::GetInstance()->GetConfiguration(cfg) == 0) {
+        std::string colormode = cfg.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+        HILOG_DEBUG("getcolormode is %{public}s.", colormode.c_str());
+        resConfig->SetColorMode(AppExecFwk::ConvertColorMode(colormode));
+    } else {
+        HILOG_WARN("getcolormode failed.");
+    }
+
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
     resourceMgr->UpdateResConfig(*resConfig);
 
@@ -1347,7 +1357,7 @@ void AbilityRecord::SendResult(bool isSandboxApp)
     result_.reset();
 }
 
-void AbilityRecord::SendResultToCallers()
+void AbilityRecord::SendResultToCallers(bool schedulerdied)
 {
     for (auto caller : GetCallerRecordList()) {
         if (caller == nullptr) {
@@ -1363,8 +1373,8 @@ void AbilityRecord::SendResultToCallers()
             if (callerSystemAbilityRecord != nullptr) {
                 HILOG_INFO("Send result to system ability.");
                 callerSystemAbilityRecord->SendResultToSystemAbility(caller->GetRequestCode(),
-                    callerSystemAbilityRecord->GetResultCode(), callerSystemAbilityRecord->GetResultWant(),
-                    callerSystemAbilityRecord->GetCallerToken());
+                    callerSystemAbilityRecord, abilityInfo_.applicationInfo.uid,
+                    abilityInfo_.applicationInfo.accessTokenId, schedulerdied);
             }
         }
     }
@@ -1429,12 +1439,22 @@ void SystemAbilityCallerRecord::SetResultToSystemAbility(
     callerSystemAbilityRecord->SetResult(resultWant, resultCode);
 }
 
-void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode, int resultCode, Want &resultWant,
-    const sptr<IRemoteObject> &callerToken)
+void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
+    const std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord,
+    int32_t callerUid, uint32_t accessToken, bool schedulerdied)
 {
     HILOG_INFO("call");
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (callerSystemAbilityRecord == nullptr) {
+        HILOG_ERROR("callerSystemAbilityRecord is nullptr");
+        return;
+    }
+    int resultCode = callerSystemAbilityRecord->GetResultCode();
+    Want resultWant = callerSystemAbilityRecord->GetResultWant();
+    sptr<IRemoteObject> callerToken = callerSystemAbilityRecord->GetCallerToken();
+    if (!schedulerdied) {
+        callerUid = IPCSkeleton::GetCallingUid();
+        accessToken = IPCSkeleton::GetCallingTokenID();
+    }
     HILOG_INFO("Try to SendResult, callerUid = %{public}d, AccessTokenId = %{public}u",
         callerUid, accessToken);
     if (callerToken == nullptr) {
@@ -1867,7 +1887,7 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     handler->PostTask(task);
     auto uriTask = [want = want_, ability = shared_from_this()]() {
         ability->SaveResultToCallers(-1, &want);
-        ability->SendResultToCallers();
+        ability->SendResultToCallers(true);
     };
     handler->PostTask(uriTask);
 #ifdef SUPPORT_GRAPHICS
@@ -2342,7 +2362,6 @@ void AbilityRecord::GrantUriPermission(Want &want, int32_t userId, std::string t
     uriVec = want.GetStringArrayParam(AbilityConfig::PARAMS_STREAM);
     uriVec.emplace_back(uriStr);
     HILOG_DEBUG("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
-    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
     auto fromTokenId = IPCSkeleton::GetCallingTokenID();
     for (auto&& str : uriVec) {
@@ -2367,8 +2386,9 @@ void AbilityRecord::GrantUriPermission(Want &want, int32_t userId, std::string t
             continue;
         }
         int autoremove = 1;
-        auto ret = IN_PROCESS_CALL(upmClient->GrantUriPermission(uri, want.GetFlags(),
-            targetBundleName, autoremove));
+        auto ret = IN_PROCESS_CALL(
+            AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uri, want.GetFlags(),
+                targetBundleName, autoremove));
         if (ret == 0) {
             isGrantedUriPermission_ = true;
         }
@@ -2397,7 +2417,6 @@ void AbilityRecord::GrantDmsUriPermission(Want &want, std::string targetBundleNa
 {
     std::vector<std::string> uriVec = want.GetStringArrayParam(PARAMS_URI);
     HILOG_DEBUG("GrantDmsUriPermission uriVec size: %{public}zu", uriVec.size());
-    auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
     for (auto&& str : uriVec) {
         Uri uri(str);
         auto&& scheme = uri.GetScheme();
@@ -2408,8 +2427,9 @@ void AbilityRecord::GrantDmsUriPermission(Want &want, std::string targetBundleNa
             continue;
         }
         int autoremove = 1;
-        auto ret = IN_PROCESS_CALL(upmClient->GrantUriPermission(uri, want.GetFlags(),
-            targetBundleName, autoremove));
+        auto ret = IN_PROCESS_CALL(
+            AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uri, want.GetFlags(),
+                targetBundleName, autoremove));
         if (ret) {
             isGrantedUriPermission_ = true;
         }
@@ -2422,8 +2442,7 @@ void AbilityRecord::RevokeUriPermission()
 {
     if (isGrantedUriPermission_) {
         HILOG_DEBUG("To remove uri permission.");
-        auto upmClient = AAFwk::UriPermissionManagerClient::GetInstance();
-        upmClient->RevokeUriPermission(applicationInfo_.accessTokenId);
+        AAFwk::UriPermissionManagerClient::GetInstance().RevokeUriPermission(applicationInfo_.accessTokenId);
         isGrantedUriPermission_ = false;
     }
 }

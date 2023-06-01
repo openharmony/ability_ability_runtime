@@ -97,6 +97,7 @@ void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     const std::shared_ptr<OHOSApplication> &application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
 {
+    HILOG_DEBUG("JsUIExtension begin init");
     UIExtension::Init(record, application, handler, token);
     if (Extension::abilityInfo_->srcEntrance.empty()) {
         HILOG_ERROR("JsUIExtension Init abilityInfo srcEntrance is empty");
@@ -127,8 +128,6 @@ void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 
     BindContext(engine, obj);
     obj->SetNativePointer(this, JsUIExtension::Finalizer, nullptr);
-    const char *loadName = "JsUIExtension";
-    BindNativeFunction(engine, *obj, "loadContent", loadName, JsUIExtension::LoadContent);
 
     SetExtensionCommon(
         JsExtensionCommon::Create(jsRuntime_, static_cast<NativeReference&>(*jsObj_), shellContextRef_));
@@ -174,8 +173,8 @@ void JsUIExtension::BindContext(NativeEngine& engine, NativeObject* obj)
 
 void JsUIExtension::OnStart(const AAFwk::Want &want)
 {
-    Extension::OnStart(want);
     HILOG_DEBUG("JsUIExtension OnStart begin.");
+    Extension::OnStart(want);
     HandleScope handleScope(jsRuntime_);
     NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
@@ -188,15 +187,23 @@ void JsUIExtension::OnStart(const AAFwk::Want &want)
 void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HILOG_DEBUG("JsUIExtension OnStart begin.");
-
     Extension::OnStart(want, sessionInfo);
     if (sessionInfo) {
-        uiWindow_ = Ace::NG::UIWindow::CreateWindowExtension(GetContext(), sessionInfo->sessionToken);
+        sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+        auto context = GetContext();
+        if (context == nullptr || context->GetAbilityInfo() == nullptr) {
+            HILOG_ERROR("Failed to get context");
+            return;
+        }
+        option->SetWindowName(context->GetBundleName() + context->GetAbilityInfo()->name);
+        option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
+        option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
+        uiWindow_ = Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
         if (uiWindow_ == nullptr) {
             HILOG_ERROR("JsUIExtension OnStart create ui window error.");
             return;
         }
-        uiWindow_->RegisterSessionStageStateListener(sceneSessionStageListener_);
+        uiWindow_->RegisterLifeCycleListener(extensionWindowLifeCycleListener_);
     } else {
         HILOG_DEBUG("JsUIExtension OnStart sessionInfo is nullptr.");
     }
@@ -218,8 +225,7 @@ void JsUIExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> se
 
     if (uiWindow_ != nullptr && !contextPath_.empty()) {
         HILOG_DEBUG("JsUIExtension OnStart contextPath is %{private}s", contextPath_.c_str());
-        uiWindow_->LoadContent(contextPath_, nativeEngine, nullptr);
-        uiWindow_->Connect();
+        uiWindow_->SetUIContent(contextPath_, nativeEngine, nullptr);
     } else {
         HILOG_ERROR("JsUIExtension OnStart uiWindow or contextPath is null.");
     }
@@ -234,21 +240,9 @@ void JsUIExtension::OnStop()
     CallObjectMethod("onDestroy");
 
     if (uiWindow_ != nullptr) {
-        uiWindow_->Disconnect();
+        uiWindow_->Destroy();
     } else {
         HILOG_ERROR("JsUIExtension::OnStop uiWindow is null.");
-    }
-
-    auto context = GetContext();
-    if (context == nullptr) {
-        HILOG_ERROR("Failed to get context");
-        return;
-    }
-
-    bool ret = ConnectionManager::GetInstance().DisconnectCaller(context->GetToken());
-    if (ret) {
-        ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
-        HILOG_WARN("The ui extension connection is not disconnected.");
     }
     HILOG_DEBUG("JsUIExtension OnStop end.");
 }
@@ -259,7 +253,7 @@ sptr<IRemoteObject> JsUIExtension::OnConnect(const AAFwk::Want &want)
     NativeValue *result = CallOnConnect(want);
     if (uiWindow_) {
         HILOG_DEBUG("JsUIExtension::OnForeground uiWindow Foreground.");
-        uiWindow_->Foreground();
+        uiWindow_->Show();
     } else {
         HILOG_ERROR("JsUIExtension::OnForeground uiWindow is null.");
     }
@@ -299,7 +293,7 @@ void JsUIExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId
     CallObjectMethod("onRequest", argv, ARGC_TWO);
     if (uiWindow_) {
         HILOG_DEBUG("JsUIExtension::OnForeground uiWindow Foreground.");
-        uiWindow_->Foreground();
+        uiWindow_->Show();
     } else {
         HILOG_ERROR("JsUIExtension::OnForeground uiWindow is null.");
     }
@@ -320,7 +314,7 @@ void JsUIExtension::OnForeground(const Want &want)
     Extension::OnForeground(want);
     if (uiWindow_) {
         HILOG_DEBUG("JsUIExtension::OnForeground uiWindow Foreground.");
-        uiWindow_->Foreground();
+        uiWindow_->Show();
     } else {
         HILOG_ERROR("JsUIExtension::OnForeground uiWindow is null.");
     }
@@ -336,7 +330,7 @@ void JsUIExtension::OnBackground()
     Extension::OnBackground();
     if (uiWindow_) {
         HILOG_DEBUG("JsUIExtension::OnForeground uiWindow Foreground.");
-        uiWindow_->Background();
+        uiWindow_->Hide();
     } else {
         HILOG_ERROR("JsUIExtension::OnForeground uiWindow is null.");
     }
@@ -513,19 +507,6 @@ void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std
         info.push_back(dumpInfoStr);
     }
     HILOG_DEBUG("Dump info size: %{public}zu", info.size());
-}
-
-NativeValue* JsUIExtension::LoadContent(NativeEngine* engine, NativeCallbackInfo* info)
-{
-    HILOG_INFO("JsUIExtension::LoadContent is called");
-    JsUIExtension *me = CheckParamsAndGetThis<JsUIExtension>(engine, info);
-
-    if (!ConvertFromJsValue(*engine, info->argv[0], me->contextPath_)) {
-        HILOG_ERROR("JsUIExtension LoadContent failed to convert parameter to context url");
-        return engine->CreateUndefined();
-    }
-
-    return engine->CreateUndefined();
 }
 }
 }
