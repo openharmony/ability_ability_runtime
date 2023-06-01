@@ -1972,7 +1972,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (abilityRecord == nullptr) {
         HILOG_ERROR("CompleteForegroundFailed, ability is nullptr.");
-        return; 
+        return;
     }
     if (state == AbilityState::FOREGROUND_WINDOW_FREEZED) {
         HILOG_INFO("Window was freezed.");
