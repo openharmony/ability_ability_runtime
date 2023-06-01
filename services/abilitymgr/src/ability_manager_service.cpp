@@ -6132,6 +6132,34 @@ bool AbilityManagerService::CheckWindowMode(int32_t windowMode,
     }
     return false;
 }
+
+int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &token,
+    sptr<IPrepareTerminateCallback> &callback)
+{
+    HILOG_DEBUG("call");
+    if (callback == nullptr) {
+        HILOG_ERROR("callback is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("record is nullptr.");
+        callback->DoPrepareTerminate();
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!JudgeSelfCalled(abilityRecord)) {
+        HILOG_ERROR("Not self call.");
+        callback->DoPrepareTerminate();
+        return CHECK_PERMISSION_FAILED;
+    }
+    bool res = abilityRecord->PrepareTerminateAbility();
+    if (!res) {
+        callback->DoPrepareTerminate();
+    }
+    return ERR_OK;
+}
 #endif
 
 int AbilityManagerService::CheckCallServicePermission(const AbilityRequest &abilityRequest)
