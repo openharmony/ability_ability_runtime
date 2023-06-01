@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <vector>
 
-#include "dfx_dump_catcher.h"
+#include "catchframe_local.h"
 #include "event_handler.h"
 #include "ohos_application.h"
 #include "runtime.h"
@@ -34,7 +34,7 @@ public:
     void InstallDumpHandler(std::shared_ptr<OHOSApplication> application,
         std::shared_ptr<EventHandler> handler);
     static std::string GetMixStack(bool onlyMainThread);
-
+    static bool IsInstalled();
     static bool Dump_SignalHandler(int sig, siginfo_t *si, void *context);
 
 private:
@@ -44,9 +44,8 @@ private:
     void GetThreadList(std::vector<pid_t>& threadList);
     bool IsJsNativePcEqual(uintptr_t *jsNativePointer, uint64_t nativePc, uint64_t nativeOffset);
     void BuildJsNativeMixStack(int fd, std::vector<JsFrames>& jsFrames,
-        std::vector<OHOS::HiviewDFX::NativeFrame>& nativeFrames);
+        std::vector<OHOS::HiviewDFX::DfxFrame>& nativeFrames);
     std::string GetThreadStackTraceLabel(pid_t tid);
-    void PrintNativeFrames(int fd, std::vector<OHOS::HiviewDFX::NativeFrame>& nativeFrames);
     void PrintProcessHeader(int fd, pid_t pid, uid_t uid);
     void Write(int fd, const std::string& outStr);
     std::string DumpMixStackLocked(int fd, pid_t tid);
@@ -56,7 +55,7 @@ private:
 private:
     static std::weak_ptr<EventHandler> signalHandler_;
     static std::weak_ptr<OHOSApplication> application_;
-    std::unique_ptr<OHOS::HiviewDFX::DfxDumpCatcher> catcher_{nullptr};
+    std::unique_ptr<OHOS::HiviewDFX::DfxCatchFrameLocal> catcher_{nullptr};
     std::string outputStr_;
 };
 } // AppExecFwk
