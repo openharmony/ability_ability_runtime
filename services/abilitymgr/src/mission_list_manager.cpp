@@ -117,6 +117,7 @@ int32_t MissionListManager::GetMissionCount() const
 
 int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::recursive_mutex> guard(managerLock_);
     bool isReachToSingleLimit = CheckSingleLimit(abilityRequest);
     if (isReachToSingleLimit) {
@@ -304,7 +305,9 @@ void MissionListManager::StartWaitingAbility()
 int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> &currentTopAbility,
     const std::shared_ptr<AbilityRecord> &callerAbility, const AbilityRequest &abilityRequest)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::string connector = "##";
+    std::string traceName = __PRETTY_FUNCTION__ + connector + abilityRequest.want.GetElement().GetAbilityName();
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceName);
     HILOG_DEBUG("Start ability locked.");
     // 1. choose target mission list
     auto targetList = GetTargetMissionList(callerAbility, abilityRequest);
@@ -499,6 +502,7 @@ bool MissionListManager::CreateOrReusedMissionInfo(const AbilityRequest &ability
 void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilityRequest,
     std::shared_ptr<Mission> &targetMission, std::shared_ptr<AbilityRecord> &targetRecord, bool &isReachToLimit)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (HandleReusedMissionAndAbility(abilityRequest, targetMission, targetRecord)) {
         return;
     }
@@ -517,7 +521,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         if (CheckLimit()) {
             isReachToLimit = true;
             HILOG_ERROR("already reach to limit, not create new mission and ability.");
-       	    return;
+            return;
         }
         HILOG_DEBUG("Make new mission data.");
         targetRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
@@ -1229,7 +1233,7 @@ void MissionListManager::TerminatePreviousAbility(const std::shared_ptr<AbilityR
     abilityRecord->SetPreAbilityRecord(nullptr);
     auto self(shared_from_this());
     if (terminatingAbilityRecord->GetAbilityState() == AbilityState::FOREGROUND) {
-        MoveToBackgroundTask(terminatingAbilityRecord);
+        MoveToBackgroundTask(terminatingAbilityRecord, true);
     }
     if (terminatingAbilityRecord->GetAbilityState() == AbilityState::BACKGROUND) {
         auto task = [terminatingAbilityRecord, self]() {
@@ -1388,7 +1392,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
             nextAbilityRecord->ProcessForegroundAbility();
         } else {
 #endif
-            MoveToBackgroundTask(abilityRecord);
+            MoveToBackgroundTask(abilityRecord, true);
         }
         return ERR_OK;
     }
@@ -1588,7 +1592,6 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
                 break;
             }
             innerMissionInfo.hasRecoverInfo = false;
-            innerMissionInfo.missionInfo.time = GetCurrentTime();
             innerMissionInfo.missionInfo.runningState = -1;
             DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(innerMissionInfo);
             if (listenerController_) {
@@ -1757,7 +1760,27 @@ void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject>& token)
     UpdateMissionSnapshot(abilityRecord);
 }
 
-void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecord> &abilityRecord)
+void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject> &token,
+    const std::shared_ptr<Media::PixelMap> &pixelMap)
+{
+    auto abilityRecord = GetAbilityRecordByToken(token);
+    if (!abilityRecord) {
+        HILOG_ERROR("Cannot find AbilityRecord by Token.");
+        return;
+    }
+    if (abilityRecord->GetAbilityInfo().excludeFromMissions) {
+        HILOG_DEBUG("excludeFromMissions is true, no need to update mission snapshot.");
+        return;
+    }
+    int32_t missionId = abilityRecord->GetMissionId();
+    auto isPrivate = abilityRecord->GetAppIndex() != 0;
+    DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionSnapshot(missionId, pixelMap, isPrivate);
+    if (listenerController_) {
+        listenerController_->NotifyMissionSnapshotChanged(missionId);
+    }
+}
+
+void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecord> &abilityRecord, bool isClose)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
@@ -1766,7 +1789,8 @@ void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecor
     }
     HILOG_INFO("ability:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
     abilityRecord->SetIsNewWant(false);
-    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD && !abilityRecord->IsClearMissionFlag()) {
+    if (abilityRecord->lifeCycleStateInfo_.sceneFlag != SCENE_FLAG_KEYGUARD &&
+        !abilityRecord->IsClearMissionFlag() && !isClose) {
         UpdateMissionSnapshot(abilityRecord);
     }
 

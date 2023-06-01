@@ -86,7 +86,8 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("StartFreeInstall called");
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall && !IsTopAbility(callerToken)) {
+    auto isGatewayCall = AAFwk::PermissionVerification::GetInstance()->IsGatewayCall();
+    if (!isSaCall && !isGatewayCall && !IsTopAbility(callerToken)) {
         return NOT_TOP_ABILITY;
     }
     FreeInstallInfo info = BuildFreeInstallInfo(want, userId, requestCode, callerToken, isAsync);
@@ -174,6 +175,9 @@ FreeInstallInfo FreeInstallManager::BuildFreeInstallInfo(const Want &want, int32
         auto promise = std::make_shared<std::promise<int32_t>>();
         info.promise = promise;
     }
+    auto identity = IPCSkeleton::ResetCallingIdentity();
+    info.identity = identity;
+    IPCSkeleton::SetCallingIdentity(identity);
     return info;
 }
 
@@ -275,8 +279,11 @@ void FreeInstallManager::NotifyFreeInstallResult(const Want &want, int resultCod
             if (isAsync) {
                 Want newWant((*it).want);
                 newWant.SetFlags(want.GetFlags() ^ Want::FLAG_INSTALL_ON_DEMAND);
-                int result = AbilityManagerClient::GetInstance()->StartAbilityAsCaller(newWant, (*it).callerToken,
+                auto identity = IPCSkeleton::ResetCallingIdentity();
+                IPCSkeleton::SetCallingIdentity((*it).identity);
+                int result = AbilityManagerClient::GetInstance()->StartAbility(newWant, (*it).callerToken,
                     (*it).requestCode, (*it).userId);
+                IPCSkeleton::SetCallingIdentity(identity);
                 HILOG_INFO("The result of StartAbility is %{public}d.", result);
                 DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinished(
                     bundleName, abilityName, startTime, result);

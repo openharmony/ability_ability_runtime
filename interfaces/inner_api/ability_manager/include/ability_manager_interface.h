@@ -649,6 +649,14 @@ public:
         const std::shared_ptr<OHOS::Media::PixelMap> &icon) = 0;
 
     /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     * @param pixelMap The snapshot.
+     */
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
+        const std::shared_ptr<OHOS::Media::PixelMap> &pixelMap) {};
+
+    /**
      * Register the WindowManagerService handler
      *
      * @param handler Indidate handler of WindowManagerService.
@@ -888,6 +896,18 @@ public:
      * @return Returns ERR_OK if the current process has the permission, others on failure.
      */
     virtual int VerifyPermission(const std::string &permission, int pid, int uid)
+    {
+        return 0;
+    }
+
+    /**
+     * Request dialog service with want, send want to ability manager service.
+     *
+     * @param want, the want of the dialog service to start.
+     * @param callerToken, caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RequestDialogService(const Want &want, const sptr<IRemoteObject> &callerToken)
     {
         return 0;
     }
@@ -1198,6 +1218,9 @@ public:
         // ipc id for close ui ability by scb
         CLOSE_UI_ABILITY_BY_SCB,
 
+        // ipc id for request dialog service
+        REQUEST_DIALOG_SERVICE,
+
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
 
@@ -1221,6 +1244,7 @@ public:
         UPDATE_MISSION_SNAPSHOT = 1116,
         MOVE_MISSIONS_TO_FOREGROUND = 1117,
         MOVE_MISSIONS_TO_BACKGROUND = 1118,
+        UPDATE_MISSION_SNAPSHOT_FROM_WMS,
 
         // ipc id for user test(1120)
         START_USER_TEST = 1120,

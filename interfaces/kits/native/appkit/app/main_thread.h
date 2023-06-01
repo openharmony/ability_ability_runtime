@@ -477,7 +477,7 @@ private:
      * @param abilityRecord current running ability record
      */
     void UpdateProcessExtensionType(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
-    
+
     /**
      * @brief Add Extension block item
      *
@@ -485,7 +485,7 @@ private:
      * @param type extension type
      */
     void AddExtensionBlockItem(const std::string &extensionName, int32_t type);
-    
+
     /**
      * @brief Update extension block list to nativeEngine
      *
@@ -531,7 +531,6 @@ private:
 
     bool isRunnerStarted_ = false;
     int newThreadId_ = -1;
-    std::shared_ptr<Profile> appProfile_ = nullptr;
     std::shared_ptr<ApplicationInfo> applicationInfo_ = nullptr;
     std::shared_ptr<ProcessInfo> processInfo_ = nullptr;
     std::shared_ptr<OHOSApplication> application_ = nullptr;
@@ -571,13 +570,6 @@ private:
     void ChangeToLocalPath(const std::string &bundleName,
         const std::string &sourcDir, std::string &localPath);
 
-    /**
-     *
-     * @brief Close the ability library loaded.
-     *
-     */
-    void CloseAbilityLibrary();
-
     bool ScanDir(const std::string &dirPath, std::vector<std::string> &files);
 
     /**
@@ -592,8 +584,7 @@ private:
      */
     bool CheckFileType(const std::string &fileName, const std::string &extensionName);
 
-    bool InitCreate(std::shared_ptr<ContextDeal> &contextDeal, ApplicationInfo &appInfo, ProcessInfo &processInfo,
-        Profile &appProfile);
+    bool InitCreate(std::shared_ptr<ContextDeal> &contextDeal, ApplicationInfo &appInfo, ProcessInfo &processInfo);
     bool CheckForHandleLaunchApplication(const AppLaunchData &appLaunchData);
     bool InitResourceManager(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
         const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const std::string &bundleName,

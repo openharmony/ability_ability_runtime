@@ -99,7 +99,6 @@ void Extension::OnForeground(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("extension:%{public}s.", abilityInfo_->name.c_str());
-
 }
 
 void Extension::OnBackground()
@@ -158,9 +157,9 @@ sptr<AAFwk::SessionInfo> Extension::GetSessionInfo()
     return sessionInfo_;
 }
 
-void Extension::SetSceneSessionStageListener(const std::shared_ptr<Rosen::ISessionStageStateListener> &listener)
+void Extension::SetExtensionWindowLifeCycleListener(const sptr<Rosen::IWindowLifeCycle> &listener)
 {
-    sceneSessionStageListener_ = listener;
+    extensionWindowLifeCycleListener_ = listener;
 }
 }
 }
