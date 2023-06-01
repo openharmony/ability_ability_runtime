@@ -89,6 +89,10 @@ public:
     {
         return 0;
     }
+    int32_t ScheduleNotifyAppFault(const FaultData &faultData) override
+    {
+        return 0;
+    }
 };
 class AppMgrServiceModuleTest : public testing::Test {
 public:
