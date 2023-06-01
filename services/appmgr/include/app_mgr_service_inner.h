@@ -49,6 +49,7 @@
 #include "want.h"
 #include "window_focus_changed_listener.h"
 #include "app_malloc_info.h"
+#include "fault_data.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -629,7 +630,27 @@ public:
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
 
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Notify Fault Data By SA
+     *
+     * @param faultData the fault data notified by SA.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFault(const AppFaultDataBySA &faultData);
+
 private:
+
+    std::string FaultTypeToString(AppExecFwk::FaultDataType type);
+
+    FaultData ConvertDataTypes(const AppFaultDataBySA &faultData);
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount,
         bool isEmptyKeepAliveApp);

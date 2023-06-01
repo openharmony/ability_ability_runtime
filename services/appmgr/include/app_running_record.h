@@ -36,6 +36,7 @@
 #include "module_running_record.h"
 #include "app_spawn_msg_wrapper.h"
 #include "app_malloc_info.h"
+#include "fault_data.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -610,6 +611,8 @@ public:
 
     ExtensionAbilityType GetExtensionType() const;
     ProcessType GetProcessType() const;
+
+    int32_t NotifyAppFault(const FaultData &faultData);
 
 private:
     /**
