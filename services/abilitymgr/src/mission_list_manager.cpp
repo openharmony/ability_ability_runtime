@@ -1647,9 +1647,7 @@ int MissionListManager::ClearMission(int missionId)
         return ERR_INVALID_VALUE;
     }
 
-    MissionInfo missionInfo;
-    if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetMissionInfoById(
-        missionId, missionInfo) == 0 && (missionInfo.unclearable)) {
+    if (mission && mission->IsUnclearable()) {
         HILOG_WARN("mission is unclearable.");
         return ERR_INVALID_VALUE;
     }
@@ -1720,9 +1718,7 @@ void MissionListManager::ClearAllMissionsLocked(std::list<std::shared_ptr<Missio
             continue;
         }
 
-        MissionInfo missionInfo;
-        if (DelayedSingleton<MissionInfoMgr>::GetInstance()->GetMissionInfoById(
-            mission->GetMissionId(), missionInfo) == 0 && (missionInfo.unclearable)) {
+        if (mission && mission->IsUnclearable()) {
             HILOG_WARN("mission is unclearable.");
             continue;
         }
@@ -2282,6 +2278,7 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
     abilityRecord->UpdateRecoveryInfo(innerMissionInfo.hasRecoverInfo);
     innerMissionInfo.hasRecoverInfo = false;
     mission->SetLockedState(innerMissionInfo.missionInfo.lockedState);
+    mission->SetUnclearable(innerMissionInfo.missionInfo.unclearable);
     abilityRecord->SetMission(mission);
     abilityRecord->SetOwnerMissionUserId(userId_);
     std::shared_ptr<MissionList> newMissionList = std::make_shared<MissionList>();
