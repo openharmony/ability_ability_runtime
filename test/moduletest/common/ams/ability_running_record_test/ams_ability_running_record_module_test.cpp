@@ -166,6 +166,11 @@ public:
         appLaunchTime = 0;
     }
 
+    int32_t ScheduleNotifyAppFault(const FaultData &faultData) override
+    {
+        return 0;
+    }
+
 private:
     int abilityLaunchTime = 0;
     int appLaunchTime = 0;
