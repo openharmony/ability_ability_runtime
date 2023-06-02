@@ -534,6 +534,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         targetRecord->UpdateRecoveryInfo(info.hasRecoverInfo);
         info.hasRecoverInfo = false;
         targetMission->SetLockedState(info.missionInfo.lockedState);
+        targetMission->SetUnclearable(info.missionInfo.unclearable);
         targetMission->UpdateMissionTime(info.missionInfo.time);
         targetRecord->SetMission(targetMission);
         targetRecord->SetOwnerMissionUserId(userId_);
