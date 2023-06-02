@@ -1529,7 +1529,7 @@ FaultDataType CovertFaultType(std::string &cmd)
 
 ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
 {
-    HILOG_INFO("called");
+    HILOG_DEBUG("called");
     int result = OHOS::ERR_OK;
     int option = -1;
     int counter = 0;
