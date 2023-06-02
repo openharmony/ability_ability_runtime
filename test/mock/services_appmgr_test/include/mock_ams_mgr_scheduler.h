@@ -49,6 +49,7 @@ public:
     MOCK_METHOD1(RegisterStartSpecifiedAbilityResponse, void(const sptr<IStartSpecifiedAbilityResponse>& response));
     MOCK_METHOD3(GetApplicationInfoByProcessID, int(const int pid, AppExecFwk::ApplicationInfo& application,
         bool& debug));
+    MOCK_METHOD2(GetBundleNameByPid, int32_t(const int pid, std::string &bundleName));
 
     MockAmsMgrScheduler() : AmsMgrStub() {};
     virtual ~MockAmsMgrScheduler() {};
