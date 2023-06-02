@@ -963,6 +963,7 @@ public:
         return 0;
     }
 
+    /**
      * Set rootSceneSession by SCB.
      *
      * @param rootSceneSession Indicates root scene session of SCB.
