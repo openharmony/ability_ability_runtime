@@ -881,8 +881,7 @@ public:
     /**
      * @brief Called when ability prepare terminate.
      *
-     *
-     * @return Return true if ability need stop terminating; return false if ability need be terminated.
+     * @return Return true if ability need to stop terminating; return false if ability need to terminate.
      */
     virtual bool OnPrepareTerminate();
 

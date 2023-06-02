@@ -502,7 +502,7 @@ bool JsAbility::OnPrepareTerminate()
     HILOG_DEBUG("call, ability: %{public}s.", GetAbilityName().c_str());
     Ability::OnPrepareTerminate();
 
-    NativeValue *jsValue = CallObjectMethod("onPrepareTerminate", nullptr, 0, true);
+    NativeValue *jsValue = CallObjectMethod("onPrepareToTerminate", nullptr, 0, true);
     auto numberValue = ConvertNativeValueTo<NativeBoolean>(jsValue);
     if (numberValue == nullptr) {
         HILOG_ERROR("numberValue is nullptr.");

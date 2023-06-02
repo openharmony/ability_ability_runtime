@@ -48,10 +48,13 @@
 #include "uri.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window_manager_service_handler.h"
-#include "iprepare_terminate_callback_interface.h"
 #endif
 
 namespace OHOS {
+namespace Rosen {
+class RootSceneSession;
+}  // namespace Rosen
+
 namespace AAFwk {
 constexpr const char* ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
 const int DEFAULT_INVAL_VALUE = -1;
@@ -951,6 +954,13 @@ public:
         return 0;
     }
 
+    /**
+     * Set rootSceneSession by SCB.
+     *
+     * @param rootSceneSession Indicates root scene session of SCB.
+     */
+    virtual void SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession) {}
+
     enum {
         // ipc id 1-1000 for kit
         // ipc id for terminating ability (1)
@@ -1131,7 +1141,10 @@ public:
 
         SEND_ABILITY_RESULT_BY_TOKEN,
 
-        // prepare terminate ability (64)
+        // ipc id for set rootSceneSession (64)
+        SET_ROOTSSCENESESSION,
+
+        // prepare terminate ability (65)
         PREPARE_TERMINATE_ABILITY,
 
         // ipc id 1001-2000 for DMS

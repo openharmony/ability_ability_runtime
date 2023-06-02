@@ -26,8 +26,8 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.aafwk.prepareTerminateCallback");
     virtual void DoPrepareTerminate() {};
     enum {
-        // ipc id for DoPrepareTerminate
-        ON_DO_PREPARE_TERMINATE,
+        // ipc id for DoPrepareTerminate (1)
+        ON_DO_PREPARE_TERMINATE = 1,
         CODE_MAX
     };
 };
