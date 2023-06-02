@@ -320,7 +320,7 @@ public:
     #endif
 
     /**
-     * get bundleName by pid.
+     * Get bundleName by pid.
      *
      * @param pid process id.
      * @param bundleName Output parameters, return bundleName.
