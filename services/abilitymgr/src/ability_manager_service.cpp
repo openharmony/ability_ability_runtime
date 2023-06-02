@@ -6255,9 +6255,16 @@ int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &to
         return CHECK_PERMISSION_FAILED;
     }
 
+    auto type = abilityRecord->GetAbilityInfo().type;
+    if (type != AppExecFwk::AbilityType::PAGE) {
+        HILOG_ERROR("Only support PAGE.");
+        callback->DoPrepareTerminate();
+        return RESOLVE_CALL_ABILITY_TYPE_ERR;
+    }
+
     auto timeoutTask = [&callback]() {
         callback->DoPrepareTerminate();
-    }
+    };
     int prepareTerminateTimeout =
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
     if (handler_) {
@@ -6956,6 +6963,15 @@ int32_t AbilityManagerService::ShareDataDone(
     CHECK_POINTER_AND_RETURN_LOG(handler_, ERR_INVALID_VALUE, "fail to get abilityEventHandler.");
     handler_->RemoveEvent(SHAREDATA_TIMEOUT_MSG, uniqueId);
     return GetShareDataPairAndReturnData(abilityRecord, resultCode, uniqueId, wantParam);
+}
+
+void AbilityManagerService::SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession)
+{
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD, U0_USER_ID)) {
+        HILOG_ERROR("Not sceneboard called, not allowed.");
+        return;
+    }
+    uiAbilityLifecycleManager_->SetRootSceneSession(rootSceneSession);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

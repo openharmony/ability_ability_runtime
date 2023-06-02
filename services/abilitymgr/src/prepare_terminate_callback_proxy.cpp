@@ -38,7 +38,7 @@ void PrepareTerminateCallbackProxy::DoPrepareTerminate()
         HILOG_ERROR("Remote() is NULL");
         return;
     }
-    int error = Remote()->SendRequest(ON_DO_PREPARE_TERMINATE, data, reply, option);
+    int error = remote->SendRequest(ON_DO_PREPARE_TERMINATE, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
     }

@@ -189,7 +189,7 @@ bool AbilitySchedulerProxy::SchedulePrepareTerminateAbility()
         HILOG_ERROR("Remote() is NULL");
         return false;
     }
-    int32_t err = Remote()->SendRequest(IAbilityScheduler::SCHEDULE_ABILITY_PREPARE_TERMINATE, data, reply, option);
+    int32_t err = remote->SendRequest(IAbilityScheduler::SCHEDULE_ABILITY_PREPARE_TERMINATE, data, reply, option);
     if (err != NO_ERROR) {
         HILOG_ERROR("end failed. err: %{public}d", err);
         return false;
