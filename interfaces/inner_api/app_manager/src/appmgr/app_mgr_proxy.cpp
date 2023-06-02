@@ -1172,7 +1172,7 @@ int32_t AppMgrProxy::StartNativeProcessForDebugger(const AAFwk::Want &want)
 
 int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("called.");
     MessageParcel data;
 
     if (!WriteInterfaceToken(data)) {
@@ -1205,7 +1205,7 @@ int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
 
 int32_t AppMgrProxy::NotifyAppFault(const AppFaultDataBySA &faultData)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("called.");
     MessageParcel data;
 
     if (!WriteInterfaceToken(data)) {

@@ -220,7 +220,7 @@ int32_t AppLifeCycleDeal::NotifyUnLoadRepairPatch(const std::string &bundleName,
 
 int32_t AppLifeCycleDeal::NotifyAppFault(const FaultData &faultData)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("called.");
     if (appThread_ == nullptr) {
         HILOG_ERROR("appThread_ is nullptr.");
         return ERR_INVALID_VALUE;

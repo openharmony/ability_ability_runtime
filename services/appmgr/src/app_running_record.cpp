@@ -1418,7 +1418,7 @@ int32_t AppRunningRecord::NotifyUnLoadRepairPatch(const std::string &bundleName,
 
 int32_t AppRunningRecord::NotifyAppFault(const FaultData &faultData)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("called.");
     if (!appLifeCycleDeal_) {
         HILOG_ERROR("appLifeCycleDeal_ is null");
         return ERR_INVALID_VALUE;

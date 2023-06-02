@@ -30,13 +30,13 @@
 #include "app_mgr_constants.h"
 #include "app_scheduler_proxy.h"
 #include "app_record_id.h"
+#include "fault_data.h"
 #include "profile.h"
 #include "priority_object.h"
 #include "app_lifecycle_deal.h"
 #include "module_running_record.h"
 #include "app_spawn_msg_wrapper.h"
 #include "app_malloc_info.h"
-#include "fault_data.h"
 
 namespace OHOS {
 namespace AppExecFwk {

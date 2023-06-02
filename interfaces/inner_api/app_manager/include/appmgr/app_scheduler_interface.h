@@ -20,10 +20,10 @@
 #include "ability_info.h"
 #include "app_launch_data.h"
 #include "configuration.h"
+#include "fault_data.h"
 #include "hap_module_info.h"
 #include "iquick_fix_callback.h"
 #include "want.h"
-#include "fault_data.h"
 #include "app_malloc_info.h"
 
 namespace OHOS {

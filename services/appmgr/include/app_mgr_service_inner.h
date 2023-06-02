@@ -34,6 +34,7 @@
 #include "app_scheduler_interface.h"
 #include "app_spawn_client.h"
 #include "app_task_info.h"
+#include "fault_data.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -49,7 +50,6 @@
 #include "want.h"
 #include "window_focus_changed_listener.h"
 #include "app_malloc_info.h"
-#include "fault_data.h"
 
 namespace OHOS {
 namespace AppExecFwk {

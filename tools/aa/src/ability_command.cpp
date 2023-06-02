@@ -1515,11 +1515,11 @@ FaultDataType CovertFaultType(std::string &cmd)
     } else if (cmd.compare("JS_ERROR") == 0) {
         return FaultDataType::JS_ERROR;
     } else if (cmd.compare("APP_FREEZE") == 0) {
-        return FaultDataType::JS_ERROR;
+        return FaultDataType::APP_FREEZE;
     } else if (cmd.compare("PERFORMANCE_CONTROL") == 0) {
-        return FaultDataType::JS_ERROR;
+        return FaultDataType::PERFORMANCE_CONTROL;
     } else if (cmd.compare("RESOURCE_CONTROL") == 0) {
-        return FaultDataType::JS_ERROR;
+        return FaultDataType::RESOURCE_CONTROL;
     } else if (cmd.compare("EXCEPTION") == 0) {
         return static_cast<FaultDataType>(-10);
     }
