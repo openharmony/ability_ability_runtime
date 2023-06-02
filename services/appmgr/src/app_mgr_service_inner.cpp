@@ -3482,14 +3482,13 @@ int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleNam
 
 int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("called.");
     auto bundleMgr = remoteClientManager_->GetBundleManager();
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     std::string bundleName;
     bundleMgr->GetBundleNameForUid(callerUid, bundleName);
-
-    HILOG_ERROR("FaultData is: error name: %{public}s, faultType: %{public}s, uid: %{public}d, pid: %{public}d,\
+    HILOG_DEBUG("FaultData is: error name: %{public}s, faultType: %{public}s, uid: %{public}d, pid: %{public}d,\
         bundleName: %{public}s", faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(), 
         callerUid, pid, bundleName.c_str());
     return ERR_OK;
@@ -3497,7 +3496,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 
 int32_t AppMgrServiceInner::NotifyAppFault(const AppFaultDataBySA &faultData)
 {
-    HILOG_DEBUG("%{public}s is called", __FUNCTION__);
+    HILOG_DEBUG("called");
 #ifdef ABILITY_COMMAND_FOR_TEST
     if ((AAFwk::PermissionVerification::GetInstance()->IsSACall()) ||
         AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
@@ -3513,13 +3512,13 @@ int32_t AppMgrServiceInner::NotifyAppFault(const AppFaultDataBySA &faultData)
         FaultData transformedFaultData = ConvertDataTypes(faultData);
         int32_t uid = appRecord->GetUid();
         std::string bundleName = appRecord->GetBundleName();
-        HILOG_ERROR("FaultDataBySA is: error name: %{public}s, faultType: %{public}s, uid: %{public}d,\
+        HILOG_DEBUG("FaultDataBySA is: error name: %{public}s, faultType: %{public}s, uid: %{public}d,\
             pid: %{public}d, bundleName: %{public}s",
             faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(),
             uid, pid, bundleName.c_str());
         appRecord->NotifyAppFault(transformedFaultData);
     } else {
-        HILOG_ERROR("the same app don't notify fault data to the app.");
+        HILOG_DEBUG("this is not called by SA.");
         return AAFwk::CHECK_PERMISSION_FAILED;
     }
     return ERR_OK;
