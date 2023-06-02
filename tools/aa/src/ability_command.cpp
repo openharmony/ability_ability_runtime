@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,6 +56,13 @@ constexpr struct option LONG_OPTIONS_ApplicationNotResponding[] = {
     {"pid", required_argument, nullptr, 'p'},
     {nullptr, 0, nullptr, 0},
 };
+const std::string SHORT_OPTIONS_FORCE_EXIT_APP = "hp:r:";
+constexpr struct option LONG_OPTIONS_FORCE_EXIT_APP[] = {
+    { "help", no_argument, nullptr, 'h' },
+    { "pid", required_argument, nullptr, 'p' },
+    { "reason", required_argument, nullptr, 'r' },
+    { nullptr, 0, nullptr, 0 }
+};
 #endif
 const std::string SHORT_OPTIONS_DUMPSYS = "hal::i:e::p::r::d::u:c";
 constexpr struct option LONG_OPTIONS_DUMPSYS[] = {
@@ -107,6 +114,7 @@ ErrCode AbilityManagerShellCommand::CreateCommandMap()
         {"block-ability", std::bind(&AbilityManagerShellCommand::RunAsBlockAbilityCommand, this)},
         {"block-ams-service", std::bind(&AbilityManagerShellCommand::RunAsBlockAmsServiceCommand, this)},
         {"block-app-service", std::bind(&AbilityManagerShellCommand::RunAsBlockAppServiceCommand, this)},
+        {"forceexitapp", std::bind(&AbilityManagerShellCommand::RunAsForceExitAppCommand, this)}
 #endif
     };
 
@@ -1488,6 +1496,114 @@ ErrCode AbilityManagerShellCommand::RunAsBlockAppServiceCommand()
         resultReceiver_ = STRING_BLOCK_APP_SERVICE_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
     }
+    return result;
+}
+
+Reason CovertExitReason(std::string &cmd)
+{
+    if (cmd.empty()) {
+        return Reason::REASON_UNKNOWN;
+    }
+
+    if (cmd.compare("UNKNOWN") == 0) {
+        return Reason::REASON_UNKNOWN;
+    } else if (cmd.compare("CPP_CRASH") == 0) {
+        return Reason::REASON_CPP_CRASH;
+    } else if (cmd.compare("JS_ERROR") == 0) {
+        return Reason::REASON_JS_ERROR;
+    } else if (cmd.compare("APP_FREEZE") == 0) {
+        return Reason::REASON_APP_FREEZE;
+    } else if (cmd.compare("PERFORMANCE_CONTROL") == 0) {
+        return Reason::REASON_PERFORMANCE_CONTROL;
+    } else if (cmd.compare("RESOURCE_CONTROL") == 0) {
+        return Reason::REASON_RESOURCE_CONTROL;
+    } else if (cmd.compare("UPGRADE") == 0) {
+        return Reason::REASON_UPGRADE;
+    }
+
+    return Reason::REASON_UNKNOWN;
+}
+
+ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
+{
+    HILOG_INFO("enter");
+
+    int result = OHOS::ERR_OK;
+
+    int option = -1;
+    int counter = 0;
+
+    std::string pid;
+    std::string reason;
+
+    while (true) {
+        counter++;
+        option = getopt_long(argc_, argv_, SHORT_OPTIONS_FORCE_EXIT_APP.c_str(), LONG_OPTIONS_FORCE_EXIT_APP, nullptr);
+        HILOG_INFO("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+
+        if (optind < 0 || optind > argc_) {
+            return OHOS::ERR_INVALID_VALUE;
+        }
+
+        if (option == -1) {
+            if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
+                HILOG_INFO("'aa %{public}s' %{public}s", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
+                resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
+                result = OHOS::ERR_INVALID_VALUE;
+            }
+            break;
+        }
+
+        switch (option) {
+            case 'h': {
+                HILOG_INFO("'aa %{public}s -h' with no argument.", cmd_.c_str());
+                // 'aa forceexitapp -h'
+                // 'aa forceexitapp --help'
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            case 'p': {
+                HILOG_INFO("'aa %{public}s -p' pid.", cmd_.c_str());
+                // 'aa forceexitapp -p pid'
+                pid = optarg;
+                break;
+            }
+            case 'r': {
+                HILOG_INFO("'aa %{public}s -r' reason.", cmd_.c_str());
+                // 'aa forceexitapp -r reason'
+                reason = optarg;
+                break;
+            }
+            case '?': {
+                std::string unknownOption = "";
+                std::string unknownOptionMsg = GetUnknownOptionMsg(unknownOption);
+                HILOG_INFO("'aa notifyappfault' with an unknown option.");
+                resultReceiver_.append(unknownOptionMsg);
+                result = OHOS::ERR_INVALID_VALUE;
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    if (result != OHOS::ERR_OK) {
+        resultReceiver_.append(HELP_MSG_SCREEN);
+        result = OHOS::ERR_INVALID_VALUE;
+    }
+
+    result = AbilityManagerClient::GetInstance()->ForceExitApp(std::stoi(pid), CovertExitReason(reason));
+    if (result == OHOS::ERR_OK) {
+        HILOG_INFO("%{public}s", STRING_BLOCK_AMS_SERVICE_OK.c_str());
+        resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";
+    } else {
+        HILOG_INFO("%{public}s result = %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
+        resultReceiver_ = STRING_BLOCK_AMS_SERVICE_NG + "\n";
+        resultReceiver_.append(GetMessageFromCode(result));
+    }
+
+    HILOG_INFO("pid: %{public}s, reason: %{public}s", pid.c_str(), reason.c_str());
     return result;
 }
 #endif

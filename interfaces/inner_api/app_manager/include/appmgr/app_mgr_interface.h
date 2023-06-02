@@ -344,7 +344,7 @@ public:
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) = 0;
 
     /**
-     * get bundleName by pid.
+     * Get bundleName by pid.
      *
      * @param pid process id.
      * @param bundleName Output parameters, return bundleName.
@@ -393,7 +393,7 @@ public:
         DUMP_HEAP_MEMORY_PROCESS,
         START_NATIVE_PROCESS_FOR_DEBUGGER,
         JUDGE_SANDBOX_BY_PID,
-        GET_BUNDLE_NAME_BY_PID,
+        GET_BUNDLE_NAME_BY_PID
     };
 };
 }  // namespace AppExecFwk

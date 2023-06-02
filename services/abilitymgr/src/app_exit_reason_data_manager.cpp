@@ -72,7 +72,7 @@ bool AppExitReasonDataManager::CheckKvStore()
         if (status == DistributedKv::Status::SUCCESS && kvStorePtr_ != nullptr) {
             return true;
         }
-        HILOG_INFO("try times: %{public}d", tryTimes);
+        HILOG_DEBUG("try times: %{public}d", tryTimes);
         usleep(CHECK_INTERVAL);
         tryTimes--;
     }
@@ -179,9 +179,6 @@ int32_t AppExitReasonDataManager::GetAppExitReason(
     for (const auto &item : allEntries) {
         if (item.key.ToString() == bundleName) {
             ConvertAppExitReasonInfoFromValue(item.value, reason, time_stamp, abilityList);
-            for (auto ability : abilityList) {
-                HILOG_INFO("current ability: %{public}s in database", ability.c_str());
-            }
             auto pos = std::find(abilityList.begin(), abilityList.end(), abilityName);
             if (pos != abilityList.end()) {
                 isSetReason = true;

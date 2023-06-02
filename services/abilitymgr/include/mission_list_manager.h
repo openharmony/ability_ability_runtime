@@ -497,6 +497,7 @@ private:
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord);
     LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
+    bool IsAppLastAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     int userId_;
     mutable std::recursive_mutex managerLock_;

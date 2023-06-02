@@ -33,6 +33,7 @@ namespace AAFwk {
 namespace {
 constexpr uint32_t DELAY_NOTIFY_LABEL_TIME = 30; // 30ms
 constexpr uint32_t SCENE_FLAG_KEYGUARD = 1;
+constexpr uint32_t ONLY_ONE_ABILITY = 1;
 constexpr char EVENT_KEY_UID[] = "UID";
 constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
@@ -3117,6 +3118,10 @@ bool MissionListManager::CheckLimit()
     if (isAllMaxLimit) {
         auto earliestMission = FindEarliestMission();
         if (earliestMission) {
+            if (IsAppLastAbility(earliestMission->GetAbilityRecord())) {
+               OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->RecordAppExitReason(
+                   REASON_RESOURCE_CONTROL);
+            }
             if (TerminateAbility(earliestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE, nullptr, true) != ERR_OK) {
                 HILOG_ERROR("already reach limit instance. limit: %{public}d, and terminate earliestAbility failed.",
                     MAX_INSTANCE_COUNT);
@@ -3557,6 +3562,11 @@ void MissionListManager::GetActiveAbilityList(const std::string &bundleName, std
             }
         }
     }
+
+    if (!abilityList.empty()) {
+        sort(abilityList.begin(), abilityList.end());
+        abilityList.erase(unique(abilityList.begin(), abilityList.end()), abilityList.end());
+    }
 }
 
 void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -3602,6 +3612,32 @@ LastExitReason MissionListManager::CovertAppExitReasonToLastReason(const Reason 
         default:
             return LASTEXITREASON_UNKNOWN;
     }
+}
+
+bool MissionListManager::IsAppLastAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr.");
+        return false;
+    }
+
+    std::string bundleName = abilityRecord->GetAbilityInfo().bundleName;
+    if (bundleName.empty()) {
+        HILOG_ERROR("bundleName is empty.");
+        return false;
+    }
+
+    std::vector<std::string> abilityList;
+    for (auto missionList : currentMissionLists_) {
+        if (missionList != nullptr) {
+            missionList->GetActiveAbilityList(bundleName, abilityList);
+        }
+    }
+
+    if (abilityList.size() == ONLY_ONE_ABILITY) {
+        return true;
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

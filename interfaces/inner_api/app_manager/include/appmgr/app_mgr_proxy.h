@@ -300,7 +300,7 @@ public:
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) override;
 
     /**
-     * get bundleName by pid.
+     * Get bundleName by pid.
      *
      * @param pid process id.
      * @param bundleName Output parameters, return bundleName.
