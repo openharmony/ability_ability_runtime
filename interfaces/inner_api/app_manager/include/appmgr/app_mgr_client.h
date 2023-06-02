@@ -418,7 +418,7 @@ public:
     void SetCurrentUserId(const int32_t userId);
 
     /**
-     * get bundleName by pid.
+     * Get bundleName by pid.
      *
      * @param pid process id.
      * @param bundleName Output parameters, return bundleName.
