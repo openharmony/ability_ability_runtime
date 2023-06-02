@@ -138,6 +138,7 @@ const int32_t GET_PARAMETER_OTHER = -1;
 const int32_t SIZE_10 = 10;
 const int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
 const int32_t DMS_UID = 5522;
+const int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 const std::string BUNDLE_NAME_KEY = "bundleName";
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
 const std::string ACTION_CHOOSE = "ohos.want.action.select";
@@ -6253,10 +6254,22 @@ int AbilityManagerService::PrepareTerminateAbility(const sptr<IRemoteObject> &to
         callback->DoPrepareTerminate();
         return CHECK_PERMISSION_FAILED;
     }
+
+    auto timeoutTask = [&callback]() {
+        callback->DoPrepareTerminate();
+    }
+    int prepareTerminateTimeout =
+        AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * PREPARE_TERMINATE_TIMEOUT_MULTIPLE;
+    if (handler_) {
+        handler_->PostTask(timeoutTask, "PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()),
+            prepareTerminateTimeout);
+    }
+
     bool res = abilityRecord->PrepareTerminateAbility();
     if (!res) {
         callback->DoPrepareTerminate();
     }
+    handler_->RemoveTask("PrepareTermiante_" + std::to_string(abilityRecord->GetAbilityRecordId()));
     return ERR_OK;
 }
 
