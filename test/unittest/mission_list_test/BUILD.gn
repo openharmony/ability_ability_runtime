@@ -61,6 +61,7 @@ ohos_unittest("mission_list_test") {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
   }
 
+  defines = []
   if (ability_command_for_test) {
     defines += [ "ABILITY_COMMAND_FOR_TEST" ]
   }

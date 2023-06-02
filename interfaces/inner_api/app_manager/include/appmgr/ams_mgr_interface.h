@@ -185,16 +185,13 @@ public:
     virtual void SetCurrentUserId(const int32_t userId) = 0;
 
     /**
-     * get bundleName by pid.
+     * Get bundleName by pid.
      *
      * @param pid process id.
      * @param bundleName Output parameters, return bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName)
-    {
-        return ERR_OK;
-    }
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName) = 0;
 
     enum class Message {
         LOAD_ABILITY = 0,
@@ -219,7 +216,8 @@ public:
         KILL_APPLICATION_SELF,
         GET_RUNNING_PROCESS_INFO_BY_PID,
         UPDATE_APPLICATION_INFO_INSTALLED,
-        SET_CURRENT_USER_ID
+        SET_CURRENT_USER_ID,
+        Get_BUNDLE_NAME_BY_PID
     };
 };
 }  // namespace AppExecFwk

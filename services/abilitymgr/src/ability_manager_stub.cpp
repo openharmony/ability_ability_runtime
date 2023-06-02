@@ -2010,12 +2010,6 @@ int AbilityManagerStub::VerifyPermissionInner(MessageParcel &data, MessageParcel
 
 int32_t AbilityManagerStub::ForceExitAppInner(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (!token) {
-        HILOG_ERROR("read ability token failed.");
-        return ERR_NULL_OBJECT;
-    }
-
     int32_t pid = data.ReadInt32();
     Reason reason = static_cast<Reason>(data.ReadInt32());
     int32_t result = ForceExitApp(pid, reason);
@@ -2028,12 +2022,6 @@ int32_t AbilityManagerStub::ForceExitAppInner(MessageParcel &data, MessageParcel
 
 int32_t AbilityManagerStub::RecordAppExitReasonInner(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (!token) {
-        HILOG_ERROR("read ability token failed.");
-        return ERR_NULL_OBJECT;
-    }
-
     Reason reason = static_cast<Reason>(data.ReadInt32());
     int32_t result = RecordAppExitReason(reason);
     if (!reply.WriteInt32(result)) {

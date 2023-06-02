@@ -163,6 +163,8 @@ public:
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) override;
 
     virtual void SetCurrentUserId(const int32_t userId) override;
+
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
 

@@ -1182,7 +1182,7 @@ int32_t AppMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName)
     }
 
     if (!data.WriteInt32(pid)) {
-        HILOG_ERROR("uid write failed.");
+        HILOG_ERROR("pid write failed.");
         return ERR_INVALID_DATA;
     }
 

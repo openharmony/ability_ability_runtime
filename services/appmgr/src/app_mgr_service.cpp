@@ -720,10 +720,6 @@ int32_t AppMgrService::GetBundleNameByPid(const int32_t pid, std::string &bundle
         HILOG_ERROR("AppMgrService is not ready.");
         return ERR_INVALID_OPERATION;
     }
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        return ERR_INVALID_OPERATION;
-    }
     return appMgrServiceInner_->GetBundleNameByPid(pid, bundleName);
 }
 }  // namespace AppExecFwk
