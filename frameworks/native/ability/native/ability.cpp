@@ -58,6 +58,10 @@
 #include "ui_window.h"
 #endif
 
+#ifdef IMAGE_PURGEABLE_PIXELMAP
+#include "purgeable_resource_manager.h"
+#endif
+
 namespace OHOS {
 namespace AppExecFwk {
 const std::string Ability::SYSTEM_UI("com.ohos.systemui");
@@ -1603,6 +1607,9 @@ void Ability::OnBackground()
         HILOG_ERROR("Ability::OnBackground error. lifecycle_ == nullptr.");
         return;
     }
+#ifdef IMAGE_PURGEABLE_PIXELMAP
+    PurgeableMem::PurgeableResourceManager::GetInstance().EndAccessPurgeableMem();
+#endif
     lifecycle_->DispatchLifecycle(LifeCycle::Event::ON_BACKGROUND);
     HILOG_DEBUG("%{public}s end", __func__);
     AAFwk::EventInfo eventInfo;
