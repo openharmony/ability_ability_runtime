@@ -7028,5 +7028,14 @@ void AbilityManagerService::RecordAppExitReasonAtUpgrade(const AppExecFwk::Bundl
             bundleInfo.name, abilityList, REASON_UPGRADE);
     }
 }
+
+void AbilityManagerService::SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession)
+{
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD, U0_USER_ID)) {
+        HILOG_ERROR("Not sceneboard called, not allowed.");
+        return;
+    }
+    uiAbilityLifecycleManager_->SetRootSceneSession(rootSceneSession);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
