@@ -28,6 +28,7 @@
 #include "ability_event_handler.h"
 #include "ability_interceptor_executer.h"
 #include "ability_manager_stub.h"
+#include "app_mgr_interface.h"
 #include "app_scheduler.h"
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 #include "background_task_observer.h"
@@ -52,6 +53,7 @@
 #ifdef SUPPORT_GRAPHICS
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
+#include "window_focus_changed_listener.h"
 #endif
 #include "event_report.h"
 #include "iacquire_share_data_callback_interface.h"
@@ -768,6 +770,10 @@ public:
 
     virtual int PrepareTerminateAbility(const sptr<IRemoteObject> &token,
         sptr<IPrepareTerminateCallback> &callback) override;
+        
+    void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
+
+    void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 #endif
 
     void ClearUserData(int32_t userId);
@@ -980,6 +986,8 @@ public:
     int32_t IsValidMissionIds(
         const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) override;
 
+    virtual int32_t RequestDialogService(const Want &want, const sptr<IRemoteObject> &callerToken) override;
+
     virtual int32_t AcquireShareData(
         const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData) override;
     virtual int32_t ShareDataDone(const sptr<IRemoteObject>& token,
@@ -999,6 +1007,8 @@ public:
     virtual int VerifyPermission(const std::string &permission, int pid, int uid) override;
 
     bool IsDmsAlive() const;
+
+    int32_t GetConfiguration(AppExecFwk::Configuration& config);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1102,6 +1112,9 @@ private:
     void InitGlobalConfiguration();
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+
+    sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
+
     int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
         const sptr<IRemoteObject> &callerToken);
     int ConnectLocalAbility(
@@ -1304,6 +1317,8 @@ private:
      */
     int IsCallFromBackground(const AbilityRequest &abilityRequest, bool &isBackgroundCall);
 
+    bool IsTargetPermission(const Want &want) const;
+
     bool IsDelegatorCall(const AppExecFwk::RunningProcessInfo &processInfo, const AbilityRequest &abilityRequest);
 
     bool IsAbilityVisible(const AbilityRequest &abilityRequest) const;
@@ -1339,10 +1354,12 @@ private:
 
     bool CheckProxyComponent(const Want &want, const int result);
 
+    int32_t RequestDialogServiceInner(const Want &want, const sptr<IRemoteObject> &callerToken,
+        int requestCode, int32_t userId);
+
     bool IsReleaseCallInterception(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element,
         int &result);
 
-    std::string GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken);
     bool CheckCallingTokenId(const std::string &bundleName, int32_t userId);
 
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);
@@ -1356,6 +1373,7 @@ private:
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
     std::shared_ptr<AbilityConnectManager> connectManager_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
+    sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
     std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
     std::shared_ptr<DataAbilityManager> dataAbilityManager_;
     std::shared_ptr<DataAbilityManager> systemDataAbilityManager_;
@@ -1388,7 +1406,7 @@ private:
     std::map<int32_t, std::pair<int64_t, const sptr<IAcquireShareDataCallback>>> iAcquireShareDataMap_;
     // first is callstub, second is ability token
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject>> callStubTokenMap_;
-
+    sptr<WindowFocusChangedListener> focusListener_;
     // Component StartUp rule switch
     bool startUpNewRule_ = true;
     /** It only takes effect when startUpNewRule_ is TRUE
@@ -1414,6 +1432,8 @@ private:
 #ifdef SUPPORT_GRAPHICS
     int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
     bool CheckWindowMode(int32_t windowMode, const std::vector<AppExecFwk::SupportWindowMode>& windowModes) const;
+    void InitFocusListener();
+    void RegisterFocusListener();
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif
