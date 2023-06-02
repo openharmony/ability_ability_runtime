@@ -5114,6 +5114,10 @@ void AbilityManagerService::OnAcceptWantResponse(
     const AAFwk::Want &want, const std::string &flag)
 {
     HILOG_DEBUG("On accept want response");
+    if (uiAbilityLifecycleManager_ && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        uiAbilityLifecycleManager_->OnAcceptWantResponse(want, flag);
+        return;
+    }
     if (!currentMissionListManager_) {
         return;
     }
@@ -7279,6 +7283,16 @@ bool AbilityManagerService::CheckPrepareTerminateEnable()
         return false;
     }
     return true;
+}
+
+void AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
+{
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD, U0_USER_ID)) {
+        HILOG_ERROR("Not sceneboard called, not allowed.");
+        return;
+    }
+    int32_t userId = GetUserId();
+    uiAbilityLifecycleManager_->StartSpecifiedAbilityBySCB(want, userId);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
