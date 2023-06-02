@@ -790,6 +790,7 @@ public:
      */
     virtual int32_t RecordAppExitReason(Reason exitReason) override;
 
+    /**
      * Set rootSceneSession by SCB.
      *
      * @param rootSceneSession Indicates root scene session of SCB.
