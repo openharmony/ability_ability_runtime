@@ -74,6 +74,10 @@ public:
     int MoveMissionToFront(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
         std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr);
 
+    void NotifyMissionFocused(const int32_t missionId);
+
+    void NotifyMissionUnfocused(const int32_t missionId);
+
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
      *
@@ -359,6 +363,8 @@ public:
     void SetMissionANRStateByTokens(const std::vector<sptr<IRemoteObject>> &tokens);
 
     int32_t IsValidMissionIds(const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results);
+
+    int DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t flag);
 
 #ifdef SUPPORT_GRAPHICS
 public:
