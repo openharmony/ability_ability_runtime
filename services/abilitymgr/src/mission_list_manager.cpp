@@ -3119,8 +3119,8 @@ bool MissionListManager::CheckLimit()
         auto earliestMission = FindEarliestMission();
         if (earliestMission) {
             if (IsAppLastAbility(earliestMission->GetAbilityRecord())) {
-               OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->RecordAppExitReason(
-                   REASON_RESOURCE_CONTROL);
+                OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->RecordAppExitReason(
+                    REASON_RESOURCE_CONTROL);
             }
             if (TerminateAbility(earliestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE, nullptr, true) != ERR_OK) {
                 HILOG_ERROR("already reach limit instance. limit: %{public}d, and terminate earliestAbility failed.",

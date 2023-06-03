@@ -118,6 +118,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleJudgeSandboxByPid;
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_BUNDLE_NAME_BY_PID)] =
         &AppMgrStub::HandleGetBundleNameByPid;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_GET_ALL_RENDER_PROCESSES)] =
+        &AppMgrStub::HandleGetAllRenderProcesses;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -242,6 +244,23 @@ int32_t AppMgrStub::HandleGetProcessRunningInfosByUserId(MessageParcel &data, Me
     int32_t userId = data.ReadInt32();
     std::vector<RunningProcessInfo> info;
     auto result = GetProcessRunningInfosByUserId(info, userId);
+    reply.WriteInt32(info.size());
+    for (auto &it : info) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::vector<RenderProcessInfo> info;
+    auto result = GetAllRenderProcesses(info);
     reply.WriteInt32(info.size());
     for (auto &it : info) {
         if (!reply.WriteParcelable(&it)) {

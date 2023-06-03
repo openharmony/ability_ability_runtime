@@ -1217,7 +1217,7 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
 
     AppExecFwk::BundleInfo bundleInfo;
     if (!IN_PROCESS_CALL(
-            bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId))) {
+        bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId))) {
         HILOG_ERROR("Failed to get bundle info.");
         return;
     }
@@ -1267,10 +1267,10 @@ int32_t AbilityManagerService::RecordAppExitReason(Reason exitReason)
 
 int32_t AbilityManagerService::ForceExitApp(const int32_t pid, Reason exitReason)
 {
-    if (exitReason < REASON_UNKNOWN  || exitReason > REASON_UPGRADE) {
+    if (exitReason < REASON_UNKNOWN || exitReason > REASON_UPGRADE) {
         HILOG_ERROR("Force exit reason invalid.");
         return ERR_INVALID_VALUE;
-	}
+    }
 
     std::string bundleName;
     DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(pid, bundleName);
