@@ -688,7 +688,7 @@ int32_t AppMgrStub::HandleNotifyFaultBySA(MessageParcel &data, MessageParcel &re
         return ERR_INVALID_VALUE;
     }
 
-    int32_t result = NotifyAppFault(*faultData);
+    int32_t result = NotifyAppFaultBySA(*faultData);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("reply write failed.");
         return ERR_INVALID_VALUE;

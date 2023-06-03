@@ -728,14 +728,14 @@ int32_t AppMgrService::NotifyAppFault(const FaultData &faultData)
     return ret;
 }
 
-int32_t AppMgrService::NotifyAppFault(const AppFaultDataBySA &faultData)
+int32_t AppMgrService::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
     if (!IsReady()) {
         HILOG_ERROR("AppMgrService is not ready.");
         return ERR_INVALID_OPERATION;
     }
 
-    auto ret = appMgrServiceInner_->NotifyAppFault(faultData);
+    auto ret = appMgrServiceInner_->NotifyAppFaultBySA(faultData);
     if (ret != ERR_OK) {
         HILOG_ERROR("Notify fault data fail.");
     }

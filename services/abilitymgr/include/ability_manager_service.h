@@ -1007,6 +1007,13 @@ public:
 
     int32_t GetConfiguration(AppExecFwk::Configuration& config);
 
+    /**
+     * Set rootSceneSession by SCB.
+     *
+     * @param rootSceneSession Indicates root scene session of SCB.
+     */
+    virtual void SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1357,7 +1364,6 @@ private:
     bool IsReleaseCallInterception(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element,
         int &result);
 
-    std::string GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken);
     bool CheckCallingTokenId(const std::string &bundleName, int32_t userId);
 
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);

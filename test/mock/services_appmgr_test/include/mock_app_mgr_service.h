@@ -77,7 +77,7 @@ public:
     MOCK_METHOD2(IsSharedBundleRunning, bool(const std::string &bundleName, uint32_t versionCode));
 
     MOCK_METHOD1(NotifyAppFault, int32_t(const FaultData &faultData));
-    MOCK_METHOD1(NotifyAppFault, int32_t(const AppFaultDataBySA &faultData));
+    MOCK_METHOD1(NotifyAppFaultBySA, int32_t(const AppFaultDataBySA &faultData));
     virtual int StartUserTestProcess(
         const AAFwk::Want& want, const sptr<IRemoteObject>& observer, const BundleInfo& bundleInfo, int32_t userId)
     {
