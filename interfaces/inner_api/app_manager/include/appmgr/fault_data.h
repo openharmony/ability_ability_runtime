@@ -18,8 +18,8 @@
 
 #include <string>
 
-#include "parcel.h"
 #include "ierror_observer.h"
+#include "parcel.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -63,6 +63,6 @@ struct AppFaultDataBySA : public Parcelable {
     FaultDataType faultType = FaultDataType::UNKNOWN;
     int32_t pid = -1;
 };
-}  // namespace AAFwk
+}  // namespace AppExecFwk
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_MISSION_INFO_H
+#endif  // OHOS_ABILITY_RUNTIME_FAULT_DATA_H

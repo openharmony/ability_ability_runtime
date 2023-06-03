@@ -1203,7 +1203,7 @@ int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::NotifyAppFault(const AppFaultDataBySA &faultData)
+int32_t AppMgrProxy::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
     HILOG_DEBUG("called.");
     MessageParcel data;

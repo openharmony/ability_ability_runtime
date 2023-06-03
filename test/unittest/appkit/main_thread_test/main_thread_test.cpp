@@ -260,7 +260,7 @@ class MockAppMgrStub : public AppMgrStub {
         return 0;
     }
 
-    int32_t NotifyAppFault(const AppFaultDataBySA &faultData) override
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override
     {
         return 0;
     }
@@ -1529,10 +1529,11 @@ HWTEST_F(MainThreadTest, LoadNativeLiabrary_0100, TestSize.Level1)
     HILOG_INFO("%{public}s start.", __func__);
     std::string nativeLibraryPath = "";
     ASSERT_NE(mainThread_, nullptr);
-    mainThread_->LoadNativeLiabrary(nativeLibraryPath);
+    BundleInfo bundleInfo;
+    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
 
     nativeLibraryPath = "test/";
-    mainThread_->LoadNativeLiabrary(nativeLibraryPath);
+    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
     HILOG_INFO("%{public}s end.", __func__);
 }
 #endif

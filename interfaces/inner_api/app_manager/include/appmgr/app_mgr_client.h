@@ -432,7 +432,7 @@ public:
      * @param faultData the fault data notified by SA.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t NotifyAppFault(const AppFaultDataBySA &faultData);
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

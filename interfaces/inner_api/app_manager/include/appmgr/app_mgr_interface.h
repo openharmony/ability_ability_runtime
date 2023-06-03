@@ -333,7 +333,7 @@ public:
      * @param faultData the fault data notified by SA.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t NotifyAppFault(const AppFaultDataBySA &faultData) = 0;
+    virtual int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) = 0;
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     /**

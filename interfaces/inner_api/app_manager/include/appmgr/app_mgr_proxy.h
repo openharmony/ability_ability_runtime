@@ -273,7 +273,7 @@ public:
      * @param faultData the fault data notified by SA.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t NotifyAppFault(const AppFaultDataBySA &faultData) override;
+    virtual int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**

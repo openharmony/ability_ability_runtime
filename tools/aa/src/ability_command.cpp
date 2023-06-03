@@ -1521,7 +1521,8 @@ FaultDataType CovertFaultType(std::string &cmd)
     } else if (cmd.compare("RESOURCE_CONTROL") == 0) {
         return FaultDataType::RESOURCE_CONTROL;
     } else if (cmd.compare("EXCEPTION") == 0) {
-        return static_cast<FaultDataType>(-10);
+        constexpr int32_t exception = -10;
+        return static_cast<FaultDataType>(exception);
     }
 
     return FaultDataType::UNKNOWN;
@@ -1540,7 +1541,8 @@ ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
     std::string pid = "";
     while (true) {
         counter++;
-        option = getopt_long(argc_, argv_, SHORT_OPTIONS_NOTIFY_APP_FAULT.c_str(), LONG_OPTIONS_NOTIFY_APP_FAULT, nullptr);
+        option = getopt_long(
+            argc_, argv_, SHORT_OPTIONS_NOTIFY_APP_FAULT.c_str(), LONG_OPTIONS_NOTIFY_APP_FAULT, nullptr);
         HILOG_INFO("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
         if (optind < 0 || optind > argc_) {
             return OHOS::ERR_INVALID_VALUE;
@@ -1621,7 +1623,7 @@ ErrCode AbilityManagerShellCommand::RunAsNotifyAppFaultCommand()
     faultData.errorObject.stack = errorStack;
     faultData.faultType = CovertFaultType(faultType);
     faultData.pid = std::stoi(pid);
-    DelayedSingleton<AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
+    DelayedSingleton<AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultData);
     return result;
 }
 #endif

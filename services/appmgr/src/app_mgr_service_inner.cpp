@@ -859,6 +859,9 @@ int32_t AppMgrServiceInner::GetAllRunningProcesses(std::vector<RunningProcessInf
     // check permission
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
+        if (!appRecord->GetSpawned()) {
+            continue;
+        }
         if (isPerm) {
             GetRunningProcesses(appRecord, info);
         } else {
@@ -886,6 +889,9 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
 
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
+        if (!appRecord->GetSpawned()) {
+            continue;
+        }
         int32_t userIdTemp = static_cast<int32_t>(appRecord->GetUid() / USER_SCALE);
         if (userIdTemp == userId) {
             GetRunningProcesses(appRecord, info);
@@ -1728,6 +1734,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     appRecord->SetUid(startMsg.uid);
     appRecord->SetStartMsg(startMsg);
     appRecord->SetAppMgrServiceInner(weak_from_this());
+    appRecord->SetSpawned();
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, false);
     AddAppToRecentList(appName, appRecord->GetProcessName(), pid, appRecord->GetRecordId());
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessCreated(appRecord);
@@ -3489,12 +3496,12 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     std::string bundleName;
     bundleMgr->GetBundleNameForUid(callerUid, bundleName);
     HILOG_DEBUG("FaultData is: error name: %{public}s, faultType: %{public}s, uid: %{public}d, pid: %{public}d,\
-        bundleName: %{public}s", faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(), 
+        bundleName: %{public}s", faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(),
         callerUid, pid, bundleName.c_str());
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::NotifyAppFault(const AppFaultDataBySA &faultData)
+int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
     HILOG_DEBUG("called");
 #ifdef ABILITY_COMMAND_FOR_TEST

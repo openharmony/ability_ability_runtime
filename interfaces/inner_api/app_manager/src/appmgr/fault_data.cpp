@@ -139,5 +139,5 @@ bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
     }
     return true;
 }
-}  // namespace AAFwk
+}  // namespace AppExecFwk
 }  // namespace OHOS
