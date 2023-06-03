@@ -3610,7 +3610,8 @@ bool MissionListManager::CheckPrepareTerminateEnable(const std::shared_ptr<Missi
     }
     char value[PREPARE_TERMINATE_ENABLE_SIZE] = "false";
     int retSysParam = GetParameter(PREPARE_TERMINATE_ENABLE_PARAMETER, "false", value, PREPARE_TERMINATE_ENABLE_SIZE);
-    HILOG_INFO("CheckPrepareTerminateEnable, %{public}s value is %{public}s.", param.c_str(), value);
+    HILOG_INFO("CheckPrepareTerminateEnable, %{public}s value is %{public}s.", PREPARE_TERMINATE_ENABLE_PARAMETER,
+        value);
     if (retSysParam > 0 && !std::strcmp(value, "true")) {
         return true;
     }
