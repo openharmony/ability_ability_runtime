@@ -70,10 +70,10 @@ void JsEnvironment::InitTimerModule()
     }
 }
 
-void JsEnvironment::InitWorkerModule(const std::string& codePath, bool isDebugVersion, bool isBundle)
+void JsEnvironment::InitWorkerModule(std::shared_ptr<WorkerInfo> workerInfo)
 {
     if (impl_ != nullptr && engine_ != nullptr) {
-        impl_->InitWorkerModule(*engine_, codePath, isDebugVersion, isBundle);
+        impl_->InitWorkerModule(*engine_, workerInfo);
     }
 }
 
@@ -162,6 +162,31 @@ void JsEnvironment::InitConsoleModule()
 
     if (impl_ != nullptr) {
         impl_->InitConsoleModule(engine_);
+    }
+}
+
+bool JsEnvironment::InitLoop(const std::shared_ptr<AppExecFwk::EventRunner>& eventRunner)
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return false;
+    }
+
+    if (impl_ != nullptr) {
+        impl_->InitLoop(engine_, eventRunner);
+    }
+    return true;
+}
+
+void JsEnvironment::DeInitLoop()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return;
+    }
+
+    if (impl_ != nullptr) {
+        impl_->DeInitLoop(engine_);
     }
 }
 
