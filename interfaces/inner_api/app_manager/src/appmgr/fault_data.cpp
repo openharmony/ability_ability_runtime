@@ -22,21 +22,21 @@ namespace OHOS {
 namespace AppExecFwk {
 bool FaultData::ReadFromParcel(Parcel &parcel)
 {
-    std::u16string strValue;
-    if (!parcel.ReadString16(strValue)) {
+    std::string strValue;
+    if (!parcel.ReadString(strValue)) {
         return false;
     }
-    errorObject.name = Str16ToStr8(strValue);
+    errorObject.name = strValue;
 
-    if (!parcel.ReadString16(strValue)) {
+    if (!parcel.ReadString(strValue)) {
         return false;
     }
-    errorObject.message = Str16ToStr8(strValue);
+    errorObject.message = strValue;
 
-    if (!parcel.ReadString16(strValue)) {
+    if (!parcel.ReadString(strValue)) {
         return false;
     }
-    errorObject.stack = Str16ToStr8(strValue);
+    errorObject.stack = strValue;
 
     int type = 0;
     if (!parcel.ReadInt32(type)) {
@@ -58,15 +58,15 @@ FaultData *FaultData::Unmarshalling(Parcel &parcel)
 
 bool FaultData::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteString16(Str8ToStr16(errorObject.name))) {
+    if (!parcel.WriteString(errorObject.name)) {
         return false;
     }
 
-    if (!parcel.WriteString16(Str8ToStr16(errorObject.message))) {
+    if (!parcel.WriteString(errorObject.message)) {
         return false;
     }
     
-    if (!parcel.WriteString16(Str8ToStr16(errorObject.stack))) {
+    if (!parcel.WriteString(errorObject.stack)) {
         return false;
     }
 
@@ -78,21 +78,21 @@ bool FaultData::Marshalling(Parcel &parcel) const
 
 bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
 {
-    std::u16string strValue;
-    if (!parcel.ReadString16(strValue)) {
+    std::string strValue;
+    if (!parcel.ReadString(strValue)) {
         return false;
     }
-    errorObject.name = Str16ToStr8(strValue);
+    errorObject.name = strValue;
 
-    if (!parcel.ReadString16(strValue)) {
+    if (!parcel.ReadString(strValue)) {
         return false;
     }
-    errorObject.message = Str16ToStr8(strValue);
+    errorObject.message = strValue;
 
-    if (!parcel.ReadString16(strValue)) {
+    if (!parcel.ReadString(strValue)) {
         return false;
     }
-    errorObject.stack = Str16ToStr8(strValue);
+    errorObject.stack = strValue;
 
     int type = 0;
     if (!parcel.ReadInt32(type)) {
@@ -118,15 +118,15 @@ AppFaultDataBySA *AppFaultDataBySA::Unmarshalling(Parcel &parcel)
 
 bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
 {
-    if (!parcel.WriteString16(Str8ToStr16(errorObject.name))) {
+    if (!parcel.WriteString(errorObject.name)) {
         return false;
     }
 
-    if (!parcel.WriteString16(Str8ToStr16(errorObject.message))) {
+    if (!parcel.WriteString(errorObject.message)) {
         return false;
     }
     
-    if (!parcel.WriteString16(Str8ToStr16(errorObject.stack))) {
+    if (!parcel.WriteString(errorObject.stack)) {
         return false;
     }
 
