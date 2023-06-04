@@ -1520,9 +1520,6 @@ FaultDataType CovertFaultType(std::string &cmd)
         return FaultDataType::PERFORMANCE_CONTROL;
     } else if (cmd.compare("RESOURCE_CONTROL") == 0) {
         return FaultDataType::RESOURCE_CONTROL;
-    } else if (cmd.compare("EXCEPTION") == 0) {
-        constexpr int32_t exception = -10;
-        return static_cast<FaultDataType>(exception);
     }
 
     return FaultDataType::UNKNOWN;
