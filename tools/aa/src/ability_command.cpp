@@ -1611,7 +1611,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
     if (result == OHOS::ERR_OK) {
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";
     } else {
-        HILOG_ERROR("%{public}s result = %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
+        HILOG_INFO("%{public}s result = %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
     }
