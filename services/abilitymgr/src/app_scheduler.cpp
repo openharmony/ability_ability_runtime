@@ -431,5 +431,17 @@ void AppScheduler::SetCurrentUserId(const int32_t userId)
     CHECK_POINTER(appMgrClient_);
     IN_PROCESS_CALL_WITHOUT_RET(appMgrClient_->SetCurrentUserId(userId));
 }
+
+int32_t AppScheduler::NotifyFault(const AppExecFwk::FaultData &faultData)
+{
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    auto ret = static_cast<int>(appMgrClient_->NotifyAppFault(faultData));
+    if (ret != ERR_OK) {
+        HILOG_ERROR("NotifyAppFault failed.");
+        return INNER_ERR;
+    }
+
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

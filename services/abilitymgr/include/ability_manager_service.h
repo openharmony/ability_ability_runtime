@@ -768,6 +768,9 @@ public:
 
     sptr<IWindowManagerServiceHandler> GetWMSHandler() const;
 
+    virtual int PrepareTerminateAbility(const sptr<IRemoteObject> &token,
+        sptr<IPrepareTerminateCallback> &callback) override;
+        
     void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
@@ -1391,6 +1394,8 @@ private:
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);
 
     void RecordAppExitReasonAtUpgrade(const AppExecFwk::BundleInfo &bundleInfo);
+
+    bool CheckPrepareTerminateEnable();
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

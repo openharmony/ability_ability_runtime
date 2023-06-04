@@ -499,6 +499,10 @@ private:
     LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
     bool IsAppLastAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
+    int PrepareClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission);
+
+    bool CheckPrepareTerminateEnable(const std::shared_ptr<Mission> &mission);
+
     int userId_;
     mutable std::recursive_mutex managerLock_;
     // launcher list is also in currentMissionLists_

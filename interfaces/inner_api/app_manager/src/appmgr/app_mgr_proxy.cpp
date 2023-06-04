@@ -1226,5 +1226,71 @@ int32_t AppMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName)
     bundleName = reply.ReadString();
     return ERR_NONE;
 }
+
+int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)
+{
+    HILOG_DEBUG("called.");
+    MessageParcel data;
+
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteParcelable(&faultData)) {
+        HILOG_ERROR("Write FaultData error.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_ERROR("Send request failed with error code %{public}d.", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
+{
+    HILOG_DEBUG("called.");
+    MessageParcel data;
+
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteParcelable(&faultData)) {
+        HILOG_ERROR("Write FaultDataBySA error.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT_BY_SA),
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_ERROR("Send request failed with error code %{public}d.", ret);
+        return ret;
+    }
+
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

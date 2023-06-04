@@ -33,6 +33,7 @@
 #include "iconfiguration_observer.h"
 #include "app_mem_info.h"
 #include "app_malloc_info.h"
+#include "fault_data.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -435,6 +436,22 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t GetBundleNameByPid(const int pid, std::string &bundleName);
+
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Notify App Fault Data By SA
+     *
+     * @param faultData the fault data notified by SA.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
