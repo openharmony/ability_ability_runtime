@@ -192,6 +192,7 @@ private:
     ErrCode RunAsSendAppNotRespondingWithUnknownOption();
     ErrCode RunAsSendAppNotRespondingWithOption(int32_t option, std::string& pid);
     ErrCode RunAsForceExitAppCommand();
+    ErrCode RunAsNotifyAppFaultCommand();
 #endif
     sptr<IAbilityManager> GetAbilityManagerService();
 

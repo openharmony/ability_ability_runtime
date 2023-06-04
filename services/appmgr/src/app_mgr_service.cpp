@@ -730,5 +730,33 @@ int32_t AppMgrService::GetBundleNameByPid(const int32_t pid, std::string &bundle
     }
     return appMgrServiceInner_->GetBundleNameByPid(pid, bundleName);
 }
+
+int32_t AppMgrService::NotifyAppFault(const FaultData &faultData)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    auto ret = appMgrServiceInner_->NotifyAppFault(faultData);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("Notify fault data fail.");
+    }
+    return ret;
+}
+
+int32_t AppMgrService::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
+{
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+
+    auto ret = appMgrServiceInner_->NotifyAppFaultBySA(faultData);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("Notify fault data fail.");
+    }
+    return ret;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

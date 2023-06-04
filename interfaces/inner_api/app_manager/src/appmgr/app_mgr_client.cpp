@@ -702,5 +702,23 @@ int32_t AppMgrClient::GetBundleNameByPid(const int pid, std::string &bundleName)
     }
     return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
 }
+
+int32_t AppMgrClient::NotifyAppFault(const FaultData &faultData)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->NotifyAppFault(faultData);
+}
+
+int32_t AppMgrClient::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->NotifyAppFaultBySA(faultData);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

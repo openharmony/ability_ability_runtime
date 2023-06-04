@@ -268,6 +268,22 @@ public:
      */
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status) override;
 
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyAppFault(const FaultData &faultData) override;
+
+    /**
+     * Notify App Fault Data By SA
+     *
+     * @param faultData the fault data notified by SA.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override;
+
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * Block app service.

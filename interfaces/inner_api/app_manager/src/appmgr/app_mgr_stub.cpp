@@ -114,6 +114,10 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleIsSharedBundleRunning;
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::START_NATIVE_PROCESS_FOR_DEBUGGER)] =
         &AppMgrStub::HandleStartNativeProcessForDebugger;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT)] =
+        &AppMgrStub::HandleNotifyFault;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT_BY_SA)] =
+        &AppMgrStub::HandleNotifyFaultBySA;
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::JUDGE_SANDBOX_BY_PID)] =
         &AppMgrStub::HandleJudgeSandboxByPid;
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_BUNDLE_NAME_BY_PID)] =
@@ -691,6 +695,38 @@ int32_t AppMgrStub::HandleGetBundleNameByPid(MessageParcel &data, MessageParcel 
     }
 
     if (!reply.WriteString(bundleName)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleNotifyFault(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<FaultData> faultData(data.ReadParcelable<FaultData>());
+    if (faultData == nullptr) {
+        HILOG_ERROR("ReadParcelable<FaultData> failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t result = NotifyAppFault(*faultData);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleNotifyFaultBySA(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<AppFaultDataBySA> faultData(data.ReadParcelable<AppFaultDataBySA>());
+    if (faultData == nullptr) {
+        HILOG_ERROR("ReadParcelable<AppFaultDataBySA> failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t result = NotifyAppFaultBySA(*faultData);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

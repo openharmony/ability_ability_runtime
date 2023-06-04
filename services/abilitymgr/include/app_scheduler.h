@@ -25,6 +25,7 @@
 #include "appmgr/start_specified_ability_response_stub.h"
 #include "application_info.h"
 #include "bundle_info.h"
+#include "fault_data.h"
 #include "iremote_object.h"
 #include "refbase.h"
 #include "singleton.h"
@@ -327,6 +328,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t GetBundleNameByPid(const int pid, std::string &bundleName);
+
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyFault(const AppExecFwk::FaultData &faultData);
 
 protected:
     /**

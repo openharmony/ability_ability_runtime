@@ -313,6 +313,22 @@ public:
      */
     virtual int32_t GetBundleNameByPid(const int32_t pid, std::string &bundleName) override;
 
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFault(const FaultData &faultData) override;
+
+    /**
+     * Notify Fault Data By SA
+     *
+     * @param faultData the fault data notified by SA.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override;
+
 private:
     /**
      * Init, Initialize application services.

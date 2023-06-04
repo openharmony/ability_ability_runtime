@@ -34,6 +34,7 @@
 #include "app_scheduler_interface.h"
 #include "app_spawn_client.h"
 #include "app_task_info.h"
+#include "fault_data.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -648,7 +649,27 @@ public:
      */
     int32_t GetBundleNameByPid(const int32_t pid, std::string &bundleName);
 
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Notify Fault Data By SA
+     *
+     * @param faultData the fault data notified by SA.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData);
+
 private:
+
+    std::string FaultTypeToString(FaultDataType type);
+
+    FaultData ConvertDataTypes(const AppFaultDataBySA &faultData);
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount,
         bool isEmptyKeepAliveApp);
