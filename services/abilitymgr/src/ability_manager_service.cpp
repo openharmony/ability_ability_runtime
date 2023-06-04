@@ -1325,6 +1325,17 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, Reason exitReason
     return result;
 }
 
+int32_t AbilityManagerService::GetConfiguration(AppExecFwk::Configuration& config)
+{
+    auto appMgr = GetAppMgr();
+    if (appMgr == nullptr) {
+        HILOG_WARN("GetAppMgr failed");
+        return -1;
+    }
+
+    return appMgr->GetConfiguration(config);
+}
+
 OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AbilityManagerService::GetAppMgr()
 {
     if (appMgr_) {
