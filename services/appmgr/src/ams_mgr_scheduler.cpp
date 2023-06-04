@@ -335,12 +335,12 @@ void AmsMgrScheduler::SetCurrentUserId(const int32_t userId)
     amsMgrServiceInner_->SetCurrentUserId(userId);
 }
 
-int32_t AmsMgrScheduler::GetBundleNameByPid(const int pid, std::string &bundleName)
+int32_t AmsMgrScheduler::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->GetBundleNameByPid(pid, bundleName);
+    return amsMgrServiceInner_->GetBundleNameByPid(pid, bundleName, uid);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

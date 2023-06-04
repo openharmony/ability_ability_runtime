@@ -189,9 +189,10 @@ public:
      *
      * @param pid process id.
      * @param bundleName Output parameters, return bundleName.
+     * @param uid Output parameters, return userId.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName) = 0;
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) = 0;
 
     enum class Message {
         LOAD_ABILITY = 0,

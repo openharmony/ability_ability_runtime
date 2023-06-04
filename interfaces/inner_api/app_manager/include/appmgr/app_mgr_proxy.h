@@ -329,9 +329,10 @@ public:
      *
      * @param pid process id.
      * @param bundleName Output parameters, return bundleName.
+     * @param uid Output parameters, return userId.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName) override;
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
 
 private:
     bool SendTransactCmd(IAppMgr::Message code, MessageParcel &data, MessageParcel &reply);
