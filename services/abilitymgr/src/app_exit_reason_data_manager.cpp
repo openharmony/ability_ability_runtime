@@ -24,7 +24,7 @@
 #include "nlohmann/json.hpp"
 
 namespace OHOS {
-namespace AAFwk {
+namespace AbilityRuntime {
 namespace {
 constexpr int32_t CHECK_INTERVAL = 100000; // 100ms
 constexpr int32_t MAX_TIMES = 5;           // 5 * 100ms = 500ms
@@ -80,7 +80,7 @@ bool AppExitReasonDataManager::CheckKvStore()
 }
 
 int32_t AppExitReasonDataManager::SetAppExitReason(
-    const std::string &bundleName, const std::vector<std::string> &abilityList, const Reason &reason)
+    const std::string &bundleName, const std::vector<std::string> &abilityList, const AAFwk::Reason &reason)
 {
     if (bundleName.empty()) {
         HILOG_WARN("invalid value!");
@@ -150,7 +150,7 @@ int32_t AppExitReasonDataManager::DeleteAppExitReason(const std::string &bundleN
 }
 
 int32_t AppExitReasonDataManager::GetAppExitReason(
-    const std::string &bundleName, const std::string &abilityName, bool &isSetReason, Reason &reason)
+    const std::string &bundleName, const std::string &abilityName, bool &isSetReason, AAFwk::Reason &reason)
 {
     if (bundleName.empty()) {
         HILOG_WARN("invalid value!");
@@ -202,7 +202,7 @@ int32_t AppExitReasonDataManager::GetAppExitReason(
 }
 
 void AppExitReasonDataManager::UpdateAppExitReason(
-    const std::string &bundleName, const std::vector<std::string> &abilityList, const Reason &reason)
+    const std::string &bundleName, const std::vector<std::string> &abilityList, const AAFwk::Reason &reason)
 {
     if (kvStorePtr_ == nullptr) {
         HILOG_ERROR("kvStore is nullptr");
@@ -231,7 +231,7 @@ void AppExitReasonDataManager::UpdateAppExitReason(
 }
 
 DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
-    const std::vector<std::string> &abilityList, const Reason &reason)
+    const std::vector<std::string> &abilityList, const AAFwk::Reason &reason)
 {
     std::chrono::milliseconds nowMs =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
@@ -246,11 +246,11 @@ DistributedKv::Value AppExitReasonDataManager::ConvertAppExitReasonInfoToValue(
 }
 
 void AppExitReasonDataManager::ConvertAppExitReasonInfoFromValue(
-    const DistributedKv::Value &value, Reason &reason, int64_t &time_stamp, std::vector<std::string> &abilityList)
+    const DistributedKv::Value &value, AAFwk::Reason &reason, int64_t &time_stamp, std::vector<std::string> &abilityList)
 {
     nlohmann::json jsonObject = nlohmann::json::parse(value.ToString());
     if (!jsonObject.at(JSON_KEY_REASON).is_null()) {
-        reason = jsonObject.at(JSON_KEY_REASON).get<Reason>();
+        reason = jsonObject.at(JSON_KEY_REASON).get<AAFwk::Reason>();
     }
     if (!jsonObject.at(JSON_KEY_TIME_STAMP).is_null()) {
         time_stamp = jsonObject.at(JSON_KEY_TIME_STAMP).get<int64_t>();
@@ -278,5 +278,5 @@ void AppExitReasonDataManager::InnerDeleteAppExitReason(const std::string &bundl
         HILOG_ERROR("delete data from kvStore error: %{public}d", status);
     }
 }
-} // namespace AAFwk
+} // namespace AbilityRuntime
 } // namespace OHOS

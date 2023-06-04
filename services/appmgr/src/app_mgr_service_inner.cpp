@@ -3661,12 +3661,11 @@ void AppMgrServiceInner::SetCurrentUserId(const int32_t userId)
 int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &bundleName)
 {
     auto callerRecord = GetAppRunningRecordByPid(pid);
-    if (callerRecord != nullptr) {
-        bundleName = callerRecord->GetBundleName();
-    } else {
+    if (callerRecord == nullptr) {
         HILOG_ERROR("callerRecord is nullptr, can not get callerBundleName.");
         return ERR_INVALID_OPERATION;
     }
+    bundleName = callerRecord->GetBundleName();
     return ERR_OK;
 }
 }  // namespace AppExecFwk

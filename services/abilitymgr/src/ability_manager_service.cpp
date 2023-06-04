@@ -1211,6 +1211,12 @@ bool AbilityManagerService::IsDmsAlive() const
 
 void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, int32_t uid)
 {
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
+        HILOG_ERROR("Not sa or shell call");
+        return;
+    }
+
     auto bms = GetBundleManager();
     CHECK_POINTER(bms);
     auto userId = uid / BASE_USER_RANGE;
@@ -1244,6 +1250,17 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
 
 int32_t AbilityManagerService::RecordAppExitReason(Reason exitReason)
 {
+    if (!currentMissionListManager_) {
+        HILOG_ERROR("currentMissionListManager_ is null.");
+        return ERR_NULL_OBJECT;
+    }
+
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
+        HILOG_ERROR("Not sa or shell call");
+        return ERR_PERMISSION_DENIED;
+    }
+
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, ERR_NULL_OBJECT);
 
@@ -1254,14 +1271,10 @@ int32_t AbilityManagerService::RecordAppExitReason(Reason exitReason)
         return ERR_INVALID_VALUE;
     }
 
-    if (!currentMissionListManager_) {
-        HILOG_ERROR("Current Mission list is null.");
-        return ERR_NULL_OBJECT;
-    }
     std::vector<std::string> abilityList;
     currentMissionListManager_->GetActiveAbilityList(bundleName, abilityList);
 
-    return DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+    return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
         bundleName, abilityList, exitReason);
 }
 
@@ -1272,6 +1285,17 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, Reason exitReason
         return ERR_INVALID_VALUE;
     }
 
+    if (!currentMissionListManager_) {
+        HILOG_ERROR("currentMissionListManager_ is null.");
+        return ERR_NULL_OBJECT;
+    }
+
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
+        HILOG_ERROR("Not sa or shell call");
+        return ERR_PERMISSION_DENIED;
+    }
+
     std::string bundleName;
     DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(pid, bundleName);
 
@@ -1280,14 +1304,10 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, Reason exitReason
         return ERR_INVALID_VALUE;
     }
 
-    if (!currentMissionListManager_) {
-        HILOG_ERROR("Current Mission is null.");
-        return ERR_NULL_OBJECT;
-    }
     std::vector<std::string> abilityList;
     currentMissionListManager_->GetActiveAbilityList(bundleName, abilityList);
 
-    int32_t result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+    int32_t result = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
         bundleName, abilityList, exitReason);
 
     kill(pid, SIGKILL);
@@ -4257,7 +4277,7 @@ int AbilityManagerService::UninstallApp(const std::string &bundleName, int32_t u
         return UNINSTALL_APP_FAILED;
     }
 
-    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName);
+    DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName);
     return ERR_OK;
 }
 
@@ -7024,7 +7044,7 @@ void AbilityManagerService::RecordAppExitReasonAtUpgrade(const AppExecFwk::Bundl
     }
 
     if (!abilityList.empty()) {
-        DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
             bundleInfo.name, abilityList, REASON_UPGRADE);
     }
 }
