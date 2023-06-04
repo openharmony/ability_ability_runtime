@@ -1195,7 +1195,7 @@ int32_t AppMgrProxy::StartNativeProcessForDebugger(const AAFwk::Want &want)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName)
+int32_t AppMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1224,6 +1224,7 @@ int32_t AppMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName)
         return ret;
     }
     bundleName = reply.ReadString();
+    uid = reply.ReadInt32();
     return ERR_NONE;
 }
 

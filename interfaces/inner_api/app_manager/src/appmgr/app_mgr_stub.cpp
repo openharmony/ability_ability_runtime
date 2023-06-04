@@ -689,12 +689,17 @@ int32_t AppMgrStub::HandleGetBundleNameByPid(MessageParcel &data, MessageParcel 
 {
     int32_t pid = data.ReadInt32();
     std::string bundleName;
-    auto result = GetBundleNameByPid(pid, bundleName);
+    int32_t uid;
+    auto result = GetBundleNameByPid(pid, bundleName, uid);
     if (result != ERR_OK) {
         return result;
     }
 
     if (!reply.WriteString(bundleName)) {
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!reply.WriteInt32(uid)) {
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;

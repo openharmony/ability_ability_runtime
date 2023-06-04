@@ -108,10 +108,6 @@ int32_t AppExitReasonDataManager::SetAppExitReason(
         HILOG_ERROR("insert data to kvStore error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
-
-    dataManager_.CloseKvStore(appId_, kvStorePtr_);
-    kvStorePtr_ = nullptr;
-
     return ERR_OK;
 }
 
@@ -142,10 +138,6 @@ int32_t AppExitReasonDataManager::DeleteAppExitReason(const std::string &bundleN
         HILOG_ERROR("delete data from kvStore error: %{public}d", status);
         return ERR_INVALID_OPERATION;
     }
-
-    dataManager_.CloseKvStore(appId_, kvStorePtr_);
-    kvStorePtr_ = nullptr;
-
     return ERR_OK;
 }
 
@@ -194,9 +186,6 @@ int32_t AppExitReasonDataManager::GetAppExitReason(
             break;
         }
     }
-
-    dataManager_.CloseKvStore(appId_, kvStorePtr_);
-    kvStorePtr_ = nullptr;
 
     return ERR_OK;
 }

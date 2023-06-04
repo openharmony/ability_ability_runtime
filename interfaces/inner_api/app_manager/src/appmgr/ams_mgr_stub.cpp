@@ -367,9 +367,11 @@ int32_t AmsMgrStub::HandleGetBundleNameByPid(MessageParcel &data, MessageParcel 
 {
     int32_t pid = data.ReadInt32();
     std::string bundleName;
-    GetBundleNameByPid(pid, bundleName);
+    int32_t uid;
+    GetBundleNameByPid(pid, bundleName, uid);
 
     reply.WriteString(bundleName);
+    reply.WriteInt32(uid);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

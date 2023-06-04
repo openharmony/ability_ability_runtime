@@ -1259,12 +1259,6 @@ int32_t AbilityManagerService::RecordAppExitReason(Reason exitReason)
         return ERR_NULL_OBJECT;
     }
 
-    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
-        !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-        HILOG_ERROR("Not sa or shell call");
-        return ERR_PERMISSION_DENIED;
-    }
-
     auto bms = GetBundleManager();
     CHECK_POINTER_AND_RETURN(bms, ERR_NULL_OBJECT);
 
@@ -1289,11 +1283,6 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, Reason exitReason
         return ERR_INVALID_VALUE;
     }
 
-    if (!currentMissionListManager_) {
-        HILOG_ERROR("currentMissionListManager_ is null.");
-        return ERR_NULL_OBJECT;
-    }
-
     if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
         !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
         HILOG_ERROR("Not sa or shell call");
@@ -1301,32 +1290,39 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, Reason exitReason
     }
 
     std::string bundleName;
-    DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(pid, bundleName);
-
+    int32_t uid;
+    DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(pid, bundleName, uid);
     if (bundleName.empty()) {
         HILOG_ERROR("Get bundle name by pid failed.");
         return ERR_INVALID_VALUE;
     }
 
-    std::vector<std::string> abilityList;
-    currentMissionListManager_->GetActiveAbilityList(bundleName, abilityList);
-
-    int32_t result = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
-        bundleName, abilityList, exitReason);
-
-    kill(pid, SIGKILL);
-    return result;
-}
-
-int32_t AbilityManagerService::GetConfiguration(AppExecFwk::Configuration& config)
-{
-    auto appMgr = GetAppMgr();
-    if (appMgr == nullptr) {
-        HILOG_WARN("GetAppMgr failed");
-        return -1;
+    int32_t targetUserId = uid / BASE_USER_RANGE;
+    std::vector<std::string> abilityLists;
+    if (targetUserId == U0_USER_ID) {
+        std::shared_lock<std::shared_mutex> lock(managersMutex_);
+        for (auto item: missionListManagers_) {
+            if (item.second) {
+                std::vector<std::string> abilityList;
+                item.second->GetActiveAbilityList(bundleName, abilityList);
+                if (!abilityList.empty()) {
+                    abilityLists.insert(abilityLists.end(), abilityList.begin(), abilityList.end());
+                }
+            }
+        }
+    } else {
+        auto listManager = GetListManagerByUserId(targetUserId);
+        if (listManager) {
+            listManager->GetActiveAbilityList(bundleName, abilityLists);
+        }
     }
 
-    return appMgr->GetConfiguration(config);
+    int32_t result = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+        bundleName, abilityLists, exitReason);
+    
+    DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName);
+
+    return result;
 }
 
 OHOS::sptr<OHOS::AppExecFwk::IAppMgr> AbilityManagerService::GetAppMgr()

@@ -3735,7 +3735,7 @@ void AppMgrServiceInner::SetCurrentUserId(const int32_t userId)
     currentUserId_ = userId;
 }
 
-int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &bundleName)
+int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &bundleName, int32_t &uid)
 {
     auto callerRecord = GetAppRunningRecordByPid(pid);
     if (callerRecord == nullptr) {
@@ -3743,6 +3743,7 @@ int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &b
         return ERR_INVALID_OPERATION;
     }
     bundleName = callerRecord->GetBundleName();
+    uid = callerRecord->GetUid();
     return ERR_OK;
 }
 }  // namespace AppExecFwk

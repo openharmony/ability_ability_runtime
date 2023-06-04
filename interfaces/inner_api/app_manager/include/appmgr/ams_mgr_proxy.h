@@ -164,7 +164,7 @@ public:
 
     virtual void SetCurrentUserId(const int32_t userId) override;
 
-    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName) override;
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
 
