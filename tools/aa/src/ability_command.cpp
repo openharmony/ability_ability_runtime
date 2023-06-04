@@ -1507,10 +1507,14 @@ Reason CovertExitReason(std::string &cmd)
 
     if (cmd.compare("UNKNOWN") == 0) {
         return Reason::REASON_UNKNOWN;
+    } else if (cmd.compare("NORMAL") == 0) {
+        return Reason::REASON_NORMAL;
     } else if (cmd.compare("CPP_CRASH") == 0) {
         return Reason::REASON_CPP_CRASH;
     } else if (cmd.compare("JS_ERROR") == 0) {
         return Reason::REASON_JS_ERROR;
+    } else if (cmd.compare("ABILITY_NOT_RESPONDING") == 0) {
+        return Reason::REASON_APP_FREEZE;
     } else if (cmd.compare("APP_FREEZE") == 0) {
         return Reason::REASON_APP_FREEZE;
     } else if (cmd.compare("PERFORMANCE_CONTROL") == 0) {
@@ -1526,8 +1530,7 @@ Reason CovertExitReason(std::string &cmd)
 
 ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
 {
-    HILOG_INFO("enter");
-
+    HILOG_DEBUG("enter");
     int result = OHOS::ERR_OK;
 
     int option = -1;
@@ -1539,7 +1542,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
     while (true) {
         counter++;
         option = getopt_long(argc_, argv_, SHORT_OPTIONS_FORCE_EXIT_APP.c_str(), LONG_OPTIONS_FORCE_EXIT_APP, nullptr);
-        HILOG_INFO("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
+        HILOG_DEBUG("option: %{public}d, optopt: %{public}d, optind: %{public}d", option, optopt, optind);
 
         if (optind < 0 || optind > argc_) {
             return OHOS::ERR_INVALID_VALUE;
@@ -1547,7 +1550,7 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
 
         if (option == -1) {
             if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
-                HILOG_INFO("'aa %{public}s' %{public}s", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
+                HILOG_ERROR("'aa %{public}s' %{public}s", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
                 resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
                 result = OHOS::ERR_INVALID_VALUE;
             }
@@ -1595,15 +1598,14 @@ ErrCode AbilityManagerShellCommand::RunAsForceExitAppCommand()
 
     result = AbilityManagerClient::GetInstance()->ForceExitApp(std::stoi(pid), CovertExitReason(reason));
     if (result == OHOS::ERR_OK) {
-        HILOG_INFO("%{public}s", STRING_BLOCK_AMS_SERVICE_OK.c_str());
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_OK + "\n";
     } else {
-        HILOG_INFO("%{public}s result = %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
+        HILOG_ERROR("%{public}s result = %{public}d", STRING_BLOCK_AMS_SERVICE_NG.c_str(), result);
         resultReceiver_ = STRING_BLOCK_AMS_SERVICE_NG + "\n";
         resultReceiver_.append(GetMessageFromCode(result));
     }
 
-    HILOG_INFO("pid: %{public}s, reason: %{public}s", pid.c_str(), reason.c_str());
+    HILOG_DEBUG("pid: %{public}s, reason: %{public}s", pid.c_str(), reason.c_str());
     return result;
 }
 #endif

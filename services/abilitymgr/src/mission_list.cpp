@@ -474,7 +474,7 @@ void MissionList::GetActiveAbilityList(const std::string &bundleName, std::vecto
             continue;
         }
 
-        const AppExecFwk::AbilityInfo &abilityInfo = mission->GetAbilityRecord()->GetAbilityInfo();
+        const AppExecFwk::AbilityInfo &abilityInfo = abilityRecord->GetAbilityInfo();
         if (abilityInfo.bundleName == bundleName && !abilityInfo.name.empty()) {
             HILOG_DEBUG("find ability name is %{public}s", abilityInfo.name.c_str());
             abilityList.push_back(abilityInfo.name);

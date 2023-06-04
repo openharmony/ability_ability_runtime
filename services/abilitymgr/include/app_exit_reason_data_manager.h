@@ -25,7 +25,7 @@
 #include "singleton.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace AbilityRuntime {
 class AppExitReasonDataManager : public DelayedSingleton<AppExitReasonDataManager> {
 public:
     AppExitReasonDataManager();
@@ -33,10 +33,10 @@ public:
     virtual ~AppExitReasonDataManager();
 
     int32_t SetAppExitReason(
-        const std::string &bundleName, const std::vector<std::string> &abilityList, const Reason &reason);
+        const std::string &bundleName, const std::vector<std::string> &abilityList, const AAFwk::Reason &reason);
 
     int32_t GetAppExitReason(
-        const std::string &bundleName, const std::string &abilityName, bool &isSetReason, Reason &reason);
+        const std::string &bundleName, const std::string &abilityName, bool &isSetReason, AAFwk::Reason &reason);
 
     int32_t DeleteAppExitReason(const std::string &bundleName);
 
@@ -44,11 +44,11 @@ private:
     DistributedKv::Status GetKvStore();
     bool CheckKvStore();
     DistributedKv::Value ConvertAppExitReasonInfoToValue(
-        const std::vector<std::string> &abilityList, const Reason &reason);
+        const std::vector<std::string> &abilityList, const AAFwk::Reason &reason);
     void ConvertAppExitReasonInfoFromValue(
-        const DistributedKv::Value &value, Reason &reason, int64_t &time_stamp, std::vector<std::string> &abilityList);
+        const DistributedKv::Value &value, AAFwk::Reason &reason, int64_t &time_stamp, std::vector<std::string> &abilityList);
     void UpdateAppExitReason(
-        const std::string &bundleName, const std::vector<std::string> &abilityList, const Reason &reason);
+        const std::string &bundleName, const std::vector<std::string> &abilityList, const AAFwk::Reason &reason);
     void InnerDeleteAppExitReason(const std::string &bundleName);
 
     const DistributedKv::AppId appId_ { "app_exit_reason_storage" };
@@ -57,6 +57,6 @@ private:
     std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr_;
     mutable std::mutex kvStorePtrMutex_;
 };
-} // namespace AAFwk
+} // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_APP_EXIT_REASON_DATA_MANAGER_H

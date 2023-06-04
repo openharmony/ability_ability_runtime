@@ -3118,14 +3118,14 @@ bool MissionListManager::CheckLimit()
     if (isAllMaxLimit) {
         auto earliestMission = FindEarliestMission();
         if (earliestMission) {
-            if (IsAppLastAbility(earliestMission->GetAbilityRecord())) {
-                OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->RecordAppExitReason(
-                    REASON_RESOURCE_CONTROL);
-            }
             if (TerminateAbility(earliestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE, nullptr, true) != ERR_OK) {
                 HILOG_ERROR("already reach limit instance. limit: %{public}d, and terminate earliestAbility failed.",
                     MAX_INSTANCE_COUNT);
                 return true;
+            }
+            if (IsAppLastAbility(earliestMission->GetAbilityRecord())) {
+                OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->RecordAppExitReason(
+                    REASON_RESOURCE_CONTROL);
             }
             HILOG_INFO("already reach limit instance. limit: %{public}d, and terminate earliestAbility success.",
                 MAX_INSTANCE_COUNT);
@@ -3583,7 +3583,7 @@ void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> &abili
 
     Reason exitReason;
     bool isSetReason;
-    DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+    DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
         abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetAbilityInfo().name, isSetReason, exitReason);
 
     if (isSetReason) {
