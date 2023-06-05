@@ -85,6 +85,7 @@ bool MissionInfoMgr::AddMissionInfo(const InnerMissionInfo &missionInfo)
     std::lock_guard<std::mutex> lock(mutex_);
     return AddMissionInfoInner(missionInfo);
 }
+
 bool MissionInfoMgr::AddMissionInfoInner(const InnerMissionInfo &missionInfo)
 {
     auto id = missionInfo.missionInfo.id;
