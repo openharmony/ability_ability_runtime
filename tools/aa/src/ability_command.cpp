@@ -33,7 +33,7 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace AAFwk {
 namespace {
-size_t paramLength = 1024;
+size_t PARAM_LENGTH = 1024;
 
 const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:CDSN";
 constexpr struct option LONG_OPTIONS[] = {
@@ -884,7 +884,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
             case 'p': {
                 // 'aa process -p xxx'
                 // save perf cmd
-                if (strlen(optarg) < paramLength) {
+                if (strlen(optarg) < PARAM_LENGTH) {
                     perfCmd = optarg;
                     isPerf = true;
                 }
@@ -893,7 +893,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
             case 'D': {
                 // 'aa process -D xxx'
                 // save debug cmd
-                if (!isPerf && strlen(optarg) < paramLength) {
+                if (!isPerf && strlen(optarg) < PARAM_LENGTH) {
                     HILOG_INFO("debug cmd.");
                     debugCmd = optarg;
                 }
@@ -1189,7 +1189,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // 'aa stop-service -p xxx'
 
                 // save module name
-                if (!CheckPerfCmdString(optarg, paramLength, perfCmd)) {
+                if (!CheckPerfCmdString(optarg, PARAM_LENGTH, perfCmd)) {
                     HILOG_ERROR("input perfCmd is invalid %{public}s", perfCmd.c_str());
                     result = OHOS::ERR_INVALID_VALUE;
                 }
