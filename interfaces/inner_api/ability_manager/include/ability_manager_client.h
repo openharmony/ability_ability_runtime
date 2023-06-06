@@ -250,7 +250,7 @@ public:
      */
     ErrCode TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
         int resultCode = DEFAULT_INVAL_VALUE, const Want *resultWant = nullptr);
-    
+
     /**
      *  CloseUIAbilityBySCB, close the special ability by scb.
      *
@@ -754,6 +754,14 @@ public:
      */
     ErrCode RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler);
 
+    /**
+     * PrepareTerminateAbility with want, if terminate, return want from ability manager service.
+     *
+     * @param token Ability token.
+     * @param callback callback.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PrepareTerminateAbility(const sptr<IRemoteObject> &token, sptr<IPrepareTerminateCallback> &callback);
 #ifdef SUPPORT_GRAPHICS
     /**
      * Set mission label of this ability.
@@ -985,6 +993,39 @@ public:
      */
     ErrCode ShareDataDone(
         const sptr<IRemoteObject> &token, const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
+
+    /**
+     * Request dialog service with want, send want to ability manager service.
+     *
+     * @param want target component.
+     * @param callerToken caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RequestDialogService(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken);
+
+    /**
+     * Force app exit and record exit reason.
+     * @param pid Process id .
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ForceExitApp(const int32_t pid, Reason exitReason);
+
+    /**
+     * Record app exit reason.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordAppExitReason(Reason exitReason);
+
+    /**
+     * Set rootSceneSession by SCB.
+     *
+     * @param rootSceneSession Indicates root scene session of SCB.
+     */
+    void SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession);
 
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {

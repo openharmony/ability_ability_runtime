@@ -74,6 +74,10 @@ public:
     int MoveMissionToFront(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
         std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr);
 
+    void NotifyMissionFocused(const int32_t missionId);
+
+    void NotifyMissionUnfocused(const int32_t missionId);
+
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
      *
@@ -360,6 +364,10 @@ public:
 
     int32_t IsValidMissionIds(const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results);
 
+    int DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t flag);
+
+    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList);
+
 #ifdef SUPPORT_GRAPHICS
 public:
     /**
@@ -486,6 +494,14 @@ private:
     std::shared_ptr<AbilityRecord> GetAliveAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest);
     void NotifyStartAbilityResult(const AbilityRequest &abilityRequest, int result);
+
+    void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord);
+    LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
+    bool IsAppLastAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    int PrepareClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission);
+
+    bool CheckPrepareTerminateEnable(const std::shared_ptr<Mission> &mission);
 
     int userId_;
     mutable std::recursive_mutex managerLock_;

@@ -26,6 +26,7 @@
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "parameter.h"
+#include "session/host/include/zidl/session_interface.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -378,6 +379,7 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
 
     // 2. schedule disconnect to target service
     int result = ERR_OK;
+    ConnectListType list;
     for (auto &connectRecord : connectRecordList) {
         if (connectRecord) {
             auto abilityRecord = connectRecord->GetAbilityRecord();
@@ -393,9 +395,9 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             }
 
             if (force) {
-                DisconnectRecordForce(connectRecord);
+                DisconnectRecordForce(list, connectRecord);
             } else {
-                result = DisconnectRecordNormal(connectRecord);
+                result = DisconnectRecordNormal(list, connectRecord);
             }
 
             if (result != ERR_OK) {
@@ -403,6 +405,9 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
                 break;
             }
         }
+    }
+    for (auto&& connectRecord : list) {
+        RemoveConnectionRecordFromMap(connectRecord);
     }
 
     return result;
@@ -419,7 +424,8 @@ void AbilityConnectManager::TerminateRecord(std::shared_ptr<AbilityRecord> abili
     abilityRecord->Terminate(timeoutTask);
 }
 
-int AbilityConnectManager::DisconnectRecordNormal(std::shared_ptr<ConnectionRecord> connectRecord)
+int AbilityConnectManager::DisconnectRecordNormal(ConnectListType &list,
+    std::shared_ptr<ConnectionRecord> connectRecord) const
 {
     auto result = connectRecord->DisconnectAbility();
     if (result != ERR_OK) {
@@ -430,12 +436,13 @@ int AbilityConnectManager::DisconnectRecordNormal(std::shared_ptr<ConnectionReco
     if (connectRecord->GetConnectState() == ConnectionState::DISCONNECTED) {
         HILOG_WARN("This record: %{public}d complete disconnect directly.", connectRecord->GetRecordId());
         connectRecord->CompleteDisconnect(ERR_OK, false);
-        RemoveConnectionRecordFromMap(connectRecord);
+        list.emplace_back(connectRecord);
     }
     return ERR_OK;
 }
 
-void AbilityConnectManager::DisconnectRecordForce(std::shared_ptr<ConnectionRecord> connectRecord)
+void AbilityConnectManager::DisconnectRecordForce(ConnectListType &list,
+    std::shared_ptr<ConnectionRecord> connectRecord)
 {
     auto abilityRecord = connectRecord->GetAbilityRecord();
     if (abilityRecord == nullptr) {
@@ -444,7 +451,7 @@ void AbilityConnectManager::DisconnectRecordForce(std::shared_ptr<ConnectionReco
     }
     abilityRecord->RemoveConnectRecordFromList(connectRecord);
     connectRecord->CompleteDisconnect(ERR_OK, true);
-    RemoveConnectionRecordFromMap(connectRecord);
+    list.emplace_back(connectRecord);
     if (abilityRecord->IsConnectListEmpty() && abilityRecord->GetStartId() == 0) {
         HILOG_WARN("Force terminate ability record state: %{public}d.", abilityRecord->GetAbilityState());
         TerminateRecord(abilityRecord);
@@ -706,7 +713,8 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordByElementN
     return nullptr;
 }
 
-std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromServiceMap(const sptr<IRemoteObject> &token)
+std::shared_ptr<AbilityRecord> AbilityConnectManager::GetExtensionByTokenFromServiceMap(
+    const sptr<IRemoteObject> &token)
 {
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     auto IsMatch = [token](auto service) {
@@ -728,7 +736,7 @@ std::shared_ptr<AbilityRecord> AbilityConnectManager::GetServiceRecordBySessionI
 {
     std::lock_guard<std::recursive_mutex> guard(Lock_);
     CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);
-    sptr<Rosen::ISession> sessionToken = sessionInfo->sessionToken;
+    auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
     CHECK_POINTER_AND_RETURN(sessionToken, nullptr);
     std::string descriptor = Str16ToStr8(sessionToken->GetDescriptor());
     if (descriptor != "OHOS.ISession") {
@@ -1227,7 +1235,8 @@ void AbilityConnectManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId)
         HILOG_ERROR("AbilityConnectManager on time out event: ability record is nullptr.");
         return;
     }
-    HILOG_DEBUG("Ability timeout ,msg:%{public}d,name:%{public}s", msgId, abilityRecord->GetAbilityInfo().name.c_str());
+    HILOG_DEBUG("Ability timeout ,msg:%{public}d,name:%{public}s", msgId,
+        abilityRecord->GetAbilityInfo().name.c_str());
 
     switch (msgId) {
         case AbilityManagerService::INACTIVE_TIMEOUT_MSG:
@@ -1507,8 +1516,8 @@ void AbilityConnectManager::GetAbilityRunningInfos(std::vector<AbilityRunningInf
     std::for_each(serviceMap_.begin(), serviceMap_.end(), queryInfo);
 }
 
-void AbilityConnectManager::GetExtensionRunningInfo(std::shared_ptr<AbilityRecord> &abilityRecord, const int32_t userId,
-    std::vector<ExtensionRunningInfo> &info)
+void AbilityConnectManager::GetExtensionRunningInfo(std::shared_ptr<AbilityRecord> &abilityRecord,
+    const int32_t userId, std::vector<ExtensionRunningInfo> &info)
 {
     ExtensionRunningInfo extensionInfo;
     AppExecFwk::RunningProcessInfo processInfo;
