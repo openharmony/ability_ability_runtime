@@ -185,6 +185,7 @@ private:
     int SetMissionIconInner(MessageParcel &data, MessageParcel &reply);
     int RegisterWindowManagerServiceHandlerInner(MessageParcel &data, MessageParcel &reply);
     int CompleteFirstFrameDrawingInner(MessageParcel &data, MessageParcel &reply);
+    int PrepareTerminateAbilityInner(MessageParcel &data, MessageParcel &reply);
 #endif
 
     #ifdef ABILITY_COMMAND_FOR_TEST
@@ -210,9 +211,16 @@ private:
 
     int VerifyPermissionInner(MessageParcel &data, MessageParcel &reply);
 
+    int HandleRequestDialogService(MessageParcel &data, MessageParcel &reply);
+
     int AcquireShareDataInner(MessageParcel &data, MessageParcel &reply);
     int ShareDataDoneInner(MessageParcel &data, MessageParcel &reply);
     int GetAbilityTokenByCalleeObjInner(MessageParcel &data, MessageParcel &reply);
+
+    int32_t ForceExitAppInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RecordAppExitReasonInner(MessageParcel &data, MessageParcel &reply);
+
+    int SetRootSceneSessionInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

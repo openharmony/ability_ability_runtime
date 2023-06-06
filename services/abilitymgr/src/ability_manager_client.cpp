@@ -24,6 +24,7 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "session/host/include/root_scene_session.h"
 #include "session_info.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -709,6 +710,17 @@ ErrCode AbilityManagerClient::GetProcessRunningInfos(std::vector<AppExecFwk::Run
     return abms->GetProcessRunningInfos(info);
 }
 
+ErrCode AbilityManagerClient::RequestDialogService(
+    const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HILOG_INFO("request is:%{public}s.", want.GetElement().GetURI().c_str());
+    HandleDlpApp(const_cast<Want &>(want));
+    return abms->RequestDialogService(want, callerToken);
+}
+
 /**
  * Start synchronizing remote device mission
  * @param devId, deviceId.
@@ -826,6 +838,21 @@ void AbilityManagerClient::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     abms->CompleteFirstFrameDrawing(abilityToken);
+}
+
+ErrCode AbilityManagerClient::PrepareTerminateAbility(const sptr<IRemoteObject> &token,
+    sptr<IPrepareTerminateCallback> &callback)
+{
+    if (callback == nullptr) {
+        HILOG_ERROR("callback is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    auto abms = GetAbilityManager();
+    if (abms == nullptr) {
+        HILOG_ERROR("abms is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    return abms->PrepareTerminateAbility(token, callback);
 }
 #endif
 
@@ -1024,5 +1051,28 @@ ErrCode AbilityManagerClient::ShareDataDone(
     return abms->ShareDataDone(token, resultCode, uniqueId, wantParam);
 }
 
+ErrCode AbilityManagerClient::ForceExitApp(const int32_t pid, Reason exitReason)
+{
+    HILOG_DEBUG("begin.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->ForceExitApp(pid, exitReason);
+}
+
+ErrCode AbilityManagerClient::RecordAppExitReason(Reason exitReason)
+{
+    HILOG_DEBUG("begin.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RecordAppExitReason(exitReason);
+}
+
+void AbilityManagerClient::SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession)
+{
+    HILOG_INFO("call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->SetRootSceneSession(rootSceneSession);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
