@@ -48,7 +48,7 @@
             "eventhandler",
             "faultloggerd",
             "form_fwk",
-            "hichecker_native",
+            "hichecker",
             "hicollie_native",
             "hisysevent_native",
             "hitrace_native",
