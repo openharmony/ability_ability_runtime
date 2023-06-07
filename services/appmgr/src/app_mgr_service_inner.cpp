@@ -126,7 +126,9 @@ const std::string PROCESS_EXIT_EVENT_TASK = "Send Process Exit Event Task";
 constexpr int32_t ROOT_UID = 0;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t DEFAULT_USER_ID = 0;
-
+#ifdef APP_MGR_SERVICE_APPMS
+constexpr int32_t NETSYS_SOCKET_GROUPID = 1097;
+#endif
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -1732,6 +1734,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         } else {
             auto ret = SetInternetPermission(bundleInfo.uid, 1);
             HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
+            bundleInfo.gids.push_back(NETSYS_SOCKET_GROUPID);
 #endif
         }
 
@@ -1747,6 +1750,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     AppSpawnStartMsg startMsg;
     startMsg.uid = bundleInfo.uid;
     startMsg.gid = bundleInfo.gid;
+    startMsg.gids = bundleInfo.gids;
     startMsg.accessTokenId = bundleInfo.applicationInfo.accessTokenId;
     startMsg.apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     startMsg.bundleName = bundleName;
