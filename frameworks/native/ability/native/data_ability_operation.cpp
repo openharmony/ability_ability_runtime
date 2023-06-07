@@ -438,7 +438,7 @@ bool DataAbilityOperation::ReadFromParcel(Parcel &in)
     HILOG_DEBUG("DataAbilityOperation::ReadFromParcel empty is %{public}s",
         (empty == VALUE_OBJECT) ? "VALUE_OBJECT" : "VALUE_NULL");
     if (empty == VALUE_OBJECT) {
-		valuesBucketReferences_ = std::make_shared<NativeRdb::ValuesBucket>(NativeRdb::ValuesBucket::Unmarshalling(in));
+        valuesBucketReferences_ = std::make_shared<NativeRdb::ValuesBucket>(NativeRdb::ValuesBucket::Unmarshalling(in));
     } else {
         valuesBucketReferences_.reset();
     }
