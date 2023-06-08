@@ -20,6 +20,7 @@
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "app_exit_reason_data_manager.h"
 #include "hitrace_meter.h"
 #include "errors.h"
 #include "hilog_wrapper.h"
@@ -32,6 +33,7 @@ namespace AAFwk {
 namespace {
 constexpr uint32_t DELAY_NOTIFY_LABEL_TIME = 30; // 30ms
 constexpr uint32_t SCENE_FLAG_KEYGUARD = 1;
+constexpr uint32_t ONLY_ONE_ABILITY = 1;
 constexpr char EVENT_KEY_UID[] = "UID";
 constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
@@ -123,7 +125,7 @@ int32_t MissionListManager::GetMissionCount() const
 int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     bool isReachToSingleLimit = CheckSingleLimit(abilityRequest);
     if (isReachToSingleLimit) {
         HILOG_ERROR("already reach single limit instance. limit is : %{public}d", SINGLE_MAX_INSTANCE_COUNT);
@@ -143,7 +145,7 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
         }
     }
 
-    auto callerAbility = GetAbilityRecordByToken(abilityRequest.callerToken);
+    auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
     if (callerAbility) {
         std::string element = callerAbility->GetWant().GetElement().GetURI();
         auto state = callerAbility->GetAbilityState();
@@ -174,10 +176,10 @@ int MissionListManager::StartAbility(const std::shared_ptr<AbilityRecord> &curre
 int MissionListManager::MinimizeAbility(const sptr<IRemoteObject> &token, bool fromUser)
 {
     HILOG_INFO("fromUser:%{public}d.", fromUser);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     // check if ability is in list to avoid user create fake token.
-    CHECK_POINTER_AND_RETURN_LOG(
-        GetAbilityRecordByToken(token), INNER_ERR, "Minimize ability fail, ability is not in mission list.");
+    CHECK_POINTER_AND_RETURN_LOG(GetAbilityRecordByTokenInner(token), INNER_ERR,
+        "Minimize ability fail, ability is not in mission list.");
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     return MinimizeAbilityLocked(abilityRecord, fromUser);
 }
@@ -222,15 +224,21 @@ int MissionListManager::GetMissionInfo(int32_t missionId, MissionInfo &missionIn
 
 int MissionListManager::MoveMissionToFront(int32_t missionId, std::shared_ptr<StartOptions> startOptions)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
-    return MoveMissionToFront(missionId, true, true, nullptr, startOptions);
+    std::lock_guard guard(managerLock_);
+    return MoveMissionToFrontInner(missionId, true, true, nullptr, startOptions);
 }
 
 int MissionListManager::MoveMissionToFront(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
     std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions)
 {
+    std::lock_guard guard(managerLock_);
+    return MoveMissionToFrontInner(missionId, isCallerFromLauncher, isRecent, callerAbility, startOptions);
+}
+
+int MissionListManager::MoveMissionToFrontInner(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
+    std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions)
+{
     HILOG_INFO("missionId:%{public}d.", missionId);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
     std::shared_ptr<Mission> mission;
     bool isReachToLimit = false;
     auto targetMissionList = GetTargetMissionList(missionId, mission, isReachToLimit);
@@ -276,7 +284,6 @@ void MissionListManager::EnqueueWaitingAbility(const AbilityRequest &abilityRequ
 
 void MissionListManager::EnqueueWaitingAbilityToFront(const AbilityRequest &abilityRequest)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
     std::queue<AbilityRequest> abilityQueue;
     abilityQueue.push(abilityRequest);
     waitingAbilityQueue_.swap(abilityQueue);
@@ -290,7 +297,7 @@ void MissionListManager::EnqueueWaitingAbilityToFront(const AbilityRequest &abil
 void MissionListManager::StartWaitingAbility()
 {
     HILOG_INFO("call");
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     auto topAbility = GetCurrentTopAbilityLocked();
     if (topAbility != nullptr && topAbility->IsAbilityState(FOREGROUNDING)) {
         HILOG_INFO("Top ability is foregrounding, must return for start waiting again.");
@@ -301,7 +308,7 @@ void MissionListManager::StartWaitingAbility()
         AbilityRequest abilityRequest = waitingAbilityQueue_.front();
         HILOG_INFO("name:%{public}s", abilityRequest.abilityInfo.name.c_str());
         waitingAbilityQueue_.pop();
-        auto callerAbility = GetAbilityRecordByToken(abilityRequest.callerToken);
+        auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
         StartAbility(topAbility, callerAbility, abilityRequest);
         return;
     }
@@ -542,6 +549,7 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         targetMission->UpdateMissionTime(info.missionInfo.time);
         targetRecord->SetMission(targetMission);
         targetRecord->SetOwnerMissionUserId(userId_);
+        SetLastExitReason(targetRecord);
 
         // handle specified
         if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
@@ -900,8 +908,8 @@ std::shared_ptr<AbilityRecord> MissionListManager::GetCurrentTopAbilityLocked() 
 int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
-    auto abilityRecord = GetAbilityRecordByToken(token);
+    std::lock_guard guard(managerLock_);
+    auto abilityRecord = GetAbilityRecordByTokenInner(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
     HILOG_DEBUG("AbilityMS attach abilityThread, name is %{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
@@ -941,7 +949,7 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
 void MissionListManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state)
 {
     HILOG_DEBUG("Ability request state %{public}d done.", state);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     AppAbilityState abilityState = DelayedSingleton<AppScheduler>::GetInstance()->ConvertToAppAbilityState(state);
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         auto abilityRecord = GetAliveAbilityRecordByToken(token);
@@ -954,7 +962,7 @@ void MissionListManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, 
 
 void MissionListManager::OnAppStateChanged(const AppInfo &info)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     if (info.state == AppState::TERMINATED || info.state == AppState::END) {
         for (const auto& abilityRecord : terminateAbilityList_) {
@@ -1012,11 +1020,16 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
 std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByToken(
     const sptr<IRemoteObject> &token) const
 {
+    std::lock_guard guard(managerLock_);
+    return GetAbilityRecordByTokenInner(token);
+}
+
+std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByTokenInner(
+    const sptr<IRemoteObject> &token) const
+{
     if (!token) {
         return nullptr;
     }
-
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
     // first find in terminating list
     for (auto ability : terminateAbilityList_) {
         if (ability && token == ability->GetToken()->AsObject()) {
@@ -1034,7 +1047,6 @@ std::shared_ptr<AbilityRecord> MissionListManager::GetAliveAbilityRecordByToken(
         return nullptr;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     for (auto missionList : currentMissionLists_) {
         if (missionList && (abilityRecord = missionList->GetAbilityRecordByToken(token)) != nullptr) {
@@ -1076,10 +1088,10 @@ int MissionListManager::AbilityTransactionDone(const sptr<IRemoteObject> &token,
     std::string abilityState = AbilityRecord::ConvertAbilityState(static_cast<AbilityState>(targetState));
     HILOG_INFO("state: %{public}s.", abilityState.c_str());
 
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
-    auto abilityRecord = GetAbilityFromTerminateList(token);
+    std::lock_guard guard(managerLock_);
+    auto abilityRecord = GetAbilityFromTerminateListInner(token);
     if (abilityRecord == nullptr) {
-        abilityRecord = GetAbilityRecordByToken(token);
+        abilityRecord = GetAbilityRecordByTokenInner(token);
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     }
 
@@ -1107,7 +1119,8 @@ int MissionListManager::DispatchState(const std::shared_ptr<AbilityRecord> &abil
         }
         case AbilityState::FOREGROUND_FAILED:
         case AbilityState::FOREGROUND_INVALID_MODE:
-        case AbilityState::FOREGROUND_WINDOW_FREEZED: {
+        case AbilityState::FOREGROUND_WINDOW_FREEZED:
+        case AbilityState::FOREGROUND_DO_NOTHING: {
             return DispatchForeground(abilityRecord, false, static_cast<AbilityState>(state));
         }
         default: {
@@ -1167,7 +1180,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
 void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     CHECK_POINTER(abilityRecord);
     // ability do not save window mode
@@ -1270,7 +1283,7 @@ int MissionListManager::DispatchBackground(const std::shared_ptr<AbilityRecord> 
 
 void MissionListManager::CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     if (abilityRecord->GetAbilityState() != AbilityState::BACKGROUNDING) {
         HILOG_ERROR("Ability state is %{public}d, it can't complete background.", abilityRecord->GetAbilityState());
         return;
@@ -1317,9 +1330,16 @@ int MissionListManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &a
     int resultCode, const Want *resultWant, bool flag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    std::lock_guard guard(managerLock_);
+    return TerminateAbilityInner(abilityRecord, resultCode, resultWant, flag);
+}
+
+int MissionListManager::TerminateAbilityInner(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    int resultCode, const Want *resultWant, bool flag)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
     HILOG_DEBUG("Terminate ability, ability is %{public}s.", element.c_str());
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
     if (abilityRecord->IsTerminating() && !abilityRecord->IsForeground()) {
         HILOG_ERROR("Ability is on terminating.");
         return ERR_OK;
@@ -1331,7 +1351,7 @@ int MissionListManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &a
     }
 
     // double check to avoid the ability has been removed
-    if (!GetAbilityRecordByToken(abilityRecord->GetToken())) {
+    if (!GetAbilityRecordByTokenInner(abilityRecord->GetToken())) {
         HILOG_ERROR("Ability has already been removed");
         return ERR_OK;
     }
@@ -1351,7 +1371,7 @@ int MissionListManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &a
 int MissionListManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &caller, int requestCode)
 {
     HILOG_DEBUG("Terminate ability with result called.");
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     std::shared_ptr<AbilityRecord> targetAbility = GetAbilityRecordByCaller(caller, requestCode);
     if (!targetAbility) {
@@ -1367,7 +1387,7 @@ int MissionListManager::TerminateAbility(const std::shared_ptr<AbilityRecord> &c
         return result;
     }
 
-    return TerminateAbility(targetAbility, DEFAULT_INVAL_VALUE, nullptr, true);
+    return TerminateAbilityInner(targetAbility, DEFAULT_INVAL_VALUE, nullptr, true);
 }
 
 int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
@@ -1427,7 +1447,7 @@ void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityR
 {
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
     HILOG_DEBUG("Remove terminating ability, ability is %{public}s.", element.c_str());
-    if (GetAbilityFromTerminateList(abilityRecord->GetToken())) {
+    if (GetAbilityFromTerminateListInner(abilityRecord->GetToken())) {
         abilityRecord->SetNextAbilityRecord(nullptr);
         HILOG_DEBUG("Find ability in terminating list, return.");
         return;
@@ -1552,7 +1572,7 @@ void MissionListManager::DelayCompleteTerminate(const std::shared_ptr<AbilityRec
 void MissionListManager::CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     if (abilityRecord->GetAbilityState() != AbilityState::TERMINATING) {
         HILOG_ERROR("%{public}s, ability is not terminating.", __func__);
         return;
@@ -1610,11 +1630,16 @@ void MissionListManager::CompleteTerminateAndUpdateMission(const std::shared_ptr
 
 std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityFromTerminateList(const sptr<IRemoteObject> &token)
 {
+    std::lock_guard guard(managerLock_);
+    return GetAbilityFromTerminateListInner(token);
+}
+
+std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityFromTerminateListInner(const sptr<IRemoteObject> &token)
+{
     if (!token) {
         return nullptr;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
     for (auto abilityRecord : terminateAbilityList_) {
         // token is type of IRemoteObject, abilityRecord->GetToken() is type of Token extending from IRemoteObject.
         if (abilityRecord && abilityRecord->GetToken() && token == abilityRecord->GetToken()->AsObject()) {
@@ -1630,7 +1655,7 @@ int MissionListManager::ClearMission(int missionId)
         HILOG_ERROR("Mission id is invalid.");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     auto mission = GetMissionById(missionId);
     if (mission && mission->GetMissionList() && mission->GetMissionList()->GetType() == MissionListType::LAUNCHER) {
         HILOG_ERROR("Mission id is launcher, can not clear.");
@@ -1646,6 +1671,12 @@ int MissionListManager::ClearMission(int missionId)
         return PrepareClearMissionLocked(missionId, mission);
     }
 
+    return ClearMissionLocked(missionId, mission);
+}
+
+int MissionListManager::ClearMissionLocking(int missionId, const std::shared_ptr<Mission> &mission)
+{
+    std::lock_guard guard(managerLock_);
     return ClearMissionLocked(missionId, mission);
 }
 
@@ -1683,7 +1714,7 @@ int MissionListManager::ClearMissionLocked(int missionId, const std::shared_ptr<
 
 int MissionListManager::ClearAllMissions()
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     DelayedSingleton<MissionInfoMgr>::GetInstance()->DeleteAllMissionInfos(listenerController_);
     std::list<std::shared_ptr<Mission>> foregroundAbilities;
     ClearAllMissionsLocked(defaultStandardList_->GetAllMissions(), foregroundAbilities, false);
@@ -1732,7 +1763,7 @@ void MissionListManager::ClearAllMissionsLocked(std::list<std::shared_ptr<Missio
 
 int MissionListManager::SetMissionLockedState(int missionId, bool lockedState)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     if (missionId < 0) {
         HILOG_ERROR("param is invalid");
         return MISSION_NOT_FOUND;
@@ -1762,8 +1793,8 @@ int MissionListManager::SetMissionLockedState(int missionId, bool lockedState)
 
 void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject>& token)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
-    auto abilityRecord = GetAbilityRecordByToken(token);
+    std::lock_guard guard(managerLock_);
+    auto abilityRecord = GetAbilityRecordByTokenInner(token);
     if (!abilityRecord) {
         HILOG_ERROR("Cannot find AbilityRecord by Token.");
         return;
@@ -1923,7 +1954,7 @@ void MissionListManager::UpdateMissionSnapshot(const std::shared_ptr<AbilityReco
 void MissionListManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId)
 {
     HILOG_INFO("On timeout, msgId is %{public}d", msgId);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     auto abilityRecord = GetAbilityRecordById(abilityRecordId);
     if (abilityRecord == nullptr) {
         HILOG_ERROR("MissionListManager on time out event: ability record is nullptr.");
@@ -2005,7 +2036,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     AbilityState state)
 {
     HILOG_DEBUG("CompleteForegroundFailed come, state: %{public}d.", static_cast<int32_t>(state));
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     if (abilityRecord == nullptr) {
         HILOG_ERROR("CompleteForegroundFailed, ability is nullptr.");
         return;
@@ -2016,6 +2047,16 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
         abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToBackground(abilityRecord->GetToken());
         TerminatePreviousAbility(abilityRecord);
+        return;
+    }
+    if (state == AbilityState::FOREGROUND_DO_NOTHING) {
+        HILOG_INFO("ForegroundFailed. WMS return do_nothing");
+        auto pendingState = abilityRecord->GetPendingState();
+        if (pendingState == AbilityState::BACKGROUND) {
+            MoveToBackgroundTask(abilityRecord);
+        } else if (pendingState == AbilityState::FOREGROUND) {
+            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
+        }
         return;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -2086,7 +2127,7 @@ void MissionListManager::DelayedResumeTimeout(const std::shared_ptr<AbilityRecor
 void MissionListManager::BackToCaller(const std::shared_ptr<AbilityRecord> &callerAbility)
 {
     HILOG_INFO("Back to Caller.");
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     // caller is already the top ability and foregroundnew.
     auto topAbility = GetCurrentTopAbilityLocked();
@@ -2096,7 +2137,7 @@ void MissionListManager::BackToCaller(const std::shared_ptr<AbilityRecord> &call
     }
 
     // other , resume caller ability to top and foreground.
-    MoveMissionToFront(callerAbility->GetMissionId(), false, false, nullptr);
+    MoveMissionToFrontInner(callerAbility->GetMissionId(), false, false, nullptr);
 }
 
 void MissionListManager::MoveToTerminateList(const std::shared_ptr<AbilityRecord>& abilityRecord)
@@ -2196,7 +2237,7 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 #ifdef SUPPORT_GRAPHICS
     if (abilityRecord->IsStartingWindow()) {
         PostCancelStartingWindowTask(abilityRecord);
@@ -2286,8 +2327,13 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
 
 int32_t MissionListManager::GetMissionIdByAbilityToken(const sptr<IRemoteObject> &token)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
-    auto abilityRecord = GetAbilityRecordByToken(token);
+    std::lock_guard guard(managerLock_);
+    return GetMissionIdByAbilityTokenInner(token);
+}
+
+int32_t MissionListManager::GetMissionIdByAbilityTokenInner(const sptr<IRemoteObject> &token)
+{
+    auto abilityRecord = GetAbilityRecordByTokenInner(token);
     if (!abilityRecord) {
         return -1;
     }
@@ -2300,7 +2346,7 @@ int32_t MissionListManager::GetMissionIdByAbilityToken(const sptr<IRemoteObject>
 
 sptr<IRemoteObject> MissionListManager::GetAbilityTokenByMissionId(int32_t missionId)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     sptr<IRemoteObject> result = nullptr;
     for (auto missionList : currentMissionLists_) {
         if (missionList && (result = missionList->GetAbilityTokenByMissionId(missionId)) != nullptr) {
@@ -2443,7 +2489,7 @@ void MissionListManager::DelayedStartLauncher()
 void MissionListManager::BackToLauncher()
 {
     HILOG_INFO("Back to launcher.");
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     CHECK_POINTER(launcherList_);
 
     auto launcherRootAbility = launcherList_->GetLauncherRoot();
@@ -2509,8 +2555,8 @@ int MissionListManager::SetMissionIcon(const sptr<IRemoteObject> &token, const s
         return -1;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
-    auto missionId = GetMissionIdByAbilityToken(token);
+    std::lock_guard guard(managerLock_);
+    auto missionId = GetMissionIdByAbilityTokenInner(token);
     if (missionId <= 0) {
         HILOG_ERROR("SetMissionIcon find mission failed.");
         return -1;
@@ -2636,7 +2682,7 @@ void MissionListManager::InitPrepareTerminateConfig()
 
 void MissionListManager::Dump(std::vector<std::string> &info)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     std::string dumpInfo = "User ID #" + std::to_string(userId_);
     info.push_back(dumpInfo);
     dumpInfo = " current mission lists:{";
@@ -2682,7 +2728,7 @@ void MissionListManager::DumpMissionListByRecordId(
     std::unique_ptr<MissionList> defaultSingleListBackup;
     std::unique_ptr<MissionList> launcherListBackup;
     {
-        std::lock_guard<std::recursive_mutex> guard(managerLock_);
+        std::lock_guard guard(managerLock_);
         for (const auto& missionList : currentMissionLists_) {
             if (missionList != nullptr) {
                 currentMissionListsBackup.emplace_back(std::make_unique<MissionList>(*missionList));
@@ -2725,7 +2771,7 @@ void MissionListManager::DumpMissionList(std::vector<std::string> &info, bool is
     std::unique_ptr<MissionList> defaultSingleListBackup;
     std::unique_ptr<MissionList> launcherListBackup;
     {
-        std::lock_guard<std::recursive_mutex> guard(managerLock_);
+        std::lock_guard guard(managerLock_);
         for (const auto& missionList : currentMissionLists_) {
             if (missionList != nullptr) {
                 currentMissionListsBackup.emplace_back(std::make_unique<MissionList>(*missionList));
@@ -2809,7 +2855,7 @@ int MissionListManager::ResolveLocked(const AbilityRequest &abilityRequest)
 int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 {
     HILOG_INFO("call ability.");
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     // allow to start ability by called type without loading ui.
     if (!abilityRequest.IsCallType(AbilityCallType::CALL_REQUEST_TYPE)) {
@@ -2883,7 +2929,7 @@ int MissionListManager::ReleaseCallLocked(
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
 
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     auto abilityRecords = GetAbilityRecordsByName(element);
     auto isExist = [connect] (const std::shared_ptr<AbilityRecord> &abilityRecord) {
@@ -2987,7 +3033,7 @@ void MissionListManager::OnCallConnectDied(const std::shared_ptr<CallRecord> &ca
 {
     HILOG_INFO("On callConnect died.");
     CHECK_POINTER(callRecord);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     AppExecFwk::ElementName element = callRecord->GetTargetServiceName();
     auto abilityRecords = GetAbilityRecordsByName(element);
@@ -3005,7 +3051,7 @@ void MissionListManager::OnCallConnectDied(const std::shared_ptr<CallRecord> &ca
 }
 void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     if (waitingAbilityQueue_.empty()) {
         return;
     }
@@ -3014,7 +3060,7 @@ void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std
     waitingAbilityQueue_.pop();
 
     auto currentTopAbility = GetCurrentTopAbilityLocked();
-    auto callerAbility = GetAbilityRecordByToken(abilityRequest.callerToken);
+    auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
 
     if (!flag.empty()) {
         auto mission = GetMissionBySpecifiedFlag(want, flag);
@@ -3030,7 +3076,7 @@ void MissionListManager::OnAcceptWantResponse(const AAFwk::Want &want, const std
                 callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
             }
             auto isCallerFromLauncher = (callerAbility && callerAbility->IsLauncherAbility());
-            MoveMissionToFront(mission->GetMissionId(), isCallerFromLauncher, false, callerAbility);
+            MoveMissionToFrontInner(mission->GetMissionId(), isCallerFromLauncher, false, callerAbility);
             NotifyRestartSpecifiedAbility(abilityRequest, ability->GetToken());
             return;
         }
@@ -3083,7 +3129,7 @@ void MissionListManager::NotifyStartSpecifiedAbility(AbilityRequest &abilityRequ
 void MissionListManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     if (waitingAbilityQueue_.empty()) {
         return;
     }
@@ -3096,7 +3142,7 @@ void MissionListManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Wan
     waitingAbilityQueue_.pop();
 
     auto currentTopAbility = GetCurrentTopAbilityLocked();
-    auto callerAbility = GetAbilityRecordByToken(abilityRequest.callerToken);
+    auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
     StartAbility(currentTopAbility, callerAbility, abilityRequest);
 }
 
@@ -3139,10 +3185,15 @@ bool MissionListManager::CheckLimit()
     if (isAllMaxLimit) {
         auto earliestMission = FindEarliestMission();
         if (earliestMission) {
-            if (TerminateAbility(earliestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE, nullptr, true) != ERR_OK) {
+            if (TerminateAbilityInner(earliestMission->GetAbilityRecord(), DEFAULT_INVAL_VALUE,
+                nullptr, true) != ERR_OK) {
                 HILOG_ERROR("already reach limit instance. limit: %{public}d, and terminate earliestAbility failed.",
                     MAX_INSTANCE_COUNT);
                 return true;
+            }
+            if (IsAppLastAbility(earliestMission->GetAbilityRecord())) {
+                OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->RecordAppExitReason(
+                    REASON_RESOURCE_CONTROL);
             }
             HILOG_INFO("already reach limit instance. limit: %{public}d, and terminate earliestAbility success.",
                 MAX_INSTANCE_COUNT);
@@ -3202,8 +3253,8 @@ bool MissionListManager::GetMissionSnapshot(int32_t missionId, const sptr<IRemot
     HILOG_DEBUG("snapshot: Start get mission snapshot.");
     bool forceSnapshot = false;
     {
-        std::lock_guard<std::recursive_mutex> guard(managerLock_);
-        auto abilityRecord = GetAbilityRecordByToken(abilityToken);
+        std::lock_guard guard(managerLock_);
+        auto abilityRecord = GetAbilityRecordByTokenInner(abilityToken);
         if (abilityRecord && abilityRecord->IsAbilityState(FOREGROUND)) {
             forceSnapshot = true;
             missionSnapshot.isPrivate = (abilityRecord->GetAppIndex() != 0);
@@ -3215,7 +3266,7 @@ bool MissionListManager::GetMissionSnapshot(int32_t missionId, const sptr<IRemot
 
 void MissionListManager::GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info, bool isPerm)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
 
     auto func = [&info, isPerm](const std::shared_ptr<Mission> &mission) {
         if (!mission) {
@@ -3274,7 +3325,7 @@ void MissionListManager::UninstallApp(const std::string &bundleName, int32_t uid
 void MissionListManager::AddUninstallTags(const std::string &bundleName, int32_t uid)
 {
     HILOG_INFO("AddUninstallTags, bundleName: %{public}s, uid:%{public}d", bundleName.c_str(), uid);
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     for (auto it = currentMissionLists_.begin(); it != currentMissionLists_.end();) {
         auto missionList = *it;
         if (missionList) {
@@ -3314,7 +3365,7 @@ void MissionListManager::EraseWaitingAbility(const std::string &bundleName, int3
 
 bool MissionListManager::IsStarted()
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     auto launcherRoot = launcherList_->GetLauncherRoot();
     return launcherRoot != nullptr;
 }
@@ -3322,7 +3373,7 @@ bool MissionListManager::IsStarted()
 void MissionListManager::PauseManager()
 {
     HILOG_INFO("MissionListManager PauseManager. move foreground to background.");
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     std::list<std::shared_ptr<AbilityRecord>> foregroundAbilities;
     GetAllForegroundAbilities(foregroundAbilities);
 
@@ -3464,7 +3515,7 @@ int32_t MissionListManager::IsValidMissionIds(
         HILOG_ERROR("missionInfoMgr is nullptr.");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     for (auto i = 0; i < searchCount && i < static_cast<int32_t>(missionIds.size()); ++i) {
         MissionVaildResult missionResult = {};
         missionResult.missionId = missionIds.at(i);
@@ -3551,7 +3602,7 @@ void MissionListManager::NotifyStartAbilityResult(const AbilityRequest &abilityR
 
 int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t flag)
 {
-    std::lock_guard<std::recursive_mutex> guard(managerLock_);
+    std::lock_guard guard(managerLock_);
     if (abilityRecord == nullptr) {
         HILOG_ERROR("DoAbilityForeground failed, ability record is null.");
         return ERR_INVALID_VALUE;
@@ -3566,6 +3617,95 @@ int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abil
     }
     abilityRecord->ProcessForegroundAbility(flag);
     return ERR_OK;
+}
+
+void MissionListManager::GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList)
+{
+    for (auto missionList : currentMissionLists_) {
+        if (missionList != nullptr) {
+            std::vector<std::string> abilityNameList;
+            missionList->GetActiveAbilityList(bundleName, abilityNameList);
+            if (!abilityNameList.empty()) {
+                abilityList.insert(abilityList.end(), abilityNameList.begin(), abilityNameList.end());
+            }
+        }
+    }
+
+    if (!abilityList.empty()) {
+        sort(abilityList.begin(), abilityList.end());
+        abilityList.erase(unique(abilityList.begin(), abilityList.end()), abilityList.end());
+    }
+}
+
+void MissionListManager::SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr.");
+        return;
+    }
+
+    if (abilityRecord->GetAbilityInfo().bundleName.empty()) {
+        HILOG_ERROR("bundleName is empty.");
+        return;
+    }
+
+    Reason exitReason;
+    bool isSetReason;
+    DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->GetAppExitReason(
+        abilityRecord->GetAbilityInfo().bundleName, abilityRecord->GetAbilityInfo().name, isSetReason, exitReason);
+
+    if (isSetReason) {
+        abilityRecord->SetLastExitReason(CovertAppExitReasonToLastReason(exitReason));
+    }
+}
+
+LastExitReason MissionListManager::CovertAppExitReasonToLastReason(const Reason exitReason)
+{
+    switch (exitReason) {
+        case REASON_NORMAL:
+            return LASTEXITREASON_NORMAL;
+        case REASON_CPP_CRASH:
+            return LASTEXITREASON_CPP_CRASH;
+        case REASON_JS_ERROR:
+            return LASTEXITREASON_JS_ERROR;
+        case REASON_APP_FREEZE:
+            return LASTEXITREASON_APP_FREEZE;
+        case REASON_PERFORMANCE_CONTROL:
+            return LASTEXITREASON_PERFORMANCE_CONTROL;
+        case REASON_RESOURCE_CONTROL:
+            return LASTEXITREASON_RESOURCE_CONTROL;
+        case REASON_UPGRADE:
+            return LASTEXITREASON_UPGRADE;
+        case REASON_UNKNOWN:
+        default:
+            return LASTEXITREASON_UNKNOWN;
+    }
+}
+
+bool MissionListManager::IsAppLastAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr.");
+        return false;
+    }
+
+    std::string bundleName = abilityRecord->GetAbilityInfo().bundleName;
+    if (bundleName.empty()) {
+        HILOG_ERROR("bundleName is empty.");
+        return false;
+    }
+
+    std::vector<std::string> abilityList;
+    for (auto missionList : currentMissionLists_) {
+        if (missionList != nullptr) {
+            missionList->GetActiveAbilityList(bundleName, abilityList);
+        }
+    }
+
+    if (abilityList.size() == ONLY_ONE_ABILITY) {
+        return true;
+    }
+    return false;
 }
 
 int MissionListManager::PrepareClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission)
@@ -3586,7 +3726,7 @@ int MissionListManager::PrepareClearMissionLocked(int missionId, const std::shar
         HILOG_INFO("Handle terminate task: %{public}d", missionId);
         auto mgr = wpMgr.lock();
         if (mgr) {
-            mgr->ClearMissionLocked(missionId, mission);
+            mgr->ClearMissionLocking(missionId, mission);
         }
     };
     std::shared_ptr<AbilityEventHandler> handler =

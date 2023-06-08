@@ -82,7 +82,7 @@ public:
     int MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
-     * GetServiceRecordBySessionInfo.
+     * GetUIAbilityRecordBySessionInfo.
      *
      * @param sessionToken, service ability's session token.
      * @return Returns AbilityRecord shared_ptr.
@@ -125,7 +125,8 @@ private:
     void PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId);
     void DelayCompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    mutable std::recursive_mutex sessionLock_;
+    bool IsContainsAbilityInner(const sptr<IRemoteObject> &token) const;
+    mutable std::mutex sessionLock_;
     std::map<uint64_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<Rosen::RootSceneSession> rootSceneSession_;
