@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "ability_running_info.h"
 #include "ability_scheduler_interface.h"
 #include "ability_start_setting.h"
+#include "ability_state.h"
 #include "extension_running_info.h"
 #include "free_install_observer_interface.h"
 #include "iability_controller.h"
@@ -35,17 +36,19 @@
 #include "mission_info.h"
 #include "mission_snapshot.h"
 #include "remote_mission_listener_interface.h"
+#include "remote_on_listener_interface.h"
 #include "running_process_info.h"
 #include "sender_info.h"
 #include "snapshot.h"
 #include "start_options.h"
 #include "stop_user_callback.h"
 #include "system_memory_attr.h"
+#include "ui_extension_window_command.h"
+#include "uri.h"
 #include "want.h"
 #include "want_receiver_interface.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
-#include "uri.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window_manager_service_handler.h"
 #endif
@@ -476,6 +479,12 @@ public:
      */
     virtual int ScheduleCommandAbilityDone(const sptr<IRemoteObject> &token) = 0;
 
+    virtual int ScheduleCommandAbilityWindowDone(
+        const sptr<IRemoteObject> &token,
+        const sptr<AAFwk::SessionInfo> &sessionInfo,
+        AAFwk::WindowCommand winCmd,
+        AAFwk::AbilityCommand abilityCmd) = 0;
+
     /**
      * dump ability stack info, about userID, mission stack info,
      * mission record info and ability info.
@@ -573,6 +582,12 @@ public:
 
     virtual int ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId, int32_t missionId,
         const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams) = 0;
+
+    virtual int ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
+        const std::string &bundleName, const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams)
+    {
+        return 0;
+    }
 
     virtual int ContinueAbility(const std::string &deviceId, int32_t missionId, uint32_t versionCode) = 0;
 
@@ -712,6 +727,16 @@ public:
     virtual int StopSyncRemoteMissions(const std::string &devId) = 0;
 
     virtual int RegisterMissionListener(const std::string &deviceId, const sptr<IRemoteMissionListener> &listener) = 0;
+
+    virtual int RegisterOnListener(const std::string &type, const sptr<IRemoteOnListener> &listener)
+    {
+        return 0;
+    }
+
+    virtual int RegisterOffListener(const std::string &type, const sptr<IRemoteOnListener> &listener)
+    {
+        return 0;
+    }
 
     virtual int UnRegisterMissionListener(const std::string &deviceId,
         const sptr<IRemoteMissionListener> &listener) = 0;
@@ -955,6 +980,27 @@ public:
     }
 
     /**
+     * Force app exit and record exit reason.
+     * @param pid Process id .
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ForceExitApp(const int32_t pid, Reason exitReason)
+    {
+        return 0;
+    }
+
+    /**
+     * Record app exit reason.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RecordAppExitReason(Reason exitReason)
+    {
+        return 0;
+    }
+
+    /**
      * Set rootSceneSession by SCB.
      *
      * @param rootSceneSession Indicates root scene session of SCB.
@@ -1147,6 +1193,8 @@ public:
         // prepare terminate ability (65)
         PREPARE_TERMINATE_ABILITY,
 
+        COMMAND_ABILITY_WINDOW_DONE,
+
         // ipc id 1001-2000 for DMS
         // ipc id for starting ability (1001)
         START_ABILITY = 1001,
@@ -1264,6 +1312,12 @@ public:
 
         SEND_RESULT_TO_ABILITY = 1106,
 
+        REGISTER_REMOTE_ON_LISTENER = 1107,
+
+        REGISTER_REMOTE_OFF_LISTENER = 1108,
+
+        CONTINUE_MISSION_OF_BUNDLENAME = 1109,
+
         // ipc id for mission manager(1110)
         REGISTER_REMOTE_MISSION_LISTENER = 1110,
         UNREGISTER_REMOTE_MISSION_LISTENER = 1111,
@@ -1311,6 +1365,9 @@ public:
         SHARE_DATA_DONE = 4002,
 
         GET_ABILITY_TOKEN = 5001,
+
+        FORCE_EXIT_APP = 6001,
+        RECORD_APP_EXIT_REASON = 6002
     };
 };
 }  // namespace AAFwk
