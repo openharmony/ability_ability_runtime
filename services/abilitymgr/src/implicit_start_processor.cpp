@@ -123,8 +123,10 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         return ret;
     }
 
-    //There is a default opening method or Only one application supports
-    if (dialogAppInfos.size() == 1) {
+    //There is a default opening method add Only one application supports
+    bool withDefault = false;
+    request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault);
+    if (dialogAppInfos.size() == 1 && withDefault) {
         auto info = dialogAppInfos.front();
         HILOG_INFO("ImplicitQueryInfos success, target ability: %{public}s", info.abilityName.data());
         return IN_PROCESS_CALL(startAbilityTask(info.bundleName, info.abilityName));
