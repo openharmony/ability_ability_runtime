@@ -205,7 +205,7 @@ void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppL
         if (GetHapSoPath(hapInfo, appLibPaths, bundleInfo.isPreInstallApp)) {
             continue;
         }
-        
+
         std::string libPath = LOCAL_CODE_PATH;
         const auto &tmpNativePath = hapInfo.isLibIsolated ? hapInfo.nativeLibraryPath : nativeLibraryPath;
         libPath += (libPath.back() == '/') ? tmpNativePath : "/" + tmpNativePath;
@@ -1190,7 +1190,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         LoadAppDetailAbilityLibrary(appInfo.appDetailAbilityLibraryPath);
     }
     LoadAppLibrary();
-     
+
     applicationForDump_ = application_;
     mixStackDumper_ = std::make_shared<MixStackDumper>();
     if (!mixStackDumper_->IsInstalled()) {
@@ -1244,10 +1244,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (isStageBased) {
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;
+        auto moduleName = entryHapModuleInfo.moduleName;
         AbilityRuntime::Runtime::Options options;
         options.bundleName = appInfo.bundleName;
         options.codePath = LOCAL_CODE_PATH;
         options.hapPath = hapPath;
+        options.moduleName = moduleName;
         options.eventRunner = mainHandler_->GetEventRunner();
         options.loadAce = true;
         options.isBundle = (entryHapModuleInfo.compileMode != AppExecFwk::CompileMode::ES_MODULE);
@@ -1452,7 +1454,7 @@ void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::st
             loadSoFromDir = true;
         }
     }
-    
+
     if (loadSoFromDir) {
         if (nativeLibraryPath.empty()) {
             HILOG_WARN("Native library path is empty.");

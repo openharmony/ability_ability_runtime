@@ -41,6 +41,7 @@ public:
     struct Options {
         Language lang = Language::JS;
         std::string bundleName;
+        std::string moduleName;
         std::string codePath;
         std::string bundleCodeDir;
         std::string hapPath;
@@ -81,6 +82,7 @@ public:
     virtual void UpdateExtensionType(int32_t extensionType) = 0;
     virtual void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) = 0;
     virtual void StartProfiler(const std::string &perfCmd) = 0;
+    virtual void DoCleanWorkAfterStageCleaned() = 0;
 
     Runtime(const Runtime&) = delete;
     Runtime(Runtime&&) = delete;
