@@ -755,8 +755,8 @@ int AppMgrProxy::StartRenderProcess(const std::string &renderParam,
     auto result = reply.ReadInt32();
     renderPid = reply.ReadInt32();
     if (result != 0) {
-        HILOG_WARN("StartRenderProcess failed, result: %{public}d", ret);
-        return ret;
+        HILOG_WARN("StartRenderProcess failed, result: %{public}d", result);
+        return result;
     }
     return 0;
 }
@@ -1193,6 +1193,39 @@ int32_t AppMgrProxy::StartNativeProcessForDebugger(const AAFwk::Want &want)
     }
 
     return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    if (!data.WriteInt32(pid)) {
+        HILOG_ERROR("pid write failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    auto ret =
+        remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::GET_BUNDLE_NAME_BY_PID), data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_WARN("Send request failed with error code %{public}d.", ret);
+        return ret;
+    }
+    bundleName = reply.ReadString();
+    uid = reply.ReadInt32();
+    return ERR_NONE;
 }
 
 int32_t AppMgrProxy::NotifyAppFault(const FaultData &faultData)

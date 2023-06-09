@@ -21,6 +21,7 @@
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iability_info_callback.h"
+#include "session/host/include/zidl/session_interface.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -30,6 +31,7 @@ constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
+const std::string DLP_INDEX = "ohos.dlp.params.index";
 #ifdef SUPPORT_ASAN
 const int KILL_TIMEOUT_MULTIPLE = 45;
 #else
@@ -39,24 +41,26 @@ const int KILL_TIMEOUT_MULTIPLE = 3;
 int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     HILOG_DEBUG("Call.");
     if (sessionInfo == nullptr || sessionInfo->sessionToken == nullptr) {
         HILOG_ERROR("sessionInfo is invalid.");
         return ERR_INVALID_VALUE;
     }
-    auto descriptor = Str16ToStr8(sessionInfo->sessionToken->GetDescriptor());
+    auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
+    auto descriptor = Str16ToStr8(sessionToken->GetDescriptor());
     if (descriptor != "OHOS.ISession") {
         HILOG_ERROR("token's Descriptor: %{public}s", descriptor.c_str());
         return ERR_INVALID_VALUE;
     }
+    abilityRequest.sessionInfo = sessionInfo;
 
     std::shared_ptr<AbilityRecord> uiAbilityRecord = nullptr;
     auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
     if (iter != sessionAbilityMap_.end()) {
         uiAbilityRecord = iter->second;
     } else {
-        uiAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest, sessionInfo);
+        uiAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
     }
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
 
@@ -74,6 +78,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
     }
 
+    ReportEventToSuspendManager(abilityRequest.abilityInfo);
     UpdateAbilityRecordLaunchReason(abilityRequest, uiAbilityRecord);
     sptr<AppExecFwk::IAbilityInfoCallback> abilityInfoCallback
         = iface_cast<AppExecFwk::IAbilityInfoCallback>(abilityRequest.abilityInfoCallback);
@@ -92,8 +97,8 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
-    if (!IsContainsAbility(token)) {
+    std::lock_guard<std::mutex> guard(sessionLock_);
+    if (!IsContainsAbilityInner(token)) {
         return ERR_INVALID_VALUE;
     }
     auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
@@ -112,7 +117,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
 void UIAbilityLifecycleManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, int32_t state) const
 {
     HILOG_DEBUG("Ability request state %{public}d done.", state);
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     AppAbilityState abilityState = DelayedSingleton<AppScheduler>::GetInstance()->ConvertToAppAbilityState(state);
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
@@ -131,7 +136,7 @@ int UIAbilityLifecycleManager::AbilityTransactionDone(const sptr<IRemoteObject> 
     std::string abilityState = AbilityRecord::ConvertAbilityState(static_cast<AbilityState>(targetState));
     HILOG_INFO("AbilityTransactionDone, state: %{public}s.", abilityState.c_str());
 
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     auto abilityRecord = GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
@@ -143,6 +148,35 @@ int UIAbilityLifecycleManager::AbilityTransactionDone(const sptr<IRemoteObject> 
     }
 
     return DispatchState(abilityRecord, targetState);
+}
+
+int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("Call.");
+    std::lock_guard<std::mutex> guard(sessionLock_);
+    sptr<SessionInfo> sessionInfo = new SessionInfo();
+    sessionInfo->callerToken = abilityRequest.callerToken;
+    sessionInfo->want = abilityRequest.want;
+    sessionInfo->requestCode = abilityRequest.requestCode;
+    if (abilityRequest.startRecent) {
+        sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest);
+    }
+
+    auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (abilityRecord == nullptr) {
+        CHECK_POINTER_AND_RETURN(rootSceneSession_, ERR_INVALID_VALUE);
+        HILOG_INFO("Call PendingSessionActivation.");
+        rootSceneSession_->PendingSessionActivation(sessionInfo);
+    } else {
+        auto callerSessionInfo = abilityRecord->GetSessionInfo();
+        CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
+        CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
+        HILOG_INFO("Call PendingSessionActivation.");
+        auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
+        callerSession->PendingSessionActivation(sessionInfo);
+    }
+    return ERR_OK;
 }
 
 int UIAbilityLifecycleManager::DispatchState(const std::shared_ptr<AbilityRecord> &abilityRecord, int state)
@@ -260,7 +294,7 @@ int UIAbilityLifecycleManager::DispatchTerminate(const std::shared_ptr<AbilityRe
 void UIAbilityLifecycleManager::CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
 
     CHECK_POINTER(abilityRecord);
     // ability do not save window mode
@@ -282,7 +316,7 @@ void UIAbilityLifecycleManager::HandleForegroundTimeoutOrFailed(const std::share
     AbilityState state)
 {
     HILOG_DEBUG("state: %{public}d.", static_cast<int32_t>(state));
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     if (ability == nullptr) {
         HILOG_ERROR("ability record is nullptr.");
         return;
@@ -308,7 +342,6 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetAbilityRecordByToke
         return nullptr;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
     for (auto ability : terminateAbilityList_) {
         if (ability && token == ability->GetToken()->AsObject()) {
             return ability;
@@ -325,7 +358,12 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetAbilityRecordByToke
 
 bool UIAbilityLifecycleManager::IsContainsAbility(const sptr<IRemoteObject> &token) const
 {
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
+    return IsContainsAbilityInner(token);
+}
+
+bool UIAbilityLifecycleManager::IsContainsAbilityInner(const sptr<IRemoteObject> &token) const
+{
     for (auto iter = sessionAbilityMap_.begin(); iter != sessionAbilityMap_.end(); iter++) {
         if (iter->second != nullptr && iter->second->GetToken()->AsObject() == token) {
             return true;
@@ -339,7 +377,7 @@ void UIAbilityLifecycleManager::EraseAbilityRecord(const std::shared_ptr<Ability
     if (abilityRecord == nullptr) {
         return;
     }
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+
     for (auto iter = sessionAbilityMap_.begin(); iter != sessionAbilityMap_.end(); iter++) {
         if (iter->second != nullptr && iter->second->GetToken()->AsObject() == abilityRecord->GetToken()->AsObject()) {
             sessionAbilityMap_.erase(iter);
@@ -373,10 +411,10 @@ void UIAbilityLifecycleManager::UpdateAbilityRecordLaunchReason(
 std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetUIAbilityRecordBySessionInfo(
     const sptr<SessionInfo> &sessionInfo)
 {
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     CHECK_POINTER_AND_RETURN(sessionInfo, nullptr);
-    sptr<Rosen::ISession> sessionToken = sessionInfo->sessionToken;
-    CHECK_POINTER_AND_RETURN(sessionToken, nullptr);
+    CHECK_POINTER_AND_RETURN(sessionInfo->sessionToken, nullptr);
+    auto sessionToken = iface_cast<Rosen::ISession>(sessionInfo->sessionToken);
     std::string descriptor = Str16ToStr8(sessionToken->GetDescriptor());
     if (descriptor != "OHOS.ISession") {
         HILOG_ERROR("failed, input token is not a sessionToken, token->GetDescriptor(): %{public}s",
@@ -394,7 +432,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetUIAbilityRecordBySe
 int UIAbilityLifecycleManager::MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HILOG_DEBUG("call");
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     if (abilityRecord == nullptr) {
         HILOG_ERROR("ability record is null");
         return ERR_INVALID_VALUE;
@@ -484,7 +522,7 @@ void UIAbilityLifecycleManager::PrintTimeOutLog(const std::shared_ptr<AbilityRec
 
 void UIAbilityLifecycleManager::CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     if (abilityRecord->GetAbilityState() != AbilityState::BACKGROUNDING) {
         HILOG_ERROR("failed, ability state is %{public}d, it can't complete background.",
             abilityRecord->GetAbilityState());
@@ -505,7 +543,7 @@ void UIAbilityLifecycleManager::CompleteBackground(const std::shared_ptr<Ability
 int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HILOG_DEBUG("call");
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetWant().GetElement().GetURI();
@@ -545,7 +583,7 @@ void UIAbilityLifecycleManager::DelayCompleteTerminate(const std::shared_ptr<Abi
 void UIAbilityLifecycleManager::CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     CHECK_POINTER(abilityRecord);
-    std::lock_guard<std::recursive_mutex> guard(sessionLock_);
+    std::lock_guard<std::mutex> guard(sessionLock_);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
 
     if (abilityRecord->GetAbilityState() != AbilityState::TERMINATING) {
@@ -562,5 +600,88 @@ void UIAbilityLifecycleManager::CompleteTerminate(const std::shared_ptr<AbilityR
     terminateAbilityList_.remove(abilityRecord);
 }
 
+uint64_t UIAbilityLifecycleManager::GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const
+{
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
+        return GetReusedSpecifiedPersistentId(abilityRequest);
+    }
+
+    if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD) {
+        return GetReusedStandardPersistentId(abilityRequest);
+    }
+
+    if (abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::SINGLETON) {
+        HILOG_WARN("Launch mode is not singleton.");
+        return 0;
+    }
+
+    for (const auto& [first, second] : sessionAbilityMap_) {
+        if (CheckProperties(second, abilityRequest, AppExecFwk::LaunchMode::SINGLETON)) {
+            HILOG_DEBUG("SINGLETON: find.");
+            return first;
+        }
+    }
+
+    HILOG_DEBUG("Not find existed ui ability.");
+    return 0;
+}
+
+uint64_t UIAbilityLifecycleManager::GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest) const
+{
+    if (abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
+        HILOG_WARN("Not SPECIFIED.");
+        return 0;
+    }
+
+    // specified ability name and bundle name and module name and appIndex format is same as singleton.
+    for (const auto& [first, second] : sessionAbilityMap_) {
+        if (second->GetSpecifiedFlag() == abilityRequest.specifiedFlag &&
+            CheckProperties(second, abilityRequest, AppExecFwk::LaunchMode::SPECIFIED)) {
+            HILOG_DEBUG("SPECIFIED: find.");
+            return first;
+        }
+    }
+    return 0;
+}
+
+uint64_t UIAbilityLifecycleManager::GetReusedStandardPersistentId(const AbilityRequest &abilityRequest) const
+{
+    if (abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::STANDARD) {
+        HILOG_WARN("Not STANDARD.");
+        return 0;
+    }
+
+    if (!abilityRequest.startRecent) {
+        HILOG_WARN("startRecent is false.");
+        return 0;
+    }
+
+    int64_t sessionTime = 0;
+    uint64_t persistantId = 0;
+    for (const auto& [first, second] : sessionAbilityMap_) {
+        if (CheckProperties(second, abilityRequest, AppExecFwk::LaunchMode::STANDARD) &&
+            second->GetRestartTime() >= sessionTime) {
+            persistantId = first;
+            sessionTime = second->GetRestartTime();
+        }
+    }
+    return persistantId;
+}
+
+bool UIAbilityLifecycleManager::CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord,
+    const AbilityRequest &abilityRequest, AppExecFwk::LaunchMode launchMode) const
+{
+    const auto& abilityInfo = abilityRecord->GetAbilityInfo();
+    return abilityInfo.launchMode == launchMode && abilityRequest.abilityInfo.name == abilityInfo.name &&
+        abilityRequest.abilityInfo.bundleName == abilityInfo.bundleName &&
+        abilityRequest.abilityInfo.moduleName == abilityInfo.moduleName &&
+        abilityRequest.want.GetIntParam(DLP_INDEX, 0) == abilityRecord->GetAppIndex();
+}
+
+void UIAbilityLifecycleManager::ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo) const
+{
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#endif // EFFICIENCY_MANAGER_ENABLE
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -28,6 +28,7 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 static const int MAX_PROCESS_LEN = 256;
+static const int MAX_RETRY = 10;
 OHOS::sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr()
 {
     OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
@@ -57,12 +58,26 @@ std::string ConnectionStateManager::GetProcessNameByPid(int32_t pid)
     return name;
 }
 
-void ConnectionStateManager::Init()
+void ConnectionStateManager::Init(const std::shared_ptr<AppExecFwk::EventHandler> &handler)
 {
     if (!observerController_) {
         observerController_ = std::make_shared<ConnectionObserverController>();
     }
-    InitAppStateObserver();
+    handler_ = handler;
+    if (!handler) {
+        HILOG_WARN("eventhandler is invalid");
+        InitAppStateObserver();
+        return;
+    }
+    auto initConnectionStateManagerTask = [weak = weak_from_this()]() {
+        auto self = weak.lock();
+        if (!self) {
+            HILOG_WARN("invalid self pointer");
+            return;
+        }
+        self->InitAppStateObserver();
+    };
+    handler->PostTask(initConnectionStateManagerTask, "InitConnectionStateManager");
 }
 
 int ConnectionStateManager::RegisterObserver(const sptr<AbilityRuntime::IConnectionObserver> &observer)
@@ -228,7 +243,7 @@ void ConnectionStateManager::AddDlpManager(const std::shared_ptr<AbilityRecord> 
     }
 
     auto userId = dlpManger->GetOwnerMissionUserId();
-    std::lock_guard<std::recursive_mutex> guard(dlpLock_);
+    std::lock_guard<std::mutex> guard(dlpLock_);
     auto it = dlpItems_.find(userId);
     if (it == dlpItems_.end()) {
         dlpItems_[userId] = std::make_shared<DlpStateItem>(dlpManger->GetUid(), dlpManger->GetPid());
@@ -241,7 +256,7 @@ void ConnectionStateManager::RemoveDlpManager(const std::shared_ptr<AbilityRecor
         return;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(dlpLock_);
+    std::lock_guard<std::mutex> guard(dlpLock_);
     dlpItems_.erase(dlpManger->GetOwnerMissionUserId());
 }
 
@@ -282,7 +297,7 @@ void ConnectionStateManager::HandleAppDied(int32_t pid)
 
 void ConnectionStateManager::GetDlpConnectionInfos(std::vector<AbilityRuntime::DlpConnectionInfo> &infos)
 {
-    std::lock_guard<std::recursive_mutex> guard(dlpLock_);
+    std::lock_guard<std::mutex> guard(dlpLock_);
     for (auto it = dlpItems_.begin(); it != dlpItems_.end(); it++) {
         auto item = it->second;
         if (!item) {
@@ -301,7 +316,7 @@ bool ConnectionStateManager::AddConnectionInner(const std::shared_ptr<Connection
 {
     std::shared_ptr<ConnectionStateItem> targetItem = nullptr;
     auto callerPid = connectionRecord->GetCallerPid();
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::mutex> guard(stateLock_);
     auto it = connectionStates_.find(callerPid);
     if (it == connectionStates_.end()) {
         targetItem = ConnectionStateItem::CreateConnectionStateItem(connectionRecord);
@@ -324,7 +339,7 @@ bool ConnectionStateManager::RemoveConnectionInner(const std::shared_ptr<Connect
     AbilityRuntime::ConnectionData &data)
 {
     auto callerPid = connectionRecord->GetCallerPid();
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::mutex> guard(stateLock_);
     auto it = connectionStates_.find(callerPid);
     if (it == connectionStates_.end()) {
         HILOG_WARN("can not find target item, connection caller pid:%{public}d.", callerPid);
@@ -371,7 +386,7 @@ void ConnectionStateManager::HandleCallerDied(int32_t callerPid)
 
 std::shared_ptr<ConnectionStateItem> ConnectionStateManager::RemoveDiedCaller(int32_t callerPid)
 {
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::mutex> guard(stateLock_);
     auto it = connectionStates_.find(callerPid);
     if (it == connectionStates_.end()) {
         HILOG_WARN("connection caller pid:%{public}d.", callerPid);
@@ -387,7 +402,7 @@ bool ConnectionStateManager::AddDataAbilityConnectionInner(const DataAbilityCall
     const std::shared_ptr<DataAbilityRecord> &record, ConnectionData &data)
 {
     std::shared_ptr<ConnectionStateItem> targetItem = nullptr;
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::mutex> guard(stateLock_);
     auto it = connectionStates_.find(caller.callerPid);
     if (it == connectionStates_.end()) {
         targetItem = ConnectionStateItem::CreateConnectionStateItem(caller);
@@ -409,7 +424,7 @@ bool ConnectionStateManager::AddDataAbilityConnectionInner(const DataAbilityCall
 bool ConnectionStateManager::RemoveDataAbilityConnectionInner(const DataAbilityCaller &caller,
     const std::shared_ptr<DataAbilityRecord> &record, AbilityRuntime::ConnectionData &data)
 {
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::mutex> guard(stateLock_);
     auto it = connectionStates_.find(caller.callerPid);
     if (it == connectionStates_.end()) {
         HILOG_WARN("can not find target item, connection caller pid:%{public}d.", caller.callerPid);
@@ -432,7 +447,7 @@ bool ConnectionStateManager::RemoveDataAbilityConnectionInner(const DataAbilityC
 void ConnectionStateManager::HandleDataAbilityDiedInner(const sptr<IRemoteObject> &abilityToken,
     std::vector<AbilityRuntime::ConnectionData> &allData)
 {
-    std::lock_guard<std::recursive_mutex> guard(stateLock_);
+    std::lock_guard<std::mutex> guard(stateLock_);
     for (auto it = connectionStates_.begin(); it != connectionStates_.end();) {
         auto item = it->second;
         if (!item) {
@@ -466,7 +481,7 @@ bool ConnectionStateManager::HandleDlpAbilityInner(const std::shared_ptr<Ability
         return false;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(dlpLock_);
+    std::lock_guard<std::mutex> guard(dlpLock_);
     auto it = dlpItems_.find(dlpAbility->GetOwnerMissionUserId());
     if (it == dlpItems_.end()) {
         HILOG_WARN("no dlp manager, invalid state.");
@@ -494,7 +509,19 @@ void ConnectionStateManager::InitAppStateObserver()
 
     sptr<OHOS::AppExecFwk::IAppMgr> appManager = GetAppMgr();
     if (!appManager) {
-        HILOG_WARN("%{public}s app manager nullptr!", __func__);
+        HILOG_WARN("%{public}s app manager nullptr! retry:%{public}d", __func__, retry_);
+        if (retry_ < MAX_RETRY && handler_) {
+            auto initConnectionStateManagerTask = [weak = weak_from_this()]() {
+                auto self = weak.lock();
+                if (!self) {
+                    HILOG_WARN("invalid self pointer");
+                    return;
+                }
+                self->InitAppStateObserver();
+            };
+            handler_->PostTask(initConnectionStateManagerTask, "InitConnectionStateManager", 1000);
+            retry_++;
+        }
         return;
     }
 

@@ -23,6 +23,7 @@
 #include <atomic>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #include "accesstoken_kit.h"
 #include "constants.h"
@@ -35,13 +36,11 @@
 #include "hitrace_meter.h"
 #include "hot_reloader.h"
 #include "ipc_skeleton.h"
-#include "js_console_log.h"
 #include "js_environment.h"
 #include "js_module_reader.h"
 #include "js_module_searcher.h"
 #include "js_quickfix_callback.h"
 #include "js_runtime_utils.h"
-#include "js_timer.h"
 #include "js_utils.h"
 #include "js_worker.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
@@ -67,6 +66,7 @@ constexpr size_t PARAM_TWO = 2;
 constexpr uint8_t SYSCAP_MAX_SIZE = 64;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr int32_t DEFAULT_INTER_VAL = 500;
+constexpr int32_t TRIGGER_GC_AFTER_CLEAR_STAGE_MS = 3000;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
 #ifdef APP_USE_ARM
@@ -496,7 +496,6 @@ bool JsRuntime::Initialize(const Options& options)
         CHECK_POINTER_AND_RETURN(globalObj, false);
 
         if (!preloaded_) {
-            InitConsoleModule();
             InitSyscapModule(*nativeEngine, *globalObj);
 
             // Simple hook function 'isSystemplugin'
@@ -532,7 +531,7 @@ bool JsRuntime::Initialize(const Options& options)
                 if (newCreate) {
                     ExtractorUtil::AddExtractor(loadPath, extractor);
                     extractor->SetRuntimeFlag(true);
-                    panda::JSNApi::LoadAotFile(vm, options.hapPath);
+                    panda::JSNApi::LoadAotFile(vm, options.moduleName);
                 }
             }
 
@@ -545,28 +544,25 @@ bool JsRuntime::Initialize(const Options& options)
                 HILOG_ERROR("Initialize loop failed.");
                 return false;
             }
-
-            if (options.isUnique) {
-                HILOG_INFO("Not supported TimerModule when form render");
-            } else {
-                InitTimerModule();
-            }
         }
     }
-    if (jsEnv_ && !options.preload) {
-        std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-        workerInfo->codePath = codePath_;
-        workerInfo->isDebugVersion = options.isDebugVersion;
-        workerInfo->isBundle = options.isBundle;
-        workerInfo->packagePathStr = options.packagePathStr;
-        workerInfo->assetBasePathStr = options.assetBasePathStr;
-        workerInfo->hapPath = options.hapPath;
-        workerInfo->isStageModel = options.isStageModel;
-        jsEnv_->InitWorkerModule(workerInfo);
+
+    if (!preloaded_) {
+        InitConsoleModule();
     }
 
-    auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.hapPath, isModular);
-    InitSourceMap(operatorObj);
+    if (!options.preload) {
+        auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.hapPath, isModular);
+        InitSourceMap(operatorObj);
+
+        if (options.isUnique) {
+            HILOG_INFO("Not supported TimerModule when form render");
+        } else {
+            InitTimerModule();
+        }
+
+        InitWorkerModule(options);
+    }
 
     preloaded_ = options.preload;
     return true;
@@ -638,6 +634,17 @@ void JsRuntime::ReloadFormComponent()
     OHOS::Ace::DeclarativeModulePreloader::ReloadCard(*nativeEngine, bundleName_);
 }
 
+void JsRuntime::DoCleanWorkAfterStageCleaned()
+{
+    // Force gc. If the jsRuntime is destroyed, this task should not be executed.
+    HILOG_DEBUG("DoCleanWorkAfterStageCleaned begin");
+    RemoveTask("ability_destruct_gc");
+    auto gcTask = [this]() {
+        panda::JSNApi::TriggerGC(GetEcmaVm(), panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    };
+    PostTask(gcTask, "ability_destruct_gc", TRIGGER_GC_AFTER_CLEAR_STAGE_MS);
+}
+
 bool JsRuntime::InitLoop(const std::shared_ptr<AppExecFwk::EventRunner>& eventRunner)
 {
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
@@ -662,6 +669,10 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSy
     for (const auto &appLibPath : appLibPaths) {
         moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second, isSystemApp);
     }
+
+    if (!isSystemApp) {
+        dlns_disable();
+    }
 }
 
 void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorObj)
@@ -680,7 +691,7 @@ void JsRuntime::Deinitialize()
     }
 
     methodRequireNapiRef_.reset();
-    
+
     CHECK_POINTER(jsEnv_);
     jsEnv_->DeInitLoop();
 }
@@ -836,7 +847,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
     if (newCreate) {
         ExtractorUtil::AddExtractor(loadPath, extractor);
         extractor->SetRuntimeFlag(true);
-        panda::JSNApi::LoadAotFile(vm, hapPath);
+        panda::JSNApi::LoadAotFile(vm, moduleName_);
         auto resourceManager = AbilityBase::ExtractResourceManager::GetExtractResourceManager().GetGlobalObject();
         if (resourceManager) {
             resourceManager->AddResource(loadPath.c_str());
@@ -1127,6 +1138,20 @@ void JsRuntime::InitTimerModule()
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitTimerModule();
+}
+
+void JsRuntime::InitWorkerModule(const Options& options)
+{
+    CHECK_POINTER(jsEnv_);
+    std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
+    workerInfo->codePath = options.codePath;
+    workerInfo->isDebugVersion = options.isDebugVersion;
+    workerInfo->isBundle = options.isBundle;
+    workerInfo->packagePathStr = options.packagePathStr;
+    workerInfo->assetBasePathStr = options.assetBasePathStr;
+    workerInfo->hapPath = options.hapPath;
+    workerInfo->isStageModel = options.isStageModel;
+    jsEnv_->InitWorkerModule(workerInfo);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
