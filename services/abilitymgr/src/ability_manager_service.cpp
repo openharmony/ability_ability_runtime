@@ -305,10 +305,7 @@ bool AbilityManagerService::Init()
     implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
 #endif
 
-    auto initConnectionStateManagerTask = []() {
-        DelayedSingleton<ConnectionStateManager>::GetInstance()->Init();
-    };
-    handler_->PostTask(initConnectionStateManagerTask, "InitConnectionStateManager");
+    DelayedSingleton<ConnectionStateManager>::GetInstance()->Init(handler_);
 
     interceptorExecuter_ = std::make_shared<AbilityInterceptorExecuter>();
     interceptorExecuter_->AddInterceptor(std::make_shared<CrowdTestInterceptor>());
