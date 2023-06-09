@@ -47,7 +47,7 @@ bool AppScheduler::Init(const std::weak_ptr<AppStateCallback> &callback)
     CHECK_POINTER_RETURN_BOOL(callback.lock());
     CHECK_POINTER_RETURN_BOOL(appMgrClient_);
 
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     if (isInit_) {
         return true;
     }
@@ -414,6 +414,17 @@ int AppScheduler::BlockAppService()
     return ERR_OK;
 }
 #endif
+
+int32_t AppScheduler::GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid)
+{
+    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
+    int32_t ret = static_cast<int32_t>(IN_PROCESS_CALL(appMgrClient_->GetBundleNameByPid(pid, bundleName, uid)));
+    if (ret != ERR_OK) {
+        HILOG_ERROR("Get bundle name failed.");
+        return INNER_ERR;
+    }
+    return ERR_OK;
+}
 
 void AppScheduler::SetCurrentUserId(const int32_t userId)
 {

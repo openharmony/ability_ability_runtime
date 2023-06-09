@@ -148,6 +148,7 @@ void AppMgrServiceInner::Init()
     InitGlobalConfiguration();
     AddWatchParameter();
     supportIsolationMode_ = OHOS::system::GetParameter(SUPPORT_ISOLATION_MODE, "false");
+    deviceType_ = OHOS::system::GetDeviceType();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
     InitFocusListener();
 }
@@ -479,7 +480,8 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
     }
     if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
         appRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
-        bool needNotifyApp = appRunningManager_->IsApplicationBackground(appRecord->GetBundleName());
+        bool needNotifyApp =
+            !appRecord->IsUIExtension() && appRunningManager_->IsApplicationBackground(appRecord->GetBundleName());
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_BACKGROUND, needNotifyApp);
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
     } else {
@@ -1966,6 +1968,10 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
             if (renderRecord && renderRecord->GetPid() > 0) {
                 HILOG_DEBUG("Kill render process when host died.");
                 KillProcessByPid(renderRecord->GetPid());
+                {
+                    std::lock_guard<std::mutex> lock(renderUidSetLock_);
+                    renderUidSet_.erase(renderRecord->GetUid());
+                }
                 DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
             }
         }
@@ -2761,7 +2767,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         return result;
     }
     // notify
-    std::lock_guard<std::recursive_mutex> notifyLock(configurationObserverLock_);
+    std::lock_guard<std::mutex> notifyLock(configurationObserverLock_);
     for (auto &observer : configurationObservers_) {
         if (observer != nullptr) {
             observer->OnConfigurationUpdated(config);
@@ -2778,7 +2784,7 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurat
         HILOG_ERROR("AppMgrServiceInner::Register error: observer is null");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> registerLock(configurationObserverLock_);
+    std::lock_guard<std::mutex> registerLock(configurationObserverLock_);
     auto it = std::find_if(configurationObservers_.begin(), configurationObservers_.end(),
         [&observer](const sptr<IConfigurationObserver> &item) {
             return (item && item->AsObject() == observer->AsObject());
@@ -2799,7 +2805,7 @@ int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const sptr<IConfigur
         HILOG_ERROR("AppMgrServiceInner::Register error: observer is null");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> unregisterLock(configurationObserverLock_);
+    std::lock_guard<std::mutex> unregisterLock(configurationObserverLock_);
     auto it = std::find_if(configurationObservers_.begin(), configurationObservers_.end(),
         [&observer](const sptr<IConfigurationObserver> &item) {
             return (item && item->AsObject() == observer->AsObject());
@@ -3031,7 +3037,7 @@ int AppMgrServiceInner::VerifyProcessPermission(const std::string &bundleName) c
         HILOG_ERROR("Permission verification failed.");
         return ERR_PERMISSION_DENIED;
     }
-    
+
     return ERR_OK;
 }
 
@@ -3063,7 +3069,7 @@ int AppMgrServiceInner::VerifyProcessPermission(const sptr<IRemoteObject> &token
         HILOG_ERROR("Permission verification failed.");
         return ERR_PERMISSION_DENIED;
     }
-    
+
     return ERR_OK;
 }
 
@@ -3179,12 +3185,19 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
     }
 
     auto renderRecordMap = appRecord->GetRenderRecordMap();
-    if (!renderRecordMap.empty()) {
+    if (!renderRecordMap.empty() && deviceType_.compare("tablet") != 0 && deviceType_.compare("pc") != 0) {
         for (auto iter : renderRecordMap) {
             if (iter.second != nullptr) {
-                HILOG_WARN("already exist render process, renderPid:%{public}d", iter.second->GetPid());
                 renderPid = iter.second->GetPid();
-                return ERR_ALREADY_EXIST_RENDER;
+                if (ProcessExist(renderPid)) {
+                    HILOG_WARN("already exist render process,do not request again, renderPid:%{public}d", renderPid);
+                    return ERR_ALREADY_EXIST_RENDER;
+                }
+                auto scheduler = iter.second->GetScheduler();
+                if (scheduler) {
+                    HILOG_WARN("render process not realy exist, renderPid:%{public}d", renderPid);
+                    OnRenderRemoteDied(scheduler->AsObject());
+                }
             }
         }
     }
@@ -3242,6 +3255,46 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
                                renderRecord->GetCrashFd());
 }
 
+bool AppMgrServiceInner::GenerateRenderUid(int32_t &renderUid)
+{
+    std::lock_guard<std::mutex> lock(renderUidSetLock_);
+    int32_t uid = lastRenderUid_ + 1;
+    bool needSecondScan = true;
+    if (uid > Constants::END_UID_FOR_RENDER_PROCESS) {
+        uid = Constants::START_UID_FOR_RENDER_PROCESS;
+        needSecondScan = false;
+    }
+
+    if (renderUidSet_.empty()) {
+        renderUid = uid;
+        renderUidSet_.insert(renderUid);
+        lastRenderUid_ = renderUid;
+        return true;
+    }
+
+    for (int32_t i = uid; i <= Constants::END_UID_FOR_RENDER_PROCESS; i++) {
+        if (renderUidSet_.find(i) == renderUidSet_.end()) {
+            renderUid = i;
+            renderUidSet_.insert(renderUid);
+            lastRenderUid_ = renderUid;
+            return true;
+        }
+    }
+
+    if (needSecondScan) {
+        for (int32_t i = Constants::START_UID_FOR_RENDER_PROCESS; i <= lastRenderUid_; i++) {
+            if (renderUidSet_.find(i) == renderUidSet_.end()) {
+                renderUid = i;
+                renderUidSet_.insert(renderUid);
+                lastRenderUid_ = renderUid;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
     const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid)
 {
@@ -3256,21 +3309,30 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
         return ERR_INVALID_VALUE;
     }
 
+    int32_t renderUid = Constants::INVALID_UID;
+    if (!GenerateRenderUid(renderUid)) {
+        HILOG_ERROR("Generate renderUid failed");
+        return ERR_INVALID_OPERATION;
+    }
+
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     startMsg.renderParam = renderRecord->GetRenderParam();
+    startMsg.uid = renderUid;
     startMsg.code = 0; // 0: DEFAULT
     pid_t pid = 0;
     ErrCode errCode = nwebSpawnClient->StartProcess(startMsg, pid);
     if (FAILED(errCode)) {
         HILOG_ERROR("failed to spawn new render process, errCode %{public}08x", errCode);
+        std::lock_guard<std::mutex> lock(renderUidSetLock_);
+        renderUidSet_.erase(renderUid);
         return ERR_INVALID_VALUE;
     }
     renderPid = pid;
     renderRecord->SetPid(pid);
-    renderRecord->SetUid(startMsg.uid);
+    renderRecord->SetUid(renderUid);
     appRecord->AddRenderRecord(renderRecord);
-    HILOG_INFO("start render process success, hostPid:%{public}d, pid:%{public}d uid:%{public}d",
-        renderRecord->GetHostPid(), pid, startMsg.uid);
+    HILOG_INFO("start render process success, hostPid:%{public}d, hostUid:%{public}d, pid:%{public}d, uid:%{public}d",
+        renderRecord->GetHostPid(), renderRecord->GetHostUid(), pid, renderUid);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessCreated(renderRecord);
     return 0;
 }
@@ -3306,6 +3368,10 @@ void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
     if (appRunningManager_) {
         auto renderRecord = appRunningManager_->OnRemoteRenderDied(remote);
         if (renderRecord) {
+            {
+                std::lock_guard<std::mutex> lock(renderUidSetLock_);
+                renderUidSet_.erase(renderRecord->GetUid());
+            }
             DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
         }
     }
@@ -3733,6 +3799,18 @@ void AppMgrServiceInner::SetCurrentUserId(const int32_t userId)
     }
     HILOG_DEBUG("set current userId: %{public}d", userId);
     currentUserId_ = userId;
+}
+
+int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &bundleName, int32_t &uid)
+{
+    auto callerRecord = GetAppRunningRecordByPid(pid);
+    if (callerRecord == nullptr) {
+        HILOG_ERROR("callerRecord is nullptr, can not get callerBundleName.");
+        return ERR_INVALID_OPERATION;
+    }
+    bundleName = callerRecord->GetBundleName();
+    uid = callerRecord->GetUid();
+    return ERR_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

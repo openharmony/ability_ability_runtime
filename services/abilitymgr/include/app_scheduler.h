@@ -321,6 +321,16 @@ public:
     #endif
 
     /**
+     * Get bundleName by pid.
+     *
+     * @param pid process id.
+     * @param bundleName Output parameters, return bundleName.
+     * @param uid Output parameters, return userId.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid);
+
+    /**
      * Notify Fault Data
      *
      * @param faultData the fault data.
@@ -345,7 +355,7 @@ protected:
     virtual void OnAppStateChanged(const AppExecFwk::AppProcessData &appData) override;
 
 private:
-    std::recursive_mutex lock_;
+    std::mutex lock_;
     bool isInit_  {false};
     std::weak_ptr<AppStateCallback> callback_;
     std::unique_ptr<AppExecFwk::AppMgrClient> appMgrClient_;

@@ -70,6 +70,10 @@
 #include "nweb_helper.h"
 #endif
 
+#ifdef IMAGE_PURGEABLE_PIXELMAP
+#include "purgeable_resource_manager.h"
+#endif
+
 #if defined(ABILITY_LIBRARY_LOADER) || defined(APPLICATION_LIBRARY_LOADER)
 #include <dirent.h>
 #include <dlfcn.h>
@@ -201,7 +205,7 @@ void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppL
         if (GetHapSoPath(hapInfo, appLibPaths, bundleInfo.isPreInstallApp)) {
             continue;
         }
-        
+
         std::string libPath = LOCAL_CODE_PATH;
         const auto &tmpNativePath = hapInfo.isLibIsolated ? hapInfo.nativeLibraryPath : nativeLibraryPath;
         libPath += (libPath.back() == '/') ? tmpNativePath : "/" + tmpNativePath;
@@ -1186,7 +1190,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         LoadAppDetailAbilityLibrary(appInfo.appDetailAbilityLibraryPath);
     }
     LoadAppLibrary();
-     
+
     applicationForDump_ = application_;
     mixStackDumper_ = std::make_shared<MixStackDumper>();
     if (!mixStackDumper_->IsInstalled()) {
@@ -1240,10 +1244,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (isStageBased) {
         // Create runtime
         auto hapPath = entryHapModuleInfo.hapPath;
+        auto moduleName = entryHapModuleInfo.moduleName;
         AbilityRuntime::Runtime::Options options;
         options.bundleName = appInfo.bundleName;
         options.codePath = LOCAL_CODE_PATH;
         options.hapPath = hapPath;
+        options.moduleName = moduleName;
         options.eventRunner = mainHandler_->GetEventRunner();
         options.loadAce = true;
         options.isBundle = (entryHapModuleInfo.compileMode != AppExecFwk::CompileMode::ES_MODULE);
@@ -1295,6 +1301,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             // if app's callback has been registered, let app decide whether exit or not.
             HILOG_ERROR("\n%{public}s is about to exit due to RuntimeError\nError type:%{public}s\n%{public}s",
                 bundleName.c_str(), errorObj.name.c_str(), summary.c_str());
+            DelayedSingleton<AbilityManagerClient>::GetInstance()->RecordAppExitReason(REASON_JS_ERROR);
             appThread->ScheduleProcessSecurityExit();
         };
         (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
@@ -1447,7 +1454,7 @@ void MainThread::CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::st
             loadSoFromDir = true;
         }
     }
-    
+
     if (loadSoFromDir) {
         if (nativeLibraryPath.empty()) {
             HILOG_WARN("Native library path is empty.");
@@ -1882,7 +1889,9 @@ void MainThread::HandleForegroundApplication()
         HILOG_ERROR("MainThread::handleForegroundApplication error!");
         return;
     }
-
+#ifdef IMAGE_PURGEABLE_PIXELMAP
+    PurgeableMem::PurgeableResourceManager::GetInstance().BeginAccessPurgeableMem();
+#endif
     if (!applicationImpl_->PerformForeground()) {
         HILOG_ERROR("MainThread::handleForegroundApplication error!, applicationImpl_->PerformForeground() failed");
         return;

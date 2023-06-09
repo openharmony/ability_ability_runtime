@@ -34,7 +34,6 @@
 #include "foundation/communication/ipc/interfaces/innerkits/ipc_core/include/iremote_object.h"
 #include "system_ability_definition.h"
 #include "hilog_wrapper.h"
-#include "js_console_log.h"
 #include "js_runtime_utils.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "commonlibrary/ets_utils/js_sys_module/console/console.h"
@@ -159,7 +158,7 @@ void AssetHelper::operator()(const std::string& uri, std::vector<uint8_t>& conte
         } else if (uri.find_first_of("/") == 0) {
             HILOG_DEBUG("uri start with /modulename");
             realPath = uri.substr(1);
-        } else if (uri.find("../") == 0) {
+        } else if (uri.find("../") == 0 && !workerInfo_->isStageModel) {
             HILOG_DEBUG("uri start with ../");
             realPath = uri.substr(3);
         } else {

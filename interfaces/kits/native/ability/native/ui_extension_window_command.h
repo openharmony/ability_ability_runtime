@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_TIMER_H
-#define OHOS_ABILITY_RUNTIME_JS_TIMER_H
-
-#include "native_engine/native_engine.h"
+#ifndef OHOS_ABILITY_RUNTIME_UI_EXTENSION_WINDOW_COMMAND_H
+#define OHOS_ABILITY_RUNTIME_UI_EXTENSION_WINDOW_COMMAND_H
 
 namespace OHOS {
-namespace AbilityRuntime {
-void InitTimer(NativeEngine& engine, NativeObject& globalObject);
-} // namespace AbilityRuntime
-} // namespace OHOS
+namespace AAFwk {
+enum WindowCommand {
+    WIN_CMD_FOREGROUND,
+    WIN_CMD_BACKGROUND,
+    WIN_CMD_DESTROY
+};
 
-#endif // OHOS_ABILITY_RUNTIME_JS_TIMER_H
+enum AbilityCommand {
+    ABILITY_CMD_FOREGROUND,
+    ABILITY_CMD_BACKGROUND,
+    ABILITY_CMD_DESTROY
+};
+}  // namespace AAFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_UI_EXTENSION_WINDOW_COMMAND_H
