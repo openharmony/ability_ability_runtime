@@ -1146,6 +1146,9 @@ void JsRuntime::InitWorkerModule(const Options& options)
     workerInfo->assetBasePathStr = options.assetBasePathStr;
     workerInfo->hapPath = options.hapPath;
     workerInfo->isStageModel = options.isStageModel;
+    if (options.isJsFramework) {
+        SetJsFramework();
+    }
     jsEnv_->InitWorkerModule(workerInfo);
 }
 }  // namespace AbilityRuntime
