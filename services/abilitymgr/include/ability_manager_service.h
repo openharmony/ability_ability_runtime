@@ -24,6 +24,7 @@
 #include <unordered_map>
 #include <map>
 
+#include "ability_bundle_event_callback.h"
 #include "ability_connect_manager.h"
 #include "ability_event_handler.h"
 #include "ability_interceptor_executer.h"
@@ -1310,6 +1311,10 @@ private:
 
     void UnSubscribeBackgroundTask();
 
+    void SubscribeBundleEventCallback();
+
+    void UnsubscribeBundleEventCallback();
+
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
@@ -1499,6 +1504,8 @@ private:
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
+
+    sptr<AbilityBundleEventCallback> abilityBundleEventCallback_;
 
 #ifdef SUPPORT_GRAPHICS
     int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
