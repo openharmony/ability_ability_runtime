@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "session/host/include/root_scene_session.h"
 #include "session_info.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -102,6 +101,17 @@ ErrCode AbilityManagerClient::ScheduleCommandAbilityDone(const sptr<IRemoteObjec
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->ScheduleCommandAbilityDone(token);
+}
+
+ErrCode AbilityManagerClient::ScheduleCommandAbilityWindowDone(
+    const sptr<IRemoteObject> &token,
+    const sptr<SessionInfo> &sessionInfo,
+    WindowCommand winCmd,
+    AbilityCommand abilityCmd)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->ScheduleCommandAbilityWindowDone(token, sessionInfo, winCmd, abilityCmd);
 }
 
 ErrCode AbilityManagerClient::StartAbility(const Want &want, int requestCode, int32_t userId)
@@ -502,6 +512,20 @@ ErrCode AbilityManagerClient::ContinueMission(const std::string &srcDeviceId, co
     return result;
 }
 
+ErrCode AbilityManagerClient::ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
+    const std::string &bundleName, const sptr<IRemoteObject> &callback, AAFwk::WantParams &wantParams)
+{
+    if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
+        HILOG_ERROR("srcDeviceId or dstDeviceId or callback is null!");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    int result = abms->ContinueMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
+    return result;
+}
+
 ErrCode AbilityManagerClient::StartContinuation(const Want &want, const sptr<IRemoteObject> &abilityToken,
     int32_t status)
 {
@@ -567,6 +591,22 @@ ErrCode AbilityManagerClient::RegisterMissionListener(const std::string &deviceI
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->RegisterMissionListener(deviceId, listener);
+}
+
+ErrCode AbilityManagerClient::RegisterOnListener(const std::string &type,
+    const sptr<IRemoteOnListener> &listener)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RegisterOnListener(type, listener);
+}
+
+ErrCode AbilityManagerClient::RegisterOffListener(const std::string &type,
+    const sptr<IRemoteOnListener> &listener)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RegisterOffListener(type, listener);
 }
 
 ErrCode AbilityManagerClient::UnRegisterMissionListener(const std::string &deviceId,
@@ -1067,12 +1107,20 @@ ErrCode AbilityManagerClient::RecordAppExitReason(Reason exitReason)
     return abms->RecordAppExitReason(exitReason);
 }
 
-void AbilityManagerClient::SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession)
+void AbilityManagerClient::SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession)
 {
     HILOG_INFO("call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->SetRootSceneSession(rootSceneSession);
+}
+
+void AbilityManagerClient::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+{
+    HILOG_INFO("call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->CallUIAbilityBySCB(sessionInfo);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
