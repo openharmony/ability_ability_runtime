@@ -19,7 +19,7 @@
 #include <queue>
 
 #include "ability_record.h"
-#include "session/host/include/root_scene_session.h"
+#include "session/host/include/zidl/session_interface.h"
 #include "session_info.h"
 
 namespace OHOS {
@@ -82,7 +82,7 @@ public:
     int MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
-     * GetServiceRecordBySessionInfo.
+     * GetUIAbilityRecordBySessionInfo.
      *
      * @param sessionToken, service ability's session token.
      * @return Returns AbilityRecord shared_ptr.
@@ -93,22 +93,56 @@ public:
      * CloseUIAbility, close the special ability by scb.
      *
      * @param abilityRecord, the ability to close.
+     * @param resultCode, the resultCode of the ability to terminate.
+     * @param resultWant, the Want of the ability to return.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int CloseUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int CloseUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        int resultCode, const Want *resultWant);
 
     /**
      * Set rootSceneSession by SCB.
      *
      * @param rootSceneSession Indicates root scene session of SCB.
      */
-    inline void SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession)
-    {
-        rootSceneSession_ = rootSceneSession;
-    }
+    void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
+
+    int NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest);
+
+    /**
+     * @brief handle time out event
+     *
+     * @param msgId the msg id in ability record
+     * @param abilityRecordId the id of ability record
+     */
+    void OnTimeOut(uint32_t msgId, int64_t abilityRecordId);
+
+    /**
+     * @brief handle when ability died
+     *
+     * @param abilityRecord the died ability
+     */
+    void OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRecord);
+
+    /**
+     * resolve the call ipc of ability for scheduling oncall.
+     *
+     * @param abilityRequest target ability request.
+     */
+    int ResolveLocked(const AbilityRequest &abilityRequest);
+
+    /**
+     * Call UIAbility by SCB.
+     *
+     * @param sessionInfo the session info of the ability to be called.
+     */
+    void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo);
 
 private:
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
+    uint64_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const;
+    uint64_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest) const;
+    uint64_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest) const;
     void UpdateAbilityRecordLaunchReason(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void EraseAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -118,18 +152,34 @@ private:
     int DispatchForeground(const std::shared_ptr<AbilityRecord> &abilityRecord, bool success,
         AbilityState state = AbilityState::INITIAL);
     void CompleteForegroundSuccess(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    void HandleForegroundTimeoutOrFailed(const std::shared_ptr<AbilityRecord> &ability,
+    void HandleLoadTimeout(const std::shared_ptr<AbilityRecord> &ability);
+    void HandleForegroundFailed(const std::shared_ptr<AbilityRecord> &ability,
         AbilityState state = AbilityState::INITIAL);
+    void HandleForegroundTimeout(const std::shared_ptr<AbilityRecord> &ability);
+    void NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &ability, int32_t errorCode,
+        std::string errorReason);
     void MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId);
     void DelayCompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
     bool IsContainsAbilityInner(const sptr<IRemoteObject> &token) const;
+    void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo) const;
+    bool CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord, const AbilityRequest &abilityRequest,
+        AppExecFwk::LaunchMode launchMode) const;
+    void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest) const;
+
+    // byCall
+    int CallAbilityLocked(const AbilityRequest &abilityRequest);
+    sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
+    int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const sptr<IRemoteObject> &token) const;
+    int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
+
     mutable std::mutex sessionLock_;
     std::map<uint64_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
+    std::map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
-    sptr<Rosen::RootSceneSession> rootSceneSession_;
+    sptr<Rosen::ISession> rootSceneSession_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

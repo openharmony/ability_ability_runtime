@@ -347,6 +347,8 @@ public:
 
     void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList);
 
+    void CallRequestDone(const std::shared_ptr<AbilityRecord> &abilityRecord, const sptr<IRemoteObject> &callStub);
+
 #ifdef SUPPORT_GRAPHICS
 public:
     /**
@@ -374,6 +376,7 @@ public:
 private:
     Closure GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void PostCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const;
+    void InitPrepareTerminateConfig();
 #endif
 
 private:
@@ -522,6 +525,7 @@ private:
 
     std::queue<AbilityRequest> waitingAbilityQueue_;
     std::shared_ptr<MissionListenerController> listenerController_;
+    bool isPrepareTerminateEnable_ = false;
 
     class MissionDmInitCallback : public DistributedHardware::DmInitCallback {
     public:

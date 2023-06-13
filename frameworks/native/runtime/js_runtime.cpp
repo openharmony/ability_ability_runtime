@@ -23,6 +23,7 @@
 #include <atomic>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #include "accesstoken_kit.h"
 #include "constants.h"
@@ -65,6 +66,7 @@ constexpr size_t PARAM_TWO = 2;
 constexpr uint8_t SYSCAP_MAX_SIZE = 64;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr int32_t DEFAULT_INTER_VAL = 500;
+constexpr int32_t TRIGGER_GC_AFTER_CLEAR_STAGE_MS = 3000;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
 #ifdef APP_USE_ARM
@@ -535,7 +537,7 @@ bool JsRuntime::Initialize(const Options& options)
 
             panda::JSNApi::SetBundle(vm, options.isBundle);
             panda::JSNApi::SetBundleName(vm, options.bundleName);
-            panda::JSNApi::SetHostResolveBufferTracker(vm, JsModuleReader(options.bundleName));
+            panda::JSNApi::SetHostResolveBufferTracker(vm, JsModuleReader(options.bundleName, options.hapPath));
             isModular = !panda::JSNApi::IsBundle(vm);
 
             if (!InitLoop(options.eventRunner)) {
@@ -632,6 +634,17 @@ void JsRuntime::ReloadFormComponent()
     OHOS::Ace::DeclarativeModulePreloader::ReloadCard(*nativeEngine, bundleName_);
 }
 
+void JsRuntime::DoCleanWorkAfterStageCleaned()
+{
+    // Force gc. If the jsRuntime is destroyed, this task should not be executed.
+    HILOG_DEBUG("DoCleanWorkAfterStageCleaned begin");
+    RemoveTask("ability_destruct_gc");
+    auto gcTask = [this]() {
+        panda::JSNApi::TriggerGC(GetEcmaVm(), panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    };
+    PostTask(gcTask, "ability_destruct_gc", TRIGGER_GC_AFTER_CLEAR_STAGE_MS);
+}
+
 bool JsRuntime::InitLoop(const std::shared_ptr<AppExecFwk::EventRunner>& eventRunner)
 {
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
@@ -655,6 +668,10 @@ void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSy
 
     for (const auto &appLibPath : appLibPaths) {
         moduleManager->SetAppLibPath(appLibPath.first, appLibPath.second, isSystemApp);
+    }
+
+    if (!isSystemApp) {
+        dlns_disable();
     }
 }
 
