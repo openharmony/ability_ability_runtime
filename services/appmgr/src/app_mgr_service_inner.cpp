@@ -1764,17 +1764,15 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.allowInternet = allowInternet;
     startMsg.hspList = hspList;
     startMsg.hapFlags = bundleInfo.isPreInstallApp ? 1 : 0;
-    uint32_t  permissionLength = AppSpawn::AppspawnMountPermission::GetMountPermissionListSize();
-    std::string permissions[permissionLength];
-    size_t permissionIndex = 0;
-    for (int i = 0; i < permissionLength; i++) {
-        const std::string permission = AppSpawn::AppspawnMountPermission::mountPermissionList[i];
+    std::set<std::string> mountPermissionList = AppSpawn::AppspawnMountPermission::GetMountPermissionList();
+    std::set<std::string> permissions;
+    for (std::string permission : mountPermissionList) {
         if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, permission) ==
             Security::AccessToken::PERMISSION_GRANTED) {
-            permissions[permissionIndex++] = permission;
+            permissions.insert(permission);
         }
     }
-    startMsg.mountPermissionFlags = AppSpawn::AppspawnMountPermission::GenPermissionCode(permissions, permissionIndex);
+    startMsg.mountPermissionFlags = AppSpawn::AppspawnMountPermission::GenPermissionCode(permissions);
     if (hasAccessBundleDirReq) {
         startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
     }
