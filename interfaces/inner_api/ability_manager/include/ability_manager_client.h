@@ -1063,7 +1063,21 @@ public:
      *
      * @param rootSceneSession Indicates root scene session of SCB.
      */
-    void SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession);
+    void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
+
+    /**
+     * Call UIAbility by SCB.
+     *
+     * @param sessionInfo the session info of the ability to be called.
+     */
+    void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo);
+
+    /**
+     * Start specified ability by SCB.
+     *
+     * @param want Want information.
+     */
+    void StartSpecifiedAbilityBySCB(const Want &want);
 
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {

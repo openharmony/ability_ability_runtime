@@ -54,10 +54,6 @@
 #endif
 
 namespace OHOS {
-namespace Rosen {
-class RootSceneSession;
-}  // namespace Rosen
-
 namespace AAFwk {
 constexpr const char* ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
 const int DEFAULT_INVAL_VALUE = -1;
@@ -1005,7 +1001,21 @@ public:
      *
      * @param rootSceneSession Indicates root scene session of SCB.
      */
-    virtual void SetRootSceneSession(const sptr<Rosen::RootSceneSession> &rootSceneSession) {}
+    virtual void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession) {}
+
+    /**
+     * Call UIAbility by SCB.
+     *
+     * @param sessionInfo the session info of the ability to be called.
+     */
+    virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo) {}
+
+    /**
+     * Start specified ability by SCB.
+     *
+     * @param want Want information.
+     */
+    virtual void StartSpecifiedAbilityBySCB(const Want &want) {};
 
     enum {
         // ipc id 1-1000 for kit
@@ -1188,12 +1198,15 @@ public:
         SEND_ABILITY_RESULT_BY_TOKEN,
 
         // ipc id for set rootSceneSession (64)
-        SET_ROOTSSCENESESSION,
+        SET_ROOT_SCENE_SESSION,
 
         // prepare terminate ability (65)
         PREPARE_TERMINATE_ABILITY,
 
         COMMAND_ABILITY_WINDOW_DONE,
+
+        // prepare terminate ability (67)
+        CALL_ABILITY_BY_SCB,
 
         // ipc id 1001-2000 for DMS
         // ipc id for starting ability (1001)
@@ -1298,6 +1311,9 @@ public:
 
         // ipc id for request dialog service
         REQUEST_DIALOG_SERVICE,
+
+        // ipc id for start specified ability by scb
+        START_SPECIFIED_ABILITY_BY_SCB,
 
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,

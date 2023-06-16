@@ -23,7 +23,6 @@
 #include "ability_manager_errors.h"
 #include "ability_scheduler_proxy.h"
 #include "ability_scheduler_stub.h"
-#include "session/host/include/root_scene_session.h"
 #include "session_info.h"
 
 namespace OHOS {
@@ -181,6 +180,9 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[QUERY_MISSION_VAILD] = &AbilityManagerStub::IsValidMissionIdsInner;
     requestFuncMap_[VERIFY_PERMISSION] = &AbilityManagerStub::VerifyPermissionInner;
     requestFuncMap_[START_UI_ABILITY_BY_SCB] = &AbilityManagerStub::StartUIAbilityBySCBInner;
+    requestFuncMap_[SET_ROOT_SCENE_SESSION] = &AbilityManagerStub::SetRootSceneSessionInner;
+    requestFuncMap_[CALL_ABILITY_BY_SCB] = &AbilityManagerStub::CallUIAbilityBySCBInner;
+    requestFuncMap_[START_SPECIFIED_ABILITY_BY_SCB] = &AbilityManagerStub::StartSpecifiedAbilityBySCBInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -2128,12 +2130,35 @@ int32_t AbilityManagerStub::RecordAppExitReasonInner(MessageParcel &data, Messag
 int AbilityManagerStub::SetRootSceneSessionInner(MessageParcel &data, MessageParcel &reply)
 {
     HILOG_DEBUG("Call.");
-    auto rootSceneSession = iface_cast<Rosen::RootSceneSession>(data.ReadRemoteObject());
+    auto rootSceneSession = data.ReadRemoteObject();
     if (rootSceneSession == nullptr) {
         HILOG_ERROR("Read rootSceneSession failed.");
         return ERR_INVALID_VALUE;
     }
     SetRootSceneSession(rootSceneSession);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::CallUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("Call.");
+    sptr<SessionInfo> sessionInfo = nullptr;
+    if (data.ReadBool()) {
+        sessionInfo = data.ReadParcelable<SessionInfo>();
+    }
+    CallUIAbilityBySCB(sessionInfo);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartSpecifiedAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("Call.");
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    StartSpecifiedAbilityBySCB(*want);
     return NO_ERROR;
 }
 }  // namespace AAFwk
