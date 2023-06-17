@@ -1017,6 +1017,22 @@ public:
      */
     virtual void StartSpecifiedAbilityBySCB(const Want &want) {};
 
+    /**
+     * Set sessionManagerService
+     * @param sessionManagerService the point of sessionManagerService.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &callerToken)
+    {
+        return 0;
+    }
+
+    virtual sptr<IRemoteObject> GetSessionManagerService()
+    {
+        return nullptr;
+    }
+
     enum {
         // ipc id 1-1000 for kit
         // ipc id for terminating ability (1)
@@ -1314,6 +1330,11 @@ public:
 
         // ipc id for start specified ability by scb
         START_SPECIFIED_ABILITY_BY_SCB,
+
+        // ipc id for set sessionManagerService
+        SET_SESSIONMANAGERSERVICE,
+
+        GET_SESSIONMANAGERSERVICE,
 
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
