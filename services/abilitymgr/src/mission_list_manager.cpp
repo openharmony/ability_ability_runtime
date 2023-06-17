@@ -2336,6 +2336,7 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
     mission->SetUnclearable(innerMissionInfo.missionInfo.unclearable);
     abilityRecord->SetMission(mission);
     abilityRecord->SetOwnerMissionUserId(userId_);
+    SetLastExitReason(abilityRecord);
     std::shared_ptr<MissionList> newMissionList = std::make_shared<MissionList>();
     return newMissionList;
 }
