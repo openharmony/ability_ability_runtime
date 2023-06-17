@@ -3638,6 +3638,7 @@ int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abil
 
 void MissionListManager::GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList)
 {
+    std::lock_guard guard(managerLock_);
     for (auto missionList : currentMissionLists_) {
         if (missionList != nullptr) {
             std::vector<std::string> currentActiveAbilities;
