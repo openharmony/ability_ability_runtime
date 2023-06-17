@@ -3913,7 +3913,7 @@ int AbilityManagerService::ScheduleCommandAbilityWindowDone(
         return CHECK_PERMISSION_FAILED;
     }
 
-    if (!abilityRecord->IsUIExtension() && !AbilityRecord->IsWindowExtension()) {
+    if (!abilityRecord->IsUIExtension() && !abilityRecord->IsWindowExtension()) {
         HILOG_ERROR("target ability is not ui or window extension.");
         return ERR_INVALID_VALUE;
     }
