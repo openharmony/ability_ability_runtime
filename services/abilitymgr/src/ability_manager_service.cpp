@@ -3913,8 +3913,8 @@ int AbilityManagerService::ScheduleCommandAbilityWindowDone(
         return CHECK_PERMISSION_FAILED;
     }
 
-    if (!abilityRecord->IsUIExtension()) {
-        HILOG_ERROR("target ability is not ui extension.");
+    if (!abilityRecord->IsUIExtension() && !AbilityRecord->IsWindowExtension()) {
+        HILOG_ERROR("target ability is not ui or window extension.");
         return ERR_INVALID_VALUE;
     }
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
