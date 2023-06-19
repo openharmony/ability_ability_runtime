@@ -1085,7 +1085,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode SetSessionManagerService(const sptr<IRemoteObject> &callerToken);
+    ErrCode SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService);
 
     /**
      * Get sessionManagerService

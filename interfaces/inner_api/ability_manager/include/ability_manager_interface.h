@@ -1023,7 +1023,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &callerToken)
+    virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
     {
         return 0;
     }
