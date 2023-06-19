@@ -2166,12 +2166,12 @@ int32_t AbilityManagerStub::StartSpecifiedAbilityBySCBInner(MessageParcel &data,
 
 int AbilityManagerStub::SetSessionManagerServiceInner(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    sptr<IRemoteObject> sessionManagerService = data.ReadRemoteObject();
     if (!token) {
         HILOG_ERROR("SetSessionManagerServiceInner read ability token failed.");
         return ERR_NULL_OBJECT;
     }
-    SetSessionManagerService(token);
+    SetSessionManagerService(sessionManagerService);
     return NO_ERROR;
 }
 

@@ -4250,19 +4250,19 @@ void AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
     }
 }
 
-int32_t AbilityManagerProxy::SetSessionManagerService(const sptr<IRemoteObject> &callerToken)
+int32_t AbilityManagerProxy::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
 {
     HILOG_INFO("AbilityManagerProxy::SetSessionManagerService start.");
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
 
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("write interface token failed.");
         return INNER_ERR;
     }
 
-    if (!data.WriteRemoteObject(callerToken)) {
+    if (!data.WriteRemoteObject(sessionManagerService)) {
         HILOG_ERROR("token write failed.");
         return INNER_ERR;
     }

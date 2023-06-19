@@ -1131,12 +1131,12 @@ void AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
     abms->StartSpecifiedAbilityBySCB(want);
 }
 
-ErrCode AbilityManagerClient::SetSessionManagerService(const sptr<IRemoteObject> &callerToken)
+ErrCode AbilityManagerClient::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
 {
     HILOG_INFO("AbilityManagerClient::SetSessionManagerService call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->SetSessionManagerService(callerToken);
+    return abms->SetSessionManagerService(sessionManagerService);
 }
 
 sptr<IRemoteObject> AbilityManagerClient::GetSessionManagerService()

@@ -7301,9 +7301,9 @@ void AbilityManagerService::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionI
     uiAbilityLifecycleManager_->CallUIAbilityBySCB(sessionInfo);
 }
 
-int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject> &callerToken)
+int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
 {
-    if (!callerToken) {
+    if (!sessionManagerService) {
         HILOG_ERROR("SetSessionManagerService: callerToken is nullptr");
     }
     sessionManagerService_ = callerToken;
