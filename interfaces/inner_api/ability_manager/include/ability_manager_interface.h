@@ -306,6 +306,14 @@ public:
     virtual int TerminateAbilityByCaller(const sptr<IRemoteObject> &callerToken, int requestCode) = 0;
 
     /**
+     * MoveAbilityToBackground.
+     *
+     * @param token, the token of the ability to move.
+     * @param invokeLastAbility need to invoke last ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int MoveAbilityToBackground(const sptr<IRemoteObject> &token, bool invokeLastAbility) = 0;
+    /**
      * CloseAbility, close the special ability.
      *
      * @param token, the token of the ability to terminate.
@@ -655,6 +663,13 @@ public:
     virtual int StartUser(int userId) = 0;
 
     virtual int StopUser(int userId, const sptr<IStopUserCallback> &callback) = 0;
+
+    /**
+     * @brief Called when back press is dispatched.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int OnBackPressedCallBack(const sptr<IRemoteObject> &token, bool &needMoveToBackground) = 0;
 
 #ifdef SUPPORT_GRAPHICS
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) = 0;
@@ -1221,6 +1236,10 @@ public:
 
         // prepare terminate ability (67)
         CALL_ABILITY_BY_SCB,
+
+        ON_BACK_PRESSED_CALL_BACK,
+
+        MOVE_ABILITY_TO_BACKGROUND,
 
         // ipc id 1001-2000 for DMS
         // ipc id for starting ability (1001)

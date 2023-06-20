@@ -186,5 +186,16 @@ bool LifecycleDeal::PrepareTerminateAbility()
     }
     return abilityScheduler->SchedulePrepareTerminateAbility();
 }
+
+bool LifecycleDeal::OnBackPressedCallBack()
+{
+    HILOG_DEBUG("call");
+    auto abilityScheduler = GetScheduler();
+    if (abilityScheduler == nullptr) {
+        HILOG_ERROR("abilityScheduler is nullptr.");
+        return false;
+    }
+    return abilityScheduler->ScheduleBackPressed();
+}
 }  // namespace AAFwk
 }  // namespace OHOS

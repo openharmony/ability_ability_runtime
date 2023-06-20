@@ -120,6 +120,15 @@ public:
     std::shared_ptr<Mission> GetMissionById(int missionId) const;
 
     /**
+     * @brief Move ability to background with the given abilityRecord
+     *
+     * @param abilityRecord the ability to move
+     * @param flag whether need to invoke last ability.
+     * @return int error code
+     */
+    int MoveAbilityToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
+
+    /**
      * @brief Terminate ability with the given abilityRecord
      *
      * @param abilityRecord the ability to terminate
@@ -423,6 +432,8 @@ private:
         const std::shared_ptr<MissionList> &list);
     int ClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission);
     int ClearMissionLocking(int missionId, const std::shared_ptr<Mission> &mission);
+    int MoveAbilityToBackgroundLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
+    void RemoveBackgroundingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
     int TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
     /**
      * @brief remove the mission from the mission list

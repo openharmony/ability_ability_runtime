@@ -64,6 +64,7 @@ AbilitySchedulerStub::AbilitySchedulerStub()
     requestFuncMap_[CONTINUE_ABILITY] = &AbilitySchedulerStub::ContinueAbilityInner;
     requestFuncMap_[DUMP_ABILITY_RUNNER_INNER] = &AbilitySchedulerStub::DumpAbilityInfoInner;
     requestFuncMap_[SCHEDULE_SHARE_DATA] = &AbilitySchedulerStub::ShareDataInner;
+    requestFuncMap_[SCHEDULE_BACK_PRESSED] = &AbilitySchedulerStub::BackPressedInner;
     
 #ifdef ABILITY_COMMAND_FOR_TEST
     requestFuncMap_[BLOCK_ABILITY_INNER] = &AbilitySchedulerStub::BlockAbilityInner;
@@ -170,6 +171,16 @@ int AbilitySchedulerStub::CommandAbilityInner(MessageParcel &data, MessageParcel
     int startId = data.ReadInt32();
     HILOG_INFO("ReadInt32, startId:%{public}d", startId);
     ScheduleCommandAbility(*want, reStart, startId);
+    return NO_ERROR;
+}
+
+int AbilitySchedulerStub::BackPressedInner(MessageParcel &data, MessageParcel &reply)
+{
+    bool ret = ScheduleBackPressed();
+    if (!reply.WriteBool(ret)) {
+        HILOG_ERROR("fail to write ret");
+        return ERR_INVALID_VALUE;
+    }
     return NO_ERROR;
 }
 
