@@ -306,7 +306,7 @@ struct SelectorPcDialog {
               .backgroundColor(this.hapListBackGround[current])
               .borderRadius(12)
               .height(64)
-              .width(346)
+              .width(328)
             }, item => item)
             ListItem() {
               Button($r("app.string.message_moreOpenMode_selector"),{ type: ButtonType.Capsule })
@@ -392,7 +392,7 @@ struct SelectorPcDialog {
               .backgroundColor(this.moreHapListBackGround[current])
               .borderRadius(12)
               .height(64)
-              .width(346)
+              .width(328)
               .visibility(this.moreHapListVisibility)
             }, item => item)
           }
