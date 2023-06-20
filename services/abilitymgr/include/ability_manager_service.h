@@ -282,6 +282,15 @@ public:
     virtual int TerminateAbilityByCaller(const sptr<IRemoteObject> &callerToken, int requestCode) override;
 
     /**
+     * MoveAbilityToBackground.
+     *
+     * @param token, the token of the ability to move background.
+     * @param invokeLastAbility need to invoke last ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int MoveAbilityToBackground(const sptr<IRemoteObject> &token, bool invokeLastAbility) override;
+
+    /**
      * CloseAbility, close the special ability.
      *
      * @param token, the token of the ability to terminate.
@@ -792,6 +801,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int DumpAbilityInfoDone(std::vector<std::string> &infos, const sptr<IRemoteObject> &callerToken) override;
+    
+    virtual int OnBackPressedCallBack(const sptr<IRemoteObject> &token, bool &needMoveToBackground) override;
 
 #ifdef SUPPORT_GRAPHICS
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) override;

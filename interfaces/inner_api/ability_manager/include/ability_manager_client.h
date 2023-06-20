@@ -274,6 +274,15 @@ public:
      */
     ErrCode SendResultToAbility(int requestCode, int resultCode, Want& resultWant);
 
+/**
+     * MoveAbilityToBackground.
+     *
+     * @param token Ability token.
+     * @param invokeLastAbility need to invoke last ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MoveAbilityToBackground(const sptr<IRemoteObject> &token, bool invokeLastAbility);
+
     /**
      * CloseAbility with want, return want from ability manager service.
      *
@@ -798,6 +807,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PrepareTerminateAbility(const sptr<IRemoteObject> &token, sptr<IPrepareTerminateCallback> &callback);
+
+    /**
+     * @brief Get OnBackPressedCallBack by token.
+     * @param token Ability token.
+     * @param needMoveToBackground true if ability will be moved to background; false if ability will be terminated.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode OnBackPressedCallBack(const sptr<IRemoteObject> &token, bool &needMoveToBackground);
 #ifdef SUPPORT_GRAPHICS
     /**
      * Set mission label of this ability.

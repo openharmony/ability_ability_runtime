@@ -427,6 +427,16 @@ void AbilityContextImpl::MinimizeAbility(bool fromUser)
     }
 }
 
+ErrCode AbilityContextImpl::MoveAbilityToBackground(bool invokeLastAbility)
+{
+    HILOG_DEBUG("call");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->MoveAbilityToBackground(token_, invokeLastAbility);
+    if (err != ERR_OK) {
+        HILOG_ERROR("MoveAbilityToBackground failed: %{public}d", err);
+    }
+    return err;
+}
+
 ErrCode AbilityContextImpl::TerminateSelf()
 {
     HILOG_DEBUG("TerminateSelf");

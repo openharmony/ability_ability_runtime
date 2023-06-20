@@ -200,6 +200,8 @@ public:
      */
     virtual void MinimizeAbility(bool fromUser = false) = 0;
 
+    virtual ErrCode MoveAbilityToBackground(bool invokeLastAbility) = 0;
+
     virtual ErrCode TerminateSelf() = 0;
 
     virtual ErrCode CloseAbility() = 0;

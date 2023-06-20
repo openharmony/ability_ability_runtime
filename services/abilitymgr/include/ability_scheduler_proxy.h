@@ -87,6 +87,11 @@ public:
 
     void ScheduleCommandAbilityWindow(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd) override;
 
+    /**
+     * ScheduleBackPressed, schedule ability to back pressed.
+     */
+    bool ScheduleBackPressed() override;
+
     /*
      * SchedulePrepareTerminateAbility, schedule service ability to prepare terminate.
      */

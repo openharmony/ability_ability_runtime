@@ -1818,6 +1818,32 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     return eventInfo.errCode;
 }
 
+int AbilityManagerService::MoveAbilityToBackground(const sptr<IRemoteObject> &token, bool invokeLastAbility)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("Move ability to background begin");
+    if (!VerificationAllToken(token)) {
+        return ERR_INVALID_VALUE;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (!JudgeSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    if (!IsAbilityControllerForeground(abilityRecord->GetAbilityInfo().bundleName)) {
+        return ERR_WOULD_BLOCK;
+    }
+
+    auto ownerUserId = abilityRecord->GetOwnerMissionUserId();
+    auto missionListManager = GetListManagerByUserId(ownerUserId);
+    if (!missionListManager) {
+        HILOG_ERROR("missionListManager is Null. ownerUserId=%{public}d", ownerUserId);
+        return ERR_INVALID_VALUE;
+    }
+    return missionListManager->MoveAbilityToBackground(abilityRecord, invokeLastAbility);
+}
+
 int AbilityManagerService::TerminateAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant)
 {
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
@@ -6332,6 +6358,21 @@ int AbilityManagerService::DumpAbilityInfoDone(std::vector<std::string> &infos, 
         return CHECK_PERMISSION_FAILED;
     }
     abilityRecord->DumpAbilityInfoDone(infos);
+    return ERR_OK;
+}
+
+int AbilityManagerService::OnBackPressedCallBack(const sptr<IRemoteObject> &token, bool &needMoveToBackground)
+{
+    HILOG_DEBUG("call");
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!JudgeSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    needMoveToBackground = abilityRecord->OnBackPressedCallBack();
     return ERR_OK;
 }
 
