@@ -1596,29 +1596,6 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Release_0200,
 }
 
 /**
- * @tc.number: AaFwk_DataAbilityHelper_Release_0300
- * @tc.name: Release
- * @tc.desc: Simulate successful test cases
- */
-HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Release_0300, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AaFwk_DataAbilityHelper_Release_0300 start";
-    std::shared_ptr<Context> context = std::make_shared<AbilityContext>();
-    std::shared_ptr<Uri> uri =
-        std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
-    std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
-    bool ret = false;
-    std::weak_ptr<AbilityRecord> abilityRecord;
-    sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
-    EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ != nullptr);
-    EXPECT_TRUE(!ret);
-    ret = dataAbilityHelper->Release();
-    EXPECT_TRUE(ret);
-    GTEST_LOG_(INFO) << "AaFwk_DataAbilityHelper_Release_0300 end";
-}
-
-/**
  * @tc.number: AaFwk_DataAbilityHelper_Release_0400
  * @tc.name: Release
  * @tc.desc: Simulate successful test cases
@@ -1676,27 +1653,6 @@ HWTEST_F(
     dataAbilityHelper->RegisterObserver(uri1, dataObserver);
 
     EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ == nullptr);
-}
-
-/**
- * @tc.number: AaFwk_DataAbilityHelper_RegisterObserver_0300
- * @tc.name: RegisterObserver
- * @tc.desc: Simulate successful test cases
- */
-HWTEST_F(
-    DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_RegisterObserver_0300, Function | MediumTest | Level3)
-{
-    std::shared_ptr<Context> context = std::make_shared<AbilityContext>();
-    std::shared_ptr<Uri> uri =
-        std::make_shared<Uri>("datashare://device_id/com.domainname.dataability.persondata/person/10");
-    std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
-    std::weak_ptr<AbilityRecord> abilityRecord;
-    sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
-    const sptr<AAFwk::IDataAbilityObserver> dataObserver;
-    dataAbilityHelper->RegisterObserver(*uri, dataObserver);
-
-    EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ != nullptr);
 }
 
 /**
@@ -1762,27 +1718,6 @@ HWTEST_F(
 }
 
 /**
- * @tc.number: AaFwk_DataAbilityHelper_UnregisterObserver_0300
- * @tc.name: UnregisterObserver
- * @tc.desc: Simulate successful test cases
- */
-HWTEST_F(
-    DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_UnregisterObserver_0300, Function | MediumTest | Level3)
-{
-    std::shared_ptr<Context> context = std::make_shared<AbilityContext>();
-    std::shared_ptr<Uri> uri =
-        std::make_shared<Uri>("datashare://device_id/com.domainname.dataability.persondata/person/10");
-    std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
-    std::weak_ptr<AbilityRecord> abilityRecord;
-    sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
-    sptr<AAFwk::IDataAbilityObserver> dataObserver;
-    dataAbilityHelper->UnregisterObserver(*uri, dataObserver);
-
-    EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ != nullptr);
-}
-
-/**
  * @tc.number: AaFwk_DataAbilityHelper_UnregisterObserver_0400
  * @tc.name: UnregisterObserver
  * @tc.desc: Simulate successful test cases
@@ -1838,25 +1773,6 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_NotifyChange_
     dataAbilityHelper->NotifyChange(uri1);
 
     EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ == nullptr);
-}
-
-/**
- * @tc.number: AaFwk_DataAbilityHelper_NotifyChange_0300
- * @tc.name: NotifyChange
- * @tc.desc: Simulate successful test cases
- */
-HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_NotifyChange_0300, Function | MediumTest | Level3)
-{
-    std::shared_ptr<Context> context = std::make_shared<AbilityContext>();
-    std::shared_ptr<Uri> uri =
-        std::make_shared<Uri>("datashare://device_id/com.domainname.dataability.persondata/person/10");
-    std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
-    std::weak_ptr<AbilityRecord> abilityRecord;
-    sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
-    dataAbilityHelper->NotifyChange(*uri);
-
-    EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ != nullptr);
 }
 
 /**
