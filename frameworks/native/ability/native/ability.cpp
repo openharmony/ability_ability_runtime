@@ -1635,6 +1635,7 @@ void Ability::InitWindow(int32_t displayId, sptr<Rosen::WindowOption> option)
         HILOG_ERROR("Ability::InitWindow abilityWindow_ is nullptr");
         return;
     }
+    abilityWindow_->SetSessionInfo(sessionInfo_);
     abilityWindow_->InitWindow(abilityContext_, sceneListener_, displayId, option, securityFlag_);
 }
 
