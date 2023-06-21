@@ -38,7 +38,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 using namespace testing::ext;
-
+std::string DATA_SHARE_URI = "datashare:///device_id/com.domainname.dataability.persondata/person/10";
 class DataAbilityHelperForObserverTest : public testing::Test {
 public:
     DataAbilityHelperForObserverTest()
@@ -152,7 +152,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_GetFileTypes_
     std::string mimeTypeFilter("mimeTypeFiltertest");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     auto returnGetFileTypes = [&](const Uri &uri, const std::string &mimeTypeFilter) {
         std::vector<std::string> matchedMIMEs;
@@ -270,7 +270,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenFile_0300
     std::string mode("modetest");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     dataAbilityHelper->callFromJs_ = true;
     // Test to AbilityThread interface
     auto returnOpenFile = [&](const Uri &uri, const std::string &mode) {
@@ -304,7 +304,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenFile_0400
     std::string mode("modetest");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     dataAbilityHelper->callFromJs_ = false;
     // Test to AbilityThread interface
     auto returnOpenFile = [&](const Uri &uri, const std::string &mode) {
@@ -421,7 +421,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Insert_0300, 
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     NativeRdb::ValuesBucket val;
     val.PutInt("valtest", 20);
     // Test to AbilityThread interface
@@ -548,7 +548,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Update_0300, 
     NativeRdb::DataAbilityPredicates predicates("predicatestest");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     auto returnUpdate = [&](
         const Uri &uri, const NativeRdb::ValuesBucket &val, const NativeRdb::DataAbilityPredicates &predicates) {
@@ -664,7 +664,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Delete_0300, 
     NativeRdb::DataAbilityPredicates predicates("predicatestest");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     dataAbilityHelper->dataAbilityHelperImpl_ = nullptr;
 
     EXPECT_EQ(dataAbilityHelper->Delete(*uri, predicates), -1);
@@ -780,7 +780,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Query_0300, F
     NativeRdb::DataAbilityPredicates predicates("predicatestest");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     auto returnQuery =
         [&](const Uri &uri, const std::vector<std::string> &columns,
@@ -816,7 +816,8 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Query_0400, F
     NativeRdb::DataAbilityPredicates predicates("predicatestest");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     auto returnQuery =
         [&](const Uri &uri, const std::vector<std::string> &columns,
@@ -932,7 +933,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_GetType_0300,
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     auto returnGetType = [&](const Uri &uri) {
         std::string type("Type1");
@@ -1046,7 +1047,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_OpenRawFile_0
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     std::string mode("modetest");
     auto returnOpenRawFile = [&](const Uri &uri, const std::string &mode) {
@@ -1155,7 +1156,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Reload_0300, 
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     PacMap extras;
     auto returnReload = [&](const Uri &uri, const PacMap &extras) { return true; };
@@ -1262,7 +1263,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_BatchInsert_0
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);;
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     std::vector<NativeRdb::ValuesBucket> values;
     NativeRdb::ValuesBucket value1;
@@ -1383,7 +1384,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_NormalizeUri_
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     auto returnNormalizeUri = [&](const Uri &uri) {
         Uri uriValue("dataability://device_id/com.domainname.dataability.");
@@ -1499,7 +1500,7 @@ HWTEST_F(
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     // Test to AbilityThread interface
     auto returnDenormalizeUri = [&](const Uri &uri) {
         Uri uriValue("dataability://device_id/com.domainname.dataability.");
@@ -1609,7 +1610,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Release_0300,
     bool ret = false;
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ != nullptr);
     EXPECT_TRUE(!ret);
     ret = dataAbilityHelper->Release();
@@ -1691,7 +1692,7 @@ HWTEST_F(
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     const sptr<AAFwk::IDataAbilityObserver> dataObserver;
     dataAbilityHelper->RegisterObserver(*uri, dataObserver);
 
@@ -1774,7 +1775,7 @@ HWTEST_F(
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     sptr<AAFwk::IDataAbilityObserver> dataObserver;
     dataAbilityHelper->UnregisterObserver(*uri, dataObserver);
 
@@ -1852,7 +1853,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_NotifyChange_
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     dataAbilityHelper->NotifyChange(*uri);
 
     EXPECT_TRUE(dataAbilityHelper->dataShareHelper_ != nullptr);
@@ -1929,7 +1930,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_ExecuteBatch_
     std::shared_ptr<DataAbilityHelper> dataAbilityHelper = DataAbilityHelper::Creator(context);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     std::string uriString;
     Uri uri1(uriString);
     std::vector<std::shared_ptr<DataAbilityOperation>> operations;
@@ -2242,7 +2243,7 @@ HWTEST_F(
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    auto dataShareHelper = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    auto dataShareHelper = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
     auto result = std::make_shared<DataAbilityHelper>(dataShareHelper);
     EXPECT_TRUE(result != nullptr);
 
@@ -2264,7 +2265,7 @@ HWTEST_F(DataAbilityHelperForObserverTest, AaFwk_DataAbilityHelper_Call_0100, Fu
     EXPECT_TRUE(dataAbilityHelper != nullptr);
     std::weak_ptr<AbilityRecord> abilityRecord;
     sptr<IRemoteObject> remote = new OHOS::AAFwk::Token(abilityRecord);
-    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, uri->ToString());
+    dataAbilityHelper->dataShareHelper_ = DataShare::DataShareHelper::Creator(remote, DATA_SHARE_URI);
 
     const std::string method;
     const std::string arg;
