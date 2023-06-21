@@ -3674,12 +3674,12 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
     HILOG_DEBUG("called");
-#ifdef ABILITY_COMMAND_FOR_TEST
-    if ((AAFwk::PermissionVerification::GetInstance()->IsSACall()) ||
-        AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
-#else
-    if ((AAFwk::PermissionVerification::GetInstance()->IsSACall())) {
-#endif
+// #ifdef ABILITY_COMMAND_FOR_TEST
+//     if ((AAFwk::PermissionVerification::GetInstance()->IsSACall()) ||
+//         AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
+// #else
+//     if ((AAFwk::PermissionVerification::GetInstance()->IsSACall())) {
+// #endif
         int32_t pid = faultData.pid;
         auto appRecord = GetAppRunningRecordByPid(pid);
         if (appRecord == nullptr) {
@@ -3694,10 +3694,10 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
             faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(),
             uid, pid, bundleName.c_str());
         appRecord->NotifyAppFault(transformedFaultData);
-    } else {
-        HILOG_DEBUG("this is not called by SA.");
-        return AAFwk::CHECK_PERMISSION_FAILED;
-    }
+    // } else {
+    //     HILOG_DEBUG("this is not called by SA.");
+    //     return AAFwk::CHECK_PERMISSION_FAILED;
+    // }
     return ERR_OK;
 }
 
