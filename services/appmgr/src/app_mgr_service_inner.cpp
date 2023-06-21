@@ -3835,6 +3835,10 @@ int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &b
     return ERR_OK;
 }
 void AppMgrServiceInner::KillRenderProcess(const std::shared_ptr<AppRunningRecord> &appRecord) {
+    if (appRecord == nullptr) {
+        HILOG_ERROR("appRecord is nullptr.");
+        return;
+    }
     auto renderRecordMap = appRecord->GetRenderRecordMap();
     if (!renderRecordMap.empty()) {
         for (auto iter : renderRecordMap) {
