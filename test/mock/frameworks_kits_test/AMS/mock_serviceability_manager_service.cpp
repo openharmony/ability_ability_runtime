@@ -157,17 +157,28 @@ int MockServiceAbilityManagerService::ScheduleCommandAbilityDone(const sptr<IRem
     return 0;
 }
 
+int MockServiceAbilityManagerService::ScheduleCommandAbilityWindowDone(
+    const sptr<IRemoteObject> &token,
+    const sptr<SessionInfo> &sessionInfo,
+    WindowCommand winCmd,
+    AbilityCommand abilityCmd)
+{
+    return 0;
+}
+
 int MockServiceAbilityManagerService::TerminateAbilityResult(const sptr<IRemoteObject>& token, int startId)
 {
     return 0;
 }
 
-int MockServiceAbilityManagerService::TerminateAbilityByCaller(const sptr<IRemoteObject>& callerToken, int requestCode)
+int MockServiceAbilityManagerService::TerminateAbilityByCaller(const sptr<IRemoteObject>& callerToken,
+    int requestCode)
 {
     return 0;
 }
 
-int MockServiceAbilityManagerService::StopServiceAbility(const Want& want, int32_t userId, const sptr<IRemoteObject> &token)
+int MockServiceAbilityManagerService::StopServiceAbility(const Want& want, int32_t userId,
+    const sptr<IRemoteObject> &token)
 {
     GTEST_LOG_(INFO) << "MockServiceAbilityManagerService::StopServiceAbility";
     if (abilityScheduler_ != nullptr) {

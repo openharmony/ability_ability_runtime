@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -254,6 +254,16 @@ class MockAppMgrStub : public AppMgrStub {
     {
         return 0;
     }
+
+    int32_t NotifyAppFault(const FaultData &faultData) override
+    {
+        return 0;
+    }
+
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override
+    {
+        return 0;
+    }
 };
 
 /*
@@ -411,11 +421,7 @@ HWTEST_F(MainThreadTest, InitCreate_0100, TestSize.Level1)
     std::shared_ptr<ContextDeal> contextDeal;
     ApplicationInfo appInfo;
     ProcessInfo processInfo;
-    Profile appProfile;
-    EXPECT_TRUE(mainThread_->InitCreate(contextDeal, appInfo, processInfo, appProfile));
-
-    mainThread_->watchdog_ = nullptr;
-    EXPECT_TRUE(mainThread_->InitCreate(contextDeal, appInfo, processInfo, appProfile));
+    EXPECT_TRUE(mainThread_->InitCreate(contextDeal, appInfo, processInfo));
     HILOG_INFO("%{public}s end.", __func__);
 }
 
@@ -466,7 +472,7 @@ HWTEST_F(MainThreadTest, GetHqfFileAndHapPath_0100, TestSize.Level1)
     std::string bundleName = "com.ohos.quickfix";
     std::vector<std::pair<std::string, std::string>> fileMap;
     auto ret = mainThread_->GetHqfFileAndHapPath(bundleName, fileMap);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     HILOG_INFO("%{public}s end.", __func__);
 }
 
@@ -787,8 +793,7 @@ HWTEST_F(MainThreadTest, HandleProcessSecurityExit_0100, TestSize.Level1)
     std::shared_ptr<ContextDeal> contextDeal;
     ApplicationInfo appInfo;
     ProcessInfo processInfo;
-    Profile appProfile;
-    mainThread_->InitCreate(contextDeal, appInfo, processInfo, appProfile);
+    mainThread_->InitCreate(contextDeal, appInfo, processInfo);
     mainThread_->HandleProcessSecurityExit();
     HILOG_INFO("%{public}s end.", __func__);
 }
@@ -1522,10 +1527,11 @@ HWTEST_F(MainThreadTest, LoadNativeLiabrary_0100, TestSize.Level1)
     HILOG_INFO("%{public}s start.", __func__);
     std::string nativeLibraryPath = "";
     ASSERT_NE(mainThread_, nullptr);
-    mainThread_->LoadNativeLiabrary(nativeLibraryPath);
+    BundleInfo bundleInfo;
+    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
 
     nativeLibraryPath = "test/";
-    mainThread_->LoadNativeLiabrary(nativeLibraryPath);
+    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
     HILOG_INFO("%{public}s end.", __func__);
 }
 #endif

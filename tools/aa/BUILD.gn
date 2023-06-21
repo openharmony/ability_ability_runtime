@@ -62,13 +62,13 @@ ohos_source_set("tools_aa_source_set") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
 
   subsystem_name = "ability"
-  part_name = "ability_tools"
+  part_name = "ability_runtime"
 }
 
 ohos_executable("aa") {
@@ -84,7 +84,7 @@ ohos_executable("aa") {
   external_deps = [
     "ability_base:base",
     "ability_base:configuration",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 
@@ -113,13 +113,13 @@ ohos_executable("aa") {
   install_enable = true
 
   subsystem_name = "ability"
-  part_name = "ability_tools"
+  part_name = "ability_runtime"
 }
 
 ohos_prebuilt_etc("shell_command_executor_config.json") {
   source = "resource/shell_command_executor_config.json"
   subsystem_name = "ability"
-  part_name = "ability_tools"
+  part_name = "ability_runtime"
 }
 
 group("tools_aa") {

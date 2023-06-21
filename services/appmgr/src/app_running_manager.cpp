@@ -64,7 +64,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
     appRecord->SetStageModelState(isStageBasedModel);
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     appRunningRecordMap_.emplace(recordId, appRecord);
     return appRecord;
 }
@@ -72,6 +72,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
     const std::string &processName, const int uid, const BundleInfo &bundleInfo)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("appName: %{public}s, processName: %{public}s, uid : %{public}d",
         appName.c_str(), processName.c_str(), uid);
 
@@ -90,7 +91,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     };
 
     // If it is not empty, look for whether it can come in the same process
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     if (jointUserId.empty()) {
         for (const auto &item : appRunningRecordMap_) {
             const auto &appRecord = item.second;
@@ -118,7 +119,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
 
 bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     if (appRunningRecordMap_.empty()) {
         return false;
     }
@@ -133,7 +134,12 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByPid(const pid_t pid)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
+    return GetAppRunningRecordByPidInner(pid);
+}
+
+std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByPidInner(const pid_t pid)
+{
     auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
         return pair.second->GetPriorityObject()->GetPid() == pid;
     });
@@ -143,7 +149,13 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByPid(co
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilityToken(
     const sptr<IRemoteObject> &abilityToken)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
+    return GetAppRunningRecordByTokenInner(abilityToken);
+}
+
+std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByTokenInner(
+    const sptr<IRemoteObject> &abilityToken)
+{
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetAbilityRunningRecordByToken(abilityToken)) {
@@ -155,7 +167,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilit
 
 bool AppRunningManager::ProcessExitByBundleName(const std::string &bundleName, std::list<pid_t> &pids)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         // condition [!appRecord->IsKeepAliveApp()] Is to not kill the resident process.
@@ -179,7 +191,7 @@ bool AppRunningManager::ProcessExitByBundleName(const std::string &bundleName, s
 
 bool AppRunningManager::GetPidsByUserId(int32_t userId, std::list<pid_t> &pids)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord) {
@@ -200,7 +212,7 @@ bool AppRunningManager::GetPidsByUserId(int32_t userId, std::list<pid_t> &pids)
 
 int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     int32_t result = ERR_OK;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -221,7 +233,7 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
 bool AppRunningManager::ProcessExitByBundleNameAndUid(
     const std::string &bundleName, const int uid, std::list<pid_t> &pids)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord) {
@@ -245,7 +257,7 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
 
 bool AppRunningManager::ProcessExitByPid(pid_t pid)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord) {
@@ -273,7 +285,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
         HILOG_ERROR("object is null");
         return nullptr;
     }
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     const auto &iter =
         std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&object](const auto &pair) {
             if (pair.second && pair.second->GetApplicationClient() != nullptr) {
@@ -295,19 +307,19 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
 
 std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> AppRunningManager::GetAppRunningRecordMap()
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     return appRunningRecordMap_;
 }
 
 void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     appRunningRecordMap_.erase(recordId);
 }
 
 void AppRunningManager::ClearAppRunningRecordMap()
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     appRunningRecordMap_.clear();
 }
 
@@ -331,7 +343,7 @@ void AppRunningManager::HandleTerminateTimeOut(int64_t eventId)
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetTerminatingAppRunningRecord(
     const sptr<IRemoteObject> &abilityToken)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetAbilityByTerminateLists(abilityToken)) {
@@ -344,7 +356,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetTerminatingAppRunningRec
 std::shared_ptr<AbilityRunningRecord> AppRunningManager::GetAbilityRunningRecord(const int64_t eventId)
 {
     HILOG_INFO("Get ability running record by eventId.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (auto &item : appRunningRecordMap_) {
         if (item.second) {
             auto abilityRecord = item.second->GetAbilityRunningRecord(eventId);
@@ -359,7 +371,7 @@ std::shared_ptr<AbilityRunningRecord> AppRunningManager::GetAbilityRunningRecord
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecord(const int64_t eventId)
 {
     HILOG_INFO("Get app running record by eventId.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&eventId](const auto &pair) {
         return pair.second->GetEventId() == eventId;
     });
@@ -464,16 +476,16 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 void AppRunningManager::GetRunningProcessInfoByToken(
     const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
-    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    std::lock_guard<std::mutex> guard(lock_);
+    auto appRecord = GetAppRunningRecordByTokenInner(token);
 
     AssignRunningProcessInfoByAppRecord(appRecord, info);
 }
 
 void AppRunningManager::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
-    auto appRecord = GetAppRunningRecordByPid(pid);
+    std::lock_guard<std::mutex> guard(lock_);
+    auto appRecord = GetAppRunningRecordByPidInner(pid);
 
     AssignRunningProcessInfoByAppRecord(appRecord, info);
 }
@@ -509,7 +521,7 @@ void AppRunningManager::ClipStringContent(const std::regex &re, const std::strin
 void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &list)
 {
     HILOG_INFO("%{public}s, begin.", __func__);
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (!appRecord) {
@@ -517,7 +529,7 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
             return;
         }
         auto state = appRecord->GetState();
-        if (state == ApplicationState::APP_STATE_FOREGROUND) {
+        if (state == ApplicationState::APP_STATE_FOREGROUND && !appRecord->IsUIExtension()) {
             AppStateData appData;
             appData.bundleName = appRecord->GetBundleName();
             appData.uid = appRecord->GetUid();
@@ -570,7 +582,7 @@ void AppRunningManager::HandleStartSpecifiedAbilityTimeOut(const int64_t eventId
 int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 {
     HILOG_INFO("call %{public}s", __func__);
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     HILOG_INFO("current app size %{public}zu", appRunningRecordMap_.size());
     int32_t result = ERR_OK;
     for (const auto &item : appRunningRecordMap_) {
@@ -585,7 +597,7 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     HILOG_INFO("call %{public}s, current app size %{public}zu", __func__, appRunningRecordMap_.size());
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -599,7 +611,7 @@ int32_t AppRunningManager::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
 {
     std::shared_ptr<AppRunningRecord> appRecord;
     {
-        std::lock_guard<std::recursive_mutex> guard(lock_);
+        std::lock_guard<std::mutex> guard(lock_);
         HILOG_INFO("call %{public}s, current app size %{public}zu", __func__, appRunningRecordMap_.size());
         auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
             auto priorityObject = pair.second->GetPriorityObject();
@@ -621,10 +633,19 @@ int32_t AppRunningManager::DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByRenderPid(const pid_t pid)
 {
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
-        auto renderRecord = pair.second->GetRenderRecord();
-        return renderRecord && renderRecord->GetPid() == pid;
+        auto renderRecordMap = pair.second->GetRenderRecordMap();
+        if (renderRecordMap.empty()) {
+            return false;
+        }
+        for (auto it : renderRecordMap) {
+            auto renderRecord = it.second;
+            if (renderRecord && renderRecord->GetPid() == pid) {
+                return true;
+            }
+        }
+        return false;
     });
     return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
 }
@@ -641,25 +662,34 @@ std::shared_ptr<RenderRecord> AppRunningManager::OnRemoteRenderDied(const wptr<I
         return nullptr;
     }
 
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
+    std::shared_ptr<RenderRecord> renderRecord;
     const auto &it =
-        std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&object](const auto &pair) {
+        std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(),
+            [&object, &renderRecord](const auto &pair) {
             if (!pair.second) {
                 return false;
             }
 
-            auto renderRecord = pair.second->GetRenderRecord();
-            if (!renderRecord) {
+            auto renderRecordMap = pair.second->GetRenderRecordMap();
+            if (renderRecordMap.empty()) {
                 return false;
             }
-
-            auto scheduler = renderRecord->GetScheduler();
-            return scheduler && scheduler->AsObject() == object;
+            for (auto iter : renderRecordMap) {
+                if (iter.second == nullptr) {
+                    continue;
+                }
+                auto scheduler = iter.second->GetScheduler();
+                if (scheduler && scheduler->AsObject() == object) {
+                    renderRecord = iter.second;
+                    return true;
+                }
+            }
+            return false;
         });
     if (it != appRunningRecordMap_.end()) {
         auto appRecord = it->second;
-        auto renderRecord = appRecord->GetRenderRecord();
-        appRecord->SetRenderRecord(nullptr);
+        appRecord->RemoveRenderRecord(renderRecord);
         return renderRecord;
     }
     return nullptr;
@@ -669,7 +699,7 @@ bool AppRunningManager::GetAppRunningStateByBundleName(const std::string &bundle
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetBundleName() == bundleName) {
@@ -685,7 +715,7 @@ int32_t AppRunningManager::NotifyLoadRepairPatch(const std::string &bundleName, 
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     int32_t result = ERR_OK;
     bool loadSucceed = false;
     sptr<QuickFixCallbackWithRecord> callbackByRecord = new (std::nothrow) QuickFixCallbackWithRecord(callback);
@@ -711,7 +741,7 @@ int32_t AppRunningManager::NotifyHotReloadPage(const std::string &bundleName, co
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     int32_t result = ERR_OK;
     bool reloadPageSucceed = false;
     sptr<QuickFixCallbackWithRecord> callbackByRecord = new (std::nothrow) QuickFixCallbackWithRecord(callback);
@@ -738,7 +768,7 @@ int32_t AppRunningManager::NotifyUnLoadRepairPatch(const std::string &bundleName
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     int32_t result = ERR_OK;
     bool unLoadSucceed = false;
     sptr<QuickFixCallbackWithRecord> callbackByRecord = new (std::nothrow) QuickFixCallbackWithRecord(callback);
@@ -763,10 +793,14 @@ int32_t AppRunningManager::NotifyUnLoadRepairPatch(const std::string &bundleName
 bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &foregroundingRecord)
 {
     HILOG_DEBUG("function called.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
+    if (foregroundingRecord.IsUIExtension()) {
+        return false;
+    }
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr || appRecord->GetBundleName() != foregroundingRecord.GetBundleName()) {
+        if (appRecord == nullptr || appRecord->GetBundleName() != foregroundingRecord.GetBundleName()
+            || appRecord->IsUIExtension()) {
             continue;
         }
         auto state = appRecord->GetState();
@@ -781,12 +815,15 @@ bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &for
 bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
 {
     HILOG_DEBUG("function called.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord == nullptr) {
             HILOG_ERROR("appRecord is nullptr");
             return false;
+        }
+        if (appRecord->IsUIExtension()) {
+            continue;
         }
         auto state = appRecord->GetState();
         if (appRecord && appRecord->GetBundleName() == bundleName &&
@@ -800,7 +837,7 @@ bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
 bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focusedRecord)
 {
     HILOG_DEBUG("check focus function called.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord == nullptr || appRecord->GetBundleName() != focusedRecord.GetBundleName()) {
@@ -816,7 +853,7 @@ bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focuse
 bool AppRunningManager::IsApplicationUnfocused(const std::string &bundleName)
 {
     HILOG_DEBUG("check is application unfocused.");
-    std::lock_guard<std::recursive_mutex> guard(lock_);
+    std::lock_guard<std::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetBundleName() == bundleName && appRecord->GetFocusFlag()) {

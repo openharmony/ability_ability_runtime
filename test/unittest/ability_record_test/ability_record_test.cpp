@@ -888,6 +888,23 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_003, TestSize.Leve
 
 /*
  * Feature: AbilityRecord
+ * Function: ForegroundAbility
+ * SubFunction: ForegroundAbility
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityRecord ForegroundAbility
+ */
+HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_ForegroundAbility_004, TestSize.Level1)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
+    EXPECT_NE(abilityRecord, nullptr);
+    Closure task = []() {};
+    abilityRecord->lifecycleDeal_ = std::make_unique<LifecycleDeal>();
+    abilityRecord->ForegroundAbility(task);
+}
+
+/*
+ * Feature: AbilityRecord
  * Function: ProcessForegroundAbility
  * SubFunction: ProcessForegroundAbility
  * FunctionPoints: NA
@@ -1801,10 +1818,9 @@ HWTEST_F(AbilityRecordTest, SystemAbilityCallerRecord_SendResultToSystemAbility_
     std::shared_ptr<SystemAbilityCallerRecord> systemAbilityRecord =
         std::make_shared<SystemAbilityCallerRecord>(srcAbilityId, abilityRecord->GetToken());
     int requestCode = 0;
-    int resultCode = 0;
-    Want resultWant;
-    sptr<IRemoteObject> callerToken = abilityRecord->GetToken();
-    systemAbilityRecord->SendResultToSystemAbility(requestCode, resultCode, resultWant, callerToken);
+    int32_t callerUid = 0;
+    uint32_t accessToken = 0;
+    systemAbilityRecord->SendResultToSystemAbility(requestCode, systemAbilityRecord, callerUid, accessToken, false);
 }
 
 /*
@@ -2340,6 +2356,20 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetRecoveryInfo_001, TestSize.Level1)
 {
     std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecord();
     EXPECT_FALSE(abilityRecord->GetRecoveryInfo());
+}
+
+/*
+ * Feature: AbilityRecord
+ * Function: IsUIExtension
+ * SubFunction: IsUIExtension
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify IsUIExtension
+ */
+HWTEST_F(AbilityRecordTest, IsUIExtension_001, TestSize.Level1)
+{
+    abilityRecord_->abilityInfo_.extensionAbilityType = AppExecFwk::ExtensionAbilityType::UI;
+    EXPECT_EQ(abilityRecord_->IsUIExtension(), true);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -303,7 +303,7 @@ public:
     int GetConnectionState() const;
     void SetConnectionState(int connectionState);
     size_t GetCallbackSize();
-    size_t ReomveAllCallbacks(ConnectRemoveKeyType key);
+    size_t RemoveAllCallbacks(ConnectRemoveKeyType key);
 
 private:
     std::list<std::shared_ptr<ConnectionCallback>> callbacks_;
@@ -372,7 +372,7 @@ struct key_compare {
     }
 };
 static std::map<ConnectionKey, sptr<NAPIAbilityConnection>, key_compare> connects_;
-static std::recursive_mutex g_connectionsLock_;
+static std::mutex g_connectionsLock_;
 static int64_t serialNumber_ = 0;
 enum ErrorCode {
     NO_ERROR = 0,

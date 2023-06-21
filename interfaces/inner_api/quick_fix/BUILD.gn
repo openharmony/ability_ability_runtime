@@ -39,15 +39,16 @@ ohos_shared_library("quickfix_manager") {
 
   defines = [ "AMS_LOG_TAG = \"QuickFixService\"" ]
 
+  deps = [ "${ability_runtime_innerkits_path}/app_manager:app_manager" ]
+
   external_deps = [
     "ability_base:want",
-    "ability_runtime:app_manager",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_single",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//commonlibrary/memory_utils/purgeable_mem_config.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/distributeddatamgr/relational_store/relational_store.gni")
 
@@ -161,8 +162,7 @@ ohos_shared_library("abilitykit_utils") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "hilog:libhilog",
     "ipc:ipc_napi_common",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -170,10 +170,7 @@ ohos_shared_library("abilitykit_utils") {
 
   if (ability_runtime_graphics) {
     deps += [ "//third_party/icu/icu4c:shared_icuuc" ]
-    external_deps += [
-      "ability_base:session_info",
-      "ace_engine:ace_uicontent",
-    ]
+    external_deps += [ "ability_base:session_info" ]
   }
 
   innerapi_tags = [ "platformsdk" ]
@@ -235,7 +232,13 @@ ohos_shared_library("abilitykit_native") {
   deps = [
     ":continuation_ipc",
     ":extension_blocklist_config",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
+    "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
+    "${ability_runtime_innerkits_path}/napi_base_context:napi_base_context",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_innerkits_path}/wantagent:wantagent_innerkits",
+    "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
@@ -249,20 +252,15 @@ ohos_shared_library("abilitykit_native") {
     "ability_base:session_info",
     "ability_base:want",
     "ability_base:zuri",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_deps_wrapper",
-    "ability_runtime:ability_manager",
-    "ability_runtime:napi_base_context",
-    "ability_runtime:runtime",
-    "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "hisysevent_native:libhisysevent",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi_common",
     "ipc_js:rpc",
@@ -280,6 +278,11 @@ ohos_shared_library("abilitykit_native") {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 
+  if (purgeable_ashmem_enable) {
+    defines += [ "IMAGE_PURGEABLE_PIXELMAP" ]
+    external_deps += [ "memory_utils:libpurgeablemem" ]
+  }
+
   if (efficiency_manager) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
@@ -289,7 +292,6 @@ ohos_shared_library("abilitykit_native") {
     ":abilitykit_utils",
     ":extensionkit_native",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
-    "${eventhandler_path}/frameworks/eventhandler:libeventhandler",
     "${init_path}/interfaces/innerkits:libbegetutil",
   ]
 
@@ -309,7 +311,6 @@ ohos_shared_library("abilitykit_native") {
 
     public_deps += [
       "${ability_base_path}:session_info",
-      "${ace_engine_path}/interfaces/inner_api/ace:ace_uicontent",
       "${multimedia_path}/interfaces/innerkits:image_native",
       "${windowmanager_path}/dm:libdm",
       "${windowmanager_path}/interfaces/kits/napi/window_runtime:windowstage_kit",
@@ -368,16 +369,19 @@ ohos_shared_library("extensionkit_native") {
 
   public_configs = [ ":extensionkit_public_config" ]
 
+  deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability:ability_context_native",
+  ]
+
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:napi_common",
-    "ability_runtime:runtime",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
   ]
 
   public_deps = [
@@ -387,10 +391,7 @@ ohos_shared_library("extensionkit_native") {
   ]
 
   if (ability_runtime_graphics) {
-    public_deps += [
-      "${ability_base_path}:session_info",
-      "${ace_engine_path}/interfaces/inner_api/ace:ace_uicontent",
-    ]
+    public_deps += [ "${ability_base_path}:session_info" ]
   }
 
   innerapi_tags = [ "platformsdk" ]
@@ -407,7 +408,9 @@ ohos_shared_library("ability_thread") {
 
   deps = [
     ":abilitykit_native",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
+    "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
 
@@ -415,12 +418,10 @@ ohos_shared_library("ability_thread") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
   ]
 
@@ -438,7 +439,6 @@ ohos_shared_library("form_extension") {
 
     sources = [
       "${ability_runtime_native_path}/ability/native/form_extension.cpp",
-      "${ability_runtime_native_path}/ability/native/form_js_event_handler.cpp",
       "${ability_runtime_native_path}/ability/native/form_runtime/form_extension_provider_client.cpp",
       "${ability_runtime_native_path}/ability/native/form_runtime/js_form_extension.cpp",
       "${ability_runtime_native_path}/ability/native/form_runtime/js_form_extension_context.cpp",
@@ -447,20 +447,20 @@ ohos_shared_library("form_extension") {
 
     deps = [
       ":abilitykit_native",
+      "${ability_runtime_innerkits_path}/runtime:runtime",
       "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+      "${ability_runtime_native_path}/ability:ability_context_native",
       "${ability_runtime_native_path}/appkit:app_context",
-      "${form_fwk_napi_path}:formutil_napi",
     ]
 
     external_deps = [
       "ability_base:want",
-      "ability_runtime:ability_context_native",
-      "ability_runtime:runtime",
       "c_utils:utils",
       "common_event_service:cesfwk_innerkits",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
-      "hiviewdfx_hilog_native:libhilog",
+      "form_fwk:formutil_napi",
+      "hilog:libhilog",
       "ipc:ipc_core",
     ]
   }
@@ -482,12 +482,10 @@ ohos_shared_library("form_extension_module") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:session_info",
-    "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 
@@ -511,21 +509,21 @@ ohos_shared_library("service_extension") {
 
   deps = [
     ":abilitykit_native",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "ipc:ipc_napi_common",
     "napi:ace_napi",
@@ -560,15 +558,17 @@ ohos_shared_library("continuation_ipc") {
 
   public_configs = [ ":ability_public_config" ]
 
-  deps = [ ":abilitykit_utils" ]
+  deps = [
+    ":abilitykit_utils",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+  ]
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_manager",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "resource_management:global_resmgr",
   ]
@@ -606,8 +606,8 @@ ohos_shared_library("data_ability_helper") {
     "common_event_service:cesfwk_innerkits",
     "data_share:datashare_common",
     "data_share:datashare_consumer",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "relational_store:rdb_data_ability_adapter",
@@ -632,12 +632,10 @@ ohos_shared_library("service_extension_module") {
   external_deps = [
     "ability_base:configuration",
     "ability_base:session_info",
-    "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 
@@ -699,7 +697,7 @@ ohos_shared_library("dialog_request_callback") {
   external_deps = [
     "ability_base:want",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 
@@ -741,25 +739,20 @@ ohos_shared_library("ui_extension") {
 
   deps = [
     ":abilitykit_native",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/ability/native:ability_business_error",
     "${ability_runtime_native_path}/appkit:app_context",
   ]
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_napi_common",
-    "ipc_js:rpc",
-    "relational_store:native_dataability",
-    "relational_store:native_rdb",
   ]
 
   subsystem_name = "ability"
@@ -773,18 +766,17 @@ ohos_shared_library("ui_extension_module") {
 
   configs = [ ":ability_config" ]
 
-  deps = [ ":ui_extension" ]
+  deps = [
+    ":ui_extension",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+  ]
 
   external_deps = [
     "ability_base:configuration",
     "ability_base:session_info",
     "ability_base:want",
-    "ability_runtime:runtime",
-    "ace_engine:ace_uicontent",
     "bundle_framework:appexecfwk_core",
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "ipc_js:rpc",
+    "hilog:libhilog",
     "napi:ace_napi",
   ]
 
