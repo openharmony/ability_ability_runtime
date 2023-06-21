@@ -64,7 +64,6 @@ ohos_unittest("context_deal_interface_test") {
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
-    "${ability_runtime_native_path}/appkit:appkit_native",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "${global_path}/resource_management/frameworks/resmgr:global_resmgr",
     "//third_party/googletest:gmock_main",
@@ -75,7 +74,7 @@ ohos_unittest("context_deal_interface_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 
@@ -123,8 +122,10 @@ ohos_unittest("application_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "resource_management:global_resmgr",
   ]
@@ -162,7 +163,8 @@ ohos_unittest("context_container_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
   ]
 }
@@ -206,7 +208,8 @@ ohos_unittest("context_deal_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "resource_management:global_resmgr",
   ]
@@ -249,7 +252,8 @@ ohos_unittest("application_impl_test") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
   ]
 }
@@ -276,15 +280,12 @@ ohos_unittest("ability_start_setting_test") {
     "ability_start_setting_test.cpp",
   ]
 
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ "//third_party/googletest:gtest_main" ]
 
   external_deps = [
     "c_utils:utils",
     "c_utils:utilsbase",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 }
@@ -323,7 +324,7 @@ ohos_unittest("watchdog_test") {
     "c_utils:utils",
     "c_utils:utilsbase",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
     "multimedia_image_framework:image_native",
     "napi:ace_napi",
@@ -349,7 +350,7 @@ ohos_unittest("mix_stack_dumper_test") {
     "ability_runtime:abilitykit_native",
     "ability_runtime:runtime",
     "common_event_service:cesfwk_innerkits",
-    "faultloggerd:libdfx_dumpcatcher",
+    "faultloggerd:libbacktrace_local",
   ]
 }
 
@@ -389,8 +390,10 @@ ohos_unittest("ability_stage_test") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "resource_management:global_resmgr",
   ]
@@ -426,7 +429,8 @@ ohos_unittest("form_extension_context_test") {
     "common_event_service:cesfwk_innerkits",
     "form_fwk:fmskit_native",
     "form_fwk:form_manager",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
   ]
 }

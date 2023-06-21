@@ -39,6 +39,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "mock_ability_controller.h"
+#include "session/host/include/session.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -309,7 +310,7 @@ HWTEST_F(AbilityManagerServiceTest, CheckCallServicePermission_001, TestSize.Lev
     abilityMs_->startUpNewRule_ = false;
     EXPECT_FALSE(abilityMs_->startUpNewRule_);
     request.abilityInfo.visible = true;
-    EXPECT_EQ(abilityMs_->CheckCallServicePermission(request), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallServicePermission(request), ERR_INVALID_VALUE);
 
     abilityMs_->startUpNewRule_ = true;
     request.abilityInfo.isStageBasedModel = false;
@@ -420,7 +421,7 @@ HWTEST_F(AbilityManagerServiceTest, CheckCallAbilityPermission_001, TestSize.Lev
     EXPECT_TRUE(abilityMs_->startUpNewRule_);
     abilityMs_->startUpNewRule_ = false;
     request.abilityInfo.visible = true;
-    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_INVALID_VALUE);
 
     abilityMs_->startUpNewRule_ = true;
     EXPECT_EQ(abilityMs_->CheckCallAbilityPermission(abilityRequest_), ERR_INVALID_VALUE);
@@ -459,34 +460,6 @@ HWTEST_F(AbilityManagerServiceTest, CheckStartByCallPermission_002, TestSize.Lev
     abilityRequest_.abilityInfo.type = AbilityType::DATA;
     EXPECT_EQ(abilityMs_->CheckStartByCallPermission(abilityRequest_), RESOLVE_CALL_ABILITY_TYPE_ERR);
     HILOG_INFO("AbilityManagerServiceTest CheckStartByCallPermission_002 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: CheckCallerPermissionOldRule
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckCallerPermissionOldRule
- */
-HWTEST_F(AbilityManagerServiceTest, CheckCallerPermissionOldRule_001, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerServiceTest CheckCallerPermissionOldRule_001 start");
-    EXPECT_EQ(abilityMs_->CheckCallerPermissionOldRule(abilityRequest_, true), RESOLVE_CALL_NO_PERMISSIONS);
-    EXPECT_EQ(abilityMs_->CheckCallerPermissionOldRule(abilityRequest_, false), ERR_OK);
-    HILOG_INFO("AbilityManagerServiceTest CheckCallerPermissionOldRule_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: CheckCallerPermissionOldRule
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckCallerPermissionOldRule
- */
-HWTEST_F(AbilityManagerServiceTest, CheckCallerPermissionOldRule_002, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerServiceTest CheckCallerPermissionOldRule_002 start");
-    abilityRequest_.callerUid = USER_ID_U100;
-    EXPECT_EQ(abilityMs_->CheckCallerPermissionOldRule(abilityRequest_, true), RESOLVE_CALL_NO_PERMISSIONS);
-    HILOG_INFO("AbilityManagerServiceTest CheckCallerPermissionOldRule_002 end");
 }
 
 /*
@@ -770,6 +743,46 @@ HWTEST_F(AbilityManagerServiceTest, MinimizeAbility_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
+ * Function: MinimizeUIAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService MinimizeUIAbilityBySCB
+ */
+HWTEST_F(AbilityManagerServiceTest, MinimizeUIAbilityBySCB_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest MinimizeUIAbilityBySCB_001 start");
+    EXPECT_EQ(abilityMs_->MinimizeUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
+
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    EXPECT_EQ(abilityMs_->MinimizeUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
+
+    Rosen::SessionInfo info;
+    sessionInfo->sessionToken = new (std::nothrow) Rosen::Session(info);
+    EXPECT_EQ(abilityMs_->MinimizeUIAbilityBySCB(sessionInfo), ERR_WRONG_INTERFACE_CALL);
+    HILOG_INFO("AbilityManagerServiceTest MinimizeUIAbilityBySCB_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CloseUIAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CloseUIAbilityBySCB
+ */
+HWTEST_F(AbilityManagerServiceTest, CloseUIAbilityBySCB_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest CloseUIAbilityBySCB_001 start");
+    EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
+
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
+
+    Rosen::SessionInfo info;
+    sessionInfo->sessionToken = new (std::nothrow) Rosen::Session(info);
+    EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(sessionInfo), ERR_WRONG_INTERFACE_CALL);
+    HILOG_INFO("AbilityManagerServiceTest CloseUIAbilityBySCB_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: ConnectAbility
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService ConnectAbility
@@ -871,6 +884,23 @@ HWTEST_F(AbilityManagerServiceTest, ContinueMission_001, TestSize.Level1)
     EXPECT_EQ(abilityMs_->ContinueMission(srcDeviceId, dstDeviceId, 1, nullptr, wantParams),
         CHECK_PERMISSION_FAILED);
     HILOG_INFO("AbilityManagerServiceTest ContinueMission_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ContinueMissionBundleName
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ContinueMissionBundleName
+ */
+HWTEST_F(AbilityManagerServiceTest, ContinueMissionBundleName_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest ContinueMissionBundleName_001 start");
+    std::string srcDeviceId = "test";
+    std::string dstDeviceId = "test";
+    AAFwk::WantParams wantParams;
+    EXPECT_EQ(abilityMs_->ContinueMission(srcDeviceId, dstDeviceId, "bundleName", nullptr, wantParams),
+        CHECK_PERMISSION_FAILED);
+    HILOG_INFO("AbilityManagerServiceTest ContinueMissionBundleName_001 end");
 }
 
 /*
@@ -2167,11 +2197,14 @@ HWTEST_F(AbilityManagerServiceTest, JudgeAbilityVisibleControl_001, TestSize.Lev
     HILOG_INFO("AbilityManagerServiceTest JudgeAbilityVisibleControl_001 start");
     AppExecFwk::AbilityInfo abilityInfo;
     abilityInfo.visible = true;
-    EXPECT_EQ(abilityMs_->JudgeAbilityVisibleControl(abilityInfo, 100), ERR_OK);
+    EXPECT_EQ(abilityMs_->JudgeAbilityVisibleControl(abilityInfo), ERR_OK);
 
     abilityInfo.visible = false;
-    EXPECT_EQ(abilityMs_->JudgeAbilityVisibleControl(abilityInfo, -1), ABILITY_VISIBLE_FALSE_DENY_REQUEST);
-    EXPECT_EQ(abilityMs_->JudgeAbilityVisibleControl(abilityInfo, 100), ABILITY_VISIBLE_FALSE_DENY_REQUEST);
+    EXPECT_EQ(abilityMs_->JudgeAbilityVisibleControl(abilityInfo), ERR_OK);
+
+    abilityInfo.applicationInfo.accessTokenId = IPCSkeleton::GetCallingTokenID();
+    EXPECT_EQ(abilityMs_->JudgeAbilityVisibleControl(abilityInfo), ERR_OK);
+
     HILOG_INFO("AbilityManagerServiceTest JudgeAbilityVisibleControl_001 end");
 }
 
@@ -2692,7 +2725,6 @@ HWTEST_F(AbilityManagerServiceTest, DelegatorMoveMissionToFront_001, TestSize.Le
     abilityMs_->currentMissionListManager_ = temp;
 
     EXPECT_EQ(abilityMs_->DelegatorMoveMissionToFront(100), MOVE_MISSION_FAILED);
-    EXPECT_EQ(abilityMs_->DelegatorMoveMissionToFront(1), MOVE_MISSION_FAILED);
     HILOG_INFO("AbilityManagerServiceTest DelegatorMoveMissionToFront_001 end");
 }
 
@@ -2956,24 +2988,6 @@ HWTEST_F(AbilityManagerServiceTest, CreateVerificationInfo_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: CheckCallerEligibility
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService CheckCallerEligibility
- */
-HWTEST_F(AbilityManagerServiceTest, CheckCallerEligibility_001, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerServiceTest CheckCallerEligibility_001 start");
-    AppExecFwk::AbilityInfo abilityInfo;
-    EXPECT_FALSE(abilityMs_->CheckCallerEligibility(abilityInfo, 100));
-
-    MyFlag::flag_ = 1;
-    EXPECT_TRUE(abilityMs_->CheckCallerEligibility(abilityInfo, 100));
-    MyFlag::flag_ = 0;
-    HILOG_INFO("AbilityManagerServiceTest CheckCallerEligibility_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: StartUser
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartUser
@@ -3041,27 +3055,17 @@ HWTEST_F(AbilityManagerServiceTest, IsCallFromBackground_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: IsUseNewStartUpRule
+ * Function: IsAbilityVisible
  * SubFunction: NA
- * FunctionPoints: AbilityManagerService IsUseNewStartUpRule
+ * FunctionPoints: AbilityManagerService IsAbilityVisible
  */
-HWTEST_F(AbilityManagerServiceTest, IsUseNewStartUpRule_001, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceTest, IsAbilityVisible_001, TestSize.Level1)
 {
-    HILOG_INFO("AbilityManagerServiceTest IsUseNewStartUpRule_001 start");
+    HILOG_INFO("AbilityManagerServiceTest IsAbilityVisible_001 start");
     AbilityRequest abilityRequest;
-    EXPECT_FALSE(abilityMs_->startUpNewRule_);
-    abilityMs_->startUpNewRule_ = false;
-    EXPECT_FALSE(abilityMs_->IsUseNewStartUpRule(abilityRequest));
-
-    abilityMs_->startUpNewRule_ = true;
-    MyFlag::flag_ = 1;
-    EXPECT_TRUE(abilityMs_->IsUseNewStartUpRule(abilityRequest));
-    MyFlag::flag_ = 2;
-    EXPECT_TRUE(abilityMs_->IsUseNewStartUpRule(abilityRequest));
-
-    EXPECT_TRUE(abilityMs_->IsUseNewStartUpRule(abilityRequest));
-    abilityMs_->startUpNewRule_ = false;
-    HILOG_INFO("AbilityManagerServiceTest IsUseNewStartUpRule_001 end");
+    abilityRequest.abilityInfo.visible = true;
+    EXPECT_TRUE(abilityMs_->IsAbilityVisible(abilityRequest));
+    HILOG_INFO("AbilityManagerServiceTest IsAbilityVisible_001 end");
 }
 
 /*
@@ -3344,6 +3348,49 @@ HWTEST_F(AbilityManagerServiceTest, StopExtensionAbility_006, TestSize.Level1)
         RESOLVE_ABILITY_ERR);
     MyFlag::flag_ = 0;
     HILOG_INFO("AbilityManagerServiceTest StopExtensionAbility_006 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RecordAppExitReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RecordAppExitReason
+ */
+HWTEST_F(AbilityManagerServiceTest, RecordAppExitReason_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest RecordAppExitReason_001 start");
+    EXPECT_EQ(abilityMs_->RecordAppExitReason(REASON_JS_ERROR), ERR_INVALID_VALUE);
+    HILOG_INFO("AbilityManagerServiceTest RecordAppExitReason_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ForceExitApp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ForceExitApp
+ */
+HWTEST_F(AbilityManagerServiceTest, ForceExitApp_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest ForceExitApp_001 start");
+    int32_t pid = 0;
+    EXPECT_EQ(abilityMs_->ForceExitApp(pid, REASON_JS_ERROR), ERR_PERMISSION_DENIED);
+    HILOG_INFO("AbilityManagerServiceTest ForceExitApp_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: ScheduleCommandAbilityDone
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService ScheduleCommandAbilityDone
+ * @tc.require: AR000I7F9D
+ */
+HWTEST_F(AbilityManagerServiceTest, ScheduleCommandAbilityWindowDone_001, TestSize.Level1)
+{
+    sptr<SessionInfo> session = new (std::nothrow) SessionInfo();
+    EXPECT_EQ(abilityMs_->ScheduleCommandAbilityWindowDone(
+        nullptr, session, WIN_CMD_FOREGROUND, ABILITY_CMD_FOREGROUND), ERR_INVALID_VALUE);
+    EXPECT_EQ(abilityMs_->ScheduleCommandAbilityWindowDone(
+        MockToken(AbilityType::EXTENSION), session, WIN_CMD_FOREGROUND, ABILITY_CMD_FOREGROUND), ERR_INVALID_VALUE);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

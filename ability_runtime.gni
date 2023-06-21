@@ -18,9 +18,11 @@ form_fwk_path = "//foundation/ability/form_fwk"
 ability_runtime_innerkits_path = "${ability_runtime_path}/interfaces/inner_api"
 ability_runtime_native_path = "${ability_runtime_path}/frameworks/native"
 ability_runtime_services_path = "${ability_runtime_path}/services"
+ability_runtime_abilitymgr_path = "${ability_runtime_services_path}/abilitymgr"
 ability_runtime_test_path = "${ability_runtime_path}/test"
 ace_engine_path = "//foundation/arkui/ace_engine"
 arkui_path = "//foundation/arkui"
+previewer_path = "//ide/tools/previewer"
 
 bundlefwk_path = "//foundation/bundlemanager/bundle_framework"
 bundlefwk_inner_api_path = "${bundlefwk_path}/interfaces/inner_api"
@@ -63,6 +65,8 @@ device_usage_statistics_path =
     "//foundation/resourceschedule/device_usage_statistics"
 device_manager_path = "//foundation/distributedhardware/device_manager"
 graphic_2d_path = "//foundation/graphic/graphic_2d"
+srms_inner_api_path =
+    "${ability_runtime_path}/service_router_framework/interfaces/inner_api"
 
 declare_args() {
   background_task_mgr_continuous_task_enable = true

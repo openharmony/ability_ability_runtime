@@ -116,6 +116,7 @@ void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
     const std::shared_ptr<OHOSApplication> application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Ability::Init(abilityInfo, application, handler, token);
 
     if (!abilityInfo) {
@@ -495,8 +496,26 @@ void JsAbility::OnBackground()
     HILOG_DEBUG("OnBackground end, ability is %{public}s.", GetAbilityName().c_str());
 }
 
+bool JsAbility::OnPrepareTerminate()
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("call, ability: %{public}s.", GetAbilityName().c_str());
+    Ability::OnPrepareTerminate();
+
+    NativeValue *jsValue = CallObjectMethod("onPrepareToTerminate", nullptr, 0, true);
+    auto numberValue = ConvertNativeValueTo<NativeBoolean>(jsValue);
+    if (numberValue == nullptr) {
+        HILOG_ERROR("numberValue is nullptr.");
+        return false;
+    }
+    bool ret = (bool)(*numberValue);
+    HILOG_DEBUG("end, ret = %{public}d", ret);
+    return ret;
+}
+
 std::unique_ptr<NativeReference> JsAbility::CreateAppWindowStage()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HandleScope handleScope(jsRuntime_);
     auto &engine = jsRuntime_.GetNativeEngine();
     NativeValue *jsWindowStage = Rosen::CreateJsWindowStage(engine, GetScene());
@@ -538,6 +557,7 @@ void JsAbility::RestorePageStack(const Want &want)
 
 void JsAbility::AbilityContinuationOrRecover(const Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     // multi-instance ability continuation
     HILOG_DEBUG("launch reason = %{public}d", launchParam_.launchReason);
     if (IsRestoredInContinuation()) {
@@ -562,6 +582,7 @@ void JsAbility::AbilityContinuationOrRecover(const Want &want)
 
 void JsAbility::DoOnForeground(const Want &want)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (scene_ == nullptr) {
         if ((abilityContext_ == nullptr) || (sceneListener_ == nullptr)) {
             HILOG_ERROR("Ability::OnForeground error. abilityContext_ or sceneListener_ is nullptr!");
@@ -586,6 +607,7 @@ void JsAbility::DoOnForeground(const Want &want)
         auto option = GetWindowOption(want);
         Rosen::WMError ret = Rosen::WMError::WM_OK;
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionInfo_ != nullptr) {
+            abilityContext_->SetWeakSessionToken(sessionInfo_->sessionToken);
             ret = scene_->Init(displayId, abilityContext_, sceneListener_, option, sessionInfo_->sessionToken);
         } else {
             ret = scene_->Init(displayId, abilityContext_, sceneListener_, option);
@@ -825,6 +847,10 @@ void JsAbility::OnNewWant(const Want &want)
 
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(&nativeEngine), want);
     NativeValue *jsWant = reinterpret_cast<NativeValue *>(napiWant);
+    if (jsWant == nullptr) {
+        HILOG_ERROR("Failed to get want");
+        return;
+    }
 
     obj->SetProperty("lastRequestWant", jsWant);
 
@@ -897,6 +923,7 @@ sptr<IRemoteObject> JsAbility::CallRequest()
 
 NativeValue *JsAbility::CallObjectMethod(const char *name, NativeValue *const *argv, size_t argc, bool withResult)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("JsAbility::CallObjectMethod(%{public}s", name);
 
     if (!jsAbilityObj_) {

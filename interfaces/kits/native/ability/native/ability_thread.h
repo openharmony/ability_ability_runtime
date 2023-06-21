@@ -154,6 +154,13 @@ public:
      */
     void ScheduleCommandAbility(const Want &want, bool restart, int startId);
 
+    void ScheduleCommandAbilityWindow(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd);
+
+    /**
+     * @description: Provide operating system PrepareTerminateAbility information to the observer
+     */
+    bool SchedulePrepareTerminateAbility();
+
     /**
      * @description: Provide operating system SaveabilityState information to the observer
      */
@@ -437,7 +444,7 @@ private:
      *
      */
     std::shared_ptr<ContextDeal> CreateAndInitContextDeal(std::shared_ptr<OHOSApplication> &application,
-        const std::shared_ptr<AbilityLocalRecord> &abilityRecord, const std::shared_ptr<Context> &abilityObject);
+        const std::shared_ptr<AbilityLocalRecord> &abilityRecord, const std::shared_ptr<AbilityContext> &abilityObject);
 
     /**
      * @description:  Handle the life cycle of Ability.
@@ -506,6 +513,8 @@ private:
      * value of startId is 6.
      */
     void HandleCommandExtension(const Want &want, bool restart, int startId);
+
+    void HandleCommandExtensionWindow(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd);
 
     /**
      * @description: Handle the restoreAbility state.

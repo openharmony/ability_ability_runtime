@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import deviceInfo from '@ohos.deviceInfo';
 import display from '@ohos.display';
 import extension from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
@@ -31,13 +30,13 @@ export default class JumpInterceptorServiceExtAbility extends extension {
 
   async onRequest(want, startId) {
     globalThis.abilityWant = want;
-    globalThis.params = JSON.parse(want['parameters']['params']);
-    globalThis.position = JSON.parse(want['parameters']['position']);
-    globalThis.interceptor_callerBundleName = want['parameters']['interceptor_callerBundleName'];
-    globalThis.interceptor_callerModuleName = want['parameters']['interceptor_callerModuleName'];
-    globalThis.interceptor_callerLabelId = want['parameters']['interceptor_callerLabelId'];
-    globalThis.interceptor_targetModuleName = want['parameters']['interceptor_targetModuleName'];
-    globalThis.interceptor_targetLabelId = want['parameters']['interceptor_targetLabelId'];
+    globalThis.params = JSON.parse(want.parameters.params);
+    globalThis.position = JSON.parse(want.parameters.position);
+    globalThis.interceptor_callerBundleName = want.parameters.interceptor_callerBundleName;
+    globalThis.interceptor_callerModuleName = want.parameters.interceptor_callerModuleName;
+    globalThis.interceptor_callerLabelId = want.parameters.interceptor_callerLabelId;
+    globalThis.interceptor_targetModuleName = want.parameters.interceptor_targetModuleName;
+    globalThis.interceptor_targetLabelId = want.parameters.interceptor_targetLabelId;
     await this.getHapResource();
     display.getDefaultDisplay().then(dis => {
       let navigationBarRect = {
@@ -50,7 +49,7 @@ export default class JumpInterceptorServiceExtAbility extends extension {
         win.destroy();
         winNum--;
       }
-      if (deviceInfo.deviceType === 'phone') {
+      if (globalThis.params.deviceType === 'phone' || globalThis.params.deviceType === 'default') {
         this.createWindow('JumpInterceptorDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
       } else {
         this.createWindow('JumpInterceptorDialog' + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);

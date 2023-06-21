@@ -18,7 +18,6 @@
 
 #include "extension.h"
 #include "lifecycle_state_info.h"
-#include "session/container/include/session_stage.h"
 
 namespace OHOS {
 class IRemoteObject;
@@ -59,7 +58,7 @@ public:
      *
      * @param want The Want object to connect to.
      * @param targetState The terget state.
-     * @param sessionInfo  Indicates the sessionInfo.
+     *  @param sessionInfo  Indicates the sessionInfo.
      *
      */
     virtual void HandleExtensionTransaction(const Want &want, const AAFwk::LifeCycleStateInfo &targetState,
@@ -134,6 +133,8 @@ public:
      */
     void CommandExtension(const Want &want, bool restart, int startId);
 
+    void CommandExtensionWindow(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd);
+
 protected:
     /**
      * @brief Toggles the lifecycle status of Extension to AAFwk::ABILITY_STATE_INACTIVE. And notifies the application
@@ -171,11 +172,11 @@ private:
     sptr<IRemoteObject> token_;
     std::shared_ptr<Extension> extension_;
 
-class ExtensionSessionStateLifeCycleImpl : public Rosen::ISessionStageStateListener {
+class ExtensionWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
 public:
-    ExtensionSessionStateLifeCycleImpl(const sptr<IRemoteObject>& token, const std::shared_ptr<ExtensionImpl>& owner)
+    ExtensionWindowLifeCycleImpl(const sptr<IRemoteObject>& token, const std::shared_ptr<ExtensionImpl>& owner)
         : token_(token), owner_(owner) {}
-    virtual ~ExtensionSessionStateLifeCycleImpl() {}
+    virtual ~ExtensionWindowLifeCycleImpl() {}
     void AfterForeground() override;
     void AfterBackground() override;
     void AfterActive() override;

@@ -106,11 +106,8 @@ private:
 
 void JsFeatureAbility::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
-    HILOG_DEBUG("JsFeatureAbility::Finalizer is called");
-    auto pthis = std::unique_ptr<JsFeatureAbility>(static_cast<JsFeatureAbility*>(data));
-    if (pthis) {
-        pthis->RemoveAllCallbacksLocked();
-    }
+    HILOG_INFO("JsFeatureAbility::Finalizer is called");
+    std::unique_ptr<JsFeatureAbility>(static_cast<JsFeatureAbility*>(data));
 }
 
 NativeValue* JsFeatureAbilityInit(NativeEngine *engine, NativeValue *exports)
@@ -1130,7 +1127,6 @@ void GetDataAbilityHelperPromiseCompleteCB(napi_env env, napi_status status, voi
  */
 napi_value NAPI_AcquireDataAbilityHelper(napi_env env, napi_callback_info info)
 {
-    HILOG_INFO("%{public}s,called", __func__);
     return NAPI_AcquireDataAbilityHelperCommon(env, info, AbilityType::PAGE);
 }
 

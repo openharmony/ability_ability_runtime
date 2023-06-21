@@ -42,8 +42,8 @@ void ExtensionImpl::Init(std::shared_ptr<AppExecFwk::OHOSApplication> &applicati
     extension_ = extension;
     if (record->GetAbilityInfo() != nullptr &&
         record->GetAbilityInfo()->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI) {
-        extension_->SetSceneSessionStageListener(
-            std::make_shared<ExtensionSessionStateLifeCycleImpl>(token_, shared_from_this()));
+        extension_->SetExtensionWindowLifeCycleListener(
+            sptr<ExtensionWindowLifeCycleImpl>(new ExtensionWindowLifeCycleImpl(token_, shared_from_this())));
     }
     extension_->Init(record, application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
@@ -73,7 +73,7 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
 
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
-            if (lifecycleState_ == AAFwk::ABILITY_STATE_ACTIVE) {
+            if (lifecycleState_ != AAFwk::ABILITY_STATE_INITIAL) {
                 Stop();
             }
             break;
@@ -82,6 +82,14 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
             if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL) {
                 Start(want, sessionInfo);
             }
+            break;
+        }
+        case AAFwk::ABILITY_STATE_FOREGROUND_NEW: {
+            Foreground(want);
+            break;
+        }
+        case AAFwk::ABILITY_STATE_BACKGROUND_NEW: {
+            Background();
             break;
         }
         default: {
@@ -140,7 +148,7 @@ void ExtensionImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     }
 
     HILOG_INFO("ExtensionImpl::Start");
-    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI) {
+    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW) {
         extension_->OnStart(want, sessionInfo);
     } else {
         extension_->OnStart(want);
@@ -320,6 +328,18 @@ void ExtensionImpl::CommandExtension(const Want &want, bool restart, int startId
     HILOG_INFO("ok");
 }
 
+void ExtensionImpl::CommandExtensionWindow(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
+{
+    HILOG_INFO("call");
+    if (extension_ == nullptr) {
+        HILOG_ERROR("extension_ is nullptr");
+        return;
+    }
+
+    extension_->OnCommandWindow(sessionInfo, winCmd);
+    HILOG_INFO("ok");
+}
+
 void ExtensionImpl::Foreground(const Want &want)
 {
     HILOG_DEBUG("ExtensionImpl::Foreground begin");
@@ -343,24 +363,24 @@ void ExtensionImpl::Background()
     lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterForeground()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterForeground()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterForeground called.");
+    HILOG_DEBUG("called.");
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterBackground()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterBackground()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterBackground called.");
+    HILOG_DEBUG("called.");
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterActive()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterActive()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterActive called.");
+    HILOG_DEBUG("called.");
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterInactive()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterInactive()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterInactive called.");
+    HILOG_DEBUG("called.");
 }
 }
 }

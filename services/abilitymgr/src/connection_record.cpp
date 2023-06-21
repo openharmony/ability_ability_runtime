@@ -152,10 +152,21 @@ void ConnectionRecord::CompleteDisconnect(int resultCode, bool isDied)
     const AppExecFwk::AbilityInfo &abilityInfo = targetService_->GetAbilityInfo();
     AppExecFwk::ElementName element(abilityInfo.deviceId, abilityInfo.bundleName,
         abilityInfo.name, abilityInfo.moduleName);
-    if (connCallback_) {
-        HILOG_DEBUG("OnAbilityDisconnectDone");
-        connCallback_->OnAbilityDisconnectDone(element, isDied ? (resultCode - 1) : resultCode);
+    auto code = isDied ? (resultCode - 1) : resultCode;
+    auto onDisconnectDoneTask = [connCallback = connCallback_, element, code]() {
+        HILOG_DEBUG("OnAbilityDisconnectDone.");
+        if (!connCallback) {
+            HILOG_ERROR("connCallback_ is nullptr.");
+            return;
+        }
+        connCallback->OnAbilityDisconnectDone(element, code);
+    };
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+    if (handler == nullptr) {
+        HILOG_ERROR("handler is nullptr.");
+        return;
     }
+    handler->PostTask(onDisconnectDoneTask);
     DelayedSingleton<ConnectionStateManager>::GetInstance()->RemoveConnection(shared_from_this(), isDied);
     HILOG_INFO("result: %{public}d. connectState:%{public}d.", resultCode, state_);
 }
@@ -230,6 +241,7 @@ void ConnectionRecord::Dump(std::vector<std::string> &info) const
 
 void ConnectionRecord::AttachCallerInfo()
 {
+    callerTokenId_ = IPCSkeleton::GetCallingTokenID(); // tokenId identifies the real caller
     auto targetRecord = Token::GetAbilityRecordByToken(callerToken_);
     if (targetRecord) {
         callerUid_ = targetRecord->GetUid();
@@ -251,6 +263,11 @@ int32_t ConnectionRecord::GetCallerUid() const
 int32_t ConnectionRecord::GetCallerPid() const
 {
     return callerPid_;
+}
+
+uint32_t ConnectionRecord::GetCallerTokenId() const
+{
+    return callerTokenId_;
 }
 
 std::string ConnectionRecord::GetCallerName() const

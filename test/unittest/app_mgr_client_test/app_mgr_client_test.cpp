@@ -225,6 +225,23 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetApplicationInfoByProcessID_001, TestS
 }
 
 /**
+ * @tc.name: AppMgrClient_GetAllRenderProcesses_001
+ * @tc.desc: get all render processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Level0)
+{
+    HILOG_INFO("GetAllRenderProcesses_001 start");
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    std::vector<RenderProcessInfo> info;
+    auto result = appMgrClient->GetAllRenderProcesses(info);
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    HILOG_INFO("GetAllRenderProcesses_001 end");
+}
+
+/**
  * @tc.name: AppMgrClient_GetRenderProcessTerminationStatus_001
  * @tc.desc: can not get render process termination status with error pid.
  * @tc.type: FUNC
@@ -537,6 +554,76 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_SetCurrentUserId_001, TestSize.Level0)
 
     int32_t userId = 0;
     appMgrClient->SetCurrentUserId(userId);
+}
+
+/**
+ * @tc.name: AppMgrClient_UpdateApplicationInfoInstalled_001
+ * @tc.desc: UpdateApplicationInfoInstalled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateApplicationInfoInstalled_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    std::string bundleName = "";
+    int uid = 1;
+    appMgrClient->UpdateApplicationInfoInstalled(bundleName, uid);
+}
+
+/**
+ * @tc.name: AppMgrClient_GetProcessRunningInformation_001
+ * @tc.desc: GetProcessRunningInformation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetProcessRunningInformation_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    AppExecFwk::RunningProcessInfo info;
+    appMgrClient->GetProcessRunningInformation(info);
+}
+
+/**
+ * @tc.name: AppMgrClient_DumpHeapMemory_001
+ * @tc.desc: DumpHeapMemory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_DumpHeapMemory_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    int32_t pid = 1;
+    OHOS::AppExecFwk::MallocInfo mallocInfo;
+    appMgrClient->DumpHeapMemory(pid, mallocInfo);
+}
+
+/**
+ * @tc.name: AppMgrClient_StartNativeProcessForDebugger_001
+ * @tc.desc: StartNativeProcessForDebugger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_StartNativeProcessForDebugger_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    AAFwk::Want want;
+    appMgrClient->StartNativeProcessForDebugger(want);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

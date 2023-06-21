@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,26 +25,30 @@
 #include "ability_running_info.h"
 #include "ability_scheduler_interface.h"
 #include "ability_start_setting.h"
+#include "ability_state.h"
 #include "extension_running_info.h"
 #include "free_install_observer_interface.h"
 #include "iability_controller.h"
 #include "iacquire_share_data_callback_interface.h"
 #include "icomponent_interception.h"
+#include "iprepare_terminate_callback_interface.h"
 #include "mission_listener_interface.h"
 #include "mission_info.h"
 #include "mission_snapshot.h"
 #include "remote_mission_listener_interface.h"
+#include "remote_on_listener_interface.h"
 #include "running_process_info.h"
 #include "sender_info.h"
 #include "snapshot.h"
 #include "start_options.h"
 #include "stop_user_callback.h"
 #include "system_memory_attr.h"
+#include "ui_extension_window_command.h"
+#include "uri.h"
 #include "want.h"
 #include "want_receiver_interface.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
-#include "uri.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window_manager_service_handler.h"
 #endif
@@ -202,12 +206,10 @@ public:
     /**
      * Start ui ability with want, send want to ability manager service.
      *
-     * @param want the want of the ability to start.
-     * @param startOptions Indicates the options used to start.
      * @param sessionInfo the session info of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions, sptr<SessionInfo> sessionInfo)
+    virtual int StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
     {
         return 0;
     }
@@ -471,6 +473,12 @@ public:
      */
     virtual int ScheduleCommandAbilityDone(const sptr<IRemoteObject> &token) = 0;
 
+    virtual int ScheduleCommandAbilityWindowDone(
+        const sptr<IRemoteObject> &token,
+        const sptr<AAFwk::SessionInfo> &sessionInfo,
+        AAFwk::WindowCommand winCmd,
+        AAFwk::AbilityCommand abilityCmd) = 0;
+
     /**
      * dump ability stack info, about userID, mission stack info,
      * mission record info and ability info.
@@ -569,6 +577,12 @@ public:
     virtual int ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId, int32_t missionId,
         const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams) = 0;
 
+    virtual int ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
+        const std::string &bundleName, const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams)
+    {
+        return 0;
+    }
+
     virtual int ContinueAbility(const std::string &deviceId, int32_t missionId, uint32_t versionCode) = 0;
 
     virtual int StartContinuation(const Want &want, const sptr<IRemoteObject> &abilityToken, int32_t status) = 0;
@@ -649,6 +663,14 @@ public:
         const std::shared_ptr<OHOS::Media::PixelMap> &icon) = 0;
 
     /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     * @param pixelMap The snapshot.
+     */
+    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
+        const std::shared_ptr<OHOS::Media::PixelMap> &pixelMap) {};
+
+    /**
      * Register the WindowManagerService handler
      *
      * @param handler Indidate handler of WindowManagerService.
@@ -662,6 +684,18 @@ public:
      * @param abilityToken Indidate token of ability.
      */
     virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) = 0;
+
+    /**
+     * PrepareTerminateAbility, prepare terminate the special ability.
+     *
+     * @param token, the token of the ability to terminate.
+     * @param callback callback.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int PrepareTerminateAbility(const sptr<IRemoteObject> &token, sptr<IPrepareTerminateCallback> &callback)
+    {
+        return 0;
+    }
 #endif
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) = 0;
@@ -687,6 +721,16 @@ public:
     virtual int StopSyncRemoteMissions(const std::string &devId) = 0;
 
     virtual int RegisterMissionListener(const std::string &deviceId, const sptr<IRemoteMissionListener> &listener) = 0;
+
+    virtual int RegisterOnListener(const std::string &type, const sptr<IRemoteOnListener> &listener)
+    {
+        return 0;
+    }
+
+    virtual int RegisterOffListener(const std::string &type, const sptr<IRemoteOnListener> &listener)
+    {
+        return 0;
+    }
 
     virtual int UnRegisterMissionListener(const std::string &deviceId,
         const sptr<IRemoteMissionListener> &listener) = 0;
@@ -893,6 +937,18 @@ public:
     }
 
     /**
+     * Request dialog service with want, send want to ability manager service.
+     *
+     * @param want, the want of the dialog service to start.
+     * @param callerToken, caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RequestDialogService(const Want &want, const sptr<IRemoteObject> &callerToken)
+    {
+        return 0;
+    }
+
+    /**
      * Acquire the shared data.
      * @param missionId The missionId of Target ability.
      * @param shareData The IAcquireShareData object.
@@ -915,6 +971,64 @@ public:
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam)
     {
         return 0;
+    }
+
+    /**
+     * Force app exit and record exit reason.
+     * @param pid Process id .
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ForceExitApp(const int32_t pid, Reason exitReason)
+    {
+        return 0;
+    }
+
+    /**
+     * Record app exit reason.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RecordAppExitReason(Reason exitReason)
+    {
+        return 0;
+    }
+
+    /**
+     * Set rootSceneSession by SCB.
+     *
+     * @param rootSceneSession Indicates root scene session of SCB.
+     */
+    virtual void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession) {}
+
+    /**
+     * Call UIAbility by SCB.
+     *
+     * @param sessionInfo the session info of the ability to be called.
+     */
+    virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo) {}
+
+    /**
+     * Start specified ability by SCB.
+     *
+     * @param want Want information.
+     */
+    virtual void StartSpecifiedAbilityBySCB(const Want &want) {};
+
+    /**
+     * Set sessionManagerService
+     * @param sessionManagerService the point of sessionManagerService.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
+    {
+        return 0;
+    }
+
+    virtual sptr<IRemoteObject> GetSessionManagerService()
+    {
+        return nullptr;
     }
 
     enum {
@@ -1097,6 +1211,17 @@ public:
 
         SEND_ABILITY_RESULT_BY_TOKEN,
 
+        // ipc id for set rootSceneSession (64)
+        SET_ROOT_SCENE_SESSION,
+
+        // prepare terminate ability (65)
+        PREPARE_TERMINATE_ABILITY,
+
+        COMMAND_ABILITY_WINDOW_DONE,
+
+        // prepare terminate ability (67)
+        CALL_ABILITY_BY_SCB,
+
         // ipc id 1001-2000 for DMS
         // ipc id for starting ability (1001)
         START_ABILITY = 1001,
@@ -1198,6 +1323,17 @@ public:
         // ipc id for close ui ability by scb
         CLOSE_UI_ABILITY_BY_SCB,
 
+        // ipc id for request dialog service
+        REQUEST_DIALOG_SERVICE,
+
+        // ipc id for start specified ability by scb
+        START_SPECIFIED_ABILITY_BY_SCB,
+
+        // ipc id for set sessionManagerService
+        SET_SESSIONMANAGERSERVICE,
+
+        GET_SESSIONMANAGERSERVICE,
+
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
 
@@ -1211,6 +1347,12 @@ public:
 
         SEND_RESULT_TO_ABILITY = 1106,
 
+        REGISTER_REMOTE_ON_LISTENER = 1107,
+
+        REGISTER_REMOTE_OFF_LISTENER = 1108,
+
+        CONTINUE_MISSION_OF_BUNDLENAME = 1109,
+
         // ipc id for mission manager(1110)
         REGISTER_REMOTE_MISSION_LISTENER = 1110,
         UNREGISTER_REMOTE_MISSION_LISTENER = 1111,
@@ -1221,6 +1363,7 @@ public:
         UPDATE_MISSION_SNAPSHOT = 1116,
         MOVE_MISSIONS_TO_FOREGROUND = 1117,
         MOVE_MISSIONS_TO_BACKGROUND = 1118,
+        UPDATE_MISSION_SNAPSHOT_FROM_WMS,
 
         // ipc id for user test(1120)
         START_USER_TEST = 1120,
@@ -1257,6 +1400,9 @@ public:
         SHARE_DATA_DONE = 4002,
 
         GET_ABILITY_TOKEN = 5001,
+
+        FORCE_EXIT_APP = 6001,
+        RECORD_APP_EXIT_REASON = 6002
     };
 };
 }  // namespace AAFwk
