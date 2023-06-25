@@ -1333,6 +1333,12 @@ public:
         // ipc id for request dialog service
         REQUEST_DIALOG_SERVICE,
 
+        // ipc id for start specified ability by scb
+        START_SPECIFIED_ABILITY_BY_SCB,
+
+        // ipc id for set sessionManagerService
+        SET_SESSIONMANAGERSERVICE,
+
         // ipc id for report drawn completed
         REPORT_DRAWN_COMPLETED,
 
