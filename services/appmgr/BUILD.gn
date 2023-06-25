@@ -94,6 +94,7 @@ ohos_shared_library("libappms") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "window_manager:libwsutils",
+    "memory_utils:libmeminfo",
   ]
 
   if (product_name != "ohcore") {
