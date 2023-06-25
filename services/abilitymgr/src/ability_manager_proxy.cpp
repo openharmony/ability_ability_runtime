@@ -722,7 +722,7 @@ int AbilityManagerProxy::TerminateAbilityByCaller(const sptr<IRemoteObject> &cal
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::MoveAbilityToBackground(const sptr<IRemoteObject> &token, bool invokeLastAbility)
+int AbilityManagerProxy::MoveAbilityToBackground(const sptr<IRemoteObject> &token)
 {
     int error;
     MessageParcel data;
@@ -742,10 +742,6 @@ int AbilityManagerProxy::MoveAbilityToBackground(const sptr<IRemoteObject> &toke
             HILOG_ERROR("flag write failed.");
             return INNER_ERR;
         }
-    }
-    if (!data.WriteBool(invokeLastAbility)) {
-        HILOG_ERROR("invokeLastAbility write failed.");
-        return INNER_ERR;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -2797,50 +2793,6 @@ int AbilityManagerProxy::StopUser(int userId, const sptr<IStopUserCallback> &cal
         HILOG_ERROR("StopUser:SendRequest error: %d", error);
         return error;
     }
-    return reply.ReadInt32();
-}
-
-int AbilityManagerProxy::OnBackPressedCallBack(const sptr<IRemoteObject> &token, bool &needMoveToBackground)
-{
-    int error;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-
-    if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("write interface token failed.");
-        return INNER_ERR;
-    }
-
-    if (token) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(token)) {
-            HILOG_ERROR("write token failed.");
-            return INNER_ERR;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            HILOG_ERROR("write token failed.");
-            return INNER_ERR;
-        }
-    }
-
-    if (!data.WriteBool(needMoveToBackground)) {
-        HILOG_ERROR("write needMoveToBackground fail.");
-        return ERR_INVALID_VALUE;
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOG_ERROR("remote is nullptr.");
-        return INNER_ERR;
-    }
-
-    error = remote->SendRequest(IAbilityManager::ON_BACK_PRESSED_CALL_BACK, data, reply, option);
-    if (error != NO_ERROR) {
-        HILOG_ERROR("send request failed. error: %{public}d", error);
-        return error;
-    }
-    needMoveToBackground = reply.ReadBool();
     return reply.ReadInt32();
 }
 

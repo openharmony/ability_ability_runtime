@@ -81,7 +81,9 @@ public:
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const override;
     void MinimizeAbility(bool fromUser = false) override;
 
-    ErrCode MoveAbilityToBackground(bool invokeLastAbility) override;
+    ErrCode OnBackPressedCallBack(bool &needMoveToBackground) override;
+
+    ErrCode MoveAbilityToBackground() override;
 
     ErrCode TerminateSelf() override;
 

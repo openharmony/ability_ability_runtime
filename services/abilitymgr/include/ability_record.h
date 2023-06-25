@@ -333,13 +333,6 @@ public:
     void BackgroundAbility(const Closure &task);
 
     /**
-     * On back pressed.
-     *
-     * @return Return true if ability will be moved to background; return false if will be terminated.
-     */
-    bool OnBackPressedCallBack();
-
-    /**
      * prepare terminate ability.
      *
      * @return Returns true on stop terminating; returns false on terminate.

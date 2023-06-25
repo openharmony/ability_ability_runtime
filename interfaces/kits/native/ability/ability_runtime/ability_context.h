@@ -200,7 +200,15 @@ public:
      */
     virtual void MinimizeAbility(bool fromUser = false) = 0;
 
-    virtual ErrCode MoveAbilityToBackground(bool invokeLastAbility) = 0;
+    /**
+     * @brief Get OnBackPressedCallBack.
+     * @param needMoveToBackground true if ability will be moved to background; false if ability will be terminated.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode OnBackPressedCallBack(bool &needMoveToBackground) = 0;
+
+    virtual ErrCode MoveAbilityToBackground() = 0;
 
     virtual ErrCode TerminateSelf() = 0;
 

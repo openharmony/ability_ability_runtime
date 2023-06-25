@@ -163,7 +163,6 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[REGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::RegisterConnectionObserverInner;
     requestFuncMap_[UNREGISTER_CONNECTION_OBSERVER] = &AbilityManagerStub::UnregisterConnectionObserverInner;
     requestFuncMap_[GET_DLP_CONNECTION_INFOS] = &AbilityManagerStub::GetDlpConnectionInfosInner;
-    requestFuncMap_[ON_BACK_PRESSED_CALL_BACK] = &AbilityManagerStub::OnBackPressedCallBackInner;
     requestFuncMap_[MOVE_ABILITY_TO_BACKGROUND] = &AbilityManagerStub::MoveAbilityToBackgroundInner;
 #ifdef SUPPORT_GRAPHICS
     requestFuncMap_[SET_MISSION_LABEL] = &AbilityManagerStub::SetMissionLabelInner;
@@ -225,8 +224,7 @@ int AbilityManagerStub::MoveAbilityToBackgroundInner(MessageParcel &data, Messag
     if (data.ReadBool()) {
         token = data.ReadRemoteObject();
     }
-    bool invokeLastAbility = data.ReadBool();
-    int32_t result = MoveAbilityToBackground(token, invokeLastAbility);
+    int32_t result = MoveAbilityToBackground(token);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("write result failed");
         return ERR_INVALID_VALUE;
@@ -1987,30 +1985,6 @@ int AbilityManagerStub::GetDlpConnectionInfosInner(MessageParcel &data, MessageP
         }
     }
 
-    return ERR_OK;
-}
-
-int AbilityManagerStub::OnBackPressedCallBackInner(MessageParcel &data, MessageParcel &reply)
-{
-    HILOG_DEBUG("call");
-    sptr<IRemoteObject> token = nullptr;
-    if (data.ReadBool()) {
-        token = data.ReadRemoteObject();
-    }
-    if (token == nullptr) {
-        HILOG_ERROR("token is nullptr");
-        return ERR_NULL_OBJECT;
-    }
-    bool needMoveToBackground = data.ReadBool();
-    auto result = OnBackPressedCallBack(token, needMoveToBackground);
-    if (!reply.WriteBool(needMoveToBackground)) {
-        HILOG_ERROR("write needMoveToBackground failed");
-        return ERR_INVALID_VALUE;
-    }
-    if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("write result failed");
-        return ERR_INVALID_VALUE;
-    }
     return ERR_OK;
 }
 

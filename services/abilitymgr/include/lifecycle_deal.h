@@ -63,7 +63,6 @@ public:
     void NotifyContinuationResult(int32_t result);
     void ShareData(const int32_t &uniqueId);
     bool PrepareTerminateAbility();
-    bool OnBackPressedCallBack();
 
 private:
     sptr<IAbilityScheduler> GetScheduler();

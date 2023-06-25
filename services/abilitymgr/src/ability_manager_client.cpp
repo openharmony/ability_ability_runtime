@@ -262,12 +262,12 @@ ErrCode AbilityManagerClient::TerminateAbilityResult(const sptr<IRemoteObject> &
     return abms->TerminateAbilityResult(token, startId);
 }
 
-ErrCode AbilityManagerClient::MoveAbilityToBackground(const sptr<IRemoteObject> &token, bool invokeLastAbility)
+ErrCode AbilityManagerClient::MoveAbilityToBackground(const sptr<IRemoteObject> &token)
 {
     HILOG_INFO("call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->MoveAbilityToBackground(token, invokeLastAbility);
+    return abms->MoveAbilityToBackground(token);
 }
 
 
@@ -901,14 +901,6 @@ ErrCode AbilityManagerClient::PrepareTerminateAbility(const sptr<IRemoteObject> 
         return ERR_INVALID_VALUE;
     }
     return abms->PrepareTerminateAbility(token, callback);
-}
-
-ErrCode AbilityManagerClient::OnBackPressedCallBack(const sptr<IRemoteObject> &token, bool &needMoveToBackground)
-{
-    HILOG_DEBUG("call");
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->OnBackPressedCallBack(token, needMoveToBackground);
 }
 #endif
 

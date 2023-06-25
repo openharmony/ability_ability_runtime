@@ -1332,14 +1332,14 @@ void MissionListManager::CompleteBackground(const std::shared_ptr<AbilityRecord>
     }
 }
 
-int MissionListManager::MoveAbilityToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
+int MissionListManager::MoveAbilityToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard guard(managerLock_);
-    return MoveAbilityToBackgroundLocked(abilityRecord, flag);
+    return MoveAbilityToBackgroundLocked(abilityRecord);
 }
 
-int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
+int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
@@ -1347,7 +1347,7 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
         return ERR_INVALID_VALUE;
     }
     HILOG_DEBUG("ability:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
-    RemoveBackgroundingAbility(abilityRecord, flag);
+    RemoveBackgroundingAbility(abilityRecord);
 
     if (abilityRecord->IsAbilityState(FOREGROUND) || abilityRecord->IsAbilityState(FOREGROUNDING)) {
         HILOG_DEBUG("current ability is active");
@@ -1372,12 +1372,9 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
     }
 }
 
-void MissionListManager::RemoveBackgroundingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
+void MissionListManager::RemoveBackgroundingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    if (abilityRecord == nullptr) {
-        HILOG_ERROR("RemoveBackgroundingAbility fail, ability record is null.");
-        return;
-    }
+    CHECK_POINTER_LOG(abilityRecord, "RemoveBackgroundingAbility fail, ability record is null.")
     auto missionList = abilityRecord->GetOwnedMissionList();
     CHECK_POINTER(missionList);
     auto mission = missionList->GetTopMission();
@@ -1399,11 +1396,6 @@ void MissionListManager::RemoveBackgroundingAbility(const std::shared_ptr<Abilit
         return;
     }
 
-    if (!flag) {
-        HILOG_DEBUG("Close ability schedule.");
-        return;
-    }
-
     std::shared_ptr<AbilityRecord> needTopAbility;
     if (!missionList->IsEmpty()) {
         needTopAbility = missionList->GetTopAbility();
@@ -1412,16 +1404,13 @@ void MissionListManager::RemoveBackgroundingAbility(const std::shared_ptr<Abilit
     }
 
     if (!needTopAbility) {
-        HILOG_DEBUG("The ability need to top is null.");
+        HILOG_DEBUG("The ability needs to top is null.");
         if (!abilityRecord->IsNeedBackToOtherMissionStack()) {
             HILOG_INFO("This ability doesn't need back to other mission stack.");
             return;
         }
         needTopAbility = abilityRecord->GetOtherMissionStackAbilityRecord();
-        if (!needTopAbility) {
-            HILOG_ERROR("This ability needs back to other mission stack, but needTopAbility is null.");
-            return;
-        }
+        CHECK_POINTER_LOG(needTopAbility, "The ability needs back to other mission stack, but needTopAbility is null.")
         abilityRecord->SetNeedBackToOtherMissionStack(false);
     }
 
@@ -1435,10 +1424,7 @@ void MissionListManager::RemoveBackgroundingAbility(const std::shared_ptr<Abilit
         needTopAbility = launcherList_->GetLauncherRoot();
     }
 
-    if (!needTopAbility) {
-        HILOG_DEBUG("NeedTopAbility of launcherRoot is null.");
-        return;
-    }
+    CHECK_POINTER_LOG(needTopAbility, "NeedTopAbility of launcherRoot is null.")
 
     if (!needTopAbility->IsForeground() && !needTopAbility->IsMinimizeFromUser() && needTopAbility->IsReady()) {
         HILOG_DEBUG("%{public}s is need to foreground.", elementName.GetURI().c_str());

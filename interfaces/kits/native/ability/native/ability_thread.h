@@ -157,11 +157,6 @@ public:
     void ScheduleCommandAbilityWindow(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd);
 
     /**
-     * @description: ScheduleBackPressed, scheduling back pressed.
-     */
-    bool ScheduleBackPressed();
-
-    /**
      * @description: Provide operating system PrepareTerminateAbility information to the observer
      */
     bool SchedulePrepareTerminateAbility();
