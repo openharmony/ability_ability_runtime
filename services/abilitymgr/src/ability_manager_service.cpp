@@ -1818,7 +1818,7 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     return eventInfo.errCode;
 }
 
-int AbilityManagerService::MoveAbilityToBackground(const sptr<IRemoteObject> &token, bool invokeLastAbility)
+int AbilityManagerService::MoveAbilityToBackground(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Move ability to background begin");
@@ -1841,7 +1841,7 @@ int AbilityManagerService::MoveAbilityToBackground(const sptr<IRemoteObject> &to
         HILOG_ERROR("missionListManager is Null. ownerUserId=%{public}d", ownerUserId);
         return ERR_INVALID_VALUE;
     }
-    return missionListManager->MoveAbilityToBackground(abilityRecord, invokeLastAbility);
+    return missionListManager->MoveAbilityToBackground(abilityRecord);
 }
 
 int AbilityManagerService::TerminateAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant)
@@ -6358,21 +6358,6 @@ int AbilityManagerService::DumpAbilityInfoDone(std::vector<std::string> &infos, 
         return CHECK_PERMISSION_FAILED;
     }
     abilityRecord->DumpAbilityInfoDone(infos);
-    return ERR_OK;
-}
-
-int AbilityManagerService::OnBackPressedCallBack(const sptr<IRemoteObject> &token, bool &needMoveToBackground)
-{
-    HILOG_DEBUG("call");
-    auto abilityRecord = Token::GetAbilityRecordByToken(token);
-    if (abilityRecord == nullptr) {
-        HILOG_ERROR("abilityRecord is nullptr.");
-        return ERR_INVALID_VALUE;
-    }
-    if (!JudgeSelfCalled(abilityRecord)) {
-        return CHECK_PERMISSION_FAILED;
-    }
-    needMoveToBackground = abilityRecord->OnBackPressedCallBack();
     return ERR_OK;
 }
 

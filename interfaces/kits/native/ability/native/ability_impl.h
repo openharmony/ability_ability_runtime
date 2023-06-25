@@ -79,13 +79,6 @@ public:
     bool PrepareTerminateAbility();
 
     /**
-     * @brief Called when back press is dispatched.
-     *
-     * @return Return true if ability will be moved to background; return false if will be terminated.
-     */
-    bool BackPressed();
-
-    /**
      * @brief Gets the current Ability status.
      *
      */

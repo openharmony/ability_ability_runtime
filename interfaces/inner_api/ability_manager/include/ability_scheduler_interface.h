@@ -92,11 +92,6 @@ public:
         WindowCommand winCmd) = 0;
 
     /**
-     * ScheduleBackPressed, schedule ability to back pressed.
-     */
-    virtual bool ScheduleBackPressed() = 0;
-
-    /**
      * SchedulePrepareTerminateAbility, schedule ability to prepare terminate.
      */
     virtual bool SchedulePrepareTerminateAbility() = 0;
@@ -396,9 +391,7 @@ public:
         SCHEDULE_SHARE_DATA,
 
         // ipc id for scheduling service ability to prepare terminate (30)
-        SCHEDULE_ABILITY_PREPARE_TERMINATE,
-
-        SCHEDULE_BACK_PRESSED
+        SCHEDULE_ABILITY_PREPARE_TERMINATE
     };
 };
 }  // namespace AAFwk

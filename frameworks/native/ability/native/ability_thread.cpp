@@ -821,18 +821,6 @@ void AbilityThread::ScheduleCommandAbility(const Want &want, bool restart, int s
     HILOG_DEBUG("AbilityThread::ScheduleCommandAbility end");
 }
 
-bool AbilityThread::ScheduleBackPressed()
-{
-    HILOG_DEBUG("call");
-    if (abilityImpl_ == nullptr) {
-        HILOG_ERROR("abilityImpl_ is nullptr.");
-        return true;
-    }
-    bool ret = abilityImpl_->BackPressed();
-    HILOG_DEBUG("end, ret = %{public}d", ret);
-    return ret;
-}
-
 bool AbilityThread::SchedulePrepareTerminateAbility()
 {
     HILOG_DEBUG("call");

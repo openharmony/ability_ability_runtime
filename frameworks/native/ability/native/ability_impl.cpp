@@ -766,18 +766,6 @@ void AbilityImpl::Background()
     HILOG_INFO("%{public}s end.", __func__);
 }
 
-bool AbilityImpl::BackPressed()
-{
-    HILOG_DEBUG("call");
-    if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
-        return false;
-    }
-    bool ret = ability_->OnBackPress();
-    HILOG_DEBUG("end, ret = %{public}d", ret);
-    return ret;
-}
-
 void AbilityImpl::DoKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
     HILOG_DEBUG("AbilityImpl::DoKeyDown called");

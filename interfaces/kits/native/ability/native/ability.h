@@ -883,7 +883,7 @@ public:
      *
      * @return Return true if ability will be moved to background; return false if will be terminated.
      */
-    virtual bool OnBackPress();
+    virtual bool OnBackPress() override;
 
     /**
      * @brief Called when ability prepare terminate.
