@@ -29,6 +29,22 @@ public:
     UIAbilityLifecycleManager() = default;
     virtual ~UIAbilityLifecycleManager() = default;
 
+    struct SpecifiedInfo {
+        std::string abilityName = "";
+        std::string bundleName = "";
+        std::string flag = "";
+    };
+    struct key_compare {
+        bool operator()(const SpecifiedInfo &info1, const SpecifiedInfo &info2) const
+        {
+            if (info1.abilityName < info2.abilityName || info1.bundleName < info2.bundleName ||
+                info1.flag < info2.flag) {
+                return true;
+            }
+            return false;
+        }
+    };
+
     /**
      * StartUIAbility with request.
      *
@@ -138,6 +154,39 @@ public:
      */
     void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo);
 
+    /**
+     * OnAcceptWantResponse.
+     *
+     * @param want the want of the ability to start.
+     * @param abilityRequest the flag of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag);
+
+    /**
+     * Start specified ability by SCB.
+     *
+     * @param want Want information.
+     * @param userId Use id.
+     */
+    void StartSpecifiedAbilityBySCB(const Want &want, int32_t userId);
+
+    /**
+     * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
+     *
+     * @param abilityRecord ability's record.
+     * @param callStub ability's callee.
+     */
+    void CallRequestDone(const std::shared_ptr<AbilityRecord> &abilityRecord, const sptr<IRemoteObject> &callStub);
+
+    /**
+     * release the connection of this call.
+     *
+     * @param connect caller callback ipc.
+     * @param element target ability name.
+     */
+    int ReleaseCallLocked(const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element);
+
 private:
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
     uint64_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const;
@@ -174,12 +223,26 @@ private:
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const sptr<IRemoteObject> &token) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+
+    void EnqueueAbilityToFront(const AbilityRequest &abilityRequest);
+    void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
+    void NotifyRestartSpecifiedAbility(AbilityRequest &request, const sptr<IRemoteObject> &token);
+    int MoveAbilityToFront(const AbilityRequest &abilityRequest, const std::shared_ptr<AbilityRecord> &abilityRecord,
+        std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr);
+    int SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility, sptr<SessionInfo> &sessionInfo);
+    int StartAbilityBySpecifed(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &callerAbility);
+    std::shared_ptr<AbilityRecord> GetReusedSpecifiedAbility(const AAFwk::Want &want, const std::string &flag);
+    void EraseSpecifiedAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     mutable std::mutex sessionLock_;
     std::map<uint64_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
     std::map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<Rosen::ISession> rootSceneSession_;
+    std::map<SpecifiedInfo, std::shared_ptr<AbilityRecord>, key_compare> specifiedAbilityMap_;
+    std::queue<AbilityRequest> abilityQueue_;
+    std::queue<SpecifiedInfo> specifiedInfoQueue_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

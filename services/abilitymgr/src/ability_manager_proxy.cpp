@@ -451,21 +451,12 @@ int AbilityManagerProxy::StartUIExtensionAbility(const Want &want, const sptr<Se
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions,
-    sptr<SessionInfo> sessionInfo)
+int AbilityManagerProxy::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-    if (!data.WriteParcelable(&want)) {
-        HILOG_ERROR("want write failed.");
-        return INNER_ERR;
-    }
-    if (!data.WriteParcelable(&startOptions)) {
-        HILOG_ERROR("startOptions write failed.");
         return INNER_ERR;
     }
     if (sessionInfo) {
@@ -1627,7 +1618,7 @@ int AbilityManagerProxy::ForceTimeoutForTest(const std::string &abilityName, con
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("Remote() is NULL");
-        return;
+        return INNER_ERR;
     }
     int error = remote->SendRequest(IAbilityManager::FORCE_TIMEOUT, data, reply, option);
     if (error != NO_ERROR) {
@@ -3714,7 +3705,7 @@ int AbilityManagerProxy::BlockAmsService()
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("Remote() is NULL");
-        return;
+        return INNER_ERR;
     }
     auto error = remote->SendRequest(IAbilityManager::BLOCK_AMS_SERVICE, data, reply, option);
     if (error != NO_ERROR) {
@@ -3739,7 +3730,7 @@ int AbilityManagerProxy::BlockAbility(int32_t abilityRecordId)
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("Remote() is NULL");
-        return;
+        return INNER_ERR;
     }
     auto error = remote->SendRequest(IAbilityManager::BLOCK_ABILITY, data, reply, option);
     if (error != NO_ERROR) {
@@ -3760,7 +3751,7 @@ int AbilityManagerProxy::BlockAppService()
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("Remote() is NULL");
-        return;
+        return INNER_ERR;
     }
     auto error = remote->SendRequest(IAbilityManager::BLOCK_APP_SERVICE, data, reply, option);
     if (error != NO_ERROR) {
@@ -4154,7 +4145,7 @@ int32_t AbilityManagerProxy::RecordAppExitReason(Reason exitReason)
         return INNER_ERR;
     }
 
-    int32_t error = remote->SendRequest(IAbilityManager::FORCE_EXIT_APP, data, reply, option);
+    int32_t error = remote->SendRequest(IAbilityManager::RECORD_APP_EXIT_REASON, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("fail to SendRequest, err: %{public}d.", error);
         return error;
@@ -4221,6 +4212,88 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
     }
+}
+
+void AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("WriteInterfaceToken failed.");
+        return;
+    }
+
+    if (!data.WriteParcelable(&want)) {
+        HILOG_ERROR("want write failed.");
+        return;
+    }
+
+    auto remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote is nullptr.");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    auto error = remote->SendRequest(IAbilityManager::START_SPECIFIED_ABILITY_BY_SCB, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+    }
+}
+
+int32_t AbilityManagerProxy::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
+{
+    HILOG_INFO("AbilityManagerProxy::SetSessionManagerService start.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("write interface token failed.");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteRemoteObject(sessionManagerService)) {
+        HILOG_ERROR("token write failed.");
+        return INNER_ERR;
+    }
+
+    auto remote = Remote();
+    if (!remote) {
+        HILOG_ERROR("remote object is nullptr.");
+        return INNER_ERR;
+    }
+
+    int32_t error = remote->SendRequest(IAbilityManager::SET_SESSIONMANAGERSERVICE, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return error;
+    }
+    HILOG_INFO("AbilityManagerProxy::SetSessionManagerService end.");
+    return reply.ReadInt32();
+}
+sptr<IRemoteObject> AbilityManagerProxy::GetSessionManagerService()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        return nullptr;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote() is NULL");
+        return nullptr;
+    }
+    auto error = remote->SendRequest(IAbilityManager::GET_SESSIONMANAGERSERVICE, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return nullptr;
+    }
+
+    return reply.ReadRemoteObject();
 }
 }  // namespace AAFwk
 }  // namespace OHOS

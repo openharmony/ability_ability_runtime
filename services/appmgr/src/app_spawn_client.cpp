@@ -141,14 +141,9 @@ ErrCode AppSpawnClient::StartProcessImpl(const AppSpawnStartMsg &startMsg, pid_t
             HILOG_ERROR("WriteMessage failed!");
             return result;
         }
-        result = WriteStrInfoMessage(msgWrapper.GetHspListStr());
+        result = StartProcessForWriteMsg(msgWrapper, startMsg);
         if (FAILED(result)) {
-            HILOG_ERROR("Write HspList failed!");
-            return result;
-        }
-        result = WriteStrInfoMessage(startMsg.overlayInfo);
-        if (FAILED(result)) {
-            HILOG_ERROR("Write OverlayInfo failed!");
+            HILOG_ERROR("StartProcessForWriteMsg failed!");
             return result;
         }
         result = socket_->ReadMessage(reinterpret_cast<void *>(pidMsg.pidBuf), LEN_PID);
@@ -162,6 +157,22 @@ ErrCode AppSpawnClient::StartProcessImpl(const AppSpawnStartMsg &startMsg, pid_t
         result = ERR_APPEXECFWK_INVALID_PID;
     } else {
         pid = pidMsg.pid;
+    }
+    return result;
+}
+
+ErrCode AppSpawnClient::StartProcessForWriteMsg(const AppSpawnMsgWrapper &msgWrapper, const AppSpawnStartMsg &startMsg)
+{
+    ErrCode result = ERR_OK;
+    result = WriteStrInfoMessage(msgWrapper.GetHspListStr());
+    if (FAILED(result)) {
+        HILOG_ERROR("Write HspList failed!");
+        return result;
+    }
+    result = WriteStrInfoMessage(startMsg.overlayInfo);
+    if (FAILED(result)) {
+        HILOG_ERROR("Write OverlayInfo failed!");
+        return result;
     }
     return result;
 }

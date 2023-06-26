@@ -320,7 +320,9 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
     const std::shared_ptr<AbilityRecord> &callerAbility, const AbilityRequest &abilityRequest)
 {
     std::string connector = "##";
-    std::string traceName = __PRETTY_FUNCTION__ + connector + abilityRequest.want.GetElement().GetAbilityName();
+    auto element = abilityRequest.want.GetElement();
+    std::string traceName = __PRETTY_FUNCTION__ + connector + element.GetBundleName() + connector +
+        element.GetAbilityName();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceName);
     HILOG_DEBUG("Start ability locked.");
     // 1. choose target mission list
@@ -2336,6 +2338,7 @@ std::shared_ptr<MissionList> MissionListManager::GetTargetMissionList(int missio
     mission->SetUnclearable(innerMissionInfo.missionInfo.unclearable);
     abilityRecord->SetMission(mission);
     abilityRecord->SetOwnerMissionUserId(userId_);
+    SetLastExitReason(abilityRecord);
     std::shared_ptr<MissionList> newMissionList = std::make_shared<MissionList>();
     return newMissionList;
 }
@@ -3638,13 +3641,30 @@ int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abil
 
 void MissionListManager::GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList)
 {
+    std::lock_guard guard(managerLock_);
     for (auto missionList : currentMissionLists_) {
         if (missionList != nullptr) {
-            std::vector<std::string> abilityNameList;
-            missionList->GetActiveAbilityList(bundleName, abilityNameList);
-            if (!abilityNameList.empty()) {
-                abilityList.insert(abilityList.end(), abilityNameList.begin(), abilityNameList.end());
+            std::vector<std::string> currentActiveAbilities;
+            missionList->GetActiveAbilityList(bundleName, currentActiveAbilities);
+            if (!currentActiveAbilities.empty()) {
+                abilityList.insert(abilityList.end(), currentActiveAbilities.begin(), currentActiveAbilities.end());
             }
+        }
+    }
+
+    if (defaultStandardList_ != nullptr) {
+        std::vector<std::string> defaultActiveStandardList;
+        defaultStandardList_->GetActiveAbilityList(bundleName, defaultActiveStandardList);
+        if (!defaultActiveStandardList.empty()) {
+            abilityList.insert(abilityList.end(), defaultActiveStandardList.begin(), defaultActiveStandardList.end());
+        }
+    }
+
+    if (defaultSingleList_ != nullptr) {
+        std::vector<std::string> defaultActiveSingleList;
+        defaultSingleList_->GetActiveAbilityList(bundleName, defaultActiveSingleList);
+        if (!defaultActiveSingleList.empty()) {
+            abilityList.insert(abilityList.end(), defaultActiveSingleList.begin(), defaultActiveSingleList.end());
         }
     }
 
@@ -3807,6 +3827,15 @@ void MissionListManager::CallRequestDone(const std::shared_ptr<AbilityRecord> &a
         return;
     }
     abilityRecord->CallRequestDone(callStub);
+}
+
+bool MissionListManager::IsTopAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    if (abilityRecord == nullptr) {
+        return false;
+    }
+    std::lock_guard guard(managerLock_);
+    return GetCurrentTopAbilityLocked() == abilityRecord;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
