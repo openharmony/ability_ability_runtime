@@ -28,6 +28,7 @@
 #include "app_process_data.h"
 #include "app_state_observer_manager.h"
 #include "application_state_observer_stub.h"
+#include "appspawn_mount_permission.h"
 #include "bundle_constants.h"
 #include "common_event.h"
 #include "common_event_manager.h"
@@ -196,7 +197,7 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         auto callRecord = GetAppRunningRecordByAbilityToken(preToken);
         if (callRecord != nullptr) {
             auto launchReson = (want == nullptr) ? 0 : want->GetIntParam("ohos.ability.launch.reason", 0);
-            HILOG_INFO("req: %{public}d, proc: %{public}s, call:%{public}d,%{public}s", launchReson,
+            HILOG_DEBUG("req: %{public}d, proc: %{public}s, call:%{public}d,%{public}s", launchReson,
                 appInfo->name.c_str(), appRecord->GetCallerPid(), callRecord->GetBundleName().c_str());
         }
         uint32_t startFlags = (want == nullptr) ? 0 : BuildStartFlags(*want, *abilityInfo);
@@ -311,7 +312,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     }
 
     auto userId = GetUserIdByUid(appInfo->uid);
-    HILOG_INFO("call,userId:%{public}d", userId);
+    HILOG_INFO("userId:%{public}d", userId);
     bool bundleMgrResult;
     if (appIndex == 0) {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleInfo(appInfo->bundleName,
@@ -549,6 +550,8 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
         HILOG_ERROR("current state is not background");
         return;
     }
+
+    KillRenderProcess(appRecord);
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
     appRecord->RemoveAppDeathRecipient();
     appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_APP_TERMINATED);
@@ -1681,18 +1684,18 @@ int32_t AppMgrServiceInner::StartPerfProcess(const std::shared_ptr<AppRunningRec
         return ERR_INVALID_OPERATION;
     }
     if (perfCmd.empty() && debugCmd.empty()) {
-        HILOG_ERROR("perfCmd is empty");
+        HILOG_DEBUG("perfCmd is empty");
         return ERR_INVALID_OPERATION;
     }
 
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     if (!perfCmd.empty()) {
-        HILOG_INFO("debuggablePipe perfCmd:%{public}s", perfCmd.c_str());
+        HILOG_DEBUG("debuggablePipe perfCmd:%{public}s", perfCmd.c_str());
     } else {
-        HILOG_INFO("debuggablePipe debugCmd:%{public}s", debugCmd.c_str());
+        HILOG_DEBUG("debuggablePipe debugCmd:%{public}s", debugCmd.c_str());
     }
     if (isSanboxApp) {
-        HILOG_INFO("debuggablePipe sandbox: true");
+        HILOG_DEBUG("debuggablePipe sandbox: true");
     }
     return ERR_OK;
 }
@@ -1796,6 +1799,15 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.allowInternet = allowInternet;
     startMsg.hspList = hspList;
     startMsg.hapFlags = bundleInfo.isPreInstallApp ? 1 : 0;
+    std::set<std::string> mountPermissionList = AppSpawn::AppspawnMountPermission::GetMountPermissionList();
+    std::set<std::string> permissions;
+    for (std::string permission : mountPermissionList) {
+        if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, permission) ==
+            Security::AccessToken::PERMISSION_GRANTED) {
+            permissions.insert(permission);
+        }
+    }
+    startMsg.mountPermissionFlags = AppSpawn::AppspawnMountPermission::GenPermissionCode(permissions);
     if (hasAccessBundleDirReq) {
         startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
     }
@@ -1999,21 +2011,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
 
     // kill render if exist.
-    auto renderRecordMap = appRecord->GetRenderRecordMap();
-    if (!renderRecordMap.empty()) {
-        for (auto iter : renderRecordMap) {
-            auto renderRecord = iter.second;
-            if (renderRecord && renderRecord->GetPid() > 0) {
-                HILOG_DEBUG("Kill render process when host died.");
-                KillProcessByPid(renderRecord->GetPid());
-                {
-                    std::lock_guard<std::mutex> lock(renderUidSetLock_);
-                    renderUidSet_.erase(renderRecord->GetUid());
-                }
-                DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
-            }
-        }
-    }
+    KillRenderProcess(appRecord);
 
     if (appRecord->GetPriorityObject() != nullptr) {
         SendProcessExitEvent(appRecord->GetPriorityObject()->GetPid());
@@ -3356,6 +3354,7 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     startMsg.renderParam = renderRecord->GetRenderParam();
     startMsg.uid = renderUid;
+    startMsg.gid = renderUid;
     startMsg.code = 0; // 0: DEFAULT
     pid_t pid = 0;
     ErrCode errCode = nwebSpawnClient->StartProcess(startMsg, pid);
@@ -3852,6 +3851,27 @@ int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &b
     bundleName = callerRecord->GetBundleName();
     uid = callerRecord->GetUid();
     return ERR_OK;
+}
+void AppMgrServiceInner::KillRenderProcess(const std::shared_ptr<AppRunningRecord> &appRecord) {
+    if (appRecord == nullptr) {
+        HILOG_ERROR("appRecord is nullptr.");
+        return;
+    }
+    auto renderRecordMap = appRecord->GetRenderRecordMap();
+    if (!renderRecordMap.empty()) {
+        for (auto iter : renderRecordMap) {
+            auto renderRecord = iter.second;
+            if (renderRecord && renderRecord->GetPid() > 0) {
+                HILOG_DEBUG("Kill render process when host died.");
+                KillProcessByPid(renderRecord->GetPid());
+                {
+                    std::lock_guard<std::mutex> lock(renderUidSetLock_);
+                    renderUidSet_.erase(renderRecord->GetUid());
+                }
+                DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+            }
+        }
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
