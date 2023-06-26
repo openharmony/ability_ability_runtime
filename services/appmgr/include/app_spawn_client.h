@@ -105,6 +105,14 @@ private:
      */
     ErrCode WriteStrInfoMessage(const std::string &strInfo);
 
+    /**
+     * @brief write message to appSpawn.
+     *
+     * @param msgWrapper, request message.
+     * @param startMsg, request message.
+     */
+    ErrCode StartProcessForWriteMsg(const AppSpawnMsgWrapper &msgWrapper, const AppSpawnStartMsg &startMsg);
+
 private:
     std::shared_ptr<AppSpawnSocket> socket_;
     SpawnConnectionState state_ = SpawnConnectionState::STATE_NOT_CONNECT;

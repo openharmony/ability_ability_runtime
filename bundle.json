@@ -35,38 +35,49 @@
       "deps": {
         "components": [
             "ability_base",
+            "accessibility",
             "access_token",
             "ace_engine",
             "appspawn",
-            "ark_js_runtime",
             "background_task_mgr",
             "bundle_framework",
-            "common",
             "common_event_service",
             "c_utils",
+            "data_share",
+            "dlp_permission_service",
             "dsoftbus",
+            "efficiency_manager",
             "eventhandler",
+            "ets_runtime",
+            "ets_utils",
             "faultloggerd",
             "form_fwk",
-            "hichecker_native",
-            "hicollie_native",
-            "hisysevent_native",
-            "hitrace_native",
+            "graphic_standard",
+            "hichecker",
+            "hicollie",
+            "hilog",
+            "hisysevent",
+            "hitrace",
             "hiview",
-            "hiviewdfx_hilog_native",
             "i18n",
             "icu",
             "init",
             "input",
             "ipc",
+            "ipc_js",
+            "kv_store",
+            "memory_utils",
             "multimedia_image_framework",
             "napi",
+            "netmanager_base",
             "os_account",
             "relational_store",
             "resource_management",
+            "resource_schedule_service",
             "safwk",
             "samgr",
-            "startup_l2",
+            "storage_service",
+            "webview",
             "window_manager"
   ],
           "third_party": [
@@ -185,6 +196,14 @@
               ]
             },
             "name": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_common:napi_common"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_ability_common",
+              "header_files": [
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_ability_common:napi_ability_common"
           },
           {
             "header": {

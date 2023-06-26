@@ -484,70 +484,6 @@ void RegisterMissionExecuteCB(napi_env env, void *data)
     HILOG_DEBUG("%{public}s end.deviceId:%{public}d ", __func__, registerMissionCB->result);
 }
 
-void OnExecuteCB(napi_env env, void *data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    auto onCB = (OnCB*)data;
-
-    std::lock_guard<std::mutex> autoLock(onLock_);
-    sptr<NAPIRemoteOnListener> registrationOfOn;
-    auto item = registrationOfOn_.find(onCB->type);
-    if (item != registrationOfOn_.end()) {
-        HILOG_INFO("registrationOfOn exits.");
-        registrationOfOn = registrationOfOn_[onCB->type];
-    } else {
-        HILOG_INFO("registrationOfOn not exits.");
-        registrationOfOn = new (std::nothrow) NAPIRemoteOnListener();
-    }
-    onCB->onRegistration = registrationOfOn;
-    if (onCB->onRegistration == nullptr) {
-        HILOG_ERROR("%{public}s onRegistration == nullptr.", __func__);
-        onCB->result = -1;
-        return;
-    }
-    onCB->onRegistration->SetEnv(env);
-    onCB->onRegistration->
-        SetOnCallbackCBRef(onCB->onCallbackCB.callback);
-    HILOG_INFO("set callback success.");
-
-    onCB->result =
-        AbilityManagerClient::GetInstance()->
-        RegisterOnListener(onCB->type,
-        onCB->onRegistration);
-    if (onCB->result == NO_ERROR) {
-        HILOG_INFO("add registrationOfOn.");
-        registrationOfOn_[onCB->type] = registrationOfOn;
-    }
-}
-
-void OffExecuteCB(napi_env env, void *data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    auto onCB = (OnCB*)data;
-
-    std::lock_guard<std::mutex> autoLock(onLock_);
-    sptr<NAPIRemoteOnListener> registrationOfOn;
-    auto item = registrationOfOn_.find(onCB->type);
-    if (item != registrationOfOn_.end()) {
-        HILOG_INFO("registrationOfOn exits.");
-        registrationOfOn = registrationOfOn_[onCB->type];
-    } else {
-        HILOG_INFO("registrationOfOn not exits.");
-        onCB->result = -1;
-        return;
-    }
-    onCB->onRegistration = registrationOfOn;
-    onCB->result =
-        AbilityManagerClient::GetInstance()->
-        RegisterOffListener(onCB->type,
-        onCB->onRegistration);
-    if (onCB->result == NO_ERROR) {
-        HILOG_INFO("remove registration.");
-        registrationOfOn_.erase(onCB->type);
-    }
-    HILOG_DEBUG("%{public}s end.type:%{public}d ", __func__, onCB->result);
-}
-
 void RegisterMissionCallbackCompletedCB(napi_env env, napi_status status, void *data)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -566,38 +502,6 @@ void RegisterMissionCallbackCompletedCB(napi_env env, napi_status status, void *
     delete registerMissionCB;
     registerMissionCB = nullptr;
     HILOG_INFO("%{public}s end.", __func__);
-}
-
-void OnCallbackCompletedCB(napi_env env, napi_status status, void *data)
-{
-    HILOG_INFO("%{public}s called.", __func__);
-    auto onCB = static_cast<OnCB *>(data);
-    // set result
-    napi_value result[2] = { nullptr };
-    napi_get_undefined(env, &result[1]);
-    if (onCB->result == 0) {
-        napi_get_undefined(env, &result[0]);
-    } else {
-        int32_t errCode = ErrorCodeReturn(onCB->result);
-        result[0] = GenerateBusinessError(env, errCode, ErrorMessageReturn(errCode));
-    }
-
-    ReturnValueToApplication(env, &result[0], onCB);
-    delete onCB;
-    onCB = nullptr;
-    HILOG_INFO("%{public}s end.", __func__);
-}
-
-void ReturnValueToApplication(napi_env &env, napi_value *result, OnCB *onCB)
-{
-    if (onCB->callbackRef != nullptr) {
-        napi_value callback = nullptr;
-        napi_get_reference_value(env, onCB->callbackRef, &callback);
-        napi_value callResult;
-        napi_call_function(env, nullptr, callback, ARGS_ONE, &result[0], &callResult);
-        napi_delete_reference(env, onCB->callbackRef);
-    }
-    NAPI_CALL_RETURN_VOID(env, napi_delete_async_work(env, onCB->cbBase.asyncWork));
 }
 
 void ReturnValueToApplication(napi_env &env, napi_value *result, RegisterMissionCB *registerMissionCB)
@@ -643,56 +547,6 @@ napi_value RegisterMissionAsync(napi_env env, RegisterMissionCB *registerMission
         static_cast<void *>(registerMissionCB),
         &registerMissionCB->cbBase.asyncWork);
     napi_queue_async_work(env, registerMissionCB->cbBase.asyncWork);
-    HILOG_INFO("%{public}s asyncCallback end.", __func__);
-    return result;
-}
-
-napi_value OnAsync(napi_env env, OnCB *onCB)
-{
-    HILOG_INFO("%{public}s asyncCallback.", __func__);
-    if (onCB == nullptr) {
-        HILOG_ERROR("%{public}s, onCB == nullptr.", __func__);
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, ErrorMessageReturn(SYSTEM_WORK_ABNORMALLY)));
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_get_undefined(env, &result);
-    napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
-        OnExecuteCB,
-        OnCallbackCompletedCB,
-        static_cast<void *>(onCB),
-        &onCB->cbBase.asyncWork);
-    napi_queue_async_work(env, onCB->cbBase.asyncWork);
-    HILOG_INFO("%{public}s asyncCallback end.", __func__);
-    return result;
-}
-
-napi_value OffAsync(napi_env env, OnCB *onCB)
-{
-    HILOG_INFO("%{public}s asyncCallback.", __func__);
-    if (onCB == nullptr) {
-        HILOG_ERROR("%{public}s, onCB == nullptr.", __func__);
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, ErrorMessageReturn(SYSTEM_WORK_ABNORMALLY)));
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    napi_get_undefined(env, &result);
-    napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, __func__, NAPI_AUTO_LENGTH, &resourceName);
-
-    napi_create_async_work(env,
-        nullptr,
-        resourceName,
-        OffExecuteCB,
-        OnCallbackCompletedCB,
-        static_cast<void *>(onCB),
-        &onCB->cbBase.asyncWork);
-    napi_queue_async_work(env, onCB->cbBase.asyncWork);
     HILOG_INFO("%{public}s asyncCallback end.", __func__);
     return result;
 }
@@ -900,6 +754,42 @@ napi_value RegisterMissionWrap(napi_env &env, napi_callback_info info,
     return ret;
 }
 
+void OnExecuteCB(napi_env &env, OnCB *onCB)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    std::lock_guard<std::mutex> autoLock(onLock_);
+    sptr<NAPIRemoteOnListener> registrationOfOn;
+    auto item = registrationOfOn_.find(onCB->type);
+    if (item != registrationOfOn_.end()) {
+        HILOG_INFO("registrationOfOn exits.");
+        registrationOfOn = registrationOfOn_[onCB->type];
+    } else {
+        HILOG_INFO("registrationOfOn not exits.");
+        registrationOfOn = new (std::nothrow) NAPIRemoteOnListener();
+    }
+    onCB->onRegistration = registrationOfOn;
+    if (onCB->onRegistration == nullptr) {
+        HILOG_ERROR("%{public}s onRegistration == nullptr.", __func__);
+        onCB->result = -1;
+        int32_t errCode = ErrorCodeReturn(onCB->result);
+        napi_throw(env, GenerateBusinessError(env, errCode, ErrorMessageReturn(errCode)));
+        return;
+    }
+    onCB->onRegistration->SetEnv(env);
+    onCB->onRegistration->
+        SetOnCallbackCBRef(onCB->onCallbackCB.callback);
+    HILOG_INFO("set callback success.");
+    onCB->result =
+        AbilityManagerClient::GetInstance()->
+        RegisterOnListener(onCB->type,
+        onCB->onRegistration);
+    if (onCB->result == NO_ERROR) {
+        HILOG_INFO("add registrationOfOn.");
+        registrationOfOn_[onCB->type] = registrationOfOn;
+    }
+    HILOG_INFO("%{public}s called end.", __func__);
+}
+
 napi_value OnWrap(napi_env &env, napi_callback_info info,
     OnCB *onCB, std::string &errInfo)
 {
@@ -912,7 +802,6 @@ napi_value OnWrap(napi_env &env, napi_callback_info info,
         errInfo = "Parameter error. The type of \"number of parameters\" must be 2";
         return nullptr;
     }
-
     if (!OnWrapType(env, args[0], onCB, errInfo)) {
         HILOG_INFO("%{public}s, OnWrapType failed.", __func__);
         return nullptr;
@@ -920,10 +809,44 @@ napi_value OnWrap(napi_env &env, napi_callback_info info,
     if (!CreateOnCallbackReference(env, args[1], onCB, errInfo)) {
         return nullptr;
     }
-
-    napi_value ret = OnAsync(env, onCB);
+    OnExecuteCB(env, onCB);
+    if (onCB->result != 0) {
+        int32_t errCode = ErrorCodeReturn(onCB->result);
+        napi_throw(env, GenerateBusinessError(env, errCode, ErrorMessageReturn(errCode)));
+    }
+    if (onCB->callbackRef != nullptr) {
+        napi_delete_reference(env, onCB->callbackRef);
+    }
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
     HILOG_INFO("%{public}s called end.", __func__);
-    return ret;
+    return result;
+}
+
+void OffExecuteCB(napi_env env, OnCB *onCB)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    std::lock_guard<std::mutex> autoLock(onLock_);
+    sptr<NAPIRemoteOnListener> registrationOfOn;
+    auto item = registrationOfOn_.find(onCB->type);
+    if (item != registrationOfOn_.end()) {
+        HILOG_INFO("registrationOfOff exits.");
+        registrationOfOn = registrationOfOn_[onCB->type];
+    } else {
+        HILOG_INFO("registrationOfOff not exits.");
+        onCB->result = -1;
+        return;
+    }
+    onCB->onRegistration = registrationOfOn;
+    onCB->result =
+        AbilityManagerClient::GetInstance()->
+        RegisterOffListener(onCB->type,
+        onCB->onRegistration);
+    if (onCB->result == NO_ERROR) {
+        HILOG_INFO("remove registration.");
+        registrationOfOn_.erase(onCB->type);
+    }
+    HILOG_DEBUG("%{public}s end.type:%{public}d ", __func__, onCB->result);
 }
 
 napi_value OffWrap(napi_env &env, napi_callback_info info,
@@ -933,23 +856,30 @@ napi_value OffWrap(napi_env &env, napi_callback_info info,
     size_t argcAsync = 2;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr);
-    if (argcAsync != ARGS_TWO) {
+    if (argcAsync != ARGS_ONE && argcAsync != ARGS_TWO) {
         HILOG_ERROR("%{public}s, Wrong argument count.", __func__);
-        errInfo = "Parameter error. The type of \"number of parameters\" must be 2";
+        errInfo = "Parameter error. The type of \"number of parameters\" must be 1 or 2";
         return nullptr;
     }
-
     if (!OnWrapType(env, args[0], onCB, errInfo)) {
         HILOG_INFO("%{public}s, OffWrapType failed.", __func__);
         return nullptr;
     }
-    if (!CreateOnCallbackReference(env, args[1], onCB, errInfo)) {
+    if (argcAsync == ARGS_TWO && !CreateOnCallbackReference(env, args[1], onCB, errInfo)) {
         return nullptr;
     }
-
-    napi_value ret = OffAsync(env, onCB);
+    OffExecuteCB(env, onCB);
+    if (onCB->result != 0) {
+        int32_t errCode = ErrorCodeReturn(onCB->result);
+        napi_throw(env, GenerateBusinessError(env, errCode, ErrorMessageReturn(errCode)));
+    }
+    if (onCB->callbackRef != nullptr) {
+        napi_delete_reference(env, onCB->callbackRef);
+    }
+    napi_value result = nullptr;
+    napi_get_undefined(env, &result);
     HILOG_INFO("%{public}s called end.", __func__);
-    return ret;
+    return result;
 }
 
 napi_value NAPI_RegisterMissionListener(napi_env env, napi_callback_info info)
@@ -1142,19 +1072,24 @@ void UvWorkOnCallback(uv_work_t *work, int status)
         return;
     }
 
-    napi_value result[2] = {nullptr};
+    napi_value result[3] = {nullptr};
     napi_create_int32(onCB->cbBase.cbInfo.env, onCB->continueState, &result[0]);
     napi_create_object(onCB->cbBase.cbInfo.env, &result[1]);
+    napi_create_object(onCB->cbBase.cbInfo.env, &result[ARGS_TWO]);
     std::string napiValue1 = onCB->srcDeviceId;
     std::string napiValue2 = onCB->bundleName;
     napi_value jsValue1 = nullptr;
     napi_value jsValue2 = nullptr;
     napi_create_string_utf8(onCB->cbBase.cbInfo.env, napiValue1.c_str(), NAPI_AUTO_LENGTH, &jsValue1);
     napi_create_string_utf8(onCB->cbBase.cbInfo.env, napiValue2.c_str(), NAPI_AUTO_LENGTH, &jsValue2);
+    std::string napiState = "state";
     std::string paramName1 = "srcDeviceId";
     std::string paramName2 = "bundleName";
+    std::string napiInfo = "info";
     napi_set_named_property(onCB->cbBase.cbInfo.env, result[1], paramName1.c_str(), jsValue1);
     napi_set_named_property(onCB->cbBase.cbInfo.env, result[1], paramName2.c_str(), jsValue2);
+    napi_set_named_property(onCB->cbBase.cbInfo.env, result[ARGS_TWO], napiState.c_str(), result[0]);
+    napi_set_named_property(onCB->cbBase.cbInfo.env, result[ARGS_TWO], napiInfo.c_str(), result[1]);
 
     napi_value callback = nullptr;
     napi_value undefined = nullptr;
@@ -1162,7 +1097,7 @@ void UvWorkOnCallback(uv_work_t *work, int status)
     napi_value callResult = nullptr;
     napi_get_reference_value(onCB->cbBase.cbInfo.env, onCB->cbBase.cbInfo.callback, &callback);
 
-    napi_call_function(onCB->cbBase.cbInfo.env, undefined, callback, ARGS_TWO, &result[0], &callResult);
+    napi_call_function(onCB->cbBase.cbInfo.env, undefined, callback, ARGS_ONE, &result[ARGS_TWO], &callResult);
     delete onCB;
     onCB = nullptr;
     delete work;
