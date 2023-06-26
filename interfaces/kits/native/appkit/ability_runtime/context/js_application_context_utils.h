@@ -103,8 +103,8 @@ private:
     NativeValue* OnGetApplicationContext(NativeEngine& engine, NativeCallbackInfo& info);
     bool CheckCallerIsSystemApp();
     static void BindNativeApplicationContext(NativeEngine &engine, NativeObject* object);
-    static JsAppProcessState ConvertToJsAppProcessState(const AppExecFwk::AppProcessState &appProcessState,
-                                                        const bool &isFocused);
+    static JsAppProcessState ConvertToJsAppProcessState(
+        const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused);
     std::shared_ptr<JsAbilityLifecycleCallback> callback_;
     std::shared_ptr<JsEnvironmentCallback> envCallback_;
     std::shared_ptr<JsApplicationStateChangeCallback> applicationStateCallback_;

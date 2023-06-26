@@ -26,26 +26,26 @@ JsApplicationStateChangeCallback::JsApplicationStateChangeCallback(NativeEngine*
 {
 }
 
-void JsApplicationStateChangeCallback::CallJsMethodInnerCommon(const std::string &methodName, 
-    const std::set<std::shared_ptr<NativeReference>> callbacks)
+void JsApplicationStateChangeCallback::CallJsMethodInnerCommon(
+    const std::string &methodName, const std::set<std::shared_ptr<NativeReference>> callbacks)
 {
     for (auto &callback : callbacks) {
         if (!callback) {
             HILOG_ERROR("Invalid jsCallback");
-            return;
+            continue;
         }
 
         auto value = callback->Get();
         auto obj = ConvertNativeValueTo<NativeObject>(value);
         if (obj == nullptr) {
             HILOG_ERROR("Failed to get object");
-            return;
+            continue;
         }
 
         auto method = obj->GetProperty(methodName.data());
         if (method == nullptr) {
             HILOG_ERROR("Failed to get %{public}s from object", methodName.data());
-            return;
+            continue;
         }
         engine_->CallFunction(value, method, nullptr, 0);
     }
@@ -82,7 +82,8 @@ void JsApplicationStateChangeCallback::NotifyApplicationBackground()
 
 void JsApplicationStateChangeCallback::Register(NativeValue *jsCallback)
 {
-    if (engine_ == nullptr) {
+    if (engine_ == nullptr || jsCallback == nullptr) {
+        HILOG_ERROR("Engine or jsCallback is nullptr");
         return;
     }
     callbacks_.emplace(std::shared_ptr<NativeReference>(engine_->CreateReference(jsCallback, 1)));
@@ -90,21 +91,27 @@ void JsApplicationStateChangeCallback::Register(NativeValue *jsCallback)
 
 bool JsApplicationStateChangeCallback::UnRegister(NativeValue *jsCallback)
 {
+    if (jsCallback == nullptr) {
+        HILOG_ERROR("jsCallback nullptr");
+        return false;
+    }
+
     for (auto &callback : callbacks_) {
         if (!callback) {
+            HILOG_ERROR("Invalid jsCallback");
             continue;
         }
 
         NativeValue *value = callback->Get();
         if (value == nullptr) {
-           continue;
+            HILOG_ERROR("Failed to get object");
+            continue;
         }
 
         if (value->StrictEquals(jsCallback)) {
             return callbacks_.erase(callback) == 1;
         }
     }
-    HILOG_ERROR("Failed to get callback.");
     return false;
 }
 
