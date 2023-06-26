@@ -918,11 +918,13 @@ NativeValue *JsApplicationContextUtils::OnOffApplicationStateChange(
     std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
     if (applicationStateCallback_ == nullptr) {
         HILOG_ERROR("ApplicationStateCallback_ is nullptr.");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return engine.CreateUndefined();
     }
 
     if (!applicationStateCallback_->UnRegister(info.argv[INDEX_ONE])) {
         HILOG_ERROR("call UnRegister failed!");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return engine.CreateUndefined();
     }
 
