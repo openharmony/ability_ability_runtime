@@ -1188,12 +1188,12 @@ NativeValue* JsAbilityContext::OnIsTerminating(NativeEngine& engine, NativeCallb
 NativeValue* JsAbilityContext::OnReportDrawnCompleted(NativeEngine& engine, NativeCallbackInfo& info)
 {
     HILOG_DEBUG("called.");
-    auto innerErrorCode = std::make_shared<int>(ERR_OK);
+    auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
     AsyncTask::ExecuteCallback execute = [weak = context_, innerErrorCode]() {
         auto context = weak.lock();
         if (!context) {
             HILOG_WARN("context is released");
-            *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            *innerErrorCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
             return;
         }
 
