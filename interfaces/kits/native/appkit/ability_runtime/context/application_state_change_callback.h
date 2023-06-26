@@ -51,15 +51,15 @@ class JsApplicationStateChangeCallback : public ApplicationStateChangeCallback,
     public std::enable_shared_from_this<JsApplicationStateChangeCallback> {
 public:
     explicit JsApplicationStateChangeCallback(NativeEngine* engine);
-    ~JsApplicationStateChangeCallback() {};
+    virtual ~JsApplicationStateChangeCallback() = default;
     void NotifyApplicationForeground() override;
     void NotifyApplicationBackground() override;
     void Register(NativeValue *jsCallback);
     bool UnRegister(NativeValue *jsCallback);
     bool IsEmpty() const;
 private:
-    void CallJsMethodInnerCommon(const std::string &methodName, 
-        const std::set<std::shared_ptr<NativeReference>> callbacks);
+    void CallJsMethodInnerCommon(
+        const std::string &methodName, const std::set<std::shared_ptr<NativeReference>> callbacks);
     void CallJsMethod(const std::string &methodName);
     void CallApplicationForegroundInner(const std::string &methodName);
     NativeEngine* engine_ = nullptr;

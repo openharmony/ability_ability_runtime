@@ -248,24 +248,24 @@ void ApplicationContext::DispatchMemoryLevel(const int level)
 
 void ApplicationContext::NotifyApplicationForeground()
 {
-    auto Callback = applicationStateCallback_.lock();
-    if (Callback == nullptr) {
+    auto callback = applicationStateCallback_.lock();
+    if (callback == nullptr) {
         HILOG_ERROR("applicationStateCallback is nullptr");
         return;
     }
 
-    Callback->NotifyApplicationForeground();
+    callback->NotifyApplicationForeground();
 }
 
 void ApplicationContext::NotifyApplicationBackground()
 {
-    auto Callback = applicationStateCallback_.lock();
-    if (Callback == nullptr) {
+    auto callback = applicationStateCallback_.lock();
+    if (callback == nullptr) {
         HILOG_ERROR("applicationStateCallback is nullptr");
         return;
     }
 
-    Callback->NotifyApplicationBackground();
+    callback->NotifyApplicationBackground();
 }
 
 std::string ApplicationContext::GetBundleName() const

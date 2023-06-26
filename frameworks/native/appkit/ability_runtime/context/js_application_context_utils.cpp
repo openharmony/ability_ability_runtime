@@ -449,8 +449,8 @@ NativeValue *JsApplicationContextUtils::OnGetRunningProcessInformation(NativeEng
             object->SetProperty("pid", CreateJsValue(engine, processInfo.pid_));
             object->SetProperty("uid", CreateJsValue(engine, processInfo.uid_));
             object->SetProperty("bundleNames", CreateNativeArray(engine, processInfo.bundleNames));
-            object->SetProperty("state", CreateJsValue(engine,
-                ConvertToJsAppProcessState(processInfo.state_, processInfo.isFocused)));
+            object->SetProperty(
+                "state", CreateJsValue(engine, ConvertToJsAppProcessState(processInfo.state_, processInfo.isFocused)));
             object->SetProperty("isContinuousTask", CreateJsValue(engine, processInfo.isContinuousTask));
             object->SetProperty("isKeepAlive", CreateJsValue(engine, processInfo.isKeepAlive));
             object->SetProperty("isFocused", CreateJsValue(engine, processInfo.isFocused));
