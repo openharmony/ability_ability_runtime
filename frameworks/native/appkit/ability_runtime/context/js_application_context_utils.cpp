@@ -1057,8 +1057,7 @@ JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(
     const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused)
 {
     JsAppProcessState processState;
-    switch(appProcessState)
-    {
+    switch (appProcessState) {
         case AppExecFwk::AppProcessState::APP_STATE_CREATE:
         case AppExecFwk::AppProcessState::APP_STATE_READY:
             processState = STATE_CREATE;
