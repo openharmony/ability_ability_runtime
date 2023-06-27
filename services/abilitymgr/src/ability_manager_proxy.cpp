@@ -4052,7 +4052,7 @@ int32_t AbilityManagerProxy::ReportDrawnCompleted(const sptr<IRemoteObject> &cal
         return INNER_ERR;
     }
 
-    auto remote= Remote();
+    auto remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("remote is nullptr.");
         return INNER_ERR;
