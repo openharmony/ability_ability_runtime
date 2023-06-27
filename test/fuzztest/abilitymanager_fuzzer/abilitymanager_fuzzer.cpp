@@ -39,27 +39,27 @@ uint32_t GetU32Data(const char* ptr)
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    uint32_t code = GetU32Data(data) % (IAbilityManager::GET_ABILITY_TOKEN + IAbilityManager::SET_ROOT_SCENE_SESSION);
-    if (code >IAbilityManager::GET_ABILITY_TOKEN) {
-        code = IAbilityManager::GET_ABILITY_TOKEN;
-    } else if (code > IAbilityManager::SHARE_DATA_DONE && code != IAbilityManager::GET_ABILITY_TOKEN) {
-        code = IAbilityManager::ACQUIRE_SHARE_DATA +
-            (code % (IAbilityManager::SHARE_DATA_DONE - IAbilityManager::ACQUIRE_SHARE_DATA + 1));
-    } else if (code > IAbilityManager::VERIFY_PERMISSION) {
-        code = IAbilityManager::GET_TOP_ABILITY +
-            (code % (IAbilityManager::VERIFY_PERMISSION - IAbilityManager::GET_TOP_ABILITY + 1));
-    } else if (code > IAbilityManager::GET_DLP_CONNECTION_INFOS) {
-        code = IAbilityManager::REGISTER_WMS_HANDLER +
-            (code % (IAbilityManager::GET_DLP_CONNECTION_INFOS - IAbilityManager::REGISTER_WMS_HANDLER + 1));
-    } else if (code > IAbilityManager::FORCE_TIMEOUT) {
-        code = IAbilityManager::DUMP_STATE +
-            (code % (IAbilityManager::FORCE_TIMEOUT - IAbilityManager::DUMP_STATE + 1));
-    } else if (code > IAbilityManager::GET_TOP_ABILITY_TOKEN) {
-        code = IAbilityManager::START_ABILITY +
-            (code % (IAbilityManager::GET_TOP_ABILITY_TOKEN - IAbilityManager::START_ABILITY + 1));
-    } else if (code > IAbilityManager::SET_ROOT_SCENE_SESSION) {
-        code = IAbilityManager::TERMINATE_ABILITY +
-            (code % (IAbilityManager::SET_ROOT_SCENE_SESSION - IAbilityManager::TERMINATE_ABILITY + 1));
+    uint32_t code = GetU32Data(data) % (AbilityManagerInterfaceCode::GET_ABILITY_TOKEN + AbilityManagerInterfaceCode::SET_ROOT_SCENE_SESSION);
+    if (code >AbilityManagerInterfaceCode::GET_ABILITY_TOKEN) {
+        code = AbilityManagerInterfaceCode::GET_ABILITY_TOKEN;
+    } else if (code > AbilityManagerInterfaceCode::SHARE_DATA_DONE && code != AbilityManagerInterfaceCode::GET_ABILITY_TOKEN) {
+        code = AbilityManagerInterfaceCode::ACQUIRE_SHARE_DATA +
+            (code % (AbilityManagerInterfaceCode::SHARE_DATA_DONE - AbilityManagerInterfaceCode::ACQUIRE_SHARE_DATA + 1));
+    } else if (code > AbilityManagerInterfaceCode::VERIFY_PERMISSION) {
+        code = AbilityManagerInterfaceCode::GET_TOP_ABILITY +
+            (code % (AbilityManagerInterfaceCode::VERIFY_PERMISSION - AbilityManagerInterfaceCode::GET_TOP_ABILITY + 1));
+    } else if (code > AbilityManagerInterfaceCode::GET_DLP_CONNECTION_INFOS) {
+        code = AbilityManagerInterfaceCode::REGISTER_WMS_HANDLER +
+            (code % (AbilityManagerInterfaceCode::GET_DLP_CONNECTION_INFOS - AbilityManagerInterfaceCode::REGISTER_WMS_HANDLER + 1));
+    } else if (code > AbilityManagerInterfaceCode::FORCE_TIMEOUT) {
+        code = AbilityManagerInterfaceCode::DUMP_STATE +
+            (code % (AbilityManagerInterfaceCode::FORCE_TIMEOUT - AbilityManagerInterfaceCode::DUMP_STATE + 1));
+    } else if (code > AbilityManagerInterfaceCode::GET_TOP_ABILITY_TOKEN) {
+        code = AbilityManagerInterfaceCode::START_ABILITY +
+            (code % (AbilityManagerInterfaceCode::GET_TOP_ABILITY_TOKEN - AbilityManagerInterfaceCode::START_ABILITY + 1));
+    } else if (code > AbilityManagerInterfaceCode::SET_ROOT_SCENE_SESSION) {
+        code = AbilityManagerInterfaceCode::TERMINATE_ABILITY +
+            (code % (AbilityManagerInterfaceCode::SET_ROOT_SCENE_SESSION - AbilityManagerInterfaceCode::TERMINATE_ABILITY + 1));
     }
 
     MessageParcel parcel;
