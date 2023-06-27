@@ -3880,7 +3880,6 @@ int32_t AppMgrServiceInner::GetProcessMemoryByPid(const int32_t pid, int32_t &me
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     uint64_t memSize = OHOS::MemInfo::GetPssByPid(pid);
-    HILOG_INFO("memorySize is %{public}lu", memSize);
     memorySize = memSize;
     return ERR_OK;
 }
@@ -3923,7 +3922,6 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
             }
         }
     }
-    HILOG_INFO("info size is %{public}zu", info.size());
     return ERR_OK;
 }
 }  // namespace AppExecFwk
