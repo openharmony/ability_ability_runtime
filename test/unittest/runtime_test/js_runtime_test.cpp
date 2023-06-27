@@ -754,5 +754,20 @@ HWTEST_F(JsRuntimeTest, PostSyncTask_0100, TestSize.Level0)
     jsRuntime->PostSyncTask(task, taskName);
     EXPECT_EQ(taskExecuted, true);
 }
+
+/**
+ * @tc.name: JsRuntimeStartProfilerTest_0100
+ * @tc.desc: JsRuntime test for StartProfiler.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeStartProfilerTest_0100, TestSize.Level1)
+{
+    AbilityRuntime::Runtime::Options options;
+    options.preload = false;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    std::string perfCmd = "profile test";
+    jsRuntime->StartProfiler(perfCmd);
+    ASSERT_NE(jsRuntime, nullptr);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS
