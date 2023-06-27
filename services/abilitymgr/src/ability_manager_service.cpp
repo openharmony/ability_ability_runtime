@@ -1714,14 +1714,6 @@ int AbilityManagerService::StartUIExtensionAbility(const Want &want, const sptr<
     HILOG_DEBUG("userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
-    result = CheckOptExtensionAbility(want, abilityRequest, validUserId, extensionType);
-    if (result != ERR_OK) {
-        HILOG_ERROR("CheckOptExtensionAbility error.");
-        eventInfo.errCode = result;
-        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
-        return result;
-    }
-
     result = JudgeAbilityVisibleControl(abilityInfo);
     if (result != ERR_OK) {
         HILOG_ERROR("JudgeAbilityVisibleControl error.");
