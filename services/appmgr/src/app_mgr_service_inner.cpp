@@ -3914,7 +3914,7 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
         auto appInfoList = appRecord->GetAppInfoList();
         for (const auto &appInfo : appInfoList) {
             if (appInfo == nullptr) {
-                continue;              
+                continue;
             }
             if (appInfo->bundleName == bundleName && appInfo->uid == uid) {
                 GetRunningProcesses(appRecord, info);
