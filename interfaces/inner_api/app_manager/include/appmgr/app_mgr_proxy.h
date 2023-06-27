@@ -335,7 +335,7 @@ public:
     virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
 
 private:
-    bool SendTransactCmd(IAppMgr::Message code, MessageParcel &data, MessageParcel &reply);
+    bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);
     template<typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
