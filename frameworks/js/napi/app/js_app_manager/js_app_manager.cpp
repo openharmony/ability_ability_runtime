@@ -538,7 +538,7 @@ private:
 
     NativeValue* OnGetProcessMemoryByPid(NativeEngine& engine, const NativeCallbackInfo& info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("is called");
         if (info.argc < ARGC_ONE) {
             HILOG_ERROR("Params not match");
             ThrowTooFewParametersError(engine);
@@ -564,7 +564,7 @@ private:
                 if (ret == 0) {
                     task.ResolveWithNoError(engine, CreateJsValue(engine, memSize));
                 } else {
-                    task.Reject(engine, CreateJsErrorByNativeErr(engine, ret, "Get Process Memory by pid failed."));
+                    task.Reject(engine, CreateJsErrorByNativeErr(engine, ret));
                 }
             };
 
@@ -577,7 +577,7 @@ private:
 
     NativeValue* OnGetRunningProcessInfoByBundleName(NativeEngine& engine, const NativeCallbackInfo& info)
     {
-        HILOG_INFO("%{public}s is called", __FUNCTION__);
+        HILOG_DEBUG("is called");
         if (info.argc < ARGC_ONE) {
             HILOG_ERROR("Params number less then one");
             ThrowTooFewParametersError(engine);
@@ -587,38 +587,19 @@ private:
         std::string bundleName;
         int userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
         bool isPromiseType = false;
-        bool argCheckPass = true;
 
-        do {
-            if (!ConvertFromJsValue(engine, info.argv[0], bundleName)) {
-                HILOG_ERROR("First parameter must be string");
-                argCheckPass = false;
-                break;
-            }
-            if (info.argc == ARGC_ONE) {
-                isPromiseType = true;
-            } else if (info.argc == ARGC_TWO) {
-                if (ConvertFromJsValue(engine, info.argv[1], userId)) {
-                    isPromiseType = true;
-                } else {
-                    HILOG_INFO("Second parameter must be async callback");
-                }
-            } else if (info.argc == ARGC_THREE) {
-                if (ConvertFromJsValue(engine, info.argv[1], userId)) {
-                    HILOG_INFO("Third parameter must be async callback");
-                } else {
-                    HILOG_WARN("Must input userid and use callback when argc is three.");
-                    argCheckPass = false;
-                    break;
-                }
-            } else {
-                HILOG_WARN("Argc cannot be larger then 3.");
-                argCheckPass = false;
-                break;
-            }
-        } while (false);
-
-        if (!argCheckPass) {
+        if (!ConvertFromJsValue(engine, info.argv[0], bundleName)) {
+            HILOG_ERROR("First parameter must be string");
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return engine.CreateUndefined();
+        }
+        if (info.argc == ARGC_ONE) {
+            isPromiseType = true;
+        } else if (info.argc == ARGC_TWO && ConvertFromJsValue(engine, info.argv[1], userId)) {
+            isPromiseType = true;
+        } else if (info.argc == ARGC_THREE && ConvertFromJsValue(engine, info.argv[1], userId)) {
+            HILOG_INFO("Third parameter must be async callback");
+        } else {
             HILOG_ERROR("Param not match");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
@@ -636,7 +617,7 @@ private:
             if (ret == 0) {
                 task.ResolveWithNoError(engine, CreateJsRunningProcessInfoArray(engine, infos));
             } else {
-                task.Reject(engine, CreateJsErrorByNativeErr(engine, ret, "Get RunningProcessInfo by bundleName failed."));
+                task.Reject(engine, CreateJsErrorByNativeErr(engine, ret));
             }
         };
 
