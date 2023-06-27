@@ -1359,8 +1359,12 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
             nextAbilityRecord->SetPreAbilityRecord(abilityRecord);
 #ifdef SUPPORT_GRAPHICS
             nextAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
-            nextAbilityRecord->ProcessForegroundAbility(abilityRecord);
+            nextAbilityRecord->ProcessForegroundAbility(abilityRecord, false);
         } else {
+            if (!abilityRecord->IsClearMissionFlag()) {
+                abilityRecord->NotifyAnimationFromMinimizeAbility();
+                return ERR_OK;
+            }
 #else
             nextAbilityRecord->ProcessForegroundAbility();
         } else {
