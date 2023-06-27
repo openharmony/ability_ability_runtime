@@ -446,7 +446,8 @@ std::string AbilityRecord::GetLabel()
 }
 
 #ifdef SUPPORT_GRAPHICS
-void AbilityRecord::ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, uint32_t sceneFlag)
+void AbilityRecord::ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit,
+    uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetWant().GetElement().GetURI();
@@ -454,7 +455,7 @@ void AbilityRecord::ProcessForegroundAbility(const std::shared_ptr<AbilityRecord
 
     StartingWindowHot();
     auto flag = !IsForeground();
-    NotifyAnimationFromTerminatingAbility(callerAbility, flag);
+    NotifyAnimationFromTerminatingAbility(callerAbility, needExit, flag);
     PostCancelStartingWindowHotTask();
 
     if (IsAbilityState(AbilityState::FOREGROUND)) {
@@ -469,7 +470,7 @@ void AbilityRecord::ProcessForegroundAbility(const std::shared_ptr<AbilityRecord
 }
 
 void AbilityRecord::NotifyAnimationFromTerminatingAbility(const std::shared_ptr<AbilityRecord>& callerAbility,
-    bool flag)
+    bool needExit, bool flag)
 {
     auto windowHandler = GetWMSHandler();
     if (!windowHandler) {
@@ -484,8 +485,10 @@ void AbilityRecord::NotifyAnimationFromTerminatingAbility(const std::shared_ptr<
         fromInfo->abilityToken_ = callerAbility->GetToken();
     }
 
-    if (flag) {
+    if (flag && needExit) {
         fromInfo->reason_ = TransitionReason::BACK_TRANSITION;
+    } else if (flag && !needExit) {
+        fromInfo->reason_ = TransitionReason::BACKGROUND_TRANSITION;
     } else {
         fromInfo->reason_ = TransitionReason::CLOSE;
     }
@@ -507,6 +510,20 @@ void AbilityRecord::NotifyAnimationFromTerminatingAbility() const
     sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
     SetAbilityTransitionInfo(fromInfo);
     fromInfo->reason_ = TransitionReason::CLOSE;
+    windowHandler->NotifyWindowTransition(fromInfo, nullptr);
+}
+
+void AbilityRecord::NotifyAnimationFromMinimizeAbility() const
+{
+    auto windowHandler = GetWMSHandler();
+    if (!windowHandler) {
+        HILOG_WARN("Get WMS handler failed.");
+        return;
+    }
+
+    sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
+    SetAbilityTransitionInfo(fromInfo);
+    fromInfo->reason_ = TransitionReason::MINIMIZE;
     windowHandler->NotifyWindowTransition(fromInfo, nullptr);
 }
 
