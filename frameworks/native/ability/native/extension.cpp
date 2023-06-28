@@ -156,5 +156,10 @@ void Extension::SetExtensionWindowLifeCycleListener(const sptr<Rosen::IWindowLif
 {
     extensionWindowLifeCycleListener_ = listener;
 }
+
+void Extension::OnAbilityResult(int requestCode, int resultCode, const Want &want)
+{
+    HILOG_DEBUG("call.");
+}
 }
 }
