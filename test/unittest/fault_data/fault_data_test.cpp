@@ -142,7 +142,6 @@ HWTEST_F(FaultDataTest, ReadFromParcel_002, TestSize.Level1)
     EXPECT_EQ(false, retSecond);
 
     MessageParcel messageThird;
-
     messageThird.WriteString(helloWord);
     messageThird.WriteString(helloWord);
     bool retThird = appFaultDataBySA->ReadFromParcel(messageThird);
@@ -193,7 +192,7 @@ HWTEST_F(FaultDataTest, Unmarshalling_002, TestSize.Level1)
     message.WriteInt32(34);
     message.WriteInt32(56);
     message.WriteString(helloWord);
-    auto retSecond = appFaultDataBySA->Unmarshalling(message); 
+    auto retSecond = appFaultDataBySA->Unmarshalling(message);
     EXPECT_NE(nullptr, retSecond);
 }
 

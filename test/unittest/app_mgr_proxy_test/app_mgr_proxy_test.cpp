@@ -240,7 +240,7 @@ HWTEST_F(AppMgrProxyTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI79RY8
  */
-HWTEST_F(AppMgrProxyTest, NotifyAppFault_001, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, NotifyAppFault_001, TestSize.Level1)
 {
     EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
         .Times(1)
@@ -256,7 +256,7 @@ HWTEST_F(AppMgrProxyTest, NotifyAppFault_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI79RY8
  */
-HWTEST_F(AppMgrProxyTest, NotifyAppFaultBySA_001, TestSize.Level0)
+HWTEST_F(AppMgrProxyTest, NotifyAppFaultBySA_001, TestSize.Level1)
 {
     EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
         .Times(1)

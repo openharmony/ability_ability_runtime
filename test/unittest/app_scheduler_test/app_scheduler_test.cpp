@@ -1160,6 +1160,5 @@ HWTEST_F(AppSchedulerTest, AppScheduler_NotifyFault_001, TestSize.Level1)
     int res = DelayedSingleton<AppScheduler>::GetInstance()->NotifyFault(faultData);
     EXPECT_EQ(res, INNER_ERR);
 }
-
 }  // namespace AAFwk
 }  // namespace OHOS

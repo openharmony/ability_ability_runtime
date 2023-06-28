@@ -225,7 +225,7 @@ HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI79RY8
  */
-HWTEST_F(AppMgrStubTest, HandleNotifyFault_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, HandleNotifyFault_001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -238,7 +238,6 @@ HWTEST_F(AppMgrStubTest, HandleNotifyFault_001, TestSize.Level0)
     faultData.faultType = FaultDataType::UNKNOWN;
     data.WriteParcelable(&faultData);
     EXPECT_CALL(*mockAppMgrService_, NotifyAppFault(_)).Times(1);
-
     auto result = mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
@@ -250,7 +249,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyFault_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI79RY8
  */
-HWTEST_F(AppMgrStubTest, HandleNotifyFaultBySA_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, HandleNotifyFaultBySA_001, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -264,7 +263,6 @@ HWTEST_F(AppMgrStubTest, HandleNotifyFaultBySA_001, TestSize.Level0)
     faultData.pid = 24;
     data.WriteParcelable(&faultData);
     EXPECT_CALL(*mockAppMgrService_, NotifyAppFaultBySA(_)).Times(1);
-
     auto result = mockAppMgrService_->OnRemoteRequest(
         static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT_BY_SA), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
