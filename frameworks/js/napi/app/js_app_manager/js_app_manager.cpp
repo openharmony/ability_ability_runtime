@@ -577,9 +577,7 @@ private:
 
     NativeValue* OnGetRunningProcessInfoByBundleName(NativeEngine& engine, const NativeCallbackInfo& info)
     {
-        HILOG_DEBUG("is called");
         if (info.argc < ARGC_ONE) {
-            HILOG_ERROR("Params number less then one.");
             ThrowTooFewParametersError(engine);
             return engine.CreateUndefined();
         }
@@ -587,7 +585,6 @@ private:
         std::string bundleName;
         int userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
         bool isPromiseType = false;
-
         if (!ConvertFromJsValue(engine, info.argv[0], bundleName)) {
             HILOG_ERROR("First parameter must be string");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
@@ -606,7 +603,6 @@ private:
                 return engine.CreateUndefined();
             }
         } else {
-            HILOG_ERROR("Param not match");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return engine.CreateUndefined();
         }
@@ -614,7 +610,6 @@ private:
         AsyncTask::CompleteCallback complete =
             [bundleName, userId, appManager = appManager_](NativeEngine &engine, AsyncTask &task, int32_t status) {
             if (appManager == nullptr) {
-                HILOG_WARN("appManager is nullptr");
                 task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
@@ -626,7 +621,6 @@ private:
                 task.Reject(engine, CreateJsErrorByNativeErr(engine, ret));
             }
         };
-
         NativeValue* lastParam = isPromiseType ? nullptr : info.argv[info.argc - 1];
         NativeValue* result = nullptr;
         AsyncTask::Schedule("JSAppManager::OnGetRunningProcessInfoByBundleName",
