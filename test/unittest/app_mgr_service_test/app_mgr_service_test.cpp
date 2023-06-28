@@ -1187,7 +1187,7 @@ HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_002, TestSize.Level0)
  */
 HWTEST_F(AppMgrServiceTest, NotifyAppFault_001, TestSize.Level1)
 {
-    sptr<AppMgrService> appMgrService = new (std::nothrow)AppMgrService();
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     appMgrService->SetInnerService(nullptr);
     FaultData faultData;
     int32_t res = appMgrService->NotifyAppFault(faultData);
@@ -1201,7 +1201,7 @@ HWTEST_F(AppMgrServiceTest, NotifyAppFault_001, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceTest, NotifyAppFault_002, TestSize.Level1)
 {
-    sptr<AppMgrService> appMgrService = new (std::nothrow)AppMgrService();
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     appMgrService->SetInnerService(nullptr);
     AppFaultDataBySA faultData;
     int32_t res = appMgrService->NotifyAppFaultBySA(faultData);
@@ -1215,8 +1215,8 @@ HWTEST_F(AppMgrServiceTest, NotifyAppFault_002, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceTest, NotifyAppFault_003, TestSize.Level1)
 {
-    sptr<AppMgrService> appMgrService = new (std::nothrow)AppMgrService();
-    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());  
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrService->appMgrServiceInner_);
     AppFaultDataBySA faultData;
     int32_t res = appMgrService->NotifyAppFaultBySA(faultData);

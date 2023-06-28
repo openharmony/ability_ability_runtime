@@ -79,7 +79,6 @@ HWTEST_F(AppSchedulerHostTest, HandleNotifyAppFault_001, TestSize.Level1)
     faultData.faultType = FaultDataType::UNKNOWN;
     data.WriteParcelable(&faultData);
     EXPECT_CALL(*mockAppScheduler_, ScheduleNotifyAppFault(_)).Times(1);
-
     auto result = mockAppScheduler_->OnRemoteRequest(
         static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NOTIFY_FAULT), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);

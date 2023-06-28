@@ -82,12 +82,10 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_DumpSysState_0100, TestS
 HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_ForceExitApp_0100, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerClient_ForceExitApp_0100 start");
-
     int32_t pid = 0;
-    Reason exitReason  = REASON_JS_ERROR;
+    Reason exitReason = REASON_JS_ERROR;
     auto result = AbilityManagerClient::GetInstance()->ForceExitApp(pid, exitReason);
     EXPECT_EQ(result, ERR_OK);
-
     HILOG_INFO("AbilityManagerClient_ForceExitApp_0100 end");
 }
 
@@ -99,11 +97,9 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_ForceExitApp_0100, TestS
 HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RecordAppExitReason_0100, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerClient_RecordAppExitReason_0100 start");
-
-    Reason exitReason  = REASON_JS_ERROR;
+    Reason exitReason = REASON_JS_ERROR;
     auto result = AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
     EXPECT_EQ(result, ERR_OK);
-    
     HILOG_INFO("AbilityManagerClient_RecordAppExitReason_0100 end");
 }
 }  // namespace AAFwk

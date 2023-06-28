@@ -53,7 +53,7 @@ void AppSchedulerProxyTest::TearDown()
 HWTEST_F(AppSchedulerProxyTest, ScheduleNotifyAppFault_001, TestSize.Level1)
 {
     sptr<IRemoteObject> impl;
-    sptr<AppSchedulerProxy> appSchedulerProxy = new (std::nothrow)AppSchedulerProxy(impl);
+    sptr<AppSchedulerProxy> appSchedulerProxy = new (std::nothrow) AppSchedulerProxy(impl);
     FaultData faultData;
     faultData.faultType = FaultDataType::APP_FREEZE;
     faultData.errorObject.message = "msgContent";
