@@ -394,7 +394,7 @@ std::unique_ptr<uint8_t[]> MissionDataStorage::ReadFileToBuffer(const std::strin
     fseek(fp, 0, SEEK_SET);
     if (bufferSize < fileSize) {
         HILOG_ERROR("ReadFileToBuffer:buffer size:(%{public}zu) is smaller than file size:(%{public}zu).", bufferSize,
-                     fileSize);
+            fileSize);
         fclose(fp);
         return nullptr;
     }
