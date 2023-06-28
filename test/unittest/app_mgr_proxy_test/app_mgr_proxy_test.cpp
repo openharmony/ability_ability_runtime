@@ -277,6 +277,9 @@ HWTEST_F(AppMgrProxyTest, GetRunningProcessInformation_001, TestSize.Level0)
     EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(IAppMgr::Message::GET_PIDS_BY_BUNDLENAME));
 
     HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: NotifyAppFault_001
  * @tc.desc: Notify app fault.
  * @tc.type: FUNC

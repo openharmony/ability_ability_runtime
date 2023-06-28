@@ -1290,6 +1290,8 @@ HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_002, TestSize.Level0)
     std::vector<RunningProcessInfo> info;
     int32_t res = appMgrService->GetRunningProcessInformation(bundleName, userId, info);
     EXPECT_EQ(res, ERR_OK);
+}
+
 /**
  * @tc.name: NotifyAppFault_001
  * @tc.desc: Verify that the NotifyAppFault interface calls normally
