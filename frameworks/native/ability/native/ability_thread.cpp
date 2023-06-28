@@ -905,19 +905,30 @@ void AbilityThread::ScheduleCommandAbilityWindow(const Want &want, const sptr<AA
 void AbilityThread::SendResult(int requestCode, int resultCode, const Want &want)
 {
     HILOG_DEBUG("AbilityThread::SendResult begin");
-    if (abilityImpl_ == nullptr) {
-        HILOG_ERROR("AbilityThread::SendResult abilityImpl_ == nullptr");
-        return;
-    }
     wptr<AbilityThread> weak = this;
     auto task = [weak, requestCode, resultCode, want]() {
         auto abilityThread = weak.promote();
-        if (abilityThread == nullptr || abilityThread->abilityImpl_ == nullptr) {
-            HILOG_ERROR("abilityThread or abilityImpl is nullptr, SendResult failed.");
+        if (abilityThread == nullptr) {
+            HILOG_ERROR("abilityThread is nullptr, SendResult failed.");
             return;
         }
-        if (requestCode != -1) {
-            abilityThread->abilityImpl_->SendResult(requestCode, resultCode, want);
+        if(abilityThread->isExtension_){
+            if (abilityThread->extensionImpl_ == nullptr) {
+                HILOG_ERROR(" extensionImpl_ is nullptr, SendResult failed.");
+                return;
+            }
+            if (requestCode != -1) {
+                HILOG_INFO("extension SendResult");
+                abilityThread->extensionImpl_->SendResult(requestCode, resultCode, want);
+            }
+        } else {
+            if (abilityThread->abilityImpl_ == nullptr) {
+                HILOG_ERROR("abilityImpl is nullptr, SendResult failed.");
+                return;
+            }
+            if (requestCode != -1) {
+                abilityThread->abilityImpl_->SendResult(requestCode, resultCode, want);
+            }
         }
     };
 
