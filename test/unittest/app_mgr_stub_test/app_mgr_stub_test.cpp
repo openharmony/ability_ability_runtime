@@ -271,6 +271,9 @@ HWTEST_F(AppMgrStubTest, GetRunningProcessInformation_001, TestSize.Level0)
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: HandleNotifyFault_001
  * @tc.desc: Handle notify fault.
  * @tc.type: FUNC

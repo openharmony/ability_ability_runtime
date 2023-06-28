@@ -3308,6 +3308,9 @@ HWTEST_F(AppMgrServiceInnerTest, GetRunningProcessInformation_001, TestSize.Leve
     EXPECT_EQ(ret, ERR_NO_INIT);
 
     HILOG_INFO("GetRunningProcessInformation_001 end");
+}
+
+/**
  * @tc.name: GetBundleNameByPid_001
  * @tc.desc: get bundle name by Pid.
  * @tc.type: FUNC
