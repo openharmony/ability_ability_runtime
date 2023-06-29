@@ -1217,7 +1217,8 @@ HWTEST_F(AppMgrServiceTest, NotifyAppFault_003, TestSize.Level1)
 {
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
-    appMgrService->handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrService->appMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     AppFaultDataBySA faultData;
     int32_t res = appMgrService->NotifyAppFaultBySA(faultData);
     EXPECT_EQ(ERR_INVALID_VALUE, res);
