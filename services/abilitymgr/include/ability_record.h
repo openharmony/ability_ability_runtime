@@ -472,7 +472,7 @@ public:
     void ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit = true,
         uint32_t sceneFlag = 0);
     void NotifyAnimationFromTerminatingAbility() const;
-    void NotifyAnimationFromMinimizeAbility() const;
+    void NotifyAnimationFromMinimizeAbility(bool& animaEnabled);
 
     void SetCompleteFirstFrameDrawing(const bool flag);
     bool IsCompleteFirstFrameDrawing() const;

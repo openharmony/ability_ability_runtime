@@ -495,8 +495,8 @@ void AbilityRecord::NotifyAnimationFromTerminatingAbility(const std::shared_ptr<
 
     auto toInfo = CreateAbilityTransitionInfo();
     SetAbilityTransitionInfo(abilityInfo_, toInfo);
-
-    windowHandler->NotifyWindowTransition(fromInfo, toInfo);
+    bool animaEnabled = false;
+    windowHandler->NotifyWindowTransition(fromInfo, toInfo, animaEnabled);
 }
 
 void AbilityRecord::NotifyAnimationFromTerminatingAbility() const
@@ -510,21 +510,22 @@ void AbilityRecord::NotifyAnimationFromTerminatingAbility() const
     sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
     SetAbilityTransitionInfo(fromInfo);
     fromInfo->reason_ = TransitionReason::CLOSE;
-    windowHandler->NotifyWindowTransition(fromInfo, nullptr);
+    bool animaEnabled = false;
+    windowHandler->NotifyWindowTransition(fromInfo, nullptr, animaEnabled);
 }
 
-void AbilityRecord::NotifyAnimationFromMinimizeAbility() const
+void AbilityRecord::NotifyAnimationFromMinimizeAbility(bool& animaEnabled)
 {
     auto windowHandler = GetWMSHandler();
     if (!windowHandler) {
         HILOG_WARN("Get WMS handler failed.");
         return;
     }
-
+    HILOG_INFO("Notify Animation From MinimizeAbility");
     sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
     SetAbilityTransitionInfo(fromInfo);
     fromInfo->reason_ = TransitionReason::MINIMIZE;
-    windowHandler->NotifyWindowTransition(fromInfo, nullptr);
+    windowHandler->NotifyWindowTransition(fromInfo, nullptr, animaEnabled);
 }
 
 void AbilityRecord::SetAbilityTransitionInfo(sptr<AbilityTransitionInfo>& info) const
@@ -681,7 +682,8 @@ void AbilityRecord::NotifyAnimationFromRecentTask(const std::shared_ptr<StartOpt
     SetAbilityTransitionInfo(abilityInfo_, toInfo);
     sptr<AbilityTransitionInfo> fromInfo = new AbilityTransitionInfo();
     fromInfo->isRecent_ = true;
-    windowHandler->NotifyWindowTransition(fromInfo, toInfo);
+    bool animaEnabled = false;
+    windowHandler->NotifyWindowTransition(fromInfo, toInfo, animaEnabled);
 }
 
 void AbilityRecord::NotifyAnimationFromStartingAbility(const std::shared_ptr<AbilityRecord> &callerAbility,
@@ -706,8 +708,8 @@ void AbilityRecord::NotifyAnimationFromStartingAbility(const std::shared_ptr<Abi
     toInfo->abilityToken_ = token_;
     toInfo->missionId_ = missionId_;
     SetAbilityTransitionInfo(abilityInfo_, toInfo);
-
-    windowHandler->NotifyWindowTransition(fromInfo, toInfo);
+    bool animaEnabled = false;
+    windowHandler->NotifyWindowTransition(fromInfo, toInfo, animaEnabled);
 }
 
 void AbilityRecord::StartingWindowTask(bool isRecent, bool isCold, const AbilityRequest &abilityRequest,
