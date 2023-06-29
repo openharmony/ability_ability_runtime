@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -914,21 +914,20 @@ void AbilityThread::SendResult(int requestCode, int resultCode, const Want &want
         }
         if(abilityThread->isExtension_){
             if (abilityThread->extensionImpl_ == nullptr) {
-                HILOG_ERROR(" extensionImpl_ is nullptr, SendResult failed.");
+                HILOG_ERROR("extensionImpl_ is nullptr, SendResult failed.");
                 return;
             }
             if (requestCode != -1) {
-                HILOG_INFO("extension SendResult");
                 abilityThread->extensionImpl_->SendResult(requestCode, resultCode, want);
             }
-        } else {
-            if (abilityThread->abilityImpl_ == nullptr) {
-                HILOG_ERROR("abilityImpl is nullptr, SendResult failed.");
-                return;
-            }
-            if (requestCode != -1) {
-                abilityThread->abilityImpl_->SendResult(requestCode, resultCode, want);
-            }
+            return;
+        }
+        if (abilityThread->abilityImpl_ == nullptr) {
+            HILOG_ERROR("abilityImpl is nullptr, SendResult failed.");
+            return;
+        }
+        if (requestCode != -1) {
+            abilityThread->abilityImpl_->SendResult(requestCode, resultCode, want);
         }
     };
 

@@ -199,7 +199,7 @@ NativeValue *JsUIExtensionContext::OnStartAbilityForResult(NativeEngine &engine,
             ? context->StartAbilityForResult(want, curRequestCode_, std::move(task))
             : context->StartAbilityForResult(want, startOptions, curRequestCode_, std::move(task));
     }
-    HILOG_INFO("end.");
+    HILOG_DEBUG("end.");
     return result;
 }
 

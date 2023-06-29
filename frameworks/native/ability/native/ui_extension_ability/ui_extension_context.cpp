@@ -95,7 +95,7 @@ void UIExtensionContext::OnAbilityResult(int requestCode, int resultCode, const 
         }
         resultCallbacks_.erase(requestCode);
     }
-    HILOG_INFO("end.");
+    HILOG_DEBUG("end.");
 }
 
 AppExecFwk::AbilityType UIExtensionContext::GetAbilityInfoType() const
@@ -119,7 +119,7 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
         }
         resultCallbacks_.erase(requestCode);
     }
-    HILOG_INFO("end.");
+    HILOG_DEBUG("end.");
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
