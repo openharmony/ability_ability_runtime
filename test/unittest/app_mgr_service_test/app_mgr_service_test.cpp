@@ -1214,7 +1214,8 @@ HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_002, TestSize.Level0)
     ASSERT_NE(appMgrService, nullptr);
     
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
-    appMgrService->handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrService->appMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
 
     int32_t pid = 0;
     int32_t memorySize = 0;
@@ -1257,7 +1258,8 @@ HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_002, TestSize.Level0)
     ASSERT_NE(appMgrService, nullptr);
     
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
-    appMgrService->handler_ = std::make_shared<AMSEventHandler>(runner_, appMgrService->appMgrServiceInner_);
+    appMgrService->taskHandler_ = taskHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
 
     std::string bundleName = "testBundleName";
     int32_t userId = 100;
