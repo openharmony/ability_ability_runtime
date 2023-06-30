@@ -63,8 +63,8 @@ ErrCode UIExtensionContext::StartAbilityForResult(const AAFwk::Want &want, int r
     HILOG_DEBUG("begin.");
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode);
-    HILOG_INFO("ret=%{public}d", err);
     if (err != ERR_OK) {
+        HILOG_ERROR("ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
     HILOG_DEBUG("end.");
@@ -77,8 +77,8 @@ ErrCode UIExtensionContext::StartAbilityForResult(
     HILOG_DEBUG("begin.");
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_, requestCode);
-    HILOG_INFO("ret=%{public}d", err);
     if (err != ERR_OK) {
+        HILOG_ERROR("ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
     HILOG_DEBUG("end.");

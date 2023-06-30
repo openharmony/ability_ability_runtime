@@ -209,11 +209,11 @@ public:
     void SetExtensionWindowLifeCycleListener(const sptr<Rosen::IWindowLifeCycle> &listener);
 
     /**
-     * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an extension ability 
+     * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an extension ability
      * and the result is returned.
      * @param requestCode Indicates the request code returned after the ability is started. You can define the request
      * code to identify the results returned by abilities. The value ranges from 0 to 65535.
-     * @param resultCode Indicates the result code returned after the ability is started. You can define the result 
+     * @param resultCode Indicates the result code returned after the ability is started. You can define the result
      * code to identify an error.
      * @param want Indicates the data returned after the ability is started. You can define the data returned. The
      * value can be null.

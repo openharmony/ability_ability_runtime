@@ -97,6 +97,6 @@ private:
 
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
 };
-} // namespace AbilityRuntime
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_UI_EXTENSION_CONTEXT_H
+}  // namespace AbilityRuntime
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_UI_EXTENSION_CONTEXT_H
