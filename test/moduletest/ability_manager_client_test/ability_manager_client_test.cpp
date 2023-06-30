@@ -129,7 +129,7 @@ HWTEST_F(AbilityManagerClientTest, ReportDrawnCompleted_0200, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerClient ReportDrawnCompleted_0200 start");
 
-    OHOS::sptr<IRemoteObject> callerToken = sptr<IRemoteObject>(new (std::nothrow) AppExecFwk::MockAbilityToken());
+    sptr<IRemoteObject> callerToken = new (std::nothrow) AppExecFwk::MockAbilityToken();
     EXPECT_NE(callerToken, nullptr);
     auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
     EXPECT_EQ(result, NO_ERROR);
