@@ -153,14 +153,12 @@ NativeValue *JsUIExtensionContext::OnStartAbilityForResult(NativeEngine &engine,
         ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
     }
-
     AAFwk::Want want;
     if (!UnWrapWant(engine, info.argv[INDEX_ZERO], want)) {
         HILOG_ERROR("failed to parse want!");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return engine.CreateUndefined();
     }
-
     decltype(info.argc) unwrapArgc = 1;
     AAFwk::StartOptions startOptions;
     if (info.argc > ARGC_ONE && info.argv[INDEX_ONE]->TypeOf() == NATIVE_OBJECT) {
@@ -169,7 +167,6 @@ NativeValue *JsUIExtensionContext::OnStartAbilityForResult(NativeEngine &engine,
             reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[INDEX_ONE]), startOptions);
         unwrapArgc++;
     }
-
     NativeValue *lastParam = info.argc > unwrapArgc ? info.argv[unwrapArgc] : nullptr;
     NativeValue *result = nullptr;
     std::unique_ptr<AsyncTask> uasyncTask = CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
@@ -180,25 +177,24 @@ NativeValue *JsUIExtensionContext::OnStartAbilityForResult(NativeEngine &engine,
         if (abilityResult == nullptr) {
             HILOG_WARN("wrap abilityResult failed.");
             asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
-        } else {
-            if (isInner) {
-                asyncTask->Reject(engine, CreateJsErrorByNativeErr(engine, resultCode));
-            } else {
-                asyncTask->Resolve(engine, abilityResult);
-            }
+            return;
         }
+        if (isInner) {
+            asyncTask->Reject(engine, CreateJsErrorByNativeErr(engine, resultCode));
+            return;
+        }
+        asyncTask->Resolve(engine, abilityResult);
     };
     auto context = context_.lock();
     if (context == nullptr) {
         HILOG_WARN("context is released.");
         asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-    } else {
-        want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
-        curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
-        (unwrapArgc == INDEX_ONE)
-            ? context->StartAbilityForResult(want, curRequestCode_, std::move(task))
-            : context->StartAbilityForResult(want, startOptions, curRequestCode_, std::move(task));
+        return result;
     }
+    want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
+    curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
+    (unwrapArgc == INDEX_ONE) ? context->StartAbilityForResult(want, curRequestCode_, std::move(task))
+                              : context->StartAbilityForResult(want, startOptions, curRequestCode_, std::move(task));
     HILOG_DEBUG("end.");
     return result;
 }

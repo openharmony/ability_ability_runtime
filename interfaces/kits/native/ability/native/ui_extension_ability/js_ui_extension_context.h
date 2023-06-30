@@ -18,41 +18,41 @@
 
 #include <memory>
 
-#include "native_engine/native_engine.h"
 #include "ui_extension_context.h"
+#include "native_engine/native_engine.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 class JsUIExtensionContext {
 public:
-    explicit JsUIExtensionContext(const std::shared_ptr<UIExtensionContext> &context) : context_(context) {}
+    explicit JsUIExtensionContext(const std::shared_ptr<UIExtensionContext>& context) : context_(context) {}
     virtual ~JsUIExtensionContext() = default;
-    static void Finalizer(NativeEngine *engine, void *data, void *hint);
-    static NativeValue *StartAbility(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *TerminateSelf(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *TerminateSelfWithResult(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *CreateJsUIExtensionContext(NativeEngine &engine, std::shared_ptr<UIExtensionContext> context);
+    static void Finalizer(NativeEngine* engine, void* data, void* hint);
+    static NativeValue* StartAbility(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* TerminateSelf(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* TerminateSelfWithResult(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* CreateJsUIExtensionContext(NativeEngine& engine, std::shared_ptr<UIExtensionContext> context);
     static NativeValue *StartAbilityForResult(NativeEngine *engine, NativeCallbackInfo *info);
 
 protected:
-    virtual NativeValue *OnStartAbility(NativeEngine &engine, NativeCallbackInfo &info);
-    virtual NativeValue *OnTerminateSelf(NativeEngine &engine, const NativeCallbackInfo &info);
-    virtual NativeValue *OnTerminateSelfWithResult(NativeEngine &engine, const NativeCallbackInfo &info);
+    virtual NativeValue* OnStartAbility(NativeEngine& engine, NativeCallbackInfo& info);
+    virtual NativeValue* OnTerminateSelf(NativeEngine& engine, const NativeCallbackInfo& info);
+    virtual NativeValue* OnTerminateSelfWithResult(NativeEngine& engine, const NativeCallbackInfo& info);
     virtual NativeValue *OnStartAbilityForResult(NativeEngine &engine, NativeCallbackInfo &info);
 
 private:
     std::weak_ptr<UIExtensionContext> context_;
     int curRequestCode_ = 0;
 
-    bool CheckStartAbilityInputParam(NativeEngine &engine, NativeCallbackInfo &info, AAFwk::Want &want,
-        AAFwk::StartOptions &startOptions, size_t &unwrapArgc) const;
-    bool CheckWantParam(NativeEngine &engine, NativeValue *value, AAFwk::Want &want) const;
+    bool CheckStartAbilityInputParam(NativeEngine& engine, NativeCallbackInfo& info, AAFwk::Want& want,
+        AAFwk::StartOptions& startOptions, size_t& unwrapArgc) const;
+    bool CheckWantParam(NativeEngine& engine, NativeValue* value, AAFwk::Want& want) const;
 
-    static bool UnWrapWant(NativeEngine &engine, NativeValue *argv, AAFwk::Want &want);
-    static bool UnWrapAbilityResult(NativeEngine &engine, NativeValue *argv, int &resultCode, AAFwk::Want &want);
+    static bool UnWrapWant(NativeEngine& engine, NativeValue* argv, AAFwk::Want& want);
+    static bool UnWrapAbilityResult(NativeEngine& engine, NativeValue* argv, int& resultCode, AAFwk::Want& want);
     static NativeValue *WrapAbilityResult(NativeEngine &engine, const int &resultCode, const AAFwk::Want &want);
     static NativeValue *WrapWant(NativeEngine &engine, const AAFwk::Want &want);
 };
-} // namespace AbilityRuntime
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_JS_UI_EXTENSION_CONTEXT_H
+}  // namespace AbilityRuntime
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_JS_UI_EXTENSION_CONTEXT_H
