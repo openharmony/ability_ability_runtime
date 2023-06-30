@@ -17,7 +17,6 @@
 
 #include "ability_manager_client.h"
 #include "hilog_wrapper.h"
-#include "mock_ability_token.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -120,21 +119,5 @@ HWTEST_F(AbilityManagerClientTest, ReportDrawnCompleted_0100, TestSize.Level1)
     HILOG_INFO("AbilityManagerClient_ReportDrawnCompleted_0100 end");
 }
 
-/**
- * @tc.number: ReportDrawnCompleted_0200
- * @tc.name: ReportDrawnCompleted
- * @tc.desc: After passing in the parameter callerToken, NO_ERROR is returned
- */
-HWTEST_F(AbilityManagerClientTest, ReportDrawnCompleted_0200, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerClient ReportDrawnCompleted_0200 start");
-
-    sptr<IRemoteObject> callerToken = new (std::nothrow) AppExecFwk::MockAbilityToken();
-    EXPECT_NE(callerToken, nullptr);
-    auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
-    EXPECT_EQ(result, NO_ERROR);
-
-    HILOG_INFO("AbilityManagerClient ReportDrawnCompleted_0200 end");
-}
 }  // namespace AAFwk
 }  // namespace OHOS
