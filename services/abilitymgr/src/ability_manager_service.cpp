@@ -113,7 +113,7 @@ const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 // UIExtension type
-const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.UIEXTENSIONTYPE";
+const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 
 const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_SETTINGSDATA };
 
@@ -573,12 +573,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     } else {
         HILOG_DEBUG("Check call ability permission, name is %{public}s.", abilityInfo.name.c_str());
-        if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-            result = CheckCallAbilityPermission(abilityRequest);
-            if (result != ERR_OK) {
-                HILOG_ERROR("Check permission failed");
-                return result;
-            }
+        result = CheckCallAbilityPermission(abilityRequest);
+        if (result != ERR_OK) {
+            HILOG_ERROR("Check permission failed");
+            return result;
         }
     }
 
@@ -723,14 +721,12 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STATIC_CFG_PERMISSION;
     }
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        result = CheckCallAbilityPermission(abilityRequest);
-        if (result != ERR_OK) {
-            HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
-            eventInfo.errCode = result;
-            EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-            return result;
-        }
+    result = CheckCallAbilityPermission(abilityRequest);
+    if (result != ERR_OK) {
+        HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
+        eventInfo.errCode = result;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return result;
     }
 
     abilityRequest.startSetting = std::make_shared<AbilityStartSetting>(abilityStartSetting);
@@ -912,14 +908,12 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STATIC_CFG_PERMISSION;
     }
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        result = CheckCallAbilityPermission(abilityRequest);
-        if (result != ERR_OK) {
-            HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
-            eventInfo.errCode = result;
-            EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-            return result;
-        }
+    result = CheckCallAbilityPermission(abilityRequest);
+    if (result != ERR_OK) {
+        HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
+        eventInfo.errCode = result;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return result;
     }
 
     if (abilityInfo.type != AppExecFwk::AbilityType::PAGE) {
@@ -1716,6 +1710,14 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     HILOG_DEBUG("userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
+
+    result = CheckOptExtensionAbility(extensionSessionInfo->want, abilityRequest, validUserId, extensionType);
+    if (result != ERR_OK) {
+        HILOG_ERROR("CheckOptExtensionAbility error.");
+        eventInfo.errCode = result;
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        return result;
+    }
 
     result = JudgeAbilityVisibleControl(abilityInfo);
     if (result != ERR_OK) {

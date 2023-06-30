@@ -38,7 +38,6 @@ using namespace OHOS::AppExecFwk;
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
-constexpr static char DEFAULT_BACKGROUND_COLOR[] = "#40ffffff";
 }
 
 NativeValue *AttachUIExtensionContext(NativeEngine *engine, void *value, void *)
@@ -316,7 +315,6 @@ void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::
             HILOG_ERROR("create ui window error.");
             return;
         }
-        uiWindow->SetBackgroundColor(DEFAULT_BACKGROUND_COLOR);
         HandleScope handleScope(jsRuntime_);
         NativeEngine* nativeEngine = &jsRuntime_.GetNativeEngine();
         napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
