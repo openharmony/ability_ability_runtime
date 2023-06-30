@@ -6812,7 +6812,7 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
     if (!isData) {
         isSA = AAFwk::PermissionVerification::GetInstance()->IsSACall();
         isShell = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
-    } 
+    }
     if (isSA || isShell) {
         return verificationInfo;
     }
