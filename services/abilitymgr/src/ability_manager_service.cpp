@@ -571,12 +571,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     } else {
         HILOG_DEBUG("Check call ability permission, name is %{public}s.", abilityInfo.name.c_str());
-        if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-            result = CheckCallAbilityPermission(abilityRequest);
-            if (result != ERR_OK) {
-                HILOG_ERROR("Check permission failed");
-                return result;
-            }
+        result = CheckCallAbilityPermission(abilityRequest);
+        if (result != ERR_OK) {
+            HILOG_ERROR("Check permission failed");
+            return result;
         }
     }
 
@@ -721,14 +719,12 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STATIC_CFG_PERMISSION;
     }
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        result = CheckCallAbilityPermission(abilityRequest);
-        if (result != ERR_OK) {
-            HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
-            eventInfo.errCode = result;
-            EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-            return result;
-        }
+    result = CheckCallAbilityPermission(abilityRequest);
+    if (result != ERR_OK) {
+        HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
+        eventInfo.errCode = result;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return result;
     }
 
     abilityRequest.startSetting = std::make_shared<AbilityStartSetting>(abilityStartSetting);
@@ -910,14 +906,12 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_STATIC_CFG_PERMISSION;
     }
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        result = CheckCallAbilityPermission(abilityRequest);
-        if (result != ERR_OK) {
-            HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
-            eventInfo.errCode = result;
-            EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-            return result;
-        }
+    result = CheckCallAbilityPermission(abilityRequest);
+    if (result != ERR_OK) {
+        HILOG_ERROR("%{public}s CheckCallAbilityPermission error.", __func__);
+        eventInfo.errCode = result;
+        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
+        return result;
     }
 
     if (abilityInfo.type != AppExecFwk::AbilityType::PAGE) {
@@ -985,6 +979,31 @@ int32_t AbilityManagerService::RequestDialogService(const Want &want, const sptr
 
     HILOG_INFO("request dialog service, target is %{public}s", want.GetElement().GetURI().c_str());
     return RequestDialogServiceInner(want, callerToken, -1, -1);
+}
+
+int32_t AbilityManagerService::ReportDrawnCompleted(const sptr<IRemoteObject> &callerToken)
+{
+    HILOG_DEBUG("called.");
+    if (callerToken == nullptr) {
+        HILOG_ERROR("callerToken is nullptr");
+        return INNER_ERR;
+    }
+
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr");
+        return INNER_ERR;
+    }
+    auto abilityInfo = abilityRecord->GetAbilityInfo();
+
+    EventInfo eventInfo;
+    eventInfo.userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    eventInfo.pid = IPCSkeleton::GetCallingPid();
+    eventInfo.bundleName = abilityInfo.bundleName;
+    eventInfo.moduleName = abilityInfo.moduleName;
+    eventInfo.abilityName = abilityInfo.name;
+    EventReport::SendAppEvent(EventName::DRAWN_COMPLETED, HiSysEventType::BEHAVIOR, eventInfo);
+    return ERR_OK;
 }
 
 int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const sptr<IRemoteObject> &callerToken,
