@@ -102,6 +102,5 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RecordAppExitReason_0100
     EXPECT_EQ(result, ERR_OK);
     HILOG_INFO("AbilityManagerClient_RecordAppExitReason_0100 end");
 }
-
 }  // namespace AAFwk
 }  // namespace OHOS
