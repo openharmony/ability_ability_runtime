@@ -16,8 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_APPLICATION_STATE_CHANGE_CALLBACK_H
 #define OHOS_ABILITY_RUNTIME_APPLICATION_STATE_CHANGE_CALLBACK_H
 
-#include <set>
 #include <memory>
+#include <set>
 
 class NativeEngine;
 class NativeValue;
@@ -55,7 +55,14 @@ public:
     void NotifyApplicationForeground() override;
     void NotifyApplicationBackground() override;
     void Register(NativeValue *jsCallback);
-    bool UnRegister(NativeValue *jsCallback);
+
+    /**
+     * @brief Unregister application state change callback.
+     * @param jsCallback, if jscallback is nullptr, delete all register jscallback.
+     *                    or if jscallback is specified, delete prescribed jscallback.
+     * @return Returns true on unregister success, others return false.
+     */
+    bool UnRegister(NativeValue *jsCallback = nullptr);
     bool IsEmpty() const;
 private:
     void CallJsMethodInnerCommon(
