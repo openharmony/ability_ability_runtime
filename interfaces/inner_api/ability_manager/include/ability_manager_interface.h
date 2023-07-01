@@ -186,19 +186,15 @@ public:
     }
 
     /**
-     * Start ui extension ability with want, send want to ability manager service.
+     * Start ui extension ability with extension session info, send extension session info to ability manager service.
      *
-     * @param want, the want of the ability to start.
      * @param extensionSessionInfo the extension session info of the ability to start.
      * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartUIExtensionAbility(
-        const Want &want,
         const sptr<SessionInfo> &extensionSessionInfo,
-        int32_t userId = DEFAULT_INVAL_VALUE,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED)
+        int32_t userId = DEFAULT_INVAL_VALUE)
     {
         return 0;
     }
@@ -959,6 +955,13 @@ public:
     }
 
     /**
+     * Report drawn completed.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ReportDrawnCompleted(const sptr<IRemoteObject> &callerToken) = 0;
+
+    /**
      * Acquire the shared data.
      * @param missionId The missionId of Target ability.
      * @param shareData The IAcquireShareData object.
@@ -1343,6 +1346,9 @@ public:
 
         // ipc id for set sessionManagerService
         SET_SESSIONMANAGERSERVICE,
+
+        // ipc id for report drawn completed
+        REPORT_DRAWN_COMPLETED,
 
         GET_SESSIONMANAGERSERVICE,
 
