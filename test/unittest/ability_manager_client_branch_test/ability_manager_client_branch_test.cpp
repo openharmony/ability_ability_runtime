@@ -1432,5 +1432,38 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_GetSessionManagerS
     auto result = client_->GetSessionManagerService();
     EXPECT_TRUE(result == nullptr);
 }
+
+/**
+ * @tc.number: ReportDrawnCompleted_0100
+ * @tc.name: ReportDrawnCompleted
+ * @tc.desc: After passing in a callerToken with parameter nullptr, INNER_ERR is returned
+ */
+HWTEST_F(AbilityManagerClientBranchTest, ReportDrawnCompleted_0100, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerClient_ReportDrawnCompleted_0100 start");
+
+    sptr<IRemoteObject> callerToken = nullptr;
+    auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
+    EXPECT_EQ(result, INNER_ERR);
+
+    HILOG_INFO("AbilityManagerClient_ReportDrawnCompleted_0100 end");
+}
+
+/**
+ * @tc.number: ReportDrawnCompleted_0200
+ * @tc.name: ReportDrawnCompleted
+ * @tc.desc: After passing in the parameter callerToken, ERR_OK is returned
+ */
+HWTEST_F(AbilityManagerClientBranchTest, ReportDrawnCompleted_0200, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerClient ReportDrawnCompleted_0200 start");
+
+    sptr<IRemoteObject> callerToken = new AbilityManagerStubTestMock();
+    EXPECT_NE(callerToken, nullptr);
+    auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
+    EXPECT_EQ(result, ERR_OK);
+
+    HILOG_INFO("AbilityManagerClient ReportDrawnCompleted_0200 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS
