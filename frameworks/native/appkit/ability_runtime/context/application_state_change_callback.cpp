@@ -92,8 +92,9 @@ void JsApplicationStateChangeCallback::Register(NativeValue *jsCallback)
 bool JsApplicationStateChangeCallback::UnRegister(NativeValue *jsCallback)
 {
     if (jsCallback == nullptr) {
-        HILOG_ERROR("jsCallback nullptr");
-        return false;
+        HILOG_INFO("jsCallback is nullptr, delete all callback.");
+        callbacks_.clear();
+        return true;
     }
 
     for (auto &callback : callbacks_) {

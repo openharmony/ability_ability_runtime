@@ -716,18 +716,12 @@ NativeValue *JsApplicationContextUtils::OnOn(NativeEngine &engine, NativeCallbac
 NativeValue *JsApplicationContextUtils::OnOff(NativeEngine &engine, const NativeCallbackInfo &info)
 {
     HILOG_INFO("OnOff is called");
-
-    int32_t callbackId = -1;
-    if (info.argc != ARGC_TWO && info.argc != ARGC_THREE) {
+    if (info.argc < ARGC_ONE) {
         HILOG_ERROR("Not enough params");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return engine.CreateUndefined();
     }
-    if (info.argv[1]->TypeOf() == NATIVE_NUMBER) {
-        napi_get_value_int32(
-            reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[1]), &callbackId);
-        HILOG_DEBUG("callbackId is %{public}d.", callbackId);
-    }
+
     if (info.argv[0]->TypeOf() != NATIVE_STRING) {
         HILOG_ERROR("param0 is invalid");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -740,14 +734,28 @@ NativeValue *JsApplicationContextUtils::OnOff(NativeEngine &engine, const Native
         return engine.CreateUndefined();
     }
 
+    if (type == "applicationStateChange") {
+        return OnOffApplicationStateChange(engine, info);
+    }
+
+    if (info.argc != ARGC_TWO && info.argc != ARGC_THREE) {
+        HILOG_ERROR("Not enough params");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+
+    int32_t callbackId = -1;
+    if (info.argv[1]->TypeOf() == NATIVE_NUMBER) {
+        napi_get_value_int32(
+            reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[1]), &callbackId);
+        HILOG_DEBUG("callbackId is %{public}d.", callbackId);
+    }
+
     if (type == "abilityLifecycle") {
         return OnOffAbilityLifecycle(engine, info, callbackId);
     }
     if (type == "environment") {
         return OnOffEnvironment(engine, info, callbackId);
-    }
-    if (type == "applicationStateChange") {
-        return OnOffApplicationStateChange(engine, info);
     }
     HILOG_ERROR("off function type not match.");
     AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -922,7 +930,9 @@ NativeValue *JsApplicationContextUtils::OnOffApplicationStateChange(
         return engine.CreateUndefined();
     }
 
-    if (!applicationStateCallback_->UnRegister(info.argv[INDEX_ONE])) {
+    if (info.argc == ARGC_ONE || info.argv[INDEX_ONE]->TypeOf() != NATIVE_OBJECT) {
+        applicationStateCallback_->UnRegister();
+    } else if (!applicationStateCallback_->UnRegister(info.argv[INDEX_ONE])) {
         HILOG_ERROR("call UnRegister failed!");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return engine.CreateUndefined();
