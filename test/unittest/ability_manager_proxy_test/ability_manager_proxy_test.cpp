@@ -1896,13 +1896,9 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_SendANRProcessID_001, Test
  */
 HWTEST_F(AbilityManagerProxyTest, ReportDrawnCompleted_001, TestSize.Level1)
 {
-    HILOG_INFO("AbilityManagerProxyTest ReportDrawnCompleted_001 start");
-
     sptr<IRemoteObject> callerToken = nullptr;
     auto res = proxy_->ReportDrawnCompleted(callerToken);
     EXPECT_EQ(res, INNER_ERR);
-
-    HILOG_INFO("AbilityManagerProxyTest ReportDrawnCompleted_001 end");
 }
 
 /**
@@ -1912,8 +1908,6 @@ HWTEST_F(AbilityManagerProxyTest, ReportDrawnCompleted_001, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerProxyTest, ReportDrawnCompleted_002, TestSize.Level1)
 {
-    HILOG_INFO("AbilityManagerProxyTest ReportDrawnCompleted_002 start");
-
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
@@ -1921,8 +1915,6 @@ HWTEST_F(AbilityManagerProxyTest, ReportDrawnCompleted_002, TestSize.Level1)
     auto res = proxy_->ReportDrawnCompleted(callerToken);
     EXPECT_EQ(IAbilityManager::REPORT_DRAWN_COMPLETED, mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
-
-    HILOG_INFO("AbilityManagerProxyTest ReportDrawnCompleted_002 end");
 }
 
 /*

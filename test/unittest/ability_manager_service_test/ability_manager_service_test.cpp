@@ -2934,11 +2934,9 @@ HWTEST_F(AbilityManagerServiceTest, VerifyAccountPermission_001, TestSize.Level1
 HWTEST_F(AbilityManagerServiceTest, ReportDrawnCompleted_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest ReportDrawnCompleted_001 start");
-
     auto callerToken = MockAbilityRecord(AbilityType::PAGE)->GetToken();
     EXPECT_NE(callerToken, nullptr);
     EXPECT_EQ(abilityMs_->ReportDrawnCompleted(callerToken), INNER_ERR);
-
     HILOG_INFO("AbilityManagerServiceTest ReportDrawnCompleted_001 end");
 }
 
@@ -2950,10 +2948,8 @@ HWTEST_F(AbilityManagerServiceTest, ReportDrawnCompleted_001, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceTest, ReportDrawnCompleted_002, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest ReportDrawnCompleted_002 start");
-
     sptr<IRemoteObject> callerToken = nullptr;
     EXPECT_EQ(abilityMs_->ReportDrawnCompleted(callerToken), INNER_ERR);
-
     HILOG_INFO("AbilityManagerServiceTest ReportDrawnCompleted_002 end");
 }
 

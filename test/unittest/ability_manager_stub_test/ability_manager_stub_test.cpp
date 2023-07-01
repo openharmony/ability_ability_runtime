@@ -2125,14 +2125,10 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DumpAbilityInfoDoneInner_001
  */
 HWTEST_F(AbilityManagerStubTest, HandleReportDrawnCompleted_001, TestSize.Level1)
 {
-    HILOG_INFO("AbilityManagerStub HandleReportDrawnCompleted_001 start");
-
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->HandleReportDrawnCompleted(data, reply);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
-
-    HILOG_INFO("AbilityManagerStub HandleReportDrawnCompleted_001 end");
 }
 
 /*
