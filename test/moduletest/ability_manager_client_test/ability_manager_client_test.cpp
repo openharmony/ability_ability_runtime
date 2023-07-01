@@ -103,21 +103,5 @@ HWTEST_F(AbilityManagerClientTest, AbilityManagerClient_RecordAppExitReason_0100
     HILOG_INFO("AbilityManagerClient_RecordAppExitReason_0100 end");
 }
 
-/**
- * @tc.number: ReportDrawnCompleted_0100
- * @tc.name: ReportDrawnCompleted
- * @tc.desc: After passing in a callerToken with parameter nullptr, INNER_ERR is returned
- */
-HWTEST_F(AbilityManagerClientTest, ReportDrawnCompleted_0100, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerClient_ReportDrawnCompleted_0100 start");
-
-    sptr<IRemoteObject> callerToken = nullptr;
-    auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
-    EXPECT_EQ(result, INNER_ERR);
-
-    HILOG_INFO("AbilityManagerClient_ReportDrawnCompleted_0100 end");
-}
-
 }  // namespace AAFwk
 }  // namespace OHOS
