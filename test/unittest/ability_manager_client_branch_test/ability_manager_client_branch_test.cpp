@@ -1091,7 +1091,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartUIExtensionAbility_0100, TestSize.
 {
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0100 start";
     Want want;
-    EXPECT_EQ(client_->StartUIExtensionAbility(want, nullptr, 100, AppExecFwk::ExtensionAbilityType::UI),
+    EXPECT_EQ(client_->StartUIExtensionAbility(nullptr, 100),
         ERR_OK);
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0100 end";
 }
@@ -1408,6 +1408,29 @@ HWTEST_F(AbilityManagerClientBranchTest, RequestDialogService_0100, TestSize.Lev
     sptr<IRemoteObject> callerToken = nullptr;
     auto result = client_->RequestDialogService(want, callerToken);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_SetSessionManagerService_0100
+ * @tc.desc: SetSessionManagerService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetSessionManagerService_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> sessionManagerService = nullptr;
+    auto result = client_->SetSessionManagerService(sessionManagerService);
+    EXPECT_TRUE(result = ERR_WRONG_INTERFACE_CALL);
+}
+
+/**
+ * @tc.name: AbilityManagerClient_GetSessionManagerService_0100
+ * @tc.desc: GetSessionManagerService
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_GetSessionManagerService_0100, TestSize.Level1)
+{
+    auto result = client_->GetSessionManagerService();
+    EXPECT_TRUE(result == nullptr);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
