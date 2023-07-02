@@ -634,6 +634,8 @@ public:
      */
     virtual int GetTopAbility(sptr<IRemoteObject> &token) override;
 
+    virtual int CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused) override;
+
     /**
      * The delegator calls this interface to move the ability to the foreground.
      *
