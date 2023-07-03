@@ -2647,13 +2647,14 @@ void MissionListManager::BackToLauncher()
 int MissionListManager::SetMissionContinueState(const sptr<IRemoteObject> &token, const int32_t missionId,
     const AAFwk::ContinueState &state)
 {
-    HILOG_INFO("MissionListManager SetMissionContinueState start.");
+    HILOG_DEBUG("SetMissionContinueState start. Mission id: %{public}d, state: %{public}d",
+        missionId, state);
     if (!token) {
-        HILOG_INFO("SetMissionContinueState token is nullptr.");
+        HILOG_ERROR("SetMissionContinueState token is nullptr. Mission id: %{public}d, state: %{public}d",
+            missionId, state);
         return -1;
     }
 
-    HILOG_INFO("MissionListManager SetMissionContinueState check token success!");
     return DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionContinueState(missionId, state);
 }
 

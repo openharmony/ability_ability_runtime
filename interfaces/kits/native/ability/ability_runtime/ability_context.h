@@ -23,11 +23,11 @@
 #include "caller_callback.h"
 #include "configuration.h"
 #include "iability_callback.h"
+#include "mission_info.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 #include "start_options.h"
 #include "want.h"
-#include "mission_info.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "pixel_map.h"

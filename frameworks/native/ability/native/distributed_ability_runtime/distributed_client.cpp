@@ -531,7 +531,7 @@ int32_t DistributedClient::StopRemoteExtensionAbility(const Want &want, int32_t 
 
 int32_t DistributedClient::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
 {
-    HILOG_INFO("SetMissionContinueState called");
+    HILOG_INFO("SetMissionContinueState called. Mission id: %{public}d, state: %{public}d", missionId, state);
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         HILOG_ERROR("remote system ablity is null");

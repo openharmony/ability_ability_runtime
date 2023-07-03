@@ -27,6 +27,7 @@
 #include "js_runtime_utils.h"
 #include "ability_runtime/js_caller_complex.h"
 #include "ipc_skeleton.h"
+#include "mission_info.h"
 #include "napi_common_ability.h"
 #include "napi_common_start_options.h"
 #include "napi_common_util.h"
@@ -37,7 +38,6 @@
 #include "event_handler.h"
 #include "hitrace_meter.h"
 #include "tokenid_kit.h"
-#include "mission_info.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "pixel_map_napi.h"
