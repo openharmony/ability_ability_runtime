@@ -1923,7 +1923,8 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     CHECK_POINTER_AND_RETURN(extensionSessionInfo, ERR_INVALID_VALUE);
     auto abilityRecord = Token::GetAbilityRecordByToken(extensionSessionInfo->callerToken);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
+    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    HILOG_DEBUG("userId=%{public}d", userId);
     auto connectManager = GetConnectManagerByUserId(userId);
     if (!connectManager) {
         HILOG_ERROR("connectManager is nullptr.");
@@ -2218,7 +2219,8 @@ int AbilityManagerService::MinimizeUIExtensionAbility(const sptr<SessionInfo> &e
     if (!JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
     }
-    auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
+    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    HILOG_DEBUG("userId=%{public}d", userId);
     auto connectManager = GetConnectManagerByUserId(userId);
     if (!connectManager) {
         HILOG_ERROR("connectManager is nullptr.");
@@ -6680,7 +6682,7 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
     if (!isData) {
         isSA = AAFwk::PermissionVerification::GetInstance()->IsSACall();
         isShell = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
-    } 
+    }
     if (isSA || isShell) {
         return verificationInfo;
     }
