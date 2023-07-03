@@ -335,26 +335,28 @@ bool MissionInfoMgr::FindReusedMissionInfo(const std::string &missionName,
 
 int MissionInfoMgr::UpdateMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
 {
-    HILOG_INFO("MissionInfoMgr UpdateMissionContinueState Start.");
+    HILOG_INFO("UpdateMissionContinueState Start. Mission id: %{public}d, state: %{public}d",
+        missionId, state);
+
     if (missionId <= 0) {
         HILOG_ERROR("UpdateMissionContinueState failed, missionId %{public}d invalid", missionId);
         return -1;
     }
-
-    HILOG_INFO("MissionInfoMgr UpdateMissionContinueState check mission id ok.");
+   
     std::lock_guard<ffrt::mutex> lock(mutex_);
     auto it = find_if(missionInfoList_.begin(), missionInfoList_.end(), [missionId](const InnerMissionInfo &info) {
         return missionId == info.missionInfo.id;
     });
     if (it == missionInfoList_.end()) {
-        HILOG_ERROR("UpdateMissionContinueState failed, missionId %{public}d not exists", missionId);
+        HILOG_ERROR("UpdateMissionContinueState to %{public}d failed, missionId %{public}d not exists.",
+            state, missionId);
         return -1;
     }
-    HILOG_INFO("MissionInfoMgr UpdateMissionContinueState fetch mission info iter ok.");
 
     it->missionInfo.continueState = state;
     
-    HILOG_INFO("MissionInfoMgr UpdateMissionContinueState success. ContinueState set to: %{public}d", state);
+    HILOG_INFO("UpdateMissionContinueState success. Mission id: %{public}d, ContinueState set to: %{public}d",
+        missionId, state);
     return 0;
 }
 

@@ -22,13 +22,13 @@
 #include "ability_manager_errors.h"
 #include "ability_scheduler_interface.h"
 #include "ability_manager_interface.h"
+#include "mission_info.h"
 #include "snapshot.h"
 #include "want.h"
 
 #include "iremote_object.h"
 #include "system_memory_attr.h"
 #include "ui_extension_window_command.h"
-#include "mission_info.h"
 
 namespace OHOS {
 namespace AAFwk {
