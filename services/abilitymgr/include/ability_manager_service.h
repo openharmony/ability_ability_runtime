@@ -818,6 +818,9 @@ public:
      */
     virtual int DumpAbilityInfoDone(std::vector<std::string> &infos, const sptr<IRemoteObject> &callerToken) override;
 
+    virtual int SetMissionContinueState(const sptr<IRemoteObject> &abilityToken,
+        const AAFwk::ContinueState &state) override;
+
 #ifdef SUPPORT_GRAPHICS
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) override;
 
@@ -1133,13 +1136,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService) override;
-
-    /**
-     * Get sessionManagerService
-     *
-     * @return returns the SessionManagerService object, or nullptr for failed.
-     */
-    virtual sptr<IRemoteObject> GetSessionManagerService() override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1584,7 +1580,6 @@ private:
     std::unordered_map<int32_t, int64_t> appRecoveryHistory_; // uid:time
     bool isPrepareTerminateEnable_ = false;
     std::multimap<int, std::shared_ptr<StartAbilityHandler>, std::greater<int>> startAbilityChain_;
-    sptr<IRemoteObject> sessionManagerService_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

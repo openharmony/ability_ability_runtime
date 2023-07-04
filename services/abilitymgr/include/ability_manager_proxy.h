@@ -19,6 +19,7 @@
 #include "ability_manager_interface.h"
 #include "hilog_wrapper.h"
 #include "iremote_proxy.h"
+#include "mission_info.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -562,6 +563,8 @@ public:
 
     virtual int StopUser(int userId, const sptr<IStopUserCallback> &callback) override;
 
+    virtual int SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state) override;
+
 #ifdef SUPPORT_GRAPHICS
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) override;
 
@@ -848,13 +851,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService) override;
-
-    /**
-     * Get sessionManagerService
-     *
-     * @return returns the SessionManagerService object, or nullptr for failed.
-     */
-    virtual sptr<IRemoteObject> GetSessionManagerService() override;
 
 private:
     template <typename T>

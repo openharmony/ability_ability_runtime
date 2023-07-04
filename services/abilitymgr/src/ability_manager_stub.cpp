@@ -275,6 +275,8 @@ void AbilityManagerStub::ThirdStepInit()
         &AbilityManagerStub::GetDlpConnectionInfosInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::MOVE_ABILITY_TO_BACKGROUND)] =
         &AbilityManagerStub::MoveAbilityToBackgroundInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_MISSION_CONTINUE_STATE)] =
+        &AbilityManagerStub::SetMissionContinueStateInner;
 #ifdef SUPPORT_GRAPHICS
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_MISSION_LABEL)] =
         &AbilityManagerStub::SetMissionLabelInner;
@@ -307,7 +309,6 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[START_SPECIFIED_ABILITY_BY_SCB] = &AbilityManagerStub::StartSpecifiedAbilityBySCBInner;
     requestFuncMap_[NOTIFY_SAVE_AS_RESULT] = &AbilityManagerStub::NotifySaveAsResultInner;
     requestFuncMap_[SET_SESSIONMANAGERSERVICE] = &AbilityManagerStub::SetSessionManagerServiceInner;
-    requestFuncMap_[GET_SESSIONMANAGERSERVICE] = &AbilityManagerStub::GetSessionManagerServiceInner;
     requestFuncMap_[NOTIFY_SAVE_AS_RESULT] = &AbilityManagerStub::NotifySaveAsResultInner;
 }
 
@@ -2119,6 +2120,23 @@ int AbilityManagerStub::GetDlpConnectionInfosInner(MessageParcel &data, MessageP
     return ERR_OK;
 }
 
+int AbilityManagerStub::SetMissionContinueStateInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    if (!token) {
+        HILOG_ERROR("SetMissionContinueStateInner read ability token failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    int32_t state = data.ReadInt32();
+    int result = SetMissionContinueState(token, static_cast<AAFwk::ContinueState>(state));
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("SetMissionContinueState failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 #ifdef SUPPORT_GRAPHICS
 int AbilityManagerStub::SetMissionLabelInner(MessageParcel &data, MessageParcel &reply)
 {
@@ -2322,16 +2340,6 @@ int AbilityManagerStub::SetSessionManagerServiceInner(MessageParcel &data, Messa
         return ERR_NULL_OBJECT;
     }
     SetSessionManagerService(sessionManagerService);
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::GetSessionManagerServiceInner(MessageParcel &data, MessageParcel &reply)
-{
-    auto token = GetSessionManagerService();
-    if (!reply.WriteRemoteObject(token)) {
-        HILOG_ERROR("GetSessionManagerServiceInner reply write failed.");
-        return ERR_INVALID_VALUE;
-    }
     return NO_ERROR;
 }
 }  // namespace AAFwk
