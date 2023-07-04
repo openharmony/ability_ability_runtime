@@ -663,6 +663,11 @@ public:
 
     virtual int StopUser(int userId, const sptr<IStopUserCallback> &callback) = 0;
 
+    virtual int SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state)
+    {
+        return 0;
+    };
+
 #ifdef SUPPORT_GRAPHICS
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) = 0;
 
@@ -1052,11 +1057,6 @@ public:
         return 0;
     }
 
-    virtual sptr<IRemoteObject> GetSessionManagerService()
-    {
-        return nullptr;
-    }
-
     enum {
         // ipc id 1-1000 for kit
         // ipc id for terminating ability (1)
@@ -1250,6 +1250,9 @@ public:
 
         MOVE_ABILITY_TO_BACKGROUND,
 
+        // ipc id for set mission continue state (69)
+        SET_MISSION_CONTINUE_STATE,
+
         // ipc id 1001-2000 for DMS
         // ipc id for starting ability (1001)
         START_ABILITY = 1001,
@@ -1362,8 +1365,6 @@ public:
 
         // ipc id for report drawn completed
         REPORT_DRAWN_COMPLETED,
-
-        GET_SESSIONMANAGERSERVICE,
 
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
