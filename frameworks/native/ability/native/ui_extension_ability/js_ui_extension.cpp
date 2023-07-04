@@ -38,6 +38,7 @@ using namespace OHOS::AppExecFwk;
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
+constexpr static char DEFAULT_BACKGROUND_COLOR[] = "#40ffffff";
 }
 
 NativeValue *AttachUIExtensionContext(NativeEngine *engine, void *value, void *)
@@ -329,6 +330,7 @@ void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::
     }
     auto& uiWindow = uiWindowMap_[obj];
     if (uiWindow) {
+        uiWindow->SetBackgroundColor(DEFAULT_BACKGROUND_COLOR);
         uiWindow->Show();
         foregroundWindows_.emplace(obj);
     }
@@ -552,6 +554,19 @@ void JsUIExtension::Dump(const std::vector<std::string> &params, std::vector<std
         info.push_back(dumpInfoStr);
     }
     HILOG_DEBUG("Dump info size: %{public}zu", info.size());
+}
+
+void JsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
+{
+    HILOG_DEBUG("begin.");
+    Extension::OnAbilityResult(requestCode, resultCode, resultData);
+    auto context = GetContext();
+    if (context == nullptr) {
+        HILOG_WARN("not attached to any runtime context!");
+        return;
+    }
+    context->OnAbilityResult(requestCode, resultCode, resultData);
+    HILOG_DEBUG("end.");
 }
 }
 }

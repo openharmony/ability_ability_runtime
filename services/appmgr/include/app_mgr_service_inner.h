@@ -676,6 +676,26 @@ public:
      */
     int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData);
 
+    /**
+     * get memorySize by pid.
+     *
+     * @param pid process id.
+     * @param memorySize Output parameters, return memorySize in KB.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetProcessMemoryByPid(const int32_t pid, int32_t &memorySize);
+
+    /**
+     * get application processes information list by bundleName.
+     *
+     * @param bundleName Bundle name.
+     * @param userId user Id in Application record.
+     * @param info Output parameters, return running process info list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetRunningProcessInformation(
+        const std::string &bundleName, int32_t userId, std::vector<RunningProcessInfo> &info) ;
+
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -910,6 +930,8 @@ private:
     void RemoveRunningSharedBundleList(const std::string &bundleName);
 
     void KillRenderProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void SetOverlayInfo(const std::string& bundleName, const int32_t userId, AppSpawnStartMsg& startMsg);
 
 private:
     /**

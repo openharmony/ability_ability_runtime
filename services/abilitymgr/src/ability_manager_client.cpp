@@ -197,14 +197,14 @@ ErrCode AbilityManagerClient::StartExtensionAbility(const Want &want, const sptr
     return abms->StartExtensionAbility(want, callerToken, userId, extensionType);
 }
 
-ErrCode AbilityManagerClient::StartUIExtensionAbility(const Want &want, const sptr<SessionInfo> &extensionSessionInfo,
-    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
+ErrCode AbilityManagerClient::StartUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("name:%{public}s %{public}s, userId:%{public}d.",
-        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetBundleName().c_str(), userId);
-    return abms->StartUIExtensionAbility(want, extensionSessionInfo, userId, extensionType);
+        extensionSessionInfo->want.GetElement().GetAbilityName().c_str(),
+        extensionSessionInfo->want.GetElement().GetBundleName().c_str(), userId);
+    return abms->StartUIExtensionAbility(extensionSessionInfo, userId);
 }
 
 ErrCode AbilityManagerClient::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
@@ -1147,22 +1147,20 @@ void AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
     abms->StartSpecifiedAbilityBySCB(want);
 }
 
+ErrCode AbilityManagerClient::NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
+{
+    HILOG_DEBUG("call.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->NotifySaveAsResult(want, resultCode, requestCode);
+}
+
 ErrCode AbilityManagerClient::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
 {
     HILOG_INFO("AbilityManagerClient::SetSessionManagerService call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->SetSessionManagerService(sessionManagerService);
-}
-
-sptr<IRemoteObject> AbilityManagerClient::GetSessionManagerService()
-{
-    HILOG_INFO("AbilityManagerClient::GetSessionManagerService call");
-    auto abms = GetAbilityManager();
-    if (!abms) {
-        return nullptr;
-    }
-    return abms->GetSessionManagerService();
 }
 }  // namespace AAFwk
 }  // namespace OHOS
