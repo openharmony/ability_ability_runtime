@@ -143,19 +143,15 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED) override;
 
     /**
-     * Start ui extension ability with want, send want to ability manager service.
+     * Start ui extension ability with extension session info, send extension session info to ability manager service.
      *
-     * @param want, the want of the ability to start.
      * @param extensionSessionInfo the extension session info of the ability to start.
      * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartUIExtensionAbility(
-        const Want &want,
         const sptr<SessionInfo> &extensionSessionInfo,
-        int32_t userId = DEFAULT_INVAL_VALUE,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED) override;
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
      * Start ui ability with want, send want to ability manager service.
@@ -837,6 +833,15 @@ public:
     void StartSpecifiedAbilityBySCB(const Want &want) override;
 
     /**
+     * Notify sandbox app the result of saving file.
+     * @param want Result of saving file, which contains the file's uri if success.
+     * @param resultCode Indicates the action's result.
+     * @param requestCode Pass the requestCode to match request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifySaveAsResult(const Want &want, int resultCode, int requestCode) override;
+
+    /**
      * Set sessionManagerService
      * @param sessionManagerService the point of sessionManagerService.
      *
@@ -844,19 +849,14 @@ public:
      */
     virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService) override;
 
-    /**
-     * Get sessionManagerService
-     *
-     * @return returns the SessionManagerService object, or nullptr for failed.
-     */
-    virtual sptr<IRemoteObject> GetSessionManagerService() override;
-
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
     bool WriteInterfaceToken(MessageParcel &data);
     // flag = true : terminate; flag = false : close
     int TerminateAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant, bool flag);
+    ErrCode SendRequest(AbilityManagerInterfaceCode code, MessageParcel &data, MessageParcel &reply,
+        MessageOption& option);
 
 private:
     static inline BrokerDelegator<AbilityManagerProxy> delegator_;

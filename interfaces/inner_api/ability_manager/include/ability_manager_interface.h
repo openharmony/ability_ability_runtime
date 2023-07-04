@@ -22,6 +22,7 @@
 #include <iremote_broker.h>
 
 #include "ability_connect_callback_interface.h"
+#include "ability_manager_ipc_interface_code.h"
 #include "ability_running_info.h"
 #include "ability_scheduler_interface.h"
 #include "ability_start_setting.h"
@@ -186,19 +187,15 @@ public:
     }
 
     /**
-     * Start ui extension ability with want, send want to ability manager service.
+     * Start ui extension ability with extension session info, send extension session info to ability manager service.
      *
-     * @param want, the want of the ability to start.
      * @param extensionSessionInfo the extension session info of the ability to start.
      * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartUIExtensionAbility(
-        const Want &want,
         const sptr<SessionInfo> &extensionSessionInfo,
-        int32_t userId = DEFAULT_INVAL_VALUE,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED)
+        int32_t userId = DEFAULT_INVAL_VALUE)
     {
         return 0;
     }
@@ -1033,6 +1030,18 @@ public:
     virtual void StartSpecifiedAbilityBySCB(const Want &want) {};
 
     /**
+     * Notify sandbox app the result of saving file.
+     * @param want Result of saving file, which contains the file's uri if success.
+     * @param resultCode Indicates the action's result.
+     * @param requestCode Pass the requestCode to match request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
+    {
+        return 0;
+    }
+
+    /**
      * Set sessionManagerService
      * @param sessionManagerService the point of sessionManagerService.
      *
@@ -1041,11 +1050,6 @@ public:
     virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
     {
         return 0;
-    }
-
-    virtual sptr<IRemoteObject> GetSessionManagerService()
-    {
-        return nullptr;
     }
 
     enum {
@@ -1354,8 +1358,6 @@ public:
         // ipc id for report drawn completed
         REPORT_DRAWN_COMPLETED,
 
-        GET_SESSIONMANAGERSERVICE,
-
         // ipc id for continue ability(1101)
         START_CONTINUATION = 1101,
 
@@ -1420,6 +1422,9 @@ public:
 
         ACQUIRE_SHARE_DATA = 4001,
         SHARE_DATA_DONE = 4002,
+
+        // ipc id for notify as result (notify to snadbox app)
+        NOTIFY_SAVE_AS_RESULT = 4201,
 
         GET_ABILITY_TOKEN = 5001,
 

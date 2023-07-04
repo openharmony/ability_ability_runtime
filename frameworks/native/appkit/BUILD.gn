@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -111,6 +111,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit/app/application_env.cpp",
     "${ability_runtime_native_path}/appkit/app/application_env_impl.cpp",
     "${ability_runtime_native_path}/appkit/app/application_impl.cpp",
+    "${ability_runtime_native_path}/appkit/app/extension_plugin_info.cpp",
     "${ability_runtime_native_path}/appkit/app/idle_time.cpp",
     "${ability_runtime_native_path}/appkit/app/main_thread.cpp",
     "${ability_runtime_native_path}/appkit/app/mix_stack_dumper.cpp",
@@ -207,6 +208,7 @@ ohos_shared_library("app_context") {
   sources = [
     "${ability_runtime_native_path}/appkit/ability_runtime/context/ability_lifecycle_callback.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/application_context.cpp",
+    "${ability_runtime_native_path}/appkit/ability_runtime/context/application_state_change_callback.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/context_impl.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/context/environment_callback.cpp",
     "${ability_runtime_native_path}/appkit/app/overlay_event_subscriber.cpp",
