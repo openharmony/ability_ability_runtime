@@ -152,7 +152,7 @@ ohos_copy("copy_ability_simulator") {
   out_path =
       get_label_info("${hilog_path}/interfaces/native/innerkits:libhilog",
                      "root_out_dir")
-  sources += [ out_path + "/hiviewdfx/hilog_native/libhilog" + dylib_suffix ]
+  sources += [ out_path + "/hiviewdfx/hilog/libhilog" + dylib_suffix ]
 
   deps += [ "//third_party/icu/icu4c:shared_icui18n" ]
   out_path =
