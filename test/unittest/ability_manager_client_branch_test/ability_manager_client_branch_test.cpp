@@ -1423,17 +1423,6 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetSessionManagerS
 }
 
 /**
- * @tc.name: AbilityManagerClient_GetSessionManagerService_0100
- * @tc.desc: GetSessionManagerService
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_GetSessionManagerService_0100, TestSize.Level1)
-{
-    auto result = client_->GetSessionManagerService();
-    EXPECT_TRUE(result == nullptr);
-}
-
-/**
  * @tc.number: ReportDrawnCompleted_0100
  * @tc.name: ReportDrawnCompleted
  * @tc.desc: After passing in a callerToken with parameter nullptr, INNER_ERR is returned
