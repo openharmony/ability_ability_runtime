@@ -1188,7 +1188,7 @@ int AbilityManagerProxy::MinimizeUIExtensionAbility(const sptr<SessionInfo> &ext
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+int AbilityManagerProxy::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser)
 {
     int error;
     MessageParcel data;
@@ -1208,6 +1208,10 @@ int AbilityManagerProxy::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &session
             HILOG_ERROR("flag write failed.");
             return INNER_ERR;
         }
+    }
+    if (!data.WriteBool(fromUser)) {
+        HILOG_ERROR("fromUser write failed.");
+        return INNER_ERR;
     }
 
     error = SendRequest(AbilityManagerInterfaceCode::MINIMIZE_UI_ABILITY_BY_SCB, data, reply, option);
@@ -2422,6 +2426,35 @@ int AbilityManagerProxy::StartUser(int userId)
     error = SendRequest(AbilityManagerInterfaceCode::START_USER, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("StartUser:SendRequest error: %d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int AbilityManagerProxy::SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        HILOG_ERROR("SetMissionContinueState write token failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(state))) {
+        HILOG_ERROR("SetMissionContinueState write state failed.");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote() is NULL");
+        return INNER_ERR;
+    }
+    auto error = remote->SendRequest(IAbilityManager::SET_MISSION_CONTINUE_STATE, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("SetMissionContinueState Send request error: %{public}d", error);
         return error;
     }
     return reply.ReadInt32();
@@ -3757,6 +3790,44 @@ void AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
     }
 }
 
+int32_t AbilityManagerProxy::NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("WriteInterfaceToken failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        HILOG_ERROR("WriteWantObject failed.");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteInt32(resultCode)) {
+        HILOG_ERROR("resultCode write failed.");
+        return INNER_ERR;
+    }
+
+    if (!data.WriteInt32(requestCode)) {
+        HILOG_ERROR("requestCode write failed.");
+        return INNER_ERR;
+    }
+
+    auto remote = Remote();
+    if (!remote) {
+        HILOG_ERROR("remote object is nullptr.");
+        return INNER_ERR;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto error = remote->SendRequest(IAbilityManager::NOTIFY_SAVE_AS_RESULT, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+    }
+
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerProxy::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
 {
     HILOG_INFO("AbilityManagerProxy::SetSessionManagerService start.");
@@ -3781,24 +3852,6 @@ int32_t AbilityManagerProxy::SetSessionManagerService(const sptr<IRemoteObject> 
     }
     HILOG_INFO("AbilityManagerProxy::SetSessionManagerService end.");
     return reply.ReadInt32();
-}
-sptr<IRemoteObject> AbilityManagerProxy::GetSessionManagerService()
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        return nullptr;
-    }
-
-    auto error = SendRequest(AbilityManagerInterfaceCode::GET_SESSIONMANAGERSERVICE, data, reply, option);
-    if (error != NO_ERROR) {
-        HILOG_ERROR("Send request error: %{public}d", error);
-        return nullptr;
-    }
-
-    return reply.ReadRemoteObject();
 }
 
 ErrCode AbilityManagerProxy::SendRequest(AbilityManagerInterfaceCode code, MessageParcel &data, MessageParcel &reply,
