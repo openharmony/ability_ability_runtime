@@ -169,7 +169,7 @@ int UIAbilityLifecycleManager::AbilityTransactionDone(const sptr<IRemoteObject> 
     return DispatchState(abilityRecord, targetState);
 }
 
-int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest)
+int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Call.");
@@ -184,6 +184,7 @@ int UIAbilityLifecycleManager::NotifySCBToStartUIAbility(const AbilityRequest &a
     auto sessionInfo = CreateSessionInfo(abilityRequest);
     sessionInfo->requestCode = abilityRequest.requestCode;
     sessionInfo->persistentId = GetPersistentIdByAbilityRequest(abilityRequest);
+    sessionInfo->userId = userId;
     return NotifySCBPendingActivation(sessionInfo, abilityRequest.callerToken);
 }
 
@@ -457,7 +458,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetUIAbilityRecordBySe
     return nullptr;
 }
 
-int UIAbilityLifecycleManager::MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
+int UIAbilityLifecycleManager::MinimizeUIAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool fromUser)
 {
     HILOG_DEBUG("call");
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
@@ -466,6 +467,7 @@ int UIAbilityLifecycleManager::MinimizeUIAbility(const std::shared_ptr<AbilityRe
         return ERR_INVALID_VALUE;
     }
     HILOG_INFO("abilityInfoName:%{public}s", abilityRecord->GetAbilityInfo().name.c_str());
+    abilityRecord->SetMinimizeReason(fromUser);
     abilityRecord->SetPendingState(AbilityState::BACKGROUND);
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
         HILOG_ERROR("ability state is not foreground");
@@ -1251,6 +1253,18 @@ std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilit
         }
     }
     return records;
+}
+
+uint64_t UIAbilityLifecycleManager::GetSessionIdByAbilityToken(const sptr<IRemoteObject> &token)
+{
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    for (const auto& [first, second] : sessionAbilityMap_) {
+        if (second && second->GetToken()->AsObject() == token) {
+            return first;
+        }
+    }
+    HILOG_ERROR("not find");
+    return 0;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
