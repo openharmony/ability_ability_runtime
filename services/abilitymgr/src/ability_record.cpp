@@ -1271,7 +1271,8 @@ bool AbilityRecord::IsCreateByConnect() const
 
 bool AbilityRecord::IsUIExtension() const
 {
-    return abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI;
+    return abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI
+        || abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH;
 }
 
 bool AbilityRecord::IsWindowExtension() const

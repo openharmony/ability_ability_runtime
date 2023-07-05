@@ -1638,7 +1638,9 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         extensionSessionInfo->want.GetElement().GetBundleName().c_str(),
         extensionSessionInfo->want.GetElement().GetAbilityName().c_str(), userId);
     CHECK_POINTER_AND_RETURN(extensionSessionInfo, ERR_INVALID_VALUE);
-    AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UI;
+    std::string extensionTypeStr = extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY);
+    AppExecFwk::ExtensionAbilityType extensionType = extensionTypeStr.empty() ?
+        AppExecFwk::ExtensionAbilityType::UI : AppExecFwk::ConvertToExtensionAbilityType(extensionTypeStr);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
     EventReport::SendExtensionEvent(EventName::START_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
@@ -1696,7 +1698,6 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     AbilityRequest abilityRequest;
     abilityRequest.Voluation(extensionSessionInfo->want, DEFAULT_INVAL_VALUE, callerToken);
     abilityRequest.callType = AbilityCallType::START_EXTENSION_TYPE;
-    abilityRequest.extensionType = extensionType;
     abilityRequest.sessionInfo = extensionSessionInfo;
     result = GenerateExtensionAbilityRequest(extensionSessionInfo->want, abilityRequest, callerToken, validUserId);
     if (result != ERR_OK) {
@@ -1705,13 +1706,15 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
         return result;
     }
+    abilityRequest.extensionType = abilityRequest.abilityInfo.extensionAbilityType;
 
     auto abilityInfo = abilityRequest.abilityInfo;
     validUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : validUserId;
     HILOG_DEBUG("userId is : %{public}d, singleton is : %{public}d",
         validUserId, static_cast<int>(abilityInfo.applicationInfo.singleton));
 
-    result = CheckOptExtensionAbility(extensionSessionInfo->want, abilityRequest, validUserId, extensionType);
+    result = CheckOptExtensionAbility(extensionSessionInfo->want, abilityRequest, validUserId,
+        abilityRequest.extensionType);
     if (result != ERR_OK) {
         HILOG_ERROR("CheckOptExtensionAbility error.");
         eventInfo.errCode = result;
@@ -1923,7 +1926,8 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     CHECK_POINTER_AND_RETURN(extensionSessionInfo, ERR_INVALID_VALUE);
     auto abilityRecord = Token::GetAbilityRecordByToken(extensionSessionInfo->callerToken);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
+    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    HILOG_DEBUG("userId=%{public}d", userId);
     auto connectManager = GetConnectManagerByUserId(userId);
     if (!connectManager) {
         HILOG_ERROR("connectManager is nullptr.");
@@ -2218,7 +2222,8 @@ int AbilityManagerService::MinimizeUIExtensionAbility(const sptr<SessionInfo> &e
     if (!JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
     }
-    auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
+    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    HILOG_DEBUG("userId=%{public}d", userId);
     auto connectManager = GetConnectManagerByUserId(userId);
     if (!connectManager) {
         HILOG_ERROR("connectManager is nullptr.");
@@ -6724,7 +6729,8 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (extensionType == AppExecFwk::ExtensionAbilityType::WINDOW) {
         return ERR_OK;
     }
-    if (extensionType == AppExecFwk::ExtensionAbilityType::UI) {
+    if (extensionType == AppExecFwk::ExtensionAbilityType::UI ||
+        extensionType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {
         return ERR_OK;
     }
     const std::string fileAccessPermission = "ohos.permission.FILE_ACCESS_MANAGER";

@@ -635,7 +635,8 @@ public:
 
     bool IsUIExtension() const
     {
-        return extensionType_ == ExtensionAbilityType::UI;
+        return extensionType_ == ExtensionAbilityType::UI
+            || extensionType_ == ExtensionAbilityType::SYSDIALOG_USERAUTH;
     }
 
     bool IsWindowExtension() const
