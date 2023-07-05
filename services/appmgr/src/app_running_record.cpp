@@ -857,7 +857,8 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
             if (abilityRecord && abilityRecord->GetState() == AbilityState::ABILITY_STATE_FOREGROUND &&
                 abilityRecord->GetAbilityInfo() &&
                 (abilityRecord->GetAbilityInfo()->type == AppExecFwk::AbilityType::PAGE
-                || abilityRecord->GetAbilityInfo()->extensionAbilityType == ExtensionAbilityType::UI)) {
+                || abilityRecord->GetAbilityInfo()->extensionAbilityType == ExtensionAbilityType::UI
+                || abilityRecord->GetAbilityInfo()->extensionAbilityType == ExtensionAbilityType::SYSDIALOG_USERAUTH)) {
                 foregroundSize++;
                 break;
             }
