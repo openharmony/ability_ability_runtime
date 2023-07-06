@@ -65,6 +65,7 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "system_ability_token_callback.h"
+#include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
 
 #ifdef SUPPORT_GRAPHICS
@@ -2088,7 +2089,7 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
         return result;
     }
 
-    if (!targetRecord->IsUIExtension()) {
+    if (!UIExtensionUtils::IsUIExtension(targetRecord->GetAbilityInfo().extensionAbilityType)) {
         HILOG_ERROR("Cannot terminate except ui extension ability.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -2380,7 +2381,7 @@ int AbilityManagerService::MinimizeUIExtensionAbility(const sptr<SessionInfo> &e
         return result;
     }
 
-    if (!targetRecord->IsUIExtension()) {
+    if (!UIExtensionUtils::IsUIExtension(targetRecord->GetAbilityInfo().extensionAbilityType)) {
         HILOG_ERROR("Cannot minimize except ui extension ability.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -2686,7 +2687,7 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         return ERR_STATIC_CFG_PERMISSION;
     }
 
-    if (extensionType == AppExecFwk::ExtensionAbilityType::UI) {
+    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
         AppExecFwk::ExtensionAbilityType targetExtensionType = abilityInfo.extensionAbilityType;
         if (targetExtensionType != AppExecFwk::ExtensionAbilityType::UI
             && targetExtensionType != AppExecFwk::ExtensionAbilityType::WINDOW) {
@@ -4085,7 +4086,8 @@ int AbilityManagerService::ScheduleCommandAbilityWindowDone(
         return CHECK_PERMISSION_FAILED;
     }
 
-    if (!abilityRecord->IsUIExtension() && !abilityRecord->IsWindowExtension()) {
+    if (!UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)
+        && !UIExtensionUtils::IsWindowExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         HILOG_ERROR("target ability is not ui or window extension.");
         return ERR_INVALID_VALUE;
     }
@@ -6139,10 +6141,15 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
         HILOG_WARN("%{public}s caller abilityRecord is null.", __func__);
         want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
         want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, std::string(""));
+        want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+        want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, std::string(""));
     } else {
         std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
         want.RemoveParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
         want.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerBundleName);
+        std::string callerAbilityName = abilityRecord->GetAbilityInfo().name;
+        want.RemoveParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
+        want.SetParam(Want::PARAM_RESV_CALLER_ABILITY_NAME, callerAbilityName);
     }
 }
 
@@ -6944,8 +6951,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (extensionType == AppExecFwk::ExtensionAbilityType::WINDOW) {
         return ERR_OK;
     }
-    if (extensionType == AppExecFwk::ExtensionAbilityType::UI ||
-        extensionType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {
+    if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
         return ERR_OK;
     }
     const std::string fileAccessPermission = "ohos.permission.FILE_ACCESS_MANAGER";
