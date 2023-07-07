@@ -1633,6 +1633,7 @@ void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityR
     if (!needTopAbility->IsForeground() && !needTopAbility->IsMinimizeFromUser() && needTopAbility->IsReady()) {
         HILOG_DEBUG("%{public}s is need to foreground.", elementName.GetURI().c_str());
         abilityRecord->SetNextAbilityRecord(needTopAbility);
+        needTopAbility->SetAllowedBackgroundCall();
     }
 }
 
@@ -3949,15 +3950,6 @@ void MissionListManager::CallRequestDone(const std::shared_ptr<AbilityRecord> &a
         return;
     }
     abilityRecord->CallRequestDone(callStub);
-}
-
-bool MissionListManager::IsTopAbility(const std::shared_ptr<AbilityRecord> &abilityRecord)
-{
-    if (abilityRecord == nullptr) {
-        return false;
-    }
-    std::lock_guard guard(managerLock_);
-    return GetCurrentTopAbilityLocked() == abilityRecord;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
