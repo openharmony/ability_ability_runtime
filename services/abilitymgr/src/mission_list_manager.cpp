@@ -1118,7 +1118,7 @@ int MissionListManager::DispatchState(const std::shared_ptr<AbilityRecord> &abil
             return DispatchTerminate(abilityRecord);
         }
         case AbilityState::BACKGROUND:
-        case AbilityState::BACKGROUND_FAILED {
+        case AbilityState::BACKGROUND_FAILED: {
             return DispatchBackground(abilityRecord);
         }
         case AbilityState::FOREGROUND: {
