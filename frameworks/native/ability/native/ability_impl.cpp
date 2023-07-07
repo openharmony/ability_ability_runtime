@@ -747,6 +747,19 @@ void AbilityImpl::Foreground(const Want &want)
     HILOG_INFO("%{public}s end.", __func__);
 }
 
+void AbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
+{
+    HILOG_DEBUG("%{public}s begin.", __func__);
+    PacMap restoreData;
+    switch (type) {
+        case static_cast<int32_t>(OHOS::Rosen::WMError::WM_DO_NOTHING): {
+            AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
+                AbilityLifeCycleState::ABILITY_STATE_DO_NOTHING, restoreData);
+            break;
+        }
+    }
+}
+
 void AbilityImpl::Background()
 {
     HILOG_DEBUG("%{public}s begin.", __func__);
