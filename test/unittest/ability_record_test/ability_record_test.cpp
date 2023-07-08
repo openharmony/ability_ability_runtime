@@ -248,13 +248,13 @@ HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_SetGetToken, TestSize.Level1)
  */
 HWTEST_F(AbilityRecordTest, AaFwk_AbilityMS_GetAbilityState, TestSize.Level1)
 {
-    abilityRecord_->SetAllowedBackgroundCall();
+    abilityRecord_->SetAbilityForegroundingFlag();
     abilityRecord_->SetAbilityState(AbilityState::BACKGROUND);
-    EXPECT_FALSE(abilityRecord_->IsAllowedBackgroundCall());
+    EXPECT_FALSE(abilityRecord_->GetAbilityForegroundingFlag());
 
-    abilityRecord_->SetAllowedBackgroundCall();
+    abilityRecord_->SetAbilityForegroundingFlag();
     abilityRecord_->SetAbilityState(AbilityState::FOREGROUND);
-    EXPECT_TRUE(abilityRecord_->IsAllowedBackgroundCall());
+    EXPECT_TRUE(abilityRecord_->GetAbilityForegroundingFlag());
 }
 
 /*

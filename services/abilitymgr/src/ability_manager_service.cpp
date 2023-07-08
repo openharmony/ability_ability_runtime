@@ -7051,7 +7051,7 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
     AppExecFwk::RunningProcessInfo processInfo;
     std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (callerAbility) {
-        if (callerAbility->IsForeground() || callerAbility->IsAllowedBackgroundCall()) {
+        if (callerAbility->IsForeground() || callerAbility->GetAbilityForegroundingFlag()) {
             isBackgroundCall = false;
             return ERR_OK;
         }
@@ -7082,7 +7082,7 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
 
     if (backgroundJudgeFlag_) {
         isBackgroundCall = processInfo.state_ != AppExecFwk::AppProcessState::APP_STATE_FOREGROUND &&
-            !processInfo.isFocused;
+            !processInfo.isFocused && !processInfo.isAbilityForegrounding;
     } else {
         isBackgroundCall = !processInfo.isFocused;
         if (!processInfo.isFocused && processInfo.state_ == AppExecFwk::AppProcessState::APP_STATE_FOREGROUND) {
