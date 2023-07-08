@@ -369,9 +369,9 @@ public:
      */
     void SetAbilityState(AbilityState state);
 
-    bool IsAllowedBackgroundCall() const;
+    bool GetAbilityForegroundingFlag() const;
 
-    void SetAllowedBackgroundCall();
+    void SetAbilityForegroundingFlag();
 
     /**
      * get ability's state.
@@ -979,10 +979,10 @@ private:
 
     /**
      * When this ability startAbilityForResult another ability, if another ability is terminated,
-     * this ability will move to foreground, during this time, isAllowedBackgroundCall_ is true,
-     * isAllowedBackgroundCall_ will be set to false when this ability is background
+     * this ability will move to foreground, during this time, isAbilityForegrounding_ is true,
+     * isAbilityForegrounding_ will be set to false when this ability is background
      */
-    bool isAllowedBackgroundCall_ = false;
+    bool isAbilityForegrounding_ = false;
 
     // service(ability) can be connected by multi-pages(abilites), so need to store this service's connections
     std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};

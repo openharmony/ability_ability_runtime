@@ -404,6 +404,8 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
 
     NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest);
 
+    targetAbilityRecord->SetAbilityForegroundingFlag();
+
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<StartOptions> startOptions = nullptr;
     targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
@@ -1633,7 +1635,7 @@ void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityR
     if (!needTopAbility->IsForeground() && !needTopAbility->IsMinimizeFromUser() && needTopAbility->IsReady()) {
         HILOG_DEBUG("%{public}s is need to foreground.", elementName.GetURI().c_str());
         abilityRecord->SetNextAbilityRecord(needTopAbility);
-        needTopAbility->SetAllowedBackgroundCall();
+        needTopAbility->SetAbilityForegroundingFlag();
     }
 }
 
