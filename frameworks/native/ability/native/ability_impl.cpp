@@ -752,7 +752,7 @@ void AbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
     HILOG_DEBUG("%{public}s begin.", __func__);
     PacMap restoreData;
     AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
-        AbilityLifeCycleState::ABILITY_STATE_DO_NOTHING, restoreData);
+        AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_FAILED, restoreData);
 }
 
 void AbilityImpl::Background()
