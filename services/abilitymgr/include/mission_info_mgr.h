@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 #ifndef OHOS_ABILITY_RUNTIME_MISSION_INFO_MGR_H
 #define OHOS_ABILITY_RUNTIME_MISSION_INFO_MGR_H
 
-#include <condition_variable>
 #include <list>
 #include <mutex>
 #include <string>
+#include "cpp/mutex.h"
+#include "cpp/condition_variable.h"
 
 #include "ability_state.h"
 #include "inner_mission_info.h"
@@ -114,6 +115,15 @@ public:
     bool DeleteAllMissionInfos(const std::shared_ptr<MissionListenerController> &listenerController);
 
     /**
+     * @brief Update mission continue state.
+     *
+     * @param missionId indicates this mission id.
+     * @param state indicates this mission label.
+     * @return 0 if success.
+     */
+    int UpdateMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state);
+
+    /**
      * @brief Update mission label.
      *
      * @param missionId indicates this mission id.
@@ -148,6 +158,14 @@ public:
      */
     bool UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
         MissionSnapshot& missionSnapshot, bool isLowResolution = false);
+
+    /**
+     * @brief update mission snapshot
+     * @param missionId mission id
+     * @param pixelMap The snapshot.
+     * @param isPrivate Indicates whether the window is private window.
+     */
+    void UpdateMissionSnapshot(int32_t missionId, const std::shared_ptr<Media::PixelMap> &pixelMap, bool isPrivate);
 
 #ifdef SUPPORT_GRAPHICS
     /**
@@ -185,7 +203,7 @@ private:
      * @return Returns true if this function is successfully called; returns false otherwise.
      */
     bool LoadAllMissionInfo();
-
+    bool AddMissionInfoInner(const InnerMissionInfo &missionInfo);
     void GetMatchedMission(const std::string &bundleName, int32_t uid, std::list<int32_t> &missions);
 #ifdef SUPPORT_GRAPHICS
     void CreateWhitePixelMap(Snapshot &snapshot) const;
@@ -197,10 +215,10 @@ private:
     std::list<InnerMissionInfo> missionInfoList_;
     std::shared_ptr<TaskDataPersistenceMgr> taskDataPersistenceMgr_;
     sptr<ISnapshotHandler> snapshotHandler_;
-    mutable std::recursive_mutex mutex_;
+    mutable ffrt::mutex mutex_;
     std::unordered_map<int32_t, uint32_t> savingSnapshot_;
-    std::mutex savingSnapshotLock_;
-    std::condition_variable waitSavingCondition_;
+    ffrt::mutex savingSnapshotLock_;
+    ffrt::condition_variable waitSavingCondition_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

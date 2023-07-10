@@ -16,15 +16,15 @@
 #ifndef OHOS_ABILITY_RUNTIME_UI_EXTENSION_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_UI_EXTENSION_CONTEXT_H
 
-#include "extension_context.h"
+#include <map>
 
-#include "ability_connect_callback.h"
-#include "connection_manager.h"
+#include "extension_context.h"
 #include "start_options.h"
 #include "want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+using RuntimeTask = std::function<void(int, const AAFwk::Want &, bool)>;
 /**
  * @brief context supply for UIExtension
  *
@@ -44,62 +44,49 @@ public:
      *
      * @return errCode ERR_OK on success, others on failure.
      */
-    ErrCode StartAbility(const AAFwk::Want &want) const;
-    ErrCode StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const;
+    virtual ErrCode StartAbility(const AAFwk::Want &want) const;
+    virtual ErrCode StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const;
 
     /**
-     * @brief Starts a new ui extension ability.
-     * An ui extension ability uses this method to start a specific ui extension ability.
-     * The system locates the target ui extension ability from installed abilities based on the value of the want
-     * parameter and then starts it. You can specify the ui extension ability to start using the want parameter.
-     *
-     * @param want Indicates the Want containing information about the target ui extension ability to start.
+     * @brief Destroys the current ui extension ability.
      *
      * @return errCode ERR_OK on success, others on failure.
      */
-    ErrCode StartUIExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) const;
+    virtual ErrCode TerminateSelf();
 
     /**
-     * @brief Connects the current ability to an ability using the AbilityInfo.AbilityType.EXTENSION template.
+     * Start other ability for result.
      *
-     * @param want Indicates the want containing information about the ability to connect
-     *
-     * @param conn Indicates the callback object when the target ability is connected.
-     *
-     * @return Returns zero on success, others on failure.
-     */
-    ErrCode ConnectExtensionAbility(
-        const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const;
-
-    /**
-     * @brief Disconnects the current ability from an ability.
-     *
-     * @param conn Indicates the IAbilityConnection callback object passed by connectAbility after the connection
-     * is set up. The IAbilityConnection object uniquely identifies a connection between two abilities.
+     * @param want Information of other ability.
+     * @param startOptions Indicates the StartOptions containing service side information about the target ability to
+     * start.
+     * @param requestCode Request code for abilityMS to return result.
+     * @param task Represent std::function<void(int, const AAFwk::Want &, bool)>.
      *
      * @return errCode ERR_OK on success, others on failure.
      */
-    ErrCode DisconnectExtensionAbility(
-        const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const;
+    virtual ErrCode StartAbilityForResult(const AAFwk::Want &want, int requestCode, RuntimeTask &&task);
+    virtual ErrCode StartAbilityForResult(
+        const AAFwk::Want &want, const AAFwk::StartOptions &startOptions, int requestCode, RuntimeTask &&task);
 
     /**
-     * @brief Destroys the current ability.
-     *
-     * @return errCode ERR_OK on success, others on failure.
+     * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an extension ability
+     * and the result is returned.
+     * @param requestCode Indicates the request code returned after the ability is started. You can define the request
+     * code to identify the results returned by abilities. The value ranges from 0 to 65535.
+     * @param resultCode Indicates the result code returned after the ability is started. You can define the result
+     * code to identify an error.
+     * @param resultData Indicates the data returned after the ability is started. You can define the data returned. The
+     * value can be null.
      */
-    ErrCode TerminateAbility();
+    virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData);
 
     using SelfType = UIExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
 
-protected:
-    bool IsContext(size_t contextTypeId) override
-    {
-        return contextTypeId == CONTEXT_TYPE_ID || ExtensionContext::IsContext(contextTypeId);
-    }
-
 private:
     static int ILLEGAL_REQUEST_CODE;
+    std::map<int, RuntimeTask> resultCallbacks_;
 
     /**
      * @brief Get Current Ability Type
@@ -107,6 +94,8 @@ private:
      * @return Current Ability Type
      */
     OHOS::AppExecFwk::AbilityType GetAbilityInfoType() const;
+
+    void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

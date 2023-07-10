@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_FREE_INSTALL_MANAGER_H
 
 #include <future>
+#include "cpp/mutex.h"
 
 #include <iremote_object.h>
 #include <iremote_stub.h>
@@ -35,6 +36,7 @@ struct FreeInstallInfo {
     int32_t requestCode = -1;
     std::shared_ptr<std::promise<int32_t>> promise;
     bool isInstalled = false;
+    std::string identity;
     sptr<IRemoteObject> callerToken = nullptr;
     sptr<IRemoteObject> dmsCallback = nullptr;
 };
@@ -133,9 +135,9 @@ private:
     std::vector<FreeInstallInfo> freeInstallList_;
     std::vector<FreeInstallInfo> dmsFreeInstallCbs_;
     std::map<std::string, std::time_t> timeStampMap_;
-    std::mutex distributedFreeInstallLock_;
-    std::mutex freeInstallListLock_;
-    std::mutex freeInstallObserverLock_;
+    ffrt::mutex distributedFreeInstallLock_;
+    ffrt::mutex freeInstallListLock_;
+    ffrt::mutex freeInstallObserverLock_;
     /**
      * Start remote free install.
      *

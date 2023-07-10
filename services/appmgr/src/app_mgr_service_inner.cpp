@@ -17,6 +17,7 @@
 
 #include <cinttypes>
 #include <csignal>
+#include <mutex>
 #include <securec.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -28,6 +29,7 @@
 #include "app_process_data.h"
 #include "app_state_observer_manager.h"
 #include "application_state_observer_stub.h"
+#include "appspawn_mount_permission.h"
 #include "bundle_constants.h"
 #include "common_event.h"
 #include "common_event_manager.h"
@@ -52,7 +54,13 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "system_ability_definition.h"
+#include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
+#ifdef APP_MGR_SERVICE_APPMS
+#include "socket_permission.h"
+#endif
+#include "application_info.h"
+#include "meminfo.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -85,14 +93,16 @@ const std::string DEBUG_CMD = "debugCmd";
 const std::string ENTER_SANBOX = "sanboxApp";
 const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
 const std::string PERMISSION_INTERNET = "ohos.permission.INTERNET";
+const std::string PERMISSION_MANAGE_VPN = "ohos.permission.MANAGE_VPN";
 const std::string PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_DIR";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const std::string SUPPORT_ISOLATION_MODE = "supportIsolationMode";
+const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
 #define APP_ACCESS_BUNDLE_DIR 0x20
-#define OVERLAY_FLAG 0x80
+#define APP_OVERLAY_FLAG 0x100
 
 constexpr int32_t BASE_USER_RANGE = 200000;
 
@@ -125,6 +135,12 @@ constexpr int32_t ROOT_UID = 0;
 constexpr int32_t FOUNDATION_UID = 5523;
 constexpr int32_t DEFAULT_USER_ID = 0;
 
+constexpr int32_t BLUETOOTH_GROUPID = 1002;
+
+#ifdef APP_MGR_SERVICE_APPMS
+constexpr int32_t NETSYS_SOCKET_GROUPID = 1097;
+#endif
+
 int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
@@ -146,6 +162,7 @@ void AppMgrServiceInner::Init()
     InitGlobalConfiguration();
     AddWatchParameter();
     supportIsolationMode_ = OHOS::system::GetParameter(SUPPORT_ISOLATION_MODE, "false");
+    deviceType_ = OHOS::system::GetDeviceType();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
     InitFocusListener();
 }
@@ -193,7 +210,7 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         auto callRecord = GetAppRunningRecordByAbilityToken(preToken);
         if (callRecord != nullptr) {
             auto launchReson = (want == nullptr) ? 0 : want->GetIntParam("ohos.ability.launch.reason", 0);
-            HILOG_INFO("req: %{public}d, proc: %{public}s, call:%{public}d,%{public}s", launchReson,
+            HILOG_DEBUG("req: %{public}d, proc: %{public}s, call:%{public}d,%{public}s", launchReson,
                 appInfo->name.c_str(), appRecord->GetCallerPid(), callRecord->GetBundleName().c_str());
         }
         uint32_t startFlags = (want == nullptr) ? 0 : BuildStartFlags(*want, *abilityInfo);
@@ -300,6 +317,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     const std::shared_ptr<ApplicationInfo> &appInfo, BundleInfo &bundleInfo, HapModuleInfo &hapModuleInfo,
     int32_t appIndex) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto bundleMgr_ = remoteClientManager_->GetBundleManager();
     if (bundleMgr_ == nullptr) {
         HILOG_ERROR("GetBundleManager fail");
@@ -307,7 +325,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     }
 
     auto userId = GetUserIdByUid(appInfo->uid);
-    HILOG_INFO("call,userId:%{public}d", userId);
+    HILOG_INFO("userId:%{public}d", userId);
     bool bundleMgrResult;
     if (appIndex == 0) {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleInfo(appInfo->bundleName,
@@ -336,43 +354,60 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
 
 void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppScheduler> &appScheduler)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (pid <= 0) {
         HILOG_ERROR("invalid pid:%{public}d", pid);
         return;
     }
-    if (!appScheduler) {
-        HILOG_ERROR("app client is null");
-        return;
-    }
-    HILOG_INFO("attach, pid:%{public}d.", pid);
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
         HILOG_ERROR("no such appRecord");
         return;
     }
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    AAFwk::EventInfo eventInfo;
+    if (!applicationInfo) {
+        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+    }
+    std::string connector = "##";
+    std::string traceName = __PRETTY_FUNCTION__ + connector + eventInfo.bundleName;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, traceName);
+    if (!appScheduler) {
+        HILOG_ERROR("app client is null");
+        return;
+    }
+    HILOG_INFO("attach, pid:%{public}d.", pid);
     appRecord->SetApplicationClient(appScheduler);
     appRecord->RegisterAppDeathRecipient();
     if (appRecord->GetState() == ApplicationState::APP_STATE_CREATE) {
         LaunchApplication(appRecord);
     }
-    AAFwk::EventInfo eventInfo;
-    auto applicationInfo = appRecord->GetApplicationInfo();
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
-    eventInfo.bundleName = applicationInfo->name;
-    eventInfo.versionName = applicationInfo->versionName;
-    eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_ATTACH, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!appRecord) {
         HILOG_ERROR("appRecord is null");
         return;
     }
+    AAFwk::EventInfo eventInfo;
+    auto applicationInfo = appRecord->GetApplicationInfo();
+    if (!applicationInfo) {
+        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+    }
+    std::string connector = "##";
+    std::string traceName = __PRETTY_FUNCTION__ + connector + eventInfo.bundleName;
+    HITRACE_METER_NAME(HITRACE_TAG_APP, traceName);
 
     if (!configuration_) {
         HILOG_ERROR("configuration_ is null");
@@ -402,13 +437,15 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
         return;
     }
     appRecord->LaunchPendingAbilities();
-    AAFwk::EventInfo eventInfo;
-    auto applicationInfo = appRecord->GetApplicationInfo();
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
-    eventInfo.bundleName = applicationInfo->name;
-    eventInfo.versionName = applicationInfo->versionName;
-    eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
+    int32_t callerPid = appRecord->GetCallerPid() == -1 ? IPCSkeleton::GetCallingPid() : appRecord->GetCallerPid();
+    auto callerRecord = GetAppRunningRecordByPid(callerPid);
+    if (callerRecord != nullptr) {
+        eventInfo.callerBundleName = callerRecord->GetBundleName();
+    } else {
+        HILOG_ERROR("callerRecord is nullptr, can not get callerBundleName.");
+    }
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_LAUNCH, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
@@ -448,12 +485,16 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     HILOG_INFO("application is foregrounded");
     AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
+    if (!applicationInfo) {
+        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+        eventInfo.bundleType = static_cast<int32_t>(applicationInfo->bundleType);
+    }
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
-    eventInfo.bundleName = applicationInfo->name;
-    eventInfo.versionName = applicationInfo->versionName;
-    eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
-    eventInfo.bundleType = static_cast<int32_t>(applicationInfo->bundleType);
     int32_t callerPid = appRecord->GetCallerPid() == -1 ? IPCSkeleton::GetCallingPid() : appRecord->GetCallerPid();
     auto callerRecord = GetAppRunningRecordByPid(callerPid);
     if (callerRecord != nullptr) {
@@ -474,7 +515,9 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
     }
     if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
         appRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
-        bool needNotifyApp = appRunningManager_->IsApplicationBackground(appRecord->GetBundleName());
+        bool needNotifyApp = !AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType())
+            && !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())
+            && appRunningManager_->IsApplicationBackground(appRecord->GetBundleName());
         OnAppStateChanged(appRecord, ApplicationState::APP_STATE_BACKGROUND, needNotifyApp);
         DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
     } else {
@@ -486,12 +529,16 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
     HILOG_INFO("application is backgrounded");
     AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
+    if (!applicationInfo) {
+        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+        eventInfo.bundleType = static_cast<int32_t>(applicationInfo->bundleType);
+    }
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
-    eventInfo.bundleName = applicationInfo->name;
-    eventInfo.versionName = applicationInfo->versionName;
-    eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
-    eventInfo.bundleType = static_cast<int32_t>(applicationInfo->bundleType);
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_BACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
@@ -517,6 +564,8 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
         HILOG_ERROR("current state is not background");
         return;
     }
+
+    KillRenderProcess(appRecord);
     appRecord->SetState(ApplicationState::APP_STATE_TERMINATED);
     appRecord->RemoveAppDeathRecipient();
     appRecord->SetProcessChangeReason(ProcessChangeReason::REASON_APP_TERMINATED);
@@ -525,10 +574,14 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
     RemoveAppFromRecentListById(recordId);
     AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
+    if (!applicationInfo) {
+        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+    }
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
-    eventInfo.bundleName = applicationInfo->name;
-    eventInfo.versionName = applicationInfo->versionName;
-    eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
@@ -676,7 +729,7 @@ void AppMgrServiceInner::SendProcessExitEventTask(pid_t pid, time_t exitTime, in
     auto sendEventTask = [inner = shared_from_this(), pid, exitTime, count] () {
         inner->SendProcessExitEventTask(pid, exitTime, count);
     };
-    eventHandler_->PostTask(sendEventTask, PROCESS_EXIT_EVENT_TASK, KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
+    taskHandler_->SubmitTask(sendEventTask, PROCESS_EXIT_EVENT_TASK, KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
 }
 
 void AppMgrServiceInner::SendProcessExitEvent(pid_t pid)
@@ -854,6 +907,9 @@ int32_t AppMgrServiceInner::GetAllRunningProcesses(std::vector<RunningProcessInf
     // check permission
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
+        if (!appRecord->GetSpawned()) {
+            continue;
+        }
         if (isPerm) {
             GetRunningProcesses(appRecord, info);
         } else {
@@ -881,6 +937,9 @@ int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningPr
 
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
+        if (!appRecord->GetSpawned()) {
+            continue;
+        }
         int32_t userIdTemp = static_cast<int32_t>(appRecord->GetUid() / USER_SCALE);
         if (userIdTemp == userId) {
             GetRunningProcesses(appRecord, info);
@@ -902,6 +961,29 @@ int32_t AppMgrServiceInner::GetProcessRunningInformation(RunningProcessInfo &inf
         return ERR_INVALID_VALUE;
     }
     GetRunningProcess(appRecord, info);
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::GetAllRenderProcesses(std::vector<RenderProcessInfo> &info)
+{
+    auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    // check permission
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (isPerm) {
+            GetRenderProcesses(appRecord, info);
+        } else {
+            auto applicationInfo = appRecord->GetApplicationInfo();
+            if (!applicationInfo) {
+                continue;
+            }
+            auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+            auto tokenId = applicationInfo->accessTokenId;
+            if (callingTokenId == tokenId) {
+                GetRenderProcesses(appRecord, info);
+            }
+        }
+    }
     return ERR_OK;
 }
 
@@ -971,6 +1053,27 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.extensionType_ = appRecord->GetExtensionType();
 }
 
+void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord,
+    std::vector<RenderProcessInfo> &info)
+{
+    auto renderRecordMap = appRecord->GetRenderRecordMap();
+    if (renderRecordMap.empty()) {
+        return;
+    }
+    for (auto iter : renderRecordMap) {
+        auto renderRecord = iter.second;
+        if (renderRecord != nullptr) {
+            RenderProcessInfo renderProcessInfo;
+            renderProcessInfo.bundleName_ = renderRecord->GetHostBundleName();
+            renderProcessInfo.processName_ = renderRecord->GetProcessName();
+            renderProcessInfo.pid_ = renderRecord->GetPid();
+            renderProcessInfo.uid_ = renderRecord->GetUid();
+            renderProcessInfo.hostUid_ = renderRecord->GetHostUid();
+            info.emplace_back(renderProcessInfo);
+        }
+    }
+}
+
 int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
 {
     int32_t ret = -1;
@@ -984,10 +1087,14 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
         return ret;
     }
     auto applicationInfo = appRecord->GetApplicationInfo();
+    if (!applicationInfo) {
+        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+    }
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
-    eventInfo.bundleName = applicationInfo->name;
-    eventInfo.versionName = applicationInfo->versionName;
-    eventInfo.versionCode = applicationInfo->versionCode;
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
     return ret;
@@ -1088,6 +1195,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(con
     appRecord->SetProcessAndExtensionType(abilityInfo);
     bool isKeepAlive = bundleInfo.isKeepAlive && bundleInfo.singleton;
     appRecord->SetKeepAliveAppState(isKeepAlive, false);
+    appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want);
     if (want) {
@@ -1278,6 +1386,7 @@ void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback> 
     }
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (callback != nullptr) {
+        std::lock_guard lock(appStateCallbacksLock_);
         appStateCallbacks_.push_back(callback);
     }
 }
@@ -1484,9 +1593,12 @@ void AppMgrServiceInner::OnAppStateChanged(
 
     HILOG_DEBUG("OnAppStateChanged begin, bundleName is %{public}s, state:%{public}d",
         appRecord->GetBundleName().c_str(), static_cast<int32_t>(state));
-    for (const auto &callback : appStateCallbacks_) {
-        if (callback != nullptr) {
-            callback->OnAppStateChanged(WrapAppProcessData(appRecord, state));
+    {
+        std::lock_guard lock(appStateCallbacksLock_);
+        for (const auto &callback : appStateCallbacks_) {
+            if (callback != nullptr) {
+                callback->OnAppStateChanged(WrapAppProcessData(appRecord, state));
+            }
         }
     }
 
@@ -1547,6 +1659,15 @@ AppProcessData AppMgrServiceInner::WrapAppProcessData(const std::shared_ptr<AppR
     processData.pid = appRecord->GetPriorityObject()->GetPid();
     processData.appState = state;
     processData.isFocused = appRecord->GetFocusFlag();
+    auto renderRecordMap = appRecord->GetRenderRecordMap();
+    if (!renderRecordMap.empty()) {
+        for (auto iter : renderRecordMap) {
+            auto renderRecord = iter.second;
+            if (renderRecord != nullptr) {
+                processData.renderPids.emplace_back(renderRecord->GetPid());
+            }
+        }
+    }
     return processData;
 }
 
@@ -1557,6 +1678,7 @@ void AppMgrServiceInner::OnAbilityStateChanged(
         HILOG_ERROR("ability is null");
         return;
     }
+    std::lock_guard lock(appStateCallbacksLock_);
     for (const auto &callback : appStateCallbacks_) {
         if (callback != nullptr) {
             callback->OnAbilityRequestDone(ability->GetToken(), state);
@@ -1577,20 +1699,104 @@ int32_t AppMgrServiceInner::StartPerfProcess(const std::shared_ptr<AppRunningRec
         return ERR_INVALID_OPERATION;
     }
     if (perfCmd.empty() && debugCmd.empty()) {
-        HILOG_ERROR("perfCmd is empty");
+        HILOG_DEBUG("perfCmd is empty");
         return ERR_INVALID_OPERATION;
     }
 
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     if (!perfCmd.empty()) {
-        HILOG_INFO("debuggablePipe perfCmd:%{public}s", perfCmd.c_str());
+        HILOG_DEBUG("debuggablePipe perfCmd:%{public}s", perfCmd.c_str());
     } else {
-        HILOG_INFO("debuggablePipe debugCmd:%{public}s", debugCmd.c_str());
+        HILOG_DEBUG("debuggablePipe debugCmd:%{public}s", debugCmd.c_str());
     }
     if (isSanboxApp) {
-        HILOG_INFO("debuggablePipe sandbox: true");
+        HILOG_DEBUG("debuggablePipe sandbox: true");
     }
     return ERR_OK;
+}
+
+void AppMgrServiceInner::SetOverlayInfo(const std::string &bundleName,
+                                        const int32_t userId,
+                                        AppSpawnStartMsg &startMsg)
+{
+    if (remoteClientManager_ == nullptr) {
+        HILOG_ERROR("remoteClientManager_ fail");
+        return;
+    }
+    auto bundleMgr = remoteClientManager_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOG_ERROR("GetBundleManager fail");
+        return;
+    }
+    auto overlayMgrProxy = bundleMgr->GetOverlayManagerProxy();
+    if (overlayMgrProxy !=  nullptr) {
+        std::vector<OverlayModuleInfo> overlayModuleInfo;
+        HILOG_DEBUG("Check overlay app begin.");
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetOverlayModuleInfoForTarget");
+        auto targetRet = IN_PROCESS_CALL(overlayMgrProxy->GetOverlayModuleInfoForTarget(
+            bundleName, "", overlayModuleInfo, userId));
+        if (targetRet == ERR_OK && overlayModuleInfo.size() != 0) {
+            HILOG_DEBUG("Start an overlay app process.");
+            startMsg.flags = startMsg.flags | APP_OVERLAY_FLAG;
+            std::string overlayInfoPaths;
+            for (auto it : overlayModuleInfo) {
+                overlayInfoPaths += (it.hapPath + "|");
+            }
+            startMsg.overlayInfo = overlayInfoPaths;
+        }
+    }
+}
+
+void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleInfo, bool &hasAccessBundleDirReq,
+                                                      uint8_t &setAllowInternet, uint8_t &allowInternet,
+                                                      std::vector<int32_t> &gids, std::set<std::string> &permissions)
+{
+    hasAccessBundleDirReq = std::any_of(bundleInfo.reqPermissions.begin(), bundleInfo.reqPermissions.end(),
+        [] (const auto &reqPermission) {
+            if (PERMISSION_ACCESS_BUNDLE_DIR == reqPermission) {
+                return true;
+            }
+            return false;
+        });
+
+    auto token = bundleInfo.applicationInfo.accessTokenId;
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
+        int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET);
+        if (result != Security::AccessToken::PERMISSION_GRANTED) {
+            setAllowInternet = 1;
+            allowInternet = 0;
+    #ifdef APP_MGR_SERVICE_APPMS
+            auto ret = SetInternetPermission(bundleInfo.uid, 0);
+            HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
+        } else {
+            auto ret = SetInternetPermission(bundleInfo.uid, 1);
+            HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
+            gids.push_back(NETSYS_SOCKET_GROUPID);
+    #endif
+        }
+
+        result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_MANAGE_VPN);
+        if (result == Security::AccessToken::PERMISSION_GRANTED) {
+            gids.push_back(BLUETOOTH_GROUPID);
+        }
+
+        if (hasAccessBundleDirReq) {
+            int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_ACCESS_BUNDLE_DIR);
+            if (result != Security::AccessToken::PERMISSION_GRANTED) {
+                HILOG_ERROR("StartProcess PERMISSION_ACCESS_BUNDLE_DIR NOT GRANTED");
+                hasAccessBundleDirReq = false;
+            }
+        }
+    }
+
+    std::set<std::string> mountPermissionList = AppSpawn::AppspawnMountPermission::GetMountPermissionList();
+    for (std::string permission : mountPermissionList) {
+        if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, permission) ==
+            Security::AccessToken::PERMISSION_GRANTED) {
+            permissions.insert(permission);
+        }
+    }
 }
 
 void AppMgrServiceInner::StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
@@ -1643,38 +1849,24 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         return;
     }
 
-    bool hasAccessBundleDirReq = std::any_of(bundleInfo.reqPermissions.begin(), bundleInfo.reqPermissions.end(),
-        [] (const auto &reqPermission) {
-            if (PERMISSION_ACCESS_BUNDLE_DIR == reqPermission) {
-                return true;
-            }
+    DataGroupInfoList dataGroupInfoList;
+    bool result = bundleMgr_->QueryDataGroupInfos(bundleName, userId, dataGroupInfoList);
+    if (!result || dataGroupInfoList.empty()) {
+        HILOG_DEBUG("the bundle has no groupInfos");
+    }
 
-            return false;
-        });
+    bool hasAccessBundleDirReq;
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
-    auto token = bundleInfo.applicationInfo.accessTokenId;
-    {
-        // Add TRACE
-        HITRACE_METER_NAME(HITRACE_TAG_APP, "AccessTokenKit::VerifyAccessToken");
-        int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_INTERNET);
-        if (result != Security::AccessToken::PERMISSION_GRANTED) {
-            setAllowInternet = 1;
-            allowInternet = 0;
-        }
-
-        if (hasAccessBundleDirReq) {
-            int result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, PERMISSION_ACCESS_BUNDLE_DIR);
-            if (result != Security::AccessToken::PERMISSION_GRANTED) {
-                HILOG_ERROR("StartProcess PERMISSION_ACCESS_BUNDLE_DIR NOT GRANTED");
-                hasAccessBundleDirReq = false;
-            }
-        }
-    }
+    std::vector<int32_t> gids;
+    std::set<std::string> permissions;
+    StartProcessVerifyPermission(bundleInfo, hasAccessBundleDirReq, setAllowInternet, allowInternet, gids,
+                                 permissions);
 
     AppSpawnStartMsg startMsg;
     startMsg.uid = bundleInfo.uid;
     startMsg.gid = bundleInfo.gid;
+    startMsg.gids = gids;
     startMsg.accessTokenId = bundleInfo.applicationInfo.accessTokenId;
     startMsg.apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     startMsg.bundleName = bundleName;
@@ -1684,22 +1876,15 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.setAllowInternet = setAllowInternet;
     startMsg.allowInternet = allowInternet;
     startMsg.hspList = hspList;
+    startMsg.dataGroupInfoList = dataGroupInfoList;
     startMsg.hapFlags = bundleInfo.isPreInstallApp ? 1 : 0;
+
+    startMsg.mountPermissionFlags = AppSpawn::AppspawnMountPermission::GenPermissionCode(permissions);
     if (hasAccessBundleDirReq) {
         startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
     }
 
-    auto overlayMgrProxy = bundleMgr_->GetOverlayManagerProxy();
-    if (overlayMgrProxy !=  nullptr) {
-        std::vector<OverlayModuleInfo> overlayModuleInfo;
-        HILOG_DEBUG("Check overlay app begin.");
-        HITRACE_METER_NAME(HITRACE_TAG_APP, "BMS->GetOverlayModuleInfoForTarget");
-        auto targetRet = IN_PROCESS_CALL(overlayMgrProxy->GetOverlayModuleInfoForTarget(bundleName, "", overlayModuleInfo, userId));
-        if (targetRet == ERR_OK && overlayModuleInfo.size() != 0) {
-            HILOG_DEBUG("Start an overlay app process.");
-            startMsg.flags = startMsg.flags | OVERLAY_FLAG;
-        }
-    }
+    SetOverlayInfo(bundleName, userId, startMsg);
 
     HILOG_DEBUG("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",
         startMsg.apl.c_str(), bundleName.c_str(), startFlags);
@@ -1728,6 +1913,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     appRecord->SetUid(startMsg.uid);
     appRecord->SetStartMsg(startMsg);
     appRecord->SetAppMgrServiceInner(weak_from_this());
+    appRecord->SetSpawned();
     OnAppStateChanged(appRecord, ApplicationState::APP_STATE_CREATE, false);
     AddAppToRecentList(appName, appRecord->GetProcessName(), pid, appRecord->GetRecordId());
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessCreated(appRecord);
@@ -1790,7 +1976,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
         eventInfo.callerProcessName = callerAppRecord->GetProcessName();
     }
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::PROCESS_START, HiSysEventType::BEHAVIOR, eventInfo);
-    HILOG_INFO("%{public}s. time : %{public}" PRId64 ", abilityType : %{public}d, bundle : %{public}s,\
+    HILOG_DEBUG("%{public}s. time : %{public}" PRId64 ", abilityType : %{public}d, bundle : %{public}s,\
         uid : %{public}d, process : %{public}s",
         __func__, eventInfo.time, eventInfo.abilityType, eventInfo.callerBundleName.c_str(), eventInfo.callerUid,
         eventInfo.callerProcessName.c_str());
@@ -1899,12 +2085,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
 
     // kill render if exist.
-    auto renderRecord = appRecord->GetRenderRecord();
-    if (renderRecord && renderRecord->GetPid() > 0) {
-        HILOG_DEBUG("Kill render process when host died.");
-        KillProcessByPid(renderRecord->GetPid());
-        DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
-    }
+    KillRenderProcess(appRecord);
 
     if (appRecord->GetPriorityObject() != nullptr) {
         SendProcessExitEvent(appRecord->GetPriorityObject()->GetPid());
@@ -1918,12 +2099,12 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
         auto restartProcess = [appRecord, innerService = shared_from_this()]() {
             innerService->RestartResidentProcess(appRecord);
         };
+        if (!taskHandler_) {
+            HILOG_ERROR("taskHandler_ is nullptr");
+            return;
+        }
         if (appRecord->CanRestartResidentProc()) {
-            if (!eventHandler_) {
-                HILOG_ERROR("eventHandler_ is nullptr");
-                return;
-            }
-            eventHandler_->PostTask(restartProcess, "RestartResidentProcess");
+            taskHandler_->SubmitTask(restartProcess, "RestartResidentProcess");
         } else {
             auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
                 return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
@@ -1936,7 +2117,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
             }
             restartResedentTaskList_.emplace_back(appRecord);
             HILOG_INFO("PostRestartResidentProcessDelayTask.");
-            eventHandler_->PostTask(restartProcess, "RestartResidentProcessDelayTask", RESTART_INTERVAL_TIME);
+            taskHandler_->SubmitTask(restartProcess, "RestartResidentProcessDelayTask", RESTART_INTERVAL_TIME);
         }
     }
 }
@@ -1972,11 +2153,11 @@ void AppMgrServiceInner::AddAppDeathRecipient(const pid_t pid, const sptr<AppDea
     }
 }
 
-void AppMgrServiceInner::HandleTimeOut(const InnerEvent::Pointer &event)
+void AppMgrServiceInner::HandleTimeOut(const AAFwk::EventWrap &event)
 {
     HILOG_INFO("handle time out");
-    if (!appRunningManager_ || event == nullptr) {
-        HILOG_ERROR("appRunningManager or event is nullptr");
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager is nullptr");
         return;
     }
 
@@ -1990,33 +2171,27 @@ void AppMgrServiceInner::HandleTimeOut(const InnerEvent::Pointer &event)
         return;
     }
 
-    switch (event->GetInnerEventId()) {
+    switch (event.GetEventId()) {
         case AMSEventHandler::TERMINATE_ABILITY_TIMEOUT_MSG:
-            appRunningManager_->HandleTerminateTimeOut(event->GetParam());
+            appRunningManager_->HandleTerminateTimeOut(event.GetParam());
             break;
         case AMSEventHandler::TERMINATE_APPLICATION_TIMEOUT_MSG:
-            SendHiSysEvent(event->GetInnerEventId(), event->GetParam());
-            HandleTerminateApplicationTimeOut(event->GetParam());
+            SendHiSysEvent(event.GetEventId(), event.GetParam());
+            HandleTerminateApplicationTimeOut(event.GetParam());
             break;
         case AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG:
         case AMSEventHandler::ADD_ABILITY_STAGE_INFO_TIMEOUT_MSG:
-            SendHiSysEvent(event->GetInnerEventId(), event->GetParam());
-            HandleAddAbilityStageTimeOut(event->GetParam());
+            SendHiSysEvent(event.GetEventId(), event.GetParam());
+            HandleAddAbilityStageTimeOut(event.GetParam());
             break;
         case AMSEventHandler::START_SPECIFIED_ABILITY_TIMEOUT_MSG:
-            SendHiSysEvent(event->GetInnerEventId(), event->GetParam());
-            HandleStartSpecifiedAbilityTimeOut(event->GetParam());
+            SendHiSysEvent(event.GetEventId(), event.GetParam());
+            HandleStartSpecifiedAbilityTimeOut(event.GetParam());
             break;
         default:
             break;
     }
 }
-
-void AppMgrServiceInner::SetEventHandler(const std::shared_ptr<AMSEventHandler> &handler)
-{
-    eventHandler_ = handler;
-}
-
 void AppMgrServiceInner::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -2070,11 +2245,11 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
                 return;
             }
         };
-        if (!eventHandler_) {
-            HILOG_ERROR("eventHandler_ is nullptr");
+        if (!taskHandler_) {
+            HILOG_ERROR("taskHandler_ is nullptr");
             return;
         }
-        eventHandler_->PostTask(timeoutTask, "DelayKillProcess", AMSEventHandler::KILL_PROCESS_TIMEOUT);
+        taskHandler_->SubmitTask(timeoutTask, "DelayKillProcess", AMSEventHandler::KILL_PROCESS_TIMEOUT);
     }
     appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
     RemoveAppFromRecentListById(appRecord->GetRecordId());
@@ -2126,6 +2301,16 @@ void AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppEx
     }
 
     appRunningManager_->GetRunningProcessInfoByPid(pid, info);
+}
+
+void AppMgrServiceInner::SetAbilityForegroundingFlagToAppRecord(const pid_t pid) const
+{
+    HILOG_DEBUG("called");
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        return;
+    }
+
+    appRunningManager_->SetAbilityForegroundingFlagToAppRecord(pid);
 }
 
 bool AppMgrServiceInner::CheckGetRunningInfoPermission() const
@@ -2216,6 +2401,7 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         appRecord->SetRestartResidentProcCount(restartCount);
     }
 
+    appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModules(appInfo, info.hapModuleInfos);
     HILOG_INFO("StartEmptyResidentProcess of pid : [%{public}d], ", appRecord->GetPriorityObject()->GetPid());
@@ -2481,6 +2667,7 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
         return ERR_INVALID_VALUE;
     }
 
+    appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModules(appInfo, info.hapModuleInfos);
     HILOG_INFO("StartEmptyProcess OK pid : [%{public}d]", appRecord->GetPriorityObject()->GetPid());
@@ -2528,7 +2715,7 @@ int AppMgrServiceInner::FinishUserTestLocked(
         return ERR_INVALID_VALUE;
     }
 
-    std::unique_lock<std::mutex> lock(userTestLock_);
+    std::lock_guard<ffrt::mutex> lock(userTestLock_);
     auto userTestRecord = appRecord->GetUserTestInfo();
     if (!userTestRecord) {
         HILOG_WARN("not start user test");
@@ -2588,6 +2775,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             appRecord->SetCallerTokenId(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
         }
         appRecord->SetProcessAndExtensionType(abilityInfoPtr);
+        appRecord->SetTaskHandler(taskHandler_);
         appRecord->SetEventHandler(eventHandler_);
         appRecord->SendEventForSpecifiedAbility(AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT_MSG,
             AMSEventHandler::START_PROCESS_SPECIFIED_ABILITY_TIMEOUT);
@@ -2696,7 +2884,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         return result;
     }
     // notify
-    std::lock_guard<std::recursive_mutex> notifyLock(configurationObserverLock_);
+    std::lock_guard<ffrt::mutex> notifyLock(configurationObserverLock_);
     for (auto &observer : configurationObservers_) {
         if (observer != nullptr) {
             observer->OnConfigurationUpdated(config);
@@ -2713,7 +2901,7 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurat
         HILOG_ERROR("AppMgrServiceInner::Register error: observer is null");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> registerLock(configurationObserverLock_);
+    std::lock_guard<ffrt::mutex> registerLock(configurationObserverLock_);
     auto it = std::find_if(configurationObservers_.begin(), configurationObservers_.end(),
         [&observer](const sptr<IConfigurationObserver> &item) {
             return (item && item->AsObject() == observer->AsObject());
@@ -2734,7 +2922,7 @@ int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const sptr<IConfigur
         HILOG_ERROR("AppMgrServiceInner::Register error: observer is null");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> unregisterLock(configurationObserverLock_);
+    std::lock_guard<ffrt::mutex> unregisterLock(configurationObserverLock_);
     auto it = std::find_if(configurationObservers_.begin(), configurationObservers_.end(),
         [&observer](const sptr<IConfigurationObserver> &item) {
             return (item && item->AsObject() == observer->AsObject());
@@ -2785,8 +2973,8 @@ std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration(
 void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     HILOG_DEBUG("Kill application by appRecord.");
-    if (!appRecord || !eventHandler_) {
-        HILOG_WARN("appRecord or eventHandler_ is nullptr.");
+    if (!appRecord || !taskHandler_) {
+        HILOG_WARN("appRecord or taskHandler_ is nullptr.");
         return;
     }
 
@@ -2809,7 +2997,7 @@ void AppMgrServiceInner::KillApplicationByRecord(const std::shared_ptr<AppRunnin
             return;
         }
     };
-    eventHandler_->PostTask(timeoutTask, "DelayKillProcess", AMSEventHandler::KILL_PROCESS_TIMEOUT);
+    taskHandler_->SubmitTask(timeoutTask, "DelayKillProcess", AMSEventHandler::KILL_PROCESS_TIMEOUT);
 }
 
 void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_t eventId)
@@ -2966,7 +3154,7 @@ int AppMgrServiceInner::VerifyProcessPermission(const std::string &bundleName) c
         HILOG_ERROR("Permission verification failed.");
         return ERR_PERMISSION_DENIED;
     }
-    
+
     return ERR_OK;
 }
 
@@ -2998,7 +3186,7 @@ int AppMgrServiceInner::VerifyProcessPermission(const sptr<IRemoteObject> &token
         HILOG_ERROR("Permission verification failed.");
         return ERR_PERMISSION_DENIED;
     }
-    
+
     return ERR_OK;
 }
 
@@ -3113,14 +3301,26 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
         return ERR_INVALID_VALUE;
     }
 
-    auto renderRecord = appRecord->GetRenderRecord();
-    if (renderRecord) {
-        HILOG_WARN("already exist render process,do not request again, renderPid:%{public}d", renderRecord->GetPid());
-        renderPid = renderRecord->GetPid();
-        return ERR_ALREADY_EXIST_RENDER;
+    auto renderRecordMap = appRecord->GetRenderRecordMap();
+    if (!renderRecordMap.empty() && deviceType_.compare("tablet") != 0 && deviceType_.compare("pc") != 0 &&
+        deviceType_.compare("2in1") != 0) {
+        for (auto iter : renderRecordMap) {
+            if (iter.second != nullptr) {
+                renderPid = iter.second->GetPid();
+                if (ProcessExist(renderPid)) {
+                    HILOG_WARN("already exist render process,do not request again, renderPid:%{public}d", renderPid);
+                    return ERR_ALREADY_EXIST_RENDER;
+                }
+                auto scheduler = iter.second->GetScheduler();
+                if (scheduler) {
+                    HILOG_WARN("render process not realy exist, renderPid:%{public}d", renderPid);
+                    OnRenderRemoteDied(scheduler->AsObject());
+                }
+            }
+        }
     }
 
-    renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, appRecord);
+    auto renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, appRecord);
     if (!renderRecord) {
         HILOG_ERROR("create render record failed, hostPid:%{public}d", hostPid);
         return ERR_INVALID_VALUE;
@@ -3153,14 +3353,14 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
         return;
     }
 
-    auto renderRecord = appRecord->GetRenderRecord();
+    auto renderRecord = appRecord->GetRenderRecordByPid(pid);
     if (!renderRecord) {
         HILOG_ERROR("no such render Record, pid:%{public}d", pid);
         return;
     }
 
     sptr<AppDeathRecipient> appDeathRecipient = new AppDeathRecipient();
-    appDeathRecipient->SetEventHandler(eventHandler_);
+    appDeathRecipient->SetTaskHandler(taskHandler_);
     appDeathRecipient->SetAppMgrServiceInner(shared_from_this());
     appDeathRecipient->SetIsRenderProcess(true);
     renderRecord->SetScheduler(scheduler);
@@ -3171,6 +3371,46 @@ void AppMgrServiceInner::AttachRenderProcess(const pid_t pid, const sptr<IRender
     scheduler->NotifyBrowserFd(renderRecord->GetIpcFd(),
                                renderRecord->GetSharedFd(),
                                renderRecord->GetCrashFd());
+}
+
+bool AppMgrServiceInner::GenerateRenderUid(int32_t &renderUid)
+{
+    std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
+    int32_t uid = lastRenderUid_ + 1;
+    bool needSecondScan = true;
+    if (uid > Constants::END_UID_FOR_RENDER_PROCESS) {
+        uid = Constants::START_UID_FOR_RENDER_PROCESS;
+        needSecondScan = false;
+    }
+
+    if (renderUidSet_.empty()) {
+        renderUid = uid;
+        renderUidSet_.insert(renderUid);
+        lastRenderUid_ = renderUid;
+        return true;
+    }
+
+    for (int32_t i = uid; i <= Constants::END_UID_FOR_RENDER_PROCESS; i++) {
+        if (renderUidSet_.find(i) == renderUidSet_.end()) {
+            renderUid = i;
+            renderUidSet_.insert(renderUid);
+            lastRenderUid_ = renderUid;
+            return true;
+        }
+    }
+
+    if (needSecondScan) {
+        for (int32_t i = Constants::START_UID_FOR_RENDER_PROCESS; i <= lastRenderUid_; i++) {
+            if (renderUidSet_.find(i) == renderUidSet_.end()) {
+                renderUid = i;
+                renderUidSet_.insert(renderUid);
+                lastRenderUid_ = renderUid;
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
@@ -3187,20 +3427,31 @@ int AppMgrServiceInner::StartRenderProcessImpl(const std::shared_ptr<RenderRecor
         return ERR_INVALID_VALUE;
     }
 
+    int32_t renderUid = Constants::INVALID_UID;
+    if (!GenerateRenderUid(renderUid)) {
+        HILOG_ERROR("Generate renderUid failed");
+        return ERR_INVALID_OPERATION;
+    }
+
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     startMsg.renderParam = renderRecord->GetRenderParam();
+    startMsg.uid = renderUid;
+    startMsg.gid = renderUid;
     startMsg.code = 0; // 0: DEFAULT
     pid_t pid = 0;
     ErrCode errCode = nwebSpawnClient->StartProcess(startMsg, pid);
     if (FAILED(errCode)) {
         HILOG_ERROR("failed to spawn new render process, errCode %{public}08x", errCode);
+        std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
+        renderUidSet_.erase(renderUid);
         return ERR_INVALID_VALUE;
     }
     renderPid = pid;
-    appRecord->SetRenderRecord(renderRecord);
     renderRecord->SetPid(pid);
-    HILOG_INFO("start render process success, hostPid:%{public}d, pid:%{public}d uid:%{public}d",
-        renderRecord->GetHostPid(), pid, startMsg.uid);
+    renderRecord->SetUid(renderUid);
+    appRecord->AddRenderRecord(renderRecord);
+    HILOG_INFO("start render process success, hostPid:%{public}d, hostUid:%{public}d, pid:%{public}d, uid:%{public}d",
+        renderRecord->GetHostPid(), renderRecord->GetHostUid(), pid, renderUid);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessCreated(renderRecord);
     return 0;
 }
@@ -3236,6 +3487,10 @@ void AppMgrServiceInner::OnRenderRemoteDied(const wptr<IRemoteObject> &remote)
     if (appRunningManager_) {
         auto renderRecord = appRunningManager_->OnRemoteRenderDied(remote);
         if (renderRecord) {
+            {
+                std::lock_guard<ffrt::mutex> lock(renderUidSetLock_);
+                renderUidSet_.erase(renderRecord->GetUid());
+            }
             DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
         }
     }
@@ -3288,15 +3543,16 @@ void AppMgrServiceInner::InitFocusListener()
         return;
     }
 
-    focusListener_ = new WindowFocusChangedListener(shared_from_this(), eventHandler_);
+    focusListener_ = new WindowFocusChangedListener(shared_from_this(), taskHandler_);
     auto registerTask = [innerService = shared_from_this()]() {
         if (innerService) {
             HILOG_INFO("RegisterFocusListener task");
             innerService->RegisterFocusListener();
         }
     };
-    if (eventHandler_) {
-        eventHandler_->PostTask(registerTask, "RegisterFocusListenerTask", REGISTER_FOCUS_DELAY);
+    if (taskHandler_) {
+        taskHandler_->SubmitTask(registerTask, "RegisterFocusListenerTask", REGISTER_FOCUS_DELAY);
+        HILOG_INFO("Submit RegisterFocusListenerTask");
     }
 }
 
@@ -3480,6 +3736,91 @@ int32_t AppMgrServiceInner::NotifyUnLoadRepairPatch(const std::string &bundleNam
     return appRunningManager_->NotifyUnLoadRepairPatch(bundleName, callback);
 }
 
+int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
+{
+    HILOG_DEBUG("called.");
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        HILOG_ERROR("no such appRecord");
+        return ERR_INVALID_VALUE;
+    }
+    std::string bundleName = appRecord->GetBundleName();
+    HILOG_DEBUG("FaultData is: error name: %{public}s, faultType: %{public}s, uid: %{public}d, pid: %{public}d,\
+        bundleName: %{public}s", faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(),
+        callerUid, pid, bundleName.c_str());
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
+{
+    HILOG_DEBUG("called");
+    std::string callerBundleName;
+    if (auto bundleMgr = remoteClientManager_->GetBundleManager(); bundleMgr != nullptr) {
+        bundleMgr->GetBundleNameForUid(IPCSkeleton::GetCallingUid(), callerBundleName);
+    }
+#ifdef ABILITY_FAULT_AND_EXIT_TEST
+    if ((AAFwk::PermissionVerification::GetInstance()->IsSACall()) ||
+        AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
+#else
+    if ((AAFwk::PermissionVerification::GetInstance()->IsSACall()) ||
+        callerBundleName == SCENE_BOARD_BUNDLE_NAME) {
+#endif
+        int32_t pid = faultData.pid;
+        auto appRecord = GetAppRunningRecordByPid(pid);
+        if (appRecord == nullptr) {
+            HILOG_ERROR("no such appRecord");
+            return ERR_INVALID_VALUE;
+        }
+        FaultData transformedFaultData = ConvertDataTypes(faultData);
+        int32_t uid = appRecord->GetUid();
+        std::string bundleName = appRecord->GetBundleName();
+        HILOG_DEBUG("FaultDataBySA is: error name: %{public}s, faultType: %{public}s, uid: %{public}d,\
+            pid: %{public}d, bundleName: %{public}s",
+            faultData.errorObject.name.c_str(), FaultTypeToString(faultData.faultType).c_str(),
+            uid, pid, bundleName.c_str());
+        appRecord->NotifyAppFault(transformedFaultData);
+    } else {
+        HILOG_DEBUG("this is not called by SA.");
+        return AAFwk::CHECK_PERMISSION_FAILED;
+    }
+    return ERR_OK;
+}
+
+FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData)
+{
+    FaultData newfaultData;
+    newfaultData.faultType = faultData.faultType;
+    newfaultData.errorObject = faultData.errorObject;
+    return newfaultData;
+}
+
+std::string AppMgrServiceInner::FaultTypeToString(AppExecFwk::FaultDataType type)
+{
+    std::string typeStr = "UNKNOWN";
+    switch (type) {
+        case AppExecFwk::FaultDataType::CPP_CRASH:
+            typeStr = "CPP_CRASH";
+            break;
+        case AppExecFwk::FaultDataType::JS_ERROR:
+            typeStr = "JS_ERROR";
+            break;
+        case AppExecFwk::FaultDataType::APP_FREEZE:
+            typeStr = "APP_FREEZE";
+            break;
+        case AppExecFwk::FaultDataType::PERFORMANCE_CONTROL:
+            typeStr = "PERFORMANCE_CONTROL";
+            break;
+        case AppExecFwk::FaultDataType::RESOURCE_CONTROL:
+            typeStr = "RESOURCE_CONTROL";
+            break;
+        default:
+            break;
+    }
+    return typeStr;
+}
+
 bool AppMgrServiceInner::IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode)
 {
     if (!CheckGetRunningInfoPermission()) {
@@ -3586,6 +3927,88 @@ void AppMgrServiceInner::SetCurrentUserId(const int32_t userId)
     }
     HILOG_DEBUG("set current userId: %{public}d", userId);
     currentUserId_ = userId;
+}
+
+int32_t AppMgrServiceInner::GetBundleNameByPid(const int32_t pid, std::string &bundleName, int32_t &uid)
+{
+    auto callerRecord = GetAppRunningRecordByPid(pid);
+    if (callerRecord == nullptr) {
+        HILOG_ERROR("callerRecord is nullptr, can not get callerBundleName.");
+        return ERR_INVALID_OPERATION;
+    }
+    bundleName = callerRecord->GetBundleName();
+    uid = callerRecord->GetUid();
+    return ERR_OK;
+}
+void AppMgrServiceInner::KillRenderProcess(const std::shared_ptr<AppRunningRecord> &appRecord) {
+    if (appRecord == nullptr) {
+        HILOG_ERROR("appRecord is nullptr.");
+        return;
+    }
+    auto renderRecordMap = appRecord->GetRenderRecordMap();
+    if (!renderRecordMap.empty()) {
+        for (auto iter : renderRecordMap) {
+            auto renderRecord = iter.second;
+            if (renderRecord && renderRecord->GetPid() > 0) {
+                HILOG_DEBUG("Kill render process when host died.");
+                KillProcessByPid(renderRecord->GetPid());
+                {
+                    std::lock_guard lock(renderUidSetLock_);
+                    renderUidSet_.erase(renderRecord->GetUid());
+                }
+                DelayedSingleton<AppStateObserverManager>::GetInstance()->OnRenderProcessDied(renderRecord);
+            }
+        }
+    }
+}
+
+int32_t AppMgrServiceInner::GetProcessMemoryByPid(const int32_t pid, int32_t &memorySize)
+{
+    CHECK_CALLER_IS_SYSTEM_APP;
+    uint64_t memSize = OHOS::MemInfo::GetPssByPid(pid);
+    memorySize = memSize;
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::GetRunningProcessInformation(
+    const std::string &bundleName, int32_t userId, std::vector<RunningProcessInfo> &info)
+{
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager nullptr!");
+        return ERR_NO_INIT;
+    }
+
+    if (remoteClientManager_ == nullptr) {
+        HILOG_ERROR("remoteClientManager_ nullptr!");
+        return ERR_NO_INIT;
+    }
+    auto bundleMgr = remoteClientManager_->GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOG_ERROR("bundleMgr nullptr!");
+        return ERR_NO_INIT;
+    }
+    HILOG_INFO("userid value is %{public}d", userId);
+    int uid = IN_PROCESS_CALL(bundleMgr->GetUidByBundleName(bundleName, userId));
+    HILOG_INFO("uid value is %{public}d", uid);
+    const auto &appRunningRecordMap = appRunningManager_->GetAppRunningRecordMap();
+    for (const auto &item : appRunningRecordMap) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
+        auto appInfoList = appRecord->GetAppInfoList();
+        for (const auto &appInfo : appInfoList) {
+            if (appInfo == nullptr) {
+                continue;
+            }
+            if (appInfo->bundleName == bundleName && appInfo->uid == uid) {
+                GetRunningProcesses(appRecord, info);
+                break;
+            }
+        }
+    }
+    return ERR_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

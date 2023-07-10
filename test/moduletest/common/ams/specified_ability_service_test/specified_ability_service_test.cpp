@@ -23,7 +23,6 @@
 
 #define private public
 #define protected public
-#include "sa_mgr_client.h"
 #include "mock_ability_connect_callback_stub.h"
 #include "mock_ability_scheduler.h"
 #include "mock_app_mgr_client.h"
@@ -127,13 +126,13 @@ void SpecifiedAbilityServiceTest::WaitAMS()
     if (!abilityMgrServ_) {
         return;
     }
-    auto handler = abilityMgrServ_->GetEventHandler();
+    auto handler = abilityMgrServ_->GetTaskHandler();
     if (!handler) {
         return;
     }
     std::atomic<bool> taskCalled(false);
     auto f = [&taskCalled]() { taskCalled.store(true); };
-    if (handler->PostTask(f)) {
+    if (handler->SubmitTask(f)) {
         while (!taskCalled.load()) {
             ++count;
             if (count >= maxRetryCount) {

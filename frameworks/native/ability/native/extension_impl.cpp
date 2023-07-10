@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "hitrace_meter.h"
 #include "extension_context.h"
 #include "hilog_wrapper.h"
+#include "ui_extension_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -41,9 +42,9 @@ void ExtensionImpl::Init(std::shared_ptr<AppExecFwk::OHOSApplication> &applicati
     token_ = record->GetToken();
     extension_ = extension;
     if (record->GetAbilityInfo() != nullptr &&
-        record->GetAbilityInfo()->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI) {
-        extension_->SetSceneSessionStageListener(
-            std::make_shared<ExtensionSessionStateLifeCycleImpl>(token_, shared_from_this()));
+        AAFwk::UIExtensionUtils::IsUIExtension(record->GetAbilityInfo()->extensionAbilityType)) {
+        extension_->SetExtensionWindowLifeCycleListener(
+            sptr<ExtensionWindowLifeCycleImpl>(new ExtensionWindowLifeCycleImpl(token_, shared_from_this())));
     }
     extension_->Init(record, application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
@@ -73,7 +74,7 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
 
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
-            if (lifecycleState_ == AAFwk::ABILITY_STATE_ACTIVE) {
+            if (lifecycleState_ != AAFwk::ABILITY_STATE_INITIAL) {
                 Stop();
             }
             break;
@@ -82,6 +83,14 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
             if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL) {
                 Start(want, sessionInfo);
             }
+            break;
+        }
+        case AAFwk::ABILITY_STATE_FOREGROUND_NEW: {
+            Foreground(want);
+            break;
+        }
+        case AAFwk::ABILITY_STATE_BACKGROUND_NEW: {
+            Background();
             break;
         }
         default: {
@@ -140,7 +149,7 @@ void ExtensionImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     }
 
     HILOG_INFO("ExtensionImpl::Start");
-    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI) {
+    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW) {
         extension_->OnStart(want, sessionInfo);
     } else {
         extension_->OnStart(want);
@@ -320,6 +329,31 @@ void ExtensionImpl::CommandExtension(const Want &want, bool restart, int startId
     HILOG_INFO("ok");
 }
 
+void ExtensionImpl::CommandExtensionWindow(const Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+    AAFwk::WindowCommand winCmd)
+{
+    HILOG_INFO("call");
+    if (extension_ == nullptr) {
+        HILOG_ERROR("extension_ is nullptr");
+        return;
+    }
+
+    extension_->OnCommandWindow(want, sessionInfo, winCmd);
+    HILOG_INFO("ok");
+}
+
+void ExtensionImpl::SendResult(int requestCode, int resultCode, const Want &resultData)
+{
+    HILOG_DEBUG("begin.");
+    if (extension_ == nullptr) {
+        HILOG_ERROR("extension_ is nullptr");
+        return;
+    }
+
+    extension_->OnAbilityResult(requestCode, resultCode, resultData);
+    HILOG_DEBUG("end.");
+}
+
 void ExtensionImpl::Foreground(const Want &want)
 {
     HILOG_DEBUG("ExtensionImpl::Foreground begin");
@@ -343,24 +377,24 @@ void ExtensionImpl::Background()
     lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterForeground()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterForeground()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterForeground called.");
+    HILOG_DEBUG("called.");
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterBackground()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterBackground()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterBackground called.");
+    HILOG_DEBUG("called.");
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterActive()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterActive()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterActive called.");
+    HILOG_DEBUG("called.");
 }
 
-void ExtensionImpl::ExtensionSessionStateLifeCycleImpl::AfterInactive()
+void ExtensionImpl::ExtensionWindowLifeCycleImpl::AfterInactive()
 {
-    HILOG_DEBUG("ExtensionSessionStateLifeCycleImpl AfterInactive called.");
+    HILOG_DEBUG("called.");
 }
 }
 }

@@ -879,6 +879,20 @@ public:
     virtual void OnBackground();
 
     /**
+     * @brief Called when back press is dispatched.
+     *
+     * @return Return true if ability will be moved to background; return false if will be terminated.
+     */
+    virtual bool OnBackPress() override;
+
+    /**
+     * @brief Called when ability prepare terminate.
+     *
+     * @return Return true if ability need to stop terminating; return false if ability need to terminate.
+     */
+    virtual bool OnPrepareTerminate();
+
+    /**
      * @brief Called when a key is pressed. When any component in the Ability gains focus, the key-down event for
      * the component will be handled first. This callback will not be invoked if the callback triggered for the
      * key-down event of the component returns true. The default implementation of this callback does nothing
@@ -1102,6 +1116,16 @@ public:
      */
     virtual ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
 
+    /**
+     * @brief Get window rectangle of this ability.
+     *
+     * @param the left position of window rectangle.
+     * @param the top position of window rectangle.
+     * @param the width position of window rectangle.
+     * @param the height position of window rectangle.
+     */
+    virtual void GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height) override;
+
 protected:
     class AbilityDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
     public:
@@ -1237,7 +1261,6 @@ protected:
     LaunchParam launchParam_;
     int32_t appIndex_ = 0;
     bool securityFlag_ = false;
-    sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
 
 private:
     std::shared_ptr<NativeRdb::DataAbilityPredicates> ParsePredictionArgsReference(

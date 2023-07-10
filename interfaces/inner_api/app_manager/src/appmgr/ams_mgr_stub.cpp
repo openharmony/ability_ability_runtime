@@ -61,6 +61,8 @@ AmsMgrStub::AmsMgrStub()
         &AmsMgrStub::HandleGetRunningProcessInfoByToken;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::GET_RUNNING_PROCESS_INFO_BY_PID)] =
         &AmsMgrStub::HandleGetRunningProcessInfoByPid;
+    memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::SET_ABILITY_FOREGROUNDING_FLAG)] =
+        &AmsMgrStub::HandleSetAbilityForegroundingFlagToAppRecord;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::START_SPECIFIED_ABILITY)] =
         &AmsMgrStub::HandleStartSpecifiedAbility;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::REGISTER_START_SPECIFIED_ABILITY_RESPONSE)] =
@@ -71,6 +73,8 @@ AmsMgrStub::AmsMgrStub()
         &AmsMgrStub::HandleUpdateApplicationInfoInstalled;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::SET_CURRENT_USER_ID)] =
         &AmsMgrStub::HandleSetCurrentUserId;
+    memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID)] =
+        &AmsMgrStub::HandleGetBundleNameByPid;
 }
 
 AmsMgrStub::~AmsMgrStub()
@@ -294,6 +298,14 @@ int32_t AmsMgrStub::HandleGetRunningProcessInfoByPid(MessageParcel &data, Messag
     return NO_ERROR;
 }
 
+int32_t AmsMgrStub::HandleSetAbilityForegroundingFlagToAppRecord(MessageParcel &data, MessageParcel &reply)
+{
+    RunningProcessInfo processInfo;
+    auto pid = static_cast<pid_t>(data.ReadInt32());
+    SetAbilityForegroundingFlagToAppRecord(pid);
+    return NO_ERROR;
+}
+
 int32_t AmsMgrStub::HandleStartSpecifiedAbility(MessageParcel &data, MessageParcel &reply)
 {
     AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
@@ -358,6 +370,18 @@ int32_t AmsMgrStub::HandleSetCurrentUserId(MessageParcel &data, MessageParcel &r
 {
     int32_t userId = data.ReadInt32();
     SetCurrentUserId(userId);
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t pid = data.ReadInt32();
+    std::string bundleName;
+    int32_t uid;
+    GetBundleNameByPid(pid, bundleName, uid);
+
+    reply.WriteString(bundleName);
+    reply.WriteInt32(uid);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

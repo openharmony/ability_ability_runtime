@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,10 +63,6 @@ public:
     {
         return;
     }
-    void UpdateExtensionType(int32_t extensionType) override
-    {
-        return;
-    }
     bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false)
     {
         return true;
@@ -92,6 +88,9 @@ public:
     {
         return;
     }
+
+    void StartProfiler(const std::string &perfCmd) override {}
+    void DoCleanWorkAfterStageCleaned() override {}
 public:
     Language language;
 };

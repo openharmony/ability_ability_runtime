@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,7 @@ HWTEST_F(AppMgrStubTest, AppMgrStub_GetProcessRunningInfosByUserId_0100, TestSiz
     EXPECT_CALL(*mockAppMgrService_, GetProcessRunningInfosByUserId(_, _)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::APP_GET_RUNNING_PROCESSES_BY_USER_ID), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_USER_ID), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     GTEST_LOG_(INFO) << "AppMgrStub_GetProcessRunningInfosByUserId_0100 end";
@@ -110,7 +110,7 @@ HWTEST_F(AppMgrStubTest, HandleGetAppRunningStateByBundleName_0100, TestSize.Lev
     EXPECT_CALL(*mockAppMgrService_, GetAppRunningStateByBundleName(_)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::GET_APP_RUNNING_STATE), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_STATE), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
@@ -137,7 +137,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyLoadRepairPatch_0100, TestSize.Level0)
     EXPECT_CALL(*mockAppMgrService_, NotifyLoadRepairPatch(_, _)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_LOAD_REPAIR_PATCH), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_LOAD_REPAIR_PATCH), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
@@ -164,7 +164,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyHotReloadPage_0100, TestSize.Level0)
     EXPECT_CALL(*mockAppMgrService_, NotifyHotReloadPage(_, _)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_HOT_RELOAD_PAGE), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_HOT_RELOAD_PAGE), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
@@ -191,7 +191,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyUnLoadRepairPatch_0100, TestSize.Level0)
     EXPECT_CALL(*mockAppMgrService_, NotifyUnLoadRepairPatch(_, _)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_UNLOAD_REPAIR_PATCH), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_UNLOAD_REPAIR_PATCH), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
@@ -213,10 +213,113 @@ HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
     EXPECT_CALL(*mockAppMgrService_, PreStartNWebSpawnProcess()).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::PRE_START_NWEBSPAWN_PROCESS), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::PRE_START_NWEBSPAWN_PROCESS), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: GetProcessMemoryByPid_001
+ * @tc.desc: Get memorySize by pid.
+ * @tc.type: FUNC
+ * @tc.require: issueI76JBF
+ */
+HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level0)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    int32_t pid = 0;
+    data.WriteInt32(pid);
+    
+    EXPECT_CALL(*mockAppMgrService_, GetProcessMemoryByPid(_, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppMgr::Message::GET_PROCESS_MEMORY_BY_PID), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: GetRunningProcessInformation_001
+ * @tc.desc: Get pid list by bundleName.
+ * @tc.type: FUNC
+ * @tc.require: issueI76JBF
+ */
+HWTEST_F(AppMgrStubTest, GetRunningProcessInformation_001, TestSize.Level0)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    std::string bundleName = "testBundleName";
+    int32_t userId = 0;
+    data.WriteString(bundleName);
+    data.WriteInt32(userId);
+    
+    EXPECT_CALL(*mockAppMgrService_, GetRunningProcessInformation(_, _, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppMgr::Message::GET_PIDS_BY_BUNDLENAME), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: HandleNotifyFault_001
+ * @tc.desc: Handle notify fault.
+ * @tc.type: FUNC
+ * @tc.require: issueI79RY8
+ */
+HWTEST_F(AppMgrStubTest, HandleNotifyFault_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    FaultData faultData;
+    faultData.errorObject.name = "testName";
+    faultData.errorObject.message = "testMessage";
+    faultData.errorObject.stack = "testStack";
+    faultData.faultType = FaultDataType::UNKNOWN;
+    data.WriteParcelable(&faultData);
+    EXPECT_CALL(*mockAppMgrService_, NotifyAppFault(_)).Times(1);
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleNotifyFaultBySA_001
+ * @tc.desc: Handle notify fault by SA.
+ * @tc.type: FUNC
+ * @tc.require: issueI79RY8
+ */
+HWTEST_F(AppMgrStubTest, HandleNotifyFaultBySA_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    AppFaultDataBySA faultData;
+    faultData.errorObject.name = "testName";
+    faultData.errorObject.message = "testMessage";
+    faultData.errorObject.stack = "testStack";
+    faultData.faultType = FaultDataType::UNKNOWN;
+    faultData.pid = 24;
+    data.WriteParcelable(&faultData);
+    EXPECT_CALL(*mockAppMgrService_, NotifyAppFaultBySA(_)).Times(1);
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT_BY_SA), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

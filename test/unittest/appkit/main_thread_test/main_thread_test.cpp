@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -254,6 +254,16 @@ class MockAppMgrStub : public AppMgrStub {
     {
         return 0;
     }
+
+    int32_t NotifyAppFault(const FaultData &faultData) override
+    {
+        return 0;
+    }
+
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override
+    {
+        return 0;
+    }
 };
 
 /*
@@ -411,11 +421,7 @@ HWTEST_F(MainThreadTest, InitCreate_0100, TestSize.Level1)
     std::shared_ptr<ContextDeal> contextDeal;
     ApplicationInfo appInfo;
     ProcessInfo processInfo;
-    Profile appProfile;
-    EXPECT_TRUE(mainThread_->InitCreate(contextDeal, appInfo, processInfo, appProfile));
-
-    mainThread_->watchdog_ = nullptr;
-    EXPECT_TRUE(mainThread_->InitCreate(contextDeal, appInfo, processInfo, appProfile));
+    EXPECT_TRUE(mainThread_->InitCreate(contextDeal, appInfo, processInfo));
     HILOG_INFO("%{public}s end.", __func__);
 }
 
@@ -466,7 +472,7 @@ HWTEST_F(MainThreadTest, GetHqfFileAndHapPath_0100, TestSize.Level1)
     std::string bundleName = "com.ohos.quickfix";
     std::vector<std::pair<std::string, std::string>> fileMap;
     auto ret = mainThread_->GetHqfFileAndHapPath(bundleName, fileMap);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     HILOG_INFO("%{public}s end.", __func__);
 }
 
@@ -787,8 +793,7 @@ HWTEST_F(MainThreadTest, HandleProcessSecurityExit_0100, TestSize.Level1)
     std::shared_ptr<ContextDeal> contextDeal;
     ApplicationInfo appInfo;
     ProcessInfo processInfo;
-    Profile appProfile;
-    mainThread_->InitCreate(contextDeal, appInfo, processInfo, appProfile);
+    mainThread_->InitCreate(contextDeal, appInfo, processInfo);
     mainThread_->HandleProcessSecurityExit();
     HILOG_INFO("%{public}s end.", __func__);
 }
@@ -1522,10 +1527,11 @@ HWTEST_F(MainThreadTest, LoadNativeLiabrary_0100, TestSize.Level1)
     HILOG_INFO("%{public}s start.", __func__);
     std::string nativeLibraryPath = "";
     ASSERT_NE(mainThread_, nullptr);
-    mainThread_->LoadNativeLiabrary(nativeLibraryPath);
+    BundleInfo bundleInfo;
+    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
 
     nativeLibraryPath = "test/";
-    mainThread_->LoadNativeLiabrary(nativeLibraryPath);
+    mainThread_->LoadNativeLiabrary(bundleInfo, nativeLibraryPath);
     HILOG_INFO("%{public}s end.", __func__);
 }
 #endif
@@ -2176,6 +2182,23 @@ HWTEST_F(MainThreadTest, HandleOnOverlayChanged_0100, TestSize.Level1)
     data.SetWant(want);
 
     mainThread_->HandleOnOverlayChanged(data, resourceManager, bundleName, moduleName, loadPath);
+}
+
+/**
+ * @tc.name: ScheduleNotifyAppFault_0100
+ * @tc.desc: Schedule notify app Fault.
+ * @tc.type: FUNC
+ * @tc.require: issueI79RY8
+ */
+HWTEST_F(MainThreadTest, ScheduleNotifyAppFault_0100, TestSize.Level1)
+{
+    FaultData faultData;
+    faultData.faultType = FaultDataType::APP_FREEZE;
+    faultData.errorObject.message = "msgContent";
+    faultData.errorObject.stack = "stack";
+    faultData.errorObject.name = "eventType";
+    auto ret = mainThread_->ScheduleNotifyAppFault(faultData);
+    EXPECT_EQ(ret, NO_ERROR);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

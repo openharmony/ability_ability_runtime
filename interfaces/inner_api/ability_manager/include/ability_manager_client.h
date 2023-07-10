@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,11 +22,13 @@
 #include "ability_manager_errors.h"
 #include "ability_scheduler_interface.h"
 #include "ability_manager_interface.h"
+#include "mission_info.h"
 #include "snapshot.h"
 #include "want.h"
 
 #include "iremote_object.h"
 #include "system_memory_attr.h"
+#include "ui_extension_window_command.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -83,12 +85,25 @@ public:
      */
     ErrCode ScheduleCommandAbilityDone(const sptr<IRemoteObject> &token);
 
+    ErrCode ScheduleCommandAbilityWindowDone(
+        const sptr<IRemoteObject> &token,
+        const sptr<SessionInfo> &sessionInfo,
+        WindowCommand winCmd,
+        AbilityCommand abilityCmd);
+
     /**
      * Get top ability.
      *
      * @return Returns front desk focus ability elementName.
      */
     AppExecFwk::ElementName GetTopAbility();
+
+    /**
+     * Get element name by token.
+     *
+     * @return Returns front desk focus ability elementName by token.
+     */
+    AppExecFwk::ElementName GetElementNameByToken(const sptr<IRemoteObject> &token);
 
     /**
      * StartAbility with want, send want to ability manager service.
@@ -191,29 +206,23 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
 
     /**
-     * Start ui extension ability with want, send want to ability manager service.
+     * Start ui extension ability with extension session info, send extension session info to ability manager service.
      *
-     * @param want, the want of the ability to start.
      * @param extensionSessionInfo the extension session info of the ability to start.
      * @param userId, Designation User ID.
-     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode StartUIExtensionAbility(
-        const Want &want,
         const sptr<SessionInfo> &extensionSessionInfo,
-        int32_t userId = DEFAULT_INVAL_VALUE,
-        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * Start ui ability with want, send want to ability manager service.
      *
-     * @param want the want of the ability to start.
-     * @param startOptions Indicates the options used to start.
      * @param sessionInfo the session info of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions, sptr<SessionInfo> sessionInfo);
+    ErrCode StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo);
 
     /**
      * Stop extension ability with want, send want to ability manager service.
@@ -250,7 +259,7 @@ public:
      */
     ErrCode TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo,
         int resultCode = DEFAULT_INVAL_VALUE, const Want *resultWant = nullptr);
-    
+
     /**
      *  CloseUIAbilityBySCB, close the special ability by scb.
      *
@@ -268,6 +277,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode SendResultToAbility(int requestCode, int resultCode, Want& resultWant);
+
+/**
+     * MoveAbilityToBackground.
+     *
+     * @param token Ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MoveAbilityToBackground(const sptr<IRemoteObject> &token);
 
     /**
      * CloseAbility with want, return want from ability manager service.
@@ -323,9 +340,10 @@ public:
      * MinimizeUIAbilityBySCB, minimize the special ability by scb.
      *
      * @param sessionInfo the session info of the ability to minimize.
+     * @param fromUser, Whether form user.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo);
+    ErrCode MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser = false);
 
     /**
      * ConnectAbility, connect session with service ability.
@@ -480,6 +498,19 @@ public:
         const sptr<IRemoteObject> &callback, AAFwk::WantParams &wantParams);
 
     /**
+     * ContinueMission, continue ability from mission center.
+     *
+     * @param srcDeviceId, origin deviceId.
+     * @param dstDeviceId, target deviceId.
+     * @param bundleName, indicates which bundleName to continue.
+     * @param callBack, notify result back.
+     * @param wantParams, extended params.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
+        const std::string &bundleName, const sptr<IRemoteObject> &callback, AAFwk::WantParams &wantParams);
+
+    /**
      * start continuation.
      * @param want, used to start a ability.
      * @param abilityToken, ability token.
@@ -554,6 +585,24 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RegisterMissionListener(const std::string &deviceId, const sptr<IRemoteMissionListener> &listener);
+
+    /**
+     * @brief Register mission listener to ability manager service.
+     * @param deviceId The remote device Id.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterOnListener(const std::string &type, const sptr<IRemoteOnListener> &listener);
+
+    /**
+     * @brief Register mission listener to ability manager service.
+     * @param deviceId The remote device Id.
+     * @param listener The handler of listener.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RegisterOffListener(const std::string &type, const sptr<IRemoteOnListener> &listener);
 
     /**
      * @brief UnRegister mission listener from ability manager service.
@@ -754,6 +803,24 @@ public:
      */
     ErrCode RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler);
 
+    /**
+     * PrepareTerminateAbility with want, if terminate, return want from ability manager service.
+     *
+     * @param token Ability token.
+     * @param callback callback.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PrepareTerminateAbility(const sptr<IRemoteObject> &token, sptr<IPrepareTerminateCallback> &callback);
+
+    /**
+     * Set mission continue state of this ability.
+     *
+     * @param token Indidate token of ability.
+     * @param state the mission continuation state of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state);
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * Set mission label of this ability.
@@ -788,6 +855,14 @@ public:
      * @param abilityToken Indidate token of ability.
      */
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken);
+
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     * @param pixelMap The snapshot.
+     */
+    void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
+        const std::shared_ptr<OHOS::Media::PixelMap> &pixelMap);
 #endif
 
     /**
@@ -816,6 +891,8 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode GetTopAbility(sptr<IRemoteObject> &token);
+
+    ErrCode CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused);
 
     /**
      * DelegatorDoAbilityForeground, the delegator calls this interface to move the ability to the foreground.
@@ -977,6 +1054,72 @@ public:
      */
     ErrCode ShareDataDone(
         const sptr<IRemoteObject> &token, const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam);
+
+    /**
+     * Request dialog service with want, send want to ability manager service.
+     *
+     * @param want target component.
+     * @param callerToken caller ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RequestDialogService(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken);
+
+    /**
+     * Force app exit and record exit reason.
+     * @param pid Process id .
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ForceExitApp(const int32_t pid, Reason exitReason);
+
+    /**
+     * Record app exit reason.
+     * @param exitReason The reason of app exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RecordAppExitReason(Reason exitReason);
+
+    /**
+     * Set rootSceneSession by SCB.
+     *
+     * @param rootSceneSession Indicates root scene session of SCB.
+     */
+    void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
+
+    /**
+     * Call UIAbility by SCB.
+     *
+     * @param sessionInfo the session info of the ability to be called.
+     */
+    void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo);
+
+    /**
+     * Start specified ability by SCB.
+     *
+     * @param want Want information.
+     */
+    void StartSpecifiedAbilityBySCB(const Want &want);
+
+    /**
+     * Notify sandbox app the result of saving file.
+     * @param want Result of saving file, which contains the file's uri if success.
+     * @param resultCode Indicates the action's result.
+     * @param requestCode Pass the requestCode to match request.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode NotifySaveAsResult(const Want &want, int resultCode, int requestCode);
+
+    /**
+     * Set sessionManagerService
+     * @param sessionManagerService the point of sessionManagerService.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService);
+
+    ErrCode ReportDrawnCompleted(const sptr<IRemoteObject> &token);
 
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {

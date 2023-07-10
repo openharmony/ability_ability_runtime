@@ -15,22 +15,47 @@
 
 #include "js_module_reader.h"
 
+#include "bundle_info.h"
+#include "bundle_mgr_proxy.h"
 #include "file_path_utils.h"
 #include "hilog_wrapper.h"
+#include "hitrace_meter.h"
+#include "iservice_registry.h"
 #include "js_runtime_utils.h"
+#include "system_ability_definition.h"
 
 using namespace OHOS::AbilityBase;
 
 namespace OHOS {
 namespace AbilityRuntime {
-std::vector<uint8_t> JsModuleReader::operator()(const std::string& hapPath) const
+using IBundleMgr = AppExecFwk::IBundleMgr;
+
+JsModuleReader::JsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender)
+    : JsModuleSearcher(bundleName), isFormRender_(isFormRender)
 {
+    if (!hapPath.empty() && hapPath.find(std::string(ABS_DATA_CODE_PATH)) != 0) {
+        isSystemPath_ = true;
+    } else {
+        isSystemPath_ = false;
+    }
+}
+
+std::vector<uint8_t> JsModuleReader::operator()(const std::string& inputPath) const
+{
+    HILOG_INFO("JsModuleReader operator start: %{private}s", inputPath.c_str());
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::vector<uint8_t> buffer;
-    if (hapPath.empty()) {
-        HILOG_ERROR("hapPath is empty");
+    if (inputPath.empty()) {
+        HILOG_ERROR("inputPath is empty");
         return buffer;
     }
-    std::string realHapPath = std::string(ABS_CODE_PATH) + hapPath + std::string(SHARED_FILE_SUFFIX);
+
+    auto realHapPath = GetAppHspPath(inputPath);
+    if (realHapPath.empty()) {
+        HILOG_ERROR("realHapPath is empty");
+        return buffer;
+    }
+
     bool newCreate = false;
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(realHapPath, newCreate);
     if (extractor == nullptr) {
@@ -45,6 +70,107 @@ std::vector<uint8_t> JsModuleReader::operator()(const std::string& hapPath) cons
     }
     buffer.assign(dataPtr.get(), dataPtr.get() + len);
     return buffer;
+}
+
+std::string JsModuleReader::GetAppHspPath(const std::string& inputPath) const
+{
+    if (isFormRender_) {
+        return GetFormAppHspPath(inputPath);
+    }
+    return GetCommonAppHspPath(inputPath);
+}
+
+std::string JsModuleReader::GetFormAppHspPath(const std::string& inputPath) const
+{
+    std::string realHapPath;
+    std::string suffix = std::string(SHARED_FILE_SUFFIX);
+    realHapPath.append("/data/bundles/")
+        .append(bundleName_).append("/")
+        .append(GetModuleName(inputPath))
+        .append(SHARED_FILE_SUFFIX);
+
+    HILOG_INFO("realHapPath: %{private}s", realHapPath.c_str());
+    if (realHapPath.empty() ||
+        realHapPath.length() < suffix.length() ||
+        realHapPath.compare(realHapPath.length() - suffix.length(), suffix.length(), suffix) != 0) {
+        HILOG_ERROR("failed to obtain realHapPath");
+        return realHapPath;
+    }
+    return realHapPath;
+}
+
+std::string JsModuleReader::GetModuleName(const std::string& inputPath) const
+{
+    return inputPath.substr(inputPath.find_last_of("/") + 1);
+}
+
+std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) const
+{
+    std::string suffix = std::string(SHARED_FILE_SUFFIX);
+    std::string realHapPath = GetPresetAppHapPath(inputPath);
+    if ((realHapPath.find(ABS_DATA_CODE_PATH) == 0) || (realHapPath == inputPath)) {
+        realHapPath = std::string(ABS_CODE_PATH) + inputPath + suffix;
+    }
+
+    HILOG_INFO("realHapPath: %{private}s", realHapPath.c_str());
+    if (realHapPath.empty() ||
+        realHapPath.length() < suffix.length() ||
+        realHapPath.compare(realHapPath.length() - suffix.length(), suffix.length(), suffix) != 0) {
+        HILOG_ERROR("failed to obtain realHapPath");
+        return realHapPath;
+    }
+    return realHapPath;
+}
+
+std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath) const
+{
+    std::string presetAppHapPath = inputPath;
+    std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
+    if (moduleName.empty()) {
+        HILOG_ERROR("failed to obtain moduleName.");
+        return presetAppHapPath;
+    }
+    auto systemAbilityManagerClient = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManagerClient) {
+        HILOG_ERROR("fail to get system ability mgr.");
+        return presetAppHapPath;
+    }
+    auto remoteObject = systemAbilityManagerClient->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        HILOG_ERROR("fail to get bundle manager proxy.");
+        return presetAppHapPath;
+    }
+    auto bundleMgrProxy = iface_cast<IBundleMgr>(remoteObject);
+    if (inputPath.find_first_of("/") == inputPath.find_last_of("/")) {
+        AppExecFwk::BundleInfo bundleInfo;
+        auto getInfoResult = bundleMgrProxy->GetBundleInfoForSelf(static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::
+            GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+        if (getInfoResult != 0 || bundleInfo.hapModuleInfos.empty()) {
+            HILOG_ERROR("GetBundleInfoForSelf failed.");
+            return presetAppHapPath;
+        }
+        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+            if (hapModuleInfo.moduleName == moduleName) {
+                presetAppHapPath = hapModuleInfo.hapPath;
+                break;
+            }
+        }
+    } else {
+        std::vector<AppExecFwk::BaseSharedBundleInfo> baseSharedBundleInfos;
+        if (bundleMgrProxy->GetBaseSharedBundleInfos(bundleName_, baseSharedBundleInfos) != 0) {
+            HILOG_ERROR("GetBaseSharedBundleInfos failed.");
+            return presetAppHapPath;
+        }
+        std::string tmpPath = inputPath.substr(inputPath.find_first_of("/") + 1);
+        const std::string sharedBundleName = tmpPath.substr(0, tmpPath.find_first_of("/"));
+        for (const auto &info : baseSharedBundleInfos) {
+            if ((info.bundleName == sharedBundleName) && (info.moduleName == moduleName)) {
+                presetAppHapPath = info.hapPath;
+                break;
+            }
+        }
+    }
+    return presetAppHapPath;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -26,14 +26,6 @@
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 
-#ifdef SUPPORT_GRAPHICS
-#include "core/common/container_scope.h"
-#endif
-
-#ifdef SUPPORT_GRAPHICS
-using OHOS::Ace::ContainerScope;
-#endif
-
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
@@ -45,7 +37,7 @@ std::unordered_map<uint32_t, std::shared_ptr<JsTimer>> g_timerTable;
 
 class JsTimer final {
 public:
-    JsTimer(NativeEngine& nativeEngine, const std::shared_ptr<NativeReference>& jsFunction, uint32_t id)
+    JsTimer(NativeEngine &nativeEngine, const std::shared_ptr<NativeReference> &jsFunction, uint32_t id)
         : nativeEngine_(nativeEngine), jsFunction_(jsFunction), id_(id)
     {
         uv_timer_init(nativeEngine.GetUVLoop(), &timerReq_);
@@ -59,7 +51,7 @@ public:
 
     void Start(int64_t timeout, int64_t repeat)
     {
-        uv_timer_start(&timerReq_, [](uv_timer_t* timerReq) {
+        uv_timer_start(&timerReq_, [](uv_timer_t *timerReq) {
             auto me = static_cast<JsTimer*>(timerReq->data);
             me->OnTimeout();
         }, timeout, repeat);
@@ -67,12 +59,6 @@ public:
 
     void OnTimeout()
     {
-#ifdef SUPPORT_GRAPHICS
-        // call js function
-        ContainerScope containerScope(containerScopeId_);
-#endif
-        HandleScope handleScope(nativeEngine_);
-
         std::vector<NativeValue*> args;
         args.reserve(jsArgs_.size());
         for (auto arg : jsArgs_) {
@@ -86,7 +72,7 @@ public:
         }
     }
 
-    void PushArgs(const std::shared_ptr<NativeReference>& ref)
+    void PushArgs(const std::shared_ptr<NativeReference> &ref)
     {
         jsArgs_.emplace_back(ref);
     }
@@ -97,12 +83,9 @@ private:
     std::vector<std::shared_ptr<NativeReference>> jsArgs_;
     uv_timer_t timerReq_;
     uint32_t id_ = 0;
-#ifdef SUPPORT_GRAPHICS
-    int32_t containerScopeId_ = ContainerScope::CurrentId();
-#endif
 };
 
-NativeValue* StartTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* info, bool isInterval)
+NativeValue *StartTimeoutOrInterval(NativeEngine *engine, NativeCallbackInfo *info, bool isInterval)
 {
     if (engine == nullptr || info == nullptr) {
         HILOG_ERROR("Start timeout or interval failed with engine or callback info is nullptr.");
@@ -140,17 +123,17 @@ NativeValue* StartTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* in
     return engine->CreateNumber(callbackId);
 }
 
-NativeValue* StartTimeout(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue *StartTimeout(NativeEngine *engine, NativeCallbackInfo *info)
 {
     return StartTimeoutOrInterval(engine, info, false);
 }
 
-NativeValue* StartInterval(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue *StartInterval(NativeEngine *engine, NativeCallbackInfo *info)
 {
     return StartTimeoutOrInterval(engine, info, true);
 }
 
-NativeValue* StopTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* info)
+NativeValue *StopTimeoutOrInterval(NativeEngine *engine, NativeCallbackInfo *info)
 {
     if (engine == nullptr || info == nullptr) {
         HILOG_ERROR("Stop timeout or interval failed with engine or callback info is nullptr.");
@@ -172,7 +155,7 @@ NativeValue* StopTimeoutOrInterval(NativeEngine* engine, NativeCallbackInfo* inf
 }
 }
 
-void InitTimerModule(NativeEngine& engine, NativeObject& globalObject)
+void InitTimer(NativeEngine &engine, NativeObject &globalObject)
 {
     const char *moduleName = "AsJsTimer";
     BindNativeFunction(engine, globalObject, "setTimeout", moduleName, StartTimeout);

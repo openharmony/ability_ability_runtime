@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,9 +28,12 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "hitrace_meter.h"
+#include "scene_board_judgement.h"
+#include "session_manager.h"
 
 namespace OHOS {
 namespace AAFwk {
+using OHOS::Rosen::SessionManager;
 std::shared_ptr<AbilityManagerClient> AbilityManagerClient::instance_ = nullptr;
 std::recursive_mutex AbilityManagerClient::mutex_;
 #ifdef WITH_DLP
@@ -47,6 +50,12 @@ const std::string DLP_PARAMS_SANDBOX = "ohos.dlp.params.sandbox";
     if (!object) {                                   \
         HILOG_ERROR("proxy is nullptr.");            \
         return ABILITY_SERVICE_NOT_CONNECTED;        \
+    }
+
+#define CHECK_POINTER_RETURN_INVALID_VALUE(object)   \
+    if (!object) {                                   \
+        HILOG_ERROR("proxy is nullptr.");            \
+        return ERR_INVALID_VALUE;                    \
     }
 
 std::shared_ptr<AbilityManagerClient> AbilityManagerClient::GetInstance()
@@ -101,6 +110,17 @@ ErrCode AbilityManagerClient::ScheduleCommandAbilityDone(const sptr<IRemoteObjec
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->ScheduleCommandAbilityDone(token);
+}
+
+ErrCode AbilityManagerClient::ScheduleCommandAbilityWindowDone(
+    const sptr<IRemoteObject> &token,
+    const sptr<SessionInfo> &sessionInfo,
+    WindowCommand winCmd,
+    AbilityCommand abilityCmd)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->ScheduleCommandAbilityWindowDone(token, sessionInfo, winCmd, abilityCmd);
 }
 
 ErrCode AbilityManagerClient::StartAbility(const Want &want, int requestCode, int32_t userId)
@@ -186,18 +206,17 @@ ErrCode AbilityManagerClient::StartExtensionAbility(const Want &want, const sptr
     return abms->StartExtensionAbility(want, callerToken, userId, extensionType);
 }
 
-ErrCode AbilityManagerClient::StartUIExtensionAbility(const Want &want, const sptr<SessionInfo> &extensionSessionInfo,
-    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
+ErrCode AbilityManagerClient::StartUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("name:%{public}s %{public}s, userId:%{public}d.",
-        want.GetElement().GetAbilityName().c_str(), want.GetElement().GetBundleName().c_str(), userId);
-    return abms->StartUIExtensionAbility(want, extensionSessionInfo, userId, extensionType);
+        extensionSessionInfo->want.GetElement().GetAbilityName().c_str(),
+        extensionSessionInfo->want.GetElement().GetBundleName().c_str(), userId);
+    return abms->StartUIExtensionAbility(extensionSessionInfo, userId);
 }
 
-ErrCode AbilityManagerClient::StartUIAbilityBySCB(const Want &want, const StartOptions &startOptions,
-    sptr<SessionInfo> sessionInfo)
+ErrCode AbilityManagerClient::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
@@ -206,8 +225,8 @@ ErrCode AbilityManagerClient::StartUIAbilityBySCB(const Want &want, const StartO
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    HILOG_INFO("abilityName: %{public}s.", want.GetElement().GetAbilityName().c_str());
-    return abms->StartUIAbilityBySCB(want, startOptions, sessionInfo);
+    HILOG_INFO("abilityName: %{public}s.", sessionInfo->want.GetElement().GetAbilityName().c_str());
+    return abms->StartUIAbilityBySCB(sessionInfo);
 }
 
 ErrCode AbilityManagerClient::StopExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
@@ -252,8 +271,29 @@ ErrCode AbilityManagerClient::TerminateAbilityResult(const sptr<IRemoteObject> &
     return abms->TerminateAbilityResult(token, startId);
 }
 
+ErrCode AbilityManagerClient::MoveAbilityToBackground(const sptr<IRemoteObject> &token)
+{
+    HILOG_INFO("call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->MoveAbilityToBackground(token);
+}
+
+
 ErrCode AbilityManagerClient::CloseAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        HILOG_DEBUG("call");
+        sptr<AAFwk::SessionInfo> info = new AAFwk::SessionInfo();
+        info->want = *resultWant;
+        info->resultCode = resultCode;
+        info->sessionToken = token;
+        auto err = sceneSessionManager->TerminateSessionNew(info, false);
+        HILOG_INFO("CloseAbility Calling SceneBoard Interface ret=%{public}d", err);
+        return static_cast<int>(err);
+    }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("call");
@@ -291,7 +331,7 @@ ErrCode AbilityManagerClient::MinimizeUIExtensionAbility(const sptr<SessionInfo>
     return abms->MinimizeUIExtensionAbility(extensionSessionInfo, fromUser);
 }
 
-ErrCode AbilityManagerClient::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+ErrCode AbilityManagerClient::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool fromUser)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (sessionInfo == nullptr) {
@@ -301,7 +341,7 @@ ErrCode AbilityManagerClient::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &se
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_DEBUG("call");
-    return abms->MinimizeUIAbilityBySCB(sessionInfo);
+    return abms->MinimizeUIAbilityBySCB(sessionInfo, fromUser);
 }
 
 ErrCode AbilityManagerClient::ConnectAbility(const Want &want, const sptr<IAbilityConnection> &connect, int32_t userId)
@@ -501,6 +541,20 @@ ErrCode AbilityManagerClient::ContinueMission(const std::string &srcDeviceId, co
     return result;
 }
 
+ErrCode AbilityManagerClient::ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
+    const std::string &bundleName, const sptr<IRemoteObject> &callback, AAFwk::WantParams &wantParams)
+{
+    if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
+        HILOG_ERROR("srcDeviceId or dstDeviceId or callback is null!");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    int result = abms->ContinueMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
+    return result;
+}
+
 ErrCode AbilityManagerClient::StartContinuation(const Want &want, const sptr<IRemoteObject> &abilityToken,
     int32_t status)
 {
@@ -566,6 +620,22 @@ ErrCode AbilityManagerClient::RegisterMissionListener(const std::string &deviceI
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->RegisterMissionListener(deviceId, listener);
+}
+
+ErrCode AbilityManagerClient::RegisterOnListener(const std::string &type,
+    const sptr<IRemoteOnListener> &listener)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RegisterOnListener(type, listener);
+}
+
+ErrCode AbilityManagerClient::RegisterOffListener(const std::string &type,
+    const sptr<IRemoteOnListener> &listener)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RegisterOffListener(type, listener);
 }
 
 ErrCode AbilityManagerClient::UnRegisterMissionListener(const std::string &deviceId,
@@ -709,6 +779,25 @@ ErrCode AbilityManagerClient::GetProcessRunningInfos(std::vector<AppExecFwk::Run
     return abms->GetProcessRunningInfos(info);
 }
 
+ErrCode AbilityManagerClient::RequestDialogService(
+    const Want &want, const sptr<IRemoteObject> &callerToken)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    HILOG_INFO("request is:%{public}s.", want.GetElement().GetURI().c_str());
+    HandleDlpApp(const_cast<Want &>(want));
+    return abms->RequestDialogService(want, callerToken);
+}
+
+ErrCode AbilityManagerClient::ReportDrawnCompleted(const sptr<IRemoteObject> &callerToken)
+{
+    HILOG_DEBUG("called.");
+    auto abilityMgr = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abilityMgr);
+    return abilityMgr->ReportDrawnCompleted(callerToken);
+}
+
 /**
  * Start synchronizing remote device mission
  * @param devId, deviceId.
@@ -779,13 +868,43 @@ ErrCode AbilityManagerClient::FinishUserTest(
 
 ErrCode AbilityManagerClient::GetTopAbility(sptr<IRemoteObject> &token)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        HILOG_DEBUG("call");
+        auto err = sceneSessionManager->GetFocusSessionToken(token);
+        return static_cast<int>(err);
+    }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->GetTopAbility(token);
 }
 
+AppExecFwk::ElementName AbilityManagerClient::GetElementNameByToken(const sptr<IRemoteObject> &token)
+{
+    auto abms = GetAbilityManager();
+    if (abms == nullptr) {
+        HILOG_ERROR("abms == nullptr");
+        return {};
+    }
+    return abms->GetElementNameByToken(token);
+}
+
+ErrCode AbilityManagerClient::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->CheckUIExtensionIsFocused(uiExtensionTokenId, isFocused);
+}
+
 ErrCode AbilityManagerClient::DelegatorDoAbilityForeground(const sptr<IRemoteObject> &token)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        HILOG_DEBUG("call");
+        sceneSessionManager->PendingSessionToForeground(token);
+    }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->DelegatorDoAbilityForeground(token);
@@ -793,14 +912,35 @@ ErrCode AbilityManagerClient::DelegatorDoAbilityForeground(const sptr<IRemoteObj
 
 ErrCode AbilityManagerClient::DelegatorDoAbilityBackground(const sptr<IRemoteObject> &token)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        HILOG_DEBUG("call");
+        sceneSessionManager->PendingSessionToBackgroundForDelegator(token);
+    }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->DelegatorDoAbilityBackground(token);
 }
 
+ErrCode AbilityManagerClient::SetMissionContinueState(const sptr<IRemoteObject> &token,
+    const AAFwk::ContinueState &state)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->SetMissionContinueState(token, state);
+}
+
 #ifdef SUPPORT_GRAPHICS
 ErrCode AbilityManagerClient::SetMissionLabel(const sptr<IRemoteObject> &token, const std::string& label)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        HILOG_DEBUG("call");
+        auto err = sceneSessionManager->SetSessionLabel(token, label);
+        return static_cast<int>(err);
+    }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->SetMissionLabel(token, label);
@@ -809,6 +949,13 @@ ErrCode AbilityManagerClient::SetMissionLabel(const sptr<IRemoteObject> &token, 
 ErrCode AbilityManagerClient::SetMissionIcon(
     const sptr<IRemoteObject> &abilityToken, const std::shared_ptr<OHOS::Media::PixelMap> &icon)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        HILOG_DEBUG("call");
+        auto err = sceneSessionManager->SetSessionIcon(abilityToken, icon);
+        return static_cast<int>(err);
+    }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->SetMissionIcon(abilityToken, icon);
@@ -826,6 +973,21 @@ void AbilityManagerClient::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     abms->CompleteFirstFrameDrawing(abilityToken);
+}
+
+ErrCode AbilityManagerClient::PrepareTerminateAbility(const sptr<IRemoteObject> &token,
+    sptr<IPrepareTerminateCallback> &callback)
+{
+    if (callback == nullptr) {
+        HILOG_ERROR("callback is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    auto abms = GetAbilityManager();
+    if (abms == nullptr) {
+        HILOG_ERROR("abms is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    return abms->PrepareTerminateAbility(token, callback);
 }
 #endif
 
@@ -863,6 +1025,14 @@ void AbilityManagerClient::UpdateMissionSnapShot(const sptr<IRemoteObject>& toke
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->UpdateMissionSnapShot(token);
+}
+
+void AbilityManagerClient::UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
+    const std::shared_ptr<Media::PixelMap> &pixelMap)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    return abms->UpdateMissionSnapShot(token, pixelMap);
 }
 
 void AbilityManagerClient::EnableRecoverAbility(const sptr<IRemoteObject>& token)
@@ -946,6 +1116,20 @@ ErrCode AbilityManagerClient::FreeInstallAbilityFromRemote(const Want &want, con
 
 AppExecFwk::ElementName AbilityManagerClient::GetTopAbility()
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        AppExecFwk::ElementName elementName = {};
+        sptr<IRemoteObject> token;
+        auto ret = GetTopAbility(token);
+        if (ret != ERR_OK) {
+            HILOG_ERROR("get top ability token failed");
+            return elementName;
+        }
+        if (!token) {
+            HILOG_ERROR("token is nullptr");
+            return elementName;
+        }
+        return GetElementNameByToken(token);
+    }
     HILOG_DEBUG("enter.");
     auto abms = GetAbilityManager();
     if (abms == nullptr) {
@@ -1016,5 +1200,60 @@ ErrCode AbilityManagerClient::ShareDataDone(
     return abms->ShareDataDone(token, resultCode, uniqueId, wantParam);
 }
 
+ErrCode AbilityManagerClient::ForceExitApp(const int32_t pid, Reason exitReason)
+{
+    HILOG_DEBUG("begin.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->ForceExitApp(pid, exitReason);
+}
+
+ErrCode AbilityManagerClient::RecordAppExitReason(Reason exitReason)
+{
+    HILOG_DEBUG("begin.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RecordAppExitReason(exitReason);
+}
+
+void AbilityManagerClient::SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession)
+{
+    HILOG_INFO("call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    abms->SetRootSceneSession(rootSceneSession);
+}
+
+void AbilityManagerClient::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+{
+    HILOG_INFO("call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    abms->CallUIAbilityBySCB(sessionInfo);
+}
+
+void AbilityManagerClient::StartSpecifiedAbilityBySCB(const Want &want)
+{
+    HILOG_INFO("call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    abms->StartSpecifiedAbilityBySCB(want);
+}
+
+ErrCode AbilityManagerClient::NotifySaveAsResult(const Want &want, int resultCode, int requestCode)
+{
+    HILOG_DEBUG("call.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->NotifySaveAsResult(want, resultCode, requestCode);
+}
+
+ErrCode AbilityManagerClient::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
+{
+    HILOG_INFO("AbilityManagerClient::SetSessionManagerService call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->SetSessionManagerService(sessionManagerService);
+}
 }  // namespace AAFwk
 }  // namespace OHOS

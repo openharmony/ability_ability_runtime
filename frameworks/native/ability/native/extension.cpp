@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,6 @@ void Extension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessio
     HILOG_INFO("extension:%{public}s.", abilityInfo_->name.c_str());
     SetLaunchWant(want);
     SetLastRequestWant(want);
-    SetSessionInfo(sessionInfo);
 }
 
 void Extension::OnStop()
@@ -95,11 +94,16 @@ void Extension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
     SetLastRequestWant(want);
 }
 
+void Extension::OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+    AAFwk::WindowCommand winCmd)
+{
+    HILOG_DEBUG("call");
+}
+
 void Extension::OnForeground(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("extension:%{public}s.", abilityInfo_->name.c_str());
-
 }
 
 void Extension::OnBackground()
@@ -148,19 +152,14 @@ void Extension::Dump(const std::vector<std::string> &params, std::vector<std::st
     HILOG_DEBUG("call");
 }
 
-void Extension::SetSessionInfo(sptr<AAFwk::SessionInfo> sessionInfo)
+void Extension::SetExtensionWindowLifeCycleListener(const sptr<Rosen::IWindowLifeCycle> &listener)
 {
-    sessionInfo_ = sessionInfo;
+    extensionWindowLifeCycleListener_ = listener;
 }
 
-sptr<AAFwk::SessionInfo> Extension::GetSessionInfo()
+void Extension::OnAbilityResult(int requestCode, int resultCode, const Want &want)
 {
-    return sessionInfo_;
-}
-
-void Extension::SetSceneSessionStageListener(const std::shared_ptr<Rosen::ISessionStageStateListener> &listener)
-{
-    sceneSessionStageListener_ = listener;
+    HILOG_DEBUG("call.");
 }
 }
 }

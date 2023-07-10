@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -169,6 +169,8 @@ public:
 
     virtual void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) = 0;
 
+    virtual void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) = 0;
+
     virtual void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) = 0;
 
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) = 0;
@@ -183,6 +185,16 @@ public:
      * @return
      */
     virtual void SetCurrentUserId(const int32_t userId) = 0;
+
+    /**
+     * Get bundleName by pid.
+     *
+     * @param pid process id.
+     * @param bundleName Output parameters, return bundleName.
+     * @param uid Output parameters, return userId.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) = 0;
 
     enum class Message {
         LOAD_ABILITY = 0,
@@ -207,7 +219,9 @@ public:
         KILL_APPLICATION_SELF,
         GET_RUNNING_PROCESS_INFO_BY_PID,
         UPDATE_APPLICATION_INFO_INSTALLED,
-        SET_CURRENT_USER_ID
+        SET_CURRENT_USER_ID,
+        Get_BUNDLE_NAME_BY_PID,
+        SET_ABILITY_FOREGROUNDING_FLAG
     };
 };
 }  // namespace AppExecFwk

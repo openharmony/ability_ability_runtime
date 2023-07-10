@@ -44,6 +44,10 @@ public:
 
     std::string GetPreferencesDir() override;
 
+    int GetSystemDatabaseDir(std::string groupId, std::string &databaseDir) override;
+
+    int GetSystemPreferencesDir(std::string groupId, std::string &preferencesDir) override;
+
     std::string GetDistributedFilesDir() override;
 
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
@@ -74,6 +78,8 @@ public:
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() const override;
+
+    std::string GetGroupDir(std::string groupId) override;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

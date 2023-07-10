@@ -20,16 +20,20 @@
 #include <map>
 #include <memory>
 #include <string>
+#include "cpp/mutex.h"
 #include "iremote_object.h"
 #include "irender_scheduler.h"
 #include "ability_running_record.h"
 #include "ability_state_data.h"
 #include "application_info.h"
+#include "task_handler_wrap.h"
+#include "app_mgr_service_event_handler.h"
 #include "app_death_recipient.h"
 #include "app_launch_data.h"
 #include "app_mgr_constants.h"
 #include "app_scheduler_proxy.h"
 #include "app_record_id.h"
+#include "fault_data.h"
 #include "profile.h"
 #include "priority_object.h"
 #include "app_lifecycle_deal.h"
@@ -63,6 +67,8 @@ public:
     void SetPid(pid_t pid);
     pid_t GetPid() const ;
     pid_t GetHostPid() const;
+    void SetUid(int32_t uid);
+    int32_t GetUid() const;
     int32_t GetHostUid() const;
     std::string GetHostBundleName() const;
     std::string GetRenderParam() const;
@@ -84,6 +90,7 @@ private:
 
     pid_t pid_ = 0;
     pid_t hostPid_ = 0;
+    int32_t uid_ = 0;
     int32_t hostUid_ = 0;
     std::string hostBundleName_;
     std::string renderParam_;
@@ -489,6 +496,7 @@ public:
     */
     int32_t UpdateConfiguration(const Configuration &config);
 
+    void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler);
     void SetEventHandler(const std::shared_ptr<AMSEventHandler> &handler);
 
     int64_t GetEventId() const;
@@ -551,8 +559,10 @@ public:
     void SetDebugApp(bool isDebugApp);
     bool IsDebugApp();
     void SetNativeDebug(bool isNativeDebug);
-    void SetRenderRecord(const std::shared_ptr<RenderRecord> &record);
-    std::shared_ptr<RenderRecord> GetRenderRecord();
+    void AddRenderRecord(const std::shared_ptr<RenderRecord> &record);
+    void RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record);
+    std::shared_ptr<RenderRecord> GetRenderRecordByPid(const pid_t pid);
+    std::map<int32_t, std::shared_ptr<RenderRecord>> GetRenderRecordMap();
     void SetStartMsg(const AppSpawnStartMsg &msg);
     AppSpawnStartMsg GetStartMsg();
 
@@ -611,6 +621,27 @@ public:
     ExtensionAbilityType GetExtensionType() const;
     ProcessType GetProcessType() const;
 
+    int32_t NotifyAppFault(const FaultData &faultData);
+
+    inline void SetAbilityForegroundingFlag()
+    {
+        isAbilityForegrounding_.store(true);
+    }
+
+    inline bool GetAbilityForegroundingFlag()
+    {
+        return isAbilityForegrounding_.load();
+    }
+
+    inline void SetSpawned()
+    {
+        isSpawned_.store(true);
+    }
+
+    inline bool GetSpawned() const
+    {
+        return isSpawned_.load();
+    }
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -659,6 +690,8 @@ private:
 
     void SendEvent(uint32_t msg, int64_t timeOut);
 
+    void SendClearTask(uint32_t msg, int64_t timeOut);
+
     void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record);
 
 private:
@@ -667,25 +700,33 @@ private:
     bool isStageBasedModel_ = false;
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
     bool isFocused_ = false; // if process is focused.
+    /**
+     * If there is an ability is foregrounding, this flag will be true,
+     * and this flag will remain true until this application is background.
+     */
+    std::atomic_bool isAbilityForegrounding_ = false;
 
     std::shared_ptr<ApplicationInfo> appInfo_ = nullptr;  // the application's info of this process
     int32_t appRecordId_ = 0;
     std::string appName_;
     std::string processName_;  // the name of this process
     int64_t eventId_ = 0;
+    int64_t startProcessSpecifiedAbilityEventId_ = 0;
+    int64_t addAbilityStageInfoEventId_ = 0;
     std::list<const sptr<IRemoteObject>> foregroundingAbilityTokens_;
     std::weak_ptr<AppMgrServiceInner> appMgrServiceInner_;
     sptr<AppDeathRecipient> appDeathRecipient_ = nullptr;
     std::shared_ptr<PriorityObject> priorityObject_ = nullptr;
     std::shared_ptr<AppLifeCycleDeal> appLifeCycleDeal_ = nullptr;
-    std::shared_ptr<AMSEventHandler> eventHandler_ = nullptr;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
+    std::shared_ptr<AMSEventHandler> eventHandler_;
     bool isTerminating = false;
     std::string signCode_;  // the sign of this hap
     std::string jointUserId_;
     std::map<std::string, std::shared_ptr<ApplicationInfo>> appInfos_;
-    std::mutex appInfosLock_;
+    ffrt::mutex appInfosLock_;
     std::map<std::string, std::vector<std::shared_ptr<ModuleRunningRecord>>> hapModules_;
-    mutable std::mutex hapModulesLock_;
+    mutable ffrt::mutex hapModulesLock_;
     int32_t mainUid_;
     std::string mainBundleName_;
     bool isLauncherApp_;
@@ -703,9 +744,11 @@ private:
 
     bool isKilling_ = false;
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
+    std::atomic_bool isSpawned_ = false;
 
     // render record
-    std::shared_ptr<RenderRecord> renderRecord_ = nullptr;
+    std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap_;
+    ffrt::mutex renderRecordMapLock_;
     AppSpawnStartMsg startMsg_;
     int32_t appIndex_ = 0;
     bool securityFlag_ = false;

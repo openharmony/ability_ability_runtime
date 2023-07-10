@@ -51,6 +51,11 @@ public:
         GTEST_LOG_(INFO) << "========AbilityCallback SetMissionIcon------------------------.";
         return 0;
     }
+
+    virtual void GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height)
+    {
+        return;
+    }
 };
 
 class AbilityContextImplTest : public testing::Test {
@@ -685,6 +690,30 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetTempDir_0200, Function 
 }
 
 /**
+ * @tc.number: Ability_Context_Impl_GetGroupDir_0100
+ * @tc.name: GetGroupDir
+ * @tc.desc: Get Group Dir sucess
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetGroupDir_0100, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(mock_);
+    auto ret = context_->GetGroupDir("1");
+    EXPECT_EQ(ret, "/group");
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_GetGroupDir_0200
+ * @tc.name: GetGroupDir
+ * @tc.desc: Get Group Dir failed
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_GetGroupDir_0200, Function | MediumTest | Level1)
+{
+    context_->SetStageContext(nullptr);
+    auto ret = context_->GetGroupDir("1");
+    EXPECT_EQ(ret, "");
+}
+
+/**
  * @tc.number: Ability_Context_Impl_GetFilesDir_0100
  * @tc.name: GetFilesDir
  * @tc.desc: Get Files Dir sucess
@@ -1018,6 +1047,17 @@ HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_ClearFailedCallConnection_
     context_->localCallContainer_ = std::make_shared<LocalCallContainer>();
     context_->ClearFailedCallConnection(nullptr);
     EXPECT_NE(context_->localCallContainer_, nullptr);
+}
+
+/**
+ * @tc.number: Ability_Context_Impl_SetWeakSessionToken_0100
+ * @tc.name: SetWeakSessionToken
+ * @tc.desc: Set weak sessionToken
+ */
+HWTEST_F(AbilityContextImplTest, Ability_Context_Impl_SetWeakSessionToken_0100, Function | MediumTest | Level1)
+{
+    context_->SetWeakSessionToken(nullptr);
+    EXPECT_EQ(context_->sessionToken_, nullptr);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

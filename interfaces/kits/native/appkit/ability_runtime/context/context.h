@@ -144,11 +144,33 @@ public:
     virtual std::string GetDatabaseDir() = 0;
 
     /**
+     * @brief Obtains the local system database path.
+     * If the local system database path does not exist, the system creates one and returns the created path.
+     *
+     * @return Returns the local database file.
+     */
+    virtual int GetSystemDatabaseDir(std::string groupId, std::string &databaseDir) = 0;
+
+    /**
      * @brief Obtains the path storing the storage file of the application.
      *
      * @return Returns the local storage file.
      */
     virtual std::string GetPreferencesDir() = 0;
+
+    /**
+     * @brief Obtains the path storing the system storage file of the application.
+     *
+     * @return Returns the local system storage file.
+     */
+    virtual int GetSystemPreferencesDir(std::string groupId, std::string &preferencesDir) = 0;
+
+    /**
+     * @brief Obtains the path storing the group file of the application by the groupId.
+     *
+     * @return Returns the local group file.
+     */
+    virtual std::string GetGroupDir(std::string groupId) = 0;
 
     /**
      * @brief Obtains the path distributed file of the application

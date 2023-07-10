@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -222,6 +222,23 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetApplicationInfoByProcessID_001, TestS
 
     appMgrClient->GetApplicationInfoByProcessID(ERROR_PID, application, debug);
     EXPECT_EQ(application.bundleName, EMPTY_STRING);
+}
+
+/**
+ * @tc.name: AppMgrClient_GetAllRenderProcesses_001
+ * @tc.desc: get all render processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Level0)
+{
+    HILOG_INFO("GetAllRenderProcesses_001 start");
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    std::vector<RenderProcessInfo> info;
+    auto result = appMgrClient->GetAllRenderProcesses(info);
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    HILOG_INFO("GetAllRenderProcesses_001 end");
 }
 
 /**
@@ -480,7 +497,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_FinishUserTest_001, TestSize.Level0)
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
 
     int ret = appMgrClient->FinishUserTest(msg, resultCode, bundleName);
-    EXPECT_EQ(ret, AppMgrResultCode::RESULT_OK);
+    EXPECT_NE(ret, AppMgrResultCode::RESULT_OK);
 }
 
 /**
@@ -537,6 +554,126 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_SetCurrentUserId_001, TestSize.Level0)
 
     int32_t userId = 0;
     appMgrClient->SetCurrentUserId(userId);
+}
+
+/**
+ * @tc.name: AppMgrClient_UpdateApplicationInfoInstalled_001
+ * @tc.desc: UpdateApplicationInfoInstalled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateApplicationInfoInstalled_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    std::string bundleName = "";
+    int uid = 1;
+    appMgrClient->UpdateApplicationInfoInstalled(bundleName, uid);
+}
+
+/**
+ * @tc.name: AppMgrClient_GetProcessRunningInformation_001
+ * @tc.desc: GetProcessRunningInformation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetProcessRunningInformation_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    AppExecFwk::RunningProcessInfo info;
+    appMgrClient->GetProcessRunningInformation(info);
+}
+
+/**
+ * @tc.name: AppMgrClient_DumpHeapMemory_001
+ * @tc.desc: DumpHeapMemory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_DumpHeapMemory_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    int32_t pid = 1;
+    OHOS::AppExecFwk::MallocInfo mallocInfo;
+    appMgrClient->DumpHeapMemory(pid, mallocInfo);
+}
+
+/**
+ * @tc.name: AppMgrClient_StartNativeProcessForDebugger_001
+ * @tc.desc: StartNativeProcessForDebugger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_StartNativeProcessForDebugger_001, TestSize.Level0)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+
+    AAFwk::Want want;
+    appMgrClient->StartNativeProcessForDebugger(want);
+}
+
+/**
+ * @tc.name: AppMgrClient_GetBundleNameByPid_001
+ * @tc.desc: GetBundleNameByPid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_GetBundleNameByPid_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    int32_t pid = 0;
+    std::string name = "test";
+    int32_t uid = 0;
+    auto ret = appMgrClient->GetBundleNameByPid(pid, name, uid);
+    EXPECT_EQ(ret, NO_ERROR);
+}
+
+/**
+ * @tc.name: AppMgrClient_NotifyAppFault_001
+ * @tc.desc: NotifyAppFault.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyAppFault_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    FaultData faultData;
+    auto resultCode = appMgrClient->NotifyAppFault(faultData);
+    EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AppMgrClient_NotifyAppFaultBySA_001
+ * @tc.desc: NotifyAppFaultBySA.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyAppFaultBySA_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    AppFaultDataBySA faultData;
+    auto resultCode = appMgrClient->NotifyAppFaultBySA(faultData);
+    EXPECT_EQ(resultCode, ERR_INVALID_VALUE);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

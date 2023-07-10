@@ -103,6 +103,14 @@ void LifecycleDeal::CommandAbility(const Want &want, bool reStart, int startId)
     abilityScheduler->ScheduleCommandAbility(want, reStart, startId);
 }
 
+void LifecycleDeal::CommandAbilityWindow(const Want &want, const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd)
+{
+    HILOG_INFO("call");
+    auto abilityScheduler = GetScheduler();
+    CHECK_POINTER(abilityScheduler);
+    abilityScheduler->ScheduleCommandAbilityWindow(want, sessionInfo, winCmd);
+}
+
 void LifecycleDeal::SaveAbilityState()
 {
     HILOG_INFO("call");
@@ -168,5 +176,15 @@ void LifecycleDeal::ShareData(const int32_t &uniqueId)
     abilityScheduler->ScheduleShareData(uniqueId);
 }
 
+bool LifecycleDeal::PrepareTerminateAbility()
+{
+    HILOG_DEBUG("call");
+    auto abilityScheduler = GetScheduler();
+    if (abilityScheduler == nullptr) {
+        HILOG_ERROR("abilityScheduler is nullptr.");
+        return false;
+    }
+    return abilityScheduler->SchedulePrepareTerminateAbility();
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -24,16 +24,26 @@
 namespace OHOS {
 namespace JsEnv {
 
+static panda::DFXJSNApi::ProfilerType ConvertProfilerType(JsEnvironment::PROFILERTYPE type)
+{
+    if (type == JsEnvironment::PROFILERTYPE::PROFILERTYPE_CPU) {
+        return panda::DFXJSNApi::ProfilerType::CPU_PROFILER;
+    } else {
+        return panda::DFXJSNApi::ProfilerType::HEAP_PROFILER;
+    }
+}
+
 JsEnvironment::JsEnvironment(std::unique_ptr<JsEnvironmentImpl> impl) : impl_(std::move(impl))
 {
-    JSENV_LOG_D("Js environment costructor.");
+    JSENV_LOG_I("Js environment costructor.");
 }
 
 JsEnvironment::~JsEnvironment()
 {
-    JSENV_LOG_D("Js environment destructor.");
+    JSENV_LOG_I("Js environment destructor.");
 
     if (engine_ != nullptr) {
+        engine_->RunCleanup();
         engine_->DeleteEngine();
         delete engine_;
         engine_ = nullptr;
@@ -70,10 +80,10 @@ void JsEnvironment::InitTimerModule()
     }
 }
 
-void JsEnvironment::InitWorkerModule(const std::string& codePath, bool isDebugVersion, bool isBundle)
+void JsEnvironment::InitWorkerModule(std::shared_ptr<WorkerInfo> workerInfo)
 {
     if (impl_ != nullptr && engine_ != nullptr) {
-        impl_->InitWorkerModule(*engine_, codePath, isDebugVersion, isBundle);
+        impl_->InitWorkerModule(*engine_, workerInfo);
     }
 }
 
@@ -88,6 +98,13 @@ void JsEnvironment::PostTask(const std::function<void()>& task, const std::strin
 {
     if (impl_ != nullptr) {
         impl_->PostTask(task, name, delayTime);
+    }
+}
+
+void JsEnvironment::PostSyncTask(const std::function<void()>& task, const std::string& name)
+{
+    if (impl_ != nullptr) {
+        impl_->PostSyncTask(task, name);
     }
 }
 
@@ -136,11 +153,19 @@ bool JsEnvironment::LoadScript(const std::string& path, std::vector<uint8_t>* bu
     return engine_->RunScriptBuffer(path.c_str(), *buffer, isBundle) != nullptr;
 }
 
-bool JsEnvironment::StartDebugger(const char* libraryPath, bool needBreakPoint, uint32_t instanceId,
-    const DebuggerPostTask& debuggerPostTask)
+bool JsEnvironment::StartDebugger(const char* libraryPath, bool needBreakPoint, uint32_t instanceId)
 {
     if (vm_ != nullptr) {
-        return panda::JSNApi::StartDebugger(libraryPath, vm_, needBreakPoint, instanceId, debuggerPostTask);
+        panda::JSNApi::DebugOption debugOption = {libraryPath, needBreakPoint};
+        auto debuggerPostTask = [weak = weak_from_this()](std::function<void()>&& task) {
+            auto jsEnv = weak.lock();
+            if (jsEnv == nullptr) {
+                JSENV_LOG_E("JsEnv is invalid.");
+                return;
+            }
+            jsEnv->PostTask(task);
+        };
+        return panda::JSNApi::StartDebugger(vm_, debugOption, instanceId, debuggerPostTask);
     }
     return false;
 }
@@ -164,9 +189,73 @@ void JsEnvironment::InitConsoleModule()
     }
 }
 
+bool JsEnvironment::InitLoop()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return false;
+    }
+
+    if (impl_ != nullptr) {
+        impl_->InitLoop(engine_);
+    }
+    return true;
+}
+
+void JsEnvironment::DeInitLoop()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid Native Engine.");
+        return;
+    }
+
+    if (impl_ != nullptr) {
+        impl_->DeInitLoop(engine_);
+    }
+}
+
 bool JsEnvironment::LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle)
 {
     return engine_->RunScriptBuffer(path.c_str(), buffer, len, isBundle);
+}
+
+void JsEnvironment::StartProfiler(const char* libraryPath, uint32_t instanceId, PROFILERTYPE profiler,
+    int32_t interval)
+{
+    if (vm_ == nullptr) {
+        JSENV_LOG_E("Invalid vm.");
+        return;
+    }
+    auto debuggerPostTask = [weak = weak_from_this()](std::function<void()>&& task) {
+        auto jsEnv = weak.lock();
+        if (jsEnv == nullptr) {
+            JSENV_LOG_E("JsEnv is invalid.");
+            return;
+        }
+        jsEnv->PostTask(task);
+    };
+
+    panda::DFXJSNApi::ProfilerOption option;
+    option.libraryPath = libraryPath;
+    option.profilerType = ConvertProfilerType(profiler);
+    option.interval = interval;
+
+    panda::DFXJSNApi::StartProfiler(vm_, option, instanceId, debuggerPostTask);
+}
+
+void JsEnvironment::ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl)
+{
+    JSENV_LOG_I("ReInit jsenv impl.");
+    impl_ = std::move(impl);
+}
+
+void JsEnvironment::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate)
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("SetModuleLoadChecker failed, engine_ is null");
+        return;
+    }
+    engine_->SetModuleLoadChecker(moduleCheckerDelegate);
 }
 } // namespace JsEnv
 } // namespace OHOS

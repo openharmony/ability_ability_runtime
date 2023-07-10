@@ -154,6 +154,14 @@ public:
      */
     void ScheduleCommandAbility(const Want &want, bool restart, int startId);
 
+    void ScheduleCommandAbilityWindow(const Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        AAFwk::WindowCommand winCmd);
+
+    /**
+     * @description: Provide operating system PrepareTerminateAbility information to the observer
+     */
+    bool SchedulePrepareTerminateAbility();
+
     /**
      * @description: Provide operating system SaveabilityState information to the observer
      */
@@ -437,7 +445,7 @@ private:
      *
      */
     std::shared_ptr<ContextDeal> CreateAndInitContextDeal(std::shared_ptr<OHOSApplication> &application,
-        const std::shared_ptr<AbilityLocalRecord> &abilityRecord, const std::shared_ptr<Context> &abilityObject);
+        const std::shared_ptr<AbilityLocalRecord> &abilityRecord, const std::shared_ptr<AbilityContext> &abilityObject);
 
     /**
      * @description:  Handle the life cycle of Ability.
@@ -507,6 +515,9 @@ private:
      */
     void HandleCommandExtension(const Want &want, bool restart, int startId);
 
+    void HandleCommandExtensionWindow(const Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        AAFwk::WindowCommand winCmd);
+
     /**
      * @description: Handle the restoreAbility state.
      * @param state  Indicates save ability state used to dispatchRestoreAbilityState.
@@ -533,6 +544,11 @@ private:
      */
     void HandleExtensionUpdateConfiguration(const Configuration &config);
 
+    /**
+     * @brief Handle the scheduling prepare terminate ability.
+     */
+    void HandlePrepareTermianteAbility();
+
     std::shared_ptr<AbilityRuntime::AbilityContext> BuildAbilityContext(
         const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<OHOSApplication> &application,
         const sptr<IRemoteObject> &token, const std::shared_ptr<AbilityRuntime::Context> &stageContext);
@@ -545,6 +561,10 @@ private:
     std::shared_ptr<AbilityHandler> abilityHandler_ = nullptr;
     std::shared_ptr<EventRunner> runner_ = nullptr;
     bool isExtension_ = false;
+    bool isPrepareTerminate_ = false;
+    std::atomic_bool isPrepareTerminateAbilityDone_ = false;
+    std::mutex mutex_;
+    std::condition_variable cv_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

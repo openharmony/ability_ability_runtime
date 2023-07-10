@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -870,6 +870,20 @@ HWTEST_F(AppMgrServiceInnerTest, GetProcessRunningInfosByUserId_001, TestSize.Le
 }
 
 /**
+ * @tc.name: GetAllRenderProcesses_001
+ * @tc.desc: get all render processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetAllRenderProcesses_001, TestSize.Level0)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::vector<RenderProcessInfo> info;
+    appMgrServiceInner->GetAllRenderProcesses(info);
+}
+
+/**
  * @tc.name: NotifyMemoryLevel_001
  * @tc.desc: notify memory level.
  * @tc.type: FUNC
@@ -1636,7 +1650,7 @@ HWTEST_F(AppMgrServiceInnerTest, RemoveAppFromRecentList_001, TestSize.Level0)
     std::string renderParam = "test_renderParam";
     std::shared_ptr<RenderRecord> renderRecord =
         RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     appMgrServiceInner->AddAppToRecentList(appName1, processName1, pid, 0);
     appRecord->SetKeepAliveAppState(true, true);
     appMgrServiceInner->RemoveAppFromRecentList(appName1, processName1);
@@ -1706,20 +1720,20 @@ HWTEST_F(AppMgrServiceInnerTest, ClearAppRunningData_001, TestSize.Level0)
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
     std::shared_ptr<RenderRecord> renderRecord;
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
     pid_t pid = 123;
     std::string renderParam = "test_renderParam";
     std::shared_ptr<RenderRecord> renderRecord1 =
         RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
-    appRecord->SetRenderRecord(renderRecord1);
+    appRecord->AddRenderRecord(renderRecord1);
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
     appRecord->SetKeepAliveAppState(true, true);
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
-    appMgrServiceInner->eventHandler_ = nullptr;
+    appMgrServiceInner->taskHandler_ = nullptr;
     appMgrServiceInner->ClearAppRunningData(appRecord, false);
 
     appRecord->restartResidentProcCount_ = 0;
@@ -1773,7 +1787,7 @@ HWTEST_F(AppMgrServiceInnerTest, HandleTimeOut_001, TestSize.Level0)
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    InnerEvent::Pointer innerEvent = InnerEvent::Pointer(nullptr, nullptr);
+    AAFwk::EventWrap innerEvent(0);
     appMgrServiceInner->HandleTimeOut(innerEvent);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
@@ -1851,7 +1865,7 @@ HWTEST_F(AppMgrServiceInnerTest, HandleTerminateApplicationTimeOut_001, TestSize
     appRecord->GetPriorityObject()->SetPid(pid);
     appMgrServiceInner->HandleTerminateApplicationTimeOut(0);
 
-    appMgrServiceInner->eventHandler_ = nullptr;
+    appMgrServiceInner->taskHandler_ = nullptr;
     appMgrServiceInner->HandleTerminateApplicationTimeOut(0);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
@@ -2643,7 +2657,7 @@ HWTEST_F(AppMgrServiceInnerTest, KillApplicationByRecord_001, TestSize.Level0)
     appMgrServiceInner->KillApplicationByRecord(appRecord);
     appMgrServiceInner->KillApplicationByRecord(appRecord1);
 
-    appMgrServiceInner->eventHandler_ = nullptr;
+    appMgrServiceInner->taskHandler_ = nullptr;
     appMgrServiceInner->KillApplicationByRecord(appRecord);
     appMgrServiceInner->KillApplicationByRecord(appRecord1);
 
@@ -2891,9 +2905,9 @@ HWTEST_F(AppMgrServiceInnerTest, StartRenderProcess_002, TestSize.Level0)
 
     std::shared_ptr<RenderRecord> renderRecord =
         RenderRecord::CreateRenderRecord(hostPid1, renderParam, 1, 1, 1, appRecord);
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, 1, renderPid);
-    EXPECT_EQ(ret, 8454244);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
     ret = appMgrServiceInner->StartRenderProcess(hostPid1, renderParam, 1, 1, 1, renderPid);
@@ -2990,7 +3004,7 @@ HWTEST_F(AppMgrServiceInnerTest, AttachRenderProcess_001, TestSize.Level0)
         RenderRecord::CreateRenderRecord(pid, renderParam, 1, 1, 1, appRecord);
     EXPECT_NE(renderRecord, nullptr);
     renderRecord->SetPid(pid);
-    appRecord->SetRenderRecord(renderRecord);
+    appRecord->AddRenderRecord(renderRecord);
     appMgrServiceInner->AttachRenderProcess(pid, mockRenderScheduler);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
@@ -3245,6 +3259,98 @@ HWTEST_F(AppMgrServiceInnerTest, SetCurrentUserId_001, TestSize.Level0)
     EXPECT_EQ(appMgrServiceInner->currentUserId_, userId);
 
     HILOG_INFO("SetCurrentUserId_001 end");
+}
+
+/**
+ * @tc.name: GetProcessMemoryByPid_001
+ * @tc.desc: Get memorySize by pid.
+ * @tc.type: FUNC
+ * @tc.require: issueI76JBF
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetProcessMemoryByPid_001, TestSize.Level0)
+{
+    HILOG_INFO("GetProcessMemoryByPid_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    int32_t pid = 0;
+    int32_t memorySize = 0;
+    int32_t ret = appMgrServiceInner->GetProcessMemoryByPid(pid, memorySize);
+    EXPECT_EQ(ret, ERR_OK);
+
+    HILOG_INFO("GetProcessMemoryByPid_001 end");
+}
+
+/**
+ * @tc.name: GetRunningProcessInformation_001
+ * @tc.desc: Get application processes information list by bundleName.
+ * @tc.type: FUNC
+ * @tc.require: issueI76JBF
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetRunningProcessInformation_001, TestSize.Level0)
+{
+    HILOG_INFO("GetRunningProcessInformation_001 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "testBundleName";
+    int32_t userId = 100;
+    std::vector<RunningProcessInfo> info;
+    int32_t ret = appMgrServiceInner->GetRunningProcessInformation(bundleName, userId, info);
+    EXPECT_EQ(ret, ERR_OK);
+
+    appMgrServiceInner->remoteClientManager_ = nullptr;
+    ret = appMgrServiceInner->GetRunningProcessInformation(bundleName, userId, info);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    ret = appMgrServiceInner->GetRunningProcessInformation(bundleName, userId, info);
+    EXPECT_EQ(ret, ERR_NO_INIT);
+
+    HILOG_INFO("GetRunningProcessInformation_001 end");
+}
+
+/**
+ * @tc.name: GetBundleNameByPid_001
+ * @tc.desc: get bundle name by Pid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetBundleNameByPid_001, TestSize.Level1)
+{
+    HILOG_INFO("GetBundleNameByPid_001 start");
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    int32_t pid = 0;
+    std::string name = "test_name";
+    int32_t uid = 0;
+    auto ret  = appMgrServiceInner->GetBundleNameByPid(pid, name, uid);
+    EXPECT_EQ(ret, ERR_INVALID_OPERATION);
+
+    HILOG_INFO("GetBundleNameByPid_001 end");
+}
+
+/**
+ * @tc.name: GetBundleNameByPid_002
+ * @tc.desc: get bundle name by Pid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetBundleNameByPid_002, TestSize.Level1)
+{
+    HILOG_INFO("GetBundleNameByPid_002 start");
+
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+    BundleInfo info;
+    std::string processName = "test_processName";
+    appMgrServiceInner->appRunningManager_->CreateAppRunningRecord(applicationInfo_, processName, info);
+    int32_t pid = 0;
+    std::string name = "test_name";
+    int32_t uid = 0;
+    auto ret  = appMgrServiceInner->GetBundleNameByPid(pid, name, uid);
+    EXPECT_EQ(ret, ERR_OK);
+
+    HILOG_INFO("GetBundleNameByPid_002 end");
 }
 } // namespace AppExecFwk
 } // namespace OHOS

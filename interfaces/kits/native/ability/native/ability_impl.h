@@ -40,8 +40,7 @@ public:
     AbilityImpl() = default;
     virtual ~AbilityImpl() = default;
     virtual void Init(std::shared_ptr<OHOSApplication> &application, const std::shared_ptr<AbilityLocalRecord> &record,
-        std::shared_ptr<Ability> &ability, std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token,
-        std::shared_ptr<ContextDeal> &contextDeal);
+        std::shared_ptr<Ability> &ability, std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token);
 
     /**
      * @brief Connect the ability. and Calling information back to Ability.
@@ -71,6 +70,13 @@ public:
      * of startId is 6.
      */
     void CommandAbility(const Want &want, bool restart, int startId);
+
+    /**
+     * @brief Prepare terminate the ability.
+     *
+     * @return Return true if ability need be terminated; return false if ability need stop terminating.
+     */
+    bool PrepareTerminateAbility();
 
     /**
      * @brief Gets the current Ability status.
@@ -434,9 +440,11 @@ protected:
     void Inactive();
 
     /**
-     * @brief SerUriString
+     * @brief SetUriString
+     *
+     * @param uri the uri to set.
      */
-    void SerUriString(const std::string &uri);
+    void SetUriString(const std::string &uri);
 
     /**
      * @brief Set the LifeCycleStateInfo to the deal.
@@ -511,6 +519,7 @@ public:
     void AfterFocused() override;
     void AfterUnfocused() override;
     void ForegroundFailed(int32_t type) override;
+    void BackgroundFailed(int32_t type) override;
 private:
     sptr<IRemoteObject> token_ = nullptr;
     std::weak_ptr<AbilityImpl> owner_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "application_impl.h"
 #include "context_impl.h"
 #include "hilog_wrapper.h"
+#include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "runtime.h"
 #include "system_ability_definition.h"
@@ -34,14 +35,13 @@ REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
 
 OHOSApplication::OHOSApplication()
 {
-    HILOG_INFO("OHOSApplication::OHOSApplication call constructor.");
+    HILOG_DEBUG("OHOSApplication::OHOSApplication call constructor.");
     abilityLifecycleCallbacks_.clear();
     elementsCallbacks_.clear();
 }
 
 OHOSApplication::~OHOSApplication()
 {
-    HILOG_INFO("OHOSApplication::OHOSApplication call destructor.");
 }
 
 /**
@@ -70,6 +70,10 @@ void OHOSApplication::DispatchAbilitySavedState(const PacMap &outState)
 void OHOSApplication::OnForeground()
 {
     HILOG_DEBUG("NotifyApplicationState::OnForeground begin");
+    if (abilityRuntimeContext_) {
+        abilityRuntimeContext_->NotifyApplicationForeground();
+    }
+
     if (runtime_ == nullptr) {
         HILOG_DEBUG("NotifyApplicationState, runtime_ is nullptr");
         return;
@@ -86,6 +90,10 @@ void OHOSApplication::OnForeground()
 void OHOSApplication::OnBackground()
 {
     HILOG_DEBUG("NotifyApplicationState::OnBackground begin");
+    if (abilityRuntimeContext_) {
+        abilityRuntimeContext_->NotifyApplicationBackground();
+    }
+
     if (runtime_ == nullptr) {
         HILOG_DEBUG("NotifyApplicationState, runtime_ is nullptr");
         return;
@@ -513,6 +521,7 @@ void OHOSApplication::OnAbilitySaveState(const PacMap &outState)
 std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
         HILOG_ERROR("AddAbilityStage:abilityRecord is nullptr");
         return nullptr;
@@ -644,6 +653,15 @@ void OHOSApplication::CleanAbilityStage(const sptr<IRemoteObject> &token,
             abilityStage->OnDestroy();
             abilityStages_.erase(moduleName);
         }
+        DoCleanWorkAfterStageCleaned(*abilityInfo);
+    }
+}
+
+void OHOSApplication::DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo)
+{
+    HILOG_INFO("DoCleanWorkAfterStageCleaned language: %{public}s.", abilityInfo.srcLanguage.c_str());
+    if (runtime_) {
+        runtime_->DoCleanWorkAfterStageCleaned();
     }
 }
 

@@ -21,6 +21,8 @@
 #include <list>
 #include <memory>
 #include <vector>
+#include "cpp/mutex.h"
+#include "cpp/condition_variable.h"
 
 #include "ability_connect_callback_interface.h"
 #include "ability_info.h"
@@ -35,6 +37,7 @@
 #include "lifecycle_deal.h"
 #include "lifecycle_state_info.h"
 #include "session_info.h"
+#include "ui_extension_window_command.h"
 #include "uri.h"
 #include "want.h"
 #ifdef SUPPORT_GRAPHICS
@@ -222,6 +225,8 @@ struct AbilityRequest {
 
     AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
 
+    sptr<SessionInfo> sessionInfo;
+
     bool IsContinuation() const
     {
         auto flags = want.GetFlags();
@@ -293,8 +298,7 @@ public:
      * @param abilityRequest,create ability record.
      * @return Returns ability record ptr.
      */
-    static std::shared_ptr<AbilityRecord> CreateAbilityRecord(const AbilityRequest &abilityRequest,
-        sptr<SessionInfo> sessionInfo = nullptr);
+    static std::shared_ptr<AbilityRecord> CreateAbilityRecord(const AbilityRequest &abilityRequest);
 
     /**
      * Init ability record.
@@ -315,6 +319,7 @@ public:
      *
      */
     void ForegroundAbility(uint32_t sceneFlag = 0);
+    void ForegroundAbility(const Closure &task, uint32_t sceneFlag = 0);
 
     /**
      * process request of foregrounding the ability.
@@ -328,6 +333,13 @@ public:
      * @param task timeout task.
      */
     void BackgroundAbility(const Closure &task);
+
+    /**
+     * prepare terminate ability.
+     *
+     * @return Returns true on stop terminating; returns false on terminate.
+     */
+    bool PrepareTerminateAbility();
 
     /**
      * terminate ability.
@@ -356,6 +368,10 @@ public:
      * @param state, ability's state.
      */
     void SetAbilityState(AbilityState state);
+
+    bool GetAbilityForegroundingFlag() const;
+
+    void SetAbilityForegroundingFlag();
 
     /**
      * get ability's state.
@@ -457,8 +473,10 @@ public:
         std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
         uint32_t sceneFlag = 0);
 
-    void ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, uint32_t sceneFlag = 0);
+    void ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit = true,
+        uint32_t sceneFlag = 0);
     void NotifyAnimationFromTerminatingAbility() const;
+    void NotifyAnimationFromMinimizeAbility(bool& animaEnabled);
 
     void SetCompleteFirstFrameDrawing(const bool flag);
     bool IsCompleteFirstFrameDrawing() const;
@@ -547,6 +565,8 @@ public:
      */
     void CommandAbility();
 
+    void CommandAbilityWindow(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
+
     /**
      * save ability state.
      *
@@ -601,6 +621,12 @@ public:
      *
      */
     void SendResult(bool isSandboxApp = false);
+
+    /**
+     * send result object to caller ability thread for sandbox app file saving.
+     */
+    void SendSandboxSavefileResult(const Want &want, int resultCode, int requestCode);
+
     /**
      * send result object to caller ability.
      *
@@ -906,7 +932,8 @@ private:
         const AbilityRequest &abilityRequest) const;
     void NotifyAnimationFromRecentTask(const std::shared_ptr<StartOptions> &startOptions,
         const std::shared_ptr<Want> &want) const;
-    void NotifyAnimationFromTerminatingAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool flag);
+    void NotifyAnimationFromTerminatingAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit,
+        bool flag);
 
     void StartingWindowTask(bool isRecent, bool isCold, const AbilityRequest &abilityRequest,
         std::shared_ptr<StartOptions> &startOptions);
@@ -950,6 +977,13 @@ private:
      */
     std::shared_ptr<AbilityResult> result_ = {};
 
+    /**
+     * When this ability startAbilityForResult another ability, if another ability is terminated,
+     * this ability will move to foreground, during this time, isAbilityForegrounding_ is true,
+     * isAbilityForegrounding_ will be set to false when this ability is background
+     */
+    bool isAbilityForegrounding_ = false;
+
     // service(ability) can be connected by multi-pages(abilites), so need to store this service's connections
     std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};
     // service(ability) onConnect() return proxy of service ability
@@ -991,16 +1025,17 @@ private:
     int32_t restartCount_ = -1;
     int32_t restartMax_ = -1;
     std::string specifiedFlag_;
-    std::mutex lock_;
-    mutable std::mutex dumpInfoLock_;
-    mutable std::mutex dumpLock_;
-    mutable std::condition_variable dumpCondition_;
+    ffrt::mutex lock_;
+    mutable ffrt::mutex dumpInfoLock_;
+    mutable ffrt::mutex dumpLock_;
+    mutable ffrt::condition_variable dumpCondition_;
     mutable bool isDumpTimeout_ = false;
     std::vector<std::string> dumpInfos_;
     std::atomic<AbilityState> pendingState_ = AbilityState::INITIAL;    // pending life state
 
     // scene session
     sptr<SessionInfo> sessionInfo_ = nullptr;
+    std::unordered_set<uint64_t> sessionIds_;
 
 #ifdef SUPPORT_GRAPHICS
     bool isStartingWindow_ = false;

@@ -38,6 +38,8 @@ AbilitySchedulerStub::AbilitySchedulerStub()
     requestFuncMap_[SCHEDULE_ABILITY_CONNECT] = &AbilitySchedulerStub::ConnectAbilityInner;
     requestFuncMap_[SCHEDULE_ABILITY_DISCONNECT] = &AbilitySchedulerStub::DisconnectAbilityInner;
     requestFuncMap_[SCHEDULE_ABILITY_COMMAND] = &AbilitySchedulerStub::CommandAbilityInner;
+    requestFuncMap_[SCHEDULE_ABILITY_PREPARE_TERMINATE] = &AbilitySchedulerStub::PrepareTerminateAbilityInner;
+    requestFuncMap_[SCHEDULE_ABILITY_COMMAND_WINDOW] = &AbilitySchedulerStub::CommandAbilityWindowInner;
     requestFuncMap_[SCHEDULE_SAVE_ABILITY_STATE] = &AbilitySchedulerStub::SaveAbilityStateInner;
     requestFuncMap_[SCHEDULE_RESTORE_ABILITY_STATE] = &AbilitySchedulerStub::RestoreAbilityStateInner;
     requestFuncMap_[SCHEDULE_GETFILETYPES] = &AbilitySchedulerStub::GetFileTypesInner;
@@ -171,6 +173,29 @@ int AbilitySchedulerStub::CommandAbilityInner(MessageParcel &data, MessageParcel
     return NO_ERROR;
 }
 
+int AbilitySchedulerStub::PrepareTerminateAbilityInner(MessageParcel &data, MessageParcel &reply)
+{
+    bool ret = SchedulePrepareTerminateAbility();
+    if (!reply.WriteInt32(ret)) {
+        HILOG_ERROR("fail to write ret");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilitySchedulerStub::CommandAbilityWindowInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<SessionInfo> sessionInfo(data.ReadParcelable<SessionInfo>());
+    int32_t winCmd = data.ReadInt32();
+    ScheduleCommandAbilityWindow(*want, sessionInfo, static_cast<WindowCommand>(winCmd));
+    return NO_ERROR;
+}
+
 int AbilitySchedulerStub::SaveAbilityStateInner(MessageParcel &data, MessageParcel &reply)
 {
     ScheduleSaveAbilityState();
@@ -259,12 +284,7 @@ int AbilitySchedulerStub::InsertInner(MessageParcel &data, MessageParcel &reply)
         HILOG_ERROR("AbilitySchedulerStub uri is nullptr");
         return ERR_INVALID_VALUE;
     }
-    std::shared_ptr<NativeRdb::ValuesBucket> value(data.ReadParcelable<NativeRdb::ValuesBucket>());
-    if (value == nullptr) {
-        HILOG_ERROR("ReadParcelable value is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-    int index = Insert(*uri, *value);
+    int index = Insert(*uri, NativeRdb::ValuesBucket::Unmarshalling(data));
     if (!reply.WriteInt32(index)) {
         HILOG_ERROR("fail to WriteInt32 index");
         return ERR_INVALID_VALUE;
@@ -312,18 +332,14 @@ int AbilitySchedulerStub::UpdatetInner(MessageParcel &data, MessageParcel &reply
         HILOG_ERROR("AbilitySchedulerStub uri is nullptr");
         return ERR_INVALID_VALUE;
     }
-    std::shared_ptr<NativeRdb::ValuesBucket> value(data.ReadParcelable<NativeRdb::ValuesBucket>());
-    if (value == nullptr) {
-        HILOG_ERROR("ReadParcelable value is nullptr");
-        return ERR_INVALID_VALUE;
-    }
+    auto value = NativeRdb::ValuesBucket::Unmarshalling(data);
     std::shared_ptr<NativeRdb::DataAbilityPredicates> predicates(
         data.ReadParcelable<NativeRdb::DataAbilityPredicates>());
     if (predicates == nullptr) {
         HILOG_ERROR("ReadParcelable predicates is nullptr");
         return ERR_INVALID_VALUE;
     }
-    int index = Update(*uri, *value, *predicates);
+    int index = Update(*uri, std::move(value), *predicates);
     if (!reply.WriteInt32(index)) {
         HILOG_ERROR("fail to WriteInt32 index");
         return ERR_INVALID_VALUE;
@@ -440,12 +456,7 @@ int AbilitySchedulerStub::BatchInsertInner(MessageParcel &data, MessageParcel &r
     }
     std::vector<NativeRdb::ValuesBucket> values;
     for (int i = 0; i < count; i++) {
-        std::unique_ptr<NativeRdb::ValuesBucket> value(data.ReadParcelable<NativeRdb::ValuesBucket>());
-        if (value == nullptr) {
-            HILOG_ERROR("AbilitySchedulerStub value is nullptr, index = %{public}d", i);
-            return ERR_INVALID_VALUE;
-        }
-        values.emplace_back(*value);
+        values.emplace_back(NativeRdb::ValuesBucket::Unmarshalling(data));
     }
 
     int ret = BatchInsert(*uri, values);
@@ -563,12 +574,13 @@ int AbilitySchedulerStub::ExecuteBatchInner(MessageParcel &data, MessageParcel &
     }
     std::vector<std::shared_ptr<AppExecFwk::DataAbilityOperation>> operations;
     for (int i = 0; i < count; i++) {
-        AppExecFwk::DataAbilityOperation *operation = data.ReadParcelable<AppExecFwk::DataAbilityOperation>();
-        if (operation == nullptr) {
-            HILOG_ERROR("AbilitySchedulerStub::ExecuteBatchInner operation is nullptr, index = %{public}d", i);
+        std::shared_ptr<AppExecFwk::DataAbilityOperation> dataAbilityOperation(
+            data.ReadParcelable<AppExecFwk::DataAbilityOperation>());
+        if (dataAbilityOperation == nullptr) {
+            HILOG_ERROR("AbilitySchedulerStub::ExecuteBatchInner dataAbilityOperation is nullptr, "
+                "index = %{public}d", i);
             return ERR_INVALID_VALUE;
         }
-        std::shared_ptr<AppExecFwk::DataAbilityOperation> dataAbilityOperation(operation);
         operations.push_back(dataAbilityOperation);
     }
 

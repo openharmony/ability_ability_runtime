@@ -61,8 +61,9 @@ class AbilityContext extends Context {
         return;
       }
 
+      let callee = null;
       try {
-        var callee = await this.__context_impl__.startAbilityByCall(want);
+        callee = await this.__context_impl__.startAbilityByCall(want);
       } catch (error) {
         console.log('AbilityContext::startAbilityByCall Obtain remoteObject failed');
         reject(error);
@@ -83,8 +84,9 @@ class AbilityContext extends Context {
         return;
       }
 
+      let callee = null;
       try {
-        var callee = await this.__context_impl__.startAbilityByCall(want, accountId);
+        callee = await this.__context_impl__.startAbilityByCall(want, accountId);
       } catch (error) {
         console.log('AbilityContext::startAbilityByCall With accountId Obtain remoteObject failed');
         reject(error);
@@ -161,6 +163,10 @@ class AbilityContext extends Context {
     return this.__context_impl__.restoreWindowStage(contentStorage);
   }
 
+  setMissionContinueState(state, callback) {
+    return this.__context_impl__.setMissionContinueState(state, callback);
+  }
+
   setMissionLabel(label, callback) {
     return this.__context_impl__.setMissionLabel(label, callback);
   }
@@ -171,6 +177,10 @@ class AbilityContext extends Context {
 
   requestDialogService(want, resultCallback) {
     return this.__context_impl__.requestDialogService(want, resultCallback);
+  }
+
+  reportDrawnCompleted(callback) {
+    return this.__context_impl__.reportDrawnCompleted(callback);
   }
 }
 

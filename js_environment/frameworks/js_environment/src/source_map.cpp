@@ -109,7 +109,6 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
     ExtractStackInfo(stackStr, res);
 
     // collect error info first
-    bool needGetErrorPos = false;
     uint32_t i = 0;
     std::string codeStart = "SourceCode (";
     std::string sourceCode = "";
@@ -119,7 +118,6 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
         if (fristLine.substr(0, codeStartLen).compare(codeStart) == 0) {
             sourceCode = fristLine.substr(codeStartLen, fristLine.length() - codeStartLen - 1);
             i = 1;  // 1 means Convert from the second line
-            needGetErrorPos = true;
         }
     }
 
@@ -191,14 +189,12 @@ void SourceMap::SplitSourceMap(const std::string& sourceMapData)
     std::string value;
     while ((leftBracket = sourceMapData.find(": {", rightBracket)) != std::string::npos) {
         rightBracket = sourceMapData.find("},", leftBracket);
-        uint32_t subLeftBracket = leftBracket;
-        uint32_t subRightBracket = rightBracket;
-        value = sourceMapData.substr(subLeftBracket + INDEX_ONE, subRightBracket - subLeftBracket + INDEX_TWO);
-        std::size_t  sources = value.find("\"sources\": [");
+        value = sourceMapData.substr(leftBracket, rightBracket);
+        std::size_t sources = value.find("\"sources\": [");
         if (sources == std::string::npos) {
             continue;
         }
-        std::size_t  names = value.find("],");
+        std::size_t names = value.find("],", sources);
         if (names == std::string::npos) {
             continue;
         }
@@ -534,7 +530,6 @@ std::string SourceMap::GetOriginalNames(std::shared_ptr<SourceMapData> targetMap
                 posDiff += static_cast<int32_t>(names[i + 1].length()) - static_cast<int32_t>(names[i].length());
             }
             // In case there are other variable names not replaced.
-            // example:var e = process.a.b + _ohos_process_1.a.b;
             found = jsCode.find(names[i], found + names[i + 1].length());
         }
     }

@@ -56,6 +56,10 @@
 #include "key_event.h"
 #endif
 
+#ifdef IMAGE_PURGEABLE_PIXELMAP
+#include "purgeable_resource_manager.h"
+#endif
+
 namespace OHOS {
 namespace AppExecFwk {
 const std::string Ability::SYSTEM_UI("com.ohos.systemui");
@@ -92,6 +96,7 @@ Ability* Ability::Create(const std::unique_ptr<AbilityRuntime::Runtime>& runtime
 void Ability::Init(const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<OHOSApplication> application,
     std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("%{public}s begin.", __func__);
     application_ = application;
     abilityInfo_ = abilityInfo;
@@ -1584,6 +1589,9 @@ void Ability::OnBackground()
         HILOG_ERROR("Ability::OnBackground error. lifecycle_ == nullptr.");
         return;
     }
+#ifdef IMAGE_PURGEABLE_PIXELMAP
+    PurgeableMem::PurgeableResourceManager::GetInstance().EndAccessPurgeableMem();
+#endif
     lifecycle_->DispatchLifecycle(LifeCycle::Event::ON_BACKGROUND);
     HILOG_DEBUG("%{public}s end", __func__);
     AAFwk::EventInfo eventInfo;
@@ -1593,6 +1601,18 @@ void Ability::OnBackground()
     eventInfo.bundleType = static_cast<int32_t>(abilityInfo_->applicationInfo.bundleType);
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::ABILITY_ONBACKGROUND,
         HiSysEventType::BEHAVIOR, eventInfo);
+}
+
+bool Ability::OnBackPress()
+{
+    HILOG_DEBUG("call");
+    return false;
+}
+
+bool Ability::OnPrepareTerminate()
+{
+    HILOG_DEBUG("call");
+    return false;
 }
 
 void Ability::OnKeyDown(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
@@ -1621,6 +1641,7 @@ void Ability::InitWindow(int32_t displayId, sptr<Rosen::WindowOption> option)
         HILOG_ERROR("Ability::InitWindow abilityWindow_ is nullptr");
         return;
     }
+    abilityWindow_->SetSessionInfo(sessionInfo_);
     abilityWindow_->InitWindow(abilityContext_, sceneListener_, displayId, option, securityFlag_);
 }
 
@@ -1869,6 +1890,25 @@ ErrCode Ability::SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &ic
     return abilityWindow_->SetMissionIcon(icon);
 }
 
+void Ability::GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height)
+{
+    HILOG_DEBUG("call");
+    if (scene_ == nullptr) {
+        HILOG_ERROR("get window scene failed.");
+        return;
+    }
+    auto window = scene_->GetMainWindow();
+    if (window == nullptr) {
+        HILOG_ERROR("get window scene failed.");
+        return;
+    }
+    left = window->GetRect().posX_;
+    top = window->GetRect().posY_;
+    width = static_cast<int32_t>(window->GetRect().width_);
+    height = static_cast<int32_t>(window->GetRect().height_);
+    HILOG_INFO("left: %{public}d, top: %{public}d, width: %{public}d, height: %{public}d", left, top, width, height);
+}
+
 void Ability::OnCreate(Rosen::DisplayId displayId)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
@@ -1933,6 +1973,10 @@ void Ability::OnChange(Rosen::DisplayId displayId)
             ability->OnConfigurationUpdated(configuration);
         };
         handler_->PostTask(task);
+
+        auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(newConfig);
+        HILOG_INFO("Update display config %{public}s for all windows.", diffConfiguration->GetName().c_str());
+        Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
     }
 
     HILOG_DEBUG("%{public}s end", __func__);

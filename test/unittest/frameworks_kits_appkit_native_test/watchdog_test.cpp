@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -236,10 +236,10 @@ HWTEST_F(WatchdogTest, WatchdogTest_SetAppMainThreadState_001, TestSize.Level1)
 HWTEST_F(WatchdogTest, WatchdogTest_SetBackgroundStatus_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_SetBackgroundStatus_001 start";
-    bool isInBackground = true;
-    EXPECT_FALSE(watchdog_->isInBackground_);
-    watchdog_->SetBackgroundStatus(isInBackground);
+    bool isInBackground = false;
     EXPECT_TRUE(watchdog_->isInBackground_);
+    watchdog_->SetBackgroundStatus(isInBackground);
+    EXPECT_FALSE(watchdog_->isInBackground_);
     GTEST_LOG_(INFO) << "WatchdogTest_SetBackgroundStatus_001 end";
 }
 
@@ -323,7 +323,7 @@ HWTEST_F(WatchdogTest, WatchdogTest_Timer_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_Timer_002 start";
     bool isInBackground = true;
-    EXPECT_FALSE(watchdog_->isInBackground_);
+    EXPECT_TRUE(watchdog_->isInBackground_);
     watchdog_->SetBackgroundStatus(isInBackground);
     watchdog_->Timer();
     EXPECT_TRUE(watchdog_->appMainThreadIsAlive_);
@@ -341,6 +341,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_Timer_003, TestSize.Level1)
     bool appMainThreadState = true;
     EXPECT_FALSE(watchdog_->appMainThreadIsAlive_);
     watchdog_->SetAppMainThreadState(appMainThreadState);
+    bool isInBackground = false;
+    watchdog_->SetBackgroundStatus(isInBackground);
     watchdog_->Timer();
     EXPECT_TRUE(watchdog_->needReport_);
     EXPECT_FALSE(watchdog_->isInBackground_);
@@ -359,6 +361,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_Timer_004, TestSize.Level1)
     bool appMainThreadState = true;
     EXPECT_FALSE(watchdog_->appMainThreadIsAlive_);
     watchdog_->SetAppMainThreadState(appMainThreadState);
+    bool isInBackground = false;
+    watchdog_->SetBackgroundStatus(isInBackground);
     watchdog_->appMainHandler_ = std::make_shared<EventHandler>();
     watchdog_->Timer();
     EXPECT_TRUE(watchdog_->needReport_);
@@ -390,8 +394,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_003, TestSize.Level1)
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_004, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_002 start";
-    watchdog_->lastWatchTime_ =
-        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     watchdog_->ReportEvent();
     EXPECT_TRUE(watchdog_->applicationInfo_ == nullptr);
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_002 end";
@@ -405,8 +409,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_004, TestSize.Level1)
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_005, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_005 start";
-    watchdog_->lastWatchTime_ =
-        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     watchdog_->applicationInfo_ = std::make_shared<ApplicationInfo>();
     watchdog_->needReport_ = false;
     watchdog_->ReportEvent();
@@ -423,8 +427,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_005, TestSize.Level1)
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_006, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_006 start";
-    watchdog_->lastWatchTime_ =
-        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     watchdog_->applicationInfo_ = std::make_shared<ApplicationInfo>();
     watchdog_->isSixSecondEvent_ = true;
     watchdog_->ReportEvent();
@@ -441,8 +445,8 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_006, TestSize.Level1)
 HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_007, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "WatchdogTest_ReportEvent_007 start";
-    watchdog_->lastWatchTime_ =
-        std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::microseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
     watchdog_->applicationInfo_ = std::make_shared<ApplicationInfo>();
     watchdog_->ReportEvent();
     EXPECT_TRUE(watchdog_->applicationInfo_ != nullptr);
@@ -475,6 +479,23 @@ HWTEST_F(WatchdogTest, WatchdogTest_GetTag_001, TestSize.Level1)
     GTEST_LOG_(INFO) << "WatchdogTest_GetTag_001 start";
     EXPECT_EQ(mainHandlerDumper_->GetTag(), "");
     GTEST_LOG_(INFO) << "WatchdogTest_GetTag_001 end";
+}
+
+/**
+ * @tc.number: WatchdogTest_ReportEvent_008
+ * @tc.name: ReportEvent
+ * @tc.desc: Verify that function ReportEvent.
+ */
+HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_008, TestSize.Level1)
+{
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count() - TEST_INTERVAL_TIME;
+    std::shared_ptr<EventHandler> eventHandler = std::make_shared<EventHandler>();
+    watchdog_->applicationInfo_ = std::make_shared<ApplicationInfo>();
+    watchdog_->needReport_ = true;
+    watchdog_->isSixSecondEvent_.store(true);
+    EXPECT_TRUE(watchdog_->needReport_);
+    watchdog_->ReportEvent();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
