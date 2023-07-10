@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,10 +22,13 @@
 
 #include "ability_info.h"
 #include "application_info.h"
+#include "app_mgr_ipc_interface_code.h"
 #include "app_record_id.h"
 #include "bundle_info.h"
+#include "fault_data.h"
 #include "iapp_state_callback.h"
 #include "ams_mgr_interface.h"
+#include "render_process_info.h"
 #include "running_process_info.h"
 #include "system_memory_attr.h"
 #include "iapplication_state_observer.h"
@@ -116,6 +119,15 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int GetAllRunningProcesses(std::vector<RunningProcessInfo> &info) = 0;
+
+    /**
+     * GetAllRenderProcesses, call GetAllRenderProcesses() through proxy project.
+     * Obtains information about render processes that are running on the device.
+     *
+     * @param info, render process info.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int GetAllRenderProcesses(std::vector<RenderProcessInfo> &info) = 0;
 
     /**
      * JudgeSandboxByPid, call JudgeSandboxByPid() through proxy project.
@@ -318,6 +330,22 @@ public:
      */
     virtual int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback) = 0;
 
+    /**
+     * Notify App Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyAppFault(const FaultData &faultData) = 0;
+
+    /**
+     * Notify App Fault Data By SA
+     *
+     * @param faultData the fault data notified by SA.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) = 0;
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     /**
      * @brief Set whether the process is continuousTask.
@@ -342,6 +370,36 @@ public:
     virtual bool IsSharedBundleRunning(const std::string &bundleName, uint32_t versionCode) = 0;
 
     virtual int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) = 0;
+
+    /**
+     * Get bundleName by pid.
+     *
+     * @param pid process id.
+     * @param bundleName Output parameters, return bundleName.
+     * @param uid Output parameters, return userId.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) = 0;
+
+    /**
+     * get memorySize by pid.
+     *
+     * @param pid process id.
+     * @param memorySize Output parameters, return memorySize in KB.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetProcessMemoryByPid(const int32_t pid, int32_t &memorySize) = 0;
+
+    /**
+     * get application processes information list by bundleName.
+     *
+     * @param bundleName Bundle name.
+     * @param userId user Id in Application record.
+     * @param info Output parameters, return running process info list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetRunningProcessInformation(
+        const std::string &bundleName, int32_t userId, std::vector<RunningProcessInfo> &info) = 0;
 
     // please add new message item to the bottom in order to prevent some unexpected BUG
     enum class Message {
@@ -383,7 +441,13 @@ public:
         IS_SHARED_BUNDLE_RUNNING,
         DUMP_HEAP_MEMORY_PROCESS,
         START_NATIVE_PROCESS_FOR_DEBUGGER,
+        NOTIFY_APP_FAULT,
+        NOTIFY_APP_FAULT_BY_SA,
         JUDGE_SANDBOX_BY_PID,
+        GET_BUNDLE_NAME_BY_PID,
+        APP_GET_ALL_RENDER_PROCESSES,
+        GET_PROCESS_MEMORY_BY_PID,
+        GET_PIDS_BY_BUNDLENAME,
     };
 };
 }  // namespace AppExecFwk

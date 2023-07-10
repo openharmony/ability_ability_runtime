@@ -146,6 +146,15 @@ public:
         return 0;
     }
 
+    virtual int ScheduleCommandAbilityWindowDone(
+        const sptr<IRemoteObject> &token,
+        const sptr<SessionInfo> &sessionInfo,
+        WindowCommand winCmd,
+        AbilityCommand abilityCmd)
+    {
+        return 0;
+    }
+
     virtual void DumpState(const std::string& args, std::vector<std::string>& state)
     {}
 
@@ -369,6 +378,11 @@ public:
     }
 
     int DoAbilityBackground(const sptr<IRemoteObject>& token, uint32_t flag) override
+    {
+        return 0;
+    }
+
+    int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override
     {
         return 0;
     }

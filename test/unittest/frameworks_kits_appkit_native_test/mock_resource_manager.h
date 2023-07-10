@@ -293,6 +293,21 @@ RState GetStringFormatByName(const char *name, std::string &outValue,
 {
     return SUCCESS;
 }
+
+uint32_t GetResourceLimitKeys()
+{
+    return 0;
+}
+
+bool AddAppOverlay(const std::string &path)
+{
+    return true;
+}
+
+bool RemoveAppOverlay(const std::string &path)
+{
+    return true;
+}
 };
 }  // namespace Resource
 }  // namespace Global

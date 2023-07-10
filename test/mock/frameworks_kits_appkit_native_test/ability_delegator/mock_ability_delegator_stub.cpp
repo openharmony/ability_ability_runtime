@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,6 +129,11 @@ int MockAbilityDelegatorStub::SendANRProcessID(int pid)
     return 0;
 }
 
+int32_t MockAbilityDelegatorStub::ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken)
+{
+    return 0;
+}
+
 int MockAbilityDelegatorStub::SetAbilityController(const sptr<AppExecFwk::IAbilityController>& abilityController,
     bool imAStabilityTest)
 {
@@ -154,7 +159,7 @@ int MockAbilityDelegatorStub::StartUserTest(const Want& want, const sptr<IRemote
     return OHOS::ERR_OK;
 }
 
-int MockAbilityDelegatorStub::StopServiceAbility(const Want& want, int32_t userId, const sptr<IRemoteObject> &token) 
+int MockAbilityDelegatorStub::StopServiceAbility(const Want& want, int32_t userId, const sptr<IRemoteObject> &token)
 {
     return 0;
 }
@@ -223,6 +228,7 @@ int MockAbilityDelegatorStub::BlockAppService()
 }
 
 bool MockAbilityDelegatorStub2::finishFlag_ = false;
+TESTCASE_BRANCH MockAbilityDelegatorStub2::testcaseBranch_ = TESTCASE_BRANCH::BRANCH_1;
 
 MockAbilityDelegatorStub2::MockAbilityDelegatorStub2()
 {}
@@ -366,6 +372,23 @@ int MockAbilityDelegatorStub2::GetTopAbility(sptr<IRemoteObject>& token)
     return OHOS::ERR_INVALID_VALUE;
 }
 
+AppExecFwk::ElementName MockAbilityDelegatorStub2::GetTopAbility()
+{
+    HILOG_INFO("GetTopAbility.");
+    AppExecFwk::ElementName elementName = {};
+
+    if (testcaseBranch_ == TESTCASE_BRANCH::BRANCH_2) {
+        elementName = AppExecFwk::ElementName("deviceId", "com.ohos.bundleName", "EntryAbility", "entry");
+    } else if (testcaseBranch_ == TESTCASE_BRANCH::BRANCH_3) {
+        elementName = AppExecFwk::ElementName("deviceId", "com.example.myapplication",
+            "com.example.myapplication.MainAbility", "entry");
+    } else {
+        HILOG_INFO("Empty top ability.");
+    }
+
+    return elementName;
+}
+
 int MockAbilityDelegatorStub2::DelegatorDoAbilityForeground(const sptr<IRemoteObject>& token)
 {
     HILOG_INFO("MockAbilityDelegatorStub2::DelegatorDoAbilityForeground is called");
@@ -413,6 +436,11 @@ int MockAbilityDelegatorStub2::BlockAmsService()
 }
 
 int MockAbilityDelegatorStub2::BlockAbility(int32_t abilityRecordId)
+{
+    return 0;
+}
+
+int32_t MockAbilityDelegatorStub2::ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken)
 {
     return 0;
 }

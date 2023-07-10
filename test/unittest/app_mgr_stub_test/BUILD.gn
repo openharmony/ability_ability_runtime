@@ -37,9 +37,18 @@ ohos_unittest("AppMgrStubTest") {
     "ability_runtime:app_manager",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
+
+  defines = []
+  if (background_task_mgr_continuous_task_enable) {
+    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
+
+  if (ability_command_for_test) {
+    defines += [ "ABILITY_COMMAND_FOR_TEST" ]
+  }
 }
 
 group("unittest") {

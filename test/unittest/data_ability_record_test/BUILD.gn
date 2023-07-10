@@ -60,8 +60,8 @@ ohos_unittest("data_ability_record_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
-    "hiviewdfx_hilog_native:libhilog",
+    "ffrt:libffrt",
+    "hilog:libhilog",
     "ipc:ipc_core",
   ]
 

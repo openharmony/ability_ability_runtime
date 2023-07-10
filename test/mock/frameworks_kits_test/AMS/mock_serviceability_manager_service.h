@@ -77,6 +77,10 @@ public:
     {
         return 0;
     }
+    int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override
+    {
+        return 0;
+    }
     int ConnectAbility(
         const Want& want,
         const sptr<IAbilityConnection>& connect,
@@ -90,6 +94,11 @@ public:
     int ScheduleConnectAbilityDone(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& remoteObject) override;
     int ScheduleDisconnectAbilityDone(const sptr<IRemoteObject>& token) override;
     int ScheduleCommandAbilityDone(const sptr<IRemoteObject>& token) override;
+    int ScheduleCommandAbilityWindowDone(
+        const sptr<IRemoteObject> &token,
+        const sptr<SessionInfo> &sessionInfo,
+        WindowCommand winCmd,
+        AbilityCommand abilityCmd) override;
 
     void DumpState(const std::string& args, std::vector<std::string>& info) override;
     void DumpSysState(

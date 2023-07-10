@@ -45,6 +45,7 @@ ohos_source_set("appmgr_test_source") {
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_state_callback_host.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_state_callback_proxy.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/app_task_info.cpp",
+    "${ability_runtime_innerkits_path}/app_manager/src/appmgr/fault_data.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/process_info.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/profile.cpp",
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/render_scheduler_host.cpp",
@@ -86,8 +87,8 @@ ohos_source_set("appmgr_test_source") {
     "bundle_framework:appexecfwk_core",
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
   ]
 
@@ -101,9 +102,11 @@ config("test_exception_config") {
 
 ohos_source_set("abilityms_test_source") {
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_bundle_event_callback.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_connect_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_connect_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_event_handler.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ability_event_util.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_interceptor.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_interceptor_executer.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_manager_proxy.cpp",
@@ -114,6 +117,7 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/ability_scheduler_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_token_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ams_configuration_parameter.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/app_exit_reason_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/atomic_service_status_callback.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/atomic_service_status_callback_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/atomic_service_status_callback_stub.cpp",
@@ -138,6 +142,8 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/resident_process_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/scene_board/ui_ability_lifecycle_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/start_ability_handler.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/start_ability_handler/start_ability_sandbox_savefile.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/task_data_persistence_mgr.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_controller.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/user_event_handler.cpp",
@@ -147,6 +153,7 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/wants_info.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/window_focus_changed_listener.cpp",
     "${ability_runtime_services_path}/common/src/event_report.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/app_mgr_client.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/app_state_callback_host.cpp",
@@ -155,8 +162,8 @@ ohos_source_set("abilityms_test_source") {
 
   include_dirs = [
     "${ability_base_kits_path}/extractortool/include",
-    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core",
+    "${distributedschedule_path}/safwk/interfaces/innerkits/safwk",
     "${distributedschedule_path}/samgr/interfaces/innerkits/samgr_proxy/include",
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_runtime/context",
@@ -180,10 +187,11 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/sa_mgr:sa_mgr_mock",
+    "${ability_runtime_services_path}/common:task_handler_wrap",
   ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_deps_wrapper",
@@ -195,18 +203,22 @@ ohos_source_set("abilityms_test_source") {
     "common_event_service:cesfwk_core",
     "common_event_service:cesfwk_innerkits",
     "dsoftbus:softbus_client",
-    "eventhandler:libeventhandler",
-    "hicollie_native:libhicollie",
-    "hisysevent_native:libhisysevent",
-    "hitrace_native:hitrace_meter",
-    "hiviewdfx_hilog_native:libhilog",
+    "ffrt:libffrt",
+    "hicollie:libhicollie",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
     "relational_store:native_appdatafwk",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
+    "safwk:system_ability_fwk",
+    "window_manager:libwsutils",
+    "window_manager:sms",
   ]
 
   if (efficiency_manager) {
@@ -297,7 +309,6 @@ group("unittest") {
     "ams_app_mgr_client_test:unittest",
     "ams_app_running_record_test:unittest",
     "ams_app_state_callback_test:unittest",
-    "ams_app_workflow_test:unittest",
     "ams_ipc_interface_test:unittest",
     "ams_mgr_kill_process_test:unittest",
     "ams_mgr_proxy_test:unittest",
@@ -311,6 +322,7 @@ group("unittest") {
     "ams_service_event_drive_test:unittest",
     "ams_service_load_ability_process_test:unittest",
     "ams_service_startup_test:unittest",
+    "app_lifecycle_deal_test:unittest",
     "app_mgr_client_test:unittest",
     "app_mgr_proxy_test:unittest",
     "app_mgr_service_dump_test:unittest",
@@ -321,6 +333,8 @@ group("unittest") {
     "app_mgr_stub_test:unittest",
     "app_recovery_test:unittest",
     "app_running_processes_info_test:unittest",
+    "app_scheduler_host_test:unittest",
+    "app_scheduler_proxy_test:unittest",
     "app_scheduler_test:unittest",
     "app_spawn_client_test:unittest",
     "app_spawn_socket_test:unittest",
@@ -357,6 +371,7 @@ group("unittest") {
     "dummy_values_bucket_test:unittest",
     "event_report_test:unittest",
     "extension_config_mgr_test:unittest",
+    "fault_data:unittest",
     "file_path_utils_test:unittest",
     "form_extension_context_test:unittest",
     "frameworks_kits_ability_ability_runtime_test:unittest",
@@ -365,6 +380,7 @@ group("unittest") {
     "free_install_manager_test:unittest",
     "image_info_test:unittest",
     "implicit_start_processor_test:unittest",
+    "js_service_extension_test:unittest",
     "lifecycle_deal_test:unittest",
     "lifecycle_test:unittest",
     "mission_data_storage_test:unittest",
@@ -396,6 +412,7 @@ group("unittest") {
     "system_ability_token_callback_stub_test:unittest",
     "task_data_persistence_mgr_test:unittest",
     "trigger_Info_test:unittest",
+    "ui_extension_utils_test:unittest",
     "uri_permission_impl_test:unittest",
     "uri_permission_manager_test:unittest",
     "uri_permission_test:unittest",
@@ -425,6 +442,7 @@ group("unittest") {
       "mission_test:unittest",
       "specified_mission_list_test:unittest",
       "start_option_display_id_test:unittest",
+      "ui_ability_lifecycle_manager_test:unittest",
     ]
   }
 }

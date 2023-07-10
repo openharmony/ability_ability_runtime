@@ -157,12 +157,22 @@ public:
 
     void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) override;
 
+    /**
+     * Set AbilityForegroundingFlag of an app-record to true.
+     *
+     * @param pid, pid.
+     *
+     */
+    void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) override;
+
     virtual void StartSpecifiedAbility(
         const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) override;
 
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) override;
 
     virtual void SetCurrentUserId(const int32_t userId) override;
+
+    virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
 private:
     bool WriteInterfaceToken(MessageParcel &data);
 

@@ -40,8 +40,11 @@ public:
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;
     std::string GetDatabaseDir() override;
+    std::string GetGroupDir(std::string groupId) override;
     std::string GetPreferencesDir() override;
     std::string GetDistributedFilesDir() override;
+    int GetSystemDatabaseDir(std::string groupId, std::string &databaseDir) override;
+    int GetSystemPreferencesDir(std::string groupId, std::string &preferencesDir) override;
     void SwitchArea(int mode) override;
     int GetArea() override;
     std::string GetBundleName() const override;
@@ -80,6 +83,10 @@ public:
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const override;
     void MinimizeAbility(bool fromUser = false) override;
+
+    ErrCode OnBackPressedCallBack(bool &needMoveToBackground) override;
+
+    ErrCode MoveAbilityToBackground() override;
 
     ErrCode TerminateSelf() override;
 
@@ -174,6 +181,8 @@ public:
         return isTerminating_;
     }
 
+    void SetWeakSessionToken(const wptr<IRemoteObject>& sessionToken) override;
+
     void SetTerminating(bool state) override
     {
         isTerminating_ = state;
@@ -181,7 +190,17 @@ public:
 
     ErrCode RequestDialogService(NativeEngine &engine, AAFwk::Want &want, RequestDialogResultTask &&task) override;
 
+    ErrCode ReportDrawnCompleted() override;
+
     ErrCode GetMissionId(int32_t &missionId) override;
+    
+    /**
+     * @brief Set mission continue state of this ability.
+     *
+     * @param state the mission continuation state of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    ErrCode SetMissionContinueState(const AAFwk::ContinueState &state) override;
 
 #ifdef SUPPORT_GRAPHICS
     /**
@@ -206,6 +225,16 @@ public:
      * @return Returns the current window mode.
      */
     int GetCurrentWindowMode() override;
+
+    /**
+     * @brief Get window rectangle of this ability.
+     *
+     * @param the left position of window rectangle.
+     * @param the top position of window rectangle.
+     * @param the width position of window rectangle.
+     * @param the height position of window rectangle.
+     */
+    void GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height) override;
 #endif
 
 private:
@@ -219,6 +248,7 @@ private:
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
     int32_t missionId_ = -1;
+    wptr<IRemoteObject> sessionToken_;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

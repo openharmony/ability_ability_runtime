@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 std::vector<std::shared_ptr<AbilityLifecycleCallback>> ApplicationContext::callbacks_;
 std::vector<std::shared_ptr<EnvironmentCallback>> ApplicationContext::envCallbacks_;
+std::weak_ptr<ApplicationStateChangeCallback> ApplicationContext::applicationStateCallback_;
 
 std::shared_ptr<ApplicationContext> ApplicationContext::GetInstance()
 {
@@ -87,6 +88,12 @@ void ApplicationContext::UnregisterEnvironmentCallback(
     if (it != envCallbacks_.end()) {
         envCallbacks_.erase(it);
     }
+}
+
+void ApplicationContext::RegisterApplicationStateChangeCallback(
+    const std::weak_ptr<ApplicationStateChangeCallback> &applicationStateChangeCallback)
+{
+    applicationStateCallback_ = applicationStateChangeCallback;
 }
 
 void ApplicationContext::DispatchOnAbilityCreate(const std::shared_ptr<NativeReference> &ability)
@@ -239,6 +246,28 @@ void ApplicationContext::DispatchMemoryLevel(const int level)
     }
 }
 
+void ApplicationContext::NotifyApplicationForeground()
+{
+    auto callback = applicationStateCallback_.lock();
+    if (callback == nullptr) {
+        HILOG_ERROR("applicationStateCallback is nullptr");
+        return;
+    }
+
+    callback->NotifyApplicationForeground();
+}
+
+void ApplicationContext::NotifyApplicationBackground()
+{
+    auto callback = applicationStateCallback_.lock();
+    if (callback == nullptr) {
+        HILOG_ERROR("applicationStateCallback is nullptr");
+        return;
+    }
+
+    callback->NotifyApplicationBackground();
+}
+
 std::string ApplicationContext::GetBundleName() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetBundleName() : "";
@@ -337,6 +366,23 @@ std::string ApplicationContext::GetDatabaseDir()
 std::string ApplicationContext::GetPreferencesDir()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetPreferencesDir() : "";
+}
+
+int ApplicationContext::GetSystemDatabaseDir(std::string groupId, std::string &databaseDir)
+{
+    return contextImpl_ ?
+        contextImpl_->GetSystemDatabaseDir(groupId, databaseDir) : ERR_INVALID_VALUE;
+}
+
+int ApplicationContext::GetSystemPreferencesDir(std::string groupId, std::string &preferencesDir)
+{
+    return contextImpl_ ?
+        contextImpl_->GetSystemPreferencesDir(groupId, preferencesDir) : ERR_INVALID_VALUE;
+}
+
+std::string ApplicationContext::GetGroupDir(std::string groupId)
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetGroupDir(groupId) : "";
 }
 
 std::string ApplicationContext::GetDistributedFilesDir()

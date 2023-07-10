@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,8 @@ struct JsFrames {
     uintptr_t *nativePointer = nullptr;
 };
 
+class ModuleCheckerDelegate;
+
 namespace OHOS {
 namespace AppExecFwk {
 class EventRunner;
@@ -41,21 +43,26 @@ public:
     struct Options {
         Language lang = Language::JS;
         std::string bundleName;
+        std::string moduleName;
         std::string codePath;
         std::string bundleCodeDir;
         std::string hapPath;
         std::string arkNativeFilePath;
+        std::string packagePathStr;
+        std::vector<std::string> assetBasePathStr;
         std::shared_ptr<AppExecFwk::EventRunner> eventRunner;
         bool loadAce = true;
         bool preload = false;
         bool isBundle = true;
         bool isDebugVersion = false;
+        bool isJsFramework = false;
         bool isStageModel = true;
         bool isTestFramework = false;
         int32_t uid = -1;
         // ArkTsCard start
         bool isUnique = false;
         // ArkTsCard end
+        std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate;
     };
 
     static std::unique_ptr<Runtime> Create(const Options& options);
@@ -76,8 +83,10 @@ public:
     virtual bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) = 0;
     virtual bool NotifyHotReloadPage() = 0;
     virtual bool UnLoadRepairPatch(const std::string& patchFile) = 0;
-    virtual void UpdateExtensionType(int32_t extensionType) = 0;
     virtual void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) = 0;
+    virtual void StartProfiler(const std::string &perfCmd) = 0;
+    virtual void DoCleanWorkAfterStageCleaned() = 0;
+    virtual void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate) const {}
 
     Runtime(const Runtime&) = delete;
     Runtime(Runtime&&) = delete;

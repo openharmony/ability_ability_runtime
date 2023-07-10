@@ -38,7 +38,7 @@ class EventHub {
     if (!this.eventMap[event]) {
       this.eventMap[event] = [];
     }
-    if (this.eventMap[event].indexOf(callback) == -1) {
+    if (this.eventMap[event].indexOf(callback) === -1) {
       this.eventMap[event].push(callback);
     }
   }
@@ -113,6 +113,10 @@ class ApplicationContext {
 
   createModuleContext(bundleName, moduleName) {
     return this.__context_impl__.createModuleContext(bundleName, moduleName);
+  }
+
+  getGroupDir(groupId, callback) {
+    return this.__context_impl__.getGroupDir(groupId, callback);
   }
 
   getApplicationContext() {

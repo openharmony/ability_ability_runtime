@@ -17,8 +17,10 @@
 #define OHOS_ABILITY_RUNTIME_MISSION_LIST_MANAGER_H
 
 #include <list>
+#include <mutex>
 #include <queue>
 #include <memory>
+#include "cpp/mutex.h"
 
 #include "ability_running_info.h"
 #include "foundation/distributedhardware/device_manager/interfaces/inner_kits/native_cpp/include/device_manager.h"
@@ -74,6 +76,10 @@ public:
     int MoveMissionToFront(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
         std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr);
 
+    void NotifyMissionFocused(const int32_t missionId);
+
+    void NotifyMissionUnfocused(const int32_t missionId);
+
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
      *
@@ -92,20 +98,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int AttachAbilityThread(const sptr<AAFwk::IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &token);
-
-    /**
-     * push waiting ability to queue.
-     *
-     * @param abilityRequest, the request of ability.
-     */
-    void EnqueueWaitingAbility(const AbilityRequest &abilityRequest);
-
-    /**
-     * push front waiting ability to queue.
-     *
-     * @param abilityRequest, the request of ability.
-     */
-    void EnqueueWaitingAbilityToFront(const AbilityRequest &abilityRequest);
 
     /**
      * start waiting ability.
@@ -129,6 +121,14 @@ public:
     std::shared_ptr<Mission> GetMissionById(int missionId) const;
 
     /**
+     * @brief Move ability to background with the given abilityRecord
+     *
+     * @param abilityRecord the ability to move
+     * @return int error code
+     */
+    int MoveAbilityToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
      * @brief Terminate ability with the given abilityRecord
      *
      * @param abilityRecord the ability to terminate
@@ -148,14 +148,6 @@ public:
      * @return int error code
      */
     int TerminateAbility(const std::shared_ptr<AbilityRecord> &caller, int requestCode);
-
-    /**
-     * @brief remove the mission from the mission list
-     *
-     * @param abilityRecord the ability need to remove
-     * @param flag mark is terminate or close
-     */
-    void RemoveTerminatingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
 
     /**
      * @brief remove the mission list from the mission list manager
@@ -213,7 +205,7 @@ public:
      *
      * @param abilityRecord the ability to move
      */
-    void MoveToBackgroundTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void MoveToBackgroundTask(const std::shared_ptr<AbilityRecord> &abilityRecord, bool isClose = false);
 
     /**
      * @brief handle time out event
@@ -331,6 +323,13 @@ public:
      */
     void UpdateSnapShot(const sptr<IRemoteObject>& token);
 
+    /**
+     * Called to update mission snapshot.
+     * @param token The target ability.
+     * @param pixelMap The snapshot.
+     */
+    void UpdateSnapShot(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &pixelMap);
+
     void EnableRecoverAbility(int32_t missionId);
 
     #ifdef ABILITY_COMMAND_FOR_TEST
@@ -352,6 +351,15 @@ public:
     void SetMissionANRStateByTokens(const std::vector<sptr<IRemoteObject>> &tokens);
 
     int32_t IsValidMissionIds(const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results);
+
+    int DoAbilityForeground(std::shared_ptr<AbilityRecord> &abilityRecord, uint32_t flag);
+
+    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList);
+
+    void CallRequestDone(const std::shared_ptr<AbilityRecord> &abilityRecord, const sptr<IRemoteObject> &callStub);
+  
+    int SetMissionContinueState(const sptr<IRemoteObject> &token, const int32_t missionId,
+        const AAFwk::ContinueState &state);
 
 #ifdef SUPPORT_GRAPHICS
 public:
@@ -380,6 +388,7 @@ public:
 private:
     Closure GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void PostCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const;
+    void InitPrepareTerminateConfig();
 #endif
 
 private:
@@ -423,7 +432,17 @@ private:
     bool RemoveMissionList(const std::list<std::shared_ptr<MissionList>> lists,
         const std::shared_ptr<MissionList> &list);
     int ClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission);
+    int ClearMissionLocking(int missionId, const std::shared_ptr<Mission> &mission);
+    int MoveAbilityToBackgroundLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void RemoveBackgroundingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
     int TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
+    /**
+     * @brief remove the mission from the mission list
+     *
+     * @param abilityRecord the ability need to remove
+     * @param flag mark is terminate or close
+     */
+    void RemoveTerminatingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag);
     std::shared_ptr<AbilityRecord> GetAbilityRecordById(int64_t abilityRecordId) const;
     std::shared_ptr<AbilityRecord> GetAbilityRecordByCaller(
         const std::shared_ptr<AbilityRecord> &caller, int requestCode);
@@ -479,9 +498,36 @@ private:
     std::shared_ptr<AbilityRecord> GetAliveAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest);
     void NotifyStartAbilityResult(const AbilityRequest &abilityRequest, int result);
+    int MoveMissionToFrontInner(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
+        std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions = nullptr);
+    /**
+     * push waiting ability to queue.
+     *
+     * @param abilityRequest, the request of ability.
+     */
+    void EnqueueWaitingAbility(const AbilityRequest &abilityRequest);
+
+    /**
+     * push front waiting ability to queue.
+     *
+     * @param abilityRequest, the request of ability.
+     */
+    void EnqueueWaitingAbilityToFront(const AbilityRequest &abilityRequest);
+    std::shared_ptr<AbilityRecord> GetAbilityRecordByTokenInner(const sptr<IRemoteObject> &token) const;
+    int TerminateAbilityInner(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        int resultCode, const Want *resultWant, bool flag);
+    int32_t GetMissionIdByAbilityTokenInner(const sptr<IRemoteObject> &token);
+    std::shared_ptr<AbilityRecord> GetAbilityFromTerminateListInner(const sptr<IRemoteObject> &token);
+    void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord);
+    LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
+    bool IsAppLastAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    int PrepareClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission);
+
+    bool CheckPrepareTerminateEnable(const std::shared_ptr<Mission> &mission);
 
     int userId_;
-    mutable std::recursive_mutex managerLock_;
+    mutable ffrt::mutex managerLock_;
     // launcher list is also in currentMissionLists_
     std::list<std::shared_ptr<MissionList>> currentMissionLists_;
     // only manager the ability of standard in the default list
@@ -493,6 +539,7 @@ private:
 
     std::queue<AbilityRequest> waitingAbilityQueue_;
     std::shared_ptr<MissionListenerController> listenerController_;
+    bool isPrepareTerminateEnable_ = false;
 
     class MissionDmInitCallback : public DistributedHardware::DmInitCallback {
     public:

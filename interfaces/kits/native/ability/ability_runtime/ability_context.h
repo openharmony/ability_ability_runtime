@@ -23,6 +23,7 @@
 #include "caller_callback.h"
 #include "configuration.h"
 #include "iability_callback.h"
+#include "mission_info.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 #include "start_options.h"
@@ -200,6 +201,16 @@ public:
      */
     virtual void MinimizeAbility(bool fromUser = false) = 0;
 
+    /**
+     * @brief Get OnBackPressedCallBack.
+     * @param needMoveToBackground true if ability will be moved to background; false if ability will be terminated.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode OnBackPressedCallBack(bool &needMoveToBackground) = 0;
+
+    virtual ErrCode MoveAbilityToBackground() = 0;
+
     virtual ErrCode TerminateSelf() = 0;
 
     virtual ErrCode CloseAbility() = 0;
@@ -252,6 +263,8 @@ public:
 
     virtual void RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback) = 0;
 
+    virtual void SetWeakSessionToken(const wptr<IRemoteObject>& sessionToken) = 0;
+
     /**
      * @brief Requests dialogService from the system.
      * This method is called for dialog request. This is an asynchronous method. When it is executed,
@@ -264,7 +277,22 @@ public:
      */
     virtual ErrCode RequestDialogService(NativeEngine &engine, AAFwk::Want &want, RequestDialogResultTask &&task) = 0;
 
+    /**
+     * @brief Report drawn completed.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual ErrCode ReportDrawnCompleted() = 0;
+
     virtual ErrCode GetMissionId(int32_t &missionId) = 0;
+
+    /**
+     * Set mission continue state of this ability.
+     *
+     * @param state the mission continuation state of this ability.
+     * @return Returns ERR_OK if success.
+     */
+    virtual ErrCode SetMissionContinueState(const AAFwk::ContinueState &state) = 0;
 
 #ifdef SUPPORT_GRAPHICS
     /**
@@ -284,6 +312,16 @@ public:
     virtual ErrCode SetMissionIcon(const std::shared_ptr<OHOS::Media::PixelMap> &icon) = 0;
 
     virtual int GetCurrentWindowMode() = 0;
+
+    /**
+     * @brief Get window rectangle of this ability.
+     *
+     * @param the left position of window rectangle.
+     * @param the top position of window rectangle.
+     * @param the width position of window rectangle.
+     * @param the height position of window rectangle.
+     */
+    virtual void GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height) = 0;
 #endif
     virtual bool IsTerminating() = 0;
     virtual void SetTerminating(bool state) = 0;

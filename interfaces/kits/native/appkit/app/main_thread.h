@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -235,6 +235,13 @@ public:
 
     /**
      *
+     * @brief Preload extensions in appspawn.
+     *
+     */
+    static void PreloadExtensionPlugin();
+
+    /**
+     *
      * @brief Schedule the application process exit safely.
      *
      */
@@ -256,6 +263,8 @@ public:
 
     int32_t ScheduleNotifyUnLoadRepairPatch(const std::string &bundleName,
         const sptr<IQuickFixCallback> &callback, const int32_t recordId) override;
+
+    int32_t ScheduleNotifyAppFault(const FaultData &faultData) override;
 
 private:
     /**
@@ -456,10 +465,8 @@ private:
      * @brief Load all extension so
      *
      * @param nativeEngine nativeEngine instance
-     * @param filePath extension so file path
-     * @param bundleInfo application bundle information
      */
-    void LoadAllExtensions(NativeEngine &nativeEngine, const std::string &filePath, const BundleInfo &bundleInfo);
+    void LoadAllExtensions(NativeEngine &nativeEngine);
 
     /**
      *
@@ -472,12 +479,12 @@ private:
         const AppExecFwk::HapModuleInfo &entryHapModuleInfo);
 
     /**
-     * @brief Update current process extension type
+     * @brief Set current process extension type
      *
      * @param abilityRecord current running ability record
      */
-    void UpdateProcessExtensionType(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
-    
+    void SetProcessExtensionType(const std::shared_ptr<AbilityLocalRecord> &abilityRecord);
+
     /**
      * @brief Add Extension block item
      *
@@ -485,16 +492,18 @@ private:
      * @param type extension type
      */
     void AddExtensionBlockItem(const std::string &extensionName, int32_t type);
-    
+
     /**
-     * @brief Update extension block list to nativeEngine
+     * @brief Update runtime module checker
      *
-     * @param nativeEngine nativeEngine instance
+     * @param runtime runtime the ability runtime
      */
-    void UpdateEngineExtensionBlockList(NativeEngine &nativeEngine);
+    void UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 
     static void HandleDumpHeap(bool isPrivate);
     static void HandleSignal(int signal);
+
+    void NotifyAppFault(const FaultData &faultData);
 
     void OnOverlayChanged(const EventFwk::CommonEventData &data,
         const std::shared_ptr<Global::Resource::ResourceManager> &resourceManager, const std::string &bundleName,
@@ -531,7 +540,6 @@ private:
 
     bool isRunnerStarted_ = false;
     int newThreadId_ = -1;
-    std::shared_ptr<Profile> appProfile_ = nullptr;
     std::shared_ptr<ApplicationInfo> applicationInfo_ = nullptr;
     std::shared_ptr<ProcessInfo> processInfo_ = nullptr;
     std::shared_ptr<OHOSApplication> application_ = nullptr;
@@ -559,7 +567,8 @@ private:
      */
     void LoadAbilityLibrary(const std::vector<std::string> &libraryPaths);
 
-    void LoadNativeLiabrary(std::string &nativeLibraryPath);
+    void CalcNativeLiabraryEntries(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
+    void LoadNativeLiabrary(const BundleInfo &bundleInfo, std::string &nativeLibraryPath);
 
     void LoadAppDetailAbilityLibrary(std::string &nativeLibraryPath);
 
@@ -570,13 +579,6 @@ private:
 
     void ChangeToLocalPath(const std::string &bundleName,
         const std::string &sourcDir, std::string &localPath);
-
-    /**
-     *
-     * @brief Close the ability library loaded.
-     *
-     */
-    void CloseAbilityLibrary();
 
     bool ScanDir(const std::string &dirPath, std::vector<std::string> &files);
 
@@ -592,8 +594,7 @@ private:
      */
     bool CheckFileType(const std::string &fileName, const std::string &extensionName);
 
-    bool InitCreate(std::shared_ptr<ContextDeal> &contextDeal, ApplicationInfo &appInfo, ProcessInfo &processInfo,
-        Profile &appProfile);
+    bool InitCreate(std::shared_ptr<ContextDeal> &contextDeal, ApplicationInfo &appInfo, ProcessInfo &processInfo);
     bool CheckForHandleLaunchApplication(const AppLaunchData &appLaunchData);
     bool InitResourceManager(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager,
         const AppExecFwk::HapModuleInfo &entryHapModuleInfo, const std::string &bundleName,

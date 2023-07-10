@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_JS_ENVIRONMENT_JS_ENVIRONMENT_H
 
 #include <memory>
+#include "ecmascript/napi/include/dfx_jsnapi.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "js_environment_impl.h"
 #include "native_engine/native_engine.h"
@@ -26,11 +27,16 @@
 namespace OHOS {
 namespace JsEnv {
 class JsEnvironmentImpl;
-class JsEnvironment final {
+class JsEnvironment final : public std::enable_shared_from_this<JsEnvironment> {
 public:
     JsEnvironment() {}
     explicit JsEnvironment(std::unique_ptr<JsEnvironmentImpl> impl);
     ~JsEnvironment();
+
+    enum class PROFILERTYPE {
+        PROFILERTYPE_CPU,
+        PROFILERTYPE_HEAP
+    };
 
     bool Initialize(const panda::RuntimeOption& pandaOption, void* jsEngine);
 
@@ -46,29 +52,39 @@ public:
 
     void InitTimerModule();
 
-    void InitConsoleLogModule();
-
-    void InitWorkerModule(const std::string& codePath, bool isDebugVersion, bool isBundle);
+    void InitWorkerModule(std::shared_ptr<WorkerInfo> workerInfo);
 
     void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorObj);
 
     void InitSyscapModule();
 
-    void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
+    void PostTask(const std::function<void()>& task, const std::string& name = "", int64_t delayTime = 0);
+
+    void PostSyncTask(const std::function<void()>& task, const std::string& name = "");
 
     void RemoveTask(const std::string& name);
 
     void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo);
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
 
-    bool StartDebugger(const char* libraryPath, bool needBreakPoint, uint32_t instanceId,
-        const DebuggerPostTask& debuggerPostTask = {});
-
-    void InitConsoleModule();
+    bool StartDebugger(const char* libraryPath, bool needBreakPoint, uint32_t instanceId);
 
     void StopDebugger();
 
+    void InitConsoleModule();
+
+    bool InitLoop();
+
+    void DeInitLoop();
+
     bool LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle);
+
+    void StartProfiler(const char* libraryPath, uint32_t instanceId, PROFILERTYPE profiler,
+        int32_t interval);
+
+    void ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl);
+
+    void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate);
 
 private:
     std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;

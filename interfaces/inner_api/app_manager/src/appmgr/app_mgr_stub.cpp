@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,87 +35,99 @@ namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
 AppMgrStub::AppMgrStub()
 {
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_ATTACH_APPLICATION)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_ATTACH_APPLICATION)] =
         &AppMgrStub::HandleAttachApplication;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_APPLICATION_FOREGROUNDED)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_APPLICATION_FOREGROUNDED)] =
         &AppMgrStub::HandleApplicationForegrounded;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_APPLICATION_BACKGROUNDED)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_APPLICATION_BACKGROUNDED)] =
         &AppMgrStub::HandleApplicationBackgrounded;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_APPLICATION_TERMINATED)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_APPLICATION_TERMINATED)] =
         &AppMgrStub::HandleApplicationTerminated;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_CHECK_PERMISSION)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_CHECK_PERMISSION)] =
         &AppMgrStub::HandleCheckPermission;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_ABILITY_CLEANED)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_ABILITY_CLEANED)] =
         &AppMgrStub::HandleAbilityCleaned;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_GET_MGR_INSTANCE)] = &AppMgrStub::HandleGetAmsMgr;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_CLEAR_UP_APPLICATION_DATA)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_MGR_INSTANCE)] = &AppMgrStub::HandleGetAmsMgr;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_CLEAR_UP_APPLICATION_DATA)] =
         &AppMgrStub::HandleClearUpApplicationData;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_GET_ALL_RUNNING_PROCESSES)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_ALL_RUNNING_PROCESSES)] =
         &AppMgrStub::HandleGetAllRunningProcesses;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_NOTIFY_MEMORY_LEVEL)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_NOTIFY_MEMORY_LEVEL)] =
         &AppMgrStub::HandleNotifyMemoryLevel;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_GET_RUNNING_PROCESSES_BY_USER_ID)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_USER_ID)] =
         &AppMgrStub::HandleGetProcessRunningInfosByUserId;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_ADD_ABILITY_STAGE_INFO_DONE)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_ADD_ABILITY_STAGE_INFO_DONE)] =
         &AppMgrStub::HandleAddAbilityStageDone;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::STARTUP_RESIDENT_PROCESS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::STARTUP_RESIDENT_PROCESS)] =
         &AppMgrStub::HandleStartupResidentProcess;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::REGISTER_APPLICATION_STATE_OBSERVER)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APPLICATION_STATE_OBSERVER)] =
         &AppMgrStub::HandleRegisterApplicationStateObserver;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::UNREGISTER_APPLICATION_STATE_OBSERVER)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APPLICATION_STATE_OBSERVER)] =
         &AppMgrStub::HandleUnregisterApplicationStateObserver;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_FOREGROUND_APPLICATIONS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_FOREGROUND_APPLICATIONS)] =
         &AppMgrStub::HandleGetForegroundApplications;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::START_USER_TEST_PROCESS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::START_USER_TEST_PROCESS)] =
         &AppMgrStub::HandleStartUserTestProcess;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::FINISH_USER_TEST)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::FINISH_USER_TEST)] =
         &AppMgrStub::HandleFinishUserTest;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::SCHEDULE_ACCEPT_WANT_DONE)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::SCHEDULE_ACCEPT_WANT_DONE)] =
         &AppMgrStub::HandleScheduleAcceptWantDone;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_GET_ABILITY_RECORDS_BY_PROCESS_ID)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_ABILITY_RECORDS_BY_PROCESS_ID)] =
         &AppMgrStub::HandleGetAbilityRecordsByProcessID;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::PRE_START_NWEBSPAWN_PROCESS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::PRE_START_NWEBSPAWN_PROCESS)] =
         &AppMgrStub::HandlePreStartNWebSpawnProcess;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::START_RENDER_PROCESS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::START_RENDER_PROCESS)] =
         &AppMgrStub::HandleStartRenderProcess;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::ATTACH_RENDER_PROCESS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::ATTACH_RENDER_PROCESS)] =
         &AppMgrStub::HandleAttachRenderProcess;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_RENDER_PROCESS_TERMINATION_STATUS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_RENDER_PROCESS_TERMINATION_STATUS)] =
         &AppMgrStub::HandleGetRenderProcessTerminationStatus;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_CONFIGURATION)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_CONFIGURATION)] =
         &AppMgrStub::HandleGetConfiguration;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::UPDATE_CONFIGURATION)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION)] =
         &AppMgrStub::HandleUpdateConfiguration;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::REGISTER_CONFIGURATION_OBSERVER)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_CONFIGURATION_OBSERVER)] =
         &AppMgrStub::HandleRegisterConfigurationObserver;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::UNREGISTER_CONFIGURATION_OBSERVER)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_CONFIGURATION_OBSERVER)] =
         &AppMgrStub::HandleUnregisterConfigurationObserver;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::APP_GET_PROCESS_RUNNING_INFORMATION)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_PROCESS_RUNNING_INFORMATION)] =
         &AppMgrStub::HandleGetProcessRunningInformation;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::DUMP_HEAP_MEMORY_PROCESS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_HEAP_MEMORY_PROCESS)] =
         &AppMgrStub::HandleDumpHeapMemory;
 #ifdef ABILITY_COMMAND_FOR_TEST
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::BLOCK_APP_SERVICE)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::BLOCK_APP_SERVICE)] =
         &AppMgrStub::HandleBlockAppServiceDone;
 #endif
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_APP_RUNNING_STATE)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_STATE)] =
         &AppMgrStub::HandleGetAppRunningStateByBundleName;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::NOTIFY_LOAD_REPAIR_PATCH)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_LOAD_REPAIR_PATCH)] =
         &AppMgrStub::HandleNotifyLoadRepairPatch;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::NOTIFY_HOT_RELOAD_PAGE)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_HOT_RELOAD_PAGE)] =
         &AppMgrStub::HandleNotifyHotReloadPage;
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::SET_CONTINUOUSTASK_PROCESS)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::SET_CONTINUOUSTASK_PROCESS)] =
         &AppMgrStub::HandleSetContinuousTaskProcess;
 #endif
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::NOTIFY_UNLOAD_REPAIR_PATCH)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_UNLOAD_REPAIR_PATCH)] =
         &AppMgrStub::HandleNotifyUnLoadRepairPatch;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::IS_SHARED_BUNDLE_RUNNING)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::IS_SHARED_BUNDLE_RUNNING)] =
         &AppMgrStub::HandleIsSharedBundleRunning;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::START_NATIVE_PROCESS_FOR_DEBUGGER)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::START_NATIVE_PROCESS_FOR_DEBUGGER)] =
         &AppMgrStub::HandleStartNativeProcessForDebugger;
-    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::JUDGE_SANDBOX_BY_PID)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT)] =
+        &AppMgrStub::HandleNotifyFault;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT_BY_SA)] =
+        &AppMgrStub::HandleNotifyFaultBySA;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::JUDGE_SANDBOX_BY_PID)] =
         &AppMgrStub::HandleJudgeSandboxByPid;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_BUNDLE_NAME_BY_PID)] =
+        &AppMgrStub::HandleGetBundleNameByPid;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_ALL_RENDER_PROCESSES)] =
+        &AppMgrStub::HandleGetAllRenderProcesses;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_PROCESS_MEMORY_BY_PID)] =
+        &AppMgrStub::HandleGetProcessMemoryByPid;
+    memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_PIDS_BY_BUNDLENAME)] =
+        &AppMgrStub::HandleGetRunningProcessInformation;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -125,7 +137,7 @@ AppMgrStub::~AppMgrStub()
 
 int AppMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    HILOG_INFO("AppMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code, option.GetFlags());
+    HILOG_DEBUG("AppMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code, option.GetFlags());
     std::u16string descriptor = AppMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
@@ -240,6 +252,23 @@ int32_t AppMgrStub::HandleGetProcessRunningInfosByUserId(MessageParcel &data, Me
     int32_t userId = data.ReadInt32();
     std::vector<RunningProcessInfo> info;
     auto result = GetProcessRunningInfosByUserId(info, userId);
+    reply.WriteInt32(info.size());
+    for (auto &it : info) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::vector<RenderProcessInfo> info;
+    auto result = GetAllRenderProcesses(info);
     reply.WriteInt32(info.size());
     for (auto &it : info) {
         if (!reply.WriteParcelable(&it)) {
@@ -653,6 +682,95 @@ int32_t AppMgrStub::HandleStartNativeProcessForDebugger(MessageParcel &data, Mes
         return ERR_INVALID_VALUE;
     }
     auto result = StartNativeProcessForDebugger(*want);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t pid = data.ReadInt32();
+    std::string bundleName;
+    int32_t uid;
+    auto result = GetBundleNameByPid(pid, bundleName, uid);
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    if (!reply.WriteString(bundleName)) {
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!reply.WriteInt32(uid)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleNotifyFault(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<FaultData> faultData(data.ReadParcelable<FaultData>());
+    if (faultData == nullptr) {
+        HILOG_ERROR("ReadParcelable<FaultData> failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t result = NotifyAppFault(*faultData);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleNotifyFaultBySA(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<AppFaultDataBySA> faultData(data.ReadParcelable<AppFaultDataBySA>());
+    if (faultData == nullptr) {
+        HILOG_ERROR("ReadParcelable<AppFaultDataBySA> failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t result = NotifyAppFaultBySA(*faultData);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("reply write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetProcessMemoryByPid(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    int32_t pid = data.ReadInt32();
+    int32_t memorySize = 0;
+    auto result = GetProcessMemoryByPid(pid, memorySize);
+    if (!reply.WriteInt32(memorySize)) {
+        HILOG_ERROR("Memory size write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetRunningProcessInformation(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::string bundleName = data.ReadString();
+    int32_t userId = data.ReadInt32();
+    std::vector<RunningProcessInfo> info;
+    auto result = GetRunningProcessInformation(bundleName, userId, info);
+    reply.WriteInt32(info.size());
+    for (auto &it : info) {
+        if (!reply.WriteParcelable(&it)) {
+            return ERR_INVALID_VALUE;
+        }
+    }
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("fail to write result.");
         return ERR_INVALID_VALUE;

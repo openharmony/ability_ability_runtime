@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef MOCK_OHOS_ABILITY_FROM_MOCK_ABILITY_RUNTIME_CONTEXT_H
+#define MOCK_OHOS_ABILITY_FROM_MOCK_ABILITY_RUNTIME_CONTEXT_H
+
 #include "gtest/gtest.h"
 
 #define private public
@@ -53,6 +56,10 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() const override;
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
+    std::string GetGroupDir(std::string groupId) override;
+    int GetSystemDatabaseDir(std::string groupId, std::string &databaseDir) override;
+    int GetSystemPreferencesDir(std::string groupId, std::string &preferencesDir) override;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
+#endif  // MOCK_OHOS_ABILITY_FROM_MOCK_ABILITY_RUNTIME_CONTEXT_H

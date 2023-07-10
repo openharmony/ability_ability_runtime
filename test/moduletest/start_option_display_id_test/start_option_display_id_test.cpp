@@ -46,10 +46,10 @@ static void WaitUntilTaskFinished()
     const uint32_t maxRetryCount = 1000;
     const uint32_t sleepTime = 1000;
     uint32_t count = 0;
-    auto handler = OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+    auto handler = OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     std::atomic<bool> taskCalled(false);
     auto f = [&taskCalled]() { taskCalled.store(true); };
-    if (handler->PostTask(f)) {
+    if (handler->SubmitTask(f)) {
         while (!taskCalled.load()) {
             ++count;
             if (count >= maxRetryCount) {
@@ -115,18 +115,15 @@ void StartOptionDisplayIdTest::OnStartAms()
 
         abilityMgrServ_->state_ = ServiceRunningState::STATE_RUNNING;
 
-        abilityMgrServ_->eventLoop_ = AppExecFwk::EventRunner::Create(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
-        EXPECT_TRUE(abilityMgrServ_->eventLoop_);
-
-        abilityMgrServ_->handler_ = std::make_shared<AbilityEventHandler>(abilityMgrServ_->eventLoop_, abilityMgrServ_);
-        EXPECT_TRUE(abilityMgrServ_->handler_);
+        abilityMgrServ_->taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
+        EXPECT_TRUE(abilityMgrServ_->taskHandler_);
 
         // init user controller.
         abilityMgrServ_->userController_ = std::make_shared<UserController>();
         EXPECT_TRUE(abilityMgrServ_->userController_);
         abilityMgrServ_->userController_->Init();
         int userId = USER_ID_U100;
-        abilityMgrServ_->userController_->SetCurrentUserId(userId);
+        abilityMgrServ_->userController_->currentUserId_ = userId;
         abilityMgrServ_->InitConnectManager(userId, true);
         abilityMgrServ_->InitDataAbilityManager(userId, true);
         abilityMgrServ_->InitPendWantManager(userId, true);
@@ -136,8 +133,7 @@ void StartOptionDisplayIdTest::OnStartAms()
         AmsConfigurationParameter::GetInstance().Parse();
 
         abilityMgrServ_->InitMissionListManager(userId, true);
-        abilityMgrServ_->connectManager_->SetEventHandler(abilityMgrServ_->handler_);
-        abilityMgrServ_->eventLoop_->Run();
+        abilityMgrServ_->connectManager_->SetTaskHandler(abilityMgrServ_->taskHandler_);
 
         WaitUntilTaskFinished();
         return;
@@ -148,8 +144,7 @@ void StartOptionDisplayIdTest::OnStartAms()
 
 void StartOptionDisplayIdTest::OnStopAms()
 {
-    abilityMgrServ_->eventLoop_.reset();
-    abilityMgrServ_->handler_.reset();
+    abilityMgrServ_->taskHandler_.reset();
     abilityMgrServ_->state_ = ServiceRunningState::STATE_NOT_START;
 }
 

@@ -32,6 +32,8 @@ bool MissionInfo::ReadFromParcel(Parcel &parcel)
     }
     want = *parcelWant;
     abilityState = parcel.ReadInt32();
+    unclearable = parcel.ReadBool();
+    continueState = static_cast<AAFwk::ContinueState>(parcel.ReadInt32());
     return true;
 }
 
@@ -80,6 +82,14 @@ bool MissionInfo::Marshalling(Parcel &parcel) const
     }
 
     if (!parcel.WriteInt32(abilityState)) {
+        return false;
+    }
+
+    if (!parcel.WriteBool(unclearable)) {
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(continueState))) {
         return false;
     }
     return true;

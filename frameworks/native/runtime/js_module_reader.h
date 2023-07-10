@@ -29,9 +29,11 @@ namespace AbilityRuntime {
 class JsModuleReader final : private JsModuleSearcher {
 public:
     static constexpr char ABS_CODE_PATH[] = "/data/storage/el1/";
+    static constexpr char ABS_DATA_CODE_PATH[] = "/data/app/el1/bundle/public/";
+    static constexpr char BUNDLE[] = "bundle/";
     static constexpr char MERGE_ABC_PATH[] = "ets/modules.abc";
     static constexpr char SHARED_FILE_SUFFIX[] = ".hsp";
-    explicit JsModuleReader(const std::string& bundleName) : JsModuleSearcher(bundleName) {}
+    JsModuleReader(const std::string& bundleName, const std::string& hapPath, bool isFormRender = false);
     ~JsModuleReader() = default;
 
     JsModuleReader(const JsModuleReader&) = default;
@@ -39,7 +41,17 @@ public:
     JsModuleReader& operator=(const JsModuleReader&) = default;
     JsModuleReader& operator=(JsModuleReader&&) = default;
 
-    std::vector<uint8_t> operator()(const std::string& hapPath) const;
+    std::vector<uint8_t> operator()(const std::string& inputPath) const;
+    std::string GetPresetAppHapPath(const std::string& inputPath) const;
+
+private:
+    std::string GetAppHspPath(const std::string& inputPath) const;
+    std::string GetCommonAppHspPath(const std::string& inputPath) const;
+    std::string GetFormAppHspPath(const std::string& inputPath) const;
+    std::string GetModuleName(const std::string& inputPath) const;
+
+    bool isSystemPath_ = false;
+    bool isFormRender_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

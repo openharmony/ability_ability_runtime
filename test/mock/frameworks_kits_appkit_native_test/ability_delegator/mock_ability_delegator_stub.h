@@ -61,6 +61,8 @@ public:
         ScheduleConnectAbilityDone, int(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& remoteObject));
     MOCK_METHOD1(ScheduleDisconnectAbilityDone, int(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(ScheduleCommandAbilityDone, int(const sptr<IRemoteObject>& token));
+    MOCK_METHOD4(ScheduleCommandAbilityWindowDone, int(const sptr<IRemoteObject> &token,
+        const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd, AbilityCommand abilityCmd));
     void DumpState(const std::string& args, std::vector<std::string>& state) override;
     MOCK_METHOD2(TerminateAbilityResult, int(const sptr<IRemoteObject>& token, int startId));
     int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
@@ -152,6 +154,7 @@ public:
     int GetTopAbility(sptr<IRemoteObject>& token) override;
     int DelegatorDoAbilityForeground(const sptr<IRemoteObject>& token) override;
     int DelegatorDoAbilityBackground(const sptr<IRemoteObject>& token) override;
+    int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override;
     int DoAbilityForeground(const sptr<IRemoteObject>& token, uint32_t flag);
     int DoAbilityBackground(const sptr<IRemoteObject>& token, uint32_t flag);
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token);
@@ -173,6 +176,12 @@ public:
 public:
     std::string powerState_;
     static bool finishFlag_;
+};
+
+enum TESTCASE_BRANCH {
+    BRANCH_1 = 1,
+    BRANCH_2 = 2,
+    BRANCH_3 = 3,
 };
 
 class MockAbilityDelegatorStub2 : public AbilityManagerStub {
@@ -210,6 +219,8 @@ public:
         ScheduleConnectAbilityDone, int(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& remoteObject));
     MOCK_METHOD1(ScheduleDisconnectAbilityDone, int(const sptr<IRemoteObject>& token));
     MOCK_METHOD1(ScheduleCommandAbilityDone, int(const sptr<IRemoteObject>& token));
+    MOCK_METHOD4(ScheduleCommandAbilityWindowDone, int(const sptr<IRemoteObject> &token,
+        const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd, AbilityCommand abilityCmd));
     void DumpState(const std::string& args, std::vector<std::string>& state) override;
     MOCK_METHOD2(TerminateAbilityResult, int(const sptr<IRemoteObject>& token, int startId));
     int StopServiceAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE,
@@ -299,8 +310,10 @@ public:
     int FinishUserTest(
         const std::string& msg, const int64_t& resultCode, const std::string& bundleName) override;
     int GetTopAbility(sptr<IRemoteObject>& token) override;
+    AppExecFwk::ElementName GetTopAbility() override;
     int DelegatorDoAbilityForeground(const sptr<IRemoteObject>& token) override;
     int DelegatorDoAbilityBackground(const sptr<IRemoteObject>& token) override;
+    int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override;
     int DoAbilityForeground(const sptr<IRemoteObject>& token, uint32_t flag);
     int DoAbilityBackground(const sptr<IRemoteObject>& token, uint32_t flag);
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token);
@@ -322,6 +335,7 @@ public:
 public:
     std::string powerState_;
     static bool finishFlag_;
+    static TESTCASE_BRANCH testcaseBranch_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

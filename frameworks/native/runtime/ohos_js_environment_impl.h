@@ -23,20 +23,29 @@ namespace AbilityRuntime {
 class OHOSJsEnvironmentImpl : public JsEnv::JsEnvironmentImpl {
 public:
     OHOSJsEnvironmentImpl();
+    explicit OHOSJsEnvironmentImpl(const std::shared_ptr<AppExecFwk::EventRunner>& eventRunner);
     ~OHOSJsEnvironmentImpl() override;
 
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime) override;
+
+    void PostSyncTask(const std::function<void()>& task, const std::string& name) override;
 
     void RemoveTask(const std::string& name) override;
 
     void InitTimerModule(NativeEngine* engine) override;
 
-    void InitConsoleModule(NativeEngine *engine) override;
+    void InitConsoleModule(NativeEngine* engine) override;
 
-    void InitWorkerModule(NativeEngine& engine, const std::string& codePath, bool isDebugVersion,
-        bool isBundle) override;
+    bool InitLoop(NativeEngine* engine) override;
+
+    void DeInitLoop(NativeEngine* engine) override;
+
+    void InitWorkerModule(NativeEngine& engine, std::shared_ptr<JsEnv::WorkerInfo> workerInfo) override;
 
     void InitSyscapModule() override;
+
+private:
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

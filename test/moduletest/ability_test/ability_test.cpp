@@ -63,6 +63,17 @@ void AbilityBaseTest::SetUpTestCase(void)
 void AbilityBaseTest::TearDownTestCase(void)
 {}
 
+class TestIEcologicalRuleManager : public AppExecFwk::IEcologicalRuleManager {
+public:
+    TestIEcologicalRuleManager() = default;
+    virtual ~TestIEcologicalRuleManager()
+    {};
+    sptr<IRemoteObject> AsObject() override
+    {
+        return nullptr;
+    }
+};
+
 void AbilityBaseTest::SetUp(void)
 {
     abilityObject_ = new MockAbilityManagerService();
@@ -203,7 +214,7 @@ HWTEST_F(AbilityBaseTest, AaFwk_Ability_AbilityFwk_Start_Test_0600, Function | M
     appInfo->cacheDir = "cacheDir";
     appInfo->bundleName = "bundleName";
 
-    contextDeal->SetProcessInfo(processInfo);
+    application->SetProcessInfo(processInfo);
     contextDeal->SetApplicationInfo(appInfo);
     contextDeal->SetApplicationContext(application);
     application->AttachBaseContext(contextDeal);
@@ -1254,9 +1265,7 @@ HWTEST_F(AbilityTerminateTest,
     AppExecFwk_IEcologicalRuleManager_QueryFreeInstallExperience_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_QueryFreeInstallExperience_0100";
-    sptr<IRemoteObject> remoteObject_ =
-        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    sptr<AppExecFwk::IEcologicalRuleManager> erms = iface_cast<AppExecFwk::IEcologicalRuleManager>(remoteObject_);
+    sptr<AppExecFwk::IEcologicalRuleManager> erms = new (std::nothrow) TestIEcologicalRuleManager();
     EXPECT_NE(erms, nullptr);
     Want want;
     ErmsParams::CallerInfo callerInfo;
@@ -1274,9 +1283,7 @@ HWTEST_F(AbilityTerminateTest,
     AppExecFwk_IEcologicalRuleManager_EvaluateResolveInfos_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_EvaluateResolveInfos_0100";
-    sptr<IRemoteObject> remoteObject_ =
-        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    sptr<AppExecFwk::IEcologicalRuleManager> erms = iface_cast<AppExecFwk::IEcologicalRuleManager>(remoteObject_);
+    sptr<AppExecFwk::IEcologicalRuleManager> erms = new (std::nothrow) TestIEcologicalRuleManager();
     EXPECT_NE(erms, nullptr);
     Want want;
     ErmsParams::CallerInfo callerInfo;
@@ -1296,9 +1303,7 @@ HWTEST_F(AbilityTerminateTest,
     AppExecFwk_IEcologicalRuleManager_QueryStartExperience_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_QueryStartExperience_0100";
-    sptr<IRemoteObject> remoteObject_ =
-        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    sptr<AppExecFwk::IEcologicalRuleManager> erms = iface_cast<AppExecFwk::IEcologicalRuleManager>(remoteObject_);
+    sptr<AppExecFwk::IEcologicalRuleManager> erms = new (std::nothrow) TestIEcologicalRuleManager();
     EXPECT_NE(erms, nullptr);
     Want want;
     ErmsParams::CallerInfo callerInfo;
@@ -1316,9 +1321,7 @@ HWTEST_F(AbilityTerminateTest,
     AppExecFwk_IEcologicalRuleManager_QueryPublishFormExperience_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_QueryPublishFormExperience_0100";
-    sptr<IRemoteObject> remoteObject_ =
-        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    sptr<AppExecFwk::IEcologicalRuleManager> erms = iface_cast<AppExecFwk::IEcologicalRuleManager>(remoteObject_);
+    sptr<AppExecFwk::IEcologicalRuleManager> erms = new (std::nothrow) TestIEcologicalRuleManager();
     EXPECT_NE(erms, nullptr);
     Want want;
     ErmsParams::ExperienceRule rule;
@@ -1335,9 +1338,7 @@ HWTEST_F(AbilityTerminateTest,
     AppExecFwk_IEcologicalRuleManager_IsSupportPublishForm_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_IsSupportPublishForm_0100";
-    sptr<IRemoteObject> remoteObject_ =
-        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    sptr<AppExecFwk::IEcologicalRuleManager> erms = iface_cast<AppExecFwk::IEcologicalRuleManager>(remoteObject_);
+    sptr<AppExecFwk::IEcologicalRuleManager> erms = new (std::nothrow) TestIEcologicalRuleManager();
     EXPECT_NE(erms, nullptr);
     Want want;
     ErmsParams::CallerInfo callerInfo;
@@ -1355,57 +1356,10 @@ HWTEST_F(AbilityTerminateTest,
     AppExecFwk_IEcologicalRuleManager_QueryLastSyncTime_0100, Function | MediumTest | Level1)
 {
     GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_QueryLastSyncTime_0100";
-    sptr<IRemoteObject> remoteObject_ =
-        OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
-    sptr<AppExecFwk::IEcologicalRuleManager> erms = iface_cast<AppExecFwk::IEcologicalRuleManager>(remoteObject_);
+    sptr<AppExecFwk::IEcologicalRuleManager> erms = new (std::nothrow) TestIEcologicalRuleManager();
     EXPECT_NE(erms, nullptr);
     EXPECT_EQ(0, erms->QueryLastSyncTime());
     GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_QueryLastSyncTime_0100";
-}
-
-/**
- * @tc.number: AppExecFwk_ExperienceRule_ReadFromParcel_0100
- * @tc.name: ReadFromParcel
- * @tc.desc: test ReadFromParcel function
- */
-HWTEST_F(AbilityTerminateTest,
-    AppExecFwk_ExperienceRule_ReadFromParcel_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_ExperienceRule_ReadFromParcel_0100";
-    ErmsParams::ExperienceRule rule;
-    Parcel parcel;
-    EXPECT_EQ(true, rule.ReadFromParcel(parcel));
-    GTEST_LOG_(INFO) << "AppExecFwk_ExperienceRule_ReadFromParcel_0100";
-}
-
-/**
- * @tc.number: AppExecFwk_ExperienceRule_Marshalling_0100
- * @tc.name: Marshalling
- * @tc.desc: test Marshalling function
- */
-HWTEST_F(AbilityTerminateTest,
-    AppExecFwk_ExperienceRule_Marshalling_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_ExperienceRule_Marshalling_0100";
-    ErmsParams::ExperienceRule rule;
-    Parcel parcel;
-    EXPECT_EQ(true, rule.Marshalling(parcel));
-    GTEST_LOG_(INFO) << "AppExecFwk_ExperienceRule_Marshalling_0100";
-}
-
-/**
- * @tc.number: AppExecFwk_ExperienceRule_Unmarshalling_0100
- * @tc.name: Unmarshalling
- * @tc.desc: test Unmarshalling function
- */
-HWTEST_F(AbilityTerminateTest,
-    AppExecFwk_ExperienceRule_Unmarshalling_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_ExperienceRule_Unmarshalling_0100";
-    ErmsParams::ExperienceRule rule;
-    Parcel parcel;
-    EXPECT_NE(nullptr, rule.Unmarshalling(parcel));
-    GTEST_LOG_(INFO) << "AppExecFwk_ExperienceRule_Unmarshalling_0100";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

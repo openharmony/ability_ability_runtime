@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,8 @@
 #include "napi_remote_object.h"
 #include "iremote_object.h"
 #include "session_info.h"
-#include "ui_window.h"
+#include "foundation/window/window_manager/interfaces/innerkits/wm/window.h"
+#include "ui_extension_window_command.h"
 #include "want.h"
 
 namespace OHOS {
@@ -155,6 +156,8 @@ public:
      */
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId);
 
+    virtual void OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        AAFwk::WindowCommand winCmd);
     /**
      * @brief Called when this extension enters the <b>STATE_STOP</b> state.
      *
@@ -203,25 +206,31 @@ public:
      */
     virtual void Dump(const std::vector<std::string> &params, std::vector<std::string> &info);
 
-    void SetSessionInfo(sptr<AAFwk::SessionInfo> sessionInfo);
+    void SetExtensionWindowLifeCycleListener(const sptr<Rosen::IWindowLifeCycle> &listener);
 
-    sptr<AAFwk::SessionInfo> GetSessionInfo();
-
-    void SetSceneSessionStageListener(const std::shared_ptr<Rosen::ISessionStageStateListener> &listener);
+    /**
+     * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an extension ability
+     * and the result is returned.
+     * @param requestCode Indicates the request code returned after the ability is started. You can define the request
+     * code to identify the results returned by abilities. The value ranges from 0 to 65535.
+     * @param resultCode Indicates the result code returned after the ability is started. You can define the result
+     * code to identify an error.
+     * @param want Indicates the data returned after the ability is started. You can define the data returned. The
+     * value can be null.
+     */
+    virtual void OnAbilityResult(int requestCode, int resultCode, const Want &want);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
 protected:
     std::shared_ptr<AppExecFwk::AbilityHandler> handler_ = nullptr;
 
     //  window scene
-    std::shared_ptr<Ace::NG::UIWindow> uiWindow_;
-    std::shared_ptr<Rosen::ISessionStageStateListener> sceneSessionStageListener_ = nullptr;
+    sptr<Rosen::IWindowLifeCycle> extensionWindowLifeCycleListener_ = nullptr;
 private:
     std::shared_ptr<AppExecFwk::OHOSApplication> application_ = nullptr;
     std::shared_ptr<AAFwk::Want> launchWant_ = nullptr;
     std::shared_ptr<AAFwk::Want> lastRequestWant_ = nullptr;
     std::shared_ptr<CallingInfo> callingInfo_ = nullptr;
-    sptr<AAFwk::SessionInfo> sessionInfo_ = nullptr;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

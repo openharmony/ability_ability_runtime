@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,10 @@
 
 #include <mutex>
 #include <vector>
+#include <list>
+#include "cpp/mutex.h"
 
-#include "event_handler.h"
+#include "task_handler_wrap.h"
 #include "mission_listener_interface.h"
 
 namespace OHOS {
@@ -82,6 +84,20 @@ public:
      */
     void NotifyMissionMovedToFront(int32_t missionId);
 
+    /**
+     * notify listeners that mission was focused.
+     *
+     * @param missionId target mission id.
+     */
+    void NotifyMissionFocused(int32_t missionId);
+
+    /**
+     * notify listeners that mission was unfocused.
+     *
+     * @param missionId target mission id.
+     */
+    void NotifyMissionUnfocused(int32_t missionId);
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * notify listeners that mission icon has changed.
@@ -114,7 +130,7 @@ private:
     template<typename F, typename... Args>
     void CallListeners(F func, Args&&... args)
     {
-        std::lock_guard<std::recursive_mutex> guard(listenerLock_);
+        std::lock_guard<ffrt::mutex> guard(listenerLock_);
         for (auto listener : missionListeners_) {
             if (listener) {
                 (listener->*func)(std::forward<Args>(args)...);
@@ -134,8 +150,8 @@ private:
     };
 
 private:
-    std::recursive_mutex listenerLock_;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
+    ffrt::mutex listenerLock_;
+    std::shared_ptr<TaskHandlerWrap> handler_;
     std::vector<sptr<IMissionListener>> missionListeners_;
     sptr<IRemoteObject::DeathRecipient> listenerDeathRecipient_;
 };

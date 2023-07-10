@@ -17,6 +17,7 @@
 
 #include "extension_module_loader.h"
 #include "hilog_wrapper.h"
+#include "request_info.h"
 
 using namespace testing::ext;
 
@@ -103,6 +104,21 @@ HWTEST_F(AbilityExtensionModuleLoaderTest, ExtensionModuleLoader_GetExtensionMod
     auto result = ExtensionModuleLoader::GetLoader("/system/lib/libc++.so").Create(runtime);
     EXPECT_TRUE(result == nullptr);
     HILOG_INFO("ExtensionModuleLoader_GetExtensionModuleLoader_0200 end");
+}
+
+/**
+ * @tc.number: RequestInfo_GetToken_0100
+ * @tc.name: GetToken
+ * @tc.desc: GetToken
+ */
+HWTEST_F(AbilityExtensionModuleLoaderTest, RequestInfo_GetToken_0100, TestSize.Level1)
+{
+    HILOG_INFO("RequestInfo_GetToken_0100 start");
+    sptr<IRemoteObject> token = nullptr;
+    int32_t left = 0, top = 0, width = 0, height = 0;
+    auto requestInfo = std::make_shared<RequestInfo>(token, left, top, width, height);
+    EXPECT_EQ(requestInfo->GetToken(), nullptr);
+    HILOG_INFO("RequestInfo_GetToken_0100 end");
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

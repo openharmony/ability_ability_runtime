@@ -34,7 +34,6 @@ class JsUIExtension : public UIExtension, public std::enable_shared_from_this<Js
 public:
     explicit JsUIExtension(JsRuntime& jsRuntime);
     virtual ~JsUIExtension() override;
-    static void Finalizer(NativeEngine* engine, void* data, void* hint);
 
     /**
      * @brief Create JsUIExtension.
@@ -66,7 +65,6 @@ public:
      * @param Want Indicates the {@link Want} structure containing startup information about the ui extension.
      */
     virtual void OnStart(const AAFwk::Want &want) override;
-    virtual void OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 
     /**
      * @brief Called when this ui extension is connected for the first time.
@@ -102,6 +100,9 @@ public:
      */
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
 
+    virtual void OnCommandWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        AAFwk::WindowCommand winCmd) override;
+
     /**
      * @brief Called when this ui extension enters the <b>STATE_STOP</b> state.
      *
@@ -115,7 +116,7 @@ public:
      *
      * @param configuration Indicates the updated configuration information.
      */
-    void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
+    virtual void OnConfigurationUpdated(const AppExecFwk::Configuration& configuration) override;
 
     /**
      * @brief Called when this extension enters the <b>STATE_FOREGROUND</b> state.
@@ -124,7 +125,7 @@ public:
      * The extension in the <b>STATE_FOREGROUND</b> state is visible.
      * You can override this function to implement your own processing logic.
      */
-    void OnForeground(const Want &want) override;
+    virtual void OnForeground(const Want &want) override;
 
     /**
      * @brief Called when this extension enters the <b>STATE_BACKGROUND</b> state.
@@ -133,7 +134,7 @@ public:
      * The extension in the <b>STATE_BACKGROUND</b> state is invisible.
      * You can override this function to implement your own processing logic.
      */
-    void OnBackground() override;
+    virtual void OnBackground() override;
 
     /**
      * @brief Called when ui extension need dump info.
@@ -143,21 +144,37 @@ public:
      */
     virtual void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
-    static NativeValue* LoadContent(NativeEngine *engine, NativeCallbackInfo *info);
+    /**
+     * @brief Called when startAbilityForResult(ohos.aafwk.content.Want,int) is called to start an extension ability
+     * and the result is returned.
+     * @param requestCode Indicates the request code returned after the ability is started. You can define the request
+     * code to identify the results returned by abilities. The value ranges from 0 to 65535.
+     * @param resultCode Indicates the result code returned after the ability is started. You can define the result
+     * code to identify an error.
+     * @param resultData Indicates the data returned after the ability is started. You can define the data returned. The
+     * value can be null.
+     */
+    void OnAbilityResult(int requestCode, int resultCode, const Want &resultData) override;
 
 private:
-    NativeValue* CallObjectMethod(const char* name, NativeValue* const *argv = nullptr, size_t argc = 0);
+    virtual void BindContext(NativeEngine& engine, NativeObject* obj);
 
-    void BindContext(NativeEngine& engine, NativeObject* obj);
+    NativeValue* CallObjectMethod(const char* name, NativeValue* const *argv = nullptr, size_t argc = 0);
 
     NativeValue* CallOnConnect(const AAFwk::Want &want);
 
     NativeValue* CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
 
+    void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
+    void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
+    void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
+
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
-    std::string contextPath_;
+    std::map<sptr<IRemoteObject>, sptr<Rosen::Window>> uiWindowMap_;
+    std::set<sptr<IRemoteObject>> foregroundWindows_;
+    std::map<sptr<IRemoteObject>, std::shared_ptr<NativeReference>> contentSessions_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

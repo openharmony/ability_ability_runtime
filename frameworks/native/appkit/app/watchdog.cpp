@@ -18,6 +18,7 @@
 #include <parameter.h>
 #include <unistd.h>
 
+#include "app_mgr_client.h"
 #include "app_recovery.h"
 #include "hisysevent.h"
 #include "hilog_wrapper.h"
@@ -206,6 +207,12 @@ void Watchdog::ReportEvent()
     if (eventType == "THREAD_BLOCK_6S") {
         AppRecovery::GetInstance().ScheduleSaveAppState(StateReason::APP_FREEZE);
         AppRecovery::GetInstance().ScheduleRecoverApp(StateReason::APP_FREEZE);
+        FaultData faultData;
+        faultData.faultType = FaultDataType::APP_FREEZE;
+        faultData.errorObject.message = msgContent;
+        faultData.errorObject.stack = stack;
+        faultData.errorObject.name = eventType;
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFault(faultData);
     }
 }
 

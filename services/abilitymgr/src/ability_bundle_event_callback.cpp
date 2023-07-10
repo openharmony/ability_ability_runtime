@@ -15,21 +15,18 @@
 
 #include "ability_bundle_event_callback.h"
 
+#include "ability_manager_service.h"
+
 namespace OHOS {
 namespace AAFwk {
-AbilityBundleEventCallback::AbilityBundleEventCallback() : eventHandler_(nullptr) {}
-
-AbilityBundleEventCallback::AbilityBundleEventCallback(std::shared_ptr<AbilityEventHandler> eventHandler)
-{
-    eventHandler_ = eventHandler;
-}
-
+AbilityBundleEventCallback::AbilityBundleEventCallback(std::shared_ptr<TaskHandlerWrap> taskHandler)
+    : taskHandler_(taskHandler) {}
 
 void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData eventData)
 {
     // env check
-    if (eventHandler_ == nullptr) {
-        HILOG_ERROR("OnReceiveEvent failed, eventHandler_ is nullptr");
+    if (taskHandler_ == nullptr) {
+        HILOG_ERROR("OnReceiveEvent failed, taskHandler is nullptr");
         return;
     }
     const Want& want = eventData.GetWant();
@@ -44,21 +41,48 @@ void AbilityBundleEventCallback::OnReceiveEvent(const EventFwk::CommonEventData 
     }
     HILOG_DEBUG("OnReceiveEvent, action:%{public}s.", action.c_str());
 
-    wptr<AbilityBundleEventCallback> weakThis = this;
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED ||
-        action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED ||
         action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
-        // install or update or uninstall module/bundle
-        auto task = [weakThis, bundleName, uid]() {
-            HILOG_DEBUG("OnReceiveEvent, bundle changed, bundleName: %{public}s", bundleName.c_str());
-            sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
-            if (sharedThis) {
-                sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid);
-            }
-        };
-        eventHandler_->PostTask(task);
+        // install or uninstall module/bundle
+        HandleUpdatedModuleInfo(bundleName, uid);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
+        HandleUpdatedModuleInfo(bundleName, uid);
+        HandleAppUpgradeCompleted(bundleName, uid);
     }
 }
 
+void AbilityBundleEventCallback::HandleUpdatedModuleInfo(const std::string &bundleName, int32_t uid)
+{
+    wptr<AbilityBundleEventCallback> weakThis = this;
+    auto task = [weakThis, bundleName, uid]() {
+        sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
+        if (sharedThis == nullptr) {
+            HILOG_ERROR("sharedThis is nullptr.");
+            return;
+        }
+        sharedThis->abilityEventHelper_.HandleModuleInfoUpdated(bundleName, uid);
+    };
+    taskHandler_->SubmitTask(task);
+}
+
+void AbilityBundleEventCallback::HandleAppUpgradeCompleted(const std::string &bundleName, int32_t uid)
+{
+    wptr<AbilityBundleEventCallback> weakThis = this;
+    auto task = [weakThis, bundleName, uid]() {
+        sptr<AbilityBundleEventCallback> sharedThis = weakThis.promote();
+        if (sharedThis == nullptr) {
+            HILOG_ERROR("sharedThis is nullptr.");
+            return;
+        }
+
+        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+        if (abilityMgr == nullptr) {
+            HILOG_ERROR("abilityMgr is nullptr.");
+            return;
+        }
+        abilityMgr->AppUpgradeCompleted(bundleName, uid);
+    };
+    taskHandler_->SubmitTask(task);
+}
 } // namespace AAFwk
 } // namespace OHOS

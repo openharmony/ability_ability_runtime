@@ -19,6 +19,7 @@
 #include <map>
 #include <mutex>
 #include <regex>
+#include "cpp/mutex.h"
 
 #include "iremote_object.h"
 #include "refbase.h"
@@ -161,6 +162,14 @@ public:
     */
     int32_t DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
 
+    /**
+     * Set AbilityForegroundingFlag of an app-record to true.
+     *
+     * @param pid, pid.
+     *
+     */
+    void SetAbilityForegroundingFlagToAppRecord(const pid_t pid);
+
     void HandleTerminateTimeOut(int64_t eventId);
     void HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecord(const int64_t eventId);
@@ -204,11 +213,13 @@ private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     void AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
+    std::shared_ptr<AppRunningRecord> GetAppRunningRecordByPidInner(const pid_t pid);
+    std::shared_ptr<AppRunningRecord> GetAppRunningRecordByTokenInner(const sptr<IRemoteObject> &abilityToken);
 
 private:
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;
     std::map<const std::string, int> processRestartRecord_;
-    std::recursive_mutex lock_;
+    ffrt::mutex lock_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

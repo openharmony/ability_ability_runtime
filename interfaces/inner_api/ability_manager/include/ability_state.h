@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,8 +42,23 @@ enum AbilityState {
     FOREGROUNDING,
     BACKGROUNDING,
     FOREGROUND_FAILED,
+    BACKGROUND_FAILED,
     FOREGROUND_INVALID_MODE,
     FOREGROUND_WINDOW_FREEZED,
+    FOREGROUND_DO_NOTHING,
+};
+
+enum Reason {
+    REASON_MIN = 0,
+    REASON_UNKNOWN = REASON_MIN,
+    REASON_NORMAL,
+    REASON_CPP_CRASH,
+    REASON_JS_ERROR,
+    REASON_APP_FREEZE,
+    REASON_PERFORMANCE_CONTROL,
+    REASON_RESOURCE_CONTROL,
+    REASON_UPGRADE,
+    REASON_MAX = REASON_UPGRADE,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

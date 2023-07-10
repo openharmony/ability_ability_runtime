@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "ability_window_configuration.h"
 #include "hilog_wrapper.h"
 #include "launch_param.h"
+#include "mission_info.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "recovery_param.h"
@@ -66,6 +67,12 @@ static napi_value InitLastExitReasonObject(napi_env env)
     NAPI_CALL(env, SetEnumItem(env, object, "UNKNOWN", LASTEXITREASON_UNKNOWN));
     NAPI_CALL(env, SetEnumItem(env, object, "ABILITY_NOT_RESPONDING", LASTEXITREASON_ABILITY_NOT_RESPONDING));
     NAPI_CALL(env, SetEnumItem(env, object, "NORMAL", LASTEXITREASON_NORMAL));
+    NAPI_CALL(env, SetEnumItem(env, object, "CPP_CRASH", LASTEXITREASON_CPP_CRASH));
+    NAPI_CALL(env, SetEnumItem(env, object, "JS_ERROR", LASTEXITREASON_JS_ERROR));
+    NAPI_CALL(env, SetEnumItem(env, object, "APP_FREEZE", LASTEXITREASON_APP_FREEZE));
+    NAPI_CALL(env, SetEnumItem(env, object, "PERFORMANCE_CONTROL", LASTEXITREASON_PERFORMANCE_CONTROL));
+    NAPI_CALL(env, SetEnumItem(env, object, "RESOURCE_CONTROL", LASTEXITREASON_RESOURCE_CONTROL));
+    NAPI_CALL(env, SetEnumItem(env, object, "UPGRADE", LASTEXITREASON_UPGRADE));
 
     return object;
 }
@@ -78,6 +85,17 @@ static napi_value InitOnContinueResultObject(napi_env env)
     NAPI_CALL(env, SetEnumItem(env, object, "AGREE", ONCONTINUE_AGREE));
     NAPI_CALL(env, SetEnumItem(env, object, "REJECT", ONCONTINUE_REJECT));
     NAPI_CALL(env, SetEnumItem(env, object, "MISMATCH", ONCONTINUE_MISMATCH));
+
+    return object;
+}
+
+static napi_value InitContinueStateObject(napi_env env)
+{
+    napi_value object;
+    NAPI_CALL(env, napi_create_object(env, &object));
+
+    NAPI_CALL(env, SetEnumItem(env, object, "ACTIVE", AAFwk::ContinueState::CONTINUESTATE_ACTIVE));
+    NAPI_CALL(env, SetEnumItem(env, object, "INACTIVE", AAFwk::ContinueState::CONTINUESTATE_INACTIVE));
 
     return object;
 }
@@ -158,6 +176,12 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
         return nullptr;
     }
 
+    napi_value continueState = InitContinueStateObject(env);
+    if (continueState == nullptr) {
+        HILOG_ERROR("failed to create continue state object");
+        return nullptr;
+    }
+
     napi_value windowMode = InitWindowModeObject(env);
     if (windowMode == nullptr) {
         HILOG_ERROR("failed to create window mode object");
@@ -186,6 +210,7 @@ static napi_value AbilityConstantInit(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("LaunchReason", launchReason),
         DECLARE_NAPI_PROPERTY("LastExitReason", lastExitReason),
         DECLARE_NAPI_PROPERTY("OnContinueResult", onContinueResult),
+        DECLARE_NAPI_PROPERTY("ContinueState", continueState),
         DECLARE_NAPI_PROPERTY("WindowMode", windowMode),
         DECLARE_NAPI_PROPERTY("MemoryLevel", memoryLevel),
         DECLARE_NAPI_PROPERTY("OnSaveResult", saveResult),

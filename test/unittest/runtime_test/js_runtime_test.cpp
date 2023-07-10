@@ -75,6 +75,30 @@ void JsRuntimeTest::TearDown()
 {}
 
 /**
+ * @tc.name: JsperfProfilerCommandParse_100
+ * @tc.desc: JsRuntime test for JsperfProfilerCommandParse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsperfProfilerCommandParse_100, TestSize.Level1)
+{
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options_);
+    std::string command = "";
+    constexpr int32_t defaultVal = 500;
+    constexpr int32_t emptyVal = 0;
+    ASSERT_EQ(jsRuntime->JsperfProfilerCommandParse(command, defaultVal), emptyVal);
+    command = "jsperfabc";
+    ASSERT_EQ(jsRuntime->JsperfProfilerCommandParse(command, defaultVal), defaultVal);
+    command = "jsperf";
+    ASSERT_EQ(jsRuntime->JsperfProfilerCommandParse(command, defaultVal), defaultVal);
+    command = "jsperf ";
+    ASSERT_EQ(jsRuntime->JsperfProfilerCommandParse(command, defaultVal), defaultVal);
+    command = "jsperf 1000";
+    ASSERT_NE(jsRuntime->JsperfProfilerCommandParse(command, defaultVal), defaultVal);
+    command = " jsperf 1000";
+    ASSERT_NE(jsRuntime->JsperfProfilerCommandParse(command, defaultVal), defaultVal);
+}
+
+/**
  * @tc.name: JsRuntimeTest_0100
  * @tc.desc: JsRuntime Test
  * @tc.type: FUNC
@@ -323,28 +347,6 @@ HWTEST_F(JsRuntimeTest, JsRuntimeLoadSystemModuleTest_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: JsRuntimePostTaskTest_0100
- * @tc.desc: JsRuntime test for PostTask.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, JsRuntimePostTaskTest_0100, TestSize.Level0)
-{
-    HILOG_INFO("PostTask start");
-
-    std::unique_ptr<JsRuntime> jsRuntime = std::make_unique<MockJsRuntime>();
-    EXPECT_TRUE(jsRuntime != nullptr);
-
-    jsRuntime->eventHandler_ = nullptr;
-
-    auto task = []() { GTEST_LOG_(INFO) << "JsRuntimePostTaskTest_0100 task called"; };
-    std::string name = "";
-    int64_t delayTime = 0;
-    jsRuntime->PostTask(task, name, delayTime);
-
-    HILOG_INFO("PostTask end");
-}
-
-/**
  * @tc.name: RuntimeSavePreloadedTest_0100
  * @tc.desc: Runtime test for SavePreloaded.
  * @tc.type: FUNC
@@ -397,24 +399,6 @@ HWTEST_F(JsRuntimeTest, JsRuntimeLoadSystemModulesTest_0100, TestSize.Level0)
 }
 
 /**
- * @tc.name: JsRuntimeUpdateExtensionTypeTest_0100
- * @tc.desc: JsRuntime test for UpdateExtensionType.
- * @tc.type: FUNC
- */
-HWTEST_F(JsRuntimeTest, JsRuntimeUpdateExtensionTypeTest_0100, TestSize.Level0)
-{
-    HILOG_INFO("UpdateExtensionType start");
-
-    auto jsRuntime = std::make_unique<JsRuntime>();
-    EXPECT_TRUE(jsRuntime != nullptr);
-
-    int32_t extensionType = 1;
-    jsRuntime->UpdateExtensionType(extensionType);
-
-    HILOG_INFO("UpdateExtensionType end");
-}
-
-/**
  * @tc.name: JsRuntimeStartDebugModeTest_0100
  * @tc.desc: JsRuntime test for StartDebugMode.
  * @tc.type: FUNC
@@ -428,6 +412,7 @@ HWTEST_F(JsRuntimeTest, JsRuntimeStartDebugModeTest_0100, TestSize.Level0)
 
     bool needBreakPoint = true;
     jsRuntime->StartDebugMode(needBreakPoint);
+    jsRuntime->StopDebugMode();
 
     HILOG_INFO("StartDebugMode end");
 }
@@ -612,6 +597,316 @@ HWTEST_F(JsRuntimeTest, RegisterUncaughtExceptionHandler_0200, TestSize.Level0)
     JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
     jsRuntime->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);
     HILOG_INFO("RegisterUncaughtExceptionHandler end");
+}
+
+/**
+ * @tc.name: ReadSourceMapData_0100
+ * @tc.desc: JsRuntime test for ReadSourceMapData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, ReadSourceMapData_0100, TestSize.Level0)
+{
+    HILOG_INFO("ReadSourceMapData start");
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+
+    ASSERT_NE(jsRuntime, nullptr);
+
+    std::string hapPath = "";
+    std::string sourceMapPath = "";
+    std::string content = "";
+    jsRuntime->ReadSourceMapData(hapPath, sourceMapPath, content);
+    HILOG_INFO("ReadSourceMapData end");
+}
+
+/**
+ * @tc.name: StopDebugger_0100
+ * @tc.desc: JsRuntime test for StopDebugger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, StopDebugger_0100, TestSize.Level0)
+{
+    HILOG_INFO("StopDebugger start");
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+
+    ASSERT_NE(jsRuntime, nullptr);
+
+    jsRuntime->StopDebugger();
+    HILOG_INFO("StopDebugger end");
+}
+
+/**
+ * @tc.name: GetFileBuffer_0200
+ * @tc.desc: JsRuntime test for GetFileBuffer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, GetFileBuffer_0200, TestSize.Level0)
+{
+    HILOG_INFO("GetFileBuffer start");
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+
+    ASSERT_NE(jsRuntime, nullptr);
+
+    std::string filePath = "";
+    std::string fileFullName = "";
+    std::vector<uint8_t> buffer;
+    jsRuntime->GetFileBuffer(filePath, fileFullName, buffer);
+    HILOG_INFO("GetFileBuffer end");
+}
+
+/**
+ * @tc.name: JsRuntimeRunScriptTest_0100
+ * @tc.desc: JsRuntime test for RunScript.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeRunScriptTest_0100, TestSize.Level0)
+{
+    HILOG_INFO("RunScript start");
+
+    std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(options_);
+    EXPECT_TRUE(jsRuntime != nullptr);
+
+    std::string srcPath = "";
+    std::string hapPath = "";
+    bool useCommonChunk = true;
+    bool ret = (static_cast<AbilityRuntime::JsRuntime&>(*jsRuntime)).RunScript(srcPath, hapPath, useCommonChunk);
+    EXPECT_FALSE(ret);
+
+    HILOG_INFO("RunScript end");
+}
+
+/**
+ * @tc.name: JsRuntimeLoadScriptTest_0100
+ * @tc.desc: JsRuntime test for LoadScript.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeLoadScriptTest_0100, TestSize.Level0)
+{
+    AbilityRuntime::Runtime::Options options;
+    options.preload = false;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+
+    std::string path = "";
+    std::vector<uint8_t>* buffer = nullptr;
+    bool isBundle = true;
+    jsRuntime->LoadScript(path, buffer, isBundle);
+}
+
+/**
+ * @tc.name: JsRuntimeLoadScriptTest_0200
+ * @tc.desc: JsRuntime test for LoadScript.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeLoadScriptTest_0200, TestSize.Level0)
+{
+    AbilityRuntime::Runtime::Options options;
+    options.preload = false;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+
+    std::string path = "";
+    uint8_t *buffer = nullptr;
+    size_t len = 1;
+    bool isBundle = true;
+    jsRuntime->LoadScript(path, buffer, len, isBundle);
+}
+
+/**
+ * @tc.name: JsRuntimeStopDebuggerTest_0100
+ * @tc.desc: JsRuntime test for StopDebugger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeStopDebuggerTest_0100, TestSize.Level0)
+{
+    AbilityRuntime::Runtime::Options options;
+    options.preload = false;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    ASSERT_NE(jsRuntime, nullptr);
+
+    jsRuntime->StopDebugger();
+}
+
+/**
+ * @tc.name: PostSyncTask_0100
+ * @tc.desc: Js runtime post sync task.
+ * @tc.type: FUNC
+ * @tc.require: issueI7C87T
+ */
+HWTEST_F(JsRuntimeTest, PostSyncTask_0100, TestSize.Level0)
+{
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options_);
+    ASSERT_NE(jsRuntime, nullptr);
+
+    std::string taskName = "syncTask001";
+    bool taskExecuted = false;
+    auto task = [taskName, &taskExecuted]() {
+        HILOG_INFO("%{public}s called.", taskName.c_str());
+        taskExecuted = true;
+    };
+    jsRuntime->PostSyncTask(task, taskName);
+    EXPECT_EQ(taskExecuted, true);
+}
+
+/**
+ * @tc.name: PostSyncTask_0200
+ * @tc.desc: Js runtime post sync task in preload scene.
+ * @tc.type: FUNC
+ * @tc.require: issueI7C87T
+ */
+HWTEST_F(JsRuntimeTest, PostSyncTask_0200, TestSize.Level1)
+{
+    options_.preload = true;
+    std::unique_ptr<Runtime> jsRuntime = JsRuntime::Create(options_);
+    EXPECT_TRUE(jsRuntime != nullptr);
+
+    Runtime::SavePreloaded(std::move(jsRuntime));
+
+    options_.preload = false;
+    auto newJsRuntime = JsRuntime::Create(options_);
+    EXPECT_TRUE(newJsRuntime != nullptr);
+
+    std::string taskName = "syncTask002";
+    bool taskExecuted = false;
+    auto task = [taskName, &taskExecuted]() {
+        HILOG_INFO("%{public}s called.", taskName.c_str());
+        taskExecuted = true;
+    };
+    newJsRuntime->PostSyncTask(task, taskName);
+    EXPECT_EQ(taskExecuted, true);
+}
+
+/**
+ * @tc.name: ReInitJsEnvImpl_0100
+ * @tc.desc: Js runtime reinit js env impl.
+ * @tc.type: FUNC
+ * @tc.require: issueI7C87T
+ */
+HWTEST_F(JsRuntimeTest, ReInitJsEnvImpl_0100, TestSize.Level1)
+{
+    auto jsRuntime = std::make_unique<JsRuntime>();
+    EXPECT_TRUE(jsRuntime != nullptr);
+
+    // called when jsEnv is invalid.
+    jsRuntime->ReInitJsEnvImpl(options_);
+
+    auto ret = jsRuntime->CreateJsEnv(options_);
+    EXPECT_EQ(ret, true);
+    jsRuntime->ReInitJsEnvImpl(options_);
+}
+
+/**
+ * @tc.name: JsRuntimeStartProfilerTest_0100
+ * @tc.desc: JsRuntime test for StartProfiler.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeStartProfilerTest_0100, TestSize.Level1)
+{
+    AbilityRuntime::Runtime::Options options;
+    options.preload = false;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+    std::string perfCmd = "profile test";
+    jsRuntime->StartProfiler(perfCmd);
+    ASSERT_NE(jsRuntime, nullptr);
+}
+
+/**
+ * @tc.name: PostTask_0100
+ * @tc.desc: Js runtime post task.
+ * @tc.type: FUNC
+ * @tc.require: issueI7C87T
+ */
+HWTEST_F(JsRuntimeTest, PostTask_0100, TestSize.Level0)
+{
+    HILOG_INFO("PostTask_0100 start");
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options_);
+    ASSERT_NE(jsRuntime, nullptr);
+
+    std::string taskName = "postTask001";
+    bool taskExecuted = false;
+    auto task = [taskName, &taskExecuted]() {
+        HILOG_INFO("%{public}s called.", taskName.c_str());
+        taskExecuted = true;
+    };
+    int64_t delayTime = 10;
+    jsRuntime->PostTask(task, taskName, delayTime);
+    EXPECT_NE(taskExecuted, true);
+    HILOG_INFO("PostTask_0100 end");
+}
+
+/**
+ * @tc.name: RemoveTask_0100
+ * @tc.desc: Js runtime remove task.
+ * @tc.type: FUNC
+ * @tc.require: issueI7C87T
+ */
+HWTEST_F(JsRuntimeTest, RemoveTask_0100, TestSize.Level0)
+{
+    HILOG_INFO("RemoveTask_0100 start");
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options_);
+    ASSERT_NE(jsRuntime, nullptr);
+
+    std::string taskName = "removeTask001";
+    bool taskExecuted = false;
+    auto task = [taskName, &taskExecuted]() {
+        HILOG_INFO("%{public}s called.", taskName.c_str());
+        taskExecuted = true;
+    };
+    int64_t delayTime = 10;
+    jsRuntime->PostTask(task, taskName, delayTime);
+    jsRuntime->RemoveTask(taskName);
+    EXPECT_NE(taskExecuted, true);
+    HILOG_INFO("RemoveTask_0100 end");
+}
+
+/**
+ * @tc.name: StartDebugger_0100
+ * @tc.desc: JsRuntime test for StartDebugger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, StartDebugger_0100, TestSize.Level0)
+{
+    HILOG_INFO("StartDebugger_0100 start");
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+
+    ASSERT_NE(jsRuntime, nullptr);
+
+    bool needBreakPoint = false;
+    uint32_t instanceId = 1;
+
+    jsRuntime->StartDebugger(needBreakPoint, instanceId);
+    // debug mode is global option, maybe has started by other testcase, not check here.
+    HILOG_INFO("StartDebugger_0100 end");
+}
+
+/**
+ * @tc.name: DoCleanWorkAfterStageCleaned_0100
+ * @tc.desc: JsRuntime test for DoCleanWorkAfterStageCleaned.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, DoCleanWorkAfterStageCleaned_0100, TestSize.Level0)
+{
+    HILOG_INFO("DoCleanWorkAfterStageCleaned_0100 start");
+
+    AbilityRuntime::Runtime::Options options;
+    options.preload = true;
+    auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
+
+    ASSERT_NE(jsRuntime, nullptr);
+
+    jsRuntime->DoCleanWorkAfterStageCleaned();
+    HILOG_INFO("DoCleanWorkAfterStageCleaned_0100 end");
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

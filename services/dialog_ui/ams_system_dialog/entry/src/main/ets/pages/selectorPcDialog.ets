@@ -42,7 +42,6 @@ struct SelectorPcDialog {
   @State private moreHapListVisibility:number = 2;
   @State private totalHigh: number = 0;
   @State private isCheckSelected: boolean = false;
-  @State private scrollbarCtrl: number = 0;
   @State private action: string = "";
   @State public hapListBackGround: number[] = [0xffffff];
   @State public hapListPngVisibility: number[] = [];
@@ -157,7 +156,6 @@ struct SelectorPcDialog {
       let recommendAppAreaHigh = 48;
       let openModeHigh = 54;
       let morelist = 0;
-      this.scrollbarCtrl = 2;
       morelist ++;
         if (this.hapList.length == 2) {
           if(morelist == 1) {
@@ -177,12 +175,9 @@ struct SelectorPcDialog {
           }
       } else if (this.hapList.length == 4) {
           this.totalHigh = 543;
-          this.scrollbarCtrl = 0;
           heightTotalVp = this.hapList.length * heightVal + recommendAppAreaHigh + openModeHigh;
           if(morelist != 0) {
-              this.scrollbarCtrl = 2;
           } else {
-              this.scrollbarCtrl = 0; 
           }
       } else if (this.hapList.length > 4) {
           this.totalHigh = 543;
@@ -210,12 +205,11 @@ struct SelectorPcDialog {
         if(this.hapList.length > 6) {
             heightTotalVp = 6 * heightVal;
             this.totalHigh = 6 * heightVal + titleAreaHigh + buttonAreaHigh;
-            this.scrollbarCtrl = 2;
         }
     }
     if(globalThis.modelFlag == false) {
         heightTotalVp = this.hapList.length * heightVal + recommendAppAreaHigh + openModeHigh;
-        if (this.hapList.length == 2) {
+        if (this.hapList.length == 1 || this.hapList.length == 2) {
             this.totalHigh = 415;
         } else if (this.hapList.length == 3) {
             this.totalHigh = 479;
@@ -224,7 +218,6 @@ struct SelectorPcDialog {
         } else if (this.hapList.length > 4) {
             this.totalHigh = 543;
             heightTotalVp = 4 * heightVal + recommendAppAreaHigh + openModeHigh - 32;
-            this.scrollbarCtrl = 2;
         }
     }
     this.pcSelectorlist = {
@@ -243,163 +236,165 @@ struct SelectorPcDialog {
             .margin({ left: 48 })
             .width(394)
             .height(56)
-          List() {
-            ListItem() {
-              Text($r("app.string.message_recommendApps_selector"))
-                .fontSize(14)
-                .fontWeight(FontWeight.Medium)
-                .width(394)
-                .height(48)
-                .visibility(this.recommendAppsVisiable)
-            }
-          ForEach(globalThis.pcShowHapList, (item: any, current) => {
+          Scroll() {
+            List() {
               ListItem() {
-                Flex({ direction: FlexDirection.Row }) {
-                  if (item.split("#")[3] != "") {
-                    Image(item.split("#")[3])
-                      .height(48)
-                      .width(48)
-                      .alignSelf(ItemAlign.Center)
-                      .margin({ left : 16 })
-                      .borderRadius(12)
-                  } else {
-                    Image($r("app.media.app_icon"))
-                      .height(48)
-                      .width(48)
-                      .alignSelf(ItemAlign.Center)
-                      .margin({ left : 16 })
-                      .borderRadius(12)
+                Text($r("app.string.message_recommendApps_selector"))
+                  .fontSize(14)
+                  .fontWeight(FontWeight.Medium)
+                  .width(394)
+                  .height(48)
+                  .visibility(this.recommendAppsVisiable)
+              }
+            ForEach(globalThis.pcShowHapList, (item: any, current) => {
+                ListItem() {
+                  Flex({ direction: FlexDirection.Row }) {
+                    if (item.split("#")[3] != "") {
+                      Image(item.split("#")[3])
+                        .height(48)
+                        .width(48)
+                        .alignSelf(ItemAlign.Center)
+                        .margin({ left : 16 })
+                        .borderRadius(12)
+                    } else {
+                      Image($r("app.media.app_icon"))
+                        .height(48)
+                        .width(48)
+                        .alignSelf(ItemAlign.Center)
+                        .margin({ left : 16 })
+                        .borderRadius(12)
+                    }
+                    if (item.split("#")[2] != "") {
+                      Text(item.split("#")[2])
+                        .fontSize(16)
+                        .width("60%")
+                        .height(64)
+                        .alignSelf(ItemAlign.Center)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .margin({ left : 16 })
+                    } else {
+                      Text(item.split("#")[0])
+                        .fontSize(16)
+                        .width("60%")
+                        .height(64)
+                        .alignSelf(ItemAlign.Center)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .margin({ left : 16 })
+                    }
+                    Image($r("app.media.selectedMark"))
+                        .height(24)
+                        .width(24)
+                        .alignSelf(ItemAlign.Center)
+                        .margin({ right : 16 })
+                        .visibility(this.hapListPngVisibility[current])
                   }
-                  if (item.split("#")[2] != "") {
-                    Text(item.split("#")[2])
-                      .fontSize(16)
-                      .width("60%")
-                      .height(64)
-                      .alignSelf(ItemAlign.Center)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                      .margin({ left : 16 })
-                  } else {
-                    Text(item.split("#")[0])
-                      .fontSize(16)
-                      .width("60%")
-                      .height(64)
-                      .alignSelf(ItemAlign.Center)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                      .margin({ left : 16 })
-                  }
-                  Image($r("app.media.selectedMark"))
-                      .height(24)
-                      .width(24)
-                      .alignSelf(ItemAlign.Center)
-                      .margin({ right : 16 })
-                      .visibility(this.hapListPngVisibility[current])
+                  .onClick(() => {
+                    this.cleanFirstListColorAndVisibility();
+                    this.cleanSecondListColorAndVisibility();
+                    this.selectItem = item;
+                    this.hapListBackGround[current] = 0x1A0A59F7;
+                    this.hapListPngVisibility[current] = 0;
+                    this.isCheck = true;
+                  })
                 }
-                .onClick(() => {
-                  this.cleanFirstListColorAndVisibility();
-                  this.cleanSecondListColorAndVisibility();
-                  this.selectItem = item;
-                  this.hapListBackGround[current] = 0x1A0A59F7;
-                  this.hapListPngVisibility[current] = 0;
-                  this.isCheck = true;
+                .backgroundColor(this.hapListBackGround[current])
+                .borderRadius(12)
+                .height(64)
+                .width(328)
+              }, item => item)
+              ListItem() {
+                Button($r("app.string.message_moreOpenMode_selector"),{ type: ButtonType.Capsule })
+                  .fontSize(16)
+                  .backgroundColor('#ffffffff')
+                  .fontWeight(FontWeight.Medium)
+                  .width(128)
+                  .height(40)
+                  .fontColor('#0A59F7')
+                  .margin({ right : 218 })
+                  .onClick(() => {
+                    this.onClickMoreApp()
+                    this.moreOpenModeVisiable = 2
+                    this.moreOpenModeAreaHigh = 0
+                    this.moreHapListVisibility = 0
+                    this.moreAppsVisiable = 0
+                    this.moreAppsAreaHigh = 48
                 })
               }
-              .backgroundColor(this.hapListBackGround[current])
-              .borderRadius(12)
-              .height(64)
+              .visibility(this.moreOpenModeVisiable)
               .width(346)
-            }, item => item)
-            ListItem() {
-              Button($r("app.string.message_moreOpenMode_selector"),{ type: ButtonType.Capsule })
-                .fontSize(16)
-                .backgroundColor('#ffffffff')
-                .fontWeight(FontWeight.Medium)
-                .width(128)
-                .height(40)
-                .fontColor('#0A59F7')
-                .margin({ right : 218 })
-                .onClick(() => {
-                  this.onClickMoreApp()
-                  this.moreOpenModeVisiable = 2
-                  this.moreOpenModeAreaHigh = 0
-                  this.moreHapListVisibility = 0
-                  this.moreAppsVisiable = 0
-                  this.moreAppsAreaHigh = 48
-              })
-            }
-            .visibility(this.moreOpenModeVisiable)
-            .width(346)
-            .height(this.moreOpenModeAreaHigh)
-            ListItem() {
-              Text($r("app.string.message_moreApps_selector"))
-                .fontSize(14)
-                .fontWeight(FontWeight.Medium)
-                .visibility(this.moreAppsVisiable)
-                .margin({ right : 234 })
-            }
-            .width(346)
-            .height(this.moreAppsAreaHigh)
-            ForEach(this.pcShowMoreHapList, (item: any, current) => {
+              .height(this.moreOpenModeAreaHigh)
               ListItem() {
-                Flex({ direction: FlexDirection.Row }) {
-                  if (item.split("#")[3] != "") {
-                    Image(item.split("#")[3])
-                      .height(48)
-                      .width(48)
-                      .alignSelf(ItemAlign.Center)
-                      .margin({ left : 16 })
-                      .borderRadius(12)
-                  } else {
-                    Image($r("app.media.app_icon"))
-                      .height(48)
-                      .width(48)
-                      .alignSelf(ItemAlign.Center)
-                      .margin({ left : 16 })
-                      .borderRadius(12)
-                  }
-                  if (item.split("#")[2] != "") {
-                    Text(item.split("#")[2])
-                      .fontSize(16)
-                      .width("60%")
-                      .height(64)
-                      .alignSelf(ItemAlign.Center)
-                      .textOverflow({ overflow: TextOverflow.Ellipsis })
-                      .margin({ left : 16 })
-                  } else {
-                    Text(item.split("#")[0])
-                      .fontSize(16)
-                      .width("60%")
-                      .height(64)
-                      .alignSelf(ItemAlign.Center)
-                      .height(56)
-                      .width(394)
-                  }
-                  Image($r("app.media.selectedMark"))
-                      .height(24)
-                      .width(24)
-                      .alignSelf(ItemAlign.Center)
-                      .margin({ right : 16 })
-                      .visibility(this.moreHapListPngVisibility[current])
-                }
-                .onClick(() => {
-                  this.cleanFirstListColorAndVisibility();
-                  this.cleanSecondListColorAndVisibility();
-                  this.selectItem = item;
-                  this.moreHapListBackGround[current] = 0x1A0A59F7;
-                  this.moreHapListPngVisibility[current] = 0;
-                  this.isCheck = true;
-                })
+                Text($r("app.string.message_moreApps_selector"))
+                  .fontSize(14)
+                  .fontWeight(FontWeight.Medium)
+                  .visibility(this.moreAppsVisiable)
+                  .margin({ right : 234 })
               }
-              .backgroundColor(this.moreHapListBackGround[current])
-              .borderRadius(12)
-              .height(64)
               .width(346)
-              .visibility(this.moreHapListVisibility)
-            }, item => item)
+              .height(this.moreAppsAreaHigh)
+              ForEach(this.pcShowMoreHapList, (item: any, current) => {
+                ListItem() {
+                  Flex({ direction: FlexDirection.Row }) {
+                    if (item.split("#")[3] != "") {
+                      Image(item.split("#")[3])
+                        .height(48)
+                        .width(48)
+                        .alignSelf(ItemAlign.Center)
+                        .margin({ left : 16 })
+                        .borderRadius(12)
+                    } else {
+                      Image($r("app.media.app_icon"))
+                        .height(48)
+                        .width(48)
+                        .alignSelf(ItemAlign.Center)
+                        .margin({ left : 16 })
+                        .borderRadius(12)
+                    }
+                    if (item.split("#")[2] != "") {
+                      Text(item.split("#")[2])
+                        .fontSize(16)
+                        .width("60%")
+                        .height(64)
+                        .alignSelf(ItemAlign.Center)
+                        .textOverflow({ overflow: TextOverflow.Ellipsis })
+                        .margin({ left : 16 })
+                    } else {
+                      Text(item.split("#")[0])
+                        .fontSize(16)
+                        .width("60%")
+                        .height(64)
+                        .alignSelf(ItemAlign.Center)
+                        .height(56)
+                        .width(394)
+                    }
+                    Image($r("app.media.selectedMark"))
+                        .height(24)
+                        .width(24)
+                        .alignSelf(ItemAlign.Center)
+                        .margin({ right : 16 })
+                        .visibility(this.moreHapListPngVisibility[current])
+                  }
+                  .onClick(() => {
+                    this.cleanFirstListColorAndVisibility();
+                    this.cleanSecondListColorAndVisibility();
+                    this.selectItem = item;
+                    this.moreHapListBackGround[current] = 0x1A0A59F7;
+                    this.moreHapListPngVisibility[current] = 0;
+                    this.isCheck = true;
+                  })
+                }
+                .backgroundColor(this.moreHapListBackGround[current])
+                .borderRadius(12)
+                .height(64)
+                .width(328)
+                .visibility(this.moreHapListVisibility)
+              }, item => item)
+            }
           }
           .edgeEffect(EdgeEffect.None)
           .height(this.pcSelectorlist.height)
           .backgroundColor("#ffffff")
-          .scrollBar(this.scrollbarCtrl)
+          .scrollBar(2)
           .width(346)
           Flex({ direction: FlexDirection.Row }) {
             Checkbox({name: 'checkbox'})

@@ -21,10 +21,12 @@
 #include <vector>
 #include <regex>
 #include <unordered_map>
+#include <unordered_set>
+#include "cpp/mutex.h"
 
 #include "iremote_object.h"
 #include "refbase.h"
-
+#include "task_handler_wrap.h"
 #include "ability_info.h"
 #include "appexecfwk_errors.h"
 #include "app_death_recipient.h"
@@ -34,6 +36,7 @@
 #include "app_scheduler_interface.h"
 #include "app_spawn_client.h"
 #include "app_task_info.h"
+#include "fault_data.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -41,6 +44,7 @@
 #include "remote_client_manager.h"
 #include "app_running_manager.h"
 #include "record_query_result.h"
+#include "render_process_info.h"
 #include "running_process_info.h"
 #include "bundle_info.h"
 #include "istart_specified_ability_response.h"
@@ -277,6 +281,15 @@ public:
     virtual int32_t GetProcessRunningInformation(RunningProcessInfo &info);
 
     /**
+     * GetAllRenderProcesses, Obtains information about render processes that are running on the device.
+     *
+     * @param info, render process record.
+     *
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual int32_t GetAllRenderProcesses(std::vector<RenderProcessInfo> &info);
+
+    /**
      * NotifyMemoryLevel, Notify applications background the current memory level.
      *
      * @param level, current memory level.
@@ -462,9 +475,17 @@ public:
 
     virtual void AddAppDeathRecipient(const pid_t pid, const sptr<AppDeathRecipient> &appDeathRecipient) const;
 
-    void HandleTimeOut(const InnerEvent::Pointer &event);
+    void HandleTimeOut(const AAFwk::EventWrap &event);
 
-    void SetEventHandler(const std::shared_ptr<AMSEventHandler> &handler);
+    void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler)
+    {
+        taskHandler_ = taskHandler;
+    }
+
+    void SetEventHandler(const std::shared_ptr<AMSEventHandler> &eventHandler)
+    {
+        eventHandler_ = eventHandler;
+    }
 
     void HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token);
 
@@ -480,6 +501,14 @@ public:
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
 
     void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
+
+    /**
+     * Set AbilityForegroundingFlag of an app-record to true.
+     *
+     * @param pid, pid.
+     *
+     */
+    void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) const;
 
      /**
      * UpdateConfiguration, ANotify application update system environment changes.
@@ -629,7 +658,57 @@ public:
     int32_t SetContinuousTaskProcess(int32_t pid, bool isContinuousTask);
 #endif
 
+    /**
+     * Get bundleName by pid.
+     *
+     * @param pid process id.
+     * @param bundleName Output parameters, return bundleName.
+     * @param uid Output parameters, return userId.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetBundleNameByPid(const int32_t pid, std::string &bundleName, int32_t &uid);
+
+    /**
+     * Notify Fault Data
+     *
+     * @param faultData the fault data.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFault(const FaultData &faultData);
+
+    /**
+     * Notify Fault Data By SA
+     *
+     * @param faultData the fault data notified by SA.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData);
+
+    /**
+     * get memorySize by pid.
+     *
+     * @param pid process id.
+     * @param memorySize Output parameters, return memorySize in KB.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetProcessMemoryByPid(const int32_t pid, int32_t &memorySize);
+
+    /**
+     * get application processes information list by bundleName.
+     *
+     * @param bundleName Bundle name.
+     * @param userId user Id in Application record.
+     * @param info Output parameters, return running process info list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetRunningProcessInformation(
+        const std::string &bundleName, int32_t userId, std::vector<RunningProcessInfo> &info) ;
+
 private:
+
+    std::string FaultTypeToString(FaultDataType type);
+
+    FaultData ConvertDataTypes(const AppFaultDataBySA &faultData);
 
     void StartEmptyResidentProcess(const BundleInfo &info, const std::string &processName, int restartCount,
         bool isEmptyKeepAliveApp);
@@ -640,6 +719,8 @@ private:
         const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo);
 
     bool GetBundleInfo(const std::string &bundleName, BundleInfo &bundleInfo);
+
+    bool GenerateRenderUid(int32_t &renderUid);
 
     void MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo,
@@ -666,6 +747,10 @@ private:
 
     int32_t StartPerfProcess(const std::shared_ptr<AppRunningRecord> &appRecord, const std::string& perfCmd,
         const std::string& debugCmd, bool isSanboxApp) const;
+
+    void StartProcessVerifyPermission(const BundleInfo &bundleInfo, bool &hasAccessBundleDirReq,
+        uint8_t &setAllowInternet, uint8_t &allowInternet, std::vector<int32_t> &gids,
+        std::set<std::string> &permissions);
 
     /**
      * StartProcess, load the ability that needed to be started(Start on a new boot process).
@@ -803,6 +888,8 @@ private:
     void GetRunningProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<RunningProcessInfo> &info);
     void GetRunningProcess(const std::shared_ptr<AppRunningRecord> &appRecord, RunningProcessInfo &info);
 
+    void GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<RenderProcessInfo> &info);
+
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid);
 
@@ -854,6 +941,10 @@ private:
 
     void RemoveRunningSharedBundleList(const std::string &bundleName);
 
+    void KillRenderProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void SetOverlayInfo(const std::string& bundleName, const int32_t userId, AppSpawnStartMsg& startMsg);
+
 private:
     /**
      * Notify application status.
@@ -876,17 +967,23 @@ private:
     std::shared_ptr<AppProcessManager> appProcessManager_;
     std::shared_ptr<RemoteClientManager> remoteClientManager_;
     std::shared_ptr<AppRunningManager> appRunningManager_;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
     std::shared_ptr<AMSEventHandler> eventHandler_;
     std::shared_ptr<Configuration> configuration_;
-    std::mutex userTestLock_;
+    ffrt::mutex userTestLock_;
+    ffrt::mutex appStateCallbacksLock_;
+    ffrt::mutex renderUidSetLock_;
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
-    std::recursive_mutex configurationObserverLock_;
+    ffrt::mutex configurationObserverLock_;
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
     sptr<WindowFocusChangedListener> focusListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
+    std::unordered_set<int32_t> renderUidSet_;
     std::string supportIsolationMode_ {"false"};
+    std::string deviceType_ {"default"};
     int32_t currentUserId_ = 0;
+    int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

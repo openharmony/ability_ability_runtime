@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,7 @@ private:
     int ScheduleDisconnectAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
     int TerminateAbilityResultInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleCommandAbilityDoneInner(MessageParcel &data, MessageParcel &reply);
+    int ScheduleCommandAbilityWindowDoneInner(MessageParcel &data, MessageParcel &reply);
     int GetMissionSnapshotInner(MessageParcel &data, MessageParcel &reply);
     int AcquireDataAbilityInner(MessageParcel &data, MessageParcel &reply);
     int ReleaseDataAbilityInner(MessageParcel &data, MessageParcel &reply);
@@ -124,11 +125,14 @@ private:
     int ClearUpApplicationDataInner(MessageParcel &data, MessageParcel &reply);
 
     int ContinueMissionInner(MessageParcel &data, MessageParcel &reply);
+    int ContinueMissionOfBundleNameInner(MessageParcel &data, MessageParcel &reply);
     int ContinueAbilityInner(MessageParcel &data, MessageParcel &reply);
     int StartContinuationInner(MessageParcel &data, MessageParcel &reply);
     int NotifyCompleteContinuationInner(MessageParcel &data, MessageParcel &reply);
     int NotifyContinuationResultInner(MessageParcel &data, MessageParcel &reply);
     int RegisterRemoteMissionListenerInner(MessageParcel &data, MessageParcel &reply);
+    int RegisterRemoteOnListenerInner(MessageParcel &data, MessageParcel &reply);
+    int RegisterRemoteOffListenerInner(MessageParcel &data, MessageParcel &reply);
     int UnRegisterRemoteMissionListenerInner(MessageParcel &data, MessageParcel &reply);
 
     int LockMissionForCleanupInner(MessageParcel &data, MessageParcel &reply);
@@ -167,6 +171,7 @@ private:
     int StartUserTestInner(MessageParcel &data, MessageParcel &reply);
     int FinishUserTestInner(MessageParcel &data, MessageParcel &reply);
     int GetTopAbilityTokenInner(MessageParcel &data, MessageParcel &reply);
+    int CheckUIExtensionIsFocusedInner(MessageParcel &data, MessageParcel &reply);
     int DelegatorDoAbilityForegroundInner(MessageParcel &data, MessageParcel &reply);
     int DelegatorDoAbilityBackgroundInner(MessageParcel &data, MessageParcel &reply);
     int DoAbilityForegroundInner(MessageParcel &data, MessageParcel &reply);
@@ -176,14 +181,18 @@ private:
     int MoveMissionToFrontByOptionsInner(MessageParcel &data, MessageParcel &reply);
 
     int UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply);
+    int UpdateMissionSnapShotFromWMSInner(MessageParcel &data, MessageParcel &reply);
     int RegisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
     int UnregisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
     int GetDlpConnectionInfosInner(MessageParcel &data, MessageParcel &reply);
+    int MoveAbilityToBackgroundInner(MessageParcel &data, MessageParcel &reply);
+    int SetMissionContinueStateInner(MessageParcel &data, MessageParcel &reply);
 #ifdef SUPPORT_GRAPHICS
     int SetMissionLabelInner(MessageParcel &data, MessageParcel &reply);
     int SetMissionIconInner(MessageParcel &data, MessageParcel &reply);
     int RegisterWindowManagerServiceHandlerInner(MessageParcel &data, MessageParcel &reply);
     int CompleteFirstFrameDrawingInner(MessageParcel &data, MessageParcel &reply);
+    int PrepareTerminateAbilityInner(MessageParcel &data, MessageParcel &reply);
 #endif
 
     #ifdef ABILITY_COMMAND_FOR_TEST
@@ -204,14 +213,28 @@ private:
     int EnableRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
     int ScheduleRecoverAbilityInner(MessageParcel &data, MessageParcel &reply);
     int GetTopAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int GetElementNameByTokenInner(MessageParcel &data, MessageParcel &reply);
     int DumpAbilityInfoDoneInner(MessageParcel &data, MessageParcel &reply);
     int32_t IsValidMissionIdsInner(MessageParcel &data, MessageParcel &reply);
 
     int VerifyPermissionInner(MessageParcel &data, MessageParcel &reply);
 
+    int HandleRequestDialogService(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleReportDrawnCompleted(MessageParcel &data, MessageParcel &reply);
+
     int AcquireShareDataInner(MessageParcel &data, MessageParcel &reply);
     int ShareDataDoneInner(MessageParcel &data, MessageParcel &reply);
     int GetAbilityTokenByCalleeObjInner(MessageParcel &data, MessageParcel &reply);
+
+    int32_t ForceExitAppInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RecordAppExitReasonInner(MessageParcel &data, MessageParcel &reply);
+
+    int SetRootSceneSessionInner(MessageParcel &data, MessageParcel &reply);
+    int CallUIAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
+    int StartSpecifiedAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
+    int NotifySaveAsResultInner(MessageParcel &data, MessageParcel &reply);
+
+    int SetSessionManagerServiceInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

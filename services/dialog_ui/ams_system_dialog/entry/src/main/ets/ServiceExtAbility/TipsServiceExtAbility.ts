@@ -16,7 +16,6 @@
 import extension from '@ohos.app.ability.ServiceExtensionAbility';
 import window from '@ohos.window';
 import display from '@ohos.display';
-import deviceInfo from '@ohos.deviceInfo';
 
 const TAG = 'TipsDialog_Service';
 
@@ -32,9 +31,9 @@ export default class TipsServiceExtensionAbility extends extension {
   onRequest(want, startId) {
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     globalThis.abilityWant = want;
-    globalThis.params = JSON.parse(want['parameters']['params']);
-    globalThis.position = JSON.parse(want['parameters']['position']);
-    globalThis.callerToken = want['parameters']['callerToken'];
+    globalThis.params = JSON.parse(want.parameters.params);
+    globalThis.position = JSON.parse(want.parameters.position);
+    globalThis.callerToken = want.parameters.callerToken;
 
     display.getDefaultDisplay().then(dis => {
       let navigationBarRect = {
@@ -42,18 +41,18 @@ export default class TipsServiceExtensionAbility extends extension {
         top: globalThis.position.offsetY,
         width: globalThis.position.width,
         height: globalThis.position.height
-      }
+      };
       if (winNum > 1) {
         win.destroy();
         winNum--;
       }
-      if (deviceInfo.deviceType === 'phone') {
+      if (globalThis.params.deviceType === 'phone' || globalThis.params.deviceType === 'default') {
         this.createWindow('TipsDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
       } else {
         this.createWindow('TipsDialog' + startId, window.WindowType.TYPE_DIALOG, navigationBarRect);
       }
       winNum++;
-    })
+    });
   }
 
   onDestroy() {

@@ -112,7 +112,7 @@ public:
         return E_OK;
     }
 
-    virtual int32_t NotifyVolumeDestroyed(std::string volumeId) override
+    virtual int32_t NotifyVolumeStateChanged(std::string volumeId, VolumeState state) override
     {
         return E_OK;
     }
@@ -225,6 +225,8 @@ public:
         return E_OK;
     }
 };
+
+bool StorageManagerServiceMock::isZero = true;
 } // namespace StorageManager
 } // namespace OHOS
 #endif // MOCK_STORAGE_MANAGER_SERVICE_H
