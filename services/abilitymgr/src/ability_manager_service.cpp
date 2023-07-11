@@ -1133,12 +1133,6 @@ int AbilityManagerService::StartUIAbilityBySCB(const Want &want, const StartOpti
         return ERR_WRONG_INTERFACE_CALL;
     }
 
-    if (sessionInfo->callerToken != nullptr && !VerificationAllToken(sessionInfo->callerToken)) {
-        eventInfo.errCode = ERR_INVALID_VALUE;
-        EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
-        return ERR_INVALID_CALLER;
-    }
-
     auto requestCode = sessionInfo->requestCode;
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
         interceptorExecuter_->DoProcess(want, requestCode, currentUserId, true);
