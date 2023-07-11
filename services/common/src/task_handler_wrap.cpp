@@ -167,18 +167,24 @@ bool TaskHandlerWrap::RemoveTask(const std::string &name, const TaskHandle &task
 }
 ffrt::qos Convert2FfrtQos(TaskQoS taskqos)
 {
-    static ffrt::qos qosMap[] = {
-        ffrt::qos_inherit,
-        ffrt::qos_background,
-        ffrt::qos_utility,
-        ffrt::qos_default,
-        ffrt::qos_user_initiated,
-        ffrt::qos_deadline_request,
-        ffrt::qos_user_interactive,
-        ffrt::qos_defined_ive
-    };
+    switch (taskqos) {
+        case TaskQoS::INHERENT:
+            return ffrt::qos_inherit;
+        case TaskQoS::BACKGROUND:
+            return ffrt::qos_background;
+        case TaskQoS::UTILITY:
+            return ffrt::qos_utility;
+        case TaskQoS::DEFAULT:
+            return ffrt::qos_default;
+        case TaskQoS::USER_INITIATED:
+            return ffrt::qos_user_initiated;
+        case TaskQoS::DEADLINE_REQUEST:
+            return ffrt::qos_deadline_request;
+        case TaskQoS::USER_INTERACTIVE:
+            return ffrt::qos_user_interactive;
+    }
 
-    return qosMap[static_cast<int>(taskqos)];
+    return ffrt::qos_inherit;
 }
 void BuildFfrtTaskAttr(const TaskAttribute &taskAttr, ffrt::task_attr &result)
 {
