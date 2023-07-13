@@ -350,7 +350,7 @@ private:
     void ChangeToLocalPath(const std::string &bundleName,
         const std::string &sourcDir, std::string &localPath);
 
-    int32_t CreateDirIfNotExistWithCheck(const std::string& dirPath, const mode_t& mode, bool checkExist = true);
+    void CreateDirIfNotExistWithCheck(const std::string& dirPath, const mode_t& mode, bool checkExist = true);
     int32_t GetDatabaseDirWithCheck(bool checkExist, std::string &databaseDir);
     int32_t GetGroupDatabaseDirWithCheck(const std::string &groupId, bool checkExist, std::string &databaseDir);
     int32_t GetPreferencesDirWithCheck(bool checkExist, std::string &preferencesDir);

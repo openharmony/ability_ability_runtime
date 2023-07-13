@@ -113,20 +113,19 @@ bool ContextImpl::PrintDrawnCompleted()
     return false;
 }
 
-int32_t ContextImpl::CreateDirIfNotExistWithCheck(const std::string &dirPath, const mode_t &mode, bool checkExist)
+void ContextImpl::CreateDirIfNotExistWithCheck(const std::string &dirPath, const mode_t &mode, bool checkExist)
 {
     if (checkExist) {
         CreateDirIfNotExist(dirPath, mode);
-        return ERR_OK;
+        return;
     }
     // Check if the dirPath exists on the first call
     std::lock_guard<std::mutex> lock(checkedDirSetLock_);
     if (checkedDirSet_.find(dirPath) != checkedDirSet_.end()) {
-        return ERR_OK;
+        return;
     }
     checkedDirSet_.emplace(dirPath);
     CreateDirIfNotExist(dirPath, mode);
-    return ERR_OK;
 }
 
 int32_t ContextImpl::GetDatabaseDirWithCheck(bool checkExist, std::string &databaseDir)
@@ -141,7 +140,8 @@ int32_t ContextImpl::GetDatabaseDirWithCheck(bool checkExist, std::string &datab
         databaseDir = databaseDir + CONTEXT_FILE_SEPARATOR +
                       ((GetHapModuleInfo() == nullptr) ? "" : GetHapModuleInfo()->moduleName);
     }
-    return CreateDirIfNotExistWithCheck(databaseDir, 0, checkExist);
+    CreateDirIfNotExistWithCheck(databaseDir, 0, checkExist);
+    return ERR_OK;
 }
 
 int32_t ContextImpl::GetGroupDatabaseDirWithCheck(const std::string &groupId, bool checkExist, std::string &databaseDir)
@@ -151,7 +151,8 @@ int32_t ContextImpl::GetGroupDatabaseDirWithCheck(const std::string &groupId, bo
         return ret;
     }
     databaseDir = databaseDir + CONTEXT_FILE_SEPARATOR + CONTEXT_DATABASE;
-    return CreateDirIfNotExistWithCheck(databaseDir, GROUP_MODE, checkExist);
+    CreateDirIfNotExistWithCheck(databaseDir, GROUP_MODE, checkExist);
+    return ERR_OK;
 }
 
 int32_t ContextImpl::GetSystemDatabaseDir(const std::string &groupId, bool checkExist, std::string &databaseDir)
@@ -162,7 +163,7 @@ int32_t ContextImpl::GetSystemDatabaseDir(const std::string &groupId, bool check
     } else {
         ret = GetGroupDatabaseDirWithCheck(groupId, checkExist, databaseDir);
     }
-    HILOG_DEBUG("ContextImpl::GetSystemDatabaseDir: %{public}s", databaseDir.c_str());
+    HILOG_DEBUG("databaseDir: %{public}s", databaseDir.c_str());
     return ret;
 }
 
@@ -170,14 +171,15 @@ std::string ContextImpl::GetDatabaseDir()
 {
     std::string dir;
     GetDatabaseDirWithCheck(true, dir);
-    HILOG_DEBUG("ContextImpl::GetDatabaseDir:%{public}s", dir.c_str());
+    HILOG_DEBUG("databaseDir: %{public}s", dir.c_str());
     return dir;
 }
 
 int32_t ContextImpl::GetPreferencesDirWithCheck(bool checkExist, std::string &preferencesDir)
 {
     preferencesDir = GetBaseDir() + CONTEXT_FILE_SEPARATOR + CONTEXT_PREFERENCES;
-    return CreateDirIfNotExistWithCheck(preferencesDir, MODE, checkExist);
+    CreateDirIfNotExistWithCheck(preferencesDir, MODE, checkExist);
+    return ERR_OK;
 }
 
 int32_t ContextImpl::GetGroupPreferencesDirWithCheck(const std::string &groupId, bool checkExist,
@@ -188,7 +190,8 @@ int32_t ContextImpl::GetGroupPreferencesDirWithCheck(const std::string &groupId,
         return ret;
     }
     preferencesDir = preferencesDir + CONTEXT_FILE_SEPARATOR + CONTEXT_PREFERENCES;
-    return CreateDirIfNotExistWithCheck(preferencesDir, GROUP_MODE, checkExist);
+    CreateDirIfNotExistWithCheck(preferencesDir, GROUP_MODE, checkExist);
+    return ERR_OK;
 }
 
 int32_t ContextImpl::GetSystemPreferencesDir(const std::string &groupId, bool checkExist, std::string &preferencesDir)
@@ -199,7 +202,7 @@ int32_t ContextImpl::GetSystemPreferencesDir(const std::string &groupId, bool ch
     } else {
         ret = GetGroupPreferencesDirWithCheck(groupId, checkExist, preferencesDir);
     }
-    HILOG_DEBUG("ContextImpl::GetSystemPreferencesDir: %{public}s", preferencesDir.c_str());
+    HILOG_DEBUG("preferencesDir: %{public}s", preferencesDir.c_str());
     return ret;
 }
 
@@ -207,7 +210,7 @@ std::string ContextImpl::GetPreferencesDir()
 {
     std::string dir;
     GetPreferencesDirWithCheck(true, dir);
-    HILOG_DEBUG("ContextImpl::GetPreferencesDir:%{public}s", dir.c_str());
+    HILOG_DEBUG("preferencesDir: %{public}s", dir.c_str());
     return dir;
 }
 
@@ -230,7 +233,8 @@ int32_t ContextImpl::GetGroupDirWithCheck(const std::string &groupId, bool check
     }
     std::string uuid = groupDirGet.substr(groupDirGet.rfind('/'));
     groupDir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_GROUP + uuid;
-    return CreateDirIfNotExistWithCheck(groupDir, MODE, true);
+    CreateDirIfNotExistWithCheck(groupDir, MODE, true);
+    return ERR_OK;
 }
 
 std::string ContextImpl::GetGroupDir(std::string groupId)
@@ -704,7 +708,7 @@ sptr<IRemoteObject> ContextImpl::GetToken()
 void ContextImpl::CreateDirIfNotExist(const std::string& dirPath, const mode_t& mode) const
 {
     if (!OHOS::FileExists(dirPath)) {
-        HILOG_INFO("ForceCreateDirectory, dir: %{public}s", dirPath.c_str());
+        HILOG_DEBUG("ForceCreateDirectory, dir: %{public}s", dirPath.c_str());
         bool createDir = OHOS::ForceCreateDirectory(dirPath);
         if (!createDir) {
             HILOG_ERROR("createDir: create dir %{public}s failed, errno is %{public}d.", dirPath.c_str(), errno);
