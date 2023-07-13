@@ -288,9 +288,9 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         HILOG_ERROR("InitResourceManager deal is nullptr");
         return;
     }
-    if (bundleInfo.applicationInfo.codePath == TYPE_RESERVE ||
-        bundleInfo.applicationInfo.codePath == TYPE_OTHERS) {
+    if (bundleInfo.applicationInfo.codePath == TYPE_RESERVE || bundleInfo.applicationInfo.codePath == TYPE_OTHERS) {
         std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+        std::string moduleName;
         std::string hapPath;
         std::vector<std::string> overlayPaths;
         int32_t appType;
