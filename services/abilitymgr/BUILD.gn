@@ -104,6 +104,11 @@ config("abilityms_config") {
     defines += [ "SUPPORT_ASAN" ]
   }
 
+  if (ecologic_rule_mgr_enabled) {
+    include_dirs += [ "//foundation/bundlemanager/ecological_rule_mgr/interface/innerkits/include" ]
+    defines += [ "SUPPPORT_ERMS" ]
+  }
+
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -194,6 +199,10 @@ ohos_shared_library("abilityms") {
       "resource_management:global_resmgr",
       "window_manager:libdm",
     ]
+  }
+
+  if (ecologic_rule_mgr_enabled) {
+    external_deps += [ "ecological_rule_mgr:erms_client" ]
   }
 
   version_script = "libabilityms.map"
