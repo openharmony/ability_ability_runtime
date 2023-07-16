@@ -4319,7 +4319,7 @@ int AbilityManagerService::GenerateAbilityRequest(
             return RESOLVE_ABILITY_ERR;
         }
         request.want = wantBroker;
-        std::string bundleName = wantBroker.GetElement().GetBundleName()
+        std::string bundleName = wantBroker.GetElement().GetBundleName();
         request.abilityInfo.applicationInfo.bundleName = bundleName;
         request.abilityInfo.applicationInfo.name = bundleName;
 
