@@ -145,3 +145,4 @@ declare_args() {
   } else {
     ecologic_rule_mgr_enabled = false
   }
+}

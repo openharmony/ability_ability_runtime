@@ -105,8 +105,7 @@ config("abilityms_config") {
   }
 
   if (ecologic_rule_mgr_enabled) {
-    include_dirs += [ "//foundation/bundlemanager/ecological_rule_mgr/interface/innerkits/include" ]
-    defines += [ "SUPPPORT_ERMS" ]
+    defines += [ "SUPPORT_ERMS" ]
   }
 
   cflags = []

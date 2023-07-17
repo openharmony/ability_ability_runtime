@@ -289,7 +289,6 @@ bool EcologicalRuleInterceptor::CheckRule(const Want &want, ErmsCallerInfo &call
 }
 #endif
 
-
 AbilityJumpInterceptor::AbilityJumpInterceptor()
 {}
 
