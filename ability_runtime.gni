@@ -138,11 +138,4 @@ declare_args() {
   } else {
     accessibility_enable = false
   }
-
-  if (!defined(global_parts_info) ||
-      defined(global_parts_info.bundlemanager_ecological_rule_mgr)) {
-    ecologic_rule_mgr_enabled = true
-  } else {
-    ecologic_rule_mgr_enabled = false
-  }
 }
