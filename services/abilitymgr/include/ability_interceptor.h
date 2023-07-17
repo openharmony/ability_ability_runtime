@@ -18,7 +18,7 @@
 
 #include "ability_util.h"
 #ifdef SUPPORT_ERMS
-#include "foundation/bundlemanager/ecological_rule_mgr/interfaces/innerkits/include/ecological_rule_mgr_service_client.h"
+#include "ecological_rule_mgr_service_client.h"
 #else
 #include "erms_mgr_param.h"
 #include "erms_mgr_interface.h"

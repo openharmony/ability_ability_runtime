@@ -362,7 +362,7 @@ bool ImplicitStartProcessor::FilterAbilityList(const Want &want,
 #ifdef SUPPORT_ERMS
     ErmsCallerInfo callerInfo;
     GetEcologicalCallerInfo(want, callerInfo, userId);
-    int res = IN_PROCESS_CALL(EcologicalRuleMgrServiceClient::GetInstance()->EvaluateResolveInfos(want, callerInfo, 0,
+    int ret = IN_PROCESS_CALL(EcologicalRuleMgrServiceClient::GetInstance()->EvaluateResolveInfos(want, callerInfo, 0,
         abilityInfos, extensionInfos));
 #else
     auto erms = AbilityUtil::CheckEcologicalRuleMgr();
