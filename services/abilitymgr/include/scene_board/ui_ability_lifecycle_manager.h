@@ -206,9 +206,9 @@ public:
 
 private:
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
-    uint64_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const;
-    uint64_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest) const;
-    uint64_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest) const;
+    uint32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const;
+    uint32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest) const;
+    uint32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest) const;
     void UpdateAbilityRecordLaunchReason(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void EraseAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -253,7 +253,7 @@ private:
     void EraseSpecifiedAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     mutable ffrt::mutex sessionLock_;
-    std::map<uint64_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
+    std::map<uint32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
     std::map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<Rosen::ISession> rootSceneSession_;
