@@ -271,15 +271,6 @@ public:
     virtual int SendResultToAbility(int32_t requestCode, int32_t resultCode, Want& resultWant) override;
 
     /**
-     * TerminateAbility, terminate the special ability.
-     *
-     * @param callerToken, caller ability token.
-     * @param requestCode, Ability request code.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    virtual int TerminateAbilityByCaller(const sptr<IRemoteObject> &callerToken, int requestCode) override;
-
-    /**
      * MoveAbilityToBackground.
      *
      * @param token, the token of the ability to move background.
@@ -563,18 +554,6 @@ public:
     virtual void DumpState(const std::string &args, std::vector<std::string> &info) override;
     virtual void DumpSysState(
         const std::string& args, std::vector<std::string>& info, bool isClient, bool isUserID, int UserID) override;
-
-    /**
-     * Destroys this Service ability if the number of times it
-     * has been started equals the number represented by
-     * the given startId.
-     *
-     * @param token ability's token.
-     * @param startId is incremented by 1 every time this ability is started.
-     * @return Returns true if the startId matches the number of startup times
-     * and this Service ability will be destroyed; returns false otherwise.
-     */
-    virtual int TerminateAbilityResult(const sptr<IRemoteObject> &token, int startId) override;
 
     /**
      * Destroys this Service ability by Want.
@@ -1143,6 +1122,43 @@ public:
      */
     virtual int32_t SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService) override;
 
+    /**
+     * @brief Register collaborator.
+     * @param type collaborator type.
+     * @param impl collaborator.
+     * @return 0 or else.
+    */
+    virtual int32_t RegisterIAbilityManagerCollaborator(
+        int32_t type, const sptr<IAbilityManagerCollaborator> &impl) override;
+
+    /**
+     * @brief Unregister collaborator.
+     * @param type collaborator type.
+     * @return 0 or else.
+    */
+    virtual int32_t UnregisterIAbilityManagerCollaborator(int32_t type) override;
+
+    /**
+     * @brief Notify to move mission to backround.
+     * @param missionId missionId.
+     * @return 0 or else.
+    */
+    virtual int32_t MoveMissionToBackground(int32_t missionId) override;
+
+    /**
+     * @brief Notify to terminate mission. it is not clear.
+     * @param missionId missionId.
+     * @return 0 or else.
+    */
+    virtual int32_t TerminateMission(int32_t missionId) override;
+
+    /**
+     * @brief Get collaborator.
+     * @param type collaborator type.
+     * @return nullptr or IAbilityManagerCollaborator stpr.
+    */
+    sptr<IAbilityManagerCollaborator> GetCollaborator(int32_t type);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1506,6 +1522,8 @@ private:
 
     bool CheckPrepareTerminateEnable();
 
+    bool CheckCollaboratorType(int32_t type);
+    
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 
@@ -1583,9 +1601,15 @@ private:
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif
     std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;
+#ifdef SUPPORT_ERMS
+    std::shared_ptr<AbilityInterceptorExecuter> afterCheckExecuter_;
+#endif
     std::unordered_map<int32_t, int64_t> appRecoveryHistory_; // uid:time
     bool isPrepareTerminateEnable_ = false;
     std::multimap<int, std::shared_ptr<StartAbilityHandler>, std::greater<int>> startAbilityChain_;
+
+    ffrt::mutex collaboratorMapLock_;
+    std::unordered_map<int32_t, sptr<IAbilityManagerCollaborator>> collaboratorMap_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

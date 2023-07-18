@@ -59,8 +59,10 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     auto iter = sessionAbilityMap_.find(sessionInfo->persistentId);
     if (iter != sessionAbilityMap_.end()) {
         uiAbilityRecord = iter->second;
-        uiAbilityRecord->SetWant(abilityRequest.want);
-        uiAbilityRecord->SetIsNewWant(true);
+        uiAbilityRecord->SetIsNewWant(sessionInfo->isNewWant);
+        if (sessionInfo->isNewWant) {
+            uiAbilityRecord->SetWant(abilityRequest.want);
+        }
     } else {
         if (sessionInfo->startSetting != nullptr) {
             HILOG_DEBUG("startSetting is valid.");
@@ -1235,6 +1237,27 @@ int UIAbilityLifecycleManager::ReleaseCallLocked(
         return RELEASE_CALL_ABILITY_INNER_ERR;
     }
     return ERR_OK;
+}
+
+void UIAbilityLifecycleManager::OnCallConnectDied(const std::shared_ptr<CallRecord> &callRecord)
+{
+    HILOG_INFO("On callConnect died.");
+    CHECK_POINTER(callRecord);
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+
+    AppExecFwk::ElementName element = callRecord->GetTargetServiceName();
+    auto abilityRecords = GetAbilityRecordsByName(element);
+    auto isExist = [callRecord] (const std::shared_ptr<AbilityRecord> &abilityRecord) {
+        return abilityRecord->IsExistConnection(callRecord->GetConCallBack());
+    };
+    auto findRecord = std::find_if(abilityRecords.begin(), abilityRecords.end(), isExist);
+    if (findRecord == abilityRecords.end()) {
+        HILOG_ERROR("not found ability record by callback");
+        return;
+    }
+    auto abilityRecord = *findRecord;
+    CHECK_POINTER(abilityRecord);
+    abilityRecord->ReleaseCall(callRecord->GetConCallBack());
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> UIAbilityLifecycleManager::GetAbilityRecordsByName(
