@@ -87,6 +87,7 @@ struct Options {
     int32_t targetVersion;
     std::string releaseType;
     bool enablePartialUpdate;
+    std::string moduleSrcPath;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

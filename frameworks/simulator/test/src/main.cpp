@@ -44,7 +44,8 @@ constexpr int32_t PARAM_TWENTYTWO = 22;
 constexpr int32_t PARAM_TWENTYTHREE = 23;
 constexpr int32_t PARAM_TWENTYFOUR = 24;
 constexpr int32_t PARAM_TWENTYFIVE = 25;
-constexpr int32_t MIN_PARAMS = 26;
+constexpr int32_t PARAM_TWENTYSIX = 26;
+constexpr int32_t PARAM_TWENTYSEVEN = 27;
 
 int32_t main(int32_t argc, const char *argv[])
 {
@@ -79,13 +80,14 @@ int32_t main(int32_t argc, const char *argv[])
     options.targetVersion = atoi(argv[PARAM_TWENTYTHREE]);
     options.releaseType = argv[PARAM_TWENTYFOUR];
     options.enablePartialUpdate = atoi(argv[PARAM_TWENTYFIVE]);
+    options.moduleSrcPath = argv[PARAM_TWENTYSEVEN];
     auto simulator = OHOS::AbilityRuntime::Simulator::Create(options);
     if (!simulator) {
         std::cout << "Create Simulator failed." << std::endl;
         return 1;
     }
 
-    std::string abilitySrcPath {argv[MIN_PARAMS]};
+    std::string abilitySrcPath {argv[PARAM_TWENTYSIX]};
     int64_t id = simulator->StartAbility(abilitySrcPath, [](int64_t abilityId) {});
     if (id < 0) {
         std::cout << "Start Ability failed." << std::endl;
