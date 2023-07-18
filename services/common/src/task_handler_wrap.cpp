@@ -98,11 +98,11 @@ TaskHandle TaskHandlerWrap::SubmitTaskJust(const std::function<void()> &task,
 TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task,
     const std::string &name, int64_t delayMillis, bool forceSubmit)
 {
-    HILOG_INFO("SubmitTask delay task begin");
     TaskAttribute atskAttr{name, delayMillis};
     std::lock_guard<ffrt::mutex> guard(*tasksMutex_);
     auto it = tasks_.find(name);
     if (it != tasks_.end()) {
+        HILOG_DEBUG("SubmitTask repeated task: %{public}s", name.c_str());
         if (forceSubmit) {
             return SubmitTask(task, atskAttr);
         } else {
@@ -115,13 +115,11 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task,
 
     // submit clear task to clear map record
     auto clearTask = [whandler = weak_from_this(), name, taskHandle = result]() {
-        HILOG_INFO("clearTask delay task begin");
         auto handler = whandler.lock();
         if (!handler) {
             return;
         }
         handler->RemoveTask(name, taskHandle);
-        HILOG_INFO("clearTask delay task end");
     };
     SubmitTask(clearTask, delayMillis);
 
@@ -143,7 +141,7 @@ TaskHandle TaskHandlerWrap::SubmitTask(const std::function<void()> &task, const 
 }
 bool TaskHandlerWrap::CancelTask(const std::string &name)
 {
-    HILOG_INFO("CancelTask task begin");
+    HILOG_DEBUG("CancelTask task: %{public}s", name.c_str());
     std::lock_guard<ffrt::mutex> guard(*tasksMutex_);
     auto it = tasks_.find(name);
     if (it == tasks_.end()) {
