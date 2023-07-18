@@ -70,7 +70,9 @@ ohos_shared_library("ability_simulator") {
     sources = [
       "${ability_runtime_native_path}/runtime/js_module_searcher.cpp",
       "src/ability_context.cpp",
+      "src/ability_stage_context.cpp",
       "src/js_ability_context.cpp",
+      "src/js_ability_stage_context.cpp",
       "src/js_application_context_utils.cpp",
       "src/js_console_log.cpp",
       "src/js_context_utils.cpp",
