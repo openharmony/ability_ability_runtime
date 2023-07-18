@@ -141,15 +141,6 @@ public:
         int resultCode, const Want *resultWant, bool flag);
 
     /**
-     * @brief Terminate ability with caller
-     *
-     * @param caller the ability which start the ability
-     * @param requestCode which ability to terminate
-     * @return int error code
-     */
-    int TerminateAbility(const std::shared_ptr<AbilityRecord> &caller, int requestCode);
-
-    /**
      * @brief remove the mission list from the mission list manager
      *
      * @param MissionList the mission list need to remove
@@ -385,6 +376,8 @@ public:
 
     void PostMissionLabelUpdateTask(int missionId) const;
 
+    int32_t TerminateMission(int32_t missionId);
+
 private:
     Closure GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void PostCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const;
@@ -525,6 +518,9 @@ private:
     int PrepareClearMissionLocked(int missionId, const std::shared_ptr<Mission> &mission);
 
     bool CheckPrepareTerminateEnable(const std::shared_ptr<Mission> &mission);
+
+    void NotifyCollaboratorMissionCreated(const AbilityRequest &abilityRequest,
+        const std::shared_ptr<Mission> &targetMission, InnerMissionInfo &info);
 
     int userId_;
     mutable ffrt::mutex managerLock_;
