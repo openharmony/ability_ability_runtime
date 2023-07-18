@@ -49,7 +49,7 @@ constexpr int32_t PARAM_TWENTYSEVEN = 27;
 
 int32_t main(int32_t argc, const char *argv[])
 {
-    if (argc < MIN_PARAMS) {
+    if (argc < PARAM_TWENTYSEVEN) {
         std::cout << "Insufficient parameters." << std::endl;
         return 1;
     }
