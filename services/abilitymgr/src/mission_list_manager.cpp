@@ -542,6 +542,13 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
         return;
     }
 
+    // judge caller is laucnher
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility != nullptr && callerAbility->GetAbilityInfo().bundleName == AbilityConfig::LAUNCHER_BUNDLE_NAME
+        && abilityRequest.collaboratorType != CollaboratorType::DEFAULT_TYPE) {
+        abilityRequest.startRecent = true;
+    }
+
     // try reuse mission info
     InnerMissionInfo info;
     bool findReusedMissionInfo = CreateOrReusedMissionInfo(abilityRequest, info);
