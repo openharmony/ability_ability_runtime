@@ -56,6 +56,7 @@ const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate"
 const int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 constexpr int32_t TRACE_ATOMIC_SERVICE_ID = 201;
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
+const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -517,6 +518,14 @@ bool MissionListManager::CreateOrReusedMissionInfo(const AbilityRequest &ability
     bool needFind = false;
     bool isFindRecentStandard = abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::STANDARD &&
         abilityRequest.startRecent;
+    // judge caller is laucnher
+    bool isLauncherStartCollaborator = false;
+    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if (callerAbility != nullptr && callerAbility->GetAbilityInfo().bundleName == AbilityConfig::LAUNCHER_BUNDLE_NAME &&
+        abilityRequest.want.GetElement().GetBundleName() == SHELL_ASSISTANT_BUNDLENAME &&
+        abilityRequest.collaboratorType == CollaboratorType::DEFAULT_TYPE) {
+        isFindRecentStandard = true;
+    }
     if (abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::STANDARD || isFindRecentStandard) {
         needFind = true;
     }
@@ -540,13 +549,6 @@ void MissionListManager::GetTargetMissionAndAbility(const AbilityRequest &abilit
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (HandleReusedMissionAndAbility(abilityRequest, targetMission, targetRecord)) {
         return;
-    }
-
-    // judge caller is laucnher
-    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (callerAbility != nullptr && callerAbility->GetAbilityInfo().bundleName == AbilityConfig::LAUNCHER_BUNDLE_NAME
-        && abilityRequest.collaboratorType != CollaboratorType::DEFAULT_TYPE) {
-        abilityRequest.startRecent = true;
     }
 
     // try reuse mission info
@@ -3998,6 +4000,23 @@ void MissionListManager::NotifyCollaboratorMissionCreated(const AbilityRequest &
         return;
     }
     HILOG_INFO("collaborator NotifyMissionCreated success.");
+}
+
+int32_t MissionListManager::TerminateMission(int32_t missionId)
+{
+    HILOG_INFO("call");
+    std::shared_ptr<Mission> mission = GetMissionById(missionId);
+    if (!mission) {
+        HILOG_ERROR("mission is null.");
+        return ERR_INVALID_VALUE;
+    }
+    std::shared_ptr<AbilityRecord> abilityRecord = mission->GetAbilityRecord();
+    if (!abilityRecord) {
+        HILOG_ERROR("abilityRecord is null.");
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard guard(managerLock_);
+    return TerminateAbilityInner(abilityRecord, DEFAULT_INVAL_VALUE, nullptr, true);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
