@@ -57,6 +57,10 @@ ohos_fuzztest("AbilityManagerFuzzTest") {
   if (ability_runtime_graphics) {
     external_deps += [ "input:libmmi-client" ]
   }
+
+  if (ecologic_rule_enabled) {
+    external_deps += [ "ecological_rule_mgr:erms_client" ]
+  }
 }
 
 ###############################################################################
