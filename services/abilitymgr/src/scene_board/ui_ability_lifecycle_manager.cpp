@@ -90,7 +90,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (iter == sessionAbilityMap_.end()) {
         sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     }
-    uiAbilityRecord->ProcessForegroundAbility();
+    uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED && !specifiedInfoQueue_.empty()) {
         SpecifiedInfo specifiedInfo = specifiedInfoQueue_.front();
         specifiedInfoQueue_.pop();
@@ -609,6 +609,7 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
     if (abilityRequest.startSetting != nullptr) {
         sessionInfo->startSetting = abilityRequest.startSetting;
     }
+    sessionInfo->callingTokenId = IPCSkeleton::GetCallingTokenID();
     return sessionInfo;
 }
 
