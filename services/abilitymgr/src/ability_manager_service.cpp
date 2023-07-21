@@ -69,7 +69,7 @@
 #include "uri_permission_manager_client.h"
 
 #ifdef SUPPORT_GRAPHICS
-
+#include "application_anr_listener.h"
 #include "display_manager.h"
 #include "input_manager.h"
 #include "png.h"
@@ -320,6 +320,8 @@ bool AbilityManagerService::Init()
     int amsTimeOut = AmsConfigurationParameter::GetInstance().GetAMSTimeOutTime();
     HILOG_INFO("amsTimeOut is %{public}d", amsTimeOut);
 #ifdef SUPPORT_GRAPHICS
+    auto anrListener = std::make_shared<ApplicationAnrListener>();
+    MMI::InputManager::GetInstance()->SetAnrObserver(anrListener);
     DelayedSingleton<SystemDialogScheduler>::GetInstance()->SetDeviceType(OHOS::system::GetDeviceType());
     implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -2068,10 +2070,6 @@ int AbilityManagerService::CloseAbility(const sptr<IRemoteObject> &token, int re
 int AbilityManagerService::TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode,
     const Want *resultWant, bool flag)
 {
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOG_DEBUG("Not support in scb.");
-        return ERR_OK;
-    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Terminate ability begin, flag:%{public}d.", flag);
     if (!VerificationAllToken(token)) {
@@ -2128,16 +2126,11 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
     CHECK_POINTER_AND_RETURN(extensionSessionInfo, ERR_INVALID_VALUE);
     auto abilityRecord = Token::GetAbilityRecordByToken(extensionSessionInfo->callerToken);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    HILOG_DEBUG("userId=%{public}d", userId);
-    auto connectManager = GetConnectManagerByUserId(userId);
-    if (!connectManager) {
-        HILOG_ERROR("connectManager is nullptr.");
-        return ERR_INVALID_VALUE;
-    }
-
-    auto targetRecord = connectManager->GetUIExtensioBySessionInfo(extensionSessionInfo);
+    std::shared_ptr<AbilityConnectManager> connectManager;
+    std::shared_ptr<AbilityRecord> targetRecord;
+    GetConnectManagerAndUIExtensionBySessionInfo(extensionSessionInfo, connectManager, targetRecord);
     CHECK_POINTER_AND_RETURN(targetRecord, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
 
     if (!JudgeSelfCalled(targetRecord) && !JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
@@ -2314,10 +2307,6 @@ std::string AbilityManagerService::AnonymizeDeviceId(const std::string& deviceId
 
 int AbilityManagerService::MinimizeAbility(const sptr<IRemoteObject> &token, bool fromUser)
 {
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOG_DEBUG("Not support in scb.");
-        return ERR_OK;
-    }
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Minimize ability, fromUser:%{public}d.", fromUser);
     if (!VerificationAllToken(token)) {
@@ -2359,16 +2348,12 @@ int AbilityManagerService::MinimizeUIExtensionAbility(const sptr<SessionInfo> &e
     if (!JudgeSelfCalled(abilityRecord)) {
         return CHECK_PERMISSION_FAILED;
     }
-    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    HILOG_DEBUG("userId=%{public}d", userId);
-    auto connectManager = GetConnectManagerByUserId(userId);
-    if (!connectManager) {
-        HILOG_ERROR("connectManager is nullptr.");
-        return ERR_INVALID_VALUE;
-    }
 
-    auto targetRecord = connectManager->GetUIExtensioBySessionInfo(extensionSessionInfo);
+    std::shared_ptr<AbilityConnectManager> connectManager;
+    std::shared_ptr<AbilityRecord> targetRecord;
+    GetConnectManagerAndUIExtensionBySessionInfo(extensionSessionInfo, connectManager, targetRecord);
     CHECK_POINTER_AND_RETURN(targetRecord, ERR_INVALID_VALUE);
+    CHECK_POINTER_AND_RETURN(connectManager, ERR_INVALID_VALUE);
 
     auto result = JudgeAbilityVisibleControl(targetRecord->GetAbilityInfo());
     if (result != ERR_OK) {
@@ -4699,17 +4684,17 @@ bool AbilityManagerService::IsSystemUI(const std::string &bundleName) const
     return bundleName == AbilityConfig::SYSTEM_UI_BUNDLE_NAME;
 }
 
-void AbilityManagerService::HandleLoadTimeOut(int64_t abilityRecordId)
+void AbilityManagerService::HandleLoadTimeOut(int64_t abilityRecordId, bool isHalf)
 {
     HILOG_DEBUG("Handle load timeout.");
     std::lock_guard<ffrt::mutex> lock(managersMutex_);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        uiAbilityLifecycleManager_->OnTimeOut(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecordId);
+        uiAbilityLifecycleManager_->OnTimeOut(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecordId, isHalf);
         return;
     }
     for (auto& item : missionListManagers_) {
         if (item.second) {
-            item.second->OnTimeOut(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecordId);
+            item.second->OnTimeOut(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecordId, isHalf);
         }
     }
 }
@@ -4742,17 +4727,17 @@ void AbilityManagerService::HandleInactiveTimeOut(int64_t abilityRecordId)
     }
 }
 
-void AbilityManagerService::HandleForegroundTimeOut(int64_t abilityRecordId)
+void AbilityManagerService::HandleForegroundTimeOut(int64_t abilityRecordId, bool isHalf)
 {
     HILOG_DEBUG("Handle foreground timeout.");
     std::lock_guard<ffrt::mutex> lock(managersMutex_);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        uiAbilityLifecycleManager_->OnTimeOut(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecordId);
+        uiAbilityLifecycleManager_->OnTimeOut(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecordId, isHalf);
         return;
     }
     for (auto& item : missionListManagers_) {
         if (item.second) {
-            item.second->OnTimeOut(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecordId);
+            item.second->OnTimeOut(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecordId, isHalf);
         }
     }
 }
@@ -5398,10 +5383,6 @@ void AbilityManagerService::ClearUserData(int32_t userId)
 
 int AbilityManagerService::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler)
 {
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOG_DEBUG("Not support in scb.");
-        return ERR_OK;
-    }
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (!isSaCall) {
         HILOG_ERROR("%{public}s: Permission verification failed", __func__);
@@ -5526,6 +5507,28 @@ void AbilityManagerService::ReportAppRecoverResult(const int32_t appId, const Ap
         "RECOVERY_RESULT", result);
 }
 
+void AbilityManagerService::AppRecoverKill(pid_t pid, int32_t reason)
+{
+    AppExecFwk::AppFaultDataBySA faultDataSA;
+    faultDataSA.errorObject.name = "appRecovery";
+    switch (reason) {
+        case AppExecFwk::StateReason::CPP_CRASH:
+            faultDataSA.faultType = AppExecFwk::FaultDataType::CPP_CRASH;
+            break;
+        case AppExecFwk::StateReason::JS_ERROR:
+            faultDataSA.faultType = AppExecFwk::FaultDataType::JS_ERROR;
+            break;
+        case AppExecFwk::StateReason::LIFECYCLE:
+        case AppExecFwk::StateReason::APP_FREEZE:
+            faultDataSA.faultType = AppExecFwk::FaultDataType::APP_FREEZE;
+            break;
+        default:
+            faultDataSA.faultType = AppExecFwk::FaultDataType::UNKNOWN;
+    }
+    faultDataSA.pid = pid;
+    IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyAppFaultBySA(faultDataSA));
+}
+
 void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& token, int32_t reason, const Want *want)
 {
     if (token == nullptr) {
@@ -5568,7 +5571,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
             HILOG_ERROR("%{public}s AppRecovery recover app more than once in one minute, just kill app(%{public}d).",
                 __func__, record->GetPid());
             ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "FAIL_WITHIN_ONE_MINUTE");
-            kill(record->GetPid(), SIGKILL);
+            AppRecoverKill(record->GetPid(), reason);
             return;
         }
 
@@ -5621,7 +5624,7 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
         curWant.SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true);
 
         ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "SUCCESS");
-        kill(record->GetPid(), SIGKILL);
+        AppRecoverKill(record->GetPid(), reason);
     }
 
     constexpr int delaytime = 1000;
@@ -6093,10 +6096,6 @@ int AbilityManagerService::DelegatorDoAbilityBackground(const sptr<IRemoteObject
 
 int AbilityManagerService::DoAbilityForeground(const sptr<IRemoteObject> &token, uint32_t flag)
 {
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOG_DEBUG("Not support in scb.");
-        return ERR_OK;
-    }
     HILOG_DEBUG("DoAbilityForeground, sceneFlag:%{public}u", flag);
     CHECK_POINTER_AND_RETURN(token, ERR_INVALID_VALUE);
     if (!VerificationToken(token) && !VerificationAllToken(token)) {
@@ -6128,10 +6127,6 @@ int AbilityManagerService::DoAbilityForeground(const sptr<IRemoteObject> &token,
 
 int AbilityManagerService::DoAbilityBackground(const sptr<IRemoteObject> &token, uint32_t flag)
 {
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOG_DEBUG("Not support in scb.");
-        return ERR_OK;
-    }
     HILOG_DEBUG("DoAbilityBackground, sceneFlag:%{public}u", flag);
     CHECK_POINTER_AND_RETURN(token, ERR_INVALID_VALUE);
 
@@ -7461,13 +7456,24 @@ int AbilityManagerService::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId
         return ret;
     }
 
+    bool focused = false;
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
     auto connectManager = GetConnectManagerByUserId(userId);
-    if (!connectManager) {
-        HILOG_ERROR("connectManager is nullptr.");
-        return ERR_INVALID_VALUE;
+    if (connectManager) {
+        focused = connectManager->IsUIExtensionFocused(uiExtensionTokenId, token);
+    } else {
+        HILOG_WARN("connectManager is nullptr, userId: %{public}d", userId);
     }
-    isFocused = connectManager->IsUIExtensionFocused(uiExtensionTokenId, token);
+    if (!focused && userId != U0_USER_ID) {
+        HILOG_DEBUG("Check connectManager in user0");
+        connectManager = GetConnectManagerByUserId(U0_USER_ID);
+        if (connectManager) {
+            focused = connectManager->IsUIExtensionFocused(uiExtensionTokenId, token);
+        } else {
+            HILOG_WARN("connectManager is nullptr, userId: 0");
+        }
+    }
+    isFocused = focused;
     HILOG_DEBUG("isFocused: %{public}d", isFocused);
     return ERR_OK;
 }
@@ -7749,6 +7755,29 @@ bool AbilityManagerService::CheckCollaboratorType(int32_t type)
         return false;
     }
     return true;
+}
+
+void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
+    std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility)
+{
+    targetAbility = nullptr;
+    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    HILOG_DEBUG("userId=%{public}d", userId);
+    connectManager = GetConnectManagerByUserId(userId);
+    if (connectManager) {
+        targetAbility = connectManager->GetUIExtensioBySessionInfo(sessionInfo);
+    } else {
+        HILOG_WARN("connectManager is nullptr, userId: %{public}d", userId);
+    }
+    if (targetAbility == nullptr && userId != U0_USER_ID) {
+        HILOG_DEBUG("try to find UIExtension in user0");
+        connectManager = GetConnectManagerByUserId(U0_USER_ID);
+        if (connectManager) {
+            targetAbility = connectManager->GetUIExtensioBySessionInfo(sessionInfo);
+        } else {
+            HILOG_WARN("connectManager is nullptr, userId: 0");
+        }
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
