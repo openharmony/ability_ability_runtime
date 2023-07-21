@@ -19,6 +19,7 @@
 #include "ability_stage_context.h"
 #include "context.h"
 #include "resource_manager.h"
+#include "simulator.h"
 #include "uv.h"
 
 namespace OHOS {
@@ -47,12 +48,18 @@ public:
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const;
     void SetResourceManager(const std::shared_ptr<Global::Resource::ResourceManager> &resMgr);
     void SetAbilityStageContext(const std::shared_ptr<AbilityStageContext> &stageContext);
+    bool IsTerminating();
+    void SetTerminating(const bool &state);
+    int32_t TerminateSelf();
+    void SetSimulator(Simulator *simulator);
 
 private:
     static const int EL_DEFAULT = 1;
     Options options_;
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr_;
     std::shared_ptr<AbilityStageContext> stageContext_;
+    bool isTerminating_ = false;
+    Simulator *simulator_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
