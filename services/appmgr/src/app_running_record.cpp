@@ -816,13 +816,13 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
 
     // We need schedule application to foregrounded when current application state is ready or background running.
     if (curState_ == ApplicationState::APP_STATE_READY || curState_ == ApplicationState::APP_STATE_BACKGROUND) {
-        if (curState_ == ApplicationState::APP_STATE_BACKGROUND) {
-            SendAppStartupTypeEvent(ability, AppStartType::HOT);
-        }
         if (foregroundingAbilityTokens_.empty()) {
             ScheduleForegroundRunning();
         }
         foregroundingAbilityTokens_.push_back(ability->GetToken());
+        if (curState_ == ApplicationState::APP_STATE_BACKGROUND) {
+            SendAppStartupTypeEvent(ability, AppStartType::HOT);
+        }
         return;
     } else if (curState_ == ApplicationState::APP_STATE_FOREGROUND) {
         // Just change ability to foreground if current application state is foreground or focus.
@@ -1077,7 +1077,7 @@ void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunn
     AAFwk::EventInfo eventInfo;
     auto applicationInfo = GetApplicationInfo();
     if (!applicationInfo) {
-        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+        HILOG_ERROR("applicationInfo is nullptr, can not get app information");
     } else {
         eventInfo.bundleName = applicationInfo->name;
         eventInfo.versionName = applicationInfo->versionName;
@@ -1086,11 +1086,13 @@ void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunn
 
     auto abilityInfo = ability->GetAbilityInfo();
     if (!abilityInfo) {
-        HILOG_ERROR("abilityInfo is nullptr, can not get ability informations");
+        HILOG_ERROR("abilityInfo is nullptr, can not get ability information");
     } else {
         eventInfo.abilityName = abilityInfo->name;
     }
-    if (GetPriorityObject()) {
+    if (GetPriorityObject() == nullptr) {
+        HILOG_ERROR("appRecord's priorityObject is null");
+    } else {
         eventInfo.pid = GetPriorityObject()->GetPid();
     }
     eventInfo.startType = static_cast<int32_t>(startType);

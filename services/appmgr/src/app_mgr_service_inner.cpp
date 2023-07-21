@@ -1998,18 +1998,20 @@ void AppMgrServiceInner::SendAppStartupTypeEvent(const std::shared_ptr<AppRunnin
     AAFwk::EventInfo eventInfo;
     auto applicationInfo = appRecord->GetApplicationInfo();
     if (!applicationInfo) {
-        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+        HILOG_ERROR("applicationInfo is nullptr, can not get app information");
     } else {
         eventInfo.bundleName = applicationInfo->name;
         eventInfo.versionName = applicationInfo->versionName;
         eventInfo.versionCode = applicationInfo->versionCode;
     }
     if (!abilityInfo) {
-        HILOG_ERROR("abilityInfo is nullptr, can not get ability informations");
+        HILOG_ERROR("abilityInfo is nullptr, can not get ability information");
     } else {
         eventInfo.abilityName = abilityInfo->name;
     }
-    if (appRecord->GetPriorityObject()) {
+    if (appRecord->GetPriorityObject() == nullptr) {
+        HILOG_ERROR("appRecord's priorityObject is null");
+    } else {
         eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     }
     eventInfo.startType = static_cast<int32_t>(startType);
