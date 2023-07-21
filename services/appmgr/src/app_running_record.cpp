@@ -15,6 +15,7 @@
 
 #include "app_running_record.h"
 #include "app_mgr_service_inner.h"
+#include "event_report.h"
 #include "hitrace_meter.h"
 #include "hilog_wrapper.h"
 #include "ui_extension_utils.h"
@@ -815,6 +816,9 @@ void AppRunningRecord::AbilityForeground(const std::shared_ptr<AbilityRunningRec
 
     // We need schedule application to foregrounded when current application state is ready or background running.
     if (curState_ == ApplicationState::APP_STATE_READY || curState_ == ApplicationState::APP_STATE_BACKGROUND) {
+        if (curState_ == ApplicationState::APP_STATE_BACKGROUND) {
+            SendAppStartupTypeEvent(ability, AppStartType::HOT);
+        }
         if (foregroundingAbilityTokens_.empty()) {
             ScheduleForegroundRunning();
         }
@@ -1061,6 +1065,36 @@ std::shared_ptr<PriorityObject> AppRunningRecord::GetPriorityObject()
 void AppRunningRecord::SendEventForSpecifiedAbility(uint32_t msg, int64_t timeOut)
 {
     SendEvent(msg, timeOut);
+}
+
+void AppRunningRecord::SendAppStartupTypeEvent(const std::shared_ptr<AbilityRunningRecord> &ability,
+    const AppStartType startType)
+{
+    if (!ability) {
+        HILOG_ERROR("AbilityRunningRecord is nullptr");
+        return;
+    }
+    AAFwk::EventInfo eventInfo;
+    auto applicationInfo = GetApplicationInfo();
+    if (!applicationInfo) {
+        HILOG_ERROR("applicationInfo is nullptr, can not get app informations");
+    } else {
+        eventInfo.bundleName = applicationInfo->name;
+        eventInfo.versionName = applicationInfo->versionName;
+        eventInfo.versionCode = applicationInfo->versionCode;
+    }
+
+    auto abilityInfo = ability->GetAbilityInfo();
+    if (!abilityInfo) {
+        HILOG_ERROR("abilityInfo is nullptr, can not get ability informations");
+    } else {
+        eventInfo.abilityName = abilityInfo->name;
+    }
+    if (GetPriorityObject()) {
+        eventInfo.pid = GetPriorityObject()->GetPid();
+    }
+    eventInfo.startType = static_cast<int32_t>(startType);
+    AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_STARTUP_TYPE, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
 void AppRunningRecord::SendEvent(uint32_t msg, int64_t timeOut)
