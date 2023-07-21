@@ -829,7 +829,7 @@ void UIAbilityLifecycleManager::CompleteTerminate(const std::shared_ptr<AbilityR
     terminateAbilityList_.remove(abilityRecord);
 }
 
-uint32_t UIAbilityLifecycleManager::GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const
+int32_t UIAbilityLifecycleManager::GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const
 {
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED) {
         return GetReusedSpecifiedPersistentId(abilityRequest);
@@ -855,7 +855,7 @@ uint32_t UIAbilityLifecycleManager::GetPersistentIdByAbilityRequest(const Abilit
     return 0;
 }
 
-uint32_t UIAbilityLifecycleManager::GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest) const
+int32_t UIAbilityLifecycleManager::GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest) const
 {
     if (abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
         HILOG_WARN("Not SPECIFIED.");
@@ -873,7 +873,7 @@ uint32_t UIAbilityLifecycleManager::GetReusedSpecifiedPersistentId(const Ability
     return 0;
 }
 
-uint32_t UIAbilityLifecycleManager::GetReusedStandardPersistentId(const AbilityRequest &abilityRequest) const
+int32_t UIAbilityLifecycleManager::GetReusedStandardPersistentId(const AbilityRequest &abilityRequest) const
 {
     if (abilityRequest.abilityInfo.launchMode != AppExecFwk::LaunchMode::STANDARD) {
         HILOG_WARN("Not STANDARD.");
@@ -886,7 +886,7 @@ uint32_t UIAbilityLifecycleManager::GetReusedStandardPersistentId(const AbilityR
     }
 
     int64_t sessionTime = 0;
-    uint32_t persistentId = 0;
+    int32_t persistentId = 0;
     for (const auto& [first, second] : sessionAbilityMap_) {
         if (CheckProperties(second, abilityRequest, AppExecFwk::LaunchMode::STANDARD) &&
             second->GetRestartTime() >= sessionTime) {
