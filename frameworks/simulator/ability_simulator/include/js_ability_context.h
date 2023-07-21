@@ -29,7 +29,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class JsAbilityContext final {
 public:
-    JsAbilityContext() {}
+    explicit JsAbilityContext(const std::shared_ptr<AbilityContext>& context) : context_(context) {}
     ~JsAbilityContext() = default;
 
     static void Finalizer(NativeEngine *engine, void *data, void *hint);
@@ -53,8 +53,16 @@ public:
     static NativeValue *RestoreWindowStage(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue *RequestDialogService(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue *IsTerminating(NativeEngine *engine, NativeCallbackInfo *info);
+
+private:
+    NativeValue *OnTerminateSelf(NativeEngine &engine, NativeCallbackInfo &info);
+    NativeValue *OnIsTerminating(NativeEngine &engine, NativeCallbackInfo &info);
+    NativeValue *OnTerminateSelfWithResult(NativeEngine &engine, NativeCallbackInfo &info);
+
+    std::weak_ptr<AbilityContext> context_;
 };
 NativeValue *CreateJsAbilityContext(NativeEngine &engine, const std::shared_ptr<AbilityContext> &context);
+NativeValue *CreateJsErrorByNativeErr(NativeEngine &engine, int32_t err, const std::string &permission = "");
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_SIMULAOTR_JS_ABILITY_CONTEXT_H

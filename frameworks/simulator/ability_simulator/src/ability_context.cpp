@@ -136,5 +136,28 @@ void AbilityContext::SetAbilityStageContext(const std::shared_ptr<AbilityStageCo
 {
     stageContext_ = stageContext;
 }
+
+bool AbilityContext::IsTerminating()
+{
+    return isTerminating_;
+}
+
+void AbilityContext::SetTerminating(const bool &state)
+{
+    isTerminating_ = state;
+}
+
+int32_t AbilityContext::TerminateSelf()
+{
+    if (simulator_ != nullptr) {
+        simulator_->TerminateAbility(0);
+    }
+    return 0;
+}
+
+void AbilityContext::SetSimulator(Simulator *simulator)
+{
+    simulator_ = simulator;
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

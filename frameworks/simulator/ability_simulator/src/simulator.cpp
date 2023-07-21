@@ -34,6 +34,7 @@
 #include "js_runtime_utils.h"
 #include "js_timer.h"
 #include "js_window_stage.h"
+#include "launch_param.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "resource_manager.h"
 #include "window_scene.h"
@@ -100,6 +101,7 @@ private:
     NativeValue *CreateJsWant(NativeEngine &engine);
     bool LoadAbilityStage(uint8_t *buffer, size_t len);
     void InitJsAbilityStageContext(NativeValue *instanceValue);
+    NativeValue *CreateJsLaunchParam(NativeEngine &engine);
 
     panda::ecmascript::EcmaVM *CreateJSVM();
     Options options_;
@@ -281,6 +283,10 @@ bool SimulatorImpl::LoadAbilityStage(uint8_t *buffer, size_t len)
     InitJsAbilityStageContext(instanceValue);
 
     CallObjectMethod(*nativeEngine_, instanceValue, "onCreate", nullptr, 0);
+    NativeValue *wantArgv[] = {
+        CreateJsWant(*nativeEngine_)
+    };
+    CallObjectMethod(*nativeEngine_, instanceValue, "onAcceptWant", wantArgv, ArraySize(wantArgv));
 
     abilityStage_ = std::shared_ptr<NativeReference>(nativeEngine_->CreateReference(instanceValue, 1));
     return true;
@@ -317,6 +323,11 @@ void SimulatorImpl::InitJsAbilityStageContext(NativeValue *instanceValue)
 
 void SimulatorImpl::TerminateAbility(int64_t abilityId)
 {
+    if (abilityId == 0 && abilities_.begin() != abilities_.end()) {
+        TerminateAbility(abilities_.begin()->first);
+        return;
+    }
+
     auto it = abilities_.find(abilityId);
     if (it == abilities_.end()) {
         return;
@@ -369,6 +380,7 @@ void SimulatorImpl::InitJsAbilityContext(NativeValue *instanceValue)
 {
     if (context_ == nullptr) {
         context_ = std::make_shared<AbilityContext>();
+        context_->SetSimulator(static_cast<Simulator*>(this));
         context_->SetOptions(options_);
         context_->SetAbilityStageContext(stageContext_);
         context_->SetResourceManager(resourceMgr_);
@@ -401,23 +413,33 @@ NativeValue *SimulatorImpl::CreateJsWant(NativeEngine &engine)
     NativeValue *objValue = engine.CreateObject();
     NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
 
-    object->SetProperty("deviceId", engine.CreateUndefined());
-    object->SetProperty("bundleName", engine.CreateUndefined());
-    object->SetProperty("abilityName", engine.CreateUndefined());
-    object->SetProperty("moduleName", engine.CreateUndefined());
-    object->SetProperty("uri", engine.CreateUndefined());
-    object->SetProperty("type", engine.CreateUndefined());
-    object->SetProperty("flags", engine.CreateUndefined());
-    object->SetProperty("action", engine.CreateUndefined());
-    object->SetProperty("parameters", engine.CreateUndefined());
-    object->SetProperty("entities", engine.CreateUndefined());
+    object->SetProperty("deviceId", CreateJsValue(engine, ""));
+    object->SetProperty("bundleName", CreateJsValue(engine, options_.bundleName));
+    object->SetProperty("abilityName", engine.CreateUndefined()); //FIXME
+    object->SetProperty("moduleName", CreateJsValue(engine, options_.moduleName));
+    object->SetProperty("uri", CreateJsValue(engine, ""));
+    object->SetProperty("type", CreateJsValue(engine, ""));
+    object->SetProperty("flags", CreateJsValue(engine, 0));
+    object->SetProperty("action", CreateJsValue(engine, ""));
+    object->SetProperty("parameters", engine.CreateObject());
+    object->SetProperty("entities", engine.CreateArray(0));
+    return objValue;
+}
+
+NativeValue *SimulatorImpl::CreateJsLaunchParam(NativeEngine &engine)
+{
+    NativeValue *objValue = engine.CreateObject();
+    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    object->SetProperty("launchReason", CreateJsValue(engine, AAFwk::LAUNCHREASON_UNKNOWN));
+    object->SetProperty("lastExitReason", CreateJsValue(engine, AAFwk::LASTEXITREASON_UNKNOWN));
     return objValue;
 }
 
 void SimulatorImpl::DispatchStartLifecycle(NativeValue *instanceValue)
 {
     NativeValue *wantArgv[] = {
-        CreateJsWant(*nativeEngine_)
+        CreateJsWant(*nativeEngine_),
+        CreateJsLaunchParam(*nativeEngine_)
     };
     CallObjectMethod(*nativeEngine_, instanceValue, "onCreate", wantArgv, ArraySize(wantArgv));
 
