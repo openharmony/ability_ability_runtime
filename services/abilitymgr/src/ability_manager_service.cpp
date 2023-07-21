@@ -602,22 +602,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_INFO("try to StartRemoteAbility");
         return StartRemoteAbility(want, requestCode, validUserId, callerToken);
     }
-    if (AbilityUtil::IsStartFreeInstall(want)) {
-        if (freeInstallManager_ == nullptr) {
-            return ERR_INVALID_VALUE;
-        }
-        Want localWant = want;
-        if (!localWant.GetDeviceId().empty()) {
-            localWant.SetDeviceId("");
-        }
-        if (!isStartAsCaller) {
-            UpdateCallerInfo(localWant, callerToken);
-        } else {
-            HILOG_DEBUG("start as caller, skip UpdateCallerInfo!");
-        }
-        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
-    }
-
+    
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
         return ERR_CROSS_USER;
@@ -644,6 +629,41 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     ComponentRequest componentRequest = initComponentRequest(callerToken, requestCode, result);
     if (CheckProxyComponent(want, result) && !IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
         return componentRequest.requestResult;
+    }
+
+    if (AbilityUtil::IsStartFreeInstall(want)) {
+        if (freeInstallManager_ == nullptr) {
+            return ERR_INVALID_VALUE;
+        }
+        Want localWant = want;
+        if (!localWant.GetDeviceId().empty()) {
+            localWant.SetDeviceId("");
+        }
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_DEBUG("start as caller, skip UpdateCallerInfo!");
+        }
+        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
+    } else if (want.GetElement().GetBundleName() == GetBundleNameFromToken(callerToken) &&
+        want.GetElement().GetModuleName() != "") {
+        if (freeInstallManager_ == nullptr) {
+            return ERR_INVALID_VALUE;
+        }
+        Want localWant = want;
+        if (!localWant.GetDeviceId().empty()) {
+            localWant.SetDeviceId("");
+        }
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        } else {
+            HILOG_INFO("Start as caller, skip UpdateCallerInfo");
+        }
+        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, false);
+        if (ret == ERR_OK) {
+            result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
+            componentRequest = initComponentRequest(callerToken, requestCode, result);
+        }
     }
 
     if (result != ERR_OK) {
@@ -757,6 +777,20 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     HILOG_DEBUG("Start ability, name is %{public}s.", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
 }
+
+
+std::string AbilityManagerService::GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken)
+{
+    std::string callerBundleName;
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    if (!abilityRecord) {
+        HILOG_WARN("abilityRecord is null.");
+    } else {
+        callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+    }
+    return callerBundleName;
+}
+
 
 int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSetting &abilityStartSetting,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)

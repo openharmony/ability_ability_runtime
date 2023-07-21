@@ -1525,6 +1525,8 @@ private:
     bool CheckPrepareTerminateEnable();
 
     bool CheckCollaboratorType(int32_t type);
+
+    std::string GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken);
     
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
