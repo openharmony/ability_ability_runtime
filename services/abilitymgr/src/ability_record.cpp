@@ -76,12 +76,12 @@ const int LOAD_TIMEOUT_ASANENABLED = 150;
 const int TERMINATE_TIMEOUT_ASANENABLED = 150;
 const int HALF_TIMEOUT = 2;
 #ifdef SUPPORT_ASAN
-const int COLDSTART_TIMEOUT_MULTIPLE = 150;
-const int LOAD_TIMEOUT_MULTIPLE = 150;
+const int COLDSTART_TIMEOUT_MULTIPLE = 15000;
+const int LOAD_TIMEOUT_MULTIPLE = 15000;
 const int FOREGROUND_TIMEOUT_MULTIPLE = 75;
 const int BACKGROUND_TIMEOUT_MULTIPLE = 45;
 const int ACTIVE_TIMEOUT_MULTIPLE = 75;
-const int TERMINATE_TIMEOUT_MULTIPLE = 150;
+const int TERMINATE_TIMEOUT_MULTIPLE = 15000;
 const int INACTIVE_TIMEOUT_MULTIPLE = 8;
 const int DUMP_TIMEOUT_MULTIPLE = 15;
 const int SHAREDATA_TIMEOUT_MULTIPLE = 75;
@@ -2221,6 +2221,7 @@ void AbilityRecord::SetMission(const std::shared_ptr<Mission> &mission)
         missionId_ = mission->GetMissionId();
         HILOG_DEBUG("SetMission come, missionId is %{public}d.", missionId_);
     }
+    want_.RemoveParam(KEY_MISSION_ID);
     want_.SetParam(KEY_MISSION_ID, missionId_);
     mission_ = mission;
 }
