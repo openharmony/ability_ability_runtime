@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ABILITY_RUNTIME_SIMULATOR_OPTIONS_H
 #define FOUNDATION_ABILITY_RUNTIME_SIMULATOR_OPTIONS_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -95,7 +96,7 @@ struct Options {
     AppExecFwk::ApplicationInfo applicationInfo;
     AppExecFwk::HapModuleInfo hapModuleInfo;
     AppExecFwk::AbilityInfo abilityInfo;
-    AppExecFwk::Configuration configuration;
+    std::shared_ptr<AppExecFwk::Configuration> configuration;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
