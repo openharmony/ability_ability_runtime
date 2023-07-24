@@ -27,6 +27,9 @@ public:
     virtual ~AbilityStageContext() = default;
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() override;
+    void SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &configuration);
+    std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const override;
+    std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;
 
     Options GetOptions() override;
     void SetOptions(const Options &options) override;
@@ -53,6 +56,9 @@ private:
     Options options_;
     std::string currArea_ = "el2";
     std::string fileSeparator_ = "/";
+    std::shared_ptr<AppExecFwk::Configuration> configuration_;
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo_;
+    std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfo_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -184,7 +184,6 @@ struct ApplicationInfo {
     BundleType bundleType = BundleType::APP;
 
     std::string compileSdkVersion;
-    std::string compileSdkType = "OpenHarmony";
 };
 } // namespace AppExecFwk
 } // namespace OHOS

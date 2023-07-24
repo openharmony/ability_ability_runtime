@@ -80,7 +80,9 @@ int32_t main(int32_t argc, const char *argv[])
     options.targetVersion = atoi(argv[PARAM_TWENTYTHREE]);
     options.releaseType = argv[PARAM_TWENTYFOUR];
     options.enablePartialUpdate = atoi(argv[PARAM_TWENTYFIVE]);
-    options.moduleSrcPath = argv[PARAM_TWENTYSEVEN];
+    OHOS::AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.srcEntrance = argv[PARAM_TWENTYSEVEN];
+    options.hapModuleInfo = hapModuleInfo;
     auto simulator = OHOS::AbilityRuntime::Simulator::Create(options);
     if (!simulator) {
         std::cout << "Create Simulator failed." << std::endl;

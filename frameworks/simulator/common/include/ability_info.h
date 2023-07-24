@@ -17,6 +17,7 @@
 #define FOUNDATION_ABILITY_RUNTIME_SIMULATOR_COMMON_ABILITY_INFO_H
 
 #include <string>
+#include <vector>
 
 namespace OHOS {
 namespace AppExecFwk {

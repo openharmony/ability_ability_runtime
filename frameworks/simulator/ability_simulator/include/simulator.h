@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "configuration.h"
 #include "options.h"
 
 #ifdef _WIN32
@@ -45,6 +46,7 @@ public:
 
     virtual int64_t StartAbility(const std::string &abilitySrcPath, TerminateCallback callback) = 0;
     virtual void TerminateAbility(int64_t abilityId) = 0;
+    virtual void UpdateConfiguration(const AppExecFwk::Configuration &config) = 0;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -19,6 +19,10 @@
 #include <string>
 #include <vector>
 
+#include "ability_info.h"
+#include "application_info.h"
+#include "hap_module_info.h"
+
 namespace OHOS {
 namespace AbilityRuntime {
 enum class DeviceType {
@@ -87,7 +91,9 @@ struct Options {
     int32_t targetVersion;
     std::string releaseType;
     bool enablePartialUpdate;
-    std::string moduleSrcPath;
+    AppExecFwk::ApplicationInfo applicationInfo;
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    AppExecFwk::AbilityInfo abilityInfo;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
