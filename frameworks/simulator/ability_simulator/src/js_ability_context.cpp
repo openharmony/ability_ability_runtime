@@ -26,6 +26,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr size_t ARGC_ZERO = 0;
+constexpr size_t ARGC_ONE = 1;
 }
 void JsAbilityContext::Finalizer(NativeEngine *engine, void *data, void *hint)
 {
@@ -150,7 +151,7 @@ NativeValue *JsAbilityContext::OnTerminateSelfWithResult(NativeEngine &engine, N
     }
     abilityContext->SetTerminating(true);
 
-    NativeValue *lastParam = (info.argc > ARGC_ZERO) ? info.argv[ARGC_ZERO] : nullptr;
+    NativeValue *lastParam = (info.argc > ARGC_ONE) ? info.argv[ARGC_ONE] : nullptr;
     NativeValue *result = nullptr;
     auto task = CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
     if (task == nullptr) {

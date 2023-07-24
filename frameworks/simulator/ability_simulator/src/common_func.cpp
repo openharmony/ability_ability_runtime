@@ -15,14 +15,6 @@
 #include "common_func.h"
 
 #include <vector>
-// #include "appexecfwk_errors.h"
-// #include "bundle_errors.h"
-// #include "bundle_mgr_interface.h"
-// #include "bundle_mgr_proxy.h"
-// #include "iservice_registry.h"
-// #include "napi/native_api.h"
-// #include "napi/native_common.h"
-// #include "napi/native_node_api.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"

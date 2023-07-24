@@ -21,6 +21,7 @@
 
 #include "ability_info.h"
 #include "application_info.h"
+#include "configuration.h"
 #include "hap_module_info.h"
 
 namespace OHOS {
@@ -94,6 +95,7 @@ struct Options {
     AppExecFwk::ApplicationInfo applicationInfo;
     AppExecFwk::HapModuleInfo hapModuleInfo;
     AppExecFwk::AbilityInfo abilityInfo;
+    AppExecFwk::Configuration configuration;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
