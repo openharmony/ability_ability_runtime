@@ -25,7 +25,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr float DPI_BASE = 160.0;
 }
-Global::Resource::ColorMode ConvertColorMode(std::string colormode)
+Global::Resource::ColorMode ConvertColorMode(const std::string &colormode)
 {
     auto resolution = Global::Resource::ColorMode::COLOR_MODE_NOT_SET;
 
@@ -44,7 +44,7 @@ Global::Resource::ColorMode ConvertColorMode(std::string colormode)
     return resolution;
 }
 
-int32_t ConvertDisplayId(std::string displayId)
+int32_t ConvertDisplayId(const std::string &displayId)
 {
     if (displayId == AppExecFwk::ConfigurationInner::EMPTY_STRING) {
         return -1;
@@ -53,7 +53,7 @@ int32_t ConvertDisplayId(std::string displayId)
     return std::stoi(displayId);
 }
 
-Global::Resource::ScreenDensity ConvertDensity(std::string density)
+Global::Resource::ScreenDensity ConvertDensity(const std::string &density)
 {
     auto resolution = Global::Resource::ScreenDensity::SCREEN_DENSITY_NOT_SET;
 

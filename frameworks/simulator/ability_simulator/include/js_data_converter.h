@@ -27,9 +27,9 @@ class NativeValue;
 
 namespace OHOS {
 namespace AbilityRuntime {
-Global::Resource::ColorMode ConvertColorMode(std::string colormode);
-Global::Resource::Direction ConvertDirection(std::string direction);
-Global::Resource::ScreenDensity ConvertDensity(std::string density);
+Global::Resource::ColorMode ConvertColorMode(const std::string &colormode);
+Global::Resource::Direction ConvertDirection(const std::string &direction);
+Global::Resource::ScreenDensity ConvertDensity(const std::string &density);
 int32_t ConvertDisplayId(std::string displayId);
 std::string GetDensityStr(float density);
 NativeValue *CreateJsConfiguration(NativeEngine &engine, const AppExecFwk::Configuration &configuration);
