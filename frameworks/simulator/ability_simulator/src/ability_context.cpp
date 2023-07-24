@@ -48,7 +48,7 @@ Options AbilityContext::GetOptions()
 void AbilityContext::SetOptions(const Options &options)
 {
     options_ = options;
-    abilityInfo_ = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo);
+    abilityInfo_ = std::make_shared<AppExecFwk::AbilityInfo>(options.abilityInfo);
 
     HILOG_DEBUG("Options.bundleName: %{public}s", options.bundleName.c_str());
     HILOG_DEBUG("Options.moduleName: %{public}s", options.moduleName.c_str());
