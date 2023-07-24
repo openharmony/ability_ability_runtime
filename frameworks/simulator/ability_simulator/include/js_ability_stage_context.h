@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_CONTEXT_H
 
+#include "configuration.h"
 #include "context.h"
 #include "native_engine/native_engine.h"
 
@@ -25,6 +26,9 @@ class JsAbilityStageContext final {
 public:
     explicit JsAbilityStageContext(const std::shared_ptr<Context> &context) : context_(context) {}
     ~JsAbilityStageContext() = default;
+
+    static void ConfigurationUpdated(NativeEngine* engine, std::shared_ptr<NativeReference> &jsContext,
+        const std::shared_ptr<AppExecFwk::Configuration> &config);
 
     std::shared_ptr<Context> GetContext()
     {

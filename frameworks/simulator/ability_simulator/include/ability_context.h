@@ -30,6 +30,9 @@ public:
     virtual ~AbilityContext() = default;
 
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() override;
+    std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const override;
+    std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;
+    std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const;
 
     Options GetOptions() override;
     void SetOptions(const Options &options) override;
@@ -60,6 +63,7 @@ private:
     std::shared_ptr<AbilityStageContext> stageContext_;
     bool isTerminating_ = false;
     Simulator *simulator_;
+    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -29,6 +29,7 @@
 #include "js_ability_context.h"
 #include "js_ability_stage_context.h"
 #include "js_console_log.h"
+#include "js_data_converter.h"
 #include "js_module_searcher.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
@@ -90,6 +91,7 @@ public:
 
     int64_t StartAbility(const std::string &abilityName, TerminateCallback callback) override;
     void TerminateAbility(int64_t abilityId) override;
+    void UpdateConfiguration(const AppExecFwk::Configuration &config) override;
 private:
     bool OnInit();
     void Run();
@@ -258,12 +260,12 @@ int64_t SimulatorImpl::StartAbility(const std::string &abilitySrcPath, Terminate
 
 bool SimulatorImpl::LoadAbilityStage(uint8_t *buffer, size_t len)
 {
-    if (options_.moduleSrcPath.empty()) {
+    if (options_.hapModuleInfo.srcEntrance.empty()) {
         HILOG_DEBUG("module src path is empty.");
         return true;
     }
 
-    auto moduleSrcPath = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + options_.moduleSrcPath;
+    auto moduleSrcPath = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + options_.hapModuleInfo.srcEntrance;
     if (!nativeEngine_->RunScriptBuffer(moduleSrcPath, buffer, len, false)) {
         HILOG_ERROR("Failed to run ability stage script: %{public}s", moduleSrcPath.c_str());
         return false;
@@ -358,6 +360,49 @@ void SimulatorImpl::TerminateAbility(int64_t abilityId)
     auto jsContextIter = jsContexts_.find(abilityId);
     if (jsContextIter != jsContexts_.end()) {
         jsContexts_.erase(jsContextIter);
+    }
+}
+
+void SimulatorImpl::UpdateConfiguration(const AppExecFwk::Configuration &config)
+{
+    HILOG_DEBUG("called.");
+    if (abilityStage_ == nullptr) {
+        HILOG_ERROR("abilityStage_ is nullptr");
+        return;
+    }
+
+    auto configuration = std::make_shared<AppExecFwk::Configuration>(config);
+    if (configuration == nullptr) {
+        return;
+    }
+
+    if (stageContext_) {
+        stageContext_->SetConfiguration(configuration);
+    }
+
+    NativeValue *configArgv[] = {
+        CreateJsConfiguration(*nativeEngine_, config)
+    };
+
+    auto abilityStage = abilityStage_->Get();
+    if (abilityStage == nullptr) {
+        HILOG_ERROR("abilityStage is nullptr");
+        return;
+    }
+    CallObjectMethod(*nativeEngine_, abilityStage, "onConfigurationUpdated", configArgv, ArraySize(configArgv));
+    CallObjectMethod(*nativeEngine_, abilityStage, "onConfigurationUpdate", configArgv, ArraySize(configArgv));
+    JsAbilityStageContext::ConfigurationUpdated(nativeEngine_.get(), jsStageContext_, configuration);
+
+    for (auto iter = abilities_.begin(); iter != abilities_.end(); iter++) {
+        auto ability = iter->second->Get();
+        if (ability == nullptr) {
+            HILOG_ERROR("ability is nullptr");
+            continue;
+        }
+
+        CallObjectMethod(*nativeEngine_, abilityStage, "onConfigurationUpdated", configArgv, ArraySize(configArgv));
+        CallObjectMethod(*nativeEngine_, abilityStage, "onConfigurationUpdate", configArgv, ArraySize(configArgv));
+        JsAbilityContext::ConfigurationUpdated(nativeEngine_.get(), iter->second, configuration);
     }
 }
 

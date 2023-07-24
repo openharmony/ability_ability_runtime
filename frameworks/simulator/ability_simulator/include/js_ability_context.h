@@ -20,6 +20,7 @@
 #include <memory>
 #include <native_engine/native_value.h>
 #include "ability_context.h"
+#include "configuration.h"
 
 class NativeObject;
 class NativeReference;
@@ -29,7 +30,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 class JsAbilityContext final {
 public:
-    explicit JsAbilityContext(const std::shared_ptr<AbilityContext>& context) : context_(context) {}
+    explicit JsAbilityContext(const std::shared_ptr<AbilityContext> &context) : context_(context) {}
     ~JsAbilityContext() = default;
 
     static void Finalizer(NativeEngine *engine, void *data, void *hint);
@@ -53,6 +54,9 @@ public:
     static NativeValue *RestoreWindowStage(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue *RequestDialogService(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue *IsTerminating(NativeEngine *engine, NativeCallbackInfo *info);
+
+    static void ConfigurationUpdated(NativeEngine *engine, std::shared_ptr<NativeReference> &jsContext,
+        const std::shared_ptr<AppExecFwk::Configuration> &config);
 
 private:
     NativeValue *OnTerminateSelf(NativeEngine &engine, NativeCallbackInfo &info);

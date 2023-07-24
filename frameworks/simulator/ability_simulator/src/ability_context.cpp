@@ -22,7 +22,22 @@ namespace OHOS {
 namespace AbilityRuntime {
 std::shared_ptr<AppExecFwk::Configuration> AbilityContext::GetConfiguration()
 {
-    return nullptr;
+    return stageContext_ ? stageContext_->GetConfiguration() : nullptr;
+}
+
+std::shared_ptr<AppExecFwk::ApplicationInfo> AbilityContext::GetApplicationInfo() const
+{
+    return stageContext_ ? stageContext_->GetApplicationInfo() : nullptr;
+}
+
+std::shared_ptr<AppExecFwk::HapModuleInfo> AbilityContext::GetHapModuleInfo() const
+{
+    return stageContext_ ? stageContext_->GetHapModuleInfo() : nullptr;
+}
+
+std::shared_ptr<AppExecFwk::AbilityInfo> AbilityContext::GetAbilityInfo() const
+{
+    return abilityInfo_;
 }
 
 Options AbilityContext::GetOptions()
@@ -33,6 +48,8 @@ Options AbilityContext::GetOptions()
 void AbilityContext::SetOptions(const Options &options)
 {
     options_ = options;
+    abilityInfo_ = std::make_shared<AppExecFwk::AbilityInfo>(abilityInfo);
+
     HILOG_DEBUG("Options.bundleName: %{public}s", options.bundleName.c_str());
     HILOG_DEBUG("Options.moduleName: %{public}s", options.moduleName.c_str());
     HILOG_DEBUG("Options.modulePath: %{public}s", options.modulePath.c_str());

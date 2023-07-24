@@ -38,7 +38,22 @@ constexpr int DIR_DEFAULT_PERM = 0770;
 }
 std::shared_ptr<AppExecFwk::Configuration> AbilityStageContext::GetConfiguration()
 {
-    return nullptr;
+    return configuration_;
+}
+
+void AbilityStageContext::SetConfiguration(const std::shared_ptr<AppExecFwk::Configuration> &configuration)
+{
+    configuration_ = configuration;
+}
+
+std::shared_ptr<AppExecFwk::ApplicationInfo> AbilityStageContext::GetApplicationInfo() const
+{
+    return applicationInfo_;
+}
+
+std::shared_ptr<AppExecFwk::HapModuleInfo> AbilityStageContext::GetHapModuleInfo() const
+{
+    return hapModuleInfo_;
 }
 
 Options AbilityStageContext::GetOptions()
@@ -54,6 +69,9 @@ void AbilityStageContext::SetOptions(const Options &options)
     if (pos == std::string::npos) {
         fileSeparator_ = CONTEXT_FILE_OPPOSITE_SEPARATOR;
     }
+
+    applicationInfo_ = std::make_shared<AppExecFwk::ApplicationInfo>(options.applicationInfo);
+    hapModuleInfo_ = std::make_shared<AppExecFwk::HapModuleInfo>(options.hapModuleInfo);
 }
 
 std::string AbilityStageContext::GetBundleName()
