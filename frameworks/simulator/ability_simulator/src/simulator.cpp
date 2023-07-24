@@ -460,7 +460,7 @@ NativeValue *SimulatorImpl::CreateJsWant(NativeEngine &engine)
 
     object->SetProperty("deviceId", CreateJsValue(engine, ""));
     object->SetProperty("bundleName", CreateJsValue(engine, options_.bundleName));
-    object->SetProperty("abilityName", engine.CreateUndefined()); //FIXME
+    object->SetProperty("abilityName", CreateJsValue(engine, options_.abilityInfo.name));
     object->SetProperty("moduleName", CreateJsValue(engine, options_.moduleName));
     object->SetProperty("uri", CreateJsValue(engine, ""));
     object->SetProperty("type", CreateJsValue(engine, ""));
