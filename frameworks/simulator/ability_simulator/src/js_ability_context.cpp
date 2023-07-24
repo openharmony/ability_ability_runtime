@@ -112,19 +112,23 @@ NativeValue *JsAbilityContext::OnTerminateSelf(NativeEngine &engine, NativeCallb
 {
     HILOG_DEBUG("TerminateSelf");
     auto abilityContext = context_.lock();
-    if (abilityContext != nullptr) {
-        abilityContext->SetTerminating(true);
+    if (abilityContext == nullptr) {
+        return nullptr;
     }
+    abilityContext->SetTerminating(true);
 
     NativeValue* lastParam = (info.argc > ARGC_ZERO) ? info.argv[ARGC_ZERO] : nullptr;
     NativeValue* result = nullptr;
     auto task = CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
+    if (task == nullptr) {
+        return nullptr;
+    }
 
-    auto errcode = context->TerminateSelf();
+    auto errcode = abilityContext->TerminateSelf();
     if (errcode == 0) {
-        task.Resolve(engine, engine.CreateUndefined());
+        task->Resolve(engine, engine.CreateUndefined());
     } else {
-        task.Reject(engine, CreateJsErrorByNativeErr(engine, errcode));
+        task->Reject(engine, CreateJsErrorByNativeErr(engine, errcode));
     }
 
     return result;
@@ -139,21 +143,24 @@ NativeValue *JsAbilityContext::TerminateSelfWithResult(NativeEngine *engine, Nat
 NativeValue* JsAbilityContext::OnTerminateSelfWithResult(NativeEngine& engine, NativeCallbackInfo& info)
 {
     HILOG_INFO("TerminateSelfWithResult");
-
     auto abilityContext = context_.lock();
-    if (abilityContext != nullptr) {
-        abilityContext->SetTerminating(true);
+    if (abilityContext == nullptr) {
+        return nullptr;
     }
+    abilityContext->SetTerminating(true);
 
     NativeValue* lastParam = (info.argc > ARGC_ZERO) ? info.argv[ARGC_ZERO] : nullptr;
     NativeValue* result = nullptr;
     auto task = CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
+    if (task == nullptr) {
+        return nullptr;
+    }
 
-    auto errcode = context->TerminateSelf();
+    auto errcode = abilityContext->TerminateSelf();
     if (errcode == 0) {
-        task.Resolve(engine, engine.CreateUndefined());
+        task->Resolve(engine, engine.CreateUndefined());
     } else {
-        task.Reject(engine, CreateJsErrorByNativeErr(engine, errcode));
+        task->Reject(engine, CreateJsErrorByNativeErr(engine, errcode));
     }
 
     return result;
