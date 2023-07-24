@@ -236,11 +236,11 @@ void JsActionExtension::OnDisconnect(const AAFwk::Want &want)
 void JsActionExtension::OnCommandWindow(
     const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
 {
+    HILOG_DEBUG("begin. persistentId: %{private}d, winCmd: %{public}d", sessionInfo->persistentId, winCmd);
     if (sessionInfo == nullptr) {
         HILOG_ERROR("sessionInfo is nullptr.");
         return;
     }
-    HILOG_DEBUG("called. persistentId: %{private}" PRIu64", winCmd: %{public}d", sessionInfo->persistentId, winCmd);
     Extension::OnCommandWindow(want, sessionInfo, winCmd);
     switch (winCmd) {
         case AAFwk::WIN_CMD_FOREGROUND:
