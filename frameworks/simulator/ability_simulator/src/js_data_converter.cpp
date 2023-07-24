@@ -76,8 +76,7 @@ Global::Resource::ScreenDensity ConvertDensity(const std::string &density)
     return resolution;
 }
 
-
-Global::Resource::Direction ConvertDirection(std::string direction)
+Global::Resource::Direction ConvertDirection(const std::string &direction)
 {
     auto resolution = Global::Resource::Direction::DIRECTION_NOT_SET;
 

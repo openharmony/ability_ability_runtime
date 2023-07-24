@@ -30,7 +30,7 @@ namespace AbilityRuntime {
 Global::Resource::ColorMode ConvertColorMode(const std::string &colormode);
 Global::Resource::Direction ConvertDirection(const std::string &direction);
 Global::Resource::ScreenDensity ConvertDensity(const std::string &density);
-int32_t ConvertDisplayId(std::string displayId);
+int32_t ConvertDisplayId(const std::string &displayId);
 std::string GetDensityStr(float density);
 NativeValue *CreateJsConfiguration(NativeEngine &engine, const AppExecFwk::Configuration &configuration);
 NativeValue *CreateJsApplicationInfo(NativeEngine &engine, const AppExecFwk::ApplicationInfo &applicationInfo);
