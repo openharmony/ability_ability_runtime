@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_SIMULAOTR_JS_ABILITY_CONTEXT_H
-#define OHOS_ABILITY_RUNTIME_SIMULAOTR_JS_ABILITY_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_JS_ABILITY_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_SIMULATOR_JS_ABILITY_CONTEXT_H
 
 #include <algorithm>
 #include <memory>
@@ -69,4 +69,4 @@ NativeValue *CreateJsAbilityContext(NativeEngine &engine, const std::shared_ptr<
 NativeValue *CreateJsErrorByNativeErr(NativeEngine &engine, int32_t err, const std::string &permission = "");
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_SIMULAOTR_JS_ABILITY_CONTEXT_H
+#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_JS_ABILITY_CONTEXT_H

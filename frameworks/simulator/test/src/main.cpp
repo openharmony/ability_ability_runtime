@@ -80,9 +80,28 @@ int32_t main(int32_t argc, const char *argv[])
     options.targetVersion = atoi(argv[PARAM_TWENTYTHREE]);
     options.releaseType = argv[PARAM_TWENTYFOUR];
     options.enablePartialUpdate = atoi(argv[PARAM_TWENTYFIVE]);
+
     OHOS::AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.name = "entry";
     hapModuleInfo.srcEntrance = argv[PARAM_TWENTYSEVEN];
     options.hapModuleInfo = hapModuleInfo;
+
+    OHOS::AppExecFwk::ApplicationInfo appInfo;
+    appInfo.name = "com.test.simulator";
+    options.applicationInfo = appInfo;
+
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.name = "EntryAbility";
+    options.abilityInfo = abilityInfo;
+
+    OHOS::AppExecFwk::Configuration config;
+    config.AddItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "testlanguage");
+    config.AddItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "light");
+    config.AddItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID, "0");
+    config.AddItem(0, OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION, "vertical");
+    auto configuration = std::make_shared<OHOS::AppExecFwk::Configuration>(config);
+    options.configuration = configuration;
+
     auto simulator = OHOS::AbilityRuntime::Simulator::Create(options);
     if (!simulator) {
         std::cout << "Create Simulator failed." << std::endl;
@@ -95,6 +114,9 @@ int32_t main(int32_t argc, const char *argv[])
         std::cout << "Start Ability failed." << std::endl;
         return 1;
     }
+
+    config.AddItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION, "horizontal");
+    simulator->UpdateConfiguration(config);
 
     simulator->TerminateAbility(id);
     return 0;

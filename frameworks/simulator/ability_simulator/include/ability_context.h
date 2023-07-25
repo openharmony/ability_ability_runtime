@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_SIMULAOTR_ABILITY_CONTEXT_H
-#define OHOS_ABILITY_RUNTIME_SIMULAOTR_ABILITY_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_ABILITY_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_SIMULATOR_ABILITY_CONTEXT_H
 
 #include "ability_stage_context.h"
 #include "context.h"
@@ -67,4 +67,4 @@ private:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_SIMULAOTR_ABILITY_CONTEXT_H
+#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_ABILITY_CONTEXT_H

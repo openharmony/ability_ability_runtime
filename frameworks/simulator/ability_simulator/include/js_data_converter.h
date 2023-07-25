@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_SIMULAOTR_JS_DATA_CONVERTER_H
-#define OHOS_ABILITY_RUNTIME_SIMULAOTR_JS_DATA_CONVERTER_H
+#ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_JS_DATA_CONVERTER_H
+#define OHOS_ABILITY_RUNTIME_SIMULATOR_JS_DATA_CONVERTER_H
 
 #include "ability_info.h"
 #include "application_info.h"
@@ -24,7 +24,6 @@
 
 class NativeEngine;
 class NativeValue;
-
 namespace OHOS {
 namespace AbilityRuntime {
 Global::Resource::ColorMode ConvertColorMode(const std::string &colormode);
@@ -38,4 +37,4 @@ NativeValue *CreateJsHapModuleInfo(NativeEngine &engine, const AppExecFwk::HapMo
 NativeValue *CreateJsAbilityInfo(NativeEngine &engine, const AppExecFwk::AbilityInfo &abilityInfo);
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_SIMULAOTR_JS_DATA_CONVERTER_H
+#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_JS_DATA_CONVERTER_H

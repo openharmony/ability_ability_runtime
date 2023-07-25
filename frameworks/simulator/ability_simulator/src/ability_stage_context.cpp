@@ -214,8 +214,8 @@ std::string AbilityStageContext::GetPreviewPath()
 bool AbilityStageContext::Access(const std::string &path)
 {
     HILOG_DEBUG("Access: dir: %{public}s", path.c_str());
-    std::unique_ptr<uv_fs_t, decltype(AbilityStageContext::fs_req_cleanup)*> access_req = {
-        new uv_fs_t, AbilityStageContext::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(AbilityStageContext::FsReqCleanup)*> access_req = {
+        new uv_fs_t, AbilityStageContext::FsReqCleanup };
     if (!access_req) {
         HILOG_ERROR("Failed to request heap memory.");
         return false;
@@ -227,8 +227,8 @@ bool AbilityStageContext::Access(const std::string &path)
 void AbilityStageContext::Mkdir(const std::string &path)
 {
     HILOG_DEBUG("Mkdir: dir: %{public}s", path.c_str());
-    std::unique_ptr<uv_fs_t, decltype(AbilityStageContext::fs_req_cleanup)*> mkdir_req = {
-        new uv_fs_t, AbilityStageContext::fs_req_cleanup };
+    std::unique_ptr<uv_fs_t, decltype(AbilityStageContext::FsReqCleanup)*> mkdir_req = {
+        new uv_fs_t, AbilityStageContext::FsReqCleanup };
     if (!mkdir_req) {
         HILOG_ERROR("Failed to request heap memory.");
         return;
@@ -275,7 +275,7 @@ bool AbilityStageContext::CreateMultiDir(const std::string &path)
     return Access(tempStr);
 }
 
-void AbilityStageContext::fs_req_cleanup(uv_fs_t *req)
+void AbilityStageContext::FsReqCleanup(uv_fs_t *req)
 {
     uv_fs_req_cleanup(req);
     if (req) {

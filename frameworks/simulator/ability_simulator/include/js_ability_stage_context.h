@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_CONTEXT_H
-#define OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_JS_ABILITY_STAGE_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_SIMULATOR_JS_ABILITY_STAGE_CONTEXT_H
 
 #include "configuration.h"
 #include "context.h"
@@ -40,6 +40,6 @@ private:
 };
 
 NativeValue *CreateJsAbilityStageContext(NativeEngine &engine, const std::shared_ptr<Context> &context);
-}  // namespace AbilityRuntime
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_CONTEXT_H
+} // namespace AbilityRuntime
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_JS_ABILITY_STAGE_CONTEXT_H
