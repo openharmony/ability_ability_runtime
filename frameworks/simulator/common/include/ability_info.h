@@ -19,6 +19,9 @@
 #include <string>
 #include <vector>
 
+#include "application_info.h"
+#include "extension_ability_info.h"
+
 namespace OHOS {
 namespace AppExecFwk {
 enum class AbilityType {
@@ -89,6 +92,7 @@ struct AbilityInfo {
     bool visible = false;
     std::string kind;  // ability category
     AbilityType type = AbilityType::UNKNOWN;
+    ExtensionAbilityType extensionAbilityType = ExtensionAbilityType::UNSPECIFIED;
     DisplayOrientation orientation = DisplayOrientation::UNSPECIFIED;
     LaunchMode launchMode = LaunchMode::SINGLETON;
     std::string srcPath;
@@ -100,6 +104,7 @@ struct AbilityInfo {
     std::vector<std::string> deviceCapabilities;
     std::string uri;
     std::string targetAbility;
+    ApplicationInfo applicationInfo;
     bool isLauncherAbility = false;
     bool isNativeAbility = false;
     bool enabled = false;
@@ -114,7 +119,10 @@ struct AbilityInfo {
     int32_t defaultFormHeight = 0;
     int32_t minFormWidth = 0;
     int32_t defaultFormWidth = 0;
+    MetaData metaData;
     uint32_t backgroundModes = 0;
+
+    std::vector<SkillUriForAbilityAndExtension> skillUri;
 
     // set when install
     std::string package;  // the "module.package" in config.json
@@ -127,6 +135,7 @@ struct AbilityInfo {
     std::string hapPath;
 
     std::string srcEntrance;
+    std::vector<Metadata> metadata;
     bool isModuleJson = false;
     bool isStageBasedModel = false;
     bool continuable = false;
@@ -139,6 +148,7 @@ struct AbilityInfo {
     int32_t startWindowBackgroundId;
     // whether to display in the missions list
     bool excludeFromMissions = false;
+    bool unclearableMission = false;
     // whether to support recover UI interface
     bool recoverable = false;
 
@@ -152,6 +162,7 @@ struct AbilityInfo {
     uint32_t minWindowHeight = 0;
     // for NAPI, save self query cache
     int32_t uid = -1;
+    CompileMode compileMode = CompileMode::JS_BUNDLE;
 
     // unused
     std::string originalBundleName;
@@ -172,6 +183,8 @@ struct AbilityInfo {
     std::string libPath;
     std::string deviceId;
     int64_t installTime;
+    std::vector<std::string> supportExtNames;
+    std::vector<std::string> supportMimeTypes;
 };
 } // namespace AppExecFwk
 } // namespace OHOS
