@@ -15,6 +15,7 @@
 #include "common_func.h"
 
 #include <vector>
+#include "hilog_wrapper.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
 #include "napi/native_node_api.h"
@@ -66,11 +67,13 @@ bool CommonFunc::ParsePropertyArray(napi_env env, napi_value args, const std::st
     bool hasKey = false;
     napi_has_named_property(env, args, propertyName.c_str(), &hasKey);
     if (!hasKey) {
+        HILOG_ERROR("%{public}s is not existed", propertyName.c_str());
         return true;
     }
     napi_value property = nullptr;
     napi_status status = napi_get_named_property(env, args, propertyName.c_str(), &property);
     if (status != napi_ok) {
+        HILOG_ERROR("get name property failed, propertyName: %{public}s", propertyName.c_str());
         return false;
     }
     bool isArray = false;

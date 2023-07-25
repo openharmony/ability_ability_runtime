@@ -400,8 +400,8 @@ void SimulatorImpl::UpdateConfiguration(const AppExecFwk::Configuration &config)
             continue;
         }
 
-        CallObjectMethod(*nativeEngine_, abilityStage, "onConfigurationUpdated", configArgv, ArraySize(configArgv));
-        CallObjectMethod(*nativeEngine_, abilityStage, "onConfigurationUpdate", configArgv, ArraySize(configArgv));
+        CallObjectMethod(*nativeEngine_, ability, "onConfigurationUpdated", configArgv, ArraySize(configArgv));
+        CallObjectMethod(*nativeEngine_, ability, "onConfigurationUpdate", configArgv, ArraySize(configArgv));
         JsAbilityContext::ConfigurationUpdated(nativeEngine_.get(), iter->second, configuration);
     }
 }
