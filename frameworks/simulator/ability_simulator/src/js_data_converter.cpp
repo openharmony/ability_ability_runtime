@@ -34,7 +34,7 @@ Global::Resource::ColorMode ConvertColorMode(const std::string &colormode)
         { "light", Global::Resource::ColorMode::LIGHT },
     };
 
-    for (const auto& [tempColorMode, value] : resolutions) {
+    for (const auto &[tempColorMode, value] : resolutions) {
         if (tempColorMode == colormode) {
             resolution = value;
             break;
@@ -66,7 +66,7 @@ Global::Resource::ScreenDensity ConvertDensity(const std::string &density)
         { "xxxldpi", Global::Resource::ScreenDensity::SCREEN_DENSITY_XXXLDPI },
     };
 
-    for (const auto& [tempdensity, value] : resolutions) {
+    for (const auto &[tempdensity, value] : resolutions) {
         if (tempdensity == density) {
             resolution = value;
             break;
@@ -85,7 +85,7 @@ Global::Resource::Direction ConvertDirection(const std::string &direction)
         { "horizontal", Global::Resource::Direction::DIRECTION_HORIZONTAL },
     };
 
-    for (const auto& [tempDirection, value] : resolutions) {
+    for (const auto &[tempDirection, value] : resolutions) {
         if (tempDirection == direction) {
             resolution = value;
             break;

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_SIMULAOTR_H
-#define OHOS_ABILITY_RUNTIME_SIMULAOTR_H
+#ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_H
+#define OHOS_ABILITY_RUNTIME_SIMULATOR_H
 
 #include <functional>
 #include <memory>
@@ -51,4 +51,4 @@ public:
 } // namespace AbilityRuntime
 } // namespace OHOS
 
-#endif // OHOS_ABILITY_RUNTIME_SIMULAOTR_H
+#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_H

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_SIMULAOTR_ABILITY_STAGE_CONTEXT_H
-#define OHOS_ABILITY_RUNTIME_SIMULAOTR_ABILITY_STAGE_CONTEXT_H
+#ifndef OHOS_ABILITY_RUNTIME_SIMULATOR_ABILITY_STAGE_CONTEXT_H
+#define OHOS_ABILITY_RUNTIME_SIMULATOR_ABILITY_STAGE_CONTEXT_H
 
 #include "context.h"
 #include "uv.h"
@@ -48,7 +48,7 @@ public:
     std::string GetPreviewPath();
     bool Access(const std::string &path);
     void Mkdir(const std::string &path);
-    static void fs_req_cleanup(uv_fs_t *req);
+    static void FsReqCleanup(uv_fs_t *req);
     bool CreateMultiDir(const std::string &path);
 
 private:
@@ -62,4 +62,4 @@ private:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_SIMULAOTR_ABILITY_STAGE_CONTEXT_H
+#endif // OHOS_ABILITY_RUNTIME_SIMULATOR_ABILITY_STAGE_CONTEXT_H
