@@ -432,13 +432,13 @@ NativeValue *JsActionExtension::CallObjectMethod(const char *name, NativeValue *
     NativeValue *value = jsObj_->Get();
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        HILOG_ERROR("Failed to get UIExtension object");
+        HILOG_ERROR("Failed to get ActionExtension object");
         return nullptr;
     }
 
     NativeValue *method = obj->GetProperty(name);
     if (method == nullptr || method->TypeOf() != NATIVE_FUNCTION) {
-        HILOG_ERROR("Failed to get '%{public}s' from UIExtension object", name);
+        HILOG_ERROR("Failed to get '%{public}s' from ActionExtension object", name);
         return nullptr;
     }
     HILOG_DEBUG("JsActionExtension CallFunction(%{public}s), success", name);
@@ -464,20 +464,20 @@ NativeValue *JsActionExtension::CallOnConnect(const AAFwk::Want &want)
     }
     NativeValue *argv[] = { nativeWant };
     if (!jsObj_) {
-        HILOG_ERROR("Not found UIExtension.js");
+        HILOG_ERROR("Not found ActionExtension.js");
         return nullptr;
     }
 
     NativeValue *value = jsObj_->Get();
     auto *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        HILOG_ERROR("Failed to get UIExtension object");
+        HILOG_ERROR("Failed to get ActionExtension object");
         return nullptr;
     }
 
     NativeValue *method = obj->GetProperty("onConnect");
     if (method == nullptr) {
-        HILOG_ERROR("Failed to get onConnect from UIExtension object");
+        HILOG_ERROR("Failed to get onConnect from ActionExtension object");
         return nullptr;
     }
     NativeValue *remoteNative = nativeEngine->CallFunction(value, method, argv, ARGC_ONE);
@@ -503,20 +503,20 @@ NativeValue *JsActionExtension::CallOnDisconnect(const AAFwk::Want &want, bool w
     }
     NativeValue *argv[] = { nativeWant };
     if (!jsObj_) {
-        HILOG_ERROR("Not found UIExtension.js");
+        HILOG_ERROR("Not found ActionExtension.js");
         return nullptr;
     }
 
     NativeValue *value = jsObj_->Get();
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        HILOG_ERROR("Failed to get UIExtension object");
+        HILOG_ERROR("Failed to get ActionExtension object");
         return nullptr;
     }
 
     NativeValue *method = obj->GetProperty("onDisconnect");
     if (method == nullptr) {
-        HILOG_ERROR("Failed to get onDisconnect from UIExtension object");
+        HILOG_ERROR("Failed to get onDisconnect from ActionExtension object");
         return nullptr;
     }
 
@@ -576,14 +576,14 @@ void JsActionExtension::Dump(const std::vector<std::string> &params, std::vector
     NativeValue *argv[] = { arrayValue };
 
     if (!jsObj_) {
-        HILOG_ERROR("Not found UIExtension.js");
+        HILOG_ERROR("Not found ActionExtension.js");
         return;
     }
 
     NativeValue *value = jsObj_->Get();
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        HILOG_ERROR("Failed to get UIExtension object");
+        HILOG_ERROR("Failed to get ActionExtension object");
         return;
     }
 
@@ -591,7 +591,7 @@ void JsActionExtension::Dump(const std::vector<std::string> &params, std::vector
     if (method == nullptr || method->TypeOf() != NATIVE_FUNCTION) {
         method = obj->GetProperty("dump");
         if (method == nullptr || method->TypeOf() != NATIVE_FUNCTION) {
-            HILOG_ERROR("Failed to get onDump from UIExtension object");
+            HILOG_ERROR("Failed to get onDump from ActionExtension object");
             return;
         }
     }
