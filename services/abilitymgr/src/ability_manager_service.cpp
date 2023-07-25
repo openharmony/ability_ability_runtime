@@ -650,7 +650,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
         HILOG_DEBUG("start as caller, skip UpdateCallerInfo!");
         if (selfFreeInstallEnable) {
-            int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, false);
+            int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, 
+                                                                callerToken, false);
             if (ret == ERR_OK) {
                 result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
             }
