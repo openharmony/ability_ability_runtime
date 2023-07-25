@@ -435,7 +435,6 @@ void SimulatorImpl::InitJsAbilityContext(NativeValue *instanceValue)
         context_->SetOptions(options_);
         context_->SetAbilityStageContext(stageContext_);
         context_->SetResourceManager(resourceMgr_);
-        stageContext_->SetConfiguration(options_.configuration);
     }
     NativeValue *contextObj = CreateJsAbilityContext(*nativeEngine_, context_);
     auto systemModule = std::shared_ptr<NativeReference>(
