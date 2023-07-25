@@ -166,7 +166,7 @@ std::string AbilityStageContext::GetDistributedFilesDir()
 void AbilityStageContext::SwitchArea(int mode)
 {
     HILOG_DEBUG("called, mode:%{public}d.", mode);
-    if (mode < 0 || mode >= (int)(sizeof(CONTEXT_ELS) / sizeof(CONTEXT_ELS[0]))) {
+    if (mode < 0 || mode >= static_cast<int>(sizeof(CONTEXT_ELS) / sizeof(CONTEXT_ELS[0]))) {
         HILOG_ERROR("mode is invalid.");
         return;
     }
@@ -221,8 +221,7 @@ bool AbilityStageContext::Access(const std::string &path)
         return false;
     }
 
-    int ret = uv_fs_access(nullptr, access_req.get(), path.c_str(), 0, nullptr);
-    return ret == 0;
+    return (uv_fs_access(nullptr, access_req.get(), path.c_str(), 0, nullptr) == 0);
 }
 
 void AbilityStageContext::Mkdir(const std::string &path)
