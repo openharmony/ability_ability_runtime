@@ -21,6 +21,7 @@
 
 #include "ability_info.h"
 #include "application_info.h"
+#include "extension_ability_info.h"
 #include "hap_module_info.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
@@ -31,6 +32,21 @@ namespace AppExecFwk {
 class CommonFunc {
 public:
 static std::string GetStringFromNAPI(napi_env env, napi_value value);
+
+static void ConvertMetadata(napi_env env, const Metadata &metadata, napi_value value);
+
+static void ConvertDependency(napi_env env, const Dependency &dependency, napi_value value);
+
+static void ConvertPreloadItem(napi_env env, const PreloadItem &preloadItem, napi_value value);
+
+static void ConvertExtensionInfos(
+    napi_env env, const std::vector<ExtensionAbilityInfo> &extensionInfos, napi_value value);
+
+static void ConvertStringArrays(napi_env env, const std::vector<std::string> &strs, napi_value value);
+
+static void ConvertExtensionInfo(napi_env env, const ExtensionAbilityInfo &extensionInfo, napi_value objExtensionInfo);
+
+static void ConvertAbilityInfos(napi_env env, const std::vector<AbilityInfo> &abilityInfos, napi_value value);
 
 static bool ParsePropertyArray(napi_env env, napi_value args, const std::string &propertyName,
     std::vector<napi_value> &valueVec);
