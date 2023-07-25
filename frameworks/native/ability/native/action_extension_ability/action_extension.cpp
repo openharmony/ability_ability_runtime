@@ -15,10 +15,10 @@
 
 #include "action_extension.h"
 
-#include "js_action_extension.h"
-#include "ui_extension_context.h"
 #include "hilog_wrapper.h"
+#include "js_action_extension.h"
 #include "runtime.h"
+#include "ui_extension_context.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

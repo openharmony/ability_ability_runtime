@@ -85,7 +85,6 @@ NativeValue *AttachActionExtensionContext(NativeEngine *engine, void *value, voi
 
 JsActionExtension *JsActionExtension::Create(const std::unique_ptr<Runtime> &runtime)
 {
-    HILOG_DEBUG("call");
     return new JsActionExtension(static_cast<JsRuntime&>(*runtime));
 }
 
@@ -109,6 +108,10 @@ void JsActionExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 {
     HILOG_DEBUG("called.");
     ActionExtension::Init(record, application, handler, token);
+    if (Extension::abilityInfo_->srcEntrance.empty()) {
+        HILOG_ERROR("JsActionExtension Init abilityInfo srcEntrance is empty");
+        return;
+    }
     std::string srcPath(Extension::abilityInfo_->moduleName + "/");
     srcPath.append(Extension::abilityInfo_->srcEntrance);
     srcPath.erase(srcPath.rfind('.'));
@@ -116,8 +119,6 @@ void JsActionExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
 
     std::string moduleName(Extension::abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
-    HILOG_DEBUG("JsActionExtension::Init moduleName:%{public}s,srcPath:%{public}s, compileMode :%{public}d.",
-        moduleName.c_str(), srcPath.c_str(), abilityInfo_->compileMode);
     HandleScope handleScope(jsRuntime_);
     auto &engine = jsRuntime_.GetNativeEngine();
 
@@ -135,6 +136,9 @@ void JsActionExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
     }
 
     BindContext(engine, obj);
+
+    SetExtensionCommon(
+        JsExtensionCommon::Create(jsRuntime_, static_cast<NativeReference&>(*jsObj_), shellContextRef_));
 }
 
 void JsActionExtension::BindContext(NativeEngine &engine, NativeObject *obj)
@@ -420,6 +424,10 @@ void JsActionExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInf
 NativeValue *JsActionExtension::CallObjectMethod(const char *name, NativeValue *const *argv, size_t argc)
 {
     HILOG_DEBUG("CallObjectMethod(%{public}s), begin", name);
+    if (!jsObj_) {
+        HILOG_ERROR("Not found ActionExtension.js");
+        return nullptr;
+    }
     auto &nativeEngine = jsRuntime_.GetNativeEngine();
     NativeValue *value = jsObj_->Get();
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
