@@ -633,8 +633,11 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (CheckProxyComponent(want, result) && !IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
         return componentRequest.requestResult;
     }
-
-    if (AbilityUtil::IsStartFreeInstall(want)) {
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    std::string callerBundleName = abilityRecord ? abilityRecord->GetAbilityInfo().bundleName : "";
+    bool selfFreeInstallEnable = (result == RESOLVE_ABILITY_ERR && want.GetElement().GetModuleName() != "" &&
+                                  want.GetElement().GetBundleName() == callerBundleName);
+    if (AbilityUtil::IsStartFreeInstall(want) || selfFreeInstallEnable) {
         if (freeInstallManager_ == nullptr) {
             return ERR_INVALID_VALUE;
         }
@@ -644,28 +647,15 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
         if (!isStartAsCaller) {
             UpdateCallerInfo(localWant, callerToken);
+        }
+        HILOG_DEBUG("start as caller, skip UpdateCallerInfo!");
+        if (selfFreeInstallEnable) {
+            int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, false);
+            if (ret == ERR_OK) {
+                result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
+            }
         } else {
-            HILOG_DEBUG("start as caller, skip UpdateCallerInfo!");
-        }
-        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
-    } else if (result == RESOLVE_ABILITY_ERR && want.GetElement().GetModuleName() != "" &&
-        want.GetElement().GetBundleName() == GetBundleNameFromToken(callerToken)) {
-        if (freeInstallManager_ == nullptr) {
-            return ERR_INVALID_VALUE;
-        }
-        Want localWant = want;
-        if (!localWant.GetDeviceId().empty()) {
-            localWant.SetDeviceId("");
-        }
-        if (!isStartAsCaller) {
-            UpdateCallerInfo(localWant, callerToken);
-        } else {
-            HILOG_INFO("Start as caller, skip UpdateCallerInfo");
-        }
-        int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, false);
-        if (ret == ERR_OK) {
-            result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
-            componentRequest = initComponentRequest(callerToken, requestCode, result);
+            return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
         }
     }
 
@@ -780,20 +770,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     HILOG_DEBUG("Start ability, name is %{public}s.", abilityInfo.name.c_str());
     return missionListManager->StartAbility(abilityRequest);
 }
-
-
-std::string AbilityManagerService::GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken)
-{
-    std::string callerBundleName;
-    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (!abilityRecord) {
-        HILOG_WARN("abilityRecord is null.");
-    } else {
-        callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
-    }
-    return callerBundleName;
-}
-
 
 int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSetting &abilityStartSetting,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)

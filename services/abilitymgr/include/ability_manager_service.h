@@ -1526,8 +1526,6 @@ private:
 
     bool CheckCollaboratorType(int32_t type);
 
-    std::string GetBundleNameFromToken(const sptr<IRemoteObject> &callerToken);
-
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
         std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility);
     
