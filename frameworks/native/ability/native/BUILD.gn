@@ -832,8 +832,8 @@ ohos_shared_library("share_extension") {
   ]
 
   sources = [
-    "${ability_runtime_native_path}/ability/native/share_extension_ability/share_extension.cpp",
     "${ability_runtime_native_path}/ability/native/share_extension_ability/js_share_extension.cpp",
+    "${ability_runtime_native_path}/ability/native/share_extension_ability/share_extension.cpp",
   ]
 
   deps = [

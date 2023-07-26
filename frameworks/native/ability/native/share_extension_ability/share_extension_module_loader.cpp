@@ -33,7 +33,8 @@ std::map<std::string, std::string> ShareExtensionModuleLoader::GetParams()
 {
     HILOG_DEBUG("called");
     std::map<std::string, std::string> params;
-    params.insert(std::pair<std::string, std::string>("type", "20"));
+    // type means extension type in ExtensionAbilityType of extension_ability_info.h, 16 means shareextension.
+    params.insert(std::pair<std::string, std::string>("type", "16"));
     params.insert(std::pair<std::string, std::string>("name", "ShareExtensionAbility"));
     return params;
 }
