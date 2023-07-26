@@ -305,7 +305,6 @@ inline int StartAppgallery(const int requestCode, const int32_t userId, const st
     want.SetAction(action);
     return AbilityManagerClient::GetInstance()->StartAbility(want, userId, requestCode);
 }
-
 }  // namespace AbilityUtil
 }  // namespace AAFwk
 }  // namespace OHOS
