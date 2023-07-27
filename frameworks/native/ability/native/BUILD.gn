@@ -863,6 +863,10 @@ ohos_shared_library("action_extension") {
     "napi:ace_napi",
   ]
 
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
   subsystem_name = "ability"
   part_name = "ability_runtime"
 }
