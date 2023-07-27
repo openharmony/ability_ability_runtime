@@ -605,22 +605,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         HILOG_INFO("try to StartRemoteAbility");
         return StartRemoteAbility(want, requestCode, validUserId, callerToken);
     }
-    if (AbilityUtil::IsStartFreeInstall(want)) {
-        if (freeInstallManager_ == nullptr) {
-            return ERR_INVALID_VALUE;
-        }
-        Want localWant = want;
-        if (!localWant.GetDeviceId().empty()) {
-            localWant.SetDeviceId("");
-        }
-        if (!isStartAsCaller) {
-            UpdateCallerInfo(localWant, callerToken);
-        } else {
-            HILOG_DEBUG("start as caller, skip UpdateCallerInfo!");
-        }
-        return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
-    }
-
+    
     if (!JudgeMultiUserConcurrency(validUserId)) {
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
         return ERR_CROSS_USER;
@@ -647,6 +632,32 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     ComponentRequest componentRequest = initComponentRequest(callerToken, requestCode, result);
     if (CheckProxyComponent(want, result) && !IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
         return componentRequest.requestResult;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+    std::string callerBundleName = abilityRecord ? abilityRecord->GetAbilityInfo().bundleName : "";
+    bool selfFreeInstallEnable = (result == RESOLVE_ABILITY_ERR && want.GetElement().GetModuleName() != "" &&
+                                  want.GetElement().GetBundleName() == callerBundleName);
+    if (AbilityUtil::IsStartFreeInstall(want) || selfFreeInstallEnable) {
+        if (freeInstallManager_ == nullptr) {
+            return ERR_INVALID_VALUE;
+        }
+        Want localWant = want;
+        if (!localWant.GetDeviceId().empty()) {
+            localWant.SetDeviceId("");
+        }
+        if (!isStartAsCaller) {
+            UpdateCallerInfo(localWant, callerToken);
+        }
+        HILOG_DEBUG("start as caller, skip UpdateCallerInfo!");
+        if (selfFreeInstallEnable) {
+            int32_t ret = freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode,
+                                                                callerToken, false);
+            if (ret == ERR_OK) {
+                result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
+            }
+        } else {
+            return freeInstallManager_->StartFreeInstall(localWant, validUserId, requestCode, callerToken, true);
+        }
     }
 
     if (result != ERR_OK) {
@@ -1472,7 +1483,7 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
 
 int32_t AbilityManagerService::RecordAppExitReason(Reason exitReason)
 {
-    if (!currentMissionListManager_) {
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && !currentMissionListManager_) {
         HILOG_ERROR("currentMissionListManager_ is null.");
         return ERR_NULL_OBJECT;
     }
@@ -1488,7 +1499,11 @@ int32_t AbilityManagerService::RecordAppExitReason(Reason exitReason)
     }
 
     std::vector<std::string> abilityList;
-    currentMissionListManager_->GetActiveAbilityList(bundleName, abilityList);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        uiAbilityLifecycleManager_->GetActiveAbilityList(bundleName, abilityList);
+    } else {
+        currentMissionListManager_->GetActiveAbilityList(bundleName, abilityList);
+    }
 
     return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
         bundleName, abilityList, exitReason);
@@ -4228,7 +4243,7 @@ void AbilityManagerService::InitMissionListManager(int userId, bool switchUser)
 }
 
 // multi user scene
-int AbilityManagerService::GetUserId()
+int32_t AbilityManagerService::GetUserId() const
 {
     if (userController_) {
         auto userId = userController_->GetCurrentUserId();
@@ -5528,13 +5543,20 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
         }
     }
 
-    auto userId = record->GetOwnerMissionUserId();
-    auto missionListMgr = GetListManagerByUserId(userId);
-    if (missionListMgr == nullptr) {
-        HILOG_ERROR("missionListMgr is nullptr");
-        return;
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        const auto& abilityInfo = record->GetAbilityInfo();
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            AddAbilityRecoverInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name);
+    } else {
+        auto userId = record->GetOwnerMissionUserId();
+        auto missionListMgr = GetListManagerByUserId(userId);
+        if (missionListMgr == nullptr) {
+            HILOG_ERROR("missionListMgr is nullptr");
+            return;
+        }
+        missionListMgr->EnableRecoverAbility(record->GetMissionId());
     }
-    missionListMgr->EnableRecoverAbility(record->GetMissionId());
+
 }
 
 void AbilityManagerService::RecoverAbilityRestart(const Want& want)
@@ -7537,6 +7559,9 @@ int32_t AbilityManagerService::IsValidMissionIds(
     const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
 {
     auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return uiAbilityLifecycleManager_->IsValidMissionIds(missionIds, results, userId);
+    }
     auto missionlistMgr = GetListManagerByUserId(userId);
     if (missionlistMgr == nullptr) {
         HILOG_ERROR("missionlistMgr is nullptr.");
