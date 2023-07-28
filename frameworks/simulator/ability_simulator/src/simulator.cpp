@@ -279,6 +279,7 @@ bool SimulatorImpl::LoadAbilityStage(uint8_t *buffer, size_t len)
     std::string srcEntrance = options_.hapModuleInfo.srcEntrance;
     srcEntrance.erase(srcEntrance.rfind("."));
     srcEntrance.append(".abc");
+    srcEntrance = srcEntrance.substr(srcEntrance.find('/') + 1, srcEntrance.length());
 
     auto moduleSrcPath = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + srcEntrance;
     if (!nativeEngine_->RunScriptBuffer(moduleSrcPath, buffer, len, false)) {
