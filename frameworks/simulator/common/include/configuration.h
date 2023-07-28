@@ -42,6 +42,7 @@ constexpr const char* CONNECTION_SYMBOL = "#";
 constexpr const char* EMPTY_STRING = "";
 constexpr const char* APPLICATION_DIRECTION = "ohos.application.direction";
 constexpr const char* APPLICATION_DENSITYDPI = "ohos.application.densitydpi";
+constexpr const char* APPLICATION_DISPLAYID = "ohos.application.displayid";
 
 /*
  * This must be synchronized with the value in GlobalConfigurationKey
@@ -54,6 +55,7 @@ const std::vector<std::string> SystemConfigurationKeyStore {
     OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE,
     OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION,
     OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI,
+    OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID,
 };
 
 constexpr const char* COLOR_MODE_LIGHT = "light";
@@ -65,7 +67,11 @@ constexpr const char* DIRECTION_HORIZONTAL = "horizontal";
 
 class Configuration {
 public:
-    Configuration() {}
+    Configuration()
+    {
+        AddItem(AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID, "0");
+        AddItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE, "true");
+    }
 
     Configuration(const Configuration &other)
     {

@@ -113,6 +113,9 @@ NativeValue *CreateJsConfiguration(NativeEngine &engine, const AppExecFwk::Confi
     std::string density = configuration.GetItem(AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
     object->SetProperty("screenDensity", CreateJsValue(engine, ConvertDensity(density)));
 
+    int32_t displayId = ConvertDisplayId(configuration.GetItem(AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID));
+    object->SetProperty("displayId", CreateJsValue(engine, displayId));
+
     std::string hasPointerDevice = configuration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
     object->SetProperty("hasPointerDevice", CreateJsValue(engine, hasPointerDevice == "true" ? true : false));
 
