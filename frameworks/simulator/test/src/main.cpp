@@ -97,8 +97,7 @@ int32_t main(int32_t argc, const char *argv[])
     OHOS::AppExecFwk::Configuration config;
     config.AddItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, "testlanguage");
     config.AddItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, "light");
-    config.AddItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DISPLAYID, "0");
-    config.AddItem(0, OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION, "vertical");
+    config.AddItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION, "vertical");
     auto configuration = std::make_shared<OHOS::AppExecFwk::Configuration>(config);
     options.configuration = configuration;
 
