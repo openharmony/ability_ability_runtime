@@ -18,7 +18,6 @@
 #include <functional>
 
 #include "bundle_mgr_interface.h"
-#include "dm_common.h"
 #include "singleton.h"
 
 namespace OHOS {
@@ -97,11 +96,13 @@ private:
     void GetSelectorDialogPositionAndSize(
         DialogPosition &portraitPosition, DialogPosition &landscapePosition, int lineNums) const;
     void GetSelectorDialogLandscapePosition(
-        int32_t height, int32_t width, float densityPixels, int lineNums, DialogPosition &position) const;
+        DialogPosition &position, int32_t height, int32_t width, int lineNums, float densityPixels) const;
     void DialogLandscapePositionAdaptive(
         DialogPosition &position, float densityPixels, int lineNums) const;
     void GetSelectorDialogPortraitPosition(
-        int32_t height, int32_t width, float densityPixels, DialogPosition &position) const;
+        DialogPosition &position, int32_t height, int32_t width, int lineNums, float densityPixels) const;
+    void DialogPortraitPositionAdaptive(
+        DialogPosition &position, float densityPixels, int lineNums) const;
     void DialogPositionAdaptive(DialogPosition &position, int lineNums) const;
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
