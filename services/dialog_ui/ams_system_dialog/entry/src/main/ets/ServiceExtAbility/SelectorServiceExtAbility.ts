@@ -40,6 +40,7 @@ export default class SelectorServiceExtensionAbility extends extension {
     let phoneShowHapList = [];
     let jsonIconMap: Map<string, image.PixelMap> = new Map();
     for (let i = 1; i <= globalThis.params.hapList.length; i++) {
+      console.info(TAG, 'hapList[' + (i - 1).toString() + ']: ' + JSON.stringify(globalThis.params.hapList[i]));
       await this.getHapResource(globalThis.params.hapList[i - 1], showHapList, jsonIconMap);
       if (i % lineNums === 0) {
         phoneShowHapList.push(showHapList);
@@ -117,11 +118,21 @@ export default class SelectorServiceExtensionAbility extends extension {
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     globalThis.abilityWant = want;
     globalThis.params = JSON.parse(want.parameters.params);
-    globalThis.position = JSON.parse(want.parameters.position);
+    globalThis.landScapePosition = JSON.parse(want.parameters.landscapeScreen);
+    globalThis.verticalPosition = JSON.parse(want.parameters.position);
+    let displayClass = display.getDefaultDisplaySync();
+    globalThis.mscreenorientation = displayClass.orientation;
+    if(globalThis.mscreenorientation === 0) {
+      globalThis.position = globalThis.verticalPosition;
+      console.info('screen position is vertical')
+    } else {
+      globalThis.position = globalThis.landScapePosition;
+      console.info('screen position is landscape')
+    }
+    console.info('onRequest display is' + JSON.stringify(displayClass));
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     console.debug(TAG, 'onRequest, params: ' + JSON.stringify(globalThis.params));
     globalThis.callerToken = want.parameters.callerToken;
-    console.debug(TAG, 'onRequest, params: ' + JSON.stringify(globalThis.params));
     console.debug(TAG, 'onRequest, position: ' + JSON.stringify(globalThis.position));
     if (globalThis.params.deviceType !== 'phone' && globalThis.params.deviceType !== 'default') {
       globalThis.modelFlag = Boolean(globalThis.params.modelFlag);
@@ -185,5 +196,36 @@ export default class SelectorServiceExtensionAbility extends extension {
     } catch (e) {
       console.error(TAG, 'window create failed: ' + JSON.stringify(e));
     }
+  }
+
+  private async moveWindow(rect) {
+    try {
+      await win.moveTo(rect.left, rect.top);
+      await win.resetSize(rect.width, rect.height);
+      await win.show();
+    } catch (e) {
+      console.error(TAG, 'window create failed: ' + JSON.stringify(e));
+    }
+  }
+
+  onConfigurationUpdate(config) {
+    console.info(TAG, 'onConfigurationUpdate================: ' + JSON.stringify(config));
+    let displayClass = display.getDefaultDisplaySync();
+    console.info('displayOrientation is' + JSON.stringify(displayClass.orientation))
+    console.info('display is' + JSON.stringify(displayClass))
+    globalThis.mscreenorientation = displayClass.orientation;
+    if (globalThis.mscreenorientation === 0) {
+      globalThis.position = globalThis.verticalPosition;
+    } else {
+      globalThis.position = globalThis.landScapePosition;
+    }
+    let navigationBarRect = {
+      left: globalThis.position.offsetX,
+      top: globalThis.position.offsetY,
+      width: globalThis.position.width,
+      height: globalThis.position.height
+    };
+    console.info('onConfigurationUpdate navigationBarRect is' + JSON.stringify(navigationBarRect))
+    this.moveWindow(navigationBarRect);
   }
 };
