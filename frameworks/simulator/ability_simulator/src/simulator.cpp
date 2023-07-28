@@ -277,7 +277,7 @@ bool SimulatorImpl::LoadAbilityStage(uint8_t *buffer, size_t len)
         return false;
     }
     std::string srcEntrance = options_.hapModuleInfo.srcEntrance;
-    srcEntrance.erase(srcPath.rfind("."));
+    srcEntrance.erase(srcEntrance.rfind("."));
     srcEntrance.append(".abc");
 
     auto moduleSrcPath = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + srcEntrance;

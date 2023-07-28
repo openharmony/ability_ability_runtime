@@ -46,10 +46,11 @@ constexpr int32_t PARAM_TWENTYFOUR = 24;
 constexpr int32_t PARAM_TWENTYFIVE = 25;
 constexpr int32_t PARAM_TWENTYSIX = 26;
 constexpr int32_t PARAM_TWENTYSEVEN = 27;
+constexpr int32_t PARAM_TWENTYEIGHT = 28;
 
 int32_t main(int32_t argc, const char *argv[])
 {
-    if (argc < PARAM_TWENTYSEVEN) {
+    if (argc < PARAM_TWENTYEIGHT) {
         std::cout << "Insufficient parameters." << std::endl;
         return 1;
     }
@@ -80,6 +81,7 @@ int32_t main(int32_t argc, const char *argv[])
     options.targetVersion = atoi(argv[PARAM_TWENTYTHREE]);
     options.releaseType = argv[PARAM_TWENTYFOUR];
     options.enablePartialUpdate = atoi(argv[PARAM_TWENTYFIVE]);
+    options.previewPath = argv[PARAM_TWENTYEIGHT];
 
     OHOS::AppExecFwk::HapModuleInfo hapModuleInfo;
     hapModuleInfo.name = "entry";
