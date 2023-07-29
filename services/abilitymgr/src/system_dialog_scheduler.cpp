@@ -45,15 +45,15 @@ const int32_t UI_SELECTOR_DIALOG_PC_H3 = (64 * 3 + 56 + 48 + 54 + 64 + 48 + 2) *
 const int32_t UI_SELECTOR_DIALOG_PC_H4 = (64 * 4 + 56 + 48 + 54 + 64 + 48 + 2) * 2;
 const int32_t UI_SELECTOR_DIALOG_PC_H5 = (64 * 4 + 56 + 48 + 54 + 64 + 48 + 58 + 2) * 2;
 
-const int32_t UI_SELECTOR_PORTRAIT_PHONE_H1 = 280; // 240
-const int32_t UI_SELECTOR_PORTRAIT_PHONE_H2 = 400; // 340
-const int32_t UI_SELECTOR_PORTRAIT_PHONE_H3 = 410; // 350
+const int32_t UI_SELECTOR_PORTRAIT_PHONE_H1 = 280;
+const int32_t UI_SELECTOR_PORTRAIT_PHONE_H2 = 400;
+const int32_t UI_SELECTOR_PORTRAIT_PHONE_H3 = 410;
 const int32_t UI_SELECTOR_LANDSCAPE_SIGNAL_BAR = 24;
 const int32_t UI_SELECTOR_LANDSCAPE_HEIGHT = 350;
 const int32_t UI_SELECTOR_LANDSCAPE_HEIGHT_NARROW = 350;
-const int32_t UI_SELECTOR_LANDSCAPE_PHONE_H1 = 280; // 240
-const int32_t UI_SELECTOR_LANDSCAPE_PHONE_H2 = 400; // 340
-const int32_t UI_SELECTOR_LANDSCAPE_PHONE_H3 = 410; // 350
+const int32_t UI_SELECTOR_LANDSCAPE_PHONE_H1 = 280;
+const int32_t UI_SELECTOR_LANDSCAPE_PHONE_H2 = 400;
+const int32_t UI_SELECTOR_LANDSCAPE_PHONE_H3 = 410;
 const int32_t UI_SELECTOR_LANDSCAPE_COUNT_THREE = 3;
 const int32_t UI_SELECTOR_LANDSCAPE_COUNT_FOUR = 4;
 const float UI_SELECTOR_LANDSCAPE_GRILLE_LARGE = 0.107692;
@@ -312,20 +312,16 @@ void SystemDialogScheduler::GetSelectorDialogPositionAndSize(
     if (displayInfo->GetDisplayOrientation() == Rosen::DisplayOrientation::PORTRAIT ||
         displayInfo->GetDisplayOrientation() == Rosen::DisplayOrientation::PORTRAIT_INVERTED) {
         HILOG_INFO("GetDialogPositionAndSize GetOrientation, PORTRAIT or PORTRAIT_INVERTED");
-        // portrait set
         GetSelectorDialogPortraitPosition(portraitPosition, display->GetHeight(), display->GetWidth(),
             lineNums, (display->GetVirtualPixelRatio()));
-        // landscape set
         GetSelectorDialogLandscapePosition(landscapePosition, display->GetWidth(), display->GetHeight(),
             lineNums, (display->GetVirtualPixelRatio()));
         return;
     }
 
     HILOG_INFO("GetDialogPositionAndSize GetOrientation, LANDSCAPE or LANDSCAPE_INVERTED");
-    // portrait set
     GetSelectorDialogPortraitPosition(portraitPosition, display->GetWidth(), display->GetHeight(),
         lineNums, (display->GetVirtualPixelRatio()));
-    // landscape set
     GetSelectorDialogLandscapePosition(landscapePosition, display->GetHeight(), display->GetWidth(),
         lineNums, (display->GetVirtualPixelRatio()));
 }
