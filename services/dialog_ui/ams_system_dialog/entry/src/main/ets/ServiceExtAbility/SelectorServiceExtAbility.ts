@@ -53,6 +53,23 @@ export default class SelectorServiceExtensionAbility extends extension {
     globalThis.phoneShowHapList = phoneShowHapList;
     globalThis.jsonIconMap = jsonIconMap;
     console.debug(TAG, 'phoneShowHapList: ' + JSON.stringify(phoneShowHapList));
+
+    const signalRowlineNums = 4;
+    let signalRowShowHapList = [];
+    let signalRowPhoneShowHapList = [];
+    for (let i = 1; i <= globalThis.params.hapList.length; i++) {
+      console.info(TAG, 'hapList[' + (i - 1).toString() + ']: ' + JSON.stringify(globalThis.params.hapList[i]));
+      await this.getHapResource(globalThis.params.hapList[i - 1], signalRowShowHapList);
+      if (i % signalRowlineNums === 0) {
+        signalRowPhoneShowHapList.push(signalRowShowHapList);
+        signalRowShowHapList = [];
+      }
+      if (i >= globalThis.params.hapList.length && signalRowShowHapList.length > 0) {
+        signalRowPhoneShowHapList.push(signalRowShowHapList);
+      }
+    }
+    globalThis.signalRowPhoneShowHapList = signalRowPhoneShowHapList;
+    console.debug(TAG, 'signalRowPhoneShowHapList: ' + JSON.stringify(signalRowPhoneShowHapList));
   }
 
   async getPcShowHapList() {
@@ -121,15 +138,14 @@ export default class SelectorServiceExtensionAbility extends extension {
     globalThis.landScapePosition = JSON.parse(want.parameters.landscapeScreen);
     globalThis.verticalPosition = JSON.parse(want.parameters.position);
     let displayClass = display.getDefaultDisplaySync();
-    globalThis.mscreenorientation = displayClass.orientation;
-    if(globalThis.mscreenorientation === 0) {
+    if (displayClass.orientation === display.Orientation.PORTRAIT) {
       globalThis.position = globalThis.verticalPosition;
-      console.info('screen position is vertical')
+      console.debug(TAG, 'screen position is vertical');
     } else {
       globalThis.position = globalThis.landScapePosition;
-      console.info('screen position is landscape')
+      console.debug(TAG, 'screen position is landscape');
     }
-    console.info('onRequest display is' + JSON.stringify(displayClass));
+    console.debug(TAG, 'onRequest display is' + JSON.stringify(displayClass));
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     console.debug(TAG, 'onRequest, params: ' + JSON.stringify(globalThis.params));
     globalThis.callerToken = want.parameters.callerToken;
@@ -144,6 +160,7 @@ export default class SelectorServiceExtensionAbility extends extension {
       await this.getPcShowHapList();
     }
 
+    AppStorage.SetOrCreate('oversizeHeight', globalThis.position.oversizeHeight ? 'true' : 'false');
     display.getDefaultDisplay().then(dis => {
       let navigationBarRect = {
         left: globalThis.position.offsetX,
@@ -202,19 +219,25 @@ export default class SelectorServiceExtensionAbility extends extension {
     try {
       await win.moveTo(rect.left, rect.top);
       await win.resetSize(rect.width, rect.height);
+      if (globalThis.params.deviceType === 'phone' || globalThis.params.deviceType === 'default') {
+        try {
+          await win.loadContent('pages/selectorPhoneDialog');
+          await win.setBackgroundColor('#00000000');
+        } catch (e) {
+          console.error(TAG, 'window loadContent failed: ' + JSON.stringify(e));
+        }
+      }
       await win.show();
     } catch (e) {
-      console.error(TAG, 'window create failed: ' + JSON.stringify(e));
+      console.error(TAG, 'window move failed: ' + JSON.stringify(e));
     }
   }
 
-  onConfigurationUpdate(config) {
-    console.info(TAG, 'onConfigurationUpdate================: ' + JSON.stringify(config));
+  onConfigurationUpdate(config): void {
+    console.debug(TAG, 'configuration is : ' + JSON.stringify(config));
     let displayClass = display.getDefaultDisplaySync();
-    console.info('displayOrientation is' + JSON.stringify(displayClass.orientation))
-    console.info('display is' + JSON.stringify(displayClass))
-    globalThis.mscreenorientation = displayClass.orientation;
-    if (globalThis.mscreenorientation === 0) {
+    console.debug(TAG, 'display is' + JSON.stringify(displayClass));
+    if (displayClass.orientation === display.Orientation.PORTRAIT) {
       globalThis.position = globalThis.verticalPosition;
     } else {
       globalThis.position = globalThis.landScapePosition;
@@ -225,7 +248,8 @@ export default class SelectorServiceExtensionAbility extends extension {
       width: globalThis.position.width,
       height: globalThis.position.height
     };
-    console.info('onConfigurationUpdate navigationBarRect is' + JSON.stringify(navigationBarRect))
+    AppStorage.SetOrCreate('oversizeHeight', globalThis.position.oversizeHeight ? 'true' : 'false');
+    console.debug(TAG, 'onConfigurationUpdate navigationBarRect is' + JSON.stringify(navigationBarRect));
     this.moveWindow(navigationBarRect);
   }
 };

@@ -61,7 +61,7 @@ const float UI_SELECTOR_LANDSCAPE_GRILLE_SAMLL = 0.015385;
 const float UI_SELECTOR_LANDSCAPE_MAX_RATIO = 0.9;
 const float UI_SELECTOR_PORTRAIT_WIDTH_RATIO = 0.8;
 const float UI_SELECTOR_PORTRAIT_WIDTH_EDGE_RATIO = 0.1;
-const float UI_SELECTOR_PORTRAIT_HEUGHT_RATIO = 0.9;
+const float UI_SELECTOR_PORTRAIT_HEIGHT_RATIO = 0.9;
 
 const int32_t UI_TIPS_DIALOG_WIDTH = 328 * 2;
 const int32_t UI_TIPS_DIALOG_HEIGHT = 135 * 2;
@@ -83,6 +83,7 @@ const std::string WIDTH = "width";
 const std::string HEIGHT = "height";
 const std::string MODEL_FLAG = "modelFlag";
 const std::string ACTION = "action";
+const std::string OVERSIZE_HEIGHT = "oversizeHeight";
 
 const int32_t UI_HALF = 2;
 const int32_t UI_DEFAULT_BUTTOM_CLIP = 100;
@@ -228,8 +229,16 @@ void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     }
 
     DialogPortraitPositionAdaptive(position, densityPixels, lineNums);
+
+    int32_t portraitMax = static_cast<int32_t>(height * UI_SELECTOR_PORTRAIT_HEIGHT_RATIO);
+    if (portraitMax < position.height) {
+        position.oversizeHeight = true;
+        position.height = static_cast<int32_t>(UI_SELECTOR_PORTRAIT_PHONE_H1 * densityPixels);
+        HILOG_INFO("portrait ratio 0.9 height is %{public}d.", portraitMax);
+    }
+
     position.offsetX = static_cast<int32_t>(width * UI_SELECTOR_PORTRAIT_WIDTH_EDGE_RATIO);
-    position.offsetY = static_cast<int32_t>((height * UI_SELECTOR_PORTRAIT_HEUGHT_RATIO - position.height));
+    position.offsetY = static_cast<int32_t>((height * UI_SELECTOR_PORTRAIT_HEIGHT_RATIO - position.height));
     HILOG_DEBUG("dialog offset x:%{public}d y:%{public}d h:%{public}d w:%{public}d",
         position.offsetX, position.offsetY, position.height, position.width);
 }
@@ -269,8 +278,9 @@ void SystemDialogScheduler::GetSelectorDialogLandscapePosition(
     int32_t landscapeMax = static_cast<int32_t>(
         (height - UI_SELECTOR_LANDSCAPE_SIGNAL_BAR * densityPixels) * UI_SELECTOR_LANDSCAPE_MAX_RATIO);
     if (position.height > landscapeMax) {
-        position.height = landscapeMax;
-        HILOG_INFO("ratio 0.9 height is %{public}d.", landscapeMax);
+        position.oversizeHeight = true;
+        position.height = static_cast<int32_t>(UI_SELECTOR_LANDSCAPE_PHONE_H1 * densityPixels);
+        HILOG_INFO("landscape ratio 0.9 height is %{public}d.", landscapeMax);
     }
 
     HILOG_DEBUG("dialog height is %{public}d.", position.height);
@@ -313,17 +323,17 @@ void SystemDialogScheduler::GetSelectorDialogPositionAndSize(
         displayInfo->GetDisplayOrientation() == Rosen::DisplayOrientation::PORTRAIT_INVERTED) {
         HILOG_INFO("GetDialogPositionAndSize GetOrientation, PORTRAIT or PORTRAIT_INVERTED");
         GetSelectorDialogPortraitPosition(portraitPosition, display->GetHeight(), display->GetWidth(),
-            lineNums, (display->GetVirtualPixelRatio()));
+            lineNums, display->GetVirtualPixelRatio());
         GetSelectorDialogLandscapePosition(landscapePosition, display->GetWidth(), display->GetHeight(),
-            lineNums, (display->GetVirtualPixelRatio()));
+            lineNums, display->GetVirtualPixelRatio());
         return;
     }
 
     HILOG_INFO("GetDialogPositionAndSize GetOrientation, LANDSCAPE or LANDSCAPE_INVERTED");
     GetSelectorDialogPortraitPosition(portraitPosition, display->GetWidth(), display->GetHeight(),
-        lineNums, (display->GetVirtualPixelRatio()));
+        lineNums, display->GetVirtualPixelRatio());
     GetSelectorDialogLandscapePosition(landscapePosition, display->GetHeight(), display->GetWidth(),
-        lineNums, (display->GetVirtualPixelRatio()));
+        lineNums, display->GetVirtualPixelRatio());
 }
 
 Want SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
@@ -430,6 +440,7 @@ const std::string SystemDialogScheduler::GetDialogPositionParams(const DialogPos
     dialogPositionData[OFF_SET_Y] = position.offsetY;
     dialogPositionData[WIDTH] = position.width;
     dialogPositionData[HEIGHT] = position.height;
+    dialogPositionData[OVERSIZE_HEIGHT] = position.oversizeHeight;
     return dialogPositionData.dump();
 }
 
