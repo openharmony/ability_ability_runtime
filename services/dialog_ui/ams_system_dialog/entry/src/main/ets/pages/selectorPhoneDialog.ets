@@ -112,11 +112,13 @@ struct SelectorPhoneDialog {
       this.selector.swiper.gridColumns = "1fr 1fr 1fr 1fr";
       this.selector.swiper.gridRows = "1fr 1fr";
       this.selector.btn.marginTop = "10vp";
-    } else if (this.hapList.length > 3) {
+    } else if (this.hapList.length > 4) {
       this.selector.swiper.height = "200vp";
       this.selector.swiper.contentHeight = "200vp";
       this.selector.swiper.gridColumns = "1fr 1fr 1fr 1fr";
       this.selector.swiper.gridRows = "1fr 1fr";
+    } else if (this.hapList.length > 3) {
+      this.selector.swiper.gridColumns = "1fr 1fr 1fr 1fr";
     } else if (this.hapList.length > 2) {
       this.selector.swiper.gridColumns = "1fr 1fr 1fr";
     } else {
