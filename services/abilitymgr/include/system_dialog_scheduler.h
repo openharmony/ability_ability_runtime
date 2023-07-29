@@ -47,6 +47,7 @@ struct DialogPosition {
     int32_t width_narrow = 0;
     int32_t height_narrow = 0;
     bool wideScreen = true;
+    bool oversizeHeight = false;
     DialogAlign align = DialogAlign::CENTER;
 };
 struct DialogAppInfo {
