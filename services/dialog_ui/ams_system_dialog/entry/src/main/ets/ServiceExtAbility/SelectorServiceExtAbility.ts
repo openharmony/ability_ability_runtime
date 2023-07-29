@@ -57,9 +57,10 @@ export default class SelectorServiceExtensionAbility extends extension {
     const signalRowlineNums = 4;
     let signalRowShowHapList = [];
     let signalRowPhoneShowHapList = [];
+    let jsonIconMapData: Map<string, image.PixelMap> = new Map();
     for (let i = 1; i <= globalThis.params.hapList.length; i++) {
       console.info(TAG, 'hapList[' + (i - 1).toString() + ']: ' + JSON.stringify(globalThis.params.hapList[i]));
-      await this.getHapResource(globalThis.params.hapList[i - 1], signalRowShowHapList);
+      await this.getHapResource(globalThis.params.hapList[i - 1], signalRowShowHapList, jsonIconMapData);
       if (i % signalRowlineNums === 0) {
         signalRowPhoneShowHapList.push(signalRowShowHapList);
         signalRowShowHapList = [];
