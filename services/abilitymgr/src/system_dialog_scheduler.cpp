@@ -61,7 +61,7 @@ const float UI_SELECTOR_LANDSCAPE_GRILLE_SAMLL = 0.015385;
 const float UI_SELECTOR_LANDSCAPE_MAX_RATIO = 0.9;
 const float UI_SELECTOR_PORTRAIT_WIDTH_RATIO = 0.8;
 const float UI_SELECTOR_PORTRAIT_WIDTH_EDGE_RATIO = 0.1;
-const float UI_SELECTOR_PORTRAIT_HEIGHT_RATIO = 0.9;
+const float UI_SELECTOR_PORTRAIT_HEIGHT_RATIO = 0.98;
 
 const int32_t UI_TIPS_DIALOG_WIDTH = 328 * 2;
 const int32_t UI_TIPS_DIALOG_HEIGHT = 135 * 2;
@@ -285,9 +285,7 @@ void SystemDialogScheduler::GetSelectorDialogLandscapePosition(
 
     HILOG_DEBUG("dialog height is %{public}d.", position.height);
     position.offsetX = static_cast<int32_t>((width - position.width) / UI_HALF);
-    position.offsetY = static_cast<int32_t>(
-        (height - (UI_SELECTOR_LANDSCAPE_SIGNAL_BAR * densityPixels) - position.height) / UI_HALF +
-        (UI_SELECTOR_LANDSCAPE_SIGNAL_BAR * densityPixels));
+    position.offsetY = static_cast<int32_t>((height * UI_SELECTOR_PORTRAIT_HEIGHT_RATIO - position.height));
     HILOG_DEBUG("dialog offset x:%{public}d y:%{public}d h:%{public}d w:%{public}d",
         position.offsetX, position.offsetY, position.height, position.width);
 }

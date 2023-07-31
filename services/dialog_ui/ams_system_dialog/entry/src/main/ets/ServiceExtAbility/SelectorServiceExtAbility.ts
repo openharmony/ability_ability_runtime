@@ -174,7 +174,7 @@ export default class SelectorServiceExtensionAbility extends extension {
         winNum--;
       }
       if (globalThis.params.deviceType === 'phone' || globalThis.params.deviceType === 'default') {
-        this.createWindow('SelectorDialog' + startId, window.WindowType.TYPE_SYSTEM_ALERT, navigationBarRect);
+        this.createWindow('SelectorDialog' + startId, window.WindowType.TYPE_FLOAT, navigationBarRect);
       } else {
         console.debug(TAG, 'onRequest, params: ' + JSON.stringify(globalThis.params));
         let windowType = (typeof(globalThis.callerToken) === 'object' && globalThis.callerToken !== null) ?
