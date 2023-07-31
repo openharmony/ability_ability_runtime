@@ -139,7 +139,7 @@ export default class SelectorServiceExtensionAbility extends extension {
     globalThis.landScapePosition = JSON.parse(want.parameters.landscapeScreen);
     globalThis.verticalPosition = JSON.parse(want.parameters.position);
     let displayClass = display.getDefaultDisplaySync();
-    if (displayClass.orientation === display.Orientation.PORTRAIT) {
+    if (displayClass.orientation === display.Orientation.PORTRAIT || display.Orientation.PORTRAIT_INVERTED) {
       globalThis.position = globalThis.verticalPosition;
       console.debug(TAG, 'screen position is vertical');
     } else {
@@ -238,7 +238,7 @@ export default class SelectorServiceExtensionAbility extends extension {
     console.debug(TAG, 'configuration is : ' + JSON.stringify(config));
     let displayClass = display.getDefaultDisplaySync();
     console.debug(TAG, 'display is' + JSON.stringify(displayClass));
-    if (displayClass.orientation === display.Orientation.PORTRAIT) {
+    if (displayClass.orientation === display.Orientation.PORTRAIT || display.Orientation.PORTRAIT_INVERTED) {
       globalThis.position = globalThis.verticalPosition;
     } else {
       globalThis.position = globalThis.landScapePosition;
