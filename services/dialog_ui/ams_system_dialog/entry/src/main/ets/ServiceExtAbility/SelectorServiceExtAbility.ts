@@ -216,7 +216,7 @@ export default class SelectorServiceExtensionAbility extends extension {
     }
   }
 
-  private async moveWindow(rect) {
+  private async moveWindow(rect): Promise<void> {
     try {
       await win.moveTo(rect.left, rect.top);
       await win.resetSize(rect.width, rect.height);
