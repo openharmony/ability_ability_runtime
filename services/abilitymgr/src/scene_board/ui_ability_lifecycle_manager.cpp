@@ -73,7 +73,8 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
             abilityRequest.startSetting = sessionInfo->startSetting;
         }
         uiAbilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
-        uiAbilityRecord->SetOwnerMissionUserId(DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId());
+        HILOG_DEBUG("user id: %{public}d.", sessionInfo->userId);
+        uiAbilityRecord->SetOwnerMissionUserId(sessionInfo->userId);
         SetRevicerInfo(abilityRequest, uiAbilityRecord);
         SetLastExitReason(uiAbilityRecord);
     }
@@ -1322,7 +1323,8 @@ void UIAbilityLifecycleManager::GetActiveAbilityList(const std::string &bundleNa
 }
 
 int32_t UIAbilityLifecycleManager::IsValidMissionIds(const std::vector<int32_t> &missionIds,
-    std::vector<MissionVaildResult> &results, int32_t userId) {
+    std::vector<MissionVaildResult> &results, int32_t userId)
+{
     constexpr int32_t searchCount = 20;
     auto callerUid = IPCSkeleton::GetCallingUid();
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
@@ -1330,7 +1332,7 @@ int32_t UIAbilityLifecycleManager::IsValidMissionIds(const std::vector<int32_t> 
         MissionVaildResult missionResult = {};
         missionResult.missionId = missionIds.at(i);
         auto search = sessionAbilityMap_.find(missionResult.missionId);
-        if (search == sessionAbilityMap_.end()) {
+        if (search == sessionAbilityMap_.end() || search->second == nullptr) {
             results.push_back(missionResult);
             continue;
         }

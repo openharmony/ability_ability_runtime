@@ -2218,6 +2218,13 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
     if (!IsAbilityControllerForeground(abilityRecord->GetAbilityInfo().bundleName)) {
         return ERR_WOULD_BLOCK;
     }
+
+    if (sessionInfo->isClearSession) {
+        const auto &abilityInfo = abilityRecord->GetAbilityInfo();
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            DeleteAbilityRecoverInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name);
+    }
+
     EventInfo eventInfo;
     eventInfo.bundleName = abilityRecord->GetAbilityInfo().bundleName;
     eventInfo.abilityName = abilityRecord->GetAbilityInfo().name;
@@ -2699,6 +2706,7 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
 
     AbilityRequest abilityRequest;
     ErrCode result = GenerateAbilityRequest(want, DEFAULT_INVAL_VALUE, abilityRequest, callerToken, userId);
+    abilityRequest.sessionInfo = sessionInfo;
 
     Want requestWant = want;
     CHECK_POINTER_AND_RETURN_LOG(connect, ERR_INVALID_VALUE, "connect is nullptr");
@@ -5534,7 +5542,6 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
         HILOG_ERROR("AppRecovery ScheduleRecoverAbility not self, not enabled");
         return;
     }
-
     {
         std::lock_guard<ffrt::mutex> guard(globalLock_);
         auto it = appRecoveryHistory_.find(record->GetUid());
@@ -6116,11 +6123,17 @@ int AbilityManagerService::GetTopAbility(sptr<IRemoteObject> &token)
         return CHECK_PERMISSION_FAILED;
     }
 #ifdef SUPPORT_GRAPHICS
-    if (!wmsHandler_) {
-        HILOG_ERROR("wmsHandler_ is nullptr.");
-        return ERR_INVALID_VALUE;
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        Rosen::FocusChangeInfo focusChangeInfo;
+        Rosen::WindowManager::GetInstance().GetFocusWindowInfo(focusChangeInfo);
+        token = focusChangeInfo.abilityToken_;
+    } else {
+        if (!wmsHandler_) {
+            HILOG_ERROR("wmsHandler_ is nullptr.");
+            return ERR_INVALID_VALUE;
+        }
+        wmsHandler_->GetFocusWindow(token);
     }
-    wmsHandler_->GetFocusWindow(token);
 
     if (!token) {
         HILOG_ERROR("token is nullptr");
@@ -7527,7 +7540,8 @@ int AbilityManagerService::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId
     int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
     auto connectManager = GetConnectManagerByUserId(userId);
     if (connectManager) {
-        focused = connectManager->IsUIExtensionFocused(uiExtensionTokenId, token);
+        focused = connectManager->IsUIExtensionFocused(uiExtensionTokenId, token)
+            || connectManager->IsWindowExtensionFocused(uiExtensionTokenId, token);
     } else {
         HILOG_WARN("connectManager is nullptr, userId: %{public}d", userId);
     }
@@ -7535,7 +7549,8 @@ int AbilityManagerService::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId
         HILOG_DEBUG("Check connectManager in user0");
         connectManager = GetConnectManagerByUserId(U0_USER_ID);
         if (connectManager) {
-            focused = connectManager->IsUIExtensionFocused(uiExtensionTokenId, token);
+            focused = connectManager->IsUIExtensionFocused(uiExtensionTokenId, token)
+                || connectManager->IsWindowExtensionFocused(uiExtensionTokenId, token);
         } else {
             HILOG_WARN("connectManager is nullptr, userId: 0");
         }
