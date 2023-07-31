@@ -515,7 +515,7 @@ bool JsRuntime::Initialize(const Options& options)
             if (!options.hapPath.empty()) {
                 bool newCreate = false;
                 std::string loadPath = ExtractorUtil::GetLoadFilePath(options.hapPath);
-                std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
+                std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
                 if (!extractor) {
                     HILOG_ERROR("Get extractor failed. hapPath[%{private}s]", options.hapPath.c_str());
                     return false;
@@ -827,7 +827,7 @@ bool JsRuntime::RunScript(const std::string& srcPath, const std::string& hapPath
 
     bool newCreate = false;
     std::string loadPath = ExtractorUtil::GetLoadFilePath(hapPath);
-    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
+    std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate, true);
     if (!extractor) {
         HILOG_ERROR("Get extractor failed. hapPath[%{private}s]", hapPath.c_str());
         return false;
@@ -953,6 +953,30 @@ void JsRuntime::NotifyApplicationState(bool isBackground)
     CHECK_POINTER(nativeEngine);
     nativeEngine->NotifyApplicationState(isBackground);
     HILOG_INFO("NotifyApplicationState, isBackground %{public}d.", isBackground);
+}
+
+bool JsRuntime::SuspendVM(uint32_t tid)
+{
+    auto nativeEngine = GetNativeEnginePointer();
+    CHECK_POINTER_AND_RETURN(nativeEngine, false);
+    auto arkNativeEngine = nativeEngine->GetWorkerEngine(tid);
+    if (arkNativeEngine == nullptr) {
+        HILOG_ERROR("SuspendVM arkNativeEngine is nullptr");
+        return false;
+    }
+    return arkNativeEngine->SuspendVM();
+}
+
+void JsRuntime::ResumeVM(uint32_t tid)
+{
+    auto nativeEngine = GetNativeEnginePointer();
+    CHECK_POINTER(nativeEngine);
+    auto arkNativeEngine = nativeEngine->GetWorkerEngine(tid);
+    if (arkNativeEngine == nullptr) {
+        HILOG_ERROR("ResumeVM arkNativeEngine is nullptr");
+        return;
+    }
+    arkNativeEngine->ResumeVM();
 }
 
 void JsRuntime::PreloadSystemModule(const std::string& moduleName)
