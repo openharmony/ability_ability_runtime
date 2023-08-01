@@ -41,7 +41,7 @@ namespace AbilityRuntime {
 namespace {
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
-}
+} // namespace
 NativeValue *AttachActionExtensionContext(NativeEngine *engine, void *value, void*)
 {
     HILOG_DEBUG("called.");
@@ -168,16 +168,18 @@ void JsActionExtension::BindContext(NativeEngine &engine, NativeObject *obj)
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<UIExtensionContext>(context);
-    nativeObj->ConvertToNativeBindingObject(&engine, DetachCallbackFunc, AttachActionExtensionContext,
-        workContext, nullptr);
+    nativeObj->ConvertToNativeBindingObject(
+        &engine, DetachCallbackFunc, AttachActionExtensionContext, workContext, nullptr);
     context->Bind(jsRuntime_, shellContextRef_.get());
     obj->SetProperty("context", contextObj);
 
-    nativeObj->SetNativePointer(workContext,
+    nativeObj->SetNativePointer(
+        workContext,
         [](NativeEngine*, void *data, void*) {
             HILOG_DEBUG("Finalizer for weak_ptr ui extension context is called");
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
-        }, nullptr);
+        },
+        nullptr);
 }
 
 void JsActionExtension::OnStart(const AAFwk::Want &want)
@@ -409,7 +411,7 @@ void JsActionExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInf
     }
     if (contentSessions_.find(obj) != contentSessions_.end() && contentSessions_[obj] != nullptr) {
         HandleScope handleScope(jsRuntime_);
-        NativeValue *argv[] = {contentSessions_[obj]->Get()};
+        NativeValue *argv[] = { contentSessions_[obj]->Get() };
         CallObjectMethod("onSessionDestroy", argv, ARGC_ONE);
     }
     auto &uiWindow = uiWindowMap_[obj];
@@ -543,8 +545,8 @@ void JsActionExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &
     }
     JsExtensionContext::ConfigurationUpdated(&nativeEngine, shellContextRef_, fullConfig);
 
-    napi_value napiConfiguration = OHOS::AppExecFwk::WrapConfiguration(
-        reinterpret_cast<napi_env>(&nativeEngine), *fullConfig);
+    napi_value napiConfiguration =
+        OHOS::AppExecFwk::WrapConfiguration(reinterpret_cast<napi_env>(&nativeEngine), *fullConfig);
     NativeValue *jsConfiguration = reinterpret_cast<NativeValue*>(napiConfiguration);
     if (jsConfiguration == nullptr) {
         HILOG_ERROR("Failed to get configuration.");
