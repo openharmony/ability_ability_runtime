@@ -2214,6 +2214,8 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
             MoveToBackgroundTask(abilityRecord);
         } else if (pendingState == AbilityState::FOREGROUND) {
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
+        } else {
+            abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
         }
         return;
     }
