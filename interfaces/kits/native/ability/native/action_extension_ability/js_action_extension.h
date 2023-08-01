@@ -16,8 +16,8 @@
 #ifndef OHOS_ABILITY_RUNTIME_JS_ACTION_EXTENSION_H
 #define OHOS_ABILITY_RUNTIME_JS_ACTION_EXTENSION_H
 
-#include "configuration.h"
 #include "action_extension.h"
+#include "configuration.h"
 
 class NativeReference;
 class NativeValue;
@@ -91,8 +91,8 @@ public:
      * execute its own logic.
      *
      * @param want Indicates the want of action extension to start.
-     * @param restart Indicates the startup mode. The value true indicates that action extension is restarted after being
-     * destroyed, and the value false indicates a normal startup.
+     * @param restart Indicates the startup mode. The value true indicates that action extension is restarted after
+     * being destroyed, and the value false indicates a normal startup.
      * @param startId Indicates the number of times the action extension has been started. The startId is incremented
      * by 1 every time the action extension is started. For example, if the action extension has been started for six
      * times, the value of startId is 6.
