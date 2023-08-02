@@ -15,8 +15,8 @@
 
 #include "share_extension_module_loader.h"
 
-#include "share_extension.h"
 #include "hilog_wrapper.h"
+#include "share_extension.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -33,7 +33,8 @@ std::map<std::string, std::string> ShareExtensionModuleLoader::GetParams()
 {
     HILOG_DEBUG("called");
     std::map<std::string, std::string> params;
-    // type means extension type in ExtensionAbilityType of extension_ability_info.h, 16 means shareextension.
+    // type means extension type in ExtensionAbilityType of
+    // extension_ability_info.h, 16 means shareextension.
     params.insert(std::pair<std::string, std::string>("type", "16"));
     params.insert(std::pair<std::string, std::string>("name", "ShareExtensionAbility"));
     return params;

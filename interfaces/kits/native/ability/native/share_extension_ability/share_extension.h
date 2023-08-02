@@ -38,9 +38,8 @@ public:
      * @param handler the share extension handler.
      * @param token the remote token.
      */
-    void Init(const std::shared_ptr<AbilityLocalRecord> &record,
-        const std::shared_ptr<OHOSApplication>& application, std::shared_ptr<AbilityHandler> &handler,
-        const sptr<IRemoteObject> &token) override;
+    void Init(const std::shared_ptr<AbilityLocalRecord> &record, const std::shared_ptr<OHOSApplication> &application,
+        std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token) override;
 
     /**
      * @brief Create share extension.
