@@ -154,6 +154,7 @@ public:
      * value can be null.
      */
     void OnAbilityResult(int32_t requestCode, int32_t resultCode, const Want &resultData) override;
+
 private:
     virtual void BindContext(NativeEngine &engine, NativeObject *obj);
 
