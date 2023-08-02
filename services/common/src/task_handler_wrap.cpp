@@ -46,10 +46,12 @@ void TaskHandle::Sync() const
 {
     auto handler = handler_.lock();
     if (!status_ || !handler || !innerTaskHandle_) {
+        HILOG_ERROR("Invalid state");
         return;
     }
     auto &status = *status_;
     if (status == TaskStatus::FINISHED || status == TaskStatus::CANCELED) {
+        HILOG_ERROR("Invalid status");
         return;
     }
     handler->WaitTaskInner(innerTaskHandle_);
@@ -180,6 +182,8 @@ ffrt::qos Convert2FfrtQos(TaskQoS taskqos)
             return ffrt::qos_deadline_request;
         case TaskQoS::USER_INTERACTIVE:
             return ffrt::qos_user_interactive;
+        default:
+            break;
     }
 
     return ffrt::qos_inherit;

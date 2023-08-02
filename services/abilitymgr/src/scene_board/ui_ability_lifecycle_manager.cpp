@@ -97,7 +97,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
     if (iter == sessionAbilityMap_.end()) {
         sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     }
-    uiAbilityRecord->ProcessForegroundAbility();
+    uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
     if (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED && !specifiedInfoQueue_.empty()) {
         SpecifiedInfo specifiedInfo = specifiedInfoQueue_.front();
         specifiedInfoQueue_.pop();
@@ -619,6 +619,7 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
     if (abilityRequest.startSetting != nullptr) {
         sessionInfo->startSetting = abilityRequest.startSetting;
     }
+    sessionInfo->callingTokenId = IPCSkeleton::GetCallingTokenID();
     return sessionInfo;
 }
 
@@ -838,6 +839,7 @@ void UIAbilityLifecycleManager::CompleteTerminate(const std::shared_ptr<AbilityR
         // Don't return here
         HILOG_ERROR("AppMS fail to terminate ability.");
     }
+    abilityRecord->RevokeUriPermission();
     EraseSpecifiedAbilityRecord(abilityRecord);
     terminateAbilityList_.remove(abilityRecord);
 }
@@ -942,7 +944,7 @@ void UIAbilityLifecycleManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordI
         return;
     }
     HILOG_DEBUG("call, msgId:%{public}d, name:%{public}s", msgId, abilityRecord->GetAbilityInfo().name.c_str());
-
+    abilityRecord->RevokeUriPermission();
     PrintTimeOutLog(abilityRecord, msgId, isHalf);
     if (isHalf) {
         return;
@@ -1323,7 +1325,8 @@ void UIAbilityLifecycleManager::GetActiveAbilityList(const std::string &bundleNa
 }
 
 int32_t UIAbilityLifecycleManager::IsValidMissionIds(const std::vector<int32_t> &missionIds,
-    std::vector<MissionVaildResult> &results, int32_t userId) {
+    std::vector<MissionVaildResult> &results, int32_t userId)
+{
     constexpr int32_t searchCount = 20;
     auto callerUid = IPCSkeleton::GetCallingUid();
     std::lock_guard<ffrt::mutex> guard(sessionLock_);
