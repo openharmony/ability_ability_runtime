@@ -276,8 +276,12 @@ bool SimulatorImpl::LoadAbilityStage(uint8_t *buffer, size_t len)
         HILOG_ERROR("nativeEngine_ is nullptr");
         return false;
     }
+    std::string srcEntrance = options_.hapModuleInfo.srcEntrance;
+    srcEntrance.erase(srcEntrance.rfind("."));
+    srcEntrance.append(".abc");
+    srcEntrance = srcEntrance.substr(srcEntrance.find('/') + 1, srcEntrance.length());
 
-    auto moduleSrcPath = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + options_.hapModuleInfo.srcEntrance;
+    auto moduleSrcPath = BUNDLE_INSTALL_PATH + options_.moduleName + "/" + srcEntrance;
     if (!nativeEngine_->RunScriptBuffer(moduleSrcPath, buffer, len, false)) {
         HILOG_ERROR("Failed to run ability stage script: %{public}s", moduleSrcPath.c_str());
         return false;
@@ -573,6 +577,17 @@ bool SimulatorImpl::OnInit()
 
     NativeValue *mockRequireNapi = globalObj->GetProperty("requireNapi");
     globalObj->SetProperty("mockRequireNapi", mockRequireNapi);
+
+    std::string fileSeparator = "/";
+    auto pos = options_.containerSdkPath.find(fileSeparator);
+    if (pos == std::string::npos) {
+        fileSeparator = "\\";
+    }
+    std::string fileName = options_.containerSdkPath + fileSeparator + "apiMock" + fileSeparator + "jsMockHmos.abc";
+    HILOG_DEBUG("file name: %{public}s", fileName.c_str());
+    if (!fileName.empty() && AbilityStageContext::Access(fileName)) {
+        panda::JSNApi::Execute(vm_, fileName, "_GLOBAL::func_main_0");
+    }
 
     const char *moduleName = "SimulatorImpl";
     BindNativeFunction(*nativeEngine, *globalObj, "requireNapi", moduleName,

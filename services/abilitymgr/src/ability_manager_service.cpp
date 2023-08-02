@@ -2262,7 +2262,7 @@ int AbilityManagerService::SendResultToAbility(int32_t requestCode, int32_t resu
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
 
     abilityRecord->SetResult(std::make_shared<AbilityResult>(requestCode, resultCode, resultWant));
-    abilityRecord->SendResult();
+    abilityRecord->SendResult(0, 0);
     return ERR_OK;
 }
 
@@ -3076,16 +3076,19 @@ void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
         HILOG_ERROR("GetOsAccountLocalIdFromUid failed. uid=%{public}d", callerUid);
         return;
     }
-    AppExecFwk::BundleInfo bundleInfo;
-    bool bundleMgrResult = IN_PROCESS_CALL(
-        bms->GetBundleInfo(record->GetKey()->GetBundleName(),
-            AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
-    if (!bundleMgrResult) {
-        HILOG_ERROR("GetBundleInfo is fail.");
-        return;
+    std::string apl;
+    if (record->GetKey() != nullptr && !record->GetKey()->GetBundleName().empty()) {
+        AppExecFwk::BundleInfo bundleInfo;
+        bool bundleMgrResult = IN_PROCESS_CALL(
+            bms->GetBundleInfo(record->GetKey()->GetBundleName(),
+                 AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
+        if (!bundleMgrResult) {
+            HILOG_ERROR("GetBundleInfo is fail.");
+            return;
+        }
+        apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     }
 
-    auto apl = bundleInfo.applicationInfo.appPrivilegeLevel;
     pendingWantManager_->CancelWantSender(apl, sender);
 }
 
@@ -5542,7 +5545,6 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
         HILOG_ERROR("AppRecovery ScheduleRecoverAbility not self, not enabled");
         return;
     }
-
     {
         std::lock_guard<ffrt::mutex> guard(globalLock_);
         auto it = appRecoveryHistory_.find(record->GetUid());
@@ -6133,8 +6135,8 @@ int AbilityManagerService::GetTopAbility(sptr<IRemoteObject> &token)
             HILOG_ERROR("wmsHandler_ is nullptr.");
             return ERR_INVALID_VALUE;
         }
+        wmsHandler_->GetFocusWindow(token);
     }
-    wmsHandler_->GetFocusWindow(token);
 
     if (!token) {
         HILOG_ERROR("token is nullptr");
@@ -7499,7 +7501,7 @@ int32_t AbilityManagerService::SendResultToAbilityByToken(const Want &want, cons
         return ERR_INVALID_VALUE;
     }
     abilityRecord->SetResult(std::make_shared<AbilityResult>(requestCode, resultCode, want));
-    abilityRecord->SendResult();
+    abilityRecord->SendResult(0, 0);
     return ERR_OK;
 }
 
