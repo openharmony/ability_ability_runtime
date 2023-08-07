@@ -587,7 +587,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 
     GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.bundleName);
 
-    if (isReady_) {
+    if (isReady_ && isWindowStarted_) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (!handler) {
             HILOG_ERROR("Fail to get AbilityEventHandler.");
@@ -620,6 +620,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
         }
         LoadAbility();
     }
+    isWindowStarted_ = true;
 }
 
 std::shared_ptr<Want> AbilityRecord::GetWantFromMission() const
