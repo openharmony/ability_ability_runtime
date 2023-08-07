@@ -33,8 +33,8 @@ std::map<std::string, std::string> ActionExtensionModuleLoader::GetParams()
 {
     HILOG_DEBUG("called");
     std::map<std::string, std::string> params;
-    // type means extension type in ExtensionAbilityType of extension_ability_info.h, 20 means actionextension.
-    params.insert(std::pair<std::string, std::string>("type", "20"));
+    // type means extension type in ExtensionAbilityType of extension_ability_info.h, 19 means actionextension.
+    params.insert(std::pair<std::string, std::string>("type", "19"));
     params.insert(std::pair<std::string, std::string>("name", "ActionExtensionAbility"));
     return params;
 }
