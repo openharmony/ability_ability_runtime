@@ -826,16 +826,13 @@ ohos_shared_library("ui_extension_module") {
   part_name = "ability_runtime"
 }
 
-config("action_extension_public_config") {
+config("action_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/action_extension_ability" ]
 }
 
 ohos_shared_library("action_extension") {
-  public_configs = [
-    ":action_extension_public_config",
-    ":ui_extension_public_config",
-  ]
+  configs = [ ":action_extension_config" ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/action_extension_ability/action_extension.cpp",
@@ -874,7 +871,10 @@ ohos_shared_library("action_extension") {
 ohos_shared_library("action_extension_module") {
   sources = [ "${ability_runtime_native_path}/ability/native/action_extension_ability/action_extension_module_loader.cpp" ]
 
-  configs = [ ":ability_config" ]
+  configs = [
+    ":ability_config",
+    ":action_extension_config",
+  ]
 
   deps = [
     ":action_extension",
