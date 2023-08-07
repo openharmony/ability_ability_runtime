@@ -826,16 +826,13 @@ ohos_shared_library("ui_extension_module") {
   part_name = "ability_runtime"
 }
 
-config("share_extension_public_config") {
+config("share_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/share_extension_ability" ]
 }
 
 ohos_shared_library("share_extension") {
-  public_configs = [
-    ":share_extension_public_config",
-    ":ui_extension_public_config",
-  ]
+  configs = [ ":share_extension_config" ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/share_extension_ability/js_share_extension.cpp",
@@ -874,7 +871,10 @@ ohos_shared_library("share_extension") {
 ohos_shared_library("share_extension_module") {
   sources = [ "${ability_runtime_native_path}/ability/native/share_extension_ability/share_extension_module_loader.cpp" ]
 
-  configs = [ ":ability_config" ]
+  configs = [
+    ":ability_config",
+    ":share_extension_config",
+  ]
 
   deps = [
     ":share_extension",

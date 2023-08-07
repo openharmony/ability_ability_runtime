@@ -66,24 +66,6 @@ public:
     void OnStart(const AAFwk::Want &want) override;
 
     /**
-     * @brief Called when this share extension is connected for the first time.
-     *
-     * You can override this function to implement your own processing logic.
-     *
-     * @param want Indicates the {@link Want} structure containing connection information about the share extension.
-     * @return Returns a pointer to the <b>sid</b> of the connected share extension.
-     */
-    sptr<IRemoteObject> OnConnect(const AAFwk::Want &want) override;
-
-    /**
-     * @brief Called when all abilities connected to this share extension are disconnected.
-     *
-     * You can override this function to implement your own processing logic.
-     *
-     */
-    void OnDisconnect(const AAFwk::Want &want) override;
-
-    /**
      * @brief Called back when share extension is started.
      *
      * This method can be called only by share extension. You can use the StartAbility(Want) method to start
@@ -159,10 +141,6 @@ private:
     virtual void BindContext(NativeEngine &engine, NativeObject *obj);
 
     NativeValue *CallObjectMethod(const char *name, NativeValue *const *argv = nullptr, size_t argc = 0);
-
-    NativeValue *CallOnConnect(const AAFwk::Want &want);
-
-    NativeValue *CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
 
     void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);

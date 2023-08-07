@@ -24,12 +24,12 @@ namespace AAFwk {
 namespace UIExtensionUtils {
 // ui extension type list
 const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
+    AppExecFwk::ExtensionAbilityType::SHARE,
     AppExecFwk::ExtensionAbilityType::UI,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_ATOMICSERVICEPANEL,
-    AppExecFwk::ExtensionAbilityType::SHARE,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_SHARE,
     AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT
 };
