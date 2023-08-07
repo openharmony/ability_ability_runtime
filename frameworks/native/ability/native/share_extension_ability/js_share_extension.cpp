@@ -187,19 +187,7 @@ void JsShareExtension::OnStart(const AAFwk::Want &want)
     HILOG_DEBUG("called.");
     Extension::OnStart(want);
     HandleScope handleScope(jsRuntime_);
-    NativeEngine *nativeEngine = &jsRuntime_.GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        HILOG_ERROR("NativeEngine is nullptr.");
-        return;
-    }
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-    NativeValue *nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-    if (nativeWant == nullptr) {
-        HILOG_ERROR("Failed to get want");
-        return;
-    }
-    NativeValue *argv[] = { nativeWant };
-    CallObjectMethod("onCreate", argv, ARGC_ONE);
+    CallObjectMethod("onCreate");
 }
 
 void JsShareExtension::OnStop()
@@ -208,35 +196,6 @@ void JsShareExtension::OnStop()
     ShareExtension::OnStop();
     HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
-}
-
-sptr<IRemoteObject> JsShareExtension::OnConnect(const AAFwk::Want &want)
-{
-    HandleScope handleScope(jsRuntime_);
-    NativeValue *result = CallOnConnect(want);
-    if (result == nullptr) {
-        HILOG_ERROR("CallOnConnect failed.");
-        return nullptr;
-    }
-    NativeEngine *nativeEngine = &jsRuntime_.GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        HILOG_ERROR("NativeEngine is nullptr.");
-        return nullptr;
-    }
-    auto remoteObj = NAPI_ohos_rpc_getNativeRemoteObject(
-        reinterpret_cast<napi_env>(nativeEngine), reinterpret_cast<napi_value>(result));
-    if (remoteObj == nullptr) {
-        HILOG_ERROR("remoteObj is nullptr.");
-    }
-    return remoteObj;
-}
-
-void JsShareExtension::OnDisconnect(const AAFwk::Want &want)
-{
-    HILOG_DEBUG("called.");
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    Extension::OnDisconnect(want);
-    CallOnDisconnect(want, false);
 }
 
 void JsShareExtension::OnCommandWindow(
@@ -446,89 +405,6 @@ NativeValue *JsShareExtension::CallObjectMethod(const char *name, NativeValue *c
     }
     HILOG_DEBUG("JsShareExtension CallFunction(%{public}s), success", name);
     return nativeEngine.CallFunction(value, method, argv, argc);
-}
-
-NativeValue *JsShareExtension::CallOnConnect(const AAFwk::Want &want)
-{
-    HILOG_DEBUG("called.");
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    Extension::OnConnect(want);
-    HandleScope handleScope(jsRuntime_);
-    NativeEngine *nativeEngine = &jsRuntime_.GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        HILOG_ERROR("NativeEngine is nullptr.");
-        return nullptr;
-    }
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-    auto *nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-    if (nativeWant == nullptr) {
-        HILOG_ERROR("Failed to get want");
-        return nullptr;
-    }
-    NativeValue *argv[] = { nativeWant };
-    if (!jsObj_) {
-        HILOG_ERROR("Not found ShareExtension.js");
-        return nullptr;
-    }
-
-    NativeValue *value = jsObj_->Get();
-    auto *obj = ConvertNativeValueTo<NativeObject>(value);
-    if (obj == nullptr) {
-        HILOG_ERROR("Failed to get ShareExtension object");
-        return nullptr;
-    }
-
-    NativeValue *method = obj->GetProperty("onConnect");
-    if (method == nullptr) {
-        HILOG_ERROR("Failed to get onConnect from ShareExtension object");
-        return nullptr;
-    }
-    NativeValue *remoteNative = nativeEngine->CallFunction(value, method, argv, ARGC_ONE);
-    if (remoteNative == nullptr) {
-        HILOG_ERROR("remoteNative is nullptr.");
-    }
-    return remoteNative;
-}
-
-NativeValue *JsShareExtension::CallOnDisconnect(const AAFwk::Want &want, bool withResult)
-{
-    HandleEscape handleEscape(jsRuntime_);
-    NativeEngine *nativeEngine = &jsRuntime_.GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        HILOG_ERROR("NativeEngine is nullptr.");
-        return nullptr;
-    }
-    napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
-    NativeValue *nativeWant = reinterpret_cast<NativeValue*>(napiWant);
-    if (nativeWant == nullptr) {
-        HILOG_ERROR("Failed to get want");
-        return nullptr;
-    }
-    NativeValue *argv[] = { nativeWant };
-    if (!jsObj_) {
-        HILOG_ERROR("Not found ShareExtension.js");
-        return nullptr;
-    }
-
-    NativeValue *value = jsObj_->Get();
-    NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
-    if (obj == nullptr) {
-        HILOG_ERROR("Failed to get ShareExtension object");
-        return nullptr;
-    }
-
-    NativeValue *method = obj->GetProperty("onDisconnect");
-    if (method == nullptr) {
-        HILOG_ERROR("Failed to get onDisconnect from ShareExtension object");
-        return nullptr;
-    }
-
-    if (withResult) {
-        return handleEscape.Escape(nativeEngine->CallFunction(value, method, argv, ARGC_ONE));
-    } else {
-        nativeEngine->CallFunction(value, method, argv, ARGC_ONE);
-        return nullptr;
-    }
 }
 
 void JsShareExtension::OnConfigurationUpdated(const AppExecFwk::Configuration &configuration)
