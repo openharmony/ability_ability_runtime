@@ -1474,5 +1474,16 @@ void UIAbilityLifecycleManager::SetSessionHandler(const sptr<ISessionHandler> &h
 {
     handler_ = handler;
 }
+
+std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetAbilityRecordsById(int32_t sessionId) const
+{
+    std::lock_guard<ffrt::mutex> guard(sessionLock_);
+    auto search = sessionAbilityMap_.find(sessionId);
+    if (search == sessionAbilityMap_.end()) {
+        HILOG_INFO("sessionId is invalid.");
+        return nullptr;
+    }
+    return search->second;
+}
 }  // namespace AAFwk
 }  // namespace OHOS
