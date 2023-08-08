@@ -154,7 +154,9 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0400, TestSize.Lev
 HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialog_0500, TestSize.Level1)
 {
     HILOG_INFO("AbilityMgrServiceDialog_0500 start");
-    DialogAppInfo dialogAppInfo = { 0, 0, "com.example.test", "MainAbility", "entry" };
+    DialogAppInfo dialogAppInfo = {
+        0, 0, "com.example.test", "MainAbility", "entry"
+    };
     std::vector<DialogAppInfo> dialogAppInfos = { dialogAppInfo };
     auto params = systemDialogScheduler_->GetSelectorParams(dialogAppInfos);
     nlohmann::json jsonObj = nlohmann::json::parse(params);
@@ -443,6 +445,7 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2100, TestSize
     DialogPosition landscapePosition;
     portraitPosition.height = 0;
     portraitPosition.offsetX = 0;
+    systemDialogScheduler_->deviceType_ = "phone";
     const int lineNums = 1;
     sptr<Rosen::DisplayInfo> displayInfo = new (std::nothrow) Rosen::DisplayInfo;
     Rosen::display = new (std::nothrow) Rosen::Display(std::string(""), displayInfo);
@@ -468,6 +471,7 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2200, TestSize
     DialogPosition landscapePosition;
     landscapePosition.height = 0;
     landscapePosition.offsetX = 0;
+    systemDialogScheduler_->deviceType_ = "default";
     const int lineNums = 1;
     sptr<Rosen::DisplayInfo> displayInfo = new (std::nothrow) Rosen::DisplayInfo;
     Rosen::display = new (std::nothrow) Rosen::Display(std::string(""), displayInfo);
@@ -493,6 +497,7 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2300, TestSize
     DialogPosition landscapePosition;
     landscapePosition.height = 0;
     landscapePosition.offsetX = 0;
+    systemDialogScheduler_->deviceType_ = "pc";
     const int lineNums = 1;
     sptr<Rosen::DisplayInfo> displayInfo = new (std::nothrow) Rosen::DisplayInfo;
     Rosen::display = nullptr;
