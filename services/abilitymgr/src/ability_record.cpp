@@ -39,6 +39,7 @@
 #include "scene_board_judgement.h"
 #include "system_ability_token_callback.h"
 #include "uri_permission_manager_client.h"
+#include "permission_constants.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
 #include "locale_config.h"
@@ -52,6 +53,7 @@
 namespace OHOS {
 namespace AAFwk {
 using namespace OHOS::Security;
+using namespace OHOS::AAFwk::PermissionConstants;
 const std::string DEBUG_APP = "debugApp";
 const std::string NATIVE_DEBUG = "nativeDebug";
 const std::string PERF_CMD = "perfCmd";
@@ -150,6 +152,7 @@ Token::~Token()
 
 std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (token == nullptr) {
         HILOG_INFO("null");
         return nullptr;
@@ -226,6 +229,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
         HILOG_DEBUG("abilityRequest.callType is CALL_REQUEST_TYPE.");
         abilityRecord->SetStartedByCall(true);
     }
+    abilityRecord->collaboratorType_ = abilityRequest.collaboratorType;
     return abilityRecord;
 }
 
@@ -1156,6 +1160,36 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
     if (currentState_ == AbilityState::BACKGROUND) {
         isAbilityForegrounding_ = false;
     }
+
+    auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
+        collaboratorType_);
+    if (collaborator == nullptr) {
+        HILOG_DEBUG("collaborator is nullptr");
+    } else {
+        HILOG_INFO("start notify collaborator, missionId:%{public}d, state:%{public}d", missionId_,
+            static_cast<int32_t>(state));
+        int ret = ERR_OK;
+        switch (state) {
+            case AbilityState::FOREGROUNDING: {
+                ret = collaborator->NotifyMoveMissionToForeground(missionId_);
+                break;
+            }
+            case AbilityState::BACKGROUNDING: {
+                ret = collaborator->NotifyMoveMissionToBackground(missionId_);
+                break;
+            }
+            case AbilityState::TERMINATING: {
+                ret = collaborator->NotifyTerminateMission(missionId_);
+                break;
+            }
+            default:
+                break;
+        }
+        if (ret != ERR_OK) {
+            HILOG_ERROR("notify broker move mission to background failed, err: %{public}d", ret);
+        }
+    }
+
     DelayedSingleton<MissionInfoMgr>::GetInstance()->SetMissionAbilityState(missionId_, currentState_);
 }
 
@@ -2529,6 +2563,10 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     } else {
         fromTokenId = IPCSkeleton::GetCallingTokenID();
     }
+
+    auto permission =
+        PermissionVerification::GetInstance()->VerifyCallingPermission(PERMISSION_PROXY_AUTHORIZATION_URI) ||
+        PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId, PERMISSION_PROXY_AUTHORIZATION_URI);
     auto userId = GetCurrentAccountId();
     auto callerTokenId = static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
     for (auto&& str : uriVec) {
@@ -2542,16 +2580,23 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         }
         auto&& authority = uri.GetAuthority();
         HILOG_INFO("uri authority is %{public}s.", authority.c_str());
-        AppExecFwk::BundleInfo uriBundleInfo;
-        if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
-            HILOG_WARN("To fail to get bundle info according to uri.");
+        bool authorityFlag = authority == "media" || authority == "docs";
+        if (authorityFlag && !permission) {
+            HILOG_ERROR("the uri is media or docs, have no permission");
             continue;
         }
-        if (uriBundleInfo.applicationInfo.accessTokenId != fromTokenId &&
-            uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_ &&
-            uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
-            HILOG_ERROR("the uri does not belong to caller.");
-            continue;
+        if (!authorityFlag) {
+            AppExecFwk::BundleInfo uriBundleInfo;
+            if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
+                HILOG_WARN("To fail to get bundle info according to uri.");
+                continue;
+            }
+            if (uriBundleInfo.applicationInfo.accessTokenId != fromTokenId &&
+                uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_ &&
+                uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
+                HILOG_ERROR("the uri does not belong to caller.");
+                continue;
+            }
         }
         int autoremove = 1;
         auto ret = IN_PROCESS_CALL(
@@ -2734,6 +2779,11 @@ void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo)
 bool AbilityRecord::GetRecoveryInfo()
 {
     return want_.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false);
+}
+
+int32_t AbilityRecord::GetCollaboratorType() const
+{
+    return collaboratorType_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

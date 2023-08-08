@@ -24,6 +24,7 @@ namespace AAFwk {
 namespace UIExtensionUtils {
 // ui extension type list
 const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
+    AppExecFwk::ExtensionAbilityType::SHARE,
     AppExecFwk::ExtensionAbilityType::ACTION,
     AppExecFwk::ExtensionAbilityType::UI,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL,
@@ -42,6 +43,11 @@ inline bool IsUIExtension(const AppExecFwk::ExtensionAbilityType type)
 inline bool IsWindowExtension(const AppExecFwk::ExtensionAbilityType type)
 {
     return type == AppExecFwk::ExtensionAbilityType::WINDOW;
+}
+
+inline AppExecFwk::ExtensionAbilityType ConvertType(const AppExecFwk::ExtensionAbilityType type)
+{
+    return IsUIExtension(type) ? AppExecFwk::ExtensionAbilityType::UI : type;
 }
 } // namespace UIExtensionUtils
 } // namespace AAFwk
