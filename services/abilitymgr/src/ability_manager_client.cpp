@@ -854,6 +854,7 @@ ErrCode AbilityManagerClient::FinishUserTest(
 
 ErrCode AbilityManagerClient::GetTopAbility(sptr<IRemoteObject> &token)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
@@ -868,6 +869,7 @@ ErrCode AbilityManagerClient::GetTopAbility(sptr<IRemoteObject> &token)
 
 AppExecFwk::ElementName AbilityManagerClient::GetElementNameByToken(const sptr<IRemoteObject> &token)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
     if (abms == nullptr) {
         HILOG_ERROR("abms == nullptr");
@@ -1102,6 +1104,7 @@ ErrCode AbilityManagerClient::FreeInstallAbilityFromRemote(const Want &want, con
 
 AppExecFwk::ElementName AbilityManagerClient::GetTopAbility()
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         AppExecFwk::ElementName elementName = {};
         sptr<IRemoteObject> token;
@@ -1138,8 +1141,10 @@ ErrCode AbilityManagerClient::DumpAbilityInfoDone(std::vector<std::string> &info
 void AbilityManagerClient::HandleDlpApp(Want &want)
 {
 #ifdef WITH_DLP
-    bool sandboxFlag = Security::DlpPermission::DlpFileKits::GetSandboxFlag(want);
-    want.SetParam(DLP_PARAMS_SANDBOX, sandboxFlag);
+    if (!want.GetParams().HasParam(DLP_PARAMS_SANDBOX)) {
+        bool sandboxFlag = Security::DlpPermission::DlpFileKits::GetSandboxFlag(want);
+        want.SetParam(DLP_PARAMS_SANDBOX, sandboxFlag);
+    }
 #endif // WITH_DLP
 }
 
@@ -1273,6 +1278,23 @@ ErrCode AbilityManagerClient::TerminateMission(int32_t missionId)
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->TerminateMission(missionId);
+}
+
+ErrCode AbilityManagerClient::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo,
+    bool &isPrepareTerminate)
+{
+    HILOG_INFO("call.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->PrepareTerminateAbilityBySCB(sessionInfo, isPrepareTerminate);
+}
+
+ErrCode AbilityManagerClient::RegisterSessionHandler(const sptr<IRemoteObject> &object)
+{
+    HILOG_DEBUG("call");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->RegisterSessionHandler(object);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
