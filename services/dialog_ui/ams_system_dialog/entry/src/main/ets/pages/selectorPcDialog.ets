@@ -425,7 +425,7 @@ struct SelectorPcDialog {
               .onClick(() => { globalThis.selectExtensionContext.terminateSelf(); })
               if(this.isCheck) {
                 Button($r("app.string.message_sure_selector"), { type: ButtonType.Capsule , stateEffect : this.isCheck})  
-                .backgroundColor('#0d000000')
+                .backgroundColor('#EAEAEA')
                 .fontColor('#0A59F7')
                 .fontWeight(FontWeight.Medium)
                 .width(157)
@@ -436,8 +436,8 @@ struct SelectorPcDialog {
                 .onClick(() => { this.onSelectApp(this.selectItem) })
               } else{
                 Button($r("app.string.message_sure_selector"), { type: ButtonType.Capsule , stateEffect : this.isCheck})  
-                .backgroundColor('#0d000000')
-                .fontColor('#0d002965')
+                .backgroundColor('#EAEAEA')
+                .fontColor('#AEAEAE')
                 .fontWeight(FontWeight.Medium)
                 .width(157)
                 .height(40)
