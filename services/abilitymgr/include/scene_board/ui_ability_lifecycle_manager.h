@@ -24,6 +24,7 @@
 #include "cpp/mutex.h"
 
 #include "ability_record.h"
+#include "isession_handler_interface.h"
 #include "session/host/include/zidl/session_interface.h"
 
 namespace OHOS {
@@ -217,6 +218,7 @@ public:
         int32_t userId);
 
     bool PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void SetSessionHandler(const sptr<ISessionHandler> &handler);
 
 private:
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
@@ -280,6 +282,7 @@ private:
     std::map<SpecifiedInfo, std::shared_ptr<AbilityRecord>, key_compare> specifiedAbilityMap_;
     std::queue<AbilityRequest> abilityQueue_;
     std::queue<SpecifiedInfo> specifiedInfoQueue_;
+    sptr<ISessionHandler> handler_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
