@@ -15,6 +15,7 @@ import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 module_output_path = "ability_runtime/abilitymgr"
+window_base_path = "//foundation/window/window_manager"
 
 ohos_unittest("ability_manager_service_dialog_test") {
   module_out_path = module_output_path
@@ -27,7 +28,7 @@ ohos_unittest("ability_manager_service_dialog_test") {
 
   deps = [
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "//foundation/window/window_manager/utils:libwmutil",
+    "${window_base_path}/utils:libwmutil",
     "//third_party/googletest:gtest_main",
   ]
 
