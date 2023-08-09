@@ -5553,8 +5553,9 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
 
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         const auto& abilityInfo = record->GetAbilityInfo();
-        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-            AddAbilityRecoverInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name);
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->AddAbilityRecoverInfo(
+            abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name,
+            uiAbilityLifecycleManager_->GetSessionIdByAbilityToken(token));
     } else {
         auto userId = record->GetOwnerMissionUserId();
         auto missionListMgr = GetListManagerByUserId(userId);
@@ -7911,6 +7912,19 @@ int AbilityManagerService::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> 
     auto abilityRecord = uiAbilityLifecycleManager_->GetUIAbilityRecordBySessionInfo(sessionInfo);
     isTerminate = uiAbilityLifecycleManager_->PrepareTerminateAbility(abilityRecord);
 
+    return ERR_OK;
+}
+
+int AbilityManagerService::RegisterSessionHandler(const sptr<IRemoteObject> &object)
+{
+    HILOG_INFO("call");
+    CHECK_POINTER_AND_RETURN(uiAbilityLifecycleManager_, ERR_NO_INIT);
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD, U0_USER_ID)) {
+        HILOG_ERROR("Not sceneboard called, not allowed.");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+    sptr<ISessionHandler> handler = iface_cast<ISessionHandler>(object);
+    uiAbilityLifecycleManager_->SetSessionHandler(handler);
     return ERR_OK;
 }
 }  // namespace AAFwk
