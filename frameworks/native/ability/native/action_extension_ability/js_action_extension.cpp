@@ -76,6 +76,10 @@ NativeValue *AttachActionExtensionContext(NativeEngine *engine, void *value, voi
     nObject->SetNativePointer(
         workContext,
         [](NativeEngine*, void *data, void*) {
+            if (data == nullptr) {
+                HILOG_ERROR("data is nullptr.");
+                return;
+            }
             HILOG_DEBUG("Finalizer for weak_ptr ui extension context is called");
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
@@ -176,6 +180,10 @@ void JsActionExtension::BindContext(NativeEngine &engine, NativeObject *obj)
     nativeObj->SetNativePointer(
         workContext,
         [](NativeEngine*, void *data, void*) {
+            if (data == nullptr) {
+                HILOG_ERROR("data is nullptr.");
+                return;
+            }
             HILOG_DEBUG("Finalizer for weak_ptr ui extension context is called");
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
