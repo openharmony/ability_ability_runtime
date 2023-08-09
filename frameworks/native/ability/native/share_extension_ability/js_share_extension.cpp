@@ -77,6 +77,10 @@ NativeValue *AttachShareExtensionContext(NativeEngine *engine, void *value, void
         workContext,
         [](NativeEngine*, void *data, void*) {
             HILOG_DEBUG("Finalizer for weak_ptr ui extension context is called");
+            if (data == nullptr) {
+                HILOG_ERROR("Finalizer for weak_ptr is nullptr");
+                return;
+            }
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
         nullptr);
@@ -177,6 +181,10 @@ void JsShareExtension::BindContext(NativeEngine &engine, NativeObject *obj)
         workContext,
         [](NativeEngine*, void *data, void*) {
             HILOG_DEBUG("Finalizer for weak_ptr ui extension context is called");
+            if (data == nullptr) {
+                HILOG_ERROR("Finalizer for weak_ptr is nullptr");
+                return;
+            }
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
         nullptr);
