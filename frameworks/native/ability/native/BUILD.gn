@@ -835,7 +835,6 @@ ohos_shared_library("ui_extension_module") {
   part_name = "ability_runtime"
 }
 
-<<<<<<< master
 config("share_extension_config") {
   visibility = [ ":*" ]
   include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/share_extension_ability" ]
