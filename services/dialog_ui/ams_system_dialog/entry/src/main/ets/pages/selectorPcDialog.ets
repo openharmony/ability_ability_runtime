@@ -437,7 +437,7 @@ struct SelectorPcDialog {
               } else{
                 Button($r("app.string.message_sure_selector"), { type: ButtonType.Capsule , stateEffect : this.isCheck})  
                 .backgroundColor('#EAEAEA')
-                .fontColor('#AEAEAE')
+                .fontColor('#999999')
                 .fontWeight(FontWeight.Medium)
                 .width(157)
                 .height(40)
