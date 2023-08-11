@@ -72,12 +72,35 @@ NativeValue *AttachUIExtensionContext(NativeEngine *engine, void *value, void *)
     return contextObj;
 }
 
+AbilityResultListener::AbilityResultListener() {}
+
+AbilityResultListener::~AbilityResultListener() {}
+
+AbilityResultListeners::AbilityResultListeners() {}
+
+bool AbilityResultListeners::AddListener(const std::shared_ptr<AbilityResultListener> &listener)
+{
+    auto ret = listeners.emplace(listener);
+    return ret.second;
+}
+
+void AbilityResultListeners:: OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
+{
+    for(auto item:listeners) {
+        item->OnAbilityResult(requestCode, resultCode, resultData);
+    }
+}
+
 JsUIExtension* JsUIExtension::Create(const std::unique_ptr<Runtime>& runtime)
 {
     return new JsUIExtension(static_cast<JsRuntime&>(*runtime));
 }
 
-JsUIExtension::JsUIExtension(JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) {}
+JsUIExtension::JsUIExtension(JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) 
+{
+    abilityResultListeners = std::make_shared<AbilityResultListeners>();
+}
+
 JsUIExtension::~JsUIExtension()
 {
     HILOG_DEBUG("Js ui extension destructor.");
@@ -320,7 +343,8 @@ void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::
         napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
         NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
         NativeValue* nativeContentSession =
-            JsUIExtensionContentSession::CreateJsUIExtensionContentSession(*nativeEngine, sessionInfo, uiWindow);
+            JsUIExtensionContentSession::CreateJsUIExtensionContentSession(*nativeEngine, sessionInfo, 
+            uiWindow, GetContext(), abilityResultListeners);
         contentSessions_.emplace(
             obj, std::shared_ptr<NativeReference>(nativeEngine->CreateReference(nativeContentSession, 1)));
         NativeValue* argv[] = {nativeWant, nativeContentSession};
@@ -564,6 +588,7 @@ void JsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want 
         return;
     }
     context->OnAbilityResult(requestCode, resultCode, resultData);
+    abilityResultListeners->OnAbilityResult(requestCode, resultCode, resultData);
     HILOG_DEBUG("end.");
 }
 }
