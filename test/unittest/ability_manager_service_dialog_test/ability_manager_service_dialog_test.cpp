@@ -506,6 +506,5 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2300, TestSize
     EXPECT_EQ(landscapePosition.offsetX, 0);
     HILOG_INFO("AbilityMgrServiceDialogTest_2300 end");
 }
-
 } // namespace AAFwk
 } // namespace OHOS
