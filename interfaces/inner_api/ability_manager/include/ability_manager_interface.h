@@ -79,7 +79,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbility(
-        const Want &want,
+        const Want &want, 
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE) = 0;
 
@@ -107,13 +107,14 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbility(
+    virtual int StartAbility( 
         const Want &want,
         const AbilityStartSetting &abilityStartSetting,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE) = 0;
 
+    
     /**
      * Starts a new ability with specific start options.
      *
@@ -168,6 +169,42 @@ public:
     {
         return 0;
     }
+
+    /**
+     * Start ui session ability with extension session info, send session info to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param callerToken, caller ability token.
+     * @param sessionInfo the information of UIExtensionContentSession.
+     * @param userId, Designation User ID.
+     * @param requestCode, Ability request code.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartUISessionAbility(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        const sptr<SessionInfo> &sessionInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE) = 0;
+
+/**
+     * Start ui session ability with extension session info, send session info to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param callerToken, caller ability token.
+     * @param sessionInfo the information of UIExtensionContentSession.
+     * @param userId, Designation User ID.
+     * @param requestCode the resultCode of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartUISessionAbility(
+        const Want &want,
+        const StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken,
+        const sptr<SessionInfo> &sessionInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE) = 0;
 
     /**
      * Start extension ability with want, send want to ability manager service.
