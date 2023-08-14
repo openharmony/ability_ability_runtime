@@ -170,6 +170,8 @@ public:
     static void Schedule(const std::string& name, NativeEngine& engine, std::unique_ptr<AsyncTask>&& task);
     static void ScheduleWithDefaultQos(const std::string &name, NativeEngine& engine,
         std::unique_ptr<AsyncTask>&& task);
+    static void ScheduleHighQos(const std::string& name, NativeEngine& engine, std::unique_ptr<AsyncTask>&& task);
+    static void ScheduleLowQos(const std::string& name, NativeEngine& engine, std::unique_ptr<AsyncTask>&& task);
     bool StartWithDefaultQos(const std::string &name, NativeEngine& engine);
 
     AsyncTask(NativeDeferred* deferred, std::unique_ptr<ExecuteCallback>&& execute,
@@ -189,6 +191,8 @@ private:
     static void Complete(NativeEngine* engine, int32_t status, void* data);
 
     bool Start(const std::string &name, NativeEngine& engine);
+    bool StartHighQos(const std::string &name, NativeEngine& engine);
+    bool StartLowQos(const std::string &name, NativeEngine& engine);
 
     std::unique_ptr<NativeDeferred> deferred_;
     std::unique_ptr<NativeReference> callbackRef_;

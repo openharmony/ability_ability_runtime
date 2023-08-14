@@ -1051,7 +1051,7 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     info.startTimeMillis_ = appRecord->GetAppStartTime();
     appRecord->GetBundleNames(info.bundleNames);
     info.processType_ = appRecord->GetProcessType();
-    info.extensionType_ = appRecord->GetExtensionType();
+    info.extensionType_ = AAFwk::UIExtensionUtils::ConvertType(appRecord->GetExtensionType());
 }
 
 void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord,
@@ -3883,7 +3883,7 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
     HILOG_DEBUG("called");
     std::string callerBundleName;
     if (auto bundleMgr = remoteClientManager_->GetBundleManager(); bundleMgr != nullptr) {
-        bundleMgr->GetBundleNameForUid(IPCSkeleton::GetCallingUid(), callerBundleName);
+        IN_PROCESS_CALL(bundleMgr->GetNameForUid(IPCSkeleton::GetCallingUid(), callerBundleName));
     }
 #ifdef ABILITY_FAULT_AND_EXIT_TEST
     if ((AAFwk::PermissionVerification::GetInstance()->IsSACall()) ||
@@ -4115,7 +4115,7 @@ int32_t AppMgrServiceInner::GetProcessMemoryByPid(const int32_t pid, int32_t &me
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     uint64_t memSize = OHOS::MemInfo::GetPssByPid(pid);
-    memorySize = memSize;
+    memorySize = static_cast<int32_t>(memSize);
     return ERR_OK;
 }
 

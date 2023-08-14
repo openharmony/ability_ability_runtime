@@ -191,7 +191,8 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
     ExperienceRule rule;
 #ifdef SUPPORT_ERMS
     GetEcologicalCallerInfo(want, callerInfo, userId);
-    int ret = IN_PROCESS_CALL(EcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want, callerInfo, rule));
+    int ret = IN_PROCESS_CALL(EcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
+        callerInfo, rule));
 #else
     int ret = CheckRule(want, callerInfo, rule);
 #endif
@@ -346,12 +347,12 @@ bool AbilityJumpInterceptor::CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, con
 {
     int callerUid = IPCSkeleton::GetCallingUid();
     std::string callerBundleName;
-    bool result = IN_PROCESS_CALL(bms->GetBundleNameForUid(callerUid, callerBundleName));
+    auto result = IN_PROCESS_CALL(bms->GetNameForUid(callerUid, callerBundleName));
     std::string targetBundleName = want.GetBundle();
     controlRule.callerPkg = callerBundleName;
     controlRule.targetPkg = targetBundleName;
-    if (!result) {
-        HILOG_ERROR("GetBundleNameForUid from bms fail.");
+    if (result != ERR_OK) {
+        HILOG_ERROR("GetBundleName from bms fail.");
         return false;
     }
     if (controlRule.callerPkg.empty() || controlRule.targetPkg.empty()) {
