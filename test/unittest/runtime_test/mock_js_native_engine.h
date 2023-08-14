@@ -309,15 +309,18 @@ public:
         return true;
     }
 
-    bool DeleteWorker(NativeEngine* hostEngine, NativeEngine* workerEngine) override
+    bool DeleteWorker(NativeEngine* workerEngine) override
     {
         return true;
     }
 
-    NativeEngine* GetWorkerVm(NativeEngine* hostEngine, uint32_t tid) override
+    bool SuspendVMById(uint32_t tid) override
     {
-        return nullptr;
+        return true;
     }
+
+    void ResumeVMById(uint32_t tid) override
+    {}
 
     bool StartHeapTracking(double timeInterval, bool isVmMode = true) override
     {

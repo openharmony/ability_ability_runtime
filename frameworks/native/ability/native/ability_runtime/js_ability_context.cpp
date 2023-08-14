@@ -53,6 +53,28 @@ constexpr size_t ARGC_THREE = 3;
 constexpr int32_t TRACE_ATOMIC_SERVICE_ID = 201;
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
 
+namespace {
+static std::map<ConnectionKey, sptr<JSAbilityConnection>, KeyCompare> g_connects;
+int64_t g_serialNumber = 0;
+
+// This function has to be called from engine thread
+void RemoveConnection(int64_t connectId)
+{
+    auto item = std::find_if(g_connects.begin(), g_connects.end(),
+    [&connectId](const auto &obj) {
+        return connectId == obj.first.id;
+    });
+    if (item != g_connects.end()) {
+        HILOG_DEBUG("remove conn ability exist");
+        if (item->second) {
+            item->second->RemoveConnectionObject();
+        }
+        g_connects.erase(item);
+    } else {
+        HILOG_DEBUG("remove conn ability not exist");
+    }
+}
+}
 class StartAbilityByCallParameters {
 public:
     int err = 0;
@@ -273,10 +295,10 @@ NativeValue* JsAbilityContext::OnStartAbility(NativeEngine& engine, NativeCallba
     NativeValue* result = nullptr;
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
         AddFreeInstallObserver(engine, want, lastParam);
-        AsyncTask::Schedule("JsAbilityContext::OnStartAbility", engine,
+        AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbility", engine,
             CreateAsyncTaskWithLastParam(engine, nullptr, std::move(execute), nullptr, &result));
     } else {
-        AsyncTask::Schedule("JsAbilityContext::OnStartAbility", engine,
+        AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbility", engine,
             CreateAsyncTaskWithLastParam(engine, lastParam, std::move(execute), std::move(complete), &result));
     }
     return result;
@@ -323,7 +345,7 @@ NativeValue* JsAbilityContext::OnStartAbilityAsCaller(NativeEngine& engine, Nati
 
     NativeValue* lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnStartAbilityAsCaller",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityAsCaller",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -396,10 +418,10 @@ NativeValue* JsAbilityContext::OnStartAbilityWithAccount(NativeEngine& engine, N
     NativeValue* result = nullptr;
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
         AddFreeInstallObserver(engine, want, lastParam);
-        AsyncTask::Schedule("JsAbilityContext::OnStartAbilityWithAccount", engine,
+        AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityWithAccount", engine,
             CreateAsyncTaskWithLastParam(engine, nullptr, std::move(execute), nullptr, &result));
     } else {
-        AsyncTask::Schedule("JsAbilityContext::OnStartAbilityWithAccount", engine,
+        AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityWithAccount", engine,
             CreateAsyncTaskWithLastParam(engine, lastParam, std::move(execute), std::move(complete), &result));
     }
     return result;
@@ -528,13 +550,13 @@ NativeValue* JsAbilityContext::OnStartAbilityByCall(NativeEngine& engine, Native
 
     if (calls->remoteCallee == nullptr) {
         HILOG_INFO("OnStartAbilityByCall async wait execute");
-        AsyncTask::Schedule("JsAbilityContext::OnStartAbilityByCall",
+        AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByCall",
             engine,
             CreateAsyncTaskWithLastParam(
                 engine, lastParam, std::move(callExecute), std::move(callComplete), &retsult));
     } else {
         HILOG_INFO("OnStartAbilityByCall promiss return result execute");
-        AsyncTask::Schedule("JsAbilityContext::OnStartAbilityByCall", engine,
+        AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityByCall", engine,
             CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(callComplete), &retsult));
     }
 
@@ -732,7 +754,7 @@ NativeValue* JsAbilityContext::OnStartExtensionAbility(NativeEngine& engine, Nat
 
     NativeValue* lastParam = (info.argc > ARGC_ONE) ? info.argv[ARGC_ONE] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnStartExtensionAbility",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartExtensionAbility",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -773,7 +795,7 @@ NativeValue* JsAbilityContext::OnStartExtensionAbilityWithAccount(NativeEngine& 
 
     NativeValue* lastParam = (info.argc > ARGC_TWO) ? info.argv[ARGC_TWO] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnStartExtensionAbilityWithAccount",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnStartExtensionAbilityWithAccount",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -899,7 +921,7 @@ NativeValue* JsAbilityContext::OnTerminateSelfWithResult(NativeEngine& engine, N
 
     NativeValue* lastParam = (info.argc > ARGC_ONE) ? info.argv[1] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnTerminateSelfWithResult",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnTerminateSelfWithResult",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     HILOG_DEBUG("OnTerminateSelfWithResult is called end");
     return result;
@@ -931,7 +953,7 @@ NativeValue* JsAbilityContext::OnConnectAbility(NativeEngine& engine, NativeCall
     key.id = g_serialNumber;
     key.want = want;
     connection->SetConnectionId(key.id);
-    abilityConnects_.emplace(key, connection);
+    g_connects.emplace(key, connection);
     if (g_serialNumber < INT32_MAX) {
         g_serialNumber++;
     } else {
@@ -944,6 +966,7 @@ NativeValue* JsAbilityContext::OnConnectAbility(NativeEngine& engine, NativeCall
             if (!context) {
                 HILOG_ERROR("Connect ability failed, context is released.");
                 task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                RemoveConnection(connectId);
                 return;
             }
             HILOG_DEBUG("ConnectAbility connection:%{public}d", static_cast<int32_t>(connectId));
@@ -951,11 +974,12 @@ NativeValue* JsAbilityContext::OnConnectAbility(NativeEngine& engine, NativeCall
             int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
             if (errcode) {
                 connection->CallJsFailed(errcode);
+                RemoveConnection(connectId);
             }
             task.Resolve(engine, engine.CreateUndefined());
         };
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnConnectAbility",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnConnectAbility",
         engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
     return engine.CreateNumber(connectId);
 }
@@ -993,7 +1017,7 @@ NativeValue* JsAbilityContext::OnConnectAbilityWithAccount(NativeEngine& engine,
     key.id = g_serialNumber;
     key.want = want;
     connection->SetConnectionId(key.id);
-    abilityConnects_.emplace(key, connection);
+    g_connects.emplace(key, connection);
     if (g_serialNumber < INT32_MAX) {
         g_serialNumber++;
     } else {
@@ -1006,6 +1030,7 @@ NativeValue* JsAbilityContext::OnConnectAbilityWithAccount(NativeEngine& engine,
                 if (!context) {
                     HILOG_ERROR("context is released");
                     task.Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                    RemoveConnection(connectId);
                     return;
                 }
                 HILOG_INFO("context->ConnectAbilityWithAccount connection:%{public}d", static_cast<int32_t>(connectId));
@@ -1013,11 +1038,12 @@ NativeValue* JsAbilityContext::OnConnectAbilityWithAccount(NativeEngine& engine,
                 int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
                 if (errcode) {
                     connection->CallJsFailed(errcode);
+                    RemoveConnection(connectId);
                 }
                 task.Resolve(engine, engine.CreateUndefined());
         };
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnConnectAbilityWithAccount",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnConnectAbilityWithAccount",
         engine, CreateAsyncTaskWithLastParam(engine, nullptr, nullptr, std::move(complete), &result));
     return engine.CreateNumber(connectId);
 }
@@ -1039,12 +1065,12 @@ NativeValue* JsAbilityContext::OnDisconnectAbility(NativeEngine& engine, NativeC
     napi_get_value_int64(reinterpret_cast<napi_env>(&engine),
         reinterpret_cast<napi_value>(info.argv[0]), &connectId);
     HILOG_INFO("DisconnectAbility, connection:%{public}d.", static_cast<int32_t>(connectId));
-    auto item = std::find_if(abilityConnects_.begin(),
-        abilityConnects_.end(),
-        [&connectId](const std::map<ConnectionKey, sptr<JSAbilityConnection>>::value_type &obj) {
+    auto item = std::find_if(g_connects.begin(),
+        g_connects.end(),
+        [&connectId](const auto &obj) {
             return connectId == obj.first.id;
         });
-    if (item != abilityConnects_.end()) {
+    if (item != g_connects.end()) {
         // match id
         want = item->first.want;
         connection = item->second;
@@ -1105,7 +1131,7 @@ NativeValue* JsAbilityContext::OnTerminateSelf(NativeEngine& engine, NativeCallb
 
     NativeValue* lastParam = (info.argc > ARGC_ZERO) ? info.argv[ARGC_ZERO] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnTerminateSelf",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnTerminateSelf",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -1211,7 +1237,7 @@ NativeValue* JsAbilityContext::OnReportDrawnCompleted(NativeEngine& engine, Nati
 
     NativeValue* lastParam = info.argv[ARGC_ZERO];
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnReportDrawnCompleted",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnReportDrawnCompleted",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -1366,8 +1392,6 @@ NativeValue* CreateJsAbilityContext(NativeEngine& engine, std::shared_ptr<Abilit
     std::unique_ptr<JsAbilityContext> jsContext = std::make_unique<JsAbilityContext>(context);
     object->SetNativePointer(jsContext.release(), JsAbilityContext::Finalizer, nullptr);
 
-    handler_ = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
-
     auto abilityInfo = context->GetAbilityInfo();
     if (abilityInfo != nullptr) {
         object->SetProperty("abilityInfo", CreateJsAbilityInfo(engine, *abilityInfo));
@@ -1489,21 +1513,21 @@ void JSAbilityConnection::OnAbilityConnectDone(const AppExecFwk::ElementName &el
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
     HILOG_INFO("OnAbilityConnectDone, resultCode:%{public}d", resultCode);
-    if (handler_ == nullptr) {
-        HILOG_ERROR("handler_ nullptr");
-        return;
-    }
-
     wptr<JSAbilityConnection> connection = this;
-    auto task = [connection, element, remoteObject, resultCode] {
-        sptr<JSAbilityConnection> connectionSptr = connection.promote();
-        if (!connectionSptr) {
-            HILOG_ERROR("connectionSptr nullptr");
-            return;
-        }
-        connectionSptr->HandleOnAbilityConnectDone(element, remoteObject, resultCode);
-    };
-    handler_->PostTask(task, "OnAbilityConnectDone");
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
+        ([connection, element, remoteObject, resultCode](NativeEngine &engine, AsyncTask &task, int32_t status) {
+            sptr<JSAbilityConnection> connectionSptr = connection.promote();
+            if (!connectionSptr) {
+                HILOG_ERROR("connectionSptr nullptr");
+                return;
+            }
+            connectionSptr->HandleOnAbilityConnectDone(element, remoteObject, resultCode);
+        });
+
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JSAbilityConnection::OnAbilityConnectDone",
+        engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JSAbilityConnection::HandleOnAbilityConnectDone(const AppExecFwk::ElementName &element,
@@ -1538,21 +1562,20 @@ void JSAbilityConnection::HandleOnAbilityConnectDone(const AppExecFwk::ElementNa
 void JSAbilityConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int resultCode)
 {
     HILOG_INFO("OnAbilityDisconnectDone, resultCode:%{public}d", resultCode);
-    if (handler_ == nullptr) {
-        HILOG_INFO("handler_ nullptr");
-        return;
-    }
-
     wptr<JSAbilityConnection> connection = this;
-    auto task = [connection, element, resultCode] {
-        sptr<JSAbilityConnection> connectionSptr = connection.promote();
-        if (!connectionSptr) {
-            HILOG_INFO("connectionSptr nullptr");
-            return;
-        }
-        connectionSptr->HandleOnAbilityDisconnectDone(element, resultCode);
-    };
-    handler_->PostTask(task, "OnAbilityDisconnectDone");
+    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
+        ([connection, element, resultCode](NativeEngine &engine, AsyncTask &task, int32_t status) {
+            sptr<JSAbilityConnection> connectionSptr = connection.promote();
+            if (!connectionSptr) {
+                HILOG_INFO("connectionSptr nullptr");
+                return;
+            }
+            connectionSptr->HandleOnAbilityDisconnectDone(element, resultCode);
+        });
+    NativeReference* callback = nullptr;
+    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
+    AsyncTask::Schedule("JSAbilityConnection::OnAbilityDisconnectDone",
+        engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JSAbilityConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::ElementName &element,
@@ -1577,20 +1600,20 @@ void JSAbilityConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::Elemen
     }
 
     // release connect
-    HILOG_DEBUG("OnAbilityDisconnectDone abilityConnects_.size:%{public}zu", abilityConnects_.size());
+    HILOG_DEBUG("OnAbilityDisconnectDone g_connects.size:%{public}zu", g_connects.size());
     std::string bundleName = element.GetBundleName();
     std::string abilityName = element.GetAbilityName();
-    auto item = std::find_if(abilityConnects_.begin(), abilityConnects_.end(),
+    auto item = std::find_if(g_connects.begin(), g_connects.end(),
         [bundleName, abilityName, connectionId = connectionId_] (
-            const std::map<ConnectionKey, sptr<JSAbilityConnection>>::value_type &obj) {
+            const auto &obj) {
                 return (bundleName == obj.first.want.GetBundle()) &&
                     (abilityName == obj.first.want.GetElement().GetAbilityName()) &&
                     connectionId == obj.first.id;
         });
-    if (item != abilityConnects_.end()) {
+    if (item != g_connects.end()) {
         // match bundlename && abilityname
-        abilityConnects_.erase(item);
-        HILOG_DEBUG("OnAbilityDisconnectDone erase abilityConnects_.size:%{public}zu", abilityConnects_.size());
+        g_connects.erase(item);
+        HILOG_DEBUG("OnAbilityDisconnectDone erase g_connects.size:%{public}zu", g_connects.size());
     }
 
     NativeValue* argv[] = { ConvertElement(element) };
@@ -1632,6 +1655,11 @@ NativeValue* JSAbilityConnection::ConvertElement(const AppExecFwk::ElementName &
 void JSAbilityConnection::SetJsConnectionObject(NativeValue* jsConnectionObject)
 {
     jsConnectionObject_ = std::unique_ptr<NativeReference>(engine_.CreateReference(jsConnectionObject, 1));
+}
+
+void JSAbilityConnection::RemoveConnectionObject()
+{
+    jsConnectionObject_.reset();
 }
 
 NativeValue* JsAbilityContext::SetMissionContinueState(NativeEngine* engine, NativeCallbackInfo* info)
@@ -1681,7 +1709,7 @@ NativeValue* JsAbilityContext::OnSetMissionContinueState(NativeEngine& engine, N
 
     NativeValue* lastParam = (info.argc > ARGC_ONE) ? info.argv[ARGC_ONE] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::SetMissionContinueState",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::SetMissionContinueState",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -1734,7 +1762,7 @@ NativeValue* JsAbilityContext::OnSetMissionLabel(NativeEngine& engine, NativeCal
 
     NativeValue* lastParam = (info.argc > ARGC_ONE) ? info.argv[ARGC_ONE] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnSetMissionLabel",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnSetMissionLabel",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -1775,7 +1803,7 @@ NativeValue* JsAbilityContext::OnSetMissionIcon(NativeEngine& engine, NativeCall
 
     NativeValue* lastParam = (info.argc > ARGC_ONE) ? info.argv[1] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsAbilityContext::OnSetMissionIcon",
+    AsyncTask::ScheduleHighQos("JsAbilityContext::OnSetMissionIcon",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }

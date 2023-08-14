@@ -25,6 +25,9 @@
 #include "ability_loader.h"
 #include "abs_shared_result_set.h"
 #include "application_impl.h"
+#ifdef WITH_DLP
+#include "dlp_file_kits.h"
+#endif // WITH_DLP
 #include "hitrace_meter.h"
 #include "context_deal.h"
 #include "data_ability_predicates.h"
@@ -55,6 +58,8 @@ constexpr static char FORM_EXTENSION[] = "FormExtension";
 constexpr static char UI_EXTENSION[] = "UIExtensionAbility";
 constexpr static char MEDIA_CONTROL_EXTENSION[] = "MediaControlExtensionAbility";
 constexpr static char USER_AUTH_EXTENSION[] = "UserAuthExtensionAbility";
+constexpr static char ACTION_EXTENSION[] = "ActionExtensionAbility";
+constexpr static char SHARE_EXTENSION[] = "ShareExtensionAbility";
 #endif
 constexpr static char BASE_SERVICE_EXTENSION[] = "ServiceExtension";
 constexpr static char BASE_DRIVER_EXTENSION[] = "DriverExtension";
@@ -67,6 +72,9 @@ constexpr static char FILEACCESS_EXT_ABILITY[] = "FileAccessExtension";
 constexpr static char ENTERPRISE_ADMIN_EXTENSION[] = "EnterpriseAdminExtension";
 constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
 constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthorizationExtension";
+#ifdef WITH_DLP
+constexpr static char DLP_PARAMS_SANDBOX[] = "ohos.dlp.params.sandbox";
+#endif // WITH_DLP
 
 const int32_t PREPARE_TO_TERMINATE_TIMEOUT_MILLISECONDS = 3000;
 
@@ -171,7 +179,13 @@ std::string AbilityThread::CreateAbilityName(const std::shared_ptr<AbilityLocalR
             abilityName = INPUTMETHOD_EXTENSION;
         }
         if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
-            abilityName = UI_EXTENSION;
+            if (abilityInfo->extensionAbilityType == ExtensionAbilityType::SHARE) {
+                abilityName = SHARE_EXTENSION;
+            } else if (abilityInfo->extensionAbilityType == ExtensionAbilityType::ACTION) {
+                abilityName = ACTION_EXTENSION;
+            } else {
+                abilityName = UI_EXTENSION;
+            }
         }
         if (abilityInfo->extensionAbilityType == ExtensionAbilityType::SYSPICKER_MEDIACONTROL) {
             abilityName = MEDIA_CONTROL_EXTENSION;
@@ -701,6 +715,8 @@ void AbilityThread::ScheduleAbilityTransaction(const Want &want, const LifeCycle
         }
         if (abilityThread->isExtension_) {
             abilityThread->HandleExtensionTransaction(want, lifeCycleStateInfo, sessionInfo);
+            Want newWant(want);
+            newWant.CloseAllFd();
         } else {
             abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
         }
@@ -814,7 +830,16 @@ void AbilityThread::ScheduleCommandAbility(const Want &want, bool restart, int s
             return;
         }
         if (abilityThread->isExtension_) {
-            abilityThread->HandleCommandExtension(want, restart, startId);
+            Want newWant(want);
+#ifdef WITH_DLP
+            bool sandboxFlag = Security::DlpPermission::DlpFileKits::GetSandboxFlag(newWant);
+            newWant.SetParam(DLP_PARAMS_SANDBOX, sandboxFlag);
+            if (sandboxFlag) {
+                newWant.CloseAllFd();
+            }
+#endif // WITH_DLP
+            abilityThread->HandleCommandExtension(newWant, restart, startId);
+            newWant.CloseAllFd();
         } else {
             abilityThread->HandleCommandAbility(want, restart, startId);
         }

@@ -16,15 +16,22 @@
 #ifndef OHOS_ABILITY_RUNTIME_UI_ABILITY_LIFECYCLE_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_UI_ABILITY_LIFECYCLE_MANAGER_H
 
+#include <list>
+#include <map>
+#include <memory>
 #include <queue>
+#include <unordered_map>
 #include "cpp/mutex.h"
 
 #include "ability_record.h"
+#include "isession_handler_interface.h"
 #include "session/host/include/zidl/session_interface.h"
-#include "session_info.h"
 
 namespace OHOS {
 namespace AAFwk {
+class SessionInfo;
+struct MissionVaildResult;
+
 class UIAbilityLifecycleManager : public std::enable_shared_from_this<UIAbilityLifecycleManager> {
 public:
     UIAbilityLifecycleManager() = default;
@@ -63,7 +70,7 @@ public:
      * @param saveData the saved data
      * @return execute error code
      */
-    int AbilityTransactionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData);
+    int AbilityTransactionDone(const sptr<IRemoteObject> &token, int state, const AppExecFwk::PacMap &saveData);
 
     /**
      * attach ability thread ipc object.
@@ -148,7 +155,7 @@ public:
      *
      * @param abilityRequest target ability request.
      */
-    int ResolveLocked(const AbilityRequest &abilityRequest);
+    int ResolveLocked(const AbilityRequest &abilityRequest, int32_t userId);
 
     /**
      * Call UIAbility by SCB.
@@ -203,13 +210,43 @@ public:
      * @param token the ability token.
      * @return Returns sessionId on success, zero on failure.
      */
-    uint64_t GetSessionIdByAbilityToken(const sptr<IRemoteObject> &token);
+    int32_t GetSessionIdByAbilityToken(const sptr<IRemoteObject> &token);
+
+    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList);
+
+    bool PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void SetSessionHandler(const sptr<ISessionHandler> &handler);
+
+    /**
+     * Get abilityRecord by session id.
+     *
+     * @param sessionId the session id.
+     * @return Returns abilityRecord on success, nullptr on failure.
+     */
+    std::shared_ptr<AbilityRecord> GetAbilityRecordsById(int32_t sessionId) const;
+
+    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList,
+        int32_t targetUserId) const;
+
+    void OnAppStateChanged(const AppInfo &info, int32_t targetUserId);
+
+    void UninstallApp(const std::string &bundleName, int32_t uid, int32_t targetUserId);
+
+    #ifdef ABILITY_COMMAND_FOR_TEST
+    /**
+     * Block ability.
+     *
+     * @param abilityRecordId The Ability Record Id.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int BlockAbility(int abilityRecordId, int32_t targetUserId) const;
+    #endif
 
 private:
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
-    int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest) const;
-    int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest) const;
-    int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest) const;
+    int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
+    int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
+    int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     void UpdateAbilityRecordLaunchReason(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void EraseAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -233,13 +270,13 @@ private:
     bool IsContainsAbilityInner(const sptr<IRemoteObject> &token) const;
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo) const;
     bool CheckProperties(const std::shared_ptr<AbilityRecord> &abilityRecord, const AbilityRequest &abilityRequest,
-        AppExecFwk::LaunchMode launchMode) const;
+        AppExecFwk::LaunchMode launchMode, int32_t userId) const;
     void NotifyAbilityToken(const sptr<IRemoteObject> &token, const AbilityRequest &abilityRequest) const;
 
     // byCall
-    int CallAbilityLocked(const AbilityRequest &abilityRequest);
+    int CallAbilityLocked(const AbilityRequest &abilityRequest, int32_t userId);
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
-    int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const sptr<IRemoteObject> &token) const;
+    int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
     std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
 
@@ -253,14 +290,21 @@ private:
     std::shared_ptr<AbilityRecord> GetReusedSpecifiedAbility(const AAFwk::Want &want, const std::string &flag);
     void EraseSpecifiedAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
+    void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
+    LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason) const;
+    void SetRevicerInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
+
+    bool CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
     mutable ffrt::mutex sessionLock_;
-    std::map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
-    std::map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
+    std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
+    std::unordered_map<int64_t, std::shared_ptr<AbilityRecord>> tmpAbilityMap_;
     std::list<std::shared_ptr<AbilityRecord>> terminateAbilityList_;
     sptr<Rosen::ISession> rootSceneSession_;
     std::map<SpecifiedInfo, std::shared_ptr<AbilityRecord>, key_compare> specifiedAbilityMap_;
     std::queue<AbilityRequest> abilityQueue_;
     std::queue<SpecifiedInfo> specifiedInfoQueue_;
+    sptr<ISessionHandler> handler_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

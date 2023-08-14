@@ -24,11 +24,15 @@ namespace AAFwk {
 namespace UIExtensionUtils {
 // ui extension type list
 const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
+    AppExecFwk::ExtensionAbilityType::SHARE,
+    AppExecFwk::ExtensionAbilityType::ACTION,
     AppExecFwk::ExtensionAbilityType::UI,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_COMMON,
-    AppExecFwk::ExtensionAbilityType::SYSDIALOG_ATOMICSERVICEPANEL
+    AppExecFwk::ExtensionAbilityType::SYSDIALOG_ATOMICSERVICEPANEL,
+    AppExecFwk::ExtensionAbilityType::SYSPICKER_SHARE,
+    AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT
 };
 
 inline bool IsUIExtension(const AppExecFwk::ExtensionAbilityType type)
@@ -39,6 +43,11 @@ inline bool IsUIExtension(const AppExecFwk::ExtensionAbilityType type)
 inline bool IsWindowExtension(const AppExecFwk::ExtensionAbilityType type)
 {
     return type == AppExecFwk::ExtensionAbilityType::WINDOW;
+}
+
+inline AppExecFwk::ExtensionAbilityType ConvertType(const AppExecFwk::ExtensionAbilityType type)
+{
+    return IsUIExtension(type) ? AppExecFwk::ExtensionAbilityType::UI : type;
 }
 } // namespace UIExtensionUtils
 } // namespace AAFwk

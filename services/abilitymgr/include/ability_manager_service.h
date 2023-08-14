@@ -1159,6 +1159,21 @@ public:
     */
     sptr<IAbilityManagerCollaborator> GetCollaborator(int32_t type);
 
+    /**
+     * get the user id.
+     *
+     */
+    int32_t GetUserId() const;
+
+    /**
+     * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to start.
+     * @param isTerminate the result of ability onPrepareToTermiante.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isTerminate) override;
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1245,11 +1260,7 @@ private:
      *
      */
     void ConnectBmsService();
-    /**
-     * get the user id.
-     *
-     */
-    int GetUserId();
+
     /**
      * Determine whether it is a system APP
      *
@@ -1528,7 +1539,8 @@ private:
 
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
         std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility);
-    
+
+    virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 

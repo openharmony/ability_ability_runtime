@@ -531,6 +531,18 @@ HWTEST_F(AbilityManagerClientBranchTest, ScheduleCommandAbilityWindowDone_0100, 
 }
 
 /**
+ * @tc.name: AbilityManagerClient_MoveAbilityToBackground_0100
+ * @tc.desc: MoveAbilityToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, MoveAbilityToBackground_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = nullptr;
+    auto result = client_->MoveAbilityToBackground(token);
+    EXPECT_EQ(ERR_OK, result);
+}
+
+/**
  * @tc.name: AbilityManagerClient_CloseAbility_0100
  * @tc.desc: CloseAbility
  * @tc.type: FUNC
@@ -1433,5 +1445,31 @@ HWTEST_F(AbilityManagerClientBranchTest, ReportDrawnCompleted_0200, TestSize.Lev
     auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
     EXPECT_EQ(result, INNER_ERR);
 }
+
+/**
+ * @tc.number: GetElementNameByToken_0100
+ * @tc.name: GetElementNameByToken
+ * @tc.desc: Token is nullptr, empty element name is returned
+ */
+HWTEST_F(AbilityManagerClientBranchTest, GetElementNameByToken_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = nullptr;
+    ElementName element = {};
+    auto result = AbilityManagerClient::GetInstance()->GetElementNameByToken(token);
+    EXPECT_EQ(result, element);
+}
+
+/**
+ * @tc.number: NotifySaveAsResult_0100
+ * @tc.name: NotifySaveAsResult
+ * @tc.desc: The caller is expected to be dlp manager.
+ */
+HWTEST_F(AbilityManagerClientBranchTest, NotifySaveAsResult_0100, TestSize.Level1)
+{
+    Want want;
+    auto result = AbilityManagerClient::GetInstance()->NotifySaveAsResult(want, 0, 0);
+    EXPECT_EQ(result, ERR_INVALID_CALLER);
+}
+
 }  // namespace AAFwk
 }  // namespace OHOS
