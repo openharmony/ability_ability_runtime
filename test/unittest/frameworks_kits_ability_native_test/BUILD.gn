@@ -2067,6 +2067,7 @@ ohos_unittest("action_extension_module_loader_test") {
   configs = [ ":module_private_config" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:action_extension",
     "//third_party/googletest:gmock_main",
@@ -2074,7 +2075,6 @@ ohos_unittest("action_extension_module_loader_test") {
   ]
 
   external_deps = [
-    "ability_runtime:runtime",
     "c_utils:utils",
     "hilog:libhilog",
     "napi:ace_napi",
@@ -2094,6 +2094,7 @@ ohos_unittest("action_extension_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:action_extension",
     "${ability_runtime_native_path}/appkit:app_context",
@@ -2105,7 +2106,6 @@ ohos_unittest("action_extension_test") {
   external_deps = [
     "ability_base:base",
     "ability_base:want",
-    "ability_runtime:runtime",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
