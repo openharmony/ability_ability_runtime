@@ -1375,6 +1375,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
         HILOG_ERROR("Generate ability request local error.");
         return result;
     }
+    abilityRequest.collaboratorType = sessionInfo->collaboratorType;
 
     auto abilityInfo = abilityRequest.abilityInfo;
     if (!AAFwk::PermissionVerification::GetInstance()->IsSystemAppCall() &&
