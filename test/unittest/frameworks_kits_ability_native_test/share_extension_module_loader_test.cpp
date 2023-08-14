@@ -16,10 +16,10 @@
 #include <gtest/gtest.h>
 
 #include "ability_handler.h"
-#include "share_extension.h"
 #include "mock_ability_token.h"
 #include "ohos_application.h"
 #include "runtime.h"
+#include "share_extension.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
