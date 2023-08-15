@@ -531,6 +531,18 @@ HWTEST_F(AbilityManagerClientBranchTest, ScheduleCommandAbilityWindowDone_0100, 
 }
 
 /**
+ * @tc.name: AbilityManagerClient_MoveAbilityToBackground_0100
+ * @tc.desc: MoveAbilityToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, MoveAbilityToBackground_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = nullptr;
+    auto result = client_->MoveAbilityToBackground(token);
+    EXPECT_EQ(ERR_OK, result);
+}
+
+/**
  * @tc.name: AbilityManagerClient_CloseAbility_0100
  * @tc.desc: CloseAbility
  * @tc.type: FUNC
@@ -958,21 +970,6 @@ HWTEST_F(AbilityManagerClientBranchTest, SendANRProcessID_0100, TestSize.Level1)
 
     EXPECT_EQ(ERR_OK, result);
     GTEST_LOG_(INFO) << "SendANRProcessID_0100 end";
-}
-
-/**
- * @tc.name: AbilityManagerClient_UpdateMissionSnapShot_0100
- * @tc.desc: UpdateMissionSnapShot
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, UpdateMissionSnapShot_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "UpdateMissionSnapShot_0100 start";
-    sptr<IRemoteObject> token = nullptr;
-    client_->UpdateMissionSnapShot(token);
-
-    EXPECT_TRUE(true);
-    GTEST_LOG_(INFO) << "UpdateMissionSnapShot_0100 end";
 }
 
 /**

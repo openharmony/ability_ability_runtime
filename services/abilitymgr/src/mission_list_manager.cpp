@@ -1978,18 +1978,6 @@ int MissionListManager::SetMissionLockedState(int missionId, bool lockedState)
     return ERR_OK;
 }
 
-void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject>& token)
-{
-    std::lock_guard guard(managerLock_);
-    auto abilityRecord = GetAbilityRecordByTokenInner(token);
-    if (!abilityRecord) {
-        HILOG_ERROR("Cannot find AbilityRecord by Token.");
-        return;
-    }
-    HILOG_INFO("UpdateSnapShot, ability:%{public}s.", abilityRecord->GetAbilityInfo().name.c_str());
-    UpdateMissionSnapshot(abilityRecord);
-}
-
 void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &pixelMap)
 {
@@ -2243,12 +2231,7 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     if (state == AbilityState::FOREGROUND_DO_NOTHING) {
         HILOG_INFO("ForegroundFailed. WMS return do_nothing");
         abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
-        auto pendingState = abilityRecord->GetPendingState();
-        if (pendingState == AbilityState::BACKGROUND) {
-            MoveToBackgroundTask(abilityRecord);
-        } else if (pendingState == AbilityState::FOREGROUND) {
-            abilityRecord->SetPendingState(AbilityState::INITIAL);
-        }
+        MoveToBackgroundTask(abilityRecord);
         return;
     }
 #ifdef SUPPORT_GRAPHICS

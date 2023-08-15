@@ -235,6 +235,8 @@ void AbilityManagerStub::SecondStepInit()
         &AbilityManagerStub::ForceExitAppInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::RECORD_APP_EXIT_REASON)] =
         &AbilityManagerStub::RecordAppExitReasonInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REGISTER_SESSION_HANDLER)] =
+        &AbilityManagerStub::RegisterSessionHandlerInner;
 #ifdef ABILITY_COMMAND_FOR_TEST
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::BLOCK_ABILITY)] =
         &AbilityManagerStub::BlockAbilityInner;
@@ -275,8 +277,6 @@ void AbilityManagerStub::ThirdStepInit()
         &AbilityManagerStub::StartExtensionAbilityInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::STOP_EXTENSION_ABILITY)] =
         &AbilityManagerStub::StopExtensionAbilityInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::UPDATE_MISSION_SNAPSHOT)] =
-        &AbilityManagerStub::UpdateMissionSnapShotInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::UPDATE_MISSION_SNAPSHOT_FROM_WMS)] =
         &AbilityManagerStub::UpdateMissionSnapShotFromWMSInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REGISTER_CONNECTION_OBSERVER)] =
@@ -289,6 +289,8 @@ void AbilityManagerStub::ThirdStepInit()
         &AbilityManagerStub::MoveAbilityToBackgroundInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_MISSION_CONTINUE_STATE)] =
         &AbilityManagerStub::SetMissionContinueStateInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::PREPARE_TERMINATE_ABILITY_BY_SCB)] =
+        &AbilityManagerStub::PrepareTerminateAbilityBySCBInner;
 #ifdef SUPPORT_GRAPHICS
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_MISSION_LABEL)] =
         &AbilityManagerStub::SetMissionLabelInner;
@@ -1946,17 +1948,6 @@ int AbilityManagerStub::DumpAbilityInfoDoneInner(MessageParcel &data, MessagePar
     return NO_ERROR;
 }
 
-int AbilityManagerStub::UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (!token) {
-        HILOG_ERROR("UpdateMissionSnapShot read ability token failed.");
-        return ERR_NULL_OBJECT;
-    }
-    UpdateMissionSnapShot(token);
-    return NO_ERROR;
-}
-
 int AbilityManagerStub::UpdateMissionSnapShotFromWMSInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -2396,5 +2387,34 @@ int32_t AbilityManagerStub::TerminateMissionInner(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 
+int AbilityManagerStub::PrepareTerminateAbilityBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("Call.");
+    sptr<SessionInfo> sessionInfo = nullptr;
+    if (data.ReadBool()) {
+        sessionInfo = data.ReadParcelable<SessionInfo>();
+    }
+    bool isPrepareTerminate = false;
+    auto result = PrepareTerminateAbilityBySCB(sessionInfo, isPrepareTerminate);
+    if (result == ERR_OK) {
+        if (!reply.WriteBool(isPrepareTerminate)) {
+            HILOG_ERROR("reply write failed.");
+            return ERR_INVALID_VALUE;
+        }
+    }
+    return result;
+}
+
+int AbilityManagerStub::RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> handler = data.ReadRemoteObject();
+    if (handler == nullptr) {
+        HILOG_ERROR("stub register session handler, handler is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterSessionHandler(handler);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

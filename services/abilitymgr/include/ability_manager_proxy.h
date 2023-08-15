@@ -740,12 +740,6 @@ public:
     /**
      * Called to update mission snapshot.
      * @param token The target ability.
-     */
-    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) override;
-
-    /**
-     * Called to update mission snapshot.
-     * @param token The target ability.
      * @param pixelMap The snapshot.
      */
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
@@ -871,6 +865,16 @@ public:
      * @return 0 or else.
     */
     virtual int32_t TerminateMission(int32_t missionId) override;
+
+    /**
+     * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to start.
+     * @param isPrepareTerminate the result of ability onPrepareToTermiante.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate) override;
+    virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
 
 private:
     template <typename T>

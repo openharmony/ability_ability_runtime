@@ -618,6 +618,11 @@ public:
         return 0;
     }
 
+    virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object)
+    {
+        return 0;
+    }
+
     /**
      * Start Ability, connect session with common ability.
      *
@@ -909,11 +914,6 @@ public:
         return 0;
     }
 
-    /**
-     * Called to update mission snapshot.
-     * @param token The target ability.
-     */
-    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) = 0;
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) {};
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
@@ -1086,7 +1086,19 @@ public:
     */
     virtual int32_t TerminateMission(int32_t missionId)
     {
-            return 0;
+        return 0;
+    }
+
+    /**
+     * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to start.
+     * @param isPrepareTerminate the result of ability onPrepareToTerminate
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate)
+    {
+        return 0;
     }
 
     enum {
@@ -1420,7 +1432,6 @@ public:
         STOP_SYNC_MISSIONS = 1113,
         REGISTER_SNAPSHOT_HANDLER = 1114,
         GET_MISSION_SNAPSHOT_INFO = 1115,
-        UPDATE_MISSION_SNAPSHOT = 1116,
         MOVE_MISSIONS_TO_FOREGROUND = 1117,
         MOVE_MISSIONS_TO_BACKGROUND = 1118,
         UPDATE_MISSION_SNAPSHOT_FROM_WMS,
@@ -1466,7 +1477,10 @@ public:
         GET_ABILITY_TOKEN = 5001,
 
         FORCE_EXIT_APP = 6001,
-        RECORD_APP_EXIT_REASON = 6002
+        RECORD_APP_EXIT_REASON = 6002,
+
+        // ipc id for register session handler
+        REGISTER_SESSION_HANDLER = 6010,
     };
 };
 }  // namespace AAFwk

@@ -178,7 +178,6 @@ private:
     int IsRunningInStabilityTestInner(MessageParcel &data, MessageParcel &reply);
     int MoveMissionToFrontByOptionsInner(MessageParcel &data, MessageParcel &reply);
 
-    int UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply);
     int UpdateMissionSnapShotFromWMSInner(MessageParcel &data, MessageParcel &reply);
     int RegisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
     int UnregisterConnectionObserverInner(MessageParcel &data, MessageParcel &reply);
@@ -238,6 +237,9 @@ private:
     int32_t UnregisterIAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
     int32_t MoveMissionToBackgroundInner(MessageParcel &data, MessageParcel &reply);
     int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);
+
+    int PrepareTerminateAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
+    int RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS
