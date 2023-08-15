@@ -2354,7 +2354,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_PrepareTerminateAbilityBySCB
         GTEST_LOG_(INFO) << "AbilityManagerStub_IsValidMissionIdsInner_002 caller";
         return ERR_INVALID_VALUE;
     };
-    EXPECT_CALL(*stub_, PrepareTerminateAbilityBySCBInner(_, _)).Times(1).WillOnce(
+    EXPECT_CALL(*stub_, PrepareTerminateAbilityBySCB(_, _)).Times(1).WillOnce(
         testing::Invoke(prepareTerminateAbilityBySCBTask));
     EXPECT_EQ(stub_->PrepareTerminateAbilityBySCBInner(data, reply), ERR_INVALID_VALUE);
 }
