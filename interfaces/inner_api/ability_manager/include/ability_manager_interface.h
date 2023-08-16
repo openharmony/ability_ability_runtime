@@ -240,12 +240,13 @@ public:
         return false;
     }
 
-    virtual AppExecFwk::ElementName GetTopAbility()
+    virtual AppExecFwk::ElementName GetTopAbility(bool isNeedLocalDeviceId = true)
     {
         return {};
     }
 
-    virtual AppExecFwk::ElementName GetElementNameByToken(const sptr<IRemoteObject> &token)
+    virtual AppExecFwk::ElementName GetElementNameByToken(const sptr<IRemoteObject> &token,
+        bool isNeedLocalDeviceId = true)
     {
         return {};
     }
@@ -914,11 +915,6 @@ public:
         return 0;
     }
 
-    /**
-     * Called to update mission snapshot.
-     * @param token The target ability.
-     */
-    virtual void UpdateMissionSnapShot(const sptr<IRemoteObject>& token) = 0;
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) {};
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
