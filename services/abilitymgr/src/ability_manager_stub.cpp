@@ -277,8 +277,6 @@ void AbilityManagerStub::ThirdStepInit()
         &AbilityManagerStub::StartExtensionAbilityInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::STOP_EXTENSION_ABILITY)] =
         &AbilityManagerStub::StopExtensionAbilityInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::UPDATE_MISSION_SNAPSHOT)] =
-        &AbilityManagerStub::UpdateMissionSnapShotInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::UPDATE_MISSION_SNAPSHOT_FROM_WMS)] =
         &AbilityManagerStub::UpdateMissionSnapShotFromWMSInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REGISTER_CONNECTION_OBSERVER)] =
@@ -313,18 +311,30 @@ void AbilityManagerStub::ThirdStepInit()
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::PREPARE_TERMINATE_ABILITY)] =
         &AbilityManagerStub::PrepareTerminateAbilityInner;
 #endif
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REQUEST_DIALOG_SERVICE)] = &AbilityManagerStub::HandleRequestDialogService;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REPORT_DRAWN_COMPLETED)] = &AbilityManagerStub::HandleReportDrawnCompleted;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_COMPONENT_INTERCEPTION)] = &AbilityManagerStub::SetComponentInterceptionInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_ABILITY_RESULT_BY_TOKEN)] = &AbilityManagerStub::SendResultToAbilityByTokenInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::QUERY_MISSION_VAILD)] = &AbilityManagerStub::IsValidMissionIdsInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::VERIFY_PERMISSION)] = &AbilityManagerStub::VerifyPermissionInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITY_BY_SCB)] = &AbilityManagerStub::StartUIAbilityBySCBInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_ROOT_SCENE_SESSION)] = &AbilityManagerStub::SetRootSceneSessionInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CALL_ABILITY_BY_SCB)] = &AbilityManagerStub::CallUIAbilityBySCBInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SPECIFIED_ABILITY_BY_SCB)] = &AbilityManagerStub::StartSpecifiedAbilityBySCBInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::NOTIFY_SAVE_AS_RESULT)] = &AbilityManagerStub::NotifySaveAsResultInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_SESSIONMANAGERSERVICE)] = &AbilityManagerStub::SetSessionManagerServiceInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REQUEST_DIALOG_SERVICE)] =
+        &AbilityManagerStub::HandleRequestDialogService;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REPORT_DRAWN_COMPLETED)] =
+        &AbilityManagerStub::HandleReportDrawnCompleted;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_COMPONENT_INTERCEPTION)] =
+        &AbilityManagerStub::SetComponentInterceptionInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_ABILITY_RESULT_BY_TOKEN)] =
+        &AbilityManagerStub::SendResultToAbilityByTokenInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::QUERY_MISSION_VAILD)] =
+        &AbilityManagerStub::IsValidMissionIdsInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::VERIFY_PERMISSION)] =
+        &AbilityManagerStub::VerifyPermissionInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_ABILITY_BY_SCB)] =
+        &AbilityManagerStub::StartUIAbilityBySCBInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_ROOT_SCENE_SESSION)] =
+        &AbilityManagerStub::SetRootSceneSessionInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CALL_ABILITY_BY_SCB)] =
+        &AbilityManagerStub::CallUIAbilityBySCBInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SPECIFIED_ABILITY_BY_SCB)] =
+        &AbilityManagerStub::StartSpecifiedAbilityBySCBInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::NOTIFY_SAVE_AS_RESULT)] =
+        &AbilityManagerStub::NotifySaveAsResultInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_SESSIONMANAGERSERVICE)] =
+        &AbilityManagerStub::SetSessionManagerServiceInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -349,7 +359,8 @@ int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, Mess
 
 int AbilityManagerStub::GetTopAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    AppExecFwk::ElementName result = GetTopAbility();
+    bool isNeedLocalDeviceId = data.ReadBool();
+    AppExecFwk::ElementName result = GetTopAbility(isNeedLocalDeviceId);
     if (result.GetDeviceID().empty()) {
         HILOG_DEBUG("GetTopAbilityInner is nullptr");
     }
@@ -359,8 +370,9 @@ int AbilityManagerStub::GetTopAbilityInner(MessageParcel &data, MessageParcel &r
 
 int AbilityManagerStub::GetElementNameByTokenInner(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();;
-    AppExecFwk::ElementName result = GetElementNameByToken(token);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    bool isNeedLocalDeviceId = data.ReadBool();
+    AppExecFwk::ElementName result = GetElementNameByToken(token, isNeedLocalDeviceId);
     if (result.GetDeviceID().empty()) {
         HILOG_DEBUG("GetElementNameByTokenInner is nullptr");
     }
@@ -1947,17 +1959,6 @@ int AbilityManagerStub::DumpAbilityInfoDoneInner(MessageParcel &data, MessagePar
         HILOG_ERROR("reply write failed.");
         return ERR_INVALID_VALUE;
     }
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::UpdateMissionSnapShotInner(MessageParcel &data, MessageParcel &reply)
-{
-    sptr<IRemoteObject> token = data.ReadRemoteObject();
-    if (!token) {
-        HILOG_ERROR("UpdateMissionSnapShot read ability token failed.");
-        return ERR_NULL_OBJECT;
-    }
-    UpdateMissionSnapShot(token);
     return NO_ERROR;
 }
 
