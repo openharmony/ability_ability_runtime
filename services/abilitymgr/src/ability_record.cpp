@@ -333,6 +333,7 @@ bool AbilityRecord::CanRestartResident()
 
 void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 {
+    isWindowStarted_ = true;
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("name:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
@@ -587,7 +588,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 
     GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.bundleName);
 
-    if (isReady_ && isWindowStarted_) {
+    if (isReady_) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
         if (!handler) {
             HILOG_ERROR("Fail to get AbilityEventHandler.");
@@ -595,10 +596,16 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
         }
         auto taskName = std::to_string(missionId_) + "_hot";
         handler->CancelTask(taskName);
-        StartingWindowTask(isRecent, false, abilityRequest, startOptions);
-        AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
-        PostCancelStartingWindowHotTask();
-
+        
+        if (isWindowStarted_) {
+            StartingWindowTask(isRecent, false, abilityRequest, startOptions);
+            AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
+            PostCancelStartingWindowHotTask();
+        } else {
+            StartingWindowTask(isRecent, true, abilityRequest, startOptions);
+            AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
+            PostCancelStartingWindowColdTask();
+        }
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             HILOG_DEBUG("Activate %{public}s", element.c_str());
             ForegroundAbility(sceneFlag);
@@ -620,7 +627,6 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
         }
         LoadAbility();
     }
-    isWindowStarted_ = true;
 }
 
 std::shared_ptr<Want> AbilityRecord::GetWantFromMission() const
