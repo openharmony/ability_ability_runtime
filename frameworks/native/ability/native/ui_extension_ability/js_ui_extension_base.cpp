@@ -326,7 +326,7 @@ void JsUIExtensionBase::ForegroundWindow(const AAFwk::Want &want, const sptr<AAF
             HILOG_ERROR("create ui window error.");
             return;
         }
-        if (!CreateNativeContentSession(want, sessionInfo, uiWindow, obj)) {
+        if (!CallJsOnSessionCreate(want, sessionInfo, uiWindow, obj)) {
             return;
         }
         uiWindowMap_[obj] = uiWindow;
