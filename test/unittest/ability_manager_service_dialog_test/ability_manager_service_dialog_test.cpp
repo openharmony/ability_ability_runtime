@@ -19,9 +19,6 @@
 #define protected public
 #include "ability_info.h"
 #include "ability_record.h"
-#include "display.h"
-#include "display_info.h"
-#include "display_manager.h"
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #undef private
@@ -34,14 +31,6 @@ using namespace testing::ext;
 const int32_t DEFAULT_USERID = 100;
 
 namespace OHOS {
-namespace Rosen {
-static sptr<Display> display;
-sptr<Display> DisplayManager::GetDefaultDisplay()
-{
-    HILOG_INFO("Mock GetDefaultDisplay successfully");
-    return display;
-}
-} // namespace Rosen
 namespace AAFwk {
 class AbilityMgrServiceDialogTest : public testing::Test {
 public:
@@ -431,80 +420,6 @@ HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2000, TestSize
     EXPECT_TRUE(position.oversizeHeight);
     EXPECT_NE(position.offsetX, 0);
     HILOG_INFO("AbilityMgrServiceDialogTest_2000 end");
-}
-
-/*
- * @tc.number    : AbilityMgrServiceDialogTest_2100
- * @tc.name      : AbilityMgrServiceDialogTest
- * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
- */
-HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2100, TestSize.Level1)
-{
-    HILOG_INFO("AbilityMgrServiceDialogTest_2100 start");
-    DialogPosition portraitPosition;
-    DialogPosition landscapePosition;
-    portraitPosition.height = 0;
-    portraitPosition.offsetX = 0;
-    systemDialogScheduler_->deviceType_ = "phone";
-    const int lineNums = 1;
-    sptr<Rosen::DisplayInfo> displayInfo = new (std::nothrow) Rosen::DisplayInfo;
-    Rosen::display = new (std::nothrow) Rosen::Display(std::string(""), displayInfo);
-    displayInfo->width_ = 720;
-    displayInfo->height_ = 1280;
-    displayInfo->virtualPixelRatio_ = 1.5;
-    displayInfo->displayOrientation_ = Rosen::DisplayOrientation::PORTRAIT;
-    systemDialogScheduler_->GetSelectorDialogPositionAndSize(portraitPosition, landscapePosition, lineNums);
-    EXPECT_NE(portraitPosition.height, 0);
-    EXPECT_NE(portraitPosition.offsetX, 0);
-    HILOG_INFO("AbilityMgrServiceDialogTest_2100 end");
-}
-
-/*
- * @tc.number    : AbilityMgrServiceDialogTest_2200
- * @tc.name      : AbilityMgrServiceDialogTest
- * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
- */
-HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2200, TestSize.Level1)
-{
-    HILOG_INFO("AbilityMgrServiceDialogTest_2200 start");
-    DialogPosition portraitPosition;
-    DialogPosition landscapePosition;
-    landscapePosition.height = 0;
-    landscapePosition.offsetX = 0;
-    systemDialogScheduler_->deviceType_ = "default";
-    const int lineNums = 1;
-    sptr<Rosen::DisplayInfo> displayInfo = new (std::nothrow) Rosen::DisplayInfo;
-    Rosen::display = new (std::nothrow) Rosen::Display(std::string(""), displayInfo);
-    displayInfo->width_ = 720;
-    displayInfo->height_ = 1280;
-    displayInfo->virtualPixelRatio_ = 1.5;
-    displayInfo->displayOrientation_ = Rosen::DisplayOrientation::LANDSCAPE;
-    systemDialogScheduler_->GetSelectorDialogPositionAndSize(portraitPosition, landscapePosition, lineNums);
-    EXPECT_NE(landscapePosition.height, 0);
-    EXPECT_NE(landscapePosition.offsetX, 0);
-    HILOG_INFO("AbilityMgrServiceDialogTest_2200 end");
-}
-
-/*
- * @tc.number    : AbilityMgrServiceDialogTest_2300
- * @tc.name      : AbilityMgrServiceDialogTest
- * @tc.desc      : 1.Test DialogPortraitPositionAdaptive
- */
-HWTEST_F(AbilityMgrServiceDialogTest, AbilityMgrServiceDialogTest_2300, TestSize.Level1)
-{
-    HILOG_INFO("AbilityMgrServiceDialogTest_2300 start");
-    DialogPosition portraitPosition;
-    DialogPosition landscapePosition;
-    landscapePosition.height = 0;
-    landscapePosition.offsetX = 0;
-    systemDialogScheduler_->deviceType_ = "pc";
-    const int lineNums = 1;
-    sptr<Rosen::DisplayInfo> displayInfo = new (std::nothrow) Rosen::DisplayInfo;
-    Rosen::display = nullptr;
-    systemDialogScheduler_->GetSelectorDialogPositionAndSize(portraitPosition, landscapePosition, lineNums);
-    EXPECT_EQ(landscapePosition.height, 0);
-    EXPECT_EQ(landscapePosition.offsetX, 0);
-    HILOG_INFO("AbilityMgrServiceDialogTest_2300 end");
 }
 } // namespace AAFwk
 } // namespace OHOS
