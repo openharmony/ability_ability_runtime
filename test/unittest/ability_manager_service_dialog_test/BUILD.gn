@@ -27,7 +27,6 @@ ohos_unittest("ability_manager_service_dialog_test") {
 
   deps = [
     "${ability_runtime_services_path}/abilitymgr:abilityms",
-    "${windowmanager_path}/utils:libwmutil",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -40,7 +39,6 @@ ohos_unittest("ability_manager_service_dialog_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "window_manager:libdm",
-    "window_manager:libwm",
   ]
 
   if (ecologic_rule_enabled) {
