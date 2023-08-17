@@ -155,6 +155,10 @@ private:
     void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
+    bool CallJsOnSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        const sptr<Rosen::Window> &uiWindow, const sptr<IRemoteObject> &sessionToken);
+    bool ParseDumpParams(
+        const std::vector<std::string> &params, NativeValue *method, NativeValue *arrayValue, NativeValue *value);
 
     JsRuntime &jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
