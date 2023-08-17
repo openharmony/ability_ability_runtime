@@ -3203,6 +3203,21 @@ int AbilityManagerService::UnlockMissionForCleanup(int32_t missionId)
     return currentMissionListManager_->SetMissionLockedState(missionId, false);
 }
 
+void AbilityManagerService::SetLockedState(int32_t sessionId, bool lockedState)
+{
+    HILOG_INFO("request lock abilityRecord, sessionId :%{public}d", sessionId);
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD, U0_USER_ID)) {
+        HILOG_ERROR("Not sceneboard called, not allowed.");
+        return;
+    }
+    auto abilityRecord = uiAbilityLifecycleManager_->GetAbilityRecordsById(sessionId);
+    if (!abilityRecord) {
+        HILOG_ERROR("abilityRecord is null.");
+        return;
+    }
+    abilityRecord->SetLockedState(lockedState);
+}
+
 int AbilityManagerService::RegisterMissionListener(const sptr<IMissionListener> &listener)
 {
     HILOG_INFO("request RegisterMissionListener ");
@@ -3600,10 +3615,7 @@ void AbilityManagerService::DumpFuncInit()
 {
     dumpFuncMap_[KEY_DUMP_SERVICE] = &AbilityManagerService::DumpStateInner;
     dumpFuncMap_[KEY_DUMP_DATA] = &AbilityManagerService::DataDumpStateInner;
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOG_DEBUG("Support by scb, not ability server.");
-        return;
-    }
+
     dumpFuncMap_[KEY_DUMP_ALL] = &AbilityManagerService::DumpInner;
     dumpFuncMap_[KEY_DUMP_MISSION] = &AbilityManagerService::DumpMissionInner;
     dumpFuncMap_[KEY_DUMP_MISSION_LIST] = &AbilityManagerService::DumpMissionListInner;
@@ -3617,10 +3629,7 @@ void AbilityManagerService::DumpSysFuncInit()
     dumpsysFuncMap_[KEY_DUMPSYS_PENDING] = &AbilityManagerService::DumpSysPendingInner;
     dumpsysFuncMap_[KEY_DUMPSYS_PROCESS] = &AbilityManagerService::DumpSysProcess;
     dumpsysFuncMap_[KEY_DUMPSYS_DATA] = &AbilityManagerService::DataDumpSysStateInner;
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOG_DEBUG("Support by scb, not ability server.");
-        return;
-    }
+
     dumpsysFuncMap_[KEY_DUMPSYS_MISSION_LIST] = &AbilityManagerService::DumpSysMissionListInner;
     dumpsysFuncMap_[KEY_DUMPSYS_ABILITY] = &AbilityManagerService::DumpSysAbilityInner;
 }
@@ -3633,9 +3642,8 @@ void AbilityManagerService::DumpSysInner(
     if (argList.empty()) {
         return;
     }
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        DumpSysMissionListInner(args, info, isClient, isUserID, userId);
-    }
+
+    DumpSysMissionListInner(args, info, isClient, isUserID, userId);
     DumpSysStateInner(args, info, isClient, isUserID, userId);
     DumpSysPendingInner(args, info, isClient, isUserID, userId);
     DumpSysProcess(args, info, isClient, isUserID, userId);
@@ -3644,6 +3652,10 @@ void AbilityManagerService::DumpSysInner(
 void AbilityManagerService::DumpSysMissionListInner(
     const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        DumpSysMissionListInnerBySCB(args, info, isClient, isUserID, userId);
+        return;
+    }
     std::shared_ptr<MissionListManager> targetManager;
     if (isUserID) {
         std::lock_guard<ffrt::mutex> lock(managersMutex_);
@@ -3673,9 +3685,46 @@ void AbilityManagerService::DumpSysMissionListInner(
         info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
     }
 }
+
+void AbilityManagerService::DumpSysMissionListInnerBySCB(
+    const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId)
+{
+    if (isUserID) {
+        if (!CheckUserIdActive(userId)) {
+            info.push_back("error: No user found.");
+            return;
+        }
+    } else {
+        userId = GetUserId();
+    }
+
+    std::vector<std::string> argList;
+    SplitStr(args, " ", argList);
+    if (argList.empty()) {
+        return;
+    }
+
+    if (!uiAbilityLifecycleManager_) {
+        HILOG_ERROR("failed, uiAbilityLifecycleManager is nullptr");
+        return;
+    }
+
+    if (argList.size() == MIN_DUMP_ARGUMENT_NUM) {
+        uiAbilityLifecycleManager_->DumpMissionList(info, isClient, userId, argList[1]);
+    } else if (argList.size() < MIN_DUMP_ARGUMENT_NUM) {
+        uiAbilityLifecycleManager_->DumpMissionList(info, isClient, userId);
+    } else {
+        info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
+    }
+}
+
 void AbilityManagerService::DumpSysAbilityInner(
     const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        DumpSysAbilityInnerBySCB(args, info, isClient, isUserID, userId);
+        return;
+    }
     std::shared_ptr<MissionListManager> targetManager;
     if (isUserID) {
         std::lock_guard<ffrt::mutex> lock(managersMutex_);
@@ -3702,6 +3751,43 @@ void AbilityManagerService::DumpSysAbilityInner(
         try {
             auto abilityId = static_cast<int32_t>(std::stoi(argList[1]));
             targetManager->DumpMissionListByRecordId(info, isClient, abilityId, params);
+        } catch (...) {
+            HILOG_WARN("stoi(%{public}s) failed", argList[1].c_str());
+            info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
+        }
+    } else {
+        info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
+    }
+}
+
+void AbilityManagerService::DumpSysAbilityInnerBySCB(
+    const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId)
+{
+    if (isUserID) {
+        if (!CheckUserIdActive(userId)) {
+            info.push_back("error: No user found.");
+            return;
+        }
+    } else {
+        userId = GetUserId();
+    }
+
+    std::vector<std::string> argList;
+    SplitStr(args, " ", argList);
+    if (argList.empty()) {
+        return;
+    }
+    if (argList.size() >= MIN_DUMP_ARGUMENT_NUM) {
+        HILOG_INFO("argList = %{public}s", argList[1].c_str());
+        std::vector<std::string> params(argList.begin() + MIN_DUMP_ARGUMENT_NUM, argList.end());
+        try {
+            auto abilityId = static_cast<int32_t>(std::stoi(argList[1]));
+
+            if (!uiAbilityLifecycleManager_) {
+                HILOG_ERROR("failed, uiAbilityLifecycleManager is nullptr");
+                return;
+            }
+            uiAbilityLifecycleManager_->DumpMissionListByRecordId(info, isClient, abilityId, params, userId);
         } catch (...) {
             HILOG_WARN("stoi(%{public}s) failed", argList[1].c_str());
             info.emplace_back("error: invalid argument, please see 'hidumper -s AbilityManagerService -a '-h''.");
@@ -3858,6 +3944,15 @@ void AbilityManagerService::DataDumpSysStateInner(
 
 void AbilityManagerService::DumpInner(const std::string &args, std::vector<std::string> &info)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        if (!uiAbilityLifecycleManager_) {
+            HILOG_ERROR("failed, uiAbilityLifecycleManager is nullptr");
+            return;
+        }
+        uiAbilityLifecycleManager_->Dump(info);
+        return;
+    }
+    
     if (currentMissionListManager_) {
         currentMissionListManager_->Dump(info);
     }
@@ -3865,6 +3960,14 @@ void AbilityManagerService::DumpInner(const std::string &args, std::vector<std::
 
 void AbilityManagerService::DumpMissionListInner(const std::string &args, std::vector<std::string> &info)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        if (!uiAbilityLifecycleManager_) {
+            HILOG_ERROR("failed, uiAbilityLifecycleManager is nullptr");
+            return;
+        }
+        uiAbilityLifecycleManager_->DumpMissionList(info, false, GetUserId(), " ");
+        return;
+    }
     if (currentMissionListManager_) {
         currentMissionListManager_->DumpMissionList(info, false, "");
     }
@@ -3872,6 +3975,11 @@ void AbilityManagerService::DumpMissionListInner(const std::string &args, std::v
 
 void AbilityManagerService::DumpMissionInfosInner(const std::string &args, std::vector<std::string> &info)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        HILOG_INFO("Support by scb, not ability server.");
+        // notify wms
+        return;
+    }
     if (currentMissionListManager_) {
         currentMissionListManager_->DumpMissionInfos(info);
     }
@@ -3879,6 +3987,11 @@ void AbilityManagerService::DumpMissionInfosInner(const std::string &args, std::
 
 void AbilityManagerService::DumpMissionInner(const std::string &args, std::vector<std::string> &info)
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        HILOG_INFO("Support by scb, not ability server.");
+        // notify wms missionInfo
+        return;
+    }
     CHECK_POINTER_LOG(currentMissionListManager_, "Current mission manager not init.");
     std::vector<std::string> argList;
     SplitStr(args, " ", argList);
@@ -7927,6 +8040,26 @@ int AbilityManagerService::RegisterSessionHandler(const sptr<IRemoteObject> &obj
     sptr<ISessionHandler> handler = iface_cast<ISessionHandler>(object);
     uiAbilityLifecycleManager_->SetSessionHandler(handler);
     return ERR_OK;
+}
+
+bool AbilityManagerService::CheckUserIdActive(int32_t userId)
+{
+    std::vector<int32_t> osActiveAccountIds;
+    auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
+        QueryActiveOsAccountIds(osActiveAccountIds);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("QueryActiveOsAccountIds failed.");
+        return false;
+    }
+    if (osActiveAccountIds.empty()) {
+        HILOG_ERROR("%{public}s, QueryActiveOsAccountIds is empty, no accounts.", __func__);
+        return false;
+    }
+    auto iter = std::find(osActiveAccountIds.begin(), osActiveAccountIds.end(), userId);
+    if (iter == osActiveAccountIds.end()) {
+        return false;
+    }
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
