@@ -883,6 +883,9 @@ public:
 
     std::string GetMissionAffinity() const;
 
+    void SetLockedState(bool lockedState);
+    bool GetLockedState();
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1);
 
@@ -1064,6 +1067,7 @@ private:
     std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA
     int32_t collaboratorType_ = 0;
     std::string missionAffinity_ = "";
+    bool lockedState_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
