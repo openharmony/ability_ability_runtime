@@ -163,6 +163,7 @@ public:
     {
         return false;
     }
+
     bool InitTaskPoolFunc(NativeEngine* engine, NativeValue* func, void* taskInfo) override
     {
         return false;
@@ -171,6 +172,16 @@ public:
     void* GetCurrentTaskInfo() const override
     {
         return nullptr;
+    }
+
+    bool HasPendingJob() override
+    {
+        return false;
+    }
+
+    bool IsProfiling() override
+    {
+        return false;
     }
 
     NativeValue* CallFunction(
@@ -314,10 +325,13 @@ public:
         return true;
     }
 
-    NativeEngine* GetWorkerEngine(uint32_t tid) override
+    bool SuspendVMById(uint32_t tid) override
     {
-        return nullptr;
+        return true;
     }
+
+    void ResumeVMById(uint32_t tid) override
+    {}
 
     bool StartHeapTracking(double timeInterval, bool isVmMode = true) override
     {
