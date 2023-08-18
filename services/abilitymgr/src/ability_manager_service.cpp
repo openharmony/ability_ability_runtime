@@ -1401,6 +1401,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
         HILOG_ERROR("uiAbilityLifecycleManager_ is nullptr");
         return ERR_INVALID_VALUE;
     }
+    ReportAbilitStartInfoToRSS(abilityInfo);
     return uiAbilityLifecycleManager_->StartUIAbility(abilityRequest, sessionInfo);
 }
 
