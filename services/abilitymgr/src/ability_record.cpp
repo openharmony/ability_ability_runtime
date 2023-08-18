@@ -75,6 +75,7 @@ const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string SHELL_ASSISTANT_DIEREASON = "crash_die";
 const char* GRANT_PERSISTABLE_URI_PERMISSION_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
 constexpr int32_t GRANT_PERSISTABLE_URI_PERMISSION_ENABLE_SIZE = 6;
+const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -232,6 +233,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
         abilityRecord->SetStartedByCall(true);
     }
     abilityRecord->collaboratorType_ = abilityRequest.collaboratorType;
+    abilityRecord->missionAffinity_ = abilityRequest.want.GetStringParam(PARAM_MISSION_AFFINITY_KEY);
     return abilityRecord;
 }
 
@@ -345,6 +347,7 @@ bool AbilityRecord::CanRestartResident()
 
 void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 {
+    isWindowStarted_ = true;
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("name:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
@@ -608,10 +611,16 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
         }
         auto taskName = std::to_string(missionId_) + "_hot";
         handler->CancelTask(taskName);
-        StartingWindowTask(isRecent, false, abilityRequest, startOptions);
-        AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
-        PostCancelStartingWindowHotTask();
-
+        
+        if (isWindowStarted_) {
+            StartingWindowTask(isRecent, false, abilityRequest, startOptions);
+            AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
+            PostCancelStartingWindowHotTask();
+        } else {
+            StartingWindowTask(isRecent, true, abilityRequest, startOptions);
+            AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
+            PostCancelStartingWindowColdTask();
+        }
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             HILOG_DEBUG("Activate %{public}s", element.c_str());
             ForegroundAbility(sceneFlag);
@@ -1166,12 +1175,33 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
 
     auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
         collaboratorType_);
-    if (collaborator == nullptr) {
-        HILOG_DEBUG("collaborator is nullptr");
-    } else {
+    if (collaborator != nullptr) {
         HILOG_INFO("start notify collaborator, missionId:%{public}d, state:%{public}d", missionId_,
             static_cast<int32_t>(state));
         int ret = ERR_OK;
+        if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            if (sessionInfo_ == nullptr) {
+                HILOG_ERROR("sessionInfo_ is nullptr");
+                return;
+            }
+            int32_t persistentId = sessionInfo_->persistentId;
+            switch (state) {
+                case AbilityState::BACKGROUNDING: {
+                    ret = collaborator->NotifyMoveMissionToBackground(persistentId);
+                    break;
+                }
+                case AbilityState::TERMINATING: {
+                    ret = collaborator->NotifyTerminateMission(persistentId);
+                    break;
+                }
+                default:
+                    break;
+            }
+            if (ret != ERR_OK) {
+                HILOG_ERROR("notify broker move mission to background failed, err: %{public}d", ret);
+            }
+            return;
+        }
         switch (state) {
             case AbilityState::FOREGROUNDING: {
                 ret = collaborator->NotifyMoveMissionToForeground(missionId_);
@@ -2815,6 +2845,11 @@ void AbilityRecord::InitPersistableUriPermissionConfig()
     if (retSysParam > 0 && !std::strcmp(value, "true")) {
         isGrantPersistableUriPermissionEnable_ = true;
     }
+}
+
+std::string AbilityRecord::GetMissionAffinity() const
+{
+    return missionAffinity_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
