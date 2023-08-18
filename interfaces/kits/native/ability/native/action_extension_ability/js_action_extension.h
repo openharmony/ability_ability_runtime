@@ -19,17 +19,20 @@
 #include "action_extension.h"
 #include "configuration.h"
 
+class NativeReference;
+class NativeValue;
+class NativeObject;
+
 namespace OHOS {
 namespace AbilityRuntime {
 class ActionExtension;
 class JsRuntime;
-class JsUIExtensionBase;
 /**
  * @brief Basic action extension components.
  */
 class JsActionExtension : public ActionExtension, public std::enable_shared_from_this<JsActionExtension> {
 public:
-    explicit JsActionExtension(const std::unique_ptr<Runtime> &runtime);
+    explicit JsActionExtension(JsRuntime &jsRuntime);
     virtual ~JsActionExtension() override;
 
     /**
@@ -134,7 +137,20 @@ public:
      */
     void OnAbilityResult(int32_t requestCode, int32_t resultCode, const Want &resultData) override;
 private:
-    std::shared_ptr<JsUIExtensionBase> jsUIExtensionBase_;
+    virtual void BindContext(NativeEngine &engine, NativeObject *obj);
+
+    NativeValue *CallObjectMethod(const char *name, NativeValue *const *argv = nullptr, size_t argc = 0);
+
+    void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
+    void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
+    void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
+
+    JsRuntime &jsRuntime_;
+    std::unique_ptr<NativeReference> jsObj_;
+    std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
+    std::map<sptr<IRemoteObject>, sptr<Rosen::Window>> uiWindowMap_;
+    std::set<sptr<IRemoteObject>> foregroundWindows_;
+    std::map<sptr<IRemoteObject>, std::shared_ptr<NativeReference>> contentSessions_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
