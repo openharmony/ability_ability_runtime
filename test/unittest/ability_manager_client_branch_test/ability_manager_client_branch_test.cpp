@@ -531,6 +531,18 @@ HWTEST_F(AbilityManagerClientBranchTest, ScheduleCommandAbilityWindowDone_0100, 
 }
 
 /**
+ * @tc.name: AbilityManagerClient_MoveAbilityToBackground_0100
+ * @tc.desc: MoveAbilityToBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, MoveAbilityToBackground_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = nullptr;
+    auto result = client_->MoveAbilityToBackground(token);
+    EXPECT_EQ(ERR_OK, result);
+}
+
+/**
  * @tc.name: AbilityManagerClient_CloseAbility_0100
  * @tc.desc: CloseAbility
  * @tc.type: FUNC
@@ -1448,6 +1460,7 @@ HWTEST_F(AbilityManagerClientBranchTest, GetElementNameByToken_0100, TestSize.Le
 }
 
 /**
+<<<<<<< HEAD
  * @tc.name: AbilityManagerClient_StartUISessionAbility_0100
  * @tc.desc: StartUISessionAbility
  * @tc.type: FUNC
@@ -1478,6 +1491,18 @@ HWTEST_F(AbilityManagerClientBranchTest, StartUISessionAbility_0200, TestSize.Le
     EXPECT_EQ(client_->StartUIExtensionAbility(want, startOptions, callerToken, sessionInfo),
         ERR_OK);
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0200 end";
+}
+
+/**
+ * @tc.number: NotifySaveAsResult_0100
+ * @tc.name: NotifySaveAsResult
+ * @tc.desc: The caller is expected to be dlp manager.
+ */
+HWTEST_F(AbilityManagerClientBranchTest, NotifySaveAsResult_0100, TestSize.Level1)
+{
+    Want want;
+    auto result = AbilityManagerClient::GetInstance()->NotifySaveAsResult(want, 0, 0);
+    EXPECT_EQ(result, ERR_INVALID_CALLER);
 }
 
 }  // namespace AAFwk

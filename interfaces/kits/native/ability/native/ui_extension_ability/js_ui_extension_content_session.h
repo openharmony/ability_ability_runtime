@@ -78,7 +78,7 @@ protected:
     NativeValue* OnSetWindowBackgroundColor(NativeEngine& engine, NativeCallbackInfo& info);
     NativeValue* OnSetWindowPrivacyMode(NativeEngine& engine, NativeCallbackInfo& info);
 
-    static void CallReceiveDataCallBack(NativeEngine& engine, std::weak_ptr<NativeReference> weakCallback,
+    static void CallReceiveDataCallback(NativeEngine& engine, std::weak_ptr<CallbackWrapper> weakCallback,
         const AAFwk::WantParams& wantParams);
     static bool UnWrapAbilityResult(NativeEngine& engine, NativeValue* argv, int& resultCode, AAFwk::Want& want);
     static NativeValue* WrapAbilityResult(NativeEngine& engine, const int& resultCode, const AAFwk::Want& want);
@@ -95,6 +95,20 @@ private:
     bool isRegistered = false;
     std::shared_ptr<UISessionAbilityResultListener> listener_;
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
+};
+
+class JsUIExtensionContentSession::CallbackWrapper {
+public:
+    void ResetCallback(std::shared_ptr<NativeReference> callback)
+    {
+        callback_ = callback;
+    }
+    std::shared_ptr<NativeReference> GetCallback() const
+    {
+        return callback_;
+    }
+private:
+    std::shared_ptr<NativeReference> callback_;
 };
 
 class JsUIExtensionContentSession::CallbackWrapper {

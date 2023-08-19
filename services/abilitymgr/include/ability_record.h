@@ -332,7 +332,7 @@ public:
      * process request of foregrounding the ability.
      *
      */
-    void ProcessForegroundAbility(uint32_t sceneFlag = 0);
+    void ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag = 0);
 
     /**
      * move the ability to back ground.
@@ -627,7 +627,7 @@ public:
      * send result object to caller ability thread.
      *
      */
-    void SendResult(bool isSandboxApp = false);
+    void SendResult(bool isSandboxApp, uint32_t tokeId);
 
     /**
      * send result object to caller ability thread for sandbox app file saving.
@@ -879,6 +879,8 @@ public:
     void RemoveAbilityDeathRecipient() const;
     bool IsExistConnection(const sptr<IAbilityConnection> &connect);
 
+    int32_t GetCollaboratorType() const;
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1);
 
@@ -894,7 +896,7 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
-    void GrantUriPermission(Want &want, int32_t userId, std::string targetBundleName, bool isSandboxApp = false);
+    void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
     void GrantDmsUriPermission(Want &want, std::string targetBundleName);
     bool IsDmsCall();
     int32_t GetCurrentAccountId() const;
@@ -910,7 +912,7 @@ private:
 
     void HandleDlpAttached();
     void HandleDlpClosed();
-    void NotifyRemoveShellProcess();
+    void NotifyRemoveShellProcess(int32_t type);
     void NotifyAnimationAbilityDied();
     inline void SetCallerAccessTokenId(uint32_t callerAccessTokenId)
     {
@@ -1058,6 +1060,7 @@ private:
     uint32_t callerAccessTokenId_ = -1;
     bool isNeedBackToOtherMissionStack_ = false;
     std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA
+    int32_t collaboratorType_ = 0;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

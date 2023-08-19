@@ -660,6 +660,11 @@ public:
         return 0;
     }
 
+    virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object)
+    {
+        return 0;
+    }
+
     /**
      * Start Ability, connect session with common ability.
      *
@@ -1128,7 +1133,19 @@ public:
     */
     virtual int32_t TerminateMission(int32_t missionId)
     {
-            return 0;
+        return 0;
+    }
+
+    /**
+     * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to start.
+     * @param isPrepareTerminate the result of ability onPrepareToTerminate
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate)
+    {
+        return 0;
     }
 
     enum {
@@ -1508,7 +1525,10 @@ public:
         GET_ABILITY_TOKEN = 5001,
 
         FORCE_EXIT_APP = 6001,
-        RECORD_APP_EXIT_REASON = 6002
+        RECORD_APP_EXIT_REASON = 6002,
+
+        // ipc id for register session handler
+        REGISTER_SESSION_HANDLER = 6010,
     };
 };
 }  // namespace AAFwk
