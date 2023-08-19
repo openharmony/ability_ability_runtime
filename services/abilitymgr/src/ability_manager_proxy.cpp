@@ -339,8 +339,8 @@ int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const StartOptio
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUISessionAbility(const Want &want, 
-    const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo, 
+int AbilityManagerProxy::StartUISessionAbility(const Want &want,
+    const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
     int32_t userId, int requestCode)
 {
     int error;
@@ -397,7 +397,7 @@ int AbilityManagerProxy::StartUISessionAbility(const Want &want,
 }
 
 int AbilityManagerProxy::StartUISessionAbility(const Want &want, const StartOptions &startOptions,
-    const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo, 
+    const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
     int32_t userId, int requestCode)
 {
     int error;

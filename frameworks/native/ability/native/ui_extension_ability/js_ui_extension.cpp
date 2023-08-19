@@ -72,22 +72,25 @@ NativeValue *AttachUIExtensionContext(NativeEngine *engine, void *value, void *)
     return contextObj;
 }
 
-AbilityResultListener::AbilityResultListener() {}
-
-AbilityResultListener::~AbilityResultListener() {}
-
-AbilityResultListeners::AbilityResultListeners() {}
-
-bool AbilityResultListeners::AddListener(const std::shared_ptr<AbilityResultListener> &listener)
+void AbilityResultListeners::AddListener(sptr<IRemoteObject> sessionToken,
+        std::shared_ptr<AbilityResultListener> listener)
 {
-    auto ret = listeners.emplace(listener);
-    return ret.second;
+    listeners[sessionToken] = listener;
+}
+
+void AbilityResultListeners::RemoveListener(sptr<IRemoteObject> sessionToken)
+{
+    if (listeners.find(sessionToken) != listeners.end() && listeners[sessionToken] != nullptr) {
+        listeners.erase(sessionToken);
+    }
 }
 
 void AbilityResultListeners:: OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
     for(auto item:listeners) {
-        item->OnAbilityResult(requestCode, resultCode, resultData);
+        if(item.second) {
+            item.second->OnAbilityResult(requestCode, resultCode, resultData);
+        }
     }
 }
 
@@ -96,7 +99,7 @@ JsUIExtension* JsUIExtension::Create(const std::unique_ptr<Runtime>& runtime)
     return new JsUIExtension(static_cast<JsRuntime&>(*runtime));
 }
 
-JsUIExtension::JsUIExtension(JsRuntime& jsRuntime) : jsRuntime_(jsRuntime) 
+JsUIExtension::JsUIExtension(JsRuntime& jsRuntime) : jsRuntime_(jsRuntime)
 {
     abilityResultListeners = std::make_shared<AbilityResultListeners>();
 }
@@ -343,7 +346,7 @@ void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::
         napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(nativeEngine), want);
         NativeValue* nativeWant = reinterpret_cast<NativeValue*>(napiWant);
         NativeValue* nativeContentSession =
-            JsUIExtensionContentSession::CreateJsUIExtensionContentSession(*nativeEngine, sessionInfo, 
+            JsUIExtensionContentSession::CreateJsUIExtensionContentSession(*nativeEngine, sessionInfo,
             uiWindow, GetContext(), abilityResultListeners);
         contentSessions_.emplace(
             obj, std::shared_ptr<NativeReference>(nativeEngine->CreateReference(nativeContentSession, 1)));
@@ -403,6 +406,7 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     uiWindowMap_.erase(obj);
     foregroundWindows_.erase(obj);
     contentSessions_.erase(obj);
+    abilityResultListeners->RemoveListener(obj);
     HILOG_DEBUG("end.");
 }
 

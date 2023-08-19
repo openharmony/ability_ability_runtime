@@ -192,10 +192,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartUISessionAbility(
-        const Want &want, 
+        const Want &want,
         const sptr<IRemoteObject> &callerToken,
-        const sptr<SessionInfo> &sessionInfo, 
-        int32_t userId, 
+        const sptr<SessionInfo> &sessionInfo,
+        int32_t userId,
         int requestCode) override;
 
     /**
@@ -210,11 +210,11 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartUISessionAbility(
-        const Want &want, 
-        const StartOptions &startOptions, 
-        const sptr<IRemoteObject> &callerToken, 
-        const sptr<SessionInfo> &sessionInfo, 
-        int32_t userId, 
+        const Want &want,
+        const StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken,
+        const sptr<SessionInfo> &sessionInfo,
+        int32_t userId,
         int requestCode) override;
 
     /**
