@@ -28,6 +28,7 @@ ohos_shared_library("missionmanager_napi") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:mission_info",
     "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
@@ -70,11 +71,13 @@ ohos_shared_library("distributedmissionmanager") {
 
   sources = [
     "distributed_mission_manager.cpp",
+    "dms_sa_client.cpp",
     "mission_continue_stub.cpp",
   ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:mission_info",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_napi_path}/inner/napi_common:napi_common",
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
@@ -90,6 +93,7 @@ ohos_shared_library("distributedmissionmanager") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "samgr:samgr_proxy",
   ]
 
   relative_install_dir = "module"

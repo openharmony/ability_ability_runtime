@@ -826,6 +826,15 @@ public:
     ErrCode PrepareTerminateAbility(const sptr<IRemoteObject> &token, sptr<IPrepareTerminateCallback> &callback);
 
     /**
+     * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
+     *
+     * @param sessionInfo the session info of the ability to terminate.
+     * @param isPrepareTerminate the result of ability onPrepareToTermiante.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate);
+
+    /**
      * Set mission continue state of this ability.
      *
      * @param token Indidate token of ability.
@@ -1133,6 +1142,44 @@ public:
     ErrCode SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService);
 
     ErrCode ReportDrawnCompleted(const sptr<IRemoteObject> &token);
+
+    /**
+     * @brief Register collaborator.
+     * @param type collaborator type.
+     * @param impl collaborator.
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    ErrCode RegisterIAbilityManagerCollaborator(
+        int32_t type, const sptr<IAbilityManagerCollaborator> &impl);
+
+    /**
+     * @brief Unregister collaborator.
+     * @param type collaborator type.
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    ErrCode UnregisterIAbilityManagerCollaborator(int32_t type);
+
+    /**
+     * @brief Notify to move mission to backround.
+     * @param missionId missionId.
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    ErrCode MoveMissionToBackground(int32_t missionId);
+
+    /**
+     * @brief Notify to terminate mission. it is not clear.
+     * @param missionId missionId.
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    ErrCode TerminateMission(int32_t missionId);
+
+    /**
+     * @brief Register session handler.
+     * @param object The handler.
+     *
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    ErrCode RegisterSessionHandler(const sptr<IRemoteObject> &object);
 
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {

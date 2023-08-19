@@ -36,8 +36,10 @@
 #include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
 #include "parameters.h"
+#include "scene_board_judgement.h"
 #include "system_ability_token_callback.h"
 #include "uri_permission_manager_client.h"
+#include "permission_constants.h"
 #ifdef SUPPORT_GRAPHICS
 #include "image_source.h"
 #include "locale_config.h"
@@ -51,6 +53,7 @@
 namespace OHOS {
 namespace AAFwk {
 using namespace OHOS::Security;
+using namespace OHOS::AAFwk::PermissionConstants;
 const std::string DEBUG_APP = "debugApp";
 const std::string NATIVE_DEBUG = "nativeDebug";
 const std::string PERF_CMD = "perfCmd";
@@ -68,6 +71,9 @@ const std::string NEED_STARTINGWINDOW = "ohos.ability.NeedStartingWindow";
 const std::string PARAMS_URI = "ability.verify.uri";
 const std::string PARAMS_FILE_SAVING_URL_KEY = "pick_path_return";
 const uint32_t RELEASE_STARTING_BG_TIMEOUT = 15000; // release starting window resource timeout.
+const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
+const std::string SHELL_ASSISTANT_DIEREASON = "crash_die";
+const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
 const int32_t SEND_RESULT_CANCELED = -1;
@@ -146,6 +152,7 @@ Token::~Token()
 
 std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (token == nullptr) {
         HILOG_INFO("null");
         return nullptr;
@@ -222,6 +229,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
         HILOG_DEBUG("abilityRequest.callType is CALL_REQUEST_TYPE.");
         abilityRecord->SetStartedByCall(true);
     }
+    abilityRecord->collaboratorType_ = abilityRequest.collaboratorType;
     return abilityRecord;
 }
 
@@ -395,11 +403,12 @@ void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ProcessForegroundAbility(uint32_t sceneFlag)
+void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string element = GetWant().GetElement().GetURI();
     HILOG_DEBUG("ability record: %{public}s", element.c_str());
+    GrantUriPermission(want_, applicationInfo_.bundleName, false, tokenId);
 
     if (isReady_) {
         if (IsAbilityState(AbilityState::FOREGROUND)) {
@@ -586,7 +595,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
     std::string element = GetWant().GetElement().GetURI();
     HILOG_DEBUG("SUPPORT_GRAPHICS: ability record: %{public}s", element.c_str());
 
-    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.bundleName);
+    GrantUriPermission(want_, applicationInfo_.bundleName, false, 0);
 
     if (isReady_) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -653,8 +662,7 @@ void AbilityRecord::AnimationTask(bool isRecent, const AbilityRequest &abilityRe
 void AbilityRecord::SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo,
     sptr<AbilityTransitionInfo> &info) const
 {
-    std::vector<AppExecFwk::CustomizeData> datas = abilityInfo.metaData.customizeData;
-    for (AppExecFwk::CustomizeData data : datas) {
+    for (const auto &data : abilityInfo.metaData.customizeData) {
         if (data.name == SHOW_ON_LOCK_SCREEN) {
             info->isShowWhenLocked_ = true;
             break;
@@ -1152,6 +1160,36 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
     if (currentState_ == AbilityState::BACKGROUND) {
         isAbilityForegrounding_ = false;
     }
+
+    auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
+        collaboratorType_);
+    if (collaborator == nullptr) {
+        HILOG_DEBUG("collaborator is nullptr");
+    } else {
+        HILOG_INFO("start notify collaborator, missionId:%{public}d, state:%{public}d", missionId_,
+            static_cast<int32_t>(state));
+        int ret = ERR_OK;
+        switch (state) {
+            case AbilityState::FOREGROUNDING: {
+                ret = collaborator->NotifyMoveMissionToForeground(missionId_);
+                break;
+            }
+            case AbilityState::BACKGROUNDING: {
+                ret = collaborator->NotifyMoveMissionToBackground(missionId_);
+                break;
+            }
+            case AbilityState::TERMINATING: {
+                ret = collaborator->NotifyTerminateMission(missionId_);
+                break;
+            }
+            default:
+                break;
+        }
+        if (ret != ERR_OK) {
+            HILOG_ERROR("notify broker move mission to background failed, err: %{public}d", ret);
+        }
+    }
+
     DelayedSingleton<MissionInfoMgr>::GetInstance()->SetMissionAbilityState(missionId_, currentState_);
 }
 
@@ -1445,13 +1483,13 @@ std::shared_ptr<AbilityResult> AbilityRecord::GetResult() const
     return result_;
 }
 
-void AbilityRecord::SendResult(bool isSandboxApp)
+void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
 {
     HILOG_INFO("ability:%{public}s.", abilityInfo_.name.c_str());
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
     CHECK_POINTER(result_);
-    GrantUriPermission(result_->resultWant_, GetCurrentAccountId(), applicationInfo_.bundleName, isSandboxApp);
+    GrantUriPermission(result_->resultWant_, applicationInfo_.bundleName, isSandboxApp, tokeId);
     scheduler_->SendResult(result_->requestCode_, result_->resultCode_, result_->resultWant_);
     // reset result to avoid send result next time
     result_.reset();
@@ -1506,7 +1544,7 @@ void AbilityRecord::SendResultToCallers(bool schedulerdied)
         std::shared_ptr<AbilityRecord> callerAbilityRecord = caller->GetCaller();
         if (callerAbilityRecord != nullptr && callerAbilityRecord->GetResult() != nullptr) {
             bool isSandboxApp = appIndex_ > 0 ? true : false;
-            callerAbilityRecord->SendResult(isSandboxApp);
+            callerAbilityRecord->SendResult(isSandboxApp, applicationInfo_.accessTokenId);
         } else {
             std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord = caller->GetSaCaller();
             if (callerSystemAbilityRecord != nullptr) {
@@ -1917,6 +1955,13 @@ void AbilityRecord::DumpAbilityState(
         info.push_back(dumpInfo);
     }
 
+    auto mission = GetMission();
+    if (mission) {
+        std::string missionAffinity = mission->GetMissionAffinity();
+        dumpInfo = "        missionAffinity: " + missionAffinity;
+        info.push_back(dumpInfo);
+    }
+
     // add dump client info
     DumpClientInfo(info, params, isClient, params.empty());
 }
@@ -2033,7 +2078,8 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     NotifyAnimationAbilityDied();
 #endif
     HandleDlpClosed();
-    NotifyRemoveShellProcess();
+    NotifyRemoveShellProcess(CollaboratorType::RESERVE_TYPE);
+    NotifyRemoveShellProcess(CollaboratorType::OTHERS_TYPE);
 }
 
 void AbilityRecord::NotifyAnimationAbilityDied()
@@ -2315,8 +2361,6 @@ void AbilityRecord::SetStartToForeground(const bool flag)
 void AbilityRecord::CallRequest()
 {
     CHECK_POINTER(scheduler_);
-
-    GrantUriPermission(want_, GetCurrentAccountId(), applicationInfo_.bundleName);
     // Async call request
     scheduler_->CallRequest();
 }
@@ -2481,7 +2525,7 @@ void AbilityRecord::DumpAbilityInfoDone(std::vector<std::string> &infos)
     dumpCondition_.notify_all();
 }
 
-void AbilityRecord::GrantUriPermission(Want &want, int32_t userId, std::string targetBundleName, bool isSandboxApp)
+void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId)
 {
     // reject sandbox to grant uri permission by start ability
     if (!callerList_.empty() && callerList_.back()) {
@@ -2513,7 +2557,17 @@ void AbilityRecord::GrantUriPermission(Want &want, int32_t userId, std::string t
     uriVec.emplace_back(uriStr);
     HILOG_DEBUG("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    auto fromTokenId = IPCSkeleton::GetCallingTokenID();
+    uint32_t fromTokenId = 0;
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        fromTokenId = tokenId;
+    } else {
+        fromTokenId = IPCSkeleton::GetCallingTokenID();
+    }
+
+    auto permission =
+        PermissionVerification::GetInstance()->VerifyCallingPermission(PERMISSION_PROXY_AUTHORIZATION_URI) ||
+        PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId, PERMISSION_PROXY_AUTHORIZATION_URI);
+    auto userId = GetCurrentAccountId();
     auto callerTokenId = static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
     for (auto&& str : uriVec) {
         Uri uri(str);
@@ -2526,16 +2580,23 @@ void AbilityRecord::GrantUriPermission(Want &want, int32_t userId, std::string t
         }
         auto&& authority = uri.GetAuthority();
         HILOG_INFO("uri authority is %{public}s.", authority.c_str());
-        AppExecFwk::BundleInfo uriBundleInfo;
-        if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
-            HILOG_WARN("To fail to get bundle info according to uri.");
+        bool authorityFlag = authority == "media" || authority == "docs";
+        if (authorityFlag && !permission) {
+            HILOG_ERROR("the uri is media or docs, have no permission");
             continue;
         }
-        if (uriBundleInfo.applicationInfo.accessTokenId != fromTokenId &&
-            uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_ &&
-            uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
-            HILOG_ERROR("the uri does not belong to caller.");
-            continue;
+        if (!authorityFlag) {
+            AppExecFwk::BundleInfo uriBundleInfo;
+            if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
+                HILOG_WARN("To fail to get bundle info according to uri.");
+                continue;
+            }
+            if (uriBundleInfo.applicationInfo.accessTokenId != fromTokenId &&
+                uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_ &&
+                uriBundleInfo.applicationInfo.accessTokenId != callerTokenId) {
+                HILOG_ERROR("the uri does not belong to caller.");
+                continue;
+            }
         }
         int autoremove = 1;
         auto ret = IN_PROCESS_CALL(
@@ -2621,22 +2682,17 @@ void AbilityRecord::HandleDlpClosed()
     }
 }
 
-void AbilityRecord::NotifyRemoveShellProcess()
+void AbilityRecord::NotifyRemoveShellProcess(int32_t type)
 {
-    InnerMissionInfo info;
-    int getMission = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-        missionId_, info);
-    if (getMission == ERR_OK && info.collaboratorType != CollaboratorType::DEFAULT_TYPE) {
-        auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
-            info.collaboratorType);
+    HILOG_INFO("NotifyRemoveShellProcess type is : %{public}d", type);
+    if (abilityInfo_.bundleName == SHELL_ASSISTANT_BUNDLENAME) {
+        auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(type);
         if (collaborator == nullptr) {
             HILOG_DEBUG("collaborator is nullptr");
             return;
         }
-        int32_t type = 0;
-        std::string reason;
-        int ret = collaborator->NotifyRemoveShellProcess(pid_, type, reason);
-        HILOG_INFO("notify broker params: %{public}d", pid_);
+        int ret = collaborator->NotifyRemoveShellProcess(pid_, SHELL_ASSISTANT_DIETYPE, SHELL_ASSISTANT_DIEREASON);
+        HILOG_INFO("notify broker params pid is: %{public}d", pid_);
         if (ret != ERR_OK) {
             HILOG_ERROR("notify broker remove shell process failed, err: %{public}d", ret);
         }
@@ -2723,6 +2779,11 @@ void AbilityRecord::UpdateRecoveryInfo(bool hasRecoverInfo)
 bool AbilityRecord::GetRecoveryInfo()
 {
     return want_.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false);
+}
+
+int32_t AbilityRecord::GetCollaboratorType() const
+{
+    return collaboratorType_;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

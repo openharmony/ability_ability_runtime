@@ -16,6 +16,7 @@
 #include "js_ui_extension_content_session.h"
 
 #include "ability_manager_client.h"
+#include "accesstoken_kit.h"
 #include "event_handler.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
@@ -37,6 +38,7 @@ constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
 constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
+constexpr const char* PERMISSION_PRIVACY_WINDOW = "ohos.permission.PRIVACY_WINDOW";
 } // namespace
 
 void UISessionAbilityResultListener::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
@@ -407,26 +409,33 @@ NativeValue *JsUIExtensionContentSession::OnSetReceiveDataCallback(NativeEngine&
         return engine.CreateUndefined();
     }
 
-    NativeValue* callback = info.argv[INDEX_ZERO];
-    receiveDataCallback_.reset(engine.CreateReference(callback, 1));
     if (!isRegistered) {
         if (uiWindow_ == nullptr) {
             HILOG_ERROR("uiWindow_ is nullptr");
             ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
             return engine.CreateUndefined();
         }
-        std::weak_ptr<NativeReference> weakCallback(receiveDataCallback_);
+        receiveDataCallback_ = std::make_shared<CallbackWrapper>();
+        std::weak_ptr<CallbackWrapper> weakCallback(receiveDataCallback_);
         auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
         uiWindow_->RegisterTransferComponentDataListener([&engine = engine_, handler, weakCallback](
             const AAFwk::WantParams& wantParams) {
             if (handler) {
                 handler->PostTask([&engine, weakCallback, wantParams]() {
-                    JsUIExtensionContentSession::CallReceiveDataCallBack(engine, weakCallback, wantParams);
+                    JsUIExtensionContentSession::CallReceiveDataCallback(engine, weakCallback, wantParams);
                 });
             }
         });
         isRegistered = true;
     }
+
+    NativeValue* callback = info.argv[INDEX_ZERO];
+    if (receiveDataCallback_ == nullptr) {
+        HILOG_ERROR("uiWindow_ is nullptr");
+        ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
+        return engine.CreateUndefined();
+    }
+    receiveDataCallback_->ResetCallback(std::shared_ptr<NativeReference>(engine.CreateReference(callback, 1)));
     return engine.CreateUndefined();
 }
 
@@ -491,6 +500,12 @@ NativeValue *JsUIExtensionContentSession::OnSetWindowPrivacyMode(NativeEngine& e
     if (info.argc < ARGC_ONE || !ConvertFromJsValue(engine, info.argv[INDEX_ZERO], isPrivacyMode)) {
         HILOG_ERROR("invalid param");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return engine.CreateUndefined();
+    }
+    auto selfToken = IPCSkeleton::GetSelfTokenID();
+    int ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(selfToken, PERMISSION_PRIVACY_WINDOW);
+    if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
+        ThrowNoPermissionError(engine, PERMISSION_PRIVACY_WINDOW);
         return engine.CreateUndefined();
     }
 
@@ -565,10 +580,15 @@ NativeValue *JsUIExtensionContentSession::CreateJsUIExtensionContentSession(Nati
     return objValue;
 }
 
-void JsUIExtensionContentSession::CallReceiveDataCallBack(NativeEngine& engine,
-    std::weak_ptr<NativeReference> weakCallback, const AAFwk::WantParams& wantParams)
+void JsUIExtensionContentSession::CallReceiveDataCallback(NativeEngine& engine,
+    std::weak_ptr<CallbackWrapper> weakCallback, const AAFwk::WantParams& wantParams)
 {
-    auto callback = weakCallback.lock();
+    auto cbWrapper = weakCallback.lock();
+    if (cbWrapper == nullptr) {
+        HILOG_WARN("cbWrapper is nullptr");
+        return;
+    }
+    auto callback = cbWrapper->GetCallback();
     if (callback == nullptr) {
         HILOG_WARN("callback is nullptr");
         return;

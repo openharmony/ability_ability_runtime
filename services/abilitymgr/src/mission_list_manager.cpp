@@ -274,7 +274,7 @@ int MissionListManager::MoveMissionToFrontInner(int32_t missionId, bool isCaller
     AbilityRequest abilityRequest;
     targetAbilityRecord->ProcessForegroundAbility(isRecent, abilityRequest, startOptions, callerAbility);
 #else
-    targetAbilityRecord->ProcessForegroundAbility();
+    targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
     HILOG_DEBUG("SetMovingState, missionId: %{public}d", missionId);
     mission->SetMovingState(true);
@@ -430,7 +430,7 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
     std::shared_ptr<StartOptions> startOptions = nullptr;
     targetAbilityRecord->ProcessForegroundAbility(false, abilityRequest, startOptions, callerAbility);
 #else
-    targetAbilityRecord->ProcessForegroundAbility();
+    targetAbilityRecord->ProcessForegroundAbility(0);
 #endif
     return ERR_OK;
 }
@@ -1437,7 +1437,7 @@ int MissionListManager::MoveAbilityToBackgroundLocked(const std::shared_ptr<Abil
                 return ERR_OK;
             }
 #else
-            nextAbilityRecord->ProcessForegroundAbility();
+            nextAbilityRecord->ProcessForegroundAbility(0);
         } else {
 #endif
             MoveToBackgroundTask(abilityRecord, true);
@@ -1574,7 +1574,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
                 abilityRecord->NotifyAnimationFromTerminatingAbility();
             }
 #else
-            nextAbilityRecord->ProcessForegroundAbility();
+            nextAbilityRecord->ProcessForegroundAbility(0);
         } else {
 #endif
             MoveToBackgroundTask(abilityRecord, true);
@@ -1856,22 +1856,6 @@ int MissionListManager::ClearMissionLocked(int missionId, const std::shared_ptr<
         }
     }
 
-    InnerMissionInfo info;
-    int getMission = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-        missionId, info);
-    if (getMission == ERR_OK && info.collaboratorType != CollaboratorType::DEFAULT_TYPE) {
-        auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
-            info.collaboratorType);
-        if (collaborator == nullptr) {
-            HILOG_DEBUG("collaborator is nullptr");
-        } else {
-            int ret = collaborator->NotifyClearMission(missionId);
-            if (ret != ERR_OK) {
-                HILOG_ERROR("notify broker clear mission failed, err: %{public}d", ret);
-            }
-        }
-    }
-
     if (mission == nullptr) {
         HILOG_DEBUG("ability has already terminate, just remove mission.");
         return ERR_OK;
@@ -1881,6 +1865,20 @@ int MissionListManager::ClearMissionLocked(int missionId, const std::shared_ptr<
     if (abilityRecord == nullptr || abilityRecord->IsTerminating()) {
         HILOG_WARN("Ability record is not exist or is on terminating.");
         return ERR_OK;
+    }
+
+    int collaboratorType = abilityRecord->GetCollaboratorType();
+    if (collaboratorType != CollaboratorType::DEFAULT_TYPE) {
+        auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
+            collaboratorType);
+        if (collaborator == nullptr) {
+            HILOG_DEBUG("collaborator is nullptr");
+        } else {
+            int ret = collaborator->NotifyClearMission(missionId);
+            if (ret != ERR_OK) {
+                HILOG_ERROR("notify broker clear mission failed, err: %{public}d", ret);
+            }
+        }
     }
 
     abilityRecord->SetTerminatingState();
@@ -2244,12 +2242,8 @@ void MissionListManager::CompleteForegroundFailed(const std::shared_ptr<AbilityR
     }
     if (state == AbilityState::FOREGROUND_DO_NOTHING) {
         HILOG_INFO("ForegroundFailed. WMS return do_nothing");
-        auto pendingState = abilityRecord->GetPendingState();
-        if (pendingState == AbilityState::BACKGROUND) {
-            MoveToBackgroundTask(abilityRecord);
-        } else if (pendingState == AbilityState::FOREGROUND) {
-            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
-        }
+        abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
+        MoveToBackgroundTask(abilityRecord);
         return;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -2709,7 +2703,7 @@ void MissionListManager::BackToLauncher()
 
     launcherList_->AddMissionToTop(launcherRootMission);
     MoveMissionListToTop(launcherList_);
-    launcherRootAbility->ProcessForegroundAbility();
+    launcherRootAbility->ProcessForegroundAbility(0);
 }
 
 int MissionListManager::SetMissionContinueState(const sptr<IRemoteObject> &token, const int32_t missionId,
@@ -3826,7 +3820,7 @@ int MissionListManager::DoAbilityForeground(std::shared_ptr<AbilityRecord> &abil
         HILOG_DEBUG("pending state is not FOREGROUND.");
         abilityRecord->SetPendingState(AbilityState::FOREGROUND);
     }
-    abilityRecord->ProcessForegroundAbility(flag);
+    abilityRecord->ProcessForegroundAbility(0, flag);
     return ERR_OK;
 }
 
