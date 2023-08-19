@@ -485,7 +485,7 @@ int AbilityManagerService::StartUISessionAbility(const Want &want, const sptr<IR
     return StartAbility(want, callerToken, userId, requestCode);
 }
 
-int AbilityManagerService::StartUISessionAbility(const Want &want, const StartOptions &startOptions, 
+int AbilityManagerService::StartUISessionAbility(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
     sptr<IRemoteObject> token;

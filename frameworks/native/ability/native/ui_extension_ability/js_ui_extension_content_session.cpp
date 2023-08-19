@@ -19,6 +19,7 @@
 #include "event_handler.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
+#include "ipc_skeleton.h"
 #include "js_error_utils.h"
 #include "js_runtime_utils.h"
 #include "js_ui_extension_context.h"
@@ -38,10 +39,6 @@ constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 } // namespace
 
-UISessionAbilityResultListener::UISessionAbilityResultListener() {}
-
-UISessionAbilityResultListener::~UISessionAbilityResultListener() {}
-
 void UISessionAbilityResultListener::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
     HILOG_DEBUG("begin.");
@@ -55,19 +52,32 @@ void UISessionAbilityResultListener::OnAbilityResult(int requestCode, int result
     HILOG_DEBUG("end.");
 }
 
-void UISessionAbilityResultListener::saveResultCallbacks(int requestCode, RuntimeTask&& task)
+void UISessionAbilityResultListener::OnAbilityResultInner(int requestCode, int resultCode, const Want &resultData)
+{
+    HILOG_DEBUG("begin.");
+    auto callback = resultCallbacks_.find(requestCode);
+    if (callback != resultCallbacks_.end()) {
+        if (callback->second) {
+            callback->second(resultCode, resultData, true);
+        }
+        resultCallbacks_.erase(requestCode);
+    }
+    HILOG_DEBUG("end.");
+}
+
+void UISessionAbilityResultListener::SaveResultCallbacks(int requestCode, RuntimeTask&& task)
 {
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
 }
 
 JsUIExtensionContentSession::JsUIExtensionContentSession(
-    NativeEngine& engine, sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow, 
+    NativeEngine& engine, sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
     std::weak_ptr<AbilityRuntime::Context> &context,
     std::shared_ptr<AbilityResultListeners>& abilityResultListeners)
-    : engine_(engine), sessionInfo_(sessionInfo), uiWindow_(uiWindow), context_(context) 
+    : engine_(engine), sessionInfo_(sessionInfo), uiWindow_(uiWindow), context_(context)
 {
         listener_ = std::make_shared<UISessionAbilityResultListener>();
-        abilityResultListeners->AddListener(listener_);
+        abilityResultListeners->AddListener(sessionInfo->sessionToken, listener_);
 }
 
 JsUIExtensionContentSession::JsUIExtensionContentSession(
@@ -174,10 +184,10 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
         }
 
         *innerErrorCode = (unwrapArgc == 1) ?
-            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want, 
-            context->GetToken(), sessionInfo, -1, -1): 
-            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want, 
-            startOptions, context->GetToken(), sessionInfo, -1, -1);
+            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
+                context->GetToken(), sessionInfo, -1, -1) :
+            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
+                startOptions, context->GetToken(), sessionInfo, -1, -1);
         if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
             *innerErrorCode != 0 && observer != nullptr) {
             std::string bundleName = want.GetElement().GetBundleName();
@@ -244,7 +254,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
     std::unique_ptr<AsyncTask> uasyncTask =
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
     std::shared_ptr<AsyncTask> asyncTask = std::move(uasyncTask);
-    RuntimeTask task = [&engine, asyncTask, &observer = freeInstallObserver_](int resultCode, 
+    RuntimeTask task = [&engine, asyncTask, &observer = freeInstallObserver_](int resultCode,
     const AAFwk::Want& want, bool isInner) {
         HILOG_DEBUG("OnStartAbilityForResult async callback is called");
         NativeValue* abilityResult = WrapAbilityResult(engine, resultCode, want);
@@ -272,16 +282,16 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
         asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
     } else {
         want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
-        curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
-        listener_->saveResultCallbacks(curRequestCode_, std::move(task));
+        int curRequestCode_ = reinterpret_cast<UIExtensionContext*>(context.get())->setCurRequestCode();
+        listener_->SaveResultCallbacks(curRequestCode_, std::move(task));
         ErrCode err = (unwrapArgc == 1) ?
-            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want, 
-            context->GetToken(), sessionInfo_, curRequestCode_, -1): 
-            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want, 
-            startOptions, context->GetToken(), sessionInfo_, curRequestCode_, -1);
+            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
+                context->GetToken(), sessionInfo_, curRequestCode_, -1) :
+            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
+                startOptions, context->GetToken(), sessionInfo_, curRequestCode_, -1);
         if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
             HILOG_ERROR("StartAbilityForResult. ret=%{public}d", err);
-            listener_->OnAbilityResult(curRequestCode_, err, want);
+            listener_->OnAbilityResultInner(curRequestCode_, err, want);
         }
     }
     HILOG_DEBUG("OnStartAbilityForResult is called end");

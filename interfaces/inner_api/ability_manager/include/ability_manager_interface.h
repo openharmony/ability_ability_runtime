@@ -79,7 +79,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartAbility(
-        const Want &want, 
+        const Want &want,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE) = 0;
 
@@ -107,14 +107,13 @@ public:
      * @param userId, Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbility( 
+    virtual int StartAbility(
         const Want &want,
         const AbilityStartSetting &abilityStartSetting,
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE) = 0;
 
-    
     /**
      * Starts a new ability with specific start options.
      *
@@ -185,7 +184,10 @@ public:
         const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) = 0;
+        int requestCode = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
 
 /**
      * Start ui session ability with extension session info, send session info to ability manager service.
@@ -204,7 +206,10 @@ public:
         const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) = 0;
+        int requestCode = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
 
     /**
      * Start extension ability with want, send want to ability manager service.

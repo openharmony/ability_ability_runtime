@@ -35,20 +35,20 @@ class JsRuntime;
 
 class AbilityResultListener {
 public:
-    AbilityResultListener();
-    virtual ~AbilityResultListener();
+    AbilityResultListener() = default;
+    virtual ~AbilityResultListener() = default;
     virtual void OnAbilityResult(int requestCode, int resultCode, const Want &resultData) = 0;
 };
 
 class AbilityResultListeners {
 public:
-    AbilityResultListeners();
+    AbilityResultListeners() = default;
     virtual ~AbilityResultListeners() = default;
-    bool AddListener(const std::shared_ptr<AbilityResultListener>& listener);
-    bool RemoveListener(const std::shared_ptr<AbilityResultListener> &listener);
+    void AddListener(sptr<IRemoteObject> sessionToken, std::shared_ptr<AbilityResultListener> listener);
+    void RemoveListener(sptr<IRemoteObject> sessionToken);
     void OnAbilityResult(int requestCode, int resultCode, const Want &resultData);
 private:
-    std::set<std::shared_ptr<AbilityResultListener>> listeners;
+    std::map<sptr<IRemoteObject>, std::shared_ptr<AbilityResultListener>> listeners;
 };
 
 class JsUIExtension : public UIExtension, public std::enable_shared_from_this<JsUIExtension> {

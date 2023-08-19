@@ -200,7 +200,7 @@ ErrCode AbilityManagerClient::StartUISessionAbility(const Want &want, const Star
     return abms->StartUISessionAbility(want, startOptions, callerToken, sessionInfo, userId, requestCode);
 }
 
-ErrCode AbilityManagerClient::StartUISessionAbility(const Want &want, const sptr<IRemoteObject> &callerToken, 
+ErrCode AbilityManagerClient::StartUISessionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<AAFwk::SessionInfo> &sessionInfo, int requestCode, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);

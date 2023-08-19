@@ -30,25 +30,28 @@ using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 class UISessionAbilityResultListener : public AbilityResultListener
 {
 public:
-    UISessionAbilityResultListener();
-    virtual ~UISessionAbilityResultListener();
+    UISessionAbilityResultListener() = default;
+    virtual ~UISessionAbilityResultListener() = default;
     virtual void OnAbilityResult(int requestCode, int resultCode, const Want &resultData);
-    void saveResultCallbacks(int requestCode, RuntimeTask&& task);
+    void OnAbilityResultInner(int requestCode, int resultCode, const Want &resultData);
+    void SaveResultCallbacks(int requestCode, RuntimeTask&& task);
 private:
     std::map<int, RuntimeTask> resultCallbacks_;
 };
 
 class JsUIExtensionContentSession {
+private:
+    class CallbackWrapper;
 public:
     JsUIExtensionContentSession(NativeEngine& engine, sptr<AAFwk::SessionInfo> sessionInfo,
-        sptr<Rosen::Window> uiWindow, std::weak_ptr<AbilityRuntime::Context>& context, 
+        sptr<Rosen::Window> uiWindow, std::weak_ptr<AbilityRuntime::Context>& context,
         std::shared_ptr<AbilityResultListeners>& abilityResultListeners);
     JsUIExtensionContentSession(NativeEngine& engine, sptr<AAFwk::SessionInfo> sessionInfo,
         sptr<Rosen::Window> uiWindow);
     virtual ~JsUIExtensionContentSession() = default;
     static void Finalizer(NativeEngine* engine, void* data, void* hint);
     static NativeValue* CreateJsUIExtensionContentSession(NativeEngine& engine,
-        sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow, 
+        sptr<AAFwk::SessionInfo> sessionInfo, sptr<Rosen::Window> uiWindow,
         std::weak_ptr<AbilityRuntime::Context> context,
         std::shared_ptr<AbilityResultListeners>& abilityResultListeners);
     static NativeValue* CreateJsUIExtensionContentSession(NativeEngine& engine,
@@ -88,11 +91,24 @@ private:
     sptr<AAFwk::SessionInfo> sessionInfo_;
     sptr<Rosen::Window> uiWindow_;
     std::weak_ptr<AbilityRuntime::Context> context_;
-    std::shared_ptr<NativeReference> receiveDataCallback_;
+    std::shared_ptr<CallbackWrapper> receiveDataCallback_;
     bool isRegistered = false;
     std::shared_ptr<UISessionAbilityResultListener> listener_;
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
-    int curRequestCode_ = 0;
+};
+
+class JsUIExtensionContentSession::CallbackWrapper {
+public:
+    void ResetCallback(std::shared_ptr<NativeReference> callback)
+    {
+        callback_ = callback;
+    }
+    std::shared_ptr<NativeReference> GetCallback() const
+    {
+        return callback_;
+    }
+private:
+    std::shared_ptr<NativeReference> callback_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
