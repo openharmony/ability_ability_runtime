@@ -34,6 +34,7 @@
 #include "mock_ability_controller.h"
 #include "session/host/include/session.h"
 #include "mock_ability_manager_collaborator.h"
+#include "mock_prepare_terminate_callback.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -3830,7 +3831,8 @@ HWTEST_F(AbilityManagerServiceTest, CheckCollaboratorType_001, TestSize.Level1)
 HWTEST_F(AbilityManagerServiceTest, PrepareTerminateAbility_001, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    int res = abilityMs_->PrepareTerminateAbility(nullptr, nullptr);
+    sptr<IPrepareTerminateCallback> callback = new (std::nothrow) PrepareTerminateCallback();
+    int res = abilityMs_->PrepareTerminateAbility(nullptr, callback);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
