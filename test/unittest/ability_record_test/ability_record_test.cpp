@@ -2430,10 +2430,10 @@ HWTEST_F(AbilityRecordTest, IsUIExtension_001, TestSize.Level1)
  * CaseDescription: Verify NotifyMoveMissionToForeground
  * @tc.require: issueI7LJ1M
  */
-HWTEST_F(AbilityRecordTest, NotifyMoveMissionToForeground_001. TestSize.Level1)
+HWTEST_F(AbilityRecordTest, NotifyMoveMissionToForeground_001, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
-    abilityRecord_->collaboratorType = 1;
+    abilityRecord_->collaboratorType_ = 1;
     abilityRecord_->SetAbilityStateInner(AbilityState::FOREGROUNDING);
 }
 
@@ -2446,10 +2446,10 @@ HWTEST_F(AbilityRecordTest, NotifyMoveMissionToForeground_001. TestSize.Level1)
  * CaseDescription: Verify NotifyMoveMissionToBackground
  * @tc.require: issueI7LJ1M
  */
-HWTEST_F(AbilityRecordTest, NotifyMoveMissionToBackground_001. TestSize.Level1)
+HWTEST_F(AbilityRecordTest, NotifyMoveMissionToBackground_001, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
-    abilityRecord_->collaboratorType = 1;
+    abilityRecord_->collaboratorType_ = 1;
     abilityRecord_->SetAbilityStateInner(AbilityState::BACKGROUNDING);
 }
 
@@ -2462,10 +2462,10 @@ HWTEST_F(AbilityRecordTest, NotifyMoveMissionToBackground_001. TestSize.Level1)
  * CaseDescription: Verify NotifyTerminateMission
  * @tc.require: issueI7LJ1M
  */
-HWTEST_F(AbilityRecordTest, NotifyTerminateMission_001. TestSize.Level1)
+HWTEST_F(AbilityRecordTest, NotifyTerminateMission_001, TestSize.Level1)
 {
     EXPECT_NE(abilityRecord_, nullptr);
-    abilityRecord_->collaboratorType = 1;
+    abilityRecord_->collaboratorType_ = 1;
     abilityRecord_->SetAbilityStateInner(AbilityState::TERMINATING);
 }
 }  // namespace AAFwk

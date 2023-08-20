@@ -16,6 +16,7 @@
 #ifndef MOCK_ABILITY_MANAGER_COLLABORATOR_H
 #define MOCK_ABILITY_MANAGER_COLLABORATOR_H
 
+#include <gmock/gmock.h>
 #include "iability_manager_collaborator.h"
 
 namespace OHOS {
@@ -25,14 +26,18 @@ public:
     MOCK_METHOD4(NotifyStartAbility, int32_t(const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t userId, Want &want, uint64_t accessTokenIDEx));
     MOCK_METHOD2(NotifyMissionCreated, int32_t(int32_t missionId, const Want &want));
+    MOCK_METHOD1(NotifyMissionCreated, int32_t(const sptr<SessionInfo> &sessionInfo));
     MOCK_METHOD3(NotifyLoadAbility, int32_t(const AppExecFwk::AbilityInfo &abilityInfo, int32_t missionId,
         const Want &want));
+    MOCK_METHOD2(NotifyLoadAbility, int32_t(const AppExecFwk::AbilityInfo &abilityInfo,
+        const sptr<SessionInfo> &sessionInfo));
     MOCK_METHOD1(NotifyMoveMissionToBackground, int32_t(int32_t missionId));
     MOCK_METHOD1(NotifyMoveMissionToForeground, int32_t(int32_t missionId));
     MOCK_METHOD1(NotifyTerminateMission, int32_t(int32_t missionId));
     MOCK_METHOD1(NotifyClearMission, int32_t(int32_t missionId));
     MOCK_METHOD3(NotifyRemoveShellProcess, int32_t(int32_t pid, int32_t type, const std::string &reason));
     MOCK_METHOD1(UpdateMissionInfo, void(InnerMissionInfoDto &info));
+    MOCK_METHOD1(UpdateMissionInfo, void(sptr<SessionInfo> &sessionInfo));
     sptr<IRemoteObject> AsObject() override
     {
         return {};
