@@ -85,6 +85,10 @@ protected:
     static bool UnWrapWant(NativeEngine& engine, NativeValue* argv, AAFwk::Want& want);
     void AddFreeInstallObserver(NativeEngine& engine, const AAFwk::Want &want, NativeValue* callback,
         bool isAbilityResult = false);
+    AsyncTask::ExecuteCallback& StartAbilityExecuteCallback(AAFwk::Want &want);
+    RuntimeTask& StartAbilityForResultRuntimeTask(NativeEngine& engine,
+        AAFwk::Want &want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam);
+    
 private:
     NativeEngine& engine_;
     sptr<AAFwk::SessionInfo> sessionInfo_;
