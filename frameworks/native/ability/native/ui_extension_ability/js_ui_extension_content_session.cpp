@@ -159,8 +159,35 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
 
     AAFwk::Want want;
     OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]), want);
-    decltype(info.argc) unwrapArgc = 1;
     HILOG_INFO("StartAbility, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
+    auto innerErrorCode = std::make_shared<int>(ERR_OK);
+    AsyncTask::ExecuteCallback execute = StartAbilityExecuteCallback(want);
+
+    AsyncTask::CompleteCallback complete = [innerErrorCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+        if (*innerErrorCode == 0) {
+            task.Resolve(engine, engine.CreateUndefined());
+        } else {
+            task.Reject(engine, CreateJsErrorByNativeErr(engine, *innerErrorCode));
+        }
+    };
+
+    NativeValue* lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
+    NativeValue* result = nullptr;
+    if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
+        AddFreeInstallObserver(engine, want, lastParam);
+        AsyncTask::Schedule("JsUIExtensionContentSession::OnStartAbility", engine,
+            CreateAsyncTaskWithLastParam(engine, nullptr, std::move(execute), nullptr, &result));
+    } else {
+        AsyncTask::Schedule("JsUIExtensionContentSession::OnStartAbility", engine,
+            CreateAsyncTaskWithLastParam(engine, lastParam, std::move(execute), std::move(complete), &result));
+    }
+    HILOG_DEBUG("OnStartAbility is called end");
+    return result;
+}
+
+AsyncTask::ExecuteCallback &JsUIExtensionContentSession::StartAbilityExecuteCallback(AAFwk::Want &want)
+{
+    decltype(info.argc) unwrapArgc = 1;
     AAFwk::StartOptions startOptions;
     if (info.argc > ARGC_ONE && info.argv[1]->TypeOf() == NATIVE_OBJECT) {
         HILOG_DEBUG("OnStartAbility start options is used.");
@@ -198,27 +225,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
             observer->OnInstallFinished(bundleName, abilityName, startTime, *innerErrorCode);
         }
     };
-
-    AsyncTask::CompleteCallback complete = [innerErrorCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
-        if (*innerErrorCode == 0) {
-            task.Resolve(engine, engine.CreateUndefined());
-        } else {
-            task.Reject(engine, CreateJsErrorByNativeErr(engine, *innerErrorCode));
-        }
-    };
-
-    NativeValue* lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
-    NativeValue* result = nullptr;
-    if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
-        AddFreeInstallObserver(engine, want, lastParam);
-        AsyncTask::Schedule("JsUIExtensionContentSession::OnStartAbility", engine,
-            CreateAsyncTaskWithLastParam(engine, nullptr, std::move(execute), nullptr, &result));
-    } else {
-        AsyncTask::Schedule("JsUIExtensionContentSession::OnStartAbility", engine,
-            CreateAsyncTaskWithLastParam(engine, lastParam, std::move(execute), std::move(complete), &result));
-    }
-    HILOG_DEBUG("OnStartAbility is called end");
-    return result;
+    return execute;
 }
 
 NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& engine, NativeCallbackInfo &info)
@@ -247,37 +254,10 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
 
     NativeValue* lastParam = info.argc > unwrapArgc ? info.argv[unwrapArgc] : nullptr;
     NativeValue* result = nullptr;
-    if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
-        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
-            system_clock::now().time_since_epoch()).count());
-        want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
-        AddFreeInstallObserver(engine, want, lastParam, true);
-    }
     std::unique_ptr<AsyncTask> uasyncTask =
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
     std::shared_ptr<AsyncTask> asyncTask = std::move(uasyncTask);
-    RuntimeTask task = [&engine, asyncTask, &observer = freeInstallObserver_](int resultCode,
-    const AAFwk::Want& want, bool isInner) {
-        HILOG_DEBUG("OnStartAbilityForResult async callback is called");
-        NativeValue* abilityResult = WrapAbilityResult(engine, resultCode, want);
-        if (abilityResult == nullptr) {
-            HILOG_WARN("wrap abilityResult failed");
-            asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
-        } else {
-            if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
-                resultCode != 0 && observer != nullptr) {
-                std::string bundleName = want.GetElement().GetBundleName();
-                std::string abilityName = want.GetElement().GetAbilityName();
-                std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
-                observer->OnInstallFinished(bundleName, abilityName, startTime,
-                    static_cast<int>(GetJsErrorCodeByNativeError(resultCode)));
-            } else if (isInner) {
-                asyncTask->Reject(engine, CreateJsErrorByNativeErr(engine, resultCode));
-            } else {
-                asyncTask->Resolve(engine, abilityResult);
-            }
-        }
-    };
+    RuntimeTask task = StartAbilityForResultRuntimeTask;
     auto context = context_.lock();
     if (context == nullptr) {
         HILOG_WARN("context is released");
@@ -300,6 +280,40 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
     return result;
 }
 
+RuntimeTask &JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(NativeEngine& engine,
+    AAFwk::Want &want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam)
+{
+    if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
+        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+            system_clock::now().time_since_epoch()).count());
+        want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
+        AddFreeInstallObserver(engine, want, lastParam, true);
+    }
+    RuntimeTask task = [&engine, asyncTask, &observer = freeInstallObserver_](int resultCode,
+    const AAFwk::Want& want, bool isInner) {
+        HILOG_DEBUG("OnStartAbilityForResult async callback is called");
+        NativeValue* abilityResult = WrapAbilityResult(engine, resultCode, want);
+        if (abilityResult == nullptr) {
+            HILOG_WARN("wrap abilityResult failed");
+            asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INNER));
+        } else {
+            if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
+                resultCode != 0 && observer != nullptr) {
+                std::string bundleName = want.GetElement().GetBundleName();
+                std::string abilityName = want.GetElement().GetAbilityName();
+                std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
+                observer->OnInstallFinished(bundleName, abilityName, startTime,
+                    static_cast<int>(GetJsErrorCodeByNativeError(resultCode)));
+            } else if (isInner) {
+                asyncTask->Reject(engine, CreateJsErrorByNativeErr(engine, resultCode));
+            } else {
+                asyncTask->Resolve(engine, abilityResult);
+            }
+        }
+    };
+    return task;
+}
+
 NativeValue *JsUIExtensionContentSession::OnTerminateSelf(NativeEngine& engine, NativeCallbackInfo& info)
 {
     HILOG_DEBUG("called");
@@ -319,7 +333,7 @@ NativeValue *JsUIExtensionContentSession::OnTerminateSelf(NativeEngine& engine, 
 
     NativeValue* lastParam = (info.argc > ARGC_ZERO) ? info.argv[INDEX_ZERO] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::ScheduleHighQos("JsUIExtensionContentSession::OnTerminateSelf",
+    AsyncTask::Schedule("JsUIExtensionContentSession::OnTerminateSelf",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -363,7 +377,7 @@ NativeValue *JsUIExtensionContentSession::OnTerminateSelfWithResult(NativeEngine
 
     NativeValue* lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::ScheduleHighQos("JsUIExtensionContentSession::OnTerminateSelfWithResult",
+    AsyncTask::Schedule("JsUIExtensionContentSession::OnTerminateSelfWithResult",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
