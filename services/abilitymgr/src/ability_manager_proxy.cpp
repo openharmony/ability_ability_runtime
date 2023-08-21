@@ -346,7 +346,7 @@ int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const StartOptio
     return reply.ReadInt32();
 }
 
-Errode AbilityManagerProxy::CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
+int AbilityManagerProxy::CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
     const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
     if (callerToken) {
@@ -399,7 +399,7 @@ int AbilityManagerProxy::StartUISessionAbility(const Want &want,
         HILOG_ERROR("want write failed.");
         return INNER_ERR;
     }
-    if(CheckUISessionParams(data, callerToken, sessionInfo, userId, request) == INNER_ERR) {
+    if(CheckUISessionParams(data, callerToken, sessionInfo, userId, requestCode) == INNER_ERR) {
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_ADD_CALLER, data, reply, option);
@@ -429,7 +429,7 @@ int AbilityManagerProxy::StartUISessionAbility(const Want &want, const StartOpti
         HILOG_ERROR("startOptions write failed.");
         return INNER_ERR;
     }
-    if(CheckUISessionParams(data, callerToken, sessionInfo, userId, request) == INNER_ERR) {
+    if(CheckUISessionParams(data, callerToken, sessionInfo, userId, requestCode) == INNER_ERR) {
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_FOR_OPTIONS, data, reply, option);

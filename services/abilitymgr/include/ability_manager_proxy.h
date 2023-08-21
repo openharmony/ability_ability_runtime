@@ -924,7 +924,7 @@ private:
     int TerminateAbility(const sptr<IRemoteObject> &token, int resultCode, const Want *resultWant, bool flag);
     ErrCode SendRequest(AbilityManagerInterfaceCode code, MessageParcel &data, MessageParcel &reply,
         MessageOption& option);
-    ErrCode CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
+    int CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode);
 
 private:
