@@ -1472,5 +1472,30 @@ HWTEST_F(AbilityManagerClientBranchTest, NotifySaveAsResult_0100, TestSize.Level
     EXPECT_EQ(result, ERR_INVALID_CALLER);
 }
 
+/**
+ * @tc.number: PrepareTerminateAbility_0100
+ * @tc.name: PrepareTerminateAbility_0100
+ * @tc.desc: callback is nullptr, ERR_INVALID_VALUE is returned.
+ */
+HWTEST_F(AbilityManagerClientBranchTest, PrepareTerminateAbility_0100, TestSize.Level1)
+{
+    sptr<IRemoteObject> token = nullptr;
+    sptr<IPrepareTerminateCallback> callback = nullptr;
+    auto result = AbilityManagerClient::GetInstance()->PrepareTerminateAbility(token, callback);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: PrepareTerminateAbilityBySCB_0100
+ * @tc.name: PrepareTerminateAbilityBySCB_0100
+ * @tc.desc: sessionInfo is nullptr, INNER_ERR is returned.
+ */
+HWTEST_F(AbilityManagerClientBranchTest, PrepareTerminateAbilityBySCB_0100, TestSize.Level1)
+{
+    sptr<SessionInfo> sessionInfo = nullptr;
+    bool isPrepareTerminate = false;
+    auto result = AbilityManagerClient::GetInstance()->PrepareTerminateAbilityBySCB(sessionInfo, isPrepareTerminate);
+    EXPECT_EQ(result, INNER_ERR);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
