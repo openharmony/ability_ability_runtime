@@ -642,7 +642,8 @@ bool JsUIExtensionContentSession::UnWrapAbilityResult(NativeEngine& engine, Nati
     return AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(jWant), want);
 }
 
-NativeValue* JsUIExtensionContentSession::WrapAbilityResult(NativeEngine& engine, const int& resultCode, const AAFwk::Want& want)
+NativeValue* JsUIExtensionContentSession::WrapAbilityResult(NativeEngine& engine,
+    const int& resultCode, const AAFwk::Want& want)
 {
     NativeValue* jAbilityResult = engine.CreateObject();
     NativeObject* abilityResult = ConvertNativeValueTo<NativeObject>(jAbilityResult);
@@ -665,8 +666,8 @@ bool JsUIExtensionContentSession::UnWrapWant(NativeEngine& engine, NativeValue* 
     return AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(argv), want);
 }
 
-void JsUIExtensionContentSession::AddFreeInstallObserver(NativeEngine& engine, const AAFwk::Want &want, NativeValue* callback,
-    bool isAbilityResult)
+void JsUIExtensionContentSession::AddFreeInstallObserver(NativeEngine& engine,
+    const AAFwk::Want &want, NativeValue* callback, bool isAbilityResult)
 {
     // adapter free install async return install and start result
     int ret = 0;

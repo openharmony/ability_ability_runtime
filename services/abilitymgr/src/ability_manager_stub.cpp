@@ -363,7 +363,7 @@ int AbilityManagerStub::GetTopAbilityInner(MessageParcel &data, MessageParcel &r
 
 int AbilityManagerStub::GetElementNameByTokenInner(MessageParcel &data, MessageParcel &reply)
 {
-    sptr<IRemoteObject> token = data.ReadRemoteObject();;
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
     AppExecFwk::ElementName result = GetElementNameByToken(token);
     if (result.GetDeviceID().empty()) {
         HILOG_DEBUG("GetElementNameByTokenInner is nullptr");

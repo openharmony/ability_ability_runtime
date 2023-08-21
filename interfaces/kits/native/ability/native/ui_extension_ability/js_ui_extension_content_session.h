@@ -27,8 +27,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 using RuntimeTask = std::function<void(int, const AAFwk::Want&, bool)>;
 
-class UISessionAbilityResultListener : public AbilityResultListener
-{
+class UISessionAbilityResultListener : public AbilityResultListener {
 public:
     UISessionAbilityResultListener() = default;
     virtual ~UISessionAbilityResultListener() = default;
@@ -95,20 +94,6 @@ private:
     bool isRegistered = false;
     std::shared_ptr<UISessionAbilityResultListener> listener_;
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
-};
-
-class JsUIExtensionContentSession::CallbackWrapper {
-public:
-    void ResetCallback(std::shared_ptr<NativeReference> callback)
-    {
-        callback_ = callback;
-    }
-    std::shared_ptr<NativeReference> GetCallback() const
-    {
-        return callback_;
-    }
-private:
-    std::shared_ptr<NativeReference> callback_;
 };
 
 class JsUIExtensionContentSession::CallbackWrapper {
