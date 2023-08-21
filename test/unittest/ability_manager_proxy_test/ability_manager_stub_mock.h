@@ -262,11 +262,6 @@ public:
         return 0;
     }
 
-    void UpdateMissionSnapShot(const sptr<IRemoteObject>& token)
-    {
-        return;
-    }
-
     virtual int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler)
     {
         return 0;

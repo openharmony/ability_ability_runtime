@@ -30,9 +30,17 @@
 #include "hitrace_meter.h"
 #include "scene_board_judgement.h"
 #include "session_manager.h"
+#include "ws_common.h"
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+static std::unordered_map<Rosen::WSError, int32_t> SCB_TO_MISSION_ERROR_CODE_MAP {
+    { Rosen::WSError::WS_ERROR_INVALID_PERMISSION, CHECK_PERMISSION_FAILED },
+    { Rosen::WSError::WS_ERROR_NOT_SYSTEM_APP, ERR_NOT_SYSTEM_APP },
+};
+}
+
 using OHOS::Rosen::SessionManager;
 std::shared_ptr<AbilityManagerClient> AbilityManagerClient::instance_ = nullptr;
 std::recursive_mutex AbilityManagerClient::mutex_;
@@ -619,6 +627,9 @@ ErrCode AbilityManagerClient::RegisterMissionListener(const sptr<IMissionListene
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
         auto err = sceneSessionManager->RegisterSessionListener(listener);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     return abms->RegisterMissionListener(listener);
@@ -633,6 +644,9 @@ ErrCode AbilityManagerClient::UnRegisterMissionListener(const sptr<IMissionListe
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
         auto err = sceneSessionManager->UnRegisterSessionListener(listener);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     return abms->UnRegisterMissionListener(listener);
@@ -680,6 +694,9 @@ ErrCode AbilityManagerClient::GetMissionInfos(const std::string& deviceId, int32
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
         auto err = sceneSessionManager->GetSessionInfos(deviceId, numMax, missionInfos);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     return abms->GetMissionInfos(deviceId, numMax, missionInfos);
@@ -695,6 +712,9 @@ ErrCode AbilityManagerClient::GetMissionInfo(const std::string& deviceId, int32_
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
         auto err = sceneSessionManager->GetSessionInfo(deviceId, missionId, missionInfo);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     return abms->GetMissionInfo(deviceId, missionId, missionInfo);
@@ -709,6 +729,9 @@ ErrCode AbilityManagerClient::CleanMission(int32_t missionId)
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
         auto err = sceneSessionManager->ClearSession(missionId);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     return abms->CleanMission(missionId);
@@ -905,6 +928,9 @@ ErrCode AbilityManagerClient::GetMissionSnapshot(const std::string& deviceId, in
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
         auto err = sceneSessionManager->GetSessionSnapshot(deviceId, missionId, snapshot.snapshot, isLowResolution);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     return abms->GetMissionSnapshot(deviceId, missionId, snapshot, isLowResolution);
@@ -940,7 +966,8 @@ ErrCode AbilityManagerClient::GetTopAbility(sptr<IRemoteObject> &token)
     return abms->GetTopAbility(token);
 }
 
-AppExecFwk::ElementName AbilityManagerClient::GetElementNameByToken(const sptr<IRemoteObject> &token)
+AppExecFwk::ElementName AbilityManagerClient::GetElementNameByToken(const sptr<IRemoteObject> &token,
+    bool isNeedLocalDeviceId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto abms = GetAbilityManager();
@@ -948,7 +975,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetElementNameByToken(const sptr<I
         HILOG_ERROR("abms == nullptr");
         return {};
     }
-    return abms->GetElementNameByToken(token);
+    return abms->GetElementNameByToken(token, isNeedLocalDeviceId);
 }
 
 ErrCode AbilityManagerClient::CheckUIExtensionIsFocused(uint32_t uiExtensionTokenId, bool& isFocused)
@@ -1090,13 +1117,6 @@ ErrCode AbilityManagerClient::SendANRProcessID(int pid)
     return abms->SendANRProcessID(pid);
 }
 
-void AbilityManagerClient::UpdateMissionSnapShot(const sptr<IRemoteObject>& token)
-{
-    auto abms = GetAbilityManager();
-    CHECK_POINTER_RETURN(abms);
-    return abms->UpdateMissionSnapShot(token);
-}
-
 void AbilityManagerClient::UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &pixelMap)
 {
@@ -1184,7 +1204,7 @@ ErrCode AbilityManagerClient::FreeInstallAbilityFromRemote(const Want &want, con
     return abms->FreeInstallAbilityFromRemote(want, callback, userId, requestCode);
 }
 
-AppExecFwk::ElementName AbilityManagerClient::GetTopAbility()
+AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDeviceId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1199,7 +1219,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility()
             HILOG_ERROR("token is nullptr");
             return elementName;
         }
-        return GetElementNameByToken(token);
+        return GetElementNameByToken(token, isNeedLocalDeviceId);
     }
     HILOG_DEBUG("enter.");
     auto abms = GetAbilityManager();
@@ -1208,7 +1228,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility()
         return {};
     }
 
-    return abms->GetTopAbility();
+    return abms->GetTopAbility(isNeedLocalDeviceId);
 }
 
 ErrCode AbilityManagerClient::DumpAbilityInfoDone(std::vector<std::string> &infos,
@@ -1242,6 +1262,21 @@ int32_t AbilityManagerClient::IsValidMissionIds(
     const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
 {
     HILOG_INFO("call");
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
+        CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
+        std::vector<bool> isValidList;
+        auto err = sceneSessionManager->IsValidSessionIds(missionIds, isValidList);
+        HILOG_DEBUG("IsValidSessionIds %{public}d size %{public}d",
+            static_cast<int>(err), static_cast<int32_t>(isValidList.size()));
+        for (auto i = 0; i < static_cast<int32_t>(isValidList.size()); ++i) {
+            MissionVaildResult missionResult = {};
+            missionResult.missionId = missionIds.at(i);
+            missionResult.isVaild = isValidList.at(i);
+            results.push_back(missionResult);
+        }
+        return static_cast<int>(err);
+    }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->IsValidMissionIds(missionIds, results);

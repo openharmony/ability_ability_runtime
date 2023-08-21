@@ -46,6 +46,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 constexpr size_t ARGC_THREE = 3;
 constexpr const char* ON_OFF_TYPE = "applicationState";
+constexpr const char* ON_OFF_TYPE_SYNC = "applicationStateEvent";
 
 class JsAppManager final {
 public:
@@ -147,8 +148,20 @@ private:
     sptr<OHOS::AppExecFwk::IAppMgr> appManager_ = nullptr;
     sptr<OHOS::AAFwk::IAbilityManager> abilityManager_ = nullptr;
     sptr<JSAppStateObserver> observer_ = nullptr;
+    sptr<JSAppStateObserver> observerSync_ = nullptr;
+    int32_t serialNumber_ = 0;
 
     NativeValue* OnOn(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        HILOG_DEBUG("called");
+        std::string type = ParseParamType(engine, info);
+        if (type == ON_OFF_TYPE_SYNC) {
+            return OnOnNew(engine, info);
+        }
+        return OnOnOld(engine, info);
+    }
+
+    NativeValue* OnOnOld(NativeEngine& engine, NativeCallbackInfo& info)
     {
         HILOG_DEBUG("called");
         if (info.argc < ARGC_TWO) { // support 2 or 3 params, if > 3 params, ignore other params
@@ -180,13 +193,60 @@ private:
         int32_t ret = appManager_->RegisterApplicationStateObserver(observer_, bundleNameList);
         if (ret == 0) {
             HILOG_DEBUG("success.");
-            static int64_t serialNumber = 0;
-            int64_t observerId = serialNumber;
+            int64_t observerId = serialNumber_;
             observer_->AddJsObserverObject(observerId, info.argv[INDEX_ONE]);
-            if (serialNumber < INT32_MAX) {
-                serialNumber++;
+            if (serialNumber_ < INT32_MAX) {
+                serialNumber_++;
             } else {
-                serialNumber = 0;
+                serialNumber_ = 0;
+            }
+            return engine.CreateNumber(observerId);
+        } else {
+            HILOG_ERROR("failed error:%{public}d.", ret);
+            ThrowErrorByNativeErr(engine, ret);
+            return engine.CreateUndefined();
+        }
+    }
+
+    NativeValue* OnOnNew(NativeEngine& engine, NativeCallbackInfo& info)
+    {
+        HILOG_DEBUG("called");
+        if (info.argc < ARGC_TWO) { // support 2 or 3 params, if > 3 params, ignore other params
+            HILOG_ERROR("Not enough params");
+            ThrowTooFewParametersError(engine);
+            return engine.CreateUndefined();
+        }
+        if (info.argv[INDEX_ONE]->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+            HILOG_ERROR("Invalid param");
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return engine.CreateUndefined();
+        }
+        std::vector<std::string> bundleNameList;
+        if (info.argc > ARGC_TWO) {
+            if (!AppExecFwk::UnwrapArrayStringFromJS(reinterpret_cast<napi_env>(&engine),
+                reinterpret_cast<napi_value>(info.argv[INDEX_TWO]), bundleNameList)) {
+                HILOG_ERROR("Parse bundleNameList failed");
+                ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+                return engine.CreateUndefined();
+            }
+        }
+        if (observerSync_ == nullptr) {
+            observerSync_ = new JSAppStateObserver(engine);
+        }
+        if (appManager_ == nullptr || observerSync_ == nullptr) {
+            HILOG_ERROR("appManager or observer is nullptr");
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
+            return engine.CreateUndefined();
+        }
+        int32_t ret = appManager_->RegisterApplicationStateObserver(observerSync_, bundleNameList);
+        if (ret == 0) {
+            HILOG_DEBUG("success.");
+            int32_t observerId = serialNumber_;
+            observerSync_->AddJsObserverObject(observerId, info.argv[INDEX_ONE]);
+            if (serialNumber_ < INT32_MAX) {
+                serialNumber_++;
+            } else {
+                serialNumber_ = 0;
             }
             return engine.CreateNumber(observerId);
         } else {
@@ -197,6 +257,16 @@ private:
     }
 
     NativeValue* OnOff(NativeEngine& engine, const NativeCallbackInfo& info)
+    {
+        HILOG_DEBUG("called");
+        std::string type = ParseParamType(engine, info);
+        if (type == ON_OFF_TYPE_SYNC) {
+            return OnOffNew(engine, info);
+        }
+        return OnOffOld(engine, info);
+    }
+
+    NativeValue* OnOffOld(NativeEngine& engine, const NativeCallbackInfo& info)
     {
         HILOG_DEBUG("called");
         if (info.argc < ARGC_TWO) {
@@ -248,6 +318,42 @@ private:
         AsyncTask::Schedule("JSAppManager::OnUnregisterApplicationStateObserver",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
+    }
+
+    NativeValue* OnOffNew(NativeEngine& engine, const NativeCallbackInfo& info)
+    {
+        HILOG_DEBUG("called");
+        if (info.argc < ARGC_TWO) {
+            HILOG_ERROR("Not enough params when off.");
+            ThrowTooFewParametersError(engine);
+            return engine.CreateUndefined();
+        }
+        int32_t observerId = -1;
+        if (!ConvertFromJsValue(engine, info.argv[INDEX_ONE], observerId)) {
+            HILOG_ERROR("Parse observerId failed");
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return engine.CreateUndefined();
+        }
+
+        if (observerSync_ == nullptr || appManager_ == nullptr) {
+            HILOG_ERROR("observer or appManager nullptr");
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
+            return engine.CreateUndefined();
+        }
+        if (!observerSync_->FindObserverByObserverId(observerId)) {
+            HILOG_ERROR("not find observer, observer:%{public}d", static_cast<int32_t>(observerId));
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return engine.CreateUndefined();
+        }
+        int32_t ret = appManager_->UnregisterApplicationStateObserver(observerSync_);
+        if (ret == 0 && observerSync_->RemoveJsObserverObject(observerId)) {
+            HILOG_DEBUG("success size:%{public}zu", observerSync_->GetJsObserverMapSize());
+            return engine.CreateUndefined();
+        } else {
+            HILOG_ERROR("failed error:%{public}d", ret);
+            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
+            return engine.CreateUndefined();
+        }
     }
 
     NativeValue* OnGetForegroundApplications(NativeEngine& engine, const NativeCallbackInfo& info)
@@ -360,7 +466,7 @@ private:
 
         NativeValue* lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnkillProcessesByBundleName",
+        AsyncTask::ScheduleHighQos("JSAppManager::OnkillProcessesByBundleName",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -440,7 +546,7 @@ private:
 
         NativeValue* lastParam = (info.argc == ARGC_THREE) ? info.argv[INDEX_TWO] : nullptr;
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnIsSharedBundleRunning",
+        AsyncTask::ScheduleHighQos("JSAppManager::OnIsSharedBundleRunning",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -484,7 +590,7 @@ private:
 
         NativeValue* lastParam = (info.argc == ARGC_THREE) ? info.argv[INDEX_TWO] : nullptr;
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnKillProcessWithAccount",
+        AsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -505,7 +611,7 @@ private:
 
         NativeValue* lastParam = (info.argc > ARGC_ZERO) ? info.argv[INDEX_ZERO] : nullptr;
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnGetAppMemorySize",
+        AsyncTask::ScheduleHighQos("JSAppManager::OnGetAppMemorySize",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -526,7 +632,7 @@ private:
 
         NativeValue* lastParam = (info.argc > ARGC_ZERO) ? info.argv[INDEX_ZERO] : nullptr;
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnIsRamConstrainedDevice",
+        AsyncTask::ScheduleHighQos("JSAppManager::OnIsRamConstrainedDevice",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -565,7 +671,7 @@ private:
 
         NativeValue* lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnGetProcessMemoryByPid",
+        AsyncTask::ScheduleHighQos("JSAppManager::OnGetProcessMemoryByPid",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -618,7 +724,7 @@ private:
         };
         NativeValue* lastParam = isPromiseType ? nullptr : info.argv[info.argc - 1];
         NativeValue* result = nullptr;
-        AsyncTask::Schedule("JSAppManager::OnGetRunningProcessInfoByBundleName",
+        AsyncTask::ScheduleHighQos("JSAppManager::OnGetRunningProcessInfoByBundleName",
             engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -645,6 +751,15 @@ private:
             return false;
         }
         return true;
+    }
+
+    std::string ParseParamType(NativeEngine& engine, const NativeCallbackInfo& info)
+    {
+        std::string type;
+        if (info.argc > INDEX_ZERO && ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type)) {
+            return type;
+        }
+        return "";
     }
 };
 } // namespace
