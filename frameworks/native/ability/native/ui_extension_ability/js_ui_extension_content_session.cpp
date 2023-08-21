@@ -162,7 +162,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
     OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]), want);
     HILOG_INFO("StartAbility, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
-    AsyncTask::ExecuteCallback execute = StartAbilityExecuteCallback(want);
+    AsyncTask::ExecuteCallback execute = StartAbilityExecuteCallback(want, unwrapArgc, engine, info);
 
     AsyncTask::CompleteCallback complete = [innerErrorCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (*innerErrorCode == 0) {
@@ -258,7 +258,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
     std::unique_ptr<AsyncTask> uasyncTask =
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
     std::shared_ptr<AsyncTask> asyncTask = std::move(uasyncTask);
-    RuntimeTask task = StartAbilityForResultRuntimeTask;
+    RuntimeTask task = StartAbilityForResultRuntimeTask(engine, want, asyncTask, lastParam);
     auto context = context_.lock();
     if (context == nullptr) {
         HILOG_WARN("context is released");
