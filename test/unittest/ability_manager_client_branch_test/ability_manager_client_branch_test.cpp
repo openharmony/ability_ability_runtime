@@ -1477,7 +1477,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartUISessionAbility_0100, TestSize.Le
     Want want;
     sptr<IRemoteObject> callerToken = nullptr;
     const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
-    EXPECT_EQ(client_->StartUIExtensionAbility(want, callerToken, sessionInfo),
+    EXPECT_EQ(client_->StartUISessionAbility(want, callerToken, sessionInfo),
         ERR_OK);
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0100 end";
 }
@@ -1494,7 +1494,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartUISessionAbility_0200, TestSize.Le
     sptr<IRemoteObject> callerToken = nullptr;
     const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
     StartOptions startOptions;
-    EXPECT_EQ(client_->StartUIExtensionAbility(want, startOptions, callerToken, sessionInfo),
+    EXPECT_EQ(client_->StartUISessionAbility(want, startOptions, callerToken, sessionInfo),
         ERR_OK);
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0200 end";
 }
