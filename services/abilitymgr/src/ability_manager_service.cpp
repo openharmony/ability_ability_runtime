@@ -479,7 +479,7 @@ int AbilityManagerService::StartUISessionAbility(const Want &want, const sptr<IR
         return ERR_INVALID_VALUE;
     }
 
-    if(token != sessionInfo->callerToken) {
+    if (token != sessionInfo->callerToken) {
         HILOG_ERROR("callerToken is not equal to top ablity token");
         return NOT_TOP_ABILITY;
     }
@@ -507,7 +507,7 @@ int AbilityManagerService::StartUISessionAbility(const Want &want, const StartOp
         return ERR_INVALID_VALUE;
     }
 
-    if(token != sessionInfo->callerToken) {
+    if (token != sessionInfo->callerToken) {
         HILOG_ERROR("callerToken is not equal to top ablity token");
         return NOT_TOP_ABILITY;
     }

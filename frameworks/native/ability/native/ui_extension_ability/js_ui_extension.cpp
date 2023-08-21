@@ -73,7 +73,7 @@ NativeValue *AttachUIExtensionContext(NativeEngine *engine, void *value, void *)
 }
 
 void AbilityResultListeners::AddListener(sptr<IRemoteObject> sessionToken,
-        std::shared_ptr<AbilityResultListener> listener)
+    std::shared_ptr<AbilityResultListener> listener)
 {
     listeners[sessionToken] = listener;
 }
@@ -85,10 +85,10 @@ void AbilityResultListeners::RemoveListener(sptr<IRemoteObject> sessionToken)
     }
 }
 
-void AbilityResultListeners:: OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
+void AbilityResultListeners::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
-    for(auto item:listeners) {
-        if(item.second) {
+    for (auto item:listeners) {
+        if (item.second) {
             item.second->OnAbilityResult(requestCode, resultCode, resultData);
         }
     }
