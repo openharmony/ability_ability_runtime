@@ -158,6 +158,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
     }
 
     AAFwk::Want want;
+    size_t unwrapArgc = 1;
     OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]), want);
     HILOG_INFO("StartAbility, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
@@ -185,9 +186,9 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
     return result;
 }
 
-AsyncTask::ExecuteCallback &JsUIExtensionContentSession::StartAbilityExecuteCallback(AAFwk::Want &want)
+AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallback(AAFwk::Want& want, size_t& unwrapArgc,
+    NativeEngine& engine, NativeCallbackInfo &info)
 {
-    decltype(info.argc) unwrapArgc = 1;
     AAFwk::StartOptions startOptions;
     if (info.argc > ARGC_ONE && info.argv[1]->TypeOf() == NATIVE_OBJECT) {
         HILOG_DEBUG("OnStartAbility start options is used.");
@@ -280,7 +281,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
     return result;
 }
 
-RuntimeTask &JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(NativeEngine& engine,
+RuntimeTask JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(NativeEngine& engine,
     AAFwk::Want &want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam)
 {
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {

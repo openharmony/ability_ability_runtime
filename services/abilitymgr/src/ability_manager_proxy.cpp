@@ -346,22 +346,9 @@ int AbilityManagerProxy::StartAbilityAsCaller(const Want &want, const StartOptio
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUISessionAbility(const Want &want,
-    const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
-    int32_t userId, int requestCode)
+Errode AbilityManagerProxy::CheckUISessionParams(MessageParcel &data, const sptr<IRemoteObject> &callerToken,
+    const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
-    int error;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-    if (!data.WriteParcelable(&want)) {
-        HILOG_ERROR("want write failed.");
-        return INNER_ERR;
-    }
     if (callerToken) {
         if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
             HILOG_ERROR("callerToken and flag write failed.");
@@ -373,9 +360,8 @@ int AbilityManagerProxy::StartUISessionAbility(const Want &want,
             return INNER_ERR;
         }
     }
-
     CHECK_POINTER_AND_RETURN_LOG(sessionInfo, ERR_INVALID_VALUE,
-        "connect ability fail, sessionInfo is nullptr");
+        "start ability fail, sessionInfo is nullptr");
     if (sessionInfo) {
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             HILOG_ERROR("flag and sessionInfo write failed.");
@@ -393,6 +379,27 @@ int AbilityManagerProxy::StartUISessionAbility(const Want &want,
     }
     if (!data.WriteInt32(requestCode)) {
         HILOG_ERROR("requestCode write failed.");
+        return INNER_ERR;
+    }
+    return ERR_OK;
+}
+
+int AbilityManagerProxy::StartUISessionAbility(const Want &want,
+    const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
+    int32_t userId, int requestCode)
+{
+    int error;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        HILOG_ERROR("want write failed.");
+        return INNER_ERR;
+    }
+    if(CheckUISessionParams(data, callerToken, sessionInfo, userId, request) == INNER_ERR) {
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_ADD_CALLER, data, reply, option);
@@ -422,36 +429,7 @@ int AbilityManagerProxy::StartUISessionAbility(const Want &want, const StartOpti
         HILOG_ERROR("startOptions write failed.");
         return INNER_ERR;
     }
-    if (callerToken) {
-        if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
-            HILOG_ERROR("flag and callerToken write failed.");
-            return INNER_ERR;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            HILOG_ERROR("flag write failed.");
-            return INNER_ERR;
-        }
-    }
-    CHECK_POINTER_AND_RETURN_LOG(sessionInfo, ERR_INVALID_VALUE,
-        "connect ability fail, sessionInfo is nullptr");
-    if (sessionInfo) {
-        if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
-            HILOG_ERROR("flag and sessionInfo write failed.");
-            return INNER_ERR;
-        }
-    } else {
-        if (!data.WriteBool(false)) {
-            HILOG_ERROR("flag write failed.");
-            return INNER_ERR;
-        }
-    }
-    if (!data.WriteInt32(userId)) {
-        HILOG_ERROR("userId write failed.");
-        return INNER_ERR;
-    }
-    if (!data.WriteInt32(requestCode)) {
-        HILOG_ERROR("requestCode write failed.");
+    if(CheckUISessionParams(data, callerToken, sessionInfo, userId, request) == INNER_ERR) {
         return INNER_ERR;
     }
     error = SendRequest(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_FOR_OPTIONS, data, reply, option);

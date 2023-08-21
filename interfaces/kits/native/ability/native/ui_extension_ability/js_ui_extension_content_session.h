@@ -18,6 +18,7 @@
 
 #include "native_engine/native_engine.h"
 #include "js_free_install_observer.h"
+#include "js_runtime_utils.h"
 #include "js_ui_extension.h"
 #include "session_info.h"
 #include "window.h"
@@ -85,9 +86,10 @@ protected:
     static bool UnWrapWant(NativeEngine& engine, NativeValue* argv, AAFwk::Want& want);
     void AddFreeInstallObserver(NativeEngine& engine, const AAFwk::Want &want, NativeValue* callback,
         bool isAbilityResult = false);
-    AsyncTask::ExecuteCallback& StartAbilityExecuteCallback(AAFwk::Want &want);
-    RuntimeTask& StartAbilityForResultRuntimeTask(NativeEngine& engine,
-        AAFwk::Want &want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam);
+    AsyncTask::ExecuteCallback StartAbilityExecuteCallback(AAFwk::Want& want, size_t& unwrapArgc,
+        NativeEngine& engine, NativeCallbackInfo &info);
+    RuntimeTask StartAbilityForResultRuntimeTask(NativeEngine& engine,
+        AAFwk::Want& want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam);
     
 private:
     NativeEngine& engine_;
