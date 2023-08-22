@@ -78,8 +78,10 @@ JsUIExtensionContentSession::JsUIExtensionContentSession(
     std::shared_ptr<AbilityResultListeners>& abilityResultListeners)
     : engine_(engine), sessionInfo_(sessionInfo), uiWindow_(uiWindow), context_(context)
 {
-        listener_ = std::make_shared<UISessionAbilityResultListener>();
+    listener_ = std::make_shared<UISessionAbilityResultListener>();
+    if (abilityResultListeners) {
         abilityResultListeners->AddListener(sessionInfo->sessionToken, listener_);
+    }
 }
 
 JsUIExtensionContentSession::JsUIExtensionContentSession(
@@ -159,14 +161,19 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
 
     AAFwk::Want want;
     size_t unwrapArgc = 1;
-    OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[0]), want);
+    if (!OHOS::AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine),
+        reinterpret_cast<napi_value>(info.argv[0]), want)) {
+        HILOG_ERROR("Failed to parse want!");
+        ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return engine.CreateUndefined();
+    }
     HILOG_INFO("StartAbility, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
     AsyncTask::ExecuteCallback execute = StartAbilityExecuteCallback(want, unwrapArgc, engine, info);
 
-    AsyncTask::CompleteCallback complete = [innerErrorCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    AsyncTask::CompleteCallback complete = [](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (*innerErrorCode == 0) {
-            task.Resolve(engine, engine.CreateUndefined());
+            task.ResolveWithNoError(engine, engine.CreateUndefined());
         } else {
             task.Reject(engine, CreateJsErrorByNativeErr(engine, *innerErrorCode));
         }
@@ -205,7 +212,7 @@ AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallb
 
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
     AsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc,
-        sessionInfo = sessionInfo_, &observer = freeInstallObserver_, innerErrorCode]() {
+        sessionInfo = sessionInfo_, &observer = freeInstallObserver_]() {
         auto context = weak.lock();
         if (!context) {
             HILOG_WARN("context is released");
@@ -265,8 +272,10 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
         asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
     } else {
         want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
-        int curRequestCode_ = reinterpret_cast<UIExtensionContext*>(context.get())->setCurRequestCode();
-        listener_->SaveResultCallbacks(curRequestCode_, std::move(task));
+        int curRequestCode_ = reinterpret_cast<UIExtensionContext*>(context.get())->SetCurRequestCode();
+        if (listener_) {
+            listener_->SaveResultCallbacks(curRequestCode_, std::move(task));
+        }
         ErrCode err = (unwrapArgc == 1) ?
             AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
                 context->GetToken(), sessionInfo_, curRequestCode_, -1) :
@@ -291,7 +300,7 @@ RuntimeTask JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(Native
         AddFreeInstallObserver(engine, want, lastParam, true);
     }
     RuntimeTask task = [&engine, asyncTask, &observer = freeInstallObserver_](int resultCode,
-    const AAFwk::Want& want, bool isInner) {
+        const AAFwk::Want& want, bool isInner) {
         HILOG_DEBUG("OnStartAbilityForResult async callback is called");
         NativeValue* abilityResult = WrapAbilityResult(engine, resultCode, want);
         if (abilityResult == nullptr) {
@@ -308,7 +317,7 @@ RuntimeTask JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(Native
             } else if (isInner) {
                 asyncTask->Reject(engine, CreateJsErrorByNativeErr(engine, resultCode));
             } else {
-                asyncTask->Resolve(engine, abilityResult);
+                asyncTask->ResolveWithNoError(engine, abilityResult);
             }
         }
     };
@@ -334,7 +343,7 @@ NativeValue *JsUIExtensionContentSession::OnTerminateSelf(NativeEngine& engine, 
 
     NativeValue* lastParam = (info.argc > ARGC_ZERO) ? info.argv[INDEX_ZERO] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsUIExtensionContentSession::OnTerminateSelf",
+    AsyncTask::ScheduleHighQos("JsUIExtensionContentSession::OnTerminateSelf",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -378,7 +387,7 @@ NativeValue *JsUIExtensionContentSession::OnTerminateSelfWithResult(NativeEngine
 
     NativeValue* lastParam = (info.argc > ARGC_ONE) ? info.argv[INDEX_ONE] : nullptr;
     NativeValue* result = nullptr;
-    AsyncTask::Schedule("JsUIExtensionContentSession::OnTerminateSelfWithResult",
+    AsyncTask::ScheduleHighQos("JsUIExtensionContentSession::OnTerminateSelfWithResult",
         engine, CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
     return result;
 }
@@ -662,8 +671,10 @@ NativeValue* JsUIExtensionContentSession::WrapAbilityResult(NativeEngine& engine
 {
     NativeValue* jAbilityResult = engine.CreateObject();
     NativeObject* abilityResult = ConvertNativeValueTo<NativeObject>(jAbilityResult);
-    abilityResult->SetProperty("resultCode", engine.CreateNumber(resultCode));
-    abilityResult->SetProperty("want", WrapWant(engine, want));
+    if (abilityResult) {
+        abilityResult->SetProperty("resultCode", engine.CreateNumber(resultCode));
+        abilityResult->SetProperty("want", WrapWant(engine, want));
+    }
     return jAbilityResult;
 }
 

@@ -80,7 +80,7 @@ void AbilityResultListeners::AddListener(sptr<IRemoteObject> sessionToken,
 
 void AbilityResultListeners::RemoveListener(sptr<IRemoteObject> sessionToken)
 {
-    if (listeners.find(sessionToken) != listeners.end() && listeners[sessionToken] != nullptr) {
+    if (listeners.find(sessionToken) != listeners.end()) {
         listeners.erase(sessionToken);
     }
 }
@@ -407,7 +407,9 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
     uiWindowMap_.erase(obj);
     foregroundWindows_.erase(obj);
     contentSessions_.erase(obj);
-    abilityResultListeners->RemoveListener(obj);
+    if (abilityResultListeners) {
+        abilityResultListeners->RemoveListener(obj);
+    }
     HILOG_DEBUG("end.");
 }
 

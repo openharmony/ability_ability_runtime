@@ -360,8 +360,6 @@ int AbilityManagerProxy::CheckUISessionParams(MessageParcel &data, const sptr<IR
             return INNER_ERR;
         }
     }
-    CHECK_POINTER_AND_RETURN_LOG(sessionInfo, ERR_INVALID_VALUE,
-        "start ability fail, sessionInfo is nullptr");
     if (sessionInfo) {
         if (!data.WriteBool(true) || !data.WriteParcelable(sessionInfo)) {
             HILOG_ERROR("flag and sessionInfo write failed.");

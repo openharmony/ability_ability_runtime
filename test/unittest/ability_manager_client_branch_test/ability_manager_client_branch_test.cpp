@@ -1466,7 +1466,6 @@ HWTEST_F(AbilityManagerClientBranchTest, GetElementNameByToken_0100, TestSize.Le
 }
 
 /**
-<<<<<<< HEAD
  * @tc.name: AbilityManagerClient_StartUISessionAbility_0100
  * @tc.desc: StartUISessionAbility
  * @tc.type: FUNC

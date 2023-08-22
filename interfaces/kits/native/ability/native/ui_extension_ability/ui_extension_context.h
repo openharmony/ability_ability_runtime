@@ -103,7 +103,7 @@ public:
      */
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData);
 
-    virtual int setCurRequestCode();
+    virtual int SetCurRequestCode();
 
     using SelfType = UIExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
