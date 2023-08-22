@@ -79,7 +79,11 @@ JsUIExtensionContentSession::JsUIExtensionContentSession(
     : engine_(engine), sessionInfo_(sessionInfo), uiWindow_(uiWindow), context_(context)
 {
     listener_ = std::make_shared<UISessionAbilityResultListener>();
-    if (abilityResultListeners) {
+    if (abilityResultListeners == nullptr) {
+        HILOG_ERROR("abilityResultListeners is nullptr");
+    } else if (sessionInfo == nullptr) {
+        HILOG_ERROR("sessionInfo is nullptr");
+    } else {
         abilityResultListeners->AddListener(sessionInfo->sessionToken, listener_);
     }
 }
@@ -263,6 +267,10 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
     std::unique_ptr<AsyncTask> uasyncTask =
         CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, nullptr, &result);
     std::shared_ptr<AsyncTask> asyncTask = std::move(uasyncTask);
+    if (asyncTask == nullptr) {
+        HILOG_ERROR("asyncTask is nullptr");
+        return engine.CreateUndefined();
+    }
     RuntimeTask task = StartAbilityForResultRuntimeTask(engine, want, asyncTask, lastParam);
     auto context = context_.lock();
     if (context == nullptr) {
@@ -270,18 +278,20 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
         asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
     } else {
         want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
-        int curRequestCode_ = reinterpret_cast<UIExtensionContext*>(context.get())->SetCurRequestCode();
-        if (listener_) {
-            listener_->SaveResultCallbacks(curRequestCode_, std::move(task));
+        int curRequestCode = reinterpret_cast<UIExtensionContext*>(context.get())->GenerateCurRequestCode();
+        if (listener_ == nullptr) {
+            HILOG_ERROR("listener_ is nullptr");
+            return;
         }
+        listener_->SaveResultCallbacks(curRequestCode, std::move(task));
         ErrCode err = (unwrapArgc == 1) ?
             AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
-                context->GetToken(), sessionInfo_, curRequestCode_, -1) :
+                context->GetToken(), sessionInfo_, curRequestCode, -1) :
             AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
-                startOptions, context->GetToken(), sessionInfo_, curRequestCode_, -1);
+                startOptions, context->GetToken(), sessionInfo_, curRequestCode, -1);
         if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
             HILOG_ERROR("StartAbilityForResult. ret=%{public}d", err);
-            listener_->OnAbilityResultInner(curRequestCode_, err, want);
+            listener_->OnAbilityResultInner(curRequestCode, err, want);
         }
     }
     HILOG_DEBUG("OnStartAbilityForResult is called end");
@@ -560,6 +570,10 @@ NativeValue *JsUIExtensionContentSession::CreateJsUIExtensionContentSession(Nati
     HILOG_DEBUG("begin");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        HILOG_ERROR("object is nullptr");
+        return engine.CreateUndefined();
+    }
 
     std::unique_ptr<JsUIExtensionContentSession> jsSession =
         std::make_unique<JsUIExtensionContentSession>(engine, sessionInfo, uiWindow, context, abilityResultListeners);
@@ -584,6 +598,10 @@ NativeValue *JsUIExtensionContentSession::CreateJsUIExtensionContentSession(Nati
     HILOG_DEBUG("begin");
     NativeValue* objValue = engine.CreateObject();
     NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
+    if (object == nullptr) {
+        HILOG_ERROR("object is nullptr");
+        return engine.CreateUndefined();
+    }
 
     std::unique_ptr<JsUIExtensionContentSession> jsSession =
         std::make_unique<JsUIExtensionContentSession>(engine, sessionInfo, uiWindow);
@@ -669,10 +687,12 @@ NativeValue* JsUIExtensionContentSession::WrapAbilityResult(NativeEngine& engine
 {
     NativeValue* jAbilityResult = engine.CreateObject();
     NativeObject* abilityResult = ConvertNativeValueTo<NativeObject>(jAbilityResult);
-    if (abilityResult) {
-        abilityResult->SetProperty("resultCode", engine.CreateNumber(resultCode));
-        abilityResult->SetProperty("want", WrapWant(engine, want));
+    if (abilityResult == nullptr) {
+        HILOG_ERROR("abilityResult is nullptr");
+        return engine.CreateUndefined();
     }
+    abilityResult->SetProperty("resultCode", engine.CreateNumber(resultCode));
+    abilityResult->SetProperty("want", WrapWant(engine, want));
     return jAbilityResult;
 }
 
