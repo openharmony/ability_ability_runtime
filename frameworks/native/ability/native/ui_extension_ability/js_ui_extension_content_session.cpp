@@ -281,7 +281,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
         int curRequestCode = reinterpret_cast<UIExtensionContext*>(context.get())->GenerateCurRequestCode();
         if (listener_ == nullptr) {
             HILOG_ERROR("listener_ is nullptr");
-            return;
+            return engine.CreateUndefined();
         }
         listener_->SaveResultCallbacks(curRequestCode, std::move(task));
         ErrCode err = (unwrapArgc == 1) ?
