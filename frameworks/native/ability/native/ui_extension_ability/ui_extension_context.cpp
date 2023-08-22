@@ -146,7 +146,7 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
     HILOG_DEBUG("end.");
 }
 
-int UIExtensionContext::SetCurRequestCode()
+int UIExtensionContext::GenerateCurRequestCode()
 {
     curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
     return curRequestCode_;

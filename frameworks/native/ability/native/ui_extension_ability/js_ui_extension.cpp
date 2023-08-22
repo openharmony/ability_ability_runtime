@@ -595,6 +595,10 @@ void JsUIExtension::OnAbilityResult(int requestCode, int resultCode, const Want 
         return;
     }
     context->OnAbilityResult(requestCode, resultCode, resultData);
+    if (abilityResultListeners == nullptr) {
+        HILOG_WARN("abilityResultListensers is nullptr");
+        return;
+    }
     abilityResultListeners->OnAbilityResult(requestCode, resultCode, resultData);
     HILOG_DEBUG("end.");
 }
