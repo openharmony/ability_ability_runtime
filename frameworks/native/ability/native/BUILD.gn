@@ -268,7 +268,7 @@ ohos_shared_library("abilitykit_native") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:ipc_napi_common",
-    "ipc:ipc_rpc",
+    "ipc:ipc_js",
     "napi:ace_napi",
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
