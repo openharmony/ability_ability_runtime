@@ -169,7 +169,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
     }
     HILOG_INFO("StartAbility, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
-    AsyncTask::ExecuteCallback execute = StartAbilityExecuteCallback(want, unwrapArgc, engine, info);
+    AsyncTask::ExecuteCallback execute = StartAbilityExecuteCallback(want, unwrapArgc, engine, info, innerErrorCode);
 
     AsyncTask::CompleteCallback complete = [innerErrorCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (*innerErrorCode == 0) {
@@ -194,7 +194,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
 }
 
 AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallback(AAFwk::Want& want,
-    size_t& unwrapArgc, NativeEngine& engine, NativeCallbackInfo &info)
+    size_t& unwrapArgc, NativeEngine& engine, NativeCallbackInfo &info, shared_ptr<int> &innerErrorCode)
 {
     AAFwk::StartOptions startOptions;
     if (info.argc > ARGC_ONE && info.argv[1]->TypeOf() == NATIVE_OBJECT) {
@@ -209,8 +209,6 @@ AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallb
             system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
     }
-
-    auto innerErrorCode = std::make_shared<int>(ERR_OK);
     AsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc,
         sessionInfo = sessionInfo_, &observer = freeInstallObserver_, innerErrorCode]() {
         auto context = weak.lock();
