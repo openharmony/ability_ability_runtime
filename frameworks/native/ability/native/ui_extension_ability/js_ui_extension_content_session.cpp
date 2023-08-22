@@ -194,7 +194,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
 }
 
 AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallback(AAFwk::Want& want,
-    size_t& unwrapArgc, NativeEngine& engine, NativeCallbackInfo &info, shared_ptr<int> &innerErrorCode)
+    size_t& unwrapArgc, NativeEngine& engine, NativeCallbackInfo &info, std::shared_ptr<int> &innerErrorCode)
 {
     AAFwk::StartOptions startOptions;
     if (info.argc > ARGC_ONE && info.argv[1]->TypeOf() == NATIVE_OBJECT) {
