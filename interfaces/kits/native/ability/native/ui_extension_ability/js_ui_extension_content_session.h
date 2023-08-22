@@ -88,8 +88,9 @@ protected:
         bool isAbilityResult = false);
     AsyncTask::ExecuteCallback StartAbilityExecuteCallback(AAFwk::Want& want, size_t& unwrapArgc,
         NativeEngine& engine, NativeCallbackInfo &info, std::shared_ptr<int> &innerErrorCode);
-    RuntimeTask StartAbilityForResultRuntimeTask(NativeEngine& engine,
-        AAFwk::Want& want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam);
+    RuntimeTask StartAbilityForResultRuntimeTask(NativeEngine& engine, AAFwk::Want& want,
+        std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam,
+        std::shared_ptr<AbilityRuntime::Context> &context);
     
 private:
     NativeEngine& engine_;

@@ -240,8 +240,6 @@ AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallb
 
 NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& engine, NativeCallbackInfo &info)
 {
-    HILOG_DEBUG("OnStartAbilityForResult is called");
-
     if (info.argc == ARGC_ZERO) {
         ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
@@ -271,41 +269,40 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
         HILOG_ERROR("asyncTask is nullptr");
         return engine.CreateUndefined();
     }
-    RuntimeTask task = StartAbilityForResultRuntimeTask(engine, want, asyncTask, lastParam);
     auto context = context_.lock();
-    if (context == nullptr) {
-        HILOG_WARN("context is released");
-        asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
-    } else {
-        want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
-        int curRequestCode = reinterpret_cast<UIExtensionContext*>(context.get())->GenerateCurRequestCode();
-        if (listener_ == nullptr) {
-            HILOG_ERROR("listener_ is nullptr");
-            return engine.CreateUndefined();
-        }
-        listener_->SaveResultCallbacks(curRequestCode, std::move(task));
-        ErrCode err = (unwrapArgc == 1) ?
-            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
-                context->GetToken(), sessionInfo_, curRequestCode, -1) :
-            AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
-                startOptions, context->GetToken(), sessionInfo_, curRequestCode, -1);
-        if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
-            HILOG_ERROR("StartAbilityForResult. ret=%{public}d", err);
-            listener_->OnAbilityResultInner(curRequestCode, err, want);
-        }
+    RuntimeTask task = StartAbilityForResultRuntimeTask(engine, want, asyncTask, lastParam, context);
+    want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
+    int curRequestCode = reinterpret_cast<UIExtensionContext*>(context.get())->GenerateCurRequestCode();
+    if (listener_ == nullptr) {
+        HILOG_ERROR("listener_ is nullptr");
+        return engine.CreateUndefined();
     }
-    HILOG_DEBUG("OnStartAbilityForResult is called end");
+    listener_->SaveResultCallbacks(curRequestCode, std::move(task));
+    ErrCode err = (unwrapArgc == 1) ?
+        AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
+            context->GetToken(), sessionInfo_, curRequestCode, -1) :
+        AAFwk::AbilityManagerClient::GetInstance()->StartUISessionAbility(want,
+            startOptions, context->GetToken(), sessionInfo_, curRequestCode, -1);
+    if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
+        HILOG_ERROR("StartAbilityForResult. ret=%{public}d", err);
+        listener_->OnAbilityResultInner(curRequestCode, err, want);
+    }
     return result;
 }
 
 RuntimeTask JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(NativeEngine& engine,
-    AAFwk::Want &want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam)
+    AAFwk::Want &want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam,
+    std::shared_ptr<AbilityRuntime::Context> &context)
 {
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
         std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
             system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
         AddFreeInstallObserver(engine, want, lastParam, true);
+    }
+    if (context == nullptr) {
+        HILOG_WARN("context is released");
+        asyncTask->Reject(engine, CreateJsError(engine, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
     }
     RuntimeTask task = [&engine, asyncTask, &observer = freeInstallObserver_](int resultCode,
         const AAFwk::Want& want, bool isInner) {
