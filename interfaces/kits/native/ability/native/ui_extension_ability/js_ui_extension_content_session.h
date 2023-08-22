@@ -87,7 +87,7 @@ protected:
     void AddFreeInstallObserver(NativeEngine& engine, const AAFwk::Want &want, NativeValue* callback,
         bool isAbilityResult = false);
     AsyncTask::ExecuteCallback StartAbilityExecuteCallback(AAFwk::Want& want, size_t& unwrapArgc,
-        NativeEngine& engine, NativeCallbackInfo &info);
+        NativeEngine& engine, NativeCallbackInfo &info, shared_ptr<int> &innerErrorCode);
     RuntimeTask StartAbilityForResultRuntimeTask(NativeEngine& engine,
         AAFwk::Want& want, std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam);
     
