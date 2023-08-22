@@ -171,7 +171,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
     AsyncTask::ExecuteCallback execute = StartAbilityExecuteCallback(want, unwrapArgc, engine, info);
 
-    AsyncTask::CompleteCallback complete = [](NativeEngine& engine, AsyncTask& task, int32_t status) {
+    AsyncTask::CompleteCallback complete = [innerErrorCode](NativeEngine& engine, AsyncTask& task, int32_t status) {
         if (*innerErrorCode == 0) {
             task.ResolveWithNoError(engine, engine.CreateUndefined());
         } else {
@@ -212,7 +212,7 @@ AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallb
 
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
     AsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc,
-        sessionInfo = sessionInfo_, &observer = freeInstallObserver_]() {
+        sessionInfo = sessionInfo_, &observer = freeInstallObserver_, innerErrorCode]() {
         auto context = weak.lock();
         if (!context) {
             HILOG_WARN("context is released");
