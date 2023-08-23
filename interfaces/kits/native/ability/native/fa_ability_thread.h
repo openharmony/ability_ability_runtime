@@ -56,12 +56,6 @@ public:
         const std::shared_ptr<Context> &appContext) override;
 
     /**
-     * @brief Init extension Ability flag.
-     * @param abilityRecord current running ability record
-     */
-    void InitExtensionFlag(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord);
-
-    /**
      * @brief Attach The ability thread to the main process.
      * @param application Indicates the main process.
      * @param abilityRecord current running ability record
@@ -361,6 +355,12 @@ private:
     void AttachExtension(std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AppExecFwk::EventRunner> &mainRunner);
+
+    /**
+     * @brief Init extension Ability flag.
+     * @param abilityRecord current running ability record
+     */
+    void InitExtensionFlag(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord);
 
     /**
      * @brief Attach The ability thread to the main process.
