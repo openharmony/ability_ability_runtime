@@ -284,13 +284,13 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
         HILOG_ERROR("listener_ is nullptr");
         return engine.CreateUndefined();
     }
-    StartAbilityForResultRuntimeTask(engine, want, asyncTask, unwrapArgc, context, startOptions);
+    StartAbilityForResultRuntimeTask(engine, want, asyncTask, unwrapArgc, startOptions);
     return result;
 }
 
 void JsUIExtensionContentSession::StartAbilityForResultRuntimeTask(NativeEngine& engine,
     AAFwk::Want &want, std::shared_ptr<AsyncTask> asyncTask, size_t& unwrapArgc,
-    std::shared_ptr<AbilityRuntime::Context> &context, AAFwk::StartOptions startOptions)
+    AAFwk::StartOptions startOptions)
 {
     RuntimeTask task = [&engine, asyncTask, &observer = freeInstallObserver_](int resultCode,
         const AAFwk::Want& want, bool isInner) {

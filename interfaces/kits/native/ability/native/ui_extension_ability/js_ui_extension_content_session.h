@@ -21,6 +21,7 @@
 #include "js_runtime_utils.h"
 #include "js_ui_extension.h"
 #include "session_info.h"
+#include "start_options.h"
 #include "window.h"
 
 
@@ -90,8 +91,7 @@ protected:
     AsyncTask::ExecuteCallback StartAbilityExecuteCallback(AAFwk::Want& want, size_t& unwrapArgc,
         NativeEngine& engine, NativeCallbackInfo &info, std::shared_ptr<int> &innerErrorCode);
     void StartAbilityForResultRuntimeTask(NativeEngine& engine, AAFwk::Want &want,
-        std::shared_ptr<AsyncTask> asyncTask, size_t& unwrapArgc,
-        std::shared_ptr<AbilityRuntime::Context> &context, AAFwk::StartOptions startOptions);
+        std::shared_ptr<AsyncTask> asyncTask, size_t& unwrapArgc, AAFwk::StartOptions startOptions);
     
 private:
     NativeEngine& engine_;
