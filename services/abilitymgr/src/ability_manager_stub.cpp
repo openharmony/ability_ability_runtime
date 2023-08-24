@@ -661,7 +661,8 @@ int AbilityManagerStub::StartAbilityByUIContentSessionForOptionsInner(MessagePar
     }
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    int32_t result = StartAbilityByUIContentSession(*want, *startOptions, callerToken, sessionInfo, userId, requestCode);
+    int32_t result = StartAbilityByUIContentSession(*want, *startOptions,
+        callerToken, sessionInfo, userId, requestCode);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
