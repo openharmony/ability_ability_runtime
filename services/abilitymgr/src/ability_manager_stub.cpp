@@ -636,7 +636,6 @@ int AbilityManagerStub::StartAbilityByUIContentSessionAddCallerInner(MessageParc
     int requestCode = data.ReadInt32();
     int32_t result = StartAbilityByUIContentSession(*want, callerToken, sessionInfo, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
@@ -650,7 +649,6 @@ int AbilityManagerStub::StartAbilityByUIContentSessionForOptionsInner(MessagePar
     std::unique_ptr<StartOptions> startOptions(data.ReadParcelable<StartOptions>());
     if (startOptions == nullptr) {
         HILOG_ERROR("startOptions is nullptr");
-        delete want;
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> callerToken = nullptr;
@@ -665,8 +663,6 @@ int AbilityManagerStub::StartAbilityByUIContentSessionForOptionsInner(MessagePar
     int requestCode = data.ReadInt32();
     int32_t result = StartAbilityByUIContentSession(*want, *startOptions, callerToken, sessionInfo, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
-    delete startOptions;
     return NO_ERROR;
 }
 
