@@ -1466,34 +1466,34 @@ HWTEST_F(AbilityManagerClientBranchTest, GetElementNameByToken_0100, TestSize.Le
 }
 
 /**
- * @tc.name: AbilityManagerClient_StartUISessionAbility_0100
- * @tc.desc: StartUISessionAbility
+ * @tc.name: AbilityManagerClient_StartAbilityByUIContentSession_0100
+ * @tc.desc: StartAbilityByUIContentSession
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerClientBranchTest, StartUISessionAbility_0100, TestSize.Level1)
+HWTEST_F(AbilityManagerClientBranchTest, StartAbilityByUIContentSession_0100, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "StartUISessionAbility_0100 start";
+    GTEST_LOG_(INFO) << "StartAbilityByUIContentSession_0100 start";
     Want want;
     sptr<IRemoteObject> callerToken = nullptr;
     const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
-    EXPECT_EQ(client_->StartUISessionAbility(want, callerToken, sessionInfo),
+    EXPECT_EQ(client_->StartAbilityByUIContentSession(want, callerToken, sessionInfo),
         ERR_OK);
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0100 end";
 }
 
 /**
- * @tc.name: AbilityManagerClient_StartUISessionAbility_0100
- * @tc.desc: StartUISessionAbility
+ * @tc.name: AbilityManagerClient_StartAbilityByUIContentSession_0100
+ * @tc.desc: StartAbilityByUIContentSession
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerClientBranchTest, StartUISessionAbility_0200, TestSize.Level1)
+HWTEST_F(AbilityManagerClientBranchTest, StartAbilityByUIContentSession_0200, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "StartUISessionAbility_0200 start";
+    GTEST_LOG_(INFO) << "StartAbilityByUIContentSession_0200 start";
     Want want;
     sptr<IRemoteObject> callerToken = nullptr;
     const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
     StartOptions startOptions;
-    EXPECT_EQ(client_->StartUISessionAbility(want, startOptions, callerToken, sessionInfo),
+    EXPECT_EQ(client_->StartAbilityByUIContentSession(want, startOptions, callerToken, sessionInfo),
         ERR_OK);
     GTEST_LOG_(INFO) << "StartUIExtensionAbility_0200 end";
 }

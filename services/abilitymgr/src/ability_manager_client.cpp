@@ -196,7 +196,7 @@ ErrCode AbilityManagerClient::StartAbilityAsCaller(const Want &want, const Start
     return abms->StartAbilityAsCaller(want, startOptions, callerToken, userId, requestCode);
 }
 
-ErrCode AbilityManagerClient::StartUISessionAbility(const Want &want, const StartOptions &startOptions,
+ErrCode AbilityManagerClient::StartAbilityByUIContentSession(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, const sptr<AAFwk::SessionInfo> &sessionInfo,
     int requestCode, int32_t userId)
 {
@@ -205,10 +205,10 @@ ErrCode AbilityManagerClient::StartUISessionAbility(const Want &want, const Star
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     HILOG_INFO("abilityName:%{public}s, userId:%{public}d.", want.GetElement().GetAbilityName().c_str(), userId);
     HandleDlpApp(const_cast<Want &>(want));
-    return abms->StartUISessionAbility(want, startOptions, callerToken, sessionInfo, userId, requestCode);
+    return abms->StartAbilityByUIContentSession(want, startOptions, callerToken, sessionInfo, userId, requestCode);
 }
 
-ErrCode AbilityManagerClient::StartUISessionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
+ErrCode AbilityManagerClient::StartAbilityByUIContentSession(const Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<AAFwk::SessionInfo> &sessionInfo, int requestCode, int32_t userId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -217,7 +217,7 @@ ErrCode AbilityManagerClient::StartUISessionAbility(const Want &want, const sptr
     HILOG_INFO("ability:%{public}s, userId:%{public}d",
         want.GetElement().GetAbilityName().c_str(), userId);
     HandleDlpApp(const_cast<Want &>(want));
-    return abms->StartUISessionAbility(want, callerToken, sessionInfo, userId, requestCode);
+    return abms->StartAbilityByUIContentSession(want, callerToken, sessionInfo, userId, requestCode);
 }
 
 ErrCode AbilityManagerClient::SendResultToAbility(int requestCode, int resultCode, Want& resultWant)

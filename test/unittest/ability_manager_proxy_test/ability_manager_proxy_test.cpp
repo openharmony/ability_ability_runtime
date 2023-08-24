@@ -2251,13 +2251,13 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RecordAppExitReason_001, T
 
 /*
  * Feature: AbilityManagerService
- * Function: StartUISessionAbility
+ * Function: StartAbilityByUIContentSession
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartExtensionAbility
  * EnvConditions: NA
  * CaseDescription: Verify the normal process of StartExtensionAbility
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUISessionAbility_001, TestSize.Level1)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityByUIContentSession_001, TestSize.Level1)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -2266,20 +2266,20 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUISessionAbility_001,
     sptr<IRemoteObject> callerToken = nullptr;
     const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
     StartOptions startOptions;
-    auto res = proxy_->StartUISessionAbility(want, startOptions, callerToken, sessionInfo);
+    auto res = proxy_->StartAbilityByUIContentSession(want, startOptions, callerToken, sessionInfo);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_FOR_OPTIONS), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
 
 /*
  * Feature: AbilityManagerService
- * Function: StartUISessionAbility
+ * Function: StartAbilityByUIContentSession
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StopExtensionAbility
  * EnvConditions: NA
  * CaseDescription: Verify the normal process of StopExtensionAbility
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUISessionAbility_002, TestSize.Level1)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityByUIContentSession_002, TestSize.Level1)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -2287,7 +2287,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUISessionAbility_002,
     Want want;
     sptr<IRemoteObject> callerToken = nullptr;
     const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
-    auto res = proxy_->StartUISessionAbility(want, callerToken, sessionInfo);
+    auto res = proxy_->StartAbilityByUIContentSession(want, callerToken, sessionInfo);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_ADD_CALLER), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
