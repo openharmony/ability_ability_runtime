@@ -191,7 +191,7 @@ public:
      * @param requestCode, Ability request code.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUISessionAbility(
+    virtual int StartAbilityByUIContentSession(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo,
@@ -209,7 +209,7 @@ public:
      * @param requestCode the resultCode of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUISessionAbility(
+    virtual int StartAbilityByUIContentSession(
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,

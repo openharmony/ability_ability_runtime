@@ -382,7 +382,7 @@ int AbilityManagerProxy::CheckUISessionParams(MessageParcel &data, const sptr<IR
     return ERR_OK;
 }
 
-int AbilityManagerProxy::StartUISessionAbility(const Want &want,
+int AbilityManagerProxy::StartAbilityByUIContentSession(const Want &want,
     const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
     int32_t userId, int requestCode)
 {
@@ -408,7 +408,7 @@ int AbilityManagerProxy::StartUISessionAbility(const Want &want,
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::StartUISessionAbility(const Want &want, const StartOptions &startOptions,
+int AbilityManagerProxy::StartAbilityByUIContentSession(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo,
     int32_t userId, int requestCode)
 {

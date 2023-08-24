@@ -82,7 +82,7 @@ public:
         return 0;
     }
 
-    virtual int StartUISessionAbility(
+    virtual int StartAbilityByUIContentSession(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         const sptr<SessionInfo> &sessionInfo,
@@ -92,7 +92,7 @@ public:
         return 0;
     }
 
-    virtual int StartUISessionAbility(
+    virtual int StartAbilityByUIContentSession(
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,

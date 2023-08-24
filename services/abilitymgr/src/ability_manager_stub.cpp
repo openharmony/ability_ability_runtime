@@ -78,9 +78,9 @@ void AbilityManagerStub::FirstStepInit()
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_AS_CALLER_FOR_OPTIONS)] =
         &AbilityManagerStub::StartAbilityAsCallerForOptionInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_ADD_CALLER)] =
-        &AbilityManagerStub::StartUISessionAbilityAddCallerInner;
+        &AbilityManagerStub::StartAbilityByUIContentSessionAddCallerInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_SESSION_ABILITY_FOR_OPTIONS)] =
-        &AbilityManagerStub::StartUISessionAbilityForOptionsInner;
+        &AbilityManagerStub::StartAbilityByUIContentSessionForOptionsInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CONNECT_ABILITY)] =
         &AbilityManagerStub::ConnectAbilityInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::DISCONNECT_ABILITY)] =
@@ -614,9 +614,9 @@ int AbilityManagerStub::StartAbilityInner(MessageParcel &data, MessageParcel &re
     return NO_ERROR;
 }
 
-int AbilityManagerStub::StartUISessionAbilityAddCallerInner(MessageParcel &data, MessageParcel &reply)
+int AbilityManagerStub::StartAbilityByUIContentSessionAddCallerInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
@@ -634,20 +634,20 @@ int AbilityManagerStub::StartUISessionAbilityAddCallerInner(MessageParcel &data,
 
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    int32_t result = StartUISessionAbility(*want, callerToken, sessionInfo, userId, requestCode);
+    int32_t result = StartAbilityByUIContentSession(*want, callerToken, sessionInfo, userId, requestCode);
     reply.WriteInt32(result);
     delete want;
     return NO_ERROR;
 }
 
-int AbilityManagerStub::StartUISessionAbilityForOptionsInner(MessageParcel &data, MessageParcel &reply)
+int AbilityManagerStub::StartAbilityByUIContentSessionForOptionsInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::unique_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
     }
-    StartOptions *startOptions = data.ReadParcelable<StartOptions>();
+    std::unique_ptr<StartOptions> startOptions(data.ReadParcelable<StartOptions>());
     if (startOptions == nullptr) {
         HILOG_ERROR("startOptions is nullptr");
         delete want;
@@ -663,7 +663,7 @@ int AbilityManagerStub::StartUISessionAbilityForOptionsInner(MessageParcel &data
     }
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    int32_t result = StartUISessionAbility(*want, *startOptions, callerToken, sessionInfo, userId, requestCode);
+    int32_t result = StartAbilityByUIContentSession(*want, *startOptions, callerToken, sessionInfo, userId, requestCode);
     reply.WriteInt32(result);
     delete want;
     delete startOptions;

@@ -202,7 +202,7 @@ public:
      * @param requestCode Ability request code.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUISessionAbility(
+    ErrCode StartAbilityByUIContentSession(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         const sptr<AAFwk::SessionInfo> &sessionInfo,
@@ -219,7 +219,7 @@ public:
      * @param requestCode the resultCode of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUISessionAbility(
+    ErrCode StartAbilityByUIContentSession(
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,

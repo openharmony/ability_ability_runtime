@@ -33,6 +33,7 @@ public:
     UISessionAbilityResultListener() = default;
     virtual ~UISessionAbilityResultListener() = default;
     virtual void OnAbilityResult(int requestCode, int resultCode, const Want &resultData);
+    virtual bool IsMatch(int requestCode);
     void OnAbilityResultInner(int requestCode, int resultCode, const Want &resultData);
     void SaveResultCallbacks(int requestCode, RuntimeTask&& task);
 private:
@@ -88,9 +89,9 @@ protected:
         bool isAbilityResult = false);
     AsyncTask::ExecuteCallback StartAbilityExecuteCallback(AAFwk::Want& want, size_t& unwrapArgc,
         NativeEngine& engine, NativeCallbackInfo &info, std::shared_ptr<int> &innerErrorCode);
-    RuntimeTask StartAbilityForResultRuntimeTask(NativeEngine& engine, AAFwk::Want& want,
-        std::shared_ptr<AsyncTask> asyncTask, NativeValue* lastParam,
-        std::shared_ptr<AbilityRuntime::Context> &context);
+    void StartAbilityForResultRuntimeTask(NativeEngine& engine, AAFwk::Want &want,
+        std::shared_ptr<AsyncTask> asyncTask, size_t& unwrapArgc,
+        std::shared_ptr<AbilityRuntime::Context> &context, AAFwk::StartOptions startOptions);
     
 private:
     NativeEngine& engine_;
