@@ -18,7 +18,9 @@
 #include <cstddef>
 #include <cstdint>
 
+#define private public
 #include "ability_manager_service.h"
+#undef private
 #include "message_parcel.h"
 #include "securec.h"
 
@@ -33,7 +35,7 @@ const std::u16string ABILITYMGR_INTERFACE_TOKEN = u"ohos.aafwk.AbilityManager";
 
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    uint32_t code = IAbilityManager::REQUEST_DIALOG_SERVICE;
+    uint32_t code = static_cast<uint32_t>(AbilityManagerInterfaceCode::REQUEST_DIALOG_SERVICE);
 
     MessageParcel parcel;
     parcel.WriteInterfaceToken(ABILITYMGR_INTERFACE_TOKEN);
@@ -41,6 +43,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     parcel.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
+    DelayedSingleton<AbilityManagerService>::GetInstance()->Init();
     DelayedSingleton<AbilityManagerService>::GetInstance()->OnRemoteRequest(code, parcel, reply, option);
 
     return true;

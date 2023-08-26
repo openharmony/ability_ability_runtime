@@ -164,6 +164,7 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetMissionIcon_020
     sptr<IRemoteObject> abilityToken = new AbilityManagerStubTestMock();
     std::shared_ptr<OHOS::Media::PixelMap> icon = nullptr;
 
+    EXPECT_TRUE(client_ != nullptr);
     auto result = client_->SetMissionIcon(abilityToken, icon);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_NE(result, ERR_OK);
@@ -344,6 +345,7 @@ HWTEST_F(AbilityManagerClientBranchTest, UnlockMissionForCleanup_0100, TestSize.
  */
 HWTEST_F(AbilityManagerClientBranchTest, RegisterMissionListener_0100, TestSize.Level1)
 {
+    EXPECT_TRUE(client_ != nullptr);
     sptr<IMissionListener> listener = nullptr;
     auto result = client_->RegisterMissionListener(listener);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -373,6 +375,7 @@ HWTEST_F(AbilityManagerClientBranchTest, RegisterMissionListener_0200, TestSize.
  */
 HWTEST_F(AbilityManagerClientBranchTest, UnRegisterMissionListener_0100, TestSize.Level1)
 {
+    EXPECT_TRUE(client_ != nullptr);
     sptr<IMissionListener> listener = nullptr;
     auto result = client_->UnRegisterMissionListener(listener);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -402,6 +405,7 @@ HWTEST_F(AbilityManagerClientBranchTest, UnRegisterMissionListener_0200, TestSiz
  */
 HWTEST_F(AbilityManagerClientBranchTest, GetMissionInfos_0100, TestSize.Level1)
 {
+    EXPECT_TRUE(client_ != nullptr);
     std::string deviceId = "123";
     std::vector<MissionInfo> missionInfos;
     auto result = client_->GetMissionInfos(deviceId, 10, missionInfos);
@@ -418,6 +422,7 @@ HWTEST_F(AbilityManagerClientBranchTest, GetMissionInfos_0100, TestSize.Level1)
  */
 HWTEST_F(AbilityManagerClientBranchTest, GetMissionSnapshot_0100, TestSize.Level1)
 {
+    EXPECT_TRUE(client_ != nullptr);
     std::string deviceId = "123";
     MissionSnapshot snapshot;
     bool isLowResolution = false;
@@ -435,6 +440,7 @@ HWTEST_F(AbilityManagerClientBranchTest, GetMissionSnapshot_0100, TestSize.Level
  */
 HWTEST_F(AbilityManagerClientBranchTest, CleanMission_0100, TestSize.Level1)
 {
+    EXPECT_TRUE(client_ != nullptr);
     auto result = client_->CleanMission(10);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         EXPECT_EQ(result, ERR_OK);
@@ -450,7 +456,9 @@ HWTEST_F(AbilityManagerClientBranchTest, CleanMission_0100, TestSize.Level1)
 HWTEST_F(AbilityManagerClientBranchTest, CleanAllMissions_0100, TestSize.Level1)
 {
     auto result = client_->CleanAllMissions();
-    EXPECT_EQ(result, ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(result, ERR_OK);
+    }
 }
 
 /**
@@ -1026,10 +1034,15 @@ HWTEST_F(AbilityManagerClientBranchTest, CallRequestDone_0100, TestSize.Level1)
 HWTEST_F(AbilityManagerClientBranchTest, IsValidMissionIds_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "IsValidMissionIds_0100 start";
+    EXPECT_TRUE(client_ != nullptr);
     std::vector<int32_t> missionIds;
     std::vector<MissionVaildResult> results;
-    EXPECT_CALL(*mock_, IsValidMissionIds(_, _)).Times(1).WillOnce(Return(ERR_OK));
-    EXPECT_EQ(client_->IsValidMissionIds(missionIds, results), ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_CALL(*mock_, IsValidMissionIds(_, _)).Times(1).WillOnce(Return(ERR_OK));
+        EXPECT_EQ(client_->IsValidMissionIds(missionIds, results), ERR_OK);
+        EXPECT_CALL(*mock_, IsValidMissionIds(_, _)).Times(1).WillOnce(Return(ERR_OK));
+        EXPECT_EQ(client_->IsValidMissionIds(missionIds, results), ERR_OK);
+    }
     GTEST_LOG_(INFO) << "IsValidMissionIds_0100 end";
 }
 
@@ -1150,7 +1163,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartAbilityByCall_002, TestSize.Level1
  */
 HWTEST_F(AbilityManagerClientBranchTest, StartUIAbilityBySCB_001, TestSize.Level1)
 {
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
+    EXPECT_EQ(client_->StartUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
 }
 
 /**
@@ -1161,7 +1174,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartUIAbilityBySCB_001, TestSize.Level
 HWTEST_F(AbilityManagerClientBranchTest, StartUIAbilityBySCB_002, TestSize.Level1)
 {
     sptr<SessionInfo> sessionInfo(new SessionInfo());
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
+    EXPECT_EQ(client_->StartUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
 }
 
 /**
@@ -1174,7 +1187,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartUIAbilityBySCB_003, TestSize.Level
     Rosen::SessionInfo info;
     sptr<SessionInfo> sessionInfo(new SessionInfo());
     sessionInfo->sessionToken = new Rosen::Session(info);
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->StartUIAbilityBySCB(sessionInfo),
+    EXPECT_EQ(client_->StartUIAbilityBySCB(sessionInfo),
         ERR_WRONG_INTERFACE_CALL);
 }
 
@@ -1185,7 +1198,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartUIAbilityBySCB_003, TestSize.Level
  */
 HWTEST_F(AbilityManagerClientBranchTest, MinimizeUIAbilityBySCB_001, TestSize.Level1)
 {
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
+    EXPECT_EQ(client_->MinimizeUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
 }
 
 /**
@@ -1196,7 +1209,7 @@ HWTEST_F(AbilityManagerClientBranchTest, MinimizeUIAbilityBySCB_001, TestSize.Le
 HWTEST_F(AbilityManagerClientBranchTest, MinimizeUIAbilityBySCB_002, TestSize.Level1)
 {
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
+    EXPECT_EQ(client_->MinimizeUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
 }
 
 /**
@@ -1209,7 +1222,7 @@ HWTEST_F(AbilityManagerClientBranchTest, MinimizeUIAbilityBySCB_003, TestSize.Le
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
     Rosen::SessionInfo info;
     sessionInfo->sessionToken = new (std::nothrow) Rosen::Session(info);
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->MinimizeUIAbilityBySCB(sessionInfo), ERR_WRONG_INTERFACE_CALL);
+    EXPECT_EQ(client_->MinimizeUIAbilityBySCB(sessionInfo), ERR_WRONG_INTERFACE_CALL);
 }
 
 /**
@@ -1219,7 +1232,7 @@ HWTEST_F(AbilityManagerClientBranchTest, MinimizeUIAbilityBySCB_003, TestSize.Le
  */
 HWTEST_F(AbilityManagerClientBranchTest, CloseUIAbilityBySCB_001, TestSize.Level1)
 {
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
+    EXPECT_EQ(client_->CloseUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
 }
 
 /**
@@ -1230,7 +1243,7 @@ HWTEST_F(AbilityManagerClientBranchTest, CloseUIAbilityBySCB_001, TestSize.Level
 HWTEST_F(AbilityManagerClientBranchTest, CloseUIAbilityBySCB_002, TestSize.Level1)
 {
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
+    EXPECT_EQ(client_->CloseUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
 }
 
 /**
@@ -1243,7 +1256,7 @@ HWTEST_F(AbilityManagerClientBranchTest, CloseUIAbilityBySCB_003, TestSize.Level
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
     Rosen::SessionInfo info;
     sessionInfo->sessionToken = new (std::nothrow) Rosen::Session(info);
-    EXPECT_EQ(AbilityManagerClient::GetInstance()->CloseUIAbilityBySCB(sessionInfo), ERR_WRONG_INTERFACE_CALL);
+    EXPECT_EQ(client_->CloseUIAbilityBySCB(sessionInfo), ERR_WRONG_INTERFACE_CALL);
 }
 
 /**
@@ -1320,6 +1333,7 @@ HWTEST_F(AbilityManagerClientBranchTest, ConnectUIExtensionAbility_0100, TestSiz
  */
 HWTEST_F(AbilityManagerClientBranchTest, GetMissionInfo_0100, TestSize.Level1)
 {
+    EXPECT_TRUE(client_ != nullptr);
     std::string deviceId = "123";
     int32_t missionId = 1;
     MissionInfo missionInfo;
@@ -1430,7 +1444,7 @@ HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetSessionManagerS
 HWTEST_F(AbilityManagerClientBranchTest, ReportDrawnCompleted_0100, TestSize.Level1)
 {
     sptr<IRemoteObject> callerToken = nullptr;
-    auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
+    auto result = client_->ReportDrawnCompleted(callerToken);
     EXPECT_EQ(result, INNER_ERR);
 }
 
@@ -1443,7 +1457,7 @@ HWTEST_F(AbilityManagerClientBranchTest, ReportDrawnCompleted_0200, TestSize.Lev
 {
     sptr<IRemoteObject> callerToken = new AbilityManagerStubTestMock();
     EXPECT_NE(callerToken, nullptr);
-    auto result = AbilityManagerClient::GetInstance()->ReportDrawnCompleted(callerToken);
+    auto result = client_->ReportDrawnCompleted(callerToken);
     EXPECT_EQ(result, INNER_ERR);
 }
 
@@ -1461,6 +1475,39 @@ HWTEST_F(AbilityManagerClientBranchTest, GetElementNameByToken_0100, TestSize.Le
 }
 
 /**
+ * @tc.name: AbilityManagerClient_StartAbilityByUIContentSession_0100
+ * @tc.desc: StartAbilityByUIContentSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, StartAbilityByUIContentSession_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartAbilityByUIContentSession_0100 start";
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
+    EXPECT_EQ(client_->StartAbilityByUIContentSession(want, callerToken, sessionInfo),
+        ERR_OK);
+    GTEST_LOG_(INFO) << "StartUIExtensionAbility_0100 end";
+}
+
+/**
+ * @tc.name: AbilityManagerClient_StartAbilityByUIContentSession_0100
+ * @tc.desc: StartAbilityByUIContentSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, StartAbilityByUIContentSession_0200, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "StartAbilityByUIContentSession_0200 start";
+    Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    const sptr<AAFwk::SessionInfo> sessionInfo = nullptr;
+    StartOptions startOptions;
+    EXPECT_EQ(client_->StartAbilityByUIContentSession(want, startOptions, callerToken, sessionInfo),
+        ERR_OK);
+    GTEST_LOG_(INFO) << "StartUIExtensionAbility_0200 end";
+}
+
+/**
  * @tc.number: NotifySaveAsResult_0100
  * @tc.name: NotifySaveAsResult
  * @tc.desc: The caller is expected to be dlp manager.
@@ -1468,7 +1515,7 @@ HWTEST_F(AbilityManagerClientBranchTest, GetElementNameByToken_0100, TestSize.Le
 HWTEST_F(AbilityManagerClientBranchTest, NotifySaveAsResult_0100, TestSize.Level1)
 {
     Want want;
-    auto result = AbilityManagerClient::GetInstance()->NotifySaveAsResult(want, 0, 0);
+    auto result = client_->NotifySaveAsResult(want, 0, 0);
     EXPECT_EQ(result, ERR_INVALID_CALLER);
 }
 
@@ -1481,7 +1528,7 @@ HWTEST_F(AbilityManagerClientBranchTest, PrepareTerminateAbility_0100, TestSize.
 {
     sptr<IRemoteObject> token = nullptr;
     sptr<IPrepareTerminateCallback> callback = nullptr;
-    auto result = AbilityManagerClient::GetInstance()->PrepareTerminateAbility(token, callback);
+    auto result = client_->PrepareTerminateAbility(token, callback);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
@@ -1494,7 +1541,7 @@ HWTEST_F(AbilityManagerClientBranchTest, PrepareTerminateAbilityBySCB_0100, Test
 {
     sptr<SessionInfo> sessionInfo = nullptr;
     bool isPrepareTerminate = false;
-    auto result = AbilityManagerClient::GetInstance()->PrepareTerminateAbilityBySCB(sessionInfo, isPrepareTerminate);
+    auto result = client_->PrepareTerminateAbilityBySCB(sessionInfo, isPrepareTerminate);
     EXPECT_EQ(result, INNER_ERR);
 }
 }  // namespace AAFwk
