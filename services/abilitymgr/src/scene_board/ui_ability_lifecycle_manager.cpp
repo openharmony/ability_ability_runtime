@@ -451,6 +451,11 @@ void UIAbilityLifecycleManager::UpdateAbilityRecordLaunchReason(
         return;
     }
 
+    if (abilityRequest.IsAcquireShareData()) {
+        abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_SHARE);
+        return;
+    }
+
     abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
     return;
 }
@@ -1644,7 +1649,7 @@ void UIAbilityLifecycleManager::Dump(std::vector<std::string> &info)
     int userId = DelayedSingleton<AbilityManagerService>::GetInstance()->GetUserId();
     std::string dumpInfo = "User ID #" + std::to_string(userId);
     info.push_back(dumpInfo);
-    dumpInfo = " current session lists:{";
+    dumpInfo = "  current mission lists:{";
     info.push_back(dumpInfo);
 
     for (const auto& [sessionId, abilityRecord] : sessionAbilityMapLocked) {
@@ -1657,12 +1662,12 @@ void UIAbilityLifecycleManager::Dump(std::vector<std::string> &info)
         }
         
         sptr<SessionInfo> sessionInfo = abilityRecord->GetSessionInfo();
-        dumpInfo = "  Session ID #" + std::to_string(sessionId);
+        dumpInfo = "    Mission ID #" + std::to_string(sessionId);
         if (sessionInfo) {
-            dumpInfo += "  session name #[" + sessionInfo->sessionName + "]";
+            dumpInfo += "  mission name #[" + sessionInfo->sessionName + "]";
         }
         dumpInfo += "  lockedState #" + std::to_string(abilityRecord->GetLockedState());
-        dumpInfo += "  session affinity #[" + abilityRecord->GetMissionAffinity() + "]";
+        dumpInfo += "  mission affinity #[" + abilityRecord->GetMissionAffinity() + "]";
         info.push_back(dumpInfo);
 
         abilityRecord->Dump(info);
@@ -1685,7 +1690,7 @@ void UIAbilityLifecycleManager::DumpMissionList(
     }
     std::string dumpInfo = "User ID #" + std::to_string(userId);
     info.push_back(dumpInfo);
-    dumpInfo = " current session lists:{";
+    dumpInfo = "  current mission lists:{";
     info.push_back(dumpInfo);
 
     for (const auto& [sessionId, abilityRecord] : sessionAbilityMapLocked) {
@@ -1697,12 +1702,12 @@ void UIAbilityLifecycleManager::DumpMissionList(
             continue;
         }
         sptr<SessionInfo> sessionInfo = abilityRecord->GetSessionInfo();
-        dumpInfo = "  Session ID #" + std::to_string(sessionId);
+        dumpInfo = "    Mission ID #" + std::to_string(sessionId);
         if (sessionInfo) {
-            dumpInfo += "  session name #[" + sessionInfo->sessionName + "]";
+            dumpInfo += "  mission name #[" + sessionInfo->sessionName + "]";
         }
         dumpInfo += "  lockedState #" + std::to_string(abilityRecord->GetLockedState());
-        dumpInfo += "  session affinity #[" + abilityRecord->GetMissionAffinity() + "]";
+        dumpInfo += "  mission affinity #[" + abilityRecord->GetMissionAffinity() + "]";
         info.push_back(dumpInfo);
 
         std::vector<std::string> params;
@@ -1726,7 +1731,7 @@ void UIAbilityLifecycleManager::DumpMissionListByRecordId(std::vector<std::strin
     }
     std::string dumpInfo = "User ID #" + std::to_string(userId);
     info.push_back(dumpInfo);
-    dumpInfo = " current session lists:{";
+    dumpInfo = "  current mission lists:{";
     info.push_back(dumpInfo);
 
     for (const auto& [sessionId, abilityRecord] : sessionAbilityMapLocked) {
@@ -1738,12 +1743,12 @@ void UIAbilityLifecycleManager::DumpMissionListByRecordId(std::vector<std::strin
             continue;
         }
         sptr<SessionInfo> sessionInfo = abilityRecord->GetSessionInfo();
-        dumpInfo = "  Session ID #" + std::to_string(sessionId);
+        dumpInfo = "    Mission ID #" + std::to_string(sessionId);
         if (sessionInfo) {
-            dumpInfo += "  session name #[" + sessionInfo->sessionName + "]";
+            dumpInfo += "  mission name #[" + sessionInfo->sessionName + "]";
         }
         dumpInfo += "  lockedState #" + std::to_string(abilityRecord->GetLockedState());
-        dumpInfo += "  session affinity #[" + abilityRecord->GetMissionAffinity() + "]";
+        dumpInfo += "  mission affinity #[" + abilityRecord->GetMissionAffinity() + "]";
         info.push_back(dumpInfo);
 
         std::vector<std::string> params;
@@ -1754,5 +1759,15 @@ void UIAbilityLifecycleManager::DumpMissionListByRecordId(std::vector<std::strin
     }
 }
 
+int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId) const
+{
+    CHECK_POINTER_AND_RETURN(rootSceneSession_, ERR_INVALID_VALUE);
+    std::shared_ptr<AbilityRecord> abilityRecord = GetAbilityRecordsById(sessionId);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    sptr<SessionInfo> sessionInfo = abilityRecord->GetSessionInfo();
+    CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
+    HILOG_INFO("Call PendingSessionActivation by rootSceneSession.");
+    return static_cast<int>(rootSceneSession_->PendingSessionActivation(sessionInfo));
+}
 }  // namespace AAFwk
 }  // namespace OHOS
