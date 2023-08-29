@@ -66,7 +66,7 @@ void Extension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInf
 }
 
 void Extension::OnStopCallBack()
-{   
+{
 }
 
 sptr<IRemoteObject> Extension::OnConnect(const AAFwk::Want &want)
