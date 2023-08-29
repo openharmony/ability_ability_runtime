@@ -243,12 +243,12 @@ void JsUIExtension::OnStop(AppExecFwk::AbilityTransactionCallbackInfo<> *callbac
 
     std::weak_ptr<Extension> weakPtr = shared_from_this();
     auto asyncCallback = [extensionWeakPtr = weakPtr]() {
-        auto js_ui_extension = extensionWeakPtr.lock();
-        if (js_ui_extension == nullptr) {
+        auto jsUIExtension = extensionWeakPtr.lock();
+        if (jsUIExtension == nullptr) {
             HILOG_ERROR("extension is nullptr.");
             return;
         }
-        js_ui_extension->OnStopCallBack();
+        jsUIExtension->OnStopCallBack();
     };
     callbackInfo->Push(asyncCallback);
     isAsyncCallback = CallPromise(result, callbackInfo);
@@ -269,8 +269,8 @@ void JsUIExtension::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        std::shared_ptr<NativeReference> shared_jsObj_ = std::move(jsObj_);
-        applicationContext->DispatchOnAbilityDestroy(shared_jsObj_);
+        std::shared_ptr<NativeReference> sharedJsObj = std::move(jsObj_);
+        applicationContext->DispatchOnAbilityDestroy(sharedJsObj);
     }
 }
 
@@ -526,10 +526,10 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
 
 NativeValue *JsUIExtension::CallObjectMethod(const char *name, NativeValue *const *argv, size_t argc, bool withResult)
 {
-    HILOG_DEBUG("JsAbility::CallObjectMethod(%{public}s", name);
+    HILOG_DEBUG("JsUIExtension CallObjectMethod(%{public}s), begin", name);
 
     if (!jsObj_) {
-        HILOG_WARN("Not found Ability.js");
+        HILOG_ERROR("Not found UIExtension.js");
         return nullptr;
     }
 
@@ -539,18 +539,19 @@ NativeValue *JsUIExtension::CallObjectMethod(const char *name, NativeValue *cons
     NativeValue *value = jsObj_->Get();
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        HILOG_ERROR("Failed to get Ability object");
+        HILOG_ERROR("Failed to get UIExtension object");
         return nullptr;
     }
 
     NativeValue *methodOnCreate = obj->GetProperty(name);
     if (methodOnCreate == nullptr) {
-        HILOG_ERROR("Failed to get '%{public}s' from Ability object", name);
+         HILOG_ERROR("Failed to get '%{public}s' from UIExtension object", name);
         return nullptr;
     }
     if (withResult) {
         return handleEscape.Escape(nativeEngine.CallFunction(value, methodOnCreate, argv, argc));
     }
+    HILOG_DEBUG("JsUIExtension CallFunction(%{public}s), success", name);
     nativeEngine.CallFunction(value, methodOnCreate, argv, argc);
     return nullptr;
 }
