@@ -460,6 +460,59 @@ NativeValue *JsApplicationContextUtils::OnKillProcessBySelf(NativeEngine &engine
     return result;
 }
 
+NativeValue *JsApplicationContextUtils::SetColorMode(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsApplicationContextUtils *me =
+        CheckParamsAndGetThis<JsApplicationContextUtils>(engine, info, APPLICATION_CONTEXT_NAME);
+    return me != nullptr ? me->OnSetColorMode(*engine, *info) : nullptr;
+}
+
+NativeValue *JsApplicationContextUtils::OnSetColorMode(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        HILOG_ERROR("Not enough params");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        HILOG_WARN("applicationContext is already released");
+        return engine.CreateUndefined();
+    }
+
+    NativeValue* lastParam = info.argv[INDEX_ZERO];
+    applicationContext->SetColorMode(lastParam);
+    return engine.CreateUndefined();
+}
+
+NativeValue *JsApplicationContextUtils::SetLanguage(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    JsApplicationContextUtils *me =
+        CheckParamsAndGetThis<JsApplicationContextUtils>(engine, info, APPLICATION_CONTEXT_NAME);
+    return me != nullptr ? me->OnSetLanguage(*engine, *info) : nullptr;
+}
+
+NativeValue *JsApplicationContextUtils::OnSetLanguage(NativeEngine *engine, NativeCallbackInfo *info)
+{
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        HILOG_ERROR("Not enough params");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        HILOG_WARN("applicationContext is already released");
+        return engine.CreateUndefined();
+    }
+
+    NativeValue* lastParam = info.argv[INDEX_ZERO];
+    applicationContext->SetLanguage(lastParam);
+    return engine.CreateUndefined();
+}
+
+
 NativeValue *JsApplicationContextUtils::GetRunningProcessInformation(NativeEngine *engine, NativeCallbackInfo *info)
 {
     JsApplicationContextUtils *me =
@@ -972,7 +1025,7 @@ NativeValue *JsApplicationContextUtils::OnOffEnvironmentEventSync(
     NativeEngine &engine, const NativeCallbackInfo &info, int32_t callbackId)
 {
     HILOG_DEBUG("called");
-    
+
     auto applicationContext = applicationContext_.lock();
     if (applicationContext == nullptr) {
         HILOG_ERROR("ApplicationContext is nullptr.");
@@ -1174,6 +1227,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(NativeEngine &engin
     BindNativeFunction(engine, *object, "getApplicationContext", MD_NAME,
         JsApplicationContextUtils::GetApplicationContext);
     BindNativeFunction(engine, *object, "killAllProcesses", MD_NAME, JsApplicationContextUtils::KillProcessBySelf);
+    BindNativeFunction(engine, *object, "setColorMode", MD_NAME, JsApplicationContextUtils::SetColorMode);
+    BindNativeFunction(engine, *object, "setLanguage", MD_NAME, JsApplicationContextUtils::SetLanguage);
     BindNativeFunction(engine, *object, "getProcessRunningInformation", MD_NAME,
         JsApplicationContextUtils::GetRunningProcessInformation);
     BindNativeFunction(engine, *object, "getRunningProcessInformation", MD_NAME,
