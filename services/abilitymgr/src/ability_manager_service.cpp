@@ -67,6 +67,7 @@
 #include "system_ability_token_callback.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
+#include "xcollie/watchdog.h"
 
 #ifdef SUPPORT_GRAPHICS
 #include "application_anr_listener.h"
@@ -299,6 +300,7 @@ void AbilityManagerService::OnStart()
 
 bool AbilityManagerService::Init()
 {
+    HiviewDFX::Watchdog::GetInstance().InitFfrtWatchdog(); // For ffrt watchdog available in foundation
     taskHandler_ = TaskHandlerWrap::CreateQueueHandler(AbilityConfig::NAME_ABILITY_MGR_SERVICE);
     eventHandler_ = std::make_shared<AbilityEventHandler>(taskHandler_, weak_from_this());
     freeInstallManager_ = std::make_shared<FreeInstallManager>(weak_from_this());
@@ -4443,7 +4445,7 @@ int AbilityManagerService::GenerateAbilityRequest(
             HILOG_ERROR("collaborator: notify broker start ability failed");
             return ERR_COLLABORATOR_NOTIFY_FAILED;
         }
-        
+
         IN_PROCESS_CALL_WITHOUT_RET(bms->QueryAbilityInfo(request.want, abilityInfoFlag, userId, request.abilityInfo));
 
         if (request.want.GetBoolParam(KEY_VISIBLE_ID, false) && !request.abilityInfo.visible) {
@@ -6753,7 +6755,7 @@ int AbilityManagerService::SetMissionContinueState(const sptr<IRemoteObject> &to
         HILOG_ERROR("SetMissionContinueState failed to get missionId. State: %{public}d", state);
         return ERR_INVALID_VALUE;
     }
-   
+
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     if (!abilityRecord) {
         HILOG_ERROR("SetMissionContinueState: No such ability record. Mission id: %{public}d, state: %{public}d",
@@ -6776,7 +6778,7 @@ int AbilityManagerService::SetMissionContinueState(const sptr<IRemoteObject> &to
             missionId, state);
         return -1;
     }
- 
+
     auto setResult = missionListManager->SetMissionContinueState(token, missionId, state);
     if (setResult != ERR_OK) {
         HILOG_ERROR("missionListManager set failed, result: %{public}d, mission id: %{public}d, state: %{public}d",
