@@ -544,7 +544,7 @@ NativeValue *JsUIExtension::CallObjectMethod(const char *name, NativeValue *cons
     }
 
     NativeValue *methodOnCreate = obj->GetProperty(name);
-    if (methodOnCreate == nullptr) {
+    if (methodOnCreate == nullptr || methodOnCreate->TypeOf() != NATIVE_FUNCTION) {
         HILOG_ERROR("Failed to get '%{public}s' from UIExtension object", name);
         return nullptr;
     }
