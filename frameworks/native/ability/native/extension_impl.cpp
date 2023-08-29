@@ -197,13 +197,13 @@ void ExtensionImpl::Stop(bool &isAsyncCallback)
         return;
     }
     std::weak_ptr<ExtensionImpl> weakPtr = shared_from_this();
-    auto asyncCallback = [ExtensionImplWeakPtr = weakPtr, state = AAFwk::ABILITY_STATE_INITIAL, this]() {
+    auto asyncCallback = [ExtensionImplWeakPtr = weakPtr, state = AAFwk::ABILITY_STATE_INITIAL]() {
         auto extensionImpl = ExtensionImplWeakPtr.lock();
         if (extensionImpl == nullptr) {
             HILOG_ERROR("extensionImpl is nullptr.");
             return;
         }
-        lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
+        extensionImpl->lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
         extensionImpl->AbilityTransactionCallback(state);
     };
     callbackInfo->Push(asyncCallback);
