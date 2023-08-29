@@ -150,15 +150,15 @@ void ApplicationImpl::PerformMemoryLevel(int level)
 void ApplicationImpl::PerformConfigurationUpdated(const Configuration &config)
 {
     HILOG_DEBUG("ApplicationImpl::PerformConfigurationUpdated called");
+    if (application_ == nullptr) {
+        HILOG_DEBUG("application is empty");
+        return;
+    }
     auto currentConfig = GetConfiguration();
     std::string language;
     std::string colormode;
     language = currentConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     colormode = currentConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    if (application_ == nullptr) {
-        HILOG_DEBUG("application is empty");
-        return;
-    }
     if (!language.empty() && (!colormode.empty() && ConvertColorMode(colormode) != ModuleColorMode::AUTO)) {
         HILOG_DEBUG("language or colormode has been set");
         return;
