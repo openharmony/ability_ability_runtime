@@ -421,6 +421,20 @@ void ApplicationContext::SwitchArea(int mode)
     }
 }
 
+void ApplicationContext::SetColorMode(int colorMode)
+{
+    if (contextImpl_ != nullptr) {
+        contextImpl_->SetColorMode(colorMode);
+    }
+}
+
+void ApplicationContext::SetLanguage(const std::string language)
+{
+    if (contextImpl_ != nullptr) {
+        contextImpl_->SetLanguage(language);
+    }
+}
+
 int ApplicationContext::GetArea()
 {
     if (contextImpl_ == nullptr) {

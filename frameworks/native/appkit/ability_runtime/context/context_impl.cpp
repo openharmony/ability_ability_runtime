@@ -357,7 +357,7 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
         }
         appContext->InitHapModuleInfo(*info);
     }
-    
+
     appContext->SetConfiguration(config_);
     InitResourceManager(bundleInfo, appContext, GetBundleName() == bundleName, moduleName);
     appContext->SetApplicationInfo(std::make_shared<AppExecFwk::ApplicationInfo>(bundleInfo.applicationInfo));
@@ -771,6 +771,36 @@ void ContextImpl::KillProcessBySelf()
     appMgrClient->KillApplicationSelf();
 }
 
+void ContextImpl::SetColorMode(int colorMode)
+{
+    HILOG_DEBUG("ContextImpl::SetColorMode, colorMode:%{public}d.", colorMode);
+    if (mode < -1 || mode > 1) {
+        HILOG_ERROR("ContextImpl::SetColorMode, colorMode is invalid.");
+        return;
+    }
+    AppExecFwk::Configuration config = nullptr;
+    if (colorMode == static_cast<int>(ModuleColorMode::DARK)) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_DARK);
+    } else if (colorMode == static_cast<int>(ModuleColorMode::LIGHT)) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_LIGHT);
+    } else {  // default use AUTO
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_AUTO);
+    }
+    HILOG_DEBUG("ContextImpl::SetColorMode end, colorMode:%{public}s.", config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
+
+    OHOSApplication::OnConfigurationUpdated(config);
+}
+
+void ContextImpl::SetLanguage(const std::string language)
+{
+    HILOG_DEBUG("ContextImpl::SetLanguage, language:%{public}s.", language);
+    AppExecFwk::Configuration config = nullptr;
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+    HILOG_DEBUG("ContextImpl::SetLanguage end, language:%{public}s.", config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+
+    OHOSApplication::OnConfigurationUpdated(config);
+}
+
 int32_t ContextImpl::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
 {
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
@@ -902,7 +932,7 @@ void ContextImpl::OnOverlayChanged(const EventFwk::CommonEventData &data,
     if (res != ERR_OK) {
         return;
     }
-    
+
     // 2.add/remove overlay hapPath
     if (loadPath.empty() || overlayModuleInfos.size() == 0) {
         HILOG_WARN("There is not any hapPath in overlayModuleInfo");
