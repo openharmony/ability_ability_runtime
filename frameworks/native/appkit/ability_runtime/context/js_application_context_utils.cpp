@@ -467,7 +467,7 @@ NativeValue *JsApplicationContextUtils::SetColorMode(NativeEngine *engine, Nativ
     return me != nullptr ? me->OnSetColorMode(*engine, *info) : nullptr;
 }
 
-NativeValue *JsApplicationContextUtils::OnSetColorMode(NativeEngine *engine, NativeCallbackInfo *info)
+NativeValue *JsApplicationContextUtils::OnSetColorMode(NativeEngine &engine, NativeCallbackInfo &info)
 {
     // only support one params
     if (info.argc == ARGC_ZERO) {
@@ -481,8 +481,12 @@ NativeValue *JsApplicationContextUtils::OnSetColorMode(NativeEngine *engine, Nat
         return engine.CreateUndefined();
     }
 
-    NativeValue* lastParam = info.argv[INDEX_ZERO];
-    applicationContext->SetColorMode(lastParam);
+    int colorMode = 0;
+    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], colorMode)) {
+        HILOG_ERROR("Parse colorMode failed");
+        return engine.CreateUndefined();
+    }
+    applicationContext->SetColorMode(colorMode);
     return engine.CreateUndefined();
 }
 
@@ -493,7 +497,7 @@ NativeValue *JsApplicationContextUtils::SetLanguage(NativeEngine *engine, Native
     return me != nullptr ? me->OnSetLanguage(*engine, *info) : nullptr;
 }
 
-NativeValue *JsApplicationContextUtils::OnSetLanguage(NativeEngine *engine, NativeCallbackInfo *info)
+NativeValue *JsApplicationContextUtils::OnSetLanguage(NativeEngine &engine, NativeCallbackInfo &info)
 {
     // only support one params
     if (info.argc == ARGC_ZERO) {
@@ -506,9 +510,13 @@ NativeValue *JsApplicationContextUtils::OnSetLanguage(NativeEngine *engine, Nati
         HILOG_WARN("applicationContext is already released");
         return engine.CreateUndefined();
     }
-
-    NativeValue* lastParam = info.argv[INDEX_ZERO];
-    applicationContext->SetLanguage(lastParam);
+    std::string language;
+    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], language)) {
+        HILOG_ERROR("Parse language failed");
+        AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return engine.CreateUndefined();
+    }
+    applicationContext->SetLanguage(language);
     return engine.CreateUndefined();
 }
 

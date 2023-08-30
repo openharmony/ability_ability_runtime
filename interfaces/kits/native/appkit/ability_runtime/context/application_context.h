@@ -79,6 +79,8 @@ public:
     sptr<IRemoteObject> GetToken() override;
     void SetToken(const sptr<IRemoteObject> &token) override;
     void SwitchArea(int mode) override;
+    void SetColorMode(int colorMode);
+    void SetLanguage(std::string language);
     int GetArea() override;
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() const override;
     std::string GetBaseDir() const override;
