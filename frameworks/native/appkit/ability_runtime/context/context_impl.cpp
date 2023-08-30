@@ -35,7 +35,6 @@
 #include "overlay_event_subscriber.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
-#include "ohos_application.h"
 #include "running_process_info.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
@@ -793,7 +792,7 @@ void ContextImpl::SetColorMode(int colorMode)
     HILOG_DEBUG("ContextImpl::SetColorMode end, colorMode:%{public}s.",
                  config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE).c_str());
 
-    OHOSApplication::OnConfigurationUpdated(config);
+    AppExecFwk::OHOSApplication::OnConfigurationUpdated(config);
 }
 
 void ContextImpl::SetLanguage(std::string language)
@@ -804,7 +803,7 @@ void ContextImpl::SetLanguage(std::string language)
     HILOG_DEBUG("ContextImpl::SetLanguage end, language:%{public}s.",
                 config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE).c_str());
 
-    OHOSApplication::OnConfigurationUpdated(config);
+    //AppExecFwk::OHOSApplication::OnConfigurationUpdated(config);
 }
 
 int32_t ContextImpl::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
