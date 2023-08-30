@@ -18,6 +18,8 @@
 #include "hilog_wrapper.h"
 #include "ohos_application.h"
 #include "uri_permission_manager_client.h"
+#include "configuration_convertor.h"
+#include "configuration.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -150,25 +152,26 @@ void ApplicationImpl::PerformMemoryLevel(int level)
 void ApplicationImpl::PerformConfigurationUpdated(const Configuration &config)
 {
     HILOG_DEBUG("ApplicationImpl::PerformConfigurationUpdated called");
-    if (application_ == nullptr) {
+    if (application_ != nullptr) {
         HILOG_DEBUG("application is empty");
-        return;
+        application_->OnConfigurationUpdated(config);
     }
-    auto currentConfig = GetConfiguration();
-    std::string language;
-    std::string colormode;
-    language = currentConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
-    colormode = currentConfig.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    if (!language.empty() && (!colormode.empty() && ConvertColorMode(colormode) != ModuleColorMode::AUTO)) {
-        HILOG_DEBUG("language or colormode has been set");
-        return;
-    } else if (!language.empty()) {
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
-    } else {
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, colormode);
-    }
+    // //Configuration currentConfig = configuration_;
+    // std::string language;
+    // std::string colormode;
+    // language = configuration_.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    // colormode = configuration_.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    // if (!language.empty() && !colormode.empty()) {
+    //     HILOG_DEBUG("language and colormode has been set");
+    //     return;
+    // }
+    // // else if (!language.empty()) {
+    // //     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+    // // } else {
+    // //     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, colormode);
+    // // }
 
-    application_->OnConfigurationUpdated(config);
+    // application_->OnConfigurationUpdated(config);
 }
 
 /**
