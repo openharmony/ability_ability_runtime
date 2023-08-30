@@ -1051,7 +1051,7 @@ NativeValue* JsApplicationContextUtils::CreateJsApplicationContext(NativeEngine 
 
     if (!applicationContext->GetApplicationInfoUpdateFlag()) {
         std::shared_ptr<NativeReference> applicationContextObj =
-            ApplicationContextManager::GetApplicationContextManager().GetGlobalObject();
+            ApplicationContextManager::GetApplicationContextManager().GetGlobalObject(engine);
         if (applicationContextObj != nullptr) {
             NativeValue* objValue = applicationContextObj->Get();
             return objValue;
@@ -1082,7 +1082,7 @@ NativeValue* JsApplicationContextUtils::CreateJsApplicationContext(NativeEngine 
     BindNativeApplicationContext(engine, object);
 
     ApplicationContextManager::GetApplicationContextManager()
-        .AddGlobalObject(std::shared_ptr<NativeReference>(engine.CreateReference(objValue, 1)));
+        .AddGlobalObject(engine, std::shared_ptr<NativeReference>(engine.CreateReference(objValue, 1)));
     applicationContext->SetApplicationInfoUpdateFlag(false);
 
     return objValue;
