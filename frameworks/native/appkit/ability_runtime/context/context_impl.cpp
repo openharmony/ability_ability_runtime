@@ -35,6 +35,7 @@
 #include "overlay_event_subscriber.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
+#include "ohos_application.h"
 #include "running_process_info.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
@@ -774,29 +775,34 @@ void ContextImpl::KillProcessBySelf()
 void ContextImpl::SetColorMode(int colorMode)
 {
     HILOG_DEBUG("ContextImpl::SetColorMode, colorMode:%{public}d.", colorMode);
-    if (mode < -1 || mode > 1) {
+    if (colorMode < -1 || colorMode > 1) {
         HILOG_ERROR("ContextImpl::SetColorMode, colorMode is invalid.");
         return;
     }
-    AppExecFwk::Configuration config = nullptr;
-    if (colorMode == static_cast<int>(ModuleColorMode::DARK)) {
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_DARK);
-    } else if (colorMode == static_cast<int>(ModuleColorMode::LIGHT)) {
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_LIGHT);
+    AppExecFwk::Configuration config;
+    if (colorMode == static_cast<int>(AppExecFwk::ModuleColorMode::DARK)) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+                       AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
+    } else if (colorMode == static_cast<int>(AppExecFwk::ModuleColorMode::LIGHT)) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+                       AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
     } else {  // default use AUTO
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_AUTO);
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
+                       AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
     }
-    HILOG_DEBUG("ContextImpl::SetColorMode end, colorMode:%{public}s.", config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE));
+    HILOG_DEBUG("ContextImpl::SetColorMode end, colorMode:%{public}s.",
+                 config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE).c_str());
 
     OHOSApplication::OnConfigurationUpdated(config);
 }
 
-void ContextImpl::SetLanguage(const std::string language)
+void ContextImpl::SetLanguage(std::string language)
 {
-    HILOG_DEBUG("ContextImpl::SetLanguage, language:%{public}s.", language);
-    AppExecFwk::Configuration config = nullptr;
+    HILOG_DEBUG("ContextImpl::SetLanguage, language:%{public}s.", language.c_str());
+    AppExecFwk::Configuration config;
     config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
-    HILOG_DEBUG("ContextImpl::SetLanguage end, language:%{public}s.", config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE));
+    HILOG_DEBUG("ContextImpl::SetLanguage end, language:%{public}s.",
+                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE).c_str());
 
     OHOSApplication::OnConfigurationUpdated(config);
 }

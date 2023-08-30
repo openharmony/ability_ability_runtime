@@ -97,8 +97,8 @@ public:
     static NativeValue* GetBundleCodeDir(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* GetApplicationContext(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* KillProcessBySelf(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue* SetColorMode(NativeEngine &engine, NativeCallbackInfo *info);
-    static NativeValue* SetLanguage(NativeEngine &engine, NativeCallbackInfo *info);
+    static NativeValue* SetColorMode(NativeEngine *engine, NativeCallbackInfo *info);
+    static NativeValue* SetLanguage(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* GetRunningProcessInformation(NativeEngine *engine, NativeCallbackInfo *info);
     static NativeValue* CreateJsApplicationContext(NativeEngine &engine);
 
