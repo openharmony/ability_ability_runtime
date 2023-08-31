@@ -469,6 +469,7 @@ NativeValue *JsApplicationContextUtils::SetColorMode(NativeEngine *engine, Nativ
 
 NativeValue *JsApplicationContextUtils::OnSetColorMode(NativeEngine &engine, NativeCallbackInfo &info)
 {
+    HILOG_DEBUG("called");
     // only support one params
     if (info.argc == ARGC_ZERO) {
         HILOG_ERROR("Not enough params");
@@ -476,12 +477,12 @@ NativeValue *JsApplicationContextUtils::OnSetColorMode(NativeEngine &engine, Nat
         return engine.CreateUndefined();
     }
     auto applicationContext = applicationContext_.lock();
-    if (!applicationContext) {
+    if (applicationContext == nullptr) {
         HILOG_WARN("applicationContext is already released");
         return engine.CreateUndefined();
     }
 
-    int colorMode = 0;
+    int32_t colorMode = 0;
     if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], colorMode)) {
         HILOG_ERROR("Parse colorMode failed");
         return engine.CreateUndefined();

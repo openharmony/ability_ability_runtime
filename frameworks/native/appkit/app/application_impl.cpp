@@ -18,8 +18,6 @@
 #include "hilog_wrapper.h"
 #include "ohos_application.h"
 #include "uri_permission_manager_client.h"
-#include "configuration_convertor.h"
-#include "configuration.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -153,7 +151,6 @@ void ApplicationImpl::PerformConfigurationUpdated(const Configuration &config)
 {
     HILOG_DEBUG("ApplicationImpl::PerformConfigurationUpdated called");
     if (application_ != nullptr) {
-        HILOG_DEBUG("application is empty");
         application_->OnConfigurationUpdated(config);
     }
 }
