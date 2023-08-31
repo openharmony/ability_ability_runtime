@@ -771,41 +771,6 @@ void ContextImpl::KillProcessBySelf()
     appMgrClient->KillApplicationSelf();
 }
 
-void ContextImpl::SetColorMode(int colorMode)
-{
-    HILOG_DEBUG("ContextImpl::SetColorMode, colorMode:%{public}d.", colorMode);
-    if (colorMode < -1 || colorMode > 1) {
-        HILOG_ERROR("ContextImpl::SetColorMode, colorMode is invalid.");
-        return;
-    }
-    AppExecFwk::Configuration config;
-    if (colorMode == static_cast<int>(AppExecFwk::ModuleColorMode::DARK)) {
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
-                       AppExecFwk::ConfigurationInner::COLOR_MODE_DARK);
-    } else if (colorMode == static_cast<int>(AppExecFwk::ModuleColorMode::LIGHT)) {
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
-                       AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT);
-    } else {  // default use AUTO
-        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE,
-                       AppExecFwk::ConfigurationInner::COLOR_MODE_AUTO);
-    }
-    HILOG_DEBUG("ContextImpl::SetColorMode end, colorMode:%{public}s.",
-                 config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE).c_str());
-
-    AppExecFwk::OHOSApplication::OnConfigurationUpdated(config);
-}
-
-void ContextImpl::SetLanguage(std::string language)
-{
-    HILOG_DEBUG("ContextImpl::SetLanguage, language:%{public}s.", language.c_str());
-    AppExecFwk::Configuration config;
-    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
-    HILOG_DEBUG("ContextImpl::SetLanguage end, language:%{public}s.",
-                config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE).c_str());
-
-    //AppExecFwk::OHOSApplication::OnConfigurationUpdated(config);
-}
-
 int32_t ContextImpl::GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info)
 {
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();

@@ -60,7 +60,6 @@ const std::vector<std::string> SystemConfigurationKeyStore {
 
 constexpr const char* COLOR_MODE_LIGHT = "light";
 constexpr const char* COLOR_MODE_DARK = "dark";
-constexpr const char* COLOR_MODE_AUTO = "auto";
 constexpr const char* DEVICE_TYPE_DEFAULT = "default";
 constexpr const char* DIRECTION_VERTICAL = "vertical";
 constexpr const char* DIRECTION_HORIZONTAL = "horizontal";
