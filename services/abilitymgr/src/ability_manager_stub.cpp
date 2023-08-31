@@ -2122,6 +2122,10 @@ int AbilityManagerStub::ShareDataDoneInner(MessageParcel &data, MessageParcel &r
     int32_t resultCode = data.ReadInt32();
     int32_t uniqueId = data.ReadInt32();
     std::shared_ptr<WantParams> wantParam(data.ReadParcelable<WantParams>());
+    if (!wantParam) {
+        HILOG_ERROR("wantParam read failed.");
+        return ERR_INVALID_VALUE;
+    }
     int32_t result = ShareDataDone(token, resultCode, uniqueId, *wantParam);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("reply write failed.");
@@ -2312,7 +2316,7 @@ int32_t AbilityManagerStub::IsValidMissionIdsInner(MessageParcel &data, MessageP
 {
     HILOG_DEBUG("%{public}s is called.", __func__);
     std::vector<int32_t> missionIds;
-    std::vector<MissionVaildResult> results;
+    std::vector<MissionValidResult> results;
 
     data.ReadInt32Vector(&missionIds);
     auto err = IsValidMissionIds(missionIds, results);

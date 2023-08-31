@@ -608,6 +608,7 @@ HWTEST_F(AbilityManagerServiceTest, StartRemoteAbility_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest StartRemoteAbility_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     Want want;
     // AddStartControlParam
     sptr<IRemoteObject> callerToken = MockToken(AbilityType::PAGE);
@@ -625,6 +626,7 @@ HWTEST_F(AbilityManagerServiceTest, StartRemoteAbility_002, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest StartRemoteAbility_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     Want want;
     // AddStartControlParam
     EXPECT_EQ(abilityMs_->StartRemoteAbility(want, 1, 1, nullptr), ERR_INVALID_VALUE);
@@ -641,6 +643,7 @@ HWTEST_F(AbilityManagerServiceTest, StartRemoteAbility_003, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest StartRemoteAbility_003 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     Want want;
     MyFlag::flag_ = 1;
     unsigned int flag = 0x00000800;
@@ -661,6 +664,7 @@ HWTEST_F(AbilityManagerServiceTest, StartRemoteAbility_004, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest StartRemoteAbility_004 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     Want want;
     want.SetFlags(0);
     want.SetParam("ohos.aafwk.param.startAbilityForResult", true);
@@ -724,6 +728,7 @@ HWTEST_F(AbilityManagerServiceTest, MinimizeUIAbilityBySCB_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest MinimizeUIAbilityBySCB_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(abilityMs_->MinimizeUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest MinimizeUIAbilityBySCB_001 end");
 }
@@ -738,6 +743,7 @@ HWTEST_F(AbilityManagerServiceTest, MinimizeUIAbilityBySCB_002, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest MinimizeUIAbilityBySCB_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
     EXPECT_EQ(abilityMs_->MinimizeUIAbilityBySCB(sessionInfo), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest MinimizeUIAbilityBySCB_002 end");
@@ -753,6 +759,7 @@ HWTEST_F(AbilityManagerServiceTest, CloseUIAbilityBySCB_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest CloseUIAbilityBySCB_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(abilityMs_->CloseUIAbilityBySCB(nullptr), ERR_INVALID_VALUE);
 
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
@@ -899,6 +906,7 @@ HWTEST_F(AbilityManagerServiceTest, ContinueAbility_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest ContinueAbility_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::string deviceId = "test";
     EXPECT_EQ(abilityMs_->ContinueAbility(deviceId, 1, 1), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest ContinueAbility_001 end");
@@ -914,6 +922,7 @@ HWTEST_F(AbilityManagerServiceTest, StartContinuation_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest StartContinuation_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     Want want;
     EXPECT_EQ(abilityMs_->StartContinuation(want, nullptr, 1), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest StartContinuation_001 end");
@@ -945,6 +954,7 @@ HWTEST_F(AbilityManagerServiceTest, NotifyContinuationResult_001, TestSize.Level
 {
     HILOG_INFO("AbilityManagerServiceTest NotifyContinuationResult_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(abilityMs_->NotifyContinuationResult(1, 1), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest NotifyContinuationResult_001 end");
 }
@@ -1561,6 +1571,7 @@ HWTEST_F(AbilityManagerServiceTest, AttachAbilityThread_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest AttachAbilityThread_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(abilityMs_->AttachAbilityThread(nullptr, nullptr), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest AttachAbilityThread_001 end");
 }
@@ -1575,6 +1586,7 @@ HWTEST_F(AbilityManagerServiceTest, DumpInner_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest DumpInner_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::vector<std::string> info;
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->DumpInner("", info);
@@ -1591,6 +1603,7 @@ HWTEST_F(AbilityManagerServiceTest, DumpMissionListInner_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest DumpMissionListInner_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::vector<std::string> info;
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->DumpMissionListInner("", info);
@@ -1607,6 +1620,7 @@ HWTEST_F(AbilityManagerServiceTest, DumpMissionInfosInner_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest DumpMissionInfosInner_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::vector<std::string> info;
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->DumpMissionInfosInner("", info);
@@ -1623,6 +1637,7 @@ HWTEST_F(AbilityManagerServiceTest, DumpMissionInner_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest DumpMissionInner_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::vector<std::string> info;
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->DumpMissionInner("", info);
@@ -1639,6 +1654,7 @@ HWTEST_F(AbilityManagerServiceTest, DumpStateInner_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest DumpStateInner_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::vector<std::string> info;
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->DumpStateInner("", info);
@@ -1703,6 +1719,7 @@ HWTEST_F(AbilityManagerServiceTest, AbilityTransitionDone_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest AbilityTransitionDone_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     PacMap saveData;
     EXPECT_EQ(abilityMs_->AbilityTransitionDone(nullptr, 1, saveData), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest AbilityTransitionDone_001 end");
@@ -1748,6 +1765,7 @@ HWTEST_F(AbilityManagerServiceTest, OnAbilityRequestDone_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest OnAbilityRequestDone_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->OnAbilityRequestDone(nullptr, 1);
     abilityMs_->OnAbilityRequestDone(MockToken(AbilityType::DATA), 1);
@@ -1765,6 +1783,7 @@ HWTEST_F(AbilityManagerServiceTest, OnAppStateChanged_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest OnAppStateChanged_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     AppInfo info;
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->OnAppStateChanged(info);
@@ -2024,6 +2043,7 @@ HWTEST_F(AbilityManagerServiceTest, VerificationAllToken_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest VerificationAllToken_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_FALSE(abilityMs_->VerificationAllToken(nullptr));
     HILOG_INFO("AbilityManagerServiceTest VerificationAllToken_001 end");
 }
@@ -2207,6 +2227,7 @@ HWTEST_F(AbilityManagerServiceTest, GetMissionIdByAbilityToken_001, TestSize.Lev
 {
     HILOG_INFO("AbilityManagerServiceTest GetMissionIdByAbilityToken_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(abilityMs_->GetMissionIdByAbilityToken(nullptr), -1);
 
     EXPECT_EQ(abilityMs_->GetMissionIdByAbilityToken(MockToken(AbilityType::PAGE)), -1);
@@ -2242,6 +2263,7 @@ HWTEST_F(AbilityManagerServiceTest, StartRemoteAbilityByCall_001, TestSize.Level
 {
     HILOG_INFO("AbilityManagerServiceTest StartRemoteAbilityByCall_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     Want want;
     EXPECT_EQ(abilityMs_->StartRemoteAbilityByCall(want, nullptr, nullptr), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest StartRemoteAbilityByCall_001 end");
@@ -2272,6 +2294,7 @@ HWTEST_F(AbilityManagerServiceTest, ReleaseCall_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest ReleaseCall_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     AppExecFwk::ElementName element;
     EXPECT_EQ(abilityMs_->ReleaseCall(nullptr, element), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest ReleaseCall_001 end");
@@ -2310,6 +2333,7 @@ HWTEST_F(AbilityManagerServiceTest, OnAcceptWantResponse_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest OnAcceptWantResponse_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     AAFwk::Want want;
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->OnAcceptWantResponse(want, "test");
@@ -2353,6 +2377,7 @@ HWTEST_F(AbilityManagerServiceTest, GetAbilityRunningInfos_001, TestSize.Level1)
     HILOG_INFO("AbilityManagerServiceTest GetAbilityRunningInfos_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->OnStart();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::vector<AbilityRunningInfo> info;
     EXPECT_EQ(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
 
@@ -2476,6 +2501,7 @@ HWTEST_F(AbilityManagerServiceTest, CallRequestDone_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest CallRequestDone_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     sptr<IRemoteObject> token = nullptr;
     sptr<IRemoteObject> callStub = nullptr;
     ASSERT_NE(abilityMs_, nullptr);
@@ -2534,6 +2560,7 @@ HWTEST_F(AbilityManagerServiceTest, EnableRecoverAbility_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest EnableRecoverAbility_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(abilityMs_, nullptr);
     abilityMs_->EnableRecoverAbility(nullptr);
     abilityMs_->EnableRecoverAbility(MockToken(AbilityType::PAGE));
@@ -2727,6 +2754,7 @@ HWTEST_F(AbilityManagerServiceTest, DelegatorDoAbilityForeground_001, TestSize.L
 {
     HILOG_INFO("AbilityManagerServiceTest DelegatorDoAbilityForeground_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     EXPECT_EQ(abilityMs_->DelegatorDoAbilityForeground(nullptr), ERR_INVALID_VALUE);
     EXPECT_EQ(abilityMs_->DelegatorDoAbilityForeground(MockToken(AbilityType::PAGE)), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest DelegatorDoAbilityForeground_001 end");
@@ -3110,6 +3138,7 @@ HWTEST_F(AbilityManagerServiceTest, BlockAbility_001, TestSize.Level1)
 {
     HILOG_INFO("AbilityManagerServiceTest BlockAbility_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     auto temp = abilityMs_->currentMissionListManager_;
     abilityMs_->currentMissionListManager_ = nullptr;
     EXPECT_EQ(abilityMs_->BlockAbility(1), ERR_OK);
@@ -3336,7 +3365,7 @@ HWTEST_F(AbilityManagerServiceTest, IsValidMissionIds_001, TestSize.Level1)
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::vector<int32_t> missionIds;
-    std::vector<MissionVaildResult> results;
+    std::vector<MissionValidResult> results;
     EXPECT_EQ(abilityMs_->IsValidMissionIds(missionIds, results), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_001 end");
 }
@@ -3352,7 +3381,7 @@ HWTEST_F(AbilityManagerServiceTest, IsValidMissionIds_002, TestSize.Level1)
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::vector<int32_t> missionIds;
-    std::vector<MissionVaildResult> results;
+    std::vector<MissionValidResult> results;
     abilityMs_->InitMissionListManager(IPCSkeleton::GetCallingUid() / BASE_USER_RANGE, false);
     EXPECT_EQ(abilityMs_->IsValidMissionIds(missionIds, results), ERR_OK);
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_002 end");
@@ -3924,6 +3953,20 @@ HWTEST_F(AbilityManagerServiceTest, CheckPrepareTerminateEnable_001, TestSize.Le
 
 /*
  * Feature: AbilityManagerService
+ * Function: SetLockedState
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetLockedState
+ */
+HWTEST_F(AbilityManagerServiceTest, SetLockedState_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    abilityMs_->SetLockedState(1, true);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: CheckPrepareTerminateEnable
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService CheckPrepareTerminateEnable
@@ -3935,6 +3978,19 @@ HWTEST_F(AbilityManagerServiceTest, CheckPrepareTerminateEnable_002, TestSize.Le
     abilityMs_->isPrepareTerminateEnable_ = true;
     bool res = abilityMs_->CheckPrepareTerminateEnable();
     EXPECT_TRUE(res);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckUserIdActive
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckUserIdActive
+ */
+HWTEST_F(AbilityManagerServiceTest, CheckUserIdActive_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    abilityMs_->CheckUserIdActive(USER_ID_U100);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
