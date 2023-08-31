@@ -406,6 +406,20 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
         return;
     }
 
+    std::string language;
+    std::string colormode;
+    language = configuration_.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    colormode = configuration_.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!language.empty() && !colormode.empty()) {
+        HILOG_DEBUG("language and colormode has been set");
+        return;
+    }
+    else if (!language.empty()) {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE, language);
+    } else {
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, colormode);
+    }
+
     // Update own object configuration_
     std::vector<std::string> changeKeyV;
     configuration_->CompareDifferent(changeKeyV, config);
