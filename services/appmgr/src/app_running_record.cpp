@@ -846,7 +846,7 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
         HILOG_ERROR("ability is null");
         return;
     }
-    HILOG_INFO("ability is %{public}s", ability->GetAbilityInfo().bundleName.c_str());
+    HILOG_INFO("ability is %{public}s", mainBundleName_.c_str());
     if (ability->GetState() != AbilityState::ABILITY_STATE_FOREGROUND &&
         ability->GetState() != AbilityState::ABILITY_STATE_READY) {
         HILOG_ERROR("ability state is not foreground or focus");
@@ -871,8 +871,10 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
             }
         }
 
+
+
         // Then schedule application background when all ability is not foreground.
-        if (foregroundSize == 0 && ability->GetAbilityInfo().bundleName != LAUNCHER_NAME) {
+        if (foregroundSize == 0 && mainBundleName_ != LAUNCHER_NAME) {
             ScheduleBackgroundRunning();
         }
     } else {
