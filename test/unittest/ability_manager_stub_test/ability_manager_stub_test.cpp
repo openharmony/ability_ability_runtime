@@ -2358,5 +2358,21 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_PrepareTerminateAbilityBySCB
         testing::Invoke(prepareTerminateAbilityBySCBTask));
     EXPECT_EQ(stub_->PrepareTerminateAbilityBySCBInner(data, reply), ERR_INVALID_VALUE);
 }
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSessionHandlerInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSessionHandlerInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function RegisterSessionHandlerInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_RegisterSessionHandlerInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->RegisterSessionHandlerInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
