@@ -629,6 +629,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
 #endif
     result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
+    if (result == SHARE_PICKER_SUCCESS) {
+        return ERR_OK;
+    }
     ComponentRequest componentRequest = initComponentRequest(callerToken, requestCode, result);
     if (CheckProxyComponent(want, result) && !IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
         return componentRequest.requestResult;
@@ -857,6 +860,9 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     }
 #endif
     result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
+    if (result == SHARE_PICKER_SUCCESS) {
+        return ERR_OK;
+    }
     ComponentRequest componentRequest = initComponentRequest(callerToken, requestCode, result);
     if (result != ERR_OK && !IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
         return componentRequest.requestResult;
@@ -1068,6 +1074,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     }
 #endif
     result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
+    if (result == SHARE_PICKER_SUCCESS) {
+        return ERR_OK;
+    }
     ComponentRequest componentRequest = initComponentRequest(callerToken, requestCode, result);
     if (result != ERR_OK && !IsComponentInterceptionStart(want, componentRequest, abilityRequest)) {
         return componentRequest.requestResult;
@@ -4494,7 +4503,11 @@ int AbilityManagerService::GenerateAbilityRequest(
     CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
 #ifdef SUPPORT_GRAPHICS
     if (want.GetAction().compare(ACTION_CHOOSE) == 0) {
-        return ShowPickerDialog(want, userId, callerToken);
+        auto result = ShowPickerDialog(want, userId, callerToken);
+        if (result == ERR_OK) {
+            return SHARE_PICKER_SUCCESS;
+        }
+        return result;
     }
 #endif
     auto abilityInfoFlag = (AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION |
