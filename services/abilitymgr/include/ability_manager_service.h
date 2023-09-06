@@ -373,7 +373,8 @@ public:
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
-        int32_t userId = DEFAULT_INVAL_VALUE) override;
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        bool isQueryExtensionOnly = false) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -764,6 +765,13 @@ public:
         int requestCode,
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false);
+
+    int StartExtensionAbilityInner(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        int32_t userId,
+        AppExecFwk::ExtensionAbilityType extensionType,
+        bool checkSystemCaller = true);
 
     int StartAbilityForOptionWrap(
         const Want &want,
@@ -1317,7 +1325,8 @@ private:
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
-        const sptr<SessionInfo> &sessionInfo = nullptr);
+        const sptr<SessionInfo> &sessionInfo = nullptr,
+        bool isQueryExtensionOnly = false);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);

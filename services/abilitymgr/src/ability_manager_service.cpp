@@ -395,7 +395,6 @@ void AbilityManagerService::OnStop()
             HILOG_ERROR("unsubscribe bgtask failed, err:%{public}d.", ret);
         }
     }
-    bgtaskObserver_.reset();
 #endif
     if (abilityBundleEventCallback_) {
         auto bms = GetBundleManager();
@@ -643,7 +642,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
 
         if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
-            return StartExtensionAbility(want, callerToken, userId, AppExecFwk::ExtensionAbilityType::SERVICE);
+            return StartExtensionAbilityInner(want, callerToken, userId, AppExecFwk::ExtensionAbilityType::SERVICE, false);
         }
     }
 
@@ -1737,13 +1736,11 @@ void AbilityManagerService::SubscribeBackgroundTask()
 {
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::unique_lock<ffrt::mutex> lock(bgtaskObserverMutex_);
-    if (bgtaskObserver_) {
-        return;
+    if (!bgtaskObserver_) {
+        bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
     }
-    bgtaskObserver_ = std::make_shared<BackgroundTaskObserver>();
     int ret = BackgroundTaskMgrHelper::SubscribeBackgroundTask(*bgtaskObserver_);
     if (ret != ERR_OK) {
-        bgtaskObserver_ = nullptr;
         HILOG_ERROR("%{public}s failed, err:%{public}d.", __func__, ret);
         return;
     }
@@ -1759,7 +1756,6 @@ void AbilityManagerService::UnSubscribeBackgroundTask()
     if (!bgtaskObserver_) {
         return;
     }
-    bgtaskObserver_ = nullptr;
     HILOG_INFO("%{public}s success.", __func__);
 #endif
 }
@@ -1839,9 +1835,17 @@ void AbilityManagerService::ReportEventToSuspendManager(const AppExecFwk::Abilit
 int AbilityManagerService::StartExtensionAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, AppExecFwk::ExtensionAbilityType extensionType)
 {
+    return StartExtensionAbilityInner(want, callerToken, userId, extensionType, true);
+}
+
+int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
+    int32_t userId, AppExecFwk::ExtensionAbilityType extensionType, bool checkSystemCaller)
+{
     HILOG_INFO("Start extension ability come, bundlename: %{public}s, ability is %{public}s, userId is %{public}d",
         want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), userId);
-    CHECK_CALLER_IS_SYSTEM_APP;
+    if (checkSystemCaller) {
+        CHECK_CALLER_IS_SYSTEM_APP;
+    }
     EventInfo eventInfo = BuildEventInfo(want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
     EventReport::SendExtensionEvent(EventName::START_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
@@ -2537,7 +2541,7 @@ int AbilityManagerService::ConnectAbility(
 
 int AbilityManagerService::ConnectAbilityCommon(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
-    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId, bool isQueryExtensionOnly)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Connect ability called, element uri: %{public}s.", want.GetElement().GetURI().c_str());
@@ -2638,7 +2642,8 @@ int AbilityManagerService::ConnectAbilityCommon(
         }
         return eventInfo.errCode;
     }
-    eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken, extensionType);
+    eventInfo.errCode = ConnectLocalAbility(abilityWant, validUserId, connect, callerToken, extensionType, nullptr,
+        isQueryExtensionOnly);
     if (eventInfo.errCode != ERR_OK) {
         EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE_ERROR, HiSysEventType::FAULT, eventInfo);
     }
@@ -2773,7 +2778,8 @@ int AbilityManagerService::DisconnectAbility(const sptr<IAbilityConnection> &con
 
 int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t userId,
     const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
-    AppExecFwk::ExtensionAbilityType extensionType, const sptr<SessionInfo> &sessionInfo)
+    AppExecFwk::ExtensionAbilityType extensionType, const sptr<SessionInfo> &sessionInfo,
+    bool isQueryExtensionOnly)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Connect local ability begin.");
@@ -2783,7 +2789,13 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
     }
 
     AbilityRequest abilityRequest;
-    ErrCode result = GenerateAbilityRequest(want, DEFAULT_INVAL_VALUE, abilityRequest, callerToken, userId);
+    ErrCode result = ERR_OK;
+    if (isQueryExtensionOnly ||
+        AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
+        result = GenerateExtensionAbilityRequest(want, abilityRequest, callerToken, userId);
+    } else {
+        result = GenerateAbilityRequest(want, DEFAULT_INVAL_VALUE, abilityRequest, callerToken, userId);
+    }
     abilityRequest.sessionInfo = sessionInfo;
 
     Want requestWant = want;
@@ -4074,7 +4086,7 @@ void AbilityManagerService::DumpInner(const std::string &args, std::vector<std::
         uiAbilityLifecycleManager_->Dump(info);
         return;
     }
-    
+
     if (currentMissionListManager_) {
         currentMissionListManager_->Dump(info);
     }
@@ -5288,6 +5300,7 @@ void AbilityManagerService::ConnectBmsService()
 
     HILOG_INFO("Waiting BundleMgr Service run completed.");
     /* wait until connected to bundle manager service */
+    std::lock_guard<ffrt::mutex> guard(globalLock_);
     while (iBundleManager_ == nullptr) {
         sptr<IRemoteObject> bundle_obj =
             OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
