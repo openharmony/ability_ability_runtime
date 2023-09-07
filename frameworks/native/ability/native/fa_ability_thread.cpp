@@ -306,7 +306,6 @@ void FAAbilityThread::AttachInner(std::shared_ptr<AppExecFwk::OHOSApplication> &
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
         HILOG_ERROR("err = %{public}d", err);
-        return;
     }
 }
 
@@ -356,7 +355,6 @@ void FAAbilityThread::AttachExtension(std::shared_ptr<AppExecFwk::OHOSApplicatio
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
         HILOG_ERROR("err = %{public}d", err);
-        return;
     }
 }
 
