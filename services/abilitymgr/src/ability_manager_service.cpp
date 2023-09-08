@@ -692,8 +692,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         return implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId);
     }
     if (want.GetAction().compare(ACTION_CHOOSE) == 0) {
-        auto result = ShowPickerDialog(want, validUserId, callerToken);
-        return result;
+        return ShowPickerDialog(want, validUserId, callerToken);
     }
 #endif
     result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
@@ -925,8 +924,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         return result;
     }
     if (want.GetAction().compare(ACTION_CHOOSE) == 0) {
-        auto result = ShowPickerDialog(want, validUserId, callerToken);
-        return result;
+        return ShowPickerDialog(want, validUserId, callerToken);
     }
 #endif
     result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
@@ -1142,8 +1140,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         return result;
     }
     if (want.GetAction().compare(ACTION_CHOOSE) == 0) {
-        auto result = ShowPickerDialog(want, validUserId, callerToken);
-        return result;
+        return ShowPickerDialog(want, validUserId, callerToken);
     }
 #endif
     result = GenerateAbilityRequest(want, requestCode, abilityRequest, callerToken, validUserId);
