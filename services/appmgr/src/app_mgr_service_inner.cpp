@@ -3617,10 +3617,7 @@ void AppMgrServiceInner::FreeFocusListener()
         return;
     }
     WindowManager::GetInstance().UnregisterFocusChangedListener(focusListener_);
-    if (focusListener_ != nullptr) {
-        delete focusListener_;
-        focusListener_ = nullptr;
-    }
+    focusListener_ = nullptr;
     HILOG_INFO("FreeFocusListener end");
 }
 
