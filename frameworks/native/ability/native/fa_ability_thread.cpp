@@ -1157,22 +1157,19 @@ void FAAbilityThread::NotifyContinuationResult(int32_t result)
 void FAAbilityThread::NotifyMemoryLevel(int32_t level)
 {
     HILOG_DEBUG("begin, result: %{public}d", level);
-
     if (isExtension_) {
-        HILOG_DEBUG("extension ability");
         if (extensionImpl_ == nullptr) {
             HILOG_ERROR("extensionImpl_ is nullptr");
             return;
         }
         extensionImpl_->NotifyMemoryLevel(level);
-    } else {
-        HILOG_DEBUG("ability");
-        if (abilityImpl_ == nullptr) {
-            HILOG_ERROR("abilityImpl_ is nullptr");
-            return;
-        }
-        abilityImpl_->NotifyMemoryLevel(level);
+        return;
     }
+    if (abilityImpl_ == nullptr) {
+        HILOG_ERROR("abilityImpl_ is nullptr");
+        return;
+    }
+    abilityImpl_->NotifyMemoryLevel(level);
 }
 
 void FAAbilityThread::InitExtensionFlag(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord)
@@ -1188,7 +1185,7 @@ void FAAbilityThread::InitExtensionFlag(const std::shared_ptr<AppExecFwk::Abilit
         return;
     }
     if (abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
-        HILOG_DEBUG("InitExtensionFlag true");
+        HILOG_DEBUG("InitExtensionFlag is true");
         isExtension_ = true;
     } else {
         isExtension_ = false;
@@ -1274,7 +1271,6 @@ bool FAAbilityThread::HandleNotifyChange(const Uri &uri)
 bool FAAbilityThread::ScheduleRegisterObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
 {
     HILOG_DEBUG("called");
-
     wptr<FAAbilityThread> weak = this;
     auto task = [weak, uri, dataObserver]() {
         auto abilityThread = weak.promote();
@@ -1300,7 +1296,6 @@ bool FAAbilityThread::ScheduleRegisterObserver(const Uri &uri, const sptr<AAFwk:
 bool FAAbilityThread::ScheduleUnregisterObserver(const Uri &uri, const sptr<AAFwk::IDataAbilityObserver> &dataObserver)
 {
     HILOG_DEBUG("called");
-
     wptr<FAAbilityThread> weak = this;
     auto task = [weak, uri, dataObserver]() {
         auto abilityThread = weak.promote();
@@ -1326,7 +1321,6 @@ bool FAAbilityThread::ScheduleUnregisterObserver(const Uri &uri, const sptr<AAFw
 bool FAAbilityThread::ScheduleNotifyChange(const Uri &uri)
 {
     HILOG_DEBUG("called");
-
     wptr<FAAbilityThread> weak = this;
     auto task = [weak, uri]() {
         auto abilityThread = weak.promote();
@@ -1489,7 +1483,6 @@ void FAAbilityThread::DumpOtherInfo(std::vector<std::string> &info)
 void FAAbilityThread::CallRequest()
 {
     HILOG_DEBUG("begin");
-
     if (currentAbility_ == nullptr) {
         HILOG_ERROR("ability is nullptr");
         return;
@@ -1531,3 +1524,4 @@ void FAAbilityThread::HandlePrepareTermianteAbility()
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
+
