@@ -694,7 +694,7 @@ void FAAbilityThread::HandleUpdateConfiguration(const AppExecFwk::Configuration 
 void FAAbilityThread::HandleExtensionUpdateConfiguration(const AppExecFwk::Configuration &config)
 {
     HILOG_DEBUG("begin");
-    if (!extensionImpl_) {
+    if (extensionImpl_ == nullptr) {
         HILOG_ERROR("extensionImpl_ is nullptr");
         return;
     }
@@ -746,21 +746,21 @@ void FAAbilityThread::ScheduleAbilityTransaction(
 void FAAbilityThread::ScheduleShareData(const int32_t &uniqueId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (!token_) {
+    if (token_ == nullptr) {
         HILOG_ERROR("token_ is nullptr");
         return;
     }
     wptr<FAAbilityThread> weak = this;
     auto task = [weak, uniqueId]() {
         auto abilityThread = weak.promote();
-        if (!abilityThread) {
+        if (abilityThread == nullptr) {
             HILOG_ERROR("abilityThread is nullptr");
             return;
         }
         abilityThread->HandleShareData(uniqueId);
     };
 
-    if (!abilityHandler_) {
+    if (abilityHandler_ == nullptr) {
         HILOG_ERROR("abilityHandler_ is nullptr");
         return;
     }
@@ -872,49 +872,48 @@ bool FAAbilityThread::SchedulePrepareTerminateAbility()
     HILOG_DEBUG("begin");
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
-        return true;
+        return false;
     }
     if (getpid() == gettid()) {
         bool ret = abilityImpl_->PrepareTerminateAbility();
         HILOG_DEBUG("end, ret = %{public}d", ret);
         return ret;
-    } else {
-        wptr<FAAbilityThread> weak = this;
-        auto task = [weak]() {
-            auto abilityThread = weak.promote();
-            if (abilityThread == nullptr) {
-                HILOG_ERROR("abilityThread is nullptr");
-                return;
-            }
-            abilityThread->HandlePrepareTermianteAbility();
-        };
-
-        if (abilityHandler_ == nullptr) {
-            HILOG_ERROR("abilityHandler_ is nullptr");
-            return false;
-        }
-
-        bool ret = abilityHandler_->PostTask(task);
-        if (!ret) {
-            HILOG_ERROR("PostTask error");
-            return false;
-        }
-
-        std::unique_lock<std::mutex> lock(mutex_);
-        auto condition = [weak] {
-            auto abilityThread = weak.promote();
-            if (abilityThread == nullptr) {
-                HILOG_ERROR("abilityThread is nullptr");
-                return false;
-            }
-            return abilityThread->isPrepareTerminateAbilityDone_;
-        };
-        if (!cv_.wait_for(lock, std::chrono::milliseconds(PREPARE_TO_TERMINATE_TIMEOUT_MILLISECONDS), condition)) {
-            HILOG_WARN("Wait timeout");
-        }
-        HILOG_DEBUG("end, ret = %{public}d", isPrepareTerminate_);
-        return isPrepareTerminate_;
     }
+    wptr<FAAbilityThread> weak = this;
+    auto task = [weak]() {
+        auto abilityThread = weak.promote();
+        if (abilityThread == nullptr) {
+            HILOG_ERROR("abilityThread is nullptr");
+            return;
+        }
+        abilityThread->HandlePrepareTermianteAbility();
+    };
+
+    if (abilityHandler_ == nullptr) {
+        HILOG_ERROR("abilityHandler_ is nullptr");
+        return false;
+    }
+
+    bool ret = abilityHandler_->PostTask(task);
+    if (!ret) {
+        HILOG_ERROR("PostTask error");
+        return false;
+    }
+
+    std::unique_lock<std::mutex> lock(mutex_);
+    auto condition = [weak] {
+        auto abilityThread = weak.promote();
+        if (abilityThread == nullptr) {
+            HILOG_ERROR("abilityThread is nullptr");
+            return false;
+        }
+        return abilityThread->isPrepareTerminateAbilityDone_;
+    };
+    if (!cv_.wait_for(lock, std::chrono::milliseconds(PREPARE_TO_TERMINATE_TIMEOUT_MILLISECONDS), condition)) {
+        HILOG_WARN("Wait timeout");
+    }
+    HILOG_DEBUG("end, ret = %{public}d", isPrepareTerminate_);
+    return isPrepareTerminate_;
 }
 
 void FAAbilityThread::ScheduleCommandAbilityWindow(
@@ -960,11 +959,12 @@ void FAAbilityThread::SendResult(int requestCode, int resultCode, const Want &wa
         if (abilityThread->isExtension_ && abilityThread->extensionImpl_ != nullptr) {
             abilityThread->extensionImpl_->SendResult(requestCode, resultCode, want);
             return;
-        } else if (!abilityThread->isExtension_ && abilityThread->abilityImpl_ != nullptr) {
+        }
+        if (!abilityThread->isExtension_ && abilityThread->abilityImpl_ != nullptr) {
             abilityThread->abilityImpl_->SendResult(requestCode, resultCode, want);
             return;
         }
-        HILOG_ERROR("%{public}simpl is nullptr", abilityThread->isExtension_ ? "extension" : "ability");
+        HILOG_ERROR("%{public}s impl is nullptr", abilityThread->isExtension_ ? "extension" : "ability");
     };
 
     if (abilityHandler_ == nullptr) {
