@@ -182,6 +182,42 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Start ui session ability with extension session info, send session info to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param callerToken, caller ability token.
+     * @param sessionInfo the information of UIExtensionContentSession.
+     * @param userId, Designation User ID.
+     * @param requestCode, Ability request code.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityByUIContentSession(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        const sptr<SessionInfo> &sessionInfo,
+        int32_t userId,
+        int requestCode) override;
+
+    /**
+     * Start ui session ability with extension session info, send session info to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param callerToken, caller ability token.
+     * @param sessionInfo the information of UIExtensionContentSession.
+     * @param userId, Designation User ID.
+     * @param requestCode the resultCode of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int StartAbilityByUIContentSession(
+        const Want &want,
+        const StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken,
+        const sptr<SessionInfo> &sessionInfo,
+        int32_t userId,
+        int requestCode) override;
+
+    /**
      * Start extension ability with want, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -337,7 +373,8 @@ public:
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
-        int32_t userId = DEFAULT_INVAL_VALUE) override;
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        bool isQueryExtensionOnly = false) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -729,6 +766,13 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false);
 
+    int StartExtensionAbilityInner(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        int32_t userId,
+        AppExecFwk::ExtensionAbilityType extensionType,
+        bool checkSystemCaller = true);
+
     int StartAbilityForOptionWrap(
         const Want &want,
         const StartOptions &startOptions,
@@ -1031,7 +1075,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t IsValidMissionIds(
-        const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) override;
+        const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results) override;
 
     virtual int32_t RequestDialogService(const Want &want, const sptr<IRemoteObject> &callerToken) override;
 
@@ -1281,7 +1325,8 @@ private:
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
-        const sptr<SessionInfo> &sessionInfo = nullptr);
+        const sptr<SessionInfo> &sessionInfo = nullptr,
+        bool isQueryExtensionOnly = false);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
