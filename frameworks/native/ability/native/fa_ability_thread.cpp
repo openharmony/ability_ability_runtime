@@ -977,22 +977,17 @@ std::vector<std::string> FAAbilityThread::GetFileTypes(const Uri &uri, const std
 
 int FAAbilityThread::OpenFile(const Uri &uri, const std::string &mode)
 {
-    HILOG_DEBUG("begin");
-    int32_t fd = -1;
+    HILOG_DEBUG("Called.");
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
-        return fd;
+        return -1;
     }
-
-    fd = abilityImpl_->OpenFile(uri, mode);
-    HILOG_DEBUG("end");
-    return fd;
+    return abilityImpl_->OpenFile(uri, mode);
 }
 
 int FAAbilityThread::OpenRawFile(const Uri &uri, const std::string &mode)
 {
     HILOG_DEBUG("Called.");
-    int32_t fd = -1;
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
         return -1;
@@ -1004,7 +999,6 @@ int FAAbilityThread::OpenRawFile(const Uri &uri, const std::string &mode)
 int FAAbilityThread::Insert(const Uri &uri, const NativeRdb::ValuesBucket &value)
 {
     HILOG_DEBUG("Called.");
-    int32_t index = -1;
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
         return -1;
@@ -1029,7 +1023,6 @@ int FAAbilityThread::Update(
     const Uri &uri, const NativeRdb::ValuesBucket &value, const NativeRdb::DataAbilityPredicates &predicates)
 {
     HILOG_DEBUG("Called.");
-    int32_t index = -1;
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
         return -1;
@@ -1041,7 +1034,6 @@ int FAAbilityThread::Update(
 int FAAbilityThread::Delete(const Uri &uri, const NativeRdb::DataAbilityPredicates &predicates)
 {
     HILOG_DEBUG("Called.");
-    int32_t index = -1;
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
         return -1;
@@ -1053,10 +1045,9 @@ std::shared_ptr<NativeRdb::AbsSharedResultSet> FAAbilityThread::Query(
     const Uri &uri, std::vector<std::string> &columns, const NativeRdb::DataAbilityPredicates &predicates)
 {
     HILOG_DEBUG("Called.");
-    std::shared_ptr<NativeRdb::AbsSharedResultSet> resultSet = nullptr;
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
-        return resultSet;
+        return nullptr;
     }
 
     return abilityImpl_->Query(uri, columns, predicates);
@@ -1077,7 +1068,6 @@ std::string FAAbilityThread::GetType(const Uri &uri)
 bool FAAbilityThread::Reload(const Uri &uri, const AppExecFwk::PacMap &extras)
 {
     HILOG_DEBUG("Called.");
-    bool ret = false;
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
         return false;
@@ -1088,7 +1078,6 @@ bool FAAbilityThread::Reload(const Uri &uri, const AppExecFwk::PacMap &extras)
 int FAAbilityThread::BatchInsert(const Uri &uri, const std::vector<NativeRdb::ValuesBucket> &values)
 {
     HILOG_DEBUG("Called.");
-    int32_t ret = -1;
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr");
         return -1;
