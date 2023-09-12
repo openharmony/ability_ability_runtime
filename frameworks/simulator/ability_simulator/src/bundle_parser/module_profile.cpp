@@ -1772,9 +1772,6 @@ bool ToInnerBundleInfo(const Profile::ModuleJson &moduleJson, InnerBundleInfo &i
             .append(moduleJson.module.name).append(".").append(abilityInfo.name);
         innerModuleInfo.abilityKeys.emplace_back(key);
         innerBundleInfo.InsertAbilitiesInfo(key, abilityInfo);
-        if (findEntry) {
-            continue;
-        }
     }
     if (!ParseExtensionInfo(moduleJson, innerBundleInfo, transformParam, innerModuleInfo)) {
         return false;
