@@ -30,7 +30,7 @@ void AbilityThread::AbilityThreadMain(std::shared_ptr<OHOSApplication> &applicat
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("begin");
-    sptr<AbilityThread> thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
+    sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::FAAbilityThread());
     if (thread == nullptr) {
         HILOG_ERROR("thread is nullptr");
         return;
@@ -45,7 +45,7 @@ void AbilityThread::AbilityThreadMain(std::shared_ptr<OHOSApplication> &applicat
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("begin");
-    sptr<AbilityThread> thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
+    sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::FAAbilityThread());
     if (thread == nullptr) {
         HILOG_ERROR("thread is nullptr");
         return;
