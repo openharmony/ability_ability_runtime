@@ -78,7 +78,7 @@ std::string ExtensionAbilityThread::CreateAbilityName(
         return abilityInfo->name;
     }
 
-	application->GetExtensionNameByType(static_cast<int32_t>(abilityInfo->extensionAbilityType), abilityName);
+    application->GetExtensionNameByType(static_cast<int32_t>(abilityInfo->extensionAbilityType), abilityName);
     if (!abilityName.empty()) {
         HILOG_DEBUG("Get extension name by plugin success, name: %{public}s", abilityName.c_str());
         return abilityName;
@@ -95,8 +95,8 @@ std::string ExtensionAbilityThread::CreateAbilityName(
     return abilityName;
 }
 
-void ExtensionAbilityThread::CreateExtensionAbilityName(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo, 
-    std::string &abilityName)
+void ExtensionAbilityThread::CreateExtensionAbilityName(
+    const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo, std::string &abilityName)
 {
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::STATICSUBSCRIBER) {
         abilityName = STATIC_SUBSCRIBER_EXTENSION;
@@ -131,7 +131,7 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(const std::shared_ptr<Ap
         } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ACTION) {
             abilityName = ACTION_EXTENSION;
         } else {
-        	abilityName = UI_EXTENSION;
+            abilityName = UI_EXTENSION;
         }
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL) {
@@ -496,7 +496,7 @@ void ExtensionAbilityThread::SendResult(int requestCode, int resultCode, const W
         }
         if (abilityThread->extensionImpl_ == nullptr) {
             HILOG_ERROR("extensionImpl is nullptr");
-			return;
+            return;
         }
         abilityThread->extensionImpl_->SendResult(requestCode, resultCode, want);
     };
@@ -539,7 +539,7 @@ void ExtensionAbilityThread::DumpAbilityInfo(const std::vector<std::string> &par
         }
     };
     bool ret = abilityHandler_->PostTask(task);
-	if (!ret) {
+    if (!ret) {
         HILOG_ERROR("PostTask error");
     }
     HILOG_DEBUG("end");
