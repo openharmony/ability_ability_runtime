@@ -642,7 +642,8 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
 
         if (AbilityUtil::HandleDlpApp(const_cast<Want &>(want))) {
-            return StartExtensionAbilityInner(want, callerToken, userId, AppExecFwk::ExtensionAbilityType::SERVICE, false);
+            return StartExtensionAbilityInner(want, callerToken, userId,
+                AppExecFwk::ExtensionAbilityType::SERVICE, false);
         }
     }
 
@@ -4927,12 +4928,6 @@ int AbilityManagerService::UninstallApp(const std::string &bundleName, int32_t u
     int ret = DelayedSingleton<AppScheduler>::GetInstance()->KillApplicationByUid(bundleName, uid);
     if (ret != ERR_OK) {
         return UNINSTALL_APP_FAILED;
-    }
-    // revoke all uri permissions
-    auto tokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(targetUserId, bundleName, 0);
-    ret = AAFwk::UriPermissionManagerClient::GetInstance().RevokeAllUriPermissions(tokenId);
-    if (ret != 0) {
-        HILOG_ERROR("Revoke all uri permissions is fail");
     }
     DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName);
     return ERR_OK;
