@@ -274,6 +274,11 @@ public:
     void ResumeVM() override
     {}
 
+    napi_value ValueToNapiValue(JSValueWrapper& value) override
+    {
+        return nullptr;
+    }
+
     NativeValue* ValueToNativeValue(JSValueWrapper& value) override
     {
         return nullptr;
@@ -401,6 +406,9 @@ public:
     }
 
     void RegisterTranslateBySourceMap(SourceMapCallback callback) override
+    {}
+
+    void RegisterSourceMapTranslateCallback(SourceMapTranslateCallback callback) override
     {}
 
     std::string ExecuteTranslateBySourceMap(const std::string& rawStack) override

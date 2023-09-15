@@ -373,7 +373,8 @@ public:
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
-        int32_t userId = DEFAULT_INVAL_VALUE) override;
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        bool isQueryExtensionOnly = false) override;
 
     virtual int ConnectUIExtensionAbility(
         const Want &want,
@@ -765,6 +766,13 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false);
 
+    int StartExtensionAbilityInner(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        int32_t userId,
+        AppExecFwk::ExtensionAbilityType extensionType,
+        bool checkSystemCaller = true);
+
     int StartAbilityForOptionWrap(
         const Want &want,
         const StartOptions &startOptions,
@@ -1067,7 +1075,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t IsValidMissionIds(
-        const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) override;
+        const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results) override;
 
     virtual int32_t RequestDialogService(const Want &want, const sptr<IRemoteObject> &callerToken) override;
 
@@ -1317,7 +1325,8 @@ private:
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
-        const sptr<SessionInfo> &sessionInfo = nullptr);
+        const sptr<SessionInfo> &sessionInfo = nullptr,
+        bool isQueryExtensionOnly = false);
     int DisconnectLocalAbility(const sptr<IAbilityConnection> &connect);
     int ConnectRemoteAbility(Want &want, const sptr<IRemoteObject> &callerToken, const sptr<IRemoteObject> &connect);
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
@@ -1580,6 +1589,23 @@ private:
         std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility);
 
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
+
+    /**
+     * Start switch user dialog Extension ability.
+     */
+    void StartSwitchUserDialog();
+
+    /**
+     * Stop switch user dialog Extension ability.
+     */
+    void StopSwitchUserDialog();
+
+    /**
+     * Stop switch user dialog inner.
+     * @param stopUserId, The userId who wants to stop the dialog box.
+     */
+    void StopSwitchUserDialogInner(const Want &want, const int32_t stopUserId);
+
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
 

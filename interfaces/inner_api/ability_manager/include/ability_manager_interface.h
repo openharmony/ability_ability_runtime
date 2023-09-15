@@ -427,7 +427,8 @@ public:
         const sptr<IAbilityConnection> &connect,
         const sptr<IRemoteObject> &callerToken,
         AppExecFwk::ExtensionAbilityType extensionType,
-        int32_t userId = DEFAULT_INVAL_VALUE)
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        bool isQueryExtensionOnly = false)
     {
         return 0;
     }
@@ -973,7 +974,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t IsValidMissionIds(
-        const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results) = 0;
+        const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results) = 0;
 
     /**
      * Query whether the application of the specified PID and UID has been granted a certain permission

@@ -28,6 +28,7 @@
 #include "napi_common_want.h"
 #include "native_engine.h"
 #include "native_value.h"
+#include "tokenid_kit.h"
 #include "want.h"
 #include "window.h"
 
@@ -40,6 +41,16 @@ constexpr size_t ARGC_ZERO = 0;
 constexpr size_t ARGC_ONE = 1;
 constexpr const char* PERMISSION_PRIVACY_WINDOW = "ohos.permission.PRIVACY_WINDOW";
 } // namespace
+
+#define CHECK_IS_SYSTEM_APP                                                             \
+do {                                                                                    \
+    auto selfToken = IPCSkeleton::GetSelfTokenID();                                     \
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(selfToken)) {      \
+        HILOG_ERROR("This application is not system-app, can not use system-api");      \
+        ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);                \
+        return engine.CreateUndefined();                                                \
+    }                                                                                   \
+} while(0)
 
 void UISessionAbilityResultListener::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
@@ -161,6 +172,7 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("OnStartAbility is called");
+    CHECK_IS_SYSTEM_APP;
 
     if (info.argc == ARGC_ZERO) {
         HILOG_ERROR("Not enough params");
@@ -175,6 +187,9 @@ NativeValue *JsUIExtensionContentSession::OnStartAbility(NativeEngine& engine, N
         HILOG_ERROR("Failed to parse want!");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return engine.CreateUndefined();
+    }
+    if (!want.HasParameter(Want::PARAM_BACK_TO_OTHER_MISSION_STACK)) {
+        want.SetParam(Want::PARAM_BACK_TO_OTHER_MISSION_STACK, true);
     }
     HILOG_INFO("StartAbility, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
     auto innerErrorCode = std::make_shared<int>(ERR_OK);
@@ -245,6 +260,7 @@ AsyncTask::ExecuteCallback JsUIExtensionContentSession::StartAbilityExecuteCallb
 
 NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& engine, NativeCallbackInfo &info)
 {
+    CHECK_IS_SYSTEM_APP;
     if (info.argc == ARGC_ZERO) {
         ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
@@ -255,6 +271,9 @@ NativeValue *JsUIExtensionContentSession::OnStartAbilityForResult(NativeEngine& 
         HILOG_ERROR("Failed to parse want!");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return engine.CreateUndefined();
+    }
+    if (!want.HasParameter(Want::PARAM_BACK_TO_OTHER_MISSION_STACK)) {
+        want.SetParam(Want::PARAM_BACK_TO_OTHER_MISSION_STACK, true);
     }
     size_t unwrapArgc = 1;
     AAFwk::StartOptions startOptions;
@@ -405,6 +424,7 @@ NativeValue *JsUIExtensionContentSession::OnTerminateSelfWithResult(NativeEngine
 NativeValue *JsUIExtensionContentSession::OnSendData(NativeEngine& engine, NativeCallbackInfo& info)
 {
     HILOG_DEBUG("called");
+    CHECK_IS_SYSTEM_APP;
     if (info.argc < ARGC_ONE) {
         HILOG_ERROR("invalid param");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
@@ -437,6 +457,7 @@ NativeValue *JsUIExtensionContentSession::OnSendData(NativeEngine& engine, Nativ
 NativeValue *JsUIExtensionContentSession::OnSetReceiveDataCallback(NativeEngine& engine, NativeCallbackInfo& info)
 {
     HILOG_DEBUG("called");
+    CHECK_IS_SYSTEM_APP;
     if (info.argc < ARGC_ONE || info.argv[INDEX_ZERO]->TypeOf() != NATIVE_FUNCTION) {
         HILOG_ERROR("invalid param");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
@@ -505,6 +526,7 @@ NativeValue *JsUIExtensionContentSession::OnLoadContent(NativeEngine& engine, Na
 NativeValue *JsUIExtensionContentSession::OnSetWindowBackgroundColor(NativeEngine& engine, NativeCallbackInfo& info)
 {
     HILOG_DEBUG("called");
+    CHECK_IS_SYSTEM_APP;
     std::string color;
     if (info.argc < ARGC_ONE || !ConvertFromJsValue(engine, info.argv[INDEX_ZERO], color)) {
         HILOG_ERROR("invalid param");
@@ -706,7 +728,7 @@ NativeValue* JsUIExtensionContentSession::WrapWant(NativeEngine& engine, const A
 bool JsUIExtensionContentSession::UnWrapWant(NativeEngine& engine, NativeValue* argv, AAFwk::Want& want)
 {
     if (argv == nullptr) {
-        HILOG_WARN("argv == nullptr");
+        HILOG_WARN("argv == null");
         return false;
     }
     return AppExecFwk::UnwrapWant(reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(argv), want);
@@ -723,9 +745,9 @@ void JsUIExtensionContentSession::AddFreeInstallObserver(NativeEngine& engine,
     }
 
     if (ret != ERR_OK) {
-        HILOG_ERROR("AddFreeInstallObserver failed.");
+        HILOG_ERROR("AddFreeInstallObserver failed");
     } else {
-        HILOG_INFO("AddJsObserverObject");
+        HILOG_INFO("AddJsObserverObject.");
         // build a callback observer with last param
         std::string bundleName = want.GetElement().GetBundleName();
         std::string abilityName = want.GetElement().GetAbilityName();

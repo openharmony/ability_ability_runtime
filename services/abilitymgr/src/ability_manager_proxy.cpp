@@ -765,7 +765,7 @@ int AbilityManagerProxy::ConnectAbility(
 
 int AbilityManagerProxy::ConnectAbilityCommon(
     const Want &want, const sptr<IAbilityConnection> &connect, const sptr<IRemoteObject> &callerToken,
-    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId)
+    AppExecFwk::ExtensionAbilityType extensionType, int32_t userId, bool isQueryExtensionOnly)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -807,6 +807,10 @@ int AbilityManagerProxy::ConnectAbilityCommon(
     }
     if (!data.WriteInt32(static_cast<int32_t>(extensionType))) {
         HILOG_ERROR("%{public}s, extensionType write failed.", __func__);
+        return INNER_ERR;
+    }
+    if (!data.WriteBool(isQueryExtensionOnly)) {
+        HILOG_ERROR("isQueryExtensionOnly write failed.");
         return INNER_ERR;
     }
     int error = SendRequest(AbilityManagerInterfaceCode::CONNECT_ABILITY_WITH_TYPE, data, reply, option);
@@ -3573,7 +3577,7 @@ int AbilityManagerProxy::DumpAbilityInfoDone(std::vector<std::string> &infos, co
 }
 
 int32_t AbilityManagerProxy::IsValidMissionIds(
-    const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
+    const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results)
 {
     HILOG_INFO("IsValidMissionIds Call. Quert size is %{public}zu", missionIds.size());
     MessageParcel data;
@@ -3605,7 +3609,7 @@ int32_t AbilityManagerProxy::IsValidMissionIds(
 
     auto infoSize = reply.ReadInt32();
     for (auto i = 0; i < infoSize && i < MAX_COUNT; ++i) {
-        std::unique_ptr<MissionVaildResult> info(reply.ReadParcelable<MissionVaildResult>());
+        std::unique_ptr<MissionValidResult> info(reply.ReadParcelable<MissionValidResult>());
         if (!info) {
             HILOG_ERROR("Read Parcelable result infos failed.");
             return INNER_ERR;

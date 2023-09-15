@@ -33,6 +33,9 @@
 #include "mock_ability_token.h"
 #include "mock_ability_controller.h"
 #include "session/host/include/session.h"
+#include "mock_ability_manager_collaborator.h"
+#include "mock_prepare_terminate_callback.h"
+#include "scene_board_judgement.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1433,6 +1436,25 @@ HWTEST_F(AbilityManagerServiceTest, MoveMissionToFront_002, TestSize.Level1)
     abilityMs_->OnStart();
     StartOptions startOptions;
     EXPECT_EQ(abilityMs_->MoveMissionToFront(100, startOptions), CHECK_PERMISSION_FAILED);
+    HILOG_INFO("AbilityManagerServiceTest MoveMissionToFront_002 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: MoveMissionToFront
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService MoveMissionToFront
+ */
+HWTEST_F(AbilityManagerServiceTest, MoveMissionToFront_003, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest MoveMissionToFront_003 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_TRUE(abilityMs_ != nullptr);
+    abilityMs_->OnStart();
+    StartOptions startOptions;
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(abilityMs_->MoveMissionToFront(100, startOptions), CHECK_PERMISSION_FAILED);
+    }
     HILOG_INFO("AbilityManagerServiceTest MoveMissionToFront_002 end");
 }
 
@@ -2931,31 +2953,37 @@ HWTEST_F(AbilityManagerServiceTest, CheckStaticCfgPermission_001, TestSize.Level
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     AppExecFwk::AbilityInfo abilityInfo;
     MyFlag::flag_ = 1;
-    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1), AppExecFwk::Constants::PERMISSION_GRANTED);
+    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1),
+        AppExecFwk::Constants::PERMISSION_GRANTED);
 
     MyFlag::flag_ = 0;
-    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1), AppExecFwk::Constants::PERMISSION_GRANTED);
+    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1),
+        AppExecFwk::Constants::PERMISSION_GRANTED);
 
     abilityInfo.applicationInfo.accessTokenId = 0;
     EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1), ERR_OK);
 
     // abilityInfo.permissions is empty
     abilityInfo.applicationInfo.accessTokenId = -1;
-    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1), AppExecFwk::Constants::PERMISSION_GRANTED);
+    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1),
+        AppExecFwk::Constants::PERMISSION_GRANTED);
 
     // abilityInfo.permissions is not empty
     abilityInfo.permissions.push_back("test1");
     abilityInfo.permissions.push_back("test2");
-    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1), AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1),
+        AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
 
     abilityInfo.type = AbilityType::EXTENSION;
     abilityInfo.extensionAbilityType = ExtensionAbilityType::DATASHARE;
     abilityInfo.readPermission = "test";
-    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1), AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1),
+        AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
 
     abilityInfo.readPermission.clear();
     abilityInfo.writePermission = "test";
-    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1), AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
+    EXPECT_EQ(abilityMs_->CheckStaticCfgPermission(abilityInfo, false, -1),
+        AppExecFwk::Constants::PERMISSION_NOT_GRANTED);
     HILOG_INFO("AbilityManagerServiceTest CheckStaticCfgPermission_001 end");
 }
 
@@ -3357,7 +3385,7 @@ HWTEST_F(AbilityManagerServiceTest, IsValidMissionIds_001, TestSize.Level1)
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::vector<int32_t> missionIds;
-    std::vector<MissionVaildResult> results;
+    std::vector<MissionValidResult> results;
     EXPECT_EQ(abilityMs_->IsValidMissionIds(missionIds, results), ERR_INVALID_VALUE);
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_001 end");
 }
@@ -3373,7 +3401,7 @@ HWTEST_F(AbilityManagerServiceTest, IsValidMissionIds_002, TestSize.Level1)
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_002 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     std::vector<int32_t> missionIds;
-    std::vector<MissionVaildResult> results;
+    std::vector<MissionValidResult> results;
     abilityMs_->InitMissionListManager(IPCSkeleton::GetCallingUid() / BASE_USER_RANGE, false);
     EXPECT_EQ(abilityMs_->IsValidMissionIds(missionIds, results), ERR_OK);
     HILOG_INFO("AbilityManagerServiceTest IsValidMissionIds_002 end");
@@ -3803,6 +3831,215 @@ HWTEST_F(AbilityManagerServiceTest, AppRecoverKill_001, TestSize.Level1)
     abilityMs_->AppRecoverKill(pid, StateReason::JS_ERROR);
     abilityMs_->AppRecoverKill(pid, StateReason::LIFECYCLE);
     abilityMs_->AppRecoverKill(pid, StateReason::APP_FREEZE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterIAbilityManagerCollaborator
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterIAbilityManagerCollaborator
+ * @tc.require: issueI7LF4X
+ */
+HWTEST_F(AbilityManagerServiceTest, RegisterIAbilityManagerCollaborator_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<IAbilityManagerCollaborator> broker = new (std::nothrow) MockAbilityManagerCollaborator();
+    int32_t type = CollaboratorType::RESERVE_TYPE;
+    int32_t res = abilityMs_->RegisterIAbilityManagerCollaborator(type, broker);
+    EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(abilityMs_->collaboratorMap_.size(), 0);
+
+    auto broker1 = abilityMs_->GetCollaborator(type);
+    EXPECT_EQ(broker1, nullptr);
+
+    res = abilityMs_->UnregisterIAbilityManagerCollaborator(type);
+    EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(abilityMs_->collaboratorMap_.size(), 0);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: MoveMissionToBackground
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService MoveMissionToBackground
+ * @tc.require: issueI7LF4X
+ */
+HWTEST_F(AbilityManagerServiceTest, MoveMissionToBackground_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t missionId = 1;
+    abilityMs_->currentMissionListManager_ = nullptr;
+    int res = abilityMs_->MoveMissionToBackground(missionId);
+    EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: TerminateMission
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService TerminateMission
+ * @tc.require: issueI7LF4X
+ */
+HWTEST_F(AbilityManagerServiceTest, TerminateMission_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    int32_t missionId = 1;
+    abilityMs_->currentMissionListManager_ = nullptr;
+    int res = abilityMs_->TerminateMission(missionId);
+    EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckCollaboratorType
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckCollaboratorType
+ * @tc.require: issueI7LF4X
+ */
+HWTEST_F(AbilityManagerServiceTest, CheckCollaboratorType_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    bool res = abilityMs_->CheckCollaboratorType(CollaboratorType::RESERVE_TYPE);
+    EXPECT_EQ(res, true);
+
+    res = abilityMs_->CheckCollaboratorType(CollaboratorType::DEFAULT_TYPE);
+    EXPECT_EQ(res, false);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: PrepareTerminateAbility
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService PrepareTerminateAbility
+ * @tc.require: issueI7SX12
+ */
+HWTEST_F(AbilityManagerServiceTest, PrepareTerminateAbility_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<IPrepareTerminateCallback> callback = new (std::nothrow) PrepareTerminateCallback();
+    int res = abilityMs_->PrepareTerminateAbility(nullptr, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: PrepareTerminateAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService PrepareTerminateAbilityBySCB
+ * @tc.require: issueI7SX12
+ */
+HWTEST_F(AbilityManagerServiceTest, PrepareTerminateAbilityBySCB_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<SessionInfo> sessionInfo = nullptr;
+    bool isTerminate = false;
+    int res = abilityMs_->PrepareTerminateAbilityBySCB(sessionInfo, isTerminate);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: PrepareTerminateAbilityBySCB
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService PrepareTerminateAbilityBySCB
+ * @tc.require: issueI7SX12
+ */
+HWTEST_F(AbilityManagerServiceTest, PrepareTerminateAbilityBySCB_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
+    Rosen::SessionInfo info;
+    sessionInfo->sessionToken = new (std::nothrow) Rosen::Session(info);
+    bool isTerminate = false;
+    int res = abilityMs_->PrepareTerminateAbilityBySCB(sessionInfo, isTerminate);
+    EXPECT_EQ(res, ERR_WRONG_INTERFACE_CALL);
+    EXPECT_FALSE(isTerminate);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckPrepareTerminateEnable
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckPrepareTerminateEnable
+ * @tc.require: issueI7SX12
+ */
+HWTEST_F(AbilityManagerServiceTest, CheckPrepareTerminateEnable_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->isPrepareTerminateEnable_ = false;
+    bool res = abilityMs_->CheckPrepareTerminateEnable();
+    EXPECT_FALSE(res);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckPrepareTerminateEnable
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckPrepareTerminateEnable
+ * @tc.require: issueI7SX12
+ */
+HWTEST_F(AbilityManagerServiceTest, CheckPrepareTerminateEnable_002, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->isPrepareTerminateEnable_ = true;
+    bool res = abilityMs_->CheckPrepareTerminateEnable();
+    EXPECT_TRUE(res);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: SetLockedState
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService SetLockedState
+ */
+HWTEST_F(AbilityManagerServiceTest, SetLockedState_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    std::shared_ptr<AbilityRecord> abilityRecord = MockAbilityRecord(AbilityType::PAGE);
+    abilityMs_->SetLockedState(1, true);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSessionHandler
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSessionHandler
+ */
+HWTEST_F(AbilityManagerServiceTest, RegisterSessionHandler_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest RegisterSessionHandler_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_EQ(abilityMs_->RegisterSessionHandler(nullptr), ERR_NO_INIT);
+    HILOG_INFO("AbilityManagerServiceTest RegisterSessionHandler_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: CheckUserIdActive
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService CheckUserIdActive
+ */
+HWTEST_F(AbilityManagerServiceTest, CheckUserIdActive_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    abilityMs_->CheckUserIdActive(USER_ID_U100);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RegisterSessionHandler
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RegisterSessionHandler
+ */
+HWTEST_F(AbilityManagerServiceTest, RegisterSessionHandler_002, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceTest RegisterSessionHandler_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
+    EXPECT_EQ(abilityMs_->RegisterSessionHandler(nullptr), ERR_WRONG_INTERFACE_CALL);
+    HILOG_INFO("AbilityManagerServiceTest RegisterSessionHandler_002 end");
 }
 }  // namespace AAFwk
 }  // namespace OHOS

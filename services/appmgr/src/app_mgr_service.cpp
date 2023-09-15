@@ -91,6 +91,7 @@ void AppMgrService::OnStart()
         return;
     }
     appMgrServiceState_.serviceRunningState = ServiceRunningState::STATE_RUNNING;
+    AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
     HILOG_INFO("start service success");
     PerfProfile::GetInstance().SetAmsLoadEndTime(GetTickCount());
     PerfProfile::GetInstance().Dump();
@@ -790,6 +791,36 @@ int32_t AppMgrService::GetRunningProcessInformation(const std::string &bundleNam
     }
 
     return appMgrServiceInner_->GetRunningProcessInformation(bundleName, userId, info);
+}
+
+void AppMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HILOG_INFO("systemAbilityId: %{public}d add", systemAbilityId);
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return;
+    }
+
+    if (systemAbilityId != WINDOW_MANAGER_SERVICE_ID) {
+        return;
+    }
+
+    appMgrServiceInner_->InitFocusListener();
+}
+
+void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HILOG_INFO("systemAbilityId: %{public}d remove", systemAbilityId);
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return;
+    }
+
+    if (systemAbilityId != WINDOW_MANAGER_SERVICE_ID) {
+        return;
+    }
+
+    appMgrServiceInner_->FreeFocusListener();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
