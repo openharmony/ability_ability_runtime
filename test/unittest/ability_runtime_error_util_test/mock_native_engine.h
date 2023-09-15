@@ -276,6 +276,11 @@ public:
     void ResumeVM() override
     {}
 
+    napi_value ValueToNapiValue(JSValueWrapper& value) override
+    {
+        return nullptr;
+    }
+
     NativeValue* ValueToNativeValue(JSValueWrapper& value) override
     {
         return nullptr;
@@ -386,6 +391,9 @@ public:
     {}
 
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override
+    {}
+
+    void RegisterSourceMapTranslateCallback(SourceMapTranslateCallback callback) override
     {}
 
     void HandleUncaughtException() override

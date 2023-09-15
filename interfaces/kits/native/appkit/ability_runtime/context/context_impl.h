@@ -26,7 +26,6 @@ namespace AppExecFwk {
 struct RunningProcessInfo;
 }
 namespace AbilityRuntime {
-
 class ContextImpl : public Context {
 public:
     ContextImpl() = default;

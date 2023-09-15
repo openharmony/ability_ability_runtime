@@ -51,6 +51,7 @@ int ComponentInterceptionStub::OnRemoteRequest(
             return (this->*requestFunc)(data, reply);
         }
     }
+    HILOG_DEBUG("exit");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 

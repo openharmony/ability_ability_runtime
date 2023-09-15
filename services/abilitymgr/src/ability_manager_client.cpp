@@ -328,7 +328,7 @@ ErrCode AbilityManagerClient::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessi
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    HILOG_DEBUG("call");
+    HILOG_INFO("call");
     return abms->CloseUIAbilityBySCB(sessionInfo);
 }
 
@@ -359,7 +359,7 @@ ErrCode AbilityManagerClient::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &se
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    HILOG_DEBUG("call");
+    HILOG_INFO("call");
     return abms->MinimizeUIAbilityBySCB(sessionInfo, fromUser);
 }
 
@@ -798,16 +798,28 @@ ErrCode AbilityManagerClient::MoveMissionToFront(int32_t missionId, const StartO
 
 ErrCode AbilityManagerClient::MoveMissionsToForeground(const std::vector<int32_t>& missionIds, int32_t topMissionId)
 {
-    HILOG_INFO("MoveMissionsToForeground begin.");
+    HILOG_INFO("MoveMissionsToForeground begin, topMissionId:%{public}d", topMissionId);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
-        auto err = sceneSessionManager->MoveSessionsToForeground(missionIds);
+        auto err = sceneSessionManager->MoveSessionsToForeground(missionIds, topMissionId);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
-        return static_cast<int>(err);
+        auto abms = GetAbilityManager();
+        CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+        if (missionIds.empty()) {
+            return ERR_INVALID_VALUE;
+        }
+        int32_t missionId = topMissionId;
+        if (topMissionId > 0) {
+            missionId = topMissionId;
+        } else {
+            missionId = missionIds[0];
+        }
+        auto errAMS = abms->MoveMissionToFront(missionId);
+        return static_cast<int>(errAMS);
     }
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
@@ -822,7 +834,7 @@ ErrCode AbilityManagerClient::MoveMissionsToBackground(const std::vector<int32_t
         auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
-        auto err = sceneSessionManager->MoveSessionsToBackground(missionIds);
+        auto err = sceneSessionManager->MoveSessionsToBackground(missionIds, result);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
@@ -976,7 +988,7 @@ ErrCode AbilityManagerClient::GetMissionSnapshot(const std::string& deviceId, in
         auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
         HILOG_INFO("call");
-        auto err = sceneSessionManager->GetSessionSnapshot(deviceId, missionId, snapshot.snapshot, isLowResolution);
+        auto err = sceneSessionManager->GetSessionSnapshot(deviceId, missionId, snapshot, isLowResolution);
         if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
             return SCB_TO_MISSION_ERROR_CODE_MAP[err];
         }
@@ -1085,8 +1097,11 @@ ErrCode AbilityManagerClient::SetMissionLabel(const sptr<IRemoteObject> &token, 
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        HILOG_DEBUG("call");
+        HILOG_INFO("call");
         auto err = sceneSessionManager->SetSessionLabel(token, label);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     auto abms = GetAbilityManager();
@@ -1100,8 +1115,11 @@ ErrCode AbilityManagerClient::SetMissionIcon(
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sceneSessionManager = SessionManager::GetInstance().GetSceneSessionManagerProxy();
         CHECK_POINTER_RETURN_INVALID_VALUE(sceneSessionManager);
-        HILOG_DEBUG("call");
+        HILOG_INFO("call");
         auto err = sceneSessionManager->SetSessionIcon(abilityToken, icon);
+        if (SCB_TO_MISSION_ERROR_CODE_MAP.count(err)) {
+            return SCB_TO_MISSION_ERROR_CODE_MAP[err];
+        }
         return static_cast<int>(err);
     }
     auto abms = GetAbilityManager();
@@ -1235,6 +1253,7 @@ void AbilityManagerClient::ResetProxy(const wptr<IRemoteObject>& remote)
 
     auto serviceRemote = proxy_->AsObject();
     if ((serviceRemote != nullptr) && (serviceRemote == remote.promote())) {
+        HILOG_DEBUG("To remove death recipient.");
         serviceRemote->RemoveDeathRecipient(deathRecipient_);
         proxy_ = nullptr;
     }
@@ -1310,7 +1329,7 @@ ErrCode AbilityManagerClient::AddFreeInstallObserver(const sptr<AbilityRuntime::
 }
 
 int32_t AbilityManagerClient::IsValidMissionIds(
-    const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
+    const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results)
 {
     HILOG_INFO("call");
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -1321,9 +1340,9 @@ int32_t AbilityManagerClient::IsValidMissionIds(
         HILOG_DEBUG("IsValidSessionIds %{public}d size %{public}d",
             static_cast<int>(err), static_cast<int32_t>(isValidList.size()));
         for (auto i = 0; i < static_cast<int32_t>(isValidList.size()); ++i) {
-            MissionVaildResult missionResult = {};
+            MissionValidResult missionResult = {};
             missionResult.missionId = missionIds.at(i);
-            missionResult.isVaild = isValidList.at(i);
+            missionResult.isValid = isValidList.at(i);
             results.push_back(missionResult);
         }
         return static_cast<int>(err);

@@ -2426,6 +2426,23 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
         return;
     }
 
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+    CHECK_POINTER_LOG(handler, "Fail to get AbilityEventHandler.");
+    if (abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
+        handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    }
+    if (abilityRecord->GetAbilityState() == AbilityState::FOREGROUNDING) {
+        handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    }
+    auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    CHECK_POINTER_LOG(taskHandler, "Fail to get AbilityTaskHandler.");
+    if (abilityRecord->GetAbilityState() == AbilityState::BACKGROUNDING) {
+        taskHandler->CancelTask("background_" + std::to_string(abilityRecord->GetAbilityRecordId()));
+    }
+    if (abilityRecord->GetAbilityState() == AbilityState::TERMINATING) {
+        taskHandler->CancelTask("terminate_" + std::to_string(abilityRecord->GetAbilityRecordId()));
+    }
+
     HandleAbilityDied(abilityRecord);
 }
 
@@ -3699,7 +3716,7 @@ void MissionListManager::SetMissionANRStateByTokens(const std::vector<sptr<IRemo
 }
 
 int32_t MissionListManager::IsValidMissionIds(
-    const std::vector<int32_t> &missionIds, std::vector<MissionVaildResult> &results)
+    const std::vector<int32_t> &missionIds, std::vector<MissionValidResult> &results)
 {
     constexpr int32_t searchCount = 20;
     auto callerUid = IPCSkeleton::GetCallingUid();
@@ -3710,7 +3727,7 @@ int32_t MissionListManager::IsValidMissionIds(
     }
     std::lock_guard guard(managerLock_);
     for (auto i = 0; i < searchCount && i < static_cast<int32_t>(missionIds.size()); ++i) {
-        MissionVaildResult missionResult = {};
+        MissionValidResult missionResult = {};
         missionResult.missionId = missionIds.at(i);
         InnerMissionInfo info;
         if (missionInfoMgr->GetInnerMissionInfoById(missionResult.missionId, info) != ERR_OK) {
@@ -3723,7 +3740,7 @@ int32_t MissionListManager::IsValidMissionIds(
             continue;
         }
 
-        missionResult.isVaild = true;
+        missionResult.isValid = true;
         results.push_back(missionResult);
     }
 

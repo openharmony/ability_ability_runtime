@@ -171,6 +171,7 @@ NativeValue *JsUIExtensionContext::OnStartAbility(NativeEngine& engine, NativeCa
     AAFwk::Want want;
     AAFwk::StartOptions startOptions;
     if (!CheckStartAbilityInputParam(engine, info, want, startOptions, unwrapArgc)) {
+        HILOG_DEBUG("Failed, input param type invalid");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return engine.CreateUndefined();
     }
@@ -236,19 +237,13 @@ NativeValue *JsUIExtensionContext::OnStartAbilityForResult(NativeEngine &engine,
         ThrowTooFewParametersError(engine);
         return engine.CreateUndefined();
     }
+    size_t unwrapArgc = 0;
     AAFwk::Want want;
-    if (!UnWrapWant(engine, info.argv[INDEX_ZERO], want)) {
-        HILOG_ERROR("failed to parse want!");
+    AAFwk::StartOptions startOptions;
+    if (!CheckStartAbilityInputParam(engine, info, want, startOptions, unwrapArgc)) {
+        HILOG_DEBUG("input param type invalid");
         ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
         return engine.CreateUndefined();
-    }
-    decltype(info.argc) unwrapArgc = 1;
-    AAFwk::StartOptions startOptions;
-    if (info.argc > ARGC_ONE && info.argv[INDEX_ONE]->TypeOf() == NATIVE_OBJECT) {
-        HILOG_INFO("start options is used.");
-        AppExecFwk::UnwrapStartOptions(
-            reinterpret_cast<napi_env>(&engine), reinterpret_cast<napi_value>(info.argv[INDEX_ONE]), startOptions);
-        unwrapArgc++;
     }
     NativeValue *lastParam = info.argc > unwrapArgc ? info.argv[unwrapArgc] : nullptr;
     NativeValue *result = nullptr;
@@ -352,7 +347,7 @@ NativeValue* JsUIExtensionContext::OnConnectAbility(NativeEngine& engine, Native
                 RemoveConnection(connectId);
                 return;
             }
-            HILOG_DEBUG("ConnectAbility connection:%{public}d", static_cast<int32_t>(connectId));
+            HILOG_DEBUG("ConnectAbility connection:%{public}d.", static_cast<int32_t>(connectId));
             auto innerErrorCode = context->ConnectAbility(want, connection);
             int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
             if (errcode) {
@@ -450,6 +445,9 @@ bool JsUIExtensionContext::CheckStartAbilityInputParam(NativeEngine& engine, Nat
     // Check input want
     if (!CheckWantParam(engine, info.argv[INDEX_ZERO], want)) {
         return false;
+    }
+    if (!want.HasParameter(Want::PARAM_BACK_TO_OTHER_MISSION_STACK)) {
+        want.SetParam(Want::PARAM_BACK_TO_OTHER_MISSION_STACK, true);
     }
     ++unwrapArgc;
     if (info.argc > ARGC_ONE && info.argv[1]->TypeOf() == NATIVE_OBJECT) {
@@ -605,7 +603,7 @@ void JSUIExtensionConnection::OnAbilityConnectDone(const AppExecFwk::ElementName
 void JSUIExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
 {
-    HILOG_DEBUG("HandleOnAbilityConnectDone, resultCode:%{public}d", resultCode);
+    HILOG_DEBUG("HandleOnAbilityConnectDone start, resultCode:%{public}d", resultCode);
     // wrap ElementName
     napi_value napiElementName = OHOS::AppExecFwk::WrapElementName(reinterpret_cast<napi_env>(&engine_), element);
     NativeValue* nativeElementName = reinterpret_cast<NativeValue*>(napiElementName);
@@ -616,7 +614,7 @@ void JSUIExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::Eleme
     NativeValue* nativeRemoteObject = reinterpret_cast<NativeValue*>(napiRemoteObject);
     NativeValue* argv[] = {nativeElementName, nativeRemoteObject};
     if (jsConnectionObject_ == nullptr) {
-        HILOG_ERROR("jsConnectionObject_ nullptr");
+        HILOG_ERROR("jsConnectionObject_ null");
         return;
     }
     NativeValue* value = jsConnectionObject_->Get();

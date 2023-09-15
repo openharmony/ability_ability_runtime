@@ -1717,11 +1717,12 @@ void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<Connection
     connRecordList_.remove(connRecord);
 }
 
-void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, std::string srcAbilityId)
+void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, std::string srcAbilityId,
+    uint32_t callingTokenId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Add caller record.");
-    if (!srcAbilityId.empty() && IsSystemAbilityCall(callerToken)) {
+    if (!srcAbilityId.empty() && IsSystemAbilityCall(callerToken, callingTokenId)) {
         AddSystemAbilityCallerRecord(callerToken, requestCode, srcAbilityId);
         return;
     }
@@ -1748,7 +1749,7 @@ void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int 
         abilityRecord->GetAbilityInfo().name.c_str());
 }
 
-bool AbilityRecord::IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken)
+bool AbilityRecord::IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken, uint32_t callingTokenId)
 {
     if (callerToken == nullptr) {
         return false;
@@ -1757,15 +1758,20 @@ bool AbilityRecord::IsSystemAbilityCall(const sptr<IRemoteObject> &callerToken)
     if (abilityRecord != nullptr) {
         return false;
     }
-    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(IPCSkeleton::GetCallingTokenID());
+    uint32_t tokenId = 0;
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        tokenId = callingTokenId;
+    } else {
+        tokenId = IPCSkeleton::GetCallingTokenID();
+    }
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     bool isNativeCall = tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE;
     if (!isNativeCall) {
         HILOG_INFO("Is not native call.");
         return false;
     }
     AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(),
-        nativeTokenInfo);
+    int32_t result = AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
     if (result == ERR_OK && nativeTokenInfo.processName == DMS_PROCESS_NAME) {
         HILOG_INFO("Is system ability call.");
         return true;
@@ -2065,9 +2071,11 @@ void AbilityRecord::RemoveAbilityDeathRecipient() const
 void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 {
     HILOG_WARN("On scheduler died.");
-    auto mission = GetMission();
-    if (mission) {
-        HILOG_WARN("On scheduler died. Is app not response Reason:%{public}d", mission->IsANRState());
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto mission = GetMission();
+        if (mission) {
+            HILOG_WARN("On scheduler died. Is app not response Reason:%{public}d", mission->IsANRState());
+        }
     }
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
@@ -2117,6 +2125,9 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 
 void AbilityRecord::NotifyAnimationAbilityDied()
 {
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return;
+    }
     // notify winddow manager service the ability died
     if (missionId_ != -1) {
         if (GetWMSHandler()) {
