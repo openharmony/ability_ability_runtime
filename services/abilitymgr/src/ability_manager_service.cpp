@@ -8210,5 +8210,16 @@ bool AbilityManagerService::CheckUserIdActive(int32_t userId)
     }
     return true;
 }
+
+bool AbilityManagerService::IsAbilityControllerStart(const Want &want)
+{
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (!isSaCall || (callingUid != BROKER_UID && callingUid != BROKER_RESERVE_UID)) {
+        HILOG_ERROR("The interface only support for broker");
+        return true;
+    }
+    return IsAbilityControllerStart(want, want.GetBundle());
+}
 }  // namespace AAFwk
 }  // namespace OHOS

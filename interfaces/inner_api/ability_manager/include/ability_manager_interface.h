@@ -1149,6 +1149,16 @@ public:
     {
         return 0;
     }
+
+    /**
+     * @brief Check if ability controller can start.
+     * @param want The want of ability to start.
+     * @return Return true to allow ability to start, or false to reject.
+     */
+    virtual bool IsAbilityControllerStart(const Want &want)
+    {
+        return true;
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS
