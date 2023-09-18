@@ -171,6 +171,12 @@ public:
         return 0;
     }
 
+    void AttachAppDebug() override
+    {}
+
+    void DetachAppDebug() override
+    {}
+
 private:
     int abilityLaunchTime = 0;
     int appLaunchTime = 0;
