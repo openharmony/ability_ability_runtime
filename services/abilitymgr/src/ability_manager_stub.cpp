@@ -147,6 +147,8 @@ void AbilityManagerStub::FirstStepInit()
         &AbilityManagerStub::MoveMissionToBackgroundInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::TERMINATE_MISSION)] =
         &AbilityManagerStub::TerminateMissionInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::IS_ABILITY_CONTROLLER_START)] =
+        &AbilityManagerStub::IsAbilityControllerStartInner;
 }
 
 void AbilityManagerStub::SecondStepInit()
@@ -2500,6 +2502,18 @@ int AbilityManagerStub::RegisterSessionHandlerInner(MessageParcel &data, Message
     }
     int32_t result = RegisterSessionHandler(handler);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::IsAbilityControllerStartInner(MessageParcel &data, MessageParcel &reply)
+{
+    Want *want = data.ReadParcelable<Want>();
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return true;
+    }
+    bool result = IsAbilityControllerStart(*want);
+    reply.WriteBool(result);
     return NO_ERROR;
 }
 }  // namespace AAFwk

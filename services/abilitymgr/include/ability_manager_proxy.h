@@ -919,6 +919,13 @@ public:
     virtual int PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate) override;
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
 
+    /**
+     * @brief Check if ability controller can start.
+     * @param want The want of ability to start.
+     * @return Return true to allow ability to start, or false to reject.
+     */
+    virtual bool IsAbilityControllerStart(const Want &want) override;
+
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

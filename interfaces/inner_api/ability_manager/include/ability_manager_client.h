@@ -1187,6 +1187,13 @@ public:
     */
     ErrCode RegisterSessionHandler(const sptr<IRemoteObject> &object);
 
+    /**
+     * @brief Check if ability controller can start.
+     * @param want The want of ability to start.
+     * @return Return true to allow ability to start, or false to reject.
+     */
+    bool IsAbilityControllerStart(const Want &want);
+
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
