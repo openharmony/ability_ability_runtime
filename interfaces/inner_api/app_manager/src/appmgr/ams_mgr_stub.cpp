@@ -93,6 +93,8 @@ void AmsMgrStub::CreateMemberFuncMap()
         &AmsMgrStub::HandleAttachAppDebug;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::DETACH_APP_DEBUG)] =
         &AmsMgrStub::HandleDetachAppDebug;
+    memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::REGISTER_ABILITY_DEBUG_RESPONSE)] =
+        &AmsMgrStub::HandleRegisterAbilityDebugResponse;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::IS_ATTACH_DEBUG)] =
         &AmsMgrStub::HandleIsAttachDebug;
 }
