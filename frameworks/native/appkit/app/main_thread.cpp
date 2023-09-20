@@ -1164,8 +1164,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         return;
     }
 
-    auto isAppDebug = appLaunchData.GetAppDebug();
-    if (isAppDebug && watchdog_ != nullptr && !watchdog_->IsStopWatchdog()) {
+    if (appLaunchData.GetAppDebug() && watchdog_ != nullptr && !watchdog_->IsStopWatchdog()) {
         watchdog_->Stop();
         watchdog_.reset();
     }

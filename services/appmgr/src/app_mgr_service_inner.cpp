@@ -100,6 +100,7 @@ const std::string PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const std::string SUPPORT_ISOLATION_MODE = "persist.bms.supportIsolationMode";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
+const std::string DEBUG_APP = "debugApp";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -1204,7 +1205,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(con
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want);
     if (want) {
-        appRecord->SetDebugApp(want->GetBoolParam("debugApp", false));
+        appRecord->SetDebugApp(want->GetBoolParam(DEBUG_APP, false));
         appRecord->SetNativeDebug(want->GetBoolParam("nativeDebug", false));
         if (want->GetBoolParam(COLD_START, false)) {
             appRecord->SetDebugApp(true);
@@ -1498,7 +1499,7 @@ void AppMgrServiceInner::StartAbility(const sptr<IRemoteObject> &token, const sp
     if (want) {
         want->SetParam(DLP_PARAMS_SECURITY_FLAG, appRecord->GetSecurityFlag());
 
-        auto isDebugApp = want->GetBoolParam("debugApp", false);
+        auto isDebugApp = want->GetBoolParam(DEBUG_APP, false);
         if (isDebugApp && !appRecord->IsDebugApp()) {
             ProcessAppDebug(appRecord, isDebugApp);
         }
@@ -2716,7 +2717,7 @@ int AppMgrServiceInner::StartEmptyProcess(const AAFwk::Want &want, const sptr<IR
         return ERR_INVALID_VALUE;
     }
 
-    auto isDebug = want.GetBoolParam("debugApp", false);
+    auto isDebug = want.GetBoolParam(DEBUG_APP, false);
     HILOG_INFO("Set Debug : %{public}s", (isDebug ? "true" : "false"));
     appRecord->SetDebugApp(isDebug);
     if (want.GetBoolParam(COLD_START, false)) {
@@ -2854,7 +2855,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             appRecord->SetCallerPid(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_PID, -1));
             appRecord->SetCallerUid(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1));
             appRecord->SetCallerTokenId(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
-            appRecord->SetDebugApp(wantPtr->GetBoolParam("debugApp", false));
+            appRecord->SetDebugApp(wantPtr->GetBoolParam(DEBUG_APP, false));
         }
         appRecord->SetProcessAndExtensionType(abilityInfoPtr);
         appRecord->SetTaskHandler(taskHandler_);
@@ -2870,7 +2871,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
         appRecord->AddModules(appInfo, hapModules);
     } else {
         HILOG_DEBUG("process is exist");
-        auto isDebugApp = want.GetBoolParam("debugApp", false);
+        auto isDebugApp = want.GetBoolParam(DEBUG_APP, false);
         if (isDebugApp && !appRecord->IsDebugApp()) {
             ProcessAppDebug(appRecord, isDebugApp);
         }
@@ -4251,8 +4252,7 @@ int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName)
     }
     appRunningManager_->AttachAppDebug(bundleName);
 
-    std::vector<AppDebugInfo> debugInfos;
-    appRunningManager_->GetAppDebugInfoByBundleName(bundleName, debugInfos, false);
+    auto debugInfos = appRunningManager_->GetAppDebugInfosByBundleName(bundleName, false);
     if (!debugInfos.empty()) {
         appDebugManager_->StartDebug(debugInfos);
     }
@@ -4268,11 +4268,10 @@ int32_t AppMgrServiceInner::DetachAppDebug(const std::string &bundleName)
         HILOG_ERROR("appRunningManager_ or appDebugManager_ is nullptr.");
         return ERR_NO_INIT;
     }
-    appRunningManager_->DetachAppDebug(bundleName);
 
-    std::vector<AppDebugInfo> debugInfos;
-    appRunningManager_->GetAppDebugInfoByBundleName(bundleName, debugInfos, true);
+    auto debugInfos = appRunningManager_->GetAppDebugInfosByBundleName(bundleName, true);
     if (!debugInfos.empty()) {
+        appRunningManager_->DetachAppDebug(bundleName);
         appDebugManager_->StopDebug(debugInfos);
     }
 
