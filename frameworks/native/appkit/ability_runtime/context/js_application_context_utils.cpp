@@ -53,13 +53,13 @@ NativeValue *JsApplicationContextUtils::CreateBundleContext(NativeEngine *engine
 NativeValue *JsApplicationContextUtils::OnCreateBundleContext(NativeEngine &engine, NativeCallbackInfo &info)
 {
     if (!CheckCallerIsSystemApp()) {
-        HILOG_ERROR("This application is not system-app, can not use system-api");
+        HILOG_ERROR("This application is not system-app, can not use system-api.");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
         return engine.CreateUndefined();
     }
 
     if (info.argc == 0) {
-        HILOG_ERROR("Not enough params");
+        HILOG_ERROR("Not enough arguments");
         AbilityRuntimeErrorUtil::Throw(engine, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return engine.CreateUndefined();
     }
@@ -143,7 +143,7 @@ NativeValue *JsApplicationContextUtils::OnSwitchArea(NativeEngine &engine, Nativ
     NativeValue *thisVar = info.thisVar;
     NativeObject *object = ConvertNativeValueTo<NativeObject>(thisVar);
     if (object == nullptr) {
-        HILOG_ERROR("object is nullptr");
+        HILOG_ERROR("object is nullptr.");
         return engine.CreateUndefined();
     }
     BindNativeProperty(*object, "cacheDir", GetCacheDir);
@@ -556,9 +556,6 @@ NativeValue *JsApplicationContextUtils::OnGetRunningProcessInformation(NativeEng
             object->SetProperty("bundleNames", CreateNativeArray(engine, processInfo.bundleNames));
             object->SetProperty(
                 "state", CreateJsValue(engine, ConvertToJsAppProcessState(processInfo.state_, processInfo.isFocused)));
-            object->SetProperty("isContinuousTask", CreateJsValue(engine, processInfo.isContinuousTask));
-            object->SetProperty("isKeepAlive", CreateJsValue(engine, processInfo.isKeepAlive));
-            object->SetProperty("isFocused", CreateJsValue(engine, processInfo.isFocused));
             NativeValue* arrayValue = engine.CreateArray(1);
             NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
             if (array == nullptr) {

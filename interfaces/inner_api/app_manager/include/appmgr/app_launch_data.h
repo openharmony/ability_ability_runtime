@@ -152,14 +152,24 @@ public:
         return appIndex_;
     }
 
-    inline void SetAppDebug(const bool &isDebug)
+    inline void SetDebugApp(bool debugApp)
     {
-        isDebug_ = isDebug;
+        debugApp_ = debugApp;
     }
 
-    inline bool GetAppDebug() const
+    inline bool GetDebugApp() const
     {
-        return isDebug_;
+        return debugApp_;
+    }
+
+    inline void SetPerfCmd(const std::string &perfCmd)
+    {
+        perfCmd_ = perfCmd;
+    }
+
+    inline std::string GetPerfCmd() const
+    {
+        return perfCmd_;
     }
 
     /**
@@ -192,7 +202,8 @@ private:
     int32_t uId_ = 0;
     int32_t appIndex_ = 0;
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
-    bool isDebug_;
+    bool debugApp_ = false;
+    std::string perfCmd_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

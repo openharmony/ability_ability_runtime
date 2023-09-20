@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "data_ability_helper_impl.h"
 
+#include "ability_manager_client.h"
 #include "ability_scheduler_interface.h"
 #include "ability_thread.h"
 #include "abs_shared_result_set.h"
@@ -143,25 +144,25 @@ std::shared_ptr<DataAbilityHelperImpl> DataAbilityHelperImpl::Creator(
     const std::shared_ptr<Context> &context, const std::shared_ptr<Uri> &uri, const bool tryBind)
 {
     if (context == nullptr) {
-        HILOG_ERROR("Input param invalid, context is nullptr.");
+        HILOG_ERROR("Input param invalid, context is null.");
         return nullptr;
     }
 
     if (!CheckUri(uri)) {
-        HILOG_ERROR("uri is invalid.");
+        HILOG_ERROR("uri is invalid");
         return nullptr;
     }
 
     sptr<IAbilityScheduler> dataAbilityProxy =
         AbilityManagerClient::GetInstance()->AcquireDataAbility(*uri.get(), tryBind, context->GetToken());
     if (dataAbilityProxy == nullptr) {
-        HILOG_ERROR("Acquire data ability failed.");
+        HILOG_ERROR("Acquire data ability error.");
         return nullptr;
     }
 
     auto ptrDataAbilityHelperImpl = new (std::nothrow) DataAbilityHelperImpl(context, uri, dataAbilityProxy, tryBind);
     if (ptrDataAbilityHelperImpl == nullptr) {
-        HILOG_ERROR("New DataAbilityHelperImpl failed.");
+        HILOG_ERROR("New DataAbilityHelperImpl error.");
         return nullptr;
     }
 
