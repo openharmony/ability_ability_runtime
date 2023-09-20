@@ -1164,7 +1164,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         return;
     }
 
-    if (appLaunchData.GetAppDebug() && watchdog_ != nullptr && !watchdog_->IsStopWatchdog()) {
+    if (appLaunchData.GetDebugApp() && watchdog_ != nullptr && !watchdog_->IsStopWatchdog()) {
         watchdog_->Stop();
         watchdog_.reset();
     }
@@ -1293,6 +1293,29 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             HILOG_ERROR("Failed to create runtime");
             return;
         }
+
+        if (appInfo.debug) {
+            auto perfCmd = appLaunchData.GetPerfCmd();
+            if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
+                perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
+                HILOG_DEBUG("perfCmd is %{public}s", perfCmd.c_str());
+                runtime->StartProfiler(perfCmd);
+            } else {
+                runtime->StartDebugMode(appLaunchData.GetDebugApp());
+            }
+        }
+
+        std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
+        std::map<std::string, std::string> modulePaths;
+        if (!hqfInfos.empty()) {
+            for (auto it = hqfInfos.begin(); it != hqfInfos.end(); it++) {
+                HILOG_INFO("moudelName: %{private}s, hqfFilePath: %{private}s.",
+                    it->moduleName.c_str(), it->hqfFilePath.c_str());
+                modulePaths.insert(std::make_pair(it->moduleName, it->hqfFilePath));
+            }
+            runtime->RegisterQuickFixQueryFunc(modulePaths);
+        }
+
         auto& jsEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
         auto bundleName = appInfo.bundleName;
         auto versionCode = appInfo.versionCode;
@@ -1724,35 +1747,6 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     }
 
     auto& runtime = application_->GetRuntime();
-    auto appInfo = application_->GetApplicationInfo();
-    auto want = abilityRecord->GetWant();
-    if (appInfo == nullptr) {
-        HILOG_ERROR("appInfo is nullptr");
-        return;
-    }
-
-    if (runtime && want && appInfo->debug) {
-        auto perfCmd = want->GetStringParam("perfCmd");
-        if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
-            perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
-            HILOG_DEBUG("perfCmd is %{public}s", perfCmd.c_str());
-            runtime->StartProfiler(perfCmd);
-        } else {
-            runtime->StartDebugMode(want->GetBoolParam("debugApp", false));
-        }
-    }
-
-    std::vector<HqfInfo> hqfInfos = appInfo->appQuickFix.deployedAppqfInfo.hqfInfos;
-    std::map<std::string, std::string> modulePaths;
-    if (runtime && !hqfInfos.empty()) {
-        for (auto it = hqfInfos.begin(); it != hqfInfos.end(); it++) {
-            HILOG_INFO("moudelName: %{private}s, hqfFilePath: %{private}s.",
-                it->moduleName.c_str(), it->hqfFilePath.c_str());
-            modulePaths.insert(std::make_pair(it->moduleName, it->hqfFilePath));
-        }
-        runtime->RegisterQuickFixQueryFunc(modulePaths);
-    }
-
     mainThreadState_ = MainThreadState::RUNNING;
     std::shared_ptr<AbilityRuntime::Context> stageContext = application_->AddAbilityStage(abilityRecord);
     SetProcessExtensionType(abilityRecord);

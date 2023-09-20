@@ -87,9 +87,16 @@ bool AppLaunchData::Marshalling(Parcel &parcel) const
         }
     }
 
-    if (!parcel.WriteBool(isDebug_)) {
+    if (!parcel.WriteBool(debugApp_)) {
+        HILOG_ERROR("Failed to write debug flag.");
         return false;
     }
+
+    if (!parcel.WriteString(perfCmd_)) {
+        HILOG_ERROR("Failed to write perf cmd.");
+        return false;
+    }
+
     return true;
 }
 
@@ -129,7 +136,8 @@ bool AppLaunchData::ReadFromParcel(Parcel &parcel)
         }
     }
 
-    isDebug_ = parcel.ReadBool();
+    debugApp_ = parcel.ReadBool();
+    perfCmd_ = parcel.ReadString();
     return true;
 }
 
