@@ -29,7 +29,7 @@ struct AppDebugInfo : public Parcelable {
     std::string bundleName;
     int32_t pid;
     int32_t uid;
-    bool isDebugStart; // Can only be used by app services.
+    bool isDebugStart = false; // Can only be used by app services, isAttachDebug is true when isDebugStart is false.
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

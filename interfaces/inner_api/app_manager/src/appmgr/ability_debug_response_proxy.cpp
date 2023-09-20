@@ -20,8 +20,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
 constexpr int32_t CYCLE_LIMIT_MIN = 0;
 constexpr int32_t CYCLE_LIMIT_MAX = 1000;
+}
 AbilityDebugResponseProxy::AbilityDebugResponseProxy(
     const sptr<IRemoteObject> &impl) : IRemoteProxy<IAbilityDebugResponse>(impl)
 {}
@@ -38,41 +40,17 @@ bool AbilityDebugResponseProxy::WriteInterfaceToken(MessageParcel &data)
 void AbilityDebugResponseProxy::OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens)
 {
     HILOG_DEBUG("Called.");
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("Write interface token failed.");
-        return;
-    }
-
-    if (tokens.size() <= CYCLE_LIMIT_MIN || tokens.size() > CYCLE_LIMIT_MAX ||
-        !data.WriteInt32(tokens.size())) {
-        HILOG_ERROR("Write data size failed.");
-        return;
-    }
-
-    for (auto iter = tokens.begin(); iter != tokens.end(); iter++) {
-        if (!data.WriteRemoteObject(iter->GetRefPtr())) {
-            HILOG_ERROR("Write token failed.");
-            return;
-        }
-    }
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOG_ERROR("Remote is nullptr.");
-        return;
-    }
-
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STARTED), data, reply, option);
-    if (ret != NO_ERROR) {
-        HILOG_ERROR("SendRequest is failed, error code: %{public}d", ret);
-    }
+    SendRequest(IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STARTED, tokens);
 }
 
 void AbilityDebugResponseProxy::OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObject>> &tokens)
+{
+    HILOG_DEBUG("Called.");
+    SendRequest(IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STOPED, tokens);
+}
+
+void AbilityDebugResponseProxy::SendRequest(
+    const IAbilityDebugResponse::Message &message, const std::vector<sptr<IRemoteObject>> &tokens)
 {
     HILOG_DEBUG("Called.");
     MessageParcel data;
@@ -102,8 +80,7 @@ void AbilityDebugResponseProxy::OnAbilitysDebugStoped(const std::vector<sptr<IRe
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STOPED), data, reply, option);
+    auto ret = remote->SendRequest(static_cast<uint32_t>(message), data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_ERROR("SendRequest is failed, error code: %{public}d", ret);
     }

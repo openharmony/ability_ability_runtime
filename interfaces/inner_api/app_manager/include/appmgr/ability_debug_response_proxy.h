@@ -41,6 +41,7 @@ public:
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    void SendRequest(const IAbilityDebugResponse::Message &message, const std::vector<sptr<IRemoteObject>> &tokens);
     static inline BrokerDelegator<AbilityDebugResponseProxy> delegator_;
 };
 } // namespace AppExecFwk
