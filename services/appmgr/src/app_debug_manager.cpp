@@ -75,10 +75,7 @@ void AppDebugManager::StopDebug(const std::vector<AppDebugInfo> &infos)
 {
     HILOG_DEBUG("Called.");
     std::lock_guard<std::mutex> lock(mutex_);
-    for (const auto &listener : listeners_) {
-        listener->OnAppDebugStoped(infos);
-    }
-
+    std::vector<AppDebugInfo> debugInfos;
     for (auto &it : infos) {
         auto isExist = [this, it](const AppDebugInfo &info) {
             return (info.bundleName == it.bundleName && info.pid == it.pid &&
@@ -88,6 +85,13 @@ void AppDebugManager::StopDebug(const std::vector<AppDebugInfo> &infos)
         auto finder = std::find_if(debugInfos_.begin(), debugInfos_.end(), isExist);
         if (finder != debugInfos_.end()) {
             debugInfos_.erase(finder);
+            debugInfos.emplace_back(it);
+        }
+    }
+
+    if (!debugInfos.empty()) {
+        for (const auto &listener : listeners_) {
+            listener->OnAppDebugStoped(debugInfos);
         }
     }
 }

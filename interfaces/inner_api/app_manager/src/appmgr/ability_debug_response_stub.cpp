@@ -22,6 +22,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr int32_t CYCLE_LIMIT_MIN = 0;
+constexpr int32_t CYCLE_LIMIT_MAX = 1000;
+}
 AbilityDebugResponseStub::AbilityDebugResponseStub()
 {
     responseFuncMap_[static_cast<uint32_t>(IAbilityDebugResponse::Message::ON_ABILITYS_DEBUG_STARTED)] =
@@ -38,6 +42,11 @@ AbilityDebugResponseStub::~AbilityDebugResponseStub()
 int32_t AbilityDebugResponseStub::HandleOnAbilitysDebugStarted(MessageParcel &data, MessageParcel &reply)
 {
     auto tokenSize = data.ReadInt32();
+    if (tokenSize <= CYCLE_LIMIT_MIN || tokenSize > CYCLE_LIMIT_MAX) {
+        HILOG_ERROR("Token size exceeds limit.");
+        return ERR_INVALID_DATA;
+    }
+
     std::vector<sptr<IRemoteObject>> tokens;
     for (int32_t index = 0; index < tokenSize; index++) {
         auto token = data.ReadRemoteObject();
@@ -54,6 +63,11 @@ int32_t AbilityDebugResponseStub::HandleOnAbilitysDebugStarted(MessageParcel &da
 int32_t AbilityDebugResponseStub::HandleOnAbilitysDebugStoped(MessageParcel &data, MessageParcel &reply)
 {
     auto tokenSize = data.ReadInt32();
+    if (tokenSize <= CYCLE_LIMIT_MIN || tokenSize > CYCLE_LIMIT_MAX) {
+        HILOG_ERROR("Token size exceeds limit.");
+        return ERR_INVALID_DATA;
+    }
+
     std::vector<sptr<IRemoteObject>> tokens;
     for (int32_t index = 0; index < tokenSize; index++) {
         auto token = data.ReadRemoteObject();
