@@ -909,11 +909,12 @@ void AppRunningManager::DetachAppDebug(const std::string &bundleName)
     }
 }
 
-void AppRunningManager::GetAppDebugInfoByBundleName(
-    const std::string &bundleName, std::vector<AppDebugInfo> &debugInfos, const bool &isDetachDebug)
+std::vector<AppDebugInfo> AppRunningManager::GetAppDebugInfosByBundleName(
+    const std::string &bundleName, const bool &isDetachDebug)
 {
     HILOG_DEBUG("Called.");
     std::lock_guard<ffrt::mutex> guard(lock_);
+    std::vector<AppDebugInfo> debugInfos;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord == nullptr) {
@@ -938,6 +939,7 @@ void AppRunningManager::GetAppDebugInfoByBundleName(
         debugInfo.isDebugStart = isDebug;
         debugInfos.emplace_back(debugInfo);
     }
+    return debugInfos;
 }
 
 void AppRunningManager::GetAbilityTokensByBundleName(

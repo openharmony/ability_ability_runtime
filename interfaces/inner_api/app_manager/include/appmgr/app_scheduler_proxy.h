@@ -180,6 +180,7 @@ public:
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     void ScheduleMemoryCommon(const int32_t level, const uint32_t operation);
+    void SendRequest(const IAppScheduler::Message &message);
     static inline BrokerDelegator<AppSchedulerProxy> delegator_;
 };
 }  // namespace AppExecFwk

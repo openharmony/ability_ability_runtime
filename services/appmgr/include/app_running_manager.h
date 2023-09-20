@@ -225,11 +225,10 @@ public:
     /**
      * @brief Obtain app information through bundleName.
      * @param bundleName The application bundle name.
-     * @param debugInfos Specify the stored app information based on bundle name output.
      * @param isDetachDebug Determine if it is a Detach.
+     * @return Specify the stored app informations based on bundle name output.
      */
-    void GetAppDebugInfoByBundleName(
-        const std::string &bundleName, std::vector<AppDebugInfo> &debugInfos, const bool &isDetachDebug);
+    std::vector<AppDebugInfo> GetAppDebugInfosByBundleName(const std::string &bundleName, const bool &isDetachDebug);
 
     /**
      * @brief Obtain ability token through bundleName.
