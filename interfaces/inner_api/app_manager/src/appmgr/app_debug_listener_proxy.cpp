@@ -20,8 +20,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
 constexpr int32_t CYCLE_LIMIT_MIN = 0;
 constexpr int32_t CYCLE_LIMIT_MAX = 1000;
+}
 AppDebugListenerProxy::AppDebugListenerProxy(
     const sptr<IRemoteObject> &impl) : IRemoteProxy<IAppDebugListener>(impl)
 {}
@@ -37,40 +39,18 @@ bool AppDebugListenerProxy::WriteInterfaceToken(MessageParcel &data)
 
 void AppDebugListenerProxy::OnAppDebugStarted(const std::vector<AppDebugInfo> &debugInfos)
 {
-    MessageParcel data;
-    if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("Write interface token failed.");
-        return;
-    }
-
-    if (debugInfos.size() <= CYCLE_LIMIT_MIN || debugInfos.size() > CYCLE_LIMIT_MAX ||
-        !data.WriteInt32(debugInfos.size())) {
-        HILOG_ERROR("Write debug info size failed.");
-        return;
-    }
-    for (auto &debugInfo : debugInfos) {
-        if (!data.WriteParcelable(&debugInfo)) {
-            HILOG_ERROR("Write debug info failed.");
-            return;
-        }
-    };
-
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOG_ERROR("Remote is nullptr.");
-        return;
-    }
-
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED), data, reply, option);
-    if (ret != NO_ERROR) {
-        HILOG_ERROR("SendRequest is failed, error code: %{public}d", ret);
-    }
+    HILOG_DEBUG("Called.");
+    SendRequest(IAppDebugListener::Message::ON_APP_DEBUG_STARTED, debugInfos);
 }
 
 void AppDebugListenerProxy::OnAppDebugStoped(const std::vector<AppDebugInfo> &debugInfos)
+{
+    HILOG_DEBUG("Called.");
+    SendRequest(IAppDebugListener::Message::ON_APP_DEBUG_STOPED, debugInfos);
+}
+
+void AppDebugListenerProxy::SendRequest(
+    const IAppDebugListener::Message &message, const std::vector<AppDebugInfo> &debugInfos)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -98,8 +78,7 @@ void AppDebugListenerProxy::OnAppDebugStoped(const std::vector<AppDebugInfo> &de
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STOPED), data, reply, option);
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(message), data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_ERROR("SendRequest is failed, error code: %{public}d", ret);
     }

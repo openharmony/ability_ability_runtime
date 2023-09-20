@@ -21,6 +21,10 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+constexpr int32_t CYCLE_LIMIT_MIN = 0;
+constexpr int32_t CYCLE_LIMIT_MAX = 1000;
+}
 AppDebugListenerStub::AppDebugListenerStub()
 {
     memberFuncMap_[static_cast<uint32_t>(IAppDebugListener::Message::ON_APP_DEBUG_STARTED)] =
@@ -57,13 +61,18 @@ int AppDebugListenerStub::OnRemoteRequest(
 
 int32_t AppDebugListenerStub::HandleOnAppDebugStarted(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<AppDebugInfo> appDebugInfos;
     auto infoSize = data.ReadInt32();
+    if (infoSize <= CYCLE_LIMIT_MIN || infoSize > CYCLE_LIMIT_MAX) {
+        HILOG_ERROR("Token size exceeds limit.");
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<AppDebugInfo> appDebugInfos;
     for (int32_t index = 0; index < infoSize; index++) {
         std::unique_ptr<AppDebugInfo> appDebugInfo(data.ReadParcelable<AppDebugInfo>());
         if (appDebugInfo == nullptr) {
             HILOG_ERROR("Read app debug infos failed.");
-            return ERR_INVALID_VALUE;
+            return ERR_INVALID_DATA;
         }
         appDebugInfos.emplace_back(*appDebugInfo);
     }
@@ -74,13 +83,18 @@ int32_t AppDebugListenerStub::HandleOnAppDebugStarted(MessageParcel &data, Messa
 
 int32_t AppDebugListenerStub::HandleOnAppDebugStoped(MessageParcel &data, MessageParcel &reply)
 {
-    std::vector<AppDebugInfo> appDebugInfos;
     auto infoSize = data.ReadInt32();
+    if (infoSize <= CYCLE_LIMIT_MIN || infoSize > CYCLE_LIMIT_MAX) {
+        HILOG_ERROR("Token size exceeds limit.");
+        return ERR_INVALID_DATA;
+    }
+
+    std::vector<AppDebugInfo> appDebugInfos;
     for (int32_t index = 0; index < infoSize; index++) {
         std::unique_ptr<AppDebugInfo> appDebugInfo(data.ReadParcelable<AppDebugInfo>());
         if (appDebugInfo == nullptr) {
             HILOG_ERROR("Read app debug infos failed.");
-            return ERR_INVALID_VALUE;
+            return ERR_INVALID_DATA;
         }
         appDebugInfos.emplace_back(*appDebugInfo);
     }
