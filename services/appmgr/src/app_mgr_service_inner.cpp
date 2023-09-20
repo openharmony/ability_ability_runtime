@@ -2857,6 +2857,11 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             appRecord->SetCallerUid(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1));
             appRecord->SetCallerTokenId(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
             appRecord->SetDebugApp(wantPtr->GetBoolParam(DEBUG_APP, false));
+            appRecord->SetNativeDebug(wantPtr->GetBoolParam("nativeDebug", false));
+            if (wantPtr->GetBoolParam(COLD_START, false)) {
+                appRecord->SetDebugApp(true);
+            }
+            appRecord->SetPerfCmd(wantPtr->GetStringParam(PERF_CMD));
         }
         appRecord->SetProcessAndExtensionType(abilityInfoPtr);
         appRecord->SetTaskHandler(taskHandler_);
