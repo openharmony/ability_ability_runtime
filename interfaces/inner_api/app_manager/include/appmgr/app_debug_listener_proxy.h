@@ -41,6 +41,7 @@ public:
    
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    void SendRequest(const IAppDebugListener::Message &message, const std::vector<AppDebugInfo> &debugInfos);
     static inline BrokerDelegator<AppDebugListenerProxy> delegator_;
 };
 } // namespace AppExecFwk
