@@ -907,15 +907,8 @@ std::vector<AppDebugInfo> AppRunningManager::GetAppDebugInfosByBundleName(
     std::vector<AppDebugInfo> debugInfos;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr) {
-            continue;
-        }
-        if (appRecord->GetBundleName() != bundleName) {
-            continue;
-        }
-
-        auto isDebug = appRecord->IsDebugApp();
-        if (isDetachDebug && isDebug) {
+        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName ||
+            (isDetachDebug && appRecord->IsDebugApp())) {
             continue;
         }
 
@@ -926,7 +919,7 @@ std::vector<AppDebugInfo> AppRunningManager::GetAppDebugInfosByBundleName(
             debugInfo.pid = priorityObject->GetPid();
         }
         debugInfo.uid = appRecord->GetUid();
-        debugInfo.isDebugStart = isDebug;
+        debugInfo.isDebugStart = appRecord->IsDebugApp();
         debugInfos.emplace_back(debugInfo);
     }
     return debugInfos;
@@ -939,10 +932,7 @@ void AppRunningManager::GetAbilityTokensByBundleName(
     std::lock_guard<ffrt::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord == nullptr) {
-            continue;
-        }
-        if (appRecord->GetBundleName() != bundleName) {
+        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
             continue;
         }
 
