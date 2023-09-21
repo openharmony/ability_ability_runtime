@@ -287,7 +287,12 @@ ohos_shared_library("abilitykit_native") {
 
   if (purgeable_ashmem_enable) {
     defines += [ "IMAGE_PURGEABLE_PIXELMAP" ]
-    external_deps += [ "memory_utils:libpurgeablemem" ]
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.resourceschedule_memmgr_plugin)) {
+      external_deps += [ "memmgr_plugin:libpurgeablemem_plugin" ]
+    } else {
+      external_deps += [ "memory_utils:libpurgeablemem" ]
+    }
   }
 
   if (efficiency_manager) {
@@ -406,8 +411,10 @@ ohos_shared_library("ability_thread") {
   include_dirs =
       [ "${ability_runtime_path}/interfaces/kits/native/ability/native" ]
 
-  sources =
-      [ "${ability_runtime_native_path}/ability/native/ability_thread.cpp" ]
+  sources = [
+    "${ability_runtime_native_path}/ability/native/ability_thread.cpp",
+    "${ability_runtime_native_path}/ability/native/fa_ability_thread.cpp",
+  ]
 
   deps = [
     ":abilitykit_native",
