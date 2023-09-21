@@ -647,6 +647,15 @@ public:
         return isSpawned_.load();
     }
 
+    /**
+     * @brief Notify NativeEngine GC of status change.
+     *
+     * @param state GC state
+     *
+     * @return Is the status change completed.
+     */
+    int32_t OnGcStateChange(const int32_t state);
+
     void SetAttachDebug(const bool &isAttachDebug);
     bool isAttachDebug() const;
 
