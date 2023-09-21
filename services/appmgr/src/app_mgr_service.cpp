@@ -822,5 +822,29 @@ void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::st
 
     appMgrServiceInner_->FreeFocusListener();
 }
+
+int32_t AppMgrService::NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    HILOG_DEBUG("bundleName: %{public}s, moduelName: %{public}s, abilityName: %{public}s, pageName: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), abilityName.c_str(), pageName.c_str());
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->NotifyPageShow(bundleName, moduleName, abilityName, pageName);
+}
+
+int32_t AppMgrService::NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    HILOG_DEBUG("bundleName: %{public}s, moduelName: %{public}s, abilityName: %{public}s, pageName: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), abilityName.c_str(), pageName.c_str());
+    if (!IsReady()) {
+        HILOG_ERROR("AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->NotifyPageHide(bundleName, moduleName, abilityName, pageName);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

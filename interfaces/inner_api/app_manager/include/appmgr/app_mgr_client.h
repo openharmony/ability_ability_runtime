@@ -22,18 +22,19 @@
 
 #include "ability_info.h"
 #include "application_info.h"
+#include "app_malloc_info.h"
+#include "app_mem_info.h"
 #include "app_mgr_constants.h"
 #include "bundle_info.h"
+#include "fault_data.h"
+#include "iapplication_state_observer.h"
 #include "iapp_state_callback.h"
+#include "iconfiguration_observer.h"
 #include "irender_scheduler.h"
+#include "istart_specified_ability_response.h"
 #include "render_process_info.h"
 #include "running_process_info.h"
 #include "system_memory_attr.h"
-#include "istart_specified_ability_response.h"
-#include "iconfiguration_observer.h"
-#include "app_mem_info.h"
-#include "app_malloc_info.h"
-#include "fault_data.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -461,6 +462,41 @@ public:
      *
      */
     void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) const;
+
+    /**
+     * Register application or process state observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+        const std::vector<std::string> &bundleNameList = {});
+
+    /**
+     * Unregister application or process state observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
+
+    /**
+     * @brief Notify AbilityManagerService the page show.
+     * @param bundleName The bundle name of current ability.
+     * @param moduleName The module name of current ability.
+     * @param abilityName The ability name of current ability.
+     * @param pageName The page url of current page.
+     */
+    int32_t NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &pageName);
+
+    /**
+     * @brief Notify AbilityManagerService the page hide.
+     * @param bundleName The bundle name of current ability.
+     * @param moduleName The module name of current ability.
+     * @param abilityName The ability name of current ability.
+     * @param pageName The page url of current page.
+     */
+    int32_t NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &pageName);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

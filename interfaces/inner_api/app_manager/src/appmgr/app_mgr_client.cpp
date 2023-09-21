@@ -736,5 +736,44 @@ int32_t AppMgrClient::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
     }
     return service->NotifyAppFaultBySA(faultData);
 }
+
+int32_t AppMgrClient::RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+    const std::vector<std::string> &bundleNameList)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->RegisterApplicationStateObserver(observer, bundleNameList);
+}
+
+int32_t AppMgrClient::UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->UnregisterApplicationStateObserver(observer);
+}
+
+int32_t AppMgrClient::NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->NotifyPageShow(bundleName, moduleName, abilityName, pageName);
+}
+
+int32_t AppMgrClient::NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->NotifyPageHide(bundleName, moduleName, abilityName, pageName);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

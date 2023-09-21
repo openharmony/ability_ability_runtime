@@ -128,6 +128,10 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleGetProcessMemoryByPid;
     memberFuncMap_[static_cast<uint32_t>(IAppMgr::Message::GET_PIDS_BY_BUNDLENAME)] =
         &AppMgrStub::HandleGetRunningProcessInformation;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_PAGE_SHOW)] =
+        &AppMgrStub::HandleNotifyPageShow;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_PAGE_HIDE)] =
+        &AppMgrStub::HandleNotifyPageHide;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -772,6 +776,36 @@ int32_t AppMgrStub::HandleGetRunningProcessInformation(MessageParcel &data, Mess
         }
     }
     if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleNotifyPageShow(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    std::string moduleName = data.ReadString();
+    std::string abilityName = data.ReadString();
+    std::string pageName = data.ReadString();
+
+    auto result = NotifyPageShow(bundleName, moduleName, abilityName, pageName);
+    if(!reply.WriteInt32(result)) {
+        HILOG_ERROR("fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleNotifyPageHide(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    std::string moduleName = data.ReadString();
+    std::string abilityName = data.ReadString();
+    std::string pageName = data.ReadString();
+
+    auto result = NotifyPageHide(bundleName, moduleName, abilityName, pageName);
+    if(!reply.WriteInt32(result)) {
         HILOG_ERROR("fail to write result.");
         return ERR_INVALID_VALUE;
     }

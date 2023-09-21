@@ -4179,5 +4179,39 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
     }
     return ERR_OK;
 }
+
+int32_t AppMgrServiceInner::NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    // 验证arkUI调用
+    
+    // 构建或查询pageStateData
+    PageStateData pageStateData;
+    pageStateData.bundleName = bundleName;
+    pageStateData.moduleName = moduleName;
+    pageStateData.abilityName = abilityName;
+    pageStateData.pageName = pageName;
+
+    // 调用通知
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPageShow(pageStateData);
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    // 验证arkUI调用
+    
+    // 构建或查询pageStateData
+    PageStateData pageStateData;
+    pageStateData.bundleName = bundleName;
+    pageStateData.moduleName = moduleName;
+    pageStateData.abilityName = abilityName;
+    pageStateData.pageName = pageName;
+
+    // 调用通知
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPageHide(pageStateData);
+    return ERR_OK;
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

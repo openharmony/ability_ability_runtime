@@ -438,6 +438,26 @@ private:
 
     bool JudgeSelfCalledByRecordId(int32_t recordId);
 
+    /**
+     * @brief Notify AbilityManagerService the page show.
+     * @param bundleName The bundle name of current ability.
+     * @param moduleName The module name of current ability.
+     * @param abilityName The ability name of current ability.
+     * @param pageName The page url of current page.
+     */
+    virtual int32_t NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &pageName) override;
+
+    /**
+     * @brief Notify AbilityManagerService the page hide.
+     * @param bundleName The bundle name of current ability.
+     * @param moduleName The module name of current ability.
+     * @param abilityName The ability name of current ability.
+     * @param pageName The page url of current page.
+     */
+    virtual int32_t NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &pageName) override;
+
 private:
     std::shared_ptr<AppMgrServiceInner> appMgrServiceInner_;
     AppMgrServiceState appMgrServiceState_;

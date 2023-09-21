@@ -353,10 +353,32 @@ public:
      */
     virtual int32_t GetRunningProcessInformation(
         const std::string &bundleName, int32_t userId, std::vector<RunningProcessInfo> &info) override;
+    
+    /**
+     * @brief Notify AbilityManagerService the page show.
+     * @param bundleName The bundle name of current ability.
+     * @param moduleName The module name of current ability.
+     * @param abilityName The ability name of current ability.
+     * @param pageName The page url of current page.
+     */
+    virtual int32_t NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &pageName) override;
+
+    /**
+     * @brief Notify AbilityManagerService the page hide.
+     * @param bundleName The bundle name of current ability.
+     * @param moduleName The module name of current ability.
+     * @param abilityName The ability name of current ability.
+     * @param pageName The page url of current page.
+     */
+    virtual int32_t NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
+        const std::string &abilityName, const std::string &pageName) override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);
+    int32_t SendRequest(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply,
+        MessageOption& option);
     template<typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
     static inline BrokerDelegator<AppMgrProxy> delegator_;
