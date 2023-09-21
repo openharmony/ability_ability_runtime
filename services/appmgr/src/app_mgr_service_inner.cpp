@@ -4358,19 +4358,19 @@ void AppMgrServiceInner::ApplicationTerminatedSendProcessEvent(const std::shared
         OnAppStopped(appRecord);
     }
 
-    HILOG_DEBUG("Application is terminated.");
-    if (appRecord->GetPriorityObject() == nullptr) {
-        HILOG_ERROR("Get priority object is nullptr.");
-        return;
-    }
-    SendProcessExitEvent(appRecord->GetPriorityObject()->GetPid());
-
     if (appDebugManager_ == nullptr) {
         HILOG_ERROR("App debug manager is nullptr.");
         return;
     }
     auto info = MakeAppDebugInfo(appRecord, appRecord->IsDebugApp());
     appDebugManager_->RemoveAppDebugInfo(info);
+
+    HILOG_DEBUG("Application is terminated.");
+    if (appRecord->GetPriorityObject() == nullptr) {
+        HILOG_ERROR("Get priority object is nullptr.");
+        return;
+    }
+    SendProcessExitEvent(appRecord->GetPriorityObject()->GetPid());
 }
 
 void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord)

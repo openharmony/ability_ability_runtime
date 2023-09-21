@@ -218,7 +218,7 @@ public:
     void SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug);
 
     /**
-     * @brief Obtain app debug infor through bundleName.
+     * @brief Obtain app debug infos through bundleName.
      * @param bundleName The application bundle name.
      * @param isDetachDebug Determine if it is a Detach.
      * @return Specify the stored app informations based on bundle name output.
@@ -226,7 +226,7 @@ public:
     std::vector<AppDebugInfo> GetAppDebugInfosByBundleName(const std::string &bundleName, const bool &isDetachDebug);
 
     /**
-     * @brief Obtain ability token through bundleName.
+     * @brief Obtain ability tokens through bundleName.
      * @param bundleName The application bundle name.
      * @param abilityTokens Specify the stored ability token based on bundle name output.
      */
