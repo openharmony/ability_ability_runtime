@@ -29,7 +29,13 @@ int32_t AppDebugManager::RegisterAppDebugListener(const sptr<IAppDebugListener> 
     }
 
     std::unique_lock<std::mutex> lock(mutex_);
-    auto finder = listeners_.find(listener);
+    const auto &finder =
+        std::find_if(listeners_.begin(), listeners_.end(), [&listener](const sptr<IAppDebugListener> &element) {
+            if (element != nullptr && listener != nullptr) {
+                return element->AsObject() == listener->AsObject();
+            }
+            return false;
+        });
     if (finder == listeners_.end()) {
         listeners_.emplace(listener);
     }
@@ -49,7 +55,13 @@ int32_t AppDebugManager::UnregisterAppDebugListener(const sptr<IAppDebugListener
     }
 
     std::unique_lock<std::mutex> lock(mutex_);
-    auto finder = listeners_.find(listener);
+    const auto &finder =
+        std::find_if(listeners_.begin(), listeners_.end(), [&listener](const sptr<IAppDebugListener> &element) {
+            if (element != nullptr && listener != nullptr) {
+                return element->AsObject() == listener->AsObject();
+            }
+            return false;
+        });
     if (finder != listeners_.end()) {
         listeners_.erase(finder);
     }
@@ -67,6 +79,9 @@ void AppDebugManager::StartDebug(const std::vector<AppDebugInfo> &infos)
     }
 
     for (const auto &listener : listeners_) {
+        if (listener == nullptr) {
+            continue;
+        }
         listener->OnAppDebugStarted(incrementInfos);
     }
 }
@@ -91,6 +106,9 @@ void AppDebugManager::StopDebug(const std::vector<AppDebugInfo> &infos)
 
     if (!debugInfos.empty()) {
         for (const auto &listener : listeners_) {
+            if (listener == nullptr) {
+                continue;
+            }
             listener->OnAppDebugStoped(debugInfos);
         }
     }
@@ -146,6 +164,9 @@ void AppDebugManager::RemoveAppDebugInfo(const AppDebugInfo &info)
     std::vector<AppDebugInfo> debugInfos;
     debugInfos.emplace_back(info);
     for (const auto &listener : listeners_) {
+        if (listener == nullptr) {
+            continue;
+        }
         listener->OnAppDebugStoped(debugInfos);
     }
 }
