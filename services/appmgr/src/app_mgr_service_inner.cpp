@@ -2857,6 +2857,14 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             appRecord->SetCallerUid(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1));
             appRecord->SetCallerTokenId(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
             appRecord->SetDebugApp(wantPtr->GetBoolParam(DEBUG_APP, false));
+            if (appRecord->IsDebugApp()) {
+                ProcessAppDebug(appRecord, true);
+            }
+            appRecord->SetNativeDebug(wantPtr->GetBoolParam("nativeDebug", false));
+            if (wantPtr->GetBoolParam(COLD_START, false)) {
+                appRecord->SetDebugApp(true);
+            }
+            appRecord->SetPerfCmd(wantPtr->GetStringParam(PERF_CMD));
         }
         appRecord->SetProcessAndExtensionType(abilityInfoPtr);
         appRecord->SetTaskHandler(taskHandler_);
@@ -4247,14 +4255,14 @@ int32_t AppMgrServiceInner::UnregisterAppDebugListener(const sptr<IAppDebugListe
 int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
-    if (appRunningManager_ == nullptr || appDebugManager_ == nullptr) {
-        HILOG_ERROR("appRunningManager_ or appDebugManager_ is nullptr.");
+    if (appRunningManager_ == nullptr) {
+        HILOG_ERROR("appRunningManager_ is nullptr.");
         return ERR_NO_INIT;
     }
-    appRunningManager_->AttachAppDebug(bundleName);
+    appRunningManager_->SetAttachAppDebug(bundleName, true);
 
     auto debugInfos = appRunningManager_->GetAppDebugInfosByBundleName(bundleName, false);
-    if (!debugInfos.empty()) {
+    if (!debugInfos.empty() && appDebugManager_ != nullptr) {
         appDebugManager_->StartDebug(debugInfos);
     }
 
@@ -4265,15 +4273,17 @@ int32_t AppMgrServiceInner::AttachAppDebug(const std::string &bundleName)
 int32_t AppMgrServiceInner::DetachAppDebug(const std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
-    if (appRunningManager_ == nullptr || appDebugManager_ == nullptr) {
-        HILOG_ERROR("appRunningManager_ or appDebugManager_ is nullptr.");
+    if (appRunningManager_ == nullptr) {
+        HILOG_ERROR("appRunningManager_ is nullptr.");
         return ERR_NO_INIT;
     }
 
     auto debugInfos = appRunningManager_->GetAppDebugInfosByBundleName(bundleName, true);
     if (!debugInfos.empty()) {
-        appRunningManager_->DetachAppDebug(bundleName);
-        appDebugManager_->StopDebug(debugInfos);
+        appRunningManager_->SetAttachAppDebug(bundleName, false);
+        if (appDebugManager_ != nullptr) {
+            appDebugManager_->StopDebug(debugInfos);
+        }
     }
 
     NotifyAbilitysDebugChange(bundleName, false);
@@ -4338,6 +4348,10 @@ void AppMgrServiceInner::ApplicationTerminatedSendProcessEvent(const std::shared
     }
 
     HILOG_DEBUG("Application is terminated.");
+    if (appRecord->GetPriorityObject() == nullptr) {
+        HILOG_ERROR("Get priority object is nullptr.");
+        return;
+    }
     SendProcessExitEvent(appRecord->GetPriorityObject()->GetPid());
 
     if (appDebugManager_ == nullptr) {
@@ -4367,7 +4381,8 @@ void AppMgrServiceInner::ClearAppRunningDataForKeepAlive(const std::shared_ptr<A
             taskHandler_->SubmitTask(restartProcess, "RestartResidentProcess");
         } else {
             auto findRestartResidentTask = [appRecord](const std::shared_ptr<AppRunningRecord> &appRunningRecord) {
-                return (appRecord != nullptr && appRecord->GetBundleName() == appRunningRecord->GetBundleName());
+                return (appRecord != nullptr && appRunningRecord != nullptr &&
+                        appRecord->GetBundleName() == appRunningRecord->GetBundleName());
             };
             auto findIter = find_if(restartResedentTaskList_.begin(), restartResedentTaskList_.end(),
                 findRestartResidentTask);
