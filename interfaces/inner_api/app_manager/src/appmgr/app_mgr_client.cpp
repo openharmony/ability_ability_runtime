@@ -751,98 +751,71 @@ int32_t AppMgrClient::OnGcStateChange(pid_t pid, int32_t state)
 
 int32_t AppMgrClient::RegisterAppDebugListener(const sptr<IAppDebugListener> &listener)
 {
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        HILOG_ERROR("service is nullptr.");
+    if (!IsAmsServiceReady()) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        HILOG_ERROR("amsService is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    return amsService->RegisterAppDebugListener(listener);
+    return amsService_->RegisterAppDebugListener(listener);
 }
 
 int32_t AppMgrClient::UnregisterAppDebugListener(const sptr<IAppDebugListener> &listener)
 {
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        HILOG_ERROR("service is nullptr.");
+    if (!IsAmsServiceReady()) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        HILOG_ERROR("amsService is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    return amsService->UnregisterAppDebugListener(listener);
+    return amsService_->UnregisterAppDebugListener(listener);
 }
 
 int32_t AppMgrClient::AttachAppDebug(const std::string &bundleName)
 {
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        HILOG_ERROR("service is nullptr.");
+    if (!IsAmsServiceReady()) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        HILOG_ERROR("amsService is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    return amsService->AttachAppDebug(bundleName);
+    return amsService_->AttachAppDebug(bundleName);
 }
 
 int32_t AppMgrClient::DetachAppDebug(const std::string &bundleName)
 {
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        HILOG_ERROR("service is nullptr.");
+    if (!IsAmsServiceReady()) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        HILOG_ERROR("amsService is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    return amsService->DetachAppDebug(bundleName);
+    return amsService_->DetachAppDebug(bundleName);
 }
 
 int32_t AppMgrClient::RegisterAbilityDebugResponse(const sptr<IAbilityDebugResponse> &response)
 {
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        HILOG_ERROR("service is nullptr.");
+    if (!IsAmsServiceReady()) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        HILOG_ERROR("amsService is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
-    }
-    return amsService->RegisterAbilityDebugResponse(response);
+    return amsService_->RegisterAbilityDebugResponse(response);
 }
 
 bool AppMgrClient::IsAttachDebug(const std::string &bundleName)
 {
-    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
-    if (service == nullptr) {
-        HILOG_ERROR("service is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    if (!IsAmsServiceReady()) {
+        return false;
+    }
+    return amsService_->IsAttachDebug(bundleName);
+}
+
+bool AppMgrClient::IsAmsServiceReady()
+{
+    if (mgrHolder_ == nullptr) {
+        HILOG_ERROR("mgrHolder_ is nullptr.");
+        return false;
     }
 
-    sptr<IAmsMgr> amsService = service->GetAmsMgr();
-    if (amsService == nullptr) {
-        HILOG_ERROR("amsService is nullptr.");
-        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        HILOG_ERROR("App manager service is nullptr.");
+        return false;
     }
-    return amsService->IsAttachDebug(bundleName);
+
+    amsService_ = service->GetAmsMgr();
+    if (amsService_ == nullptr) {
+        HILOG_ERROR("amsService_ is nullptr.");
+        return false;
+    }
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

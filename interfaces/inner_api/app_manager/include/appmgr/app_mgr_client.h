@@ -22,6 +22,7 @@
 #include "app_malloc_info.h"
 #include "app_mem_info.h"
 #include "app_mgr_constants.h"
+#include "app_mgr_interface.h"
 #include "application_info.h"
 #include "bundle_info.h"
 #include "fault_data.h"
@@ -523,8 +524,11 @@ private:
      */
     sptr<IRemoteObject> GetRemoteObject();
 
+    bool IsAmsServiceReady();
+
 private:
     std::shared_ptr<AppMgrRemoteHolder> mgrHolder_;
+    sptr<IAmsMgr> amsService_ {};
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
