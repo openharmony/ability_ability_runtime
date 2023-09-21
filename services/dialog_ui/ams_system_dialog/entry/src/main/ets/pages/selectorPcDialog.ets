@@ -93,11 +93,7 @@ struct SelectorPcDialog {
       abilityName: globalThis.abilityWant.abilityName,
     }
     if (this.isCheckSelected) {
-      let typeName = globalThis.abilityWant.type;
-      if (typeName == "") {
-        console.log(this.TAG + "globalThis.abilityWant.type is empty:");
-        typeName = item.split("#")[5];
-      }
+      typeName = item.split("#")[5];
       console.log(this.TAG + "setDefaultApplication typeName:" + JSON.stringify(typeName));
       globalThis.defaultAppManager.setDefaultApplication(typeName, elementName);
     }

@@ -153,21 +153,28 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     }
 
     HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose in pc.");
-    std::string type = request.want.GetType();
-    if (type.empty()) {
-        auto uri = request.want.GetUriString();
-        auto suffixIndex = uri.rfind('.');
-        if (suffixIndex == std::string::npos) {
-            HILOG_ERROR("Get suffix failed, uri is %{public}s", uri.c_str());
-            return false;
-        }
-        type = uri.substr(suffixIndex);
-    }
+    std::string type = MatchTypeAndUri(request.want);
+
     want = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, type, userId, request.callerToken);
     ret = abilityMgr->StartAbilityAsCaller(want, request.callerToken);
     // reset calling indentity
     IPCSkeleton::SetCallingIdentity(identity);
     return ret;
+}
+
+std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
+{
+    std::string type = want.GetType();
+    if (type.empty()) {
+        auto uri = want.GetUriString();
+        auto suffixIndex = uri.rfind('.');
+        if (suffixIndex == std::string::npos) {
+            HILOG_ERROR("Get suffix failed, uri is %{public}s", uri.c_str());
+            return "";
+        }
+        type = uri.substr(suffixIndex);
+    }
+    return type;
 }
 
 int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
@@ -200,16 +207,8 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     auto isExtension = request.callType == AbilityCallType::START_EXTENSION_TYPE;
 
     Want implicitwant;
-    std::string typeName = request.want.GetType();
-    if (request.want.GetType().empty()) {
-        auto uri = request.want.GetUriString();
-        auto suffixIndex = uri.rfind('.');
-        if (suffixIndex == std::string::npos) {
-            HILOG_ERROR("Get suffix failed, uri is %{public}s", uri.c_str());
-            return false;
-        }
-        typeName = uri.substr(suffixIndex);
-    }
+    std::string typeName = MatchTypeAndUri(request.want);
+
     implicitwant.SetAction(request.want.GetAction());
     implicitwant.SetType(TYPE_ONLY_MATCH_WILDCARD);
     std::vector<AppExecFwk::AbilityInfo> implicitAbilityInfos;
