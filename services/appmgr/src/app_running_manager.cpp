@@ -883,28 +883,18 @@ bool AppRunningManager::IsApplicationUnfocused(const std::string &bundleName)
     return true;
 }
 
-void AppRunningManager::AttachAppDebug(const std::string &bundleName)
+void AppRunningManager::SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug)
 {
     HILOG_DEBUG("Called.");
     std::lock_guard<ffrt::mutex> guard(lock_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
+        if (appRecord == nullptr) {
+            continue;
+        }
         if (appRecord->GetBundleName() == bundleName) {
             HILOG_DEBUG("The application: %{public}s will be set debug mode.", bundleName.c_str());
-            appRecord->SetAttachDebug(true);
-        }
-    }
-}
-
-void AppRunningManager::DetachAppDebug(const std::string &bundleName)
-{
-    HILOG_DEBUG("Called.");
-    std::lock_guard<ffrt::mutex> guard(lock_);
-    for (const auto &item : appRunningRecordMap_) {
-        const auto &appRecord = item.second;
-        if (appRecord->GetBundleName() == bundleName) {
-            HILOG_DEBUG("The application: %{public}s will be cancel debug mode.", bundleName.c_str());
-            appRecord->SetAttachDebug(false);
+            appRecord->SetAttachDebug(isAttachDebug);
         }
     }
 }

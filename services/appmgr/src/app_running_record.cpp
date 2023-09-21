@@ -992,7 +992,7 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
 
     bool isExtensionDebug = false;
     auto abilityRecord = moduleRecord->GetAbilityByTerminateLists(token);
-    if (abilityRecord != nullptr) {
+    if (abilityRecord != nullptr && abilityRecord->GetAbilityInfo() != nullptr) {
         isExtensionDebug = (abilityRecord->GetAbilityInfo()->type == AppExecFwk::AbilityType::EXTENSION) &&
                            (isAttachDebug_ || isDebugApp_);
     }

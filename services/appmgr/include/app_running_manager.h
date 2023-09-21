@@ -211,19 +211,14 @@ public:
     bool IsApplicationUnfocused(const std::string &bundleName);
 
     /**
-     * @brief Attach app debug.
+     * @brief Set attach app debug mode.
      * @param bundleName The application bundle name.
+     * @param isAttachDebug Determine if it is in attach debug mode.
      */
-    void AttachAppDebug(const std::string &bundleName);
+    void SetAttachAppDebug(const std::string &bundleName, const bool &isAttachDebug);
 
     /**
-     * @brief Detach app debug.
-     * @param bundleName The application bundle name.
-     */
-    void DetachAppDebug(const std::string &bundleName);
-
-    /**
-     * @brief Obtain app information through bundleName.
+     * @brief Obtain app debug infor through bundleName.
      * @param bundleName The application bundle name.
      * @param isDetachDebug Determine if it is a Detach.
      * @return Specify the stored app informations based on bundle name output.
