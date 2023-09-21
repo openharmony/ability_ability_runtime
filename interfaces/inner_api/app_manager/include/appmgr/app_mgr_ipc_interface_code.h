@@ -64,6 +64,8 @@ enum class AppMgrInterfaceCode {
     JUDGE_SANDBOX_BY_PID,
     GET_BUNDLE_NAME_BY_PID,
     APP_GET_ALL_RENDER_PROCESSES,
+    NOTIFY_PAGE_SHOW,
+    NOTIFY_PAGE_HIDE
 };
 } // AppExecFwk
 } // OHOS
