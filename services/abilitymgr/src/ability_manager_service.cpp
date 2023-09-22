@@ -180,6 +180,7 @@ const int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
 const int32_t BROKER_UID = 5557;
 const int32_t BROKER_RESERVE_UID = 5005;
 const int32_t DMS_UID = 5522;
+const int32_t WMS_UID = 4606;
 const int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 const std::string BUNDLE_NAME_KEY = "bundleName";
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
@@ -8215,8 +8216,9 @@ bool AbilityManagerService::IsAbilityControllerStart(const Want &want)
 {
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     auto callingUid = IPCSkeleton::GetCallingUid();
-    if (!isSaCall || (callingUid != BROKER_UID && callingUid != BROKER_RESERVE_UID)) {
-        HILOG_ERROR("The interface only support for broker");
+    if (!isSaCall || (callingUid != BROKER_UID && callingUid != BROKER_RESERVE_UID &&
+        callingUid != WMS_UID)) {
+        HILOG_ERROR("The interface only support for broker and WMS");
         return true;
     }
     return IsAbilityControllerStart(want, want.GetBundle());
