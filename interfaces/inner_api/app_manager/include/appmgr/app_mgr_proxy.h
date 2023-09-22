@@ -372,6 +372,15 @@ public:
      */
     virtual int32_t NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData) override;
 
+    /**
+     * @brief Notify NativeEngine GC of status change.
+     *
+     * @param state GC state
+     * @param pid pid
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t OnGcStateChange(pid_t pid, int32_t state) override;
+
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);

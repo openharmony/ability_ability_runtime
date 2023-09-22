@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@ constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_MESSAGE[] = "MSG";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
 constexpr char EVENT_KEY_PROCESS_NAME[] = "PROCESS_NAME";
+const std::string BUNDLE_NAME_DIALOG = "com.ohos.amsdialog";
+const std::string ABILITY_NAME_DIALOG = "SwitchUserDialog";
 #ifdef SUPPORT_ASAN
 const int LOAD_TIMEOUT_MULTIPLE = 150;
 const int CONNECT_TIMEOUT_MULTIPLE = 45;
@@ -213,10 +215,12 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
     const bool isCreatedByConnect, std::shared_ptr<AbilityRecord> &targetService, bool &isLoadedAbility)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    // lifecycle is not complete when window extension is reused
+    bool noReuse = UIExtensionUtils::IsWindowExtension(abilityRequest.abilityInfo.extensionAbilityType);
     AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, abilityRequest.abilityInfo.bundleName,
         abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
     auto serviceMapIter = serviceMap_.find(element.GetURI());
-    if (serviceMapIter == serviceMap_.end()) {
+    if (noReuse || serviceMapIter == serviceMap_.end()) {
         targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
         if (targetService) {
             targetService->SetOwnerMissionUserId(userId_);
@@ -1791,7 +1795,9 @@ void AbilityConnectManager::StopAllExtensions()
     std::lock_guard guard(Lock_);
     for (auto it = serviceMap_.begin(); it != serviceMap_.end();) {
         auto targetExtension = it->second;
-        if (targetExtension != nullptr && targetExtension->GetAbilityInfo().type == AbilityType::EXTENSION) {
+        if (targetExtension != nullptr && targetExtension->GetAbilityInfo().type == AbilityType::EXTENSION &&
+            targetExtension->GetAbilityInfo().bundleName != BUNDLE_NAME_DIALOG &&
+            targetExtension->GetAbilityInfo().name != ABILITY_NAME_DIALOG) {
             terminatingExtensionMap_.emplace(it->first, it->second);
             serviceMap_.erase(it++);
             TerminateAbilityLocked(targetExtension->GetToken());

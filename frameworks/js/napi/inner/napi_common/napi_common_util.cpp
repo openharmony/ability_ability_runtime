@@ -215,6 +215,7 @@ napi_value WrapStringToJS(napi_env env, const std::string &value)
 
 std::string UnwrapStringFromJS(napi_env env, napi_value param, const std::string &defaultValue)
 {
+    HILOG_DEBUG("enter");
     size_t size = 0;
     if (napi_get_value_string_utf8(env, param, nullptr, 0, &size) != napi_ok) {
         return defaultValue;
@@ -295,6 +296,7 @@ bool UnwrapArrayInt32FromJS(napi_env env, napi_value param, std::vector<int> &va
     int natValue = 0;
 
     if (!IsArrayForNapiValue(env, param, arraySize)) {
+        HILOG_DEBUG("Expanding ArrayInt32 from JS failed");
         return false;
     }
 
@@ -303,6 +305,7 @@ bool UnwrapArrayInt32FromJS(napi_env env, napi_value param, std::vector<int> &va
         jsValue = nullptr;
         natValue = 0;
         if (napi_get_element(env, param, i, &jsValue) != napi_ok) {
+            HILOG_DEBUG("Expanding ArrayInt32 from JS failed");
             return false;
         }
 
@@ -340,6 +343,7 @@ bool UnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<long> &va
     long natValue = 0;
 
     if (!IsArrayForNapiValue(env, param, arraySize)) {
+        HILOG_DEBUG("Expanding ArrayInt32 from JS failed.");
         return false;
     }
 
@@ -348,6 +352,7 @@ bool UnwrapArrayLongFromJS(napi_env env, napi_value param, std::vector<long> &va
         jsValue = nullptr;
         natValue = 0;
         if (napi_get_element(env, param, i, &jsValue) != napi_ok) {
+            HILOG_DEBUG("Expanding ArrayInt32 from JS failed.");
             return false;
         }
 
@@ -385,6 +390,7 @@ bool UnwrapArrayInt64FromJS(napi_env env, napi_value param, std::vector<int64_t>
     int64_t natValue = 0;
 
     if (!IsArrayForNapiValue(env, param, arraySize)) {
+        HILOG_DEBUG("Expanding ArrayInt32 from JS error");
         return false;
     }
 
@@ -393,6 +399,7 @@ bool UnwrapArrayInt64FromJS(napi_env env, napi_value param, std::vector<int64_t>
         jsValue = nullptr;
         natValue = 0;
         if (napi_get_element(env, param, i, &jsValue) != napi_ok) {
+            HILOG_DEBUG("Expanding ArrayInt32 from JS error");
             return false;
         }
 
@@ -430,6 +437,7 @@ bool UnwrapArrayDoubleFromJS(napi_env env, napi_value param, std::vector<double>
     double natValue = 0;
 
     if (!IsArrayForNapiValue(env, param, arraySize)) {
+        HILOG_DEBUG("Expanding ArrayInt32 from JS error.");
         return false;
     }
 
@@ -438,6 +446,7 @@ bool UnwrapArrayDoubleFromJS(napi_env env, napi_value param, std::vector<double>
         jsValue = nullptr;
         natValue = 0;
         if (napi_get_element(env, param, i, &jsValue) != napi_ok) {
+            HILOG_DEBUG("Expanding ArrayInt32 from JS error.");
             return false;
         }
 
@@ -1201,7 +1210,7 @@ std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue)
     size_t offset = 0;
     NAPI_CALL_BASE(env, napi_get_typedarray_info(env, jsValue, &type, &length, nullptr, &buffer, &offset), {});
     if (type != napi_uint8_array) {
-        HILOG_ERROR("%{public}s called, napi_uint8_array is null", __func__);
+        HILOG_ERROR("%{public}s called, napi_uint8_array is nullptr", __func__);
         return {};
     }
     std::string *data = nullptr;
