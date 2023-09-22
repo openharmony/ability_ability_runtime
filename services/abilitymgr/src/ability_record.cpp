@@ -2883,7 +2883,7 @@ bool AbilityRecord::GetLockedState()
     return lockedState_;
 }
 
-void AbilityRecord::SetAttachDebug(const bool &isAttachDebug)
+void AbilityRecord::SetAttachDebug(const bool isAttachDebug)
 {
     isAttachDebug_ = isAttachDebug;
 }
