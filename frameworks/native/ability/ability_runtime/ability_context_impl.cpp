@@ -18,6 +18,7 @@
 #include <native_engine/native_engine.h>
 
 #include "ability_manager_client.h"
+#include "app_mgr_client.h"
 #include "hitrace_meter.h"
 #include "connection_manager.h"
 #include "dialog_request_callback_impl.h"
@@ -27,6 +28,7 @@
 #include "scene_board_judgement.h"
 #include "session/host/include/zidl/session_interface.h"
 #include "session_info.h"
+#include "singleton.h"
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 
@@ -729,6 +731,30 @@ Ace::UIContent* AbilityContextImpl::GetUIContent()
     }
 
     return abilityCallback->GetUIContent();
+}
+
+ErrCode AbilityContextImpl::NotifyPageShow(const std::string &bundleName, const std::string moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    HILOG_DEBUG("call");
+    AppExecFwk::PageStateData pageStateData;
+    pageStateData.bundleName = bundleName;
+    pageStateData.moduleName = moduleName;
+    pageStateData.abilityName = abilityName;
+    pageStateData.pageName = pageName;
+    return DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyPageShow(token_, pageStateData);
+}
+
+ErrCode AbilityContextImpl::NotifyPageHide(const std::string &bundleName, const std::string moduleName,
+    const std::string &abilityName, const std::string &pageName)
+{
+    HILOG_DEBUG("call");
+    AppExecFwk::PageStateData pageStateData;
+    pageStateData.bundleName = bundleName;
+    pageStateData.moduleName = moduleName;
+    pageStateData.abilityName = abilityName;
+    pageStateData.pageName = pageName;
+    return DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->NotifyPageHide(token_, pageStateData);
 }
 #endif
 } // namespace AbilityRuntime

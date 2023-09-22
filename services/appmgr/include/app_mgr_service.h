@@ -445,8 +445,7 @@ private:
      * @param abilityName The ability name of current ability.
      * @param pageName The page url of current page.
      */
-    virtual int32_t NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, const std::string &pageName) override;
+    virtual int32_t NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData) override;
 
     /**
      * @brief Notify AbilityManagerService the page hide.
@@ -455,8 +454,7 @@ private:
      * @param abilityName The ability name of current ability.
      * @param pageName The page url of current page.
      */
-    virtual int32_t NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, const std::string &pageName) override;
+    virtual int32_t NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData) override;
 
 private:
     std::shared_ptr<AppMgrServiceInner> appMgrServiceInner_;

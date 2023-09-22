@@ -4180,38 +4180,54 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &pageName)
+int32_t AppMgrServiceInner::NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
 {
-    // 验证arkUI调用
-    
-    // 构建或查询pageStateData
-    PageStateData pageStateData;
-    pageStateData.bundleName = bundleName;
-    pageStateData.moduleName = moduleName;
-    pageStateData.abilityName = abilityName;
-    pageStateData.pageName = pageName;
+    if (!JudgeSelfCalledByToken(token, pageStateData)) {
+        return ERR_PERMISSION_DENIED;
+    }
 
-    // 调用通知
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPageShow(pageStateData);
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &pageName)
+int32_t AppMgrServiceInner::NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
 {
-    // 验证arkUI调用
-    
-    // 构建或查询pageStateData
-    PageStateData pageStateData;
-    pageStateData.bundleName = bundleName;
-    pageStateData.moduleName = moduleName;
-    pageStateData.abilityName = abilityName;
-    pageStateData.pageName = pageName;
+    if (!JudgeSelfCalledByToken(token, pageStateData)) {
+        return ERR_PERMISSION_DENIED;
+    }
 
-    // 调用通知
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnPageHide(pageStateData);
     return ERR_OK;
+}
+
+bool AppMgrServiceInner::JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
+{
+    if (!token) {
+        HILOG_ERROR("token is null.");
+        return false;
+    }
+    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    if (!appRecord) {
+        HILOG_ERROR("app is not exist!");
+        return false;
+    }
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    if (appRecord == nullptr || ((appRecord->GetApplicationInfo())->accessTokenId) != callingTokenId) {
+        HILOG_ERROR("Is not self, not enabled");
+        return false;
+    }
+    auto abilityRecord = appRecord->GetAbilityRunningRecordByToken(token);
+    if (!abilityRecord) {
+        HILOG_ERROR("can not find ability record");
+        return false;
+    }
+    if (abilityRecord->GetBundleName() != pageStateData.bundleName ||
+        abilityRecord->GetModuleName() != pageStateData.moduleName ||
+        abilityRecord->GetName() != pageStateData.abilityName) {
+        HILOG_ERROR("can not map the ability");
+        return false;
+    }
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

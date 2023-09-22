@@ -756,24 +756,22 @@ int32_t AppMgrClient::UnregisterApplicationStateObserver(const sptr<IApplication
     return service->UnregisterApplicationStateObserver(observer);
 }
 
-int32_t AppMgrClient::NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &pageName)
+int32_t AppMgrClient::NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->NotifyPageShow(bundleName, moduleName, abilityName, pageName);
+    return service->NotifyPageShow(token, pageStateData);
 }
 
-int32_t AppMgrClient::NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &pageName)
+int32_t AppMgrClient::NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
 {
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service == nullptr) {
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->NotifyPageHide(bundleName, moduleName, abilityName, pageName);
+    return service->NotifyPageHide(token, pageStateData);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

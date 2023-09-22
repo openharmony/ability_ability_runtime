@@ -242,6 +242,12 @@ public:
      * @return UIContent object of ACE.
      */
     Ace::UIContent* GetUIContent() override;
+
+    ErrCode NotifyPageShow(const std::string &bundleName, const std::string moduleName,
+        const std::string &abilityName, const std::string &pageName) override;
+
+    ErrCode NotifyPageHide(const std::string &bundleName, const std::string moduleName,
+        const std::string &abilityName, const std::string &pageName) override;
 #endif
 
 private:
