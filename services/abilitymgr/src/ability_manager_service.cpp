@@ -8320,8 +8320,7 @@ bool AbilityManagerService::CheckUserIdActive(int32_t userId)
 int32_t AbilityManagerService::RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener)
 {
     HILOG_DEBUG("Called.");
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         HILOG_ERROR("Permission verification failed.");
         return CHECK_PERMISSION_FAILED;
     }
@@ -8331,8 +8330,7 @@ int32_t AbilityManagerService::RegisterAppDebugListener(const sptr<AppExecFwk::I
 int32_t AbilityManagerService::UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener)
 {
     HILOG_DEBUG("Called.");
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         HILOG_ERROR("Permission verification failed.");
         return CHECK_PERMISSION_FAILED;
     }
@@ -8342,6 +8340,12 @@ int32_t AbilityManagerService::UnregisterAppDebugListener(const sptr<AppExecFwk:
 int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
+        HILOG_ERROR("Permission verification failed.");
+        return CHECK_PERMISSION_FAILED;
+    }
+
     if (abilityDebugDeal_ == nullptr) {
         HILOG_DEBUG("Creat ability debug deal object.");
         abilityDebugDeal_ = std::make_shared<AbilityDebugDeal>();
@@ -8352,6 +8356,12 @@ int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName)
 int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() &&
+        !AAFwk::PermissionVerification::GetInstance()->IsShellCall()) {
+        HILOG_ERROR("Permission verification failed.");
+        return CHECK_PERMISSION_FAILED;
+    }
+
     return DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName);
 }
 }  // namespace AAFwk

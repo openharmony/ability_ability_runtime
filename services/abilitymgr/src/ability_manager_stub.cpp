@@ -2548,6 +2548,11 @@ int32_t AbilityManagerStub::UnregisterAppDebugListenerInner(MessageParcel &data,
 int32_t AbilityManagerStub::AttachAppDebugInner(MessageParcel &data, MessageParcel &reply)
 {
     auto bundleName = data.ReadString();
+    if (bundleName.empty()) {
+        HILOG_ERROR("Bundle name is empty.");
+        return ERR_INVALID_VALUE;
+    }
+
     auto result = AttachAppDebug(bundleName);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("Fail to write result.");
@@ -2559,6 +2564,11 @@ int32_t AbilityManagerStub::AttachAppDebugInner(MessageParcel &data, MessageParc
 int32_t AbilityManagerStub::DetachAppDebugInner(MessageParcel &data, MessageParcel &reply)
 {
     auto bundleName = data.ReadString();
+    if (bundleName.empty()) {
+        HILOG_ERROR("Bundle name is empty.");
+        return ERR_INVALID_VALUE;
+    }
+
     auto result = DetachAppDebug(bundleName);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("Fail to write result.");
