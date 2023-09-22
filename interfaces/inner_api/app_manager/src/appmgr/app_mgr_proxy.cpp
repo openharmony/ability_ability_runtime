@@ -1209,8 +1209,7 @@ int32_t AppMgrProxy::GetRunningProcessInformation(
     return result;
 }
 
-int32_t AppMgrProxy::NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &pageName)
+int32_t AppMgrProxy::NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
 {
     HILOG_DEBUG("call");
     MessageParcel data;
@@ -1221,21 +1220,13 @@ int32_t AppMgrProxy::NotifyPageShow(const std::string &bundleName, const std::st
         HILOG_ERROR("Write interface token failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteString(bundleName)) {
-        HILOG_ERROR("write bundleName failed.");
+    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+        HILOG_ERROR("Failed to write token");
         return ERR_INVALID_DATA;
     }
-    if (!data.WriteString(moduleName)) {
-        HILOG_ERROR("write moduleName failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString(abilityName)) {
-        HILOG_ERROR("write abilityName failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString(pageName)) {
-        HILOG_ERROR("write pageName failed.");
-        return ERR_INVALID_DATA;
+    if (!data.WriteParcelable(&pageStateData)) {
+        HILOG_ERROR("Write PageStateData error.");
+        return ERR_FLATTEN_OBJECT;
     }
 
     auto error = SendRequest(AppMgrInterfaceCode::NOTIFY_PAGE_SHOW,
@@ -1248,8 +1239,7 @@ int32_t AppMgrProxy::NotifyPageShow(const std::string &bundleName, const std::st
     return NO_ERROR;
 }
 
-int32_t AppMgrProxy::NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
-    const std::string &abilityName, const std::string &pageName)
+int32_t AppMgrProxy::NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
 {
     HILOG_DEBUG("call");
     MessageParcel data;
@@ -1260,21 +1250,13 @@ int32_t AppMgrProxy::NotifyPageHide(const std::string &bundleName, const std::st
         HILOG_ERROR("Write interface token failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteString(bundleName)) {
-        HILOG_ERROR("write bundleName failed.");
+    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+        HILOG_ERROR("Failed to write token");
         return ERR_INVALID_DATA;
     }
-    if (!data.WriteString(moduleName)) {
-        HILOG_ERROR("write moduleName failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString(abilityName)) {
-        HILOG_ERROR("write abilityName failed.");
-        return ERR_INVALID_DATA;
-    }
-    if (!data.WriteString(pageName)) {
-        HILOG_ERROR("write pageName failed.");
-        return ERR_INVALID_DATA;
+    if (!data.WriteParcelable(&pageStateData)) {
+        HILOG_ERROR("Write PageStateData error.");
+        return ERR_FLATTEN_OBJECT;
     }
 
     auto error = SendRequest(AppMgrInterfaceCode::NOTIFY_PAGE_HIDE,

@@ -28,6 +28,7 @@
 #include "fault_data.h"
 #include "iapp_state_callback.h"
 #include "ams_mgr_interface.h"
+#include "page_state_data.h"
 #include "render_process_info.h"
 #include "running_process_info.h"
 #include "system_memory_attr.h"
@@ -408,8 +409,7 @@ public:
      * @param abilityName The ability name of current ability.
      * @param pageName The page url of current page.
      */
-    virtual int32_t NotifyPageShow(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, const std::string &pageName)
+    virtual int32_t NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
     {
         return 0;
     }
@@ -421,8 +421,7 @@ public:
      * @param abilityName The ability name of current ability.
      * @param pageName The page url of current page.
      */
-    virtual int32_t NotifyPageHide(const std::string &bundleName, const std::string &moduleName,
-        const std::string &abilityName, const std::string &pageName)
+    virtual int32_t NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData)
     {
         return 0;
     }

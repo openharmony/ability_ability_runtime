@@ -784,12 +784,14 @@ int32_t AppMgrStub::HandleGetRunningProcessInformation(MessageParcel &data, Mess
 
 int32_t AppMgrStub::HandleNotifyPageShow(MessageParcel &data, MessageParcel &reply)
 {
-    std::string bundleName = data.ReadString();
-    std::string moduleName = data.ReadString();
-    std::string abilityName = data.ReadString();
-    std::string pageName = data.ReadString();
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
+    if (pageStateData == nullptr) {
+        HILOG_ERROR("ReadParcelable<PageStateData> failed");
+        return ERR_INVALID_VALUE;
+    }
 
-    auto result = NotifyPageShow(bundleName, moduleName, abilityName, pageName);
+    auto result = NotifyPageHide(token, *pageStateData);
     if(!reply.WriteInt32(result)) {
         HILOG_ERROR("fail to write result.");
         return ERR_INVALID_VALUE;
@@ -799,12 +801,14 @@ int32_t AppMgrStub::HandleNotifyPageShow(MessageParcel &data, MessageParcel &rep
 
 int32_t AppMgrStub::HandleNotifyPageHide(MessageParcel &data, MessageParcel &reply)
 {
-    std::string bundleName = data.ReadString();
-    std::string moduleName = data.ReadString();
-    std::string abilityName = data.ReadString();
-    std::string pageName = data.ReadString();
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
+    if (pageStateData == nullptr) {
+        HILOG_ERROR("ReadParcelable<PageStateData> failed");
+        return ERR_INVALID_VALUE;
+    }
 
-    auto result = NotifyPageHide(bundleName, moduleName, abilityName, pageName);
+    auto result = NotifyPageHide(token, *pageStateData);
     if(!reply.WriteInt32(result)) {
         HILOG_ERROR("fail to write result.");
         return ERR_INVALID_VALUE;
