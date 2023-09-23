@@ -514,8 +514,7 @@ int AppMgrProxy::StartUserTestProcess(
         HILOG_ERROR("userId write failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t ret = SendRequest(AppMgrInterfaceCode::START_USER_TEST_PROCESS,
-            data, reply, option);
+    int32_t ret = SendRequest(AppMgrInterfaceCode::START_USER_TEST_PROCESS, data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
         return ret;
@@ -1155,7 +1154,7 @@ int32_t AppMgrProxy::GetProcessMemoryByPid(const int32_t pid, int32_t &memorySiz
         return ERR_NULL_OBJECT;
     }
 
-    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::GET_PROCESS_MEMORY_BY_PID),
+    auto ret = SendRequest(AppMgrInterfaceCode::GET_PROCESS_MEMORY_BY_PID,
         data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_ERROR("Send request failed with error code %{public}d.", ret);
@@ -1193,7 +1192,7 @@ int32_t AppMgrProxy::GetRunningProcessInformation(
         return ERR_NULL_OBJECT;
     }
 
-    auto ret = remote->SendRequest(static_cast<uint32_t>(IAppMgr::Message::GET_PIDS_BY_BUNDLENAME),
+    auto ret = SendRequest(AppMgrInterfaceCode::GET_PIDS_BY_BUNDLENAME,
         data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_ERROR("Send request failed with error code %{public}d.", ret);
@@ -1232,8 +1231,7 @@ int32_t AppMgrProxy::OnGcStateChange(pid_t pid, int32_t state)
         HILOG_ERROR("Remote() is NULL");
         return ERR_NULL_OBJECT;
     }
-    int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(AppMgrInterfaceCode::APP_ON_GC_STATE_CHANGE), data, reply, option);
+    int32_t ret = SendRequest(AppMgrInterfaceCode::APP_ON_GC_STATE_CHANGE, data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
         return ret;
