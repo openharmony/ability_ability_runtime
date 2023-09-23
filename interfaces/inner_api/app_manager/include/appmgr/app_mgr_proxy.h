@@ -356,19 +356,17 @@ public:
     
     /**
      * @brief Notify AbilityManagerService the page show.
-     * @param bundleName The bundle name of current ability.
-     * @param moduleName The module name of current ability.
-     * @param abilityName The ability name of current ability.
-     * @param pageName The page url of current page.
+     * @param token Ability identify.
+     * @param pageStateData The data of ability's page state.
+     * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData) override;
 
     /**
      * @brief Notify AbilityManagerService the page hide.
-     * @param bundleName The bundle name of current ability.
-     * @param moduleName The module name of current ability.
-     * @param abilityName The ability name of current ability.
-     * @param pageName The page url of current page.
+     * @param token Ability identify.
+     * @param pageStateData The data of ability's page state.
+     * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData) override;
 

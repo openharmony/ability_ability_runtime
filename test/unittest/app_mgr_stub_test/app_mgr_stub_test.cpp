@@ -239,7 +239,7 @@ HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level0)
     EXPECT_CALL(*mockAppMgrService_, GetProcessMemoryByPid(_, _)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::GET_PROCESS_MEMORY_BY_PID), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_PROCESS_MEMORY_BY_PID), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
@@ -267,7 +267,7 @@ HWTEST_F(AppMgrStubTest, GetRunningProcessInformation_001, TestSize.Level0)
     EXPECT_CALL(*mockAppMgrService_, GetRunningProcessInformation(_, _, _)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::GET_PIDS_BY_BUNDLENAME), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::GET_PIDS_BY_BUNDLENAME), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
     HILOG_INFO("%{public}s end.", __func__);
@@ -293,7 +293,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyFault_001, TestSize.Level1)
     data.WriteParcelable(&faultData);
     EXPECT_CALL(*mockAppMgrService_, NotifyAppFault(_)).Times(1);
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
 
@@ -318,7 +318,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyFaultBySA_001, TestSize.Level1)
     data.WriteParcelable(&faultData);
     EXPECT_CALL(*mockAppMgrService_, NotifyAppFaultBySA(_)).Times(1);
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT_BY_SA), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT_BY_SA), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
 }  // namespace AppExecFwk
