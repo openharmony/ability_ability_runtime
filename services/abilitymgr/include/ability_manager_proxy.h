@@ -920,6 +920,34 @@ public:
     virtual int RegisterSessionHandler(const sptr<IRemoteObject> &object) override;
 
     /**
+     * @brief Register app debug listener.
+     * @param listener App debug listener.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) override;
+	    
+    /**
+     * @brief Unregister app debug listener.
+     * @param listener App debug listener.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) override;
+
+    /**
+     * @brief Attach app debug.
+     * @param bundleName The application bundle name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t AttachAppDebug(const std::string &bundleName) override;
+
+    /**
+     * @brief Detach app debug.
+     * @param bundleName The application bundle name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t DetachAppDebug(const std::string &bundleName) override;
+
+    /**
      * @brief Check if ability controller can start.
      * @param want The want of ability to start.
      * @return Return true to allow ability to start, or false to reject.
