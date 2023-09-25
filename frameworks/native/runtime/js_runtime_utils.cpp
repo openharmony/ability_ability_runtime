@@ -307,7 +307,8 @@ std::unique_ptr<AsyncTask> CreateAsyncTaskWithLastParam(NativeEngine& engine, Na
 
 namespace {
 std::unique_ptr<NapiAsyncTask> CreateAsyncTaskWithLastParam(napi_env env, napi_value lastParam,
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback>&& execute, std::unique_ptr<NapiAsyncTask::CompleteCallback>&& complete,
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback>&& execute,
+    std::unique_ptr<NapiAsyncTask::CompleteCallback>&& complete,
     napi_value* result)
 {
     napi_valuetype type = napi_undefined;
@@ -381,6 +382,19 @@ void* GetCbInfoFromCallbackInfo(napi_env env, napi_callback_info info, size_t* a
     return result;
 }
 
+void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info, NapiCallbackInfo& napiInfo, const char* name)
+{
+    NAPI_CALL_NO_THROW(napi_get_cb_info(
+        env, info, &napiInfo.argc, napiInfo.argv, &napiInfo.thisVar, nullptr), nullptr);
+    napi_value value = napiInfo.thisVar;
+    if (name != nullptr) {
+        napi_get_named_property(env, value, name, &value);
+    }
+    void* result = nullptr;
+    NAPI_CALL_NO_THROW(napi_unwrap(env, value, &result), nullptr);
+    return result;
+}
+
 void SetNamedNativePointer(napi_env env, napi_value object, const char* name, void* ptr, napi_finalize func)
 {
     napi_value objValue = nullptr;
@@ -396,6 +410,15 @@ void* GetNamedNativePointer(napi_env env, napi_value object, const char* name)
     void* result = nullptr;
     napi_unwrap(env, proValue, &result);
     return result;
+}
+
+bool CheckTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType)
+{
+    napi_valuetype valueType = napi_undefined;
+    if (napi_typeof(env, param, &valueType) != napi_ok) {
+        return false;
+    }
+    return valueType == expectType;
 }
 
 // Handle Scope
@@ -505,8 +528,17 @@ void NapiAsyncTask::ScheduleWithDefaultQos(const std::string &name, napi_env env
 
 bool NapiAsyncTask::StartWithDefaultQos(const std::string &name, napi_env env)
 {
-    napi_delete_async_work(env, work_);
-    napi_create_async_work(env, nullptr, CreateJsValue(env, name), Execute, Complete, this, &work_);
+    if (work_) {
+        napi_delete_async_work(env, work_);
+        work_ = nullptr;
+    }
+    if (env == nullptr) {
+        return false;
+    }
+    NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
+    work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
+        reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
+        reinterpret_cast<NativeAsyncCompleteCallback>(Complete), this));
     napi_queue_async_work_with_qos(env, work_, napi_qos_default);
     return true;
 }
@@ -514,68 +546,103 @@ bool NapiAsyncTask::StartWithDefaultQos(const std::string &name, napi_env env)
 void NapiAsyncTask::Resolve(napi_env env, napi_value value)
 {
     HILOG_DEBUG("NapiAsyncTask::Resolve is called");
-    napi_resolve_deferred(env, deferred_, value);
-    napi_value argv[] = {
-        CreateJsError(env, 0),
-        value,
-    };
-    napi_value func = nullptr;
-    napi_get_reference_value(env, callbackRef_, &func);
-    napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+    if (deferred_) {
+        napi_resolve_deferred(env, deferred_, value);
+        deferred_ = nullptr;
+    }
+    if (callbackRef_) {
+        napi_value argv[] = {
+            CreateJsError(env, 0),
+            value,
+        };
+        napi_value func = nullptr;
+        napi_get_reference_value(env, callbackRef_, &func);
+        napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+        napi_delete_reference(env, callbackRef_);
+        callbackRef_ = nullptr;
+    }
     HILOG_DEBUG("NapiAsyncTask::Resolve is called end.");
 }
 
 void NapiAsyncTask::ResolveWithNoError(napi_env env, napi_value value)
 {
     HILOG_DEBUG("NapiAsyncTask::Resolve is called");
-    napi_resolve_deferred(env, deferred_, value);
-    napi_value argv[] = {
-        CreateJsNull(env),
-        value,
-    };
-    napi_value func = nullptr;
-    napi_get_reference_value(env, callbackRef_, &func);
-    napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+    if (deferred_) {
+        napi_resolve_deferred(env, deferred_, value);
+        deferred_ = nullptr;
+    }
+    if (callbackRef_) {
+        napi_value argv[] = {
+            CreateJsNull(env),
+            value,
+        };
+        napi_value func = nullptr;
+        napi_get_reference_value(env, callbackRef_, &func);
+        napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+        napi_delete_reference(env, callbackRef_);
+        callbackRef_ = nullptr;
+    }
     HILOG_DEBUG("NapiAsyncTask::Resolve is called end.");
 }
 
 void NapiAsyncTask::Reject(napi_env env, napi_value error)
 {
-    napi_reject_deferred(env, deferred_, error);
-    napi_value argv[] = {
-        error,
-        CreateJsUndefined(env),
-    };
-    napi_value func = nullptr;
-    napi_get_reference_value(env, callbackRef_, &func);
-    napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+    if (deferred_) {
+        napi_reject_deferred(env, deferred_, error);
+        deferred_ = nullptr;
+    }
+    if (callbackRef_) {
+        napi_value argv[] = {
+            error,
+            CreateJsUndefined(env),
+        };
+        napi_value func = nullptr;
+        napi_get_reference_value(env, callbackRef_, &func);
+        napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+        napi_delete_reference(env, callbackRef_);
+        callbackRef_ = nullptr;
+    }
 }
 
 void NapiAsyncTask::ResolveWithCustomize(napi_env env, napi_value error, napi_value value)
 {
     HILOG_DEBUG("NapiAsyncTask::ResolveWithCustomize is called");
-    napi_resolve_deferred(env, deferred_, value);
-    napi_value argv[] = {
-        error,
-        value,
-    };
-    napi_value func = nullptr;
-    napi_get_reference_value(env, callbackRef_, &func);
-    napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+    if (deferred_) {
+        napi_resolve_deferred(env, deferred_, value);
+        deferred_ = nullptr;
+    }
+    if (callbackRef_) {
+        napi_value argv[] = {
+            error,
+            value,
+        };
+        napi_value func = nullptr;
+        napi_get_reference_value(env, callbackRef_, &func);
+        napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+        napi_delete_reference(env, callbackRef_);
+        callbackRef_ = nullptr;
+    }
     HILOG_DEBUG("NapiAsyncTask::ResolveWithCustomize is called end.");
 }
 
 void NapiAsyncTask::RejectWithCustomize(napi_env env, napi_value error, napi_value value)
 {
     HILOG_DEBUG("NapiAsyncTask::RejectWithCustomize is called");
-    napi_reject_deferred(env, deferred_, error);
-    napi_value argv[] = {
-        error,
-        value,
-    };
-    napi_value func = nullptr;
-    napi_get_reference_value(env, callbackRef_, &func);
-    napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+    if (deferred_) {
+        napi_reject_deferred(env, deferred_, error);
+        deferred_ = nullptr;
+    }
+    if (callbackRef_) {
+        napi_value argv[] = {
+            error,
+            value,
+        };
+        napi_value func = nullptr;
+        napi_get_reference_value(env, callbackRef_, &func);
+        napi_call_function(env, CreateJsUndefined(env), func, ArraySize(argv), argv, nullptr);
+        napi_delete_reference(env, callbackRef_);
+        callbackRef_ = nullptr;
+    }
     HILOG_DEBUG("NapiAsyncTask::RejectWithCustomize is called end.");
 }
 
@@ -604,24 +671,51 @@ void NapiAsyncTask::Complete(napi_env env, napi_status status, void* data)
 
 bool NapiAsyncTask::Start(const std::string &name, napi_env env)
 {
-    napi_delete_async_work(env, work_);
-    napi_create_async_work(env, nullptr, CreateJsValue(env, name), Execute, Complete, this, &work_);
+    if (work_) {
+        napi_delete_async_work(env, work_);
+        work_ = nullptr;
+    }
+    if (env == nullptr) {
+        return false;
+    }
+    NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
+    work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
+        reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
+        reinterpret_cast<NativeAsyncCompleteCallback>(Complete), this));
     napi_queue_async_work(env, work_);
     return true;
 }
 
 bool NapiAsyncTask::StartHighQos(const std::string &name, napi_env env)
 {
-    napi_delete_async_work(env, work_);
-    napi_create_async_work(env, nullptr, CreateJsValue(env, name), Execute, Complete, this, &work_);
+    if (work_) {
+        napi_delete_async_work(env, work_);
+        work_ = nullptr;
+    }
+    if (env == nullptr) {
+        return false;
+    }
+    NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
+    work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
+        reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
+        reinterpret_cast<NativeAsyncCompleteCallback>(Complete), this));
     napi_queue_async_work_with_qos(env, work_, napi_qos_user_initiated);
     return true;
 }
 
 bool NapiAsyncTask::StartLowQos(const std::string &name, napi_env env)
 {
-    napi_delete_async_work(env, work_);
-    napi_create_async_work(env, nullptr, CreateJsValue(env, name), Execute, Complete, this, &work_);
+    if (work_) {
+        napi_delete_async_work(env, work_);
+        work_ = nullptr;
+    }
+    if (env == nullptr) {
+        return false;
+    }
+    NativeEngine* engine = reinterpret_cast<NativeEngine*>(env);
+    work_ = reinterpret_cast<napi_async_work>(engine->CreateAsyncWork(name,
+        reinterpret_cast<NativeAsyncExecuteCallback>(Execute),
+        reinterpret_cast<NativeAsyncCompleteCallback>(Complete), this));
     napi_queue_async_work_with_qos(env, work_, napi_qos_utility);
     return true;
 }

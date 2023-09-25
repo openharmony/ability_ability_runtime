@@ -220,14 +220,14 @@ void JsAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
     NativeValue *value = jsAbilityObj_->Get();
     NativeObject *obj = ConvertNativeValueTo<NativeObject>(value);
     if (obj == nullptr) {
-        HILOG_ERROR("Failed to get Ability object");
+        HILOG_ERROR("Error to get Ability object");
         return;
     }
 
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(&nativeEngine), want);
     NativeValue *jsWant = reinterpret_cast<NativeValue *>(napiWant);
     if (jsWant == nullptr) {
-        HILOG_ERROR("jsWant is nullptr");
+        HILOG_ERROR("jsWant is null");
         return;
     }
 
@@ -984,7 +984,7 @@ NativeValue *JsAbility::CallObjectMethod(const char *name, NativeValue *const *a
 bool JsAbility::CheckPromise(NativeValue *result)
 {
     if (result == nullptr) {
-        HILOG_DEBUG("result is null, no need to call promise.");
+        HILOG_DEBUG("result is nullptr, no need to call promise.");
         return false;
     }
     if (!result->IsPromise()) {
@@ -998,16 +998,16 @@ bool JsAbility::CallPromise(NativeValue *result, AppExecFwk::AbilityTransactionC
 {
     auto *retObj = ConvertNativeValueTo<NativeObject>(result);
     if (retObj == nullptr) {
-        HILOG_ERROR("Failed to convert native value to NativeObject.");
+        HILOG_ERROR("Error to convert native value to NativeObject.");
         return false;
     }
     NativeValue *then = retObj->GetProperty("then");
     if (then == nullptr) {
-        HILOG_ERROR("Failed to get property: then.");
+        HILOG_ERROR("Error to get property: then.");
         return false;
     }
     if (!then->IsCallable()) {
-        HILOG_ERROR("property then is not callable.");
+        HILOG_ERROR("property then is not callable");
         return false;
     }
     HandleScope handleScope(jsRuntime_);
@@ -1016,8 +1016,8 @@ bool JsAbility::CallPromise(NativeValue *result, AppExecFwk::AbilityTransactionC
         callbackInfo);
     NativeValue *argv[1] = { promiseCallback };
     nativeEngine.CallFunction(result, then, argv, 1);
+    HILOG_DEBUG("CallPromise complete");
     return true;
-    HILOG_DEBUG("complete");
 }
 
 std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> JsAbility::CreateADelegatorAbilityProperty()
