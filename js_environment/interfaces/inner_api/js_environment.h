@@ -27,6 +27,8 @@
 namespace OHOS {
 namespace JsEnv {
 class JsEnvironmentImpl;
+using RequestAotCallback =
+    std::function<int32_t(const std::string& bundleName, const std::string& moduleName, int32_t triggerMode)>;
 class JsEnvironment final : public std::enable_shared_from_this<JsEnvironment> {
 public:
     JsEnvironment() {}
@@ -64,7 +66,8 @@ public:
 
     void RemoveTask(const std::string& name);
 
-    void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo);
+    void RegisterUncaughtExceptionHandler(const JsEnv::UncaughtExceptionInfo& uncaughtExceptionInfo);
+
     bool LoadScript(const std::string& path, std::vector<uint8_t>* buffer = nullptr, bool isBundle = false);
 
     bool StartDebugger(const char* libraryPath, bool needBreakPoint, uint32_t instanceId);
@@ -77,13 +80,15 @@ public:
 
     void DeInitLoop();
 
-    bool LoadScript(const std::string& path, uint8_t *buffer, size_t len, bool isBundle);
+    bool LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle);
 
     void StartProfiler(const char* libraryPath, uint32_t instanceId, PROFILERTYPE profiler, int32_t interval);
 
     void ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl);
 
     void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate);
+
+    void SetRequestAotCallback(const RequestAotCallback& cb);
 
 private:
     std::unique_ptr<JsEnvironmentImpl> impl_ = nullptr;

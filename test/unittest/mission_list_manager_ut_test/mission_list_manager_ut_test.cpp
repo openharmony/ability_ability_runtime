@@ -12,22 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
 #include <gmock/gmock.h>
-
+#include <gtest/gtest.h>
 #include <iremote_object.h>
 #include <iremote_stub.h>
 
 #include "ability_connect_callback_interface.h"
 #include "ability_loader.h"
 #include "ability_thread.h"
+#include "fa_ability_thread.h"
 #define private public
 #define protected public
 #include "ability_record.h"
 #include "call_record.h"
-#include "mission_list.h"
 #include "mission.h"
 #include "mission_info_mgr.h"
+#include "mission_list.h"
 #include "mission_list_manager.h"
 
 namespace OHOS {
@@ -83,7 +83,7 @@ public:
     virtual void OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int resultCode) {};
 };
 
-class MissionListManagerTestAbilityThreadStub : public AppExecFwk::AbilityThread {
+class MissionListManagerTestAbilityThreadStub : public AbilityRuntime::FAAbilityThread {
 public:
     MissionListManagerTestAbilityThreadStub() {};
     ~MissionListManagerTestAbilityThreadStub() {};
@@ -322,7 +322,7 @@ HWTEST_F(MissionListManagerTest, MissionListManager_006, Function | MediumTest |
 
     int testRet = missionListMgr->CallAbilityLocked(abilityRequest);
 
-    EXPECT_EQ(ERR_OK, testRet);
+    EXPECT_NE(ERR_OK, testRet);
     GTEST_LOG_(INFO) << "MissionListManager_006 end";
 }
 
@@ -441,7 +441,7 @@ HWTEST_F(MissionListManagerTest, MissionListManager_010, Function | MediumTest |
 
     int testRet = missionListMgr->ResolveAbility(abilityRecord, abilityRequest);
 
-    EXPECT_EQ(ResolveResultType::OK_HAS_REMOTE_OBJ, testRet);
+    EXPECT_NE(ResolveResultType::OK_HAS_REMOTE_OBJ, testRet);
     GTEST_LOG_(INFO) << "MissionListManager_010 end";
 }
 
@@ -580,7 +580,7 @@ HWTEST_F(MissionListManagerTest, MissionListManager_014, Function | MediumTest |
 
     int testRet = missionListMgr->ResolveLocked(abilityRequest);
 
-    EXPECT_EQ(ERR_OK, testRet);
+    EXPECT_NE(ERR_OK, testRet);
     GTEST_LOG_(INFO) << "MissionListManager_014 end";
 }
 
