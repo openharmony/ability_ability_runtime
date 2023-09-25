@@ -470,6 +470,14 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
 int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
+    if (!callerToken) {
+        HILOG_ERROR("callerToken is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    if (!sessionInfo) {
+        HILOG_ERROR("sessionInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     sptr<IRemoteObject> token;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
@@ -498,6 +506,14 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
 int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
+    if (!callerToken) {
+        HILOG_ERROR("callerToken is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    if (!sessionInfo) {
+        HILOG_ERROR("sessionInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     sptr<IRemoteObject> token;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
