@@ -1074,7 +1074,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, RegisterSessionHandler_002, TestSize.Le
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService IsAbilityControllerStart
  */
-HWTEST_F(AbilityManagerServiceTest, IsAbilityControllerStart_003, TestSize.Level1)
+HWTEST_F(AbilityManagerServiceThirdTest, IsAbilityControllerStart_003, TestSize.Level1)
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     Want want;
