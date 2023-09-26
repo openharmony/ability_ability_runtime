@@ -1250,7 +1250,7 @@ int32_t AppMgrProxy::NotifyPageShow(const sptr<IRemoteObject> &token, const Page
         HILOG_ERROR("Write interface token failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+    if (!data.WriteRemoteObject(token)) {
         HILOG_ERROR("Failed to write token");
         return ERR_INVALID_DATA;
     }
@@ -1280,7 +1280,7 @@ int32_t AppMgrProxy::NotifyPageHide(const sptr<IRemoteObject> &token, const Page
         HILOG_ERROR("Write interface token failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    if (!data.WriteRemoteObject(token.GetRefPtr())) {
+    if (!data.WriteRemoteObject(token)) {
         HILOG_ERROR("Failed to write token");
         return ERR_INVALID_DATA;
     }

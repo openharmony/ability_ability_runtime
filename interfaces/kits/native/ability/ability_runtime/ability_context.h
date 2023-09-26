@@ -333,12 +333,6 @@ public:
      * @return UIContent object of ACE.
      */
     virtual Ace::UIContent* GetUIContent() = 0;
-
-    virtual ErrCode NotifyPageShow(const std::string &bundleName, const std::string moduleName,
-        const std::string &abilityName, const std::string &pageName) = 0;
-
-    virtual ErrCode NotifyPageHide(const std::string &bundleName, const std::string moduleName,
-        const std::string &abilityName, const std::string &pageName) = 0;
 #endif
     virtual bool IsTerminating() = 0;
     virtual void SetTerminating(bool state) = 0;
