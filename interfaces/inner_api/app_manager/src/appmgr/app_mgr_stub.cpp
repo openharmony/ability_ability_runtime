@@ -798,8 +798,8 @@ int32_t AppMgrStub::HandleNotifyPageShow(MessageParcel &data, MessageParcel &rep
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
-    if (pageStateData == nullptr) {
-        HILOG_ERROR("ReadParcelable<PageStateData> failed");
+    if (token == nullptr || pageStateData == nullptr) {
+        HILOG_ERROR("read data failed");
         return ERR_INVALID_VALUE;
     }
 
@@ -815,8 +815,8 @@ int32_t AppMgrStub::HandleNotifyPageHide(MessageParcel &data, MessageParcel &rep
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
-    if (pageStateData == nullptr) {
-        HILOG_ERROR("ReadParcelable<PageStateData> failed");
+    if (token == nullptr || pageStateData == nullptr) {
+        HILOG_ERROR("read data failed");
         return ERR_INVALID_VALUE;
     }
 

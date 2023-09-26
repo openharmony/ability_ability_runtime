@@ -54,6 +54,7 @@ constexpr static char ACE_ABILITY_NAME[] = "AceAbility";
 constexpr static char ACE_FORM_ABILITY_NAME[] = "AceFormAbility";
 constexpr static char FORM_EXTENSION[] = "FormExtension";
 constexpr static char UI_EXTENSION[] = "UIExtensionAbility";
+constexpr static char CUSTOM_EXTENSION[] = "ExtensionAbility";
 constexpr static char MEDIA_CONTROL_EXTENSION[] = "MediaControlExtensionAbility";
 constexpr static char USER_AUTH_EXTENSION[] = "UserAuthExtensionAbility";
 constexpr static char ACTION_EXTENSION[] = "ActionExtensionAbility";
@@ -211,6 +212,10 @@ void FAAbilityThread::CreateExtensionAbilityNameSupportGraphics(
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL) {
         abilityName = MEDIA_CONTROL_EXTENSION;
+    }
+    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
+        abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
+        abilityName = abilityInfo->extensionTypeName + CUSTOM_EXTENSION;
     }
 }
 
@@ -670,7 +675,7 @@ void FAAbilityThread::ScheduleUpdateConfiguration(const AppExecFwk::Configuratio
             abilityThread->HandleUpdateConfiguration(config);
         }
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:UpdateConfiguration");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -733,7 +738,7 @@ void FAAbilityThread::ScheduleAbilityTransaction(
             abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
         }
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:AbilityTransaction");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -759,7 +764,7 @@ void FAAbilityThread::ScheduleShareData(const int32_t &uniqueId)
         }
         abilityThread->HandleShareData(uniqueId);
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:ShareData");
     if (!ret) {
         HILOG_ERROR("postTask error");
     }
@@ -785,7 +790,7 @@ void FAAbilityThread::ScheduleConnectAbility(const Want &want)
             abilityThread->HandleConnectAbility(want);
         }
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:ConnectAbility");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -813,7 +818,7 @@ void FAAbilityThread::ScheduleDisconnectAbility(const Want &want)
             abilityThread->HandleDisconnectAbility(want);
         }
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:DisconnectAbility");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -848,7 +853,7 @@ void FAAbilityThread::ScheduleCommandAbility(const Want &want, bool restart, int
             abilityThread->HandleCommandAbility(want, restart, startId);
         }
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:CommandAbility");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -880,7 +885,7 @@ bool FAAbilityThread::SchedulePrepareTerminateAbility()
         }
         abilityThread->HandlePrepareTermianteAbility();
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:PrepareTerminateAbility");
     if (!ret) {
         HILOG_ERROR("PostTask error");
         return false;
@@ -919,7 +924,7 @@ void FAAbilityThread::ScheduleCommandAbilityWindow(
         }
         abilityThread->HandleCommandExtensionWindow(want, sessionInfo, winCmd);
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:CommandAbilityWindow");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -954,7 +959,7 @@ void FAAbilityThread::SendResult(int requestCode, int resultCode, const Want &wa
         }
         HILOG_ERROR("%{public}s impl is nullptr", abilityThread->isExtension_ ? "extension" : "ability");
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:SendResult");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -1237,7 +1242,7 @@ bool FAAbilityThread::ScheduleRegisterObserver(const Uri &uri, const sptr<AAFwk:
         }
         abilityThread->HandleRegisterObserver(uri, dataObserver);
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:RegisterObserver");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -1260,7 +1265,7 @@ bool FAAbilityThread::ScheduleUnregisterObserver(const Uri &uri, const sptr<AAFw
         }
         abilityThread->HandleUnregisterObserver(uri, dataObserver);
     };
-    bool ret = abilityHandler_->PostSyncTask(task);
+    bool ret = abilityHandler_->PostSyncTask(task, "FAAbilityThread:UnregisterObserver");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -1283,7 +1288,7 @@ bool FAAbilityThread::ScheduleNotifyChange(const Uri &uri)
         }
         abilityThread->HandleNotifyChange(uri);
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "FAAbilityThread:NotifyChange");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -1347,7 +1352,7 @@ void FAAbilityThread::DumpAbilityInfo(const std::vector<std::string> &params, st
             HILOG_ERROR("failed = %{public}d", err);
         }
     };
-    abilityHandler_->PostTask(task);
+    abilityHandler_->PostTask(task, "FAAbilityThread:DumpAbilityInfo");
 }
 
 #ifdef SUPPORT_GRAPHICS
@@ -1452,7 +1457,7 @@ void FAAbilityThread::CallRequest()
 
         retval = currentAbility->CallRequest();
     };
-    abilityHandler_->PostSyncTask(syncTask);
+    abilityHandler_->PostSyncTask(syncTask, "FAAbilityThread:CallRequest");
     AbilityManagerClient::GetInstance()->CallRequestDone(token_, retval);
     HILOG_DEBUG("end");
 }
