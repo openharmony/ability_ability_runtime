@@ -656,11 +656,19 @@ int AbilityManagerStub::StartAbilityByUIContentSessionAddCallerInner(MessageParc
     sptr<IRemoteObject> callerToken = nullptr;
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
+        if (callerToken == nullptr) {
+            HILOG_ERROR("callerToken is nullptr");
+            return ERR_INVALID_VALUE;
+        }
     }
 
     sptr<SessionInfo> sessionInfo = nullptr;
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
+        if (sessionInfo == nullptr) {
+            HILOG_ERROR("sessionInfo is nullptr");
+            return ERR_INVALID_VALUE;
+        }
     }
 
     int32_t userId = data.ReadInt32();
@@ -685,10 +693,18 @@ int AbilityManagerStub::StartAbilityByUIContentSessionForOptionsInner(MessagePar
     sptr<IRemoteObject> callerToken = nullptr;
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
+        if (callerToken == nullptr) {
+            HILOG_ERROR("callerToken is nullptr");
+            return ERR_INVALID_VALUE;
+        }
     }
     sptr<SessionInfo> sessionInfo = nullptr;
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
+        if (sessionInfo == nullptr) {
+            HILOG_ERROR("sessionInfo is nullptr");
+            return ERR_INVALID_VALUE;
+        }
     }
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
