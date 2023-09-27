@@ -19,14 +19,12 @@ module_output_path = "ability_runtime/appmgr"
 ohos_unittest("app_launch_data_test") {
   module_out_path = module_output_path
 
-  include_dirs = [ 
+  include_dirs = [
     "${ability_runtime_innerkits_path}/app_manager/include/appmgr",
-    "${ability_runtime_services_path}/appmgr/include", 
+    "${ability_runtime_services_path}/appmgr/include",
   ]
 
-  sources = [
-    "app_launch_data_test.cpp",
-  ]
+  sources = [ "app_launch_data_test.cpp" ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
@@ -34,10 +32,10 @@ ohos_unittest("app_launch_data_test") {
   ]
 
   external_deps = [
-    "hilog:libhilog",
     "ability_runtime:app_manager",
     "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",
+    "hilog:libhilog",
   ]
 }
 
