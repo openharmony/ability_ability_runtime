@@ -40,21 +40,18 @@ void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &ap
         HILOG_ERROR("abilityInfo is nullptr");
         return;
     }
+
+    sptr<AbilityThread> thread = nullptr;
     if (abilityInfo->type == AbilityType::EXTENSION) {
-        sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::ExtensionAbilityThread());
-        if (thread == nullptr) {
-            HILOG_ERROR("thread is nullptr");
-            return;
-        }
-        thread->Attach(application, abilityRecord, mainRunner, stageContext);
+        thread = sptr<AbilityRuntime::ExtensionAbilityThread>::MakeSptr();
     } else {
-        sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::FAAbilityThread());
-        if (thread == nullptr) {
-            HILOG_ERROR("thread is nullptr");
-            return;
-        }
-        thread->Attach(application, abilityRecord, mainRunner, stageContext);
+        thread = sptr<AbilityRuntime::FAAbilityThread>::MakeSptr();
     }
+    if (thread == nullptr) {
+        HILOG_ERROR("thread is nullptr");
+        return;
+    }
+    thread->Attach(application, abilityRecord, mainRunner, stageContext);
     HILOG_DEBUG("end");
 }
 
@@ -75,21 +72,17 @@ void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &ap
         return;
     }
 
+    sptr<AbilityThread> thread = nullptr;
     if (abilityInfo->type == AbilityType::EXTENSION) {
-        sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::ExtensionAbilityThread());
-        if (thread == nullptr) {
-            HILOG_ERROR("thread is nullptr");
-            return;
-        }
-        thread->Attach(application, abilityRecord, stageContext);
+        thread = sptr<AbilityRuntime::ExtensionAbilityThread>::MakeSptr();
     } else {
-        sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::FAAbilityThread());
-        if (thread == nullptr) {
-            HILOG_ERROR("thread is nullptr");
-            return;
-        }
-        thread->Attach(application, abilityRecord, stageContext);
+        thread = sptr<AbilityRuntime::FAAbilityThread>::MakeSptr();
     }
+    if (thread == nullptr) {
+        HILOG_ERROR("thread is nullptr");
+        return;
+    }
+    thread->Attach(application, abilityRecord, stageContext);
     HILOG_DEBUG("end");
 }
 
