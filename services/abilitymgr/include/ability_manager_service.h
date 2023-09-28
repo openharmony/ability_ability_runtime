@@ -722,6 +722,14 @@ public:
         const sptr<IRemoteObject> &callerToken, int32_t accountId = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * As abilityRequest is prepared, just execute starting ability procedure.
+     * By now, this is only used by start_ability_sandbox_savefile.
+     * @param abilityRequest, Prepared with all info for starting a ability.
+     * @param validUserId, Valid user id.
+     */
+    int StartAbilityJust(AbilityRequest &abilityRequest, int32_t validUserId);
+
+    /**
      * CallRequestDone, after invoke callRequest, ability will call this interface to return callee.
      *
      * @param token, ability's token.
@@ -1246,6 +1254,13 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t DetachAppDebug(const std::string &bundleName) override;
+
+    /**
+     * @brief Check if ability controller can start.
+     * @param want The want of ability to start.
+     * @return Return true to allow ability to start, or false to reject.
+     */
+    virtual bool IsAbilityControllerStart(const Want &want) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;

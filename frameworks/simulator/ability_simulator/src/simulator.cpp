@@ -27,6 +27,8 @@
 #include "ability_context.h"
 #include "ability_stage_context.h"
 #include "bundle_container.h"
+#include "commonlibrary/ets_utils/js_sys_module/timer/timer.h"
+#include "commonlibrary/ets_utils/js_sys_module/console/console.h"
 #include "hilog_wrapper.h"
 #include "js_ability_context.h"
 #include "js_ability_stage_context.h"
@@ -245,7 +247,6 @@ bool SimulatorImpl::ParseBundleAndModuleInfo()
     options_.targetVersion = appInfo_->apiTargetVersion;
     options_.releaseType = appInfo_->apiReleaseType;
     options_.compileMode = "esmodule";
-    options_.enablePartialUpdate = false;
 
     if (appInfo_->moduleInfos.empty()) {
         HILOG_ERROR("module name is not exist");
@@ -264,6 +265,13 @@ bool SimulatorImpl::ParseBundleAndModuleInfo()
     std::cout << "moduleInfo : " << moduleInfoJson.dump() << std::endl;
 
     options_.pageProfile = moduleInfo_->pages;
+    options_.enablePartialUpdate = true;
+    for (auto iter : moduleInfo_->metadata) {
+        if (iter.name == "ArkTSPartialUpdate" && iter.value == "false") {
+            options_.enablePartialUpdate = false;
+            break;
+        }
+    }
     return true;
 }
 
@@ -692,8 +700,11 @@ bool SimulatorImpl::OnInit()
 
 bool SimulatorImpl::LoadRuntimeEnv(NativeEngine &nativeEngine, NativeObject &globalObj)
 {
-    InitConsoleLogModule(nativeEngine, globalObj);
-    InitTimer(nativeEngine, globalObj);
+    JsSysModule::Console::InitConsoleModule(reinterpret_cast<napi_env>(&nativeEngine));
+    auto ret = JsSysModule::Timer::RegisterTime(reinterpret_cast<napi_env>(&nativeEngine));
+    if (!ret) {
+        HILOG_ERROR("Register timer failed");
+    }
     globalObj.SetProperty("group", nativeEngine.CreateObject());
 
     uintptr_t bufferStart = reinterpret_cast<uintptr_t>(_binary_jsMockSystemPlugin_abc_start);

@@ -181,6 +181,7 @@ const int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
 const int32_t BROKER_UID = 5557;
 const int32_t BROKER_RESERVE_UID = 5005;
 const int32_t DMS_UID = 5522;
+const int32_t WMS_UID = 4606;
 const int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 const std::string BUNDLE_NAME_KEY = "bundleName";
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
@@ -470,6 +471,10 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
 int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, const sptr<IRemoteObject> &callerToken,
     const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
+    if (!callerToken || !sessionInfo) {
+        HILOG_ERROR("callerToken or sessionInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     sptr<IRemoteObject> token;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
@@ -498,6 +503,10 @@ int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, cons
 int AbilityManagerService::StartAbilityByUIContentSession(const Want &want, const StartOptions &startOptions,
     const sptr<IRemoteObject> &callerToken, const sptr<SessionInfo> &sessionInfo, int32_t userId, int requestCode)
 {
+    if (!callerToken || !sessionInfo) {
+        HILOG_ERROR("callerToken or sessionInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     sptr<IRemoteObject> token;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         Rosen::FocusChangeInfo focusChangeInfo;
@@ -595,6 +604,7 @@ bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int 
     for (const auto &item : startAbilityChain_) {
         if (item.second->MatchStartRequest(params)) {
             reqHandler = item.second;
+            break;
         }
     }
 
@@ -622,6 +632,7 @@ int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemote
     startParams.userId = userId;
     startParams.requestCode = requestCode;
     startParams.isStartAsCaller = isStartAsCaller;
+    startParams.SetValidUserId(GetValidUserId(userId));
 
     int result = ERR_OK;
     if (StartAbilityInChain(startParams, result)) {
@@ -850,6 +861,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     startParams.callerToken = callerToken;
     startParams.userId = userId;
     startParams.requestCode = requestCode;
+    startParams.SetValidUserId(GetValidUserId(userId));
 
     int result = ERR_OK;
     if (StartAbilityInChain(startParams, result)) {
@@ -1052,6 +1064,7 @@ int AbilityManagerService::StartAbilityForOptionWrap(const Want &want, const Sta
     startParams.requestCode = requestCode;
     startParams.isStartAsCaller = isStartAsCaller;
     startParams.startOptions = &startOptions;
+    startParams.SetValidUserId(GetValidUserId(userId));
 
     int result = ERR_OK;
     if (StartAbilityInChain(startParams, result)) {
@@ -2312,12 +2325,15 @@ int AbilityManagerService::TerminateAbilityWithFlag(const sptr<IRemoteObject> &t
 
     auto ownerUserId = abilityRecord->GetOwnerMissionUserId();
     auto missionListManager = GetListManagerByUserId(ownerUserId);
-    if (missionListManager == nullptr) {
-        HILOG_ERROR("missionListManager is Null. ownerUserId=%{public}d", ownerUserId);
-        return ERR_INVALID_VALUE;
+    if (missionListManager) {
+        NotifyHandleAbilityStateChange(token, TERMINATE_ABILITY_CODE);
+        return missionListManager->TerminateAbility(abilityRecord, resultCode, resultWant, flag);
     }
-    NotifyHandleAbilityStateChange(token, TERMINATE_ABILITY_CODE);
-    return missionListManager->TerminateAbility(abilityRecord, resultCode, resultWant, flag);
+    HILOG_WARN("missionListManager is Null. ownerUserId=%{public}d", ownerUserId);
+    if (uiAbilityLifecycleManager_ && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return uiAbilityLifecycleManager_->CloseUIAbility(abilityRecord, resultCode, resultWant, false);
+    }
+    return ERR_INVALID_VALUE;
 }
 
 int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, int resultCode,
@@ -3241,18 +3257,18 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
         HILOG_INFO("App bundleName: %{public}s, uid: %{public}d", bundleName.c_str(), appUid);
     }
 
-    std::string apl;
+    bool isSystemApp = false;
     if (!wantSenderInfo.bundleName.empty()) {
         AppExecFwk::BundleInfo bundleInfo;
         bundleMgrResult = IN_PROCESS_CALL(bms->GetBundleInfo(wantSenderInfo.bundleName,
             AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId));
         if (bundleMgrResult) {
-            apl = bundleInfo.applicationInfo.appPrivilegeLevel;
+            isSystemApp = bundleInfo.applicationInfo.isSystemApp;
         }
     }
 
     HILOG_INFO("AbilityManagerService::GetWantSender: bundleName = %{public}s", wantSenderInfo.bundleName.c_str());
-    return pendingWantManager_->GetWantSender(callerUid, appUid, apl, wantSenderInfo, callerToken);
+    return pendingWantManager_->GetWantSender(callerUid, appUid, isSystemApp, wantSenderInfo, callerToken);
 }
 
 int AbilityManagerService::SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo)
@@ -3281,7 +3297,7 @@ void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
         HILOG_ERROR("GetOsAccountLocalIdFromUid failed. uid=%{public}d", callerUid);
         return;
     }
-    std::string apl;
+    bool isSystemApp = false;
     if (record->GetKey() != nullptr && !record->GetKey()->GetBundleName().empty()) {
         AppExecFwk::BundleInfo bundleInfo;
         bool bundleMgrResult = IN_PROCESS_CALL(bms->GetBundleInfo(record->GetKey()->GetBundleName(),
@@ -3290,10 +3306,10 @@ void AbilityManagerService::CancelWantSender(const sptr<IWantSender> &sender)
             HILOG_ERROR("GetBundleInfo is fail.");
             return;
         }
-        apl = bundleInfo.applicationInfo.appPrivilegeLevel;
+        isSystemApp = bundleInfo.applicationInfo.isSystemApp;
     }
 
-    pendingWantManager_->CancelWantSender(apl, sender);
+    pendingWantManager_->CancelWantSender(isSystemApp, sender);
 }
 
 int AbilityManagerService::GetPendingWantUid(const sptr<IWantSender> &target)
@@ -5625,6 +5641,25 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     return missionListMgr->ResolveLocked(abilityRequest);
 }
 
+int AbilityManagerService::StartAbilityJust(AbilityRequest &abilityRequest, int32_t validUserId)
+{
+    HILOG_DEBUG("call");
+    UpdateCallerInfo(abilityRequest.want, abilityRequest.callerToken);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        ReportEventToSuspendManager(abilityRequest.abilityInfo);
+        return uiAbilityLifecycleManager_->ResolveLocked(abilityRequest, validUserId);
+    }
+
+    auto missionListMgr = GetListManagerByUserId(validUserId);
+    if (missionListMgr == nullptr) {
+        HILOG_ERROR("missionListMgr is Null. Designated User Id=%{public}d", validUserId);
+        return ERR_INVALID_VALUE;
+    }
+    ReportEventToSuspendManager(abilityRequest.abilityInfo);
+
+    return missionListMgr->ResolveLocked(abilityRequest);
+}
+
 int AbilityManagerService::ReleaseCall(
     const sptr<IAbilityConnection> &connect, const AppExecFwk::ElementName &element)
 {
@@ -6537,7 +6572,7 @@ int AbilityManagerService::DelegatorDoAbilityForeground(const sptr<IRemoteObject
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
         auto&& want = abilityRecord->GetWant();
         if (!IsAbilityControllerStart(want, want.GetBundle())) {
-            HILOG_ERROR("SecneBoard IsAbilityControllerStart failed: %{public}s", want.GetBundle().c_str());
+            HILOG_ERROR("SceneBoard IsAbilityControllerStart failed: %{public}s", want.GetBundle().c_str());
             return ERR_WOULD_BLOCK;
         }
         return ERR_OK;
@@ -8375,6 +8410,18 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
     }
 
     return DelayedSingleton<AppScheduler>::GetInstance()->DetachAppDebug(bundleName);
+}
+
+bool AbilityManagerService::IsAbilityControllerStart(const Want &want)
+{
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (!isSaCall || (callingUid != BROKER_UID && callingUid != BROKER_RESERVE_UID &&
+        callingUid != WMS_UID)) {
+        HILOG_ERROR("The interface only support for broker and WMS");
+        return true;
+    }
+    return IsAbilityControllerStart(want, want.GetBundle());
 }
 }  // namespace AAFwk
 }  // namespace OHOS
