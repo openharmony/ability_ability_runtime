@@ -300,6 +300,30 @@ bool ModuleRunningRecord::RemoveTerminateAbilityTimeoutTask(const sptr<IRemoteOb
     return true;
 }
 
+bool ModuleRunningRecord::IsAbilitiesBackgrounded()
+{
+    HILOG_DEBUG("Called.");
+    std::lock_guard<ffrt::mutex> lock(abilitiesMutex_);
+    for (const auto &iter : abilities_) {
+        const auto &ability = iter.second;
+        if (ability == nullptr) {
+            HILOG_ERROR("Ability is nullptr.");
+            continue;
+        }
+        if (ability->GetAbilityInfo()->type != AbilityType::PAGE) {
+            continue;
+        }
+
+        const auto &state = ability->GetState();
+        if (!(state == AbilityState::ABILITY_STATE_BACKGROUND ||
+            state == AbilityState::ABILITY_STATE_TERMINATED ||
+            state == AbilityState::ABILITY_STATE_END)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ModuleRunningRecord::SetAppMgrServiceInner(const std::weak_ptr<AppMgrServiceInner> &inner)
 {
     appMgrServiceInner_ = inner;
