@@ -1,0 +1,168 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "child_process_manager.h"
+
+#include "child_process.h"
+#include "child_process_start_info.h"
+#include "application_info.h"
+#include "application_context.h"
+#include "bundle_mgr_interface.h"
+#include "bundle_info.h"
+#include "constants.h"
+#include "event_runner.h"
+#include "errors.h"
+#include "hap_module_info.h"
+#include "hilog_wrapper.h"
+#include "runtime.h"
+#include "sys_mgr_client.h"
+#include "system_ability_definition.h"
+#include <filesystem>
+#include <sys/types.h>
+#include <string>
+#include <sys/prctl.h>
+#include <signal.h>
+#include <unistd.h>
+
+namespace OHOS {
+namespace AbilityRuntime {   
+namespace {
+    constexpr pid_t INVALID_PID = -1;
+}
+
+// Avoid using binder ipc in child process forked by app self, may cause crash
+pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntry)
+{
+    HILOG_DEBUG("StartChildProcessBySelfFork called");
+    std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
+        AbilityRuntime::ApplicationContext::GetInstance();
+    std::string bundleName = applicationContext->GetBundleName();
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    if (!GetHapModuleInfo(bundleName, hapModuleInfo)) {
+        HILOG_ERROR("GetHapModuleInfo failed");
+        return INVALID_PID;
+    }
+
+    pid_t pid= fork();
+    if (pid < 0) {
+        HILOG_ERROR("Fork process failed");
+        return pid;
+    }
+    if (pid == 0) {
+        HILOG_DEBUG("Child process start");
+        HandleChildProcess(srcEntry, hapModuleInfo);
+        HILOG_DEBUG("Child process end");
+        kill(getpid(), SIGQUIT);
+    }
+    return pid;
+}
+
+void ChildProcessManager::HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo)
+{
+    std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    eventRunner->Stop(); // avoid binder ipc crash
+
+    auto runtime = CreateRuntime(hapModuleInfo);
+    if (!runtime) {
+        HILOG_ERROR("Failed to create child process runtime");
+        return;
+    }
+
+    std::shared_ptr<ChildProcessStartInfo> processStartInfo = std::make_shared<ChildProcessStartInfo>();
+    std::string filename = std::filesystem::path(srcEntry).stem();
+    processStartInfo->name = filename;
+    processStartInfo->moduleName = hapModuleInfo.moduleName;
+    processStartInfo->package = hapModuleInfo.package;
+    processStartInfo->hapPath = hapModuleInfo.hapPath;
+    processStartInfo->srcEntry = srcEntry;
+    processStartInfo->isEsModule = (hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
+
+    auto process = ChildProcess::Create(runtime);
+    process->Init(processStartInfo);
+    process->OnStart();
+}
+
+bool ChildProcessManager::GetHapModuleInfo(std::string bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo)
+{
+    auto bundleObj = 
+        DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bundleObj == nullptr) {
+        HILOG_ERROR("Failed to get bundle manager service.");
+        return false;
+    }
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+    if (bundleMgr == nullptr) {
+        HILOG_ERROR("Bundle manager is nullptr.");
+        return false;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool queryResult = (bundleMgr->GetBundleInfoForSelf(
+        (static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo) == ERR_OK);
+
+    if (!queryResult) {
+        HILOG_ERROR("GetBundleInfo failed!");
+        return false;
+    }
+
+    bool result = false;
+    if (!bundleInfo.hapModuleInfos.empty()) {
+        HILOG_DEBUG("hapModueInfos size: %d", bundleInfo.hapModuleInfos.size());
+        for (auto info : bundleInfo.hapModuleInfos) {
+            if (info.moduleType == AppExecFwk::ModuleType::ENTRY) {
+                result = true;
+                hapModuleInfo = info;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+std::unique_ptr<AbilityRuntime::Runtime> ChildProcessManager::CreateRuntime(AppExecFwk::HapModuleInfo &hapModuleInfo)
+{
+    std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
+        AbilityRuntime::ApplicationContext::GetInstance();
+    std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = applicationContext->GetApplicationInfo();
+    if (applicationInfo == nullptr) {
+        HILOG_ERROR("applicationInfo is nullptr");
+        return nullptr;
+    }
+
+    AbilityRuntime::Runtime::Options options;
+    options.codePath = AbilityBase::Constants::LOCAL_CODE_PATH;
+    options.bundleName = hapModuleInfo.bundleName;
+    options.hapPath = hapModuleInfo.hapPath;
+    options.moduleName = hapModuleInfo.moduleName;
+    options.isBundle = (hapModuleInfo.compileMode != AppExecFwk::CompileMode::ES_MODULE);
+    options.uid = applicationInfo->uid;
+    options.isDebugVersion = applicationInfo->debug;
+    options.arkNativeFilePath = applicationInfo->arkNativeFilePath;
+    options.apiTargetVersion = applicationInfo->apiTargetVersion;
+    options.loadAce = true;     
+    std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::Create();
+    options.eventRunner = eventRunner;
+
+    return AbilityRuntime::Runtime::Create(options);
+}
+}  // namespace AbilityRuntime
+}  // namespace OHOS
