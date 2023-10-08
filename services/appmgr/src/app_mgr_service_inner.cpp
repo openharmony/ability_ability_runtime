@@ -307,6 +307,9 @@ void AppMgrServiceInner::MakeProcessName(
 
 bool AppMgrServiceInner::IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo) const
 {
+    if (!appInfo) {
+        return true;
+    }
     if(hapModuleInfo.process.empty()) {
         return true;
     }
