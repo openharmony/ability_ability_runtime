@@ -37,7 +37,6 @@ private:
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> jsChildProcessObj_;
-
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

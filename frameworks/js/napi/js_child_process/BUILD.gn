@@ -28,7 +28,8 @@ gen_js_obj("child_process_js") {
 }
 
 gen_js_obj("child_process_abc") {
-  input = get_label_info(":gen_child_process_abc", "target_out_dir") + "/child_process.abc"
+  input = get_label_info(":gen_child_process_abc", "target_out_dir") +
+          "/child_process.abc"
   output = target_out_dir + "/child_process_abc.o"
   dep = ":gen_child_process_abc"
 }
