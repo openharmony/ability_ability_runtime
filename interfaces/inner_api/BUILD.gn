@@ -17,6 +17,7 @@ group("innerkits_target") {
     "ability_manager:ability_manager",
     "ability_manager:ability_manager_c",
     "app_manager:app_manager",
+    "child_process_manager:child_process_manager",
     "connectionobs_manager:connection_obs_manager",
     "dataobs_manager:dataobs_manager",
     "deps_wrapper:ability_deps_wrapper",
@@ -24,6 +25,5 @@ group("innerkits_target") {
     "quick_fix:quickfix_manager",
     "uri_permission:uri_permission_mgr",
     "wantagent:wantagent_innerkits",
-    "child_process_manager:child_process_manager",
   ]
 }

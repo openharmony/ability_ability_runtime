@@ -64,12 +64,12 @@ private:
         int32_t startMode;
         if (!ConvertFromJsValue(env, argv[0], srcEntry) || srcEntry.length() == 0) {
             HILOG_ERROR("Parse param srcEntry failed");
-             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
         }
         if (!ConvertFromJsValue(env, argv[1], startMode)) {
             HILOG_ERROR("Parse param startMode failed");
-             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
         }
 
@@ -96,7 +96,8 @@ private:
         return result;
     }
 
-    static void SelfForkProcess(napi_env env, NapiAsyncTask &task, std::string srcEntry) {
+    static void SelfForkProcess(napi_env env, NapiAsyncTask &task, std::string srcEntry)
+    {
         pid_t pid = OHOS::AbilityRuntime::ChildProcessManager::StartChildProcessBySelfFork(srcEntry);
         if (pid >= 0) {
             task.ResolveWithNoError(env, CreateJsValue(env, pid));

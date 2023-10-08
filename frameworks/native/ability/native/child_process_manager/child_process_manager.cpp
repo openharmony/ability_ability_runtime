@@ -33,16 +33,15 @@
 #include <sys/types.h>
 #include <string>
 #include <sys/prctl.h>
-#include <signal.h>
+#include <csignal>
 #include <unistd.h>
 
 namespace OHOS {
-namespace AbilityRuntime {   
+namespace AbilityRuntime {
 namespace {
     constexpr pid_t INVALID_PID = -1;
 }
 
-// Avoid using binder ipc in child process forked by app self, may cause crash
 pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntry)
 {
     HILOG_DEBUG("StartChildProcessBySelfFork called");
@@ -55,7 +54,7 @@ pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntr
         return INVALID_PID;
     }
 
-    pid_t pid= fork();
+    pid_t pid = fork();
     if (pid < 0) {
         HILOG_ERROR("Fork process failed");
         return pid;
@@ -72,7 +71,7 @@ pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntr
 void ChildProcessManager::HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
-    eventRunner->Stop(); // avoid binder ipc crash
+    eventRunner->Stop();
 
     auto runtime = CreateRuntime(hapModuleInfo);
     if (!runtime) {
@@ -96,7 +95,7 @@ void ChildProcessManager::HandleChildProcess(const std::string srcEntry, AppExec
 
 bool ChildProcessManager::GetHapModuleInfo(std::string bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
-    auto bundleObj = 
+    auto bundleObj =
         DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleObj == nullptr) {
         HILOG_ERROR("Failed to get bundle manager service.");
@@ -118,7 +117,6 @@ bool ChildProcessManager::GetHapModuleInfo(std::string bundleName, AppExecFwk::H
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo) == ERR_OK);
-
     if (!queryResult) {
         HILOG_ERROR("GetBundleInfo failed!");
         return false;
@@ -158,7 +156,7 @@ std::unique_ptr<AbilityRuntime::Runtime> ChildProcessManager::CreateRuntime(AppE
     options.isDebugVersion = applicationInfo->debug;
     options.arkNativeFilePath = applicationInfo->arkNativeFilePath;
     options.apiTargetVersion = applicationInfo->apiTargetVersion;
-    options.loadAce = true;     
+    options.loadAce = true;
     std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::Create();
     options.eventRunner = eventRunner;
 
