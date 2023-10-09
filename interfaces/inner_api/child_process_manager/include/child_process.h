@@ -16,9 +16,10 @@
 #ifndef OHOS_ABILITY_RUNTIME_CHILD_PROCESS_H
 #define OHOS_ABILITY_RUNTIME_CHILD_PROCESS_H
 
+#include <memory>
+
 #include "child_process_start_info.h"
 #include "runtime.h"
-#include <memory>
 
 namespace OHOS {
 namespace AbilityRuntime {

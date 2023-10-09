@@ -16,7 +16,6 @@
 #include "child_process.h"
 
 #include "js_child_process.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
