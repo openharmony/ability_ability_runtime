@@ -17,8 +17,8 @@
 #define OHOS_ABILITY_RUNTIME_JS_CHILD_PROCESS_H
 
 #include "child_process.h"
-#include "runtime.h"
 #include "js_runtime_utils.h"
+#include "runtime.h"
 
 namespace OHOS {
 namespace AbilityRuntime {

@@ -15,12 +15,19 @@
 
 #include "child_process_manager.h"
 
-#include "child_process.h"
-#include "child_process_start_info.h"
+#include <csignal>
+#include <filesystem>
+#include <string>
+#include <sys/prctl.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "application_info.h"
 #include "application_context.h"
-#include "bundle_mgr_interface.h"
 #include "bundle_info.h"
+#include "bundle_mgr_interface.h"
+#include "child_process.h"
+#include "child_process_start_info.h"
 #include "constants.h"
 #include "event_runner.h"
 #include "errors.h"
@@ -29,12 +36,6 @@
 #include "runtime.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
-#include <filesystem>
-#include <sys/types.h>
-#include <string>
-#include <sys/prctl.h>
-#include <csignal>
-#include <unistd.h>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -124,7 +125,7 @@ bool ChildProcessManager::GetHapModuleInfo(std::string bundleName, AppExecFwk::H
 
     bool result = false;
     if (!bundleInfo.hapModuleInfos.empty()) {
-        HILOG_DEBUG("hapModueInfos size: %d", bundleInfo.hapModuleInfos.size());
+        HILOG_DEBUG("hapModueInfos size: %{public}d", bundleInfo.hapModuleInfos.size());
         for (auto info : bundleInfo.hapModuleInfos) {
             if (info.moduleType == AppExecFwk::ModuleType::ENTRY) {
                 result = true;

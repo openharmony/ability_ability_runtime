@@ -15,13 +15,14 @@
 
 #include "js_child_process_manager.h"
 
+#include <unistd.h>
+
 #include "child_process_manager.h"
 #include "hilog_wrapper.h"
-#include "js_runtime_utils.h"
 #include "js_error_utils.h"
+#include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi/native_api.h"
-#include <unistd.h>
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -41,7 +42,7 @@ public:
 
     static void Finalizer(napi_env env, void* data, void* hint)
     {
-        HILOG_INFO("%s::Finalizer is called", PROCESS_MANAGER_NAME);
+        HILOG_INFO("%{public}s::Finalizer is called", PROCESS_MANAGER_NAME);
         std::unique_ptr<JsChildProcessManager>(static_cast<JsChildProcessManager*>(data));
     }
 
@@ -73,7 +74,7 @@ private:
             return CreateJsUndefined(env);
         }
 
-        HILOG_DEBUG("StartMode: %d", startMode);
+        HILOG_DEBUG("StartMode: %{public}d", startMode);
         NapiAsyncTask::CompleteCallback complete = [srcEntry, startMode](napi_env env, NapiAsyncTask &task,
                                                                          int32_t status) {
             switch (startMode) {

@@ -16,9 +16,9 @@
 #include "js_child_process.h"
 
 #include "child_process.h"
+#include "hilog_wrapper.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -68,7 +68,7 @@ void JsChildProcess::OnStart()
 
 napi_value JsChildProcess::CallObjectMethod(const char *name, napi_value const *argv, size_t argc)
 {
-    HILOG_DEBUG("JsChildProcess::CallObjectMethod(%s)", name);
+    HILOG_DEBUG("JsChildProcess::CallObjectMethod(%{public}s)", name);
     if (jsChildProcessObj_ == nullptr) {
         HILOG_ERROR("ChildProcess.js not found");
         return nullptr;

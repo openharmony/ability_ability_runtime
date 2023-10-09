@@ -16,10 +16,11 @@
 #ifndef OHOS_ABILITY_RUNTIME_CHILD_PROCESS_MANAGER_H
 #define OHOS_ABILITY_RUNTIME_CHILD_PROCESS_MANAGER_H
 
+#include <string>
+#include <sys/types.h>
+
 #include "hap_module_info.h"
 #include "runtime.h"
-#include <sys/types.h>
-#include <string>
 
 namespace OHOS {
 namespace AbilityRuntime {
