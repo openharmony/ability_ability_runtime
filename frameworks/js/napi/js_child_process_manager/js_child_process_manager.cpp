@@ -23,12 +23,14 @@
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi/native_api.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *PROCESS_MANAGER_NAME = "JsChildProcessManager";
 constexpr size_t ARGC_TWO = 2;
+const std::string SYS_PARAM_MULTI_PROCESS_MODEL = "persist.sys.multi_process_model";
 
 enum {
     MODE_SELF_FORK = 0,
@@ -37,7 +39,11 @@ enum {
 
 class JsChildProcessManager {
 public:
-    JsChildProcessManager() = default;
+    JsChildProcessManager()
+    {
+        multiProcessModelEnabled_ = OHOS::system::GetBoolParameter(SYS_PARAM_MULTI_PROCESS_MODEL, false);
+    }
+
     ~JsChildProcessManager() = default;
 
     static void Finalizer(napi_env env, void* data, void* hint)
@@ -55,6 +61,13 @@ private:
     napi_value OnStartChildProcess(napi_env env, size_t argc, napi_value* argv)
     {
         HILOG_INFO("%{public}s is called", __FUNCTION__);
+        
+        if (!multiProcessModelEnabled_) {
+            HILOG_ERROR("Starting child process is not enabled on this device");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED);
+            return CreateJsUndefined(env);
+        }
+
         if (argc < ARGC_TWO) {
             HILOG_ERROR("Not enough params");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
@@ -106,6 +119,8 @@ private:
             task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
         }
     }
+
+    bool multiProcessModelEnabled_ = false;
 };
 
 napi_value JsChildProcessManagerInit(napi_env env, napi_value exportObj)
