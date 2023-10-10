@@ -75,9 +75,9 @@ HWTEST_F(AppLaunchDataTest, SetDebugApp_0100, TestSize.Level1)
 HWTEST_F(AppLaunchDataTest, GetDebugApp_0100, TestSize.Level1)
 {
     EXPECT_NE(launchData_, nullptr);
-    launchData_->debugApp_ = isDebugApp; 
+    launchData_->debugApp_ = isDebugApp;
     EXPECT_EQ(launchData_->GetDebugApp(), isDebugApp);
-    launchData_->debugApp_ = noDebugApp; 
+    launchData_->debugApp_ = noDebugApp;
     EXPECT_EQ(launchData_->GetDebugApp(), noDebugApp);
 }
 

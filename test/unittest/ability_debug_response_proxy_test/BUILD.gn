@@ -30,6 +30,7 @@ ohos_unittest("ability_debug_response_proxy_test") {
   configs = []
 
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "//third_party/googletest:gmock_main",
@@ -39,8 +40,6 @@ ohos_unittest("ability_debug_response_proxy_test") {
 
   external_deps = [
     "ability_base:want",
-    "ability_runtime:ability_manager",
-    "ability_runtime:runtime",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
