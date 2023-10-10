@@ -46,6 +46,7 @@ ohos_shared_library("child_process_manager") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",

@@ -23,14 +23,12 @@
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi/native_api.h"
-#include "parameters.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr const char *PROCESS_MANAGER_NAME = "JsChildProcessManager";
 constexpr size_t ARGC_TWO = 2;
-const std::string SYS_PARAM_MULTI_PROCESS_MODEL = "persist.sys.multi_process_model";
 
 enum {
     MODE_SELF_FORK = 0,
@@ -39,11 +37,7 @@ enum {
 
 class JsChildProcessManager {
 public:
-    JsChildProcessManager()
-    {
-        multiProcessModelEnabled_ = OHOS::system::GetBoolParameter(SYS_PARAM_MULTI_PROCESS_MODEL, false);
-    }
-
+    JsChildProcessManager() = default;
     ~JsChildProcessManager() = default;
 
     static void Finalizer(napi_env env, void* data, void* hint)
@@ -61,6 +55,11 @@ private:
     napi_value OnStartChildProcess(napi_env env, size_t argc, napi_value* argv)
     {
         HILOG_INFO("%{public}s is called", __FUNCTION__);
+        AbilityErrorCode errCode = preCheck();
+        if (errCode != AbilityErrorCode::ERROR_OK) {
+            ThrowError(env, errCode);
+            return CreateJsUndefined(env);
+        }
         if (argc < ARGC_TWO) {
             HILOG_ERROR("Not enough params");
             ThrowTooFewParametersError(env);
@@ -68,7 +67,7 @@ private:
         }
         std::string srcEntry;
         int32_t startMode;
-        if (!ConvertFromJsValue(env, argv[0], srcEntry) || srcEntry.length() == 0) {
+        if (!ConvertFromJsValue(env, argv[0], srcEntry)) {
             HILOG_ERROR("Parse param srcEntry failed");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
@@ -80,13 +79,8 @@ private:
         }
         HILOG_DEBUG("StartMode: %{public}d", startMode);
 
-        NapiAsyncTask::CompleteCallback complete = [srcEntry, startMode](napi_env env, NapiAsyncTask &task,
-                                                                         int32_t status) {
-            AbilityErrorCode errCode = preCheck();
-            if (errCode != AbilityErrorCode::ERROR_OK) {
-                task.Reject(env, CreateJsError(env, errCode));
-                return;
-            }
+        NapiAsyncTask::CompleteCallback complete = [this, srcEntry, startMode](napi_env env, NapiAsyncTask &task,
+                                                                               int32_t status) {
             switch (startMode) {
                 case MODE_SELF_FORK: {
                     SelfForkProcess(env, task, srcEntry);
@@ -109,28 +103,37 @@ private:
 
     AbilityErrorCode preCheck()
     {
-        if (!multiProcessModelEnabled_) {
+        auto mgr = DelayedSingleton<ChildProcessManager>::GetInstance();
+        if (mgr == nullptr) {
+            HILOG_ERROR("Failed to get ChildProcessManager instance.");
+            return AbilityErrorCode::ERROR_CODE_INNER;
+        }
+        if (!mgr->MultiProcessModelEnabled()) {
             HILOG_ERROR("Starting child process is not supported");
             return AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED;
         }
-        if (ChildProcessManager::IsChildProcess()) {
-            HILOG_ERROR("Can not start child process in child process");
+        if (mgr->IsChildProcess()) {
+            HILOG_ERROR("Staring child process in child process is not supported");
             return AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED;
         }
         return AbilityErrorCode::ERROR_OK;
     }
 
-    static void SelfForkProcess(napi_env env, NapiAsyncTask &task, std::string srcEntry)
+    void SelfForkProcess(napi_env env, NapiAsyncTask &task, std::string srcEntry)
     {
-        pid_t pid = OHOS::AbilityRuntime::ChildProcessManager::StartChildProcessBySelfFork(srcEntry);
+        auto mgr = DelayedSingleton<ChildProcessManager>::GetInstance();
+        if (mgr == nullptr) {
+            HILOG_ERROR("Failed to get ChildProcessManager instance.");
+            task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            return;
+        }
+        pid_t pid = mgr->StartChildProcessBySelfFork(srcEntry);
         if (pid >= 0) {
             task.ResolveWithNoError(env, CreateJsValue(env, pid));
         } else {
             task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
         }
     }
-
-    bool multiProcessModelEnabled_ = false;
 };
 
 napi_value JsChildProcessManagerInit(napi_env env, napi_value exportObj)

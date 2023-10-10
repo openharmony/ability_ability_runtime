@@ -33,6 +33,7 @@
 #include "errors.h"
 #include "hap_module_info.h"
 #include "hilog_wrapper.h"
+#include "parameters.h"
 #include "runtime.h"
 #include "sys_mgr_client.h"
 #include "system_ability_definition.h"
@@ -41,9 +42,15 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
     constexpr pid_t INVALID_PID = -1;
+    const std::string SYS_PARAM_MULTI_PROCESS_MODEL = "persist.sys.multi_process_model";
 }
 
-bool ChildProcessManager::isChildProcess_ = false;
+ChildProcessManager::ChildProcessManager()
+{
+    multiProcessModelEnabled_ = OHOS::system::GetBoolParameter(SYS_PARAM_MULTI_PROCESS_MODEL, false);
+}
+
+ChildProcessManager::~ChildProcessManager() = default;
 
 pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntry)
 {
@@ -72,6 +79,11 @@ pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntr
     return pid;
 }
 
+bool ChildProcessManager::MultiProcessModelEnabled()
+{
+    return multiProcessModelEnabled_;
+}
+
 bool ChildProcessManager::IsChildProcess()
 {
     return isChildProcess_;
@@ -92,7 +104,6 @@ void ChildProcessManager::HandleChildProcess(const std::string srcEntry, AppExec
     std::string filename = std::filesystem::path(srcEntry).stem();
     processStartInfo->name = filename;
     processStartInfo->moduleName = hapModuleInfo.moduleName;
-    processStartInfo->package = hapModuleInfo.package;
     processStartInfo->hapPath = hapModuleInfo.hapPath;
     processStartInfo->srcEntry = srcEntry;
     processStartInfo->isEsModule = (hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
