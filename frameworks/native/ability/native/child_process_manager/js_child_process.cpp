@@ -38,14 +38,13 @@ void JsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &info)
     HILOG_INFO("JsChildProcess Init called");
     ChildProcess::Init(info);
 
-    std::string srcPath(info->package);
+    std::string srcPath(info->moduleName);
     if (info->srcEntry.empty()) {
         HILOG_ERROR("ChildProcessStartInfo srcEntry is empty");
         return;
     }
 
-    srcPath.append("/");
-    srcPath.append(info->srcEntry);
+    srcPath.append("/").append(info->srcEntry);
     srcPath.erase(srcPath.rfind("."));
     srcPath.append(".abc");
     std::string moduleName(info->moduleName);

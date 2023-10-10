@@ -33,7 +33,6 @@ ohos_shared_library("childprocessmanager_napi") {
 
   external_deps = [
     "hilog:libhilog",
-    "init:libbegetutil",
     "napi:ace_napi",
   ]
 

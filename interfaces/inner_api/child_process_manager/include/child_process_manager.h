@@ -21,23 +21,24 @@
 
 #include "hap_module_info.h"
 #include "runtime.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
 class ChildProcessManager {
+    DECLARE_DELAYED_SINGLETON(ChildProcessManager);
 public:
-    ChildProcessManager() = default;
-    ~ChildProcessManager() = default;
-
-    static pid_t StartChildProcessBySelfFork(const std::string srcEntry);
-    static bool IsChildProcess();
+    pid_t StartChildProcessBySelfFork(const std::string srcEntry);
+    bool MultiProcessModelEnabled();
+    bool IsChildProcess();
 
 private:
-    static void HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo);
-    static bool GetHapModuleInfo(std::string bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo);
-    static std::unique_ptr<AbilityRuntime::Runtime> CreateRuntime(AppExecFwk::HapModuleInfo &hapModuleInfo);
+    void HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo);
+    bool GetHapModuleInfo(std::string bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo);
+    std::unique_ptr<AbilityRuntime::Runtime> CreateRuntime(AppExecFwk::HapModuleInfo &hapModuleInfo);
 
-    static bool isChildProcess_;
+    bool multiProcessModelEnabled_ = false;
+    bool isChildProcess_ = false;
 };
 } // namespace AAFwk
 } // namespace OHOS

@@ -25,7 +25,6 @@ struct ChildProcessStartInfo {
     std::string moduleName;
     std::string srcEntry;
     std::string hapPath;
-    std::string package;
     bool isEsModule = true;
 };
 }  // namespace AbilityRuntime
