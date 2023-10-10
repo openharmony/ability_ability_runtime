@@ -30,11 +30,14 @@ public:
     ~ChildProcessManager() = default;
 
     static pid_t StartChildProcessBySelfFork(const std::string srcEntry);
+    static bool IsChildProcess();
 
 private:
     static void HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo);
     static bool GetHapModuleInfo(std::string bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo);
     static std::unique_ptr<AbilityRuntime::Runtime> CreateRuntime(AppExecFwk::HapModuleInfo &hapModuleInfo);
+
+    static bool isChildProcess_;
 };
 } // namespace AAFwk
 } // namespace OHOS
