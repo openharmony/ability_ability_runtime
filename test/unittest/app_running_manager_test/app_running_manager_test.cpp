@@ -27,7 +27,7 @@ namespace AppExecFwk {
 namespace {
 constexpr int32_t DEBUGINFOS_SIZE = 0;
 constexpr int32_t ABILITYTOKENS_SIZE = 0;
-constexpr int32_t RECORD_ID = 1; 
+constexpr int32_t RECORD_ID = 1;
 constexpr int32_t RECORD_MAP_SIZE = 1;
 constexpr int32_t DEBUG_INFOS_SIZE = 1;
 constexpr int32_t ABILITY_TOKENS_SIZE = 1;
@@ -66,7 +66,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_SetAttachAppDebug_0100, TestSi
     int32_t recordId = RECORD_ID;
     std::string processName;
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
-    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));  
+    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));
     appRunningManager->SetAttachAppDebug(bundleName, true);
     for (const auto &item : appRunningManager->appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -92,7 +92,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_SetAttachAppDebug_0200, TestSi
     int32_t recordId = RECORD_ID;
     std::string processName;
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
-    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));  
+    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));
     appRunningManager->SetAttachAppDebug(bundleName, isAttachDebug);
     for (const auto &item : appRunningManager->appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -119,7 +119,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppDebugInfoByBundleName_01
     int32_t recordId = RECORD_ID;
     std::string processName;
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
-    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord)); 
+    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));
     appRunningManager->GetAppDebugInfosByBundleName(bundleName, isDetachDebug);
     EXPECT_EQ(appRunningManager->appRunningRecordMap_.size(), RECORD_MAP_SIZE);
     for (const auto &item : appRunningManager->appRunningRecordMap_) {
@@ -146,7 +146,7 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAbilityTokensByBundleName_0
     std::string processName;
     auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
     appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));
-    appRunningManager->GetAbilityTokensByBundleName(bundleName, abilityTokens); 
+    appRunningManager->GetAbilityTokensByBundleName(bundleName, abilityTokens);
     for (const auto &item : appRunningManager->appRunningRecordMap_) {
         const auto &appRecord = item.second;
         for (const auto &token : appRecord->GetAbilities()) {

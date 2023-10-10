@@ -38,7 +38,6 @@ public:
     void TearDown() override;
     std::string attachCmd_ = "attach";
     std::string detachCmd_ = "detach";
-
 };
 
 void AaCommandAttachTest::SetUpTestCase()
@@ -163,7 +162,7 @@ HWTEST_F(AaCommandAttachTest, Aa_Command_Attach_0300, TestSize.Level1)
     int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     AbilityManagerShellCommand cmd(argc, argv);
-    EXPECT_EQ(cmd.ExecCommand(), "error: unknown option.\n" + HELP_MSG_ATTACH_APP_DEBUG + "\n");
+    EXPECT_EQ(cmd.ExecCommand(), "fail: unknown option.\n" + HELP_MSG_ATTACH_APP_DEBUG + "\n");
 }
 
 /**
@@ -310,7 +309,7 @@ HWTEST_F(AaCommandAttachTest, Aa_Command_Detach_0300, TestSize.Level1)
     int32_t argc = sizeof(argv) / sizeof(argv[0]) - 1;
 
     AbilityManagerShellCommand cmd(argc, argv);
-    EXPECT_EQ(cmd.ExecCommand(), "error: unknown option.\n" + HELP_MSG_DETACH_APP_DEBUG + "\n");
+    EXPECT_EQ(cmd.ExecCommand(), "fail: unknown option.\n" + HELP_MSG_DETACH_APP_DEBUG + "\n");
 }
 
 /**

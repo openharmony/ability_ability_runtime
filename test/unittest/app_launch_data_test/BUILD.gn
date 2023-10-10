@@ -28,11 +28,11 @@ ohos_unittest("app_launch_data_test") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
-    "ability_runtime:app_manager",
     "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
