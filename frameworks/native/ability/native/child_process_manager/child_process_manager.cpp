@@ -43,6 +43,8 @@ namespace {
     constexpr pid_t INVALID_PID = -1;
 }
 
+bool ChildProcessManager::isChildProcess_ = false;
+
 pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntry)
 {
     HILOG_DEBUG("StartChildProcessBySelfFork called");
@@ -62,11 +64,17 @@ pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntr
     }
     if (pid == 0) {
         HILOG_DEBUG("Child process start");
+        isChildProcess_ = true;
         HandleChildProcess(srcEntry, hapModuleInfo);
         HILOG_DEBUG("Child process end");
         kill(getpid(), SIGQUIT);
     }
     return pid;
+}
+
+bool ChildProcessManager::IsChildProcess()
+{
+    return isChildProcess_;
 }
 
 void ChildProcessManager::HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo)

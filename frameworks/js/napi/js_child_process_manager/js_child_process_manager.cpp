@@ -61,19 +61,11 @@ private:
     napi_value OnStartChildProcess(napi_env env, size_t argc, napi_value* argv)
     {
         HILOG_INFO("%{public}s is called", __FUNCTION__);
-        
-        if (!multiProcessModelEnabled_) {
-            HILOG_ERROR("Starting child process is not enabled on this device");
-            ThrowError(env, AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED);
-            return CreateJsUndefined(env);
-        }
-
         if (argc < ARGC_TWO) {
             HILOG_ERROR("Not enough params");
-            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
-
         std::string srcEntry;
         int32_t startMode;
         if (!ConvertFromJsValue(env, argv[0], srcEntry) || srcEntry.length() == 0) {
@@ -86,10 +78,15 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
         }
-
         HILOG_DEBUG("StartMode: %{public}d", startMode);
+
         NapiAsyncTask::CompleteCallback complete = [srcEntry, startMode](napi_env env, NapiAsyncTask &task,
                                                                          int32_t status) {
+            AbilityErrorCode errCode = preCheck();
+            if (errCode != AbilityErrorCode::ERROR_OK) {
+                task.Reject(env, CreateJsError(env, errCode));
+                return;
+            }
             switch (startMode) {
                 case MODE_SELF_FORK: {
                     SelfForkProcess(env, task, srcEntry);
@@ -108,6 +105,19 @@ private:
         NapiAsyncTask::Schedule("JsChildProcessManager::OnStartChildProcess",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
+    }
+
+    AbilityErrorCode preCheck()
+    {
+        if (!multiProcessModelEnabled_) {
+            HILOG_ERROR("Starting child process is not supported");
+            return AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED;
+        }
+        if (ChildProcessManager::IsChildProcess()) {
+            HILOG_ERROR("Can not start child process in child process");
+            return AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED;
+        }
+        return AbilityErrorCode::ERROR_OK;
     }
 
     static void SelfForkProcess(napi_env env, NapiAsyncTask &task, std::string srcEntry)
