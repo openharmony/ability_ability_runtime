@@ -55,7 +55,8 @@ constexpr const char* ERROR_MSG_INVALID_URI_FLAG = "Invalid URI flag.";
 constexpr const char* ERROR_MSG_INVALID_URI_TYPE = "Invalid URI type, only support file Uri.";
 constexpr const char* ERROR_MSG_GRANT_URI_PERMISSION = "Sandbox application can not grant URI permission.";
 constexpr const char* ERROR_MSG_OPERATION_NOT_SUPPORTED = "Operation not supported.";
-constexpr const char* ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND = "The number of child process exceeds upper bound.";
+constexpr const char* ERROR_MSG_CHILD_PROCESS_NUMBER_EXCEEDS_UPPER_BOUND =
+    "The number of child process exceeds upper bound.";
 constexpr const char* ERROR_MSG_INVALID_CALLER = "The caller has been released.";
 constexpr const char* ERROR_MSG_NO_MISSION_ID = "The specified mission does not exist.";
 constexpr const char* ERROR_MSG_NO_MISSION_LISTENER = "Input error. The specified mission listener does not exist.";
