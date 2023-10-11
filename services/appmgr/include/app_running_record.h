@@ -794,7 +794,7 @@ private:
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
 
-    std::set<uint32_t> windowIds_;   
+    std::set<uint32_t> windowIds_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

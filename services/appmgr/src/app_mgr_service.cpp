@@ -806,6 +806,7 @@ void AppMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::strin
     }
 
     appMgrServiceInner_->InitFocusListener();
+    appMgrServiceInner_->InitWindowVisibilityChangedListener();
 }
 
 void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -821,6 +822,7 @@ void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::st
     }
 
     appMgrServiceInner_->FreeFocusListener();
+    appMgrServiceInner_->FreeWindowVisibilityChangedListener();
 }
 
 int32_t AppMgrService::OnGcStateChange(pid_t pid, int32_t state)
