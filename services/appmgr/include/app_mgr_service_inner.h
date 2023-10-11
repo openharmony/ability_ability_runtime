@@ -745,7 +745,7 @@ public:
      *
      * @return Is the status change completed.
      */
-    int32_t OnGcStateChange(pid_t pid, int32_t state);
+    int32_t ChangeAppGcState(pid_t pid, int32_t state);
 
     /**
      * @brief Register app debug listener.
@@ -830,6 +830,8 @@ private:
         std::string &processName) const;
 
     bool CheckIsolationMode(const HapModuleInfo &hapModuleInfo) const;
+
+    bool IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo) const;
 
     /**
      * StartAbility, load the ability that needed to be started(Start on the basis of the original process).
