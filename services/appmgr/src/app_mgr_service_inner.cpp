@@ -38,6 +38,7 @@
 #include "datetime_ex.h"
 #include "distributed_data_mgr.h"
 #include "event_report.h"
+#include "freeze_util.h"
 #include "hilog_wrapper.h"
 #include "hisysevent.h"
 #include "hitrace_meter.h"
@@ -56,10 +57,11 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "system_ability_definition.h"
+#include "time_util.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
 #ifdef APP_MGR_SERVICE_APPMS
-#include "socket_permission.h"
+#include "net_conn_client.h"
 #endif
 #include "application_info.h"
 #include "meminfo.h"
@@ -177,11 +179,17 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
     const std::shared_ptr<AAFwk::Want> &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    HILOG_INFO("LoadLifecycle: name:%{public}s.", abilityInfo->name.c_str());
     if (!CheckLoadAbilityConditions(token, abilityInfo, appInfo)) {
         HILOG_ERROR("CheckLoadAbilityConditions failed");
         return;
     }
-    HILOG_INFO("load,name:%{public}s.", abilityInfo->name.c_str());
+    if (abilityInfo->type == AbilityType::PAGE) {
+        AbilityRuntime::FreezeUtil::LifecycleFlow flow = {token, AbilityRuntime::FreezeUtil::TimeoutState::LOAD};
+        auto entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
+            "; AppMgrServiceInner::LoadAbility; the load lifecycle.";
+        AbilityRuntime::FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    }
 
     if (!appRunningManager_) {
         HILOG_ERROR("appRunningManager_ is nullptr");
@@ -208,6 +216,10 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         if (!appRecord) {
             HILOG_ERROR("CreateAppRunningRecord failed, appRecord is nullptr");
             return;
+        }
+        if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
+            appRecord->SetKeepAliveAppState(false, false);
+            HILOG_DEBUG("The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
         }
         SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD);
         auto callRecord = GetAppRunningRecordByAbilityToken(preToken);
@@ -301,6 +313,26 @@ void AppMgrServiceInner::MakeProcessName(
     processName = appInfo->bundleName;
 }
 
+bool AppMgrServiceInner::IsMainProcess(const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo) const
+{
+    if (!appInfo) {
+        return true;
+    }
+    if(hapModuleInfo.process.empty()) {
+        return true;
+    }
+    if(!appInfo->process.empty()) {
+        if(hapModuleInfo.process == appInfo->process) {
+            return true;
+        }
+    } else {
+        if(hapModuleInfo.process == appInfo->bundleName) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool AppMgrServiceInner::CheckIsolationMode(const HapModuleInfo &hapModuleInfo) const
 {
     IsolationMode isolationMode = hapModuleInfo.isolationMode;
@@ -358,6 +390,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
 
 void AppMgrServiceInner::AttachApplication(const pid_t pid, const sptr<IAppScheduler> &appScheduler)
 {
+    HILOG_INFO("LoadLifecycle: attach task excutes.");
     if (pid <= 0) {
         HILOG_ERROR("invalid pid:%{public}d", pid);
         return;
@@ -1780,10 +1813,10 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
             setAllowInternet = 1;
             allowInternet = 0;
     #ifdef APP_MGR_SERVICE_APPMS
-            auto ret = SetInternetPermission(bundleInfo.uid, 0);
+            auto ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInternetPermission(bundleInfo.uid, 0);
             HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
         } else {
-            auto ret = SetInternetPermission(bundleInfo.uid, 1);
+            auto ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().SetInternetPermission(bundleInfo.uid, 1);
             HILOG_DEBUG("SetInternetPermission, ret = %{public}d", ret);
             gids.push_back(NETSYS_SOCKET_GROUPID);
     #endif
@@ -1914,13 +1947,15 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
 
     PerfProfile::GetInstance().SetAppForkStartTime(GetTickCount());
     pid_t pid = 0;
+    HILOG_INFO("LoadLifecycle: Start process, bundleName: %{public}s.", bundleName.c_str());
     ErrCode errCode = remoteClientManager_->GetSpawnClient()->StartProcess(startMsg, pid);
     if (FAILED(errCode)) {
         HILOG_ERROR("failed to spawn new app process, errCode %{public}08x", errCode);
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
         return;
     }
-    HILOG_INFO("Start process success, pid is %{public}d, processName is %{public}s.", pid, processName.c_str());
+    HILOG_INFO("LoadLifecycle: Start process success, pid: %{public}d, processName: %{public}s.",
+        pid, processName.c_str());
     SetRunningSharedBundleList(bundleName, hspList);
     appRecord->GetPriorityObject()->SetPid(pid);
     appRecord->SetUid(startMsg.uid);
@@ -2852,6 +2887,10 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             HILOG_ERROR("start process [%{public}s] failed!", processName.c_str());
             return;
         }
+        if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
+            appRecord->SetKeepAliveAppState(false, false);
+            HILOG_DEBUG("The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
+        }
         auto wantPtr = std::make_shared<AAFwk::Want>(want);
         if (wantPtr != nullptr) {
             appRecord->SetCallerPid(wantPtr->GetIntParam(Want::PARAM_RESV_CALLER_PID, -1));
@@ -3155,8 +3194,14 @@ void AppMgrServiceInner::SendHiSysEvent(const int32_t innerEventId, const int64_
     HILOG_WARN("LIFECYCLE_TIMEOUT, eventName = %{public}s, uid = %{public}d, pid = %{public}d, \
         packageName = %{public}s, processName = %{public}s, msg = %{public}s",
         eventName.c_str(), uid, pid, packageName.c_str(), processName.c_str(), msg.c_str());
-    AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(
-        typeId, pid, eventName, packageName, msg);
+    AppfreezeManager::ParamInfo info = {
+        .typeId = typeId,
+        .pid = pid,
+        .eventName = eventName,
+        .bundleName = packageName,
+        .msg = msg
+    };
+    AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info);
 }
 
 int AppMgrServiceInner::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>> &tokens)
@@ -4015,6 +4060,8 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
     newfaultData.waitSaveState = faultData.waitSaveState;
     newfaultData.notifyApp = faultData.notifyApp;
     newfaultData.forceExit = faultData.forceExit;
+    newfaultData.token = faultData.token;
+    newfaultData.state = faultData.state;
     return newfaultData;
 }
 
@@ -4233,7 +4280,7 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::OnGcStateChange(pid_t pid, int32_t state)
+int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state)
 {
     HILOG_DEBUG("called.");
     auto appRecord = GetAppRunningRecordByPid(pid);
@@ -4241,7 +4288,7 @@ int32_t AppMgrServiceInner::OnGcStateChange(pid_t pid, int32_t state)
         HILOG_ERROR("no such appRecord");
         return ERR_INVALID_VALUE;
     }
-    return appRecord->OnGcStateChange(state);
+    return appRecord->ChangeAppGcState(state);
 }
 
 int32_t AppMgrServiceInner::RegisterAppDebugListener(const sptr<IAppDebugListener> &listener)

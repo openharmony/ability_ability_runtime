@@ -90,6 +90,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/recovery",
+    "${ability_runtime_path}/utils/global/time/include",
     "${ability_runtime_services_path}/abilitymgr/include",
     "${ability_runtime_napi_path}/inner/napi_common",
   ]
@@ -137,6 +138,7 @@ ohos_shared_library("appkit_native") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 
   external_deps = [
@@ -188,14 +190,10 @@ ohos_shared_library("appkit_native") {
     defines += [ "NWEB" ]
   }
 
-  if (purgeable_ashmem_enable) {
+  if (purgeable_ashmem_enable && defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_memmgr_plugin)) {
     defines += [ "IMAGE_PURGEABLE_PIXELMAP" ]
-    if (defined(global_parts_info) &&
-        defined(global_parts_info.resourceschedule_memmgr_plugin)) {
-      external_deps += [ "memmgr_plugin:libpurgeablemem_plugin" ]
-    } else {
-      external_deps += [ "memory_utils:libpurgeablemem" ]
-    }
+    external_deps += [ "memmgr_plugin:libpurgeablemem_plugin" ]
   }
 
   innerapi_tags = [ "platformsdk" ]

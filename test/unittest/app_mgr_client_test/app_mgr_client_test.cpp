@@ -679,6 +679,23 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyAppFaultBySA_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AppMgrClient_ChangeAppGcState_001
+ * @tc.desc: ChangeAppGcState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrClientTest, AppMgrClient_ChangeAppGcState_001, TestSize.Level1)
+{
+    auto appMgrClient = std::make_unique<AppMgrClient>();
+    EXPECT_NE(appMgrClient, nullptr);
+    auto result = appMgrClient->ConnectAppMgrService();
+    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
+    pid_t pid = 0;
+    int32_t state = 0;
+    auto resultCode = appMgrClient->ChangeAppGcState(pid, state);
+    EXPECT_EQ(resultCode, NO_ERROR);
+}
+
+/**
  * @tc.name: AppMgrClient_RegisterAppDebugListener_001
  * @tc.desc: Register app debug listener, check nullptr listener.
  * @tc.type: FUNC
