@@ -43,6 +43,7 @@
 #include "distributed_client.h"
 #include "dlp_utils.h"
 #include "errors.h"
+#include "freeze_util.h"
 #include "hilog_wrapper.h"
 #include "hisysevent.h"
 #include "hitrace_meter.h"
@@ -90,6 +91,7 @@ using OHOS::AppExecFwk::ElementName;
 using OHOS::Security::AccessToken::AccessTokenKit;
 
 namespace OHOS {
+using AbilityRuntime::FreezeUtil;
 namespace AAFwk {
 namespace {
 #define CHECK_CALLER_IS_SYSTEM_APP                                                             \
@@ -181,7 +183,6 @@ const int32_t ACCOUNT_MGR_SERVICE_UID = 3058;
 const int32_t BROKER_UID = 5557;
 const int32_t BROKER_RESERVE_UID = 5005;
 const int32_t DMS_UID = 5522;
-const int32_t WMS_UID = 4606;
 const int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
 const std::string BUNDLE_NAME_KEY = "bundleName";
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
@@ -2174,7 +2175,7 @@ void AbilityManagerService::StopSwitchUserDialog()
         return;
     }
 
-    if (userController_ == nullptr || userController_->GetFreezingLastUserId() == DEFAULT_INVAL_VALUE) {
+    if (userController_ == nullptr || userController_->GetFreezingNewUserId() == DEFAULT_INVAL_VALUE) {
         HILOG_ERROR("Get last userId error.");
         return;
     }
@@ -2191,8 +2192,8 @@ void AbilityManagerService::StopSwitchUserDialog()
     }
 
     Want stopWant = sysDialog->GetSwitchUserDialogWant();
-    StopSwitchUserDialogInner(stopWant, userController_->GetFreezingLastUserId());
-    userController_->SetFreezingLastUserId(DEFAULT_INVAL_VALUE);
+    StopSwitchUserDialogInner(stopWant, userController_->GetFreezingNewUserId());
+    userController_->SetFreezingNewUserId(DEFAULT_INVAL_VALUE);
     return;
 }
 
@@ -2213,9 +2214,8 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
-    int32_t stopUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : lastUserId;
-    result = CheckOptExtensionAbility(want, abilityRequest, stopUserId,
-        AppExecFwk::ExtensionAbilityType::SERVICE);
+    auto stopUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : lastUserId;
+    result = CheckOptExtensionAbility(want, abilityRequest, stopUserId, AppExecFwk::ExtensionAbilityType::SERVICE);
     if (result != ERR_OK) {
         HILOG_ERROR("Check extensionAbility type error.");
         eventInfo.errCode = result;
@@ -2224,7 +2224,7 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
     }
 
     auto connectManager = GetConnectManagerByUserId(stopUserId);
-    if (!connectManager) {
+    if (connectManager == nullptr) {
         HILOG_ERROR("ConnectManager is nullptr. userId:%{public}d", stopUserId);
         eventInfo.errCode = ERR_INVALID_VALUE;
         EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
@@ -2236,7 +2236,6 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
         HILOG_ERROR("EventInfo errCode is %{public}d", eventInfo.errCode);
         EventReport::SendExtensionEvent(EventName::STOP_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
     }
-    return;
 }
 
 int AbilityManagerService::MoveAbilityToBackground(const sptr<IRemoteObject> &token)
@@ -3808,7 +3807,7 @@ int AbilityManagerService::AttachAbilityThread(
     const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Attach ability thread.");
+    HILOG_INFO("LoadLifecycle: Attach ability thread.");
     CHECK_POINTER_AND_RETURN(scheduler, ERR_INVALID_VALUE);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && !VerificationAllToken(token)) {
         return ERR_INVALID_VALUE;
@@ -3824,39 +3823,39 @@ int AbilityManagerService::AttachAbilityThread(
     auto type = abilityInfo.type;
     // force timeout ability for test
     if (IsNeedTimeoutForTest(abilityInfo.name, AbilityRecord::ConvertAbilityState(AbilityState::INITIAL))) {
-        HILOG_WARN("force timeout ability for test, state:INITIAL, ability: %{public}s",
-            abilityInfo.name.c_str());
+        HILOG_WARN("force timeout ability for test, state:INITIAL, ability: %{public}s", abilityInfo.name.c_str());
         return ERR_OK;
     }
-    int returnCode = -1;
     if (type == AppExecFwk::AbilityType::SERVICE || type == AppExecFwk::AbilityType::EXTENSION) {
         auto connectManager = GetConnectManagerByUserId(userId);
         if (!connectManager) {
             HILOG_ERROR("connectManager is nullptr. userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
         }
-        returnCode = connectManager->AttachAbilityThreadLocked(scheduler, token);
+        return connectManager->AttachAbilityThreadLocked(scheduler, token);
     } else if (type == AppExecFwk::AbilityType::DATA) {
         auto dataAbilityManager = GetDataAbilityManagerByUserId(userId);
         if (!dataAbilityManager) {
             HILOG_ERROR("dataAbilityManager is Null. userId=%{public}d", userId);
             return ERR_INVALID_VALUE;
         }
-        returnCode = dataAbilityManager->AttachAbilityThread(scheduler, token);
+        return dataAbilityManager->AttachAbilityThread(scheduler, token);
     } else {
+        FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
+        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) + "; AbilityManagerService::AttachAbilityThread;" +
+            " the end of load lifecycle.";
+        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-            returnCode = uiAbilityLifecycleManager_->AttachAbilityThread(scheduler, token);
-        } else {
-            int32_t ownerMissionUserId = abilityRecord->GetOwnerMissionUserId();
-            auto missionListManager = GetListManagerByUserId(ownerMissionUserId);
-            if (!missionListManager) {
-                HILOG_ERROR("missionListManager is Null. userId=%{public}d", ownerMissionUserId);
-                return ERR_INVALID_VALUE;
-            }
-            returnCode = missionListManager->AttachAbilityThread(scheduler, token);
+            return uiAbilityLifecycleManager_->AttachAbilityThread(scheduler, token);
         }
+        int32_t ownerMissionUserId = abilityRecord->GetOwnerMissionUserId();
+        auto missionListManager = GetListManagerByUserId(ownerMissionUserId);
+        if (!missionListManager) {
+            HILOG_ERROR("missionListManager is Null. userId=%{public}d", ownerMissionUserId);
+            return ERR_INVALID_VALUE;
+        }
+        return missionListManager->AttachAbilityThread(scheduler, token);
     }
-    return returnCode;
 }
 
 void AbilityManagerService::DumpFuncInit()
@@ -4341,7 +4340,7 @@ void AbilityManagerService::DumpSysState(
 int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Ability transition done come, state:%{public}d.", state);
+    HILOG_INFO("Lifecycle: state:%{public}d.", state);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && !VerificationAllToken(token)) {
         return ERR_INVALID_VALUE;
     }
@@ -4352,7 +4351,8 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     }
 
     auto abilityInfo = abilityRecord->GetAbilityInfo();
-    HILOG_DEBUG("Ability transition done come, state:%{public}d, name:%{public}s", state, abilityInfo.name.c_str());
+    HILOG_INFO("Lifecycle: bundle: %{public}s, ability: %{public}s.", abilityInfo.bundleName.c_str(),
+        abilityInfo.name.c_str());
     auto type = abilityInfo.type;
     auto userId = abilityRecord->GetApplicationInfo().uid / BASE_USER_RANGE;
     // force timeout ability for test
@@ -4382,6 +4382,20 @@ int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &toke
         }
         return dataAbilityManager->AbilityTransitionDone(token, state);
     }
+
+    if (targetState == AbilityState::BACKGROUND) {
+        FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::BACKGROUND };
+        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
+            "; AbilityManagerService::AbilityTransitionDone; the end of background lifecycle.";
+        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    } else if (targetState != AbilityState::INITIAL) {
+        FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::FOREGROUND };
+        auto entry = std::to_string(AbilityUtil::SystemTimeMillis()) +
+            "; AbilityManagerService::AbilityTransitionDone; the end of foreground lifecycle.";
+        entry += " the end of foreground lifecycle.";
+        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    }
+
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         return uiAbilityLifecycleManager_->AbilityTransactionDone(token, state, saveData);
     } else {
@@ -6134,11 +6148,51 @@ void AbilityManagerService::StartSwitchUserDialog()
     }
 
     Want dialogWant = sysDialog->GetSwitchUserDialogWant();
-    userController_->SetFreezingLastUserId(userController_->GetCurrentUserId());
-    auto result =
-        StartExtensionAbility(dialogWant, nullptr, DEFAULT_INVAL_VALUE, AppExecFwk::ExtensionAbilityType::SERVICE);
+    StartSwitchUserDialogInner(dialogWant, userController_->GetFreezingNewUserId());
+}
+
+
+void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t lastUserId)
+{
+    HILOG_DEBUG("Start switch user dialog inner come");
+    EventInfo eventInfo = BuildEventInfo(want, lastUserId);
+    eventInfo.extensionType = static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SERVICE);
+    EventReport::SendExtensionEvent(EventName::START_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
+    AbilityRequest abilityRequest;
+    auto result = GenerateExtensionAbilityRequest(want, abilityRequest, nullptr, lastUserId);
     if (result != ERR_OK) {
-        HILOG_ERROR("Start extensionAbility error %{public}d.", result);
+        HILOG_ERROR("Generate ability request local error.");
+        eventInfo.errCode = result;
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        return;
+    }
+
+    auto abilityInfo = abilityRequest.abilityInfo;
+    auto startUserId = abilityInfo.applicationInfo.singleton ? U0_USER_ID : lastUserId;
+    result = CheckOptExtensionAbility(want, abilityRequest, startUserId, AppExecFwk::ExtensionAbilityType::SERVICE);
+    if (result != ERR_OK) {
+        HILOG_ERROR("Check extensionAbility type error.");
+        eventInfo.errCode = result;
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+        return;
+    }
+
+    auto connectManager = GetConnectManagerByUserId(startUserId);
+    if (connectManager == nullptr) {
+        InitConnectManager(startUserId, false);
+        connectManager = GetConnectManagerByUserId(startUserId);
+        if (connectManager == nullptr) {
+            HILOG_ERROR("ConnectManager is nullptr. userId=%{public}d", startUserId);
+            eventInfo.errCode = ERR_INVALID_VALUE;
+            EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
+            return;
+        }
+    }
+
+    eventInfo.errCode = connectManager->StartAbility(abilityRequest);
+    if (eventInfo.errCode != ERR_OK) {
+        HILOG_ERROR("EventInfo errCode is %{public}d", eventInfo.errCode);
+        EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
     }
 }
 
@@ -8414,14 +8468,17 @@ int32_t AbilityManagerService::DetachAppDebug(const std::string &bundleName)
 
 bool AbilityManagerService::IsAbilityControllerStart(const Want &want)
 {
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    if (!isSaCall || (callingUid != BROKER_UID && callingUid != BROKER_RESERVE_UID &&
-        callingUid != WMS_UID)) {
-        HILOG_ERROR("The interface only support for broker and WMS");
-        return true;
+    bool isSCBCall = CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD, U0_USER_ID);
+    if (isSCBCall) {
+        return IsAbilityControllerStart(want, want.GetBundle());
     }
-    return IsAbilityControllerStart(want, want.GetBundle());
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    bool isBrokerCall = (callingUid == BROKER_UID || callingUid == BROKER_RESERVE_UID);
+    if (isBrokerCall) {
+        return IsAbilityControllerStart(want, want.GetBundle());
+    }
+    HILOG_ERROR("The interface only support for broker and WMS");
+    return true;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
