@@ -1455,7 +1455,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, AttachAppDebug_001, TestSize.Level1)
 
 /**
  * @tc.name: DetachAppDebug_001
- * @tc.desc: Test the state of DetachAppDebug, 
+ * @tc.desc: Test the state of DetachAppDebug
  * @tc.type: FUNC
  */
 HWTEST_F(AbilityManagerServiceFirstTest, DetachAppDebug_001, TestSize.Level1)
