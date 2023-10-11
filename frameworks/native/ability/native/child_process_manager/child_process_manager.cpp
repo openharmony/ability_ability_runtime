@@ -50,8 +50,6 @@ ChildProcessManager::ChildProcessManager()
     multiProcessModelEnabled_ = OHOS::system::GetBoolParameter(SYS_PARAM_MULTI_PROCESS_MODEL, false);
 }
 
-ChildProcessManager::~ChildProcessManager() = default;
-
 pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry)
 {
     HILOG_DEBUG("StartChildProcessBySelfFork called");
@@ -159,7 +157,7 @@ bool ChildProcessManager::GetHapModuleInfo(const std::string &bundleName,
     if (bundleInfo.hapModuleInfos.empty()) {
         return false;
     }
-    HILOG_DEBUG("hapModueInfos size: %{public}d", bundleInfo.hapModuleInfos.size());
+    HILOG_DEBUG("hapModueInfos size: %{public}zu", bundleInfo.hapModuleInfos.size());
     bool result = false;
     const bool moduleNameExist = moduleName.length() > 0;
     for (auto info : bundleInfo.hapModuleInfos) {
