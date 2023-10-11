@@ -86,6 +86,7 @@ constexpr int KILL_PROCESS_TIMEOUT_MICRO_SECONDS = 1000;
 constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
 // delay register focus listener to wms
 constexpr int REGISTER_FOCUS_DELAY = 5000;
+constexpr int REGISTER_VISIBILITY_DELAY = 5000;
 const std::string CLASS_NAME = "ohos.app.MainThread";
 const std::string FUNC_NAME = "main";
 const std::string RENDER_PARAM = "invalidparam";
@@ -163,7 +164,6 @@ AppMgrServiceInner::AppMgrServiceInner()
 void AppMgrServiceInner::Init()
 {
     InitGlobalConfiguration();
-    InitWindowVisibilityChangedListener();
     AddWatchParameter();
     supportIsolationMode_ = OHOS::system::GetParameter(SUPPORT_ISOLATION_MODE, "false");
     deviceType_ = OHOS::system::GetDeviceType();
@@ -1325,7 +1325,6 @@ void AppMgrServiceInner::OnStop()
 
     appRunningManager_->ClearAppRunningRecordMap();
     CloseAppSpawnConnection();
-    FreeWindowVisibilityChangedListener();
 }
 
 ErrCode AppMgrServiceInner::OpenAppSpawnConnection()
@@ -3736,19 +3735,32 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
 
 void AppMgrServiceInner::InitWindowVisibilityChangedListener()
 {
-    HILOG_DEBUG("Called.");
+    HILOG_DEBUG("Begin.");
     if (windowVisibilityChangedListener_ != nullptr) {
         HILOG_WARN("Visibility listener has been initiated.");
         return;
     }
-
     windowVisibilityChangedListener_ =
         new (std::nothrow) WindowVisibilityChangedListener(weak_from_this(), taskHandler_);
-    if (windowVisibilityChangedListener_ == nullptr) {
-        HILOG_ERROR("Window visibility changed listener is nullptr.");
+    auto registerTask = [innerService = weak_from_this()] () {
+        auto inner = innerService.lock();
+        if (inner == nullptr) {
+            HILOG_ERROR("Service inner is nullptr.");
+            return;
+        }
+        if (inner->windowVisibilityChangedListener_ == nullptr) {
+            HILOG_ERROR("Window visibility changed listener is nullptr.");
+            return;
+        }
+        WindowManager::GetInstance().RegisterVisibilityChangedListener(inner->windowVisibilityChangedListener_);
+    };
+
+    if (taskHandler_ == nullptr) {
+        HILOG_ERROR("Task handler is nullptr.");
         return;
     }
-    WindowManager::GetInstance().RegisterVisibilityChangedListener(windowVisibilityChangedListener_);
+    taskHandler_->SubmitTask(registerTask, "RegisterVisibilityListener.", REGISTER_VISIBILITY_DELAY);
+    HILOG_DEBUG("End.");
 }
 
 void AppMgrServiceInner::FreeWindowVisibilityChangedListener()

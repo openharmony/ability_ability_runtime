@@ -310,14 +310,15 @@ bool ModuleRunningRecord::IsAbilitiesBackgrounded()
             HILOG_ERROR("Ability is nullptr.");
             continue;
         }
-        if (ability->GetAbilityInfo()->type != AbilityType::PAGE) {
+        const auto &abilityInfo = ability->GetAbilityInfo();
+        if (abilityInfo != nullptr && abilityInfo->type != AbilityType::PAGE) {
             continue;
         }
 
         const auto &state = ability->GetState();
-        if (!(state == AbilityState::ABILITY_STATE_BACKGROUND ||
-            state == AbilityState::ABILITY_STATE_TERMINATED ||
-            state == AbilityState::ABILITY_STATE_END)) {
+        if (state != AbilityState::ABILITY_STATE_BACKGROUND &&
+            state != AbilityState::ABILITY_STATE_TERMINATED &&
+            state != AbilityState::ABILITY_STATE_END) {
             return false;
         }
     }

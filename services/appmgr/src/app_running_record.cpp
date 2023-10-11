@@ -1612,6 +1612,9 @@ void AppRunningRecord::OnWindowVisibilityChanged(
             HILOG_ERROR("Window visibility info is nullptr.");
             continue;
         }
+        if (info->pid_ != GetPriorityObject()->GetPid()) {
+            continue;
+        }
         auto iter = windowIds_.find(info->windowId_);
         if (iter != windowIds_.end() && !info->isVisible_) {
             windowIds_.erase(iter);
