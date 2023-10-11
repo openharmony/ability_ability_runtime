@@ -119,7 +119,7 @@ private:
         return AbilityErrorCode::ERROR_OK;
     }
 
-    void SelfForkProcess(napi_env env, NapiAsyncTask &task, std::string srcEntry)
+    void SelfForkProcess(napi_env env, NapiAsyncTask &task, const std::string &srcEntry)
     {
         auto mgr = DelayedSingleton<ChildProcessManager>::GetInstance();
         if (mgr == nullptr) {

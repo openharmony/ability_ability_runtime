@@ -52,14 +52,15 @@ ChildProcessManager::ChildProcessManager()
 
 ChildProcessManager::~ChildProcessManager() = default;
 
-pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string srcEntry)
+pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry)
 {
     HILOG_DEBUG("StartChildProcessBySelfFork called");
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
         AbilityRuntime::ApplicationContext::GetInstance();
     std::string bundleName = applicationContext->GetBundleName();
+    std::string moduleName = GetModuleNameFromSrcEntry(srcEntry);
     AppExecFwk::HapModuleInfo hapModuleInfo;
-    if (!GetHapModuleInfo(bundleName, hapModuleInfo)) {
+    if (!GetHapModuleInfo(bundleName, moduleName, hapModuleInfo)) {
         HILOG_ERROR("GetHapModuleInfo failed");
         return INVALID_PID;
     }
@@ -89,7 +90,7 @@ bool ChildProcessManager::IsChildProcess()
     return isChildProcess_;
 }
 
-void ChildProcessManager::HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo)
+void ChildProcessManager::HandleChildProcess(const std::string &srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
     eventRunner->Stop();
@@ -113,7 +114,21 @@ void ChildProcessManager::HandleChildProcess(const std::string srcEntry, AppExec
     process->OnStart();
 }
 
-bool ChildProcessManager::GetHapModuleInfo(std::string bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo)
+std::string ChildProcessManager::GetModuleNameFromSrcEntry(const std::string &srcEntry)
+{
+    std::string::size_type iPos = srcEntry.find_first_of('/');
+    if (iPos == std::string::npos) {
+        return "";
+    }
+    std::string moduleName = srcEntry.substr(0, iPos);
+    if (moduleName == ".") {
+        return "";
+    }
+    return moduleName;
+}
+
+bool ChildProcessManager::GetHapModuleInfo(const std::string &bundleName,
+                                           const std::string &moduleName, AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     auto bundleObj =
         DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
@@ -141,16 +156,23 @@ bool ChildProcessManager::GetHapModuleInfo(std::string bundleName, AppExecFwk::H
         HILOG_ERROR("GetBundleInfo failed!");
         return false;
     }
-
+    if (bundleInfo.hapModuleInfos.empty()) {
+        return false;
+    }
+    HILOG_DEBUG("hapModueInfos size: %{public}d", bundleInfo.hapModuleInfos.size());
     bool result = false;
-    if (!bundleInfo.hapModuleInfos.empty()) {
-        HILOG_DEBUG("hapModueInfos size: %{public}d", bundleInfo.hapModuleInfos.size());
-        for (auto info : bundleInfo.hapModuleInfos) {
-            if (info.moduleType == AppExecFwk::ModuleType::ENTRY) {
+    const bool moduleNameExist = moduleName.length() > 0;
+    for (auto info : bundleInfo.hapModuleInfos) {
+        if (moduleNameExist) {
+            if (info.moduleName == moduleName) {
                 result = true;
                 hapModuleInfo = info;
                 break;
             }
+        } else if (info.moduleType == AppExecFwk::ModuleType::ENTRY) {
+            result = true;
+            hapModuleInfo = info;
+            break;
         }
     }
     return result;

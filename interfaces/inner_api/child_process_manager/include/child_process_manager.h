@@ -28,13 +28,15 @@ namespace AbilityRuntime {
 class ChildProcessManager {
     DECLARE_DELAYED_SINGLETON(ChildProcessManager);
 public:
-    pid_t StartChildProcessBySelfFork(const std::string srcEntry);
+    pid_t StartChildProcessBySelfFork(const std::string &srcEntry);
     bool MultiProcessModelEnabled();
     bool IsChildProcess();
 
 private:
-    void HandleChildProcess(const std::string srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo);
-    bool GetHapModuleInfo(std::string bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo);
+    void HandleChildProcess(const std::string &srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo);
+    std::string GetModuleNameFromSrcEntry(const std::string &srcEntry);
+    bool GetHapModuleInfo(const std::string &bundleName,
+                          const std::string &moduleName, AppExecFwk::HapModuleInfo &hapModuleInfo);
     std::unique_ptr<AbilityRuntime::Runtime> CreateRuntime(AppExecFwk::HapModuleInfo &hapModuleInfo);
 
     bool multiProcessModelEnabled_ = false;
