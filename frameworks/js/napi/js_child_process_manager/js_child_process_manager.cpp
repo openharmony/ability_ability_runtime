@@ -79,8 +79,8 @@ private:
         }
         HILOG_DEBUG("StartMode: %{public}d", startMode);
 
-        NapiAsyncTask::CompleteCallback complete = [this, srcEntry, startMode](napi_env env, NapiAsyncTask &task,
-                                                                               int32_t status) {
+        NapiAsyncTask::CompleteCallback complete = [srcEntry, startMode](napi_env env, NapiAsyncTask &task,
+                                                                         int32_t status) {
             switch (startMode) {
                 case MODE_SELF_FORK: {
                     SelfForkProcess(env, task, srcEntry);
@@ -103,31 +103,21 @@ private:
 
     AbilityErrorCode preCheck()
     {
-        auto mgr = DelayedSingleton<ChildProcessManager>::GetInstance();
-        if (mgr == nullptr) {
-            HILOG_ERROR("Failed to get ChildProcessManager instance.");
-            return AbilityErrorCode::ERROR_CODE_INNER;
-        }
-        if (!mgr->MultiProcessModelEnabled()) {
+        auto mgr = ChildProcessManager::GetInstance();
+        if (!mgr.MultiProcessModelEnabled()) {
             HILOG_ERROR("Starting child process is not supported");
             return AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED;
         }
-        if (mgr->IsChildProcess()) {
-            HILOG_ERROR("Staring child process in child process is not supported");
+        if (mgr.IsChildProcess()) {
+            HILOG_ERROR("Starting child process in child process is not supported");
             return AbilityErrorCode::ERROR_CODE_OPERATION_NOT_SUPPORTED;
         }
         return AbilityErrorCode::ERROR_OK;
     }
 
-    void SelfForkProcess(napi_env env, NapiAsyncTask &task, const std::string &srcEntry)
+    static void SelfForkProcess(napi_env env, NapiAsyncTask &task, const std::string &srcEntry)
     {
-        auto mgr = DelayedSingleton<ChildProcessManager>::GetInstance();
-        if (mgr == nullptr) {
-            HILOG_ERROR("Failed to get ChildProcessManager instance.");
-            task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-            return;
-        }
-        pid_t pid = mgr->StartChildProcessBySelfFork(srcEntry);
+        pid_t pid = ChildProcessManager::GetInstance().StartChildProcessBySelfFork(srcEntry);
         if (pid >= 0) {
             task.ResolveWithNoError(env, CreateJsValue(env, pid));
         } else {
