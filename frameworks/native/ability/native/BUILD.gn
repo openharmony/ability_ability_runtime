@@ -186,6 +186,7 @@ ohos_shared_library("abilitykit_utils") {
 ohos_shared_library("abilitykit_native") {
   include_dirs = [
     "${ability_base_kits_path}/extractortool/include",
+    "${ability_runtime_path}/utils/global/time/include",
     "${relational_store_napi_path}/rdb/include",
     "${relational_store_napi_path}/common/include",
     "${relational_store_napi_path}/dataability/include",
@@ -249,6 +250,7 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/appkit:app_context",
     "${ability_runtime_native_path}/appkit:app_context_utils",
     "${ability_runtime_native_path}/appkit:appkit_delegator",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
     "${ability_runtime_services_path}/common:event_report",
   ]
 
@@ -285,14 +287,10 @@ ohos_shared_library("abilitykit_native") {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
 
-  if (purgeable_ashmem_enable) {
+  if (purgeable_ashmem_enable && defined(global_parts_info) &&
+      defined(global_parts_info.resourceschedule_memmgr_plugin)) {
     defines += [ "IMAGE_PURGEABLE_PIXELMAP" ]
-    if (defined(global_parts_info) &&
-        defined(global_parts_info.resourceschedule_memmgr_plugin)) {
-      external_deps += [ "memmgr_plugin:libpurgeablemem_plugin" ]
-    } else {
-      external_deps += [ "memory_utils:libpurgeablemem" ]
-    }
+    external_deps += [ "memmgr_plugin:libpurgeablemem_plugin" ]
   }
 
   if (efficiency_manager) {
@@ -408,20 +406,25 @@ ohos_shared_library("extensionkit_native") {
 }
 
 ohos_shared_library("ability_thread") {
-  include_dirs =
-      [ "${ability_runtime_path}/interfaces/kits/native/ability/native" ]
+  include_dirs = [
+    "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/utils/global/time/include",
+  ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/ability_thread.cpp",
+    "${ability_runtime_native_path}/ability/native/extension_ability_thread.cpp",
     "${ability_runtime_native_path}/ability/native/fa_ability_thread.cpp",
   ]
 
   deps = [
     ":abilitykit_native",
+    ":extensionkit_native",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/dataobs_manager:dataobs_manager",
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_native_path}/appkit:app_context",
+    "${ability_runtime_path}/utils/global/freeze:freeze_util",
   ]
 
   external_deps = [
