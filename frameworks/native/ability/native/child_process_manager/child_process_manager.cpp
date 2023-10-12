@@ -41,13 +41,19 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-    constexpr pid_t INVALID_PID = -1;
-    const std::string SYS_PARAM_MULTI_PROCESS_MODEL = "persist.sys.multi_process_model";
+constexpr pid_t INVALID_PID = -1;
+const std::string SYS_PARAM_MULTI_PROCESS_MODEL = "persist.sys.multi_process_model";
 }
 
 ChildProcessManager::ChildProcessManager()
 {
+    HILOG_DEBUG("ChildProcessManager constructor called");
     multiProcessModelEnabled_ = OHOS::system::GetBoolParameter(SYS_PARAM_MULTI_PROCESS_MODEL, false);
+}
+
+ChildProcessManager::~ChildProcessManager()
+{
+    HILOG_DEBUG("ChildProcessManager deconstructor called");
 }
 
 pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry)
@@ -73,7 +79,7 @@ pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEnt
         isChildProcess_ = true;
         HandleChildProcess(srcEntry, hapModuleInfo);
         HILOG_DEBUG("Child process end");
-        kill(getpid(), SIGQUIT);
+        exit(0);
     }
     return pid;
 }
