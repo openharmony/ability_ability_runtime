@@ -1613,7 +1613,7 @@ int AbilityManagerProxy::ForceTimeoutForTest(const std::string &abilityName, con
 }
 #endif
 
-int AbilityManagerProxy::ClearUpApplicationData(const std::string &bundleName)
+int AbilityManagerProxy::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1624,6 +1624,10 @@ int AbilityManagerProxy::ClearUpApplicationData(const std::string &bundleName)
     }
     if (!data.WriteString16(Str8ToStr16(bundleName))) {
         HILOG_ERROR("bundleName write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOG_ERROR("userId write failed.");
         return ERR_INVALID_VALUE;
     }
     int error = SendRequest(AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA, data, reply, option);
