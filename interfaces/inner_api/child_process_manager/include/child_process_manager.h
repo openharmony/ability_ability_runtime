@@ -31,7 +31,7 @@ public:
         static ChildProcessManager instance;
         return instance;
     }
-    ~ChildProcessManager() = default;
+    ~ChildProcessManager();
     
     pid_t StartChildProcessBySelfFork(const std::string &srcEntry);
     bool MultiProcessModelEnabled();
@@ -48,6 +48,8 @@ private:
 
     bool multiProcessModelEnabled_ = false;
     bool isChildProcess_ = false;
+    
+    DISALLOW_COPY_AND_MOVE(ChildProcessManager);
 };
 } // namespace AAFwk
 } // namespace OHOS
