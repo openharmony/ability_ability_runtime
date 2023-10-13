@@ -28,24 +28,24 @@ class JsAbilityAutoStartupManager {
 public:
     JsAbilityAutoStartupManager() = default;
     ~JsAbilityAutoStartupManager() = default;
-    static void Finalizer(NativeEngine *engine, void *data, void *hint);
-    static NativeValue *RegisterAutoStartupCallback(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *UnregisterAutoStartupCallback(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *SetApplicationAutoStartup(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *CancelApplicationAutoStartup(NativeEngine *engine, NativeCallbackInfo *info);
-    static NativeValue *QueryAllAutoStartupApplications(NativeEngine *engine, NativeCallbackInfo *info);
+    static void Finalizer(napi_env env, void *data, void *hint);
+    static napi_value RegisterAutoStartupCallback(napi_env env, napi_callback_info info);
+    static napi_value UnregisterAutoStartupCallback(napi_env env, napi_callback_info info);
+    static napi_value SetApplicationAutoStartup(napi_env env, napi_callback_info info);
+    static napi_value CancelApplicationAutoStartup(napi_env env, napi_callback_info info);
+    static napi_value QueryAllAutoStartupApplications(napi_env env, napi_callback_info info);
 
 private:
-    NativeValue *OnRegisterAutoStartupCallback(NativeEngine &engine, const NativeCallbackInfo &info);
-    NativeValue *OnUnregisterAutoStartupCallback(NativeEngine &engine, const NativeCallbackInfo &info);
-    NativeValue *OnSetApplicationAutoStartup(NativeEngine &engine, const NativeCallbackInfo &info);
-    NativeValue *OnCancelApplicationAutoStartup(NativeEngine &engine, const NativeCallbackInfo &info);
-    NativeValue *OnQueryAllAutoStartupApplications(NativeEngine &engine, const NativeCallbackInfo &info);
+    napi_value OnRegisterAutoStartupCallback(napi_env env, NapiCallbackInfo &info);
+    napi_value OnUnregisterAutoStartupCallback(napi_env env, NapiCallbackInfo &info);
+    napi_value OnSetApplicationAutoStartup(napi_env env, NapiCallbackInfo &info);
+    napi_value OnCancelApplicationAutoStartup(napi_env env, NapiCallbackInfo &info);
+    napi_value OnQueryAllAutoStartupApplications(napi_env env, const NapiCallbackInfo &info);
     bool CheckCallerIsSystemApp();
 
     sptr<JsAbilityAutoStartupCallBack> jsAutoStartupCallback_;
 };
-NativeValue *JsAbilityAutoStartupManagerInit(NativeEngine *engine, NativeValue *exportObj);
+napi_value JsAbilityAutoStartupManagerInit(napi_env env, napi_value exportObj);
 } // namespace AbilityRuntime
 } // namespace OHOS
 

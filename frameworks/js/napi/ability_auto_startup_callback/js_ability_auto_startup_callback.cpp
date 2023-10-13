@@ -26,7 +26,7 @@ namespace {
 const std::string METHOD_ON = "onAutoStartupOn";
 const std::string METHOD_OFF = "onAutoStartupOff";
 } // namespace
-JsAbilityAutoStartupCallBack::JsAbilityAutoStartupCallBack(NativeEngine &engine) : engine_(engine) {}
+JsAbilityAutoStartupCallBack::JsAbilityAutoStartupCallBack(napi_env env) : env_(env) {}
 
 JsAbilityAutoStartupCallBack::~JsAbilityAutoStartupCallBack() {}
 
@@ -42,35 +42,36 @@ void JsAbilityAutoStartupCallBack::OnAutoStartupOff(const AutoStartupInfo &info)
     JSCallFunction(info, METHOD_OFF);
 }
 
-void JsAbilityAutoStartupCallBack::Register(NativeValue *jsCallback)
+void JsAbilityAutoStartupCallBack::Register(napi_value value)
 {
     HILOG_DEBUG("Called.");
     std::lock_guard<std::mutex> lock(mutexlock);
-    if (jsCallback == nullptr) {
-        HILOG_ERROR("jsCallback is nullptr.");
-        return;
-    }
-
     for (auto callback : callbacks_) {
-        if (IsJsCallbackEquals(callback, jsCallback)) {
+        if (IsJsCallbackEquals(callback, value)) {
             HILOG_ERROR("The current callback already exists.");
             return;
         }
     }
-    callbacks_.emplace_back(std::shared_ptr<NativeReference>(engine_.CreateReference(jsCallback, 1)));
+
+    napi_ref ref = nullptr;
+    napi_create_reference(env_, value, 1, &ref);
+    callbacks_.emplace_back(std::unique_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref)));
 }
 
-void JsAbilityAutoStartupCallBack::UnRegister(NativeValue *jsCallback)
+void JsAbilityAutoStartupCallBack::UnRegister(napi_value value)
 {
     HILOG_DEBUG("Called.");
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env_, value, &type);
     std::lock_guard<std::mutex> lock(mutexlock);
-    if (jsCallback == nullptr) {
+    if (type == napi_undefined || type == napi_null) {
         HILOG_DEBUG("jsCallback is nullptr, delete all callback.");
         callbacks_.clear();
         return;
     }
+
     for (auto item = callbacks_.begin(); item != callbacks_.end();) {
-        if (IsJsCallbackEquals(*item, jsCallback)) {
+        if (IsJsCallbackEquals(*item, value)) {
             item = callbacks_.erase(item);
         } else {
             item++;
@@ -85,51 +86,68 @@ bool JsAbilityAutoStartupCallBack::IsCallbacksEmpty()
 
 void JsAbilityAutoStartupCallBack::JSCallFunction(const AutoStartupInfo &info, const std::string &methodName)
 {
+    wptr<JsAbilityAutoStartupCallBack> stub = iface_cast<JsAbilityAutoStartupCallBack>(AsObject());
+    NapiAsyncTask::CompleteCallback complete = [stub, info, methodName](
+                                                   napi_env env, NapiAsyncTask &task, int32_t status) {
+        sptr<JsAbilityAutoStartupCallBack> obj = stub.promote();
+        if (obj == nullptr) {
+            HILOG_ERROR("Callback object is nullptr");
+            return;
+        }
+
+        obj->JSCallFunctionWorker(info, methodName);
+    };
+
+    NapiAsyncTask::Schedule("JsAbilityAutoStartupCallBack::JSCallFunction:" + methodName, env_,
+        CreateAsyncTaskWithLastParam(env_, nullptr, nullptr, std::move(complete), nullptr));
+}
+
+void JsAbilityAutoStartupCallBack::JSCallFunctionWorker(const AutoStartupInfo &info, const std::string &methodName)
+{
     std::lock_guard<std::mutex> lock(mutexlock);
-    AbilityRuntime::HandleEscape handleEscape(engine_);
     for (auto callback : callbacks_) {
         if (callback == nullptr) {
             HILOG_ERROR("callback is nullptr.");
             continue;
         }
-        NativeValue *value = callback->Get();
-        if (value == nullptr) {
+
+        auto obj = callback->GetNapiValue();
+        if (obj == nullptr) {
             HILOG_ERROR("Failed to get value.");
-            return;
+            continue;
         }
-        NativeObject *jObj = ConvertNativeValueTo<NativeObject>(value);
-        if (jObj == nullptr) {
-            HILOG_ERROR("Failed to convert native value to object.");
-            return;
+
+        napi_value funcObject;
+        if (napi_get_named_property(env_, obj, methodName.c_str(), &funcObject) != napi_ok) {
+            HILOG_ERROR("Get function by name failed.");
+            continue;
         }
-        auto method = jObj->GetProperty(methodName.data());
-        if (method == nullptr) {
-            HILOG_ERROR("Failed to get %{public}s from object.", methodName.data());
-            return;
-        }
-        NativeValue *argv[] = { CreateJsAutoStartupInfo(engine_, info) };
-        handleEscape.Escape(engine_.CallFunction(value, method, argv, ArraySize(argv)));
+
+        napi_value argv[] = { CreateJsAutoStartupInfo(env_, info) };
+        napi_call_function(env_, obj, funcObject, ArraySize(argv), argv, nullptr);
     }
 }
 
-bool JsAbilityAutoStartupCallBack::IsJsCallbackEquals(
-    std::shared_ptr<NativeReference> callback, NativeValue *jsCallback)
+bool JsAbilityAutoStartupCallBack::IsJsCallbackEquals(std::shared_ptr<NativeReference> callback, napi_value value)
 {
-    if (!callback) {
+    if (callback == nullptr) {
         HILOG_ERROR("Invalid jsCallback.");
         return false;
     }
 
-    NativeValue *value = callback->Get();
-    if (value == nullptr) {
+    auto object = callback->GetNapiValue();
+    if (object == nullptr) {
         HILOG_ERROR("Failed to get object.");
         return false;
     }
 
-    if (value->StrictEquals(jsCallback)) {
-        return true;
+    bool result = false;
+    if (napi_strict_equals(env_, object, value, &result) != napi_ok) {
+        HILOG_ERROR("Object does not match value.");
+        return false;
     }
-    return false;
+
+    return result;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

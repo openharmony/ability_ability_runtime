@@ -37,240 +37,35 @@ constexpr int32_t INDEX_ONE = 1;
 constexpr const char *ON_OFF_TYPE_SYSTEM = "systemAutoStartup";
 } // namespace
 
-void JsAbilityAutoStartupManager::Finalizer(NativeEngine *engine, void *data, void *hint)
+void JsAbilityAutoStartupManager::Finalizer(napi_env env, void *data, void *hint)
 {
     HILOG_DEBUG("Called.");
-    delete static_cast<JsAbilityAutoStartupManager *>(data);
+    std::unique_ptr<JsAbilityAutoStartupManager>(static_cast<JsAbilityAutoStartupManager *>(data));
 }
 
-NativeValue *JsAbilityAutoStartupManager::RegisterAutoStartupCallback(NativeEngine *engine, NativeCallbackInfo *info)
+napi_value JsAbilityAutoStartupManager::RegisterAutoStartupCallback(napi_env env, napi_callback_info info)
 {
-    JsAbilityAutoStartupManager *me = CheckParamsAndGetThis<JsAbilityAutoStartupManager>(engine, info);
-    return (me != nullptr) ? me->OnRegisterAutoStartupCallback(*engine, *info) : nullptr;
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityAutoStartupManager, OnRegisterAutoStartupCallback);
 }
 
-NativeValue *JsAbilityAutoStartupManager::UnregisterAutoStartupCallback(NativeEngine *engine, NativeCallbackInfo *info)
+napi_value JsAbilityAutoStartupManager::UnregisterAutoStartupCallback(napi_env env, napi_callback_info info)
 {
-    JsAbilityAutoStartupManager *me = CheckParamsAndGetThis<JsAbilityAutoStartupManager>(engine, info);
-    return (me != nullptr) ? me->OnUnregisterAutoStartupCallback(*engine, *info) : nullptr;
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityAutoStartupManager, OnUnregisterAutoStartupCallback);
 }
 
-NativeValue *JsAbilityAutoStartupManager::SetApplicationAutoStartup(NativeEngine *engine, NativeCallbackInfo *info)
+napi_value JsAbilityAutoStartupManager::SetApplicationAutoStartup(napi_env env, napi_callback_info info)
 {
-    JsAbilityAutoStartupManager *me = CheckParamsAndGetThis<JsAbilityAutoStartupManager>(engine, info);
-    return (me != nullptr) ? me->OnSetApplicationAutoStartup(*engine, *info) : nullptr;
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityAutoStartupManager, OnSetApplicationAutoStartup);
 }
 
-NativeValue *JsAbilityAutoStartupManager::CancelApplicationAutoStartup(NativeEngine *engine, NativeCallbackInfo *info)
+napi_value JsAbilityAutoStartupManager::CancelApplicationAutoStartup(napi_env env, napi_callback_info info)
 {
-    JsAbilityAutoStartupManager *me = CheckParamsAndGetThis<JsAbilityAutoStartupManager>(engine, info);
-    return (me != nullptr) ? me->OnCancelApplicationAutoStartup(*engine, *info) : nullptr;
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityAutoStartupManager, OnCancelApplicationAutoStartup);
 }
 
-NativeValue *JsAbilityAutoStartupManager::QueryAllAutoStartupApplications(
-    NativeEngine *engine, NativeCallbackInfo *info)
+napi_value JsAbilityAutoStartupManager::QueryAllAutoStartupApplications(napi_env env, napi_callback_info info)
 {
-    JsAbilityAutoStartupManager *me = CheckParamsAndGetThis<JsAbilityAutoStartupManager>(engine, info);
-    return (me != nullptr) ? me->OnQueryAllAutoStartupApplications(*engine, *info) : nullptr;
-}
-
-NativeValue *JsAbilityAutoStartupManager::OnRegisterAutoStartupCallback(
-    NativeEngine &engine, const NativeCallbackInfo &info)
-{
-    HILOG_DEBUG("Called.");
-
-    if (info.argc < ARGC_TWO) {
-        HILOG_ERROR("The param is invalid.");
-        ThrowTooFewParametersError(engine);
-        return engine.CreateUndefined();
-    }
-
-    std::string type;
-    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != ON_OFF_TYPE_SYSTEM) {
-        HILOG_ERROR("Parse type failed.");
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return engine.CreateUndefined();
-    }
-
-    if (!CheckCallerIsSystemApp()) {
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return engine.CreateUndefined();
-    }
-
-    if (jsAutoStartupCallback_ == nullptr) {
-        jsAutoStartupCallback_ = new (std::nothrow) JsAbilityAutoStartupCallBack(engine);
-        if (jsAutoStartupCallback_ == nullptr) {
-            HILOG_ERROR("jsAutoStartupCallback_ is nullptr.");
-            ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
-            return engine.CreateUndefined();
-        }
-
-        auto ret =
-            AbilityManagerClient::GetInstance()->RegisterAutoStartupSystemCallback(jsAutoStartupCallback_->AsObject());
-        if (ret != ERR_OK) {
-            HILOG_ERROR("Register auto start up listener error[%{public}d].", ret);
-            if (ret == CHECK_PERMISSION_FAILED) {
-                ThrowNoPermissionError(engine, PermissionConstants::PERMISSION_APP_BOOT_MANAGEMENT_CAPABILIT);
-            } else {
-                ThrowError(engine, GetJsErrorCodeByNativeError(ret));
-            }
-        }
-    }
-
-    jsAutoStartupCallback_->Register(info.argv[INDEX_ONE]);
-    return engine.CreateUndefined();
-}
-
-NativeValue *JsAbilityAutoStartupManager::OnUnregisterAutoStartupCallback(
-    NativeEngine &engine, const NativeCallbackInfo &info)
-{
-    HILOG_DEBUG("Called.");
-
-    if (info.argc < ARGC_TWO) {
-        HILOG_ERROR("The param is invalid.");
-        ThrowTooFewParametersError(engine);
-        return engine.CreateUndefined();
-    }
-
-    std::string type;
-    if (!ConvertFromJsValue(engine, info.argv[INDEX_ZERO], type) || type != ON_OFF_TYPE_SYSTEM) {
-        HILOG_ERROR("Failed to parse type.");
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return engine.CreateUndefined();
-    }
-
-    if (!CheckCallerIsSystemApp()) {
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return engine.CreateUndefined();
-    }
-
-    if (jsAutoStartupCallback_ == nullptr) {
-        HILOG_ERROR("jsAutoStartupCallback_ is nullptr.");
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_INNER);
-        return engine.CreateUndefined();
-    }
-    jsAutoStartupCallback_->UnRegister(info.argv[INDEX_ONE]);
-
-    if (jsAutoStartupCallback_->IsCallbacksEmpty()) {
-        auto ret = AbilityManagerClient::GetInstance()->UnregisterAutoStartupSystemCallback(
-            jsAutoStartupCallback_->AsObject());
-        if (ret != ERR_OK) {
-            if (ret == CHECK_PERMISSION_FAILED) {
-                ThrowNoPermissionError(engine, PermissionConstants::PERMISSION_APP_BOOT_MANAGEMENT_CAPABILIT);
-            } else {
-                ThrowError(engine, GetJsErrorCodeByNativeError(ret));
-            }
-        }
-        jsAutoStartupCallback_ = nullptr;
-    }
-
-    return engine.CreateUndefined();
-}
-
-NativeValue *JsAbilityAutoStartupManager::OnSetApplicationAutoStartup(
-    NativeEngine &engine, const NativeCallbackInfo &info)
-{
-    HILOG_DEBUG("Called.");
-
-    if (info.argc < ARGC_ONE) {
-        HILOG_ERROR("The param is invalid.");
-        ThrowTooFewParametersError(engine);
-        return engine.CreateUndefined();
-    }
-
-    if (!CheckCallerIsSystemApp()) {
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return engine.CreateUndefined();
-    }
-
-    AutoStartupInfo autoStartUpInfo;
-    if (!UnwrapAutoStartupInfo(engine, info.argv[INDEX_ZERO], autoStartUpInfo)) {
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return engine.CreateUndefined();
-    }
-
-    AsyncTask::CompleteCallback complete = [autoStartUpInfo](NativeEngine &engine, AsyncTask &task, int32_t status) {
-        auto ret = AbilityManagerClient::GetInstance()->SetApplicationAutoStartup(autoStartUpInfo);
-        if (ret == 0) {
-            task.ResolveWithNoError(engine, engine.CreateUndefined());
-        } else {
-            HILOG_ERROR("Failed error:%{public}d.", ret);
-            task.Reject(engine, CreateJsError(engine, GetJsErrorCodeByNativeError(ret)));
-        }
-    };
-
-    NativeValue *lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
-    NativeValue *result = nullptr;
-    AsyncTask::Schedule("JsAbilityAutoStartupManager::OnSetApplicationAutoStartup", engine,
-        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
-}
-
-NativeValue *JsAbilityAutoStartupManager::OnCancelApplicationAutoStartup(
-    NativeEngine &engine, const NativeCallbackInfo &info)
-{
-    HILOG_DEBUG("Called.");
-
-    if (info.argc < ARGC_ONE) {
-        HILOG_ERROR("The param is invalid.");
-        ThrowTooFewParametersError(engine);
-        return engine.CreateUndefined();
-    }
-
-    if (!CheckCallerIsSystemApp()) {
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return engine.CreateUndefined();
-    }
-
-    AutoStartupInfo autoStartUpInfo;
-    if (!UnwrapAutoStartupInfo(engine, info.argv[INDEX_ZERO], autoStartUpInfo)) {
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-        return engine.CreateUndefined();
-    }
-
-    AsyncTask::CompleteCallback complete = [autoStartUpInfo](NativeEngine &engine, AsyncTask &task, int32_t status) {
-        auto ret = AbilityManagerClient::GetInstance()->CancelApplicationAutoStartup(autoStartUpInfo);
-        if (ret == 0) {
-            task.ResolveWithNoError(engine, engine.CreateUndefined());
-        } else {
-            HILOG_ERROR("Failed error:%{public}d.", ret);
-            task.Reject(engine, CreateJsError(engine, GetJsErrorCodeByNativeError(ret)));
-        }
-    };
-
-    NativeValue *lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
-    NativeValue *result = nullptr;
-    AsyncTask::Schedule("JsAbilityAutoStartupManager::OnCancelApplicationAutoStartup", engine,
-        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
-}
-
-NativeValue *JsAbilityAutoStartupManager::OnQueryAllAutoStartupApplications(
-    NativeEngine &engine, const NativeCallbackInfo &info)
-{
-    HILOG_DEBUG("Called.");
-
-    if (!CheckCallerIsSystemApp()) {
-        ThrowError(engine, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
-        return engine.CreateUndefined();
-    }
-
-    AsyncTask::CompleteCallback complete = [](NativeEngine &engine, AsyncTask &task, int32_t status) {
-        std::vector<AutoStartupInfo> infoList;
-        auto ret = AbilityManagerClient::GetInstance()->QueryAllAutoStartupApplications(infoList);
-        if (ret == 0) {
-            task.ResolveWithNoError(engine, CreateJsAutoStartupInfoArray(engine, infoList));
-        } else {
-            HILOG_ERROR("Failed error:%{public}d.", ret);
-            task.Reject(engine, CreateJsError(engine, GetJsErrorCodeByNativeError(ret)));
-        }
-    };
-
-    NativeValue *lastParam = (info.argc == ARGC_ONE) ? info.argv[INDEX_ZERO] : nullptr;
-    NativeValue *result = nullptr;
-    AsyncTask::Schedule("JsAbilityAutoStartupManager::OnCancelApplicationAutoStartup", engine,
-        CreateAsyncTaskWithLastParam(engine, lastParam, nullptr, std::move(complete), &result));
-    return result;
+    GET_NAPI_INFO_AND_CALL(env, info, JsAbilityAutoStartupManager, OnQueryAllAutoStartupApplications);
 }
 
 bool JsAbilityAutoStartupManager::CheckCallerIsSystemApp()
@@ -283,35 +78,251 @@ bool JsAbilityAutoStartupManager::CheckCallerIsSystemApp()
     return true;
 }
 
-NativeValue *JsAbilityAutoStartupManagerInit(NativeEngine *engine, NativeValue *exportObj)
+napi_value JsAbilityAutoStartupManager::OnRegisterAutoStartupCallback(napi_env env, NapiCallbackInfo &info)
 {
     HILOG_DEBUG("Called.");
-    if (engine == nullptr || exportObj == nullptr) {
-        HILOG_ERROR("engine or exportObj nullptr.");
+    if (info.argc < ARGC_TWO) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    std::string type;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], type) || type != ON_OFF_TYPE_SYSTEM) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    if (jsAutoStartupCallback_ == nullptr) {
+        jsAutoStartupCallback_ = new (std::nothrow) JsAbilityAutoStartupCallBack(env);
+        if (jsAutoStartupCallback_ == nullptr) {
+            HILOG_ERROR("JsAutoStartupCallback_ is nullptr.");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+            return CreateJsUndefined(env);
+        }
+
+        auto ret =
+            AbilityManagerClient::GetInstance()->RegisterAutoStartupSystemCallback(jsAutoStartupCallback_->AsObject());
+        if (ret != ERR_OK) {
+            jsAutoStartupCallback_ = nullptr;
+            HILOG_ERROR("Register auto start up listener error[%{public}d].", ret);
+            ThrowError(env, GetJsErrorCodeByNativeError(ret));
+            return CreateJsUndefined(env);
+        }
+    }
+
+    jsAutoStartupCallback_->Register(info.argv[INDEX_ONE]);
+    return CreateJsUndefined(env);
+}
+
+napi_value JsAbilityAutoStartupManager::OnUnregisterAutoStartupCallback(napi_env env, NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (info.argc < ARGC_ONE) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    std::string type;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], type) || type != ON_OFF_TYPE_SYSTEM) {
+        HILOG_ERROR("Failed to parse type.");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    if (jsAutoStartupCallback_ == nullptr) {
+        HILOG_ERROR("JsAutoStartupCallback_ is nullptr.");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return CreateJsUndefined(env);
+    }
+
+    auto callback = info.argc > ARGC_ONE ? info.argv[INDEX_ONE] : CreateJsUndefined(env);
+    jsAutoStartupCallback_->UnRegister(callback);
+    if (jsAutoStartupCallback_->IsCallbacksEmpty()) {
+        auto ret = AbilityManagerClient::GetInstance()->UnregisterAutoStartupSystemCallback(
+            jsAutoStartupCallback_->AsObject());
+        if (ret != ERR_OK) {
+            ThrowError(env, GetJsErrorCodeByNativeError(ret));
+        }
+        jsAutoStartupCallback_ = nullptr;
+    }
+
+    return CreateJsUndefined(env);
+}
+
+napi_value JsAbilityAutoStartupManager::OnSetApplicationAutoStartup(napi_env env, NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (info.argc < ARGC_ONE) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    AutoStartupInfo autoStartupInfo;
+    if (!UnwrapAutoStartupInfo(env, info.argv[INDEX_ZERO], autoStartupInfo)) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    auto retVal = std::make_shared<int32_t>(0);
+    NapiAsyncTask::ExecuteCallback execute = [autoStartupInfo, ret = retVal] () {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            return;
+        }
+        *ret = AbilityManagerClient::GetInstance()->SetApplicationAutoStartup(autoStartupInfo);
+    };
+    NapiAsyncTask::CompleteCallback complete = [ret = retVal](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(INNER_ERR)));
+            return;
+        }
+        if (*ret != ERR_OK) {
+            HILOG_ERROR("Failed error:%{public}d.", *ret);
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*ret)));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
+
+    napi_value lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsAbilityAutoStartupManager::OnSetApplicationAutoStartup", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAbilityAutoStartupManager::OnCancelApplicationAutoStartup(napi_env env, NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (info.argc < ARGC_ONE) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    if (!CheckCallerIsSystemApp()) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    AutoStartupInfo autoStartupInfo;
+    if (!UnwrapAutoStartupInfo(env, info.argv[INDEX_ZERO], autoStartupInfo)) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    auto retVal = std::make_shared<int32_t>(0);
+    NapiAsyncTask::ExecuteCallback execute = [autoStartupInfo, ret = retVal] () {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            return;
+        }
+        *ret = AbilityManagerClient::GetInstance()->CancelApplicationAutoStartup(autoStartupInfo);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [ret = retVal](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(INNER_ERR)));
+            return;
+        }
+        if (*ret != ERR_OK) {
+            HILOG_ERROR("Failed error:%{public}d.", *ret);
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*ret)));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
+
+    napi_value lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsAbilityAutoStartupManager::OnCancelApplicationAutoStartup", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAbilityAutoStartupManager::OnQueryAllAutoStartupApplications(napi_env env, const NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (!CheckCallerIsSystemApp()) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+
+    auto retVal = std::make_shared<int32_t>(0);
+    auto infoList = std::make_shared<std::vector<AutoStartupInfo>>();
+    NapiAsyncTask::ExecuteCallback execute = [infos = infoList, ret = retVal] () {
+        if (ret == nullptr || infos == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            return;
+        }
+        *ret = AbilityManagerClient::GetInstance()->QueryAllAutoStartupApplications(*infos);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [infos = infoList, ret = retVal] (napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (ret == nullptr || infos == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(INNER_ERR)));
+            return;
+        }
+        if (*ret != ERR_OK) {
+            HILOG_ERROR("Failed error:%{public}d.", *ret);
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*ret)));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsAutoStartupInfoArray(env, *infos));
+    };
+
+    napi_value lastParam = (info.argc == ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsAbilityAutoStartupManager::OnCancelApplicationAutoStartup", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsAbilityAutoStartupManagerInit(napi_env env, napi_value exportObj)
+{
+    HILOG_DEBUG("Called.");
+    if (env == nullptr || exportObj == nullptr) {
+        HILOG_ERROR("Env or exportObj nullptr.");
         return nullptr;
     }
 
-    NativeObject *object = ConvertNativeValueTo<NativeObject>(exportObj);
-    if (object == nullptr) {
-        HILOG_ERROR("object is nullptr.");
-        return nullptr;
-    }
-
-    std::unique_ptr<JsAbilityAutoStartupManager> jsAbilityAutoStartupManager =
-        std::make_unique<JsAbilityAutoStartupManager>();
-    object->SetNativePointer(jsAbilityAutoStartupManager.release(), JsAbilityAutoStartupManager::Finalizer, nullptr);
+    auto jsAbilityAutoStartupManager = std::make_unique<JsAbilityAutoStartupManager>();
+    napi_wrap(env, exportObj, jsAbilityAutoStartupManager.release(),
+        JsAbilityAutoStartupManager::Finalizer, nullptr, nullptr);
 
     const char *moduleName = "JsAbilityAutoStartupManager";
-    BindNativeFunction(*engine, *object, "on", moduleName, JsAbilityAutoStartupManager::RegisterAutoStartupCallback);
-    BindNativeFunction(*engine, *object, "off", moduleName, JsAbilityAutoStartupManager::UnregisterAutoStartupCallback);
-    BindNativeFunction(*engine, *object, "setApplicationAutoStartup", moduleName,
+    BindNativeFunction(env, exportObj, "on", moduleName, JsAbilityAutoStartupManager::RegisterAutoStartupCallback);
+    BindNativeFunction(env, exportObj, "off", moduleName, JsAbilityAutoStartupManager::UnregisterAutoStartupCallback);
+    BindNativeFunction(env, exportObj, "setApplicationAutoStartup", moduleName,
         JsAbilityAutoStartupManager::SetApplicationAutoStartup);
-    BindNativeFunction(*engine, *object, "cancelApplicationAutoStartup", moduleName,
+    BindNativeFunction(env, exportObj, "cancelApplicationAutoStartup", moduleName,
         JsAbilityAutoStartupManager::CancelApplicationAutoStartup);
-    BindNativeFunction(*engine, *object, "queryAllAutoStartupApplications", moduleName,
+    BindNativeFunction(env, exportObj, "queryAllAutoStartupApplications", moduleName,
         JsAbilityAutoStartupManager::QueryAllAutoStartupApplications);
     HILOG_DEBUG("End.");
-    return engine->CreateUndefined();
+    return CreateJsUndefined(env);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

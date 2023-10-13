@@ -26,7 +26,6 @@
 #include "parcel.h"
 
 class NativeReference;
-class NativeValue;
 namespace OHOS {
 namespace AbilityRuntime {
 /**
@@ -35,19 +34,20 @@ namespace AbilityRuntime {
  */
 class JsAbilityAutoStartupCallBack : public AutoStartupCallBackStub {
 public:
-    explicit JsAbilityAutoStartupCallBack(NativeEngine &engine);
+    explicit JsAbilityAutoStartupCallBack(napi_env env);
     virtual ~JsAbilityAutoStartupCallBack();
-    void Register(NativeValue *jsCallback);
-    void UnRegister(NativeValue *jsCallback);
+    void Register(napi_value value);
+    void UnRegister(napi_value value);
     void OnAutoStartupOn(const AutoStartupInfo &info) override;
     void OnAutoStartupOff(const AutoStartupInfo &info) override;
     bool IsCallbacksEmpty();
 
 private:
     void JSCallFunction(const AutoStartupInfo &info, const std::string &methodName);
-    bool IsJsCallbackEquals(std::shared_ptr<NativeReference> callback, NativeValue *jsCallback);
+    void JSCallFunctionWorker(const AutoStartupInfo &info, const std::string &methodName);
+    bool IsJsCallbackEquals(std::shared_ptr<NativeReference> callback, napi_value value);
 
-    NativeEngine &engine_;
+    napi_env env_;
     std::vector<std::shared_ptr<NativeReference>> callbacks_;
     std::mutex mutexlock;
 };

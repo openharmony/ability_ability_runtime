@@ -14,101 +14,112 @@
  */
 
 #include "js_ability_auto_startup_manager_utils.h"
+#include "napi_common_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-
-bool UnwrapAutoStartupInfo(NativeEngine &engine, NativeValue *param, AutoStartupInfo &info)
+bool UnwrapAutoStartupInfo(napi_env env, napi_value param, AutoStartupInfo &info)
 {
-    if (!IsNormalObject(param)) {
+    if (!IsNormalObject(env, param)) {
         HILOG_ERROR("param is invalid.");
         return false;
     }
 
-    NativeObject *infoObj = ConvertNativeValueTo<NativeObject>(param);
-    if (infoObj == nullptr) {
-        HILOG_ERROR("infoObj is invalid.");
+    if (!AppExecFwk::UnwrapStringByPropertyName(env, param, "bundleName", info.bundleName)) {
+        HILOG_ERROR("Convert bundle name failed.");
         return false;
     }
 
-    UnwrapStringValue(infoObj->GetProperty("bundleName"), info.bundleName);
-    UnwrapStringValue(infoObj->GetProperty("abilityName"), info.abilityName);
-    UnwrapStringValue(infoObj->GetProperty("moduleName"), info.moduleName);
+    if (!AppExecFwk::UnwrapStringByPropertyName(env, param, "abilityName", info.abilityName)) {
+        HILOG_ERROR("Convert ability name failed.");
+        return false;
+    }
+
+    AppExecFwk::UnwrapStringByPropertyName(env, param, "moduleName", info.moduleName);
     return true;
 }
 
-bool UnwrapStringValue(NativeValue *param, std::string &value)
-{
-    if (param == nullptr) {
-        HILOG_ERROR("param is nullptr.");
-        return false;
-    }
-    if (param->TypeOf() != NativeValueType::NATIVE_STRING) {
-        return false;
-    }
-
-    auto nativeString = ConvertNativeValueTo<NativeString>(param);
-    size_t size = 0;
-    nativeString->GetCString(nullptr, 0, &size);
-    if (size == 0 || size >= INT_MAX) {
-        HILOG_ERROR("String size abnormal: %{public}zu.", size);
-        return true;
-    }
-
-    value.resize(size + 1);
-    nativeString->GetCString(value.data(), size + 1, &size);
-    value.pop_back();
-    return true;
-}
-
-bool IsNormalObject(NativeValue *value)
+bool IsNormalObject(napi_env env, napi_value value)
 {
     if (value == nullptr) {
         HILOG_ERROR("value is nullptr.");
         return false;
     }
-    if (value->TypeOf() == NativeValueType::NATIVE_UNDEFINED) {
-        HILOG_ERROR("value is undefined.");
+    napi_valuetype type;
+    napi_typeof(env, value, &type);
+    if (type == napi_undefined || type == napi_null) {
+        HILOG_ERROR("value is invalid type.");
         return false;
     }
-    if (value->TypeOf() != NativeValueType::NATIVE_OBJECT) {
+    if (type != napi_object) {
         HILOG_ERROR("Invalid type.");
         return false;
     }
     return true;
 }
 
-NativeValue *CreateJsAutoStartupInfoArray(NativeEngine &engine, const std::vector<AutoStartupInfo> &infoList)
+napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStartupInfo> &infoList)
 {
     HILOG_DEBUG("Called.");
-    NativeValue *arrayValue = engine.CreateArray(infoList.size());
-    NativeArray *array = ConvertNativeValueTo<NativeArray>(arrayValue);
-    uint32_t index = 0;
-    for (const auto &info : infoList) {
-        array->SetElement(index++, CreateJsAutoStartupInfo(engine, info));
+    napi_value arrayObj = nullptr;
+    napi_create_array(env, &arrayObj);
+    for (size_t i = 0; i < infoList.size(); ++i) {
+        auto object = CreateJsAutoStartupInfo(env, infoList.at(i));
+        if (object == nullptr) {
+            HILOG_ERROR("Convert object failed.");
+            return nullptr;
+        }
+
+        if (napi_set_element(env, arrayObj, i, object) != napi_ok) {
+            HILOG_ERROR("Inster object to array failed.");
+            return nullptr;
+        }
     }
-    return arrayValue;
+
+    return arrayObj;
 }
 
-NativeValue *CreateJsAutoStartupInfo(NativeEngine &engine, const AutoStartupInfo &info)
+napi_value CreateJsAutoStartupInfo(napi_env env, const AutoStartupInfo &info)
 {
     HILOG_DEBUG("Called.");
-    NativeValue *objValue = engine.CreateObject();
-    if (objValue == nullptr) {
-        HILOG_ERROR("objValue is nullptr.");
-        return nullptr;
-    }
-
-    NativeObject *object = ConvertNativeValueTo<NativeObject>(objValue);
+    napi_value object = AppExecFwk::CreateJSObject(env);
     if (object == nullptr) {
         HILOG_ERROR("object is nullptr.");
         return nullptr;
     }
-    object->SetProperty("bundleName", CreateJsValue(engine, info.bundleName));
-    object->SetProperty("abilityName", CreateJsValue(engine, info.abilityName));
-    object->SetProperty("moduleName", CreateJsValue(engine, info.moduleName));
-    object->SetProperty("abilityTypeName", CreateJsValue(engine, info.abilityTypeName));
-    return objValue;
+
+    napi_value bundleName = AppExecFwk::WrapStringToJS(env, info.bundleName);
+    if (bundleName == nullptr) {
+        HILOG_ERROR("Convert bundle name failed.");
+        return nullptr;
+    }
+
+    napi_value abilityName = AppExecFwk::WrapStringToJS(env, info.abilityName);
+    if (abilityName == nullptr) {
+        HILOG_ERROR("Convert ability name failed.");
+        return nullptr;
+    }
+
+    napi_value moduleName = AppExecFwk::WrapStringToJS(env, info.moduleName);
+    if (moduleName == nullptr) {
+        HILOG_ERROR("Convert module name failed.");
+        return nullptr;
+    }
+
+    napi_value abilityTypeName = AppExecFwk::WrapStringToJS(env, info.abilityTypeName);
+    if (abilityTypeName == nullptr) {
+        HILOG_ERROR("Convert ability type name failed.");
+        return nullptr;
+    }
+
+    if (!(AppExecFwk::SetPropertyValueByPropertyName(env, object, "bundleName", bundleName) &&
+        AppExecFwk::SetPropertyValueByPropertyName(env, object, "abilityName", abilityName) &&
+        AppExecFwk::SetPropertyValueByPropertyName(env, object, "moduleName", moduleName) &&
+        AppExecFwk::SetPropertyValueByPropertyName(env, object, "abilityTypeName", abilityTypeName))) {
+        HILOG_ERROR("Create js AutoStartupInfo failed.");
+        return nullptr;
+    }
+    return object;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
