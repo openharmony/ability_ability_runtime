@@ -135,7 +135,7 @@ public:
         /**
          * @brief Constructor
          */
-        ClientDeathRecipient(std::weak_ptr<AbilityAutoStartupService> weakPtr);
+        explicit ClientDeathRecipient(const std::weak_ptr<AbilityAutoStartupService> &weakPtr);
         virtual ~ClientDeathRecipient() = default;
         /**
          * @brief handle remote object died event.
@@ -163,6 +163,8 @@ private:
     std::string GetAbilityTypeName(AppExecFwk::AbilityInfo abilityInfo);
     std::string GetExtensionTypeName(AppExecFwk::ExtensionAbilityInfo extensionInfo);
     std::shared_ptr<AppExecFwk::BundleMgrClient> GetBundleMgrClient();
+    int32_t CheckPermissionForSystem();
+    int32_t CheckPermissionForSelf(const std::string &bundleName);
 
     mutable std::mutex autoStartUpMutex_;
     mutable std::mutex deathRecipientsMutex_;

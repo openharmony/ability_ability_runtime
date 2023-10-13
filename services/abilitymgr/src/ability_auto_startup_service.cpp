@@ -43,14 +43,9 @@ AbilityAutoStartupService::~AbilityAutoStartupService() {}
 int32_t AbilityAutoStartupService::RegisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
 {
     HILOG_DEBUG("Called.");
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-
-    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        HILOG_ERROR("The caller is not system-app, can not use system-api.");
-        return ERR_NOT_SYSTEM_APP;
+    int32_t code = CheckPermissionForSystem();
+    if (code != ERR_OK) {
+        return code;
     }
 
     {
@@ -60,6 +55,7 @@ int32_t AbilityAutoStartupService::RegisterAutoStartupSystemCallback(const sptr<
         while (item != callbackVector_.end()) {
             if (*item == callback) {
                 isFound = true;
+                break;
             }
             item++;
         }
@@ -68,8 +64,7 @@ int32_t AbilityAutoStartupService::RegisterAutoStartupSystemCallback(const sptr<
             SetDeathRecipient(
                 callback, new (std::nothrow) AbilityAutoStartupService::ClientDeathRecipient(weak_from_this()));
         } else {
-            HILOG_ERROR("Callback is already exist.");
-            return ERR_ALREADY_EXISTS;
+            HILOG_DEBUG("Callback is already exist.");
         }
     }
     return ERR_OK;
@@ -78,14 +73,9 @@ int32_t AbilityAutoStartupService::RegisterAutoStartupSystemCallback(const sptr<
 int32_t AbilityAutoStartupService::UnregisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
 {
     HILOG_DEBUG("Called.");
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-
-    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        HILOG_ERROR("The caller is not system-app, can not use system-api.");
-        return ERR_NOT_SYSTEM_APP;
+    int32_t code = CheckPermissionForSystem();
+    if (code != ERR_OK) {
+        return code;
     }
 
     {
@@ -101,8 +91,7 @@ int32_t AbilityAutoStartupService::UnregisterAutoStartupSystemCallback(const spt
             }
         }
         if (!isFound) {
-            HILOG_ERROR("Callback is not exist.");
-            return ERR_NAME_NOT_FOUND;
+            HILOG_DEBUG("Callback is not exist.");
         }
     }
     return ERR_OK;
@@ -112,13 +101,9 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartup(const AutoStartupIn
 {
     HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        HILOG_ERROR("The caller is not system-app, can not use system-api.");
-        return ERR_NOT_SYSTEM_APP;
+    int32_t code = CheckPermissionForSystem();
+    if (code != ERR_OK) {
+        return code;
     }
 
     bool isVisible;
@@ -172,18 +157,14 @@ int32_t AbilityAutoStartupService::InnerSetApplicationAutoStartup(const AutoStar
     }
     return ERR_ALREADY_EXISTS;
 }
+
 int32_t AbilityAutoStartupService::CancelApplicationAutoStartup(const AutoStartupInfo &info)
 {
     HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-
-    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        HILOG_ERROR("The caller is not system-app, can not use system-api.");
-        return ERR_NOT_SYSTEM_APP;
+    int32_t code = CheckPermissionForSystem();
+    if (code != ERR_OK) {
+        return code;
     }
 
     bool isVisible;
@@ -231,14 +212,9 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartup(const AutoS
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList)
 {
     HILOG_DEBUG("Called.");
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-
-    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
-        HILOG_ERROR("The caller is not system-app, can not use system-api.");
-        return ERR_NOT_SYSTEM_APP;
+    int32_t code = CheckPermissionForSystem();
+    if (code != ERR_OK) {
+        return code;
     }
 
     return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList);
@@ -250,7 +226,7 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermiss
     HILOG_DEBUG("Called.");
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
         HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
     return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList);
@@ -261,7 +237,7 @@ int32_t AbilityAutoStartupService::RegisterAutoStartupCallback(const sptr<IRemot
     HILOG_DEBUG("Called.");
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
         HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
     std::string bundleName = GetSelfApplicationBundleName();
@@ -277,8 +253,7 @@ int32_t AbilityAutoStartupService::RegisterAutoStartupCallback(const sptr<IRemot
             SetDeathRecipient(
                 callback, new (std::nothrow) AbilityAutoStartupService::ClientDeathRecipient(weak_from_this()));
         } else {
-            HILOG_ERROR("Callback is already exist.");
-            return ERR_ALREADY_EXISTS;
+            HILOG_DEBUG("Callback is already exist.");
         }
     }
 
@@ -290,7 +265,7 @@ int32_t AbilityAutoStartupService::UnregisterAutoStartupCallback(const sptr<IRem
     HILOG_DEBUG("Called.");
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
         HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
     std::string bundleName = GetSelfApplicationBundleName();
@@ -302,15 +277,14 @@ int32_t AbilityAutoStartupService::UnregisterAutoStartupCallback(const sptr<IRem
         std::lock_guard<std::mutex> lock(autoStartUpMutex_);
         auto item = callbackMaps_.find(bundleName);
         if (item == callbackMaps_.end()) {
-            HILOG_ERROR("BundleName is not exist.");
+            HILOG_DEBUG("BundleName is not exist.");
             return ERR_NAME_NOT_FOUND;
+        }
+        if (item->second == callback) {
+            callbackMaps_.erase(item);
         } else {
-            if (item->second == callback) {
-                callbackMaps_.erase(item);
-            } else {
-                HILOG_ERROR("Callback is not exist.");
-                return ERR_NAME_NOT_FOUND;
-            }
+            HILOG_ERROR("Callback is not exist.");
+            return ERR_NAME_NOT_FOUND;
         }
     }
 
@@ -321,14 +295,9 @@ int32_t AbilityAutoStartupService::SetAutoStartup(const AutoStartupInfo &info)
 {
     HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-
-    if (!CheckSelfApplication(info.bundleName)) {
-        HILOG_ERROR("Not self application.");
-        return ERR_NOT_SELF_APPLICATION;
+    int32_t code = CheckPermissionForSelf(info.bundleName);
+    if (code != ERR_OK) {
+        return code;
     }
 
     bool isVisible;
@@ -389,14 +358,9 @@ int32_t AbilityAutoStartupService::CancelAutoStartup(const AutoStartupInfo &info
 {
     HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-
-    if (!CheckSelfApplication(info.bundleName)) {
-        HILOG_ERROR("Not self application.");
-        return ERR_NOT_SELF_APPLICATION;
+    int32_t code = CheckPermissionForSelf(info.bundleName);
+    if (code != ERR_OK) {
+        return code;
     }
 
     bool isVisible;
@@ -446,14 +410,9 @@ int32_t AbilityAutoStartupService::IsAutoStartup(const AutoStartupInfo &info, bo
 {
     HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
         info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
-    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
-        HILOG_ERROR("Product configuration item is disable.");
-        return INNER_ERR;
-    }
-
-    if (!CheckSelfApplication(info.bundleName)) {
-        HILOG_ERROR("Not self application.");
-        return ERR_NOT_SELF_APPLICATION;
+    int32_t code = CheckPermissionForSelf(info.bundleName);
+    if (code != ERR_OK) {
+        return code;
     }
 
     AutoStartupStatus status =
@@ -595,7 +554,8 @@ void AbilityAutoStartupService::CleanResource(const wptr<IRemoteObject> &remote)
     }
 }
 
-AbilityAutoStartupService::ClientDeathRecipient::ClientDeathRecipient(std::weak_ptr<AbilityAutoStartupService> weakPtr)
+AbilityAutoStartupService::ClientDeathRecipient::ClientDeathRecipient(
+    const std::weak_ptr<AbilityAutoStartupService> &weakPtr)
 {
     weakPtr_ = weakPtr;
 }
@@ -674,8 +634,6 @@ bool AbilityAutoStartupService::GetAbilityData(
     }
 
     for (auto abilityInfo : bundleInfo.abilityInfos) {
-        HILOG_DEBUG("AbilityInfo, bundleName: %{public}s , moduleName: %{public}s, abilityname: %{public}s.",
-            abilityInfo.bundleName.c_str(), abilityInfo.moduleName.c_str(), abilityInfo.name.c_str());
         if ((abilityInfo.bundleName == info.bundleName) && (abilityInfo.name == info.abilityName)) {
             if (info.moduleName.empty() || (abilityInfo.moduleName == info.moduleName)) {
                 isVisible = abilityInfo.visible;
@@ -687,8 +645,6 @@ bool AbilityAutoStartupService::GetAbilityData(
     }
 
     for (auto extensionInfo : bundleInfo.extensionInfos) {
-        HILOG_DEBUG("ExtensionInfo, bundleName: %{public}s , moduleName: %{public}s, abilityname: %{public}s.",
-            extensionInfo.bundleName.c_str(), extensionInfo.moduleName.c_str(), extensionInfo.name.c_str());
         if ((extensionInfo.bundleName == info.bundleName) && (extensionInfo.name == info.abilityName)) {
             if (info.moduleName.empty() || (extensionInfo.moduleName == info.moduleName)) {
                 isVisible = extensionInfo.visible;
@@ -726,6 +682,34 @@ std::shared_ptr<AppExecFwk::BundleMgrClient> AbilityAutoStartupService::GetBundl
         bundleMgrClient_ = DelayedSingleton<AppExecFwk::BundleMgrClient>::GetInstance();
     }
     return bundleMgrClient_;
+}
+
+int32_t AbilityAutoStartupService::CheckPermissionForSystem()
+{
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        HILOG_ERROR("Product configuration item is disable.");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
+
+    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        HILOG_ERROR("The caller is not system-app, can not use system-api.");
+        return ERR_NOT_SYSTEM_APP;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityAutoStartupService::CheckPermissionForSelf(const std::string &bundleName)
+{
+    if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
+        HILOG_ERROR("Product configuration item is disable.");
+        return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
+    }
+
+    if (!CheckSelfApplication(bundleName)) {
+        HILOG_ERROR("Not self application.");
+        return ERR_NOT_SELF_APPLICATION;
+    }
+    return ERR_OK;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

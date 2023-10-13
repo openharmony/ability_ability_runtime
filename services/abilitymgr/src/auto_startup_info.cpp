@@ -57,17 +57,5 @@ bool AutoStartupInfo::Marshalling(Parcel &parcel) const
     }
     return true;
 }
-
-AutoStartupInfo &AutoStartupInfo::operator=(const AutoStartupInfo &other)
-{
-    if (this != &other) {
-        bundleName = other.bundleName;
-        abilityName = other.abilityName;
-        moduleName = other.moduleName;
-        moduleName = other.moduleName;
-        abilityTypeName = other.abilityTypeName;
-    }
-    return *this;
-}
 } // namespace AbilityRuntime
 } // namespace OHOS
