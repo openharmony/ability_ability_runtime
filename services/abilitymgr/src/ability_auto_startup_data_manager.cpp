@@ -36,12 +36,14 @@ const std::string JSON_KEY_IS_AUTO_STARTUP = "isAutoStartup";
 const std::string JSON_KEY_IS_EDM_FORCE = "isEdmForce";
 const std::string JSON_KEY_TYPE_NAME = "abilityTypeName";
 } // namespace
+const DistributedKv::AppId AbilityAutoStartupDataManager::APP_ID = { "auto_startup_storage" };
+const DistributedKv::StoreId AbilityAutoStartupDataManager::STORE_ID = { "auto_startup_infos" };
 AbilityAutoStartupDataManager::AbilityAutoStartupDataManager() {}
 
 AbilityAutoStartupDataManager::~AbilityAutoStartupDataManager()
 {
     if (kvStorePtr_ != nullptr) {
-        dataManager_.CloseKvStore(appId_, kvStorePtr_);
+        dataManager_.CloseKvStore(APP_ID, kvStorePtr_);
     }
 }
 
@@ -56,12 +58,13 @@ DistributedKv::Status AbilityAutoStartupDataManager::GetKvStore()
         .kvStoreType = DistributedKv::KvStoreType::SINGLE_VERSION,
         .baseDir = AUTO_STARTUP_STORAGE_DIR };
 
-    DistributedKv::Status status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
+    DistributedKv::Status status = dataManager_.GetSingleKvStore(options, APP_ID, STORE_ID, kvStorePtr_);
     if (status != DistributedKv::Status::SUCCESS) {
         HILOG_ERROR("Return error: %{public}d.", status);
-    } else {
-        HILOG_DEBUG("Get kvStore success.");
+        return status;
     }
+
+    HILOG_DEBUG("Get kvStore success.");
     return status;
 }
 

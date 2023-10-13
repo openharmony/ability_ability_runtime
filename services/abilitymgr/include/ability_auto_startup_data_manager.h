@@ -57,8 +57,8 @@ private:
     bool IsEqual(const DistributedKv::Key &key, const AutoStartupInfo &info);
     bool IsEqual(const DistributedKv::Key &key, const std::string &bundleName);
 
-    const DistributedKv::AppId appId_ { "auto_startup_storage" };
-    const DistributedKv::StoreId storeId_ { "auto_startup_infos" };
+    static const DistributedKv::AppId APP_ID;
+    static const DistributedKv::StoreId STORE_ID;
     DistributedKv::DistributedKvDataManager dataManager_;
     std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr_;
     mutable std::mutex kvStorePtrMutex_;
