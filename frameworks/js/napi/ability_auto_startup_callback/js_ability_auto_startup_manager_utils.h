@@ -25,11 +25,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-bool UnwrapAutoStartupInfo(NativeEngine &engine, NativeValue *param, AutoStartupInfo &info);
-bool UnwrapStringValue(NativeValue *param, std::string &value);
-bool IsNormalObject(NativeValue *value);
-NativeValue *CreateJsAutoStartupInfoArray(NativeEngine &engine, const std::vector<AutoStartupInfo> &infoList);
-NativeValue *CreateJsAutoStartupInfo(NativeEngine &engine, const AutoStartupInfo &info);
+bool UnwrapAutoStartupInfo(napi_env env, napi_value param, AutoStartupInfo &info);
+bool IsNormalObject(napi_env env, napi_value value);
+napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStartupInfo> &infoList);
+napi_value CreateJsAutoStartupInfo(napi_env env, const AutoStartupInfo &info);
 } // namespace AbilityRuntime
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_JS_ABILITY_AUTO_STARTUP_MANAGER_UTILS_H
