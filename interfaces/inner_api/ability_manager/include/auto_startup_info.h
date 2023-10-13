@@ -36,7 +36,6 @@ public:
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static AutoStartupInfo *Unmarshalling(Parcel &parcel);
-    AutoStartupInfo &operator=(const AutoStartupInfo &other);
 };
 
 struct AutoStartupStatus {
