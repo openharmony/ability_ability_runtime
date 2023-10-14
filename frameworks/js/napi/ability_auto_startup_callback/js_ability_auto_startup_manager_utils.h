@@ -13,15 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_TIMER_H
-#define OHOS_ABILITY_RUNTIME_JS_TIMER_H
+#ifndef OHOS_ABILITY_RUNTIME_JS_ABILITY_AUTO_STARTUP_MANAGER_UTILS_H
+#define OHOS_ABILITY_RUNTIME_JS_ABILITY_AUTO_STARTUP_MANAGER_UTILS_H
 
+#include "auto_startup_info.h"
+#include "hilog_wrapper.h"
+#include "js_runtime.h"
+#include "js_runtime_utils.h"
 #include "native_engine/native_engine.h"
+#include "native_engine/native_value.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-void InitTimer(napi_env env, napi_value globalObject);
+bool UnwrapAutoStartupInfo(napi_env env, napi_value param, AutoStartupInfo &info);
+bool IsNormalObject(napi_env env, napi_value value);
+napi_value CreateJsAutoStartupInfoArray(napi_env env, const std::vector<AutoStartupInfo> &infoList);
+napi_value CreateJsAutoStartupInfo(napi_env env, const AutoStartupInfo &info);
 } // namespace AbilityRuntime
 } // namespace OHOS
-
-#endif // OHOS_ABILITY_RUNTIME_JS_TIMER_H
+#endif // OHOS_ABILITY_RUNTIME_JS_ABILITY_AUTO_STARTUP_MANAGER_UTILS_H

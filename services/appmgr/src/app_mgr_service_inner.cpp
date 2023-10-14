@@ -37,10 +37,8 @@
 #include "common_event_support.h"
 #include "datetime_ex.h"
 #include "distributed_data_mgr.h"
-#include "event_report.h"
 #include "freeze_util.h"
 #include "hilog_wrapper.h"
-#include "hisysevent.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
@@ -88,6 +86,7 @@ constexpr int KILL_PROCESS_TIMEOUT_MICRO_SECONDS = 1000;
 constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
 // delay register focus listener to wms
 constexpr int REGISTER_FOCUS_DELAY = 5000;
+constexpr int REGISTER_VISIBILITY_DELAY = 5000;
 const std::string CLASS_NAME = "ohos.app.MainThread";
 const std::string FUNC_NAME = "main";
 const std::string RENDER_PARAM = "invalidparam";
@@ -210,6 +209,7 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
     auto appRecord =
         appRunningManager_->CheckAppRunningRecordIsExist(appInfo->name, processName, appInfo->uid, bundleInfo);
     if (!appRecord) {
+        HILOG_INFO("appRecord null");
         bool appExistFlag = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleInfo.name);
         appRecord = CreateAppRunningRecord(token, preToken, appInfo, abilityInfo,
             processName, bundleInfo, hapModuleInfo, want);
@@ -219,7 +219,7 @@ void AppMgrServiceInner::LoadAbility(const sptr<IRemoteObject> &token, const spt
         }
         if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
             appRecord->SetKeepAliveAppState(false, false);
-            HILOG_DEBUG("The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
+            HILOG_INFO("The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
         }
         SendAppStartupTypeEvent(appRecord, abilityInfo, AppStartType::COLD);
         auto callRecord = GetAppRunningRecordByAbilityToken(preToken);
@@ -277,6 +277,7 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
         return;
     }
     if (!abilityInfo->process.empty()) {
+        HILOG_INFO("Process not null");
         processName = abilityInfo->process;
         return;
     }
@@ -290,13 +291,14 @@ void AppMgrServiceInner::MakeProcessName(
     const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo, std::string &processName) const
 {
     if (!appInfo) {
+        HILOG_ERROR("appInfo nill");
         return;
     }
     // check after abilityInfo, because abilityInfo contains extension process.
     if (hapModuleInfo.isStageBasedModel && !hapModuleInfo.process.empty()
         && hapModuleInfo.process != appInfo->bundleName) {
         processName = hapModuleInfo.process;
-        HILOG_DEBUG("Stage mode, Make processName:%{public}s", processName.c_str());
+        HILOG_INFO("Stage mode, Make processName:%{public}s", processName.c_str());
         return;
     }
     bool isRunInIsolationMode = CheckIsolationMode(hapModuleInfo);
@@ -481,6 +483,13 @@ void AppMgrServiceInner::LaunchApplication(const std::shared_ptr<AppRunningRecor
     auto callerRecord = GetAppRunningRecordByPid(callerPid);
     if (callerRecord != nullptr) {
         eventInfo.callerBundleName = callerRecord->GetBundleName();
+        eventInfo.callerUid = callerRecord->GetUid();
+        eventInfo.callerState = static_cast<int32_t>(callerRecord->GetState());
+        auto applicationInfo = callerRecord->GetApplicationInfo();
+        if (applicationInfo != nullptr) {
+            eventInfo.callerVersionName = applicationInfo->versionName;
+            eventInfo.callerVersionCode = applicationInfo->versionCode;
+        }
     } else {
         HILOG_ERROR("callerRecord is nullptr, can not get callerBundleName.");
     }
@@ -1134,6 +1143,11 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid) const
         eventInfo.bundleName = applicationInfo->name;
         eventInfo.versionName = applicationInfo->versionName;
         eventInfo.versionCode = applicationInfo->versionCode;
+    }
+    if (ret >= 0) {
+        int64_t killTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+            system_clock::now().time_since_epoch()).count();
+        killedPorcessMap_.emplace(killTime, appRecord->GetProcessName());
     }
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
@@ -1851,6 +1865,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
                                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    HILOG_INFO("StartProcess: %{public}s", bundleName.c_str());
     if (!appRecord) {
         HILOG_ERROR("appRecord is null");
         return;
@@ -1891,7 +1906,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     HspList hspList;
     ErrCode ret = bundleMgr_->GetBaseSharedBundleInfos(bundleName, hspList);
     if (ret != ERR_OK) {
-        HILOG_ERROR("GetBaseSharedBundleInfos failed: %d", ret);
+        HILOG_ERROR("GetBaseSharedBundleInfos failed: %{public}d", ret);
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
         return;
     }
@@ -1933,7 +1948,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
 
     SetOverlayInfo(bundleName, userId, startMsg);
 
-    HILOG_DEBUG("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",
+    HILOG_INFO("Start process, apl is %{public}s, bundleName is %{public}s, startFlags is %{public}d.",
         startMsg.apl.c_str(), bundleName.c_str(), startFlags);
 
     bundleMgrResult = IN_PROCESS_CALL(bundleMgr_->GetBundleGidsByUid(bundleName, uid, startMsg.gids));
@@ -2084,6 +2099,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
         uid : %{public}d, process : %{public}s",
         __func__, eventInfo.time, eventInfo.abilityType, eventInfo.callerBundleName.c_str(), eventInfo.callerUid,
         eventInfo.callerProcessName.c_str());
+    SendReStartProcessEvent(eventInfo, appRecord);
 
     return true;
 }
@@ -3778,6 +3794,61 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
 }
 
+void AppMgrServiceInner::InitWindowVisibilityChangedListener()
+{
+    HILOG_DEBUG("Begin.");
+    if (windowVisibilityChangedListener_ != nullptr) {
+        HILOG_WARN("Visibility listener has been initiated.");
+        return;
+    }
+    windowVisibilityChangedListener_ =
+        new (std::nothrow) WindowVisibilityChangedListener(weak_from_this(), taskHandler_);
+    auto registerTask = [innerService = weak_from_this()] () {
+        auto inner = innerService.lock();
+        if (inner == nullptr) {
+            HILOG_ERROR("Service inner is nullptr.");
+            return;
+        }
+        if (inner->windowVisibilityChangedListener_ == nullptr) {
+            HILOG_ERROR("Window visibility changed listener is nullptr.");
+            return;
+        }
+        WindowManager::GetInstance().RegisterVisibilityChangedListener(inner->windowVisibilityChangedListener_);
+    };
+
+    if (taskHandler_ == nullptr) {
+        HILOG_ERROR("Task handler is nullptr.");
+        return;
+    }
+    taskHandler_->SubmitTask(registerTask, "RegisterVisibilityListener.", REGISTER_VISIBILITY_DELAY);
+    HILOG_DEBUG("End.");
+}
+
+void AppMgrServiceInner::FreeWindowVisibilityChangedListener()
+{
+    HILOG_DEBUG("Called.");
+    if (windowVisibilityChangedListener_ == nullptr) {
+        HILOG_WARN("Visibility listener has been freed.");
+        return;
+    }
+    WindowManager::GetInstance().UnregisterVisibilityChangedListener(windowVisibilityChangedListener_);
+}
+
+void AppMgrServiceInner::HandleWindowVisibilityChanged(
+    const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
+{
+    HILOG_DEBUG("Called.");
+    if (windowVisibilityInfos.empty()) {
+        HILOG_WARN("Window visibility info is empty.");
+        return;
+    }
+    if (appRunningManager_ == nullptr) {
+        HILOG_ERROR("App running manager is nullptr.");
+        return;
+    }
+    appRunningManager_->OnWindowVisibilityChanged(windowVisibilityInfos);
+}
+
 void AppMgrServiceInner::PointerDeviceEventCallback(const char *key, const char *value, void *context)
 {
     HILOG_INFO("%{public}s called.", __func__);
@@ -4505,6 +4576,40 @@ bool AppMgrServiceInner::JudgeSelfCalledByToken(const sptr<IRemoteObject> &token
         return false;
     }
     return true;
+}
+
+void AppMgrServiceInner::SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
+    const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HILOG_DEBUG("Called.");
+    if (!appRecord) {
+        HILOG_ERROR("appRecord is nullptr");
+        return;
+    }
+    std::lock_guard<ffrt::mutex> lock(killpedProcessMapLock_);
+    int64_t restartTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
+    for (auto iter = killedPorcessMap_.begin(); iter != killedPorcessMap_.end();) {
+        int64_t killTime = iter->first;
+        if (restartTime - killTime > 2000) {
+            killedPorcessMap_.erase(iter++);
+            continue;
+        }
+        AAFwk::EventInfo currentEventInfo;
+        currentEventInfo = eventInfo;
+        currentEventInfo.time = restartTime;
+        std::string processName = appRecord->GetProcessName();
+        currentEventInfo.appUid = appRecord->GetUid();
+        if (currentEventInfo.bundleName == currentEventInfo.callerBundleName &&
+            processName != currentEventInfo.callerProcessName) {
+            currentEventInfo.processName = processName;
+            AAFwk::EventReport::SendKeyEvent(AAFwk::EventName::RESTART_PROCESS_BY_SAME_APP,
+                HiSysEventType::BEHAVIOR, eventInfo);
+            killedPorcessMap_.erase(iter++);
+            continue;
+        }
+        iter++;
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

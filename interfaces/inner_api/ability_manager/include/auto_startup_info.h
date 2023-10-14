@@ -13,15 +13,36 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_JS_TIMER_H
-#define OHOS_ABILITY_RUNTIME_JS_TIMER_H
+#ifndef OHOS_ABILITY_RUNTIME_AUTO_STARTUP_INFO_H
+#define OHOS_ABILITY_RUNTIME_AUTO_STARTUP_INFO_H
 
-#include "native_engine/native_engine.h"
+#include <string>
+
+#include "parcel.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-void InitTimer(napi_env env, napi_value globalObject);
+/**
+ * @struct AutoStartupInfo
+ * Defines auto startup info.
+ */
+struct AutoStartupInfo : public Parcelable {
+public:
+    std::string bundleName;
+    std::string abilityName;
+    std::string moduleName;
+    std::string abilityTypeName;
+
+    bool ReadFromParcel(Parcel &parcel);
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static AutoStartupInfo *Unmarshalling(Parcel &parcel);
+};
+
+struct AutoStartupStatus {
+    int32_t code;
+    bool isAutoStartup;
+    bool isEdmForce;
+};
 } // namespace AbilityRuntime
 } // namespace OHOS
-
-#endif // OHOS_ABILITY_RUNTIME_JS_TIMER_H
+#endif // OHOS_ABILITY_RUNTIME_AUTO_STARTUP_INFO_H

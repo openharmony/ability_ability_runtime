@@ -40,7 +40,9 @@
 #include "appexecfwk_errors.h"
 #include "bundle_info.h"
 #include "cpp/mutex.h"
+#include "event_report.h"
 #include "fault_data.h"
+#include "hisysevent.h"
 #include "iapp_state_callback.h"
 #include "iapplication_state_observer.h"
 #include "iconfiguration_observer.h"
@@ -55,6 +57,7 @@
 #include "task_handler_wrap.h"
 #include "want.h"
 #include "window_focus_changed_listener.h"
+#include "window_visibility_changed_listener.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -648,6 +651,12 @@ public:
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
     /**
+     * Handle window visibility changed.
+     */
+    void HandleWindowVisibilityChanged(
+            const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+    
+    /**
      * Set the current userId, only used by abilityMgr.
      *
      * @param userId the user id.
@@ -721,6 +730,16 @@ public:
     void FreeFocusListener();
 
     /**
+     * Init window visibility changed listener.
+     */
+    void InitWindowVisibilityChangedListener();
+
+    /**
+     * Free window visibility changed listener.
+     */
+    void FreeWindowVisibilityChangedListener();
+
+    /*
      * @brief Notify NativeEngine GC of status change.
      *
      * @param state GC state
@@ -1045,6 +1064,9 @@ private:
     int32_t NotifyAbilitysDebugChange(const std::string &bundleName, const bool &isAppDebug);
 
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
+
+    void SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
+        const std::shared_ptr<AppRunningRecord> &appRecord);
 private:
     /**
      * Notify application status.
@@ -1077,6 +1099,7 @@ private:
     ffrt::mutex configurationObserverLock_;
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
     sptr<WindowFocusChangedListener> focusListener_;
+    sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
     std::unordered_set<int32_t> renderUidSet_;
@@ -1086,6 +1109,8 @@ private:
     int32_t lastRenderUid_ = Constants::START_UID_FOR_RENDER_PROCESS;
     sptr<IAbilityDebugResponse> abilityDebugResponse_;
     std::shared_ptr<AppDebugManager> appDebugManager_;
+    ffrt::mutex killpedProcessMapLock_;
+    mutable std::map<int64_t, std::string> killedPorcessMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
