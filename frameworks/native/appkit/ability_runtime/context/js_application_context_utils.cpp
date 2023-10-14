@@ -17,14 +17,19 @@
 
 #include <map>
 
+#include "ability_business_error.h"
+#include "ability_manager_client.h"
+#include "ability_manager_interface.h"
 #include "ability_runtime_error_util.h"
 #include "application_context.h"
 #include "application_context_manager.h"
 #include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
-#include "js_application_context_auto_startup_manager.h"
+#include "js_ability_auto_startup_callback.h"
+#include "js_ability_auto_startup_manager_utils.h"
 #include "js_context_utils.h"
 #include "js_data_struct_converter.h"
+#include "js_error_utils.h"
 #include "js_resource_manager_utils.h"
 #include "js_runtime_utils.h"
 #include "tokenid_kit.h"
@@ -1145,8 +1150,7 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
     }
 
     BindNativeApplicationContext(env, object);
-    return reinterpret_cast<napi_value>(JsApplicationContextAutoStartupManagerInit(
-        reinterpret_cast<NativeEngine *>(env), reinterpret_cast<NativeValue *>(object)));
+    return object;
 }
 
 void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_value object)
@@ -1183,6 +1187,9 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetRunningProcessInformation);
     BindNativeFunction(env, object, "getGroupDir", MD_NAME,
         JsApplicationContextUtils::GetGroupDir);
+    BindNativeFunction(env, object, "setAutoStartup", MD_NAME, JsApplicationContextUtils::SetAutoStartup);
+    BindNativeFunction(env, object, "cancelAutoStartup", MD_NAME, JsApplicationContextUtils::CancelAutoStartup);
+    BindNativeFunction(env, object, "isAutoStartup", MD_NAME, JsApplicationContextUtils::IsAutoStartup);
 }
 
 JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(
@@ -1211,38 +1218,234 @@ JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(
     }
     return processState;
 }
-NativeValue *JsApplicationContextUtils::JsApplicationContextAutoStartupManagerInit(
-    NativeEngine *engine, NativeValue *exports)
+
+napi_value JsApplicationContextUtils::SetAutoStartup(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnSetAutoStartup, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::CancelAutoStartup(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(
+        env, info, JsApplicationContextUtils, OnCancelAutoStartup, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::IsAutoStartup(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnIsAutoStartup, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnRegisterAutoStartupCallback(napi_env env, NapiCallbackInfo &info)
 {
     HILOG_DEBUG("Called.");
-    if (engine == nullptr || exports == nullptr) {
-        HILOG_ERROR("Invalid input parameters.");
-        return nullptr;
+    if (info.argc < ARGC_TWO) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
     }
 
-    NativeObject *object = OHOS::AbilityRuntime::ConvertNativeValueTo<NativeObject>(exports);
-    if (object == nullptr) {
-        HILOG_ERROR("object is nullptr");
-        return nullptr;
+    std::string type;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], type) || type != "abilityAutoStartup") {
+        HILOG_ERROR("Parse type failed.");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
     }
 
-    std::unique_ptr<JsApplicationContextAutoStartupManager> jsApplicationContextAutoStartupManager =
-        std::make_unique<JsApplicationContextAutoStartupManager>();
-    object->SetNativePointer(
-        jsApplicationContextAutoStartupManager.release(), JsApplicationContextAutoStartupManager::Finalizer, nullptr);
+    if (jsAutoStartupCallback_ == nullptr) {
+        jsAutoStartupCallback_ = new (std::nothrow) JsAbilityAutoStartupCallBack(env);
+        if (jsAutoStartupCallback_ == nullptr) {
+            HILOG_ERROR("jsAutoStartupCallback_ is nullptr.");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+            return CreateJsUndefined(env);
+        }
 
-    BindNativeFunction(
-        *engine, *object, "on", MD_NAME, JsApplicationContextAutoStartupManager::RegisterAutoStartupCallback);
-    BindNativeFunction(
-        *engine, *object, "off", MD_NAME, JsApplicationContextAutoStartupManager::UnregisterAutoStartupCallback);
-    BindNativeFunction(
-        *engine, *object, "setAutoStartup", MD_NAME, JsApplicationContextAutoStartupManager::SetAutoStartup);
-    BindNativeFunction(
-        *engine, *object, "cancelAutoStartup", MD_NAME, JsApplicationContextAutoStartupManager::CancelAutoStartup);
-    BindNativeFunction(
-        *engine, *object, "isAutoStartup", MD_NAME, JsApplicationContextAutoStartupManager::IsAutoStartup);
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->RegisterAutoStartupCallback(
+            jsAutoStartupCallback_->AsObject());
+        if (ret != ERR_OK) {
+            jsAutoStartupCallback_ = nullptr;
+            HILOG_ERROR("Register auto start up listener error[%{public}d].", ret);
+            ThrowError(env, GetJsErrorCodeByNativeError(ret));
+            return CreateJsUndefined(env);
+        }
+    }
 
-    return exports;
+    jsAutoStartupCallback_->Register(info.argv[INDEX_ONE]);
+    return CreateJsUndefined(env);
+}
+
+napi_value JsApplicationContextUtils::OnUnregisterAutoStartupCallback(
+    napi_env env, NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (info.argc < ARGC_ONE) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    std::string type;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], type) || type != "abilityAutoStartup") {
+        HILOG_ERROR("Failed to parse type.");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    if (jsAutoStartupCallback_ == nullptr) {
+        HILOG_ERROR("jsAutoStartupCallback_ is nullptr.");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return CreateJsUndefined(env);
+    }
+
+    auto callback = info.argc > ARGC_ONE ? info.argv[INDEX_ONE] : CreateJsUndefined(env);
+    jsAutoStartupCallback_->UnRegister(callback);
+    if (jsAutoStartupCallback_->IsCallbacksEmpty()) {
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->UnregisterAutoStartupCallback(
+            jsAutoStartupCallback_->AsObject());
+        if (ret != ERR_OK) {
+            ThrowError(env, GetJsErrorCodeByNativeError(ret));
+        }
+        jsAutoStartupCallback_ = nullptr;
+    }
+    return CreateJsUndefined(env);
+}
+
+napi_value JsApplicationContextUtils::OnSetAutoStartup(napi_env env, NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (info.argc < ARGC_ONE) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    AutoStartupInfo autoStartupInfo;
+    if (!UnwrapAutoStartupInfo(env, info.argv[INDEX_ZERO], autoStartupInfo)) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    auto retVal = std::make_shared<int32_t>(0);
+    NapiAsyncTask::ExecuteCallback execute = [autoStartupInfo, ret = retVal] () {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            return;
+        }
+        *ret = AAFwk::AbilityManagerClient::GetInstance()->SetAutoStartup(autoStartupInfo);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [ret = retVal](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(AAFwk::INNER_ERR)));
+            return;
+        }
+        if (*ret != ERR_OK) {
+            HILOG_ERROR("Failed error:%{public}d.", *ret);
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*ret)));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
+
+    napi_value lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnSetAutoStartup",
+        env,
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsApplicationContextUtils::OnCancelAutoStartup(napi_env env, NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (info.argc < ARGC_ONE) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    AutoStartupInfo autoStartupInfo;
+    if (!UnwrapAutoStartupInfo(env, info.argv[INDEX_ZERO], autoStartupInfo)) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    auto retVal = std::make_shared<int32_t>(0);
+    NapiAsyncTask::ExecuteCallback execute = [autoStartupInfo, ret = retVal] () {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            return;
+        }
+        *ret = AAFwk::AbilityManagerClient::GetInstance()->CancelAutoStartup(autoStartupInfo);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = [ret = retVal](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (ret == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(AAFwk::INNER_ERR)));
+            return;
+        }
+        if (*ret != ERR_OK) {
+            HILOG_ERROR("Failed error:%{public}d.", *ret);
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*ret)));
+            return;
+        }
+        task.ResolveWithNoError(env, CreateJsUndefined(env));
+    };
+
+    napi_value lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnCancelAutoStartup",
+        env,
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
+}
+
+napi_value JsApplicationContextUtils::OnIsAutoStartup(napi_env env, NapiCallbackInfo &info)
+{
+    HILOG_DEBUG("Called.");
+    if (info.argc < ARGC_ONE) {
+        HILOG_ERROR("The param is invalid.");
+        ThrowTooFewParametersError(env);
+        return CreateJsUndefined(env);
+    }
+
+    AutoStartupInfo autoStartupInfo;
+    if (!UnwrapAutoStartupInfo(env, info.argv[INDEX_ZERO], autoStartupInfo)) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    auto retVal = std::make_shared<int32_t>(0);
+    auto isAutoStartup = std::make_shared<bool>(false);
+    NapiAsyncTask::ExecuteCallback execute = [autoStartupInfo, ret = retVal, isFlag = isAutoStartup] () {
+        if (ret == nullptr || isFlag == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            return;
+        }
+        *ret = AAFwk::AbilityManagerClient::GetInstance()->IsAutoStartup(autoStartupInfo, *isFlag);
+    };
+
+    NapiAsyncTask::CompleteCallback complete = 
+        [ret = retVal, isFlag = isAutoStartup](napi_env env, NapiAsyncTask &task, int32_t status) {
+        if (ret == nullptr || isFlag == nullptr) {
+            HILOG_ERROR("The param is invalid.");
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(AAFwk::INNER_ERR)));
+            return;
+        }
+        if (*ret != ERR_OK) {
+            HILOG_ERROR("Failed error:%{public}d.", *ret);
+            task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(*ret)));
+            return;
+        }
+        task.Resolve(env, CreateJsValue(env, *isFlag));
+    };
+
+    napi_value lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
+    napi_value result = nullptr;
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnIsAutoStartup", env,
+        CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
+    return result;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS
