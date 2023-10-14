@@ -31,6 +31,7 @@ namespace OHOS {
 namespace AAFwk {
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 constexpr int32_t CYCLE_LIMIT = 1000;
+constexpr int32_t MAX_AUTO_STARTUP_COUNT = 100;
 bool AbilityManagerProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(AbilityManagerProxy::GetDescriptor())) {
@@ -4204,7 +4205,7 @@ int32_t AbilityManagerProxy::QueryAllAutoStartupApplications(std::vector<AutoSta
     }
 
     auto infoSize = reply.ReadInt32();
-    for (auto i = 0; i < infoSize; ++i) {
+    for (auto i = 0; i < infoSize && i < MAX_AUTO_STARTUP_COUNT; ++i) {
         std::unique_ptr<AutoStartupInfo> info(reply.ReadParcelable<AutoStartupInfo>());
         if (!info) {
             HILOG_ERROR("Read Parcelable result infos failed.");

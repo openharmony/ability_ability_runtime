@@ -15,7 +15,10 @@ import("//build/ohos.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 ohos_shared_library("autostartupcallback") {
-  include_dirs = [ "./" ]
+  include_dirs = [
+    "./",
+    "${ability_runtime_napi_path}/inner/napi_common/",
+  ]
 
   sources = [
     "js_ability_auto_startup_callback.cpp",

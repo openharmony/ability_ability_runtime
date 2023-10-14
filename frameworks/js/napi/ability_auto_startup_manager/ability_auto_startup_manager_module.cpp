@@ -16,14 +16,13 @@
 #include "js_ability_auto_startup_manager.h"
 #include "native_engine/native_engine.h"
 
+static napi_module _module = {
+    .nm_filename = "app/ability/libautostartupmanager.so/ability_auto_startup_manager.js",
+    .nm_register_func = OHOS::AbilityRuntime::JsAbilityAutoStartupManagerInit,
+    .nm_modname = "app.ability.autoStartupManager",
+};
+
 extern "C" __attribute__((constructor)) void NAPI_app_ability_autoStartupManager_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "app.ability.autoStartupManager",
-        .fileName = "app/ability/libautostartupmanager.so/ability_auto_startup_manager.js",
-        .registerCallback = OHOS::AbilityRuntime::JsAbilityAutoStartupManagerInit,
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&_module);
 }
