@@ -782,6 +782,9 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     if (type == "applicationStateChange") {
         return OnOnApplicationStateChange(env, info);
     }
+    if (type == "abilityAutoStartup") {
+        return OnRegisterAutoStartupCallback(env, info);
+    }
     HILOG_ERROR("on function type not match.");
     AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
     return CreateJsUndefined(env);
@@ -835,6 +838,9 @@ napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info
     }
     if (type == "environmentEvent") {
         return OnOffEnvironmentEventSync(env, info, callbackId);
+    }
+    if (type == "abilityAutoStartup") {
+        return OnUnregisterAutoStartupCallback(env, info);
     }
     HILOG_ERROR("off function type not match.");
     AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -1349,8 +1355,7 @@ napi_value JsApplicationContextUtils::OnSetAutoStartup(napi_env env, NapiCallbac
 
     napi_value lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnSetAutoStartup",
-        env,
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnSetAutoStartup", env,
         CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
@@ -1395,8 +1400,7 @@ napi_value JsApplicationContextUtils::OnCancelAutoStartup(napi_env env, NapiCall
 
     napi_value lastParam = (info.argc >= ARGC_TWO) ? info.argv[INDEX_ONE] : nullptr;
     napi_value result = nullptr;
-    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnCancelAutoStartup",
-        env,
+    NapiAsyncTask::Schedule("JsApplicationContextUtils::OnCancelAutoStartup", env,
         CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
     return result;
 }
