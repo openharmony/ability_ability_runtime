@@ -248,13 +248,13 @@ int32_t AbilityAutoStartupService::RegisterAutoStartupCallback(const sptr<IRemot
     {
         std::lock_guard<std::mutex> lock(autoStartUpMutex_);
         auto item = callbackMaps_.find(bundleName);
-        if (item == callbackMaps_.end()) {
-            callbackMaps_.emplace(bundleName, callback);
-            SetDeathRecipient(
-                callback, new (std::nothrow) AbilityAutoStartupService::ClientDeathRecipient(weak_from_this()));
-        } else {
+        if (item != callbackMaps_.end()) {
             HILOG_DEBUG("Callback is already exist.");
+            return ERR_OK;
         }
+        callbackMaps_.emplace(bundleName, callback);
+        SetDeathRecipient(
+            callback, new (std::nothrow) AbilityAutoStartupService::ClientDeathRecipient(weak_from_this()));
     }
 
     return ERR_OK;
@@ -280,12 +280,11 @@ int32_t AbilityAutoStartupService::UnregisterAutoStartupCallback(const sptr<IRem
             HILOG_DEBUG("BundleName is not exist.");
             return ERR_NAME_NOT_FOUND;
         }
-        if (item->second == callback) {
-            callbackMaps_.erase(item);
-        } else {
-            HILOG_ERROR("Callback is not exist.");
+        if (item->second != callback) {
+            HILOG_DEBUG("Callback is not exist.");
             return ERR_NAME_NOT_FOUND;
         }
+        callbackMaps_.erase(item);
     }
 
     return ERR_OK;
@@ -509,9 +508,9 @@ void AbilityAutoStartupService::SetDeathRecipient(
     if (iter == deathRecipients_.end()) {
         deathRecipients_.emplace(callback, deathRecipient);
         callback->AddDeathRecipient(deathRecipient);
-    } else {
-        HILOG_DEBUG("The deathRecipient has been added.");
+        return;
     }
+    HILOG_DEBUG("The deathRecipient has been added.");
 }
 
 void AbilityAutoStartupService::CleanResource(const wptr<IRemoteObject> &remote)
