@@ -146,8 +146,8 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStarted_0100, TestSize.Level1
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
 
-    EXPECT_CALL(*mockStub_,OnAppDebugStarted(_)).Times(1);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data,reply), NO_ERROR);
+    EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(1);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data, reply), NO_ERROR);
 }
 
 /**
@@ -165,8 +165,8 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStarted_0200, TestSize.Level1
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(debugInfo);
 
-    EXPECT_CALL(*mockStub_,OnAppDebugStarted(_)).Times(0);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data,reply), ERR_INVALID_DATA);
+    EXPECT_CALL(*mockStub_, OnAppDebugStarted(_)).Times(0);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStarted(data, reply), ERR_INVALID_DATA);
 }
 
 /**
@@ -183,8 +183,8 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStoped_0100, TestSize.Level1)
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(&debugInfo);
     
-    EXPECT_CALL(*mockStub_,OnAppDebugStoped(_)).Times(1);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data,reply), NO_ERROR);
+    EXPECT_CALL(*mockStub_, OnAppDebugStoped(_)).Times(1);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data, reply), NO_ERROR);
 }
 
 /**
@@ -202,8 +202,8 @@ HWTEST_F(AppDebugListenerStubTest, HandleOnAppDebugStoped_0200, TestSize.Level1)
     data.WriteInt32(DEBUG_INFO_SIZE_ONE);
     data.WriteParcelable(debugInfo);
 
-    EXPECT_CALL(*mockStub_,OnAppDebugStoped(_)).Times(0);
-    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data,reply), ERR_INVALID_DATA);
+    EXPECT_CALL(*mockStub_, OnAppDebugStoped(_)).Times(0);
+    EXPECT_EQ(mockStub_->HandleOnAppDebugStoped(data, reply), ERR_INVALID_DATA);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
