@@ -53,7 +53,7 @@ void AmsMgrStubTest::SetUp()
 {
     GTEST_LOG_(INFO) << "AmsMgrStubTest::SetUp()";
 
-	listener_ = new MockAppDebugListenerStub();
+    listener_ = new MockAppDebugListenerStub();
     response_ = new MockAbilityDebugResponseStub();
     mockAmsMgrScheduler_ = new MockAmsMgrScheduler();
 }
