@@ -1294,5 +1294,73 @@ int32_t AppMgrProxy::SendRequest(AppMgrInterfaceCode code, MessageParcel &data, 
 
     return remote->SendRequest(static_cast<uint32_t>(code), data, reply, option);
 }
+
+int32_t AppMgrProxy::RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+{
+    HILOG_DEBUG("Called.");
+    if (listener == nullptr) {
+        HILOG_ERROR("Listener is null");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write Interface Token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        HILOG_ERROR("Listener write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    auto error = remote->SendRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APP_RUNNING_LISTENER), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AppMgrProxy::UnregisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+{
+    HILOG_DEBUG("Called.");
+    if (listener == nullptr) {
+        HILOG_ERROR("Listener is null");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write Interface Token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        HILOG_ERROR("Listener write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    auto error = remote->SendRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APP_RUNNING_LISTENER), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

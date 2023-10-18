@@ -38,6 +38,7 @@
 #include "ams_mgr_scheduler.h"
 #include "ams_mgr_scheduler.h"
 #include "app_malloc_info.h"
+#include "app_running_status_listener_interface.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -373,6 +374,23 @@ public:
      * @return Is the status change completed.
      */
     virtual int32_t ChangeAppGcState(pid_t pid, int32_t state) override;
+
+    /**
+     * Register AppRunning Status Listener.
+     *
+     * @param listener Running Status Listener.
+     *
+     */
+    int32_t RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener) override;
+
+    /**
+     * Unregister AppRunning Status Listener.
+     *
+     * @param listener Running Status Listener.
+     *
+     */
+    int32_t UnregisterAppRunningStatusListener(
+        const sptr<AbilityRuntime::IAppRunningStatusListener> &listener) override;
 
 private:
     /**

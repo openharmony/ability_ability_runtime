@@ -176,6 +176,16 @@ public:
         return 0;
     }
 
+    int32_t RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+    {
+        return 0;
+    }
+
+    int32_t UnregisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+    {
+        return 0;
+    }
+
 private:
     Semaphore sem_;
     std::string data_;

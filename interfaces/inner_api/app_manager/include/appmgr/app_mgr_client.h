@@ -23,6 +23,7 @@
 #include "app_mem_info.h"
 #include "app_mgr_constants.h"
 #include "app_mgr_interface.h"
+#include "app_running_status_listener_interface.h"
 #include "application_info.h"
 #include "bundle_info.h"
 #include "fault_data.h"
@@ -546,6 +547,22 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
+
+    /**
+     * Register AppRunning Status Listener.
+     *
+     * @param listener Running Status Listener.
+     *
+     */
+    int32_t RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener);
+
+    /**
+     * Unregister AppRunning Status Listener.
+     *
+     * @param listener Running Status Listener.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener);
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

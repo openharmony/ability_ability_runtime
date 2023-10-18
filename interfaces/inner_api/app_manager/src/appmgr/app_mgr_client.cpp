@@ -854,5 +854,24 @@ int32_t AppMgrClient::NotifyPageHide(const sptr<IRemoteObject> &token, const Pag
     }
     return service->NotifyPageHide(token, pageStateData);
 }
+
+int32_t AppMgrClient::RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->RegisterAppRunningStatusListener(listener);
+}
+
+int32_t AppMgrClient::UnregisterAppRunningStatusListener(
+    const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->UnregisterAppRunningStatusListener(listener);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
