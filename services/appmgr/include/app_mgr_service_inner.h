@@ -34,6 +34,8 @@
 #include "app_record_id.h"
 #include "app_running_manager.h"
 #include "app_running_record.h"
+#include "app_running_status_listener_interface.h"
+#include "app_running_status_module.h"
 #include "app_scheduler_interface.h"
 #include "app_spawn_client.h"
 #include "app_task_info.h"
@@ -806,6 +808,23 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
+
+    /**
+     * Register AppRunning Status Listener.
+     *
+     * @param listener Running Status Listener.
+     *
+     */
+    int32_t RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener);
+
+    /**
+     * Unregister AppRunning Status Listener.
+     *
+     * @param listener Running Status Listener.
+     *
+     */
+    int32_t UnregisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener);
+
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1067,6 +1086,51 @@ private:
 
     void SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
         const std::shared_ptr<AppRunningRecord> &appRecord);
+    /**
+     * App running status event.
+     *
+     * @param bundle, bundle name in Application record.
+     * @param uid, app uid in Application record.
+     * @param runningStatus, running status.
+     *
+     * @return
+     */
+    void AppRunningStatusEvent(const std::string &bundle, int32_t &uid, int32_t runningStatus);
+
+    /**
+     * LoadAbilityInner, Internal implementation load the ability that needed to be started.
+     *
+     * @param token, the unique identification to start the ability.
+     * @param preToken, the unique identification to call the ability.
+     * @param abilityInfo, the ability information.
+     * @param appInfo, the app information.
+     * @param want, the ability want.
+     * @param hapModuleInfo, the hap module info.
+     * @param processName, the process name.
+     * @param bundleInfo, the bundle info.
+     *
+     * @return
+     */
+    void LoadAbilityInner(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
+        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
+        const std::shared_ptr<AAFwk::Want> &want, const HapModuleInfo &hapModuleInfo, const std::string processName,
+        const BundleInfo &bundleInfo);
+
+    /**
+     * StartEmptyProcessInner, Internal implementation start empty process.
+     *
+     * @param want, the ability want.
+     * @param observer, the test observer remote object.
+     * @param info, the bundle info.
+     * @param processName, the process name.
+     * @param userId, user ID.
+     * @param appRecord, the application record.
+     *
+     * @return
+     */
+    int StartEmptyProcessInner(const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &info,
+        const std::string &processName, const int userId, const std::shared_ptr<AppRunningRecord> &appRecord);
+
 private:
     /**
      * Notify application status.
@@ -1111,6 +1175,7 @@ private:
     std::shared_ptr<AppDebugManager> appDebugManager_;
     ffrt::mutex killpedProcessMapLock_;
     mutable std::map<int64_t, std::string> killedPorcessMap_;
+    std::shared_ptr<AbilityRuntime::AppRunningStausModule> appRunningStausModule_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
