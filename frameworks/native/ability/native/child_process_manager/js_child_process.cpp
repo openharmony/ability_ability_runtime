@@ -46,7 +46,9 @@ void JsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &info)
         srcPath.append(info->moduleName).append("/");
     }
     srcPath.append(info->srcEntry);
-    srcPath.erase(srcPath.rfind("."));
+    if (srcPath.rfind(".") != std::string::npos) {
+        srcPath.erase(srcPath.rfind("."));
+    }
     srcPath.append(".abc");
     std::string moduleName(info->moduleName);
     moduleName.append("::").append(info->name);
