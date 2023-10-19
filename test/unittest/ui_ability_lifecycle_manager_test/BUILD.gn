@@ -28,7 +28,10 @@ ohos_unittest("ui_ability_lifecycle_manager_test") {
   public_configs =
       [ "${ability_runtime_services_path}/abilitymgr:abilityms_config" ]
 
-  sources = [ "ui_ability_lifecycle_manager_test.cpp" ]
+  sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/extension_config.cpp",
+    "ui_ability_lifecycle_manager_test.cpp"
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
@@ -50,6 +53,7 @@ ohos_unittest("ui_ability_lifecycle_manager_test") {
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "ffrt:libffrt",
+    "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
