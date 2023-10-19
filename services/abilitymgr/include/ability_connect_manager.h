@@ -478,6 +478,11 @@ private:
      */
     void RemoveExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
 
+    /**
+     * Handle extension disconnect task.
+     */
+    void HandleExtensionDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
+
 private:
     void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);
     int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord) const;

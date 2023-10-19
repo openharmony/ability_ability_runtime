@@ -32,6 +32,23 @@ const std::string EXTENSION_AUTO_DISCONNECT_TIME = "auto_disconnect_time";
 const int32_t DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME = 60000;
 }
 
+ExtensionConfig::ExtensionConfig()
+{
+    LoadExtensionConfiguration();
+}
+
+void ExtensionConfig::LoadExtensionConfiguration()
+{
+    HILOG_DEBUG("call");
+    nlohmann::json jsonBuf;
+    if (!ReadFileInfoJson(AMS_EXTENSION_CONFIG, jsonBuf)) {
+        HILOG_ERROR("Parse file failed.");
+        return;
+    }
+
+    LoadExtensionAutoDisconnectTime(jsonBuf);
+}
+
 int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(const AppExecFwk::ExtensionAbilityType &type)
 {
     if (extensionAutoDisconnectTimeMap_.find(type) != extensionAutoDisconnectTimeMap_.end()) {
@@ -40,7 +57,7 @@ int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(const AppExecFwk::Extens
     return DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME;
 }
 
-int32_t ExtensionConfig::LoadExtensionAutoDisconnectTime(nlohmann::json &object)
+void ExtensionConfig::LoadExtensionAutoDisconnectTime(nlohmann::json &object)
 {
     if (object.contains(EXTENSION_AUTO_DISCONNECT_TIME_NAME)) {
         for (auto item : object.at(EXTENSION_AUTO_DISCONNECT_TIME_NAME).items()) {
@@ -58,21 +75,6 @@ int32_t ExtensionConfig::LoadExtensionAutoDisconnectTime(nlohmann::json &object)
             extensionAutoDisconnectTimeMap_[type] = extensionAutoDisconnectTime;
         }
     }
-    return AmsConfigurationParameter::READ_OK;
-}
-
-int32_t ExtensionConfig::LoadExtensionConfiguration()
-{
-    HILOG_DEBUG("call");
-    nlohmann::json jsonBuf;
-    if (!ReadFileInfoJson(AMS_EXTENSION_CONFIG, jsonBuf)) {
-        HILOG_ERROR("Parse file failed.");
-        return AmsConfigurationParameter::READ_JSON_FAIL;
-    }
-
-    LoadExtensionAutoDisconnectTime(jsonBuf);
-
-    return AmsConfigurationParameter::READ_OK;
 }
 
 bool ExtensionConfig::ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf)

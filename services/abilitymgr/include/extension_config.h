@@ -19,17 +19,17 @@
 #include <map>
 #include <nlohmann/json.hpp>
 
-#include "ams_configuration_parameter.h"
 #include "extension_ability_info.h"
 
 namespace OHOS {
 namespace AAFwk {
 class ExtensionConfig {
 public:
-    int32_t LoadExtensionConfiguration();
+    ExtensionConfig();
+    void LoadExtensionConfiguration();
     int32_t GetExtensionAutoDisconnectTime(const AppExecFwk::ExtensionAbilityType &type);
 private:
-    int32_t LoadExtensionAutoDisconnectTime(nlohmann::json &object);
+    void LoadExtensionAutoDisconnectTime(nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
 
     std::map<AppExecFwk::ExtensionAbilityType, int32_t> extensionAutoDisconnectTimeMap_;
