@@ -23,6 +23,7 @@
 #include "ability_manager_service.h"
 #include "ability_util.h"
 #include "appfreeze_manager.h"
+#include "extension_config.h"
 #include "hitrace_meter.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
@@ -365,6 +366,9 @@ int AbilityConnectManager::DisconnectAbilityLocked(const sptr<IAbilityConnection
             CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
             HILOG_INFO("abilityName: %{public}s, bundleName: %{public}s",
                 abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
+            if (abilityRecord->GetAbilityInfo().type == AbilityType::EXTENSION) {
+                RemoveExtensionDelayDisconnectTask(connectRecord);
+            }
             if (connectRecord->GetCallerTokenId() != IPCSkeleton::GetCallingTokenID() &&
                 static_cast<uint32_t>(IPCSkeleton::GetSelfTokenID() != IPCSkeleton::GetCallingTokenID())) {
                 HILOG_WARN("The caller is inconsistent with the caller stored in the connectRecord.");
@@ -608,6 +612,9 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     auto connectRecordList = abilityRecord->GetConnectRecordList();
     for (auto &connectRecord : connectRecordList) {
         connectRecord->ScheduleConnectAbilityDone();
+        if (abilityRecord->GetAbilityInfo().type == AbilityType::EXTENSION) {
+            PostExtensionDelayDisconnectTask(connectRecord);
+        }
     }
 
     return ERR_OK;
@@ -1059,7 +1066,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
     }
 
     if (GetExtensionFromServiceMapInner(abilityRecord->GetToken()) == nullptr) {
-        HILOG_ERROR("Timeojut ability record is not exist in service map.");
+        HILOG_ERROR("Timeout ability record is not exist in service map.");
         return;
     }
     MoveToTerminatingMap(abilityRecord);
@@ -2030,6 +2037,47 @@ bool AbilityConnectManager::IsWindowExtensionFocused(uint32_t extensionTokenId, 
         }
     }
     return false;
+}
+
+void AbilityConnectManager::PostExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord)
+{
+    if (taskHandler_ == nullptr) {
+        return;
+    }
+    CHECK_POINTER(connectRecord);
+    int32_t recordId = connectRecord->GetRecordId();
+    std::string taskName = std::string("DelayDisconnectTask_") + std::to_string(recordId);
+
+    auto abilityRecord = connectRecord->GetAbilityRecord();
+    CHECK_POINTER(abilityRecord);
+    auto type = abilityRecord->GetAbilityInfo().extensionAbilityType;
+    if (extensionConfig_ == nullptr) {
+        extensionConfig_ = std::make_shared<ExtensionConfig>();
+        extensionConfig_->LoadExtensionConfiguration();
+    }
+    int32_t delayTime = extensionConfig_->GetExtensionAutoDisconnectTime(type);
+
+    auto task = [connectRecord, connectManager = shared_from_this()]() {
+        HILOG_WARN("");
+        int result = connectRecord->DisconnectAbility();
+        if (result != ERR_OK) {
+            HILOG_WARN("Auto disconnect extension error, ret: %{public}d", result);
+        }
+        connectRecord->CompleteDisconnect(ERR_OK, false);
+        connectManager->RemoveConnectionRecordFromMap(connectRecord);
+    };
+    taskHandler_->SubmitTask(task, taskName, delayTime);
+}
+
+void AbilityConnectManager::RemoveExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord)
+{
+    if (taskHandler_ == nullptr) {
+        return;
+    }
+    CHECK_POINTER(connectRecord);
+    int32_t recordId = connectRecord->GetRecordId();
+    std::string taskName = std::string("DelayDisconnectTask_") + std::to_string(recordId);
+    taskHandler_->CancelTask(taskName);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
