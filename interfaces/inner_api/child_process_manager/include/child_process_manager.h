@@ -44,9 +44,7 @@ private:
     ChildProcessManagerErrorCode PreCheck();
     bool MultiProcessModelEnabled();
     void HandleChildProcess(const std::string &srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo);
-    std::string GetModuleNameFromSrcEntry(const std::string &srcEntry);
-    bool GetHapModuleInfo(const std::string &bundleName,
-                          const std::string &moduleName, AppExecFwk::HapModuleInfo &hapModuleInfo);
+    bool GetHapModuleInfo(const std::string &bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo);
     std::unique_ptr<AbilityRuntime::Runtime> CreateRuntime(AppExecFwk::HapModuleInfo &hapModuleInfo);
 
     static bool signalRegistered_;
