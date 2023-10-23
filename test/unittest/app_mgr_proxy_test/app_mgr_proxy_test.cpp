@@ -292,7 +292,7 @@ HWTEST_F(AppMgrProxyTest, NotifyAppFault_001, TestSize.Level1)
         .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
     FaultData faultData;
     appMgrProxy_->NotifyAppFault(faultData);
-    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT));
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT));
 }
 
 /**
@@ -308,7 +308,24 @@ HWTEST_F(AppMgrProxyTest, NotifyAppFaultBySA_001, TestSize.Level1)
         .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
     AppFaultDataBySA faultData;
     appMgrProxy_->NotifyAppFaultBySA(faultData);
-    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT_BY_SA));
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT_BY_SA));
+}
+
+/**
+ * @tc.name: ChangeAppGcState_001
+ * @tc.desc: Change app Gc state.
+ * @tc.type: FUNC
+ * @tc.require: issuesI85VVU
+ */
+HWTEST_F(AppMgrProxyTest, ChangeAppGcState_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mockAppMgrService_.GetRefPtr(), &MockAppMgrService::InvokeSendRequest));
+    int32_t pid = 0;
+    int32_t state = 0;
+    appMgrProxy_->ChangeAppGcState(pid, state);
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::CHANGE_APP_GC_STATE));
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
