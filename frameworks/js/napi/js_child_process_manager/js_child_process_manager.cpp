@@ -80,13 +80,14 @@ private:
         }
         HILOG_DEBUG("StartMode: %{public}d", startMode);
         if (startMode != MODE_SELF_FORK) {
-             HILOG_ERROR("Not supported StartMode");
-             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
-             return CreateJsUndefined(env);
+            HILOG_ERROR("Not supported StartMode");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return CreateJsUndefined(env);
         }
 
         NapiAsyncTask::CompleteCallback complete = [srcEntry, startMode](napi_env env, NapiAsyncTask &task,
                                                                          int32_t status) {
+            HILOG_DEBUG("OnStartChildProcess CompleteCallback");
             switch (startMode) {
                 case MODE_SELF_FORK: {
                     SelfForkProcess(env, task, srcEntry);
