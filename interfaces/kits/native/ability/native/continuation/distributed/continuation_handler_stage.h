@@ -53,7 +53,7 @@ public:
      * @param deviceId The device identifier. This value doesn't matter.
      * @return zero if success.
      */
-    virtual bool HandleStartContinuation(const sptr<IRemoteObject> &token, const std::string &deviceId) override;
+    bool HandleStartContinuation(const sptr<IRemoteObject> &token, const std::string &deviceId) override;
 
     /**
      * @brief Receive a scheduler which could handle reverse continuation.
@@ -61,43 +61,43 @@ public:
      *        reversible. This method will not be called if this continuation is not reversible.
      * @param remoteReplica A scheduler to handle reverse continuation request.
      */
-    virtual void HandleReceiveRemoteScheduler(const sptr<IRemoteObject> &remoteReplica) override;
+    void HandleReceiveRemoteScheduler(const sptr<IRemoteObject> &remoteReplica) override;
 
     /**
      * @brief Called by DMS when the migrate device finished.
      * @param result Zero indicate the continuation is success, otherwise integer less than zero.
      */
-    virtual void HandleCompleteContinuation(int result) override;
+    void HandleCompleteContinuation(int result) override;
 
     /**
      * @brief Pass the primary reverse continuation scheduler object
      * @param Primary The remote object repersenting the reverse continuation sch
      */
-    virtual void PassPrimary(const sptr<IRemoteObject> &Primary) override;
+    void PassPrimary(const sptr<IRemoteObject> &Primary) override;
 
     /**
      * @brief Indicate a reverse continuation
      * @return true if the reverse continuation was successful initiated,otherwise false
      */
-    virtual bool ReverseContinuation() override;
+    bool ReverseContinuation() override;
 
     /**
      * @brief Notify the result of a reverse continuation
      * @param reverseResult The result of the reverse continuation
      */
-    virtual void NotifyReverseResult(int reverseResult) override;
+    void NotifyReverseResult(int reverseResult) override;
 
     /**
      * @brief Handle the continuation back request from the primary
      * @param want The want object representing the continuation back request
      * @return true indicating successful handling of the continuation back request
      */
-    virtual bool ContinuationBack(const Want &want) override;
+    bool ContinuationBack(const Want &want) override;
 
     /**
      * @brief Notify Replica Terminated
      */
-    virtual void NotifyReplicaTerminated() override;
+    void NotifyReplicaTerminated() override;
 
     /**
      * @brief Notify the primary that the replica has terminated

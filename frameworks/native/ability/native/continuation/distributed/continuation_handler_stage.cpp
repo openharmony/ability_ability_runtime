@@ -24,14 +24,16 @@
 using OHOS::AAFwk::WantParams;
 namespace OHOS {
 namespace AppExecFwk {
-const std::string ContinuationHandlerStage::ORIGINAL_DEVICE_ID("deviceId");
-const std::string VERSION_CODE_KEY = "version";
-ContinuationHandlerStage::ContinuationHandlerStage(
-    std::weak_ptr<ContinuationManagerStage> &continuationManager, std::weak_ptr<AbilityRuntime::UIAbility> &uiAbility)
+namespace
 {
-    ability_ = uiAbility;
-    continuationManager_ = continuationManager;
+const std::string ORIGINAL_DEVICE_ID("deviceId");
+const std::string VERSION_CODE_KEY = "version";
 }
+
+ContinuationHandlerStage::ContinuationHandlerStage(
+    std::weak_ptr<ContinuationManagerStage> &continuationManager,
+    std::weak_ptr<AbilityRuntime::UIAbility> &uiAbility)
+    : ability_(uiAbility), continuationManager_(continuationManager) {}
 
 bool ContinuationHandlerStage::HandleStartContinuationWithStack(
     const sptr<IRemoteObject> &token, const std::string &deviceId, uint32_t versionCode)
