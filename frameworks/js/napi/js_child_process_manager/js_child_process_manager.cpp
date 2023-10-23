@@ -84,10 +84,8 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
         }
-
         NapiAsyncTask::CompleteCallback complete = [srcEntry, startMode](napi_env env, NapiAsyncTask &task,
                                                                          int32_t status) {
-            HILOG_DEBUG("OnStartChildProcess CompleteCallback");
             switch (startMode) {
                 case MODE_SELF_FORK: {
                     SelfForkProcess(env, task, srcEntry);
@@ -100,7 +98,6 @@ private:
                 }
             }
         };
-
         napi_value lastParam = (argc <= ARGC_TWO) ? nullptr : argv[ARGC_TWO];
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JsChildProcessManager::OnStartChildProcess",
