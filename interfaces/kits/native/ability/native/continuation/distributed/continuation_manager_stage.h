@@ -207,10 +207,6 @@ private:
     std::weak_ptr<ContinuationHandlerStage> continuationHandler_;
     std::shared_ptr<EventHandler> mainHandler_ = nullptr;
     std::mutex lock_;
-
-    static const int TIMEOUT_MS_WAIT_DMS_SCHEDULE_START_CONTINUATION;
-    static const int TIMEOUT_MS_WAIT_DMS_NOTIFY_CONTINUATION_COMPLETE;
-    static const int TIMEOUT_MS_WAIT_REMOTE_NOTIFY_BACK;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

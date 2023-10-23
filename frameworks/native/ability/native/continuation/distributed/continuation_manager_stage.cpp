@@ -29,8 +29,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-const int ContinuationManagerStage::TIMEOUT_MS_WAIT_DMS_NOTIFY_CONTINUATION_COMPLETE = 25000;
-const int ContinuationManagerStage::TIMEOUT_MS_WAIT_REMOTE_NOTIFY_BACK = 6000;
+namespace {
+constexpr int TIMEOUT_MS_WAIT_DMS_NOTIFY_CONTINUATION_COMPLETE = 25000;
+constexpr int TIMEOUT_MS_WAIT_REMOTE_NOTIFY_BACK = 6000;
 const std::string PAGE_STACK_PROPERTY_NAME = "pageStack";
 const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.key.supportContinuePageStack";
 const int32_t CONTINUE_ABILITY_REJECTED = 29360197;
@@ -40,10 +41,9 @@ const int32_t CONTINUE_ON_CONTINUE_MISMATCH = 29360204;
 #ifdef SUPPORT_GRAPHICS
 const int32_t CONTINUE_GET_CONTENT_FAILED = 29360200;
 #endif
-ContinuationManagerStage::ContinuationManagerStage()
-{
-    progressState_ = ProgressState::INITIAL;
 }
+
+ContinuationManagerStage::ContinuationManagerStage() : progressState_(ProgressState::INITIAL) {}
 
 bool ContinuationManagerStage::Init(const std::shared_ptr<AbilityRuntime::UIAbility> &ability,
     const sptr<IRemoteObject> &continueToken, const std::shared_ptr<AbilityInfo> &abilityInfo,
@@ -105,22 +105,26 @@ bool ContinuationManagerStage::HandleContinueAbilityWithStack(const std::string 
         return false;
     }
 
-    sptr<IRemoteObject> continueToken = continueToken_;
-    std::shared_ptr<ContinuationHandlerStage> continuationHandler = continuationHandler_.lock();
-    if (continuationHandler == nullptr) {
-        HILOG_ERROR("ContinuationHandler is nullptr.");
-        return false;
-    }
-
     InitMainHandlerIfNeed();
-    auto task = [continuationHandler, continueToken, deviceId, versionCode]() {
+    wptr<IRemoteObject> continueTokenWeak(continueToken_);
+    auto task = [continuationHandlerWeak = continuationHandler_, continueTokenWeak, deviceId, versionCode]() {
+        auto continuationHandler = continuationHandlerWeak.lock();
+        if (continuationHandler == nullptr) {
+            HILOG_ERROR("ContinuationHandler is nullptr.");
+            return;
+        }
+
+        auto continueToken = continueTokenWeak.promote();
+        if (continueToken == nullptr) {
+            HILOG_ERROR("continueToken is nullptr.");
+            return;
+        }
         continuationHandler->HandleStartContinuationWithStack(continueToken, deviceId, versionCode);
     };
     if (!mainHandler_->PostTask(task)) {
         HILOG_ERROR("PostTask failed.");
         return false;
     }
-
     HILOG_DEBUG("End.");
     return true;
 }
@@ -128,8 +132,7 @@ bool ContinuationManagerStage::HandleContinueAbilityWithStack(const std::string 
 int32_t ContinuationManagerStage::OnStartAndSaveData(WantParams &wantParams)
 {
     HILOG_DEBUG("Begin.");
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return ERR_INVALID_VALUE;
@@ -160,8 +163,7 @@ bool ContinuationManagerStage::IsContinuePageStack(const WantParams &wantParams)
 int32_t ContinuationManagerStage::OnContinueAndGetContent(WantParams &wantParams)
 {
     HILOG_DEBUG("Begin.");
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return ERR_INVALID_VALUE;
@@ -206,17 +208,15 @@ int32_t ContinuationManagerStage::OnContinue(WantParams &wantParams)
     HILOG_DEBUG("Ability isStageBasedModel %{public}d.", stageBased);
     if (!stageBased) {
         return OnStartAndSaveData(wantParams);
-    } else {
-        return OnContinueAndGetContent(wantParams);
     }
+    return OnContinueAndGetContent(wantParams);
 }
 
 #ifdef SUPPORT_GRAPHICS
 bool ContinuationManagerStage::GetContentInfo(WantParams &wantParams)
 {
     HILOG_DEBUG("Begin.");
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return false;
@@ -344,8 +344,7 @@ void ContinuationManagerStage::CompleteContinuation(int result)
         return;
     }
 
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return;
@@ -387,8 +386,7 @@ bool ContinuationManagerStage::NotifyRemoteTerminated()
     continuationState_ = ContinuationState::LOCAL_RUNNING;
     ChangeProcessState(ProgressState::INITIAL);
 
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return false;
@@ -402,8 +400,7 @@ bool ContinuationManagerStage::NotifyRemoteTerminated()
 bool ContinuationManagerStage::CheckContinuationIllegal()
 {
     HILOG_DEBUG("Begin.");
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return false;
@@ -426,7 +423,6 @@ bool ContinuationManagerStage::HandleContinueAbility(bool reversible, const std:
         return false;
     }
 
-    sptr<IRemoteObject> continueToken = continueToken_;
     std::shared_ptr<ContinuationHandlerStage> continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
         HILOG_ERROR("ContinuationHandler is nullptr.");
@@ -435,7 +431,19 @@ bool ContinuationManagerStage::HandleContinueAbility(bool reversible, const std:
     continuationHandler->SetReversible(reversible);
 
     InitMainHandlerIfNeed();
-    auto task = [continuationHandler, continueToken, deviceId]() {
+    wptr<IRemoteObject> continueTokeWeak(continueToken_);
+    auto task = [continuationHandlerWeak = continuationHandler_, continueTokeWeak, deviceId]() {
+        auto continuationHandler = continuationHandlerWeak.lock();
+        if (continuationHandler == nullptr) {
+            HILOG_ERROR("ContinuationHandler is nullptr.");
+            return;
+        }
+
+        auto continueToken = continueTokeWeak.promote();
+        if (continueToken == nullptr) {
+            HILOG_ERROR("continueToken is nullptr.");
+            return;
+        }
         continuationHandler->HandleStartContinuation(continueToken, deviceId);
     };
     if (!mainHandler_->PostTask(task)) {
@@ -520,8 +528,7 @@ bool ContinuationManagerStage::DoScheduleStartContinuation()
         return false;
     }
 
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return false;
@@ -542,8 +549,7 @@ bool ContinuationManagerStage::DoScheduleSaveData(WantParams &saveData)
         return false;
     }
 
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return false;
@@ -570,8 +576,7 @@ bool ContinuationManagerStage::DoScheduleRestoreData(const WantParams &restoreDa
         return false;
     }
 
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return false;
@@ -593,8 +598,7 @@ bool ContinuationManagerStage::DoScheduleRestoreData(const WantParams &restoreDa
 bool ContinuationManagerStage::DoRestoreFromRemote(const WantParams &restoreData)
 {
     HILOG_DEBUG("Begin.");
-    std::shared_ptr<AbilityRuntime::UIAbility> ability = nullptr;
-    ability = ability_.lock();
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = ability_.lock();
     if (ability == nullptr) {
         HILOG_ERROR("Ability is nullptr.");
         return false;

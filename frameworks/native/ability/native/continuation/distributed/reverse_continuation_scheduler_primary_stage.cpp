@@ -29,7 +29,13 @@ ReverseContinuationSchedulerPrimaryStage::ReverseContinuationSchedulerPrimarySta
 void ReverseContinuationSchedulerPrimaryStage::NotifyReplicaTerminated()
 {
     HILOG_DEBUG("Begin.");
-    auto task = [reverseContinuationSchedulerPrimary = this]() {
+    wptr<ReverseContinuationSchedulerPrimaryStage> weak = this;
+    auto task = [weak]() {
+        auto reverseContinuationSchedulerPrimary = weak.promote();
+        if (reverseContinuationSchedulerPrimary == nullptr) {
+            HILOG_ERROR("reverseContinuationSchedulerPrimary is nullptr.");
+            return;
+        }
         reverseContinuationSchedulerPrimary->HandlerNotifyReplicaTerminated();
     };
 
@@ -49,7 +55,13 @@ void ReverseContinuationSchedulerPrimaryStage::NotifyReplicaTerminated()
 bool ReverseContinuationSchedulerPrimaryStage::ContinuationBack(const AAFwk::Want &want)
 {
     HILOG_DEBUG("Begin.");
-    auto task = [reverseContinuationSchedulerPrimary = this, want]() {
+    wptr<ReverseContinuationSchedulerPrimaryStage> weak = this;
+    auto task = [weak, want]() {
+        auto reverseContinuationSchedulerPrimary = weak.promote();
+        if (reverseContinuationSchedulerPrimary == nullptr) {
+            HILOG_ERROR("reverseContinuationSchedulerPrimary is nullptr.");
+            return;
+        }
         reverseContinuationSchedulerPrimary->HandlerContinuationBack(want);
     };
 
@@ -70,8 +82,7 @@ bool ReverseContinuationSchedulerPrimaryStage::ContinuationBack(const AAFwk::Wan
 void ReverseContinuationSchedulerPrimaryStage::HandlerNotifyReplicaTerminated()
 {
     HILOG_DEBUG("Begin.");
-    std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = nullptr;
-    continuationHandler = continuationHandler_.lock();
+    std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
         HILOG_ERROR("ContinuationHandler is nullptr.");
         return;
@@ -83,8 +94,7 @@ void ReverseContinuationSchedulerPrimaryStage::HandlerNotifyReplicaTerminated()
 void ReverseContinuationSchedulerPrimaryStage::HandlerContinuationBack(const AAFwk::Want &want)
 {
     HILOG_DEBUG("Begin.");
-    std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = nullptr;
-    continuationHandler = continuationHandler_.lock();
+    std::shared_ptr<IReverseContinuationSchedulerPrimaryHandler> continuationHandler = continuationHandler_.lock();
     if (continuationHandler == nullptr) {
         HILOG_ERROR("ContinuationHandler is nullptr.");
         return;
