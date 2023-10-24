@@ -46,6 +46,12 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
+#ifdef SUPPORT_GRAPHICS
+const std::string PAGE_STACK_PROPERTY_NAME = "pageStack";
+const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.key.supportContinuePageStack";
+#endif
+const int32_t BASE_DISPLAY_ID_NUM (10); // Numerical base (radix) that determines the valid characters and their interpretation.
+
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
     void *data = nullptr;
@@ -90,7 +96,7 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *)
 
 UIAbility *JsUIAbility::Create(const std::unique_ptr<Runtime> &runtime)
 {
-    return new JsUIAbility(static_cast<JsRuntime &>(*runtime));
+    return new (std::nothrow) JsUIAbility(static_cast<JsRuntime &>(*runtime));
 }
 
 JsUIAbility::JsUIAbility(JsRuntime &jsRuntime) : jsRuntime_(jsRuntime)
@@ -101,9 +107,8 @@ JsUIAbility::JsUIAbility(JsRuntime &jsRuntime) : jsRuntime_(jsRuntime)
 JsUIAbility::~JsUIAbility()
 {
     HILOG_DEBUG("Called.");
-    auto context = GetAbilityContext();
-    if (context) {
-        context->Unbind();
+    if (abilityContext_ != nullptr) {
+        abilityContext_->Unbind();
     }
 
     jsRuntime_.FreeNativeReference(std::move(jsAbilityObj_));
@@ -161,27 +166,19 @@ void JsUIAbility::SetAbilityContext(
 {
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-
     jsAbilityObj_ = jsRuntime_.LoadModule(
         moduleName, srcPath, abilityInfo->hapPath, abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
-    if (jsAbilityObj_ == nullptr) {
-        HILOG_ERROR("Failed to get AbilityStage object.");
+    if (jsAbilityObj_ == nullptr || abilityContext_ == nullptr) {
+        HILOG_ERROR("jsAbilityObj_ or abilityContext_ is nullptr.");
         return;
     }
-
     napi_value obj = jsAbilityObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
         HILOG_ERROR("Failed to check type");
         return;
     }
 
-    auto context = GetAbilityContext();
-    if (context == nullptr) {
-        HILOG_ERROR("Invalid context.");
-        return;
-    }
-
-    napi_value contextObj = CreateJsAbilityContext(env, context);
+    napi_value contextObj = CreateJsAbilityContext(env, abilityContext_);
     shellContextRef_ = std::shared_ptr<NativeReference>(JsRuntime::LoadSystemModuleByEngine(
         env, "application.AbilityContext", &contextObj, 1).release());
     if (shellContextRef_ == nullptr) {
@@ -193,10 +190,14 @@ void JsUIAbility::SetAbilityContext(
         HILOG_ERROR("Failed to get ability native object.");
         return;
     }
-    auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(context);
+    auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(abilityContext_);
+    if (workContext == nullptr) {
+        HILOG_ERROR("workContext is nullptr.");
+        return;
+    }
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, nullptr);
-    context->Bind(jsRuntime_, shellContextRef_.get());
+    abilityContext_->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
     HILOG_DEBUG("Set ability context");
 
@@ -380,9 +381,6 @@ void JsUIAbility::OnStopCallback()
 }
 
 #ifdef SUPPORT_GRAPHICS
-const std::string PAGE_STACK_PROPERTY_NAME = "pageStack";
-const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.key.supportContinuePageStack";
-
 void JsUIAbility::OnSceneCreated()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -679,8 +677,7 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
         std::smatch sm;
         bool flag = std::regex_match(strDisplayId, sm, formatRegex);
         if (flag && !strDisplayId.empty()) {
-            int base = 10; // Numerical base (radix) that determines the valid characters and their interpretation.
-            displayId = strtol(strDisplayId.c_str(), nullptr, base);
+            displayId = strtol(strDisplayId.c_str(), nullptr, BASE_DISPLAY_ID_NUM);
             HILOG_DEBUG("Success displayId is %{public}d.", displayId);
         } else {
             HILOG_ERROR("Failed to formatRegex: [%{public}s].", strDisplayId.c_str());
@@ -704,6 +701,10 @@ void JsUIAbility::DoOnForegroundForSceneIsNull(const Want &want)
     if (window) {
         HILOG_DEBUG("Call RegisterDisplayMoveListener, windowId: %{public}d.", window->GetWindowId());
         abilityDisplayMoveListener_ = new AbilityDisplayMoveListener(weak_from_this());
+        if (abilityDisplayMoveListener_ == nullptr) {
+            HILOG_ERROR("abilityDisplayMoveListener_ is nullptr.");
+            return;
+        }
         window->RegisterDisplayMoveListener(abilityDisplayMoveListener_);
     }
 }
@@ -837,11 +838,15 @@ void JsUIAbility::OnConfigurationUpdated(const Configuration &configuration)
 {
     UIAbility::OnConfigurationUpdated(configuration);
     HILOG_DEBUG("Called.");
+    if (abilityContext_ == nullptr) {
+        HILOG_ERROR("abilityContext_ is nullptr.");
+        return;
+    }
 
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    auto fullConfig = GetAbilityContext()->GetConfiguration();
-    if (!fullConfig) {
+    auto fullConfig = abilityContext_->GetConfiguration();
+    if (fullConfig == nullptr) {
         HILOG_ERROR("Configuration is nullptr.");
         return;
     }
@@ -870,18 +875,20 @@ void JsUIAbility::OnMemoryLevel(int level)
     }
 
     napi_value jslevel = CreateJsValue(env, level);
-    napi_value argv[] = {
-        jslevel,
-    };
+    napi_value argv[] = { jslevel };
     CallObjectMethod("onMemoryLevel", argv, ArraySize(argv));
 }
 
 void JsUIAbility::UpdateContextConfiguration()
 {
     HILOG_DEBUG("Called.");
+    if (abilityContext_ == nullptr) {
+        HILOG_ERROR("abilityContext_ is nullptr.");
+        return;
+    }
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
-    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, GetAbilityContext()->GetConfiguration());
+    JsAbilityContext::ConfigurationUpdated(env, shellContextRef_, abilityContext_->GetConfiguration());
 }
 
 void JsUIAbility::OnNewWant(const Want &want)
@@ -930,12 +937,11 @@ void JsUIAbility::OnAbilityResult(int requestCode, int resultCode, const Want &r
 {
     HILOG_DEBUG("Begin.");
     UIAbility::OnAbilityResult(requestCode, resultCode, resultData);
-    std::shared_ptr<AbilityRuntime::AbilityContext> context = GetAbilityContext();
-    if (context == nullptr) {
-        HILOG_ERROR("JsUIAbility not attached to any runtime context.");
+    if (abilityContext_ == nullptr) {
+        HILOG_ERROR("abilityContext_ is nullptr.");
         return;
     }
-    context->OnAbilityResult(requestCode, resultCode, resultData);
+    abilityContext_->OnAbilityResult(requestCode, resultCode, resultData);
     HILOG_DEBUG("End.");
 }
 
@@ -1063,10 +1069,14 @@ bool JsUIAbility::CallPromise(napi_value result, AppExecFwk::AbilityTransactionC
 
 std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> JsUIAbility::CreateADelegatorAbilityProperty()
 {
+    if (abilityContext_ == nullptr) {
+        HILOG_ERROR("abilityContext_ is nullptr.");
+        return nullptr;
+    }
     auto property = std::make_shared<AppExecFwk::ADelegatorAbilityProperty>();
-    property->token_          = GetAbilityContext()->GetToken();
-    property->name_           = GetAbilityName();
-    property->moduleName_     = GetModuleName();
+    property->token_ = abilityContext_->GetToken();
+    property->name_ = GetAbilityName();
+    property->moduleName_ = GetModuleName();
     if (GetApplicationInfo() == nullptr || GetApplicationInfo()->bundleName.empty()) {
         property->fullName_ = GetAbilityName();
     } else {
