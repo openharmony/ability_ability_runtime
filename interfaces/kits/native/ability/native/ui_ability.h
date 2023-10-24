@@ -73,12 +73,6 @@ public:
     std::shared_ptr<AbilityRuntime::AbilityContext> GetAbilityContext();
 
     /**
-     * @brief Obtains a resource manager.
-     * @return Returns a ResourceManager object.
-     */
-    std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
-
-    /**
      * @brief Obtains the Want object that starts this ability.
      * @return Returns the Want object that starts this ability.
      */
@@ -315,7 +309,6 @@ protected:
 
 private:
     friend class UIAbilityImpl;
-    bool VerifySupportForContinuation();
     void DispatchLifecycleOnForeground(const AAFwk::Want &want);
     void HandleCreateAsRecovery(const AAFwk::Want &want);
     void SetStartAbilitySetting(std::shared_ptr<AppExecFwk::AbilityStartSetting> setting);
@@ -331,12 +324,6 @@ private:
     std::shared_ptr<AppExecFwk::OHOSApplication> application_ = nullptr;
     std::shared_ptr<AAFwk::Want> setWant_ = nullptr;
     sptr<IRemoteObject> reverseContinuationSchedulerReplica_ = nullptr;
-    // Keep consistent with DMS defines. Used to callback to DMS.
-    static const std::string DMS_SESSION_ID;
-    // The originating deviceId passed by DMS using want param.
-    static const std::string DMS_ORIGIN_DEVICE_ID;
-    // If session id cannot get from want, assign it as default.
-    static const int32_t DEFAULT_DMS_SESSION_ID;
     bool isNewRuleFlagSetted_ = false;
     bool startUpNewRule_ = false;
 

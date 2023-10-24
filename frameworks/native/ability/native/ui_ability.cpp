@@ -28,9 +28,10 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-const std::string UIAbility::DMS_SESSION_ID("sessionId");
-const std::string UIAbility::DMS_ORIGIN_DEVICE_ID("deviceId");
-const int32_t UIAbility::DEFAULT_DMS_SESSION_ID(0);
+namespace {
+constexpr char DMS_SESSION_ID[] = "sessionId";
+constexpr char DMS_ORIGIN_DEVICE_ID[] = "deviceId";
+constexpr int32_t DEFAULT_DMS_SESSION_ID = 0;
 constexpr char LAUNCHER_BUNDLE_NAME[] = "com.ohos.launcher";
 constexpr char LAUNCHER_ABILITY_NAME[] = "com.ohos.launcher.MainAbility";
 constexpr char SHOW_ON_LOCK_SCREEN[] = "ShowOnLockScreen";
@@ -38,17 +39,18 @@ constexpr char DLP_INDEX[] = "ohos.dlp.params.index";
 constexpr char DLP_PARAMS_SECURITY_FLAG[] = "ohos.dlp.params.securityFlag";
 constexpr char COMPONENT_STARTUP_NEW_RULES[] = "component.startup.newRules";
 constexpr int32_t ERR_INVALID_VALUE = -1;
+}
 UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
 {
     if (!runtime) {
-        return new UIAbility;
+        return new (std::nothrow) UIAbility;
     }
 
     switch (runtime->GetLanguage()) {
         case Runtime::Language::JS:
             return JsUIAbility::Create(runtime);
         default:
-            return new UIAbility();
+            return new (std::nothrow) UIAbility();
     }
 }
 
@@ -61,12 +63,11 @@ void UIAbility::Init(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo
     application_ = application;
     abilityInfo_ = abilityInfo;
     handler_ = handler;
-    AppExecFwk::AbilityContext::token_ = token;
+    token_ = token;
 #ifdef SUPPORT_GRAPHICS
     continuationManager_ = std::make_shared<AppExecFwk::ContinuationManagerStage>();
-    std::weak_ptr<UIAbility> ability = shared_from_this();
     std::weak_ptr<AppExecFwk::ContinuationManagerStage> continuationManager = continuationManager_;
-    continuationHandler_ = std::make_shared<AppExecFwk::ContinuationHandlerStage>(continuationManager, ability);
+    continuationHandler_ = std::make_shared<AppExecFwk::ContinuationHandlerStage>(continuationManager, weak_from_this());
     if (!continuationManager_->Init(shared_from_this(), GetToken(), GetAbilityInfo(), continuationHandler_)) {
         continuationManager_.reset();
     } else {
@@ -82,18 +83,16 @@ void UIAbility::Init(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo
     }
     // register displayid change callback
     HILOG_DEBUG("Call RegisterDisplayListener.");
-    abilityDisplayListener_ = new UIAbilityDisplayListener(ability);
+    abilityDisplayListener_ = new (std::nothrow) UIAbilityDisplayListener(weak_from_this());
+    if (abilityDisplayListener_ == nullptr) {
+        HILOG_ERROR("abilityDisplayListener_ is nullptr.");
+        return;
+    }
     Rosen::DisplayManager::GetInstance().RegisterDisplayListener(abilityDisplayListener_);
 #endif
     lifecycle_ = std::make_shared<AppExecFwk::LifeCycle>();
     abilityLifecycleExecutor_ = std::make_shared<AppExecFwk::AbilityLifecycleExecutor>();
-    if (abilityLifecycleExecutor_ != nullptr) {
-        abilityLifecycleExecutor_->DispatchLifecycleState(
-            AppExecFwk::AbilityLifecycleExecutor::LifecycleState::INITIAL);
-    } else {
-        HILOG_ERROR("DispatchLifecycleState failed.");
-    }
-
+    abilityLifecycleExecutor_->DispatchLifecycleState(AppExecFwk::AbilityLifecycleExecutor::LifecycleState::INITIAL);
     if (abilityContext_ != nullptr) {
         abilityContext_->RegisterAbilityCallback(weak_from_this());
     }
@@ -313,8 +312,8 @@ void UIAbility::InitConfigurationProperties(const AppExecFwk::Configuration &cha
         language = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
         colormode = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
         hasPointerDevice = changeConfiguration.GetItem(AAFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
-        HILOG_DEBUG("Language: [%{public}s], colormode: [%{public}s], hasPointerDevice: [%{public}s].", language.c_str(),
-            colormode.c_str(), hasPointerDevice.c_str());
+        HILOG_DEBUG("Language: [%{public}s], colormode: [%{public}s], hasPointerDevice: [%{public}s].",
+            language.c_str(), colormode.c_str(), hasPointerDevice.c_str());
     }
 }
 
@@ -404,8 +403,8 @@ void UIAbility::ContinueAbilityWithStack(const std::string &deviceId, uint32_t v
         return;
     }
 
-    if (!VerifySupportForContinuation()) {
-        HILOG_ERROR("VerifySupportForContinuation failed.");
+    if (continuationManager_ == nullptr) {
+        HILOG_ERROR("continuationManager_ is nullptr.");
         return;
     }
     continuationManager_->ContinueAbilityWithStack(deviceId, versionCode);
@@ -463,15 +462,6 @@ void UIAbility::DispatchLifecycleOnForeground(const AAFwk::Want &want)
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_FOREGROUND, want);
 }
 
-bool UIAbility::VerifySupportForContinuation()
-{
-    if (continuationManager_ == nullptr) {
-        HILOG_ERROR("continuationManager_ is nullptr.");
-        return false;
-    }
-    return true;
-}
-
 void UIAbility::HandleCreateAsRecovery(const AAFwk::Want &want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
@@ -504,11 +494,6 @@ const AAFwk::LaunchParam &UIAbility::GetLaunchParam() const
 std::shared_ptr<AbilityRuntime::AbilityContext> UIAbility::GetAbilityContext()
 {
     return abilityContext_;
-}
-
-std::shared_ptr<Global::Resource::ResourceManager> UIAbility::GetResourceManager() const
-{
-    return AppExecFwk::AbilityContext::GetResourceManager();
 }
 
 sptr<IRemoteObject> UIAbility::CallRequest()
@@ -848,7 +833,12 @@ void UIAbility::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
     HILOG_DEBUG("changeKeyV size: %{public}zu.", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
-        auto task = [ability = shared_from_this(), configuration = *configuration]() {
+        auto task = [abilityWptr = weak_from_this(), configuration = *configuration]() {
+            auto ability = abilityWptr.lock();
+            if (ability == nullptr) {
+                HILOG_ERROR("ability is nullptr.");
+                return;
+            }
             ability->OnConfigurationUpdated(configuration);
         };
         handler_->PostTask(task);
@@ -867,7 +857,7 @@ void UIAbility::InitWindow(int32_t displayId, sptr<Rosen::WindowOption> option)
 
 sptr<Rosen::WindowOption> UIAbility::GetWindowOption(const AAFwk::Want &want)
 {
-    sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+    auto option = sptr<Rosen::WindowOption>::MakeSptr();
     if (option == nullptr) {
         HILOG_ERROR("Option is null.");
         return nullptr;
@@ -953,6 +943,10 @@ void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
 
 void UIAbility::OnChangeForUpdateConfiguration(const AppExecFwk::Configuration &newConfig)
 {
+    if (application_ == nullptr || handler_ == nullptr) {
+        HILOG_ERROR("application_ or handler_ is nullptr.");
+        return;
+    }
     auto configuration = application_->GetConfiguration();
     if (!configuration) {
         HILOG_ERROR("Configuration is nullptr.");
@@ -964,7 +958,12 @@ void UIAbility::OnChangeForUpdateConfiguration(const AppExecFwk::Configuration &
     HILOG_DEBUG("ChangeKeyV size: %{public}zu.", changeKeyV.size());
     if (!changeKeyV.empty()) {
         configuration->Merge(changeKeyV, newConfig);
-        auto task = [ability = shared_from_this(), configuration = *configuration]() {
+        auto task = [abilityWptr = weak_from_this(), configuration = *configuration]() {
+            auto ability = abilityWptr.lock();
+            if (ability == nullptr) {
+                HILOG_ERROR("ability is nullptr.");
+                return;
+            }
             ability->OnConfigurationUpdated(configuration);
         };
         handler_->PostTask(task);
