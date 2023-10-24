@@ -158,6 +158,7 @@ private:
     void HandleShareData(const int32_t &requestCode);
     void HandlePrepareTermianteAbility();
     void HandleUpdateConfiguration(const AppExecFwk::Configuration &config);
+    void AddLifecycleEvent(uint32_t state, std::string &methodName) const;
 
     std::shared_ptr<UIAbilityImpl> abilityImpl_ = nullptr;
     std::shared_ptr<UIAbility> currentAbility_ = nullptr;

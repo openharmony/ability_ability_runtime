@@ -18,11 +18,13 @@
 #include "ability_handler.h"
 #include "ability_manager_client.h"
 #include "context/application_context.h"
+#include "freeze_util.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "js_ui_ability.h"
 #include "ohos_application.h"
 #include "scene_board_judgement.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -177,7 +179,7 @@ void UIAbilityImpl::HandleAbilityTransaction(
     const AAFwk::Want &want, const AAFwk::LifeCycleStateInfo &targetState, sptr<AppExecFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Called sourceState:%{public}d, targetState: %{public}d, isNewWant: %{public}d, sceneFlag: %{public}d.",
+    HILOG_INFO("Lifecycle: srcState:%{public}d; targetState: %{public}d; isNewWant: %{public}d, sceneFlag: %{public}d",
         lifecycleState_, targetState.state, targetState.isNewWant, targetState.sceneFlag);
 #ifdef SUPPORT_GRAPHICS
     if (ability_ != nullptr) {
@@ -221,8 +223,12 @@ void UIAbilityImpl::HandleShareData(int32_t uniqueId)
 
 void UIAbilityImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleState &state)
 {
-    HILOG_DEBUG("Called.");
-    AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, state, GetRestoreData());
+    HILOG_INFO("Lifecycle: notify ability manager service.");
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, state, GetRestoreData());
+    if (ret == ERR_OK && state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
+        FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    }
 }
 
 bool UIAbilityImpl::PrepareTerminateAbility()
@@ -394,12 +400,17 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
 void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Begin.");
+    HILOG_INFO("Lifecycle: Call.");
     auto owner = owner_.lock();
     if (owner == nullptr) {
         HILOG_ERROR("Owner is nullptr.");
         return;
     }
+    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
+    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
+        "; UIAbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle.";
+    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+
     bool needNotifyAMS = false;
     {
         std::lock_guard<std::mutex> lock(owner->notifyForegroundLock_);
@@ -413,10 +424,13 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
     }
 
     if (needNotifyAMS) {
-        HILOG_DEBUG("Stage mode ability, window after foreground, notify ability manager service.");
+        HILOG_INFO("Lifecycle: window notify ability manager service.");
         AppExecFwk::PacMap restoreData;
-        AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
+        auto ret = AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
             token_, AAFwk::AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
+        if (ret == ERR_OK) {
+            FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        }
     }
 }
 
@@ -424,9 +438,18 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Called.");
+    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
+    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
+        "; UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
+    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+
+    HILOG_INFO("Lifecycle: window after background.");
     AppExecFwk::PacMap restoreData;
-    AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
+    auto ret = AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
         token_, AAFwk::AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
+    if (ret == ERR_OK) {
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    }
 }
 
 void UIAbilityImpl::WindowLifeCycleImpl::AfterFocused()

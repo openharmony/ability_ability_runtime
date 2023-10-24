@@ -22,8 +22,10 @@
 #include "ability_loader.h"
 #include "ability_manager_client.h"
 #include "context_deal.h"
+#include "freeze_util.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
+#include "time_util.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -90,7 +92,7 @@ std::shared_ptr<AppExecFwk::ContextDeal> UIAbilityThread::CreateAndInitContextDe
     }
 	
     auto abilityInfo = abilityRecord->GetAbilityInfo();
-    if (abilityInfo == nullptr){
+    if (abilityInfo == nullptr) {
         HILOG_ERROR("ContextDeal is nullptr.");
         return nullptr;
     }
@@ -165,11 +167,17 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     abilityImpl_->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_);
 
     // ability attach : ipc
+    HILOG_INFO("LoadLifecycle: Attach uiability.");
+    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
+    std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
+        "; AbilityThread::Attach; the load lifecycle.";
+    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
         HILOG_ERROR("Err is %{public}d.", err);
         return;
     }
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
 }
 
 void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
@@ -226,16 +234,34 @@ void UIAbilityThread::HandleAbilityTransaction(
     std::string connector = "##";
     std::string traceName = __PRETTY_FUNCTION__ + connector + want.GetElement().GetAbilityName();
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceName);
-    HILOG_DEBUG("Begin, name is %{public}s.", want.GetElement().GetAbilityName().c_str());
+    HILOG_INFO("Lifecycle: name is %{public}s.", want.GetElement().GetAbilityName().c_str());
     if (abilityImpl_ == nullptr) {
         HILOG_ERROR("abilityImpl_ is nullptr.");
         return;
     }
+    std::string methodName = "HandleAbilityTransaction";
+    AddLifecycleEvent(lifeCycleStateInfo.state, methodName);
 
     abilityImpl_->SetCallingContext(lifeCycleStateInfo.caller.deviceId, lifeCycleStateInfo.caller.bundleName,
         lifeCycleStateInfo.caller.abilityName, lifeCycleStateInfo.caller.moduleName);
     abilityImpl_->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
     HILOG_DEBUG("End.");
+}
+
+void UIAbilityThread::AddLifecycleEvent(uint32_t state, std::string &methodName) const
+{
+    if (state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
+        FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
+        std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
+            "; AbilityThread::" + methodName + "; the foreground lifecycle.";
+        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    }
+    if (state == AAFwk::ABILITY_STATE_BACKGROUND_NEW) {
+        FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
+        std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
+            "; AbilityThread::" + methodName + "; the background lifecycle.";
+        FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+    }
 }
 
 void UIAbilityThread::HandleShareData(const int32_t &uniqueId)
@@ -289,7 +315,7 @@ void UIAbilityThread::ScheduleUpdateConfiguration(const AppExecFwk::Configuratio
 
         abilityThread->HandleUpdateConfiguration(config);
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:UpdateConfiguration");
     if (!ret) {
         HILOG_ERROR("PostTask error.");
     }
@@ -312,8 +338,12 @@ void UIAbilityThread::ScheduleAbilityTransaction(
     const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AppExecFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("name: %{public}s,targeState: %{public}d,isNewWant: %{public}d",
-        want.GetElement().GetAbilityName().c_str(), lifeCycleStateInfo.state, lifeCycleStateInfo.isNewWant);
+    HILOG_INFO("Lifecycle: name:%{public}s,targeState:%{public}d,isNewWant:%{public}d",
+        want.GetElement().GetAbilityName().c_str(),
+        lifeCycleStateInfo.state,
+        lifeCycleStateInfo.isNewWant);
+    std::string methodName = "ScheduleAbilityTransaction";
+    AddLifecycleEvent(lifeCycleStateInfo.state, methodName);
 
     if (token_ == nullptr) {
         HILOG_ERROR("token_ is nullptr.");
@@ -333,7 +363,7 @@ void UIAbilityThread::ScheduleAbilityTransaction(
 
         abilityThread->HandleAbilityTransaction(want, lifeCycleStateInfo, sessionInfo);
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:AbilityTransaction");
     if (!ret) {
         HILOG_ERROR("PostTask error.");
     }
@@ -359,7 +389,7 @@ void UIAbilityThread::ScheduleShareData(const int32_t &uniqueId)
         }
         abilityThread->HandleShareData(uniqueId);
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:ShareData");
     if (!ret) {
         HILOG_ERROR("postTask error.");
     }
@@ -390,7 +420,7 @@ bool UIAbilityThread::SchedulePrepareTerminateAbility()
         }
         abilityThread->HandlePrepareTermianteAbility();
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:PrepareTerminateAbility");
     if (!ret) {
         HILOG_ERROR("PostTask error.");
         return false;
@@ -434,7 +464,7 @@ void UIAbilityThread::SendResult(int requestCode, int resultCode, const Want &wa
         }
         HILOG_ERROR("abilityImpl_ is nullptr");
     };
-    bool ret = abilityHandler_->PostTask(task);
+    bool ret = abilityHandler_->PostTask(task, "UIAbilityThread:SendResult");
     if (!ret) {
         HILOG_ERROR("PostTask error");
     }
@@ -478,7 +508,7 @@ std::shared_ptr<AbilityContext> UIAbilityThread::BuildAbilityContext(
     const std::shared_ptr<Context> &stageContext)
 {
     auto abilityContextImpl = std::make_shared<AbilityContextImpl>();
-    if (abilityContextImpl == nullptr){
+    if (abilityContextImpl == nullptr) {
         HILOG_ERROR("abilityContextImpl is nullptr.");
         return abilityContextImpl;
     }
@@ -514,7 +544,7 @@ void UIAbilityThread::DumpAbilityInfo(const std::vector<std::string> &params, st
             HILOG_ERROR("Failed err is %{public}d.", err);
         }
     };
-    abilityHandler_->PostTask(task);
+    abilityHandler_->PostTask(task, "UIAbilityThread:DumpAbilityInfo");
 }
 
 #ifdef SUPPORT_GRAPHICS
@@ -609,8 +639,8 @@ void UIAbilityThread::CallRequest()
 
         retval = currentAbility->CallRequest();
     };
-    abilityHandler_->PostSyncTask(syncTask);
-    AAFwk::AbilityManagerClient::GetInstance()->CallRequestDone(token_, retval);
+    abilityHandler_->PostSyncTask(syncTask, "UIAbilityThread:CallRequest");
+    AbilityManagerClient::GetInstance()->CallRequestDone(token_, retval);
     HILOG_DEBUG("End.");
 }
 
