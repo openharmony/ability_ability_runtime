@@ -818,8 +818,8 @@ void UIAbility::OnDisplayMove(Rosen::DisplayId from, Rosen::DisplayId to)
     newConfig.AddItem(
         to, AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION, AppExecFwk::GetDirectionStr(height, width));
     newConfig.AddItem(to, AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI, AppExecFwk::GetDensityStr(density));
-    if (application_ == nullptr) {
-        HILOG_ERROR("application_ is nullptr.");
+    if (application_ == nullptr || handler_ == nullptr) {
+        HILOG_ERROR("application_ or handler_ is nullptr.");
         return;
     }
     std::vector<std::string> changeKeyV;
