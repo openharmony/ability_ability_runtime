@@ -108,6 +108,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     }
 
     if (!isLoadedAbility) {
+        HILOG_INFO("Target service has not been loaded.");
         LoadAbility(targetService);
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE)) {
         // It may have been started through connect
@@ -220,6 +221,9 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
     AppExecFwk::ElementName element(abilityRequest.abilityInfo.deviceId, abilityRequest.abilityInfo.bundleName,
         abilityRequest.abilityInfo.name, abilityRequest.abilityInfo.moduleName);
     auto serviceMapIter = serviceMap_.find(element.GetURI());
+    if (noReuse && serviceMapIter != serviceMap_.end()) {
+        serviceMap_.erase(element.GetURI());
+    }
     if (noReuse || serviceMapIter == serviceMap_.end()) {
         targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
         if (targetService) {
