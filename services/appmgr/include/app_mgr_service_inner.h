@@ -1084,8 +1084,6 @@ private:
 
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
 
-    void SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
-        const std::shared_ptr<AppRunningRecord> &appRecord);
     /**
      * App running status event.
      *
@@ -1096,40 +1094,6 @@ private:
      * @return
      */
     void AppRunningStatusEvent(const std::string &bundle, int32_t &uid, int32_t runningStatus);
-
-    /**
-     * LoadAbilityInner, Internal implementation load the ability that needed to be started.
-     *
-     * @param token, the unique identification to start the ability.
-     * @param preToken, the unique identification to call the ability.
-     * @param abilityInfo, the ability information.
-     * @param appInfo, the app information.
-     * @param want, the ability want.
-     * @param hapModuleInfo, the hap module info.
-     * @param processName, the process name.
-     * @param bundleInfo, the bundle info.
-     *
-     * @return
-     */
-    void LoadAbilityInner(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want, const HapModuleInfo &hapModuleInfo, const std::string processName,
-        const BundleInfo &bundleInfo);
-
-    /**
-     * StartEmptyProcessInner, Internal implementation start empty process.
-     *
-     * @param want, the ability want.
-     * @param observer, the test observer remote object.
-     * @param info, the bundle info.
-     * @param processName, the process name.
-     * @param userId, user ID.
-     * @param appRecord, the application record.
-     *
-     * @return
-     */
-    int StartEmptyProcessInner(const AAFwk::Want &want, const sptr<IRemoteObject> &observer, const BundleInfo &info,
-        const std::string &processName, const int userId, const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
     /**
@@ -1148,6 +1112,9 @@ private:
     int FinishUserTestLocked(
         const std::string &msg, const int64_t &resultCode, const std::shared_ptr<AppRunningRecord> &appRecord);
     int32_t GetCurrentAccountId() const;
+    void SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
+        const std::shared_ptr<AppRunningRecord> &appRecord);
+    void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<const sptr<IAppStateCallback>> appStateCallbacks_;
     std::shared_ptr<AppProcessManager> appProcessManager_;
