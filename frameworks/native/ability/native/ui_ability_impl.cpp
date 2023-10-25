@@ -42,11 +42,9 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     token_ = record->GetToken();
     ability_ = ability;
     handler_ = handler;
-    auto info = record->GetAbilityInfo();
 #ifdef SUPPORT_GRAPHICS
-    if (info && info->type == AppExecFwk::AbilityType::PAGE) {
-        ability_->SetSceneListener(sptr<WindowLifeCycleImpl>(new WindowLifeCycleImpl(token_, shared_from_this())));
-    }
+    ability_->SetSceneListener(sptr<WindowLifeCycleImpl>(
+        new (std::nothrow) WindowLifeCycleImpl(token_, shared_from_this())));
 #endif
     ability_->Init(record->GetAbilityInfo(), application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
@@ -79,8 +77,8 @@ void UIAbilityImpl::Start(const AAFwk::Want &want, sptr<AppExecFwk::SessionInfo>
 void UIAbilityImpl::Stop()
 {
     HILOG_DEBUG("Begin.");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
+    if (ability_ == nullptr) {
+        HILOG_ERROR("ability_ is nullptr.");
         return;
     }
 
@@ -92,8 +90,8 @@ void UIAbilityImpl::Stop()
 void UIAbilityImpl::Stop(bool &isAsyncCallback)
 {
     HILOG_DEBUG("Begin.");
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
+    if (ability_ == nullptr) {
+        HILOG_ERROR("ability_ is nullptr.");
         isAsyncCallback = false;
         return;
     }
@@ -127,7 +125,7 @@ void UIAbilityImpl::Stop(bool &isAsyncCallback)
 
 void UIAbilityImpl::StopCallback()
 {
-    if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
+    if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
         HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
         return;
     }
@@ -152,27 +150,15 @@ int32_t UIAbilityImpl::Share(AAFwk::WantParams &wantParam)
 
 void UIAbilityImpl::DispatchSaveAbilityState()
 {
-    HILOG_DEBUG("Begin.");
-    if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
-        return;
-    }
-
+    HILOG_DEBUG("Called.");
     needSaveDate_ = true;
-    HILOG_DEBUG("End.");
 }
 
 void UIAbilityImpl::DispatchRestoreAbilityState(const AppExecFwk::PacMap &inState)
 {
-    HILOG_DEBUG("Begin.");
-    if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
-        return;
-    }
-
+    HILOG_DEBUG("Called.");
     hasSaveData_ = true;
     restoreData_ = inState;
-    HILOG_DEBUG("End.");
 }
 
 void UIAbilityImpl::HandleAbilityTransaction(
@@ -367,20 +353,23 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
     auto task = [abilityImpl = weak_from_this(), focuseMode = isFocused]() {
         auto impl = abilityImpl.lock();
         if (impl == nullptr) {
+            HILOG_ERROR("impl is nullptr.");
             return;
         }
 
         if (!impl->ability_ || !impl->ability_->GetAbilityInfo()) {
-            HILOG_WARN("%{public}s failed.", focuseMode ? "AfterFocused" : "AfterUnFocused");
+            HILOG_ERROR("%{public}s failed.", focuseMode ? "AfterFocused" : "AfterUnFocused");
             return;
         }
 
         auto abilityContext = impl->ability_->GetAbilityContext();
         if (abilityContext == nullptr) {
+            HILOG_ERROR("abilityContext is nullptr.");
             return;
         }
         auto applicationContext = abilityContext->GetApplicationContext();
         if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
+            HILOG_ERROR("applicationContext or lifecycleCallback is nullptr.");
             return;
         }
         auto &jsAbility = static_cast<JsUIAbility &>(*(impl->ability_));
