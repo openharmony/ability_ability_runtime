@@ -376,6 +376,9 @@ bool AbilityManagerService::Init()
 
     auto initPrepareTerminateConfigTask = [aams = shared_from_this()]() { aams->InitPrepareTerminateConfig(); };
     taskHandler_->SubmitTask(initPrepareTerminateConfigTask, "InitPrepareTerminateConfig");
+
+    auto startAutoStartupAppsTask = [aams = shared_from_this()]() { aams->StartAutoStartupAppsInner(); };
+    taskHandler_->SubmitTask(startAutoStartupAppsTask, "StartAutoStartupApps");
     HILOG_INFO("Init success.");
     return true;
 }
@@ -4756,11 +4759,6 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
 
     /* note: OOBE APP need disable itself, otherwise, it will be started when restart system everytime */
     (void)StartAbility(abilityWant, userId, DEFAULT_INVAL_VALUE);
-
-    if (isBoot) {
-        auto startAutoStartupAppsTask = [aams = shared_from_this()]() { aams->StartAutoStartupApps(); };
-        taskHandler_->SubmitTask(startAutoStartupAppsTask, "StartAutoStartupApps");
-    }
 }
 
 int AbilityManagerService::GenerateAbilityRequest(
@@ -5482,8 +5480,7 @@ void AbilityManagerService::StartResidentApps()
         DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
     }
 }
-
-void AbilityManagerService::StartAutoStartupApps()
+void AbilityManagerService::StartAutoStartupAppsInner()
 {
     HILOG_DEBUG("Called.");
     ConnectBmsService();
@@ -5497,6 +5494,15 @@ void AbilityManagerService::StartAutoStartupApps()
         HILOG_ERROR("Failed to query data.");
         return;
     }
+
+    constexpr int retryCount = 5;
+    RetryStartAutoStartupApps(infoList, retryCount);
+}
+
+void AbilityManagerService::RetryStartAutoStartupApps(
+    const std::vector<AutoStartupInfo> &infoList, int32_t retryCount)
+{
+    std::vector<AutoStartupInfo> failedList;
     for (auto info : infoList) {
         AppExecFwk::ElementName element;
         element.SetBundleName(info.bundleName);
@@ -5505,7 +5511,17 @@ void AbilityManagerService::StartAutoStartupApps()
         Want want;
         want.SetElement(element);
         want.SetParam(Want::PARAM_APP_AUTO_STARTUP_LAUNCH_REASON, true);
-        StartAbility(want);
+        if (StartAbility(want) != ERR_OK) {
+            failedList.push_back(info);
+        }
+    }
+
+    if (!failedList.empty() && retryCount > 0) {
+        auto retryStartAutoStartupAppsTask = [aams = shared_from_this(), list = failedList, retryCount]() {
+            aams->RetryStartAutoStartupApps(list, retryCount - 1);
+        };
+        constexpr int delaytime = 2000;
+        taskHandler_->SubmitTask(retryStartAutoStartupAppsTask, "RetryStartAutoStartupApps", delaytime);
     }
 }
 
