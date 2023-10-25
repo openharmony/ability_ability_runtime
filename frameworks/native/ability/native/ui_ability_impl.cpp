@@ -36,8 +36,8 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     HILOG_DEBUG("Begin.");
     if (token == nullptr || application == nullptr || handler == nullptr ||
         record == nullptr || ability == nullptr) {
-      HILOG_ERROR("Token or application or handler or record is nullptr.");
-      return;
+        HILOG_ERROR("Token or application or handler or record is nullptr.");
+        return;
     }
     token_ = record->GetToken();
     ability_ = ability;
