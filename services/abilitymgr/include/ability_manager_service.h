@@ -1563,7 +1563,8 @@ private:
 
     void StartResidentApps();
 
-    void StartAutoStartupApps();
+    void StartAutoStartupAppsInner();
+    void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);
 
     int VerifyAccountPermission(int32_t userId);
 
