@@ -377,7 +377,14 @@ bool AbilityManagerService::Init()
     auto initPrepareTerminateConfigTask = [aams = shared_from_this()]() { aams->InitPrepareTerminateConfig(); };
     taskHandler_->SubmitTask(initPrepareTerminateConfigTask, "InitPrepareTerminateConfig");
 
-    auto startAutoStartupAppsTask = [aams = shared_from_this()]() { aams->StartAutoStartupAppsInner(); };
+    auto startAutoStartupAppsTask = [aams = weak_from_this()]() {
+        auto obj = aams.lock();
+        if (obj == nullptr) {
+            HILOG_ERROR("Start auto startup app error, obj is nullptr");
+            return;
+        }
+        obj->StartAutoStartupAppsInner();
+    };
     taskHandler_->SubmitTask(startAutoStartupAppsTask, "StartAutoStartupApps");
     HILOG_INFO("Init success.");
     return true;
@@ -5480,6 +5487,7 @@ void AbilityManagerService::StartResidentApps()
         DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
     }
 }
+
 void AbilityManagerService::StartAutoStartupAppsInner()
 {
     HILOG_DEBUG("Called.");
@@ -5517,8 +5525,13 @@ void AbilityManagerService::RetryStartAutoStartupApps(
     }
 
     if (!failedList.empty() && retryCount > 0) {
-        auto retryStartAutoStartupAppsTask = [aams = shared_from_this(), list = failedList, retryCount]() {
-            aams->RetryStartAutoStartupApps(list, retryCount - 1);
+        auto retryStartAutoStartupAppsTask = [aams = weak_from_this(), list = failedList, retryCount]() {
+            auto obj = aams.lock();
+            if (obj == nullptr) {
+                HILOG_ERROR("Retry start auto startup app error, obj is nullptr");
+                return;
+            }
+            obj->RetryStartAutoStartupApps(list, retryCount - 1);
         };
         constexpr int delaytime = 2000;
         taskHandler_->SubmitTask(retryStartAutoStartupAppsTask, "RetryStartAutoStartupApps", delaytime);
