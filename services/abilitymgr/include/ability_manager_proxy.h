@@ -1013,7 +1013,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) override;
-	    
+
     /**
      * @brief Unregister app debug listener.
      * @param listener App debug listener.
@@ -1051,6 +1051,17 @@ public:
      * @return Return true to allow ability to start, or false to reject.
      */
     virtual bool IsAbilityControllerStart(const Want &want) override;
+
+    /**
+     * @brief Called when insight intent execute finished.
+     *
+     * @param token ability's token.
+     * @param intentId insight intent id.
+     * @param result insight intent execute result.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
+        const InsightIntentExecuteResult &result) override;
 
 private:
     template <typename T>
