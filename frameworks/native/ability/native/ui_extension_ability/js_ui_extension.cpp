@@ -472,8 +472,8 @@ void JsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &s
 {
     HILOG_DEBUG("called.");
     auto obj = sessionInfo->sessionToken;
-    auto &uiWindow = uiWindowMap_[obj];
-    if (uiWindow) {
+    auto res = uiWindowMap_.find(obj);
+    if (res != uiWindowMap_.end() && res->second != nullptr) {
         WantParams params;
         params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT_CODE, Integer::Box(result.innerErr));
         WantParams resultParams;
@@ -489,14 +489,14 @@ void JsUIExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &s
             params.SetParam(INSIGHT_INTENT_EXECUTE_RESULT, pWantParams);
         }
 
-        Rosen::WMError ret = uiWindow->TransferExtensionData(params);
+        Rosen::WMError ret = res->second->TransferExtensionData(params);
         if (ret == Rosen::WMError::WM_OK) {
             HILOG_DEBUG("TransferExtensionData success");
         } else {
             HILOG_ERROR("TransferExtensionData failed, ret=%{public}d", ret);
         }
 
-        uiWindow->Show();
+        res->second->Show();
         foregroundWindows_.emplace(obj);
     }
     HILOG_DEBUG("end.");
@@ -584,6 +584,7 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
 void JsUIExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     if (!HandleSessionCreate(want, sessionInfo)) {
+        HILOG_ERROR("HandleSessionCreate failed.");
         return;
     }
     auto obj = sessionInfo->sessionToken;
