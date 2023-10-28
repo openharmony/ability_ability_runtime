@@ -56,6 +56,7 @@ bool FaultData::ReadFromParcel(Parcel &parcel)
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
+    HILOG_DEBUG("end");
     return true;
 }
 
@@ -71,6 +72,7 @@ FaultData *FaultData::Unmarshalling(Parcel &parcel)
 
 bool FaultData::Marshalling(Parcel &parcel) const
 {
+    HILOG_DEBUG("FaultData::Marshalling start");
     if (!parcel.WriteString(errorObject.name)) {
         return false;
     }
@@ -159,6 +161,7 @@ bool AppFaultDataBySA::ReadFromParcel(Parcel &parcel)
     if (parcel.ReadBool()) {
         token = (static_cast<MessageParcel*>(&parcel))->ReadRemoteObject();
     }
+    HILOG_DEBUG("finish");
     return true;
 }
 
@@ -174,6 +177,7 @@ AppFaultDataBySA *AppFaultDataBySA::Unmarshalling(Parcel &parcel)
 
 bool AppFaultDataBySA::Marshalling(Parcel &parcel) const
 {
+    HILOG_DEBUG("AppFaultDataBySA::Marshalling start");
     if (!parcel.WriteString(errorObject.name)) {
         return false;
     }
