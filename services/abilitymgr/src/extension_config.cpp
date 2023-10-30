@@ -25,16 +25,11 @@ namespace AAFwk {
 namespace {
 constexpr const char* AMS_EXTENSION_CONFIG = "/etc/ams_extension_config.json";
 
-const std::string EXTENSION_AUTO_DISCONNECT_TIME_NAME = "amsExtensionConfig";
-const std::string EXTENSION_TYPE = "type";
+const std::string EXTENSION_AUTO_DISCONNECT_TIME_NAME = "ams_extension_config";
+const std::string EXTENSION_TYPE_NAME = "extension_type_name";
 const std::string EXTENSION_AUTO_DISCONNECT_TIME = "auto_disconnect_time";
 
 const int32_t DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME = 60000;
-}
-
-ExtensionConfig::ExtensionConfig()
-{
-    LoadExtensionConfiguration();
 }
 
 void ExtensionConfig::LoadExtensionConfiguration()
@@ -49,10 +44,10 @@ void ExtensionConfig::LoadExtensionConfiguration()
     LoadExtensionAutoDisconnectTime(jsonBuf);
 }
 
-int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(const AppExecFwk::ExtensionAbilityType &type)
+int32_t ExtensionConfig::GetExtensionAutoDisconnectTime(std::string extensionTypeName)
 {
-    if (extensionAutoDisconnectTimeMap_.find(type) != extensionAutoDisconnectTimeMap_.end()) {
-        return extensionAutoDisconnectTimeMap_[type];
+    if (extensionAutoDisconnectTimeMap_.find(extensionTypeName) != extensionAutoDisconnectTimeMap_.end()) {
+        return extensionAutoDisconnectTimeMap_[extensionTypeName];
     }
     return DEFAULT_EXTENSION_AUTO_DISCONNECT_TIME;
 }
@@ -62,17 +57,16 @@ void ExtensionConfig::LoadExtensionAutoDisconnectTime(nlohmann::json &object)
     if (object.contains(EXTENSION_AUTO_DISCONNECT_TIME_NAME)) {
         for (auto item : object.at(EXTENSION_AUTO_DISCONNECT_TIME_NAME).items()) {
             nlohmann::json& jsonObject = item.value();
-            if (!jsonObject.contains(EXTENSION_TYPE) || !jsonObject.at(EXTENSION_TYPE).is_number()) {
+            if (!jsonObject.contains(EXTENSION_TYPE_NAME) || !jsonObject.at(EXTENSION_TYPE_NAME).is_number()) {
                 continue;
             }
             if (!jsonObject.contains(EXTENSION_AUTO_DISCONNECT_TIME) ||
                 !jsonObject.at(EXTENSION_AUTO_DISCONNECT_TIME).is_number()) {
                 continue;
             }
-            AppExecFwk::ExtensionAbilityType type = static_cast<AppExecFwk::ExtensionAbilityType>(
-                jsonObject.at(EXTENSION_TYPE).get<int32_t>());
+            std::string extensionTypeName = jsonObject.at(EXTENSION_TYPE_NAME).get<std::string>();
             int32_t extensionAutoDisconnectTime = jsonObject.at(EXTENSION_AUTO_DISCONNECT_TIME).get<int32_t>();
-            extensionAutoDisconnectTimeMap_[type] = extensionAutoDisconnectTime;
+            extensionAutoDisconnectTimeMap_[extensionTypeName] = extensionAutoDisconnectTime;
         }
     }
 }
