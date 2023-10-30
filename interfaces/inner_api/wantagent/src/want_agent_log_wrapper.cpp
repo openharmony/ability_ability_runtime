@@ -38,7 +38,6 @@ std::string WantAgentLogWrapper::GetBriefFileName(const char *str)
     if (pos == std::string::npos) {
         return std::string();
     }
-    HILOG_INFO("WantAgentLogWrapper::GetBriefFileName end");
     return fullPath.substr(pos + 1);
 }
 }  // namespace OHOS::AbilityRuntime::WantAgent
