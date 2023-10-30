@@ -1453,6 +1453,7 @@ private:
     int DisconnectRemoteAbility(const sptr<IRemoteObject> &connect);
     int PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId);
     void UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken);
+    void UpdateCallerInfoFromToken(Want& want, const sptr<IRemoteObject> &token);
     int StartAbilityPublicPrechainCheck(StartAbilityParams &params);
     int StartAbilityPrechainInterceptor(StartAbilityParams &params);
     bool StartAbilityInChain(StartAbilityParams &params, int &result);
