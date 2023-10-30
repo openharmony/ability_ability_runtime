@@ -20,19 +20,21 @@
 #include <nlohmann/json.hpp>
 
 #include "extension_ability_info.h"
+#include "singleton.h"
 
 namespace OHOS {
 namespace AAFwk {
-class ExtensionConfig {
+class ExtensionConfig : public DelayedSingleton<ExtensionConfig> {
 public:
-    ExtensionConfig();
+    explicit ExtensionConfig() = default;
+    virtual ~ExtensionConfig() = default;
     void LoadExtensionConfiguration();
-    int32_t GetExtensionAutoDisconnectTime(const AppExecFwk::ExtensionAbilityType &type);
+    int32_t GetExtensionAutoDisconnectTime(std::string extensionTypeName);
 private:
     void LoadExtensionAutoDisconnectTime(nlohmann::json &object);
     bool ReadFileInfoJson(const std::string &filePath, nlohmann::json &jsonBuf);
 
-    std::map<AppExecFwk::ExtensionAbilityType, int32_t> extensionAutoDisconnectTimeMap_;
+    std::map<std::string, int32_t> extensionAutoDisconnectTimeMap_;
 };
 } // OHOS
 } // AAFwk

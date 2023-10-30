@@ -613,7 +613,8 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
     auto connectRecordList = abilityRecord->GetConnectRecordList();
     for (auto &connectRecord : connectRecordList) {
         connectRecord->ScheduleConnectAbilityDone();
-        if (abilityRecord->GetAbilityInfo().type == AbilityType::EXTENSION) {
+        if (abilityRecord->GetAbilityInfo().type == AbilityType::EXTENSION &&
+            abilityRecord->GetAbilityInfo().extensionAbilityType != ExtensionAbilityType::SERVICE) {
             PostExtensionDelayDisconnectTask(connectRecord);
         }
     }
@@ -1404,6 +1405,7 @@ void AbilityConnectManager::HandleCallBackDiedTask(const sptr<IRemoteObject> &co
     if (it != connectMap_.end()) {
         ConnectListType connectRecordList = it->second;
         for (auto &connRecord : connectRecordList) {
+            RemoveExtensionDelayDisconnectTask(connRecord);
             connRecord->ClearConnCallBack();
         }
     } else {
@@ -1544,6 +1546,7 @@ void AbilityConnectManager::HandleAbilityDiedTask(
     ConnectListType connlist = abilityRecord->GetConnectRecordList();
     for (auto &connectRecord : connlist) {
         HILOG_WARN("This record complete disconnect directly. recordId:%{public}d", connectRecord->GetRecordId());
+        RemoveExtensionDelayDisconnectTask(connectRecord);
         connectRecord->CompleteDisconnect(ERR_OK, true);
         abilityRecord->RemoveConnectRecordFromList(connectRecord);
         RemoveConnectionRecordFromMap(connectRecord);
@@ -2056,15 +2059,21 @@ void AbilityConnectManager::PostExtensionDelayDisconnectTask(const std::shared_p
 
     auto abilityRecord = connectRecord->GetAbilityRecord();
     CHECK_POINTER(abilityRecord);
-    auto type = abilityRecord->GetAbilityInfo().extensionAbilityType;
-    if (extensionConfig_ == nullptr) {
-        extensionConfig_ = std::make_shared<ExtensionConfig>();
+    auto typeName = abilityRecord->GetAbilityInfo().extensionTypeName;
+    int32_t delayTime = DelayedSingleton<ExtensionConfig>::GetInstance()->GetExtensionAutoDisconnectTime(typeName);
+    if (delayTime == -1) {
+        HILOG_DEBUG("This extension needn't auto disconnect.");
+        return;
     }
-    int32_t delayTime = extensionConfig_->GetExtensionAutoDisconnectTime(type);
 
-    auto task = [connectRecord, connectManager = shared_from_this()]() {
+    auto task = [connectRecord, self = weak_from_this()]() {
+        auto selfObj = self.lock();
+        if (selfObj == nullptr) {
+            HILOG_WARN("mgr is invalid.");
+            return;
+        }
         HILOG_WARN("Auto disconnect the Extension's connection.");
-        connectManager->HandleExtensionDisconnectTask(connectRecord);
+        selfObj->HandleExtensionDisconnectTask(connectRecord);
     };
     taskHandler_->SubmitTask(task, taskName, delayTime);
 }
@@ -2088,8 +2097,10 @@ void AbilityConnectManager::HandleExtensionDisconnectTask(const std::shared_ptr<
     if (result != ERR_OK) {
         HILOG_WARN("Auto disconnect extension error, ret: %{public}d.", result);
     }
-    connectRecord->CompleteDisconnect(ERR_OK, false);
-    RemoveConnectionRecordFromMap(connectRecord);
+    if (connectRecord->GetConnectState() == ConnectionState::DISCONNECTED) {
+        connectRecord->CompleteDisconnect(ERR_OK, false);
+        RemoveConnectionRecordFromMap(connectRecord);
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
