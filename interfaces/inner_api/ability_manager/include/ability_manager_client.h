@@ -108,7 +108,7 @@ public:
      * @param isNeedLocalDeviceId is need local device id.
      * @return Returns front desk focus ability elementName by token.
      */
-    AppExecFwk::ElementName GetElementNameByToken(const sptr<IRemoteObject> &token, bool isNeedLocalDeviceId = true);
+    AppExecFwk::ElementName GetElementNameByToken(sptr<IRemoteObject> token, bool isNeedLocalDeviceId = true);
 
     /**
      * StartAbility with want, send want to ability manager service.
@@ -132,6 +132,21 @@ public:
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * StartAbility by insight intent, send want to ability manager service.
+     *
+     * @param want Ability want.
+     * @param callerToken caller ability token.
+     * @param intentId insight intent id.
+     * @param userId userId of target ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityByInsightIntent(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        uint64_t intentId,
         int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
@@ -1294,6 +1309,27 @@ public:
      * @return Return true to allow ability to start, or false to reject.
      */
     bool IsAbilityControllerStart(const Want &want);
+
+    /**
+     * @brief Execute intent.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent execute param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
+        const InsightIntentExecuteParam &param);
+
+    /**
+     * @brief Called when insight intent execute finished.
+     *
+     * @param token ability's token.
+     * @param intentId insight intent id.
+     * @param result insight intent execute result.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
+        const InsightIntentExecuteResult &result);
 
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
