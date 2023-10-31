@@ -30,6 +30,7 @@
 #include "permission_constants.h"
 #include "permission_verification.h"
 #include "system_ability_definition.h"
+#include "tokenid_kit.h"
 #include "want.h"
 
 namespace OHOS {
@@ -472,7 +473,7 @@ int UriPermissionManagerStubImpl::RevokeAllUriPermissions(uint32_t tokenId)
 
     ConnectManager(storageManager_, STORAGE_MANAGER_MANAGER_ID);
     if (storageManager_ == nullptr) {
-        HILOG_ERROR("ConnectStorageManager failed");
+        HILOG_ERROR("ConnectStorageManager failed.");
         return INNER_ERR;
     }
 
@@ -650,11 +651,11 @@ int32_t UriPermissionManagerStubImpl::GetCurrentAccountId() const
     auto ret = DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
         QueryActiveOsAccountIds(osActiveAccountIds);
     if (ret != ERR_OK) {
-        HILOG_ERROR("QueryActiveOsAccountIds failed.");
+        HILOG_ERROR("QueryActiveOsAccountIds error.");
         return DEFAULT_USER_ID;
     }
     if (osActiveAccountIds.empty()) {
-        HILOG_ERROR("%{public}s, QueryActiveOsAccountIds is empty, no accounts.", __func__);
+        HILOG_ERROR("%{public}s, the QueryActiveOsAccountIds is empty, no accounts.", __func__);
         return DEFAULT_USER_ID;
     }
 
@@ -666,7 +667,7 @@ void UriPermissionManagerStubImpl::InitPersistableUriPermissionConfig()
     char value[GRANT_PERSISTABLE_URI_PERMISSION_ENABLE_SIZE] = "false";
     int retSysParam = GetParameter(GRANT_PERSISTABLE_URI_PERMISSION_ENABLE_PARAMETER, "false", value,
         GRANT_PERSISTABLE_URI_PERMISSION_ENABLE_SIZE);
-    HILOG_INFO("GrantPersistableUriPermissionEnable, %{public}s value is %{public}s.",
+    HILOG_INFO("GrantPersistableUriPermissionEnable, %{public}s value is %{public}s",
         GRANT_PERSISTABLE_URI_PERMISSION_ENABLE_PARAMETER, value);
     if (retSysParam > 0 && !std::strcmp(value, "true")) {
         isGrantPersistableUriPermissionEnable_ = true;
@@ -676,9 +677,9 @@ void UriPermissionManagerStubImpl::InitPersistableUriPermissionConfig()
 void UriPermissionManagerStubImpl::SendEvent(const Uri &uri, const std::string &targetBundleName,
     uint32_t targetTokenId, const std::vector<std::string> &uriVec)
 {
-    auto isSaCall = PermissionVerification::GetInstance()->IsSACall();
-    auto calleeTokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(targetTokenId);
-    if (isSaCall && calleeTokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+    auto isSystemAppCall = PermissionVerification::GetInstance()->IsSystemAppCall();
+    auto targetIsSystemApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(targetTokenId);
+    if (isSystemAppCall && !targetIsSystemApp) {
         EventInfo eventInfo;
         Uri uri_inner = uri;
         eventInfo.bundleName = targetBundleName;

@@ -121,6 +121,21 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * StartAbility by insight intent, send want to ability manager service.
+     *
+     * @param want Ability want.
+     * @param callerToken caller ability token.
+     * @param intentId insight intent id.
+     * @param userId userId of target ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartAbilityByInsightIntent(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        uint64_t intentId,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    /**
      * Starts a new ability with specific start settings.
      *
      * @param want Indicates the ability to start.
@@ -1018,7 +1033,7 @@ public:
 
     virtual AppExecFwk::ElementName GetTopAbility(bool isNeedLocalDeviceId = true) override;
 
-    virtual AppExecFwk::ElementName GetElementNameByToken(const sptr<IRemoteObject> &token,
+    virtual AppExecFwk::ElementName GetElementNameByToken(sptr<IRemoteObject> token,
         bool isNeedLocalDeviceId = true) override;
 
     /**
@@ -1307,7 +1322,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) override;
-	    
+
     /**
      * @brief Unregister app debug listener.
      * @param listener App debug listener.
@@ -1330,11 +1345,35 @@ public:
     int32_t DetachAppDebug(const std::string &bundleName) override;
 
     /**
+     * @brief Execute intent.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent execute param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
+        const InsightIntentExecuteParam &param) override;
+
+    int32_t StartAbilityWithInsightIntent(const Want &want, int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE);
+
+    /**
      * @brief Check if ability controller can start.
      * @param want The want of ability to start.
      * @return Return true to allow ability to start, or false to reject.
      */
     virtual bool IsAbilityControllerStart(const Want &want) override;
+
+    /**
+     * @brief Called when insight intent execute finished.
+     *
+     * @param token ability's token.
+     * @param intentId insight intent id.
+     * @param result insight intent execute result.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
+        const InsightIntentExecuteResult &result) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1548,7 +1587,8 @@ private:
 
     void StartResidentApps();
 
-    void StartAutoStartupApps();
+    void StartAutoStartupAppsInner();
+    void RetryStartAutoStartupApps(const std::vector<AutoStartupInfo> &infoList, int32_t retryCount);
 
     int VerifyAccountPermission(int32_t userId);
 
