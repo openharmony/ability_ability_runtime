@@ -694,6 +694,13 @@ int32_t AbilityAutoStartupService::CheckPermissionForSystem()
         HILOG_ERROR("The caller is not system-app, can not use system-api.");
         return ERR_NOT_SYSTEM_APP;
     }
+
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+            PermissionConstants::PERMISSION_APP_BOOT_MANAGEMENT_CAPABILIT)) {
+        HILOG_ERROR("Not have OHOS_PERMISSION_APP_BOOT_MANAGEMENT_CAPABILIT approval.");
+        return CHECK_PERMISSION_FAILED;
+    }
+
     return ERR_OK;
 }
 
