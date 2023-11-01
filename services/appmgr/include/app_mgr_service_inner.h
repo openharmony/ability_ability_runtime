@@ -1113,6 +1113,7 @@ private:
     std::shared_ptr<AppDebugManager> appDebugManager_;
     ffrt::mutex killpedProcessMapLock_;
     mutable std::map<int64_t, std::string> killedPorcessMap_;
+    std::vector<std::string> serviceExtensionWhiteList_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
