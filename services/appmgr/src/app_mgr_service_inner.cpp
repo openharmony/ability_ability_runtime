@@ -4695,5 +4695,16 @@ void AppMgrServiceInner::SendAppLaunchEvent(const std::shared_ptr<AppRunningReco
     }
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_LAUNCH, HiSysEventType::BEHAVIOR, eventInfo);
 }
+
+void AppMgrServiceInner::ParseServiceExtMultiProcessWhiteList()
+{
+    auto serviceExtMultiProcessWhiteList =
+        OHOS::system::GetParameter(SERVICE_EXT_MULTI_PROCESS_WHITE_LIST, "");
+    if (serviceExtMultiProcessWhiteList.empty()) {
+        HILOG_WARN("Service extension multi process white list is empty.");
+        return;
+    }
+    SplitStr(serviceExtMultiProcessWhiteList, ";", serviceExtensionWhiteList_);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
