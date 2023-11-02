@@ -21,29 +21,30 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class IAppRunningStatusListener : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.appexecfwk.IAppRunningStatusListener");
+enum class RunningStatus {
+    APP_RUNNING_START = 0,
+    APP_RUNNING_STOP,
+};
 
-    IAppRunningStatusListener() = default;
-    virtual ~IAppRunningStatusListener() = default;
+class AppRunningStatusListenerInterface : public IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.appexecfwk.AppRunningStatusListenerInterface");
+
+    AppRunningStatusListenerInterface() = default;
+    virtual ~AppRunningStatusListenerInterface() = default;
 
     /**
      * Notify the app running status.
      *
-     * @param bundle Bundle name in Application record.
-     * @param UID uid.
-     * @param runningStatus running status.
+     * @param bundle Bundle name in application record.
+     * @param UID Uid of bundle.
+     * @param runningStatus The app running status.
+     * @return
      */
-    virtual void NotifyAppRunningStatus(const std::string &bundle, int32_t &uid, int32_t runningStatus) = 0;
-
-    enum class RunningStatus {
-        APP_RUNNING_START = 0,
-        APP_RUNNING_STOP,
-    };
+    virtual void NotifyAppRunningStatus(const std::string &bundle, int32_t uid, RunningStatus runningStatus) = 0;
 
     enum class MessageCode {
-        // app running status
+        // app running status.
         APP_RUNNING_STATUS = 0,
     };
 };

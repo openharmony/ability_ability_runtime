@@ -176,12 +176,12 @@ public:
         return 0;
     }
 
-    int32_t RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+    int32_t RegisterAppRunningStatusListener(const sptr<IRemoteObject> &listener)
     {
         return 0;
     }
 
-    int32_t UnregisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+    int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener)
     {
         return 0;
     }

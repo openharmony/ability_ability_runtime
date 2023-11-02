@@ -16,41 +16,72 @@
 #ifndef OHOS_ABILITY_RUNTIME_APP_RUNNING_STAUS_MOUDLE_H
 #define OHOS_ABILITY_RUNTIME_APP_RUNNING_STAUS_MOUDLE_H
 
+#include <map>
+#include <shared_mutex>
+
 #include "app_running_status_listener_interface.h"
 #include "iremote_object.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-class AppRunningStausModule {
+class AppRunningStatusModule : public std::enable_shared_from_this<AppRunningStatusModule> {
 public:
-    AppRunningStausModule() = default;
-    virtual ~AppRunningStausModule() = default;
+    AppRunningStatusModule() = default;
+    virtual ~AppRunningStatusModule() = default;
 
     /**
      * Register listener.
      *
-     * @param listener app running status listener object.
+     * @param listener App running status listener object.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t RegisterListener(const sptr<IAppRunningStatusListener> &listener);
+    int32_t RegisterListener(const sptr<AppRunningStatusListenerInterface> &listener);
 
     /**
-     * Register listener.
+     * Unregister listener.
      *
-     * @param listener app running status listener object.
+     * @param listener App running status listener object.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UnregisterListener(const sptr<IAppRunningStatusListener> &listener);
+    int32_t UnregisterListener(const sptr<AppRunningStatusListenerInterface> &listener);
 
     /**
      * Notify the app running status event.
      *
-     * @param bundle Bundle name in Application record.
-     * @param UID uid.
-     * @param runningStatus running status.
+     * @param bundle Bundle name in application record.
+     * @param uid Uid of bundle.
+     * @param runningStatus Running status.
+     * @return
      */
-    void NotifyAppRunningStatusEvent(const std::string &bundle, int32_t &uid, int32_t runningStatus);
+    void NotifyAppRunningStatusEvent(const std::string &bundle, int32_t uid, RunningStatus runningStatus);
+
+    /**
+     * @class ClientDeathRecipient.
+     * Notices IRemoteBroker died.
+     */
+    class ClientDeathRecipient : public IRemoteObject::DeathRecipient {
+    public:
+        explicit ClientDeathRecipient(const std::weak_ptr<AppRunningStatusModule> &weakPtr);
+        virtual ~ClientDeathRecipient() = default;
+
+        /**
+         * Handle remote object died event.
+         *
+         * @param Remote Remote object.
+         */
+        void OnRemoteDied(const wptr<IRemoteObject> &remote) override;
+
+    private:
+        std::weak_ptr<AppRunningStatusModule> weakPtr_;
+    };
 
 private:
-    sptr<IAppRunningStatusListener> listener_;
+    void SetDeathRecipient(const sptr<AppRunningStatusListenerInterface> &listener,
+        const sptr<IRemoteObject::DeathRecipient> &deathRecipient);
+    int32_t RemoveListenerAndDeathRecipient(const wptr<IRemoteObject> &remote);
+
+    mutable std::mutex listenerMutex_;
+    std::map<sptr<AppRunningStatusListenerInterface>, sptr<IRemoteObject::DeathRecipient>> listeners_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -376,21 +376,20 @@ public:
     virtual int32_t ChangeAppGcState(pid_t pid, int32_t state) override;
 
     /**
-     * Register AppRunning Status Listener.
+     * Register appRunning status listener.
      *
-     * @param listener Running Status Listener.
-     *
+     * @param listener Running status listener.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener) override;
+    int32_t RegisterAppRunningStatusListener(const sptr<IRemoteObject> &listener) override;
 
     /**
-     * Unregister AppRunning Status Listener.
+     * Unregister appRunning status listener.
      *
-     * @param listener Running Status Listener.
-     *
+     * @param listener Running status listener.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UnregisterAppRunningStatusListener(
-        const sptr<AbilityRuntime::IAppRunningStatusListener> &listener) override;
+    int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener) override;
 
 private:
     /**

@@ -134,9 +134,9 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleNotifyPageShow;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_PAGE_HIDE)] =
         &AppMgrStub::HandleNotifyPageHide;
-    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APP_RUNNING_LISTENER)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APP_RUNNING_STATUS_LISTENER)] =
         &AppMgrStub::HandleRegisterAppRunningStatusListener;
-    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APP_RUNNING_LISTENER)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APP_RUNNING_STATUS_LISTENER)] =
         &AppMgrStub::HandleUnregisterAppRunningStatusListener;
 }
 
@@ -840,7 +840,7 @@ int32_t AppMgrStub::HandleRegisterAppRunningStatusListener(MessageParcel &data, 
         return ERR_INVALID_VALUE;
     }
 
-    auto result = RegisterAppRunningStatusListener(iface_cast<AbilityRuntime::IAppRunningStatusListener>(listener));
+    auto result = RegisterAppRunningStatusListener(listener);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("Fail to write result.");
         return ERR_INVALID_VALUE;
@@ -856,8 +856,7 @@ int32_t AppMgrStub::HandleUnregisterAppRunningStatusListener(MessageParcel &data
         return ERR_INVALID_VALUE;
     }
 
-    int32_t result = UnregisterAppRunningStatusListener(
-        iface_cast<AbilityRuntime::IAppRunningStatusListener>(listener));
+    auto result = UnregisterAppRunningStatusListener(listener);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("Fail to write result.");
         return ERR_INVALID_VALUE;

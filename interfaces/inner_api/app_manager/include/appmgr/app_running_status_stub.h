@@ -23,19 +23,18 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class AppRunningStatusStub : public IRemoteStub<IAppRunningStatusListener> {
+class AppRunningStatusStub : public IRemoteStub<AppRunningStatusListenerInterface> {
 public:
     AppRunningStatusStub();
     virtual ~AppRunningStatusStub();
 
-    virtual int OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+    int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     ErrCode HandleAppRunningStatus(MessageParcel &data, MessageParcel &reply);
 
-    using IAppRunningStatusListenerFunc = int32_t (AppRunningStatusStub::*)(MessageParcel &data, MessageParcel &reply);
-    std::map<uint32_t, IAppRunningStatusListenerFunc> requestFuncMap_;
+    using AppRunningStatusListenerFunc = int32_t (AppRunningStatusStub::*)(MessageParcel &data, MessageParcel &reply);
+    std::map<uint32_t, AppRunningStatusListenerFunc> requestFuncMap_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

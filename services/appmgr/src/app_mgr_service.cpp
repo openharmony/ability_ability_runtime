@@ -859,7 +859,7 @@ int32_t AppMgrService::NotifyPageHide(const sptr<IRemoteObject> &token, const Pa
     return appMgrServiceInner_->NotifyPageHide(token, pageStateData);
 }
 
-int32_t AppMgrService::RegisterAppRunningStatusListener(const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+int32_t AppMgrService::RegisterAppRunningStatusListener(const sptr<IRemoteObject> &listener)
 {
     HILOG_DEBUG("Called.");
     if (!IsReady()) {
@@ -869,8 +869,7 @@ int32_t AppMgrService::RegisterAppRunningStatusListener(const sptr<AbilityRuntim
     return appMgrServiceInner_->RegisterAppRunningStatusListener(listener);
 }
 
-int32_t AppMgrService::UnregisterAppRunningStatusListener(
-    const sptr<AbilityRuntime::IAppRunningStatusListener> &listener)
+int32_t AppMgrService::UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener)
 {
     HILOG_DEBUG("Called.");
     if (!IsReady()) {
