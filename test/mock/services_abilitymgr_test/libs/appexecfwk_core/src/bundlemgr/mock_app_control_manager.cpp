@@ -90,6 +90,50 @@ ErrCode AppControlProxy::GetAppRunningControlRule(
     return ERR_OK;
 }
 
+ErrCode AppControlProxy::GetAbilityRunningControlRule(
+    const std::string &bundleName, int32_t userId, std::vector<DisposedRule> &disposedRuleList)
+{
+    if (bundleName == "com.acts.disposedrulehap")
+    {
+        disposedRuleList.resize(4);
+
+        disposedRuleList[0].priority = 10;
+        (disposedRuleList[0]).want = nullptr;
+
+        disposedRuleList[1].priority = 20;
+        disposedRuleList[1].disposedType = AppExecFwk::DisposedType::BLOCK_ABILITY;
+        disposedRuleList[1].controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
+        AppExecFwk::ElementName element;
+        element.SetAbilityName("ServiceAbility2");
+        element.SetModuleName("entry");
+        disposedRuleList[1].elementList.push_back(element);
+        (disposedRuleList[1]).want = nullptr;
+
+        disposedRuleList[2].priority = 30;
+        disposedRuleList[2].disposedType = AppExecFwk::DisposedType::BLOCK_ABILITY;
+        element.SetAbilityName("MainAbility2");
+        element.SetModuleName("entry");
+        disposedRuleList[2].elementList.push_back(element);
+        element.SetAbilityName("MainAbility4");
+        element.SetModuleName("entry");
+        disposedRuleList[2].elementList.push_back(element);
+        (*(disposedRuleList[2]).want).SetElementName("com.example.disposedruletest",
+            "DisposedAbility3");
+
+        disposedRuleList[3].priority = 40;
+        disposedRuleList[3].disposedType = AppExecFwk::DisposedType::BLOCK_ABILITY;
+        disposedRuleList[3].controlType = AppExecFwk::ControlType::DISALLOWED_LIST;
+        element.SetAbilityName("MainAbility2");
+        element.SetModuleName("entry");
+        disposedRuleList[3].elementList.push_back(element);
+        (*(disposedRuleList[3]).want).SetElementName("com.example.disposedruletest",
+            "DisposedAbility2");
+
+        return ERR_OK;
+    }
+    return ERR_INVALID_VALUE;
+}
+
 ErrCode AppControlProxy::ConfirmAppJumpControlRule(const std::string &callerBundleName,
     const std::string &targetBundleName, int32_t userId)
 {
