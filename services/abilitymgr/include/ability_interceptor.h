@@ -65,6 +65,16 @@ private:
     bool CheckControl(const Want &want, int32_t userId, AppExecFwk::AppRunningControlRuleResult &controlRule);
 };
 
+class DisposedRuleInterceptor : public AbilityInterceptor {
+public:
+    DisposedRuleInterceptor();
+    ~DisposedRuleInterceptor();
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
+private:
+    bool CheckControl(const Want &want, int32_t userId, AppExecFwk::DisposedRule &disposedRule);
+    bool CheckDisposedRule(const Want &want, AppExecFwk::DisposedRule &disposedRule);
+};
+
 class EcologicalRuleInterceptor : public AbilityInterceptor {
 public:
     EcologicalRuleInterceptor();
@@ -95,6 +105,7 @@ private:
     bool LoadAppLabelInfo(sptr<AppExecFwk::IBundleMgr> &bms, Want &want, AppExecFwk::AppJumpControlRule &controlRule,
         int32_t userId);
 };
+
 } // namespace AAFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ABILITY_INTERCEPTOR_H
