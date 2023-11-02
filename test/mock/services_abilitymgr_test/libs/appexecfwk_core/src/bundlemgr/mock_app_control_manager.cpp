@@ -95,6 +95,7 @@ ErrCode AppControlProxy::GetAbilityRunningControlRule(
 {
     if (bundleName == "com.acts.disposedrulehap") {
         DisposedRule disposedRule;
+        ElementName element;
 
         disposedRule.priority = 0;
         disposedRule.disposedType = AppExecFwk::DisposedType::BLOCK_ABILITY;
