@@ -181,7 +181,6 @@ DisposedRuleInterceptor::~DisposedRuleInterceptor()
 
 ErrCode DisposedRuleInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground)
 {
-    // AppExecFwk::DisposedRule controlRule;
     AppExecFwk::DisposedRule disposedRule;
     if (CheckControl(want, userId, disposedRule)) {
         HILOG_INFO("The target application is intercpted.");
@@ -226,14 +225,13 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
 
     auto ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
         userId, disposedRuleList));
-
     if (ret != ERR_OK || disposedRuleList.empty()) {
         HILOG_DEBUG("Get No DisposedRule");
         return false;
     }
+
     for (auto &rule:disposedRuleList) {
-        if (CheckDisposedRule(want, rule))
-        {
+        if (CheckDisposedRule(want, rule)) {
             disposedRule = rule;
             return true;
         }
@@ -246,7 +244,6 @@ bool DisposedRuleInterceptor::CheckDisposedRule(const Want &want, AppExecFwk::Di
     if (disposedRule.disposedType == AppExecFwk::DisposedType::BLOCK_APPLICATION) {
         return disposedRule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST;
     }
-    HILOG_INFO("The target application is intercpted4.");
 
     std::string moduleName = want.GetElement().GetModuleName();
     std::string abilityName = want.GetElement().GetAbilityName();
