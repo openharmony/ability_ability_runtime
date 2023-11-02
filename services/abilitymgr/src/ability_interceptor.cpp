@@ -183,7 +183,7 @@ ErrCode DisposedRuleInterceptor::DoProcess(const Want &want, int requestCode, in
 {
     AppExecFwk::DisposedRule disposedRule;
     if (CheckControl(want, userId, disposedRule)) {
-        HILOG_INFO("The target application is intercpted.");
+        HILOG_INFO("The target ability is intercpted.");
 #ifdef SUPPORT_GRAPHICS
         if (isForeground && disposedRule.want != nullptr
             && disposedRule.disposedType != AppExecFwk::DisposedType::NON_BLOCK
@@ -191,7 +191,7 @@ ErrCode DisposedRuleInterceptor::DoProcess(const Want &want, int requestCode, in
             int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule.want,
                 requestCode, userId));
             if (ret != ERR_OK) {
-                HILOG_ERROR("Control implicit start appgallery failed.");
+                HILOG_ERROR("DisposedRuleInterceptor start ability failed.");
                 return ret;
             }
         }
@@ -241,26 +241,21 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
 
 bool DisposedRuleInterceptor::CheckDisposedRule(const Want &want, AppExecFwk::DisposedRule &disposedRule)
 {
+    bool isAllowed = disposedRule.controlType == AppExecFwk::ControlType::ALLOWED_LIST;
     if (disposedRule.disposedType == AppExecFwk::DisposedType::BLOCK_APPLICATION) {
-        return disposedRule.controlType == AppExecFwk::ControlType::DISALLOWED_LIST;
+        return !isAllowed;
     }
 
     std::string moduleName = want.GetElement().GetModuleName();
     std::string abilityName = want.GetElement().GetAbilityName();
 
-    bool isElementNameExist = false;
-
     for (auto elementName : disposedRule.elementList) {
         if (moduleName == elementName.GetModuleName()
             && abilityName == elementName.GetAbilityName()) {
-            isElementNameExist = true;
+            return !isAllowed;
         }
     }
-    if (disposedRule.controlType == AppExecFwk::ControlType::ALLOWED_LIST) {
-        return !isElementNameExist;
-    } else {
-        return isElementNameExist;
-    }
+    return isAllowed;
 }
 
 EcologicalRuleInterceptor::EcologicalRuleInterceptor()
