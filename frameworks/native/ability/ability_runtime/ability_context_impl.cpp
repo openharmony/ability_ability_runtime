@@ -749,6 +749,7 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
     want.SetParams(wantParams);
     Ace::ModalUIExtensionCallbacks callback;
     callback.onError = std::bind(&JsUIExtensionCallback::OnError, uiExtensionCallbacks, std::placeholders::_1);
+    callback.onRelease = std::bind(&JsUIExtensionCallback::OnRelease, uiExtensionCallbacks, std::placeholders::_1);
     Ace::ModalUIExtensionConfig config;
     config.isProhibitBack = true;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
@@ -756,6 +757,8 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
         HILOG_ERROR("CreateModalUIExtension is failed");
         return ERR_INVALID_VALUE;
     }
+    uiExtensionCallbacks->SetUIContent(uiContent);
+    uiExtensionCallbacks->SetSessionId(sessionId);
     return ERR_OK;
 }
 #endif
