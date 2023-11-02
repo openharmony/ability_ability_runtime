@@ -70,9 +70,9 @@ enum class AppMgrInterfaceCode {
     NOTIFY_PAGE_SHOW,
     NOTIFY_PAGE_HIDE,
     // Register an application to start listening
-    REGISTER_APP_RUNNING_LISTENER,
+    REGISTER_APP_RUNNING_STATUS_LISTENER,
     // Unregister the app to start listening
-    UNREGISTER_APP_RUNNING_LISTENER,
+    UNREGISTER_APP_RUNNING_STATUS_LISTENER,
 };
 } // AppExecFwk
 } // OHOS

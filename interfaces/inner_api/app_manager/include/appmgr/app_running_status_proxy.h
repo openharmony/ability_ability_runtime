@@ -21,19 +21,23 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-class AppRunningStatusProxy : public IRemoteProxy<IAppRunningStatusListener> {
+class AppRunningStatusProxy : public IRemoteProxy<AppRunningStatusListenerInterface> {
 public:
-    AppRunningStatusProxy();
-    virtual ~AppRunningStatusProxy();
+    explicit AppRunningStatusProxy(const sptr<IRemoteObject> &impl);
+    virtual ~AppRunningStatusProxy() = default;
 
     /**
      * Notify the app running status.
      *
-     * @param bundle Bundle name in Application record.
-     * @param UID uid.
-     * @param runningStatus running status.
+     * @param bundle Bundle name in application record.
+     * @param UID Uid of bundle.
+     * @param runningStatus The app running status.
+     * @return
      */
-    void NotifyAppRunningStatus(const std::string &bundle, int32_t &uid, int32_t runningStatus) override;
+    void NotifyAppRunningStatus(const std::string &bundle, int32_t uid, RunningStatus runningStatus) override;
+
+private:
+    static inline BrokerDelegator<AppRunningStatusProxy> delegator_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

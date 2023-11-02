@@ -21,27 +21,31 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-void AppRunningStatusProxy::NotifyAppRunningStatus(const std::string &bundle, int32_t &uid, int32_t runningStatus)
+AppRunningStatusProxy::AppRunningStatusProxy(
+    const sptr<IRemoteObject> &impl) : IRemoteProxy<AppRunningStatusListenerInterface>(impl)
+{}
+
+void AppRunningStatusProxy::NotifyAppRunningStatus(const std::string &bundle, int32_t uid, RunningStatus runningStatus)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option(MessageOption::TF_SYNC);
     if (!data.WriteInterfaceToken(AppRunningStatusProxy::GetDescriptor())) {
         HILOG_ERROR("Write interface token failed.");
         return;
     }
-    if (!data.WriteString(bundle) || !data.WriteInt32(uid) || !data.WriteBool(runningStatus)) {
+    if (!data.WriteString(bundle) || !data.WriteInt32(uid) || !data.WriteInt32(static_cast<int32_t>(runningStatus))) {
         HILOG_ERROR("Write data failed.");
         return;
     }
-
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOG_ERROR("Remote is nullptr.");
         return;
     }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
     int32_t ret = remote->SendRequest(
-        static_cast<uint32_t>(IAppRunningStatusListener::MessageCode::APP_RUNNING_STATUS), data, reply, option);
+        static_cast<uint32_t>(AppRunningStatusListenerInterface::MessageCode::APP_RUNNING_STATUS), data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
         return;

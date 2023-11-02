@@ -436,22 +436,20 @@ public:
     virtual int32_t ChangeAppGcState(pid_t pid, int32_t state) = 0;
 
     /**
-     * Register AppRunning Status Listener.
+     * Register appRunning status listener.
      *
-     * @param listener Running Status Listener.
-     *
+     * @param listener Running status listener.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterAppRunningStatusListener(
-        const sptr<AbilityRuntime::IAppRunningStatusListener> &listener) = 0;
+    virtual int32_t RegisterAppRunningStatusListener(const sptr<IRemoteObject> &listener) = 0;
 
     /**
-     * Unregister AppRunning Status Listener.
+     * Unregister appRunning status listener.
      *
-     * @param listener Running Status Listener.
-     *
+     * @param listener Running status listener.
+     * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UnregisterAppRunningStatusListener(
-        const sptr<AbilityRuntime::IAppRunningStatusListener> &listener) = 0;
+    virtual int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener) = 0;
 
     // please add new message item to the bottom in order to prevent some unexpected BUG
     enum class Message {
@@ -503,10 +501,10 @@ public:
         CHANGE_APP_GC_STATE,
         NOTIFY_PAGE_SHOW,
         NOTIFY_PAGE_HIDE,
-        // Register an application to start listening
-        REGISTER_APP_RUNNING_LISTENER,
-        // Unregister the app to start listening
-        UNREGISTER_APP_RUNNING_LISTENER,
+        // Register an application to start listening.
+        REGISTER_APP_RUNNING_STATUS_LISTENER,
+        // Unregister the app to start listening.
+        UNREGISTER_APP_RUNNING_STATUS_LISTENER,
     };
 };
 }  // namespace AppExecFwk

@@ -23,7 +23,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 AppRunningStatusStub::AppRunningStatusStub()
 {
-    requestFuncMap_[static_cast<uint32_t>(IAppRunningStatusListener::MessageCode::APP_RUNNING_STATUS)] =
+    requestFuncMap_[static_cast<uint32_t>(AppRunningStatusListenerInterface::MessageCode::APP_RUNNING_STATUS)] =
         &AppRunningStatusStub::HandleAppRunningStatus;
 }
 
@@ -50,7 +50,6 @@ int AppRunningStatusStub::OnRemoteRequest(
             return (this->*requestFunc)(data, reply);
         }
     }
-    HILOG_DEBUG("Exit.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -58,7 +57,7 @@ ErrCode AppRunningStatusStub::HandleAppRunningStatus(MessageParcel &data, Messag
 {
     std::string bundle = data.ReadString();
     int32_t uid = data.ReadInt32();
-    bool runningStatus = data.ReadBool();
+    RunningStatus runningStatus = static_cast<RunningStatus>(data.ReadInt32());
     NotifyAppRunningStatus(bundle, uid, runningStatus);
     return NO_ERROR;
 }
