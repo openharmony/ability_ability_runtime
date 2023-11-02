@@ -321,20 +321,22 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
     }
     MakeProcessName(appInfo, hapModuleInfo, processName);
     if (supportServiceExtMultiProcess_.compare("true") == 0) {
-        bool isInWhiteList = false;
-        auto iter = std::find(
-            serviceExtensionWhiteList_.begin(), serviceExtensionWhiteList_.end(), processName);
-        if (iter != serviceExtensionWhiteList_.end()) {
-            isInWhiteList = true;
-        }
-
-        if (!isInWhiteList && processName == appInfo->bundleName &&
+        if (processName == appInfo->bundleName &&
             abilityInfo->extensionAbilityType == ExtensionAbilityType::SERVICE) {
-            processName += SERVICE_EXTENSION;
-            if (appInfo->keepAlive) {
-                processName += KEEP_ALIVE;
+            bool isInWhiteList = false;
+            auto iter = std::find(
+                serviceExtensionWhiteList_.begin(), serviceExtensionWhiteList_.end(), processName);
+            if (iter != serviceExtensionWhiteList_.end()) {
+                isInWhiteList = true;
             }
-         }
+
+            if (!isInWhiteList) {
+                processName += SERVICE_EXTENSION;
+                if (appInfo->keepAlive) {
+                    processName += KEEP_ALIVE;
+                }
+            }
+        }
     }
     if (appIndex != 0) {
         processName += std::to_string(appIndex);
