@@ -105,7 +105,6 @@ private:
     bool LoadAppLabelInfo(sptr<AppExecFwk::IBundleMgr> &bms, Want &want, AppExecFwk::AppJumpControlRule &controlRule,
         int32_t userId);
 };
-
 } // namespace AAFwk
 } // namespace OHOS
 #endif // OHOS_ABILITY_RUNTIME_ABILITY_INTERCEPTOR_H
