@@ -154,5 +154,19 @@ int UriPermissionManagerStub::HandleVerifyUriPermission(MessageParcel &data, Mes
     reply.WriteBool(result);
     return ERR_OK;
 }
+
+int UriPermissionManagerStub::HandleOpenFile(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
+    if (!uri) {
+        HILOG_ERROR("To read uri failed.");
+        return ERR_DEAD_OBJECT;
+    }
+    auto flag = data.ReadInt32();
+    auto tokenId = data.ReadInt32();
+    int fd = OpenFile(*uri, flag, tokenId);
+    reply.WriteInt32(fd);
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

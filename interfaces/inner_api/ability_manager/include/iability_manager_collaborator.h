@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_IABILITY_MANAGER_COLLABORATOR_H
 
 #include "ability_info.h"
+#include "configuration.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "mission_info.h"
@@ -144,6 +145,24 @@ public:
         return -1;
     }
 
+    /**
+     * @brief Notify application update system environment changes.
+     * 
+     * @param config System environment change parameters.
+     * @param userId userId Designation User ID.
+     * @return Return true to notify changes successfully, or false to failed.. 
+     */
+    virtual bool UpdateConfiguration(const AppExecFwk::Configuration &config, int32_t userId) = 0;
+
+    /**
+     * @brief Open file by uri.
+     * 
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @return int The file descriptor.
+     */
+    virtual int OpenFile(const Uri& uri, uint32_t flag) = 0;
+
     enum {
         NOTIFY_START_ABILITY = 1,
         NOTIFY_MISSION_CREATED,
@@ -159,6 +178,8 @@ public:
         UPDATE_MISSION_INFO_BY_SCB,
         NOTIFY_PRELOAD_ABILITY,
         CHECK_CALL_ABILITY_PERMISSION,
+        UPDATE_CONFIGURATION,
+        OPEN_FILE,
     };
 };
 }  // namespace AAFwk

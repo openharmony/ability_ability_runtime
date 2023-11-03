@@ -93,6 +93,16 @@ public:
      */
     virtual bool VerifyUriPermission(const Uri& uri, uint32_t flag, uint32_t tokenId) = 0;
 
+    /**
+     * @brief Open file by uri.
+     * 
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param tokenId A tokenId of an application.
+     * @return int The file descriptor.
+     */
+    virtual int OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId) = 0;
+
     enum UriPermMgrCmd {
         // ipc id for GrantUriPermission
         ON_GRANT_URI_PERMISSION = 0,
@@ -113,6 +123,8 @@ public:
 
         // ipc id for BatchGrantUriPermission
         ON_BATCH_GRANT_URI_PERMISSION,
+
+        OPEN_FILE,
     };
 };
 }  // namespace AAFwk

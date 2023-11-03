@@ -2866,5 +2866,31 @@ int32_t AbilityManagerStub::ExecuteInsightIntentDoneInner(MessageParcel &data, M
     reply.WriteInt32(result);
     return NO_ERROR;
 }
+
+bool AbilityManagerStub::NotifyConfigurationChangeInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<AppExecFwk::Configuration> config(data.ReadParcelable<AppExecFwk::Configuration>());
+    if (config == nullptr) {
+        HILOG_ERROR("To read config failed.");
+        return ERR_DEAD_OBJECT;
+    }
+    auto userId = data.ReadInt32();
+    bool result = NotifyConfigurationChange(*config, userId);
+    reply.WriteBool(result);
+    return ERR_OK;
+}
+
+int AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
+    if (!uri) {
+        HILOG_ERROR("To read uri failed.");
+        return ERR_DEAD_OBJECT;
+    }
+    auto flag = data.ReadInt32();
+    int fd = OpenFile(*uri, flag);
+    reply.WriteInt32(fd);
+    return ERR_OK;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

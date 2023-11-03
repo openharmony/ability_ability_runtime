@@ -8831,6 +8831,7 @@ int32_t AbilityManagerService::ExecuteInsightIntentDone(const sptr<IRemoteObject
         intentId, result.innerErr, result);
 }
 
+
 void AbilityManagerService::HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid)
 {
     HILOG_INFO("HandleProcessFrozen: %{public}d", uid);
@@ -8842,6 +8843,26 @@ void AbilityManagerService::HandleProcessFrozen(const std::vector<int32_t> &pidL
         return;
     }
     connectManager->HandleProcessFrozen(pidSet, uid);
+}
+
+bool AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
+{
+    auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
+    if (collaborator == nullptr) {
+        HILOG_ERROR("collaborator GetCollaborator is nullptr.");
+        return ERR_COLLABORATOR_NOT_REGISTER;
+    }
+    return collaborator->UpdateConfiguration(config, userId);
+}
+
+int AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
+{
+    auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
+    if (collaborator == nullptr) {
+        HILOG_ERROR("collaborator GetCollaborator is nullptr.");
+        return ERR_COLLABORATOR_NOT_REGISTER;
+    }
+    return collaborator->OpenFile(uri, flag);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

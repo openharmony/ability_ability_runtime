@@ -17,6 +17,7 @@
 
 #include <unordered_map>
 
+#include "ability_manager_client.h"
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "event_report.h"
@@ -87,6 +88,14 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
         return false;
     }
     return true;
+}
+
+int UriPermissionManagerStubImpl::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
+{
+    if (!VerifyUriPermission(uri, flag, tokenId)) {
+        return -1;
+    }
+    return DelayedSingleton<AAFwk::AbilityManagerClient>::GetInstance()->OpenFile(uri, flag);
 }
 
 int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,

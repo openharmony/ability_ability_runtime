@@ -604,12 +604,22 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
     int32_t result = ERR_OK;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord) {
+        if (appRecord && !isCollaboratorReserveType(appRecord)) {
             HILOG_INFO("Notification app [%{public}s]", appRecord->GetName().c_str());
             result = appRecord->UpdateConfiguration(config);
         }
     }
     return result;
+}
+
+bool AppRunningManager::isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    std::string codePath = appRecord->GetApplicationInfo()->codePath;
+    bool isReserveType = codePath == std::to_string(1);
+    if (isReserveType) {
+        HILOG_INFO("isReserveType app [%{public}s]", appRecord->GetName().c_str());
+    }
+    return isReserveType;
 }
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
