@@ -101,8 +101,11 @@ const std::string PERMISSION_ACCESS_BUNDLE_DIR = "ohos.permission.ACCESS_BUNDLE_
 const std::string PERMISSION_GET_BUNDLE_RESOURCES = "ohos.permission.GET_BUNDLE_RESOURCES";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 const std::string SUPPORT_ISOLATION_MODE = "persist.bms.supportIsolationMode";
+const std::string SUPPORT_SERVICE_EXT_MULTI_PROCESS = "component.startup.extension.multiprocess.enable";
 const std::string SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 const std::string DEBUG_APP = "debugApp";
+const std::string SERVICE_EXTENSION = ":ServiceExtension";
+const std::string KEEP_ALIVE = ":KeepAlive";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -197,6 +200,7 @@ void AppMgrServiceInner::Init()
     InitGlobalConfiguration();
     AddWatchParameter();
     supportIsolationMode_ = OHOS::system::GetParameter(SUPPORT_ISOLATION_MODE, "false");
+    supportServiceExtMultiProcess_ = OHOS::system::GetParameter(SUPPORT_SERVICE_EXT_MULTI_PROCESS, "false");
     deviceType_ = OHOS::system::GetDeviceType();
     DelayedSingleton<AppStateObserverManager>::GetInstance()->Init();
 }
@@ -313,6 +317,14 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
         return;
     }
     MakeProcessName(appInfo, hapModuleInfo, processName);
+    if (supportServiceExtMultiProcess_.compare("true") == 0) {
+        if (processName == appInfo->bundleName && abilityInfo->extensionAbilityType == ExtensionAbilityType::SERVICE) {
+            processName += SERVICE_EXTENSION;
+            if (appInfo->keepAlive) {
+                processName += KEEP_ALIVE;
+            }
+         }
+    }
     if (appIndex != 0) {
         processName += std::to_string(appIndex);
     }
@@ -523,7 +535,8 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto appRecord = GetAppRunningRecordByAppRecordId(recordId);
-    if (!appRecord || !appRecord->IsUpdateStateFromService()) {
+    if (!appRecord || (!appRecord->IsUpdateStateFromService()
+        && appRecord->GetApplicationPendingState() != ApplicationPendingState::FOREGROUNDING)) {
         HILOG_ERROR("get app record failed");
         return;
     }
@@ -539,6 +552,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appState));
     }
     appRecord->SetUpdateStateFromService(false);
+    appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
 
     // push the foregrounded app front of RecentAppList.
     PushAppFront(recordId);
@@ -585,6 +599,9 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
             appRecord->GetName().c_str(), static_cast<ApplicationState>(appRecord->GetState()));
     }
     appRecord->SetUpdateStateFromService(false);
+    if (appRecord->GetApplicationPendingState() == ApplicationPendingState::BACKGROUNDING) {
+        appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
+    }
 
     HILOG_INFO("application is backgrounded");
     AAFwk::EventInfo eventInfo;
@@ -1779,12 +1796,12 @@ int32_t AppMgrServiceInner::StartPerfProcess(const std::shared_ptr<AppRunningRec
 
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     if (!perfCmd.empty()) {
-        HILOG_DEBUG("debuggablePipe perfCmd:%{public}s", perfCmd.c_str());
+        HILOG_INFO("debuggablePipe perfCmd:%{public}s", perfCmd.c_str());
     } else {
-        HILOG_DEBUG("debuggablePipe debugCmd:%{public}s", debugCmd.c_str());
+        HILOG_INFO("debuggablePipe debugCmd:%{public}s", debugCmd.c_str());
     }
     if (isSanboxApp) {
-        HILOG_DEBUG("debuggablePipe sandbox: true");
+        HILOG_INFO("debuggablePipe sandbox: true");
     }
     return ERR_OK;
 }
@@ -3894,7 +3911,7 @@ void AppMgrServiceInner::PointerDeviceEventCallback(const char *key, const char 
     }
 
     HILOG_DEBUG("update config %{public}s to %{public}s", key, value);
-    auto result = appMgrServiceInner->UpdateConfiguration(changeConfig);
+    auto result = IN_PROCESS_CALL(appMgrServiceInner->UpdateConfiguration(changeConfig));
     if (result != 0) {
         HILOG_ERROR("update config failed with %{public}d, key: %{public}s, value: %{public}s.", result, key, value);
         return;
@@ -4028,10 +4045,13 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     std::string bundleName = appRecord->GetBundleName();
 
     if (faultData.faultType == FaultDataType::APP_FREEZE) {
-        if (faultData.timeoutMarkers != "") {
-            if (!taskHandler_->CancelTask(faultData.timeoutMarkers)) {
-                return ERR_OK;
-            }
+        if (faultData.timeoutMarkers != "" &&
+            !taskHandler_->CancelTask(faultData.timeoutMarkers)) {
+            return ERR_OK;
+        }
+
+        if (appRecord->IsDebugApp()) {
+            return ERR_OK;
         }
 
         if (faultData.waitSaveState) {
@@ -4047,11 +4067,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
                 .bundleName = bundleName,
                 .processName = bundleName,
             };
-            auto appfreezeManager = AppExecFwk::AppfreezeManager::GetInstance();
-            if (!appfreezeManager->IsHandleAppfreeze(bundleName)) {
-                return;
-            }
-            appfreezeManager->AppfreezeHandle(faultData, info);
+            AppExecFwk::AppfreezeManager::GetInstance()->AppfreezeHandle(faultData, info);
         }
 
         HILOG_WARN("FaultData is: name: %{public}s, faultType: %{public}d, uid: %{public}d, pid: %{public}d,"
@@ -4087,7 +4103,6 @@ void AppMgrServiceInner::TimeoutNotifyApp(int32_t pid, int32_t uid,
 
 int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
 {
-    HILOG_DEBUG("called");
     std::string callerBundleName;
     if (auto bundleMgr = remoteClientManager_->GetBundleManager(); bundleMgr != nullptr) {
         int32_t callingUid = IPCSkeleton::GetCallingUid();
@@ -4107,7 +4122,6 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
             return ERR_INVALID_VALUE;
         }
 
-        int64_t time = SystemTimeMillisecond();
         FaultData transformedFaultData = ConvertDataTypes(faultData);
         int32_t uid = appRecord->GetUid();
         std::string bundleName = appRecord->GetBundleName();
@@ -4118,11 +4132,13 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
         }
 
         if (transformedFaultData.timeoutMarkers.empty()) {
-            transformedFaultData.timeoutMarkers = "notifyFault" + std::to_string(pid) + "-" + std::to_string(time);
+            transformedFaultData.timeoutMarkers = "notifyFault:" + transformedFaultData.errorObject.name +
+                std::to_string(pid) + "-" + std::to_string(SystemTimeMillisecond());
         }
-        const int64_t timeout = 3000;
+        const int64_t timeout = 11000;
         if (faultData.faultType == FaultDataType::APP_FREEZE) {
-            if (!AppExecFwk::AppfreezeManager::GetInstance()->IsHandleAppfreeze(bundleName)) {
+            if (!AppExecFwk::AppfreezeManager::GetInstance()->IsHandleAppfreeze(bundleName) ||
+                appRecord->IsDebugApp()) {
                 return ERR_OK;
             }
             auto timeoutNotifyApp = std::bind(&AppMgrServiceInner::TimeoutNotifyApp, this,
@@ -4144,7 +4160,11 @@ FaultData AppMgrServiceInner::ConvertDataTypes(const AppFaultDataBySA &faultData
 {
     FaultData newfaultData;
     newfaultData.faultType = faultData.faultType;
-    newfaultData.errorObject = faultData.errorObject;
+    newfaultData.errorObject.message =
+        "\nFault time:" + AbilityRuntime::TimeUtil::FormatTime("%Y/%m/%d-%H:%M:%S") + "\n";
+    newfaultData.errorObject.message += faultData.errorObject.message;
+    newfaultData.errorObject.name = faultData.errorObject.name;
+    newfaultData.errorObject.stack = faultData.errorObject.stack;
     newfaultData.timeoutMarkers = faultData.timeoutMarkers;
     newfaultData.waitSaveState = faultData.waitSaveState;
     newfaultData.notifyApp = faultData.notifyApp;
@@ -4198,12 +4218,12 @@ int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &wan
 {
     auto&& bundleMgr = remoteClientManager_->GetBundleManager();
     if (bundleMgr == nullptr) {
-        HILOG_ERROR("GetBundleManager fail");
+        HILOG_ERROR("GetBundleManager error.");
         return ERR_INVALID_OPERATION;
     }
 
     if (appRunningManager_ == nullptr) {
-        HILOG_ERROR("appRunningManager_ is nullptr");
+        HILOG_ERROR("appRunningManager_ is nullptr.");
         return ERR_INVALID_OPERATION;
     }
     HILOG_INFO("debuggablePipe bundleName:%{public}s", want.GetElement().GetBundleName().c_str());
@@ -4644,7 +4664,7 @@ void AppMgrServiceInner::SendAppLaunchEvent(const std::shared_ptr<AppRunningReco
         eventInfo.versionName = applicationInfo->versionName;
         eventInfo.versionCode = applicationInfo->versionCode;
     }
-    if ( appRecord->GetPriorityObject() != nullptr) {
+    if (appRecord->GetPriorityObject() != nullptr) {
         eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     }
     eventInfo.processName = appRecord->GetProcessName();

@@ -41,7 +41,17 @@ public:
      */
     virtual int32_t NotifyStartAbility(const AppExecFwk::AbilityInfo &abilityInfo,
         int32_t userId, Want &want, uint64_t accessTokenIDEx) = 0;
-    
+
+    /**
+     * @brief Notify collaborator to app preload.
+     * @param bundleName bundlName.
+     * @return 0 means success or else failed.
+     */
+    virtual int32_t NotifyPreloadAbility(const std::string &bundleName)
+    {
+        return 0;
+    }
+
     /**
      * @brief Notify when mission is created.
      * @param missionId missionId.
@@ -125,6 +135,15 @@ public:
      */
     virtual void UpdateMissionInfo(sptr<SessionInfo> &sessionInfo) = 0;
 
+    /**
+     * @brief Check the call permission from shell assistant.
+     * @param want target info.
+     */
+    virtual int32_t CheckCallAbilityPermission(const Want &want)
+    {
+        return -1;
+    }
+
     enum {
         NOTIFY_START_ABILITY = 1,
         NOTIFY_MISSION_CREATED,
@@ -138,6 +157,8 @@ public:
         NOTIFY_MISSION_CREATED_BY_SCB,
         NOTIFY_LOAD_ABILITY_BY_SCB,
         UPDATE_MISSION_INFO_BY_SCB,
+        NOTIFY_PRELOAD_ABILITY,
+        CHECK_CALL_ABILITY_PERMISSION,
     };
 };
 }  // namespace AAFwk

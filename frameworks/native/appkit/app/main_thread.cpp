@@ -1153,6 +1153,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     if (appLaunchData.GetDebugApp() && watchdog_ != nullptr && !watchdog_->IsStopWatchdog()) {
+        AppExecFwk::AppfreezeInner::GetInstance()->SetAppDebug(true);
         watchdog_->Stop();
         watchdog_.reset();
     }
@@ -1351,11 +1352,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         application_->SetRuntime(std::move(runtime));
 
         std::weak_ptr<OHOSApplication> wpApplication = application_;
-        AbilityLoader::GetInstance().RegisterAbility("Ability",
-            [wpApplication]() -> Ability* {
+        AbilityLoader::GetInstance().RegisterUIAbility("UIAbility",
+            [wpApplication]() -> AbilityRuntime::UIAbility* {
             auto app = wpApplication.lock();
             if (app != nullptr) {
-                return Ability::Create(app->GetRuntime());
+                return AbilityRuntime::UIAbility::Create(app->GetRuntime());
             }
             HILOG_ERROR("AbilityLoader::GetAbilityByName failed.");
             return nullptr;
@@ -2712,29 +2713,13 @@ int32_t MainThread::ChangeAppGcState(int32_t state)
 void MainThread::AttachAppDebug()
 {
     HILOG_DEBUG("Called.");
-    if (watchdog_ == nullptr || watchdog_->IsStopWatchdog()) {
-        HILOG_ERROR("Watch dog is stoped.");
-        return;
-    }
-
-    watchdog_->Stop();
-    watchdog_.reset();
+    AppExecFwk::AppfreezeInner::GetInstance()->SetAppDebug(true);
 }
 
 void MainThread::DetachAppDebug()
 {
     HILOG_DEBUG("Called.");
-    if (watchdog_ == nullptr) {
-        watchdog_ = std::make_shared<Watchdog>();
-        if (watchdog_ != nullptr) {
-            watchdog_->Init(mainHandler_);
-        }
-        return;
-    }
-
-    if (watchdog_->IsStopWatchdog()) {
-        watchdog_->Init(mainHandler_);
-    }
+    AppExecFwk::AppfreezeInner::GetInstance()->SetAppDebug(false);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
