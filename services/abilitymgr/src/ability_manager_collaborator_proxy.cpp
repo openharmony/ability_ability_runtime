@@ -424,6 +424,57 @@ int32_t AbilityManagerCollaboratorProxy::CheckCallAbilityPermission(const Want &
     return reply.ReadInt32();
 }
 
+bool AbilityManagerCollaboratorProxy::UpdateConfiguration(const AppExecFwk::Configuration &config, int32_t userId)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        HILOG_ERROR("Write interface token failed.");
+        return false;
+    }
+    if (!data.WriteParcelable(&config)) {
+        HILOG_ERROR("Write config failed.");
+        return false;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOG_ERROR("Write usr failed.");
+        return false;
+    }
+    auto error = SendTransactCmd(AbilityManagerCollaboratorProxy::UPDATE_CONFIGURATION, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send config error: %{public}d", error);
+        return true;
+    }
+    return true;
+}
+
+int AbilityManagerCollaboratorProxy::OpenFile(const Uri& uri, uint32_t flag)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(AbilityManagerCollaboratorProxy::GetDescriptor())) {
+        HILOG_ERROR("Write interface token failed.");
+        return false;
+    }
+    if (!data.WriteParcelable(&uri)) {
+        HILOG_ERROR("Write uri failed.");
+        return false;
+    }
+    if (!data.WriteInt32(flag)) {
+        HILOG_ERROR("Write flag failed.");
+        return false;
+    }
+
+    int32_t ret = SendTransactCmd(IAbilityManagerCollaborator::OPEN_FILE, data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", ret);
+        return -1;
+    }
+    return reply.ReadInt32();
+}
+
 int32_t AbilityManagerCollaboratorProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
