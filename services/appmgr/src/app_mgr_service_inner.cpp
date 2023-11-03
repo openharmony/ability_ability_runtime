@@ -306,6 +306,44 @@ bool AppMgrServiceInner::CheckLoadAbilityConditions(const sptr<IRemoteObject> &t
     return true;
 }
 
+void AppMgrServiceInner::MakeServiceExtProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
+    const std::shared_ptr<ApplicationInfo> &appInfo, std::string &processName) const
+{
+    if (abilityInfo == nullptr || appInfo == nullptr) {
+        HILOG_ERROR("Ability info or app info is nullptr.");
+        return;
+    }
+
+    if (supportServiceExtMultiProcess_.compare("true") != 0) {
+        return;
+    }
+
+    auto model = GetProductModel();
+    if (model == nullptr) {
+        HILOG_ERROR("Failed to get product model!");
+        return;
+    }
+    HILOG_DEBUG("Get product model: %{public}s", model);
+    if (strcmp(model, "ALN-AL00") == 0 || strcmp(model, "HYM-W5821") == 0) {
+        return;
+    }
+
+    if (processName == appInfo->bundleName &&
+        abilityInfo->extensionAbilityType == ExtensionAbilityType::SERVICE) {
+        auto iter = std::find(
+            serviceExtensionWhiteList_.begin(), serviceExtensionWhiteList_.end(), processName);
+        if (iter != serviceExtensionWhiteList_.end()) {
+            HILOG_DEBUG("Application is in whiteList, skipping!");
+            return;
+        }
+
+        processName += SERVICE_EXTENSION;
+        if (appInfo->keepAlive) {
+            processName += KEEP_ALIVE;
+        }
+    }
+}
+
 void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
     const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo, int32_t appIndex,
     std::string &processName) const
@@ -320,24 +358,7 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
         return;
     }
     MakeProcessName(appInfo, hapModuleInfo, processName);
-    if (supportServiceExtMultiProcess_.compare("true") == 0) {
-        if (processName == appInfo->bundleName &&
-            abilityInfo->extensionAbilityType == ExtensionAbilityType::SERVICE) {
-            bool isInWhiteList = false;
-            auto iter = std::find(
-                serviceExtensionWhiteList_.begin(), serviceExtensionWhiteList_.end(), processName);
-            if (iter != serviceExtensionWhiteList_.end()) {
-                isInWhiteList = true;
-            }
-
-            if (!isInWhiteList) {
-                processName += SERVICE_EXTENSION;
-                if (appInfo->keepAlive) {
-                    processName += KEEP_ALIVE;
-                }
-            }
-        }
-    }
+    MakeServiceExtProcessName(abilityInfo, appInfo, processName);
     if (appIndex != 0) {
         processName += std::to_string(appIndex);
     }
