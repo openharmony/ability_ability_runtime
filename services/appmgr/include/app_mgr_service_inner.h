@@ -824,6 +824,9 @@ private:
 
     bool GenerateRenderUid(int32_t &renderUid);
 
+    void MakeServiceExtProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
+        const std::shared_ptr<ApplicationInfo> &appInfo, std::string &processName) const;
+
     void MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo,
         const HapModuleInfo &hapModuleInfo, int32_t appIndex, std::string &processName) const;
