@@ -342,7 +342,9 @@ void AppMgrServiceInner::MakeServiceExtProcessName(const std::shared_ptr<Ability
         return;
     }
     HILOG_DEBUG("Get product model: %{public}s", model);
-    if (strcmp(model, "ALN-AL00") == 0 || strcmp(model, "HYM-W5821") == 0) {
+    if (strcmp(model, "ALN-AL00") == 0 ||
+        strcmp(model, "HYM-W5821") == 0 ||
+        strcmp(model, "CMS-AL00") == 0) {
         return;
     }
 
