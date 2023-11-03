@@ -344,7 +344,8 @@ void AppMgrServiceInner::MakeServiceExtProcessName(const std::shared_ptr<Ability
     HILOG_DEBUG("Get product model: %{public}s", model);
     if (strcmp(model, "ALN-AL00") == 0 ||
         strcmp(model, "HYM-W5821") == 0 ||
-        strcmp(model, "CMS-AL00") == 0) {
+        strcmp(model, "CMS-AL00") == 0 ||
+        strcmp(model, "Hyman-W5821") == 0) {
         return;
     }
 
