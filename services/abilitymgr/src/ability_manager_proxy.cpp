@@ -25,6 +25,7 @@
 #include "ability_scheduler_stub.h"
 #include "ability_util.h"
 #include "appexecfwk_errors.h"
+#include "configuration.h"
 #include "session_info.h"
 
 namespace OHOS {

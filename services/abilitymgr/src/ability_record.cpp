@@ -2757,7 +2757,8 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     }
 }
 
-bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUriVec, uint32_t flag, std::string targetPkg)
+bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUriVec, uint32_t flag,
+    std::string targetPkg)
 {
     auto callingUid = IPCSkeleton::GetCallingUid();
     if (callingUid != BROKER_UID) {

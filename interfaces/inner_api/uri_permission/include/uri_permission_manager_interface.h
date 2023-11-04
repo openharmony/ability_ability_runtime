@@ -95,7 +95,6 @@ public:
 
     /**
      * @brief Open file by uri.
-     * 
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param tokenId A tokenId of an application.

@@ -17,12 +17,17 @@
 #define OHOS_ABILITY_RUNTIME_IABILITY_MANAGER_COLLABORATOR_H
 
 #include "ability_info.h"
-#include "configuration.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "mission_info.h"
 #include "session_info.h"
 #include "want.h"
+
+namespace OHOS {
+namespace AppExecFwk {
+    class Configuration;
+}
+}
 
 namespace OHOS {
 namespace AAFwk {
@@ -147,16 +152,14 @@ public:
 
     /**
      * @brief Notify application update system environment changes.
-     * 
      * @param config System environment change parameters.
      * @param userId userId Designation User ID.
-     * @return Return true to notify changes successfully, or false to failed.. 
+     * @return Return true to notify changes successfully, or false to failed.
      */
     virtual bool UpdateConfiguration(const AppExecFwk::Configuration &config, int32_t userId) = 0;
 
     /**
      * @brief Open file by uri.
-     * 
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @return int The file descriptor.
