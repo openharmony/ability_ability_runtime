@@ -24,6 +24,7 @@
 #include "ability_manager_errors.h"
 #include "ability_scheduler_proxy.h"
 #include "ability_scheduler_stub.h"
+#include "configuration.h"
 #include "session_info.h"
 
 namespace OHOS {

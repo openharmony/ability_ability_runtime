@@ -23,7 +23,6 @@
 #include "ability_scheduler_interface.h"
 #include "ability_manager_interface.h"
 #include "auto_startup_info.h"
-#include "configuration.h"
 #include "mission_info.h"
 #include "snapshot.h"
 #include "want.h"
@@ -31,6 +30,12 @@
 #include "iremote_object.h"
 #include "system_memory_attr.h"
 #include "ui_extension_window_command.h"
+
+namespace OHOS {
+namespace AppExecFwk {
+    class Configuration;
+}
+}
 
 namespace OHOS {
 namespace AAFwk {
@@ -1313,16 +1318,14 @@ public:
 
     /**
      * @brief Notify application update system environment changes.
-     * 
      * @param config System environment change parameters.
      * @param userId userId Designation User ID.
-     * @return Return true to notify changes successfully, or false to failed.. 
+     * @return Return true to notify changes successfully, or false to failed.
      */
     bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId);
 
     /**
      * @brief Open file by uri.
-     * 
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @return int The file descriptor.
