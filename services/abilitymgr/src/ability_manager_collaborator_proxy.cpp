@@ -441,7 +441,7 @@ bool AbilityManagerCollaboratorProxy::UpdateConfiguration(const AppExecFwk::Conf
         HILOG_ERROR("Write usr failed.");
         return false;
     }
-    auto error = SendTransactCmd(AbilityManagerCollaboratorProxy::UPDATE_CONFIGURATION, data, reply, option);
+    auto error = SendTransactCmd(IAbilityManagerCollaborator::UPDATE_CONFIGURATION, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send config error: %{public}d", error);
         return true;
