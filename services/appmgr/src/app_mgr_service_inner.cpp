@@ -22,7 +22,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "ability_manager_client.h"
 #include "ability_manager_errors.h"
 #include "accesstoken_kit.h"
 #include "app_mem_info.h"
@@ -3068,7 +3067,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
     configuration_->Merge(changeKeyV, config);
     // all app
     int32_t result = appRunningManager_->UpdateConfiguration(config);
-    DelayedSingleton<AAFwk::AbilityManagerClient>::GetInstance()->NotifyConfigurationChange(config, currentUserId_);
+    HandleConfigurationChange(config);
     if (result != ERR_OK) {
         HILOG_ERROR("update error, not notify");
         return result;
@@ -3081,6 +3080,16 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
         }
     }
     return result;
+}
+
+void AppMgrServiceInner::HandleConfigurationChange(const Configuration &config)
+{
+    std::lock_guard lock(appStateCallbacksLock_);
+    for (const auto &callback : appStateCallbacks_) {
+        if (callback != nullptr) {
+            callback->NotifyConfigurationChange(config, currentUserId_);
+        }
+    }
 }
 
 int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)

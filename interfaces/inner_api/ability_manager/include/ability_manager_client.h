@@ -1317,20 +1317,13 @@ public:
     bool IsAbilityControllerStart(const Want &want);
 
     /**
-     * @brief Notify application update system environment changes.
-     * @param config System environment change parameters.
-     * @param userId userId Designation User ID.
-     * @return Return true to notify changes successfully, or false to failed.
-     */
-    bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId);
-
-    /**
      * @brief Open file by uri.
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param tokenId A tokenId of an application.
      * @return int The file descriptor.
      */
-    int OpenFile(const Uri& uri, uint32_t flag);
+    int OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId);
 
     /**
      * @brief Execute intent.

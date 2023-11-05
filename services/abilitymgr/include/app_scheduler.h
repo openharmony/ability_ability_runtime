@@ -86,6 +86,8 @@ public:
     virtual void OnAbilityRequestDone(const sptr<IRemoteObject> &token, const int32_t state) = 0;
 
     virtual void OnAppStateChanged(const AppInfo &info) = 0;
+
+    virtual bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) = 0;
 };
 
 class StartSpecifiedAbilityResponse : public AppExecFwk::StartSpecifiedAbilityResponseStub {

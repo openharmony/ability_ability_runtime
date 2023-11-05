@@ -8855,8 +8855,12 @@ bool AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configur
     return collaborator->UpdateConfiguration(config, userId);
 }
 
-int AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
+int AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
 {
+    if (!AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(uri, flad, tokenId)) {
+        HILOG_ERROR("premission check failed");
+        return -1;
+    }
     auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
     if (collaborator == nullptr) {
         HILOG_ERROR("collaborator GetCollaborator is nullptr.");

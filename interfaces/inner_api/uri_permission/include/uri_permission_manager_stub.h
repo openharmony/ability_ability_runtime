@@ -42,7 +42,6 @@ private:
     int HandleRevokeUriPermissionManually(MessageParcel &data, MessageParcel &reply);
     int HandleCheckPerSiSTableUriPermissionProxy(MessageParcel &data, MessageParcel &reply);
     int HandleVerifyUriPermission(MessageParcel &data, MessageParcel &reply);
-    int HandleOpenFile(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

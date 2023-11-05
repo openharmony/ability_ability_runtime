@@ -1064,20 +1064,13 @@ public:
         const InsightIntentExecuteResult &result) override;
 
     /**
-     * @brief Notify application update system environment changes.
-     * @param config System environment change parameters.
-     * @param userId userId Designation User ID.
-     * @return Return true to notify changes successfully, or false to failed.
-     */
-    virtual bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
-
-    /**
      * @brief Open file by uri.
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param tokenId A tokenId of an application.
      * @return int The file descriptor.
      */
-    virtual int OpenFile(const Uri& uri, uint32_t flag) override;
+    virtual int OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId) override;
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
