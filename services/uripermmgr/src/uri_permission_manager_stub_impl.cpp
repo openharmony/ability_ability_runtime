@@ -90,14 +90,6 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
     return true;
 }
 
-int UriPermissionManagerStubImpl::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
-{
-    if (!VerifyUriPermission(uri, flag, tokenId)) {
-        return -1;
-    }
-    return DelayedSingleton<AAFwk::AbilityManagerClient>::GetInstance()->OpenFile(uri, flag);
-}
-
 int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
     const std::string targetBundleName, int autoremove, int32_t appIndex)
 {

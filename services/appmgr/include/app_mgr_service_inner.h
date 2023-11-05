@@ -1064,7 +1064,6 @@ private:
     int32_t NotifyAbilitysDebugChange(const std::string &bundleName, const bool &isAppDebug);
 
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
-    void HandleConfigurationChange(const Configuration &config);
 private:
     /**
      * Notify application status.
@@ -1085,6 +1084,7 @@ private:
     void SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
         const std::shared_ptr<AppRunningRecord> &appRecord);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void HandleConfigurationChange(const Configuration &config);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<const sptr<IAppStateCallback>> appStateCallbacks_;
     std::shared_ptr<AppProcessManager> appProcessManager_;

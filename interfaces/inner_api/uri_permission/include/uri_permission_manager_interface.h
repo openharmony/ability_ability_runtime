@@ -113,8 +113,6 @@ public:
 
         // ipc id for BatchGrantUriPermission
         ON_BATCH_GRANT_URI_PERMISSION,
-
-        OPEN_FILE,
     };
 };
 }  // namespace AAFwk
