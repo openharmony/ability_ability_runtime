@@ -16,6 +16,7 @@
 #include "app_state_callback_host.h"
 
 #include "appexecfwk_errors.h"
+#include "configuration.h"
 #include "hitrace_meter.h"
 #include "hilog_wrapper.h"
 #include "ipc_types.h"
@@ -31,8 +32,8 @@ AppStateCallbackHost::AppStateCallbackHost()
         &AppStateCallbackHost::HandleOnAppStateChanged;
     memberFuncMap_[static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_ABILITY_REQUEST_DONE)] =
         &AppStateCallbackHost::HandleOnAbilityRequestDone;
-    memberFuncMap_[static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIGURATION_CHANGE)] =
-        &AppStateCallbackHost::NotifyConfigurationChange;
+    memberFuncMap_[static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIG_CHANGE)] =
+        &AppStateCallbackHost::HandleNotifyConfigurationChange;
 }
 
 AppStateCallbackHost::~AppStateCallbackHost()
@@ -73,7 +74,9 @@ void AppStateCallbackHost::OnAppStateChanged(const AppProcessData &)
 }
 
 bool AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
-{}
+{
+    return true;
+}
 
 int32_t AppStateCallbackHost::HandleOnAppStateChanged(MessageParcel &data, MessageParcel &reply)
 {

@@ -24,6 +24,12 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+    class Configuration;
+}
+}
+
+namespace OHOS {
+namespace AppExecFwk {
 class IAppStateCallback : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.appexecfwk.AppStateCallback");
@@ -54,7 +60,7 @@ public:
     enum class Message {
         TRANSACT_ON_APP_STATE_CHANGED = 0,
         TRANSACT_ON_ABILITY_REQUEST_DONE,
-        TRANSACT_ON_NOTIFY_CONFIGURATION_CHANGE,
+        TRANSACT_ON_NOTIFY_CONFIG_CHANGE,
     };
 };
 }  // namespace AppExecFwk

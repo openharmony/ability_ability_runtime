@@ -4604,7 +4604,11 @@ int AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenI
         return false;
     }
     
-    SendRequest(AbilityManagerInterfaceCode::OPEN_FILE, data, reply, option);
+    auto ret = SendRequest(AbilityManagerInterfaceCode::OPEN_FILE, data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_ERROR("Send request failed with %{public}d", ret);
+        return ret;
+    }
     return reply.ReadInt32();
 }
 
