@@ -58,7 +58,6 @@ public:
     bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
     
     uint32_t GetTokenIdByBundleName(const std::string bundleName, int32_t appIndex);
-    int OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId) override;
 
 private:
     template<typename T>
