@@ -8857,7 +8857,7 @@ bool AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configur
 
 int AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
 {
-    if (!AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(uri, flad, tokenId)) {
+    if (!AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(uri, flag, tokenId)) {
         HILOG_ERROR("premission check failed");
         return -1;
     }

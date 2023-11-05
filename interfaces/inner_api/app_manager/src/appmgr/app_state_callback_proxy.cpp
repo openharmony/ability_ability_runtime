@@ -15,6 +15,7 @@
 
 #include "app_state_callback_proxy.h"
 
+#include "configuration.h"
 #include "ipc_types.h"
 
 #include "hilog_wrapper.h"
@@ -101,7 +102,7 @@ bool AppStateCallbackProxy::NotifyConfigurationChange(const AppExecFwk::Configur
         return false;
     }
     auto error = SendTransactCmd(
-        IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIGURATION_CHANGE, data, reply, option);
+        static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIG_CHANGE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send config error: %{public}d", error);
         return true;
