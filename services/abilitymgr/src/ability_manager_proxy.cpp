@@ -4581,32 +4581,7 @@ int32_t AbilityManagerProxy::ExecuteInsightIntentDone(const sptr<IRemoteObject> 
     return reply.ReadInt32();
 }
 
-bool AbilityManagerProxy::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!WriteInterfaceToken(data)) {
-        HILOG_ERROR("Write interface token failed.");
-        return false;
-    }
-    if (!data.WriteParcelable(&config)) {
-        HILOG_ERROR("Write config failed.");
-        return false;
-    }
-    if (!data.WriteInt32(userId)) {
-        HILOG_ERROR("Write usr failed.");
-        return false;
-    }
-    auto error = SendRequest(AbilityManagerInterfaceCode::NOTIFY_CONFIGURATION_CHANGE, data, reply, option);
-    if (error != NO_ERROR) {
-        HILOG_ERROR("Send config error: %{public}d", error);
-        return true;
-    }
-    return true;
-}
-
-int AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag)
+int AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4621,6 +4596,11 @@ int AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag)
     }
     if (!data.WriteInt32(flag)) {
         HILOG_ERROR("Write flag failed.");
+        return false;
+    }
+
+    if (!data.WriteInt32(tokenId)) {
+        HILOG_ERROR("Write tokenId failed.");
         return false;
     }
     

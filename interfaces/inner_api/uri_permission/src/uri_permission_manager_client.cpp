@@ -107,15 +107,6 @@ bool UriPermissionManagerClient::VerifyUriPermission(const Uri& uri, uint32_t fl
     return false;
 }
 
-int UriPermissionManagerClient::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
-{
-    auto uriPermMgr = ConnectUriPermService();
-    if (uriPermMgr) {
-        return uriPermMgr->OpenFile(uri, flag, tokenId);
-    }
-    return -1;
-}
-
 sptr<IUriPermissionManager> UriPermissionManagerClient::ConnectUriPermService()
 {
     HILOG_DEBUG("UriPermissionManagerClient::ConnectUriPermService is called.");

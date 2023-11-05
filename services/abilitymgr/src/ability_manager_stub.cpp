@@ -166,6 +166,8 @@ void AbilityManagerStub::FirstStepInit()
         &AbilityManagerStub::ExecuteIntentInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::EXECUTE_INSIGHT_INTENT_DONE)] =
         &AbilityManagerStub::ExecuteInsightIntentDoneInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::OPEN_FILE)] =
+        &AbilityManagerStub::OpenFileInner;
 }
 
 void AbilityManagerStub::SecondStepInit()
@@ -2868,19 +2870,6 @@ int32_t AbilityManagerStub::ExecuteInsightIntentDoneInner(MessageParcel &data, M
     return NO_ERROR;
 }
 
-bool AbilityManagerStub::NotifyConfigurationChangeInner(MessageParcel &data, MessageParcel &reply)
-{
-    std::unique_ptr<AppExecFwk::Configuration> config(data.ReadParcelable<AppExecFwk::Configuration>());
-    if (config == nullptr) {
-        HILOG_ERROR("To read config failed.");
-        return ERR_DEAD_OBJECT;
-    }
-    auto userId = data.ReadInt32();
-    bool result = NotifyConfigurationChange(*config, userId);
-    reply.WriteBool(result);
-    return ERR_OK;
-}
-
 int AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
@@ -2889,7 +2878,8 @@ int AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
         return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadInt32();
-    int fd = OpenFile(*uri, flag);
+    auto tokenId = data.ReadInt32();
+    int fd = OpenFile(*uri, flag, tokenId);
     reply.WriteInt32(fd);
     return ERR_OK;
 }

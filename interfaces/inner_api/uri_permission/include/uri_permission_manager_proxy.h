@@ -38,7 +38,6 @@ public:
     virtual int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
     virtual bool CheckPersistableUriPermissionProxy(const Uri& uri, uint32_t flag, uint32_t tokenId) override;
     virtual bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
-    virtual int OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId) override;
 
 private:
     static inline BrokerDelegator<UriPermissionManagerProxy> delegator_;

@@ -1064,6 +1064,7 @@ private:
     int32_t NotifyAbilitysDebugChange(const std::string &bundleName, const bool &isAppDebug);
 
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
+    void HandleConfigurationChange(const Configuration &config);
 private:
     /**
      * Notify application status.

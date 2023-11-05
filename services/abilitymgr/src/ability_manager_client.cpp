@@ -1637,18 +1637,7 @@ ErrCode AbilityManagerClient::ExecuteInsightIntentDone(const sptr<IRemoteObject>
     return abms->ExecuteInsightIntentDone(token, intentId, result);
 }
 
-bool AbilityManagerClient::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
-{
-    HILOG_DEBUG("call notify config");
-    auto abms = GetAbilityManager();
-    if (abms == nullptr) {
-        HILOG_ERROR("abms is nullptr.");
-        return true;
-    }
-    return abms->NotifyConfigurationChange(config, userId);
-}
-
-int AbilityManagerClient::OpenFile(const Uri& uri, uint32_t flag)
+int AbilityManagerClient::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
 {
     HILOG_DEBUG("call OpenFile");
     auto abms = GetAbilityManager();
@@ -1656,7 +1645,7 @@ int AbilityManagerClient::OpenFile(const Uri& uri, uint32_t flag)
         HILOG_ERROR("abms is nullptr.");
         return true;
     }
-    return abms->OpenFile(uri, flag);
+    return abms->OpenFile(uri, flag, tokenId);
 }
 } // namespace AAFwk
 } // namespace OHOS
