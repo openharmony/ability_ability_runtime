@@ -336,19 +336,6 @@ void AppMgrServiceInner::MakeServiceExtProcessName(const std::shared_ptr<Ability
         return;
     }
 
-    auto model = GetProductModel();
-    if (model == nullptr) {
-        HILOG_ERROR("Failed to get product model!");
-        return;
-    }
-    HILOG_DEBUG("Get product model: %{public}s", model);
-    if (strcmp(model, "ALN-AL00") == 0 ||
-        strcmp(model, "HYM-W5821") == 0 ||
-        strcmp(model, "CMS-AL00") == 0 ||
-        strcmp(model, "Hyman-W5821") == 0) {
-        return;
-    }
-
     if (processName == appInfo->bundleName &&
         abilityInfo->extensionAbilityType == ExtensionAbilityType::SERVICE) {
         auto iter = std::find(
