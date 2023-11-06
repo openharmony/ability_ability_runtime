@@ -84,28 +84,28 @@ void AppStateCallbackProxy::OnAppStateChanged(const AppProcessData &appProcessDa
     HILOG_DEBUG("end");
 }
 
-bool AppStateCallbackProxy::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
+void AppStateCallbackProxy::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("Write interface token failed.");
-        return false;
+        return;
     }
     if (!data.WriteParcelable(&config)) {
         HILOG_ERROR("Write config failed.");
-        return false;
+        return;
     }
     if (!data.WriteInt32(userId)) {
         HILOG_ERROR("Write usr failed.");
-        return false;
+        return;
     }
     auto error = SendTransactCmd(
         static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIG_CHANGE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send config error: %{public}d", error);
-        return true;
+        return;
     }
     return true;
 }

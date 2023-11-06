@@ -8850,9 +8850,9 @@ void AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configur
     auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
     if (collaborator == nullptr) {
         HILOG_ERROR("collaborator GetCollaborator is nullptr.");
-        return ERR_COLLABORATOR_NOT_REGISTER;
+        return;
     }
-    return collaborator->UpdateConfiguration(config, userId);
+    collaborator->UpdateConfiguration(config, userId);
 }
 
 int AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
