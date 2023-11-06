@@ -1448,7 +1448,7 @@ protected:
 
     void OnAppStateChanged(const AppInfo &info) override;
 
-    bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
+    void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,

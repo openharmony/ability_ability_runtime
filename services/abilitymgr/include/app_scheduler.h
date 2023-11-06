@@ -87,7 +87,7 @@ public:
 
     virtual void OnAppStateChanged(const AppInfo &info) = 0;
 
-    virtual bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) = 0;
+    virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) = 0;
 };
 
 class StartSpecifiedAbilityResponse : public AppExecFwk::StartSpecifiedAbilityResponseStub {
@@ -412,9 +412,8 @@ protected:
      * @brief Notify application update system environment changes.
      * @param config System environment change parameters.
      * @param userId userId Designation User ID.
-     * @return Return true to notify changes successfully, or false to failed.
      */
-    virtual bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
+    virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
 
 private:
     std::mutex lock_;

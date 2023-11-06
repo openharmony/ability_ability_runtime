@@ -73,7 +73,7 @@ void AppStateCallbackHost::OnAppStateChanged(const AppProcessData &)
     HILOG_DEBUG("called");
 }
 
-bool AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
+void AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
 {
     return true;
 }
@@ -111,8 +111,7 @@ int32_t AppStateCallbackHost::HandleNotifyConfigurationChange(MessageParcel &dat
         return ERR_DEAD_OBJECT;
     }
     auto userId = data.ReadInt32();
-    bool result = NotifyConfigurationChange(*config, userId);
-    reply.WriteBool(result);
+    NotifyConfigurationChange(*config, userId);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

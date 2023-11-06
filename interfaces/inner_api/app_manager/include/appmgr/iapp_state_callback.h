@@ -53,9 +53,8 @@ public:
      * @brief Notify application update system environment changes.
      * @param config System environment change parameters.
      * @param userId userId Designation User ID.
-     * @return Return true to notify changes successfully, or false to failed.
      */
-    virtual bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) = 0;
+    virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) {}
 
     enum class Message {
         TRANSACT_ON_APP_STATE_CHANGED = 0,
