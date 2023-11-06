@@ -216,6 +216,7 @@ bool AppScheduler::NotifyConfigurationChange(const AppExecFwk::Configuration &co
         return false;
     }
     callback->NotifyConfigurationChange(config, userId);
+    return ERR_OK;
 }
 
 int AppScheduler::KillApplication(const std::string &bundleName)
