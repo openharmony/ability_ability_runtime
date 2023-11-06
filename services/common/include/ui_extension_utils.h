@@ -17,7 +17,9 @@
 #define OHOS_AAFwk_UI_EXTENSION_UTILS_H
 
 #include <unordered_set>
+
 #include "extension_ability_info.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace AAFwk {
