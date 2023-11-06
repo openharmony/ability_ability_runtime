@@ -156,7 +156,10 @@ public:
      * @param userId userId Designation User ID.
      * @return Return true to notify changes successfully, or false to failed.
      */
-    virtual bool UpdateConfiguration(const AppExecFwk::Configuration &config, int32_t userId) = 0;
+    virtual bool UpdateConfiguration(const AppExecFwk::Configuration &config, int32_t userId)
+    {
+        return true;
+    }
 
     /**
      * @brief Open file by uri.
@@ -164,7 +167,9 @@ public:
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @return int The file descriptor.
      */
-    virtual int OpenFile(const Uri& uri, uint32_t flag) = 0;
+    virtual int OpenFile(const Uri& uri, uint32_t flag) {
+        return -1;
+    }
 
     enum {
         NOTIFY_START_ABILITY = 1,
