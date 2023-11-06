@@ -87,7 +87,7 @@ public:
 
     virtual void OnAppStateChanged(const AppInfo &info) = 0;
 
-    virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) = 0;
+    virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) {}
 };
 
 class StartSpecifiedAbilityResponse : public AppExecFwk::StartSpecifiedAbilityResponseStub {
