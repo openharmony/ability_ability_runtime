@@ -408,6 +408,14 @@ protected:
      */
     virtual void OnAppStateChanged(const AppExecFwk::AppProcessData &appData) override;
 
+    /**
+     * @brief Notify application update system environment changes.
+     * @param config System environment change parameters.
+     * @param userId userId Designation User ID.
+     * @return Return true to notify changes successfully, or false to failed.
+     */
+    virtual bool NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
+
 private:
     std::mutex lock_;
     bool isInit_  {false};
