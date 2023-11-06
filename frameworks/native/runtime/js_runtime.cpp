@@ -570,8 +570,9 @@ bool JsRuntime::Initialize(const Options& options)
                 HILOG_ERROR("Failed to create reference for global.requireNapi");
                 return false;
             }
-
+            HILOG_INFO("PreloadAce start.");
             PreloadAce(options);
+            HILOG_INFO("PreloadAce end.");
             nativeEngine->RegisterPermissionCheck(PermissionCheckFunc);
         }
 
@@ -595,7 +596,7 @@ bool JsRuntime::Initialize(const Options& options)
     }
 
     if (!options.preload) {
-        auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.hapPath, isModular);
+        auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName, isModular);
         InitSourceMap(operatorObj);
 
         if (options.isUnique) {
@@ -726,6 +727,7 @@ void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> op
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitSourceMap(operatorObj);
     JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
+    JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetPresetAppHapPath);
 }
 
 void JsRuntime::Deinitialize()

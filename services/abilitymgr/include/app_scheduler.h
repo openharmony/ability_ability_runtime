@@ -97,6 +97,9 @@ public:
 
     virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag) override;
     virtual void OnTimeoutResponse(const AAFwk::Want &want) override;
+
+    virtual void OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag) override;
+    virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want) override;
 };
 
 /**
@@ -265,6 +268,8 @@ public:
 
     void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo);
     int GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info);
+
+    void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo);
 
     /**
      * Start a user test
