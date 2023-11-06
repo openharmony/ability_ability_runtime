@@ -75,7 +75,6 @@ void AppStateCallbackHost::OnAppStateChanged(const AppProcessData &)
 
 void AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
 {
-    return true;
 }
 
 int32_t AppStateCallbackHost::HandleOnAppStateChanged(MessageParcel &data, MessageParcel &reply)
