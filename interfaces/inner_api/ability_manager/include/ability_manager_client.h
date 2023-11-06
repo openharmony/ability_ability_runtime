@@ -32,12 +32,6 @@
 #include "ui_extension_window_command.h"
 
 namespace OHOS {
-namespace AppExecFwk {
-    class Configuration;
-}
-}
-
-namespace OHOS {
 namespace AAFwk {
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 /**
