@@ -39,7 +39,7 @@ public:
     ErrCode ConnectServiceExtensionAbility(const Want &want, const sptr<IRemoteObject> &connect,
         const sptr<IRemoteObject> &callerToken, int32_t userId);
 
-    ErrCode ExtensionManagerClient::ConnectEnterpriseAdminExtensionAbility(const Want &want,
+    ErrCode ConnectEnterpriseAdminExtensionAbility(const Want &want,
         const sptr<IRemoteObject> &connect, const sptr<IRemoteObject> &callerToken, int32_t userId);
 
     /**
