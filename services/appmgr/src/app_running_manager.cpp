@@ -31,6 +31,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+    const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
+}
 AppRunningManager::AppRunningManager()
 {}
 AppRunningManager::~AppRunningManager()
@@ -614,8 +617,8 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 
 bool AppRunningManager::isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    std::string codePath = appRecord->GetApplicationInfo()->codePath;
-    bool isReserveType = codePath == std::to_string(1);
+    std::string bundleName = appRecord->GetApplicationInfo()->name;
+    bool isReserveType = bundleName == SHELL_ASSISTANT_BUNDLENAME;
     if (isReserveType) {
         HILOG_INFO("isReserveType app [%{public}s]", appRecord->GetName().c_str());
     }
