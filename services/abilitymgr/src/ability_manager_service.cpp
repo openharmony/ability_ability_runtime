@@ -8845,7 +8845,7 @@ void AbilityManagerService::HandleProcessFrozen(const std::vector<int32_t> &pidL
     connectManager->HandleProcessFrozen(pidSet, uid);
 }
 
-bool AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
+void AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
 {
     auto collaborator = GetCollaborator(CollaboratorType::RESERVE_TYPE);
     if (collaborator == nullptr) {

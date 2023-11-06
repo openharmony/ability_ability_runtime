@@ -209,14 +209,11 @@ void AppScheduler::OnAbilityRequestDone(const sptr<IRemoteObject> &token, const 
     callback->OnAbilityRequestDone(token, static_cast<int32_t>(state));
 }
 
-bool AppScheduler::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
+void AppScheduler::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
 {
     auto callback = callback_.lock();
-    if (!callback) {
-        return false;
-    }
+    CHECK_POINTER(callback);
     callback->NotifyConfigurationChange(config, userId);
-    return ERR_OK;
 }
 
 int AppScheduler::KillApplication(const std::string &bundleName)
