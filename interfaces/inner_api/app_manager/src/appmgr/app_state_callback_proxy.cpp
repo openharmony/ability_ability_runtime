@@ -105,9 +105,7 @@ void AppStateCallbackProxy::NotifyConfigurationChange(const AppExecFwk::Configur
         static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIG_CHANGE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send config error: %{public}d", error);
-        return;
     }
-    return true;
 }
 
 int32_t AppStateCallbackProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
