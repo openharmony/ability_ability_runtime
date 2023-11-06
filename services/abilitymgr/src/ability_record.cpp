@@ -2775,11 +2775,9 @@ bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUr
         }
     }
 
-    int autoremove = 1;
     for (auto&& uri : uriVec) {
         auto ret = IN_PROCESS_CALL(
-            AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uri, flag,
-                targetPkg, autoremove, appIndex_));
+            AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermission(uri, flag, targetPkg, appIndex_));
         if (ret == ERR_OK) {
             isGrantedUriPermission_ = true;
         }
