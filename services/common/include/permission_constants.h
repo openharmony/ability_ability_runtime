@@ -39,7 +39,7 @@ constexpr const char* PERMISSION_PROXY_AUTHORIZATION_URI = "ohos.permission.PROX
 constexpr const char* PERMISSION_EXEMPT_AS_CALLER = "ohos.permission.EXEMPT_AS_CALLER";
 constexpr const char* PERMISSION_EXEMPT_AS_TARGET = "ohos.permission.EXEMPT_AS_TARGET";
 constexpr const char* PERMISSION_PREPARE_TERMINATE = "ohos.permission.PREPARE_APP_TERMINATE";
-constexpr const char* PERMISSION_APP_BOOT_MANAGEMENT_CAPABILIT = "ohos.permission.APP_BOOT_MANAGEMENT_CAPABILITY";
+constexpr const char* PERMISSION_MANAGE_APP_BOOT = "ohos.permission.MANAGE_APP_BOOT";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS

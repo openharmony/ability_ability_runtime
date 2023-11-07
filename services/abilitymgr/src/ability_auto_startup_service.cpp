@@ -696,8 +696,8 @@ int32_t AbilityAutoStartupService::CheckPermissionForSystem()
     }
 
     if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
-            PermissionConstants::PERMISSION_APP_BOOT_MANAGEMENT_CAPABILIT)) {
-        HILOG_ERROR("Not have OHOS_PERMISSION_APP_BOOT_MANAGEMENT_CAPABILIT approval.");
+        PermissionConstants::PERMISSION_MANAGE_APP_BOOT)) {
+        HILOG_ERROR("Not have PERMISSION_MANAGE_APP_BOOT approval.");
         return CHECK_PERMISSION_FAILED;
     }
 
