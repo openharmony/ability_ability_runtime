@@ -2646,7 +2646,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         HILOG_ERROR("Sandbox can not grant uriPermission by terminate self with result.");
         return;
     }
-    if (targetBundleName == SHELL_ASSISTANT_BUNDLENAME) {
+    if (targetBundleName == SHELL_ASSISTANT_BUNDLENAME && collaboratorType_ == CollaboratorType.OTHERS_TYPE) {
         HILOG_DEBUG("reject shell application to grant uri permission");
         return;
     }
