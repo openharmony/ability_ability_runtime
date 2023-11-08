@@ -16,23 +16,20 @@
 #include "app_mgr_service.h"
 
 #include <chrono>
-#include <thread>
-
 #include <nlohmann/json.hpp>
 #include <sys/types.h>
-
-#include "datetime_ex.h"
-#include "ipc_skeleton.h"
-#include "system_ability_definition.h"
+#include <thread>
 
 #include "app_death_recipient.h"
 #include "app_mgr_constants.h"
+#include "datetime_ex.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
+#include "ipc_skeleton.h"
 #include "perf_profile.h"
-
 #include "permission_constants.h"
 #include "permission_verification.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -904,6 +901,26 @@ int32_t AppMgrService::UnregisterAppRunningStatusListener(const sptr<IRemoteObje
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->UnregisterAppRunningStatusListener(listener);
+}
+
+int32_t AppMgrService::RegisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer)
+{
+    HILOG_DEBUG("Called.");
+    if (!IsReady()) {
+        HILOG_ERROR("Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->RegisterAppForegroundStateObserver(observer);
+}
+
+int32_t AppMgrService::UnregisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer)
+{
+    HILOG_DEBUG("Called.");
+    if (!IsReady()) {
+        HILOG_ERROR("Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->UnregisterAppForegroundStateObserver(observer);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
