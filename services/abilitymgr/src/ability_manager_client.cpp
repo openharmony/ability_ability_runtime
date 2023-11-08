@@ -1639,7 +1639,7 @@ ErrCode AbilityManagerClient::ExecuteInsightIntentDone(const sptr<IRemoteObject>
     return abms->ExecuteInsightIntentDone(token, intentId, result);
 }
 
-int AbilityManagerClient::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
+int32_t AbilityManagerClient::OpenFile(const Uri& uri, uint32_t flag)
 {
     HILOG_DEBUG("call OpenFile");
     auto abms = GetAbilityManager();

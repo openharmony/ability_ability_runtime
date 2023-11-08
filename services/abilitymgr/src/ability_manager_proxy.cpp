@@ -4605,7 +4605,7 @@ int32_t AbilityManagerProxy::ExecuteInsightIntentDone(const sptr<IRemoteObject> 
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId)
+int32_t AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -4623,11 +4623,6 @@ int AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenI
         return false;
     }
 
-    if (!data.WriteInt32(tokenId)) {
-        HILOG_ERROR("Write tokenId failed.");
-        return false;
-    }
-    
     auto ret = SendRequest(AbilityManagerInterfaceCode::OPEN_FILE, data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_ERROR("Send request failed with %{public}d", ret);
