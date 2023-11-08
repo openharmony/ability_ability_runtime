@@ -2877,7 +2877,7 @@ int32_t AbilityManagerStub::ExecuteInsightIntentDoneInner(MessageParcel &data, M
     return NO_ERROR;
 }
 
-int AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
+int32_t AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
     if (!uri) {
@@ -2886,7 +2886,7 @@ int AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
     }
     auto flag = data.ReadInt32();
     int fd = OpenFile(*uri, flag);
-    reply.WriteInt32(fd);
+    reply.WriteFileDescriptor(fd);
     return ERR_OK;
 }
 }  // namespace AAFwk

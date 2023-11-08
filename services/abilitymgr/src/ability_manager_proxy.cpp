@@ -4628,7 +4628,7 @@ int32_t AbilityManagerProxy::OpenFile(const Uri& uri, uint32_t flag)
         HILOG_ERROR("Send request failed with %{public}d", ret);
         return ret;
     }
-    return reply.ReadInt32();
+    return reply.ReadFileDescriptor();
 }
 
 ErrCode AbilityManagerProxy::SendRequest(AbilityManagerInterfaceCode code, MessageParcel &data, MessageParcel &reply,
