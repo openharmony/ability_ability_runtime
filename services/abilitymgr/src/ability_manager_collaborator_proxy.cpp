@@ -450,7 +450,7 @@ bool AbilityManagerCollaboratorProxy::UpdateConfiguration(const AppExecFwk::Conf
     return true;
 }
 
-int AbilityManagerCollaboratorProxy::OpenFile(const Uri& uri, uint32_t flag)
+int32_t AbilityManagerCollaboratorProxy::OpenFile(const Uri& uri, uint32_t flag)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -473,7 +473,7 @@ int AbilityManagerCollaboratorProxy::OpenFile(const Uri& uri, uint32_t flag)
         HILOG_ERROR("Send request error: %{public}d", ret);
         return -1;
     }
-    return reply.ReadInt32();
+    return reply.ReadFileDescriptor();
 }
 
 int32_t AbilityManagerCollaboratorProxy::SendTransactCmd(uint32_t code, MessageParcel &data,

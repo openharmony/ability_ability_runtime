@@ -1071,10 +1071,9 @@ public:
      * @brief Open file by uri.
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
-     * @param tokenId A tokenId of an application.
      * @return int The file descriptor.
      */
-    virtual int OpenFile(const Uri& uri, uint32_t flag, uint32_t tokenId) override;
+    virtual int32_t OpenFile(const Uri& uri, uint32_t flag) override;
 private:
     template <typename T>
     int GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

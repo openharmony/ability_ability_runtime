@@ -2885,8 +2885,7 @@ int AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
         return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadInt32();
-    auto tokenId = data.ReadInt32();
-    int fd = OpenFile(*uri, flag, tokenId);
+    int fd = OpenFile(*uri, flag);
     reply.WriteInt32(fd);
     return ERR_OK;
 }
