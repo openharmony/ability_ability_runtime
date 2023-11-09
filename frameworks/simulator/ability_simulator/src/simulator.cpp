@@ -55,6 +55,8 @@ constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr int32_t DEFAULT_ARK_PROPERTIES = -1;
 constexpr size_t DEFAULT_GC_THREAD_NUM = 7;
 constexpr size_t DEFAULT_LONG_PAUSE_TIME = 40;
+const int32_t TYPE_RESERVE = 1;
+const int32_t TYPE_OTHERS = 2;
 
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 
@@ -521,7 +523,20 @@ void SimulatorImpl::SetMockList(const std::map<std::string, std::string> &mockLi
 void SimulatorImpl::InitResourceMgr()
 {
     HILOG_DEBUG("called.");
-    resourceMgr_ = std::shared_ptr<Global::Resource::ResourceManager>(Global::Resource::CreateResourceManager());
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    std::string hapPath;
+;
+    std::vector<std::string> overlayPaths;
+    int32_t appType;
+    if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE)) {
+        appType = TYPE_RESERVE;
+    } else if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
+        appType = TYPE_OTHERS;
+    } else {
+        appType = 0;
+    }
+    resourceMgr_ = std::shared_ptr<Global::Resource::ResourceManager>(Global::Resource::CreateResourceManager(
+        options_.bundleName, options_.moduleName, hapPath, overlayPaths, *resConfig, appType));
     if (resourceMgr_ == nullptr) {
         HILOG_ERROR("resourceMgr is nullptr");
         return;
