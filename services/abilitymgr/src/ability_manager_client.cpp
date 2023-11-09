@@ -1647,7 +1647,7 @@ int32_t AbilityManagerClient::OpenFile(const Uri& uri, uint32_t flag)
         HILOG_ERROR("abms is nullptr.");
         return true;
     }
-    return abms->OpenFile(uri, flag, tokenId);
+    return abms->OpenFile(uri, flag);
 }
 } // namespace AAFwk
 } // namespace OHOS
