@@ -2760,7 +2760,7 @@ bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUr
     std::string targetPkg)
 {
     if (targetPkg != SHELL_ASSISTANT_BUNDLENAME || collaboratorType_ != CollaboratorType::RESERVE_TYPE) {
-        return;
+        return false;
     }
     
     std::vector<Uri> uriVec;
