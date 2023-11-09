@@ -8957,7 +8957,7 @@ void AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configur
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID(); 
-    if (!AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(uri, flag, tokenId)) {
+    if (!AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(uri, flag, accessTokenId)) {
         HILOG_ERROR("premission check failed");
         return -1;
     }
