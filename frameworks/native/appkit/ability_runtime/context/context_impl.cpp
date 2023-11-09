@@ -491,19 +491,19 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         HILOG_ERROR("InitResourceManager appContext is nullptr");
         return;
     }
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    std::string hapPath;
+    std::vector<std::string> overlayPaths;
+    int32_t appType;
+    if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE)) {
+        appType = TYPE_RESERVE;
+    } else if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
+        appType = TYPE_OTHERS;
+    } else {
+        appType = 0;
+    }
     if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||
         bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
-        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-        std::string hapPath;
-        std::vector<std::string> overlayPaths;
-        int32_t appType;
-        if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE)) {
-            appType = TYPE_RESERVE;
-        } else if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
-            appType = TYPE_OTHERS;
-        } else {
-            appType = 0;
-        }
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
             bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
         if (resourceManager == nullptr) {
@@ -513,8 +513,8 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         appContext->SetResourceManager(resourceManager);
         return;
     }
-
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
+        bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
     if (resourceManager == nullptr) {
         HILOG_ERROR("InitResourceManager create resourceManager failed");
         return;
@@ -590,7 +590,6 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         }
     }
 
-    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     if (resConfig == nullptr) {
         HILOG_ERROR("ContextImpl::InitResourceManager create ResConfig failed");
         return;
