@@ -427,7 +427,7 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         return;
     }
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
-        if (needNotifyApp) {
+        if (needNotifyApp && !appRecord->GetFocusFlag()) {
             AppStateData data = WrapAppStateData(appRecord, state);
             appRecord->GetSplitModeAndFloatingMode(data.isSplitScreenMode, data.isFloatingWindowMode);
             std::lock_guard<ffrt::mutex> lockForeground(appForegroundObserverLock_);
