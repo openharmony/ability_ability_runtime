@@ -52,6 +52,9 @@ void JSAbilityForegroundStateObserver::HandleOnAbilityStateChanged(const Ability
     HILOG_DEBUG("Called.");
     std::lock_guard<std::mutex> lock(mutexlock);
     for (auto &item : jsObserverObjectSet_) {
+        if (item == nullptr) {
+            continue;
+        }
         napi_value obj = item->GetNapiValue();
         napi_value argv[] = { CreateJsAbilityStateData(env_, abilityStateData) };
         CallJsFunction(obj, "onAbilityStateChanged", argv, ARGC_ONE);

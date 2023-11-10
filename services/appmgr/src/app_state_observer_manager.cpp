@@ -653,6 +653,9 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
             deathRecipient = new (std::nothrow) ApplicationStateObserverRecipient(deathRecipientFunc);
         } else if (type == ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER) {
             deathRecipient = new (std::nothrow) AbilityForegroundStateObserverRecipient(deathRecipientFunc);
+        } else {
+            HILOG_WARN("ObserverType is not exists");
+            return;
         }
         if (deathRecipient == nullptr) {
             HILOG_ERROR("deathRecipient is nullptr.");
@@ -694,6 +697,9 @@ void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, 
     } else if (type == ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER) {
         sptr<IAbilityForegroundStateObserver> observer = iface_cast<IAbilityForegroundStateObserver>(object);
         UnregisterAbilityForegroundStateObserver(observer);
+    } else {
+        HILOG_WARN("ObserverType is not exists");
+        return;
     }
 }
 
