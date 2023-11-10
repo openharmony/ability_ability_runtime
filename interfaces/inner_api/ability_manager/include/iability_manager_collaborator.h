@@ -167,7 +167,8 @@ public:
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @return int The file descriptor.
      */
-    virtual int32_t OpenFile(const Uri& uri, uint32_t flag) {
+    virtual int32_t OpenFile(const Uri& uri, uint32_t flag)
+    {
         return -1;
     }
 
