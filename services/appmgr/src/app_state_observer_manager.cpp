@@ -379,7 +379,6 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
     if (appRecord == nullptr) {
         return;
     }
-
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         if (needNotifyApp) {
             AppStateData data = WrapAppStateData(appRecord, state);
@@ -391,7 +390,6 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
                 }
             }
         }
-
         if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) &&
             !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
             AppStateData data = WrapAppStateData(appRecord, state);
@@ -411,7 +409,6 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
             }
         }
     }
-
     if (state == ApplicationState::APP_STATE_CREATE || state == ApplicationState::APP_STATE_TERMINATED) {
         AppStateData data = WrapAppStateData(appRecord, state);
         HILOG_DEBUG("OnApplicationStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d",
@@ -653,7 +650,10 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
         } else if (type == ObserverType::APP_FOREGROUND_STATE_OBSERVER) {
             deathRecipient = new (std::nothrow) AppForegroundStateObserverRecipient(deathRecipientFunc);
         }
-
+        if (deathRecipient == nullptr) {
+            HILOG_ERROR("deathRecipient is nullptr.");
+            return;
+        }
         if (!observer->AsObject()->AddDeathRecipient(deathRecipient)) {
             HILOG_ERROR("AddDeathRecipient failed.");
         }

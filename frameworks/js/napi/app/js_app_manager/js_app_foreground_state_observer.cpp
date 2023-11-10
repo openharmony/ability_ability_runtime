@@ -50,6 +50,7 @@ void JSAppForegroundStateObserver::OnAppStateChanged(const AppStateData &appStat
 void JSAppForegroundStateObserver::HandleOnAppStateChanged(const AppStateData &appStateData)
 {
     HILOG_DEBUG("Called.");
+    std::lock_guard<std::mutex> lock(jsObserverObjectSetLock_);
     for (auto &item : jsObserverObjectSet_) {
         napi_value obj = item->GetNapiValue();
         napi_value argv[] = { CreateJsAppStateData(env_, appStateData) };
@@ -88,12 +89,19 @@ void JSAppForegroundStateObserver::AddJsObserverObject(const napi_value &jsObser
     }
 
     if (GetObserverObject(jsObserverObject) == nullptr) {
+        std::lock_guard<std::mutex> lock(jsObserverObjectSetLock_);
         napi_ref ref = nullptr;
         napi_create_reference(env_, jsObserverObject, 1, &ref);
         jsObserverObjectSet_.emplace(std::shared_ptr<NativeReference>(reinterpret_cast<NativeReference *>(ref)));
     } else {
         HILOG_DEBUG("Observer is exists.");
     }
+}
+
+void JSAppForegroundStateObserver::RemoveAllJsObserverObjects()
+{
+    std::lock_guard<std::mutex> lock(jsObserverObjectSetLock_);
+    jsObserverObjectSet_.clear();
 }
 
 void JSAppForegroundStateObserver::RemoveJsObserverObject(const napi_value &jsObserverObject)
@@ -105,6 +113,7 @@ void JSAppForegroundStateObserver::RemoveJsObserverObject(const napi_value &jsOb
 
     auto observer = GetObserverObject(jsObserverObject);
     if (observer != nullptr) {
+        std::lock_guard<std::mutex> lock(jsObserverObjectSetLock_);
         jsObserverObjectSet_.erase(observer);
     }
 }
@@ -116,6 +125,7 @@ std::shared_ptr<NativeReference> JSAppForegroundStateObserver::GetObserverObject
         return nullptr;
     }
 
+    std::lock_guard<std::mutex> lock(jsObserverObjectSetLock_);
     for (auto &observer : jsObserverObjectSet_) {
         if (observer == nullptr) {
             HILOG_ERROR("Invalid observer.");
@@ -142,8 +152,9 @@ void JSAppForegroundStateObserver::SetValid(bool valid)
     valid_ = valid;
 }
 
-bool JSAppForegroundStateObserver::isEmpty()
+bool JSAppForegroundStateObserver::IsEmpty()
 {
+    std::lock_guard<std::mutex> lock(jsObserverObjectSetLock_);
     return jsObserverObjectSet_.empty();
 }
 } // namespace AbilityRuntime
