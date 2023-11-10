@@ -21,6 +21,7 @@
 #include <set>
 #include <string>
 
+#include "ability_foreground_state_observer_interface.h"
 #include "app_foreground_state_observer_interface.h"
 #include "app_running_record.h"
 #include "app_state_data.h"
@@ -39,6 +40,7 @@ namespace AppExecFwk {
 enum class ObserverType {
     APPLICATION_STATE_OBSERVER,
     APP_FOREGROUND_STATE_OBSERVER,
+    ABILITY_FOREGROUND_STATE_OBSERVER,
 };
 class AppStateObserverManager : public std::enable_shared_from_this<AppStateObserverManager> {
     DECLARE_DELAYED_SINGLETON(AppStateObserverManager)
@@ -49,6 +51,8 @@ public:
     int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
     int32_t RegisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer);
     int32_t UnregisterAppForegroundStateObserver(const sptr<IAppForegroundStateObserver> &observer);
+    int32_t RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer);
+    int32_t UnregisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer);
     void StateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility);
     void OnAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state,
         bool needNotifyApp);
@@ -74,11 +78,11 @@ private:
     void HandleOnRenderProcessDied(const std::shared_ptr<RenderRecord> &RenderRecord);
     bool ObserverExist(const sptr<IRemoteBroker> &observer);
     bool IsAppForegroundObserverExist(const sptr<IRemoteBroker> &observer);
+    bool IsAbilityForegroundObserverExist(const sptr<IRemoteBroker> &observer);
     void AddObserverDeathRecipient(const sptr<IRemoteBroker> &observer, const ObserverType &type);
     void RemoveObserverDeathRecipient(const sptr<IRemoteBroker> &observer);
     ProcessData WrapProcessData(const std::shared_ptr<AppRunningRecord> &appRecord);
     ProcessData WrapRenderProcessData(const std::shared_ptr<RenderRecord> &renderRecord);
-    void OnObserverDied(const wptr<IRemoteObject> &remote);
     void OnObserverDied(const wptr<IRemoteObject> &remote, const ObserverType &type);
     AppStateData WrapAppStateData(const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state);
@@ -96,6 +100,8 @@ private:
     std::map<sptr<IApplicationStateObserver>, std::vector<std::string>> appStateObserverMap_;
     ffrt::mutex appForegroundObserverLock_;
     std::set<sptr<IAppForegroundStateObserver>> appForegroundStateObserverSet_;
+    ffrt::mutex abilityforegroundObserverLock_;
+    std::set<sptr<IAbilityForegroundStateObserver>> abilityforegroundObserverSet_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

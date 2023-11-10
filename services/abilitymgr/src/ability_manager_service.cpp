@@ -42,6 +42,7 @@
 #include "connection_state_manager.h"
 #include "distributed_client.h"
 #include "dlp_utils.h"
+#include "extension_config.h"
 #include "errors.h"
 #include "freeze_util.h"
 #include "hilog_wrapper.h"
@@ -143,7 +144,6 @@ const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string DEBUG_APP = "debugApp";
 
 const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_SETTINGSDATA };
-
 std::atomic<bool> g_isDmsAlive = false;
 
 bool CheckCallerIsDlpManager(const sptr<AppExecFwk::IBundleMgr> &bundleManager)
@@ -394,6 +394,11 @@ bool AbilityManagerService::Init()
     };
     taskHandler_->SubmitTask(startAutoStartupAppsTask, "StartAutoStartupApps");
     ResiterSuspendObserver();
+    
+    auto initExtensionConfigTask = []() {
+        DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
+    };
+    taskHandler_->SubmitTask(initExtensionConfigTask, "InitExtensionConfigTask");
     HILOG_INFO("Init success.");
     return true;
 }
@@ -5935,6 +5940,21 @@ int AbilityManagerService::StopUser(int userId, const sptr<IStopUserCallback> &c
         callback->OnStopUserDone(userId, ret);
     }
     return 0;
+}
+
+int AbilityManagerService::LogoutUser(int32_t userId)
+{
+    if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
+        HILOG_ERROR("Permission verification failed, not account process");
+        return CHECK_PERMISSION_FAILED;
+    }
+
+    if (userController_) {
+        auto ret = userController_->LogoutUser(userId);
+        HILOG_DEBUG("logout user return = %{public}d", ret);
+        return ret;
+    }
+    return ERR_OK;
 }
 
 void AbilityManagerService::OnAcceptWantResponse(

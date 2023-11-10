@@ -411,6 +411,26 @@ int32_t AppMgrService::UnregisterApplicationStateObserver(const sptr<IApplicatio
     return appMgrServiceInner_->UnregisterApplicationStateObserver(observer);
 }
 
+int32_t AppMgrService::RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer)
+{
+    HILOG_DEBUG("Called.");
+    if (!IsReady()) {
+        HILOG_ERROR("Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->RegisterAbilityForegroundStateObserver(observer);
+}
+
+int32_t AppMgrService::UnregisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer)
+{
+    HILOG_DEBUG("Called.");
+    if (!IsReady()) {
+        HILOG_ERROR("Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->UnregisterAbilityForegroundStateObserver(observer);
+}
+
 int32_t AppMgrService::GetForegroundApplications(std::vector<AppStateData> &list)
 {
     HILOG_DEBUG("begin");
