@@ -2676,8 +2676,10 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         return;
     }
 
-    if (GrantPermissionToShell(uriVec, want.GetFlags(), targetBundleName)) {
-        HILOG_INFO("shell permission");
+    auto callerPkg = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
+    if (callerPkg == SHELL_ASSISTANT_BUNDLENAME
+        && GrantPermissionToShell(uriVec, want.GetFlags(), targetBundleName)) {
+        HILOG_INFO("permission to shell");
         return;
     }
 
@@ -2759,10 +2761,6 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
 bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUriVec, uint32_t flag,
     std::string targetPkg)
 {
-    if (targetPkg != SHELL_ASSISTANT_BUNDLENAME || collaboratorType_ != CollaboratorType::RESERVE_TYPE) {
-        return false;
-    }
-    
     std::vector<Uri> uriVec;
     for (auto&& str : strUriVec) {
         Uri uri(str);
