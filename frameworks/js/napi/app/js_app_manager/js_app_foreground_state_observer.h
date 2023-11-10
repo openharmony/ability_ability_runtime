@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_JS_APP_FOREGROUND_STATE_OBSERVER_H
 #define OHOS_ABILITY_RUNTIME_JS_APP_FOREGROUND_STATE_OBSERVER_H
 
+#include <mutex>
 #include <set>
 
 #include "app_foreground_state_observer_stub.h"
@@ -35,14 +36,16 @@ public:
     void CallJsFunction(const napi_value value, const char *methodName, const napi_value *argv, const size_t argc);
     void AddJsObserverObject(const napi_value &jsObserverObject);
     void RemoveJsObserverObject(const napi_value &jsObserverObject);
+    void RemoveAllJsObserverObjects();
     std::shared_ptr<NativeReference> GetObserverObject(const napi_value &jsObserverObject);
-    bool isEmpty();
+    bool IsEmpty();
     void SetValid(bool valid);
 
 private:
     napi_env env_;
     volatile bool valid_ = true;
     std::set<std::shared_ptr<NativeReference>> jsObserverObjectSet_;
+    std::mutex jsObserverObjectSetLock_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

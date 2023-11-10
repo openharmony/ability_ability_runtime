@@ -1552,9 +1552,9 @@ void AppRunningRecord::GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool
     isFloatingWindowMode = false;
     for (const auto &item : abilitiesMap) {
         const auto &abilityRecord = item.second;
-		if (abilityRecord == nullptr) {
-			continue;
-		}
+        if (abilityRecord == nullptr) {
+            continue;
+        }
         const auto &abilityWant = abilityRecord->GetWant();
         if (abilityWant != nullptr) {
             int windowMode = abilityWant->GetIntParam(Want::PARAM_RESV_WINDOW_MODE, -1);
