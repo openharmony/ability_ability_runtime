@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_APP_MGR_INTERFACE_H
 #define OHOS_ABILITY_RUNTIME_APP_MGR_INTERFACE_H
 
+#include "ability_foreground_state_observer_interface.h"
 #include "ability_info.h"
 #include "ams_mgr_interface.h"
 #include "app_foreground_state_observer_interface.h"
@@ -203,6 +204,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer) = 0;
+
+    /**
+     * Register application or process state observer.
+     * @param observer Is ability foreground state observer
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer) = 0;
+
+    /**
+     * Unregister application or process state observer.
+     * @param observer Is ability foreground state observer
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer) = 0;
 
     /**
      * Get foreground applications.

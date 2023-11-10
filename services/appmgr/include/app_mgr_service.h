@@ -30,6 +30,7 @@
 #include "app_mgr_stub.h"
 #include "app_record_id.h"
 #include "app_running_record.h"
+#include "app_running_status_listener_interface.h"
 #include "app_scheduler_proxy.h"
 #include "appexecfwk_errors.h"
 #include "application_info.h"
@@ -467,6 +468,20 @@ private:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer) override;
+
+    /**
+     * Register application or process state observer.
+     * @param observer, Is ability foreground state observer
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer) override;
+
+    /**
+     * Unregister application or process state observer.
+     * @param observer, Is ability foreground state observer
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterAbilityForegroundStateObserver(const sptr<IAbilityForegroundStateObserver> &observer) override;
 
     /**
      * Get foreground applications.

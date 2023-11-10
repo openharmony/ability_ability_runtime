@@ -143,6 +143,10 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleRegisterAppForegroundStateObserver;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APP_FOREGROUND_STATE_OBSERVER)] =
         &AppMgrStub::HandleUnregisterAppForegroundStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_ABILITY_FOREGROUND_STATE_OBSERVER)] =
+        &AppMgrStub::HandleRegisterAbilityForegroundStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_ABILITY_FOREGROUND_STATE_OBSERVER)] =
+        &AppMgrStub::HandleUnregisterAbilityForegroundStateObserver;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -398,6 +402,27 @@ int32_t AppMgrStub::HandleUnregisterApplicationStateObserver(MessageParcel &data
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleRegisterAbilityForegroundStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IAbilityForegroundStateObserver>(data.ReadRemoteObject());
+    int32_t result = RegisterAbilityForegroundStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterAbilityForegroundStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IAbilityForegroundStateObserver>(data.ReadRemoteObject());
+    int32_t result = UnregisterAbilityForegroundStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
 
 int32_t AppMgrStub::HandleGetForegroundApplications(MessageParcel &data, MessageParcel &reply)
 {

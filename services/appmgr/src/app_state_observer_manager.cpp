@@ -15,6 +15,7 @@
 
 #include "app_state_observer_manager.h"
 
+#include "ability_foreground_state_observer_stub.h"
 #include "app_foreground_state_observer_stub.h"
 #include "application_state_observer_stub.h"
 #include "hilog_wrapper.h"
@@ -134,6 +135,52 @@ int32_t AppStateObserverManager::UnregisterAppForegroundStateObserver(const sptr
     for (auto &it : appForegroundStateObserverSet_) {
         if (it != nullptr && it->AsObject() == observer->AsObject()) {
             appForegroundStateObserverSet_.erase(it);
+            RemoveObserverDeathRecipient(observer);
+            return ERR_OK;
+        }
+    }
+    return ERR_INVALID_VALUE;
+}
+
+int32_t AppStateObserverManager::RegisterAbilityForegroundStateObserver(
+    const sptr<IAbilityForegroundStateObserver> &observer)
+{
+    HILOG_DEBUG("Called.");
+    if (observer == nullptr) {
+        HILOG_ERROR("The param observer is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (IsAbilityForegroundObserverExist(observer)) {
+        HILOG_DEBUG("Observer exist.");
+        return ERR_OK;
+    }
+
+    std::lock_guard<ffrt::mutex> lockRegister(abilityforegroundObserverLock_);
+    abilityforegroundObserverSet_.emplace(observer);
+    AddObserverDeathRecipient(observer, ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER);
+    return ERR_OK;
+}
+
+int32_t AppStateObserverManager::UnregisterAbilityForegroundStateObserver(
+    const sptr<IAbilityForegroundStateObserver> &observer)
+{
+    HILOG_DEBUG("Called.");
+    if (observer == nullptr) {
+        HILOG_ERROR("Observer nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    if (AAFwk::PermissionVerification::GetInstance()->VerifyAppStateObserverPermission() == ERR_PERMISSION_DENIED) {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
+    }
+    std::lock_guard<ffrt::mutex> lockUnregister(abilityforegroundObserverLock_);
+    for (auto &it : abilityforegroundObserverSet_) {
+        if (it != nullptr && it->AsObject() == observer->AsObject()) {
+            abilityforegroundObserverSet_.erase(it);
             RemoveObserverDeathRecipient(observer);
             return ERR_OK;
         }
@@ -445,6 +492,17 @@ void AppStateObserverManager::HandleStateChangedNotifyObserver(const AbilityStat
             }
         }
     }
+
+    if ((abilityStateData.abilityState == static_cast<int32_t>(AbilityState::ABILITY_STATE_FOREGROUND) ||
+            abilityStateData.abilityState == static_cast<int32_t>(AbilityState::ABILITY_STATE_BACKGROUND)) &&
+        isAbility) {
+        std::lock_guard<ffrt::mutex> lockForeground(abilityforegroundObserverLock_);
+        for (auto &it : abilityforegroundObserverSet_) {
+            if (it != nullptr) {
+                it->OnAbilityStateChanged(abilityStateData);
+            }
+        }
+    }
 }
 
 void AppStateObserverManager::HandleOnAppProcessCreated(const std::shared_ptr<AppRunningRecord> &appRecord)
@@ -610,6 +668,21 @@ bool AppStateObserverManager::ObserverExist(const sptr<IRemoteBroker> &observer)
     return false;
 }
 
+bool AppStateObserverManager::IsAbilityForegroundObserverExist(const sptr<IRemoteBroker> &observer)
+{
+    if (observer == nullptr) {
+        HILOG_ERROR("The param observer is nullptr.");
+        return false;
+    }
+    std::lock_guard<ffrt::mutex> lockRegister(abilityforegroundObserverLock_);
+    for (auto &it : abilityforegroundObserverSet_) {
+        if (it != nullptr && it->AsObject() == observer->AsObject()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool AppStateObserverManager::IsAppForegroundObserverExist(const sptr<IRemoteBroker> &observer)
 {
     if (observer == nullptr) {
@@ -649,6 +722,11 @@ void AppStateObserverManager::AddObserverDeathRecipient(const sptr<IRemoteBroker
             deathRecipient = new (std::nothrow) ApplicationStateObserverRecipient(deathRecipientFunc);
         } else if (type == ObserverType::APP_FOREGROUND_STATE_OBSERVER) {
             deathRecipient = new (std::nothrow) AppForegroundStateObserverRecipient(deathRecipientFunc);
+        } else if (type == ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER) {
+            deathRecipient = new (std::nothrow) AbilityForegroundStateObserverRecipient(deathRecipientFunc);
+        } else {
+            HILOG_WARN("ObserverType is not exists");
+            return;
         }
         if (deathRecipient == nullptr) {
             HILOG_ERROR("deathRecipient is nullptr.");
@@ -688,9 +766,15 @@ void AppStateObserverManager::OnObserverDied(const wptr<IRemoteObject> &remote, 
     if (type == ObserverType::APPLICATION_STATE_OBSERVER) {
         sptr<IApplicationStateObserver> observer = iface_cast<IApplicationStateObserver>(object);
         UnregisterApplicationStateObserver(observer);
-    } else {
+    } else if (type == ObserverType::ABILITY_FOREGROUND_STATE_OBSERVER) {
+        sptr<IAbilityForegroundStateObserver> observer = iface_cast<IAbilityForegroundStateObserver>(object);
+        UnregisterAbilityForegroundStateObserver(observer);
+    } else if (type == ObserverType::APP_FOREGROUND_STATE_OBSERVER) {
         sptr<IAppForegroundStateObserver> observer = iface_cast<IAppForegroundStateObserver>(object);
         UnregisterAppForegroundStateObserver(observer);
+    } else {
+        HILOG_WARN("ObserverType is not exists");
+        return;
     }
 }
 
