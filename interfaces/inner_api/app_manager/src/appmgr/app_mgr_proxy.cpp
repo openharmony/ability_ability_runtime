@@ -1425,7 +1425,13 @@ int32_t AppMgrProxy::RegisterAppForegroundStateObserver(const sptr<IAppForegroun
     }
     MessageParcel reply;
     MessageOption option;
-    auto error = Remote()->SendRequest(
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+    auto error = remote->SendRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APP_FOREGROUND_STATE_OBSERVER), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d.", error);
@@ -1447,7 +1453,13 @@ int32_t AppMgrProxy::UnregisterAppForegroundStateObserver(const sptr<IAppForegro
 
     MessageParcel reply;
     MessageOption option;
-    auto error = Remote()->SendRequest(
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+    auto error = remote->SendRequest(
         static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APP_FOREGROUND_STATE_OBSERVER), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
