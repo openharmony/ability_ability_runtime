@@ -362,6 +362,11 @@ enum {
      * Result(2097220) for starting invalid component.
      */
     ERR_INSIGHT_INTENT_START_INVALID_COMPONENT,
+
+    /**
+     * Result(2097221) for developer mode.
+     */
+    ERR_NOT_DEVELOPER_MODE,
 };
 
 enum {
