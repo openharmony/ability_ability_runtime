@@ -20,6 +20,12 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
+namespace {
+const std::string AUTO_FILL_EXTENSION_PARAMS_NAME_KEY = "name";
+const std::string AUTO_FILL_EXTENSION_PARAMS_NAME = "AutoFillExtensionAbility";
+const std::string AUTO_FILL_EXTENSION_PARAMS_TYPE_KEY = "type";
+const std::string AUTO_FILL_EXTENSION_PARAMS_TYPE = "501";
+}
 AutoFillExtensionModuleLoader::AutoFillExtensionModuleLoader() = default;
 AutoFillExtensionModuleLoader::~AutoFillExtensionModuleLoader() = default;
 
@@ -35,8 +41,8 @@ std::map<std::string, std::string> AutoFillExtensionModuleLoader::GetParams()
     std::map<std::string, std::string> params;
     // type means extension type in ExtensionAbilityType of
     // extension_ability_info.h, 21 means autoFill/password extension.
-    params.insert(std::pair<std::string, std::string>("type", "21"));
-    params.insert(std::pair<std::string, std::string>("name", "AutoFillExtensionAbility"));
+    params.insert(std::pair<std::string, std::string>(AUTO_FILL_EXTENSION_PARAMS_TYPE_KEY, AUTO_FILL_EXTENSION_PARAMS_TYPE));
+    params.insert(std::pair<std::string, std::string>(AUTO_FILL_EXTENSION_PARAMS_NAME_KEY, AUTO_FILL_EXTENSION_PARAMS_NAME));
     return params;
 }
 

@@ -61,10 +61,6 @@ int32_t AutoFillManager::RequestAutoFill(
     want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, viewdata.ToJsonString());
 
     auto extensionCallback = std::make_shared<AutoFillExtensionCallback>();
-    if (extensionCallback == nullptr) {
-        HILOG_ERROR("Extension callback is nullptr.");
-        return AutoFiil::AUTO_FILL_OBJECT_IS_NULL;
-    }
     extensionCallback->SetFillRequestCallback(fillCallback);
 
     Ace::ModalUIExtensionCallbacks callback;
