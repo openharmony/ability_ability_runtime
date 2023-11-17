@@ -49,6 +49,9 @@
 #include "locale_config.h"
 #include "ace_forward_compatibility.h"
 #include "form_constants.h"
+#ifdef SUPPORT_APP_PREFERRED_LANGUAGE
+#include "preferred_language.h"
+#endif
 #endif
 #include "app_mgr_client.h"
 #include "if_system_ability_manager.h"
@@ -118,7 +121,7 @@ constexpr char EVENT_KEY_SUMMARY[] = "SUMMARY";
 
 const int32_t JSCRASH_TYPE = 3;
 const std::string JSVM_TYPE = "ARK";
-const std::string SIGNAL_HANDLER = "SignalHandler";
+const std::string SIGNAL_HANDLER = "OS_SignalHandler";
 
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 
@@ -1007,9 +1010,9 @@ bool MainThread::InitResourceManager(std::shared_ptr<Global::Resource::ResourceM
     }
 
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-#ifdef SUPPORT_GRAPHICS
+#if defined(SUPPORT_GRAPHICS) && defined(SUPPORT_APP_PREFERRED_LANGUAGE)
     UErrorCode status = U_ZERO_ERROR;
-    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+    icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::PreferredLanguage::GetAppPreferredLanguage(), status);
     resConfig->SetLocaleInfo(locale);
     const icu::Locale *localeInfo = resConfig->GetLocaleInfo();
     if (localeInfo != nullptr) {
@@ -1286,15 +1289,26 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             return;
         }
 
-        if (appInfo.debug) {
-            auto perfCmd = appLaunchData.GetPerfCmd();
-            if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
-                perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
-                HILOG_DEBUG("perfCmd is %{public}s", perfCmd.c_str());
-                runtime->StartProfiler(perfCmd);
-            } else {
-                runtime->StartDebugMode(appLaunchData.GetDebugApp());
-            }
+        if (appInfo.debug && appLaunchData.GetDebugApp()) {
+            wptr<MainThread> weak = this;
+            auto cb = [weak]() {
+                auto appThread = weak.promote();
+                if (appThread == nullptr) {
+                    HILOG_ERROR("appThread is nullptr");
+                    return false;
+                }
+                return appThread->NotifyDeviceDisConnect();
+            };
+            runtime->SetDeviceDisconnectCallback(cb);
+        }
+
+        auto perfCmd = appLaunchData.GetPerfCmd();
+        if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
+            perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
+            HILOG_DEBUG("perfCmd is %{public}s", perfCmd.c_str());
+            runtime->StartProfiler(perfCmd, appInfo.debug);
+        } else {
+            runtime->StartDebugMode(appLaunchData.GetDebugApp(), appInfo.debug);
         }
 
         std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
@@ -1926,7 +1940,9 @@ void MainThread::HandleBackgroundApplication()
         HILOG_ERROR("MainThread::handleBackgroundApplication error!");
         return;
     }
-
+#ifdef IMAGE_PURGEABLE_PIXELMAP
+    PurgeableMem::PurgeableResourceManager::GetInstance().EndAccessPurgeableMem();
+#endif
     if (!applicationImpl_->PerformBackground()) {
         HILOG_ERROR("MainThread::handleForegroundApplication error!, applicationImpl_->PerformBackground() failed");
         return;
@@ -2783,6 +2799,13 @@ void MainThread::DetachAppDebug()
 {
     HILOG_DEBUG("Called.");
     AppExecFwk::AppfreezeInner::GetInstance()->SetAppDebug(false);
+}
+
+bool MainThread::NotifyDeviceDisConnect()
+{
+    HILOG_DEBUG("Called.");
+    ScheduleTerminateApplication();
+    return true;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

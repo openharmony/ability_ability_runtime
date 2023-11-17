@@ -661,7 +661,7 @@ public:
     virtual sptr<IWantSender> GetWantSender(
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) override;
 
-    virtual int SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo) override;
+    virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) override;
 
     virtual void CancelWantSender(const sptr<IWantSender> &sender) override;
 
@@ -871,6 +871,8 @@ public:
     virtual int StartUser(int userId) override;
 
     virtual int StopUser(int userId, const sptr<IStopUserCallback> &callback) override;
+
+    virtual int LogoutUser(int32_t userId) override;
 
     /**
      * Called when client complete dump.
@@ -1361,8 +1363,17 @@ public:
     int32_t ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
         const InsightIntentExecuteParam &param) override;
 
+    /**
+     * @brief Execute intent.
+     * @param abilityRequest The abilityRequest.
+     */
+    int32_t OnExecuteIntent(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord);
+
     int32_t StartAbilityWithInsightIntent(const Want &want, int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE);
+
+    int32_t StartAbilityByCallWithInsightIntent(const Want &want, const sptr<IRemoteObject> &callerToken,
+        const InsightIntentExecuteParam &param);
 
     /**
      * @brief Check if ability controller can start.
@@ -1382,7 +1393,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
-        const InsightIntentExecuteResult &result) override;
+        const InsightIntentExecuteResult &result) override;	
+
+    /**
+     * @brief Open file by uri.
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @return int The file descriptor.
+     */
+    virtual int32_t OpenFile(const Uri& uri, uint32_t flag) override;
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1445,6 +1464,8 @@ protected:
     int GetUidByBundleName(std::string bundleName);
 
     void OnAppStateChanged(const AppInfo &info) override;
+
+    void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) override;
 
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
@@ -1790,6 +1811,18 @@ private:
     void StopSwitchUserDialogInner(const Want &want, const int32_t stopUserId);
 
     void SetPickerElementName(const sptr<SessionInfo> &extensionSessionInfo);
+    
+    /**
+     * @brief Start extension ability with insight intent
+     * @param want, the want of the ability to start.
+     * @param extensionType If an ExtensionAbilityType is set, only extension of that type can be started.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartExtensionAbilityWithInsightIntent(const Want &want,
+        AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
+
+    bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord,
+        const int32_t oriValidUserId);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
@@ -1870,9 +1903,8 @@ private:
     sptr<IWindowManagerServiceHandler> wmsHandler_;
 #endif
     std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;
-#ifdef SUPPORT_ERMS
     std::shared_ptr<AbilityInterceptorExecuter> afterCheckExecuter_;
-#endif
+
     std::unordered_map<int32_t, int64_t> appRecoveryHistory_; // uid:time
     bool isPrepareTerminateEnable_ = false;
     std::multimap<int, std::shared_ptr<StartAbilityHandler>, std::greater<int>> startAbilityChain_;

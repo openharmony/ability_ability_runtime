@@ -77,7 +77,7 @@ public:
     MOCK_METHOD4(CompelVerifyPermission, int(const std::string& permission, int pid, int uid, std::string& message));
     MOCK_METHOD2(
         GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken));
-    MOCK_METHOD2(SendWantSender, int(const sptr<IWantSender>& target, const SenderInfo& senderInfo));
+    MOCK_METHOD2(SendWantSender, int(sptr<IWantSender> target, const SenderInfo& senderInfo));
     MOCK_METHOD1(CancelWantSender, void(const sptr<IWantSender>& sender));
     MOCK_METHOD1(GetPendingWantUid, int(const sptr<IWantSender>& target));
     MOCK_METHOD1(GetPendingWantUserId, int(const sptr<IWantSender>& target));
@@ -127,6 +127,7 @@ public:
     MOCK_METHOD2(SetMissionContinueState, int(const sptr<IRemoteObject>& token, const AAFwk::ContinueState& state));
     int StartUser(int userId) override;
     int StopUser(int userId, const sptr<IStopUserCallback>& callback) override;
+    int LogoutUser(int32_t userId) override;
     int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
     int StopSyncRemoteMissions(const std::string& devId) override;
     int RegisterMissionListener(const std::string& deviceId,
@@ -242,7 +243,7 @@ public:
     MOCK_METHOD4(CompelVerifyPermission, int(const std::string& permission, int pid, int uid, std::string& message));
     MOCK_METHOD2(
         GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken));
-    MOCK_METHOD2(SendWantSender, int(const sptr<IWantSender>& target, const SenderInfo& senderInfo));
+    MOCK_METHOD2(SendWantSender, int(sptr<IWantSender> target, const SenderInfo& senderInfo));
     MOCK_METHOD1(CancelWantSender, void(const sptr<IWantSender>& sender));
     MOCK_METHOD1(GetPendingWantUid, int(const sptr<IWantSender>& target));
     MOCK_METHOD1(GetPendingWantUserId, int(const sptr<IWantSender>& target));
@@ -292,6 +293,7 @@ public:
     MOCK_METHOD2(SetMissionContinueState, int(const sptr<IRemoteObject>& token, const AAFwk::ContinueState& state));
     int StartUser(int userId) override;
     int StopUser(int userId, const sptr<IStopUserCallback>& callback) override;
+    int LogoutUser(int32_t userId) override;
     int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
     int StopSyncRemoteMissions(const std::string& devId) override;
     int RegisterMissionListener(const std::string& deviceId,
