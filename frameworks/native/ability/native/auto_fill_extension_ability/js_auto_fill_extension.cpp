@@ -68,8 +68,12 @@ napi_value AttachAutoFillExtensionContext(napi_env env, void *value, void *)
         return nullptr;
     }
     napi_value object = JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(env, ptr);
-    auto contextObj = JsRuntime::LoadSystemModuleByEngine(
-        env, "application.AutoFillExtensionContext", &object, 1)->GetNapiValue();
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.AutoFillExtensionContext", &object, 1);
+    if (systemModule == nullptr) {
+        HILOG_ERROR("Load system module failed.");
+        return nullptr;
+    }
+    auto contextObj = systemModule->GetNapiValue();
     if (contextObj == nullptr) {
         HILOG_ERROR("Load context error.");
         return nullptr;
@@ -119,16 +123,16 @@ void JsAutoFillExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record
 {
     HILOG_DEBUG("Called.");
     AutoFillExtension::Init(record, application, handler, token);
-    if (Extension::abilityInfo_ == nullptr || Extension::abilityInfo_->srcEntrance.empty()) {
+    if (abilityInfo_ == nullptr || abilityInfo_->srcEntrance.empty()) {
         HILOG_ERROR("Init ability info failed.");
         return;
     }
-    std::string srcPath(Extension::abilityInfo_->moduleName + "/");
-    srcPath.append(Extension::abilityInfo_->srcEntrance);
+    std::string srcPath(abilityInfo_->moduleName + "/");
+    srcPath.append(abilityInfo_->srcEntrance);
     srcPath.erase(srcPath.rfind('.'));
     srcPath.append(".abc");
 
-    std::string moduleName(Extension::abilityInfo_->moduleName);
+    std::string moduleName(abilityInfo_->moduleName);
     moduleName.append("::").append(abilityInfo_->name);
     HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
@@ -181,6 +185,10 @@ void JsAutoFillExtension::BindContext(napi_env env, napi_value obj)
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<AutoFillExtensionContext>(context);
+    if (workContext == nullptr) {
+        HILOG_ERROR("workContext is nullptr.");
+        return;
+    }
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachAutoFillExtensionContext, workContext, nullptr);
     context->Bind(jsRuntime_, shellContextRef_.get());
@@ -363,9 +371,13 @@ void JsAutoFillExtension::OnCommandWindow(
 }
 
 bool JsAutoFillExtension::ForegroundWindowWithInsightIntent(
-    const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
+    const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HILOG_DEBUG("Begin.");
+    if (sessionInfo == nullptr) {
+        HILOG_ERROR("sessionInfo is nullptr.");
+        return false;
+    }
     std::unique_ptr<InsightIntentExecutorAsyncCallback> executorCallback = nullptr;
     executorCallback.reset(InsightIntentExecutorAsyncCallback::Create());
     if (executorCallback == nullptr) {
@@ -381,15 +393,19 @@ bool JsAutoFillExtension::ForegroundWindowWithInsightIntent(
         extension->OnCommandWindowDone(sessionInfo, AAFwk::WIN_CMD_FOREGROUND);
         extension->OnInsightIntentExecuteDone(sessionInfo, result);
     });
-
     auto context = GetContext();
     if (context == nullptr) {
         HILOG_ERROR("Context is nullptr.");
         return false;
     }
+    auto abilityInfo = context->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        HILOG_ERROR("abilityInfo is nullptr.");
+        return false;
+    }
     InsightIntentExecutorInfo executorInfo;
-    executorInfo.hapPath = context->GetAbilityInfo()->hapPath;
-    executorInfo.windowMode = context->GetAbilityInfo()->compileMode == AppExecFwk::CompileMode::ES_MODULE;
+    executorInfo.hapPath = abilityInfo->hapPath;
+    executorInfo.windowMode = abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
     executorInfo.token = context->GetToken();
     executorInfo.pageLoader = contentSessions_[sessionInfo->sessionToken];
     executorInfo.executeParam = std::make_shared<InsightIntentExecuteParam>();
@@ -401,7 +417,6 @@ bool JsAutoFillExtension::ForegroundWindowWithInsightIntent(
         jsRuntime_, executorInfo, std::move(executorCallback));
     if (!ret) {
         HILOG_ERROR("Execute insight intent failed.");
-        // callback has removed, release in insight intent executor.
     }
     HILOG_DEBUG("End.");
     return true;
@@ -432,6 +447,10 @@ void JsAutoFillExtension::OnInsightIntentExecuteDone(const sptr<AAFwk::SessionIn
     const AppExecFwk::InsightIntentExecuteResult &result)
 {
     HILOG_DEBUG("Begin.");
+    if (sessionInfo == nullptr) {
+        HILOG_ERROR("sessionInfo is nullptr.");
+        return;
+    }
     auto obj = sessionInfo->sessionToken;
     auto res = uiWindowMap_.find(obj);
     if (res != uiWindowMap_.end() && res->second != nullptr) {
@@ -538,6 +557,11 @@ bool JsAutoFillExtension::HandleAutoFillCreate(const AAFwk::Want &want, const sp
 void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo)
 {
     HILOG_DEBUG("Called.");
+    if (sessionInfo == nullptr) {
+        HILOG_ERROR("sessionInfo is nullptr.");
+        return;
+    }
+
     if (!HandleAutoFillCreate(want, sessionInfo)) {
         HILOG_ERROR("Handle auto fill create failed.");
         return;
@@ -634,6 +658,10 @@ void JsAutoFillExtension::CallJsOnRequest(
     const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, const sptr<Rosen::Window> &uiWindow)
 {
     HILOG_DEBUG("Called.");
+    if (sessionInfo == nullptr) {
+        HILOG_ERROR("sessionInfo is nullptr.");
+        return;
+    }
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     if (env == nullptr) {
