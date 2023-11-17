@@ -38,6 +38,7 @@ constexpr const char *PAGE_INFO_PASSWORDRULES = "passwordRules";
 constexpr const char *PAGE_INFO_ENABLEAUTOFILL = "enableAutoFill";
 constexpr const char *WANT_PARAMS_VIEW_DATA = "ohos.ability.params.viewData";
 constexpr const char *WANT_PARAMS_AUTO_FILL_TYPE_KEY = "ability.want.params.AutoFillType";
+constexpr uint32_t PAGE_NODE_COUNT_MAX = 100;
 } // namespace
 
 napi_value JsAutoFillExtensionUtil::WrapViewData(const napi_env env, const AbilityBase::ViewData &viewData)
@@ -135,7 +136,7 @@ void JsAutoFillExtensionUtil::UnwrapViewData(
             return;
         }
 
-        for (uint32_t index = 0; index < jsProCount; index++) {
+        for (uint32_t index = 0; index < jsProCount && index < PAGE_NODE_COUNT_MAX; index++) {
             napi_value jsNode = nullptr;
             napi_get_element(env, jsValue, index, &jsNode);
             AbilityBase::PageNodeInfo node;
