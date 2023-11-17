@@ -67,7 +67,8 @@ void UIAbility::Init(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo
 #ifdef SUPPORT_GRAPHICS
     continuationManager_ = std::make_shared<AppExecFwk::ContinuationManagerStage>();
     std::weak_ptr<AppExecFwk::ContinuationManagerStage> continuationManager = continuationManager_;
-    continuationHandler_ = std::make_shared<AppExecFwk::ContinuationHandlerStage>(continuationManager, weak_from_this());
+    continuationHandler_ =
+        std::make_shared<AppExecFwk::ContinuationHandlerStage>(continuationManager, weak_from_this());
     if (!continuationManager_->Init(shared_from_this(), GetToken(), GetAbilityInfo(), continuationHandler_)) {
         continuationManager_.reset();
     } else {
@@ -584,9 +585,6 @@ void UIAbility::OnBackground()
         HILOG_ERROR("lifecycle_ is nullptr.");
         return;
     }
-#ifdef IMAGE_PURGEABLE_PIXELMAP
-    PurgeableMem::PurgeableResourceManager::GetInstance().EndAccessPurgeableMem();
-#endif
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_BACKGROUND);
     HILOG_DEBUG("End.");
     AAFwk::EventInfo eventInfo;
@@ -987,6 +985,13 @@ void UIAbility::ExecuteInsightIntentRepeateForeground(const AAFwk::Want &want,
 }
 
 void UIAbility::ExecuteInsightIntentMoveToForeground(const AAFwk::Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    HILOG_DEBUG("called");
+}
+
+void UIAbility::ExecuteInsightIntentBackground(const AAFwk::Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {

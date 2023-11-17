@@ -614,7 +614,7 @@ public:
     virtual sptr<IWantSender> GetWantSender(
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) = 0;
 
-    virtual int SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo) = 0;
+    virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) = 0;
 
     virtual void CancelWantSender(const sptr<IWantSender> &sender) = 0;
 
@@ -727,6 +727,11 @@ public:
     virtual int StartUser(int userId) = 0;
 
     virtual int StopUser(int userId, const sptr<IStopUserCallback> &callback) = 0;
+
+    virtual int LogoutUser(int32_t userId)
+    {
+        return 0;
+    }
 
     virtual int SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state)
     {
@@ -1334,6 +1339,17 @@ public:
      */
     virtual int32_t ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result) = 0;
+
+    /**
+     * @brief Open file by uri.
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @return int The file descriptor.
+     */
+    virtual int32_t OpenFile(const Uri& uri, uint32_t flag)
+    {
+        return 0;
+    }
 };
 }  // namespace AAFwk
 }  // namespace OHOS

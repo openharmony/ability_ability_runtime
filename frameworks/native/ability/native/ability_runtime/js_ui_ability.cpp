@@ -54,7 +54,8 @@ namespace {
 const std::string PAGE_STACK_PROPERTY_NAME = "pageStack";
 const std::string SUPPORT_CONTINUE_PAGE_STACK_PROPERTY_NAME = "ohos.extra.param.key.supportContinuePageStack";
 #endif
-const int32_t BASE_DISPLAY_ID_NUM (10); // Numerical base (radix) that determines the valid characters and their interpretation.
+// Numerical base (radix) that determines the valid characters and their interpretation.
+const int32_t BASE_DISPLAY_ID_NUM (10);
 
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
@@ -850,13 +851,52 @@ void JsUIAbility::ExecuteInsightIntentMoveToForeground(const Want &want,
     }
 }
 
+void JsUIAbility::ExecuteInsightIntentBackground(const Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    HILOG_DEBUG("called.");
+    if (executeParam == nullptr) {
+        HILOG_WARN("Intent execute param invalid.");
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback), ERR_OK);
+        return;
+    }
+
+    if (abilityInfo_) {
+        jsRuntime_.UpdateModuleNameAndAssetPath(abilityInfo_->moduleName);
+    }
+
+    InsightIntentExecutorInfo executeInfo;
+    auto ret = GetInsightIntentExecutorInfo(want, executeParam, executeInfo);
+    if (!ret) {
+        HILOG_ERROR("Get Intent executor failed.");
+        InsightIntentExecutorMgr::TriggerCallbackInner(std::move(callback),
+            static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
+        return;
+    }
+
+    ret = DelayedSingleton<InsightIntentExecutorMgr>::GetInstance()->ExecuteInsightIntent(
+        jsRuntime_, executeInfo, std::move(callback));
+    if (!ret) {
+        // callback has removed, release in insight intent executor.
+        HILOG_ERROR("Execute insight intent failed.");
+    }
+}
+
 bool JsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     InsightIntentExecutorInfo& executeInfo)
 {
     HILOG_DEBUG("called.");
+    
     auto context = GetAbilityContext();
-    if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr || jsWindowStageObj_ == nullptr) {
+    if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr) {
+        HILOG_ERROR("Param invalid.");
+        return false;
+    }
+
+    if (executeParam->executeMode_ == AppExecFwk::ExecuteMode::UI_ABILITY_FOREGROUND
+        && jsWindowStageObj_ == nullptr) {
         HILOG_ERROR("Param invalid.");
         return false;
     }
@@ -867,7 +907,9 @@ bool JsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     executeInfo.esmodule = abilityInfo_->compileMode == AppExecFwk::CompileMode::ES_MODULE;
     executeInfo.windowMode = windowMode_;
     executeInfo.token = context->GetToken();
-    executeInfo.pageLoader = jsWindowStageObj_;
+    if (jsWindowStageObj_ != nullptr) {
+        executeInfo.pageLoader = jsWindowStageObj_;
+    }
     executeInfo.executeParam = executeParam;
     return true;
 }
