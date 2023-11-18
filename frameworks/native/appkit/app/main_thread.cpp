@@ -1421,11 +1421,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
     std::vector<OverlayModuleInfo> overlayModuleInfos;
     auto res = GetOverlayModuleInfos(bundleInfo.name, moduleName, overlayModuleInfos);
-    if (res != ERR_OK) {
-        return;
-    }
     std::vector<std::string> overlayPaths;
-    overlayPaths = GetAddOverlayPaths(overlayModuleInfos);
+    if (res == ERR_OK) {
+        overlayPaths = GetAddOverlayPaths(overlayModuleInfos);
+    }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     int32_t appType;
     if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE)) {
