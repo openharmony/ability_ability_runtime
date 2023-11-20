@@ -1646,6 +1646,22 @@ ErrCode AbilityManagerClient::ExecuteInsightIntentDone(sptr<IRemoteObject> token
     return abms->ExecuteInsightIntentDone(token, intentId, result);
 }
 
+ErrCode AbilityManagerClient::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    HILOG_DEBUG("Called.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->SetApplicationAutoStartupByEDM(info, flag);
+}
+
+ErrCode AbilityManagerClient::CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    HILOG_DEBUG("Called.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->CancelApplicationAutoStartupByEDM(info, flag);
+}
+
 int32_t AbilityManagerClient::OpenFile(const Uri& uri, uint32_t flag)
 {
     HILOG_DEBUG("call OpenFile");

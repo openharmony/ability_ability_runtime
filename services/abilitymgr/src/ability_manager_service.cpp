@@ -9020,6 +9020,23 @@ int32_t AbilityManagerService::ExecuteInsightIntentDone(const sptr<IRemoteObject
         intentId, result.innerErr, result);
 }
 
+int32_t AbilityManagerService::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    if (abilityAutoStartupService_ == nullptr) {
+        HILOG_ERROR("abilityAutoStartupService_ is nullptr.");
+        return ERR_NO_INIT;
+    }
+    return abilityAutoStartupService_->SetApplicationAutoStartupByEDM(info, flag);
+}
+
+int32_t AbilityManagerService::CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    if (abilityAutoStartupService_ == nullptr) {
+        HILOG_ERROR("abilityAutoStartupService_ is nullptr.");
+        return ERR_NO_INIT;
+    }
+    return abilityAutoStartupService_->CancelApplicationAutoStartupByEDM(info, flag);
+}
 
 void AbilityManagerService::HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid)
 {

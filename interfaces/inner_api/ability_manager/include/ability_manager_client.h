@@ -957,6 +957,22 @@ public:
      */
     ErrCode SetMissionContinueState(sptr<IRemoteObject> token, const AAFwk::ContinueState &state);
 
+    /**
+     * @brief Set every application auto start up state by EDM.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @param flag The EDM force flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag);
+
+    /**
+     * @brief Cancel every application auto start up state by EDM.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @param flag The EDM force flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag);
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * Set mission label of this ability.
