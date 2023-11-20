@@ -38,7 +38,6 @@
 #include "accesstoken_kit.h"
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
-#include "app_utils.h"
 #include "bundle_mgr_client.h"
 #include "connection_state_manager.h"
 #include "distributed_client.h"
@@ -7778,7 +7777,7 @@ AAFwk::PermissionVerification::VerificationInfo AbilityManagerService::CreateVer
 {
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
-    verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.visible = abilityRequest.abilityInfo.visible;
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     HILOG_DEBUG("Call ServiceAbility or DataAbility, target bundleName: %{public}s.",
         abilityRequest.appInfo.bundleName.c_str());
@@ -7810,7 +7809,7 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
 
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
-    verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.visible = abilityRequest.abilityInfo.visible;
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     verificationInfo.isBackgroundCall = false;
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
@@ -7873,7 +7872,7 @@ int AbilityManagerService::CheckCallAbilityPermission(const AbilityRequest &abil
 
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
-    verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.visible = abilityRequest.abilityInfo.visible;
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
@@ -7898,7 +7897,7 @@ int AbilityManagerService::CheckStartByCallPermission(const AbilityRequest &abil
 
     AAFwk::PermissionVerification::VerificationInfo verificationInfo;
     verificationInfo.accessTokenId = abilityRequest.appInfo.accessTokenId;
-    verificationInfo.visible = IsAbilityVisible(abilityRequest);
+    verificationInfo.visible = abilityRequest.abilityInfo.visible;
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
@@ -8003,20 +8002,6 @@ inline bool AbilityManagerService::IsDelegatorCall(
         return true;
     }
     return false;
-}
-
-bool AbilityManagerService::IsAbilityVisible(const AbilityRequest &abilityRequest) const
-{
-    // TEMP, launcher is allowed to start invisible ability
-    std::shared_ptr<AbilityRecord> callerAbility = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    if (callerAbility) {
-        const std::string bundleName = callerAbility->GetApplicationInfo().bundleName;
-        HILOG_DEBUG("caller bundleName is %{public}s.", bundleName.c_str());
-        if (newRuleExceptLauncherSystemUI_ && AppUtils::GetInstance().IsLauncher(bundleName)) {
-            return true;
-        }
-    }
-    return abilityRequest.abilityInfo.visible;
 }
 
 bool AbilityManagerService::CheckNewRuleSwitchState(const std::string &param)
