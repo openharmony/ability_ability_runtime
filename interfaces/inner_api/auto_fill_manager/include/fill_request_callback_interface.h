@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_APPLICATION_ANR_LISTENER_H
-#define OHOS_ABILITY_RUNTIME_APPLICATION_ANR_LISTENER_H
+#ifndef OHOS_ABILITY_RUNTIME_AUTO_REQUEST_CALLBACK_INTERFACE_H
+#define OHOS_ABILITY_RUNTIME_AUTO_REQUEST_CALLBACK_INTERFACE_H
 
-#include <sys/types.h>
-
-#include "i_anr_observer.h"
+#include "view_data.h"
 
 namespace OHOS {
-namespace AAFwk {
-/**
- * @class ApplicationAnrListener
- * ApplicationAnrListener.
- */
-class ApplicationAnrListener : public MMI::IAnrObserver {
+namespace AbilityRuntime {
+class IFillRequestCallback {
 public:
-    ApplicationAnrListener();
-    virtual ~ApplicationAnrListener();
-    void OnAnr(int32_t pid) const override;
+    virtual ~IFillRequestCallback() {}
+
+    virtual void OnFillRequestSuccess(const AbilityBase::ViewData &viewData) = 0;
+    virtual void OnFillRequestFailed(int32_t errCode) = 0;
 };
-}  // namespace AAFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_APPLICATION_ANR_LISTENER_H
+} // AbilityRuntime
+} // OHOS
+#endif // OHOS_ABILITY_RUNTIME_AUTO_REQUEST_CALLBACK_INTERFACE_H
