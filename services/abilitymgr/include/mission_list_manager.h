@@ -348,6 +348,9 @@ public:
         const AAFwk::ContinueState &state);
 
     int32_t MoveMissionToBackground(int32_t missionId);
+
+    void GetAllForegroundAbilities(std::list<std::shared_ptr<AbilityRecord>> &foregroundList);
+
 #ifdef SUPPORT_GRAPHICS
 public:
     /**
@@ -443,7 +446,6 @@ private:
     void HandleAbilityDiedByDefault(std::shared_ptr<AbilityRecord> abilityRecord);
     void DelayedStartLauncher();
     void BackToLauncher();
-    void GetAllForegroundAbilities(std::list<std::shared_ptr<AbilityRecord>>& foregroundList);
     void GetForegroundAbilities(const std::shared_ptr<MissionList>& missionList,
         std::list<std::shared_ptr<AbilityRecord>>& foregroundList);
     std::shared_ptr<Mission> GetMissionBySpecifiedFlag(const AAFwk::Want &want, const std::string &flag) const;
