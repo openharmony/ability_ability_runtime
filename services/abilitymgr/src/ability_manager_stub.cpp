@@ -390,6 +390,10 @@ void AbilityManagerStub::FourthStepInit()
         &AbilityManagerStub::IsAutoStartupInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_CONNECTION_DATA)] =
         &AbilityManagerStub::GetConnectionDataInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_APPLICATION_AUTO_STARTUP_BY_EDM)] =
+        &AbilityManagerStub::SetApplicationAutoStartupByEDMInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CANCEL_APPLICATION_AUTO_STARTUP_BY_EDM)] =
+        &AbilityManagerStub::CancelApplicationAutoStartupByEDMInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -2886,6 +2890,32 @@ int32_t AbilityManagerStub::ExecuteInsightIntentDoneInner(MessageParcel &data, M
     }
 
     int32_t result = ExecuteInsightIntentDone(token, intentId, *executeResult);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::SetApplicationAutoStartupByEDMInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AutoStartupInfo> info = data.ReadParcelable<AutoStartupInfo>();
+    if (info == nullptr) {
+        HILOG_ERROR("Info is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    bool flag = data.ReadBool();
+    int32_t result = SetApplicationAutoStartupByEDM(*info, flag);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::CancelApplicationAutoStartupByEDMInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<AutoStartupInfo> info = data.ReadParcelable<AutoStartupInfo>();
+    if (info == nullptr) {
+        HILOG_ERROR("Info is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    bool flag = data.ReadBool();
+    int32_t result = CancelApplicationAutoStartupByEDM(*info, flag);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

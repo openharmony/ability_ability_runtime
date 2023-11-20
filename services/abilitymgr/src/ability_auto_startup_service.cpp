@@ -20,6 +20,7 @@
 
 #include "ability_auto_startup_data_manager.h"
 #include "ability_manager_errors.h"
+#include "ability_manager_service.h"
 #include "auto_startup_info.h"
 #include "auto_startup_interface.h"
 #include "hilog_wrapper.h"
@@ -212,6 +213,11 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartup(const AutoS
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList)
 {
     HILOG_DEBUG("Called.");
+    int32_t codeForEDM = CheckPermissionForEDM();
+    if (codeForEDM == ERR_OK) {
+        return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(
+            infoList);
+    }
     int32_t code = CheckPermissionForSystem();
     if (code != ERR_OK) {
         return code;
@@ -610,6 +616,10 @@ bool AbilityAutoStartupService::GetBundleInfo(
     } else {
         userId = uid / AppExecFwk::Constants::BASE_USER_RANGE;
     }
+    if (userId == 0) {
+        auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+        userId = abilityMgr->GetUserId();
+    }
     HILOG_DEBUG("Current userId: %{public}d.", userId);
     auto flags =
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES | AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
@@ -707,6 +717,139 @@ int32_t AbilityAutoStartupService::CheckPermissionForSelf(const std::string &bun
     if (!CheckSelfApplication(bundleName)) {
         HILOG_ERROR("Not self application.");
         return ERR_NOT_SELF_APPLICATION;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, flag: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), flag);
+    int32_t codeForEDM = CheckPermissionForEDM();
+    if (codeForEDM != ERR_OK) {
+        return codeForEDM;
+    }
+
+    bool isVisible;
+    std::string abilityTypeName;
+    if (!GetAbilityData(info, isVisible, abilityTypeName)) {
+        HILOG_ERROR("Failed to get ability data.");
+        return INNER_ERR;
+    }
+
+    if (!isVisible) {
+        HILOG_ERROR("Current ability is not visible.");
+        return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
+    }
+
+    AutoStartupInfo fullInfo(info);
+    fullInfo.abilityTypeName = abilityTypeName;
+
+    return InnerSetApplicationAutoStartupByEDM(fullInfo, flag);
+}
+
+int32_t AbilityAutoStartupService::InnerSetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    AutoStartupStatus status =
+        DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info);
+    if (status.code != ERR_OK && status.code != ERR_NAME_NOT_FOUND) {
+        HILOG_ERROR("Query auto startup data failed.");
+        return status.code;
+    }
+
+    int32_t result;
+    if (status.code == ERR_NAME_NOT_FOUND) {
+        HILOG_INFO("Query data is not exist.");
+        result =
+            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, true, flag);
+        if (result == ERR_OK) {
+            ExecuteCallbacks(true, info);
+        }
+        return result;
+    }
+    if (!status.isAutoStartup) {
+        result =
+            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, true, flag);
+        if (result == ERR_OK) {
+            ExecuteCallbacks(true, info);
+        }
+        return result;
+    }
+    if (status.isEdmForce != flag) {
+        result =
+            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, true, flag);
+        return result;
+    }
+
+    return ERR_OK;
+}
+
+int32_t AbilityAutoStartupService::CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, flag: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), flag);
+    int32_t codeForEDM = CheckPermissionForEDM();
+    if (codeForEDM != ERR_OK) {
+        return codeForEDM;
+    }
+
+    bool isVisible;
+    std::string abilityTypeName;
+    if (!GetAbilityData(info, isVisible, abilityTypeName)) {
+        HILOG_ERROR("Failed to get ability data.");
+        return INNER_ERR;
+    }
+
+    if (!isVisible) {
+        HILOG_ERROR("Current ability is not visible.");
+        return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
+    }
+
+    AutoStartupInfo fullInfo(info);
+    fullInfo.abilityTypeName = abilityTypeName;
+
+    return InnerCancelApplicationAutoStartupByEDM(fullInfo, flag);
+}
+
+int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+{
+    AutoStartupStatus status =
+        DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info);
+    if (status.code != ERR_OK && status.code != ERR_NAME_NOT_FOUND) {
+        HILOG_ERROR("Query auto startup data failed.");
+        return status.code;
+    }
+
+    int32_t result;
+    if (status.code == ERR_NAME_NOT_FOUND) {
+        HILOG_INFO("Query data is not exist.");
+        return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, false, flag);
+    }
+    if (status.isAutoStartup) {
+        result =
+            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, false, flag);
+        if (result == ERR_OK) {
+            HILOG_ERROR("the ability is auto startup.");
+            ExecuteCallbacks(false, info);
+        }
+        return result;
+    }
+    if (status.isEdmForce != flag) {
+        HILOG_ERROR("the ability is not auto startup and the edm flag is same with flag.");
+        result =
+            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, false, flag);
+        return result;
+    }
+
+    return ERR_OK;
+}
+
+int32_t AbilityAutoStartupService::CheckPermissionForEDM()
+{
+    if (!PermissionVerification::GetInstance()->VerifyCallingPermission(
+        PermissionConstants::PERMISSION_MANAGE_APP_BOOT_INTERNAL)) {
+        HILOG_ERROR("Not have ohos.permission.MANAGE_APP_BOOT_INTERNAL approval.");
+        return CHECK_PERMISSION_FAILED;
     }
     return ERR_OK;
 }
