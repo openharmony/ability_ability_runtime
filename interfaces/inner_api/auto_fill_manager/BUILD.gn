@@ -30,7 +30,10 @@ config("auto_fill_manager_public_config") {
 ohos_shared_library("auto_fill_manager") {
   public_configs = [ ":auto_fill_manager_public_config" ]
 
-  sources = [ "src/auto_fill_manager.cpp" ]
+  sources = [
+    "src/auto_fill_extension_callback.cpp",
+    "src/auto_fill_manager.cpp",
+  ]
 
   deps = [
     "${ability_runtime_innerkits_path}/runtime:runtime",

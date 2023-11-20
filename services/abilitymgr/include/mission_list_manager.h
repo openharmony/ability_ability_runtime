@@ -351,6 +351,7 @@ public:
 
     void GetAllForegroundAbilities(std::list<std::shared_ptr<AbilityRecord>> &foregroundList);
 
+    bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord);
 #ifdef SUPPORT_GRAPHICS
 public:
     /**
