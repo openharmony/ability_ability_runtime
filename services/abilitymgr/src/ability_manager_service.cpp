@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <unordered_set>
 
+#include "ability_background_connection.h"
 #include "ability_debug_deal.h"
 #include "ability_info.h"
 #include "ability_interceptor.h"
@@ -38,6 +39,7 @@
 #include "accesstoken_kit.h"
 #include "app_exit_reason_data_manager.h"
 #include "application_util.h"
+#include "app_utils.h"
 #include "bundle_mgr_client.h"
 #include "connection_state_manager.h"
 #include "distributed_client.h"
@@ -120,7 +122,6 @@ const std::string NEW_RULES_EXCEPT_LAUNCHER_SYSTEMUI = "component.startup.newRul
 const std::string BACKGROUND_JUDGE_FLAG = "component.startup.backgroundJudge.flag";
 const std::string WHITE_LIST_ASS_WAKEUP_FLAG = "component.startup.whitelist.associatedWakeUp";
 // White list app
-const std::string BUNDLE_NAME_LAUNCHER = "com.ohos.launcher";
 const std::string BUNDLE_NAME_SETTINGSDATA = "com.ohos.settingsdata";
 const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 // Support prepare terminate
@@ -396,7 +397,7 @@ bool AbilityManagerService::Init()
     };
     taskHandler_->SubmitTask(startAutoStartupAppsTask, "StartAutoStartupApps");
     ResiterSuspendObserver();
-    
+
     auto initExtensionConfigTask = []() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
     };
@@ -453,11 +454,9 @@ ServiceRunningState AbilityManagerService::QueryServiceState() const
 int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int requestCode)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (want.GetBoolParam("debugApp", false)) {
-        if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-            HILOG_ERROR("Developer Mode is false.");
-            return ERR_NOT_DEVELOPER_MODE;
-        }
+    if (want.GetBoolParam(DEBUG_APP, false) && !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        HILOG_ERROR("Developer Mode is false.");
+        return ERR_NOT_DEVELOPER_MODE;
     }
     HILOG_INFO("%{public}s coldStart:%{public}d", __func__, want.GetBoolParam("coldStart", false));
     bool startWithAccount = want.GetBoolParam(START_ABILITY_TYPE, false);
@@ -612,7 +611,7 @@ int AbilityManagerService::StartAbilityAsCaller(const Want &want, const sptr<IRe
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
         return ERR_INVALID_CONTINUATION_FLAG;
     }
-    
+
     AAFwk::Want newWant = want;
     if (asCallerSoureToken != nullptr) {
         HILOG_DEBUG("Start as caller, UpdateCallerInfo");
@@ -944,11 +943,9 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSetting &abilityStartSetting,
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
-    if (want.GetBoolParam("debugApp", false)) {
-        if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-            HILOG_ERROR("Developer Mode is false.");
-            return ERR_NOT_DEVELOPER_MODE;
-        }
+    if (want.GetBoolParam(DEBUG_APP, false) && !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        HILOG_ERROR("Developer Mode is false.");
+        return ERR_NOT_DEVELOPER_MODE;
     }
     StartAbilityParams startParams(const_cast<Want &>(want));
     startParams.callerToken = callerToken;
@@ -3420,7 +3417,7 @@ sptr<IWantSender> AbilityManagerService::GetWantSender(
     return pendingWantManager_->GetWantSender(callerUid, appUid, isSystemApp, wantSenderInfo, callerToken);
 }
 
-int AbilityManagerService::SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo)
+int AbilityManagerService::SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo)
 {
     HILOG_INFO("Send want sender.");
     CHECK_POINTER_AND_RETURN(pendingWantManager_, ERR_INVALID_VALUE);
@@ -4853,8 +4850,7 @@ int AbilityManagerService::GenerateAbilityRequest(
     }
 
     if (abilityRecord != nullptr) {
-        auto isDebug = abilityRecord->GetWant().GetBoolParam(DEBUG_APP, false);
-        (const_cast<Want &>(want)).SetParam(DEBUG_APP, isDebug);
+        (const_cast<Want &>(want)).SetParam(DEBUG_APP, abilityRecord->IsDebugApp());
     }
 
     request.want = want;
@@ -6059,7 +6055,7 @@ void AbilityManagerService::UpdateFocusState(std::vector<AbilityRunningInfo> &in
 
     for (auto &item : info) {
         if (item.uid == abilityRecord->GetUid() && item.pid == abilityRecord->GetPid() &&
-            item.ability == abilityRecord->GetWant().GetElement()) {
+            item.ability == abilityRecord->GetElementName()) {
             item.abilityState = static_cast<int>(AbilityState::ACTIVE);
             break;
         }
@@ -6857,7 +6853,7 @@ int AbilityManagerService::DelegatorDoAbilityForeground(const sptr<IRemoteObject
         NotifyHandleAbilityStateChange(token, ABILITY_MOVE_TO_FOREGROUND_CODE);
         auto&& abilityRecord = Token::GetAbilityRecordByToken(token);
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-        auto&& want = abilityRecord->GetWant();
+        auto want = abilityRecord->GetWant();
         if (!IsAbilityControllerStart(want, want.GetBundle())) {
             HILOG_ERROR("SceneBoard IsAbilityControllerStart failed: %{public}s", want.GetBundle().c_str());
             return ERR_WOULD_BLOCK;
@@ -7186,7 +7182,7 @@ void AbilityManagerService::GetAbilityRunningInfo(std::vector<AbilityRunningInfo
     AbilityRunningInfo runningInfo;
     AppExecFwk::RunningProcessInfo processInfo;
 
-    runningInfo.ability = abilityRecord->GetWant().GetElement();
+    runningInfo.ability = abilityRecord->GetElementName();
     runningInfo.startTime = abilityRecord->GetStartTime();
     runningInfo.abilityState = static_cast<int>(abilityRecord->GetAbilityState());
 
@@ -7288,7 +7284,7 @@ AppExecFwk::ElementName AbilityManagerService::GetTopAbility(bool isNeedLocalDev
         HILOG_ERROR("%{public}s abilityRecord is null.", __func__);
         return elementName;
     }
-    elementName = abilityRecord->GetWant().GetElement();
+    elementName = abilityRecord->GetElementName();
     bool isDeviceEmpty = elementName.GetDeviceID().empty();
     std::string localDeviceId;
     if (isDeviceEmpty && isNeedLocalDeviceId && GetLocalDeviceId(localDeviceId)) {
@@ -7314,7 +7310,7 @@ AppExecFwk::ElementName AbilityManagerService::GetElementNameByToken(sptr<IRemot
         HILOG_ERROR("%{public}s abilityRecord is null.", __func__);
         return elementName;
     }
-    elementName = abilityRecord->GetWant().GetElement();
+    elementName = abilityRecord->GetElementName();
     bool isDeviceEmpty = elementName.GetDeviceID().empty();
     std::string localDeviceId;
     if (isDeviceEmpty && isNeedLocalDeviceId && GetLocalDeviceId(localDeviceId)) {
@@ -7850,6 +7846,14 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (extensionType == AppExecFwk::ExtensionAbilityType::ADS_SERVICE) {
         return ERR_OK;
     }
+    if (extensionType == AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD) {
+        if (abilityRequest.appInfo.isSystemApp) {
+            HILOG_DEBUG("Is system app.");
+            return ERR_OK;
+        }
+        HILOG_ERROR("The application requesting the call is a non system application.");
+        return CHECK_PERMISSION_FAILED;
+    }
     if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
         return ERR_OK;
     }
@@ -8026,7 +8030,7 @@ bool AbilityManagerService::IsAbilityVisible(const AbilityRequest &abilityReques
     if (callerAbility) {
         const std::string bundleName = callerAbility->GetApplicationInfo().bundleName;
         HILOG_DEBUG("caller bundleName is %{public}s.", bundleName.c_str());
-        if (newRuleExceptLauncherSystemUI_ && bundleName == BUNDLE_NAME_LAUNCHER) {
+        if (newRuleExceptLauncherSystemUI_ && AppUtils::GetInstance().IsLauncher(bundleName)) {
             return true;
         }
     }
@@ -8876,8 +8880,8 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
             ret = StartAbilityWithInsightIntent(want);
             break;
         case ExecuteMode::UI_ABILITY_BACKGROUND: {
-            HILOG_WARN("ExecuteMode UI_ABILITY_BACKGROUND not supported.");
-            ret = ERR_INVALID_OPERATION;
+            HILOG_DEBUG("ExecuteMode UI_ABILITY_BACKGROUND.");
+            ret = StartAbilityByCallWithInsightIntent(want, callerToken, param);
             break;
         }
         case ExecuteMode::UI_EXTENSION_ABILITY:
@@ -8905,6 +8909,36 @@ int32_t AbilityManagerService::ExecuteIntent(uint64_t key, const sptr<IRemoteObj
     return ret;
 }
 
+bool AbilityManagerService::IsAbilityStarted(AbilityRequest &abilityRequest,
+    std::shared_ptr<AbilityRecord> &targetRecord, const int32_t oriValidUserId)
+{
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        HILOG_INFO("scene board is enable");
+        if (uiAbilityLifecycleManager_ == nullptr) {
+            return false;
+        }
+        return uiAbilityLifecycleManager_->IsAbilityStarted(abilityRequest, targetRecord, oriValidUserId);
+    }
+
+    auto missionListMgr = GetListManagerByUserId(oriValidUserId);
+    if (missionListMgr == nullptr) {
+        return false;
+    }
+    return missionListMgr->IsAbilityStarted(abilityRequest, targetRecord);
+}
+
+int32_t AbilityManagerService::OnExecuteIntent(AbilityRequest &abilityRequest,
+    std::shared_ptr<AbilityRecord> &targetRecord)
+{
+    HILOG_INFO("OnExecuteIntent");
+    if (targetRecord == nullptr || targetRecord->GetScheduler() == nullptr) {
+        return ERR_INVALID_VALUE;
+    }
+    targetRecord->GetScheduler()->OnExecuteIntent(abilityRequest.want);
+
+    return ERR_OK;
+}
+
 int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, int32_t userId, int requestCode)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -8928,6 +8962,42 @@ int32_t AbilityManagerService::StartExtensionAbilityWithInsightIntent(const Want
 {
     HILOG_DEBUG("called.");
     return StartExtensionAbilityInner(want, nullptr, DEFAULT_INVAL_VALUE, extensionType, true);
+}
+
+int32_t AbilityManagerService::StartAbilityByCallWithInsightIntent(const Want &want,
+    const sptr<IRemoteObject> &callerToken, const InsightIntentExecuteParam &param)
+{
+    HILOG_INFO("call StartAbilityByCallWithInsightIntent.");
+    sptr<IAbilityConnection> connect = sptr<AbilityBackgroundConnection>::MakeSptr();
+    if (connect == nullptr) {
+        HILOG_ERROR("Invalid connect.");
+        return ERR_INVALID_VALUE;
+    }
+
+    AbilityRequest abilityRequest;
+    abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
+    abilityRequest.callerUid = IPCSkeleton::GetCallingUid();
+    abilityRequest.callerToken = callerToken;
+    abilityRequest.startSetting = nullptr;
+    abilityRequest.want = want;
+    abilityRequest.connect = connect;
+    int32_t result = GenerateAbilityRequest(want, -1, abilityRequest, callerToken, GetUserId());
+    if (result != ERR_OK) {
+        HILOG_ERROR("Generate ability request error.");
+        return result;
+    }
+    std::shared_ptr<AbilityRecord> targetRecord;
+    int32_t oriValidUserId = GetValidUserId(DEFAULT_INVAL_VALUE);
+    auto missionListMgr = GetListManagerByUserId(oriValidUserId);
+    if (IsAbilityStarted(abilityRequest, targetRecord, oriValidUserId)) {
+        HILOG_INFO("ability has already started");
+        result = OnExecuteIntent(abilityRequest, targetRecord);
+    }  else {
+        result = StartAbilityByCall(want, connect, callerToken);
+    }
+
+    HILOG_INFO("StartAbilityByCallWithInsightIntent %{public}d", result);
+    return result;
 }
 
 bool AbilityManagerService::IsAbilityControllerStart(const Want &want)
