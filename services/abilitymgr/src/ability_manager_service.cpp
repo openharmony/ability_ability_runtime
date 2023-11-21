@@ -1578,7 +1578,8 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
         return ERR_INVALID_VALUE;
     }
     ReportAbilitStartInfoToRSS(abilityInfo);
-    ReportAbilitAssociatedStartInfoToRSS(abilityInfo, 0);
+    ReportAbilitAssociatedStartInfoToRSS(abilityInfo, static_cast<int64_t>(
+        ResourceSchedule::ResType::AssociatedStartType::SCB_START_ABILITY));
     return uiAbilityLifecycleManager_->StartUIAbility(abilityRequest, sessionInfo);
 }
 
@@ -2081,7 +2082,8 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
     if (eventInfo.errCode != ERR_OK) {
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
     }
-    ReportAbilitAssociatedStartInfoToRSS(abilityRequest.abilityInfo, 1);
+    ReportAbilitAssociatedStartInfoToRSS(abilityRequest.abilityInfo, static_cast<int64_t>(
+        ResourceSchedule::ResType::AssociatedStartType::EXTENSION_START_ABILITY));
     return eventInfo.errCode;
 }
 
