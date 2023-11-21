@@ -180,6 +180,8 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
         SendKeyEvent(abilityRequest);
     }
     NotifyStartAbilityResult(abilityRequest, ret);
+    ReportAbilitAssociatedStartInfoToRSS(abilityRequest.abilityInfo, static_cast<int64_t>(
+        ResourceSchedule::ResType::AssociatedStartType::MISSION_LIST_START_ABILITY));
     return ret;
 }
 
