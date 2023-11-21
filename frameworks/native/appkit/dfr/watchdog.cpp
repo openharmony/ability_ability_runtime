@@ -96,6 +96,7 @@ void Watchdog::AllowReportEvent()
 {
     needReport_.store(true);
     isSixSecondEvent_.store(false);
+    backgroundReportCount_.store(0);
 }
 
 bool Watchdog::IsReportEvent()
@@ -122,11 +123,6 @@ void Watchdog::Timer()
     }
     if (!needReport_) {
         HILOG_ERROR("Watchdog timeout, wait for the handler to recover, and do not send event.");
-        return;
-    }
-
-    if (isInBackground_) {
-        appMainThreadIsAlive_.store(true);
         return;
     }
 
@@ -159,6 +155,14 @@ void Watchdog::ReportEvent()
             static_cast<unsigned long long>(now), static_cast<unsigned long long>(lastWatchTime_));
         return;
     }
+
+    if (isInBackground_.load() && backgroundReportCount_.load() <= 6 && backgroundReportCount_.load() >= 1) {
+        HILOG_INFO("Thread may be blocked in, do not report this time. currTime: %{public}llu, lastTime: %{public}llu",
+            static_cast<unsigned long long>(now), static_cast<unsigned long long>(lastWatchTime_));
+        backgroundReportCount_.store(backgroundReportCount_.load() + 1);
+        return;
+    }
+    backgroundReportCount_.store(backgroundReportCount_.load() + 1);
 
     if (!needReport_) {
         return;
