@@ -318,6 +318,7 @@ void JsUIAbility::OnStop()
         abilityContext_->SetTerminating(true);
     }
     UIAbility::OnStop();
+    HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
     OnStopCallback();
     HILOG_DEBUG("End.");
@@ -427,6 +428,7 @@ void JsUIAbility::OnSceneRestored()
 {
     UIAbility::OnSceneRestored();
     HILOG_DEBUG("called.");
+    HandleScope handleScope(jsRuntime_);
     auto jsAppWindowStage = CreateAppWindowStage();
     if (jsAppWindowStage == nullptr) {
         HILOG_ERROR("JsAppWindowStage is nullptr.");
@@ -448,7 +450,7 @@ void JsUIAbility::onSceneDestroyed()
 {
     HILOG_DEBUG("Begin ability is %{public}s.", GetAbilityName().c_str());
     UIAbility::onSceneDestroyed();
-
+    HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onWindowStageDestroy");
 
     if (scene_ != nullptr) {
@@ -528,6 +530,7 @@ void JsUIAbility::OnBackground()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Begin ability is %{public}s.", GetAbilityName().c_str());
     std::string methodName = "OnBackground";
+    HandleScope handleScope(jsRuntime_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
     CallObjectMethod("onBackground");
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
@@ -552,7 +555,7 @@ bool JsUIAbility::OnBackPress()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Begin ability: %{public}s.", GetAbilityName().c_str());
     UIAbility::OnBackPress();
-
+    HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     napi_value jsValue = CallObjectMethod("onBackPressed", nullptr, 0, true);
     bool ret = false;
@@ -569,7 +572,7 @@ bool JsUIAbility::OnPrepareTerminate()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Begin ability: %{public}s.", GetAbilityName().c_str());
     UIAbility::OnPrepareTerminate();
-
+    HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     napi_value jsValue = CallObjectMethod("onPrepareToTerminate", nullptr, 0, true);
     bool ret = false;
@@ -888,7 +891,7 @@ bool JsUIAbility::GetInsightIntentExecutorInfo(const Want &want,
     InsightIntentExecutorInfo& executeInfo)
 {
     HILOG_DEBUG("called.");
-    
+
     auto context = GetAbilityContext();
     if (executeParam == nullptr || context == nullptr || abilityInfo_ == nullptr) {
         HILOG_ERROR("Param invalid.");
