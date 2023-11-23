@@ -3042,5 +3042,65 @@ void AbilityRecord::SetAttachDebug(const bool isAttachDebug)
 {
     isAttachDebug_ = isAttachDebug;
 }
+
+void AbilityRecord::AddAbilityWindowStateMap(const sptr<IRemoteObject> &sessionToken,
+    AbilityWindowState abilityWindowState)
+{
+    if (sessionToken == nullptr) {
+        HILOG_ERROR("sessionToken is nullptr");
+        return;
+    }
+    if (abilityWindowState == AbilityWindowState::FOREGROUNDING ||
+        abilityWindowStateMap_.find(sessionToken) != abilityWindowStateMap_.end()) {
+        abilityWindowStateMap_[sessionToken] = abilityWindowState;
+    }
+}
+
+void AbilityRecord::RemoveAbilityWindowStateMap(const sptr<IRemoteObject> &sessionToken)
+{
+    if (sessionToken == nullptr) {
+        HILOG_ERROR("sessionToken is nullptr");
+        return;
+    }
+    if (abilityWindowStateMap_.find(sessionToken) != abilityWindowStateMap_.end()) {
+        abilityWindowStateMap_.erase(sessionToken);
+    }
+}
+
+bool AbilityRecord::IsAbilityWindowReady()
+{
+    for (auto item:abilityWindowStateMap_) {
+        if (item.second == AbilityWindowState::BACKGROUNDING ||
+            item.second == AbilityWindowState::TERMINATING) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void AbilityRecord::SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd, bool isFinished)
+{
+    if (sessionInfo == nullptr) {
+        HILOG_ERROR("sessionInfo is nullptr");
+        return;
+    }
+    if (isFinished) {
+        if (winCmd == WIN_CMD_FOREGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::FOREGROUND);
+        } else if (winCmd == WIN_CMD_BACKGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::BACKGROUND);
+        } else if (winCmd == WIN_CMD_DESTROY) {
+            RemoveAbilityWindowStateMap(sessionInfo->sessionToken);
+        }
+    } else {
+        if (winCmd == WIN_CMD_FOREGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::FOREGROUNDING);
+        } else if (winCmd == WIN_CMD_BACKGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::BACKGROUNDING);
+        } else if (winCmd == WIN_CMD_DESTROY) {
+            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::TERMINATING);
+        }
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS
