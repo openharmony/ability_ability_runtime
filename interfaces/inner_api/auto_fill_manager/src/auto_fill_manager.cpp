@@ -86,23 +86,23 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
     want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_EXTENSION_TYPE);
     want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, viewdata.ToJsonString());
 
-    auto extensionCallback_ = std::make_shared<AutoFillExtensionCallback>();
+    auto extensionCallback = std::make_shared<AutoFillExtensionCallback>();
     if (fillCallback != nullptr) {
         want.SetParam(WANT_PARAMS_AUTO_FILL_CMD_KEY, WANT_PARAMS_AUTO_FILL_CMD);
         want.SetParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, static_cast<int32_t>(autoFillType));
-        extensionCallback_->SetFillRequestCallback(fillCallback);
+        extensionCallback->SetFillRequestCallback(fillCallback);
     } else {
         want.SetParam(WANT_PARAMS_AUTO_FILL_CMD_KEY, WANT_PARAMS_AUTO_SAVE_CMD);
-        extensionCallback_->SetSaveRequestCallback(saveCallback);
+        extensionCallback->SetSaveRequestCallback(saveCallback);
     }
 
     Ace::ModalUIExtensionCallbacks callback;
     callback.onResult = std::bind(
-        &AutoFillExtensionCallback::OnResult, extensionCallback_, std::placeholders::_1, std::placeholders::_2);
+        &AutoFillExtensionCallback::OnResult, extensionCallback, std::placeholders::_1, std::placeholders::_2);
     callback.onRelease = std::bind(
-        &AutoFillExtensionCallback::OnRelease, extensionCallback_, std::placeholders::_1);
+        &AutoFillExtensionCallback::OnRelease, extensionCallback, std::placeholders::_1);
     callback.onError = std::bind(&AutoFillExtensionCallback::OnError,
-        extensionCallback_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        extensionCallback, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
     Ace::ModalUIExtensionConfig config;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
@@ -110,8 +110,8 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
         HILOG_ERROR("Create modal ui extension is failed.");
         return AutoFill::AUTO_FILL_CREATE_MODULE_UI_EXTENSION_FAILED;
     }
-    extensionCallback_->SetUIContent(uiContent);
-    extensionCallback_->SetSessionId(sessionId);
+    extensionCallback->SetUIContent(uiContent);
+    extensionCallback->SetSessionId(sessionId);
     return AutoFill::AUTO_FILL_SUCCESS;
 }
 } // namespace AbilityRuntime
