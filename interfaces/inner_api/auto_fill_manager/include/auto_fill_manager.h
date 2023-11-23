@@ -50,7 +50,6 @@ private:
         const AbilityBase::ViewData &viewdata,
         const std::shared_ptr<IFillRequestCallback> &fillCallback,
         const std::shared_ptr<ISaveRequestCallback> &saveCallback);
-    std::shared_ptr<AutoFillExtensionCallback> extensionCallback_;
 };
 } // AbilityRuntime
 } // OHOS
