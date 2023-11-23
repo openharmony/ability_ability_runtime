@@ -1343,24 +1343,18 @@ public:
     /**
      * @brief Set every application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
-     * @param flag The EDM force flag.
+     * @param flag Indicate whether to allow the application to change the auto start up state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
-    {
-        return 0;
-    }
+    virtual int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) = 0;
 
     /**
      * @brief Cancel every application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
-     * @param flag The EDM force flag.
+     * @param flag Indicate whether to allow the application to change the auto start up state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
-    {
-        return 0;
-    }
+    virtual int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) = 0;
 
     /**
      * @brief Open file by uri.
