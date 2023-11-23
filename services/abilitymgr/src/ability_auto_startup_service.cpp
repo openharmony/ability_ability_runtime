@@ -213,13 +213,10 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartup(const AutoS
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList)
 {
     HILOG_DEBUG("Called.");
-    int32_t codeForEDM = CheckPermissionForEDM();
-    if (codeForEDM == ERR_OK) {
-        return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(
-            infoList);
-    }
-    int32_t code = CheckPermissionForSystem();
+    int32_t code = CheckPermissionForEDM();
+    code = code == ERR_OK ? code : CheckPermissionForSystem();
     if (code != ERR_OK) {
+        HILOG_ERROR("Permission verification failed.");
         return code;
     }
 
@@ -618,6 +615,10 @@ bool AbilityAutoStartupService::GetBundleInfo(
     }
     if (userId == 0) {
         auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+        if (abilityMgr == nullptr) {
+            HILOG_ERROR("The abilityMgr is nullptr.");
+            return false;
+        }
         userId = abilityMgr->GetUserId();
     }
     HILOG_DEBUG("Current userId: %{public}d.", userId);
@@ -725,9 +726,9 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStar
 {
     HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, flag: %{public}d.",
         info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), flag);
-    int32_t codeForEDM = CheckPermissionForEDM();
-    if (codeForEDM != ERR_OK) {
-        return codeForEDM;
+    int32_t errorCode = CheckPermissionForEDM();
+    if (errorCode != ERR_OK) {
+        return errorCode;
     }
 
     bool isVisible;
@@ -744,7 +745,6 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStar
 
     AutoStartupInfo fullInfo(info);
     fullInfo.abilityTypeName = abilityTypeName;
-
     return InnerSetApplicationAutoStartupByEDM(fullInfo, flag);
 }
 
@@ -757,9 +757,8 @@ int32_t AbilityAutoStartupService::InnerSetApplicationAutoStartupByEDM(const Aut
         return status.code;
     }
 
-    int32_t result;
+    int32_t result = ERR_ALREADY_EXISTS;
     if (status.code == ERR_NAME_NOT_FOUND) {
-        HILOG_INFO("Query data is not exist.");
         result =
             DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, true, flag);
         if (result == ERR_OK) {
@@ -781,16 +780,16 @@ int32_t AbilityAutoStartupService::InnerSetApplicationAutoStartupByEDM(const Aut
         return result;
     }
 
-    return ERR_OK;
+    return result;
 }
 
 int32_t AbilityAutoStartupService::CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
 {
     HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, flag: %{public}d.",
         info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), flag);
-    int32_t codeForEDM = CheckPermissionForEDM();
-    if (codeForEDM != ERR_OK) {
-        return codeForEDM;
+    int32_t errorCode = CheckPermissionForEDM();
+    if (errorCode != ERR_OK) {
+        return errorCode;
     }
 
     bool isVisible;
@@ -807,7 +806,6 @@ int32_t AbilityAutoStartupService::CancelApplicationAutoStartupByEDM(const AutoS
 
     AutoStartupInfo fullInfo(info);
     fullInfo.abilityTypeName = abilityTypeName;
-
     return InnerCancelApplicationAutoStartupByEDM(fullInfo, flag);
 }
 
@@ -820,9 +818,8 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartupByEDM(const 
         return status.code;
     }
 
-    int32_t result;
+    int32_t result = ERR_OK;
     if (status.code == ERR_NAME_NOT_FOUND) {
-        HILOG_INFO("Query data is not exist.");
         return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, false, flag);
     }
     if (status.isAutoStartup) {
@@ -835,13 +832,13 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartupByEDM(const 
         return result;
     }
     if (status.isEdmForce != flag) {
-        HILOG_ERROR("the ability is not auto startup and the edm flag is same with flag.");
+        HILOG_ERROR("The ability is not auto startup and the edm flag is not same with flag.");
         result =
             DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, false, flag);
         return result;
     }
 
-    return ERR_OK;
+    return result;
 }
 
 int32_t AbilityAutoStartupService::CheckPermissionForEDM()

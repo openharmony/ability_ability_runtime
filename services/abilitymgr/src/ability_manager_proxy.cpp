@@ -4667,9 +4667,6 @@ ErrCode AbilityManagerProxy::SendRequest(AbilityManagerInterfaceCode code, Messa
 int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("Write interface token failed.");
         return INNER_ERR;
@@ -4683,6 +4680,8 @@ int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInf
         return INNER_ERR;
     }
 
+    MessageParcel reply;
+    MessageOption option;
     auto ret = SendRequest(AbilityManagerInterfaceCode::SET_APPLICATION_AUTO_STARTUP_BY_EDM, data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d.", ret);
@@ -4694,9 +4693,6 @@ int32_t AbilityManagerProxy::SetApplicationAutoStartupByEDM(const AutoStartupInf
 int32_t AbilityManagerProxy::CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
     if (!WriteInterfaceToken(data)) {
         HILOG_ERROR("Write interface token failed.");
         return INNER_ERR;
@@ -4710,6 +4706,8 @@ int32_t AbilityManagerProxy::CancelApplicationAutoStartupByEDM(const AutoStartup
         return INNER_ERR;
     }
 
+    MessageParcel reply;
+    MessageOption option;
     auto ret = SendRequest(AbilityManagerInterfaceCode::CANCEL_APPLICATION_AUTO_STARTUP_BY_EDM, data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d.", ret);

@@ -2901,10 +2901,9 @@ int32_t AbilityManagerStub::SetApplicationAutoStartupByEDMInner(MessageParcel &d
         HILOG_ERROR("Info is nullptr.");
         return ERR_INVALID_VALUE;
     }
-    bool flag = data.ReadBool();
+    auto flag = data.ReadBool();
     int32_t result = SetApplicationAutoStartupByEDM(*info, flag);
-    reply.WriteInt32(result);
-    return NO_ERROR;
+    return reply.WriteInt32(result);
 }
 
 int32_t AbilityManagerStub::CancelApplicationAutoStartupByEDMInner(MessageParcel &data, MessageParcel &reply)
@@ -2914,10 +2913,9 @@ int32_t AbilityManagerStub::CancelApplicationAutoStartupByEDMInner(MessageParcel
         HILOG_ERROR("Info is nullptr.");
         return ERR_INVALID_VALUE;
     }
-    bool flag = data.ReadBool();
+    auto flag = data.ReadBool();
     int32_t result = CancelApplicationAutoStartupByEDM(*info, flag);
-    reply.WriteInt32(result);
-    return NO_ERROR;
+    return reply.WriteInt32(result);
 }
 
 int32_t AbilityManagerStub::OpenFileInner(MessageParcel &data, MessageParcel &reply)
