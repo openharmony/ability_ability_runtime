@@ -9024,39 +9024,39 @@ int32_t AbilityManagerService::GetForegroundUIAbilities(std::vector<AppExecFwk::
 {
     HILOG_DEBUG("Called.");
     CHECK_CALLER_IS_SYSTEM_APP;
-    if (currentMissionListManager_ == nullptr) {
-        HILOG_ERROR("Current mission list manager is null.");
-        return ERR_NULL_OBJECT;
-    }
-    if (!AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm()) {
+    auto isPerm = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+    if (!isPerm) {
         HILOG_ERROR("Permission verification failed.");
         return CHECK_PERMISSION_FAILED;
     }
 
-    std::list<std::shared_ptr<AbilityRecord>> foregroundAbilities;
-    currentMissionListManager_->GetAllForegroundAbilities(foregroundAbilities);
+    std::vector<AbilityRunningInfo> abilityRunningInfos;
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        uiAbilityLifecycleManager_->GetAbilityRunningInfos(abilityRunningInfos, isPerm, GetUserId());
+    } else {
+        if (currentMissionListManager_ == nullptr) {
+            HILOG_ERROR("Current mission list manager is nullptr.");
+            return ERR_NULL_OBJECT;
+        }
+        currentMissionListManager_->GetAbilityRunningInfos(abilityRunningInfos, isPerm);
+    }
 
-    for (auto &abilityRecord : foregroundAbilities) {
-        if (abilityRecord == nullptr) {
-            HILOG_ERROR("AppRecord is nullptr.");
+    for (auto &info : abilityRunningInfos) {
+        if (info.abilityState != AbilityState::FOREGROUND) {
             continue;
         }
-        if (abilityRecord->GetAbilityState() != AbilityState::FOREGROUND) {
-            continue;
-        }
+
         AppExecFwk::AbilityStateData abilityData;
-        auto abilityInfo = abilityRecord->GetAbilityInfo();
-        abilityData.moduleName = abilityInfo.moduleName;
-        abilityData.bundleName = abilityInfo.bundleName;
-        abilityData.abilityName = abilityInfo.name;
-        abilityData.abilityState = static_cast<int32_t>(AbilityState::FOREGROUND);
-        abilityData.pid = abilityRecord->GetPid();
-        abilityData.uid = abilityInfo.uid;
-        abilityData.abilityType = static_cast<int32_t>(abilityInfo.type);
-        abilityData.token = static_cast<IRemoteObject *>(abilityRecord->GetToken());
+        abilityData.bundleName = info.ability.GetBundleName();
+        abilityData.moduleName = info.ability.GetModuleName();
+        abilityData.abilityName = info.ability.GetAbilityName();
+        abilityData.abilityState = info.abilityState;
+        abilityData.pid = info.pid;
+        abilityData.uid = info.uid;
+        abilityData.abilityType = static_cast<int32_t>(AppExecFwk::AbilityType::PAGE);
         list.push_back(abilityData);
     }
-    HILOG_DEBUG("Get foreground ui abilities end, list.size = %{public}d.", list.size());
+    HILOG_DEBUG("Get foreground ui abilities end, list.size = %{public}zu.", list.size());
     return ERR_OK;
 }
 
