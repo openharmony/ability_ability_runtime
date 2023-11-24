@@ -2920,12 +2920,10 @@ int32_t AbilityManagerStub::GetForegroundUIAbilitiesInner(MessageParcel &data, M
         HILOG_ERROR("Info size exceeds the limit.");
         return ERR_INVALID_VALUE;
     }
-
     if (!reply.WriteInt32(infoSize)) {
         HILOG_ERROR("Write data size failed.");
         return ERR_INVALID_VALUE;
     }
-
     for (auto &it : abilityStateDatas) {
         if (!reply.WriteParcelable(&it)) {
             HILOG_ERROR("Write parcelable failed.");

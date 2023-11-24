@@ -4644,7 +4644,7 @@ int32_t AbilityManagerProxy::GetForegroundUIAbilities(std::vector<AppExecFwk::Ab
 
     auto errorCode = GetParcelableInfos<AppExecFwk::AbilityStateData>(reply, list);
     if (errorCode != NO_ERROR) {
-        HILOG_ERROR("Get mission infos error: %{public}d.", errorCode);
+        HILOG_ERROR("Get foreground ui abilities error: %{public}d.", errorCode);
         return errorCode;
     }
     return reply.ReadInt32();
