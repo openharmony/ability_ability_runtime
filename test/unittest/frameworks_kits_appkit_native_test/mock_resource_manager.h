@@ -207,7 +207,7 @@ RState GetSymbolById(uint32_t id, uint32_t &outValue)
     return SUCCESS;
 }
 
-RState GetSymbolByName(const std::string &name, uint32_t &outValue)
+RState GetSymbolByName(const char *name, uint32_t &outValue)
 {
     return SUCCESS;
 }
