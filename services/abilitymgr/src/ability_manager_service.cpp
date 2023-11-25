@@ -2204,7 +2204,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     abilityRequest.sessionInfo = extensionSessionInfo;
     result = GenerateExtensionAbilityRequest(extensionSessionInfo->want, abilityRequest, callerToken, validUserId);
     CHECK_POINTER_AND_RETURN(abilityRequest.sessionInfo, ERR_INVALID_VALUE);
-    abilityRequest.sessionInfo->uiExtensionComponentId = static_cast<int64_t>(callerRecord.recordId_) << OFFSET +
+    abilityRequest.sessionInfo->uiExtensionComponentId = (static_cast<int64_t>(callerRecord.recordId_) << OFFSET) +
         static_cast<int64_t>(abilityRequest.sessionInfo->persistentId);
     if (result != ERR_OK) {
         HILOG_ERROR("Generate ability request local error.");
