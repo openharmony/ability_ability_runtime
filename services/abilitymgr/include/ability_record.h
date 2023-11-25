@@ -909,10 +909,10 @@ public:
     bool IsDebugApp() const;
     bool IsDebug() const;
 
-    void AddAbilityWindowStateMap(const sptr<IRemoteObject> &sessionToken,
+    void AddAbilityWindowStateMap(int64_t uiExtensionComponentId,
         AbilityWindowState abilityWindowState);
 
-    void RemoveAbilityWindowStateMap(const sptr<IRemoteObject> &sessionToken);
+    void RemoveAbilityWindowStateMap(int64_t uiExtensionComponentId);
 
     bool IsAbilityWindowReady();
 
