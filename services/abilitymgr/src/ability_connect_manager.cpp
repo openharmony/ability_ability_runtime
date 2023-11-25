@@ -110,7 +110,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     if (UIExtensionUtils::IsUIExtension(targetService->GetAbilityInfo().extensionAbilityType)
         && abilityRequest.sessionInfo && abilityRequest.sessionInfo->sessionToken) {
         auto &remoteObj = abilityRequest.sessionInfo->sessionToken;
-        uiExtensionMap_.emplace(remoteObj, UIExtWindowMapValType(targetService, abilityRequest.sessionInfo));
+        uiExtensionMap_[remoteObj] = UIExtWindowMapValType(targetService, abilityRequest.sessionInfo);
         AddUIExtWindowDeathRecipient(remoteObj);
     }
 

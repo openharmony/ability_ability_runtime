@@ -3043,33 +3043,25 @@ void AbilityRecord::SetAttachDebug(const bool isAttachDebug)
     isAttachDebug_ = isAttachDebug;
 }
 
-void AbilityRecord::AddAbilityWindowStateMap(const sptr<IRemoteObject> &sessionToken,
+void AbilityRecord::AddAbilityWindowStateMap(int64_t uiExtensionComponentId,
     AbilityWindowState abilityWindowState)
 {
-    if (sessionToken == nullptr) {
-        HILOG_ERROR("sessionToken is nullptr");
-        return;
-    }
     if (abilityWindowState == AbilityWindowState::FOREGROUNDING ||
-        abilityWindowStateMap_.find(sessionToken) != abilityWindowStateMap_.end()) {
-        abilityWindowStateMap_[sessionToken] = abilityWindowState;
+        abilityWindowStateMap_.find(uiExtensionComponentId) != abilityWindowStateMap_.end()) {
+        abilityWindowStateMap_[uiExtensionComponentId] = abilityWindowState;
     }
 }
 
-void AbilityRecord::RemoveAbilityWindowStateMap(const sptr<IRemoteObject> &sessionToken)
+void AbilityRecord::RemoveAbilityWindowStateMap(int64_t uiExtensionComponentId)
 {
-    if (sessionToken == nullptr) {
-        HILOG_ERROR("sessionToken is nullptr");
-        return;
-    }
-    if (abilityWindowStateMap_.find(sessionToken) != abilityWindowStateMap_.end()) {
-        abilityWindowStateMap_.erase(sessionToken);
+    if (abilityWindowStateMap_.find(uiExtensionComponentId) != abilityWindowStateMap_.end()) {
+        abilityWindowStateMap_.erase(uiExtensionComponentId);
     }
 }
 
 bool AbilityRecord::IsAbilityWindowReady()
 {
-    for (auto item:abilityWindowStateMap_) {
+    for (auto &item:abilityWindowStateMap_) {
         if (item.second == AbilityWindowState::BACKGROUNDING ||
             item.second == AbilityWindowState::TERMINATING) {
             return false;
@@ -3086,19 +3078,19 @@ void AbilityRecord::SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo, 
     }
     if (isFinished) {
         if (winCmd == WIN_CMD_FOREGROUND) {
-            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::FOREGROUND);
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::FOREGROUND);
         } else if (winCmd == WIN_CMD_BACKGROUND) {
-            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::BACKGROUND);
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::BACKGROUND);
         } else if (winCmd == WIN_CMD_DESTROY) {
-            RemoveAbilityWindowStateMap(sessionInfo->sessionToken);
+            RemoveAbilityWindowStateMap(sessionInfo->uiExtensionComponentId);
         }
     } else {
         if (winCmd == WIN_CMD_FOREGROUND) {
-            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::FOREGROUNDING);
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::FOREGROUNDING);
         } else if (winCmd == WIN_CMD_BACKGROUND) {
-            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::BACKGROUNDING);
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::BACKGROUNDING);
         } else if (winCmd == WIN_CMD_DESTROY) {
-            AddAbilityWindowStateMap(sessionInfo->sessionToken, AbilityWindowState::TERMINATING);
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::TERMINATING);
         }
     }
 }

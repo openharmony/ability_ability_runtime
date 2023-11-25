@@ -1090,7 +1090,7 @@ private:
     sptr<SessionInfo> sessionInfo_ = nullptr;
     std::unordered_set<uint64_t> sessionIds_;
 
-    std::map<sptr<IRemoteObject>, AbilityWindowState> abilityWindowStateMap_;
+    std::map<int64_t, AbilityWindowState> abilityWindowStateMap_;
 
 #ifdef SUPPORT_GRAPHICS
     bool isStartingWindow_ = false;
