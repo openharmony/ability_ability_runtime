@@ -146,6 +146,9 @@ const std::string AMS_DIALOG_BUNDLENAME = "com.ohos.amsdialog";
 
 const std::string DEBUG_APP = "debugApp";
 
+constexpr int32_t FOUNDATION_UID = 5523;
+const std::string FRS_BUNDLE_NAME = "com.ohos.formrenderservice";
+
 const std::unordered_set<std::string> WHITE_LIST_ASS_WAKEUP_SET = { BUNDLE_NAME_SETTINGSDATA };
 std::atomic<bool> g_isDmsAlive = false;
 
@@ -8131,6 +8134,13 @@ int AbilityManagerService::CheckDlpForExtension(
     const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, EventInfo &eventInfo, const EventName &eventName)
 {
+    // check if form frs
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    std::string bundleName = want.GetBundle();
+    if (callingUid == FOUNDATION_UID && FRS_BUNDLE_NAME == bundleName) {
+        return ERR_OK;
+    }
+
     if (!DlpUtils::OtherAppsAccessDlpCheck(callerToken, want) ||
         VerifyAccountPermission(userId) == CHECK_PERMISSION_FAILED ||
         !DlpUtils::DlpAccessOtherAppsCheck(callerToken, want)) {
