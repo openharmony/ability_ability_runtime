@@ -220,6 +220,16 @@ public:
         return ERR_OK;
     }
 
+    ErrCode RegisterClickCallbackEventObserver(const sptr<IRemoteObject> &observer) override
+    {
+        return ERR_OK;
+    }
+
+    ErrCode UnregisterClickCallbackEventObserver(const sptr<IRemoteObject> &observer) override
+    {
+        return ERR_OK;
+    }
+
     /**
      * @brief Lifecycle Update.
      * @param formIds The Id list of the forms to notify.
