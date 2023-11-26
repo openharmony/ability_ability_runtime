@@ -13,22 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_AUTO_FILL_ERROR_H
-#define OHOS_ABILITY_RUNTIME_AUTO_FILL_ERROR_H
+#ifndef OHOS_ABILITY_RUNTIME_DIALOG_UI_EXTENSION_CALLBACK_H
+#define OHOS_ABILITY_RUNTIME_DIALOG_UI_EXTENSION_CALLBACK_H
+
+#include "ui_content.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-namespace AutoFill {
-enum {
-    AUTO_FILL_SUCCESS = 0,
-    AUTO_FILL_FAILED,
-    AUTO_FILL_CANCEL,
-    AUTO_FILL_RELEASE_FAILED,
-    AUTO_FILL_ON_ERROR,
-    AUTO_FILL_OBJECT_IS_NULL,
-    AUTO_FILL_CREATE_MODULE_UI_EXTENSION_FAILED,
+class DialogUIExtensionCallback {
+public:
+    DialogUIExtensionCallback() = default;
+    ~DialogUIExtensionCallback() = default;
+    void OnRelease();
+    void OnError();
+    void SetSessionId(int32_t sessionId);
+    void SetUIContent(Ace::UIContent *uiContent);
+private:
+    int32_t sessionId_ = 0;
+    Ace::UIContent *uiContent_ = nullptr;
 };
-} // namespace AutoFill
-} // namespace AbilityRuntime
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_AUTO_FILL_ERROR_H
+} // AbilityRuntime
+} // OHOS
+#endif // OHOS_ABILITY_RUNTIME_DIALOG_UI_EXTENSION_CALLBACK_H

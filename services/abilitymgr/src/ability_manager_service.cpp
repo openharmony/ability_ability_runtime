@@ -143,6 +143,7 @@ constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 const std::string KEY_VISIBLE_ID = "ohos.anco.param.visible";
 const std::string START_ABILITY_TYPE = "ABILITY_INNER_START_WITH_ACCOUNT";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
+const std::string AMS_DIALOG_BUNDLENAME = "com.ohos.amsdialog";
 
 const std::string DEBUG_APP = "debugApp";
 
@@ -307,7 +308,6 @@ void AbilityManagerService::OnStart()
     }
 
     SetParameter(BOOTEVENT_APPFWK_READY.c_str(), "true");
-    WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), AAFwk::ApplicationUtil::AppFwkBootEventCallback, nullptr);
     AddSystemAbilityListener(BACKGROUND_TASK_MANAGER_SERVICE_ID);
     AddSystemAbilityListener(DISTRIBUTED_SCHED_SA_ID);
     AddSystemAbilityListener(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
@@ -365,6 +365,7 @@ bool AbilityManagerService::Init()
 #else
     interceptorExecuter_->AddInterceptor(std::make_shared<EcologicalRuleInterceptor>());
 #endif
+    afterCheckExecuter_->SetTaskHandler(taskHandler_);
     bool isAppJumpEnabled = OHOS::system::GetBoolParameter(
         OHOS::AppExecFwk::PARAMETER_APP_JUMP_INTERCEPTOR_ENABLE, false);
     HILOG_ERROR("GetBoolParameter -> isAppJumpEnabled:%{public}s", (isAppJumpEnabled ? "true" : "false"));
@@ -396,12 +397,21 @@ bool AbilityManagerService::Init()
         obj->StartAutoStartupAppsInner();
     };
     taskHandler_->SubmitTask(startAutoStartupAppsTask, "StartAutoStartupApps");
-    ResiterSuspendObserver();
+    RegisterSuspendObserver();
 
     auto initExtensionConfigTask = []() {
         DelayedSingleton<ExtensionConfig>::GetInstance()->LoadExtensionConfiguration();
     };
     taskHandler_->SubmitTask(initExtensionConfigTask, "InitExtensionConfigTask");
+
+    auto bootCompletedTask = []() {
+        if (ApplicationUtil::IsBootCompleted()) {
+            ApplicationUtil::AppFwkBootEventCallback(BOOTEVENT_BOOT_COMPLETED.c_str(), "true", nullptr);
+        } else {
+            WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), ApplicationUtil::AppFwkBootEventCallback, nullptr);
+        }
+    };
+    taskHandler_->SubmitTask(bootCompletedTask, "BootCompletedTask");
     HILOG_INFO("Init success.");
     return true;
 }
@@ -822,6 +832,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     if (!isStartAsCaller) {
         HILOG_DEBUG("do not start as caller, UpdateCallerInfo");
         UpdateCallerInfo(abilityRequest.want, callerToken);
+    } else if (callerBundleName == AMS_DIALOG_BUNDLENAME) {
+        CHECK_POINTER_AND_RETURN(implicitStartProcessor_, ERR_IMPLICIT_START_ABILITY_FAIL);
+        implicitStartProcessor_->ResetCallingIdentityAsCaller(abilityRequest.want.GetIntParam(
+            Want::PARAM_RESV_CALLER_TOKEN, 0));
     }
 
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -1973,7 +1987,7 @@ void AbilityManagerService::ReportEventToSuspendManager(const AppExecFwk::Abilit
 #endif // EFFICIENCY_MANAGER_ENABLE
 }
 
-void AbilityManagerService::ResiterSuspendObserver()
+void AbilityManagerService::RegisterSuspendObserver()
 {
 #ifdef EFFICIENCY_MANAGER_ENABLE
     if (!taskHandler_) {
@@ -1981,7 +1995,7 @@ void AbilityManagerService::ResiterSuspendObserver()
         return;
     }
     taskHandler_->SubmitTask([taskHandler = taskHandler_]() {
-            ProcessFrozenStateObserver::ResiterSuspendObserver(taskHandler);
+            ProcessFrozenStateObserver::RegisterSuspendObserver(taskHandler);
         });
 #endif // EFFICIENCY_MANAGER_ENABLE
 }
@@ -9050,15 +9064,13 @@ int32_t AbilityManagerService::ExecuteInsightIntentDone(const sptr<IRemoteObject
 
 void AbilityManagerService::HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid)
 {
-    HILOG_INFO("HandleProcessFrozen: %{public}d", uid);
-    std::unordered_set<int32_t> pidSet(pidList.begin(), pidList.end());
     auto userId = uid / BASE_USER_RANGE;
     auto connectManager = GetConnectManagerByUserId(userId);
     if (connectManager == nullptr) {
         HILOG_ERROR("can not find user connect manager");
         return;
     }
-    connectManager->HandleProcessFrozen(pidSet, uid);
+    connectManager->HandleProcessFrozen(pidList, uid);
 }
 
 void AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId)
