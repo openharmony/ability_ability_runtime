@@ -40,6 +40,7 @@ constexpr int32_t TYPE_HARMONY_SERVICE = 2;
 #else
 using ErmsCallerInfo = OHOS::AppExecFwk::ErmsParams::CallerInfo;
 #endif
+const size_t IDENTITY_LIST_MAX_SIZE = 10;
 
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 const std::string STR_PHONE = "phone";
@@ -158,6 +159,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         ret = abilityMgr->StartAbilityAsCaller(want, request.callerToken, nullptr);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
+        int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
+            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
+        AddIdentity(tokenId, identity);
         return ret;
     }
 
@@ -182,6 +186,14 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
             return "";
         }
         type = uri.substr(suffixIndex);
+        if (type == ".dlp") {
+            auto suffixDlpIndex = uri.rfind('.', suffixIndex - 1);
+            if (suffixDlpIndex == std::string::npos) {
+                HILOG_ERROR("Get suffix failed, uri is %{public}s", uri.c_str());
+                return "";
+            }
+            type = uri.substr(suffixDlpIndex, suffixIndex - suffixDlpIndex);
+        }
     }
     return type;
 }
@@ -512,5 +524,28 @@ void ImplicitStartProcessor::GetEcologicalCallerInfo(const Want &want, ErmsCalle
     }
 }
 #endif
+
+void ImplicitStartProcessor::AddIdentity(int32_t tokenId, std::string identity)
+{
+    std::lock_guard guard(identityListLock_);
+    if (identityList_.size() == IDENTITY_LIST_MAX_SIZE) {
+        identityList_.pop_front();
+        identityList_.emplace_back(IdentityNode(tokenId, identity));
+        return;
+    }
+    identityList_.emplace_back(IdentityNode(tokenId, identity));
+}
+
+void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId)
+{
+    std::lock_guard guard(identityListLock_);
+    for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
+        if (it->tokenId == tokenId) {
+            IPCSkeleton::SetCallingIdentity(it->identity);
+            identityList_.erase(it);
+            return;
+        }
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS

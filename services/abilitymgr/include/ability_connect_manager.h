@@ -240,7 +240,7 @@ public:
 
     bool IsWindowExtensionFocused(uint32_t extensionTokenId, const sptr<IRemoteObject>& focusToken);
 
-    void HandleProcessFrozen(const std::unordered_set<int32_t> &pidSet, int32_t uid);
+    void HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid);
 
     void ForegroundAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);

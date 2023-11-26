@@ -1434,7 +1434,6 @@ void AbilityRecord::Activate()
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     SetAbilityStateInner(AbilityState::ACTIVATING);
-    std::lock_guard guard(wantLock_);
     lifecycleDeal_->Activate(GetWant(), lifeCycleStateInfo_);
 
     // update ability state to appMgr service when restart
@@ -1750,6 +1749,7 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
 void AbilityRecord::AddConnectRecordToList(const std::shared_ptr<ConnectionRecord> &connRecord)
 {
     CHECK_POINTER(connRecord);
+    std::lock_guard guard(connRecordListMutex_);
     auto it = std::find(connRecordList_.begin(), connRecordList_.end(), connRecord);
     // found it
     if (it != connRecordList_.end()) {
@@ -1763,12 +1763,14 @@ void AbilityRecord::AddConnectRecordToList(const std::shared_ptr<ConnectionRecor
 
 std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectRecordList() const
 {
+    std::lock_guard guard(connRecordListMutex_);
     return connRecordList_;
 }
 
 void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<ConnectionRecord> &connRecord)
 {
     CHECK_POINTER(connRecord);
+    std::lock_guard guard(connRecordListMutex_);
     connRecordList_.remove(connRecord);
 }
 
@@ -1868,11 +1870,13 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetCallerRecord() const
 
 bool AbilityRecord::IsConnectListEmpty()
 {
+    std::lock_guard guard(connRecordListMutex_);
     return connRecordList_.empty();
 }
 
 std::shared_ptr<ConnectionRecord> AbilityRecord::GetConnectingRecord() const
 {
+    std::lock_guard guard(connRecordListMutex_);
     auto connect =
         std::find_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
             return record->GetConnectState() == ConnectionState::CONNECTING;
@@ -1882,6 +1886,7 @@ std::shared_ptr<ConnectionRecord> AbilityRecord::GetConnectingRecord() const
 
 std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectingRecordList()
 {
+    std::lock_guard guard(connRecordListMutex_);
     std::list<std::shared_ptr<ConnectionRecord>> connectingList;
     for (auto record : connRecordList_) {
         if (record && record->GetConnectState() == ConnectionState::CONNECTING) {
@@ -1893,6 +1898,7 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectingRecordL
 
 std::shared_ptr<ConnectionRecord> AbilityRecord::GetDisconnectingRecord() const
 {
+    std::lock_guard guard(connRecordListMutex_);
     auto connect =
         std::find_if(connRecordList_.begin(), connRecordList_.end(), [](std::shared_ptr<ConnectionRecord> record) {
             return record->GetConnectState() == ConnectionState::DISCONNECTING;
@@ -2093,9 +2099,14 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
     if (isLauncherRoot_) {
         info.emplace_back("      can restart num #" + std::to_string(restartCount_));
     }
+    decltype(connRecordList_) connRecordListCpy;
+    {
+        std::lock_guard guard(connRecordListMutex_);
+        connRecordListCpy = connRecordList_;
+    }
 
-    info.emplace_back("      Connections: " + std::to_string(connRecordList_.size()));
-    for (auto &&conn : connRecordList_) {
+    info.emplace_back("      Connections: " + std::to_string(connRecordListCpy.size()));
+    for (auto &&conn : connRecordListCpy) {
         if (conn) {
             conn->Dump(info);
         }
@@ -3093,6 +3104,13 @@ void AbilityRecord::SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo, 
             AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::TERMINATING);
         }
     }
+}
+
+int32_t AbilityRecord::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("call");
+    CHECK_POINTER_AND_RETURN(scheduler_, INNER_ERR);
+    return scheduler_->CreateModalUIExtension(want);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

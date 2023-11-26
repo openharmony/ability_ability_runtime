@@ -58,6 +58,9 @@ const std::unordered_map<std::string, std::string> trustMap = {
     { AbilityConfig::SYSTEM_UI_BUNDLE_NAME, AbilityConfig::SYSTEM_UI_ABILITY_NAME },
     { AbilityConfig::LAUNCHER_BUNDLE_NAME, AbilityConfig::LAUNCHER_ABILITY_NAME }
 };
+const std::unordered_set<std::string> FROZEN_WHITE_LIST {
+    "com.huawei.hmos.huaweicast"
+};
 }
 
 AbilityConnectManager::AbilityConnectManager(int userId) : userId_(userId)
@@ -2150,7 +2153,7 @@ bool AbilityConnectManager::IsWindowExtensionFocused(uint32_t extensionTokenId, 
     return false;
 }
 
-void AbilityConnectManager::HandleProcessFrozen(const std::unordered_set<int32_t> &pidSet, int32_t uid)
+void AbilityConnectManager::HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid)
 {
     auto taskHandler = taskHandler_;
     if (!taskHandler) {
@@ -2158,15 +2161,17 @@ void AbilityConnectManager::HandleProcessFrozen(const std::unordered_set<int32_t
         return;
     }
     HILOG_INFO("HandleProcessFrozen: %{public}d", uid);
+    std::unordered_set<int32_t> pidSet(pidList.begin(), pidList.end());
     std::lock_guard guard(Lock_);
     auto weakthis = weak_from_this();
     for (auto [key, abilityRecord] : serviceMap_) {
         if (abilityRecord && abilityRecord->GetUid() == uid &&
+            abilityRecord->GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE &&
             pidSet.count(abilityRecord->GetPid()) > 0 &&
+            FROZEN_WHITE_LIST.count(abilityRecord->GetAbilityInfo().bundleName) == 0 &&
             abilityRecord->IsConnectListEmpty() &&
             !abilityRecord->GetKeepAlive() &&
             abilityRecord->GetStartId() != 0) { // To be honest, this is expected to be true
-            HILOG_INFO("TerminateTask: %{public}s", abilityRecord->GetAbilityInfo().bundleName.c_str());
             taskHandler->SubmitTask([weakthis, record = abilityRecord]() {
                     auto connectManager = weakthis.lock();
                     if (record && connectManager) {
