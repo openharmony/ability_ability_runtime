@@ -2552,8 +2552,9 @@ int AbilityManagerService::TerminateUIExtensionAbility(const sptr<SessionInfo> &
         HILOG_ERROR("Cannot terminate except ui extension ability.");
         return ERR_WRONG_INTERFACE_CALL;
     }
-    CHECK_POINTER_AND_RETURN(targetRecord->GetSessionInfo(), ERR_INVALID_VALUE);
-    extensionSessionInfo->uiExtensionComponentId = targetRecord->GetSessionInfo()->uiExtensionComponentId;
+    extensionSessionInfo->uiExtensionComponentId = (
+        static_cast<int64_t>(abilityRecord->GetAbilityRecordId()) << OFFSET) |
+        static_cast<int64_t>(extensionSessionInfo->persistentId);
     connectManager->TerminateAbilityWindowLocked(targetRecord, extensionSessionInfo);
     return ERR_OK;
 }
@@ -2794,8 +2795,9 @@ int AbilityManagerService::MinimizeUIExtensionAbility(const sptr<SessionInfo> &e
         HILOG_ERROR("Cannot minimize except ui extension ability.");
         return ERR_WRONG_INTERFACE_CALL;
     }
-    CHECK_POINTER_AND_RETURN(targetRecord->GetSessionInfo(), ERR_INVALID_VALUE);
-    extensionSessionInfo->uiExtensionComponentId = targetRecord->GetSessionInfo()->uiExtensionComponentId;
+    extensionSessionInfo->uiExtensionComponentId = (
+        static_cast<int64_t>(abilityRecord->GetAbilityRecordId()) << OFFSET) |
+        static_cast<int64_t>(extensionSessionInfo->persistentId);
     connectManager->BackgroundAbilityWindowLocked(targetRecord, extensionSessionInfo);
     return ERR_OK;
 }
