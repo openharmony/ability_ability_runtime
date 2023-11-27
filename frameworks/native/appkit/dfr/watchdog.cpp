@@ -32,6 +32,7 @@ namespace {
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 constexpr int RESET_RATIO = 2;
 
+constexpr int32_t BACKGROUND_REPORT_COUNT_MAX = 5;
 #ifdef SUPPORT_ASAN
 constexpr uint32_t CHECK_INTERVAL_TIME = 45000;
 #else
@@ -156,13 +157,14 @@ void Watchdog::ReportEvent()
         return;
     }
 
-    if (isInBackground_.load() && backgroundReportCount_.load() <= 6 && backgroundReportCount_.load() >= 1) {
-        HILOG_INFO("Thread may be blocked in, do not report this time. currTime: %{public}llu, lastTime: %{public}llu",
-            static_cast<unsigned long long>(now), static_cast<unsigned long long>(lastWatchTime_));
-        backgroundReportCount_.store(backgroundReportCount_.load() + 1);
+    if (isInBackground_ && backgroundReportCount_.load() < BACKGROUND_REPORT_COUNT_MAX) {
+        HILOG_INFO("In Background, thread may be blocked in, do not report this time. "
+            "currTime: %{public}" PRIu64 ", lastTime: %{public}" PRIu64 "",
+            static_cast<uint64_t>(now), static_cast<uint64_t>(lastWatchTime_));
+        backgroundReportCount_++;
         return;
     }
-    backgroundReportCount_.store(backgroundReportCount_.load() + 1);
+    backgroundReportCount_++;
 
     if (!needReport_) {
         return;
