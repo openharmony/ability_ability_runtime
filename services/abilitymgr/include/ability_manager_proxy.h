@@ -1070,7 +1070,7 @@ public:
         const InsightIntentExecuteResult &result) override;
 
     /**
-     * @brief Set every application auto start up state by EDM.
+     * @brief Set application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
      * @param flag Indicate whether to allow the application to change the auto start up state.
      * @return Returns ERR_OK on success, others on failure.
@@ -1078,7 +1078,7 @@ public:
     int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override;
 
     /**
-     * @brief Cancel every application auto start up state by EDM.
+     * @brief Cancel application auto start up state by EDM.
      * @param info The auto startup info, include bundle name, module name, ability name.
      * @param flag Indicate whether to allow the application to change the auto start up state.
      * @return Returns ERR_OK on success, others on failure.
