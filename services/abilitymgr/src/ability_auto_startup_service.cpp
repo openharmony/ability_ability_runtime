@@ -783,7 +783,8 @@ int32_t AbilityAutoStartupService::InnerApplicationAutoStartupByEDM(const AutoSt
 
     int32_t result = ERR_OK;
     if (status.code == ERR_NAME_NOT_FOUND) {
-        result = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, isSet, flag);
+        result = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(
+            info, isSet, flag);
         if (result == ERR_OK && isSet) {
             ExecuteCallbacks(isSet, info);
         }
