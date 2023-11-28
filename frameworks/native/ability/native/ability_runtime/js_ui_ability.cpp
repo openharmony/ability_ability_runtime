@@ -226,8 +226,8 @@ void JsUIAbility::CreateAbilityContext(napi_env env, napi_value &contextObj, int
     if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
         contextObj = CreateJsAbilityContext(env, abilityContext_);
     } else {
-        contextObj =
-            JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env, abilityContext_, screenMode);
+        contextObj = JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env,
+            abilityContext_, nullptr, screenMode);
     }
 }
 
