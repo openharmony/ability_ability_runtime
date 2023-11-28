@@ -364,6 +364,7 @@ void JsUIExtension::OnDisconnect(const AAFwk::Want &want)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     Extension::OnDisconnect(want);
     HILOG_DEBUG("JsUIExtension OnDisconnect begin.");
+    HandleScope handleScope(jsRuntime_);
     CallOnDisconnect(want, false);
     HILOG_DEBUG("JsUIExtension OnDisconnect end.");
 }
@@ -577,6 +578,9 @@ bool JsUIExtension::HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFw
         napi_value argv[] = {napiWant, nativeContentSession};
         CallObjectMethod("onSessionCreate", argv, ARGC_TWO);
         uiWindowMap_[obj] = uiWindow;
+        if (context->GetWindow() == nullptr) {
+            context->SetWindow(uiWindow);
+        }
     }
     return true;
 }
@@ -638,6 +642,14 @@ void JsUIExtension::DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo)
         uiWindow->Destroy();
     }
     uiWindowMap_.erase(obj);
+    auto context = GetContext();
+    if (context != nullptr && context->GetWindow() == uiWindow) {
+        context->SetWindow(nullptr);
+        for (auto it : uiWindowMap_) {
+            context->SetWindow(it.second);
+            break;
+        }
+    }
     foregroundWindows_.erase(obj);
     contentSessions_.erase(obj);
     if (abilityResultListeners_) {

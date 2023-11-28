@@ -100,6 +100,8 @@ constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 200;
 // delay register focus listener to wms
 constexpr int REGISTER_FOCUS_DELAY = 5000;
 constexpr int REGISTER_VISIBILITY_DELAY = 5000;
+// Max render process number limitation for phone device.
+constexpr int PHONE_MAX_RENDER_PROCESS_NUM = 40;
 const std::string CLASS_NAME = "ohos.app.MainThread";
 const std::string FUNC_NAME = "main";
 const std::string RENDER_PARAM = "invalidparam";
@@ -134,7 +136,10 @@ constexpr int32_t MAX_RESTART_COUNT = 3;
 constexpr int32_t RESTART_INTERVAL_TIME = 120000;
 
 constexpr ErrCode APPMGR_ERR_OFFSET = ErrCodeOffset(SUBSYS_APPEXECFWK, 0x01);
-constexpr ErrCode ERR_ALREADY_EXIST_RENDER = APPMGR_ERR_OFFSET + 100; // error code for already exist render.
+ // Error code for already exist render.
+constexpr ErrCode ERR_ALREADY_EXIST_RENDER = APPMGR_ERR_OFFSET + 100;
+ // Error code for reaching render process number limitation.
+constexpr ErrCode ERR_REACHING_MAXIMUM_RENDER_PROCESS_LIMITATION = APPMGR_ERR_OFFSET + 101;
 constexpr char EVENT_KEY_UID[] = "UID";
 constexpr char EVENT_KEY_PID[] = "PID";
 constexpr char EVENT_KEY_PACKAGE_NAME[] = "PACKAGE_NAME";
@@ -198,6 +203,13 @@ bool VerifyPermission(const BundleInfo &bundleInfo, const std::string &permissio
 
     return true;
 }
+
+bool ShouldUseMultipleRenderProcess(std::string& deviceType) {
+    // The "default" device type means phone.
+    return deviceType == "tablet" || deviceType == "pc" || deviceType == "2in1" ||
+           deviceType == "default";
+}
+
 }  // namespace
 
 using OHOS::AppExecFwk::Constants::PERMISSION_GRANTED;
@@ -667,6 +679,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     }
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
+    eventInfo.processType = static_cast<int32_t>(appRecord->GetProcessType());
     int32_t callerPid = appRecord->GetCallerPid() == -1 ? IPCSkeleton::GetCallingPid() : appRecord->GetCallerPid();
     auto callerRecord = GetAppRunningRecordByPid(callerPid);
     if (callerRecord != nullptr) {
@@ -714,6 +727,7 @@ void AppMgrServiceInner::ApplicationBackgrounded(const int32_t recordId)
     }
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
+    eventInfo.processType = static_cast<int32_t>(appRecord->GetProcessType());
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_BACKGROUND, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
@@ -1463,7 +1477,7 @@ void AppMgrServiceInner::UpdateAbilityState(const sptr<IRemoteObject> &token, co
         state == AbilityState::ABILITY_STATE_CONNECTED ||
         state == AbilityState::ABILITY_STATE_DISCONNECTED)) {
         HILOG_INFO("StateChangedNotifyObserver service type, state:%{public}d", static_cast<int32_t>(state));
-        appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(state), true);
+        appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(state), true, false);
         return;
     }
     if (state > AbilityState::ABILITY_STATE_BACKGROUND || state < AbilityState::ABILITY_STATE_FOREGROUND) {
@@ -1491,7 +1505,7 @@ void AppMgrServiceInner::UpdateExtensionState(const sptr<IRemoteObject> &token, 
         HILOG_ERROR("can not find ability record!");
         return;
     }
-    appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(state), false);
+    appRecord->StateChangedNotifyObserver(abilityRecord, static_cast<int32_t>(state), false, false);
 }
 
 void AppMgrServiceInner::OnStop()
@@ -1882,9 +1896,11 @@ void AppMgrServiceInner::OnAbilityStateChanged(
     }
 }
 
-void AppMgrServiceInner::StateChangedNotifyObserver(const AbilityStateData abilityStateData, bool isAbility)
+void AppMgrServiceInner::StateChangedNotifyObserver(
+    const AbilityStateData abilityStateData, bool isAbility, bool isFromWindowFocusChanged)
 {
-    DelayedSingleton<AppStateObserverManager>::GetInstance()->StateChangedNotifyObserver(abilityStateData, isAbility);
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->StateChangedNotifyObserver(
+        abilityStateData, isAbility, isFromWindowFocusChanged);
 }
 
 int32_t AppMgrServiceInner::StartPerfProcess(const std::shared_ptr<AppRunningRecord> &appRecord,
@@ -2089,6 +2105,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.hapFlags = bundleInfo.isPreInstallApp ? 1 : 0;
 
     startMsg.mountPermissionFlags = AppSpawn::AppspawnMountPermission::GenPermissionCode(permissions);
+    startMsg.ownerId = bundleInfo.signatureInfo.appIdentifier;
     if (hasAccessBundleDirReq) {
         startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
     }
@@ -2380,7 +2397,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     for (const auto &item : appRecord->GetAbilities()) {
         const auto &abilityRecord = item.second;
         appRecord->StateChangedNotifyObserver(abilityRecord,
-            static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true);
+            static_cast<int32_t>(AbilityState::ABILITY_STATE_TERMINATED), true, false);
     }
     RemoveAppFromRecentListById(appRecord->GetRecordId());
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
@@ -3265,7 +3282,7 @@ int32_t AppMgrServiceInner::UpdateConfiguration(const Configuration &config)
     std::vector<std::string> changeKeyV;
     configuration_->CompareDifferent(changeKeyV, config);
     HILOG_INFO("changeKeyV size :%{public}zu", changeKeyV.size());
-    if (changeKeyV.empty()) {
+    if (config.GetItem(AAFwk::GlobalConfigurationKey::THEME).empty() && changeKeyV.empty()) {
         HILOG_ERROR("changeKeyV is empty");
         return ERR_INVALID_VALUE;
     }
@@ -3713,8 +3730,7 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
     }
 
     auto renderRecordMap = appRecord->GetRenderRecordMap();
-    if (!renderRecordMap.empty() && deviceType_.compare("tablet") != 0 && deviceType_.compare("pc") != 0 &&
-        deviceType_.compare("2in1") != 0) {
+    if (!renderRecordMap.empty() && !ShouldUseMultipleRenderProcess(deviceType_)) {
         for (auto iter : renderRecordMap) {
             if (iter.second != nullptr) {
                 renderPid = iter.second->GetPid();
@@ -3729,6 +3745,15 @@ int AppMgrServiceInner::StartRenderProcess(const pid_t hostPid, const std::strin
                 }
             }
         }
+    }
+
+    // The phone device allows a maximum of 40 render processes to be created.
+    if (deviceType_ == "default" &&
+        renderRecordMap.size() >= PHONE_MAX_RENDER_PROCESS_NUM) {
+        HILOG_ERROR(
+            "Reaching the maximum render process limitation, hostPid:%{public}d",
+            hostPid);
+        return ERR_REACHING_MAXIMUM_RENDER_PROCESS_LIMITATION;
     }
 
     auto renderRecord = RenderRecord::CreateRenderRecord(hostPid, renderParam, ipcFd, sharedFd, crashFd, appRecord);
@@ -3930,6 +3955,12 @@ uint32_t AppMgrServiceInner::BuildStartFlags(const AAFwk::Want &want, const Abil
     }
     if (want.GetBoolParam("nativeDebug", false)) {
         startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::NATIVEDEBUG);
+    }
+    if (abilityInfo.applicationInfo.gwpAsanEnabled) {
+        startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::GWP_ENABLED_FORCE);
+    }
+    if (abilityInfo.applicationInfo.isSystemApp) {
+        startFlags = startFlags | (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::GWP_ENABLED_NORMAL);
     }
 
     return startFlags;
@@ -4432,6 +4463,19 @@ bool AppMgrServiceInner::IsSharedBundleRunning(const std::string &bundleName, ui
         }
     }
     return false;
+}
+
+int32_t AppMgrServiceInner::IsApplicationRunning(const std::string &bundleName, bool &isRunning)
+{
+    HILOG_DEBUG("Called, bundleName: %{public}s", bundleName.c_str());
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!CheckGetRunningInfoPermission()) {
+        HILOG_ERROR("Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    isRunning = appRunningManager_->CheckAppRunningRecordIsExistByBundleName(bundleName);
+    return ERR_OK;
 }
 
 int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &want) const

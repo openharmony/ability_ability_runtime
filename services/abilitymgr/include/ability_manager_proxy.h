@@ -347,7 +347,8 @@ public:
         const Want &want,
         const sptr<IAbilityConnection> &connect,
         const sptr<SessionInfo> &sessionInfo,
-        int32_t userId = DEFAULT_INVAL_VALUE) override;
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr) override;
 
     /**
      * DisconnectAbility, connect session with service ability.
@@ -1018,14 +1019,14 @@ public:
      * @param listener App debug listener.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) override;
+    int32_t RegisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener) override;
 
     /**
      * @brief Unregister app debug listener.
      * @param listener App debug listener.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) override;
+    int32_t UnregisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener) override;
 
     /**
      * @brief Attach app debug.
@@ -1084,6 +1085,13 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override;
+
+    /**
+     * @brief Get foreground ui abilities.
+     * @param list Foreground ui abilities.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list) override;
 
     /**
      * @brief Open file by uri.

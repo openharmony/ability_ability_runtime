@@ -40,12 +40,14 @@ constexpr int32_t TYPE_HARMONY_SERVICE = 2;
 #else
 using ErmsCallerInfo = OHOS::AppExecFwk::ErmsParams::CallerInfo;
 #endif
+const size_t IDENTITY_LIST_MAX_SIZE = 10;
 
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 const std::string STR_PHONE = "phone";
 const std::string STR_DEFAULT = "default";
 const std::string TYPE_ONLY_MATCH_WILDCARD = "reserved/wildcard";
 const std::string SHOW_DEFAULT_PICKER_FLAG = "ohos.ability.params.showDefaultPicker";
+const std::string PARAM_ABILITY_APPINFOS = "ohos.ability.params.appInfos";
 
 const std::vector<std::string> ImplicitStartProcessor::blackList = {
     std::vector<std::string>::value_type(BLACK_ACTION_SELECT_DATA),
@@ -157,6 +159,9 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         ret = abilityMgr->StartAbilityAsCaller(want, request.callerToken, nullptr);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
+        int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
+            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
+        AddIdentity(tokenId, identity);
         return ret;
     }
 
@@ -181,6 +186,14 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
             return "";
         }
         type = uri.substr(suffixIndex);
+        if (type == ".dlp") {
+            auto suffixDlpIndex = uri.rfind('.', suffixIndex - 1);
+            if (suffixDlpIndex == std::string::npos) {
+                HILOG_ERROR("Get suffix failed, uri is %{public}s", uri.c_str());
+                return "";
+            }
+            type = uri.substr(suffixDlpIndex, suffixIndex - suffixDlpIndex);
+        }
     }
     return type;
 }
@@ -198,6 +211,14 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     bool withDefault = false;
     withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault) ? false : true;
+
+    if (IPCSkeleton::GetCallingUid() == 1027 && !request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS).empty()) {
+        HILOG_INFO("The NFCNeed caller source is NFC");
+        
+        ImplicitStartProcessor::queryBmsAppInfos(request, userId, dialogAppInfos);
+        return ERR_OK;
+    }
+
     IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos));
 
@@ -285,6 +306,49 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     }
 
     return ERR_OK;
+}
+
+int ImplicitStartProcessor::queryBmsAppInfos(AbilityRequest &request, int32_t userId, std::vector<DialogAppInfo> &dialogAppInfos) {
+    auto bms = GetBundleManager();
+    std::vector<AppExecFwk::AbilityInfo> bmsApps;
+    auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
+        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_SKILL_URI;
+
+    std::vector<std::string> apps = request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS);    
+    for (std::string appInfoStr : apps) {
+        AppExecFwk::AbilityInfo abilityInfo;
+        std::vector<std::string> appInfos = ImplicitStartProcessor::splitStr(appInfoStr, '/');
+        std::string bundleName = appInfos[0];
+        std::string abilityName = appInfos[1];
+        Want want;
+        want.SetElementName(bundleName, abilityName);
+
+        IN_PROCESS_CALL_WITHOUT_RET(bms->QueryAbilityInfo(want, abilityInfoFlag,
+            userId, abilityInfo));
+            
+        bmsApps.emplace_back(abilityInfo);
+    }
+
+    for (const auto &abilityInfo : bmsApps) {
+        DialogAppInfo dialogAppInfo;
+        dialogAppInfo.abilityName = abilityInfo.name;
+        dialogAppInfo.bundleName = abilityInfo.bundleName;
+        dialogAppInfo.moduleName = abilityInfo.moduleName;
+        dialogAppInfo.iconId = abilityInfo.iconId;
+        dialogAppInfo.labelId = abilityInfo.labelId;
+        dialogAppInfos.emplace_back(dialogAppInfo);
+    }
+    return ERR_OK;;
+}
+
+std::vector<std::string> ImplicitStartProcessor::splitStr(const std::string& str, char delimiter) {
+    std::stringstream ss(str);  
+    std::vector<std::string> result;  
+    std::string s;  
+    while (std::getline(ss, s, delimiter)) {  
+        result.push_back(s);  
+    }  
+    return result;  
 }
 
 bool ImplicitStartProcessor::CheckImplicitStartExtensionIsValid(const AbilityRequest &request,
@@ -460,5 +524,28 @@ void ImplicitStartProcessor::GetEcologicalCallerInfo(const Want &want, ErmsCalle
     }
 }
 #endif
+
+void ImplicitStartProcessor::AddIdentity(int32_t tokenId, std::string identity)
+{
+    std::lock_guard guard(identityListLock_);
+    if (identityList_.size() == IDENTITY_LIST_MAX_SIZE) {
+        identityList_.pop_front();
+        identityList_.emplace_back(IdentityNode(tokenId, identity));
+        return;
+    }
+    identityList_.emplace_back(IdentityNode(tokenId, identity));
+}
+
+void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId)
+{
+    std::lock_guard guard(identityListLock_);
+    for (auto it = identityList_.begin(); it != identityList_.end(); it++) {
+        if (it->tokenId == tokenId) {
+            IPCSkeleton::SetCallingIdentity(it->identity);
+            identityList_.erase(it);
+            return;
+        }
+    }
+}
 }  // namespace AAFwk
 }  // namespace OHOS

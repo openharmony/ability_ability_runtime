@@ -182,8 +182,8 @@ private:
     int32_t CheckPermissionForSystem();
     int32_t CheckPermissionForSelf(const std::string &bundleName);
     int32_t CheckPermissionForEDM();
-    int32_t InnerSetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag);
-    int32_t InnerCancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag);
+    int32_t InnerApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool isSet, bool flag);
+    int32_t GetAbilityInfo(const AutoStartupInfo &info, std::string &abilityTypeName);
 
     mutable std::mutex autoStartUpMutex_;
     mutable std::mutex deathRecipientsMutex_;
