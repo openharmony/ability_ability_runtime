@@ -1646,7 +1646,6 @@ ErrCode AbilityManagerClient::ExecuteInsightIntentDone(sptr<IRemoteObject> token
     return abms->ExecuteInsightIntentDone(token, intentId, result);
 }
 
-
 int32_t AbilityManagerClient::GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list)
 {
     HILOG_DEBUG("Called.");
