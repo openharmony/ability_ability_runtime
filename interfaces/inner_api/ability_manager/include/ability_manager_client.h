@@ -20,16 +20,15 @@
 
 #include "ability_connect_callback_interface.h"
 #include "ability_manager_errors.h"
-#include "ability_scheduler_interface.h"
 #include "ability_manager_interface.h"
+#include "ability_scheduler_interface.h"
 #include "auto_startup_info.h"
+#include "iremote_object.h"
 #include "mission_info.h"
 #include "snapshot.h"
-#include "want.h"
-
-#include "iremote_object.h"
 #include "system_memory_attr.h"
 #include "ui_extension_window_command.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -436,10 +435,12 @@ public:
      * @param connect, callback used to notify caller the result of connecting or disconnecting.
      * @param sessionInfo the extension session info of the ability to connect.
      * @param userId, the extension runs in.
+     * @param connectInfo the connect info.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectUIExtensionAbility(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<SessionInfo> sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE);
+        sptr<SessionInfo> sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE,
+        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr);
 
     /**
      * DisconnectAbility, disconnect session with service ability.
@@ -1352,6 +1353,13 @@ public:
      */
     ErrCode ExecuteInsightIntentDone(sptr<IRemoteObject> token, uint64_t intentId,
         const InsightIntentExecuteResult &result);
+
+    /**
+     * @brief Get foreground ui abilities.
+     * @param list Foreground ui abilities.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list);
 
 private:
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {

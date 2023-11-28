@@ -3053,5 +3053,74 @@ void AbilityRecord::SetAttachDebug(const bool isAttachDebug)
 {
     isAttachDebug_ = isAttachDebug;
 }
+
+void AbilityRecord::AddAbilityWindowStateMap(int64_t uiExtensionComponentId,
+    AbilityWindowState abilityWindowState)
+{
+    if (abilityWindowState == AbilityWindowState::FOREGROUNDING ||
+        abilityWindowStateMap_.find(uiExtensionComponentId) != abilityWindowStateMap_.end()) {
+        abilityWindowStateMap_[uiExtensionComponentId] = abilityWindowState;
+    }
+}
+
+void AbilityRecord::RemoveAbilityWindowStateMap(int64_t uiExtensionComponentId)
+{
+    if (abilityWindowStateMap_.find(uiExtensionComponentId) != abilityWindowStateMap_.end()) {
+        abilityWindowStateMap_.erase(uiExtensionComponentId);
+    }
+}
+
+bool AbilityRecord::IsAbilityWindowReady()
+{
+    for (auto &item:abilityWindowStateMap_) {
+        if (item.second == AbilityWindowState::BACKGROUNDING ||
+            item.second == AbilityWindowState::TERMINATING) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void AbilityRecord::SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd, bool isFinished)
+{
+    if (sessionInfo == nullptr) {
+        HILOG_ERROR("sessionInfo is nullptr");
+        return;
+    }
+    if (isFinished) {
+        if (winCmd == WIN_CMD_FOREGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::FOREGROUND);
+        } else if (winCmd == WIN_CMD_BACKGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::BACKGROUND);
+        } else if (winCmd == WIN_CMD_DESTROY) {
+            RemoveAbilityWindowStateMap(sessionInfo->uiExtensionComponentId);
+        }
+    } else {
+        if (winCmd == WIN_CMD_FOREGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::FOREGROUNDING);
+        } else if (winCmd == WIN_CMD_BACKGROUND) {
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::BACKGROUNDING);
+        } else if (winCmd == WIN_CMD_DESTROY) {
+            AddAbilityWindowStateMap(sessionInfo->uiExtensionComponentId, AbilityWindowState::TERMINATING);
+        }
+    }
+}
+
+int32_t AbilityRecord::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("call");
+    CHECK_POINTER_AND_RETURN(scheduler_, INNER_ERR);
+    return scheduler_->CreateModalUIExtension(want);
+}
+
+void AbilityRecord::SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId)
+{
+    uiExtensionAbilityId_ = uiExtensionAbilityId;
+}
+
+int32_t AbilityRecord::GetUIExtensionAbilityId() const
+{
+    return uiExtensionAbilityId_;
+}
 }  // namespace AAFwk
 }  // namespace OHOS

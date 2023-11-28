@@ -98,6 +98,7 @@ ohos_shared_library("ability_manager") {
     "${ability_runtime_services_path}/abilitymgr/src/stop_user_callback_proxy.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/stop_user_callback_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/system_ability_token_callback_stub.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ui_extension_ability_connect_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_receiver_stub.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_info.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/want_sender_proxy.cpp",
@@ -211,6 +212,8 @@ ohos_shared_library("ability_start_setting") {
 }
 
 ohos_shared_library("ability_connect_callback_stub") {
+  defines = [ "AMS_LOG_TAG = \"Ability\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
   include_dirs = [
     "include/",
     "${ability_base_kits_path}/want/include",
