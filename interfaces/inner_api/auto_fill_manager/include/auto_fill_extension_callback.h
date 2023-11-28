@@ -31,20 +31,23 @@ public:
     void OnResult(int32_t errCode, const AAFwk::Want &want);
     void OnRelease(int32_t errCode);
     void OnError(int32_t errCode, const std::string &name, const std::string &message);
+    void OnReceive(const AAFwk::WantParams &wantParams);
 
     void SetFillRequestCallback(const std::shared_ptr<IFillRequestCallback> &callback);
     void SetSaveRequestCallback(const std::shared_ptr<ISaveRequestCallback> &callback);
+    void SendAutoFillFailed(int32_t errCode);
 
     void SetSessionId(int32_t sessionId);
     void SetUIContent(Ace::UIContent *uiContent);
-
+    void SetEventId(uint32_t eventId);
 private:
     void SendAutoFillSucess(const AAFwk::Want &want);
-    void SendAutoFillFailed(int32_t errCode);
+
     std::shared_ptr<IFillRequestCallback> fillCallback_;
     std::shared_ptr<ISaveRequestCallback> saveCallback_;
     int32_t sessionId_;
     Ace::UIContent *uiContent_ = nullptr;
+    uint32_t eventId_ = 0;
 };
 } // AbilityRuntime
 } // OHOS

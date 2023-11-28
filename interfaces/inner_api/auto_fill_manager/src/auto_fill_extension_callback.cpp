@@ -15,6 +15,7 @@
 #include "auto_fill_extension_callback.h"
 
 #include "auto_fill_error.h"
+#include "auto_fill_manager.h"
 #include "hilog_wrapper.h"
 #include "view_data.h"
 
@@ -22,15 +23,17 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewData";
+constexpr static char WANT_PARAMS_AUTO_FILL_EVENT_KEY[] = "ability.want.params.AutoFillEvent";
 } // namespace
 void AutoFillExtensionCallback::OnResult(int32_t errCode, const AAFwk::Want &want)
 {
     HILOG_DEBUG("Called, result code is %{public}d.", errCode);
-    int32_t resultCode;
+    AutoFillManager::GetInstance().RemoveEvent(eventId_);
+
     if (errCode == AutoFill::AUTO_FILL_SUCCESS) {
         SendAutoFillSucess(want);
     } else {
-        resultCode = (errCode == AutoFill::AUTO_FILL_CANCEL) ? AutoFill::AUTO_FILL_CANCEL : AutoFill::AUTO_FILL_FAILED;
+        auto resultCode = (errCode == AutoFill::AUTO_FILL_CANCEL) ? AutoFill::AUTO_FILL_CANCEL : AutoFill::AUTO_FILL_FAILED;
         SendAutoFillFailed(resultCode);
     }
 }
@@ -38,6 +41,8 @@ void AutoFillExtensionCallback::OnResult(int32_t errCode, const AAFwk::Want &wan
 void AutoFillExtensionCallback::OnRelease(int32_t errCode)
 {
     HILOG_DEBUG("Called, result code is %{public}d.", errCode);
+    AutoFillManager::GetInstance().RemoveEvent(eventId_);
+
     if (errCode != 0) {
         SendAutoFillFailed(AutoFill::AUTO_FILL_RELEASE_FAILED);
     }
@@ -53,6 +58,8 @@ void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name
 {
     HILOG_DEBUG("Called, errcode is %{public}d, name is %{public}s, message is %{public}s",
         errCode, name.c_str(), message.c_str());
+    AutoFillManager::GetInstance().RemoveEvent(eventId_);
+
     if (errCode != 0) {
         SendAutoFillFailed(AutoFill::AUTO_FILL_ON_ERROR);
     }
@@ -62,6 +69,16 @@ void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
+}
+
+void AutoFillExtensionCallback::OnReceive(const AAFwk::WantParams &wantParams)
+{
+    HILOG_DEBUG("Called.");
+    if (wantParams.GetIntParam(WANT_PARAMS_AUTO_FILL_EVENT_KEY, 0) != AutoFill::AUTO_FILL_CANCEL_TIME_OUT) {
+        HILOG_ERROR("Event is invalid.");
+        return;
+    }
+    AutoFillManager::GetInstance().RemoveEvent(eventId_);
 }
 
 void AutoFillExtensionCallback::SetFillRequestCallback(const std::shared_ptr<IFillRequestCallback> &callback)
@@ -82,6 +99,11 @@ void AutoFillExtensionCallback::SetSessionId(int32_t sessionId)
 void AutoFillExtensionCallback::SetUIContent(Ace::UIContent *uiContent)
 {
     uiContent_ = uiContent;
+}
+
+void AutoFillExtensionCallback::SetEventId(uint32_t eventId)
+{
+    eventId_ = eventId;
 }
 
 void AutoFillExtensionCallback::SendAutoFillSucess(const AAFwk::Want &want)
