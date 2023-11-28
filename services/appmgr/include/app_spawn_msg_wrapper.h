@@ -55,6 +55,7 @@ struct AppSpawnStartMsg {
     std::string overlayInfo; // overlay hap resource path list
     DataGroupInfoList dataGroupInfoList; // list of harmony shared package
     uint32_t mountPermissionFlags;
+    std::string ownerId;
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
@@ -66,6 +67,8 @@ struct StartFlags {
     static const int ASANENABLED = 4;
     static const int NATIVEDEBUG = 6;
     static const int NO_SANDBOX = 7;
+    static const int GWP_ENABLED_FORCE = 10;
+    static const int GWP_ENABLED_NORMAL = 11;
 };
 
 union AppSpawnPidMsg {

@@ -722,17 +722,9 @@ int32_t AbilityAutoStartupService::CheckPermissionForSelf(const std::string &bun
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+int32_t AbilityAutoStartupService::GetAbilityInfo(const AutoStartupInfo &info, std::string &abilityTypeName)
 {
-    HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, flag: %{public}d.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), flag);
-    int32_t errorCode = CheckPermissionForEDM();
-    if (errorCode != ERR_OK) {
-        return errorCode;
-    }
-
-    bool isVisible;
-    std::string abilityTypeName;
+    bool isVisible = false;
     if (!GetAbilityData(info, isVisible, abilityTypeName)) {
         HILOG_ERROR("Failed to get ability data.");
         return INNER_ERR;
@@ -743,74 +735,45 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStar
         return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
 
-    AutoStartupInfo fullInfo(info);
-    fullInfo.abilityTypeName = abilityTypeName;
-    return InnerSetApplicationAutoStartupByEDM(fullInfo, flag);
+    return ERR_OK;
 }
 
-int32_t AbilityAutoStartupService::InnerSetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
 {
-    AutoStartupStatus status =
-        DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info);
-    if (status.code != ERR_OK && status.code != ERR_NAME_NOT_FOUND) {
-        HILOG_ERROR("Query auto startup data failed.");
-        return status.code;
+    int32_t errorCode = CheckPermissionForEDM();
+    if (errorCode != ERR_OK) {
+        return errorCode;
     }
-
-    int32_t result = ERR_ALREADY_EXISTS;
-    if (status.code == ERR_NAME_NOT_FOUND) {
-        result =
-            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, true, flag);
-        if (result == ERR_OK) {
-            ExecuteCallbacks(true, info);
-        }
-        return result;
+    std::string typeName;
+    errorCode = GetAbilityInfo(info, typeName);
+    if (errorCode != ERR_OK) {
+        return errorCode;
     }
-    if (!status.isAutoStartup) {
-        result =
-            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, true, flag);
-        if (result == ERR_OK) {
-            ExecuteCallbacks(true, info);
-        }
-        return result;
-    }
-    if (status.isEdmForce != flag) {
-        result =
-            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, true, flag);
-        return result;
-    }
-
-    return result;
+    AutoStartupInfo fullInfo(info);
+    fullInfo.abilityTypeName = typeName;
+    return InnerApplicationAutoStartupByEDM(fullInfo, true, flag);
 }
 
 int32_t AbilityAutoStartupService::CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
 {
-    HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, flag: %{public}d.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), flag);
     int32_t errorCode = CheckPermissionForEDM();
     if (errorCode != ERR_OK) {
         return errorCode;
     }
-
-    bool isVisible;
-    std::string abilityTypeName;
-    if (!GetAbilityData(info, isVisible, abilityTypeName)) {
-        HILOG_ERROR("Failed to get ability data.");
-        return INNER_ERR;
+    std::string typeName;
+    errorCode = GetAbilityInfo(info, typeName);
+    if (errorCode != ERR_OK) {
+        return errorCode;
     }
-
-    if (!isVisible) {
-        HILOG_ERROR("Current ability is not visible.");
-        return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
-    }
-
     AutoStartupInfo fullInfo(info);
-    fullInfo.abilityTypeName = abilityTypeName;
-    return InnerCancelApplicationAutoStartupByEDM(fullInfo, flag);
+    fullInfo.abilityTypeName = typeName;
+    return InnerApplicationAutoStartupByEDM(fullInfo, false, flag);
 }
 
-int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag)
+int32_t AbilityAutoStartupService::InnerApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool isSet, bool flag)
 {
+    HILOG_DEBUG("Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, isSet: %{public}d.,"
+        "flag: %{public}d.", info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), isSet, flag);
     AutoStartupStatus status =
         DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info);
     if (status.code != ERR_OK && status.code != ERR_NAME_NOT_FOUND) {
@@ -820,21 +783,25 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartupByEDM(const 
 
     int32_t result = ERR_OK;
     if (status.code == ERR_NAME_NOT_FOUND) {
-        return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, false, flag);
+        result = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->InsertAutoStartupData(info, isSet, flag);
+        if (result == ERR_OK && isSet) {
+            ExecuteCallbacks(isSet, info);
+        }
+        return result;
     }
-    if (status.isAutoStartup) {
+
+    bool isFlag = isSet ? !status.isAutoStartup : status.isAutoStartup;
+    if (isFlag) {
         result =
-            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, false, flag);
+            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, isSet, flag);
         if (result == ERR_OK) {
-            HILOG_ERROR("the ability is auto startup.");
-            ExecuteCallbacks(false, info);
+            ExecuteCallbacks(isSet, info);
         }
         return result;
     }
     if (status.isEdmForce != flag) {
-        HILOG_ERROR("The ability is not auto startup and the edm flag is not same with flag.");
         result =
-            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, false, flag);
+            DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->UpdateAutoStartupData(info, isSet, flag);
         return result;
     }
 
