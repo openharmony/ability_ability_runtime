@@ -35,13 +35,16 @@ public:
 
     void SetFillRequestCallback(const std::shared_ptr<IFillRequestCallback> &callback);
     void SetSaveRequestCallback(const std::shared_ptr<ISaveRequestCallback> &callback);
-    void SendAutoFillFailed(int32_t errCode);
 
     void SetSessionId(int32_t sessionId);
     void SetUIContent(Ace::UIContent *uiContent);
     void SetEventId(uint32_t eventId);
+    void HandleTimeOut();
+
 private:
     void SendAutoFillSucess(const AAFwk::Want &want);
+    void SendAutoFillFailed(int32_t errCode);
+    void CloseModalUIExtension();
 
     std::shared_ptr<IFillRequestCallback> fillCallback_;
     std::shared_ptr<ISaveRequestCallback> saveCallback_;
