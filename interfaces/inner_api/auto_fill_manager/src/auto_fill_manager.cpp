@@ -169,11 +169,12 @@ void AutoFillManager::HandleTimeOut(uint32_t eventId)
         HILOG_WARN("Event id is not find.");
         return;
     }
-    if (ret->second.lock() == nullptr) {
+    auto extensionCallback = ret->second.lock();
+    if (extensionCallback == nullptr) {
         HILOG_ERROR("Extension callback is nullptr.");
         return;
     }
-    ret->second.lock()->SendAutoFillFailed(AutoFill::AUTO_FILL_REQUEST_TIME_OUT);
+    extensionCallback->HandleTimeOut();
     extensionCallbacks_.erase(ret);
 }
 } // namespace AbilityRuntime

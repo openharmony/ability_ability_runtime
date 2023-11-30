@@ -33,7 +33,8 @@ void AutoFillExtensionCallback::OnResult(int32_t errCode, const AAFwk::Want &wan
     if (errCode == AutoFill::AUTO_FILL_SUCCESS) {
         SendAutoFillSucess(want);
     } else {
-        auto resultCode = (errCode == AutoFill::AUTO_FILL_CANCEL) ? AutoFill::AUTO_FILL_CANCEL : AutoFill::AUTO_FILL_FAILED;
+        auto resultCode = (errCode == AutoFill::AUTO_FILL_CANCEL) ?
+            AutoFill::AUTO_FILL_CANCEL : AutoFill::AUTO_FILL_FAILED;
         SendAutoFillFailed(resultCode);
     }
 }
@@ -47,11 +48,7 @@ void AutoFillExtensionCallback::OnRelease(int32_t errCode)
         SendAutoFillFailed(AutoFill::AUTO_FILL_RELEASE_FAILED);
     }
 
-    if (uiContent_ == nullptr) {
-        HILOG_ERROR("uiContent_ is nullptr.");
-        return;
-    }
-    uiContent_->CloseModalUIExtension(sessionId_);
+    CloseModalUIExtension();
 }
 
 void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name, const std::string &message)
@@ -63,12 +60,7 @@ void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name
     if (errCode != 0) {
         SendAutoFillFailed(AutoFill::AUTO_FILL_ON_ERROR);
     }
-
-    if (uiContent_ == nullptr) {
-        HILOG_ERROR("UIContent is nullptr.");
-        return;
-    }
-    uiContent_->CloseModalUIExtension(sessionId_);
+    CloseModalUIExtension();
 }
 
 void AutoFillExtensionCallback::OnReceive(const AAFwk::WantParams &wantParams)
@@ -106,6 +98,12 @@ void AutoFillExtensionCallback::SetEventId(uint32_t eventId)
     eventId_ = eventId;
 }
 
+void AutoFillExtensionCallback::HandleTimeOut()
+{
+    SendAutoFillFailed(AutoFill::AUTO_FILL_REQUEST_TIME_OUT);
+    CloseModalUIExtension();
+}
+
 void AutoFillExtensionCallback::SendAutoFillSucess(const AAFwk::Want &want)
 {
     if (fillCallback_ != nullptr) {
@@ -129,6 +127,15 @@ void AutoFillExtensionCallback::SendAutoFillFailed(int32_t errCode)
     if (saveCallback_ != nullptr) {
         saveCallback_->OnSaveRequestFailed();
     }
+}
+
+void AutoFillExtensionCallback::CloseModalUIExtension()
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("uiContent_ is nullptr.");
+        return;
+    }
+    uiContent_->CloseModalUIExtension(sessionId_);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
