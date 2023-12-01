@@ -19,7 +19,6 @@
 #include <thread>
 
 #include "ability_post_event_timeout.h"
-#include "ability_recovery.h"
 #include "ability_runtime/js_ability.h"
 #include "abs_shared_result_set.h"
 #include "configuration_convertor.h"
@@ -54,10 +53,6 @@
 #ifdef SUPPORT_GRAPHICS
 #include "display_type.h"
 #include "key_event.h"
-#endif
-
-#ifdef IMAGE_PURGEABLE_PIXELMAP
-#include "purgeable_resource_manager.h"
 #endif
 
 namespace OHOS {
@@ -176,8 +171,8 @@ void Ability::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
     HILOG_INFO("AbilityName is %{public}s.", abilityInfo_->name.c_str());
 #ifdef SUPPORT_GRAPHICS
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int defualtDisplayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
-        int displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
+        int32_t  defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+        int32_t  displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         HILOG_DEBUG("abilityName:%{public}s, displayId:%{public}d", abilityInfo_->name.c_str(), displayId);
         if (!abilityInfo_->isStageBasedModel) {
             auto option = GetWindowOption(want);
@@ -253,9 +248,6 @@ void Ability::OnStop()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("called");
 #ifdef SUPPORT_GRAPHICS
-    if (abilityRecovery_ != nullptr) {
-        abilityRecovery_->ScheduleSaveAbilityState(StateReason::LIFECYCLE);
-    }
     (void)Rosen::DisplayManager::GetInstance().UnregisterDisplayListener(abilityDisplayListener_);
     auto && window = GetWindow();
     if (window != nullptr) {
@@ -399,11 +391,6 @@ bool Ability::ShouldRecoverState(const Want& want)
 {
     if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
         HILOG_INFO("AppRecovery not recovery restart");
-        return false;
-    }
-
-    if (abilityRecovery_ == nullptr) {
-        HILOG_WARN("AppRecovery Not enable");
         return false;
     }
 
@@ -1024,14 +1011,7 @@ void Ability::HandleCreateAsContinuation(const Want &want)
 
 void Ability::HandleCreateAsRecovery(const Want &want)
 {
-    if (!want.GetBoolParam(Want::PARAM_ABILITY_RECOVERY_RESTART, false)) {
-        HILOG_DEBUG("AppRecovery not recovery restart");
-        return;
-    }
-
-    if (abilityRecovery_ != nullptr) {
-        abilityRecovery_->ScheduleRestoreAbilityState(StateReason::DEVELOPER_REQUEST, want);
-    }
+    HILOG_DEBUG("called");
 }
 
 bool Ability::IsFlagExists(unsigned int flag, unsigned int flagSet)
@@ -1503,7 +1483,7 @@ bool Ability::IsUseNewStartUpRule()
 
 void Ability::EnableAbilityRecovery(const std::shared_ptr<AbilityRecovery>& abilityRecovery)
 {
-    abilityRecovery_ = abilityRecovery;
+    HILOG_DEBUG("called");
 }
 
 int32_t Ability::OnShare(WantParams &wantParams)
@@ -1567,9 +1547,6 @@ void Ability::OnBackground()
                 HILOG_DEBUG("GoBackground sceneFlag:%{public}d.", sceneFlag_);
                 scene_->GoBackground(sceneFlag_);
             }
-            if (abilityRecovery_ != nullptr) {
-                abilityRecovery_->ScheduleSaveAbilityState(StateReason::LIFECYCLE);
-            }
         } else {
             if (abilityWindow_ == nullptr) {
                 HILOG_ERROR("Ability::OnBackground error. abilityWindow_ == nullptr.");
@@ -1595,9 +1572,6 @@ void Ability::OnBackground()
         HILOG_ERROR("Ability::OnBackground error. lifecycle_ == nullptr.");
         return;
     }
-#ifdef IMAGE_PURGEABLE_PIXELMAP
-    PurgeableMem::PurgeableResourceManager::GetInstance().EndAccessPurgeableMem();
-#endif
     lifecycle_->DispatchLifecycle(LifeCycle::Event::ON_BACKGROUND);
     HILOG_DEBUG("end");
     AAFwk::EventInfo eventInfo;
@@ -2157,6 +2131,17 @@ int Ability::GetDisplayOrientation()
 void Ability::ContinuationRestore(const Want &want)
 {
     HILOG_DEBUG("called");
+}
+
+int Ability::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("call");
+    auto abilityContextImpl = GetAbilityContext();
+    if (abilityContextImpl == nullptr) {
+        HILOG_ERROR("abilitycontext is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityContextImpl->CreateModalUIExtensionWithApp(want);
 }
 #endif
 }  // namespace AppExecFwk

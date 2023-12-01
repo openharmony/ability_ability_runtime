@@ -56,6 +56,7 @@ public:
     static napi_value SwitchArea(napi_env env, napi_callback_info info);
     static napi_value GetArea(napi_env env, napi_callback_info info);
     static napi_value CreateModuleContext(napi_env env, napi_callback_info info);
+    static napi_value CreateModuleResourceManager(napi_env env, napi_callback_info info);
     static napi_value SetAutoStartup(napi_env env, napi_callback_info info);
     static napi_value CancelAutoStartup(napi_env env, napi_callback_info info);
     static napi_value IsAutoStartup(napi_env env, napi_callback_info info);
@@ -95,6 +96,7 @@ public:
     napi_value OnSetAutoStartup(napi_env env, NapiCallbackInfo &info);
     napi_value OnCancelAutoStartup(napi_env env, NapiCallbackInfo &info);
     napi_value OnIsAutoStartup(napi_env env, NapiCallbackInfo &info);
+    napi_value OnClearUpApplicationData(napi_env env, NapiCallbackInfo& info);
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
     static napi_value GetTempDir(napi_env env, napi_callback_info info);
@@ -108,6 +110,7 @@ public:
     static napi_value KillProcessBySelf(napi_env env, napi_callback_info info);
     static napi_value SetColorMode(napi_env env, napi_callback_info info);
     static napi_value SetLanguage(napi_env env, napi_callback_info info);
+    static napi_value ClearUpApplicationData(napi_env env, napi_callback_info info);
     static napi_value GetRunningProcessInformation(napi_env env, napi_callback_info info);
     static napi_value CreateJsApplicationContext(napi_env env);
 
@@ -116,6 +119,7 @@ protected:
 
 private:
     napi_value OnCreateBundleContext(napi_env env, NapiCallbackInfo& info);
+    napi_value OnCreateModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     napi_value OnSwitchArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo& info);

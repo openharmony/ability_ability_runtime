@@ -31,22 +31,31 @@ JsChildProcess::JsChildProcess(JsRuntime &jsRuntime) : jsRuntime_(jsRuntime) {}
 JsChildProcess::~JsChildProcess()
 {
     HILOG_DEBUG("JsChildProcess destructor.");
+    jsRuntime_.FreeNativeReference(std::move(jsChildProcessObj_));
 }
 
-void JsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &info)
+bool JsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &info)
 {
     HILOG_INFO("JsChildProcess Init called");
-    ChildProcess::Init(info);
+    if (info == nullptr) {
+        HILOG_ERROR("info is nullptr.");
+        return false;
+    }
+    bool ret = ChildProcess::Init(info);
+    if (!ret) {
+        HILOG_ERROR("ChildProcess init failed.");
+        return false;
+    }
     if (info->srcEntry.empty()) {
         HILOG_ERROR("ChildProcessStartInfo srcEntry is empty");
-        return;
+        return false;
     }
     std::string srcPath;
-    if (info->srcEntry.rfind("./", 0) == 0) {
-        srcPath.append(info->moduleName).append("/");
-    }
+    srcPath.append(info->moduleName).append("/");
     srcPath.append(info->srcEntry);
-    srcPath.erase(srcPath.rfind("."));
+    if (srcPath.rfind(".") != std::string::npos) {
+        srcPath.erase(srcPath.rfind("."));
+    }
     srcPath.append(".abc");
     std::string moduleName(info->moduleName);
     moduleName.append("::").append(info->name);
@@ -55,8 +64,9 @@ void JsChildProcess::Init(const std::shared_ptr<ChildProcessStartInfo> &info)
     jsChildProcessObj_ = jsRuntime_.LoadModule(moduleName, srcPath, info->hapPath, info->isEsModule);
     if (jsChildProcessObj_ == nullptr) {
         HILOG_ERROR("Failed to get ChildProcess object");
-        return;
+        return false;
     }
+    return true;
 }
 
 void JsChildProcess::OnStart()

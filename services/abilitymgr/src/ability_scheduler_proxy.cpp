@@ -14,6 +14,7 @@
  */
 #include "ability_scheduler_proxy.h"
 
+#include "ability_manager_errors.h"
 #include "abs_shared_result_set.h"
 #include "data_ability_observer_interface.h"
 #include "data_ability_operation.h"
@@ -131,13 +132,13 @@ void AbilitySchedulerProxy::ScheduleDisconnectAbility(const Want &want)
         return;
     }
     if (!data.WriteParcelable(&want)) {
-        HILOG_ERROR("fail to WriteParcelable");
+        HILOG_ERROR("fail to WriteParcelable.");
         return;
     }
 
     int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ABILITY_DISCONNECT, data, reply, option);
     if (err != NO_ERROR) {
-        HILOG_ERROR("ScheduleDisconnectAbility fail to SendRequest. err: %{public}d", err);
+        HILOG_ERROR("ScheduleDisconnectAbility fail to SendRequest. err: %{public}d.", err);
     }
 }
 
@@ -150,11 +151,11 @@ void AbilitySchedulerProxy::ScheduleCommandAbility(const Want &want, bool restar
         return;
     }
     if (!data.WriteParcelable(&want)) {
-        HILOG_ERROR("fail to WriteParcelable");
+        HILOG_ERROR("WriteParcelable failed");
         return;
     }
     if (!data.WriteBool(restart)) {
-        HILOG_ERROR("fail to WriteBool");
+        HILOG_ERROR("WriteBool failed");
         return;
     }
     HILOG_INFO("WriteInt32,startId:%{public}d", startId);
@@ -197,11 +198,11 @@ void AbilitySchedulerProxy::ScheduleCommandAbilityWindow(const Want &want, const
         return;
     }
     if (!data.WriteParcelable(&want)) {
-        HILOG_ERROR("fail to WriteParcelable");
+        HILOG_ERROR("WriteParcelable failed.");
         return;
     }
     if (!data.WriteParcelable(sessionInfo)) {
-        HILOG_ERROR("fail to WriteParcelable");
+        HILOG_ERROR("WriteParcelable failed.");
         return;
     }
     if (!data.WriteInt32(winCmd)) {
@@ -1086,6 +1087,47 @@ void AbilitySchedulerProxy::CallRequest()
     }
 
     HILOG_INFO("AbilitySchedulerProxy::CallRequest end");
+}
+
+void AbilitySchedulerProxy::OnExecuteIntent(const Want &want)
+{
+    HILOG_INFO("AbilitySchedulerProxy::OnExecuteIntent start");
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    data.WriteParcelable(&want);
+    int32_t err = SendTransactCmd(IAbilityScheduler::SCHEDULE_ONEXECUTE_INTENT, data, reply, option);
+    if (err != NO_ERROR) {
+        HILOG_ERROR("ScheduleAbilityTransaction fail to SendRequest. err: %{public}d", err);
+    }
+
+    HILOG_INFO("AbilitySchedulerProxy::OnExecuteIntent end");
+}
+
+int32_t AbilitySchedulerProxy::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("AbilitySchedulerProxy::CreateModalUIExtension start");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface fail");
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        HILOG_ERROR("Write wants fail");
+        return INNER_ERR;
+    }
+    int32_t err = SendTransactCmd(IAbilityScheduler::CREATE_MODAL_UI_EXTENSION, data, reply, option);
+    if (err != NO_ERROR) {
+        HILOG_ERROR("CreateModalUIExtension fail to SendRequest. err: %{public}d", err);
+        return err;
+    }
+    return reply.ReadInt32();
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

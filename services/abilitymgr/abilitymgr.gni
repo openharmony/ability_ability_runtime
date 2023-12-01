@@ -14,11 +14,13 @@
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 abilityms_files = [
+  "src/ability_background_connection.cpp",
   "src/ability_connect_manager.cpp",
   "src/ability_debug_deal.cpp",
   "src/ability_event_handler.cpp",
   "src/ability_interceptor.cpp",
   "src/ability_interceptor_executer.cpp",
+  "src/disposed_observer.cpp",
   "src/ability_manager_service.cpp",
   "src/ability_manager_stub.cpp",
   "src/ability_manager_proxy.cpp",
@@ -34,6 +36,7 @@ abilityms_files = [
   "src/data_ability_record.cpp",
   "src/lifecycle_deal.cpp",
   "src/ability_running_info.cpp",
+  "src/extension_config.cpp",
   "src/extension_running_info.cpp",
   "src/caller_info.cpp",
   "src/sender_info.cpp",
@@ -49,6 +52,8 @@ abilityms_files = [
   "src/pending_want_common_event.cpp",
   "src/ams_configuration_parameter.cpp",
   "src/image_info.cpp",
+  "src/insight_intent_utils.cpp",
+  "src/insight_intent_profile.cpp",
   "src/window_focus_changed_listener.cpp",
 
   # start ability handler
@@ -57,6 +62,7 @@ abilityms_files = [
 
   # new ability manager service here
   "src/task_data_persistence_mgr.cpp",
+  "src/ui_extension_ability_connect_manager.cpp",
   "src/start_options.cpp",
   "src/stop_user_callback_proxy.cpp",
   "src/stop_user_callback_stub.cpp",
@@ -103,12 +109,18 @@ abilityms_files = [
   "src/ability_auto_startup_data_manager.cpp",
   "src/ability_auto_startup_service.cpp",
   "src/auto_startup_info.cpp",
+  "src/insight_intent_execute_manager.cpp",
+  "src/insight_intent_execute_result.cpp",
 ]
 
 if (ability_runtime_graphics) {
   abilityms_files += [
-    "src/application_anr_listener.cpp",
+    "${ability_runtime_services_path}/appdfr/src/application_anr_listener.cpp",
     "src/implicit_start_processor.cpp",
     "src/system_dialog_scheduler.cpp",
   ]
+}
+
+if (efficiency_manager) {
+  abilityms_files += [ "src/process_frozen_state_observer.cpp" ]
 }

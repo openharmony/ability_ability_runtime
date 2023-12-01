@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,14 +50,22 @@ public:
     {
         return 0;
     }
+
+    int32_t StartAbilityByInsightIntent(const Want &want, const sptr<IRemoteObject> &callerToken,
+        uint64_t intentId, int32_t userId) override
+    {
+        return 0;
+    }
+
     virtual int StartAbilityAsCaller(const Want& want, const sptr<IRemoteObject>& callerToken,
-        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = -1) override
+        const sptr<IRemoteObject>& asCallerSourceToken, int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = -1) override
     {
         return 0;
     }
     virtual int StartAbilityAsCaller(const Want& want, const StartOptions& startOptions,
-        const sptr<IRemoteObject>& callerToken, int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) override
+        const sptr<IRemoteObject>& callerToken, const sptr<IRemoteObject>& asCallerSourceToken,
+        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }
@@ -312,6 +320,16 @@ public:
 
     int32_t ShareDataDone(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam) override
+    {
+        return 0;
+    }
+
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;
     }

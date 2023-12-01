@@ -22,9 +22,7 @@
 #include "ability_runtime/js_ability.h"
 
 #include "ability_runtime/js_ability_context.h"
-#include "ability_recovery.h"
 #include "ability_start_setting.h"
-#include "app_recovery.h"
 #include "connection_manager.h"
 #include "hilog_wrapper.h"
 #include "js_data_struct_converter.h"
@@ -46,6 +44,9 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
+#ifdef SUPPORT_GRAPHICS
+const std::string METHOD_NAME = "WindowScene::GoForeground";
+#endif
 napi_value PromiseCallback(napi_env env, napi_callback_info info)
 {
     void *data = nullptr;
@@ -121,13 +122,6 @@ void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
         HILOG_ERROR("abilityInfo is nullptr");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
-    if (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel &&
-        abilityContext_ != nullptr) {
-            AppExecFwk::AppRecovery::GetInstance().AddAbility(shared_from_this(), abilityContext_->GetAbilityInfo(),
-                abilityContext_->GetToken());
-    }
-#endif
     std::string srcPath(abilityInfo->package);
     if (!abilityInfo->isModuleJson) {
         /* temporary compatibility api8 + config.json */
@@ -183,9 +177,6 @@ void JsAbility::Init(const std::shared_ptr<AbilityInfo> &abilityInfo,
     napi_set_named_property(env, obj, "context", contextObj);
     HILOG_DEBUG("Set ability context");
 
-    if (abilityRecovery_ != nullptr) {
-        abilityRecovery_->SetJsAbility(reinterpret_cast<uintptr_t>(workContext));
-    }
     napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             HILOG_DEBUG("Finalizer for weak_ptr ability context is called");
@@ -294,6 +285,7 @@ void JsAbility::OnStop()
         abilityContext_->SetTerminating(true);
     }
     Ability::OnStop();
+    HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onDestroy");
     OnStopCallback();
     HILOG_DEBUG("OnStop end.");
@@ -406,6 +398,7 @@ void JsAbility::OnSceneRestored()
 {
     Ability::OnSceneRestored();
     HILOG_DEBUG("OnSceneRestored");
+    HandleScope handleScope(jsRuntime_);
     auto jsAppWindowStage = CreateAppWindowStage();
     if (jsAppWindowStage == nullptr) {
         HILOG_ERROR("Failed to create jsAppWindowStage object by LoadSystemModule");
@@ -427,7 +420,7 @@ void JsAbility::onSceneDestroyed()
 {
     HILOG_DEBUG("onSceneDestroyed begin, ability is %{public}s.", GetAbilityName().c_str());
     Ability::onSceneDestroyed();
-
+    HandleScope handleScope(jsRuntime_);
     CallObjectMethod("onWindowStageDestroy");
 
     if (scene_ != nullptr) {
@@ -503,6 +496,7 @@ void JsAbility::OnBackground()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("OnBackground begin, ability is %{public}s.", GetAbilityName().c_str());
     std::string methodName = "OnBackground";
+    HandleScope handleScope(jsRuntime_);
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
     CallObjectMethod("onBackground");
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::BACKGROUND, methodName);
@@ -527,7 +521,7 @@ bool JsAbility::OnBackPress()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("call, ability: %{public}s.", GetAbilityName().c_str());
     Ability::OnBackPress();
-
+    HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     napi_value jsValue = CallObjectMethod("onBackPressed", nullptr, 0, true);
     bool ret = false;
@@ -544,7 +538,7 @@ bool JsAbility::OnPrepareTerminate()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("call, ability: %{public}s.", GetAbilityName().c_str());
     Ability::OnPrepareTerminate();
-
+    HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     napi_value jsValue = CallObjectMethod("onPrepareToTerminate", nullptr, 0, true);
     bool ret = false;
@@ -608,15 +602,6 @@ void JsAbility::AbilityContinuationOrRecover(const Want &want)
         OnSceneRestored();
         NotifyContinuationResult(want, true);
     } else if (ShouldRecoverState(want)) {
-        std::string pageStack = abilityRecovery_->GetSavedPageStack(AppExecFwk::StateReason::DEVELOPER_REQUEST);
-        HandleScope handleScope(jsRuntime_);
-        auto env = jsRuntime_.GetNapiEnv();
-        auto mainWindow = scene_->GetMainWindow();
-        if (mainWindow != nullptr) {
-            mainWindow->NapiSetUIContent(pageStack, env, abilityContext_->GetContentStorage()->GetNapiValue(), true);
-        } else {
-            HILOG_ERROR("AppRecovery:AbilityContinuationOrRecover mainWindow nullptr");
-        }
         OnSceneRestored();
     } else {
         OnSceneCreated();
@@ -632,7 +617,7 @@ void JsAbility::DoOnForeground(const Want &want)
             return;
         }
         scene_ = std::make_shared<Rosen::WindowScene>();
-        int32_t displayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+        int32_t displayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
         if (setting_ != nullptr) {
             std::string strDisplayId =
                 setting_->GetProperty(OHOS::AppExecFwk::AbilityStartSetting::WINDOW_DISPLAY_ID_KEY);
@@ -683,6 +668,7 @@ void JsAbility::DoOnForeground(const Want &want)
     }
 
     HILOG_INFO("Move scene to foreground, sceneFlag_:%{public}d.", Ability::sceneFlag_);
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     scene_->GoForeground(Ability::sceneFlag_);
     HILOG_DEBUG("%{public}s end scene_->GoForeground.", __func__);
 }
@@ -701,10 +687,8 @@ void JsAbility::RequestFocus(const Want &want)
         window->SetWindowMode(static_cast<Rosen::WindowMode>(windowMode));
         HILOG_DEBUG("set window mode = %{public}d.", windowMode);
     }
-    std::string methodName = "RequestFocus";
-    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
+    AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, METHOD_NAME);
     scene_->GoForeground(Ability::sceneFlag_);
-    AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     HILOG_INFO("Lifecycle: end.");
 }
 

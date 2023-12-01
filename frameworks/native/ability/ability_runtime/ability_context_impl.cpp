@@ -21,6 +21,7 @@
 #include "hitrace_meter.h"
 #include "connection_manager.h"
 #include "dialog_request_callback_impl.h"
+#include "dialog_ui_extension_callback.h"
 #include "hilog_wrapper.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
@@ -149,7 +150,7 @@ ErrCode AbilityContextImpl::StartAbilityAsCaller(const AAFwk::Want &want, int re
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("StartAbilityAsCaller");
-    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityAsCaller(want, token_, requestCode);
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityAsCaller(want, token_, nullptr, requestCode);
     if (err != ERR_OK) {
         HILOG_ERROR("StartAbilityAsCaller. ret=%{public}d", err);
     }
@@ -185,7 +186,7 @@ ErrCode AbilityContextImpl::StartAbilityAsCaller(const AAFwk::Want &want, const 
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("StartAbilityAsCaller");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityAsCaller(want,
-        startOptions, token_, requestCode);
+        startOptions, token_, nullptr, requestCode);
     if (err != ERR_OK) {
         HILOG_ERROR("StartAbilityAsCaller. ret=%{public}d", err);
     }
@@ -210,7 +211,7 @@ ErrCode AbilityContextImpl::StartAbilityForResult(const AAFwk::Want& want, int r
 {
     HILOG_DEBUG("StartAbilityForResult");
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
-    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode);
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode, -1);
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
         HILOG_ERROR("StartAbilityForResult. ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
@@ -414,6 +415,12 @@ std::shared_ptr<Context> AbilityContextImpl::CreateModuleContext(const std::stri
     const std::string& moduleName)
 {
     return stageContext_ ? stageContext_->CreateModuleContext(bundleName, moduleName) : nullptr;
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> AbilityContextImpl::CreateModuleResourceManager(
+    const std::string &bundleName, const std::string &moduleName)
+{
+    return stageContext_ ? stageContext_->CreateModuleResourceManager(bundleName, moduleName) : nullptr;
 }
 
 void AbilityContextImpl::SetAbilityInfo(const std::shared_ptr<AppExecFwk::AbilityInfo>& abilityInfo)
@@ -749,13 +756,38 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
     want.SetParams(wantParams);
     Ace::ModalUIExtensionCallbacks callback;
     callback.onError = std::bind(&JsUIExtensionCallback::OnError, uiExtensionCallbacks, std::placeholders::_1);
+    callback.onRelease = std::bind(&JsUIExtensionCallback::OnRelease, uiExtensionCallbacks, std::placeholders::_1);
     Ace::ModalUIExtensionConfig config;
-    config.isProhibitBack = true;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
         HILOG_ERROR("CreateModalUIExtension is failed");
         return ERR_INVALID_VALUE;
     }
+    uiExtensionCallbacks->SetUIContent(uiContent);
+    uiExtensionCallbacks->SetSessionId(sessionId);
+    return ERR_OK;
+}
+
+ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &want)
+{
+    HILOG_DEBUG("call");
+    auto uiContent = GetUIContent();
+    if (uiContent == nullptr) {
+        HILOG_ERROR("uiContent is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    auto disposedCallback = std::make_shared<DialogUIExtensionCallback>();
+    Ace::ModalUIExtensionCallbacks callback;
+    callback.onError = std::bind(&DialogUIExtensionCallback::OnError, disposedCallback);
+    callback.onRelease = std::bind(&DialogUIExtensionCallback::OnRelease, disposedCallback);
+    Ace::ModalUIExtensionConfig config;
+    int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
+    if (sessionId == 0) {
+        HILOG_ERROR("CreateModalUIExtension is failed");
+        return ERR_INVALID_VALUE;
+    }
+    disposedCallback->SetUIContent(uiContent);
+    disposedCallback->SetSessionId(sessionId);
     return ERR_OK;
 }
 #endif

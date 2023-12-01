@@ -17,6 +17,7 @@
 
 #include "extension_ability_thread.h"
 #include "fa_ability_thread.h"
+#include "ui_ability_thread.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 
@@ -42,7 +43,9 @@ void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &ap
     }
 
     sptr<AbilityThread> thread = nullptr;
-    if (abilityInfo->type == AbilityType::EXTENSION) {
+    if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
+        thread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    } else if (abilityInfo->type == AbilityType::EXTENSION) {
         thread = new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
     } else {
         thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
@@ -73,7 +76,9 @@ void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &ap
     }
 
     sptr<AbilityThread> thread = nullptr;
-    if (abilityInfo->type == AbilityType::EXTENSION) {
+    if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
+        thread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    } else if (abilityInfo->type == AbilityType::EXTENSION) {
         thread = new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
     } else {
         thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
@@ -259,12 +264,23 @@ void AbilityThread::CallRequest()
     HILOG_DEBUG("called");
 }
 
+void AbilityThread::OnExecuteIntent(const Want &want)
+{
+    HILOG_DEBUG("called");
+}
+
 std::vector<std::shared_ptr<AppExecFwk::DataAbilityResult>> AbilityThread::ExecuteBatch(
     const std::vector<std::shared_ptr<AppExecFwk::DataAbilityOperation>> &operations)
 {
     HILOG_DEBUG("called");
     std::vector<std::shared_ptr<DataAbilityResult>> results;
     return results;
+}
+
+int AbilityThread::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("called");
+    return ERR_INVALID_VALUE;
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
