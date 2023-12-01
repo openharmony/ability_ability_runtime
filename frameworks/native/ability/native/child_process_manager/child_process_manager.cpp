@@ -28,6 +28,7 @@
 #include "bundle_info.h"
 #include "bundle_mgr_interface.h"
 #include "child_process.h"
+#include "child_process_manager_error_utils.h"
 #include "child_process_start_info.h"
 #include "constants.h"
 #include "event_runner.h"
@@ -42,8 +43,7 @@
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
-constexpr pid_t INVALID_PID = -1;
-const std::string SYS_PARAM_MULTI_PROCESS_MODEL = "persist.sys.multi_process_model";
+const std::string SYS_PARAM_PRODUCT_DEVICE_TYPE = "const.product.devicetype";
 }
 
 bool ChildProcessManager::signalRegistered_ = false;
@@ -51,7 +51,8 @@ bool ChildProcessManager::signalRegistered_ = false;
 ChildProcessManager::ChildProcessManager()
 {
     HILOG_DEBUG("ChildProcessManager constructor called");
-    multiProcessModelEnabled_ = OHOS::system::GetBoolParameter(SYS_PARAM_MULTI_PROCESS_MODEL, false);
+    std::string deviceType = OHOS::system::GetParameter(SYS_PARAM_PRODUCT_DEVICE_TYPE, "");
+    multiProcessModelEnabled_ = deviceType == "2in1" || deviceType == "tablet";
     if (!signalRegistered_) {
         signalRegistered_ = true;
         HILOG_DEBUG("Register signal");
@@ -71,23 +72,30 @@ void ChildProcessManager::HandleSigChild(int32_t signo)
     }
 }
 
-pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry)
+ChildProcessManagerErrorCode ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEntry, pid_t &pid)
 {
     HILOG_DEBUG("StartChildProcessBySelfFork called");
+    ChildProcessManagerErrorCode errorCode = PreCheck();
+    if (errorCode != ChildProcessManagerErrorCode::ERR_OK) {
+        return errorCode;
+    }
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
         AbilityRuntime::ApplicationContext::GetInstance();
+    if (applicationContext == nullptr) {
+        HILOG_ERROR("Get applicationContext failed.");
+        return ChildProcessManagerErrorCode::ERR_GET_APPLICATION_CONTEXT_FAILED;
+    }
     std::string bundleName = applicationContext->GetBundleName();
-    std::string moduleName = GetModuleNameFromSrcEntry(srcEntry);
     AppExecFwk::HapModuleInfo hapModuleInfo;
-    if (!GetHapModuleInfo(bundleName, moduleName, hapModuleInfo)) {
+    if (!GetHapModuleInfo(bundleName, hapModuleInfo)) {
         HILOG_ERROR("GetHapModuleInfo failed");
-        return INVALID_PID;
+        return ChildProcessManagerErrorCode::ERR_GET_HAP_INFO_FAILED;
     }
 
-    pid_t pid = fork();
+    pid = fork();
     if (pid < 0) {
         HILOG_ERROR("Fork process failed");
-        return pid;
+        return ChildProcessManagerErrorCode::ERR_FORK_FAILED;
     }
     if (pid == 0) {
         HILOG_DEBUG("Child process start");
@@ -96,7 +104,20 @@ pid_t ChildProcessManager::StartChildProcessBySelfFork(const std::string &srcEnt
         HILOG_DEBUG("Child process end");
         exit(0);
     }
-    return pid;
+    return ChildProcessManagerErrorCode::ERR_OK;
+}
+
+ChildProcessManagerErrorCode ChildProcessManager::PreCheck()
+{
+    if (!MultiProcessModelEnabled()) {
+        HILOG_ERROR("Multi process model is not enabled");
+        return ChildProcessManagerErrorCode::ERR_MULTI_PROCESS_MODEL_DISABLED;
+    }
+    if (IsChildProcess()) {
+        HILOG_ERROR("Already in child process");
+        return ChildProcessManagerErrorCode::ERR_ALREADY_IN_CHILD_PROCESS;
+    }
+    return ChildProcessManagerErrorCode::ERR_OK;
 }
 
 bool ChildProcessManager::MultiProcessModelEnabled()
@@ -112,6 +133,10 @@ bool ChildProcessManager::IsChildProcess()
 void ChildProcessManager::HandleChildProcess(const std::string &srcEntry, AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
     std::shared_ptr<AppExecFwk::EventRunner> eventRunner = AppExecFwk::EventRunner::GetMainEventRunner();
+    if (eventRunner == nullptr) {
+        HILOG_ERROR("Get main eventRunner failed.");
+        return;
+    }
     eventRunner->Stop();
 
     auto runtime = CreateRuntime(hapModuleInfo);
@@ -129,28 +154,26 @@ void ChildProcessManager::HandleChildProcess(const std::string &srcEntry, AppExe
     processStartInfo->isEsModule = (hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE);
 
     auto process = ChildProcess::Create(runtime);
-    process->Init(processStartInfo);
+    if (process == nullptr) {
+        HILOG_ERROR("Failed to create ChildProcess.");
+        return;
+    }
+    bool ret = process->Init(processStartInfo);
+    if (!ret) {
+        HILOG_ERROR("JsChildProcess init failed.");
+        return;
+    }
     process->OnStart();
 }
 
-std::string ChildProcessManager::GetModuleNameFromSrcEntry(const std::string &srcEntry)
+bool ChildProcessManager::GetHapModuleInfo(const std::string &bundleName, AppExecFwk::HapModuleInfo &hapModuleInfo)
 {
-    std::string::size_type iPos = srcEntry.find_first_of('/');
-    if (iPos == std::string::npos) {
-        return "";
+    auto sysMrgClient = DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
+    if (sysMrgClient == nullptr) {
+        HILOG_ERROR("Failed to get SysMrgClient.");
+        return false;
     }
-    std::string moduleName = srcEntry.substr(0, iPos);
-    if (moduleName == ".") {
-        return "";
-    }
-    return moduleName;
-}
-
-bool ChildProcessManager::GetHapModuleInfo(const std::string &bundleName,
-                                           const std::string &moduleName, AppExecFwk::HapModuleInfo &hapModuleInfo)
-{
-    auto bundleObj =
-        DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    auto bundleObj = sysMrgClient->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleObj == nullptr) {
         HILOG_ERROR("Failed to get bundle manager service.");
         return false;
@@ -176,19 +199,13 @@ bool ChildProcessManager::GetHapModuleInfo(const std::string &bundleName,
         return false;
     }
     if (bundleInfo.hapModuleInfos.empty()) {
+        HILOG_ERROR("hapModuleInfos empty!");
         return false;
     }
     HILOG_DEBUG("hapModueInfos size: %{public}zu", bundleInfo.hapModuleInfos.size());
     bool result = false;
-    const bool moduleNameExist = moduleName.length() > 0;
     for (auto info : bundleInfo.hapModuleInfos) {
-        if (moduleNameExist) {
-            if (info.moduleName == moduleName) {
-                result = true;
-                hapModuleInfo = info;
-                break;
-            }
-        } else if (info.moduleType == AppExecFwk::ModuleType::ENTRY) {
+        if (info.moduleType == AppExecFwk::ModuleType::ENTRY) {
             result = true;
             hapModuleInfo = info;
             break;
@@ -201,6 +218,10 @@ std::unique_ptr<AbilityRuntime::Runtime> ChildProcessManager::CreateRuntime(AppE
 {
     std::shared_ptr<AbilityRuntime::ApplicationContext> applicationContext =
         AbilityRuntime::ApplicationContext::GetInstance();
+    if (applicationContext == nullptr) {
+        HILOG_ERROR("Get applicationContext failed.");
+        return nullptr;
+    }
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo = applicationContext->GetApplicationInfo();
     if (applicationInfo == nullptr) {
         HILOG_ERROR("applicationInfo is nullptr");

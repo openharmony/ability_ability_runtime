@@ -306,7 +306,7 @@ ErrCode AbilityManagerShellCommand::RunAsScreenCommand()
             if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
                 // 'aa screen' with no option: aa screen
                 // 'aa screen' with a wrong argument: aa screen xxx
-                HILOG_INFO("'aa %{public}s' %{public}s", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
+                HILOG_INFO("'aa %{public}s' %{public}s.", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
                 resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
                 result = OHOS::ERR_INVALID_VALUE;
             }
@@ -819,7 +819,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
     std::string perfCmd = "";
     std::string debugCmd = "";
     bool isPerf = false;
-    bool isSanboxApp = false;
+    bool isSandboxApp = false;
 
     while (true) {
         counter++;
@@ -837,7 +837,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
             if (counter == 1 && strcmp(argv_[optind], cmd_.c_str()) == 0) {
                 // 'aa process' with no option: aa process
                 // 'aa process' with a wrong argument: aa process xxx
-                HILOG_INFO("'aa %{public}s' %{public}s", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
+                HILOG_INFO("'aa %{public}s' %{public}s!", HELP_MSG_NO_OPTION.c_str(), cmd_.c_str());
 
                 resultReceiver_.append(HELP_MSG_NO_OPTION + "\n");
                 result = OHOS::ERR_INVALID_VALUE;
@@ -971,7 +971,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
             case 'S': {
                 // 'aa process -S'
                 // enter sanbox to perform app
-                isSanboxApp = true;
+                isSandboxApp = true;
                 break;
             }
             case 0: {
@@ -1012,8 +1012,8 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
             if (!debugCmd.empty()) {
                 want.SetParam("debugCmd", debugCmd);
             }
-            if (isSanboxApp) {
-                want.SetParam("sanboxApp", isSanboxApp);
+            if (isSandboxApp) {
+                want.SetParam("sandboxApp", isSandboxApp);
             }
         }
     }
@@ -1117,7 +1117,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
     bool isColdStart = false;
     bool isDebugApp = false;
     bool isContinuation = false;
-    bool isSanboxApp = false;
+    bool isSandboxApp = false;
     bool isNativeDebug = false;
 
     while (true) {
@@ -1328,7 +1328,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             case 'S': {
                 // 'aa start -b <bundleName> -a <abilityName> -p <perf-cmd> -S'
                 // enter sanbox to perform app
-                isSanboxApp = true;
+                isSandboxApp = true;
                 break;
             }
             case 'c': {
@@ -1383,8 +1383,8 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             if (!perfCmd.empty()) {
                 want.SetParam("perfCmd", perfCmd);
             }
-            if (isSanboxApp) {
-                want.SetParam("sanboxApp", isSanboxApp);
+            if (isSandboxApp) {
+                want.SetParam("sandboxApp", isSandboxApp);
             }
             if (isNativeDebug) {
                 want.SetParam("nativeDebug", isNativeDebug);

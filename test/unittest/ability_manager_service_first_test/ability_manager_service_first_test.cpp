@@ -32,6 +32,7 @@
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
 #include "mock_ability_controller.h"
+#include "mock_app_debug_listener_stub.h"
 #include "session/host/include/session.h"
 #include "mock_ability_manager_collaborator.h"
 #include "mock_prepare_terminate_callback.h"
@@ -769,7 +770,9 @@ HWTEST_F(AbilityManagerServiceFirstTest, DelegatorDoAbilityBackground_001, TestS
 {
     HILOG_INFO("AbilityManagerServiceFirstTest DelegatorDoAbilityBackground_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->DelegatorDoAbilityBackground(nullptr), ERR_INVALID_VALUE);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(abilityMs_->DelegatorDoAbilityBackground(nullptr), ERR_INVALID_VALUE);
+    }
     HILOG_INFO("AbilityManagerServiceFirstTest DelegatorDoAbilityBackground_001 end");
 }
 
@@ -1094,7 +1097,9 @@ HWTEST_F(AbilityManagerServiceFirstTest, RecordAppExitReason_001, TestSize.Level
 {
     HILOG_INFO("AbilityManagerServiceFirstTest RecordAppExitReason_001 start");
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    EXPECT_EQ(abilityMs_->RecordAppExitReason(REASON_JS_ERROR), ERR_NULL_OBJECT);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_EQ(abilityMs_->RecordAppExitReason(REASON_JS_ERROR), ERR_NULL_OBJECT);
+    }
     HILOG_INFO("AbilityManagerServiceFirstTest RecordAppExitReason_001 end");
 }
 
@@ -1408,6 +1413,62 @@ HWTEST_F(AbilityManagerServiceFirstTest, ConnectRemoteAbility_001, TestSize.Leve
     EXPECT_EQ(abilityMs_->ConnectRemoteAbility(want, nullptr, nullptr), ERR_NULL_OBJECT);
     MyFlag::flag_ = 0;
     HILOG_INFO("AbilityManagerServiceFirstTest ConnectRemoteAbility_001 end");
+}
+
+/**
+ * @tc.name: RegisterAppDebugListener_001
+ * @tc.desc: Test the state of RegisterAppDebugListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, RegisterAppDebugListener_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<AppExecFwk::MockAppDebugListenerStub> listener;
+    auto result = abilityMs_->RegisterAppDebugListener(listener);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/**
+ * @tc.name: UnregisterAppDebugListener_001
+ * @tc.desc: Test the state of UnregisterAppDebugListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, UnregisterAppDebugListener_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    sptr<AppExecFwk::MockAppDebugListenerStub> listener;
+    auto result = abilityMs_->UnregisterAppDebugListener(listener);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/**
+ * @tc.name: AttachAppDebug_001
+ * @tc.desc: Test the state of AttachAppDebug
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, AttachAppDebug_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    std::string bundleName;
+    auto result = abilityMs_->AttachAppDebug(bundleName);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
+}
+
+/**
+ * @tc.name: DetachAppDebug_001
+ * @tc.desc: Test the state of DetachAppDebug
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, DetachAppDebug_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    std::string bundleName;
+    auto result = abilityMs_->DetachAppDebug(bundleName);
+    EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

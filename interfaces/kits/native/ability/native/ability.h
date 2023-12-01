@@ -80,6 +80,7 @@ class AbilityWindow;
 #endif
 class ILifeCycle;
 class ContinuationManager;
+class ContinuationHandler;
 class AbilityRecovery;
 class ContinuationRegisterManager;
 class Ability : public IAbilityEvent,
@@ -1143,6 +1144,12 @@ public:
      */
     Ace::UIContent* GetUIContent() override;
 
+    /**
+     * @brief create modal UIExtension.
+     * @param want Create modal UIExtension with want object.
+     */
+    int CreateModalUIExtension(const Want &want);
+
 protected:
     class AbilityDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
     public:
@@ -1273,7 +1280,6 @@ protected:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
     std::shared_ptr<AbilityStartSetting> setting_ = nullptr;
-    std::shared_ptr<AbilityRecovery> abilityRecovery_ = nullptr;
     std::shared_ptr<AbilityInfo> abilityInfo_ = nullptr;
     LaunchParam launchParam_;
     int32_t appIndex_ = 0;

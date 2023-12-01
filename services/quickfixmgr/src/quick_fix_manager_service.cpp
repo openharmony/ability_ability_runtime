@@ -54,7 +54,7 @@ bool QuickFixManagerService::Init()
     return true;
 }
 
-int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &quickFixFiles)
+int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("function called.");
@@ -77,10 +77,9 @@ int32_t QuickFixManagerService::ApplyQuickFix(const std::vector<std::string> &qu
         HILOG_ERROR("App manager is nullptr.");
         return QUICK_FIX_CONNECT_FAILED;
     }
-
     auto applyTask = std::make_shared<QuickFixManagerApplyTask>(bundleQfMgr, appMgr, eventHandler_, this);
     AddApplyTask(applyTask);
-    applyTask->Run(quickFixFiles);
+    applyTask->Run(quickFixFiles, isDebug);
 
     HILOG_DEBUG("function finished.");
     return QUICK_FIX_OK;
@@ -101,14 +100,14 @@ int32_t QuickFixManagerService::GetApplyedQuickFixInfo(const std::string &bundle
 
     auto bundleMgr = QuickFixUtil::GetBundleManagerProxy();
     if (bundleMgr == nullptr) {
-        HILOG_ERROR("Failed to get bundle manager.");
+        HILOG_ERROR("Failed to get bundle manager!");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
     AppExecFwk::BundleInfo bundleInfo;
     if (!bundleMgr->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
         AppExecFwk::Constants::ANY_USERID)) {
-        HILOG_ERROR("Get bundle info failed.");
+        HILOG_ERROR("Get bundle info failed!");
         return QUICK_FIX_GET_BUNDLE_INFO_FAILED;
     }
 

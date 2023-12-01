@@ -29,6 +29,7 @@
 #include "erms_mgr_param.h"
 #endif
 #include "hilog_wrapper.h"
+#include "iservice_registry.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "permission_constants.h"
@@ -56,6 +57,8 @@ const std::string JUMP_DIALOG_CALLER_MODULE_NAME = "interceptor_callerModuleName
 const std::string JUMP_DIALOG_CALLER_LABEL_ID = "interceptor_callerLabelId";
 const std::string JUMP_DIALOG_TARGET_MODULE_NAME = "interceptor_targetModuleName";
 const std::string JUMP_DIALOG_TARGET_LABEL_ID = "interceptor_targetLabelId";
+const std::string UNREGISTER_EVENT_TASK = "unregister event task";
+constexpr int KILL_PROCESS_DELAYTIME_MICRO_SECONDS = 5000;
 
 AbilityInterceptor::~AbilityInterceptor()
 {}
@@ -171,6 +174,127 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
         return false;
     }
     return true;
+}
+
+DisposedRuleInterceptor::DisposedRuleInterceptor()
+{}
+
+DisposedRuleInterceptor::~DisposedRuleInterceptor()
+{}
+
+ErrCode DisposedRuleInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground)
+{
+    HILOG_DEBUG("Call");
+    AppExecFwk::DisposedRule disposedRule;
+    if (CheckControl(want, userId, disposedRule)) {
+        HILOG_INFO("The target ability is intercpted.");
+#ifdef SUPPORT_GRAPHICS
+        if (isForeground && disposedRule.want != nullptr
+            && disposedRule.disposedType != AppExecFwk::DisposedType::NON_BLOCK
+            && disposedRule.componentType == AppExecFwk::ComponentType::UI_ABILITY) {
+            int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule.want,
+                requestCode, userId));
+            if (ret != ERR_OK) {
+                HILOG_ERROR("DisposedRuleInterceptor start ability failed.");
+                return ret;
+            }
+        }
+#endif
+        if (disposedRule.isEdm) {
+            return ERR_EDM_APP_CONTROLLED;
+        }
+        return ERR_APP_CONTROLLED;
+    }
+    if (disposedRule.disposedType == AppExecFwk::DisposedType::NON_BLOCK) {
+        HILOG_INFO("not block");
+        auto disposedObserver = sptr<DisposedObserver>::MakeSptr(disposedRule);
+        if (!disposedObserver) {
+            HILOG_ERROR("disposedObserver is nullptr");
+            return ERR_INVALID_VALUE;
+        }
+        sptr<OHOS::AppExecFwk::IAppMgr> appManager = disposedObserver->GetAppMgr();
+        std::vector<std::string> bundleNameList;
+        bundleNameList.push_back(want.GetBundle());
+        int32_t ret = IN_PROCESS_CALL(appManager->RegisterApplicationStateObserver(disposedObserver, bundleNameList));
+        if (ret != 0) {
+            HILOG_ERROR("register to appmanager failed. err:%{public}d", ret);
+            disposedObserver = nullptr;
+            return ret;
+        }
+        auto unregisterTask = [appManager, disposedObserver] () {
+            HILOG_ERROR("unregister observer timeout, need unregister again");
+            IN_PROCESS_CALL(appManager->UnregisterApplicationStateObserver(disposedObserver));
+        };
+        taskHandler_->SubmitTask(unregisterTask, UNREGISTER_EVENT_TASK, KILL_PROCESS_DELAYTIME_MICRO_SECONDS);
+    }
+    return ERR_OK;
+}
+
+bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
+    AppExecFwk::DisposedRule &disposedRule)
+{
+    // get bms
+    auto bms = AbilityUtil::GetBundleManager();
+    if (!bms) {
+        HILOG_ERROR("GetBundleManager failed");
+        return false;
+    }
+
+    // get disposed status
+    std::string bundleName = want.GetBundle();
+    auto appControlMgr = bms->GetAppControlProxy();
+    if (appControlMgr == nullptr) {
+        HILOG_ERROR("Get appControlMgr failed");
+        return false;
+    }
+    std::vector<AppExecFwk::DisposedRule> disposedRuleList;
+
+    auto ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
+        userId, disposedRuleList));
+    if (ret != ERR_OK || disposedRuleList.empty()) {
+        HILOG_DEBUG("Get No DisposedRule");
+        return false;
+    }
+
+    for (auto &rule:disposedRuleList) {
+        if (CheckDisposedRule(want, rule)) {
+            disposedRule = rule;
+            return true;
+        }
+    }
+    int priority = -1;
+    for (auto &rule : disposedRuleList) {
+        if (rule.disposedType != AppExecFwk::DisposedType::NON_BLOCK) {
+            return false;
+        }
+        if (rule.priority > priority) {
+            priority = rule.priority;
+            disposedRule = rule;
+        }
+    }
+    return false;
+}
+
+bool DisposedRuleInterceptor::CheckDisposedRule(const Want &want, AppExecFwk::DisposedRule &disposedRule)
+{
+    if (disposedRule.disposedType == AppExecFwk::DisposedType::NON_BLOCK) {
+        return false;
+    }
+    bool isAllowed = disposedRule.controlType == AppExecFwk::ControlType::ALLOWED_LIST;
+    if (disposedRule.disposedType == AppExecFwk::DisposedType::BLOCK_APPLICATION) {
+        return !isAllowed;
+    }
+
+    std::string moduleName = want.GetElement().GetModuleName();
+    std::string abilityName = want.GetElement().GetAbilityName();
+
+    for (auto elementName : disposedRule.elementList) {
+        if (moduleName == elementName.GetModuleName()
+            && abilityName == elementName.GetAbilityName()) {
+            return !isAllowed;
+        }
+    }
+    return isAllowed;
 }
 
 EcologicalRuleInterceptor::EcologicalRuleInterceptor()
