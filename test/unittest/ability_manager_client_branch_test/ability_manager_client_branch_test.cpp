@@ -1850,5 +1850,17 @@ HWTEST_F(AbilityManagerClientBranchTest, TerminateMission_0100, TestSize.Level1)
     auto result = client_->TerminateMission(missionId);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: AbilityManagerClient_GetForegroundUIAbilities_0100
+ * @tc.desc: Test function GetForegroundUIAbilities when normally.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerClientBranchTest, GetForegroundUIAbilities_0100, TestSize.Level1)
+{
+    std::vector<AppExecFwk::AbilityStateData> abilityStateDataLists;
+    auto result = client_->GetForegroundUIAbilities(abilityStateDataLists);
+    EXPECT_EQ(result, ERR_OK);
+}
 }  // namespace AAFwk
 }  // namespace OHOS
