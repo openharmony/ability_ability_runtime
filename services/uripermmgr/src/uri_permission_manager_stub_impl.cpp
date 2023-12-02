@@ -644,7 +644,8 @@ uint32_t UriPermissionManagerStubImpl::GetTokenIdByBundleName(const std::string 
             return GET_BUNDLE_INFO_FAILED;
         }
     } else {
-        if (IN_PROCESS_CALL(bundleMgrHelper_->GetSandboxBundleInfo(bundleName, appIndex, userId, bundleInfo) != ERR_OK)) {
+        if (IN_PROCESS_CALL(bundleMgrHelper_->GetSandboxBundleInfo(
+        	bundleName, appIndex, userId, bundleInfo) != ERR_OK)) {
             HILOG_WARN("Failed to get bundle info according to appIndex.");
             return GET_BUNDLE_INFO_FAILED;
         }

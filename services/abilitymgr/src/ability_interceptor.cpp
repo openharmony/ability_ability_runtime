@@ -465,8 +465,8 @@ ErrCode AbilityJumpInterceptor::DoProcess(const Want &want, int requestCode, int
     return ERR_OK;
 }
 
-bool AbilityJumpInterceptor::CheckControl(std::shared_ptr<AppExecFwk::BundleMgrHelper> &bundleMgrHelper, const Want &want,
-    int32_t userId, AppExecFwk::AppJumpControlRule &controlRule)
+bool AbilityJumpInterceptor::CheckControl(std::shared_ptr<AppExecFwk::BundleMgrHelper> &bundleMgrHelper,
+        const Want &want, int32_t userId, AppExecFwk::AppJumpControlRule &controlRule)
 {
     int callerUid = IPCSkeleton::GetCallingUid();
     std::string callerBundleName;
