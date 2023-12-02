@@ -76,12 +76,12 @@ void MainThreadByMockBmsTest::TearDown()
 void MainThreadByMockBmsTest::MockBundleInstaller()
 {
     auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
-    auto mockGetSystemAbility = [&](int32_t systemAbilityId) {
+    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
         GTEST_LOG_(INFO) << "MockBundleInstaller systemAbilityId: " << systemAbilityId << " )";
         if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID || systemAbilityId == APP_MGR_SERVICE_ID) {
-            return mockBundleMgr->AsObject();
+            return bms->AsObject();
         } else {
-            return iSystemAbilityMgr_->GetSystemAbility(systemAbilityId);
+            return saMgr->GetSystemAbility(systemAbilityId);
         }
     };
     EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));

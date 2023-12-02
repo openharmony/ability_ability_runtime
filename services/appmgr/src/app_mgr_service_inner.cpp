@@ -2780,7 +2780,7 @@ void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord
     auto callerUid = IPCSkeleton::GetCallingUid();
     auto userId = GetUserIdByUid(callerUid);
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
-            appRecord->GetBundleName(), BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
+        appRecord->GetBundleName(), BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
         HILOG_ERROR("GetBundleInfo fail");
         return;
     }
