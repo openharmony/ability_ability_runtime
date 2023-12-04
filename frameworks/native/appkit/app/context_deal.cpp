@@ -127,9 +127,9 @@ void ContextDeal::SetContext(const std::shared_ptr<Context> &context)
 
 std::shared_ptr<BundleMgrHelper> ContextDeal::GetBundleManager() const
 {
-    std::shared_ptr<BundleMgrHelper> bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("failed to get bundle manager service");
+        HILOG_ERROR("Failed to get bundle manager service.");
         return nullptr;
     }
     return bundleMgrHelper;
@@ -210,7 +210,7 @@ sptr<AAFwk::IAbilityManager> ContextDeal::GetAbilityManager()
 {
     auto remoteObject = OHOS::DelayedSingleton<SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
     if (remoteObject == nullptr) {
-        HILOG_ERROR("failed to get ability manager service");
+        HILOG_ERROR("Failed to get ability manager service.");
         return nullptr;
     }
     sptr<AAFwk::IAbilityManager> ams = iface_cast<AAFwk::IAbilityManager>(remoteObject);
@@ -455,18 +455,18 @@ bool ContextDeal::HapModuleInfoRequestInit()
 {
     auto ptr = GetBundleManager();
     if (ptr == nullptr) {
-        HILOG_ERROR("GetHapModuleInfo failed to get bundle manager service");
+        HILOG_ERROR("Failed to get bundle manager service.");
         return false;
     }
 
     if (abilityInfo_ == nullptr) {
-        HILOG_ERROR("GetHapModuleInfo failed for abilityInfo_ is nullptr");
+        HILOG_ERROR("Failed for abilityInfo_ is nullptr.");
         return false;
     }
 
     hapModuleInfoLocal_ = std::make_shared<HapModuleInfo>();
     if (!ptr->GetHapModuleInfo(*abilityInfo_.get(), *hapModuleInfoLocal_)) {
-        HILOG_ERROR("IBundleMgr::GetHapModuleInfo failed, will retval false value");
+        HILOG_ERROR("Failed, will retval false value.");
         return false;
     }
     return true;

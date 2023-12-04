@@ -108,7 +108,7 @@ HWTEST_F(ContextContainerTest, AppExecFwk_ContextContainer_GetBundleManager_0100
 {
     context_->AttachBaseContext(contextDeal_);
 
-    std::shared_ptr<BundleMgrHelper> ptr = context_->GetBundleManager();
+    auto ptr = context_->GetBundleManager();
 
     EXPECT_NE(ptr, nullptr);
 }
@@ -120,7 +120,7 @@ HWTEST_F(ContextContainerTest, AppExecFwk_ContextContainer_GetBundleManager_0100
  */
 HWTEST_F(ContextContainerTest, AppExecFwk_ContextContainer_GetBundleManager_0200, Function | MediumTest | Level3)
 {
-    std::shared_ptr<BundleMgrHelper> ptr = context_->GetBundleManager();
+    auto ptr = context_->GetBundleManager();
     EXPECT_EQ(ptr, nullptr);
 }
 

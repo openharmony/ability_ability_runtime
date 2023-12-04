@@ -32,12 +32,12 @@ std::unique_ptr<TestRunner> TestRunner::Create(const std::unique_ptr<AbilityRunt
 
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Failed to get bundle manager service");
+        HILOG_ERROR("Failed to get bundle manager service.");
         return nullptr;
     }
 
     if (!args) {
-        HILOG_ERROR("Invalid ability delegator args");
+        HILOG_ERROR("Invalid ability delegator args.");
         return nullptr;
     }
 
@@ -50,7 +50,7 @@ std::unique_ptr<TestRunner> TestRunner::Create(const std::unique_ptr<AbilityRunt
         static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
         static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO) +
         static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_METADATA)), bundleInfo) != ERR_OK) {
-        HILOG_ERROR("Failed to GetBundleInfo");
+        HILOG_ERROR("Failed to GetBundleInfo.");
         return nullptr;
     }
 

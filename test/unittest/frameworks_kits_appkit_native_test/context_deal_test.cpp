@@ -114,7 +114,7 @@ HWTEST_F(ContextDealTest, AppExecFwk_ContextDeal_GetBundleName_0200, Function | 
  */
 HWTEST_F(ContextDealTest, AppExecFwk_ContextDeal_GetBundleManager_0100, Function | MediumTest | Level3)
 {
-    std::shared_ptr<BundleMgrHelper> ptr = context_->GetBundleManager();
+    auto ptr = context_->GetBundleManager();
     EXPECT_NE(ptr, nullptr);
 }
 

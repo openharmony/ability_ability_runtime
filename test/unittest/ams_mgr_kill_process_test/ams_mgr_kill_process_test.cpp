@@ -64,7 +64,7 @@ std::shared_ptr<AppMgrServiceInner> AmsMgrKillProcessTest::GetAppMgrServiceInner
 {
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
-    std::shared_ptr<BundleMgrHelper> bundleMgr = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    auto bundleMgr = DelayedSingleton<BundleMgrHelper>::GetInstance();
     appMgrServiceInner->remoteClientManager_->SetBundleManagerHelper(bundleMgr);
 
     return appMgrServiceInner;

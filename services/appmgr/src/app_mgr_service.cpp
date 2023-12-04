@@ -298,6 +298,10 @@ sptr<IAmsMgr> AppMgrService::GetAmsMgr()
 int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName)
 {
     std::shared_ptr<RemoteClientManager> remoteClientManager = std::make_shared<RemoteClientManager>();
+    if(remoteClientManager == nullptr) {
+        HILOG_ERROR("Remote client manager is nullptr.");
+        return ERR_INVALID_OPERATION;
+    }
     auto bundleMgrHelper = remoteClientManager->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
         HILOG_ERROR("Get bundle manager helper is nullptr.");
@@ -315,7 +319,7 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName)
         auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
             AAFwk::PermissionConstants::PERMISSION_CLEAN_APPLICATION_DATA);
         if (!isCallingPerm) {
-            HILOG_ERROR("Permission verification failed");
+            HILOG_ERROR("Permission verification failed.");
             return ERR_PERMISSION_DENIED;
         }
     }
@@ -482,26 +486,30 @@ int AppMgrService::StartUserTestProcess(const AAFwk::Want &want, const sptr<IRem
 int AppMgrService::FinishUserTest(const std::string &msg, const int64_t &resultCode, const std::string &bundleName)
 {
     if (!IsReady()) {
-        HILOG_ERROR("not ready");
+        HILOG_ERROR("Not ready");
         return ERR_INVALID_OPERATION;
     }
     std::shared_ptr<RemoteClientManager> remoteClientManager = std::make_shared<RemoteClientManager>();
+    if(remoteClientManager == nullptr) {
+        HILOG_ERROR("Remote client manager is nullptr.");
+        return ERR_INVALID_OPERATION;
+    }
     auto bundleMgrHelper = remoteClientManager->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("AppMgrService::FinishUserTest GetBundleManager is nullptr");
+        HILOG_ERROR("AppMgrService::FinishUserTest GetBundleManager is nullptr.");
         return ERR_INVALID_OPERATION;
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     std::string callerBundleName;
     auto result = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, callerBundleName));
     if (result == ERR_OK) {
-        HILOG_INFO("FinishUserTest callingPid_ is %{public}s", callerBundleName.c_str());
+        HILOG_INFO("FinishUserTest callingPid_ is %{public}s.", callerBundleName.c_str());
         if (bundleName != callerBundleName) {
             HILOG_ERROR("AppMgrService::FinishUserTest Not this process call.");
             return ERR_INVALID_OPERATION;
         }
     } else {
-        HILOG_ERROR("GetBundleName failed: %{public}d", result);
+        HILOG_ERROR("GetBundleName failed: %{public}d.", result);
         return ERR_INVALID_OPERATION;
     }
     pid_t callingPid = IPCSkeleton::GetCallingPid();

@@ -130,12 +130,12 @@ std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, co
     std::string presetAppHapPath = inputPath;
     std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
     if (moduleName.empty()) {
-        HILOG_ERROR("failed to obtain moduleName.");
+        HILOG_ERROR("Failed to obtain moduleName.");
         return presetAppHapPath;
     }
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("fail to get bundle manager helper.");
+        HILOG_ERROR("Fail to get bundle manager helper.");
         return presetAppHapPath;
     }
     if (inputPath.find_first_of("/") == inputPath.find_last_of("/")) {

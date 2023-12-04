@@ -61,7 +61,7 @@ sptr<AppExecFwk::IQuickFixManager> QuickFixUtil::GetBundleQuickFixMgrProxy()
         return nullptr;
     }
 
-    HILOG_DEBUG("function finished.");
+    HILOG_DEBUG("Function finished.");
     return bundleQuickFixMgr;
 }
 } // namespace AAFwk

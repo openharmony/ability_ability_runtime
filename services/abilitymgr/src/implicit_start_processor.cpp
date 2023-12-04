@@ -231,7 +231,7 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
 int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos, std::string &deviceType, bool isMoreHapList)
 {
-    HILOG_DEBUG("%{public}s", __func__);
+    HILOG_DEBUG("%{public}s.", __func__);
     // get abilityinfos from bms
     auto bundleMgrHelper = GetBundleManagerHelper();
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, GET_ABILITY_SERVICE_FAILED);
@@ -243,7 +243,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault) ? false : true;
 
     if (IPCSkeleton::GetCallingUid() == 1027 && !request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS).empty()) {
-        HILOG_INFO("The NFCNeed caller source is NFC");
+        HILOG_INFO("The NFCNeed caller source is NFC.");
 
         ImplicitStartProcessor::queryBmsAppInfos(request, userId, dialogAppInfos);
         return ERR_OK;
@@ -252,14 +252,14 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos));
 
-    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu",
+    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu.",
         abilityInfos.size(), extensionInfos.size());
 
     if (abilityInfos.size() + extensionInfos.size() > 1) {
-        HILOG_INFO("More than one target application, filter by erms");
+        HILOG_INFO("More than one target application, filter by erms.");
         bool ret = FilterAbilityList(request.want, abilityInfos, extensionInfos, userId);
         if (!ret) {
-            HILOG_ERROR("FilterAbilityList failed");
+            HILOG_ERROR("FilterAbilityList failed.");
         }
     }
 
@@ -296,10 +296,10 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
                     IN_PROCESS_CALL(defaultMgr->GetDefaultApplication(userId, typeName, bundleInfo));
                 if (ret == ERR_OK) {
                     if (bundleInfo.abilityInfos.size() == 1) {
-                        HILOG_INFO("find default ability.");
+                        HILOG_INFO("Find default ability.");
                         isDefaultFlag = true;
                     } else if (bundleInfo.extensionInfos.size() == 1) {
-                        HILOG_INFO("find default extension.");
+                        HILOG_INFO("Find default extension.");
                         isDefaultFlag = true;
                     } else {
                         HILOG_INFO("GetDefaultApplication failed.");
@@ -468,6 +468,9 @@ std::shared_ptr<AppExecFwk::BundleMgrHelper> ImplicitStartProcessor::GetBundleMa
 sptr<AppExecFwk::IDefaultApp> ImplicitStartProcessor::GetDefaultAppProxy()
 {
     auto bundleMgrHelper = GetBundleManagerHelper();
+    if(bundleMgrHelper == nullptr) {
+        HILOG_ERROR("Failed to get bundle manager helper.");
+    }
     auto defaultAppProxy = bundleMgrHelper->GetDefaultAppProxy();
     if (defaultAppProxy == nullptr) {
         HILOG_ERROR("Get default app proxy failed.");
