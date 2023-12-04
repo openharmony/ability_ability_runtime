@@ -13,16 +13,21 @@
  * limitations under the License.
  */
 
-#include "js_auto_fill_manager.h"
-#include "napi/native_api.h"
+#include "ui_extension_record.h"
+#include "ability_util.h"
 
-static napi_module _module = {
-    .nm_version = 0,
-    .nm_register_func = OHOS::AbilityRuntime::JsAutoFillManagerInit,
-    .nm_modname = "app.ability.autoFillManager",
-};
+namespace OHOS {
+namespace AbilityRuntime {
+UIExtensionRecord::UIExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
+    const std::string &hostBundleName, int32_t extensionRecordId)
+    : ExtensionRecord(abilityRecord, hostBundleName, extensionRecordId)
+{}
 
-extern "C" __attribute__((constructor)) void NAPI_app_ability_autofillmanager_AutoRegister(void)
+UIExtensionRecord::~UIExtensionRecord() = default;
+
+bool UIExtensionRecord::ContinueToGetCallerToken()
 {
-    napi_module_register(&_module);
+    return true;
 }
+} // namespace AbilityRuntime
+} // namespace OHOS

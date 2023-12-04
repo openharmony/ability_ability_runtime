@@ -75,7 +75,7 @@
 #include "string_wrapper.h"
 #include "system_ability_definition.h"
 #include "system_ability_token_callback.h"
-#include "ui_extension_ability_connect_manager.h"
+#include "extension_record_manager.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
 #include "view_data.h"
@@ -208,6 +208,7 @@ const int32_t BROKER_UID = 5557;
 const int32_t BROKER_RESERVE_UID = 5005;
 const int32_t DMS_UID = 5522;
 const int32_t PREPARE_TERMINATE_TIMEOUT_MULTIPLE = 10;
+const int32_t BOOTEVENT_COMPLETED_DELAY_TIME = 1000;
 const std::string BUNDLE_NAME_KEY = "bundleName";
 const std::string DM_PKG_NAME = "ohos.distributedhardware.devicemanager";
 const std::string ACTION_CHOOSE = "ohos.want.action.select";
@@ -417,9 +418,12 @@ bool AbilityManagerService::Init()
     };
     taskHandler_->SubmitTask(initExtensionConfigTask, "InitExtensionConfigTask");
 
-    auto bootCompletedTask = []() {
+    auto bootCompletedTask = [handler = taskHandler_]() {
         if (ApplicationUtil::IsBootCompleted()) {
-            ApplicationUtil::AppFwkBootEventCallback(BOOTEVENT_BOOT_COMPLETED.c_str(), "true", nullptr);
+            auto task = []() {
+                ApplicationUtil::AppFwkBootEventCallback(BOOTEVENT_BOOT_COMPLETED.c_str(), "true", nullptr);
+            };
+            handler->SubmitTask(task, "BootCompletedDelayTask", BOOTEVENT_COMPLETED_DELAY_TIME);
         } else {
             WatchParameter(BOOTEVENT_BOOT_COMPLETED.c_str(), ApplicationUtil::AppFwkBootEventCallback, nullptr);
         }
@@ -5304,11 +5308,11 @@ int AbilityManagerService::KillProcess(const std::string &bundleName)
     return ERR_OK;
 }
 
-int AbilityManagerService::ClearUpApplicationData(const std::string &bundleName)
+int AbilityManagerService::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
 {
     HILOG_DEBUG("ClearUpApplicationData, bundleName: %{public}s", bundleName.c_str());
     CHECK_CALLER_IS_SYSTEM_APP;
-    int ret = DelayedSingleton<AppScheduler>::GetInstance()->ClearUpApplicationData(bundleName);
+    int ret = DelayedSingleton<AppScheduler>::GetInstance()->ClearUpApplicationData(bundleName, userId);
     if (ret != ERR_OK) {
         return CLEAR_APPLICATION_DATA_FAIL;
     }
