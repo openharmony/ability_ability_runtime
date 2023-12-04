@@ -42,7 +42,7 @@ bool ServiceRouterDataMgr::LoadAllBundleInfos()
     auto flags = (BundleFlag::GET_BUNDLE_WITH_ABILITIES | BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO);
     std::vector<BundleInfo> bundleInfos;
     if (!bundleMgrHelper->GetBundleInfos(flags, bundleInfos, SrSamgrHelper::GetCurrentActiveUserId())) {
-        APP_LOGE("SRDM bms->GetBundleInfos return false");
+        APP_LOGE("Return false.");
         return false;
     }
 
@@ -64,7 +64,7 @@ bool ServiceRouterDataMgr::LoadBundleInfo(const std::string &bundleName)
     BundleInfo bundleInfo;
     auto flags = (BundleFlag::GET_BUNDLE_WITH_ABILITIES | BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO);
     if (!bundleMgrHelper->GetBundleInfo(bundleName, flags, bundleInfo, SrSamgrHelper::GetCurrentActiveUserId())) {
-        APP_LOGE("SRDM bms->GetBundleInfos return false");
+        APP_LOGE("Return false.");
         return false;
     }
 

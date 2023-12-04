@@ -21,6 +21,7 @@
 #include "constants.h"
 #include "ability_record.h"
 #include "ability_util.h"
+#include "app_gallery_enable_util.h"
 #include "app_scheduler.h"
 #include "dm_common.h"
 #include "display_manager.h"
@@ -362,14 +363,14 @@ Want SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInf
         HILOG_DEBUG("set callertoken to targetWant");
         targetWant.SetParam(CALLER_TOKEN, callerToken);
     }
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto bms = GetBundleManager();
-        if (!bms) {
+    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgrHelper == nullptr) {
             HILOG_ERROR("GetBundleManager failed");
             return targetWant;
         }
         std::string bundleName;
-        auto ret = IN_PROCESS_CALL(bms->QueryAppGalleryBundleName(bundleName));
+        auto ret = IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName));
         if (ret) {
             targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
             targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
@@ -407,7 +408,7 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
 Want SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos,
     Want &targetWant, const std::string &type, int32_t userId, const sptr<IRemoteObject> &callerToken)
 {
-    HILOG_DEBUG("GetPcSelectorDialogWant start");
+    HILOG_DEBUG("GetPcSelectorDialogWant start.");
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_SELECTOR, position, static_cast<int>(dialogAppInfos.size()));
 
@@ -422,14 +423,14 @@ Want SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppI
     } else {
         targetWant.SetParam(CALLER_TOKEN, callerToken);
     }
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto bms = GetBundleManager();
-        if (!bms) {
-            HILOG_ERROR("GetBundleManager failed");
+    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgrHelper == nullptr) {
+            HILOG_ERROR("GetBundleManager failed.");
             return targetWant;
         }
         std::string bundleName;
-        auto ret = IN_PROCESS_CALL(bms->QueryAppGalleryBundleName(bundleName));
+        auto ret = IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName));
         if (ret) {
             targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
             targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
@@ -616,7 +617,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (resourceManager == nullptr) {
-        HILOG_ERROR("resourceManager init failed!");
+        HILOG_ERROR("ResourceManager init failed.");
         return;
     }
 
@@ -638,7 +639,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
         std::string(AbilityBase::Constants::FILE_SEPARATOR) + bundleInfo.name);
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         std::string loadPath;
-        HILOG_DEBUG("make a judgment");
+        HILOG_DEBUG("Make a judgment.");
         if (!hapModuleInfo.hapPath.empty()) {
             loadPath = hapModuleInfo.hapPath;
         } else {
@@ -647,13 +648,13 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
         if (loadPath.empty()) {
             continue;
         }
-        HILOG_DEBUG("GetAppNameFromResource loadPath: %{public}s", loadPath.c_str());
+        HILOG_DEBUG("GetAppNameFromResource loadPath: %{public}s.", loadPath.c_str());
         if (!resourceManager->AddResource(loadPath.c_str())) {
-            HILOG_ERROR("ResourceManager add %{public}s resource path failed!", bundleInfo.name.c_str());
+            HILOG_ERROR("ResourceManager add %{public}s resource path failed.", bundleInfo.name.c_str());
         }
     }
     resourceManager->GetStringById(static_cast<uint32_t>(labelId), appName);
-    HILOG_DEBUG("Get app display info, labelId: %{public}d, appname: %{public}s", labelId, appName.c_str());
+    HILOG_DEBUG("Get app display info, labelId: %{public}d, appname: %{public}s.", labelId, appName.c_str());
 }
 
 Want SystemDialogScheduler::GetSwitchUserDialogWant()

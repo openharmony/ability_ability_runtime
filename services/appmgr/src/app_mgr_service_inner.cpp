@@ -517,7 +517,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     }
 
     auto userId = GetUserIdByUid(appInfo->uid);
-    HILOG_INFO("userId:%{public}d", userId);
+    HILOG_INFO("UserId:%{public}d.", userId);
     bool bundleMgrResult;
     if (appIndex == 0) {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(appInfo->bundleName,
@@ -528,7 +528,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     }
 
     if (!bundleMgrResult) {
-        HILOG_ERROR("GetBundleInfo is fail");
+        HILOG_ERROR("GetBundleInfo is fail.");
         return false;
     }
     if (appIndex == 0) {
@@ -537,7 +537,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
         bundleMgrResult = (bundleMgrHelper->GetSandboxHapModuleInfo(abilityInfo, appIndex, userId, hapModuleInfo) == 0);
     }
     if (!bundleMgrResult) {
-        HILOG_ERROR("GetHapModuleInfo is fail");
+        HILOG_ERROR("GetHapModuleInfo is fail.");
         return false;
     }
 
@@ -783,24 +783,24 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
 int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
 {
     if (!appRunningManager_) {
-        HILOG_ERROR("appRunningManager_ is nullptr");
+        HILOG_ERROR("AppRunningManager_ is nullptr.");
         return ERR_NO_INIT;
     }
 
     int32_t result = VerifyRequestPermission();
     if (result != ERR_OK) {
-        HILOG_ERROR("Permission verification failed");
+        HILOG_ERROR("Permission verification failed.");
         return result;
     }
 
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("remoteClientManager_ fail");
+        HILOG_ERROR("RemoteClientManager_ fail.");
         return ERR_NO_INIT;
     }
 
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail");
+        HILOG_ERROR("Get bundle manager helper fail.");
         return ERR_NO_INIT;
     }
     auto userId = GetUserIdByUid(uid);
@@ -809,14 +809,14 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
     bool bundleMgrResult = bundleMgrHelper->GetApplicationInfo(bundleName,
         ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo);
     if (!bundleMgrResult) {
-        HILOG_ERROR("GetApplicationInfo is fail");
+        HILOG_ERROR("GetApplicationInfo is fail.");
         return ERR_INVALID_OPERATION;
     }
 
     HILOG_DEBUG("uid value is %{public}d", uid);
     result = appRunningManager_->ProcessUpdateApplicationInfoInstalled(appInfo);
     if (result != ERR_OK) {
-        HILOG_INFO("The process corresponding to the package name did not start");
+        HILOG_INFO("The process corresponding to the package name did not start.");
     }
 
     return result;

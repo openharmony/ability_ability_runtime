@@ -621,16 +621,12 @@ void UriPermissionManagerStubImpl::ConnectManager(sptr<T> &mgr, int32_t serviceI
     }
 }
 
-void UriPermissionManagerStubImpl::ConnectManager(std::shared_ptr<AppExecFwk::BundleMgrHelper> &mgr, int32_t serviceId)
+uint32_t UriPermissionManagerStubImpl::GetTokenIdByBundleName(const std::string bundleName, int32_t appIndex)
 {
     if (bundleMgrHelper_ == nullptr) {
         bundleMgrHelper_ = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+        return BUNDLE_MGR_SERVICE_SYS_ABILITY_ID;
     }
-}
-
-uint32_t UriPermissionManagerStubImpl::GetTokenIdByBundleName(const std::string bundleName, int32_t appIndex)
-{
-    ConnectManager(bundleMgrHelper_, BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (bundleMgrHelper_ == nullptr) {
         HILOG_WARN("Failed to get bms.");
         return GET_BUNDLE_MANAGER_SERVICE_FAILED;
@@ -645,7 +641,7 @@ uint32_t UriPermissionManagerStubImpl::GetTokenIdByBundleName(const std::string 
         }
     } else {
         if (IN_PROCESS_CALL(bundleMgrHelper_->GetSandboxBundleInfo(
-        	bundleName, appIndex, userId, bundleInfo) != ERR_OK)) {
+            bundleName, appIndex, userId, bundleInfo) != ERR_OK)) {
             HILOG_WARN("Failed to get bundle info according to appIndex.");
             return GET_BUNDLE_INFO_FAILED;
         }

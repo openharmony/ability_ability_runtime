@@ -1608,7 +1608,7 @@ bool AbilityConnectManager::IsAbilityNeedKeepAlive(const std::shared_ptr<Ability
     bool getBundleInfos = bundleMgrHelper->GetBundleInfos(
         OHOS::AppExecFwk::GET_BUNDLE_DEFAULT, bundleInfos, USER_ID_NO_HEAD);
     if (!getBundleInfos) {
-        HILOG_ERROR("Handle ability died task, get bundle infos failed");
+        HILOG_ERROR("Handle ability died task, get bundle infos failed.");
         return false;
     }
 

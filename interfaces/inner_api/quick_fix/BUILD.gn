@@ -55,7 +55,6 @@ ohos_shared_library("quickfix_manager") {
   ]
   sources += filter_include(output_values, [ "*.cpp" ])
   defines = [ "AMS_LOG_TAG = \"QuickFixService\"" ]
-
   deps = [
     ":quickfix_manager_interface",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",

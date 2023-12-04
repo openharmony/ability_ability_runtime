@@ -105,7 +105,6 @@ int FreeInstallManager::StartFreeInstall(const Want &want, int32_t userId, int r
     if (isAsync) {
         PostTimeoutTask(want);
     }
-    
     if (IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(info.want, flag, info.userId, abilityInfo, callback))) {
         HILOG_INFO("The app has installed.");
     }
@@ -364,9 +363,9 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
     AppExecFwk::AbilityInfo abilityInfo;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(
-    	want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId,abilityInfo)) &&
+        want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId,abilityInfo)) &&
         !IN_PROCESS_CALL(bundleMgrHelper->QueryExtensionAbilityInfos(
-        want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos))) {
+            want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos))) {
         HILOG_INFO("AbilityManagerService::ConnectFreeInstall. try to StartFreeInstall");
         int result = StartFreeInstall(want, userId, DEFAULT_INVAL_VALUE, callerToken);
         if (result) {

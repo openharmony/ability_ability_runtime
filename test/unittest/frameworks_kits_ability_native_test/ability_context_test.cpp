@@ -235,7 +235,7 @@ HWTEST_F(AbilityContextTest, AaFwk_AbilityContext_GetBundleManager_0100, Functio
 {
     std::shared_ptr<ContextDeal> deal = std::make_shared<ContextDeal>();
     context_->AttachBaseContext(deal);
-    std::shared_ptr<BundleMgrHelper> ptr = context_->GetBundleManager();
+    auto ptr = context_->GetBundleManager();
 
     EXPECT_NE(nullptr, ptr);
 }
