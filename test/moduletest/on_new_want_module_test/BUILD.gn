@@ -46,10 +46,6 @@ ohos_moduletest("on_new_want_module_test") {
     "ipc:ipc_core",
     "window_manager:scene_session",
   ]
-
-  if (ecologic_rule_enabled) {
-    external_deps += [ "ecological_rule_manager:erms_client" ]
-  }
 }
 
 group("moduletest") {
