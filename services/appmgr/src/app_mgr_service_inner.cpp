@@ -514,7 +514,7 @@ bool AppMgrServiceInner::GetBundleAndHapInfo(const AbilityInfo &abilityInfo,
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return false;
     }
 
@@ -785,7 +785,7 @@ void AppMgrServiceInner::ApplicationTerminated(const int32_t recordId)
 int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bundleName, const int uid)
 {
     if (!appRunningManager_) {
-        HILOG_ERROR("AppRunningManager_ is nullptr.");
+        HILOG_ERROR("The appRunningManager_ is nullptr.");
         return ERR_NO_INIT;
     }
 
@@ -796,13 +796,13 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
     }
 
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("RemoteClientManager_ fail.");
+        HILOG_ERROR("The remoteClientManager_ fail.");
         return ERR_NO_INIT;
     }
 
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return ERR_NO_INIT;
     }
     auto userId = GetUserIdByUid(uid);
@@ -811,7 +811,7 @@ int32_t AppMgrServiceInner::UpdateApplicationInfoInstalled(const std::string &bu
     bool bundleMgrResult = bundleMgrHelper->GetApplicationInfo(bundleName,
         ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo);
     if (!bundleMgrResult) {
-        HILOG_ERROR("GetApplicationInfo is fail.");
+        HILOG_ERROR("Failed to get applicationInfo.");
         return ERR_INVALID_OPERATION;
     }
 
@@ -857,12 +857,12 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
     int64_t startTime = SystemTimeMillisecond();
     std::list<pid_t> pids;
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("remoteClientManager_ fail");
+        HILOG_ERROR("The remoteClientManager_ is nullptr.");
         return ERR_NO_INIT;
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return ERR_NO_INIT;
     }
     HILOG_INFO("uid value is %{public}d", uid);
@@ -991,7 +991,7 @@ int32_t AppMgrServiceInner::KillApplicationByUserId(const std::string &bundleNam
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return ERR_NO_INIT;
     }
 
@@ -1009,12 +1009,12 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(const std::string &bun
     int64_t startTime = SystemTimeMillisecond();
     std::list<pid_t> pids;
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("remoteClientManager_ fail");
+        HILOG_ERROR("The remoteClientManager_ is nullptr.");
         return ERR_NO_INIT;
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return ERR_NO_INIT;
     }
 
@@ -1022,7 +1022,7 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(const std::string &bun
     int uid = IN_PROCESS_CALL(bundleMgrHelper->GetUidByBundleName(bundleName, userId));
     HILOG_INFO("uid value is %{public}d", uid);
     if (!appRunningManager_->ProcessExitByBundleNameAndUid(bundleName, uid, pids)) {
-        HILOG_INFO("The process corresponding to the package name did not start");
+        HILOG_INFO("The process corresponding to the package name did not start.");
         return result;
     }
     if (WaitForRemoteProcessExit(pids, startTime)) {
@@ -1064,7 +1064,7 @@ void AppMgrServiceInner::ClearUpApplicationDataByUserId(
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return;
     }
 
@@ -1576,7 +1576,7 @@ void AppMgrServiceInner::SetAppSpawnClient(std::shared_ptr<AppSpawnClient> spawn
 void AppMgrServiceInner::SetBundleManagerHelper(const std::shared_ptr<BundleMgrHelper> &bundleMgrHelper)
 {
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("remoteClientManager_ is null");
+        HILOG_ERROR("The remoteClientManager_ is nullptr.");
         return;
     }
 
@@ -1950,12 +1950,12 @@ void AppMgrServiceInner::SetOverlayInfo(const std::string &bundleName,
                                         AppSpawnStartMsg &startMsg)
 {
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("remoteClientManager_ fail");
+        HILOG_ERROR("The remoteClientManager_ is nullptr.");
         return;
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Get bundle manager helper fail.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return;
     }
     auto overlayMgrProxy = bundleMgrHelper->GetOverlayManagerProxy();
@@ -2127,7 +2127,7 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
 
     bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleGidsByUid(bundleName, uid, startMsg.gids));
     if (!bundleMgrResult) {
-        HILOG_ERROR("GetBundleGids is fail");
+        HILOG_ERROR("GetBundleGids is fail.");
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
         return;
     }
@@ -2787,7 +2787,7 @@ void AppMgrServiceInner::RestartResidentProcess(std::shared_ptr<AppRunningRecord
     auto userId = GetUserIdByUid(callerUid);
     if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
         appRecord->GetBundleName(), BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
-        HILOG_ERROR("GetBundleInfo fail");
+        HILOG_ERROR("GetBundleInfo fail.");
         return;
     }
     std::vector<BundleInfo> infos;
@@ -4634,17 +4634,17 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
 {
     CHECK_CALLER_IS_SYSTEM_APP;
     if (!appRunningManager_) {
-        HILOG_ERROR("appRunningManager nullptr!");
+        HILOG_ERROR("The appRunningManager is nullptr!");
         return ERR_NO_INIT;
     }
 
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("remoteClientManager_ nullptr!");
+        HILOG_ERROR("The remoteClientManager_ is nullptr!");
         return ERR_NO_INIT;
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Bundle Mgr helper is nullptr!");
+        HILOG_ERROR("The bundleMgrHelper is nullptr!");
         return ERR_NO_INIT;
     }
     HILOG_INFO("userid value is %{public}d", userId);

@@ -257,10 +257,10 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         abilityInfos.size(), extensionInfos.size());
 
     if (abilityInfos.size() + extensionInfos.size() > 1) {
-        HILOG_INFO("More than one target application, filter by erms.");
+        HILOG_INFO("More than one target application, filter by erms");
         bool ret = FilterAbilityList(request.want, abilityInfos, extensionInfos, userId);
         if (!ret) {
-            HILOG_ERROR("FilterAbilityList failed.");
+            HILOG_ERROR("FilterAbilityList failed");
         }
     }
 
@@ -297,10 +297,10 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
                     IN_PROCESS_CALL(defaultMgr->GetDefaultApplication(userId, typeName, bundleInfo));
                 if (ret == ERR_OK) {
                     if (bundleInfo.abilityInfos.size() == 1) {
-                        HILOG_INFO("Find default ability.");
+                        HILOG_INFO("find default ability.");
                         isDefaultFlag = true;
                     } else if (bundleInfo.extensionInfos.size() == 1) {
-                        HILOG_INFO("Find default extension.");
+                        HILOG_INFO("find default extension.");
                         isDefaultFlag = true;
                     } else {
                         HILOG_INFO("GetDefaultApplication failed.");
@@ -469,12 +469,12 @@ std::shared_ptr<AppExecFwk::BundleMgrHelper> ImplicitStartProcessor::GetBundleMa
 sptr<AppExecFwk::IDefaultApp> ImplicitStartProcessor::GetDefaultAppProxy()
 {
     auto bundleMgrHelper = GetBundleManagerHelper();
-    if(bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Failed to get bundle manager helper.");
+    if (bundleMgrHelper == nullptr) {
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
     }
     auto defaultAppProxy = bundleMgrHelper->GetDefaultAppProxy();
     if (defaultAppProxy == nullptr) {
-        HILOG_ERROR("Get default app proxy failed.");
+        HILOG_ERROR("The defaultAppProxy is nullptr.");
         return nullptr;
     }
     return defaultAppProxy;

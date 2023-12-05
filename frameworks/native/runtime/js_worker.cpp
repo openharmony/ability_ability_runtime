@@ -264,7 +264,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, std::vector<uint
 {
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Bundle mgr helper is nullptr.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return false;
     }
 
@@ -292,12 +292,12 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, std::vector<uint
             }
         }
     }
-    HILOG_INFO("HapPath: %{private}s.", newHapPath.c_str());
+    HILOG_INFO("HapPath: %{private}s", newHapPath.c_str());
     bool newCreate = false;
     std::string loadPath = ExtractorUtil::GetLoadFilePath(newHapPath);
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
     if (extractor == nullptr) {
-        HILOG_ERROR("LoadPath %{private}s GetExtractor failed.", loadPath.c_str());
+        HILOG_ERROR("LoadPath %{private}s GetExtractor failed", loadPath.c_str());
         return false;
     }
     std::unique_ptr<uint8_t[]> dataPtr = nullptr;
@@ -307,27 +307,27 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, std::vector<uint
         bool flag = false;
         for (const auto& basePath : workerInfo_->assetBasePathStr) {
             realfilePath = basePath + filePath;
-            HILOG_DEBUG("RealfilePath: %{private}s.", realfilePath.c_str());
+            HILOG_DEBUG("realfilePath: %{private}s", realfilePath.c_str());
             if (extractor->ExtractToBufByName(realfilePath, dataPtr, fileLen)) {
                 flag = true;
                 break;
             }
         }
         if (!flag) {
-            HILOG_ERROR("ExtractToBufByName error.");
+            HILOG_ERROR("ExtractToBufByName error");
             return flag;
         }
     } else {
         realfilePath = filePath.substr(pos + 1);
-        HILOG_DEBUG("RealfilePath: %{private}s.", realfilePath.c_str());
+        HILOG_DEBUG("realfilePath: %{private}s", realfilePath.c_str());
         if (!extractor->ExtractToBufByName(realfilePath, dataPtr, fileLen)) {
-            HILOG_ERROR("Get mergeAbc fileBuffer failed.");
+            HILOG_ERROR("get mergeAbc fileBuffer failed");
             return false;
         }
     }
 
     if (!workerInfo_->isDebugVersion && fileLen > ASSET_FILE_MAX_SIZE) {
-        HILOG_ERROR("ReadFilePathData failed, file is too large.");
+        HILOG_ERROR("ReadFilePathData failed, file is too large");
         return false;
     }
     content.assign(dataPtr.get(), dataPtr.get() + fileLen);

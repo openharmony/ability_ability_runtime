@@ -1129,11 +1129,11 @@ bool GetBundleForLaunchApplication(std::shared_ptr<BundleMgrHelper> bundleMgrHel
 {
     bool queryResult;
     if (appIndex != 0) {
-        HILOG_INFO("BundleName = %{public}s.", bundleName.c_str());
+        HILOG_INFO("The bundleName = %{public}s.", bundleName.c_str());
         queryResult = (bundleMgrHelper->GetSandboxBundleInfo(bundleName,
             appIndex, UNSPECIFIED_USERID, bundleInfo) == 0);
     } else {
-        HILOG_INFO("BundleName = %{public}s.", bundleName.c_str());
+        HILOG_INFO("The bundleName = %{public}s.", bundleName.c_str());
         queryResult = (bundleMgrHelper->GetBundleInfoForSelf(
             (static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
             static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) +
@@ -1159,7 +1159,7 @@ bool GetBundleForLaunchApplication(std::shared_ptr<BundleMgrHelper> bundleMgrHel
 void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    HILOG_INFO("Handle launch application start.");
+    HILOG_INFO("handle launch application start.");
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
         HILOG_ERROR("CheckForHandleLaunchApplication failed.");
         return;
@@ -1181,14 +1181,14 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
     auto bundleMgrHelper = contextDeal->GetBundleManager();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("GetBundleManager is nullptr.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return;
     }
 
     auto bundleName = appInfo.bundleName;
     BundleInfo bundleInfo;
     if (!GetBundleForLaunchApplication(bundleMgrHelper, bundleName, appLaunchData.GetAppIndex(), bundleInfo)) {
-        HILOG_ERROR("GetBundleInfo failed.");
+        HILOG_ERROR("Failed to get bundle info.");
         return;
     }
 
@@ -1237,7 +1237,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #endif
     }
     if (appInfo.needAppDetail) {
-        HILOG_DEBUG("MainThread::handleLaunchApplication %{public}s need add app detail ability library path.",
+        HILOG_DEBUG("MainThread::handleLaunchApplication %{public}s need add app detail ability library path",
             bundleName.c_str());
         LoadAppDetailAbilityLibrary(appInfo.appDetailAbilityLibraryPath);
     }
@@ -1252,7 +1252,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     if (isStageBased) {
         AppRecovery::GetInstance().InitApplicationInfo(GetMainHandler(), GetApplicationInfo());
     }
-    HILOG_DEBUG("StageBased:%{public}d moduleJson:%{public}d size:%{public}zu",
+    HILOG_DEBUG("stageBased:%{public}d moduleJson:%{public}d size:%{public}zu",
         isStageBased, moduelJson, bundleInfo.hapModuleInfos.size());
 
     // create contextImpl
@@ -1266,12 +1266,12 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     HspList hspList;
     ErrCode ret = bundleMgrHelper->GetBaseSharedBundleInfos(appInfo.bundleName, hspList);
     if (ret != ERR_OK) {
-        HILOG_ERROR("GetBaseSharedBundleInfos failed: %{public}d.", ret);
+        HILOG_ERROR("Get base shared bundle infos failed: %{public}d.", ret);
     }
     AppLibPathMap appLibPaths {};
     GetNativeLibPath(bundleInfo, hspList, appLibPaths);
     bool isSystemApp = bundleInfo.applicationInfo.isSystemApp;
-    HILOG_DEBUG("The application isSystemApp: %{public}d.", isSystemApp);
+    HILOG_DEBUG("the application isSystemApp: %{public}d", isSystemApp);
     AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
 
     if (isStageBased) {
@@ -1292,7 +1292,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.apiTargetVersion = appInfo.apiTargetVersion;
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
-            HILOG_ERROR("Failed to create runtime.");
+            HILOG_ERROR("Failed to create runtime");
             return;
         }
 
@@ -1301,7 +1301,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             auto cb = [weak]() {
                 auto appThread = weak.promote();
                 if (appThread == nullptr) {
-                    HILOG_ERROR("AppThread is nullptr.");
+                    HILOG_ERROR("appThread is nullptr");
                     return false;
                 }
                 return appThread->NotifyDeviceDisConnect();
@@ -1313,11 +1313,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         std::string processName = "";
         if (processInfo_ != nullptr) {
             processName = processInfo_->GetProcessName();
-            HILOG_DEBUG("MainThread::HandleLaunchApplication processName is %{public}s.", processName.c_str());
+            HILOG_DEBUG("MainThread::HandleLaunchApplication processName is %{public}s", processName.c_str());
         }
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
             perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
-            HILOG_DEBUG("PerfCmd is %{public}s.", perfCmd.c_str());
+            HILOG_DEBUG("PerfCmd is %{public}s", perfCmd.c_str());
             runtime->StartProfiler(perfCmd, appLaunchData.GetDebugApp(), appInfo.debug, processName);
         } else {
             runtime->StartDebugMode(appLaunchData.GetDebugApp(), appInfo.debug, processName);
@@ -1327,7 +1327,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         std::map<std::string, std::string> modulePaths;
         if (!hqfInfos.empty()) {
             for (auto it = hqfInfos.begin(); it != hqfInfos.end(); it++) {
-                HILOG_INFO("MoudelName: %{private}s, hqfFilePath: %{private}s.",
+                HILOG_INFO("moudelName: %{private}s, hqfFilePath: %{private}s",
                     it->moduleName.c_str(), it->hqfFilePath.c_str());
                 modulePaths.insert(std::make_pair(it->moduleName, it->hqfFilePath));
             }
@@ -1344,7 +1344,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
             (std::string summary, const JsEnv::ErrorObject errorObj) {
             auto appThread = weak.promote();
             if (appThread == nullptr) {
-                HILOG_ERROR("AppThread is nullptr.");
+                HILOG_ERROR("appThread is nullptr.");
                 return;
             }
             time_t timet;
@@ -2564,10 +2564,10 @@ int32_t MainThread::ScheduleNotifyHotReloadPage(const sptr<IQuickFixCallback> &c
 bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
     std::vector<std::pair<std::string, std::string>> &fileMap)
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("Function called.");
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Bundle manager helper is nullptr.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return false;
     }
 
@@ -2712,13 +2712,13 @@ int MainThread::GetOverlayModuleInfos(const std::string &bundleName, const std::
 {
     auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Failed to get BundleMgrHelper.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return ERR_INVALID_VALUE;
     }
 
     auto overlayMgrProxy = bundleMgrHelper->GetOverlayManagerProxy();
     if (overlayMgrProxy == nullptr) {
-        HILOG_ERROR("GetOverlayManagerProxy failed.");
+        HILOG_ERROR("The overlayMgrProxy is nullptr.");
         return ERR_INVALID_VALUE;
     }
 

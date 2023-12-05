@@ -2714,7 +2714,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         return;
     }
     if (targetBundleName == SHELL_ASSISTANT_BUNDLENAME && collaboratorType_ == CollaboratorType::OTHERS_TYPE) {
-        HILOG_DEBUG("Reject shell application to grant uri permission.");
+        HILOG_DEBUG("reject shell application to grant uri permission");
         return;
     }
 
@@ -2734,19 +2734,19 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     if (!uriStr.empty()) {
         uriVec.emplace_back(uriStr);
     }
-    HILOG_DEBUG("GrantUriPermission uriVec size: %{public}zu.", uriVec.size());
+    HILOG_DEBUG("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
     if (uriVec.size() == 0) {
         return;
     }
     if (uriVec.size() > MAX_URI_COUNT) {
-        HILOG_ERROR("Size of uriVec is more than %{public}i.", MAX_URI_COUNT);
+        HILOG_ERROR("size of uriVec is more than %{public}i", MAX_URI_COUNT);
         return;
     }
 
     auto callerPkg = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     if (callerPkg == SHELL_ASSISTANT_BUNDLENAME
         && GrantPermissionToShell(uriVec, want.GetFlags(), targetBundleName)) {
-        HILOG_INFO("Permission to shell.");
+        HILOG_INFO("permission to shell");
         return;
     }
 
@@ -2767,14 +2767,14 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
     for (auto&& str : uriVec) {
         Uri uri(str);
         auto&& scheme = uri.GetScheme();
-        HILOG_INFO("Uri scheme is %{public}s.", scheme.c_str());
+        HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
         // only support file scheme
         if (scheme != "file") {
-            HILOG_WARN("Only support file uri.");
+            HILOG_WARN("only support file uri.");
             continue;
         }
         auto&& authority = uri.GetAuthority();
-        HILOG_INFO("Uri authority is %{public}s.", authority.c_str());
+        HILOG_INFO("uri authority is %{public}s.", authority.c_str());
         bool authorityFlag = authority == "media" || authority == "docs";
         uint32_t flag = want.GetFlags();
         if (authorityFlag && !isGrantPersistableUriPermissionEnable_) {
@@ -2804,7 +2804,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
                 uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_ &&
                 uriBundleInfo.applicationInfo.accessTokenId != callerTokenId;
             if (notBelong2Caller) {
-                HILOG_ERROR("The uri does not belong to caller.");
+                HILOG_ERROR("the uri does not belong to caller.");
                 continue;
             }
             flag &= (~Want::FLAG_AUTH_PERSISTABLE_URI_PERMISSION);

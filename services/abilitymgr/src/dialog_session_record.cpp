@@ -103,7 +103,7 @@ bool DialogSessionRecord::QueryDialogAppInfo(DialogAbilityInfo &dialogAbilityInf
     bool ret = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(bundleName,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, appInfo));
     if (!ret) {
-        HILOG_ERROR("get application info failed, err:%{public}d.", ret);
+        HILOG_ERROR("Get application info failed, err:%{public}d.", ret);
         return false;
     }
     dialogAbilityInfo.bundleIconId = appInfo.iconId;

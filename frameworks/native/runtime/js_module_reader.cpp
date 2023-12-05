@@ -135,7 +135,7 @@ std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, co
     }
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Fail to get bundle manager helper.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return presetAppHapPath;
     }
     if (inputPath.find_first_of("/") == inputPath.find_last_of("/")) {

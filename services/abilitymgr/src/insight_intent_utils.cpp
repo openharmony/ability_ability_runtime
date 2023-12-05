@@ -65,7 +65,7 @@ std::string InsightIntentUtils::GetSrcEntry(const std::string &bundleName, const
             srcEntry = info.srcEntry;
         }
     }
-    HILOG_DEBUG("SrcEntry: %{public}s.", srcEntry.c_str());
+    HILOG_DEBUG("srcEntry: %{public}s", srcEntry.c_str());
     return srcEntry;
 }
 } // namespace AbilityRuntime

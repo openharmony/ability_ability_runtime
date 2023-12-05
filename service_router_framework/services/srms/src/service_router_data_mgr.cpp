@@ -36,7 +36,7 @@ bool ServiceRouterDataMgr::LoadAllBundleInfos()
     ClearAllBundleInfos();
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        APP_LOGE("Failed to get bundle manager helper.");
+        APP_LOGE("The bundleMgrHelper is nullptr.");
         return false;
     }
     auto flags = (BundleFlag::GET_BUNDLE_WITH_ABILITIES | BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO);
@@ -58,7 +58,7 @@ bool ServiceRouterDataMgr::LoadBundleInfo(const std::string &bundleName)
     APP_LOGD("SRDM LoadBundleInfo");
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        APP_LOGI("Failed to get bundle manager helper.");
+        APP_LOGI("The bundleMgrHelper is nullptr.");
         return false;
     }
     BundleInfo bundleInfo;

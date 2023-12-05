@@ -621,7 +621,8 @@ bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t u
     return bundleMgr_->GetHapModuleInfo(abilityInfo, userId, hapModuleInfo);
 }
 
-bool BundleMgrHelper::QueryAppGalleryBundleName(std::string &bundleName) {
+bool BundleMgrHelper::QueryAppGalleryBundleName(std::string &bundleName)
+{
     HILOG_DEBUG("Called.");
     ErrCode result = Connect();
     if (result != ERR_OK) {

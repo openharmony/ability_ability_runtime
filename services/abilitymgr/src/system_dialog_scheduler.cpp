@@ -366,7 +366,7 @@ Want SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInf
     if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
         if (bundleMgrHelper == nullptr) {
-            HILOG_ERROR("GetBundleManager failed");
+            HILOG_ERROR("The bundleMgrHelper is nullptr.");
             return targetWant;
         }
         std::string bundleName;
@@ -408,7 +408,7 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
 Want SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos,
     Want &targetWant, const std::string &type, int32_t userId, const sptr<IRemoteObject> &callerToken)
 {
-    HILOG_DEBUG("GetPcSelectorDialogWant start.");
+    HILOG_DEBUG("GetPcSelectorDialogWant start");
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_SELECTOR, position, static_cast<int>(dialogAppInfos.size()));
 
@@ -426,7 +426,7 @@ Want SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppI
     if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
         if (bundleMgrHelper == nullptr) {
-            HILOG_ERROR("GetBundleManager failed.");
+            HILOG_ERROR("The bundleMgrHelper is nullptr.");
             return targetWant;
         }
         std::string bundleName;
@@ -617,7 +617,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (resourceManager == nullptr) {
-        HILOG_ERROR("ResourceManager init failed.");
+        HILOG_ERROR("The resourceManager is nullptr.");
         return;
     }
 
@@ -639,7 +639,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
         std::string(AbilityBase::Constants::FILE_SEPARATOR) + bundleInfo.name);
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         std::string loadPath;
-        HILOG_DEBUG("Make a judgment.");
+        HILOG_DEBUG("make a judgment.");
         if (!hapModuleInfo.hapPath.empty()) {
             loadPath = hapModuleInfo.hapPath;
         } else {

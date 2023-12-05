@@ -48,16 +48,16 @@ sptr<AppExecFwk::IAppMgr> QuickFixUtil::GetAppManagerProxy()
 
 sptr<AppExecFwk::IQuickFixManager> QuickFixUtil::GetBundleQuickFixMgrProxy()
 {
-    HILOG_DEBUG("function called.");
+    HILOG_DEBUG("Function called.");
     auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("Failed to get bms.");
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return nullptr;
     }
 
     auto bundleQuickFixMgr = bundleMgrHelper->GetQuickFixManagerProxy();
     if (bundleQuickFixMgr == nullptr) {
-        HILOG_ERROR("Failed to get bundle quick fix manager.");
+        HILOG_ERROR("The bundleQuickFixMgr is nullptr.");
         return nullptr;
     }
 

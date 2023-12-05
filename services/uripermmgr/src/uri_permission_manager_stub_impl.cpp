@@ -628,7 +628,7 @@ uint32_t UriPermissionManagerStubImpl::GetTokenIdByBundleName(const std::string 
         return BUNDLE_MGR_SERVICE_SYS_ABILITY_ID;
     }
     if (bundleMgrHelper_ == nullptr) {
-        HILOG_WARN("Failed to get bms.");
+        HILOG_WARN("The bundleMgrHelper_ is nullptr.");
         return GET_BUNDLE_MANAGER_SERVICE_FAILED;
     }
     auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
