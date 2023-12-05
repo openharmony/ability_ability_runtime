@@ -60,10 +60,6 @@ ohos_unittest("call_container_test") {
     "napi:ace_napi",
     "window_manager:scene_session",
   ]
-
-  if (ecologic_rule_enabled) {
-    external_deps += [ "ecological_rule_manager:erms_client" ]
-  }
 }
 
 group("unittest") {

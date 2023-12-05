@@ -40,10 +40,6 @@ ohos_unittest("ability_manager_service_dialog_test") {
     "hilog:libhilog",
     "window_manager:libdm",
   ]
-
-  if (ecologic_rule_enabled) {
-    external_deps += [ "ecological_rule_manager:erms_client" ]
-  }
 }
 
 group("unittest") {

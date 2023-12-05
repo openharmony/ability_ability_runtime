@@ -21,9 +21,6 @@
 #include "ability_local_record.h"
 #include "context_deal.h"
 #include "data_ability_helper.h"
-#ifndef SUPPORT_ERMS
-#include "erms_mgr_interface.h"
-#endif
 #include "ability_manager_client.h"
 #include "ability_manager_interface.h"
 #include "demo_ability_test.h"
@@ -65,19 +62,6 @@ void AbilityBaseTest::SetUpTestCase(void)
 
 void AbilityBaseTest::TearDownTestCase(void)
 {}
-
-#ifndef SUPPORT_ERMS
-class TestIEcologicalRuleManager : public AppExecFwk::IEcologicalRuleManager {
-public:
-    TestIEcologicalRuleManager() = default;
-    virtual ~TestIEcologicalRuleManager()
-    {};
-    sptr<IRemoteObject> AsObject() override
-    {
-        return nullptr;
-    }
-};
-#endif
 
 void AbilityBaseTest::SetUp(void)
 {
@@ -1259,25 +1243,6 @@ HWTEST_F(AbilityTerminateTest, AaFwk_IAbilityManager_VerifyPermission_0100, Func
     int uid = 1;
     EXPECT_EQ(0, abms->VerifyPermission(permission, pid, uid));
     GTEST_LOG_(INFO) << "AaFwk_IAbilityManager_VerifyPermission_0100";
-}
-
-#ifndef SUPPORT_ERMS
-/**
- * @tc.number: AppExecFwk_IEcologicalRuleManager_QueryFreeInstallExperience_0100
- * @tc.name: QueryFreeInstallExperience
- * @tc.desc: test QueryFreeInstallExperience function
- */
-HWTEST_F(AbilityTerminateTest,
-    AppExecFwk_IEcologicalRuleManager_QueryFreeInstallExperience_0100, Function | MediumTest | Level1)
-{
-    GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_QueryFreeInstallExperience_0100";
-    sptr<AppExecFwk::IEcologicalRuleManager> erms = new (std::nothrow) TestIEcologicalRuleManager();
-    EXPECT_NE(erms, nullptr);
-    Want want;
-    ErmsParams::CallerInfo callerInfo;
-    ErmsParams::ExperienceRule rule;
-    EXPECT_EQ(0, erms->QueryFreeInstallExperience(want, callerInfo, rule));
-    GTEST_LOG_(INFO) << "AppExecFwk_IEcologicalRuleManager_QueryFreeInstallExperience_0100";
 }
 
 /**
