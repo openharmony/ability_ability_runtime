@@ -1040,7 +1040,7 @@ int Ability::StartBackgroundRunning(const AbilityRuntime::WantAgent::WantAgent &
         return ERR_NULL_OBJECT;
     }
     if (abilityInfo_ == nullptr) {
-        HILOG_ERROR("ability info is null");
+        HILOG_ERROR("The ability info is nullptr.");
         return ERR_INVALID_VALUE;
     }
     Want want;

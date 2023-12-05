@@ -659,7 +659,7 @@ void DataAbilityManager::RestartDataAbility(const std::shared_ptr<AbilityRecord>
             bool getDataAbilityUri = OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->GetDataAbilityUri(
                 hapModuleInfo.abilityInfos, mainElement, uriStr);
             if (getDataAbilityUri) {
-                HILOG_INFO("Restart data ability: %{public}s, uri: %{public}s.",
+                HILOG_INFO("restart data ability: %{public}s, uri: %{public}s.",
                     abilityRecord->GetAbilityInfo().name.c_str(), uriStr.c_str());
                 Uri uri(uriStr);
                 OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->AcquireDataAbility(uri, true, nullptr);

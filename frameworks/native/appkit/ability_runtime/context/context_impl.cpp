@@ -739,7 +739,7 @@ ErrCode ContextImpl::GetBundleManager()
 
     bundleMgr_ = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
     if (bundleMgr_ == nullptr) {
-        HILOG_ERROR("Failed to get bundle manager service.");
+        HILOG_ERROR("The bundleMgr_ is nullptr.");
         return ERR_NULL_OBJECT;
     }
 

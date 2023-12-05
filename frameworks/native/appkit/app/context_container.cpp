@@ -118,7 +118,7 @@ std::shared_ptr<BundleMgrHelper> ContextContainer::GetBundleManager() const
     if (baseContext_ != nullptr) {
         return baseContext_->GetBundleManager();
     } else {
-        HILOG_ERROR("BaseContext_ is nullptr.");
+        HILOG_ERROR("The baseContext_ is nullptr.");
         return nullptr;
     }
 }
@@ -240,7 +240,7 @@ std::string ContextContainer::GetProcessName()
 std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundleName, int flag, int accountId)
 {
     if (bundleName.empty()) {
-        HILOG_ERROR("BundleName is empty.");
+        HILOG_ERROR("The bundleName is empty.");
         return nullptr;
     }
 
@@ -250,7 +250,7 @@ std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundl
 
     std::shared_ptr<BundleMgrHelper> bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
-        HILOG_ERROR("GetBundleManager is nullptr.");
+        HILOG_ERROR("The bundleMgr is nullptr.");
         return nullptr;
     }
 
@@ -266,7 +266,7 @@ std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundl
     bundleMgr->GetBundleInfo(bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, realAccountId);
 
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
-        HILOG_ERROR("GetBundleInfo is error.");
+        HILOG_ERROR("Failed to get Bundle Info.");
         return nullptr;
     }
 

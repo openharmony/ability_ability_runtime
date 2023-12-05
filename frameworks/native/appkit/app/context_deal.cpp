@@ -119,7 +119,7 @@ std::shared_ptr<Context> ContextDeal::GetContext()
 void ContextDeal::SetContext(const std::shared_ptr<Context> &context)
 {
     if (context == nullptr) {
-        HILOG_ERROR("SetContext failed, context is empty");
+        HILOG_ERROR("The context is empty.");
         return;
     }
     abilityContext_ = context;
@@ -460,7 +460,7 @@ bool ContextDeal::HapModuleInfoRequestInit()
     }
 
     if (abilityInfo_ == nullptr) {
-        HILOG_ERROR("Failed for abilityInfo_ is nullptr.");
+        HILOG_ERROR("The abilityInfo_ is nullptr.");
         return false;
     }
 

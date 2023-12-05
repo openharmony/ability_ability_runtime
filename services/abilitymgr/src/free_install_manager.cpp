@@ -339,7 +339,7 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
     CHECK_POINTER_AND_RETURN(bundleMgrHelper, GET_ABILITY_SERVICE_FAILED);
     std::string wantDeviceId = want.GetElement().GetDeviceID();
     if (!(localDeviceId == wantDeviceId || wantDeviceId.empty())) {
-        HILOG_ERROR("AbilityManagerService::ConnectFreeInstall. wantDeviceId error");
+        HILOG_ERROR("Failed to get device id.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -348,14 +348,14 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
         std::string wantAbilityName = want.GetElement().GetAbilityName();
         std::string wantBundleName = want.GetElement().GetBundleName();
         if (wantBundleName.empty() || wantAbilityName.empty()) {
-            HILOG_ERROR("AbilityManagerService::ConnectFreeInstall. wantBundleName or wantAbilityName is empty");
+            HILOG_ERROR("The wantBundleName or wantAbilityName is empty.");
             return INVALID_PARAMETERS_ERR;
         }
         int callerUid = IPCSkeleton::GetCallingUid();
         std::string localBundleName;
         auto res = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callerUid, localBundleName));
         if (res != ERR_OK || localBundleName != wantBundleName) {
-            HILOG_ERROR("AbilityManagerService::ConnectFreeInstall. wantBundleName is not local BundleName");
+            HILOG_ERROR("The wantBundleName is not local BundleName.");
             return INVALID_PARAMETERS_ERR;
         }
     }
@@ -363,7 +363,7 @@ int FreeInstallManager::ConnectFreeInstall(const Want &want, int32_t userId,
     AppExecFwk::AbilityInfo abilityInfo;
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAbilityInfo(
-        want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId,abilityInfo)) &&
+        want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, abilityInfo)) &&
         !IN_PROCESS_CALL(bundleMgrHelper->QueryExtensionAbilityInfos(
             want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, extensionInfos))) {
         HILOG_INFO("AbilityManagerService::ConnectFreeInstall. try to StartFreeInstall");
