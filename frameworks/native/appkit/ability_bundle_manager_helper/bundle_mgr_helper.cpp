@@ -216,15 +216,15 @@ sptr<IBundleInstaller> BundleMgrHelper::ConnectBundleInstaller()
         if (bundleInstaller_ != nullptr) {
             return bundleInstaller_;
         }
-        auto bundleMgr = Connect();
-        if (bundleMgr == nullptr) {
-            HILOG_ERROR("Failed to connect.");
-            return nullptr;
-        }
     }
 
+    auto bundleMgr = Connect();
+    if (bundleMgr == nullptr) {
+        HILOG_ERROR("Failed to connect.");
+        return nullptr;
+    }
     std::lock_guard<std::mutex> lock(mutex_);
-    bundleInstaller_ = bundleMgr_->GetBundleInstaller();
+    bundleInstaller_ = bundleMgr->GetBundleInstaller();
     if ((bundleInstaller_ == nullptr) || (bundleInstaller_->AsObject() == nullptr)) {
         HILOG_ERROR("Failed to get bundle installer proxy.");
         return nullptr;
