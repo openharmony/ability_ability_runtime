@@ -26,7 +26,7 @@ BundleMgrHelper::BundleMgrHelper() {}
 
 BundleMgrHelper::~BundleMgrHelper()
 {
-    if (bundleMgr_ != nullptr && deathRecipient_ != nullptr) {
+    if (bundleMgr_ != nullptr && bundleMgr_->AsObject() != nullptr && deathRecipient_ != nullptr) {
         bundleMgr_->AsObject()->RemoveDeathRecipient(deathRecipient_);
     }
 }
@@ -34,7 +34,7 @@ BundleMgrHelper::~BundleMgrHelper()
 ErrCode BundleMgrHelper::GetNameForUid(const int32_t uid, std::string &name)
 {
     HILOG_DEBUG("Called.");
-    if (Connect() != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
@@ -46,8 +46,7 @@ bool BundleMgrHelper::GetBundleInfo(const std::string &bundleName, const BundleF
     int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -63,8 +62,7 @@ ErrCode BundleMgrHelper::InstallSandboxApp(const std::string &bundleName, int32_
         HILOG_ERROR("The bundleName is empty.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_PARAM_ERROR;
     }
-    ErrCode result = ConnectBundleInstaller();
-    if (result != ERR_OK) {
+    if (ConnectBundleInstaller() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_INTERNAL_ERROR;
     }
@@ -79,8 +77,7 @@ ErrCode BundleMgrHelper::UninstallSandboxApp(const std::string &bundleName, int3
         HILOG_ERROR("The params are invalid.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_PARAM_ERROR;
     }
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_INTERNAL_ERROR;
     }
@@ -91,8 +88,7 @@ ErrCode BundleMgrHelper::UninstallSandboxApp(const std::string &bundleName, int3
 ErrCode BundleMgrHelper::GetUninstalledBundleInfo(const std::string bundleName, BundleInfo &bundleInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
@@ -108,8 +104,7 @@ ErrCode BundleMgrHelper::GetSandboxBundleInfo(
         HILOG_ERROR("The params are invalid.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_PARAM_ERROR;
     }
-    ErrCode result = ConnectBundleInstaller();
-    if (result != ERR_OK) {
+    if (ConnectBundleInstaller() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_INTERNAL_ERROR;
     }
@@ -125,8 +120,7 @@ ErrCode BundleMgrHelper::GetSandboxAbilityInfo(const Want &want, int32_t appInde
         HILOG_ERROR("The params are invalid.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_PARAM_ERROR;
     }
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_INTERNAL_ERROR;
     }
@@ -142,8 +136,7 @@ ErrCode BundleMgrHelper::GetSandboxExtAbilityInfos(const Want &want, int32_t app
         HILOG_ERROR("The params are invalid.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_PARAM_ERROR;
     }
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_INTERNAL_ERROR;
     }
@@ -159,8 +152,7 @@ ErrCode BundleMgrHelper::GetSandboxHapModuleInfo(const AbilityInfo &abilityInfo,
         HILOG_ERROR("The params are invalid.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_PARAM_ERROR;
     }
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SANDBOX_INSTALL_INTERNAL_ERROR;
     }
@@ -168,7 +160,7 @@ ErrCode BundleMgrHelper::GetSandboxHapModuleInfo(const AbilityInfo &abilityInfo,
     return bundleMgr_->GetSandboxHapModuleInfo(abilityInfo, appIndex, userId, hapModuleInfo);
 }
 
-ErrCode BundleMgrHelper::Connect()
+sptr<IBundleMgr> BundleMgrHelper::Connect()
 {
     HILOG_DEBUG("Called.");
     std::lock_guard<std::mutex> lock(mutex_);
@@ -177,13 +169,13 @@ ErrCode BundleMgrHelper::Connect()
             SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemAbilityManager == nullptr) {
             HILOG_ERROR("Failed to get system ability manager.");
-            return ERR_APPEXECFWK_SERVICE_NOT_CONNECTED;
+            return nullptr;
         }
 
         sptr<IRemoteObject> remoteObject_ = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
         if (remoteObject_ == nullptr || (bundleMgr_ = iface_cast<IBundleMgr>(remoteObject_)) == nullptr) {
             HILOG_ERROR("Failed to get bundle mgr service remote object.");
-            return ERR_APPEXECFWK_SERVICE_NOT_CONNECTED;
+            return nullptr;
         }
         std::weak_ptr<BundleMgrHelper> weakPtr = shared_from_this();
         auto deathCallback = [weakPtr](const wptr<IRemoteObject>& object) {
@@ -197,21 +189,22 @@ ErrCode BundleMgrHelper::Connect()
         deathRecipient_ = new (std::nothrow) BundleMgrServiceDeathRecipient(deathCallback);
         if (deathRecipient_ == nullptr) {
             HILOG_ERROR("Failed to create death recipient ptr deathRecipient_!");
-            return ERR_APPEXECFWK_SERVICE_NOT_CONNECTED;
+            return nullptr;
         }
-        bundleMgr_->AsObject()->AddDeathRecipient(deathRecipient_);
+        if (bundleMgr_->AsObject() != nullptr) {
+            bundleMgr_->AsObject()->AddDeathRecipient(deathRecipient_);
+        }
     }
 
-    return ERR_OK;
+    return bundleMgr_;
 }
 
-ErrCode BundleMgrHelper::ConnectBundleInstaller()
+sptr<IBundleInstaller> BundleMgrHelper::ConnectBundleInstaller()
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
-        return result;
+        return nullptr;
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
@@ -219,11 +212,11 @@ ErrCode BundleMgrHelper::ConnectBundleInstaller()
         bundleInstaller_ = bundleMgr_->GetBundleInstaller();
         if ((bundleInstaller_ == nullptr) || (bundleInstaller_->AsObject() == nullptr)) {
             HILOG_ERROR("Failed to get bundle installer proxy.");
-            return ERR_APPEXECFWK_SERVICE_NOT_CONNECTED;
+            return nullptr;
         }
     }
 
-    return ERR_OK;
+    return bundleInstaller_;
 }
 
 void BundleMgrHelper::OnDeath()
@@ -243,8 +236,7 @@ bool BundleMgrHelper::GetBundleInfo(const std::string &bundleName, int32_t flags
     BundleInfo &bundleInfo, int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -255,8 +247,7 @@ bool BundleMgrHelper::GetBundleInfo(const std::string &bundleName, int32_t flags
 bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModuleInfo &hapModuleInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -267,8 +258,7 @@ bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo &abilityInfo, HapModule
 std::string BundleMgrHelper::GetAbilityLabel(const std::string &bundleName, const std::string &abilityName)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return "";
     }
@@ -279,8 +269,7 @@ std::string BundleMgrHelper::GetAbilityLabel(const std::string &bundleName, cons
 std::string BundleMgrHelper::GetAppType(const std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return "";
     }
@@ -292,8 +281,7 @@ ErrCode BundleMgrHelper::GetBaseSharedBundleInfos(
     const std::string &bundleName, std::vector<BaseSharedBundleInfo> &baseSharedBundleInfos)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
@@ -304,8 +292,7 @@ ErrCode BundleMgrHelper::GetBaseSharedBundleInfos(
 ErrCode BundleMgrHelper::GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
@@ -316,8 +303,7 @@ ErrCode BundleMgrHelper::GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleI
 ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleName, BundleInfo &sharedBundleInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
@@ -328,8 +314,7 @@ ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleN
 bool BundleMgrHelper::GetGroupDir(const std::string &dataGroupId, std::string &dir)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -340,8 +325,7 @@ bool BundleMgrHelper::GetGroupDir(const std::string &dataGroupId, std::string &d
 sptr<IOverlayManager> BundleMgrHelper::GetOverlayManagerProxy()
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return nullptr;
     }
@@ -352,8 +336,7 @@ sptr<IOverlayManager> BundleMgrHelper::GetOverlayManagerProxy()
 bool BundleMgrHelper::QueryAbilityInfo(const Want &want, AbilityInfo &abilityInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -364,8 +347,7 @@ bool BundleMgrHelper::QueryAbilityInfo(const Want &want, AbilityInfo &abilityInf
 bool BundleMgrHelper::QueryAbilityInfo(const Want &want, int32_t flags, int32_t userId, AbilityInfo &abilityInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -376,8 +358,7 @@ bool BundleMgrHelper::QueryAbilityInfo(const Want &want, int32_t flags, int32_t 
 bool BundleMgrHelper::GetBundleInfos(int32_t flags, std::vector<BundleInfo> &bundleInfos, int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -388,8 +369,7 @@ bool BundleMgrHelper::GetBundleInfos(int32_t flags, std::vector<BundleInfo> &bun
 bool BundleMgrHelper::GetBundleInfos(const BundleFlag flag, std::vector<BundleInfo> &bundleInfos, int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -400,8 +380,7 @@ bool BundleMgrHelper::GetBundleInfos(const BundleFlag flag, std::vector<BundleIn
 sptr<IQuickFixManager> BundleMgrHelper::GetQuickFixManagerProxy()
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return nullptr;
     }
@@ -412,8 +391,7 @@ sptr<IQuickFixManager> BundleMgrHelper::GetQuickFixManagerProxy()
 bool BundleMgrHelper::ProcessPreload(const Want &want)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -424,8 +402,7 @@ bool BundleMgrHelper::ProcessPreload(const Want &want)
 sptr<IAppControlMgr> BundleMgrHelper::GetAppControlProxy()
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return nullptr;
     }
@@ -437,8 +414,7 @@ bool BundleMgrHelper::QueryExtensionAbilityInfos(const Want &want, const int32_t
     std::vector<ExtensionAbilityInfo> &extensionInfos)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -450,8 +426,7 @@ bool BundleMgrHelper::GetApplicationInfo(
     const std::string &appName, const ApplicationFlag flag, const int32_t userId, ApplicationInfo &appInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -463,8 +438,7 @@ bool BundleMgrHelper::GetApplicationInfo(
     const std::string &appName, int32_t flags, int32_t userId, ApplicationInfo &appInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -475,8 +449,7 @@ bool BundleMgrHelper::GetApplicationInfo(
 bool BundleMgrHelper::UnregisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -488,8 +461,7 @@ bool BundleMgrHelper::QueryExtensionAbilityInfoByUri(
     const std::string &uri, int32_t userId, ExtensionAbilityInfo &extensionAbilityInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -501,8 +473,7 @@ bool BundleMgrHelper::ImplicitQueryInfoByPriority(
     const Want &want, int32_t flags, int32_t userId, AbilityInfo &abilityInfo, ExtensionAbilityInfo &extensionInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -513,8 +484,7 @@ bool BundleMgrHelper::ImplicitQueryInfoByPriority(
 bool BundleMgrHelper::QueryAbilityInfoByUri(const std::string &abilityUri, int32_t userId, AbilityInfo &abilityInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -526,8 +496,7 @@ bool BundleMgrHelper::QueryAbilityInfo(
     const Want &want, int32_t flags, int32_t userId, AbilityInfo &abilityInfo, const sptr<IRemoteObject> &callBack)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -538,8 +507,7 @@ bool BundleMgrHelper::QueryAbilityInfo(
 void BundleMgrHelper::UpgradeAtomicService(const Want &want, int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return;
     }
@@ -551,8 +519,7 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want &want, int32_t flags, int32_
     std::vector<AbilityInfo> &abilityInfos, std::vector<ExtensionAbilityInfo> &extensionInfos)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -563,8 +530,7 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want &want, int32_t flags, int32_
 bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, const int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -576,8 +542,7 @@ bool BundleMgrHelper::QueryDataGroupInfos(
     const std::string &bundleName, int32_t userId, std::vector<DataGroupInfo> &infos)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -588,8 +553,7 @@ bool BundleMgrHelper::QueryDataGroupInfos(
 bool BundleMgrHelper::GetBundleGidsByUid(const std::string &bundleName, const int32_t &uid, std::vector<int32_t> &gids)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -600,8 +564,7 @@ bool BundleMgrHelper::GetBundleGidsByUid(const std::string &bundleName, const in
 bool BundleMgrHelper::RegisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -612,8 +575,7 @@ bool BundleMgrHelper::RegisterBundleEventCallback(const sptr<IBundleEventCallbac
 bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -624,8 +586,7 @@ bool BundleMgrHelper::GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t u
 bool BundleMgrHelper::QueryAppGalleryBundleName(std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return false;
     }
@@ -636,8 +597,7 @@ bool BundleMgrHelper::QueryAppGalleryBundleName(std::string &bundleName)
 ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, const int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
@@ -648,8 +608,7 @@ ErrCode BundleMgrHelper::GetUidByBundleName(const std::string &bundleName, const
 sptr<IDefaultApp> BundleMgrHelper::GetDefaultAppProxy()
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return nullptr;
     }
@@ -661,8 +620,7 @@ ErrCode BundleMgrHelper::GetJsonProfile(ProfileType profileType, const std::stri
     const std::string &moduleName, std::string &profile, int32_t userId)
 {
     HILOG_DEBUG("Called.");
-    ErrCode result = Connect();
-    if (result != ERR_OK) {
+    if (Connect() == nullptr) {
         HILOG_ERROR("Failed to connect.");
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
