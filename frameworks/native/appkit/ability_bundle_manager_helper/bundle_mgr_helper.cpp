@@ -482,6 +482,11 @@ bool BundleMgrHelper::GetApplicationInfo(
 bool BundleMgrHelper::UnregisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback)
 {
     HILOG_DEBUG("Called.");
+    if(bundleEventCallback == nullptr) {
+        HILOG_ERROR("The bundleEventCallback is nullptr.");
+        return false;
+    }
+
     auto bundleMgr = Connect();
     if (bundleMgr == nullptr) {
         HILOG_ERROR("Failed to connect.");
@@ -607,6 +612,11 @@ bool BundleMgrHelper::GetBundleGidsByUid(const std::string &bundleName, const in
 bool BundleMgrHelper::RegisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback)
 {
     HILOG_DEBUG("Called.");
+    if(bundleEventCallback == nullptr) {
+        HILOG_ERROR("The bundleEventCallback is nullptr.");
+        return false;
+    }
+
     auto bundleMgr = Connect();
     if (bundleMgr == nullptr) {
         HILOG_ERROR("Failed to connect.");
@@ -674,7 +684,7 @@ ErrCode BundleMgrHelper::GetJsonProfile(ProfileType profileType, const std::stri
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
-    return bundleMgr->GetUidByBundleName(bundleName, userId);
+    return bundleMgr->GetJsonProfile(profileType, bundleName, moduleName, profile, userId);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
