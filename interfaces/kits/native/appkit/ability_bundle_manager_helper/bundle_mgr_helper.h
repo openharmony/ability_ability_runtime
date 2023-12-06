@@ -86,8 +86,8 @@ public:
     sptr<IDefaultApp> GetDefaultAppProxy();
 
 private:
-    ErrCode Connect();
-    ErrCode ConnectBundleInstaller();
+    sptr<IBundleMgr> Connect();
+    sptr<IBundleInstaller> ConnectBundleInstaller();
     void OnDeath();
 	
 private:
