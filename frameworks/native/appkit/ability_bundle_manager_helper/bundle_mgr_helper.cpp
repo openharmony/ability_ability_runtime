@@ -198,7 +198,7 @@ sptr<IBundleMgr> BundleMgrHelper::Connect()
         deathRecipient_ = new (std::nothrow) BundleMgrServiceDeathRecipient(deathCallback);
         if (deathRecipient_ == nullptr) {
             HILOG_ERROR("Failed to create death recipient ptr deathRecipient_!");
-            return ERR_APPEXECFWK_SERVICE_NOT_CONNECTED;
+            return nullptr;
         }
         if (bundleMgr_->AsObject() != nullptr) {
             bundleMgr_->AsObject()->AddDeathRecipient(deathRecipient_);
@@ -211,14 +211,16 @@ sptr<IBundleMgr> BundleMgrHelper::Connect()
 sptr<IBundleInstaller> BundleMgrHelper::ConnectBundleInstaller()
 {
     HILOG_DEBUG("Called.");
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (bundleInstaller_ != nullptr) {
-        return bundleInstaller_;
-    }
-    auto bundleMgr = Connect();
-    if (bundleMgr == nullptr) {
-        HILOG_ERROR("Failed to connect.");
-        return nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (bundleInstaller_ != nullptr) {
+            return bundleInstaller_;
+        }
+        auto bundleMgr = Connect();
+        if (bundleMgr == nullptr) {
+            HILOG_ERROR("Failed to connect.");
+            return nullptr;
+        }
     }
 
     std::lock_guard<std::mutex> lock(mutex_);
