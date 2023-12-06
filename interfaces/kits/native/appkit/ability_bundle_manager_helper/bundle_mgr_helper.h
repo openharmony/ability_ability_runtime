@@ -81,12 +81,13 @@ public:
     bool GetBundleInfos(
         const BundleFlag flag, std::vector<BundleInfo> &bundleInfos, int32_t userId = Constants::UNSPECIFIED_USERID);
     bool GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo);
+    bool QueryAppGalleryBundleName(std::string &bundleName);
     ErrCode GetUidByBundleName(const std::string &bundleName, const int32_t userId);
     sptr<IDefaultApp> GetDefaultAppProxy();
 
 private:
-    ErrCode Connect();
-    ErrCode ConnectBundleInstaller();
+    sptr<IBundleMgr> Connect();
+    sptr<IBundleInstaller> ConnectBundleInstaller();
     void OnDeath();
 	
 private:
