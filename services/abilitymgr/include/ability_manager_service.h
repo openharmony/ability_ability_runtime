@@ -1442,6 +1442,8 @@ public:
      */
     int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list) override;
 
+    void RemoveLauncherDeathRecipient(int32_t userId);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1690,7 +1692,8 @@ private:
     void UnsubscribeBundleEventCallback();
 
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
-    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type);
+    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
+        const sptr<IRemoteObject> &callerToken);
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
     void RegisterSuspendObserver();
