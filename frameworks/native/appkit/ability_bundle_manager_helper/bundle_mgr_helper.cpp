@@ -482,7 +482,7 @@ bool BundleMgrHelper::GetApplicationInfo(
 bool BundleMgrHelper::UnregisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback)
 {
     HILOG_DEBUG("Called.");
-    if(bundleEventCallback == nullptr) {
+    if (bundleEventCallback == nullptr) {
         HILOG_ERROR("The bundleEventCallback is nullptr.");
         return false;
     }
@@ -612,7 +612,7 @@ bool BundleMgrHelper::GetBundleGidsByUid(const std::string &bundleName, const in
 bool BundleMgrHelper::RegisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback)
 {
     HILOG_DEBUG("Called.");
-    if(bundleEventCallback == nullptr) {
+    if (bundleEventCallback == nullptr) {
         HILOG_ERROR("The bundleEventCallback is nullptr.");
         return false;
     }
