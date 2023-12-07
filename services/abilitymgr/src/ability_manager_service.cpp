@@ -1650,7 +1650,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
     }
 
     AbilityRequest abilityRequest;
-    result = GenerateAbilityRequest(sessionInfo->want, requestCode, abilityRequest,
+    auto result = GenerateAbilityRequest(sessionInfo->want, requestCode, abilityRequest,
         sessionInfo->callerToken, currentUserId);
     if (result != ERR_OK) {
         HILOG_ERROR("Generate ability request local error.");
