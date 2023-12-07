@@ -621,12 +621,16 @@ void UriPermissionManagerStubImpl::ConnectManager(sptr<T> &mgr, int32_t serviceI
     }
 }
 
+void UriPermissionManagerStubImpl::ConnectManagerHelper(std::shared_ptr<AppExecFwk::BundleMgrHelper> &bundleMgrHelper)
+{
+    if (bundleMgrHelper == nullptr) {
+        bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    }
+}
+
 uint32_t UriPermissionManagerStubImpl::GetTokenIdByBundleName(const std::string bundleName, int32_t appIndex)
 {
-    if (bundleMgrHelper_ == nullptr) {
-        bundleMgrHelper_ = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
-        return BUNDLE_MGR_SERVICE_SYS_ABILITY_ID;
-    }
+    ConnectManagerHelper(bundleMgrHelper_);
     if (bundleMgrHelper_ == nullptr) {
         HILOG_WARN("The bundleMgrHelper_ is nullptr.");
         return GET_BUNDLE_MANAGER_SERVICE_FAILED;
