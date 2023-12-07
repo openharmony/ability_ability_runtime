@@ -66,7 +66,7 @@ class EventHub {
       return;
     }
     if (this.eventMap[event]) {
-      this.eventMap[event].map((callback) => {
+      this.eventMap[event].slice().map((callback) => {
         callback(...args);
       });
     }
