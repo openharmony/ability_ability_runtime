@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_APPEXECFWk_MOCK_SYSTEM_ABILITY_MANAGER_H
-#define OHOS_APPEXECFWk_MOCK_SYSTEM_ABILITY_MANAGER_H
+#ifndef OHOS_APPEXECFWK_MOCK_SYSTEM_ABILITY_MANAGER_H
+#define OHOS_APPEXECFWK_MOCK_SYSTEM_ABILITY_MANAGER_H
 
 #include "gmock/gmock.h"
 #include "if_system_ability_manager.h"

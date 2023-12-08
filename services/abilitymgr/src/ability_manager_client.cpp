@@ -552,12 +552,12 @@ ErrCode AbilityManagerClient::ForceTimeoutForTest(const std::string &abilityName
 }
 #endif
 
-ErrCode AbilityManagerClient::ClearUpApplicationData(const std::string &bundleName)
+ErrCode AbilityManagerClient::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
 {
     HILOG_INFO("call");
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->ClearUpApplicationData(bundleName);
+    return abms->ClearUpApplicationData(bundleName, userId);
 }
 
 ErrCode AbilityManagerClient::ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
@@ -1175,6 +1175,20 @@ ErrCode AbilityManagerClient::PrepareTerminateAbility(sptr<IRemoteObject> token,
         return ERR_INVALID_VALUE;
     }
     return abms->PrepareTerminateAbility(token, callback);
+}
+
+ErrCode AbilityManagerClient::GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &info)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetDialogSessionInfo(dialogSessionId, info);
+}
+
+ErrCode AbilityManagerClient::SendDialogResult(const Want &want, const std::string dialogSessionId, const bool isAllow)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->SendDialogResult(want, dialogSessionId, isAllow);
 }
 #endif
 

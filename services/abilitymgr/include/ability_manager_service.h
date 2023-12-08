@@ -60,6 +60,7 @@
 #include "uri.h"
 #include "user_controller.h"
 #ifdef SUPPORT_GRAPHICS
+#include "dialog_session_record.h"
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #include "window_focus_changed_listener.h"
@@ -184,7 +185,8 @@ public:
             const sptr<IRemoteObject> &callerToken,
             sptr<IRemoteObject> asCallerSoureToken,
             int32_t userId = DEFAULT_INVAL_VALUE,
-            int requestCode = DEFAULT_INVAL_VALUE) override;
+            int requestCode = DEFAULT_INVAL_VALUE,
+            bool isSendDialogResult = false) override;
 
     /**
      * Starts a new ability using the original caller information.
@@ -642,7 +644,8 @@ public:
      * @param bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int ClearUpApplicationData(const std::string &bundleName) override;
+    virtual int ClearUpApplicationData(const std::string &bundleName,
+        const int32_t userId = -1) override;
 
     /**
      * Uninstall app
@@ -792,14 +795,16 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int requestCode,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        bool isStartAsCaller = false);
+        bool isStartAsCaller = false,
+        bool isSendDialogResult = false);
 
     int StartAbilityInner(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int requestCode,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        bool isStartAsCaller = false);
+        bool isStartAsCaller = false,
+        bool isSendDialogResult = false);
 
     int StartExtensionAbilityInner(
         const Want &want,
@@ -905,6 +910,16 @@ public:
     void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
+
+    virtual int GetDialogSessionInfo(const std::string dialogSessionId,
+        sptr<DialogSessionInfo> &dialogSessionInfo) override;
+
+    bool GenerateDialogSessionRecord(AbilityRequest &abilityRequest, int32_t userId,
+        std::string &dialogSessionId, std::vector<DialogAppInfo> &dialogAppInfos);
+
+    int CreateModalDialog(const Want &replaceWant, sptr<IRemoteObject> callerToken, std::string dialogSessionId);
+
+    virtual int SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllowed) override;
 #endif
 
     void ClearUserData(int32_t userId);
@@ -1427,6 +1442,8 @@ public:
      */
     int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list) override;
 
+    void RemoveLauncherDeathRecipient(int32_t userId);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1675,7 +1692,8 @@ private:
     void UnsubscribeBundleEventCallback();
 
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
-    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type);
+    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
+        const sptr<IRemoteObject> &callerToken);
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
     void RegisterSuspendObserver();
@@ -1927,6 +1945,7 @@ private:
     void InitPrepareTerminateConfig();
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
+    std::shared_ptr<DialogSessionRecord> dialogSessionRecord_;
 #endif
     std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;
     std::shared_ptr<AbilityInterceptorExecuter> afterCheckExecuter_;

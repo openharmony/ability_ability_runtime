@@ -27,8 +27,8 @@ public:
     MOCK_METHOD3(StartAbility, int(const Want& want, int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         int32_t userId, int requestCode));
-    MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
+    MOCK_METHOD6(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isSendDialogResult));
     MOCK_METHOD6(StartAbilityAsCaller, int(const Want &want, const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken, sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId, int requestCode));
@@ -106,7 +106,7 @@ public:
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
     MOCK_METHOD2(SetMissionIcon, int(const sptr<IRemoteObject>& token,
         const std::shared_ptr<OHOS::Media::PixelMap>& icon));
-    MOCK_METHOD1(ClearUpApplicationData, int(const std::string&));
+    MOCK_METHOD2(ClearUpApplicationData, int(const std::string&, int32_t userId));
 
     MOCK_METHOD2(GetWantSenderInfo, int(const sptr<IWantSender>& target, std::shared_ptr<WantSenderInfo>& info));
 
