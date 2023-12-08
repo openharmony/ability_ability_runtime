@@ -474,6 +474,7 @@ sptr<AppExecFwk::IDefaultApp> ImplicitStartProcessor::GetDefaultAppProxy()
     auto bundleMgrHelper = GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
         HILOG_ERROR("The bundleMgrHelper is nullptr.");
+        return nullptr;
     }
     auto defaultAppProxy = bundleMgrHelper->GetDefaultAppProxy();
     if (defaultAppProxy == nullptr) {
