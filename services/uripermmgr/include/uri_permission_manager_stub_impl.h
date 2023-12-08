@@ -62,7 +62,7 @@ public:
 private:
     template<typename T>
     void ConnectManager(sptr<T> &mgr, int32_t serviceId);
-    void ConnectManager(std::shared_ptr<AppExecFwk::BundleMgrHelper> &mgr, int32_t serviceId);
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> ConnectManagerHelper();
     int32_t GetCurrentAccountId() const;
     int GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
         TokenId fromTokenId, TokenId targetTokenId, int autoremove);

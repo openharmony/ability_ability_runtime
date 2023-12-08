@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_BUNDLE_MGR_HELPER_H
 
 #include <singleton.h>
+
 #include "bundle_mgr_interface.h"
 
 namespace OHOS {
@@ -26,7 +27,7 @@ using Want = OHOS::AAFwk::Want;
 class BundleMgrHelper : public std::enable_shared_from_this<BundleMgrHelper> {
 public:
     DISALLOW_COPY_AND_MOVE(BundleMgrHelper);
-    ErrCode GetNameForUid(const int uid, std::string &name);
+    ErrCode GetNameForUid(const int32_t uid, std::string &name);
     bool GetBundleInfo(const std::string &bundleName, const BundleFlag flag, BundleInfo &bundleInfo, int32_t userId);
     ErrCode InstallSandboxApp(const std::string &bundleName, int32_t dlpType, int32_t userId, int32_t &appIndex);
     ErrCode UninstallSandboxApp(const std::string &bundleName, int32_t appIndex, int32_t userId);
@@ -58,7 +59,7 @@ public:
     bool QueryExtensionAbilityInfos(const Want &want, const int32_t &flag, const int32_t &userId,
         std::vector<ExtensionAbilityInfo> &extensionInfos);
     bool GetApplicationInfo(
-        const std::string &appName, const ApplicationFlag flag, const int userId, ApplicationInfo &appInfo);
+        const std::string &appName, const ApplicationFlag flag, const int32_t userId, ApplicationInfo &appInfo);
     bool GetApplicationInfo(const std::string &appName, int32_t flags, int32_t userId, ApplicationInfo &appInfo);
     ErrCode GetJsonProfile(ProfileType profileType, const std::string &bundleName,
         const std::string &moduleName, std::string &profile, int32_t userId = Constants::UNSPECIFIED_USERID);
@@ -73,19 +74,20 @@ public:
     void UpgradeAtomicService(const Want &want, int32_t userId);
     bool ImplicitQueryInfos(const Want &want, int32_t flags, int32_t userId, bool withDefault,
         std::vector<AbilityInfo> &abilityInfos, std::vector<ExtensionAbilityInfo> &extensionInfos);
-    bool CleanBundleDataFiles(const std::string &bundleName, const int userId = Constants::DEFAULT_USERID);
+    bool CleanBundleDataFiles(const std::string &bundleName, const int32_t userId = Constants::DEFAULT_USERID);
     bool QueryDataGroupInfos(const std::string &bundleName, int32_t userId, std::vector<DataGroupInfo> &infos);
-    bool GetBundleGidsByUid(const std::string &bundleName, const int &uid, std::vector<int> &gids);
+    bool GetBundleGidsByUid(const std::string &bundleName, const int32_t &uid, std::vector<int32_t> &gids);
     bool RegisterBundleEventCallback(const sptr<IBundleEventCallback> &bundleEventCallback);
     bool GetBundleInfos(
         const BundleFlag flag, std::vector<BundleInfo> &bundleInfos, int32_t userId = Constants::UNSPECIFIED_USERID);
     bool GetHapModuleInfo(const AbilityInfo &abilityInfo, int32_t userId, HapModuleInfo &hapModuleInfo);
-    int GetUidByBundleName(const std::string &bundleName, const int userId);
+    bool QueryAppGalleryBundleName(std::string &bundleName);
+    ErrCode GetUidByBundleName(const std::string &bundleName, const int32_t userId);
     sptr<IDefaultApp> GetDefaultAppProxy();
 
 private:
-    ErrCode Connect();
-    ErrCode ConnectBundleInstaller();
+    sptr<IBundleMgr> Connect();
+    sptr<IBundleInstaller> ConnectBundleInstaller();
     void OnDeath();
 	
 private:

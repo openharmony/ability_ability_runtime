@@ -520,9 +520,10 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param userId User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ClearUpApplicationData(const std::string &bundleName);
+    ErrCode ClearUpApplicationData(const std::string &bundleName, const int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * ContinueMission, continue ability from mission center.
@@ -1000,6 +1001,9 @@ public:
      */
     void UpdateMissionSnapShot(sptr<IRemoteObject> token,
         std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
+
+    ErrCode GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &info);
+    ErrCode SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllow);
 #endif
 
     /**

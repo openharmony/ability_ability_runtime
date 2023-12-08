@@ -131,12 +131,12 @@ int32_t QuickFixManagerService::RevokeQuickFix(const std::string &bundleName)
 
     if (!AAFwk::PermissionVerification::GetInstance()->VerifyGetBundleInfoPrivilegedPermission() ||
         !AAFwk::PermissionVerification::GetInstance()->VerifyInstallBundlePermission()) {
-        HILOG_ERROR("Permission verification failed");
+        HILOG_ERROR("Permission verification failed.");
         return QUICK_FIX_VERIFY_PERMISSION_FAILED;
     }
 
     if (CheckTaskRunningState(bundleName)) {
-        HILOG_ERROR("Has a apply quick fix task");
+        HILOG_ERROR("Has a apply quick fix task.");
         return QUICK_FIX_DEPLOYING_TASK;
     }
 
