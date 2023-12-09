@@ -23,7 +23,6 @@
 #include "ability_interceptor.h"
 #include "ability_interceptor_executer.h"
 #include "bundlemgr/mock_bundle_manager.h"
-#include "mock_ecological_rule_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -31,7 +30,6 @@ using namespace OHOS::AppExecFwk;
 
 namespace {
 const std::string BUNDLE_NAME = "testBundle";
-const int32_t  ECOLOGICAL_RULE_SA_ID = 9999;
 const std::string ATOMIC_SERVICE_BUNDLE_NAME = "com.test.atomicservice";
 const std::string PASS_ABILITY_NAME = "com.test.pass";
 const std::string DENY_ABILITY_NAME = "com.test.deny";
@@ -58,8 +56,6 @@ void AbilityInterceptorTest::SetUpTestCase()
 
     OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->RegisterSystemAbility(
         OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, new BundleMgrService());
-    OHOS::DelayedSingleton<SaMgrClient>::GetInstance()->RegisterSystemAbility(
-        ECOLOGICAL_RULE_SA_ID, new MockEcologicalRuleMgrService());
 }
 
 void AbilityInterceptorTest::TearDownTestCase()

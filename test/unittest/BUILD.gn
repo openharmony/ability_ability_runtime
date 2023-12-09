@@ -139,6 +139,8 @@ ohos_source_set("abilityms_test_source") {
     "${ability_runtime_services_path}/abilitymgr/src/data_ability_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/dialog_session_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/dlp_state_item.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ecological_rule/ability_ecological_rule_mgr_service.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ecological_rule/ability_ecological_rule_mgr_service_param.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/extension_record_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/free_install_manager.cpp",
