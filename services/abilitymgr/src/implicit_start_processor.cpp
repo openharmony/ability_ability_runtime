@@ -341,7 +341,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
 }
 
 int ImplicitStartProcessor::queryBmsAppInfos(AbilityRequest &request, int32_t userId, std::vector<DialogAppInfo> &dialogAppInfos) {
-    auto bundleMgrHelper  = GetBundleManagerHelper();
+    auto bundleMgrHelper = GetBundleManagerHelper();
     std::vector<AppExecFwk::AbilityInfo> bmsApps;
     auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
         | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_SKILL_URI;
@@ -355,7 +355,7 @@ int ImplicitStartProcessor::queryBmsAppInfos(AbilityRequest &request, int32_t us
         Want want;
         want.SetElementName(bundleName, abilityName);
 
-        IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper ->QueryAbilityInfo(want, abilityInfoFlag,
+        IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(want, abilityInfoFlag,
             userId, abilityInfo));
         if (!abilityInfo.name.empty() && !abilityInfo.bundleName.empty() && !abilityInfo.moduleName.empty()) {
             bmsApps.emplace_back(abilityInfo);
