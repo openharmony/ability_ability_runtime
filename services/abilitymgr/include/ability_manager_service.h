@@ -41,7 +41,7 @@
 #include "background_task_observer.h"
 #endif
 #include "bundle_constants.h"
-#include "bundlemgr/bundle_mgr_interface.h"
+#include "bundle_mgr_helper.h"
 #include "data_ability_manager.h"
 #include "event_report.h"
 #include "free_install_manager.h"
@@ -257,6 +257,14 @@ public:
         const sptr<IRemoteObject> &callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED) override;
+
+    /**
+     * Requset modal UIExtension with want, send want to ability manager service.
+     *
+     * @param want, the want contains ability info about caller and called.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int RequestModalUIExtension(const Want &want) override;
 
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
@@ -813,6 +821,8 @@ public:
         AppExecFwk::ExtensionAbilityType extensionType,
         bool checkSystemCaller = true);
 
+    int RequestModalUIExtensionInner(const Want &want);
+    
     int StartAbilityForOptionWrap(
         const Want &want,
         const StartOptions &startOptions,
@@ -1442,6 +1452,8 @@ public:
      */
     int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list) override;
 
+    void RemoveLauncherDeathRecipient(int32_t userId);
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -1542,7 +1554,7 @@ private:
      */
     void InitGlobalConfiguration();
 
-    sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> GetBundleManager();
 
     sptr<OHOS::AppExecFwk::IAppMgr> GetAppMgr();
 
@@ -1690,7 +1702,8 @@ private:
     void UnsubscribeBundleEventCallback();
 
     void ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo);
-    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type);
+    void ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo, int64_t type,
+        const sptr<IRemoteObject> &callerToken);
 
     void ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo);
     void RegisterSuspendObserver();
@@ -1874,6 +1887,7 @@ private:
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
     std::shared_ptr<AbilityConnectManager> connectManager_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper_;
     sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
     std::unordered_map<int, std::shared_ptr<DataAbilityManager>> dataAbilityManagers_;
     std::shared_ptr<DataAbilityManager> dataAbilityManager_;
