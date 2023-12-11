@@ -82,7 +82,8 @@ HWTEST_F(AbilityForegroundStateObserverProxyTest, OnAbilityStateChanged_0100, Te
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &MockAbilityForegroundStateObserverStub::InvokeSendRequest));
     observerProxy_->OnAbilityStateChanged(abilityStateData);
-    EXPECT_EQ(static_cast<uint32_t>(IAbilityForegroundStateObserver::Message::ON_ABILITY_STATE_CHANGED), mock_->getCode());
+    EXPECT_EQ(
+        static_cast<uint32_t>(IAbilityForegroundStateObserver::Message::ON_ABILITY_STATE_CHANGED), mock_->getCode());
     GTEST_LOG_(INFO) << "OnAbilityStateChanged_0100 end";
 }
 } // namespace AbilityRuntime

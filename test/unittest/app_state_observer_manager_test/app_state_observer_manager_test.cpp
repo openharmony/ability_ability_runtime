@@ -1150,7 +1150,7 @@ HWTEST_F(AppSpawnSocketTest, ObserverExist_002, TestSize.Level0)
 
 /**
  * @tc.name: RegisterAbilityForegroundStateObserver_0100
- * @tc.desc: The test returns when the permission judgment is inconsistent. 
+ * @tc.desc: The test returns when the permission judgment is inconsistent.
  * @tc.type: FUNC
  */
 HWTEST_F(AppSpawnSocketTest, RegisterAbilityForegroundStateObserver_0100, TestSize.Level1)
@@ -1165,7 +1165,7 @@ HWTEST_F(AppSpawnSocketTest, RegisterAbilityForegroundStateObserver_0100, TestSi
 
 /**
  * @tc.name: UnregisterAbilityForegroundStateObserver_0100
- * @tc.desc: The test returns when the permission judgment is inconsistent. 
+ * @tc.desc: The test returns when the permission judgment is inconsistent.
  * @tc.type: FUNC
  */
 HWTEST_F(AppSpawnSocketTest, UnregisterAbilityForegroundStateObserver_0100, TestSize.Level1)
