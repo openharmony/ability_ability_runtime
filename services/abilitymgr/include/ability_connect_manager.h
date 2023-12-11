@@ -257,6 +257,8 @@ public:
 
     void TerminateAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
+    
+    void RemoveLauncherDeathRecipient();
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -505,9 +507,9 @@ private:
     inline bool IsUIExtensionAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
     inline bool CheckUIExtensionAbilityLoaded(const AbilityRequest &abilityRequest);
     inline bool CheckUIExtensionAbilitySessionExistLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    inline int32_t AddUIExtensionAbilityRecord(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
-        const std::string &hostBundleName, const int32_t inputId) const;
     inline void RemoveUIExtensionAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest, const std::string &hostBundleName,
+        std::shared_ptr<AbilityRecord> &extensionRecord, bool &isLoaded);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
