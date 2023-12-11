@@ -35,7 +35,7 @@ public:
         return 0;
     }
 
-    int getCode()
+    int GetCode()
     {
         return code_;
     }
