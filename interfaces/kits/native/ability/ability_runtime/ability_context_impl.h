@@ -53,6 +53,8 @@ public:
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
+    std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
+        const std::string &bundleName, const std::string &moduleName) override;
 
     std::string GetBundleCodePath() const override;
     ErrCode StartAbility(const AAFwk::Want &want, int requestCode) override;
@@ -205,6 +207,8 @@ public:
     ErrCode StartAbilityByType(const std::string &type,
         AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
 
+    ErrCode RequestModalUIExtension(const Want &want) override;
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Set mission label of this ability.
@@ -245,6 +249,12 @@ public:
      * @return UIContent object of ACE.
      */
     Ace::UIContent* GetUIContent() override;
+
+    /**
+     * @brief create modal UIExtension.
+     * @param want Create modal UIExtension with want object.
+     */
+    ErrCode CreateModalUIExtensionWithApp(const Want &want) override;
 #endif
 
 private:

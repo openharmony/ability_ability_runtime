@@ -164,6 +164,8 @@ public:
 
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
 
+    virtual ErrCode RequestModalUIExtension(const AAFwk::Want& want) = 0;
+
     /**
     * @brief Connects the current ability to an ability using the AbilityInfo.AbilityType.SERVICE template.
     *
@@ -336,6 +338,7 @@ public:
     virtual Ace::UIContent* GetUIContent() = 0;
     virtual ErrCode StartAbilityByType(const std::string &type, AAFwk::WantParams &wantParam,
         const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) = 0;
+    virtual ErrCode CreateModalUIExtensionWithApp(const AAFwk::Want &want) = 0;
 #endif
     virtual bool IsTerminating() = 0;
     virtual void SetTerminating(bool state) = 0;
