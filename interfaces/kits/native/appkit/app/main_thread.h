@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_MAIN_THREAD_H
 
 #include <string>
+#include <signal.h>
 #include <mutex>
 #include "event_handler.h"
 #include "extension_config_mgr.h"
@@ -252,6 +253,8 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
+    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
+
     /**
      *
      * @brief Check the App main thread state.
@@ -280,7 +283,7 @@ public:
 
     void AttachAppDebug() override;
     void DetachAppDebug() override;
-
+    bool NotifyDeviceDisConnect();
 private:
     /**
      *
@@ -290,6 +293,8 @@ private:
     void HandleTerminateApplicationLocal();
 
     void HandleScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName);
+
+    void HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
 
     /**
      *
@@ -516,7 +521,7 @@ private:
     void UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 
     static void HandleDumpHeap(bool isPrivate);
-    static void HandleSignal(int signal);
+    static void HandleSignal(int signal, siginfo_t *siginfo, void *context);
 
     void NotifyAppFault(const FaultData &faultData);
 
@@ -620,6 +625,14 @@ private:
     bool GetHqfFileAndHapPath(const std::string &bundleName,
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
+    
+    /**
+     * @brief Whether MainThread is started by ChildProcessManager.
+     *
+     * @param info The child process info to be set from appMgr.
+     * @return true if started by ChildProcessManager, false otherwise.
+     */
+    static bool IsStartChild(ChildProcessInfo &info);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

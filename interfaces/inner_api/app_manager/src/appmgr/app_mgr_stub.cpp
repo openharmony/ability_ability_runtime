@@ -15,20 +15,19 @@
 
 #include "app_mgr_stub.h"
 
-#include "ipc_skeleton.h"
-#include "ipc_types.h"
-#include "iremote_object.h"
-
 #include "ability_info.h"
+#include "app_malloc_info.h"
 #include "app_mgr_proxy.h"
 #include "app_scheduler_interface.h"
 #include "appexecfwk_errors.h"
-#include "hitrace_meter.h"
-#include "hilog_wrapper.h"
-#include "iapp_state_callback.h"
-#include "want.h"
 #include "bundle_info.h"
-#include "app_malloc_info.h"
+#include "hilog_wrapper.h"
+#include "hitrace_meter.h"
+#include "iapp_state_callback.h"
+#include "ipc_skeleton.h"
+#include "ipc_types.h"
+#include "iremote_object.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -72,6 +71,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleFinishUserTest;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::SCHEDULE_ACCEPT_WANT_DONE)] =
         &AppMgrStub::HandleScheduleAcceptWantDone;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::SCHEDULE_NEW_PROCESS_REQUEST_DONE)] =
+        &AppMgrStub::HandleScheduleNewProcessRequestDone;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_ABILITY_RECORDS_BY_PROCESS_ID)] =
         &AppMgrStub::HandleGetAbilityRecordsByProcessID;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::PRE_START_NWEBSPAWN_PROCESS)] =
@@ -134,6 +135,28 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleNotifyPageShow;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_PAGE_HIDE)] =
         &AppMgrStub::HandleNotifyPageHide;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APP_RUNNING_STATUS_LISTENER)] =
+        &AppMgrStub::HandleRegisterAppRunningStatusListener;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APP_RUNNING_STATUS_LISTENER)] =
+        &AppMgrStub::HandleUnregisterAppRunningStatusListener;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_APP_FOREGROUND_STATE_OBSERVER)] =
+        &AppMgrStub::HandleRegisterAppForegroundStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_APP_FOREGROUND_STATE_OBSERVER)] =
+        &AppMgrStub::HandleUnregisterAppForegroundStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_ABILITY_FOREGROUND_STATE_OBSERVER)] =
+        &AppMgrStub::HandleRegisterAbilityForegroundStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_ABILITY_FOREGROUND_STATE_OBSERVER)] =
+        &AppMgrStub::HandleUnregisterAbilityForegroundStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::IS_APPLICATION_RUNNING)] =
+        &AppMgrStub::HandleIsApplicationRunning;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::START_CHILD_PROCESS)] =
+        &AppMgrStub::HandleStartChildProcess;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_CHILD_PROCCESS_INFO_FOR_SELF)] =
+        &AppMgrStub::HandleGetChildProcessInfoForSelf;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::ATTACH_CHILD_PROCESS)] =
+        &AppMgrStub::HandleAttachChildProcess;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::EXIT_CHILD_PROCESS_SAFELY)] =
+        &AppMgrStub::HandleExitChildProcessSafely;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -231,7 +254,8 @@ int32_t AppMgrStub::HandleClearUpApplicationData(MessageParcel &data, MessagePar
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
-    int32_t result = ClearUpApplicationData(bundleName);
+    int32_t userId = data.ReadInt32();
+    int32_t result = ClearUpApplicationData(bundleName, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -389,6 +413,27 @@ int32_t AppMgrStub::HandleUnregisterApplicationStateObserver(MessageParcel &data
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleRegisterAbilityForegroundStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IAbilityForegroundStateObserver>(data.ReadRemoteObject());
+    int32_t result = RegisterAbilityForegroundStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterAbilityForegroundStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IAbilityForegroundStateObserver>(data.ReadRemoteObject());
+    int32_t result = UnregisterAbilityForegroundStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
 
 int32_t AppMgrStub::HandleGetForegroundApplications(MessageParcel &data, MessageParcel &reply)
 {
@@ -462,6 +507,21 @@ int32_t AppMgrStub::HandleScheduleAcceptWantDone(MessageParcel &data, MessagePar
     auto flag = data.ReadString();
 
     ScheduleAcceptWantDone(recordId, *want, flag);
+    delete want;
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleScheduleNewProcessRequestDone(MessageParcel &data, MessageParcel &reply)
+{
+    auto recordId = data.ReadInt32();
+    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    auto flag = data.ReadString();
+
+    ScheduleNewProcessRequestDone(recordId, *want, flag);
     delete want;
     return NO_ERROR;
 }
@@ -827,6 +887,131 @@ int32_t AppMgrStub::HandleNotifyPageHide(MessageParcel &data, MessageParcel &rep
         HILOG_ERROR("fail to write result.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterAppRunningStatusListener(MessageParcel &data, MessageParcel &reply)
+{
+    auto listener = data.ReadRemoteObject();
+    if (listener == nullptr) {
+        HILOG_ERROR("Read data failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto result = RegisterAppRunningStatusListener(listener);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterAppRunningStatusListener(MessageParcel &data, MessageParcel &reply)
+{
+    auto listener = data.ReadRemoteObject();
+    if (listener == nullptr) {
+        HILOG_ERROR("Read data failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    auto result = UnregisterAppRunningStatusListener(listener);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterAppForegroundStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IAppForegroundStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        HILOG_ERROR("Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterAppForegroundStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterAppForegroundStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    auto callback = iface_cast<AppExecFwk::IAppForegroundStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        HILOG_ERROR("Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterAppForegroundStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleIsApplicationRunning(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("Called.");
+    std::string bundleName = data.ReadString();
+    bool isRunning = false;
+    int32_t result = IsApplicationRunning(bundleName, isRunning);
+    if (!reply.WriteBool(isRunning)) {
+        return ERR_INVALID_VALUE;
+    }
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleStartChildProcess(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("called.");
+    std::string srcEntry = data.ReadString();
+    int32_t childPid = 0;
+    int32_t result = StartChildProcess(srcEntry, childPid);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Write result error.");
+        return ERR_INVALID_VALUE;
+    }
+    if (result == ERR_OK && !reply.WriteInt32(childPid)) {
+        HILOG_ERROR("Write childPid error.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetChildProcessInfoForSelf(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("called.");
+    ChildProcessInfo info;
+    auto result = GetChildProcessInfoForSelf(info);
+    if (!reply.WriteInt32(result)) {
+        HILOG_ERROR("Write result error.");
+        return ERR_INVALID_VALUE;
+    }
+    if (result == ERR_OK && !reply.WriteParcelable(&info)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleAttachChildProcess(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("called.");
+    sptr<IRemoteObject> scheduler = data.ReadRemoteObject();
+    AttachChildProcess(scheduler);
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleExitChildProcessSafely(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("called.");
+    ExitChildProcessSafely();
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

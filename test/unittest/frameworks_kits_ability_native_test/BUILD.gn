@@ -248,7 +248,10 @@ ohos_unittest("ability_context_test") {
     "ability_context_test.cpp",
   ]
 
-  include_dirs = [ "${ability_runtime_napi_path}/inner/napi_common" ]
+  include_dirs = [
+    "${ability_runtime_napi_path}/inner/napi_common",
+    "${ability_runtime_test_path}/mock/common/include",
+  ]
 
   configs = [ ":module_ability_context_config" ]
 
@@ -2186,12 +2189,15 @@ ohos_unittest("ability_connection_manager_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "faultloggerd:libdfx_dumpcatcher",
-    "hichecker:libhichecker",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
+
+  if (hichecker_enabled) {
+    external_deps += [ "hichecker:libhichecker" ]
+  }
 }
 
 ohos_unittest("abilityruntime_test") {

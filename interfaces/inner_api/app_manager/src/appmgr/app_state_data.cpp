@@ -16,6 +16,7 @@
 #include "app_state_data.h"
 
 #include "hilog_wrapper.h"
+#include "ui_extension_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -23,7 +24,9 @@ bool AppStateData::Marshalling(Parcel &parcel) const
 {
     return (parcel.WriteString(bundleName) && parcel.WriteInt32(uid) && parcel.WriteInt32(state)
         && parcel.WriteInt32(pid) && parcel.WriteInt32(accessTokenId) && parcel.WriteBool(isFocused)
-        && parcel.WriteInt32(static_cast<int32_t>(extensionType)) && parcel.WriteInt32Vector(renderPids));
+        && parcel.WriteInt32(static_cast<int32_t>(extensionType)) && parcel.WriteInt32Vector(renderPids)
+        && parcel.WriteString(callerBundleName) && parcel.WriteBool(isSplitScreenMode)
+        && parcel.WriteBool(isFloatingWindowMode));
 }
 
 bool AppStateData::ReadFromParcel(Parcel &parcel)
@@ -36,6 +39,9 @@ bool AppStateData::ReadFromParcel(Parcel &parcel)
     isFocused = parcel.ReadBool();
     extensionType = static_cast<ExtensionAbilityType>(parcel.ReadInt32());
     parcel.ReadInt32Vector(&renderPids);
+    callerBundleName = parcel.ReadString();
+    isSplitScreenMode = parcel.ReadBool();
+    isFloatingWindowMode = parcel.ReadBool();
 
     return true;
 }
@@ -49,6 +55,11 @@ AppStateData *AppStateData::Unmarshalling(Parcel &parcel)
         appStateData = nullptr;
     }
     return appStateData;
+}
+
+bool AppStateData::IsUIExtension(const AppExecFwk::ExtensionAbilityType type)
+{
+    return AAFwk::UIExtensionUtils::IsUIExtension(type);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
