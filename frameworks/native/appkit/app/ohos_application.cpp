@@ -21,6 +21,7 @@
 #include "app_loader.h"
 #include "application_context.h"
 #include "application_impl.h"
+#include "bundle_mgr_client.h"
 #include "context_impl.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
@@ -544,6 +545,17 @@ void OHOSApplication::OnStart()
 void OHOSApplication::OnTerminate()
 {
     HILOG_DEBUG("OHOSApplication::OnTerminate: called");
+    if (abilityRuntimeContext_ == nullptr) {
+        HILOG_ERROR("Ability runtime context is nullptr");
+        return;
+    }
+    auto applicationInfo = abilityRuntimeContext_->GetApplicationInfo();
+    if(applicationInfo == nullptr) {
+        HILOG_ERROR("Applicationinfo is nullptr");
+        return;
+    }
+    BundleMgrClient bundleMgrClient;
+    bundleMgrClient.CleanBundleTempFiles();
 }
 
 /**
