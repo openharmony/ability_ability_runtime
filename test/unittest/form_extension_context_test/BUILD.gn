@@ -75,6 +75,7 @@ ohos_unittest("form_extension_context_test") {
     "napi:ace_napi",
     "relational_store:native_dataability",
     "relational_store:native_rdb",
+    "samgr:samgr_proxy",
     "window_manager:scene_session",
   ]
 
