@@ -853,7 +853,7 @@ int32_t AppMgrServiceInner::KillApplicationByUid(const std::string &bundleName, 
         return ERR_NO_INIT;
     }
 
-    auto result = ERR_OK;
+    int32_t result = ERR_OK;
     if (!CheckCallerIsAppGallery()) {
         result = VerifyProcessPermission(bundleName);
         if (result != ERR_OK) {
