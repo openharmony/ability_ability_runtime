@@ -323,6 +323,11 @@ bool DisposedRuleInterceptor::CheckDisposedRule(const Want &want, AppExecFwk::Di
 ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
     const sptr<IRemoteObject> &callerToken)
 {
+    if (want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
+        want.GetElement().GetBundleName()) {
+        HILOG_DEBUG("The same bundle, do not intercept.");
+        return ERR_OK;
+    }
     ErmsCallerInfo callerInfo;
     ExperienceRule rule;
 #ifdef SUPPORT_ERMS
