@@ -905,6 +905,13 @@ public:
      */
     void ExitChildProcessSafelyByChildPid(const pid_t pid);
 
+    /**
+     * Whether the current application process is the last surviving process.
+     * @param bundleName To query the bundle name of a process.
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcessByBundleName(const std::string &bundleName);
+
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1114,6 +1121,8 @@ private:
     int VerifyProcessPermission() const;
 
     int VerifyProcessPermission(const std::string &bundleName) const;
+    
+    bool CheckCallerIsAppGallery();
 
     void ApplicationTerminatedSendProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ClearAppRunningDataForKeepAlive(const std::shared_ptr<AppRunningRecord> &appRecord);
