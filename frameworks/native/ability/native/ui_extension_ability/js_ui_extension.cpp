@@ -51,10 +51,10 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 }
 
-napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
+napi_value AttachUIExtensionContext(napi_env env, void *value, void *extValue)
 {
     HILOG_DEBUG("AttachUIExtensionContext");
-    if (value == nullptr) {
+    if (value == nullptr || extValue == nullptr) {
         HILOG_ERROR("invalid parameter.");
         return nullptr;
     }
@@ -64,14 +64,26 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
         HILOG_ERROR("invalid context.");
         return nullptr;
     }
-    napi_value object = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
-    auto contextObj = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
-        &object, 1)->GetNapiValue();
+    auto screenMode = *(reinterpret_cast<int32_t *>(extValue));
+    napi_value contextObj = nullptr;
+    if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
+        auto uiExtObject = JsUIExtensionContext::CreateJsUIExtensionContext(env, ptr);
+        CHECK_POINTER_AND_RETURN(uiExtObject, nullptr);
+        contextObj = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
+            &uiExtObject, 1)->GetNapiValue();
+    } else {
+        auto emUIObject = JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env,
+            nullptr, ptr, screenMode);
+        CHECK_POINTER_AND_RETURN(emUIObject, nullptr);
+        contextObj = JsRuntime::LoadSystemModuleByEngine(env, "application.EmbeddableUIAbilityContext",
+            &emUIObject, 1)->GetNapiValue();
+    }
     if (contextObj == nullptr) {
         HILOG_ERROR("load context error.");
         return nullptr;
     }
-    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, value, nullptr);
+    napi_coerce_to_native_binding_object(env, contextObj, DetachCallbackFunc,
+        AttachUIExtensionContext, value, extValue);
     auto workContext = new (std::nothrow) std::weak_ptr<UIExtensionContext>(ptr);
     napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
@@ -201,8 +213,8 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
         shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.EmbeddableUIAbilityContext",
             &contextObj, ARGC_ONE);
     }
-    if (shellContextRef_ == nullptr || contextObj == nullptr) {
-        HILOG_ERROR("Failed to get LoadSystemModuleByEngine or Create js ui extension context error.");
+    if (shellContextRef_ == nullptr) {
+        HILOG_ERROR("Failed to get LoadSystemModuleByEngine.");
         return;
     }
     contextObj = shellContextRef_->GetNapiValue();
@@ -211,8 +223,11 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<UIExtensionContext>(context);
+    CHECK_POINTER(workContext);
+    auto workScreenMode = new (std::nothrow) int32_t(screenMode);
+    CHECK_POINTER(workScreenMode);
     napi_coerce_to_native_binding_object(
-        env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, workContext, nullptr);
+        env, contextObj, DetachCallbackFunc, AttachUIExtensionContext, workContext, workScreenMode);
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
     napi_wrap(env, contextObj, workContext,
