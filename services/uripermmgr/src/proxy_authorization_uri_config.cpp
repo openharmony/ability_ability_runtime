@@ -25,9 +25,9 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
-const std::string CONFIG_PATH = "/system/etc/proxy_authorization_uri.json";
-const std::string SCB_CONFIG_PATH_PREFIX = "/system/variant/";
-const std::string SCB_CONFIG_PATH = "/base/etc/proxy_authorization_uri.json";
+const std::string CONFIG_PATH_DEFAULT = "/system/etc/proxy_authorization_uri.json";
+const std::string CONFIG_PATH_PREFIX = "/system/variant/";
+const std::string CONFIG_PATH = "/base/etc/proxy_authorization_uri.json";
 
 const std::string PROXY_AUTHORIZATION_URI_NAME = "proxyAuthorizationUri";
 const std::string BUNDLE_NAME = "bundleName";
@@ -36,15 +36,15 @@ const std::string BUNDLE_NAME = "bundleName";
 void ProxyAuthorizationUriConfig::LoadConfiguration()
 {
     HILOG_DEBUG("call");
-    nlohmann::json scbJsonBuf;
-    std::string scbConfigPath = SCB_CONFIG_PATH_PREFIX + OHOS::system::GetDeviceType() + SCB_CONFIG_PATH;
-    if (ReadFileInfoJson(scbConfigPath, scbJsonBuf)) {
-        LoadBundleNameAllowedList(scbJsonBuf);
+    nlohmann::json jsonBuf;
+    std::string configPath = CONFIG_PATH_PREFIX + OHOS::system::GetDeviceType() + CONFIG_PATH;
+    if (ReadFileInfoJson(configPath, jsonBuf)) {
+        LoadBundleNameAllowedList(jsonBuf);
         return;
     }
-    nlohmann::json jsonBuf;
-    if (ReadFileInfoJson(CONFIG_PATH, jsonBuf)) {
-        LoadBundleNameAllowedList(jsonBuf);
+    nlohmann::json jsonBufDefault;
+    if (ReadFileInfoJson(CONFIG_PATH_DEFAULT, jsonBufDefault)) {
+        LoadBundleNameAllowedList(jsonBufDefault);
     }
 }
 
