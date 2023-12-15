@@ -650,7 +650,6 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         HILOG_ERROR("get app record failed");
         return;
     }
-    appRecord->PopForegroundingAbilityTokens();
     ApplicationState appState = appRecord->GetState();
     if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
@@ -663,6 +662,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     }
     appRecord->SetUpdateStateFromService(false);
     appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
+    appRecord->PopForegroundingAbilityTokens();
 
     // push the foregrounded app front of RecentAppList.
     PushAppFront(recordId);
