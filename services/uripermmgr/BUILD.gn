@@ -28,10 +28,10 @@ config("upms_config") {
 }
 
 libupms_sources = [
+  "src/proxy_authorization_uri_config.cpp",
   "src/rdb/ability_rdb_open_callback.cpp",
   "src/rdb/rdb_data_manager.cpp",
   "src/rdb/uri_permission_rdb.cpp",
-  "src/proxy_authorization_uri_config.cpp",
   "src/uri_permission_manager_service.cpp",
   "src/uri_permission_manager_stub_impl.cpp",
 ]
