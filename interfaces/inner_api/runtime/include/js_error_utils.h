@@ -23,7 +23,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 
 void ThrowError(napi_env env, int32_t errCode, const std::string& errorMsg = "");
-void ThrowError(napi_env env, const AbilityErrorCode& errCode, const std::string& errorMsg);
 void ThrowError(napi_env env, const AbilityErrorCode& err);
 void ThrowTooFewParametersError(napi_env env);
 void ThrowNoPermissionError(napi_env env, const std::string& permission);

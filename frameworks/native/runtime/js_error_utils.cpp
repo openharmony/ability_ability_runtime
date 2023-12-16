@@ -29,11 +29,6 @@ void ThrowError(napi_env env, int32_t errCode, const std::string& errorMsg)
     napi_throw(env, CreateJsError(env, errCode, errorMsg));
 }
 
-void ThrowError(napi_env env, const AbilityErrorCode& errCode, const std::string& errorMsg)
-{
-    napi_throw(env, CreateJsError(env, static_cast<int32_t>(errCode), errorMsg));
-}
-
 void ThrowError(napi_env env, const AbilityErrorCode& err)
 {
     napi_throw(env, CreateJsError(env, static_cast<int32_t>(err), GetErrorMsg(err)));
