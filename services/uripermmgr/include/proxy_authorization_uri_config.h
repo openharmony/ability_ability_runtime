@@ -26,7 +26,7 @@ namespace OHOS {
 namespace AAFwk {
 class ProxyAuthorizationUriConfig : public DelayedSingleton<ProxyAuthorizationUriConfig> {
 public:
-    explicit ProxyAuthorizationUriConfig() = default;
+    ProxyAuthorizationUriConfig() = default;
     virtual ~ProxyAuthorizationUriConfig() = default;
     void LoadConfiguration();
     bool IsAuthorizationUriAllowed(uint32_t fromTokenId);
