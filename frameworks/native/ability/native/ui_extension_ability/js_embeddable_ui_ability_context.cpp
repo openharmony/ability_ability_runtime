@@ -42,7 +42,9 @@ namespace AbilityRuntime {
         return nullptr;                              \
     }
 
-static const std::string ERR_MSG_NOT_SUPPORT = "Not support the interface in half screen mode of atomic service.";
+namespace {
+const std::string ERR_MSG_NOT_SUPPORT = "Not support the interface in half screen mode of atomic service.";
+}
 
 JsEmbeddableUIAbilityContext::JsEmbeddableUIAbilityContext(const std::shared_ptr<AbilityContext>& uiAbiContext,
     const std::shared_ptr<UIExtensionContext>& uiExtContext, int32_t screenMode)
@@ -216,7 +218,7 @@ napi_value JsEmbeddableUIAbilityContext::OnTerminateSelf(napi_env env, NapiCallb
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Terminate self in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -227,7 +229,7 @@ napi_value JsEmbeddableUIAbilityContext::OnTerminateSelfWithResult(napi_env env,
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Terminate self with result in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -238,7 +240,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartAbilityAsCaller(napi_env env, Na
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start ability as caller in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -249,7 +251,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartAbilityWithAccount(napi_env env,
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start ability with account in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -260,7 +262,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartAbilityByCall(napi_env env, Napi
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start ability by caller in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -271,7 +273,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartAbilityForResultWithAccount(napi
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start ability for result in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -282,7 +284,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartExtensionAbility(napi_env env, N
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start extension in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -293,7 +295,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartExtensionAbilityWithAccount(napi
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start extensionin with account in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -304,7 +306,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStopExtensionAbility(napi_env env, Na
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Stop extensionin in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -315,7 +317,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStopExtensionAbilityWithAccount(napi_
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Stop extensionin with account in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -326,7 +328,7 @@ napi_value JsEmbeddableUIAbilityContext::OnConnectAbilityWithAccount(napi_env en
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Connect ability with account in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -337,7 +339,7 @@ napi_value JsEmbeddableUIAbilityContext::OnRestoreWindowStage(napi_env env, Napi
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Restore window stage with account in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -348,7 +350,7 @@ napi_value JsEmbeddableUIAbilityContext::OnIsTerminating(napi_env env, NapiCallb
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Get terminating state in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -359,7 +361,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartRecentAbility(napi_env env, Napi
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start recent ability in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -370,7 +372,7 @@ napi_value JsEmbeddableUIAbilityContext::OnRequestDialogService(napi_env env, Na
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Request dialog service in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -381,7 +383,7 @@ napi_value JsEmbeddableUIAbilityContext::OnReportDrawnCompleted(napi_env env, Na
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Report drawn completed in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -392,7 +394,7 @@ napi_value JsEmbeddableUIAbilityContext::OnSetMissionContinueState(napi_env env,
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Set mission continue state in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -403,7 +405,7 @@ napi_value JsEmbeddableUIAbilityContext::OnStartAbilityByType(napi_env env, Napi
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Start ability by type in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -427,7 +429,7 @@ napi_value JsEmbeddableUIAbilityContext::OnSetMissionLabel(napi_env env, NapiCal
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Set mission label in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);
@@ -438,7 +440,7 @@ napi_value JsEmbeddableUIAbilityContext::OnSetMissionIcon(napi_env env, NapiCall
 {
     if (screenMode_ == AAFwk::HALF_SCREEN_MODE) {
         HILOG_INFO("Set mission icon in half screen mode.");
-        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER, ERR_MSG_NOT_SUPPORT);
+        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER), ERR_MSG_NOT_SUPPORT);
         return CreateJsUndefined(env);
     }
     CHECK_POINTER_RETURN(jsAbilityContext_);

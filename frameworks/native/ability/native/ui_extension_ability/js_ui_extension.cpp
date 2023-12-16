@@ -187,6 +187,23 @@ void JsUIExtension::Init(const std::shared_ptr<AbilityLocalRecord> &record,
         JsExtensionCommon::Create(jsRuntime_, static_cast<NativeReference&>(*jsObj_), shellContextRef_));
 }
 
+void JsUIExtension::CreateJSContext(napi_env env, napi_value &contextObj,
+    std::shared_ptr<UIExtensionContext> context, int32_t screenMode)
+{
+    if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
+        contextObj = JsUIExtensionContext::CreateJsUIExtensionContext(env, context);
+        CHECK_POINTER(contextObj);
+        shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
+            &contextObj, ARGC_ONE);
+    } else {
+        contextObj = JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env,
+            nullptr, context, screenMode);
+        CHECK_POINTER(contextObj);
+        shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.EmbeddableUIAbilityContext",
+            &contextObj, ARGC_ONE);
+    }
+}
+
 void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want)
 {
     auto context = GetContext();
@@ -201,18 +218,7 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
     }
     int32_t screenMode = want->GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE);
     napi_value contextObj = nullptr;
-    if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
-        contextObj = JsUIExtensionContext::CreateJsUIExtensionContext(env, context);
-        CHECK_POINTER(contextObj);
-        shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.UIExtensionContext",
-            &contextObj, ARGC_ONE);
-    } else {
-        contextObj = JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env,
-            nullptr, context, screenMode);
-        CHECK_POINTER(contextObj);
-        shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.EmbeddableUIAbilityContext",
-            &contextObj, ARGC_ONE);
-    }
+    CreateJSContext(env, contextObj, context, screenMode);
     if (shellContextRef_ == nullptr) {
         HILOG_ERROR("Failed to get LoadSystemModuleByEngine.");
         return;
@@ -236,7 +242,11 @@ void JsUIExtension::BindContext(napi_env env, napi_value obj, std::shared_ptr<AA
             delete static_cast<std::weak_ptr<UIExtensionContext>*>(data);
         },
         nullptr, nullptr);
-
+    napi_wrap(env, contextObj, workScreenMode,
+        [](napi_env, void *extData, void *) {
+            HILOG_DEBUG("Finalizer for screen mode is called");
+            delete static_cast<int32_t *>(extData);
+        }, nullptr, nullptr);
     HILOG_DEBUG("Init end.");
 }
 
