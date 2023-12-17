@@ -213,6 +213,7 @@ private:
     std::map<uint64_t, std::shared_ptr<NativeReference>> contentSessions_;
     std::shared_ptr<AbilityResultListeners> abilityResultListeners_ = nullptr;
     int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
+    std::shared_ptr<int32_t> screenModePtr_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS
