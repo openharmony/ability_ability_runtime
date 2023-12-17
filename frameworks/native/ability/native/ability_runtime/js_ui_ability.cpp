@@ -84,15 +84,19 @@ napi_value AttachJsAbilityContext(napi_env env, void *value, void *extValue)
         return nullptr;
     }
     std::shared_ptr<NativeReference> systemModule = nullptr;
-    auto screenMode = *(reinterpret_cast<int32_t *>(extValue));
-    if (screenMode == AAFwk::IDLE_SCREEN_MODE) {
+    auto screenModePtr = reinterpret_cast<std::weak_ptr<int32_t> *>(extValue)->lock();
+    if (screenModePtr == nullptr) {
+        HILOG_ERROR("Invalid screenModePtr.");
+        return nullptr;
+    }
+    if (*screenModePtr == AAFwk::IDLE_SCREEN_MODE) {
         auto uiAbiObject = CreateJsAbilityContext(env, ptr);
         CHECK_POINTER_AND_RETURN(uiAbiObject, nullptr);
         systemModule = std::shared_ptr<NativeReference>(JsRuntime::LoadSystemModuleByEngine(env,
             "application.AbilityContext", &uiAbiObject, 1).release());
     } else {
         auto emUIObject = JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(env,
-            ptr, nullptr, screenMode);
+            ptr, nullptr, *screenModePtr);
         CHECK_POINTER_AND_RETURN(emUIObject, nullptr);
         systemModule = std::shared_ptr<NativeReference>(JsRuntime::LoadSystemModuleByEngine(env,
             "application.EmbeddableUIAbilityContext", &emUIObject, 1).release());
@@ -211,7 +215,8 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
     }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::AbilityContext>(abilityContext_);
     CHECK_POINTER(workContext);
-    auto workScreenMode = new (std::nothrow) int32_t(screenMode);
+    screenModePtr_ = std::make_shared<int32_t>(screenMode);
+    auto workScreenMode = new (std::nothrow) std::weak_ptr<int32_t>(screenModePtr_);
     CHECK_POINTER(workScreenMode);
     napi_coerce_to_native_binding_object(
         env, contextObj, DetachCallbackFunc, AttachJsAbilityContext, workContext, workScreenMode);
@@ -226,11 +231,7 @@ void JsUIAbility::SetAbilityContext(std::shared_ptr<AbilityInfo> abilityInfo,
             HILOG_DEBUG("Finalizer for weak_ptr ability context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::AbilityContext> *>(data);
         }, nullptr, nullptr);
-    napi_wrap(env, contextObj, workScreenMode,
-        [](napi_env, void *extData, void *) {
-            HILOG_DEBUG("Finalizer for screen mode is called");
-            delete static_cast<int32_t *>(extData);
-        }, nullptr, nullptr);
+    HILOG_DEBUG("Init end.");
 }
 
 void JsUIAbility::CreateJSContext(napi_env env, napi_value &contextObj, int32_t screenMode)

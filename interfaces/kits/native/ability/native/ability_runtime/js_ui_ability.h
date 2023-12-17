@@ -310,6 +310,7 @@ private:
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
     std::shared_ptr<NativeReference> jsAbilityObj_;
+    std::shared_ptr<int32_t> screenModePtr_;
     sptr<IRemoteObject> remoteCallee_;
 };
 } // namespace AbilityRuntime
