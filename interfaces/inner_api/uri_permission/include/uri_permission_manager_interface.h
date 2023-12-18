@@ -116,6 +116,8 @@ public:
      */
     virtual bool VerifyUriPermission(const Uri& uri, uint32_t flag, uint32_t tokenId) = 0;
 
+    virtual bool IsAuthorizationUriAllowed(uint32_t fromTokenId) = 0;
+
     enum UriPermMgrCmd {
         // ipc id for GrantUriPermission
         ON_GRANT_URI_PERMISSION = 0,
@@ -142,6 +144,9 @@ public:
 
         // ipc id for BatchGrantUriPermissionFor2In1
         ON_BATCH_GRANT_URI_PERMISSION_FOR_2_IN_1,
+
+        //ipc id for IsAuthorizationUriAllowed
+        ON_IS_Authorization_URI_ALLOWED
     };
 };
 }  // namespace AAFwk

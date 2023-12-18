@@ -234,6 +234,7 @@ ohos_source_set("abilityms_test_source") {
     "relational_store:native_rdb",
     "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
+    "window_manager:libmodal_system_ui_extension_client",
     "window_manager:libwsutils",
     "window_manager:sms",
   ]
@@ -279,7 +280,10 @@ ohos_source_set("abilityms_test_source") {
     external_deps += [
       "input:libmmi-client",
       "window_manager:libdm",
+      "window_manager:libmodal_system_ui_extension_client",
       "window_manager:libwm",
+      "window_manager:libwsutils",
+      "window_manager:sms",
     ]
   }
 
@@ -309,6 +313,8 @@ group("unittest") {
     "ability_extension_module_loader_test:unittest",
     "ability_extension_running_info_test:unittest",
     "ability_extension_test:unittest",
+    "ability_foreground_state_observer_proxy_test:unittest",
+    "ability_foreground_state_observer_stub_test:unittest",
     "ability_interceptor_test:unittest",
     "ability_manager_client_branch_test:unittest",
     "ability_manager_proxy_test:unittest",
@@ -352,6 +358,7 @@ group("unittest") {
     "app_debug_info_test:unittest",
     "app_debug_listener_proxy_test:unittest",
     "app_debug_listener_stub_test:unittest",
+    "app_debug_manager_test:unittest",
     "app_exit_reason_data_manager_test:unittest",
     "app_launch_data_test:unittest",
     "app_lifecycle_deal_test:unittest",
@@ -366,6 +373,7 @@ group("unittest") {
     "app_recovery_test:unittest",
     "app_running_manager_test:unittest",
     "app_running_processes_info_test:unittest",
+    "app_running_record_test:unittest",
     "app_scheduler_host_test:unittest",
     "app_scheduler_proxy_test:unittest",
     "app_scheduler_test:unittest",

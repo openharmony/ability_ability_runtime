@@ -257,7 +257,7 @@ public:
 
     void TerminateAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo);
-    
+
     void RemoveLauncherDeathRecipient();
 
     // MSG 0 - 20 represents timeout message
@@ -353,6 +353,7 @@ private:
     void HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleCommandWindowTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
+    void HandleForegroundTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleRestartResidentTask(const AbilityRequest &abilityRequest);
     void HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
         std::shared_ptr<ConnectionRecord> &connectRecord);
@@ -464,6 +465,9 @@ private:
     void HandleInactiveTimeout(const std::shared_ptr<AbilityRecord> &ability);
     void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
 
+    void DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
+    void SaveUIExtRequestSessionInfo(std::shared_ptr<AbilityRecord> abilityRecord, sptr<SessionInfo> sessionInfo);
+
     /**
      * When a service is under starting, enque the request and handle it after the service starting completes
      */
@@ -508,8 +512,8 @@ private:
     inline bool CheckUIExtensionAbilityLoaded(const AbilityRequest &abilityRequest);
     inline bool CheckUIExtensionAbilitySessionExistLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
     inline void RemoveUIExtensionAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
-    int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest, const std::string &hostBundleName,
-        std::shared_ptr<AbilityRecord> &extensionRecord, bool &isLoaded);
+    int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest, bool isCreatedByConnect,
+        const std::string &hostBundleName, std::shared_ptr<AbilityRecord> &extensionRecord, bool &isLoaded);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
@@ -519,6 +523,8 @@ private:
     ConnectMapType connectMap_;
     ServiceMapType serviceMap_;
     ServiceMapType terminatingExtensionMap_;
+
+    std::mutex recipientMapMutex_;
     RecipientMapType recipientMap_;
     RecipientMapType uiExtRecipientMap_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
