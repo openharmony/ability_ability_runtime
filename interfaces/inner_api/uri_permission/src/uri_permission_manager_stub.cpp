@@ -58,6 +58,9 @@ int UriPermissionManagerStub::OnRemoteRequest(
         case UriPermMgrCmd::ON_BATCH_GRANT_URI_PERMISSION_FOR_2_IN_1 : {
             return HandleBatchGrantUriPermissionFor2In1(data, reply);
         }
+        case UriPermMgrCmd::ON_IS_Authorization_URI_ALLOWED : {
+            return HandleIsAuthorizationUriAllowed(data, reply);
+        }
         default:
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
@@ -196,6 +199,14 @@ int UriPermissionManagerStub::HandleBatchGrantUriPermissionFor2In1(MessageParcel
     auto isSystemAppCall = data.ReadBool();
     int result = GrantUriPermissionFor2In1(uriVec, flag, targetBundleName, appIndex, isSystemAppCall);
     reply.WriteInt32(result);
+    return ERR_OK;
+}
+
+int UriPermissionManagerStub::HandleIsAuthorizationUriAllowed(MessageParcel &data, MessageParcel &reply)
+{
+    auto fromTokenId = data.ReadInt32();
+    bool result = IsAuthorizationUriAllowed(fromTokenId);
+    reply.WriteBool(result);
     return ERR_OK;
 }
 }  // namespace AAFwk

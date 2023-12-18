@@ -487,7 +487,7 @@ public:
 
     /**
      * Check whether the bundle is running.
-     * 
+     *
      * @param bundleName Indicates the bundle name of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return Return ERR_OK if success, others fail.
@@ -521,7 +521,14 @@ public:
      * Exit child process, called by itself.
      */
     virtual void ExitChildProcessSafely() = 0;
-    
+
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    virtual bool IsFinalAppProcess()  = 0;
+
     // please add new message item to the bottom in order to prevent some unexpected BUG
     enum class Message {
         APP_ATTACH_APPLICATION = 0,
