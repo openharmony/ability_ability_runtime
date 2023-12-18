@@ -823,7 +823,6 @@ int UriPermissionManagerStubImpl::GrantUriPermissionFor2In1Inner(const std::vect
         } else {
             policyInfo.mode |= READ_MODE;
         }
-        HILOG_DEBUG("The mode is %{public}llu", policyInfo.mode);
         if (authority == "docs") {
             docsVec.emplace_back(policyInfo);
         } else {
