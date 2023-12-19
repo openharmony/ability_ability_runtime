@@ -638,6 +638,14 @@ bool JsRuntime::Initialize(const Options& options)
             panda::JSNApi::SetHostResolveBufferTracker(
                 vm, JsModuleReader(options.bundleName, options.hapPath, options.isUnique));
             isModular = !panda::JSNApi::IsBundle(vm);
+            panda::JSNApi::SetSearchHapPathTracker(
+                vm, [options](const std::string moduleName, std::string &hapPath) -> bool {
+                    if (options.hapModulePath.find(moduleName) == options.hapModulePath.end()) {
+                        return false;
+                    }
+                    hapPath = options.hapModulePath.find(moduleName)->second;
+                    return true;
+                });
         }
     }
 
