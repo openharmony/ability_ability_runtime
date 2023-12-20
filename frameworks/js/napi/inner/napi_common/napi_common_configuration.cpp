@@ -51,8 +51,6 @@ napi_value WrapConfiguration(napi_env env, const AppExecFwk::Configuration &conf
         env, ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE)));
     SetPropertyValueByPropertyName(env, jsObject, "colorMode", jsValue);
 
-    SetPropertyValueByPropertyName(env, jsObject, "timeFormat", jsValue);
-
     int32_t displayId = ConvertDisplayId(configuration.GetItem(ConfigurationInner::APPLICATION_DISPLAYID));
 
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
