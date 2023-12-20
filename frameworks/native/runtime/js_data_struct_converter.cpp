@@ -91,7 +91,10 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
 
     napi_set_named_property(env, object, "language", CreateJsValue(env,
         configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE)));
-    napi_set_named_property(env, object, "colorMode", CreateJsValue(env,
+    napi_set_named_property(env, object, "colorMode1", CreateJsValue(env,
+        ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE))));
+    
+    napi_set_named_property(env, object, "timeFormat", CreateJsValue(env,
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE))));
 
     int32_t displayId = ConvertDisplayId(configuration.GetItem(ConfigurationInner::APPLICATION_DISPLAYID));
