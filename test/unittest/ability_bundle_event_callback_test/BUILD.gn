@@ -24,8 +24,6 @@ ohos_unittest("ability_bundle_event_callback_test") {
     "${ability_runtime_path}/interfaces/inner_api/uri_permission/include",
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include",
     "${ability_base_kits_path}/extractortool/include",
-    "//base/security/selinux_adapter:libselinux_parameter_static",
-    "//foundation/bundlemanager/ecological_rule_manager/interfaces/innerkits/include",
     "${ability_runtime_path}/services/abilitymgr/src/",
   ]
 
@@ -67,6 +65,9 @@ ohos_unittest("ability_bundle_event_callback_test") {
     "window_manager:libwsutils",
     "window_manager:sms",
   ]
+  if (ecologic_rule_enabled) {
+    external_deps += [ "ecological_rule_manager:erms_client" ]
+  }
 }
 
 group("unittest") {

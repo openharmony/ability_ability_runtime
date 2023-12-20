@@ -12,8 +12,6 @@
 # limitations under the License.
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-import(
-    "//foundation/bundlemanager/bundle_framework/services/bundlemgr/appexecfwk_bundlemgr.gni")
 
 module_output_path = "ability_runtime/abilitymgr"
 
