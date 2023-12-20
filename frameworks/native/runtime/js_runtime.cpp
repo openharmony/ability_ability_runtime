@@ -187,9 +187,7 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
     return instance;
 }
 
-void JsRuntime::StartDebugMode(bool needBreakPoint, bool isDebugApp) {}
-
-void JsRuntime::StartDebugMode(bool needBreakPoint, bool isDebugApp, const std::string &processName)
+void JsRuntime::StartDebugMode(bool needBreakPoint, const std::string &processName, bool isDebugApp)
 {
     CHECK_POINTER(jsEnv_);
     if (jsEnv_->GetDebugMode()) {
@@ -212,10 +210,9 @@ void JsRuntime::StartDebugMode(bool needBreakPoint, bool isDebugApp, const std::
         inputProcessName = processName;
     }
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
-        [bundleName, needBreakPoint, instanceId, weak](int socketFd, std::string option)
-    {
+        [bundleName, needBreakPoint, instanceId, weak](int socketFd, std::string option) {
         HILOG_INFO("HdcRegister callback is call, socket fd is %{public}d, option is %{public}s.",
-           socketFd, option.c_str());
+            socketFd, option.c_str());
         if (weak == nullptr) {
             HILOG_ERROR("jsEnv is nullptr in hdc register callback");
             return;
@@ -314,7 +311,7 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
 }
 
 void JsRuntime::StartProfiler(
-    const std::string &perfCmd, bool needBreakPoint, bool isDebugApp, const std::string &processName)
+    const std::string &perfCmd, bool needBreakPoint, const std::string &processName, bool isDebugApp)
 {
     CHECK_POINTER(jsEnv_);
     if (JsRuntime::hasInstance.exchange(true, std::memory_order_relaxed)) {
@@ -331,10 +328,9 @@ void JsRuntime::StartProfiler(
         inputProcessName = processName;
     }
     HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
-        [bundleName, needBreakPoint, instanceId, weak](int socketFd, std::string option)
-    {
+        [bundleName, needBreakPoint, instanceId, weak](int socketFd, std::string option) {
         HILOG_INFO("HdcRegister callback is call, socket fd is %{public}d, option is %{public}s.",
-           socketFd, option.c_str());
+            socketFd, option.c_str());
         if (weak == nullptr) {
             HILOG_ERROR("jsEnv is nullptr in hdc register callback");
             return;
@@ -781,7 +777,7 @@ void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> op
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitSourceMap(operatorObj);
     JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
-    JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetPresetAppHapPath);
+    JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetHapPathList);
 }
 
 void JsRuntime::Deinitialize()
@@ -1060,6 +1056,19 @@ void JsRuntime::DumpHeapSnapshot(bool isPrivate)
     nativeEngine->DumpHeapSnapshot(true, DumpFormat::JSON, isPrivate);
 }
 
+void JsRuntime::DestroyHeapProfiler()
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->DestroyHeapProfiler();
+}
+
+void JsRuntime::ForceFullGC()
+{
+    auto vm = GetEcmaVm();
+    CHECK_POINTER(vm);
+    panda::JSNApi::TriggerGC(vm, panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+}
+
 bool JsRuntime::BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames)
 {
     auto nativeEngine = GetNativeEnginePointer();
@@ -1287,6 +1296,7 @@ void JsRuntime::InitWorkerModule(const Options& options)
     workerInfo->assetBasePathStr = options.assetBasePathStr;
     workerInfo->hapPath = options.hapPath;
     workerInfo->isStageModel = options.isStageModel;
+    workerInfo->moduleName = options.moduleName;
     if (options.isJsFramework) {
         SetJsFramework();
     }

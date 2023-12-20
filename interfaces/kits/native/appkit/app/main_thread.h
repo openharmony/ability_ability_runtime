@@ -140,8 +140,9 @@ public:
      *
      * @brief Schedule the terminate lifecycle of application.
      *
+     * @param isLastProcess When it is the last application process, pass in true.
      */
-    void ScheduleTerminateApplication() override;
+    void ScheduleTerminateApplication(bool isLastProcess = false) override;
 
     /**
      *
@@ -376,7 +377,7 @@ private:
      * @brief Terminate the application.
      *
      */
-    void HandleTerminateApplication();
+    void HandleTerminateApplication(bool isLastProcess = false);
 
     /**
      *
@@ -521,6 +522,8 @@ private:
     void UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 
     static void HandleDumpHeap(bool isPrivate);
+    static void DestroyHeapProfiler();
+    static void ForceFullGC();
     static void HandleSignal(int signal, siginfo_t *siginfo, void *context);
 
     void NotifyAppFault(const FaultData &faultData);
@@ -625,6 +628,14 @@ private:
     bool GetHqfFileAndHapPath(const std::string &bundleName,
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
+    
+    /**
+     * @brief Whether MainThread is started by ChildProcessManager.
+     *
+     * @param info The child process info to be set from appMgr.
+     * @return true if started by ChildProcessManager, false otherwise.
+     */
+    static bool IsStartChild(ChildProcessInfo &info);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

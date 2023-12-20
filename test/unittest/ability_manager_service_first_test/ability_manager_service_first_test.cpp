@@ -1470,5 +1470,54 @@ HWTEST_F(AbilityManagerServiceFirstTest, DetachAppDebug_001, TestSize.Level1)
     auto result = abilityMs_->DetachAppDebug(bundleName);
     EXPECT_EQ(result, CHECK_PERMISSION_FAILED);
 }
+
+/**
+ * @tc.name: GetForegroundUIAbilities_001
+ * @tc.desc: Test function GetForegroundUIAbilities when dosen't have permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GetForegroundUIAbilities_001, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    EXPECT_NE(abilityMs_, nullptr);
+    std::vector<AppExecFwk::AbilityStateData> list;
+    auto res = abilityMs_->GetForegroundUIAbilities(list);
+    EXPECT_EQ(res, CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GenerateEmbeddableUIAbilityRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GenerateEmbeddableUIAbilityRequest
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GenerateEmbeddableUIAbilityRequest_001, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_001 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    want.SetParam("ScreenMode", 1);
+    AbilityRequest request;
+    auto res = abilityMs_->GenerateEmbeddableUIAbilityRequest(want, request, nullptr, USER_ID_U100);
+    EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
+    HILOG_INFO("AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_001 end");
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: GenerateEmbeddableUIAbilityRequest
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService GenerateEmbeddableUIAbilityRequest
+ */
+HWTEST_F(AbilityManagerServiceFirstTest, GenerateEmbeddableUIAbilityRequest_002, TestSize.Level1)
+{
+    HILOG_INFO("AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_002 start");
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    AbilityRequest request;
+    auto res = abilityMs_->GenerateEmbeddableUIAbilityRequest(want, request, nullptr, USER_ID_U100);
+    EXPECT_EQ(res, RESOLVE_ABILITY_ERR);
+    HILOG_INFO("AbilityManagerServiceSecondTest GenerateEmbeddableUIAbilityRequest_002 end");
+}
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -53,7 +53,8 @@ public:
         const sptr<IRemoteObject>& callerToken,
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = -1) override;
+        int requestCode = -1,
+        bool isSendDialogResult = false) override;
     int StartAbilityAsCaller(
         const Want& want,
         const StartOptions& startOptions,
@@ -168,7 +169,7 @@ public:
     MOCK_METHOD1(BlockAbility, int(int32_t abilityRecordId));
 #endif
 
-    int ClearUpApplicationData(const std::string& bundleName) override
+    int ClearUpApplicationData(const std::string& bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }
@@ -270,6 +271,16 @@ public:
     }
 
     int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override
+    {
+        return 0;
+    }
+
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;
     }

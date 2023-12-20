@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct RunningProcessInfo;
+class BundleMgrHelper;
 }
 namespace AbilityRuntime {
 class ContextImpl : public Context {
@@ -75,6 +76,15 @@ public:
      * @return Returns the application temporary directory.
      */
     std::string GetTempDir() override;
+
+    std::string GetResourceDir() override;
+
+    /**
+     * @brief Get all temporary directories.
+     *
+     * @param tempPaths Return all temporary directories of the application.
+     */
+    virtual void GetAllTempDir(std::vector<std::string> &tempPaths);
 
     /**
      * @brief Obtains the directory for storing files for the application on the device's internal storage.
@@ -355,6 +365,7 @@ private:
     static const std::string CONTEXT_FILES;
     static const std::string CONTEXT_HAPS;
     static const std::string CONTEXT_ELS[];
+    static const std::string CONTEXT_RESOURCE_END;
     int flags_ = 0x00000000;
 
     void InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo, const std::shared_ptr<ContextImpl> &appContext,
@@ -406,7 +417,7 @@ private:
     std::mutex checkedDirSetLock_;
 
     std::mutex bundleManagerMutex_;
-    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgr_;
 
     // True: need to get a new fms remote object,
     // False: no need to get a new fms remote object.

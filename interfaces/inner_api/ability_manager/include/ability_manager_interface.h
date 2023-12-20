@@ -49,12 +49,14 @@
 #include "start_options.h"
 #include "stop_user_callback.h"
 #include "system_memory_attr.h"
+#include "ui_extension_ability_connect_info.h"
 #include "ui_extension_window_command.h"
 #include "uri.h"
 #include "want.h"
 #include "want_receiver_interface.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
+#include "dialog_session_info.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window_manager_service_handler.h"
 #endif
@@ -64,6 +66,7 @@ namespace AAFwk {
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
 using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
+using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
 constexpr const char* ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
 const int DEFAULT_INVAL_VALUE = -1;
 const int DELAY_LOCAL_FREE_INSTALL_TIMEOUT = 40000;
@@ -168,7 +171,8 @@ public:
         const sptr<IRemoteObject> &callerToken,
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE)
+        int requestCode = DEFAULT_INVAL_VALUE,
+        bool isSendDialogResult = false)
     {
         return 0;
     }
@@ -255,6 +259,16 @@ public:
         return 0;
     }
 
+  /**
+     * Create UIExtension with want, send want to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int RequestModalUIExtension(const Want &want)
+    {
+        return 0;
+    }
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
      *
@@ -466,10 +480,12 @@ public:
      * @param connect, callback used to notify caller the result of connecting or disconnecting.
      * @param sessionInfo the extension session info of the ability to connect.
      * @param userId, the extension runs in.
+     * @param connectInfo the connect info.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int ConnectUIExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<SessionInfo> &sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE)
+        const sptr<SessionInfo> &sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE,
+        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr)
     {
         return 0;
     }
@@ -601,7 +617,7 @@ public:
      * @param bundleName, bundle name in Application record.
      * @return
      */
-    virtual int ClearUpApplicationData(const std::string &bundleName) = 0;
+    virtual int ClearUpApplicationData(const std::string &bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
     /**
      * Uninstall app
@@ -779,6 +795,17 @@ public:
     {
         return 0;
     }
+
+    virtual int GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &dialogSessionInfo)
+    {
+        return 0;
+    }
+
+    virtual int SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllow)
+    {
+        return 0;
+    }
+
 #endif
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) = 0;
@@ -1342,6 +1369,22 @@ public:
         const InsightIntentExecuteResult &result) = 0;
 
     /**
+     * @brief Set application auto start up state by EDM.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @param flag Indicate whether to allow the application to change the auto start up state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) = 0;
+
+    /**
+     * @brief Cancel application auto start up state by EDM.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @param flag Indicate whether to allow the application to change the auto start up state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) = 0;
+
+    /**
      * @brief Get foreground ui abilities.
      * @param list Foreground ui abilities.
      * @return Returns ERR_OK on success, others on failure.
@@ -1358,6 +1401,12 @@ public:
     {
         return 0;
     }
+
+    /**
+     * @brief Update session info.
+     * @param sessionInfos The vector of session info.
+     */
+    virtual void UpdateSessionInfoBySCB(const std::vector<SessionInfo> &sessionInfos, int32_t userId) {}
 };
 }  // namespace AAFwk
 }  // namespace OHOS

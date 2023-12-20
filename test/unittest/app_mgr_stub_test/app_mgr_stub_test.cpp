@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#define private public
 #include "app_mgr_stub.h"
+#undef private
 #include "hilog_wrapper.h"
 #include "mock_app_mgr_service.h"
 
@@ -340,5 +342,55 @@ HWTEST_F(AppMgrStubTest, HandleChangeAppGcState_001, TestSize.Level1)
             static_cast<uint32_t>(AppMgrInterfaceCode::CHANGE_APP_GC_STATE), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
+
+/**
+ * @tc.name: IsApplicationRunning_001
+ * @tc.desc: On remote request to query the running status of the application.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, IsApplicationRunning_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    std::string bundleName = "testBundleName";
+    bool isRunning = false;
+    data.WriteString(bundleName);
+    data.WriteBool(isRunning);
+
+    EXPECT_CALL(*mockAppMgrService_, IsApplicationRunning(_, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::IS_APPLICATION_RUNNING), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.number: HandleRegisterAbilityForegroundStateObserver_0100
+ * @tc.desc: Verify it when write result success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleRegisterAbilityForegroundStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = mockAppMgrService_->HandleRegisterAbilityForegroundStateObserver(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.number: HandleUnregisterAbilityForegroundStateObserver_0100
+ * @tc.desc: Verify it when write result success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUnregisterAbilityForegroundStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = mockAppMgrService_->HandleUnregisterAbilityForegroundStateObserver(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+}
+} // namespace AppExecFwk
+} // namespace OHOS
