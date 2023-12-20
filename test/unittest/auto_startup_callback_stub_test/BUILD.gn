@@ -18,14 +18,12 @@ module_output_path = "ability_runtime/ability_test"
 ohos_unittest("auto_startup_callback_stub_test") {
   module_out_path = module_output_path
 
-  include_dirs = [
-    "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
-  ]
+  include_dirs = [ "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include" ]
 
   sources = [
     "${ability_runtime_native_path}/ability/native/auto_startup_callback_stub.cpp",
     "auto_startup_callback_stub_test.cpp",
-    ]
+  ]
 
   configs = []
 
@@ -48,6 +46,6 @@ ohos_unittest("auto_startup_callback_stub_test") {
 
 group("unittest") {
   testonly = true
-  
+
   deps = [ ":auto_startup_callback_stub_test" ]
 }

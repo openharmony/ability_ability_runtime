@@ -20,27 +20,20 @@
 #include "ability_manager_errors.h"
 #include "distributed_kv_data_manager.h"
 #include "hilog_wrapper.h"
-#include "mock_ability_auto_startup_data_manager.h"
 #include "parameters.h"
 #include "permission_verification.h"
 #undef private
 #undef protected
 
 namespace {
-const std::string THE_FIRST_RETURN_VALUE = "1";
-const std::string THE_SECOND_RETURN_VALUE = "2";
-const std::string THE_THIRD_RETURN_VALUE = "3";
-const std::string THE_FOURTH_RETURN_VALUE = "4";
-const std::string THE_FIFTH_RETURN_VALUE = "5";
 const std::string AUTO_STARTUP_SERVICE_EMPTY = "";
 const std::string AUTO_STARTUP_SERVICE_BUNDLENAME = "bundleName";
+const std::string AUTO_STARTUP_SERVICE_ABILITYNAME = "abilityName";
 const bool AUTO_STARTUP_SERVICE_TRUE = true;
 const bool AUTO_STARTUP_SERVICE_FALSE = false;
 } // namespace
 using namespace testing;
 using namespace testing::ext;
-extern void MockQueryAutoStartupData(std::string mockQue);
-extern void MockCheckAutoStartupData(std::string mockChe);
 using namespace OHOS::AbilityRuntime;
 namespace OHOS {
 namespace AAFwk {
@@ -48,8 +41,8 @@ class AbilityAutoStartupServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    void SetUp();
+    void TearDown();
 };
 
 void AbilityAutoStartupServiceTest::SetUpTestCase() {}
@@ -117,9 +110,9 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetApplicationAutoStartup_001, TestSize.
 HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_001 start";
-    MockQueryAutoStartupData(THE_FIRST_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_EMPTY;
     auto result = abilityAutoStartupService->InnerSetApplicationAutoStartup(info);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_001 end";
@@ -134,64 +127,15 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_001, Test
 HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_002 start";
-    MockQueryAutoStartupData(THE_SECOND_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
+    info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     auto result = abilityAutoStartupService->InnerSetApplicationAutoStartup(info);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_002 end";
 }
 
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerSetApplicationAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerSetApplicationAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_003, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_003 start";
-    MockQueryAutoStartupData(THE_THIRD_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerSetApplicationAutoStartup(info);
-    EXPECT_EQ(result, ERR_EDM_APP_CONTROLLED);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_003 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerSetApplicationAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerSetApplicationAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_004, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_004 start";
-    MockQueryAutoStartupData(THE_FOURTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerSetApplicationAutoStartup(info);
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_004 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerSetApplicationAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerSetApplicationAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerSetApplicationAutoStartup_005, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_005 start";
-    MockQueryAutoStartupData(THE_FIFTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerSetApplicationAutoStartup(info);
-    EXPECT_EQ(result, ERR_ALREADY_EXISTS);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetApplicationAutoStartup_005 end";
-}
 /*
  * Feature: AbilityAutoStartupService
  * Function: CancelApplicationAutoStartup
@@ -217,9 +161,9 @@ HWTEST_F(AbilityAutoStartupServiceTest, CancelApplicationAutoStartup_001, TestSi
 HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelApplicationAutoStartup_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_001 start";
-    MockQueryAutoStartupData(THE_FIRST_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_EMPTY;
     auto result = abilityAutoStartupService->InnerCancelApplicationAutoStartup(info);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_001 end";
@@ -234,46 +178,13 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelApplicationAutoStartup_001, T
 HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelApplicationAutoStartup_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_002 start";
-    MockQueryAutoStartupData(THE_THIRD_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
+    info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     auto result = abilityAutoStartupService->InnerCancelApplicationAutoStartup(info);
-    EXPECT_EQ(result, ERR_EDM_APP_CONTROLLED);
+    EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_002 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerCancelApplicationAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerCancelApplicationAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelApplicationAutoStartup_003, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_003 start";
-    MockQueryAutoStartupData(THE_FOURTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerCancelApplicationAutoStartup(info);
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_003 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerCancelApplicationAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerCancelApplicationAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelApplicationAutoStartup_004, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_004 start";
-    MockQueryAutoStartupData(THE_FIFTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerCancelApplicationAutoStartup(info);
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelApplicationAutoStartup_004 end";
 }
 
 /*
@@ -366,9 +277,9 @@ HWTEST_F(AbilityAutoStartupServiceTest, SetAutoStartup_001, TestSize.Level1)
 HWTEST_F(AbilityAutoStartupServiceTest, InnerSetAutoStartup_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_001 start";
-    MockQueryAutoStartupData(THE_FIRST_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_EMPTY;
     auto result = abilityAutoStartupService->InnerSetAutoStartup(info);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_001 end";
@@ -383,63 +294,13 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerSetAutoStartup_001, TestSize.Level1
 HWTEST_F(AbilityAutoStartupServiceTest, InnerSetAutoStartup_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_002 start";
-    MockQueryAutoStartupData(THE_SECOND_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
+    info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     auto result = abilityAutoStartupService->InnerSetAutoStartup(info);
     EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_002 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerSetAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerSetAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerSetAutoStartup_003, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_003 start";
-    MockQueryAutoStartupData(THE_THIRD_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerSetAutoStartup(info);
-    EXPECT_EQ(result, ERR_EDM_APP_CONTROLLED);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_003 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerSetAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerSetAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerSetAutoStartup_004, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_004 start";
-    MockQueryAutoStartupData(THE_FOURTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerSetAutoStartup(info);
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_004 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerSetAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerSetAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerSetAutoStartup_005, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_005 start";
-    MockQueryAutoStartupData(THE_FIFTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerSetAutoStartup(info);
-    EXPECT_EQ(result, ERR_ALREADY_EXISTS);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerSetAutoStartup_005 end";
 }
 
 /*
@@ -467,9 +328,9 @@ HWTEST_F(AbilityAutoStartupServiceTest, CancelAutoStartup_001, TestSize.Level1)
 HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelAutoStartup_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_001 start";
-    MockQueryAutoStartupData(THE_FIRST_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_EMPTY;
     auto result = abilityAutoStartupService->InnerCancelAutoStartup(info);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_001 end";
@@ -484,46 +345,13 @@ HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelAutoStartup_001, TestSize.Lev
 HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelAutoStartup_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_002 start";
-    MockQueryAutoStartupData(THE_THIRD_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     AutoStartupInfo info;
+    info.abilityName = AUTO_STARTUP_SERVICE_ABILITYNAME;
+    info.bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     auto result = abilityAutoStartupService->InnerCancelAutoStartup(info);
-    EXPECT_EQ(result, ERR_EDM_APP_CONTROLLED);
+    EXPECT_EQ(result, ERR_OK);
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_002 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerCancelAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerCancelAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelAutoStartup_003, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_003 start";
-    MockQueryAutoStartupData(THE_FOURTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerCancelAutoStartup(info);
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_003 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: InnerCancelAutoStartup
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService InnerCancelAutoStartup
- */
-HWTEST_F(AbilityAutoStartupServiceTest, InnerCancelAutoStartup_004, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_004 start";
-    MockQueryAutoStartupData(THE_FIFTH_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    AutoStartupInfo info;
-    auto result = abilityAutoStartupService->InnerCancelAutoStartup(info);
-    EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest InnerCancelAutoStartup_004 end";
 }
 
 /*
@@ -568,46 +396,11 @@ HWTEST_F(AbilityAutoStartupServiceTest, DeleteAutoStartupData_001, TestSize.Leve
 HWTEST_F(AbilityAutoStartupServiceTest, CheckAutoStartupData_001, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_001 start";
-    MockCheckAutoStartupData(THE_FIRST_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    std::string bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
-    auto result = abilityAutoStartupService->CheckAutoStartupData(bundleName, -1);
-    EXPECT_EQ(result, ERR_NO_INIT);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_001 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: CheckAutoStartupData
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService CheckAutoStartupData
- */
-HWTEST_F(AbilityAutoStartupServiceTest, CheckAutoStartupData_002, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_002 start";
-    MockCheckAutoStartupData(THE_SECOND_RETURN_VALUE);
     auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
     std::string bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
     auto result = abilityAutoStartupService->CheckAutoStartupData(bundleName, -1);
     EXPECT_EQ(result, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_002 end";
-}
-
-/*
- * Feature: AbilityAutoStartupService
- * Function: CheckAutoStartupData
- * SubFunction: NA
- * FunctionPoints: AbilityAutoStartupService CheckAutoStartupData
- */
-HWTEST_F(AbilityAutoStartupServiceTest, CheckAutoStartupData_003, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_003 start";
-    MockCheckAutoStartupData(THE_THIRD_RETURN_VALUE);
-    auto abilityAutoStartupService = std::make_shared<AbilityAutoStartupService>();
-    std::string bundleName = AUTO_STARTUP_SERVICE_BUNDLENAME;
-    auto result = abilityAutoStartupService->CheckAutoStartupData(bundleName, -1);
-    EXPECT_EQ(result, INNER_ERR);
-    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_003 end";
+    GTEST_LOG_(INFO) << "AbilityAutoStartupServiceTest CheckAutoStartupData_001 end";
 }
 
 /*

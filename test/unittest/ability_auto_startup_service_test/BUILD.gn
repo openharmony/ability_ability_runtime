@@ -13,8 +13,6 @@
 
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
-import(
-    "//foundation/bundlemanager/bundle_framework/services/bundlemgr/appexecfwk_bundlemgr.gni")
 
 module_output_path = "ability_runtime/abilitymgr"
 
@@ -29,9 +27,9 @@ ohos_unittest("ability_auto_startup_service_test") {
   ]
 
   sources = [
+    "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_service.cpp",
     "ability_auto_startup_service_test.cpp",
-    "mock_ability_auto_startup_data_manager.cpp",
   ]
 
   configs = []
@@ -44,7 +42,6 @@ ohos_unittest("ability_auto_startup_service_test") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:perm_verification",
-    "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
 
