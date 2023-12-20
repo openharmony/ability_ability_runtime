@@ -13,31 +13,38 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+#include <limits>
+
 #define private public
 #include "app_mgr_service_inner.h"
 #include "app_running_record.h"
+#include "iservice_registry.h"
 #include "module_running_record.h"
 #undef private
 
-#include <limits>
-#include <gtest/gtest.h>
-#include "iremote_object.h"
-#include "refbase.h"
-#include "application_info.h"
-#include "app_record_id.h"
-#include "app_scheduler_host.h"
 #include "ability_info.h"
 #include "ability_running_record.h"
+#include "app_record_id.h"
+#include "app_scheduler_host.h"
+#include "application_info.h"
+#include "bundle_mgr_interface.h"
 #include "event_handler.h"
 #include "hilog_wrapper.h"
-#include "mock_app_scheduler.h"
+#include "if_system_ability_manager.h"
+#include "iremote_object.h"
 #include "mock_ability_token.h"
-#include "mock_app_spawn_client.h"
 #include "mock_app_mgr_service_inner.h"
+#include "mock_app_scheduler.h"
+#include "mock_app_spawn_client.h"
+#include "mock_bundle_installer_service.h"
+#include "mock_bundle_manager_service.h"
 #include "mock_iapp_state_callback.h"
-#include "mock_bundle_manager.h"
 #include "mock_render_scheduler.h"
+#include "mock_system_ability_manager.h"
+#include "refbase.h"
 #include "ui_extension_utils.h"
+#include "window_visibility_info.h"
 
 using namespace testing::ext;
 using testing::_;
@@ -50,6 +57,9 @@ namespace AppExecFwk {
 namespace {
 static constexpr int64_t NANOSECONDS = 1000000000;  // NANOSECONDS mean 10^9 nano second
 static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 millias second
+constexpr int32_t BUNDLE_MGR_SERVICE_SYS_ABILITY_ID = 401;
+sptr<MockBundleInstallerService> mockBundleInstaller = new (std::nothrow) MockBundleInstallerService();
+sptr<MockBundleManagerService> mockBundleMgr = new (std::nothrow) MockBundleManagerService();
 }
 class AmsAppRunningRecordTest : public testing::Test {
 public:
@@ -57,6 +67,10 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    void MockBundleInstallerAndSA() const;
+    void MockBundleInstaller() const;
+    sptr<ISystemAbilityManager> iSystemAbilityMgr_ = nullptr;
+    sptr<AppExecFwk::MockSystemAbilityManager> mockSystemAbility_ = nullptr;
 
 protected:
     static const std::string GetTestProcessName()
@@ -95,7 +109,6 @@ protected:
     std::shared_ptr<AppRunningRecord> testAppRecord_;
     std::unique_ptr<AppMgrServiceInner> service_;
     sptr<MockAbilityToken> mock_token_;
-    sptr<BundleMgrService> mockBundleMgr;
 };
 
 void AmsAppRunningRecordTest::SetUpTestCase()
@@ -110,14 +123,38 @@ void AmsAppRunningRecordTest::SetUp()
     service_.reset(new (std::nothrow) AppMgrServiceInner());
     mock_token_ = new (std::nothrow) MockAbilityToken();
     client_ = iface_cast<IAppScheduler>(mockAppSchedulerClient_.GetRefPtr());
-    mockBundleMgr = new (std::nothrow) BundleMgrService();
-    service_->SetBundleManager(mockBundleMgr);
+    mockSystemAbility_ = new (std::nothrow) AppExecFwk::MockSystemAbilityManager();
+    iSystemAbilityMgr_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSystemAbility_;
 }
 
 void AmsAppRunningRecordTest::TearDown()
 {
     testAbilityRecord_.reset();
     testAppRecord_.reset();
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = iSystemAbilityMgr_;
+}
+
+void AmsAppRunningRecordTest::MockBundleInstallerAndSA() const
+{
+    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
+    auto mockGetSystemAbility = [bms = mockBundleMgr, saMgr = iSystemAbilityMgr_](int32_t systemAbilityId) {
+        if (systemAbilityId == BUNDLE_MGR_SERVICE_SYS_ABILITY_ID) {
+            return bms->AsObject();
+        } else {
+            return saMgr->GetSystemAbility(systemAbilityId);
+        }
+    };
+    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
+    EXPECT_CALL(*mockSystemAbility_, GetSystemAbility(testing::_))
+        .WillOnce(testing::Invoke(mockGetSystemAbility))
+        .WillRepeatedly(testing::Invoke(mockGetSystemAbility));
+}
+
+void AmsAppRunningRecordTest::MockBundleInstaller() const
+{
+    auto mockGetBundleInstaller = []() { return mockBundleInstaller; };
+    EXPECT_CALL(*mockBundleMgr, GetBundleInstaller()).WillOnce(testing::Invoke(mockGetBundleInstaller));
 }
 
 sptr<IAppScheduler> AmsAppRunningRecordTest::GetMockedAppSchedulerClient() const
@@ -143,6 +180,9 @@ std::shared_ptr<AppRunningRecord> AmsAppRunningRecordTest::StartLoadAbility(cons
     const std::shared_ptr<AbilityInfo>& abilityInfo, const std::shared_ptr<ApplicationInfo>& appInfo,
     const pid_t newPid) const
 {
+    EXPECT_CALL(*mockBundleMgr, GetHapModuleInfo(testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(true))
+        .WillRepeatedly(testing::Return(true));
     std::shared_ptr<MockAppSpawnClient> mockClientPtr = std::make_shared<MockAppSpawnClient>();
     service_->SetAppSpawnClient(mockClientPtr);
     EXPECT_CALL(*mockClientPtr, StartProcess(_, _)).Times(1).WillOnce(DoAll(SetArgReferee<1>(newPid), Return(ERR_OK)));
@@ -576,7 +616,7 @@ HWTEST_F(AmsAppRunningRecordTest, LaunchAbility_002, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, ScheduleTerminate_001, TestSize.Level1)
 {
     auto record = GetTestAppRunningRecord();
-    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleTerminateApplication()).Times(1);
+    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleTerminateApplication(_)).Times(1);
     record->ScheduleTerminate();
 
     record->appLifeCycleDeal_ = nullptr;
@@ -767,6 +807,7 @@ HWTEST_F(AmsAppRunningRecordTest, DeleteAppRunningRecord_001, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, AttachApplication_001, TestSize.Level1)
 {
     HILOG_INFO("AmsAppRunningRecordTest AttachApplication_001 start");
+    MockBundleInstallerAndSA();
     auto abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = GetTestAbilityName();
     abilityInfo->applicationName = GetTestAppName();
@@ -799,6 +840,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_001, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, AttachApplication_002, TestSize.Level1)
 {
     HILOG_INFO("AmsAppRunningRecordTest AttachApplication_002 start");
+    MockBundleInstaller();
     auto abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = GetTestAbilityName();
     abilityInfo->applicationName = GetTestAppName();
@@ -830,6 +872,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_002, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, AttachApplication_003, TestSize.Level1)
 {
     HILOG_INFO("AmsAppRunningRecordTest AttachApplication_003 start");
+    MockBundleInstaller();
     auto abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = GetTestAbilityName();
     abilityInfo->applicationName = GetTestAppName();
@@ -861,6 +904,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_003, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, AttachApplication_004, TestSize.Level1)
 {
     HILOG_INFO("AmsAppRunningRecordTest AttachApplication_004 start");
+    MockBundleInstaller();
     auto abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = GetTestAbilityName();
     abilityInfo->applicationName = GetTestAppName();
@@ -890,6 +934,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_004, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, AttachApplication_005, TestSize.Level1)
 {
     HILOG_INFO("AmsAppRunningRecordTest AttachApplication_005 start");
+    MockBundleInstaller();
     auto abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = GetTestAbilityName();
     abilityInfo->applicationName = GetTestAppName();
@@ -928,6 +973,7 @@ HWTEST_F(AmsAppRunningRecordTest, AttachApplication_005, TestSize.Level1)
 HWTEST_F(AmsAppRunningRecordTest, AttachApplication_006, TestSize.Level1)
 {
     HILOG_INFO("AmsAppRunningRecordTest AttachApplication_006 start");
+    MockBundleInstaller();
     auto abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = GetTestAbilityName();
     abilityInfo->applicationName = GetTestAppName();
@@ -1262,7 +1308,7 @@ HWTEST_F(AmsAppRunningRecordTest, AbilityTerminated_001, TestSize.Level1)
     HILOG_INFO("AmsAppRunningRecordTest AbilityTerminated_001 start");
 
     auto record = GetTestAppRunningRecord();
-    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleTerminateApplication()).Times(0);
+    EXPECT_CALL(*mockAppSchedulerClient_, ScheduleTerminateApplication(_)).Times(0);
     record->AbilityTerminated(nullptr);
 
     HILOG_INFO("AmsAppRunningRecordTest AbilityTerminated_001 end");
@@ -2924,6 +2970,133 @@ HWTEST_F(AmsAppRunningRecordTest, ChangeAppGcState_002, TestSize.Level1)
     record->appLifeCycleDeal_ = std::make_shared<AppLifeCycleDeal>();
     EXPECT_EQ(ERR_INVALID_VALUE, record->ChangeAppGcState(0));
     HILOG_DEBUG("ChangeAppGcState_002 end.");
+}
+
+/**
+ * @tc.name: IsAbilitiesBackgrounded_001
+ * @tc.desc: verify that ModuleRunningRecord correctly judges Abilitiesbackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, IsAbilitiesBackgrounded_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsAbilitiesBackgrounded_001 start.";
+
+    // 1. create AppInfo and AbilityInfo
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::PAGE;
+
+    // 2. create ModuleRunningRecord
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+
+    // 3. create AbilityRecord with AbilityInfo, add the record into ModuleRunningRecord
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, GetMockToken());
+    EXPECT_NE(abilityRecord, nullptr);
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+
+    // 4. verify function
+    EXPECT_EQ(abilityRecord->state_, AbilityState::ABILITY_STATE_CREATE);
+    EXPECT_FALSE(moduleRecord->IsAbilitiesBackgrounded());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_BACKGROUND;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    EXPECT_TRUE(moduleRecord->IsAbilitiesBackgrounded());
+    GTEST_LOG_(INFO) << "IsAbilitiesBackgrounded_001 end.";
+}
+
+/**
+ * @tc.name: IsAbilitytiesBackground_001
+ * @tc.desc: verify that AppRunningRecord correctly judges Abilitytiesbackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, IsAbilitytiesBackground_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "IsAbilitytiesBackground_001 start.";
+    // 1. create AppRunningRecord and verify default status
+    auto record = GetTestAppRunningRecord();
+    EXPECT_NE(record, nullptr);
+    EXPECT_TRUE(record->IsAbilitytiesBackground());
+
+    // 2. create AbilityInfo and AppInfo, and construct ModuleRunningRecord
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    EXPECT_NE(appInfo, nullptr);
+    appInfo->name = GetTestAppName();
+    appInfo->bundleName = GetTestAppName();
+    auto abilityInfo = std::make_shared<AbilityInfo>();
+    EXPECT_NE(abilityInfo, nullptr);
+    abilityInfo->name = GetTestAbilityName();
+    abilityInfo->type = AbilityType::PAGE;
+    auto abilityRecord = std::make_shared<AbilityRunningRecord>(abilityInfo, GetMockToken());
+    EXPECT_NE(abilityRecord, nullptr);
+
+    std::shared_ptr<ModuleRunningRecord> moduleRecord = std::make_shared<ModuleRunningRecord>(appInfo, nullptr);;
+    EXPECT_NE(moduleRecord, nullptr);
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    std::vector<std::shared_ptr<ModuleRunningRecord>> moduleRecords;
+    moduleRecords.push_back(moduleRecord);
+    const std::string bundleName = "bundleName";
+
+    // 3. add ModuleRunningRecord into hapModules_ of AppRunningRecord
+    record->hapModules_.emplace(bundleName, moduleRecords);
+
+    // 4. verify function
+    EXPECT_FALSE(record->IsAbilitytiesBackground());
+
+    moduleRecord->abilities_.clear();
+    abilityRecord->state_ = AbilityState::ABILITY_STATE_BACKGROUND;
+    moduleRecord->abilities_.emplace(GetMockToken(), abilityRecord);
+    moduleRecords.clear();
+    moduleRecords.push_back(moduleRecord);
+    record->hapModules_.emplace(bundleName, moduleRecords);
+    EXPECT_TRUE(record->IsAbilitytiesBackground());
+    GTEST_LOG_(INFO) << "IsAbilitytiesBackground_001 end.";
+}
+
+/**
+ * @tc.name: AppRunningRecord_OnWindowVisibilityChanged_001
+ * @tc.desc: verify that AppRunningRecord correctly handle window visibility change event
+ * @tc.type: FUNC
+ */
+HWTEST_F(AmsAppRunningRecordTest, OnWindowVisibilityChanged_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "OnWindowVisibilityChanged_001 start.";
+    // 1. create AppRunningRecord, set state and windowIds_
+    auto record = GetTestAppRunningRecord();
+    EXPECT_NE(record, nullptr);
+    uint32_t windowId = 123456;
+    record->windowIds_.insert(windowId);
+    record->curState_ = ApplicationState::APP_STATE_FOREGROUND;
+
+    // 2. construct WindowVisibilityInfos
+    std::vector<sptr<Rosen::WindowVisibilityInfo>> windowVisibilityInfos;
+    auto info = new (std::nothrow) Rosen::WindowVisibilityInfo();
+    EXPECT_NE(info, nullptr);
+    info->visibilityState_ = Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_TOTALLY_OCCUSION;
+    info->windowId_ = windowId;
+    windowVisibilityInfos.emplace_back(info);
+
+    //3. verify function
+    record->OnWindowVisibilityChanged(windowVisibilityInfos);
+    EXPECT_TRUE(record->isUpdateStateFromService_);
+    EXPECT_TRUE(record->windowIds_.empty());
+
+    info->visibilityState_ = Rosen::WindowVisibilityState::WINDOW_VISIBILITY_STATE_NO_OCCLUSION;
+    windowVisibilityInfos.clear();
+    windowVisibilityInfos.emplace_back(info);
+    record->isUpdateStateFromService_ = false;
+    record->curState_ = ApplicationState::APP_STATE_BACKGROUND;
+    record->OnWindowVisibilityChanged(windowVisibilityInfos);
+    EXPECT_FALSE(record->windowIds_.empty());
+    EXPECT_TRUE(record->isUpdateStateFromService_);
+    GTEST_LOG_(INFO) << "OnWindowVisibilityChanged_001 end.";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

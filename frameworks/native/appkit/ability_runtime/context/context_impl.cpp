@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "app_mgr_client.h"
 #include "application_context.h"
+#include "bundle_mgr_helper.h"
 #include "bundle_mgr_proxy.h"
 #include "common_event_manager.h"
 #include "configuration_convertor.h"
@@ -67,6 +68,7 @@ const std::string ContextImpl::CONTEXT_TEMP("/temp");
 const std::string ContextImpl::CONTEXT_FILES("/files");
 const std::string ContextImpl::CONTEXT_HAPS("/haps");
 const std::string ContextImpl::CONTEXT_ELS[] = {"el1", "el2", "el3", "el4"};
+const std::string ContextImpl::CONTEXT_RESOURCE_END = "/resources/resfile";
 Global::Resource::DeviceType ContextImpl::deviceType_ = Global::Resource::DeviceType::DEVICE_NOT_SET;
 const std::string OVERLAY_STATE_CHANGED = "usual.event.OVERLAY_STATE_CHANGED";
 const int32_t TYPE_RESERVE = 1;
@@ -254,6 +256,51 @@ std::string ContextImpl::GetTempDir()
     CreateDirIfNotExist(dir, MODE);
     HILOG_DEBUG("ContextImpl::GetTempDir:%{public}s", dir.c_str());
     return dir;
+}
+
+void ContextImpl::GetAllTempDir(std::vector<std::string> &tempPaths)
+{
+    // Application temp dir
+    auto appTemp = GetTempDir();
+    if (OHOS::FileExists(appTemp)) {
+        tempPaths.push_back(appTemp);
+    }
+    // Module dir
+    if (applicationInfo_ == nullptr) {
+        HILOG_ERROR("The application info is empty");
+        return;
+    }
+
+    std::string baseDir;
+    if (IsCreateBySystemApp()) {
+        baseDir = CONTEXT_DATA_APP + currArea_ + CONTEXT_FILE_SEPARATOR + std::to_string(GetCurrentAccountId()) +
+            CONTEXT_FILE_SEPARATOR + CONTEXT_BASE + CONTEXT_FILE_SEPARATOR + GetBundleName();
+    } else {
+        baseDir = CONTEXT_DATA_STORAGE + currArea_ + CONTEXT_FILE_SEPARATOR + CONTEXT_BASE;
+    }
+    for (const auto &moudleItem: applicationInfo_->moduleInfos) {
+        auto moudleTemp = baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR + moudleItem.moduleName + CONTEXT_TEMP;
+        if (!OHOS::FileExists(moudleTemp)) {
+            HILOG_WARN("The application moudle[%{public}s] temp path not exists is empty, the path is %{public}s",
+                moudleItem.moduleName.c_str(), moudleTemp.c_str());
+            continue;
+        }
+        tempPaths.push_back(moudleTemp);
+    }
+}
+
+std::string ContextImpl::GetResourceDir()
+{
+    std::shared_ptr<AppExecFwk::HapModuleInfo> hapModuleInfoPtr = GetHapModuleInfo();
+    if (hapModuleInfoPtr == nullptr || hapModuleInfoPtr->moduleName.empty()) {
+        return "";
+    }
+    std::string dir = std::string(LOCAL_CODE_PATH) + CONTEXT_FILE_SEPARATOR +
+        hapModuleInfoPtr->moduleName + CONTEXT_RESOURCE_END;
+    if (OHOS::FileExists(dir)) {
+        return dir;
+    }
+    return "";
 }
 
 std::string ContextImpl::GetFilesDir()
@@ -572,17 +619,7 @@ void ContextImpl::InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo,
         HILOG_ERROR("InitResourceManager appContext is nullptr");
         return;
     }
-    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    std::string hapPath;
-    std::vector<std::string> overlayPaths;
-    int32_t appType;
-    if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE)) {
-        appType = TYPE_RESERVE;
-    } else if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
-        appType = TYPE_OTHERS;
-    } else {
-        appType = 0;
-    }
+
     if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||
         bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager = InitOthersResourceManagerInner(
@@ -639,6 +676,7 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceMana
         std::regex hsp_pattern(std::string(ABS_CODE_PATH) + FILE_SEPARATOR + bundleInfo.name + PATTERN_VERSION);
         std::string hsp_sandbox = std::string(LOCAL_CODE_PATH) + FILE_SEPARATOR + bundleInfo.name + FILE_SEPARATOR;
         for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+            HILOG_DEBUG("hapModuleInfo abilityInfo size: %{public}zu", hapModuleInfo.abilityInfos.size());
             if (!moduleName.empty() && hapModuleInfo.moduleName != moduleName) {
                 continue;
             }
@@ -736,19 +774,13 @@ ErrCode ContextImpl::GetBundleManager()
         return ERR_OK;
     }
 
-    auto instance = OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance();
-    if (instance == nullptr) {
-        HILOG_ERROR("failed to get SysMrgClient instance");
-        return ERR_NULL_OBJECT;
-    }
-    auto bundleObj = instance->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (bundleObj == nullptr) {
-        HILOG_ERROR("failed to get bundle manager service");
+    bundleMgr_ = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgr_ == nullptr) {
+        HILOG_ERROR("The bundleMgr_ is nullptr.");
         return ERR_NULL_OBJECT;
     }
 
-    bundleMgr_ = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
-    HILOG_DEBUG("ContextImpl::GetBundleManager success");
+    HILOG_DEBUG("Success.");
     return ERR_OK;
 }
 

@@ -38,9 +38,7 @@ public:
         return true;
     }
 
-    void StartDebugMode(bool needBreakPoint, bool isDebug, const std::string &processName) override {}
-
-    void StartDebugMode(bool needBreakPoint, bool isDebug) override {}
+    void StartDebugMode(bool needBreakPoint, const std::string &processName, bool isDebug = true) override {}
 
     void FinishPreload() override {}
     bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) override
@@ -61,6 +59,14 @@ public:
         return true;
     }
     void DumpHeapSnapshot(bool isPrivate) override
+    {
+        return;
+    }
+    void DestroyHeapProfiler() override
+    {
+        return;
+    }
+    void ForceFullGC() override
     {
         return;
     }
@@ -102,8 +108,9 @@ public:
         return;
     }
     
-    void StartProfiler(const std::string &perfCmd, bool needBreakPoint, bool isDebug, const std::string &processName) override {}
-    
+    void StartProfiler(const std::string &perfCmd,
+        bool needBreakPoint, const std::string &processName, bool isDebug = true) override {}
+
     void DoCleanWorkAfterStageCleaned() override {}
 public:
     Language language;

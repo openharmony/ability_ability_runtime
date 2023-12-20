@@ -128,7 +128,7 @@ class MockAppMgrStub : public AppMgrStub {
         return nullptr;
     }
 
-    int32_t ClearUpApplicationData(const std::string &bundleName) override
+    int32_t ClearUpApplicationData(const std::string &bundleName, const int32_t userId) override
     {
         return 0;
     }
@@ -268,6 +268,11 @@ class MockAppMgrStub : public AppMgrStub {
     int32_t ChangeAppGcState(pid_t pid, int32_t state) override
     {
         return 0;
+    }
+
+    bool IsFinalAppProcess() override
+    {
+        return true;
     }
 };
 
@@ -570,31 +575,6 @@ HWTEST_F(MainThreadTest, HandleLaunchApplication_0100, TestSize.Level1)
 
     lanchdata.SetAppIndex(1);
     mainThread_->HandleLaunchApplication(lanchdata, config);
-}
-
-/**
- * @tc.name: SetNativeLibPath_0100
- * @tc.desc: set native lib path.
- * @tc.type: FUNC
- * @tc.require: issueI64MUJ
- */
-HWTEST_F(MainThreadTest, SetNativeLibPath_0100, TestSize.Level1)
-{
-    HILOG_INFO("%{public}s start.", __func__);
-    Configuration config;
-    AppLaunchData launchData;
-    ProcessInfo processInfo("test_quickfix", 9999);
-    ApplicationInfo appInfo;
-    appInfo.name = "MainAbility";
-    appInfo.bundleName = "com.ohos.quickfix";
-    launchData.SetApplicationInfo(appInfo);
-    launchData.SetProcessInfo(processInfo);
-
-    // SetNativeLibPath is implemented in anonymous space, called by HandleLaunchApplication
-    mainThread_->HandleLaunchApplication(launchData, config);
-    ASSERT_NE(mainThread_->application_, nullptr);
-    EXPECT_NE(mainThread_->application_->abilityRuntimeContext_, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
 }
 
 /**
@@ -1521,6 +1501,24 @@ HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0400, TestSize.Level1)
     ASSERT_NE(mainThread_, nullptr);
     mainThread_->HandleScheduleAcceptWant(want, moduleName);
     HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: HandleScheduleAcceptWant_0500
+ * @tc.desc: HandleScheduleAcceptWant.
+ * @tc.type: FUNC
+ * @tc.require: issueI64MUJ
+ */
+HWTEST_F(MainThreadTest, HandleScheduleAcceptWant_0500, TestSize.Level1)
+{
+    std::string moduleName = "entry";
+    std::string loadPath = "test";
+    std::string bundleName = "com.ohos.demo";
+    std::vector<std::string> overlayPaths;
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    int32_t appType = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
+        bundleName, moduleName, loadPath, overlayPaths, *resConfig, appType));
 }
 
 #ifdef ABILITY_LIBRARY_LOADER

@@ -14,9 +14,10 @@
  */
 
 #include <gtest/gtest.h>
-#include "iremote_proxy.h"
 #include "ability_manager_stub_impl_mock.h"
 #include "ability_scheduler.h"
+#include "app_debug_listener_stub_mock.h"
+#include "iremote_proxy.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
 
@@ -1677,7 +1678,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_RegisterRemoteMissionListene
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->RegisterRemoteMissionListenerInner(data, reply);
-    EXPECT_EQ(res, ERR_NULL_OBJECT);
+    EXPECT_EQ(res, INVALID_PARAMETERS_ERR);
 }
 
 /*
@@ -1693,7 +1694,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_UnRegisterRemoteMissionListe
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->UnRegisterRemoteMissionListenerInner(data, reply);
-    EXPECT_EQ(res, ERR_NULL_OBJECT);
+    EXPECT_EQ(res, INVALID_PARAMETERS_ERR);
 }
 
 /*
@@ -2454,6 +2455,143 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_IsAbilityControllerStartInne
     Want want;
     data.WriteParcelable(&want);
     EXPECT_EQ(stub_->IsAbilityControllerStartInner(data, reply), NO_ERROR);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_RegisterAppDebugListenerInner_001
+ * @tc.desc: Test the status of RegisterAppDebugListenerInner, check empty AppDebugListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_RegisterAppDebugListenerInner_001, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->RegisterAppDebugListenerInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_RegisterAppDebugListenerInner_002
+ * @tc.desc: Test the status of RegisterAppDebugListenerInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_RegisterAppDebugListenerInner_002, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto token = new AppExecFwk::AppDebugListenerStubMock();
+    EXPECT_NE(token, nullptr);
+    auto ret = data.WriteRemoteObject(token);
+    EXPECT_EQ(ret, true);
+    int res = stub_->RegisterAppDebugListenerInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_UnregisterAppDebugListenerInner_001
+ * @tc.desc: Test the status of UnregisterAppDebugListenerInner, check empty appDebugListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_UnregisterAppDebugListenerInner_001, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->UnregisterAppDebugListenerInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_UnregisterAppDebugListenerInner_002
+ * @tc.desc: Test the status of UnregisterAppDebugListenerInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_UnregisterAppDebugListenerInner_002, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto token = new AppExecFwk::AppDebugListenerStubMock();
+    EXPECT_NE(token, nullptr);
+    bool ret = data.WriteRemoteObject(token);
+    EXPECT_EQ(ret, true);
+    auto res = stub_->UnregisterAppDebugListenerInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_AttachAppDebugInner_001
+ * @tc.desc: Test the state of AttachAppDebugInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_AttachAppDebugInner_001, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "bundleName";
+    data.WriteString(bundleName);
+    auto res = stub_->AttachAppDebugInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_AttachAppDebugInner_002
+ * @tc.desc: Test the state of AttachAppDebugInner, check empty bundleName;
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_AttachAppDebugInner_002, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->AttachAppDebugInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_DetachAppDebugInner_001
+ * @tc.desc: Test the state of DetachAppDebugInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DetachAppDebugInner_001, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "bundleName";
+    data.WriteString(bundleName);
+    auto res = stub_->DetachAppDebugInner(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_DetachAppDebugInner_002
+ * @tc.desc: Test the state of DetachAppDebugInner, check empty bundleName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DetachAppDebugInner_002, TestSize.Level1)
+{
+    EXPECT_NE(stub_, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->DetachAppDebugInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AbilityManagerStub_GetForegroundUIAbilitiesInner_001
+ * @tc.desc: Test function GetForegroundUIAbilitiesInner when normally.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetForegroundUIAbilitiesInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->GetForegroundUIAbilitiesInner(data, reply);
+    EXPECT_EQ(res, ERR_OK);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

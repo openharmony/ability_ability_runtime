@@ -21,6 +21,7 @@
 #include "constants.h"
 #include "ability_record.h"
 #include "ability_util.h"
+#include "app_gallery_enable_util.h"
 #include "app_scheduler.h"
 #include "dm_common.h"
 #include "display_manager.h"
@@ -30,6 +31,7 @@
 #include "locale_config.h"
 #include "parameters.h"
 #include "resource_manager.h"
+#include "scene_board_judgement.h"
 #include "ui_extension_utils.h"
 
 namespace OHOS {
@@ -109,6 +111,9 @@ const std::string ABILITY_NAME_ANR_DIALOG = "AnrDialog";
 const std::string ABILITY_NAME_FREEZE_DIALOG = "SwitchUserDialog";
 const std::string ABILITY_NAME_TIPS_DIALOG = "TipsDialog";
 const std::string ABILITY_NAME_SELECTOR_DIALOG = "SelectorDialog";
+const std::string ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG = "AppSelectorExtensionAbility";
+const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
+const std::string UIEXTENSION_SYS_COMMON_UI = "sys/commonUI";
 const std::string CALLER_TOKEN = "callerToken";
 const std::string ABILITY_NAME_JUMP_INTERCEPTOR_DIALOG = "JumpInterceptorDialog";
 const std::string TYPE_ONLY_MATCH_WILDCARD = "reserved/wildcard";
@@ -359,9 +364,27 @@ Want SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInf
     targetWant.SetParam(DIALOG_PARAMS, params);
     if (callerToken != nullptr) {
         HILOG_DEBUG("set callertoken to targetWant");
-        targetWant.SetParam(CALLER_TOKEN, callerToken);
+        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+        if (abilityRecord && UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+            targetWant.RemoveParam(CALLER_TOKEN);
+        } else {
+            targetWant.SetParam(CALLER_TOKEN, callerToken);
+        }
     }
-
+    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgrHelper == nullptr) {
+            HILOG_ERROR("The bundleMgrHelper is nullptr.");
+            return targetWant;
+        }
+        std::string bundleName;
+        auto ret = IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName));
+        if (ret) {
+            targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
+            targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
+            return targetWant;
+        }
+    }
     return targetWant;
 }
 
@@ -407,6 +430,20 @@ Want SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppI
         targetWant.RemoveParam(CALLER_TOKEN);
     } else {
         targetWant.SetParam(CALLER_TOKEN, callerToken);
+    }
+    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgrHelper == nullptr) {
+            HILOG_ERROR("The bundleMgrHelper is nullptr.");
+            return targetWant;
+        }
+        std::string bundleName;
+        auto ret = IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName));
+        if (ret) {
+            targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
+            targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
+            return targetWant;
+        }
     }
     return targetWant;
 }
@@ -588,15 +625,15 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (resourceManager == nullptr) {
-        HILOG_ERROR("resourceManager init failed!");
+        HILOG_ERROR("The resourceManager is nullptr.");
         return;
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    auto bms = GetBundleManager();
-    CHECK_POINTER(bms);
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    CHECK_POINTER(bundleMgrHelper);
     if (!IN_PROCESS_CALL(
-        bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
+        bundleMgrHelper->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
         HILOG_ERROR("Failed to get bundle info.");
         return;
     }
@@ -610,7 +647,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
         std::string(AbilityBase::Constants::FILE_SEPARATOR) + bundleInfo.name);
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         std::string loadPath;
-        HILOG_DEBUG("make a judgment");
+        HILOG_DEBUG("make a judgment.");
         if (!hapModuleInfo.hapPath.empty()) {
             loadPath = hapModuleInfo.hapPath;
         } else {
@@ -619,21 +656,13 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
         if (loadPath.empty()) {
             continue;
         }
-        HILOG_DEBUG("GetAppNameFromResource loadPath: %{public}s", loadPath.c_str());
+        HILOG_DEBUG("GetAppNameFromResource loadPath: %{public}s.", loadPath.c_str());
         if (!resourceManager->AddResource(loadPath.c_str())) {
-            HILOG_ERROR("ResourceManager add %{public}s resource path failed!", bundleInfo.name.c_str());
+            HILOG_ERROR("ResourceManager add %{public}s resource path failed.", bundleInfo.name.c_str());
         }
     }
     resourceManager->GetStringById(static_cast<uint32_t>(labelId), appName);
-    HILOG_DEBUG("Get app display info, labelId: %{public}d, appname: %{public}s", labelId, appName.c_str());
-}
-
-sptr<AppExecFwk::IBundleMgr> SystemDialogScheduler::GetBundleManager()
-{
-    if (iBundleManager_ == nullptr) {
-        iBundleManager_ = AbilityUtil::GetBundleManager();
-    }
-    return iBundleManager_;
+    HILOG_DEBUG("Get app display info, labelId: %{public}d, appname: %{public}s.", labelId, appName.c_str());
 }
 
 Want SystemDialogScheduler::GetSwitchUserDialogWant()

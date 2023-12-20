@@ -14,6 +14,7 @@
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
 abilityms_files = [
+  "src/ability_app_state_observer.cpp",
   "src/ability_background_connection.cpp",
   "src/ability_connect_manager.cpp",
   "src/ability_debug_deal.cpp",
@@ -34,6 +35,7 @@ abilityms_files = [
   "src/data_ability_caller_recipient.cpp",
   "src/data_ability_manager.cpp",
   "src/data_ability_record.cpp",
+  "src/dialog_session_record.cpp",
   "src/lifecycle_deal.cpp",
   "src/ability_running_info.cpp",
   "src/extension_config.cpp",
@@ -62,6 +64,9 @@ abilityms_files = [
 
   # new ability manager service here
   "src/task_data_persistence_mgr.cpp",
+  "src/extension_record_manager.cpp",
+  "src/extension_record.cpp",
+  "src/ui_extension_record.cpp",
   "src/start_options.cpp",
   "src/stop_user_callback_proxy.cpp",
   "src/stop_user_callback_stub.cpp",

@@ -18,12 +18,14 @@
 
 #include "ability_manager_service.h"
 #include "ability_util.h"
+#include "app_gallery_enable_util.h"
 #include "default_app_interface.h"
 #include "errors.h"
 #include "event_report.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "parameters.h"
+#include "scene_board_judgement.h"
 #include "want.h"
 #ifdef SUPPORT_ERMS
 #include "ecological_rule_mgr_service_client.h"
@@ -48,6 +50,9 @@ const std::string STR_DEFAULT = "default";
 const std::string TYPE_ONLY_MATCH_WILDCARD = "reserved/wildcard";
 const std::string SHOW_DEFAULT_PICKER_FLAG = "ohos.ability.params.showDefaultPicker";
 const std::string PARAM_ABILITY_APPINFOS = "ohos.ability.params.appInfos";
+const std::string ANCO_PENDING_REQUEST = "ancoPendingRequest";
+const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
+const int NFC_CALLER_UID = 1027;
 
 const std::vector<std::string> ImplicitStartProcessor::blackList = {
     std::vector<std::string>::value_type(BLACK_ACTION_SELECT_DATA),
@@ -110,16 +115,29 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
 
     AAFwk::Want want;
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+    int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
+        static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
+    AddIdentity(tokenId, identity);
     if (dialogAppInfos.size() == 0 && (deviceType == STR_PHONE || deviceType == STR_DEFAULT)) {
         if ((request.want.GetFlags() & Want::FLAG_START_WITHOUT_TIPS) == Want::FLAG_START_WITHOUT_TIPS) {
             HILOG_INFO("hint dialog doesn't generate.");
             return ERR_IMPLICIT_START_ABILITY_FAIL;
+        }
+        if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            want = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, request.callerToken);
+            return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
         }
         HILOG_ERROR("implicit query ability infos failed, show tips dialog.");
         want = sysDialogScheduler->GetTipsDialogWant(request.callerToken);
         abilityMgr->StartAbility(want);
         return ERR_IMPLICIT_START_ABILITY_FAIL;
     } else if (dialogAppInfos.size() == 0 && deviceType != STR_PHONE && deviceType != STR_DEFAULT) {
+        if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            std::string type = MatchTypeAndUri(request.want);
+            want = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, type,
+                userId, request.callerToken);
+            return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
+        }
         std::vector<DialogAppInfo> dialogAllAppInfos;
         bool isMoreHapList = true;
         ret = GenerateAbilityRequestByAction(userId, request, dialogAllAppInfos, deviceType, isMoreHapList);
@@ -156,12 +174,12 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     if (deviceType == STR_PHONE || deviceType == STR_DEFAULT) {
         HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose.");
         want = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, request.callerToken);
+        if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
+        }
         ret = abilityMgr->StartAbilityAsCaller(want, request.callerToken, nullptr);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
-        int32_t tokenId = request.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
-            static_cast<int32_t>(IPCSkeleton::GetCallingTokenID()));
-        AddIdentity(tokenId, identity);
         return ret;
     }
 
@@ -169,10 +187,26 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     std::string type = MatchTypeAndUri(request.want);
 
     want = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, type, userId, request.callerToken);
+    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
+    }
     ret = abilityMgr->StartAbilityAsCaller(want, request.callerToken, nullptr);
     // reset calling indentity
     IPCSkeleton::SetCallingIdentity(identity);
     return ret;
+}
+
+int ImplicitStartProcessor::NotifyCreateModalDialog(AbilityRequest &abilityRequest, const Want &want, int32_t userId,
+    std::vector<DialogAppInfo> &dialogAppInfos)
+{
+    auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
+    std::string dialogSessionId;
+    if (abilityMgr->GenerateDialogSessionRecord(abilityRequest, userId, dialogSessionId, dialogAppInfos)) {
+        HILOG_DEBUG("create dialog by ui extension");
+        return abilityMgr->CreateModalDialog(want, abilityRequest.callerToken, dialogSessionId);
+    }
+    HILOG_ERROR("create dialog by ui extension failed");
+    return INNER_ERR;
 }
 
 std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
@@ -201,10 +235,10 @@ std::string ImplicitStartProcessor::MatchTypeAndUri(const AAFwk::Want &want)
 int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     AbilityRequest &request, std::vector<DialogAppInfo> &dialogAppInfos, std::string &deviceType, bool isMoreHapList)
 {
-    HILOG_DEBUG("%{public}s", __func__);
+    HILOG_DEBUG("%{public}s.", __func__);
     // get abilityinfos from bms
-    auto bms = GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
+    auto bundleMgrHelper = GetBundleManagerHelper();
+    CHECK_POINTER_AND_RETURN(bundleMgrHelper, GET_ABILITY_SERVICE_FAILED);
     auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
         | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_SKILL_URI;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
@@ -212,17 +246,20 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     bool withDefault = false;
     withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault) ? false : true;
 
-    if (IPCSkeleton::GetCallingUid() == 1027 && !request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS).empty()) {
-        HILOG_INFO("The NFCNeed caller source is NFC");
-        
+    if (IPCSkeleton::GetCallingUid() == NFC_CALLER_UID && !request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS).empty()) {
+        HILOG_INFO("The NFCNeed caller source is NFC.");
+
         ImplicitStartProcessor::queryBmsAppInfos(request, userId, dialogAppInfos);
         return ERR_OK;
     }
 
-    IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(
+    if (!IsCallFromAncoShell(request.callerToken)) {
+        request.want.RemoveParam(ANCO_PENDING_REQUEST);
+    }
+    IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos));
 
-    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu",
+    HILOG_INFO("ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu.",
         abilityInfos.size(), extensionInfos.size());
 
     if (abilityInfos.size() + extensionInfos.size() > 1) {
@@ -244,7 +281,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::ExtensionAbilityInfo> implicitExtensionInfos;
     std::vector<std::string> infoNames;
     if (deviceType != STR_PHONE && deviceType != STR_DEFAULT) {
-        IN_PROCESS_CALL_WITHOUT_RET(bms->ImplicitQueryInfos(implicitwant, abilityInfoFlag, userId,
+        IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(implicitwant, abilityInfoFlag, userId,
             withDefault, implicitAbilityInfos, implicitExtensionInfos));
         if (implicitAbilityInfos.size() != 0 && typeName != TYPE_ONLY_MATCH_WILDCARD) {
             for (auto implicitAbilityInfo : implicitAbilityInfos) {
@@ -254,43 +291,17 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         }
     }
     for (const auto &info : abilityInfos) {
-        if (isExtension && info.type != AbilityType::EXTENSION) {
-            continue;
-        }
-        if (deviceType != STR_PHONE && deviceType != STR_DEFAULT) {
-            auto isDefaultFlag = false;
-            if (withDefault) {
-                auto defaultMgr = GetDefaultAppProxy();
-                AppExecFwk::BundleInfo bundleInfo;
-                ErrCode ret =
-                    IN_PROCESS_CALL(defaultMgr->GetDefaultApplication(userId, typeName, bundleInfo));
-                if (ret == ERR_OK) {
-                    if (bundleInfo.abilityInfos.size() == 1) {
-                        HILOG_INFO("find default ability.");
-                        isDefaultFlag = true;
-                    } else if (bundleInfo.extensionInfos.size() == 1) {
-                        HILOG_INFO("find default extension.");
-                        isDefaultFlag = true;
-                    } else {
-                        HILOG_INFO("GetDefaultApplication failed.");
-                    }
-                }
-            }
-            if (!isMoreHapList && !isDefaultFlag) {
-                if (std::find(infoNames.begin(), infoNames.end(),
-                    (info.bundleName + "#" + info.moduleName + "#" + info.name)) != infoNames.end()) {
-                    continue;
-                }
-            }
-        }
-
-        DialogAppInfo dialogAppInfo;
-        dialogAppInfo.abilityName = info.name;
-        dialogAppInfo.bundleName = info.bundleName;
-        dialogAppInfo.moduleName = info.moduleName;
-        dialogAppInfo.iconId = info.iconId;
-        dialogAppInfo.labelId = info.labelId;
-        dialogAppInfos.emplace_back(dialogAppInfo);
+        AddInfoParam param = {
+            .info = info,
+            .userId = userId,
+            .isExtension = isExtension,
+            .isMoreHapList = isMoreHapList,
+            .withDefault = withDefault,
+            .deviceType = deviceType,
+            .typeName = typeName,
+            .infoNames = infoNames
+        };
+        AddAbilityInfoToDialogInfos(param, dialogAppInfos);
     }
 
     for (const auto &info : extensionInfos) {
@@ -309,7 +320,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
 }
 
 int ImplicitStartProcessor::queryBmsAppInfos(AbilityRequest &request, int32_t userId, std::vector<DialogAppInfo> &dialogAppInfos) {
-    auto bms = GetBundleManager();
+    auto bundleMgrHelper = GetBundleManagerHelper();
     std::vector<AppExecFwk::AbilityInfo> bmsApps;
     auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
         | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_SKILL_URI;
@@ -323,22 +334,24 @@ int ImplicitStartProcessor::queryBmsAppInfos(AbilityRequest &request, int32_t us
         Want want;
         want.SetElementName(bundleName, abilityName);
 
-        IN_PROCESS_CALL_WITHOUT_RET(bms->QueryAbilityInfo(want, abilityInfoFlag,
+        IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(want, abilityInfoFlag,
             userId, abilityInfo));
-            
-        bmsApps.emplace_back(abilityInfo);
+        if (!abilityInfo.name.empty() && !abilityInfo.bundleName.empty() && !abilityInfo.moduleName.empty()) {
+            bmsApps.emplace_back(abilityInfo);
+        }
     }
-
-    for (const auto &abilityInfo : bmsApps) {
-        DialogAppInfo dialogAppInfo;
-        dialogAppInfo.abilityName = abilityInfo.name;
-        dialogAppInfo.bundleName = abilityInfo.bundleName;
-        dialogAppInfo.moduleName = abilityInfo.moduleName;
-        dialogAppInfo.iconId = abilityInfo.iconId;
-        dialogAppInfo.labelId = abilityInfo.labelId;
-        dialogAppInfos.emplace_back(dialogAppInfo);
+    if (!bmsApps.empty()) {
+        for (const auto &abilityInfo : bmsApps) {
+            DialogAppInfo dialogAppInfo;
+            dialogAppInfo.abilityName = abilityInfo.name;
+            dialogAppInfo.bundleName = abilityInfo.bundleName;
+            dialogAppInfo.moduleName = abilityInfo.moduleName;
+            dialogAppInfo.iconId = abilityInfo.iconId;
+            dialogAppInfo.labelId = abilityInfo.labelId;
+            dialogAppInfos.emplace_back(dialogAppInfo);
+        }
     }
-    return ERR_OK;;
+    return ERR_OK;
 }
 
 std::vector<std::string> ImplicitStartProcessor::splitStr(const std::string& str, char delimiter) {
@@ -427,20 +440,24 @@ int ImplicitStartProcessor::CallStartAbilityInner(int32_t userId,
     return ret;
 }
 
-sptr<AppExecFwk::IBundleMgr> ImplicitStartProcessor::GetBundleManager()
+std::shared_ptr<AppExecFwk::BundleMgrHelper> ImplicitStartProcessor::GetBundleManagerHelper()
 {
-    if (iBundleManager_ == nullptr) {
-        iBundleManager_ = AbilityUtil::GetBundleManager();
+    if (iBundleManagerHelper_ == nullptr) {
+        iBundleManagerHelper_ = AbilityUtil::GetBundleManagerHelper();
     }
-    return iBundleManager_;
+    return iBundleManagerHelper_;
 }
 
 sptr<AppExecFwk::IDefaultApp> ImplicitStartProcessor::GetDefaultAppProxy()
 {
-    auto bundleMgr = GetBundleManager();
-    auto defaultAppProxy = bundleMgr->GetDefaultAppProxy();
+    auto bundleMgrHelper = GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
+        return nullptr;
+    }
+    auto defaultAppProxy = bundleMgrHelper->GetDefaultAppProxy();
     if (defaultAppProxy == nullptr) {
-        HILOG_ERROR("GetDefaultAppProxy failed.");
+        HILOG_ERROR("The defaultAppProxy is nullptr.");
         return nullptr;
     }
     return defaultAppProxy;
@@ -480,15 +497,15 @@ void ImplicitStartProcessor::GetEcologicalCallerInfo(const Want &want, ErmsCalle
     callerInfo.targetAppType = TYPE_HARMONY_INVALID;
     callerInfo.callerAppType = TYPE_HARMONY_INVALID;
 
-    auto bms = AbilityUtil::GetBundleManager();
-    if (!bms) {
-        HILOG_ERROR("GetBundleManager failed");
+    auto bundleMgrHelper = GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        HILOG_ERROR("Get Bubndle manager helper failed.");
         return;
     }
 
     std::string targetBundleName = want.GetBundle();
     AppExecFwk::ApplicationInfo targetAppInfo;
-    bool getTargetResult = IN_PROCESS_CALL(bms->GetApplicationInfo(targetBundleName,
+    bool getTargetResult = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(targetBundleName,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, targetAppInfo));
     if (!getTargetResult) {
         HILOG_ERROR("Get targetAppInfo failed.");
@@ -503,13 +520,13 @@ void ImplicitStartProcessor::GetEcologicalCallerInfo(const Want &want, ErmsCalle
     }
 
     std::string callerBundleName;
-    ErrCode err = IN_PROCESS_CALL(bms->GetNameForUid(callerInfo.uid, callerBundleName));
+    ErrCode err = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callerInfo.uid, callerBundleName));
     if (err != ERR_OK) {
         HILOG_ERROR("Get callerBundleName failed.");
         return;
     }
     AppExecFwk::ApplicationInfo callerAppInfo;
-    bool getCallerResult = IN_PROCESS_CALL(bms->GetApplicationInfo(callerBundleName,
+    bool getCallerResult = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(callerBundleName,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, callerAppInfo));
     if (!getCallerResult) {
         HILOG_DEBUG("Get callerAppInfo failed.");
@@ -546,6 +563,64 @@ void ImplicitStartProcessor::ResetCallingIdentityAsCaller(int32_t tokenId)
             return;
         }
     }
+}
+
+void ImplicitStartProcessor::AddAbilityInfoToDialogInfos(const AddInfoParam &param,
+    std::vector<DialogAppInfo> &dialogAppInfos)
+{
+    if (param.isExtension && param.info.type != AbilityType::EXTENSION) {
+        return;
+    }
+    if (param.deviceType != STR_PHONE && param.deviceType != STR_DEFAULT) {
+        bool isDefaultFlag = param.withDefault && IsExistDefaultApp(param.userId, param.typeName);
+        if (!param.isMoreHapList && !isDefaultFlag &&
+            std::find(param.infoNames.begin(), param.infoNames.end(),
+            (param.info.bundleName + "#" + param.info.moduleName + "#" + param.info.name)) != param.infoNames.end()) {
+            return;
+        }
+    }
+    DialogAppInfo dialogAppInfo;
+    dialogAppInfo.abilityName = param.info.name;
+    dialogAppInfo.bundleName = param.info.bundleName;
+    dialogAppInfo.moduleName = param.info.moduleName;
+    dialogAppInfo.iconId = param.info.iconId;
+    dialogAppInfo.labelId = param.info.labelId;
+    dialogAppInfos.emplace_back(dialogAppInfo);
+}
+
+bool ImplicitStartProcessor::IsExistDefaultApp(int32_t userId, const std::string &typeName)
+{
+    auto defaultMgr = GetDefaultAppProxy();
+    AppExecFwk::BundleInfo bundleInfo;
+    ErrCode ret =
+        IN_PROCESS_CALL(defaultMgr->GetDefaultApplication(userId, typeName, bundleInfo));
+    if (ret != ERR_OK) {
+        return false;
+    }
+
+    if (bundleInfo.abilityInfos.size() == 1) {
+        HILOG_INFO("find default ability.");
+        return true;
+    } else if (bundleInfo.extensionInfos.size() == 1) {
+        HILOG_INFO("find default extension.");
+        return true;
+    } else {
+        HILOG_INFO("GetDefaultApplication failed.");
+        return false;
+    }
+}
+
+bool ImplicitStartProcessor::IsCallFromAncoShell(const sptr<IRemoteObject> &token)
+{
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    if (!abilityRecord) {
+        return false;
+    }
+    std::string callerBundleName = abilityRecord->GetAbilityInfo().bundleName;
+    if (callerBundleName == SHELL_ASSISTANT_BUNDLENAME) {
+        return true;
+    }
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
