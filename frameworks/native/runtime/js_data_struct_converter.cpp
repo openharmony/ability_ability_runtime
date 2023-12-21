@@ -94,8 +94,8 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
     napi_set_named_property(env, object, "colorMode", CreateJsValue(env,
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE))));
     
-    napi_set_named_property(env, object, "timeFormat", CreateJsValue(env,
-        configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR)));
+    napi_set_named_property(env, object, "time24", CreateJsValue(env,
+        ConvertTimeFormat(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR)));
 
     int32_t displayId = ConvertDisplayId(configuration.GetItem(ConfigurationInner::APPLICATION_DISPLAYID));
     std::string direction = configuration.GetItem(displayId, ConfigurationInner::APPLICATION_DIRECTION);
