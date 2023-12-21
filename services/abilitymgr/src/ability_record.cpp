@@ -2865,8 +2865,8 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
             bool notBelong2Caller = uriBundleInfo.applicationInfo.accessTokenId != fromTokenId &&
                 uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_ &&
                 uriBundleInfo.applicationInfo.accessTokenId != callerTokenId;
-            if (notBelong2Caller) {
-                HILOG_ERROR("the uri does not belong to caller.");
+            if (notBelong2Caller && !permission) {
+                HILOG_ERROR("the uri does not belong to caller and not have uri proxy permission.");
                 continue;
             }
         }
