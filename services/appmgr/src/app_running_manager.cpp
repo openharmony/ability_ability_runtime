@@ -502,7 +502,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
                 appMgrServiceInner->NotifyAppStatus(appRecord->GetBundleName(),
                     EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
                 };
-            appRecord->PostTask("DELAY_KILL_PROCESS", DELAY::DELAY_KILL_PROCESS_TIMEOUT, killProcess);
+            appRecord->PostTask("DELAY_KILL_PROCESS", AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT, killProcess);
         }
     }
 }
