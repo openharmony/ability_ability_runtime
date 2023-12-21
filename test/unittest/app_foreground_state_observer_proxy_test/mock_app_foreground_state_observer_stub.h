@@ -13,32 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_ERMS_PARAM_H
-#define OHOS_ABILITY_RUNTIME_ERMS_PARAM_H
+#ifndef OHOS_ABILITY_RUNTIME_MOCK_APP_FOREGROUND_STATE_OBSERVER_PROXY_H
+#define OHOS_ABILITY_RUNTIME_MOCK_APP_FOREGROUND_STATE_OBSERVER_PROXY_H
 
-#include <string>
-#include <vector>
+#include <gmock/gmock.h>
 
-#include "want.h"
+#include "app_foreground_state_observer_stub.h"
 
 namespace OHOS {
 namespace AppExecFwk {
-namespace ErmsParams {
-using Want = OHOS::AAFwk::Want;
+class MockAppForegroundStateObserverStub : public AppForegroundStateObserverStub {
+public:
+    MockAppForegroundStateObserverStub() = default;
+    virtual ~MockAppForegroundStateObserverStub() = default;
 
-struct ExperienceRule {
-    bool isAllow = false;
-    std::shared_ptr<Want> replaceWant = nullptr;
-    int64_t sceneCode = 0L;
-    int64_t allowTypes;
+    MOCK_METHOD1(OnAppStateChanged, void(const AppStateData &appStateData));
 };
-
-struct CallerInfo {
-    std::string packageName;
-    int64_t uid = 0L;
-    int64_t pid = 0L;
-};
-}  // namespace ErmsParams
-}  // namespace AppExecFwk
-}  // namespace OHOS
-#endif  // OHOS_ABILITY_RUNTIME_ERMS_PARAM_H
+} // namespace AppExecFwk
+} // namespace OHOS
+#endif // OHOS_ABILITY_RUNTIME_MOCK_APP_FOREGROUND_STATE_OBSERVER_PROXY_H
