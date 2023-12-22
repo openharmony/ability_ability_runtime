@@ -1059,8 +1059,19 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
     return ClearUpApplicationDataByUserId(bundleName, callerUid, callerPid, newUserId);
 }
 
+int32_t AppMgrServiceInner::ClearUpApplicationDataBySelf(const std::string &bundleName,
+    int32_t callerUid, pid_t callerPid, const int32_t userId)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    int32_t newUserId = userId;
+    if (userId == DEFAULT_INVAL_VALUE) {
+        newUserId = GetUserIdByUid(callerUid);
+    }
+    return ClearUpApplicationDataByUserId(bundleName, callerUid, callerPid, newUserId, true);
+}
+
 int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(
-    const std::string &bundleName, int32_t callerUid, pid_t callerPid, const int userId)
+    const std::string &bundleName, int32_t callerUid, pid_t callerPid, const int userId, const bool isBySelf)
 {
     if (callerPid <= 0) {
         HILOG_ERROR("invalid callerPid:%{public}d", callerPid);
@@ -1090,7 +1101,11 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(
     }
     // 3.kill application
     // 4.revoke user rights
-    result = KillApplicationByUserId(bundleName, userId);
+    if (isBySelf) {
+        result = KillApplicationSelf();
+    } else {
+        result = KillApplicationByUserId(bundleName, userId);
+    }
     if (result < 0) {
         HILOG_ERROR("Kill Application by bundle name is fail");
         return ERR_INVALID_OPERATION;

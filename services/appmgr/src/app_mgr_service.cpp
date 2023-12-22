@@ -299,6 +299,33 @@ sptr<IAmsMgr> AppMgrService::GetAmsMgr()
 
 int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
 {
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    if (userId < 0) {
+        auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+        if (!isSaCall) {
+            auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
+                AAFwk::PermissionConstants::PERMISSION_CLEAN_APPLICATION_DATA);
+            if (!isCallingPerm) {
+                HILOG_ERROR("Permission verification failed");
+                return ERR_PERMISSION_DENIED;
+            }
+        }
+    }
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    pid_t pid = IPCSkeleton::GetCallingPid();
+    std::function<void()> clearUpApplicationDataFunc =
+        std::bind(&AppMgrServiceInner::ClearUpApplicationData, appMgrServiceInner_, bundleName, uid, pid, userId);
+    taskHandler_->SubmitTask(clearUpApplicationDataFunc, TASK_CLEAR_UP_APPLICATION_DATA);
+    return ERR_OK;
+}
+
+int32_t AppMgrService::ClearUpApplicationDataBySelf(const std::string &bundleName, const int32_t userId)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
     std::shared_ptr<RemoteClientManager> remoteClientManager = std::make_shared<RemoteClientManager>();
     if (remoteClientManager == nullptr) {
         HILOG_ERROR("The remoteClientManager is nullptr.");
@@ -317,23 +344,14 @@ int32_t AppMgrService::ClearUpApplicationData(const std::string &bundleName, con
             HILOG_ERROR("GetBundleName failed: %{public}d.", result);
             return ERR_INVALID_OPERATION;
         }
-        auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-        if (!isSaCall && bundleName != callerBundleName) {
-            auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifyCallingPermission(
-                AAFwk::PermissionConstants::PERMISSION_CLEAN_APPLICATION_DATA);
-            if (!isCallingPerm) {
-                HILOG_ERROR("Permission verification failed");
-                return ERR_PERMISSION_DENIED;
-            }
+        if (bundleName != callerBundleName) {
+            HILOG_ERROR("callerBundleName is not same.");
+            return ERR_INVALID_OPERATION;
         }
-    }
-
-    if (!IsReady()) {
-        return ERR_INVALID_OPERATION;
     }
     int32_t uid = IPCSkeleton::GetCallingUid();
     pid_t pid = IPCSkeleton::GetCallingPid();
-    return appMgrServiceInner_->ClearUpApplicationData(bundleName, uid, pid, userId);
+    return appMgrServiceInner_->ClearUpApplicationDataBySelf(bundleName, uid, pid, userId);
 }
 
 int32_t AppMgrService::GetAllRunningProcesses(std::vector<RunningProcessInfo> &info)
