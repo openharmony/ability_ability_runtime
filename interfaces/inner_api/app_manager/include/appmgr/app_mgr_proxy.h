@@ -100,6 +100,16 @@ public:
         const int32_t userId = -1) override;
 
     /**
+     * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
+     * clear the application data.
+     *
+     * @param bundleName, bundle name in Application record.
+     * @return
+     */
+    virtual int32_t ClearUpApplicationDataBySelf(const std::string &bundleName,
+        const int32_t userId = -1) override;
+
+    /**
      * GetAllRunningProcesses, call GetAllRunningProcesses() through proxy project.
      * Obtains information about application processes that are running on the device.
      *

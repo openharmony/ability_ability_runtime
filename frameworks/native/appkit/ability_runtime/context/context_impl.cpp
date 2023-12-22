@@ -1097,7 +1097,7 @@ void ContextImpl::ClearUpApplicationData()
         HILOG_ERROR("Can not get bundle name");
         return;
     }
-    int errCode = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearUpApplicationData(bundleName);
+    int errCode = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearUpApplicationDataBySelf(bundleName);
     if (errCode != ERR_OK) {
         HILOG_ERROR("Delete bundle side user data is fail, bundleName: %{public}s.", bundleName.c_str());
         return;
