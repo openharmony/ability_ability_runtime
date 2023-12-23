@@ -21,6 +21,7 @@
 #include "ability_post_event_timeout.h"
 #include "ability_runtime/js_ability.h"
 #include "abs_shared_result_set.h"
+#include "bundle_mgr_helper.h"
 #include "configuration_convertor.h"
 #include "connection_manager.h"
 #include "continuation_manager.h"
@@ -41,6 +42,7 @@
 #include "reverse_continuation_scheduler_replica_handler_interface.h"
 #include "runtime.h"
 #include "scene_board_judgement.h"
+#include "singleton.h"
 #include "system_ability_definition.h"
 #include "task_handler_client.h"
 #include "values_bucket.h"
@@ -53,10 +55,6 @@
 #ifdef SUPPORT_GRAPHICS
 #include "display_type.h"
 #include "key_event.h"
-#endif
-
-#ifdef IMAGE_PURGEABLE_PIXELMAP
-#include "purgeable_resource_manager.h"
 #endif
 
 namespace OHOS {
@@ -171,12 +169,14 @@ void Ability::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
     securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
     (const_cast<Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
     SetWant(want);
-    sessionInfo_ = sessionInfo;
+    if (sessionInfo != nullptr) {
+        SetSessionToken(sessionInfo->sessionToken);
+    }
     HILOG_INFO("AbilityName is %{public}s.", abilityInfo_->name.c_str());
 #ifdef SUPPORT_GRAPHICS
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int defualtDisplayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
-        int displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
+        int32_t  defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
+        int32_t  displayId = want.GetIntParam(Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         HILOG_DEBUG("abilityName:%{public}s, displayId:%{public}d", abilityInfo_->name.c_str(), displayId);
         if (!abilityInfo_->isStageBasedModel) {
             auto option = GetWindowOption(want);
@@ -1036,13 +1036,13 @@ std::shared_ptr<AbilityPostEventTimeout> Ability::CreatePostEventTimeouter(std::
 int Ability::StartBackgroundRunning(const AbilityRuntime::WantAgent::WantAgent &wantAgent)
 {
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
-    auto bundleMgr = GetBundleMgr();
-    if (bundleMgr == nullptr) {
-        HILOG_ERROR("Ability::GetBundleMgr failed");
+    auto bundleMgrHelper = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        HILOG_ERROR("Failed to get bundleMgrHelper.");
         return ERR_NULL_OBJECT;
     }
     if (abilityInfo_ == nullptr) {
-        HILOG_ERROR("ability info is null");
+        HILOG_ERROR("The ability info is nullptr.");
         return ERR_INVALID_VALUE;
     }
     Want want;
@@ -1050,8 +1050,8 @@ int Ability::StartBackgroundRunning(const AbilityRuntime::WantAgent::WantAgent &
     want.AddEntity("entity.system.home");
     want.SetElementName("", abilityInfo_->bundleName, "", "");
     AppExecFwk::AbilityInfo abilityInfo;
-    bundleMgr->QueryAbilityInfo(want, abilityInfo);
-    std::string appName = bundleMgr->GetAbilityLabel(abilityInfo_->bundleName, abilityInfo.name);
+    bundleMgrHelper->QueryAbilityInfo(want, abilityInfo);
+    std::string appName = bundleMgrHelper->GetAbilityLabel(abilityInfo_->bundleName, abilityInfo.name);
     uint32_t defaultBgMode = 0;
     BackgroundTaskMgr::ContinuousTaskParam taskParam = BackgroundTaskMgr::ContinuousTaskParam(false, defaultBgMode,
         std::make_shared<AbilityRuntime::WantAgent::WantAgent>(wantAgent), abilityInfo_->name, GetToken(), appName);
@@ -1068,35 +1068,6 @@ int Ability::StopBackgroundRunning()
 #else
     return ERR_INVALID_OPERATION;
 #endif
-}
-
-sptr<IBundleMgr> Ability::GetBundleMgr()
-{
-    HILOG_DEBUG("called");
-    if (iBundleMgr_ == nullptr) {
-        sptr<ISystemAbilityManager> systemAbilityManager =
-            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-        auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-        if (remoteObject == nullptr) {
-            HILOG_ERROR("Failed to get bundle manager service.");
-            return nullptr;
-        }
-
-        iBundleMgr_ = iface_cast<IBundleMgr>(remoteObject);
-        if (iBundleMgr_ == nullptr) {
-            HILOG_ERROR("Failed to get remote object.");
-            return nullptr;
-        }
-    }
-
-    return iBundleMgr_;
-}
-
-void Ability::SetBundleManager(const sptr<IBundleMgr> &bundleManager)
-{
-    HILOG_DEBUG("called");
-
-    iBundleMgr_ = bundleManager;
 }
 
 void Ability::SetStartAbilitySetting(std::shared_ptr<AbilityStartSetting> setting)
@@ -1576,9 +1547,6 @@ void Ability::OnBackground()
         HILOG_ERROR("Ability::OnBackground error. lifecycle_ == nullptr.");
         return;
     }
-#ifdef IMAGE_PURGEABLE_PIXELMAP
-    PurgeableMem::PurgeableResourceManager::GetInstance().EndAccessPurgeableMem();
-#endif
     lifecycle_->DispatchLifecycle(LifeCycle::Event::ON_BACKGROUND);
     HILOG_DEBUG("end");
     AAFwk::EventInfo eventInfo;
@@ -1628,7 +1596,7 @@ void Ability::InitWindow(int32_t displayId, sptr<Rosen::WindowOption> option)
         HILOG_ERROR("Ability window is nullptr.");
         return;
     }
-    abilityWindow_->SetSessionInfo(sessionInfo_);
+    abilityWindow_->SetSessionToken(sessionToken_);
     abilityWindow_->InitWindow(abilityContext_, sceneListener_, displayId, option, securityFlag_);
 }
 
@@ -2138,6 +2106,33 @@ int Ability::GetDisplayOrientation()
 void Ability::ContinuationRestore(const Want &want)
 {
     HILOG_DEBUG("called");
+}
+
+int Ability::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("call");
+    auto abilityContextImpl = GetAbilityContext();
+    if (abilityContextImpl == nullptr) {
+        HILOG_ERROR("abilitycontext is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityContextImpl->CreateModalUIExtensionWithApp(want);
+}
+
+void Ability::SetSessionToken(sptr<IRemoteObject> sessionToken)
+{
+    std::lock_guard lock(sessionTokenMutex_);
+    sessionToken_ = sessionToken;
+}
+
+void Ability::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
+{
+    SetSessionToken(sessionToken);
+    if (abilityWindow_ == nullptr) {
+        HILOG_ERROR("Ability window is nullptr.");
+        return;
+    }
+    abilityWindow_->SetSessionToken(sessionToken_);
 }
 #endif
 }  // namespace AppExecFwk

@@ -54,20 +54,25 @@ UIAbility *UIAbility::Create(const std::unique_ptr<Runtime> &runtime)
     }
 }
 
-void UIAbility::Init(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+void UIAbility::Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
     const std::shared_ptr<AppExecFwk::OHOSApplication> application,
     std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Begin.");
+    if (record == nullptr) {
+        HILOG_ERROR("AbilityLocalRecord is nullptr.");
+        return;
+    }
     application_ = application;
-    abilityInfo_ = abilityInfo;
+    abilityInfo_ = record->GetAbilityInfo();
     handler_ = handler;
     token_ = token;
 #ifdef SUPPORT_GRAPHICS
     continuationManager_ = std::make_shared<AppExecFwk::ContinuationManagerStage>();
     std::weak_ptr<AppExecFwk::ContinuationManagerStage> continuationManager = continuationManager_;
-    continuationHandler_ = std::make_shared<AppExecFwk::ContinuationHandlerStage>(continuationManager, weak_from_this());
+    continuationHandler_ =
+        std::make_shared<AppExecFwk::ContinuationHandlerStage>(continuationManager, weak_from_this());
     if (!continuationManager_->Init(shared_from_this(), GetToken(), GetAbilityInfo(), continuationHandler_)) {
         continuationManager_.reset();
     } else {
@@ -123,9 +128,11 @@ void UIAbility::OnStart(const AAFwk::Want &want, sptr<AppExecFwk::SessionInfo> s
     securityFlag_ = want.GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false);
     (const_cast<AAFwk::Want &>(want)).RemoveParam(DLP_PARAMS_SECURITY_FLAG);
     SetWant(want);
-    sessionInfo_ = sessionInfo;
     HILOG_DEBUG("Begin ability is %{public}s.", abilityInfo_->name.c_str());
 #ifdef SUPPORT_GRAPHICS
+    if (sessionInfo != nullptr) {
+        SetSessionToken(sessionInfo->sessionToken);
+    }
     OnStartForSupportGraphics(want);
 #endif
     if (abilityLifecycleExecutor_ == nullptr) {
@@ -584,9 +591,6 @@ void UIAbility::OnBackground()
         HILOG_ERROR("lifecycle_ is nullptr.");
         return;
     }
-#ifdef IMAGE_PURGEABLE_PIXELMAP
-    PurgeableMem::PurgeableResourceManager::GetInstance().EndAccessPurgeableMem();
-#endif
     lifecycle_->DispatchLifecycle(AppExecFwk::LifeCycle::Event::ON_BACKGROUND);
     HILOG_DEBUG("End.");
     AAFwk::EventInfo eventInfo;
@@ -896,7 +900,7 @@ void UIAbility::ContinuationRestore(const AAFwk::Want &want)
 void UIAbility::OnStartForSupportGraphics(const AAFwk::Want &want)
 {
     if (abilityInfo_->type == AppExecFwk::AbilityType::PAGE) {
-        int32_t defualtDisplayId = Rosen::WindowScene::DEFAULT_DISPLAY_ID;
+        int32_t defualtDisplayId = static_cast<int32_t>(Rosen::DisplayManager::GetInstance().GetDefaultDisplayId());
         int32_t displayId = want.GetIntParam(AAFwk::Want::PARAM_RESV_DISPLAY_ID, defualtDisplayId);
         HILOG_DEBUG("abilityName: %{public}s, displayId: %{public}d.", abilityInfo_->name.c_str(), displayId);
         auto option = GetWindowOption(want);
@@ -991,6 +995,41 @@ void UIAbility::ExecuteInsightIntentMoveToForeground(const AAFwk::Want &want,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
     HILOG_DEBUG("called");
+}
+
+void UIAbility::ExecuteInsightIntentBackground(const AAFwk::Want &want,
+    const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+    std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
+{
+    HILOG_DEBUG("called");
+}
+
+int UIAbility::CreateModalUIExtension(const AAFwk::Want &want)
+{
+    HILOG_DEBUG("call");
+    auto abilityContextImpl = GetAbilityContext();
+    if (abilityContextImpl == nullptr) {
+        HILOG_ERROR("abilityContext is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityContextImpl->CreateModalUIExtensionWithApp(want);
+}
+
+void UIAbility::SetSessionToken(sptr<IRemoteObject> sessionToken)
+{
+    std::lock_guard lock(sessionTokenMutex_);
+    sessionToken_ = sessionToken;
+}
+
+void UIAbility::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
+{
+    SetSessionToken(sessionToken);
+    auto abilityContextImpl = GetAbilityContext();
+    if (abilityContextImpl == nullptr) {
+        HILOG_ERROR("abilityContext is nullptr");
+        return;
+    }
+    abilityContextImpl->SetWeakSessionToken(sessionToken);
 }
 #endif
 } // namespace AbilityRuntime

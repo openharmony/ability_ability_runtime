@@ -19,8 +19,8 @@
 #include <sys/types.h>
 
 #include "ability_info.h"
-#include "parcel.h"
 #include "iremote_object.h"
+#include "parcel.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -47,6 +47,15 @@ struct AppStateData : public Parcelable {
      */
     static AppStateData *Unmarshalling(Parcel &parcel);
 
+    /**
+     * @brief Check if extension type belongs to uiextension.
+     *
+     * @param type extension type
+     * @return true extension type is a uiextension.
+     * @return false extension type is not a uiextension.
+     */
+    static bool IsUIExtension(const AppExecFwk::ExtensionAbilityType type);
+
     std::string bundleName;
     int32_t pid = -1;
     int32_t uid = 0;
@@ -56,6 +65,8 @@ struct AppStateData : public Parcelable {
     ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
     std::vector<int32_t> renderPids;
     std::string callerBundleName;
+    bool isSplitScreenMode = false;
+    bool isFloatingWindowMode = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

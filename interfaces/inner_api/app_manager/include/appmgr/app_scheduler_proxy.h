@@ -47,9 +47,9 @@ public:
      * ScheduleTerminateApplication, call ScheduleTerminateApplication() through proxy project,
      * Notify application to terminate.
      *
-     * @return
+     * @param isLastProcess When it is the last application process, pass in true.
      */
-    virtual void ScheduleTerminateApplication() override;
+    virtual void ScheduleTerminateApplication(bool isLastProcess = false) override;
 
     /**
      * ScheduleShrinkMemory, call ScheduleShrinkMemory() through proxy project,
@@ -163,6 +163,8 @@ public:
     virtual void ScheduleProcessSecurityExit() override;
 
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
+
+    virtual void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
 
     int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
         const sptr<IQuickFixCallback> &callback, const int32_t recordId) override;

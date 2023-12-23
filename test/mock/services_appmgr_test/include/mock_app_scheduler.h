@@ -31,7 +31,7 @@ public:
     virtual ~MockAppScheduler() = default;
     MOCK_METHOD0(ScheduleForegroundApplication, void());
     MOCK_METHOD0(ScheduleBackgroundApplication, void());
-    MOCK_METHOD0(ScheduleTerminateApplication, void());
+    MOCK_METHOD1(ScheduleTerminateApplication, void(bool));
     MOCK_METHOD2(ScheduleLaunchApplication, void(const AppLaunchData&, const Configuration& config));
     MOCK_METHOD3(ScheduleLaunchAbility, void(const AbilityInfo&, const sptr<IRemoteObject>&,
         const std::shared_ptr<AAFwk::Want>&));
@@ -46,6 +46,7 @@ public:
     MOCK_METHOD1(ScheduleMemoryLevel, void(int32_t level));
     MOCK_METHOD2(ScheduleHeapMemory, void(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo));
     MOCK_METHOD2(ScheduleAcceptWant, void(const AAFwk::Want& want, const std::string& moduleName));
+    MOCK_METHOD2(ScheduleNewProcessRequest, void(const AAFwk::Want& want, const std::string& moduleName));
     MOCK_METHOD3(ScheduleNotifyLoadRepairPatch, int32_t(const std::string& bundleName,
         const sptr<IQuickFixCallback>& callback, const int32_t recordId));
     MOCK_METHOD2(ScheduleNotifyHotReloadPage, int32_t(const sptr<IQuickFixCallback>& callback, const int32_t recordId));

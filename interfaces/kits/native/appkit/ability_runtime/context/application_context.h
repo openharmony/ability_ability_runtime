@@ -60,6 +60,8 @@ public:
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
+    std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
+        const std::string &bundleName, const std::string &moduleName) override;
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const override;
     void SetApplicationInfo(const std::shared_ptr<AppExecFwk::ApplicationInfo> &info);
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
@@ -67,6 +69,8 @@ public:
     std::string GetBundleCodeDir() override;
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
+    std::string GetResourceDir() override;
+    void GetAllTempDir(std::vector<std::string> &tempPaths);
     std::string GetFilesDir() override;
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;

@@ -547,6 +547,34 @@ void AmsMgrProxy::StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFw
     }
 }
 
+void AmsMgrProxy::StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo)
+
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write data failed.");
+        return;
+    }
+
+    if (!data.WriteParcelable(&want) || !data.WriteParcelable(&abilityInfo)) {
+        HILOG_ERROR("Write data failed.");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote is nullptr.");
+        return;
+    }
+    auto ret = remote->SendRequest(
+        static_cast<uint32_t>(IAmsMgr::Message::START_SPECIFIED_PROCESS), data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
+    }
+}
+
 void AmsMgrProxy::RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response)
 {
     HILOG_DEBUG("Register multi instances response by proxy.");
@@ -798,6 +826,25 @@ bool AmsMgrProxy::IsAttachDebug(const std::string &bundleName)
         return false;
     }
     return reply.ReadBool();
+}
+
+void AmsMgrProxy::ClearProcessByToken(sptr<IRemoteObject> token)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Failed to write interface token.");
+        return;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        HILOG_ERROR("Failed to write token");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    auto ret = SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::CLEAR_PROCESS_BY_TOKEN), data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
+    }
 }
 
 int32_t AmsMgrProxy::SendTransactCmd(uint32_t code, MessageParcel &data,

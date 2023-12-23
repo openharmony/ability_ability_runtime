@@ -24,6 +24,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 struct RunningProcessInfo;
+class BundleMgrHelper;
 }
 namespace AbilityRuntime {
 class ContextImpl : public Context {
@@ -75,6 +76,15 @@ public:
      * @return Returns the application temporary directory.
      */
     std::string GetTempDir() override;
+
+    std::string GetResourceDir() override;
+
+    /**
+     * @brief Get all temporary directories.
+     *
+     * @param tempPaths Return all temporary directories of the application.
+     */
+    virtual void GetAllTempDir(std::vector<std::string> &tempPaths);
 
     /**
      * @brief Obtains the directory for storing files for the application on the device's internal storage.
@@ -202,6 +212,18 @@ public:
      * @return Returns a Context object created for the specified application.
      */
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
+
+    /**
+     * @brief Creates a ResourceManager object for a hap with the given hap name and app name.
+     *
+     * @param bundleName Indicates the app name of the application.
+     *
+     * @param moduleName Indicates the module name of the hap.
+     *
+     * @return Returns a ResourceManager object created for the specified hap and app.
+     */
+    std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
+        const std::string &bundleName, const std::string &moduleName) override;
 
     /**
     * @brief Obtains an IBundleMgr instance.
@@ -343,6 +365,7 @@ private:
     static const std::string CONTEXT_FILES;
     static const std::string CONTEXT_HAPS;
     static const std::string CONTEXT_ELS[];
+    static const std::string CONTEXT_RESOURCE_END;
     int flags_ = 0x00000000;
 
     void InitResourceManager(const AppExecFwk::BundleInfo &bundleInfo, const std::shared_ptr<ContextImpl> &appContext,
@@ -375,6 +398,12 @@ private:
     int32_t GetPreferencesDirWithCheck(bool checkExist, std::string &preferencesDir);
     int32_t GetGroupPreferencesDirWithCheck(const std::string &groupId, bool checkExist, std::string &preferencesDir);
     int32_t GetGroupDirWithCheck(const std::string &groupId, bool checkExist, std::string &groupDir);
+    std::shared_ptr<Global::Resource::ResourceManager> InitOthersResourceManagerInner(
+        const AppExecFwk::BundleInfo &bundleInfo, bool currentBundle, const std::string& moduleName);
+    std::shared_ptr<Global::Resource::ResourceManager> InitResourceManagerInner(
+        const AppExecFwk::BundleInfo &bundleInfo, bool currentBundle, const std::string& moduleName);
+    void UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager);
+    int32_t GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, bool &currentBundle);
 
     static Global::Resource::DeviceType deviceType_;
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo_ = nullptr;
@@ -388,7 +417,7 @@ private:
     std::mutex checkedDirSetLock_;
 
     std::mutex bundleManagerMutex_;
-    sptr<AppExecFwk::IBundleMgr> bundleMgr_;
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgr_;
 
     // True: need to get a new fms remote object,
     // False: no need to get a new fms remote object.

@@ -204,7 +204,7 @@ public:
      * The extension in the <b>STATE_FOREGROUND</b> state is visible.
      * You can override this function to implement your own processing logic.
      */
-    virtual void OnForeground(const Want &want);
+    virtual void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo);
 
     /**
      * @brief Called when this extension enters the <b>STATE_BACKGROUND</b> state.
@@ -241,6 +241,10 @@ public:
 
     virtual void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result);
+        
+    virtual bool HandleInsightIntent(const AAFwk::Want &want);
+
+    virtual bool OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::InsightIntentExecuteResult &result);
 
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_ = nullptr;
 protected:

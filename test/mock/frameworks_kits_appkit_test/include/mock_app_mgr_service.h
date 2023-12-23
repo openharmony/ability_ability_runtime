@@ -73,6 +73,11 @@ public:
     MOCK_METHOD2(GetProcessMemoryByPid, int32_t(const int32_t pid, int32_t & memorySize));
     MOCK_METHOD3(GetRunningProcessInformation, int32_t(const std::string & bundleName, int32_t userId,
         std::vector<RunningProcessInfo> &info));
+    MOCK_METHOD2(StartChildProcess, int32_t(const std::string &srcEntry, pid_t &childPid));
+    MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
+    MOCK_METHOD1(AttachChildProcess, void(const sptr<IRemoteObject> &childScheduler));
+    MOCK_METHOD0(ExitChildProcessSafely, void());
+    
     void AttachApplication(const sptr<IRemoteObject>& app)
     {
         GTEST_LOG_(INFO) << "MockAppMgrService::AttachApplication called";
@@ -114,6 +119,7 @@ public:
 
     MOCK_METHOD1(KillApplication, int(const std::string& appName));
     MOCK_METHOD2(KillApplicationByUid, int(const std::string&, const int uid));
+    MOCK_METHOD0(IsFinalAppProcess, bool());
 
     virtual sptr<IAmsMgr> GetAmsMgr() override
     {
@@ -199,10 +205,10 @@ public:
         callback_->OnAbilityRequestDone(token, st);
     }
 
-    void ScheduleTerminateApplication()
+    void ScheduleTerminateApplication(bool isLastProcess = false)
     {
         if (Appthread_ != nullptr) {
-            Appthread_->ScheduleTerminateApplication();
+            Appthread_->ScheduleTerminateApplication(isLastProcess);
         }
     }
 

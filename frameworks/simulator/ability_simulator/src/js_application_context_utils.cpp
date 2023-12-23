@@ -48,6 +48,7 @@ napi_value JsApplicationContextUtils::OnSwitchArea(napi_env env, NapiCallbackInf
     }
     BindNativeProperty(env, object, "cacheDir", GetCacheDir);
     BindNativeProperty(env, object, "tempDir", GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", GetResourceDir);
     BindNativeProperty(env, object, "filesDir", GetFilesDir);
     BindNativeProperty(env, object, "distributedFilesDir", GetDistributedFilesDir);
     BindNativeProperty(env, object, "databaseDir", GetDatabaseDir);
@@ -58,6 +59,11 @@ napi_value JsApplicationContextUtils::OnSwitchArea(napi_env env, NapiCallbackInf
 
 
 napi_value JsApplicationContextUtils::CreateModuleContext(napi_env env, napi_callback_info info)
+{
+    return nullptr;
+}
+
+napi_value JsApplicationContextUtils::CreateModuleResourceManager(napi_env env, napi_callback_info info)
 {
     return nullptr;
 }
@@ -75,6 +81,22 @@ napi_value JsApplicationContextUtils::OnGetTempDir(napi_env env, NapiCallbackInf
         return CreateJsUndefined(env);
     }
     std::string path = context->GetTempDir();
+    return CreateJsValue(env, path);
+}
+
+napi_value JsApplicationContextUtils::GetResourceDir(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnGetResourceDir, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetResourceDir(napi_env env, NapiCallbackInfo &info)
+{
+    auto context = context_.lock();
+    if (!context) {
+        HILOG_WARN("context is already released");
+        return CreateJsUndefined(env);
+    }
+    std::string path = context->GetResourceDir();
     return CreateJsValue(env, path);
 }
 
@@ -285,6 +307,7 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
 {
     BindNativeProperty(env, object, "cacheDir", JsApplicationContextUtils::GetCacheDir);
     BindNativeProperty(env, object, "tempDir", JsApplicationContextUtils::GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", JsApplicationContextUtils::GetResourceDir);
     BindNativeProperty(env, object, "filesDir", JsApplicationContextUtils::GetFilesDir);
     BindNativeProperty(env, object, "distributedFilesDir", JsApplicationContextUtils::GetDistributedFilesDir);
     BindNativeProperty(env, object, "databaseDir", JsApplicationContextUtils::GetDatabaseDir);
@@ -302,6 +325,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeFunction(env, object, "switchArea", MD_NAME, JsApplicationContextUtils::SwitchArea);
     BindNativeFunction(env, object, "getArea", MD_NAME, JsApplicationContextUtils::GetArea);
     BindNativeFunction(env, object, "createModuleContext", MD_NAME, JsApplicationContextUtils::CreateModuleContext);
+    BindNativeFunction(env, object, "createModuleResourceManager", MD_NAME,
+        JsApplicationContextUtils::CreateModuleResourceManager);
     BindNativeFunction(env, object, "on", MD_NAME, JsApplicationContextUtils::On);
     BindNativeFunction(env, object, "off", MD_NAME, JsApplicationContextUtils::Off);
     BindNativeFunction(env, object, "getApplicationContext", MD_NAME,

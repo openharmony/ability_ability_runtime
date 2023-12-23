@@ -37,7 +37,9 @@ public:
         GTEST_LOG_(INFO) << "MockRuntime::BuildJsStackInfoList called";
         return true;
     }
-    void StartDebugMode(bool needBreakPoint) override {}
+
+    void StartDebugMode(bool needBreakPoint, const std::string &processName, bool isDebug = true) override {}
+
     void FinishPreload() override {}
     bool LoadRepairPatch(const std::string& patchFile, const std::string& baseFile) override
     {
@@ -57,6 +59,14 @@ public:
         return true;
     }
     void DumpHeapSnapshot(bool isPrivate) override
+    {
+        return;
+    }
+    void DestroyHeapProfiler() override
+    {
+        return;
+    }
+    void ForceFullGC() override
     {
         return;
     }
@@ -93,8 +103,14 @@ public:
     {
         return;
     }
+    void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override
+    {
+        return;
+    }
+    
+    void StartProfiler(const std::string &perfCmd,
+        bool needBreakPoint, const std::string &processName, bool isDebug = true) override {}
 
-    void StartProfiler(const std::string &perfCmd) override {}
     void DoCleanWorkAfterStageCleaned() override {}
 public:
     Language language;

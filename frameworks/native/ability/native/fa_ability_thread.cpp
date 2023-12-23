@@ -1511,5 +1511,24 @@ void FAAbilityThread::HandlePrepareTermianteAbility()
     isPrepareTerminateAbilityDone_.store(true);
     cv_.notify_all();
 }
+
+int FAAbilityThread::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("Call");
+    if (currentAbility_ == nullptr) {
+        HILOG_ERROR("current ability is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return currentAbility_->CreateModalUIExtension(want);
+}
+
+void FAAbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
+{
+    if (currentAbility_ == nullptr) {
+        HILOG_ERROR("current ability is nullptr");
+        return;
+    }
+    currentAbility_->UpdateSessionToken(sessionToken);
+}
 } // namespace AbilityRuntime
 } // namespace OHOS

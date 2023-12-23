@@ -71,12 +71,16 @@ void AppSchedulerProxy::ScheduleBackgroundApplication()
     }
 }
 
-void AppSchedulerProxy::ScheduleTerminateApplication()
+void AppSchedulerProxy::ScheduleTerminateApplication(bool isLastProcess)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
+        return;
+    }
+    if (!data.WriteBool(isLastProcess)) {
+        HILOG_ERROR("Write bool failed.");
         return;
     }
     int32_t ret = SendTransactCmd(
@@ -355,6 +359,30 @@ void AppSchedulerProxy::ScheduleAcceptWant(const AAFwk::Want &want, const std::s
     }
     int32_t ret = SendTransactCmd(
         static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_ACCEPT_WANT), data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
+    }
+}
+
+void AppSchedulerProxy::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+
+    if (!data.WriteParcelable(&want) || !data.WriteString(moduleName)) {
+        return;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("Remote() is NULL");
+        return;
+    }
+    int32_t ret = remote->SendRequest(
+        static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NEW_PROCESS_REQUEST), data, reply, option);
     if (ret != NO_ERROR) {
         HILOG_WARN("SendRequest is failed, error code: %{public}d", ret);
     }

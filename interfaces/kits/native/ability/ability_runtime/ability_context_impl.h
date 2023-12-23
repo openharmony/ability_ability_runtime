@@ -36,6 +36,7 @@ public:
     std::string GetBundleCodeDir() override;
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
+    std::string GetResourceDir() override;
     std::string GetFilesDir() override;
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;
@@ -53,6 +54,8 @@ public:
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &moduleName) override;
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
+    std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
+        const std::string &bundleName, const std::string &moduleName) override;
 
     std::string GetBundleCodePath() const override;
     ErrCode StartAbility(const AAFwk::Want &want, int requestCode) override;
@@ -205,6 +208,8 @@ public:
     ErrCode StartAbilityByType(const std::string &type,
         AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
 
+    ErrCode RequestModalUIExtension(const Want &want) override;
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Set mission label of this ability.
@@ -245,6 +250,12 @@ public:
      * @return UIContent object of ACE.
      */
     Ace::UIContent* GetUIContent() override;
+
+    /**
+     * @brief create modal UIExtension.
+     * @param want Create modal UIExtension with want object.
+     */
+    ErrCode CreateModalUIExtensionWithApp(const Want &want) override;
 #endif
 
 private:
@@ -258,10 +269,12 @@ private:
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
     int32_t missionId_ = -1;
+    std::mutex sessionTokenMutex_;
     wptr<IRemoteObject> sessionToken_;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
+    sptr<IRemoteObject> GetSessionToken();
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
