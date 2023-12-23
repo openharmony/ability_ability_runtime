@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,6 @@
 #include "iremote_object.h"
 #include "mock_ability_token.h"
 #include "mock_bundle_manager.h"
-#include "mock_resource_manager.h"
 #include "system_ability_definition.h"
 #include "sys_mgr_client.h"
 
@@ -240,6 +239,47 @@ HWTEST_F(ContextImplTest, GetDatabaseDir_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDatabaseDir_0200
+ * @tc.desc: Get base directory basic test.
+ * @tc.type: FUNC
+ * @tc.require: issueI8G3YE
+ */
+HWTEST_F(ContextImplTest, GetDatabaseDir_0200, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    EXPECT_NE(contextImpl, nullptr);
+
+    // not create by system app and parent context is nullptr
+    contextImpl->SwitchArea(2);
+    auto databaseDir = contextImpl->GetDatabaseDir();
+    EXPECT_EQ(databaseDir, "/data/storage/el3/database");
+
+    // create by system app and parent context is not nullptr
+    contextImpl->SetFlags(CONTEXT_CREATE_BY_SYSTEM_APP);
+    auto parentContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    EXPECT_NE(parentContext, nullptr);
+    auto applicationInfo = std::make_shared<AppExecFwk::ApplicationInfo>();
+    EXPECT_NE(applicationInfo, nullptr);
+    applicationInfo->bundleName = "com.test.database";
+    parentContext->SetApplicationInfo(applicationInfo);
+    contextImpl->SetParentContext(parentContext);
+    contextImpl->SwitchArea(2);
+    databaseDir = contextImpl->GetDatabaseDir();
+    EXPECT_EQ(databaseDir, "/data/app/el3/0/database/com.test.database/");
+
+    // create by system app and hap module info of parent context is not nullptr
+    AppExecFwk::HapModuleInfo hapModuleInfo;
+    hapModuleInfo.moduleName = "test_moduleName";
+    contextImpl->InitHapModuleInfo(hapModuleInfo);
+    contextImpl->SwitchArea(2);
+    databaseDir = contextImpl->GetDatabaseDir();
+    EXPECT_EQ(databaseDir, "/data/app/el3/0/database/com.test.database/test_moduleName");
+
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: GetPreferencesDir_0100
  * @tc.desc: Get preference directory basic test.
  * @tc.type: FUNC
@@ -276,6 +316,24 @@ HWTEST_F(ContextImplTest, GetTempDir_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetResourceDir_0100
+ * @tc.desc: Get resource directory basic test.
+ * @tc.type: FUNC
+ * @tc.require: issueI61P7Y
+ */
+HWTEST_F(ContextImplTest, GetResourceDir_0100, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
+    EXPECT_NE(contextImpl, nullptr);
+
+    auto resourceDir = contextImpl->GetResourceDir();
+    EXPECT_EQ(resourceDir, "");
+
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
  * @tc.name: GetFilesDir_0100
  * @tc.desc: Get files directory basic test.
  * @tc.type: FUNC
@@ -306,7 +364,18 @@ HWTEST_F(ContextImplTest, GetDistributedFilesDir_0100, TestSize.Level1)
     EXPECT_NE(contextImpl, nullptr);
 
     // not create by system app
+    contextImpl->SwitchArea(1);
     auto distributedDir = contextImpl->GetDistributedFilesDir();
+    EXPECT_EQ(distributedDir, "/data/storage/el2/distributedfiles");
+
+    //for areamode is el3, the distributedfiles dir is also el2's distributedfiles dir
+    contextImpl->SwitchArea(2);
+    distributedDir = contextImpl->GetDistributedFilesDir();
+    EXPECT_EQ(distributedDir, "/data/storage/el2/distributedfiles");
+
+    //for areamode is el4, the distributedfiles dir is also el2's distributedfiles dir
+    contextImpl->SwitchArea(3);
+    distributedDir = contextImpl->GetDistributedFilesDir();
     EXPECT_EQ(distributedDir, "/data/storage/el2/distributedfiles");
 
     // create by system app and bundleName is empty
@@ -369,7 +438,7 @@ HWTEST_F(ContextImplTest, SwitchArea_0100, TestSize.Level1)
 
     // invalid mode
     contextImpl->SwitchArea(-1);
-    contextImpl->SwitchArea(2);
+    contextImpl->SwitchArea(4);
 
     // valid mode
     contextImpl->SwitchArea(0);
@@ -397,6 +466,14 @@ HWTEST_F(ContextImplTest, GetAreaArea_0100, TestSize.Level1)
     contextImpl->SwitchArea(1);
     mode = contextImpl->GetArea();
     EXPECT_EQ(mode, 1);
+
+    contextImpl->SwitchArea(2);
+    mode = contextImpl->GetArea();
+    EXPECT_EQ(mode, 2);
+
+    contextImpl->SwitchArea(3);
+    mode = contextImpl->GetArea();
+    EXPECT_EQ(mode, 3);
 
     // invalid area_
     contextImpl->currArea_ = "invalid";
@@ -437,39 +514,6 @@ HWTEST_F(ContextImplTest, GetCurrentActiveAccountId_0100, TestSize.Level1)
 
     auto accountId = contextImpl->GetCurrentActiveAccountId();
     EXPECT_EQ(accountId, 100); // default active account id is 100
-    HILOG_INFO("%{public}s end.", __func__);
-}
-
-/**
- * @tc.name: CreateBundleContext_0100
- * @tc.desc: Create bundle context test.
- * @tc.type: FUNC
- * @tc.require: issueI61P7Y
- */
-HWTEST_F(ContextImplTest, CreateBundleContext_0100, TestSize.Level1)
-{
-    HILOG_INFO("%{public}s start.", __func__);
-    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
-    EXPECT_NE(contextImpl, nullptr);
-
-    // bundle name is empty
-    auto context = contextImpl->CreateBundleContext("");
-    EXPECT_EQ(context, nullptr);
-
-    // bundle name is invalid
-    context = contextImpl->CreateBundleContext("invalid_bundleName");
-    EXPECT_EQ(context, nullptr);
-
-    context = contextImpl->CreateBundleContext("test_contextImpl");
-    EXPECT_NE(context, nullptr);
-
-    // parent context is not nullptr
-    auto parentContext = std::make_shared<AbilityRuntime::ContextImpl>();
-    EXPECT_NE(parentContext, nullptr);
-    contextImpl->SetParentContext(parentContext);
-    context = contextImpl->CreateBundleContext("");
-    EXPECT_EQ(context, nullptr);
-
     HILOG_INFO("%{public}s end.", __func__);
 }
 
@@ -573,36 +617,6 @@ HWTEST_F(ContextImplTest, CreateModuleContext_001, Function | MediumTest | Level
 }
 
 /**
- * @tc.name: CreateModuleContext_002
- * @tc.desc: Create module context test.
- * @tc.type: FUNC
- * @tc.require: issueI61P7Y
- */
-HWTEST_F(ContextImplTest, CreateModuleContext_002, TestSize.Level1)
-{
-    HILOG_INFO("%{public}s start.", __func__);
-    auto contextImpl = std::make_shared<AbilityRuntime::ContextImpl>();
-    EXPECT_NE(contextImpl, nullptr);
-
-    // bundleName is valid, but module name is empty
-    auto moduleContext = contextImpl->CreateModuleContext("test_contextImpl", "");
-    EXPECT_EQ(moduleContext, nullptr);
-
-    // bundle name is invalid
-    moduleContext = contextImpl->CreateModuleContext("invalid_bundleName", "invalid_moduleName");
-    EXPECT_EQ(moduleContext, nullptr);
-
-    // module didn't exist
-    moduleContext = contextImpl->CreateModuleContext("test_contextImpl", "invalid_moduleName");
-    EXPECT_EQ(moduleContext, nullptr);
-
-    moduleContext = contextImpl->CreateModuleContext("test_contextImpl", "test_moduleName");
-    EXPECT_NE(moduleContext, nullptr);
-
-    HILOG_INFO("%{public}s end.", __func__);
-}
-
-/**
  * @tc.number: AppExecFwk_AppContext_RegisterAbilityLifecycleCallback_001
  * @tc.name: RegisterAbilityLifecycleCallback
  * @tc.desc: Test whether RegisterAbilityLifecycleCallback is called normally.
@@ -649,6 +663,9 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_001, Functio
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
     AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.name = "com.test.module";
+    bundleInfo.isKeepAlive = true;
+    bundleInfo.applicationInfo.process = "com.test.module";
     bundleInfo.applicationInfo.multiProjects = true;
     contextImpl_->InitResourceManager(bundleInfo, appContext, true, "");
     EXPECT_TRUE(appContext->GetResourceManager() != nullptr);
@@ -680,6 +697,9 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_002, Functio
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
     AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.name = "com.ohos.contactsdataability";
+    bundleInfo.isKeepAlive = true;
+    bundleInfo.applicationInfo.process = "com.ohos.contactsdataability";
     bundleInfo.applicationInfo.multiProjects = true;
     HapModuleInfo info;
     info.name = "com.ohos.contactsdataability";
@@ -726,6 +746,9 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_003, Functio
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
     AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.name = "com.ohos.contactsdataability";
+    bundleInfo.isKeepAlive = true;
+    bundleInfo.applicationInfo.process = "com.ohos.contactsdataability";
     bundleInfo.applicationInfo.multiProjects = true;
     HapModuleInfo info;
     info.name = "com.ohos.contactsdataability";
@@ -769,6 +792,9 @@ HWTEST_F(ContextImplTest, AppExecFwk_AppContext_InitResourceManager_004, Functio
     std::shared_ptr<AbilityRuntime::ContextImpl> contextImpl_ = std::make_shared<AbilityRuntime::ContextImpl>();
     std::shared_ptr<AbilityRuntime::ContextImpl> appContext = std::make_shared<AbilityRuntime::ContextImpl>();
     AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.name = "com.ohos.contactsdataability";
+    bundleInfo.isKeepAlive = true;
+    bundleInfo.applicationInfo.process = "com.ohos.contactsdataability";
     bundleInfo.applicationInfo.multiProjects = true;
     HapModuleInfo info;
     info.name = "com.ohos.contactsdataability";
@@ -1020,7 +1046,7 @@ HWTEST_F(ContextImplTest, SetResourceManager_0100, TestSize.Level1)
     EXPECT_NE(contextImpl, nullptr);
     EXPECT_EQ(contextImpl->GetResourceManager(), nullptr);
 
-    auto resourceManager = std::make_shared<Global::Resource::MockResourceManager>();
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     EXPECT_NE(resourceManager, nullptr);
 
     contextImpl->SetResourceManager(resourceManager);
@@ -1044,7 +1070,7 @@ HWTEST_F(ContextImplTest, GetResourceManager_0100, TestSize.Level1)
     auto parentContext = std::make_shared<AbilityRuntime::ContextImpl>();
     EXPECT_NE(parentContext, nullptr);
     contextImpl->SetParentContext(parentContext);
-    auto resourceManager = std::make_shared<Global::Resource::MockResourceManager>();
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     EXPECT_NE(resourceManager, nullptr);
 
     parentContext->SetResourceManager(resourceManager);

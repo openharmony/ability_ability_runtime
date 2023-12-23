@@ -18,6 +18,7 @@
 
 #include "js_env_logger.h"
 #include "native_engine/native_engine.h"
+#include "ui_content.h"
 
 namespace OHOS {
 namespace JsEnv {
@@ -52,7 +53,8 @@ void NapiUncaughtExceptionCallback::operator()(napi_value obj)
     std::string errorMsg = GetNativeStrFromJsTaggedObj(obj, "message");
     std::string errorName = GetNativeStrFromJsTaggedObj(obj, "name");
     std::string errorStack = GetNativeStrFromJsTaggedObj(obj, "stack");
-    std::string summary = "Error message:" + errorMsg + "\n";
+    std::string summary = "Error name:" + errorName + "\n";
+    summary += "Error message:" + errorMsg + "\n";
     const JsEnv::ErrorObject errorObj = {
         .name = errorName,
         .message = errorMsg,
@@ -84,6 +86,10 @@ void NapiUncaughtExceptionCallback::operator()(napi_value obj)
         return;
     }
     summary += error + "Stacktrace:\n" + sourceMapOperator_->TranslateBySourceMap(errorStack);
+    std::string str = Ace::UIContent::GetCurrentUIStackInfo();
+    if (!str.empty()) {
+        summary.append(str);
+    }
     if (uncaughtTask_) {
         uncaughtTask_(summary, errorObj);
     }

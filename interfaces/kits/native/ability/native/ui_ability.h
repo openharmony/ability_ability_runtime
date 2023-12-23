@@ -20,6 +20,7 @@
 #include "ability_continuation_interface.h"
 #include "ability_lifecycle_executor.h"
 #include "ability_lifecycle_interface.h"
+#include "ability_local_record.h"
 #include "ability_transaction_callback_info.h"
 #include "configuration.h"
 #include "context.h"
@@ -91,7 +92,7 @@ public:
      * @param handler the UIability EventHandler object
      * @param token the remote token
      */
-    virtual void Init(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+    virtual void Init(std::shared_ptr<AppExecFwk::AbilityLocalRecord> record,
         const std::shared_ptr<AppExecFwk::OHOSApplication> application,
         std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token);
 
@@ -483,6 +484,29 @@ public:
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         std::unique_ptr<InsightIntentExecutorAsyncCallback> callback);
 
+    /**
+     * @brief Execute insight intent when an ability didn't started, schedule it to background.
+     *
+     * @param want Want.
+     * @param executeParam insight intent execute param.
+     * @param callback insight intent async callback.
+     */
+    virtual void ExecuteInsightIntentBackground(const AAFwk::Want &want,
+        const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
+        std::unique_ptr<InsightIntentExecutorAsyncCallback> callback);
+
+    /**
+     * @brief create modal UIExtension.
+     * @param want Create modal UIExtension with want object.
+     */
+    int CreateModalUIExtension(const AAFwk::Want &want);
+
+    /**
+     * @brief Update sessionToken.
+     * @param sessionToken The token of session.
+     */
+    void UpdateSessionToken(sptr<IRemoteObject> sessionToken);
+
 protected:
     class UIAbilityDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
     public:
@@ -551,6 +575,7 @@ protected:
 private:
     void OnStartForSupportGraphics(const AAFwk::Want &want);
     void OnChangeForUpdateConfiguration(const AppExecFwk::Configuration &newConfig);
+    void SetSessionToken(sptr<IRemoteObject> sessionToken);
 
     bool showOnLockScreen_ = false;
 #endif

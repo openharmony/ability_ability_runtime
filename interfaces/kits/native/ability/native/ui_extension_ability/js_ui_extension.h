@@ -43,12 +43,11 @@ class AbilityResultListeners {
 public:
     AbilityResultListeners() = default;
     virtual ~AbilityResultListeners() = default;
-    void AddListener(const sptr<IRemoteObject> &sessionToken,
-        std::shared_ptr<AbilityResultListener> listener);
-    void RemoveListener(const sptr<IRemoteObject> &sessionToken);
+    void AddListener(const uint64_t &uiExtensionComponentId, std::shared_ptr<AbilityResultListener> listener);
+    void RemoveListener(const uint64_t &uiExtensionComponentId);
     void OnAbilityResult(int requestCode, int resultCode, const Want &resultData);
 private:
-    std::map<sptr<IRemoteObject>, std::shared_ptr<AbilityResultListener>> listeners_;
+    std::map<uint64_t, std::shared_ptr<AbilityResultListener>> listeners_;
 };
 
 class JsUIExtension : public UIExtension {
@@ -151,7 +150,7 @@ public:
      * The extension in the <b>STATE_FOREGROUND</b> state is visible.
      * You can override this function to implement your own processing logic.
      */
-    virtual void OnForeground(const Want &want) override;
+    virtual void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 
     /**
      * @brief Called when this extension enters the <b>STATE_BACKGROUND</b> state.
@@ -183,7 +182,9 @@ public:
     void OnAbilityResult(int requestCode, int resultCode, const Want &resultData) override;
 
 private:
-    virtual void BindContext(napi_env env, napi_value obj);
+    virtual void BindContext(napi_env env, napi_value obj, std::shared_ptr<AAFwk::Want> want);
+    void CreateJSContext(napi_env env, napi_value &contextObj,
+        std::shared_ptr<UIExtensionContext> context, int32_t screenMode);
 
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
         bool withResult = false);
@@ -207,10 +208,12 @@ private:
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_ = nullptr;
-    std::map<sptr<IRemoteObject>, sptr<Rosen::Window>> uiWindowMap_;
-    std::set<sptr<IRemoteObject>> foregroundWindows_;
-    std::map<sptr<IRemoteObject>, std::shared_ptr<NativeReference>> contentSessions_;
+    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
+    std::set<uint64_t> foregroundWindows_;
+    std::map<uint64_t, std::shared_ptr<NativeReference>> contentSessions_;
     std::shared_ptr<AbilityResultListeners> abilityResultListeners_ = nullptr;
+    int32_t screenMode_ = AAFwk::IDLE_SCREEN_MODE;
+    std::shared_ptr<int32_t> screenModePtr_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

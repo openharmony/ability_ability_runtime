@@ -171,7 +171,7 @@ bool PendingWantManager::CheckPendingWantRecordByKey(
     return true;
 }
 
-int32_t PendingWantManager::SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo)
+int32_t PendingWantManager::SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo)
 {
     HILOG_INFO("begin");
 
@@ -179,8 +179,13 @@ int32_t PendingWantManager::SendWantSender(const sptr<IWantSender> &target, cons
         HILOG_ERROR("sender is nullptr.");
         return ERR_INVALID_VALUE;
     }
+    sptr<IRemoteObject> obj = target->AsObject();
+    if(obj == nullptr) {
+        HILOG_ERROR("target obj is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(obj);
     SenderInfo info = senderInfo;
-    sptr<PendingWantRecord> record = iface_cast<PendingWantRecord>(target->AsObject());
     return record->SenderInner(info);
 }
 
@@ -296,8 +301,7 @@ int32_t PendingWantManager::PendingWantPublishCommonEvent(
         eventPublishData.SetOrdered(true);
         pendingWantCommonEvent = std::make_shared<PendingWantCommonEvent>();
         pendingWantCommonEvent->SetFinishedReceiver(senderInfo.finishedReceiver);
-        WantParams wantParams = {};
-        pendingWantCommonEvent->SetWantParams(wantParams);
+        pendingWantCommonEvent->SetWantParams(senderInfo.want.GetParams());
     }
     bool result = IN_PROCESS_CALL(DelayedSingleton<EventFwk::CommonEvent>::GetInstance()->PublishCommonEvent(
         eventData, eventPublishData, pendingWantCommonEvent, callerUid, callerTokenId));

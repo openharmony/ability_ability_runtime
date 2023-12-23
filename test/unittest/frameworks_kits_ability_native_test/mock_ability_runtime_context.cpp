@@ -72,6 +72,11 @@ std::string MockAbilityRuntimeContext::GetTempDir()
     return {};
 };
 
+std::string MockAbilityRuntimeContext::GetResourceDir()
+{
+    return {};
+};
+
 std::string MockAbilityRuntimeContext::GetFilesDir()
 {
     return {};
@@ -123,6 +128,12 @@ std::shared_ptr<Context> MockAbilityRuntimeContext::CreateModuleContext(
 {
     return {};
 };
+
+std::shared_ptr<Global::Resource::ResourceManager> MockAbilityRuntimeContext::CreateModuleResourceManager(
+    const std::string &bundleName, const std::string &moduleName)
+{
+    return nullptr;
+}
 
 int MockAbilityRuntimeContext::GetArea()
 {

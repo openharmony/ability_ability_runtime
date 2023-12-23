@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "app_mgr_interface.h"
-#include "bundlemgr/bundle_mgr_interface.h"
+#include "bundle_mgr_helper.h"
 #include "istorage_manager.h"
 #include "uri.h"
 #include "uri_permission_manager_stub.h"
@@ -39,6 +39,13 @@ struct GrantInfo {
     const uint32_t targetTokenId;
     int autoremove;
 };
+
+struct PolicyInfo final {
+public:
+    std::string path;
+    uint64_t mode;
+};
+
 class UriPermissionManagerStubImpl : public UriPermissionManagerStub,
                                      public std::enable_shared_from_this<UriPermissionManagerStubImpl> {
 public:
@@ -47,21 +54,27 @@ public:
     void Init();
 
     int GrantUriPermission(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName, int autoremove, int32_t appIndex = 0) override;
+        const std::string targetBundleName, int32_t appIndex = 0) override;
     int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string targetBundleName, int autoremove, int32_t appIndex = 0) override;
+        const std::string targetBundleName, int32_t appIndex = 0) override;
+    int GrantUriPermissionFor2In1(
+        const Uri &uri, unsigned int flag, const std::string &targetBundleName, int32_t appIndex = 0) override;
+    int GrantUriPermissionFor2In1(const std::vector<Uri> &uriVec, unsigned int flag,
+        const std::string &targetBundleName, int32_t appIndex = 0, bool isSystemAppCall = false) override;
     void RevokeUriPermission(const TokenId tokenId) override;
     int RevokeAllUriPermissions(uint32_t tokenId) override;
     int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
 
     bool CheckPersistableUriPermissionProxy(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
     bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
+    bool IsAuthorizationUriAllowed(uint32_t fromTokenId) override;
     
     uint32_t GetTokenIdByBundleName(const std::string bundleName, int32_t appIndex);
 
 private:
     template<typename T>
     void ConnectManager(sptr<T> &mgr, int32_t serviceId);
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> ConnectManagerHelper();
     int32_t GetCurrentAccountId() const;
     int GrantUriPermissionImpl(const Uri &uri, unsigned int flag,
         TokenId fromTokenId, TokenId targetTokenId, int autoremove);
@@ -88,6 +101,16 @@ private:
     void SendEvent(const Uri &uri, const std::string &targetBundleName, uint32_t targetTokenId,
         const std::vector<std::string> &uriVec = {});
 
+    int CheckRule(unsigned int flag);
+
+    int GrantUriPermissionFor2In1Inner(const std::vector<Uri> &uriVec, unsigned int flag,
+        const std::string &targetBundleName, int32_t appIndex, bool isSystemAppCall);
+
+    void HandleUriPermission(
+        uint64_t tokenId, unsigned int flag, std::vector<PolicyInfo> &docsVec, bool isSystemAppCall);
+
+    bool IsFoundationCall();
+
     class ProxyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         explicit ProxyDeathRecipient(ClearProxyCallback&& proxy) : proxy_(proxy) {}
@@ -103,7 +126,7 @@ private:
     std::mutex mutex_;
     std::mutex mgrMutex_;
     sptr<AppExecFwk::IAppMgr> appMgr_ = nullptr;
-    sptr<AppExecFwk::IBundleMgr> bundleManager_ = nullptr;
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper_ = nullptr;
     sptr<StorageManager::IStorageManager> storageManager_ = nullptr;
     std::shared_ptr<UriPermissionRdb> uriPermissionRdb_;
     bool isGrantPersistableUriPermissionEnable_ = false;

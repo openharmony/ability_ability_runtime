@@ -109,10 +109,6 @@ class ApplicationContext {
     return this.__context_impl__.off(type, callbackId, callback);
   }
 
-  off(type, callback) {
-    return this.__context_impl__.off(type, callback);
-  }
-
   createBundleContext(bundleName) {
     return this.__context_impl__.createBundleContext(bundleName);
   }
@@ -123,6 +119,10 @@ class ApplicationContext {
 
   createModuleContext(bundleName, moduleName) {
     return this.__context_impl__.createModuleContext(bundleName, moduleName);
+  }
+
+  createModuleResourceManager(bundleName, moduleName) {
+    return this.__context_impl__.createModuleResourceManager(bundleName, moduleName);
   }
 
   getGroupDir(groupId, callback) {
@@ -195,6 +195,10 @@ class ApplicationContext {
 
   get tempDir() {
     return this.__context_impl__.tempDir;
+  }
+
+  get resourceDir() {
+    return this.__context_impl__.resourceDir;
   }
 
   get filesDir() {

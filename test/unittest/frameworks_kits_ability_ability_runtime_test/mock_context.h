@@ -41,6 +41,8 @@ public:
 
     std::string GetTempDir() override;
 
+    std::string GetResourceDir() override;
+
     std::string GetFilesDir() override;
 
     std::string GetDatabaseDir() override;
@@ -66,6 +68,9 @@ public:
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
 
     std::shared_ptr<Context> CreateBundleContext(const std::string &bundleName) override;
+
+    std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
+        const std::string &bundleName, const std::string &moduleName) override;
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager() const;
 

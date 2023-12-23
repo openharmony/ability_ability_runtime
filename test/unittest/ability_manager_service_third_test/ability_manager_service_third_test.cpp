@@ -446,22 +446,24 @@ HWTEST_F(AbilityManagerServiceThirdTest, GetAbilityRunningInfos_001, TestSize.Le
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     abilityMs_->uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
     std::vector<AbilityRunningInfo> info;
-    EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
 
-    auto temp1 = abilityMs_->currentMissionListManager_;
-    abilityMs_->currentMissionListManager_.reset();
-    EXPECT_EQ(abilityMs_->GetAbilityRunningInfos(info), ERR_INVALID_VALUE);
-    abilityMs_->currentMissionListManager_ = temp1;
+        auto temp1 = abilityMs_->currentMissionListManager_;
+        abilityMs_->currentMissionListManager_.reset();
+        EXPECT_EQ(abilityMs_->GetAbilityRunningInfos(info), ERR_INVALID_VALUE);
+        abilityMs_->currentMissionListManager_ = temp1;
 
-    auto temp2 = abilityMs_->connectManager_;
-    abilityMs_->connectManager_.reset();
-    EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
-    abilityMs_->connectManager_ = temp2;
+        auto temp2 = abilityMs_->connectManager_;
+        abilityMs_->connectManager_.reset();
+        EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
+        abilityMs_->connectManager_ = temp2;
 
-    auto temp3 = abilityMs_->dataAbilityManager_;
-    abilityMs_->dataAbilityManager_.reset();
-    EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
-    abilityMs_->dataAbilityManager_ = temp3;
+        auto temp3 = abilityMs_->dataAbilityManager_;
+        abilityMs_->dataAbilityManager_.reset();
+        EXPECT_NE(abilityMs_->GetAbilityRunningInfos(info), ERR_OK);
+        abilityMs_->dataAbilityManager_ = temp3;
+    }
     HILOG_INFO("AbilityManagerServiceThirdTest GetAbilityRunningInfos_001 end");
 }
 
@@ -873,22 +875,6 @@ HWTEST_F(AbilityManagerServiceThirdTest, StopUser_001, TestSize.Level1)
 
 /*
  * Feature: AbilityManagerService
- * Function: IsAbilityVisible
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService IsAbilityVisible
- */
-HWTEST_F(AbilityManagerServiceThirdTest, IsAbilityVisible_001, TestSize.Level1)
-{
-    HILOG_INFO("AbilityManagerServiceThirdTest IsAbilityVisible_001 start");
-    auto abilityMs_ = std::make_shared<AbilityManagerService>();
-    AbilityRequest abilityRequest;
-    abilityRequest.abilityInfo.visible = true;
-    EXPECT_TRUE(abilityMs_->IsAbilityVisible(abilityRequest));
-    HILOG_INFO("AbilityManagerServiceThirdTest IsAbilityVisible_001 end");
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: GetStartUpNewRuleFlag
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetStartUpNewRuleFlag
@@ -1091,7 +1077,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_001, TestSize.Leve
 {
     auto abilityMs_ = std::make_shared<AbilityManagerService>();
     EXPECT_NE(abilityMs_, nullptr);
-    abilityMs_->SetPickerElementName(nullptr);
+    abilityMs_->SetPickerElementName(nullptr, USER_ID_U100);
 }
 
 /*
@@ -1106,7 +1092,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_002, TestSize.Leve
     EXPECT_NE(abilityMs_, nullptr);
     sptr<SessionInfo> sessionInfo = new SessionInfo();
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo);
+    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
@@ -1125,7 +1111,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_003, TestSize.Leve
     want.SetParam("ability.want.params.uiExtensionTargetType", type);
     sessionInfo->want = want;
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo);
+    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
 }
 
 /*
@@ -1143,7 +1129,7 @@ HWTEST_F(AbilityManagerServiceThirdTest, SetPickerElementName_004, TestSize.Leve
     want.SetElementName("com.example.share", "ShareUIExtensionAbility");
     sessionInfo->want = want;
     const sptr<SessionInfo> extensionSessionInfo = sessionInfo;
-    abilityMs_->SetPickerElementName(extensionSessionInfo);
+    abilityMs_->SetPickerElementName(extensionSessionInfo, USER_ID_U100);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

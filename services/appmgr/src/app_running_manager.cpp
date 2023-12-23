@@ -31,6 +31,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+    const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
+}
 AppRunningManager::AppRunningManager()
 {}
 AppRunningManager::~AppRunningManager()
@@ -71,11 +74,12 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExist(const std::string &appName,
-    const std::string &processName, const int uid, const BundleInfo &bundleInfo)
+    const std::string &processName, const int uid, const BundleInfo &bundleInfo,
+    const std::string &specifiedProcessFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("appName: %{public}s, processName: %{public}s, uid : %{public}d",
-        appName.c_str(), processName.c_str(), uid);
+    HILOG_INFO("appName: %{public}s, processName: %{public}s, uid: %{public}d, specifiedProcessFlag: %{public}s",
+        appName.c_str(), processName.c_str(), uid, specifiedProcessFlag.c_str());
 
     std::regex rule("[a-zA-Z.]+[-_#]{1}");
     std::string signCode;
@@ -83,39 +87,43 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     HILOG_DEBUG("jointUserId : %{public}s", jointUserId.c_str());
     ClipStringContent(rule, bundleInfo.appId, signCode);
 
-    auto FindSameProcess = [signCode, processName, jointUserId](const auto &pair) {
-            return ((pair.second->GetSignCode() == signCode) &&
-                    (pair.second->GetProcessName() == processName) &&
-                    (pair.second->GetJointUserId() == jointUserId) &&
-                    !(pair.second->IsTerminating()) &&
-                    !(pair.second->IsKilling()));
+    auto FindSameProcess = [signCode, specifiedProcessFlag, processName, jointUserId](const auto &pair) {
+        bool checkSpecifiedProcessFlag = (specifiedProcessFlag.empty() ||
+            pair.second->GetSpecifiedProcessFlag() == specifiedProcessFlag);
+        return (checkSpecifiedProcessFlag) &&
+            (pair.second->GetSignCode() == signCode) &&
+            (pair.second->GetProcessName() == processName) &&
+            (pair.second->GetJointUserId() == jointUserId) &&
+            !(pair.second->IsTerminating()) &&
+            !(pair.second->IsKilling());
     };
 
     // If it is not empty, look for whether it can come in the same process
     std::lock_guard<ffrt::mutex> guard(lock_);
-    if (jointUserId.empty()) {
-        for (const auto &item : appRunningRecordMap_) {
-            const auto &appRecord = item.second;
-            if (appRecord && appRecord->GetProcessName() == processName &&
-                !(appRecord->IsTerminating()) && !(appRecord->IsKilling())) {
-                HILOG_INFO("appRecord->GetProcessName() : %{public}s", appRecord->GetProcessName().c_str());
-                auto appInfoList = appRecord->GetAppInfoList();
-                HILOG_INFO("appInfoList : %{public}zu", appInfoList.size());
-                auto isExist = [&appName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
-                    HILOG_INFO("appInfo->name : %{public}s", appInfo->name.c_str());
-                    return appInfo->name == appName && appInfo->uid == uid;
-                };
-                auto appInfoIter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-                if (appInfoIter != appInfoList.end()) {
-                    return appRecord;
-                }
+    if (!jointUserId.empty()) {
+        auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), FindSameProcess);
+        return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
+    }
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        bool checkSpecifiedProcessFlag = (specifiedProcessFlag.empty() ||
+            appRecord->GetSpecifiedProcessFlag() == specifiedProcessFlag);
+        if (appRecord && appRecord->GetProcessName() == processName && checkSpecifiedProcessFlag &&
+            !(appRecord->IsTerminating()) && !(appRecord->IsKilling())) {
+            auto appInfoList = appRecord->GetAppInfoList();
+            HILOG_INFO("appInfoList: %{public}zu, processName: %{public}s, specifiedProcessFlag: %{public}s",
+                appInfoList.size(), appRecord->GetProcessName().c_str(), specifiedProcessFlag.c_str());
+            auto isExist = [&appName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
+                HILOG_INFO("appInfo->name: %{public}s", appInfo->name.c_str());
+                return appInfo->name == appName && appInfo->uid == uid;
+            };
+            auto appInfoIter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
+            if (appInfoIter != appInfoList.end()) {
+                return appRecord;
             }
         }
-        return nullptr;
     }
-
-    auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), FindSameProcess);
-    return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
+    return nullptr;
 }
 
 bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName)
@@ -131,6 +139,20 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
         }
     }
     return false;
+}
+
+int32_t AppRunningManager::GetAllAppRunningRecordCountByBundleName(const std::string &bundleName)
+{
+    int32_t count = 0;
+    std::lock_guard<ffrt::mutex> guard(lock_);
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetBundleName() == bundleName) {
+            count++;
+        }
+    }
+
+    return count;
 }
 
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByPid(const pid_t pid)
@@ -461,15 +483,26 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         HILOG_DEBUG("The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
-            appRecord->RemoveTerminateAbilityTimeoutTask(token);
-            HILOG_DEBUG("The ability is the last, kill application");
-            auto pid = appRecord->GetPriorityObject()->GetPid();
-            auto result = appMgrServiceInner->KillProcessByPid(pid);
-            if (result < 0) {
-                HILOG_WARN("Kill application directly failed, pid: %{public}d", pid);
-            }
-            appMgrServiceInner->NotifyAppStatus(appRecord->GetBundleName(),
-                EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
+            auto killProcess = [appRecord, token, appMgrServiceInner]() {
+                if (appRecord == nullptr || token == nullptr || appMgrServiceInner == nullptr) {
+                    HILOG_ERROR("Pointer parameter error.");
+                    return;
+                }
+                appRecord->RemoveTerminateAbilityTimeoutTask(token);
+                HILOG_DEBUG("The ability is the last, kill application");
+                auto pid = appRecord->GetPriorityObject()->GetPid();
+                if (pid < 0) {
+                    HILOG_ERROR("Pid error.");
+                    return;
+                }
+                auto result = appMgrServiceInner->KillProcessByPid(pid);
+                if (result < 0) {
+                    HILOG_WARN("Kill application directly failed, pid: %{public}d", pid);
+                }
+                appMgrServiceInner->NotifyAppStatus(appRecord->GetBundleName(),
+                    EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_RESTARTED);
+                };
+            appRecord->PostTask("DELAY_KILL_PROCESS", AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT, killProcess);
         }
     }
 }
@@ -510,7 +543,7 @@ void AppRunningManager::AssignRunningProcessInfoByAppRecord(
     info.isTestProcess = (appRecord->GetUserTestInfo() != nullptr);
     info.startTimeMillis_ = appRecord->GetAppStartTime();
     info.isAbilityForegrounding = appRecord->GetAbilityForegroundingFlag();
-    info.extensionType_ = AAFwk::UIExtensionUtils::ConvertType(appRecord->GetExtensionType());
+    info.extensionType_ = appRecord->GetExtensionType();
     info.processType_ = appRecord->GetProcessType();
 }
 
@@ -550,7 +583,7 @@ void AppRunningManager::GetForegroundApplications(std::vector<AppStateData> &lis
             appData.uid = appRecord->GetUid();
             appData.pid = appRecord->GetPriorityObject()->GetPid();
             appData.state = static_cast<int32_t>(ApplicationState::APP_STATE_FOREGROUND);
-            appData.extensionType = AAFwk::UIExtensionUtils::ConvertType(appRecord->GetExtensionType());
+            appData.extensionType = appRecord->GetExtensionType();
             appData.isFocused = appRecord->GetFocusFlag();
             list.push_back(appData);
             HILOG_INFO("%{public}s, bundleName:%{public}s", __func__, appData.bundleName.c_str());
@@ -604,12 +637,22 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
     int32_t result = ERR_OK;
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
-        if (appRecord) {
+        if (appRecord && !isCollaboratorReserveType(appRecord)) {
             HILOG_INFO("Notification app [%{public}s]", appRecord->GetName().c_str());
             result = appRecord->UpdateConfiguration(config);
         }
     }
     return result;
+}
+
+bool AppRunningManager::isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    std::string bundleName = appRecord->GetApplicationInfo()->name;
+    bool isReserveType = bundleName == SHELL_ASSISTANT_BUNDLENAME;
+    if (isReserveType) {
+        HILOG_INFO("isReserveType app [%{public}s]", appRecord->GetName().c_str());
+    }
+    return isReserveType;
 }
 
 int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
@@ -858,17 +901,22 @@ void AppRunningManager::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
     HILOG_DEBUG("Called.");
+    std::set<int32_t> pids;
     for (const auto &info : windowVisibilityInfos) {
         if (info == nullptr) {
             HILOG_ERROR("Window visibility info is nullptr.");
             continue;
         }
-        auto appRecord = GetAppRunningRecordByPidInner(info->pid_);
+        if (pids.find(info->pid_) != pids.end()) {
+            continue;
+        }
+        auto appRecord = GetAppRunningRecordByPid(info->pid_);
         if (appRecord == nullptr) {
             HILOG_ERROR("App running record is nullptr.");
             return;
         }
         appRecord->OnWindowVisibilityChanged(windowVisibilityInfos);
+        pids.emplace(info->pid_);
     }
 }
 
@@ -958,6 +1006,64 @@ void AppRunningManager::GetAbilityTokensByBundleName(
             abilityTokens.emplace_back(token.first);
         }
     }
+}
+
+std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByChildProcessPid(const pid_t pid)
+{
+    std::lock_guard<ffrt::mutex> guard(lock_);
+    auto iter = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&pid](const auto &pair) {
+        auto childProcessRecordMap = pair.second->GetChildProcessRecordMap();
+        return childProcessRecordMap.find(pid) != childProcessRecordMap.end();
+    });
+    if (iter != appRunningRecordMap_.end()) {
+        return iter->second;
+    }
+    return nullptr;
+}
+
+std::shared_ptr<ChildProcessRecord> AppRunningManager::OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote)
+{
+    HILOG_ERROR("On child process remote died.");
+    if (remote == nullptr) {
+        HILOG_ERROR("remote is null");
+        return nullptr;
+    }
+    sptr<IRemoteObject> object = remote.promote();
+    if (!object) {
+        HILOG_ERROR("promote failed.");
+        return nullptr;
+    }
+
+    std::lock_guard<ffrt::mutex> guard(lock_);
+    std::shared_ptr<ChildProcessRecord> childRecord;
+    const auto &it = std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(),
+        [&object, &childRecord](const auto &pair) {
+            auto appRecord = pair.second;
+            if (!appRecord) {
+                return false;
+            }
+            auto childRecordMap = appRecord->GetChildProcessRecordMap();
+            if (childRecordMap.empty()) {
+                return false;
+            }
+            for (auto iter : childRecordMap) {
+                if (iter.second == nullptr) {
+                    continue;
+                }
+                auto scheduler = iter.second->GetScheduler();
+                if (scheduler && scheduler->AsObject() == object) {
+                    childRecord = iter.second;
+                    return true;
+                }
+            }
+            return false;
+        });
+    if (it != appRunningRecordMap_.end()) {
+        auto appRecord = it->second;
+        appRecord->RemoveChildProcessRecord(childRecord);
+        return childRecord;
+    }
+    return nullptr;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

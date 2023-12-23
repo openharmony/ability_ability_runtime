@@ -148,6 +148,7 @@ napi_value JsApplicationContextUtils::OnSwitchArea(napi_env env, NapiCallbackInf
     }
     BindNativeProperty(env, object, "cacheDir", GetCacheDir);
     BindNativeProperty(env, object, "tempDir", GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", GetResourceDir);
     BindNativeProperty(env, object, "filesDir", GetFilesDir);
     BindNativeProperty(env, object, "distributedFilesDir", GetDistributedFilesDir);
     BindNativeProperty(env, object, "databaseDir", GetDatabaseDir);
@@ -228,6 +229,48 @@ napi_value JsApplicationContextUtils::OnCreateModuleContext(napi_env env, NapiCa
     return contextObj;
 }
 
+napi_value JsApplicationContextUtils::CreateModuleResourceManager(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnCreateModuleResourceManager, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnCreateModuleResourceManager(napi_env env, NapiCallbackInfo& info)
+{
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        HILOG_WARN("applicationContext is already released");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, info.argv[0], bundleName)) {
+        HILOG_ERROR("Parse bundleName failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    std::string moduleName;
+    if (!ConvertFromJsValue(env, info.argv[1], moduleName)) {
+        HILOG_ERROR("Parse moduleName failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    if (!CheckCallerIsSystemApp()) {
+        HILOG_ERROR("This application is not system-app, can not use system-api");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+    auto resourceManager = applicationContext->CreateModuleResourceManager(bundleName, moduleName);
+    if (resourceManager == nullptr) {
+        HILOG_ERROR("Failed to create resourceManager");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    auto jsResourceManager = CreateJsResourceManager(env, resourceManager, nullptr);
+    return jsResourceManager;
+}
+
 napi_value JsApplicationContextUtils::GetArea(napi_env env, napi_callback_info info)
 {
     HILOG_INFO("JsApplicationContextUtils::GetArea is called");
@@ -276,6 +319,23 @@ napi_value JsApplicationContextUtils::OnGetTempDir(napi_env env, NapiCallbackInf
         return CreateJsUndefined(env);
     }
     std::string path = applicationContext->GetTempDir();
+    return CreateJsValue(env, path);
+}
+
+napi_value JsApplicationContextUtils::GetResourceDir(napi_env env, napi_callback_info info)
+{
+    HILOG_INFO("JsApplicationContextUtils::GetResourceDir is called");
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnGetResourceDir, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnGetResourceDir(napi_env env, NapiCallbackInfo& info)
+{
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        HILOG_WARN("applicationContext is already released");
+        return CreateJsUndefined(env);
+    }
+    std::string path = applicationContext->GetResourceDir();
     return CreateJsValue(env, path);
 }
 
@@ -1194,6 +1254,7 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
 {
     BindNativeProperty(env, object, "cacheDir", JsApplicationContextUtils::GetCacheDir);
     BindNativeProperty(env, object, "tempDir", JsApplicationContextUtils::GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", JsApplicationContextUtils::GetResourceDir);
     BindNativeProperty(env, object, "filesDir", JsApplicationContextUtils::GetFilesDir);
     BindNativeProperty(env, object, "distributedFilesDir", JsApplicationContextUtils::GetDistributedFilesDir);
     BindNativeProperty(env, object, "databaseDir", JsApplicationContextUtils::GetDatabaseDir);
@@ -1211,6 +1272,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeFunction(env, object, "switchArea", MD_NAME, JsApplicationContextUtils::SwitchArea);
     BindNativeFunction(env, object, "getArea", MD_NAME, JsApplicationContextUtils::GetArea);
     BindNativeFunction(env, object, "createModuleContext", MD_NAME, JsApplicationContextUtils::CreateModuleContext);
+    BindNativeFunction(env, object, "createModuleResourceManager", MD_NAME,
+        JsApplicationContextUtils::CreateModuleResourceManager);
     BindNativeFunction(env, object, "on", MD_NAME, JsApplicationContextUtils::On);
     BindNativeFunction(env, object, "off", MD_NAME, JsApplicationContextUtils::Off);
     BindNativeFunction(env, object, "getApplicationContext", MD_NAME,

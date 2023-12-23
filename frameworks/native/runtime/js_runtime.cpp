@@ -18,6 +18,7 @@
 #include <cerrno>
 #include <climits>
 #include <cstdlib>
+#include <fstream>
 #include <regex>
 
 #include <atomic>
@@ -75,6 +76,7 @@ constexpr int32_t TRIGGER_GC_AFTER_CLEAR_STAGE_MS = 3000;
 constexpr int32_t API8 = 8;
 const std::string SANDBOX_ARK_CACHE_PATH = "/data/storage/ark-cache/";
 const std::string SANDBOX_ARK_PROIFILE_PATH = "/data/storage/ark-profile";
+const std::string DEBUGGER = "@Debugger";
 #ifdef APP_USE_ARM
 constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib/libark_debugger.z.so";
 #elif defined(APP_USE_X86_64)
@@ -86,6 +88,13 @@ constexpr char ARK_DEBUGGER_LIB_PATH[] = "/system/lib64/libark_debugger.z.so";
 constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr const char* PERMISSION_RUN_ANY_CODE = "ohos.permission.RUN_ANY_CODE";
+
+const std::string SYSTEM_KITS_CONFIG_PATH = "/system/etc/system_kits_config.json";
+
+const std::string SYSTEM_KITS = "systemkits";
+const std::string NAMESPACE = "namespace";
+const std::string TARGET_OHM = "targetohm";
+const std::string SINCE_VERSION = "sinceVersion";
 
 static auto PermissionCheckFunc = []() {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
@@ -186,9 +195,10 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
     return instance;
 }
 
-void JsRuntime::StartDebugMode(bool needBreakPoint)
+void JsRuntime::StartDebugMode(bool needBreakPoint, const std::string &processName, bool isDebugApp)
 {
-    if (debugMode_) {
+    CHECK_POINTER(jsEnv_);
+    if (jsEnv_->GetDebugMode()) {
         HILOG_INFO("Already in debug mode");
         return;
     }
@@ -199,15 +209,39 @@ void JsRuntime::StartDebugMode(bool needBreakPoint)
 
     HILOG_INFO("Ark VM is starting debug mode [%{public}s]", needBreakPoint ? "break" : "normal");
     StartDebuggerInWorkerModule();
-    HdcRegister::Get().StartHdcRegister(bundleName_);
-    ConnectServerManager::Get().StartConnectServer(bundleName_);
+    SetDebuggerApp(isDebugApp);
+    const std::string bundleName = bundleName_;
+    uint32_t instanceId = instanceId_;
+    auto weak = jsEnv_;
+    std::string inputProcessName = "";
+    if (bundleName_ != processName) {
+        inputProcessName = processName;
+    }
+    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
+        [bundleName, needBreakPoint, instanceId, weak](int socketFd, std::string option) {
+        HILOG_INFO("HdcRegister callback is call, socket fd is %{public}d, option is %{public}s.",
+            socketFd, option.c_str());
+        if (weak == nullptr) {
+            HILOG_ERROR("jsEnv is nullptr in hdc register callback");
+            return;
+        }
+        if (option.find(DEBUGGER) == std::string::npos) {
+            ConnectServerManager::Get().StopConnectServer(false);
+            ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
+        } else {
+            weak->StopDebugger(option);
+            weak->StartDebugger(option, ARK_DEBUGGER_LIB_PATH, socketFd, needBreakPoint, instanceId);
+        }
+    });
+    ConnectServerManager::Get().StartConnectServer(bundleName_, -1, true);
     ConnectServerManager::Get().AddInstance(instanceId_);
-    debugMode_ = StartDebugger(needBreakPoint, instanceId_);
+    jsEnv_->NotifyDebugMode(gettid(), ARK_DEBUGGER_LIB_PATH, instanceId_, isDebugApp, needBreakPoint);
 }
 
 void JsRuntime::StopDebugMode()
 {
-    if (debugMode_) {
+    CHECK_POINTER(jsEnv_);
+    if (jsEnv_->GetDebugMode()) {
         ConnectServerManager::Get().RemoveInstance(instanceId_);
         StopDebugger();
     }
@@ -221,8 +255,8 @@ void JsRuntime::InitConsoleModule()
 
 bool JsRuntime::StartDebugger(bool needBreakPoint, uint32_t instanceId)
 {
-    CHECK_POINTER_AND_RETURN(jsEnv_, false);
-    return jsEnv_->StartDebugger(ARK_DEBUGGER_LIB_PATH, needBreakPoint, instanceId);
+    HILOG_DEBUG("StartDebugger called.");
+    return true;
 }
 
 void JsRuntime::StopDebugger()
@@ -284,7 +318,8 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
     return std::stoi(interval);
 }
 
-void JsRuntime::StartProfiler(const std::string &perfCmd)
+void JsRuntime::StartProfiler(
+    const std::string &perfCmd, bool needBreakPoint, const std::string &processName, bool isDebugApp)
 {
     CHECK_POINTER(jsEnv_);
     if (JsRuntime::hasInstance.exchange(true, std::memory_order_relaxed)) {
@@ -292,9 +327,33 @@ void JsRuntime::StartProfiler(const std::string &perfCmd)
     }
 
     StartDebuggerInWorkerModule();
-    HdcRegister::Get().StartHdcRegister(bundleName_);
-    ConnectServerManager::Get().StartConnectServer(bundleName_);
+    SetDebuggerApp(isDebugApp);
+    const std::string bundleName = bundleName_;
+    auto weak = jsEnv_;
+    uint32_t instanceId = instanceId_;
+    std::string inputProcessName = "";
+    if (bundleName_ != processName) {
+        inputProcessName = processName;
+    }
+    HdcRegister::Get().StartHdcRegister(bundleName_, inputProcessName, isDebugApp,
+        [bundleName, needBreakPoint, instanceId, weak](int socketFd, std::string option) {
+        HILOG_INFO("HdcRegister callback is call, socket fd is %{public}d, option is %{public}s.",
+            socketFd, option.c_str());
+        if (weak == nullptr) {
+            HILOG_ERROR("jsEnv is nullptr in hdc register callback");
+            return;
+        }
+        if (option.find(DEBUGGER) == std::string::npos) {
+            ConnectServerManager::Get().StopConnectServer(false);
+            ConnectServerManager::Get().StartConnectServer(bundleName, socketFd, false);
+        } else {
+            weak->StopDebugger(option);
+            weak->StartDebugger(option, ARK_DEBUGGER_LIB_PATH, socketFd, needBreakPoint, instanceId);
+        }
+    });
+    ConnectServerManager::Get().StartConnectServer(bundleName_, 0, true);
     ConnectServerManager::Get().AddInstance(instanceId_);
+
     JsEnv::JsEnvironment::PROFILERTYPE profiler = JsEnv::JsEnvironment::PROFILERTYPE::PROFILERTYPE_HEAP;
     int32_t interval = 0;
     const std::string profilerCommand("profile");
@@ -304,7 +363,7 @@ void JsRuntime::StartProfiler(const std::string &perfCmd)
     }
 
     HILOG_DEBUG("profiler:%{public}d interval:%{public}d.", profiler, interval);
-    jsEnv_->StartProfiler(ARK_DEBUGGER_LIB_PATH, instanceId_, profiler, interval);
+    jsEnv_->StartProfiler(ARK_DEBUGGER_LIB_PATH, instanceId_, profiler, interval, gettid());
 }
 
 bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer)
@@ -535,7 +594,6 @@ bool JsRuntime::Initialize(const Options& options)
     HILOG_INFO("Initialize: %{public}d.", apiTargetVersion_);
     bool isModular = false;
     if (IsUseAbilityRuntime(options)) {
-        HandleScope handleScope(*this);
         auto env = GetNapiEnv();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(env);
         CHECK_POINTER_AND_RETURN(nativeEngine, false);
@@ -546,7 +604,7 @@ bool JsRuntime::Initialize(const Options& options)
         if (preloaded_) {
             PostPreload(options);
         }
-
+        HandleScope handleScope(*this);
         napi_value globalObj = nullptr;
         napi_get_global(env, &globalObj);
         CHECK_POINTER_AND_RETURN(globalObj, false);
@@ -570,8 +628,9 @@ bool JsRuntime::Initialize(const Options& options)
                 HILOG_ERROR("Failed to create reference for global.requireNapi");
                 return false;
             }
-
+            HILOG_INFO("PreloadAce start.");
             PreloadAce(options);
+            HILOG_INFO("PreloadAce end.");
             nativeEngine->RegisterPermissionCheck(PermissionCheckFunc);
         }
 
@@ -587,6 +646,8 @@ bool JsRuntime::Initialize(const Options& options)
             panda::JSNApi::SetHostResolveBufferTracker(
                 vm, JsModuleReader(options.bundleName, options.hapPath, options.isUnique));
             isModular = !panda::JSNApi::IsBundle(vm);
+            std::vector<panda::HmsMap> systemKitsMap = GetSystemKitsMap(apiTargetVersion_);
+            panda::JSNApi::SetHmsModuleList(vm, systemKitsMap);
         }
     }
 
@@ -595,7 +656,7 @@ bool JsRuntime::Initialize(const Options& options)
     }
 
     if (!options.preload) {
-        auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.hapPath, isModular);
+        auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>(options.bundleName, isModular);
         InitSourceMap(operatorObj);
 
         if (options.isUnique) {
@@ -726,6 +787,7 @@ void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> op
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitSourceMap(operatorObj);
     JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
+    JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetHapPathList);
 }
 
 void JsRuntime::Deinitialize()
@@ -802,6 +864,10 @@ std::unique_ptr<NativeReference> JsRuntime::LoadModule(const std::string& module
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Load module(%{public}s, %{private}s, %{private}s, %{public}s)",
         moduleName.c_str(), modulePath.c_str(), hapPath.c_str(), esmodule ? "true" : "false");
+    auto vm = GetEcmaVm();
+    CHECK_POINTER_AND_RETURN(vm, std::unique_ptr<NativeReference>());
+    // use for debugger, js engine need to know load module to handle debug event
+    panda::JSNApi::NotifyLoadModule(vm);
     auto env = GetNapiEnv();
     CHECK_POINTER_AND_RETURN(env, std::unique_ptr<NativeReference>());
 
@@ -998,6 +1064,19 @@ void JsRuntime::DumpHeapSnapshot(bool isPrivate)
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
     nativeEngine->DumpHeapSnapshot(true, DumpFormat::JSON, isPrivate);
+}
+
+void JsRuntime::DestroyHeapProfiler()
+{
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->DestroyHeapProfiler();
+}
+
+void JsRuntime::ForceFullGC()
+{
+    auto vm = GetEcmaVm();
+    CHECK_POINTER(vm);
+    panda::JSNApi::TriggerGC(vm, panda::JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 
 bool JsRuntime::BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames)
@@ -1227,6 +1306,7 @@ void JsRuntime::InitWorkerModule(const Options& options)
     workerInfo->assetBasePathStr = options.assetBasePathStr;
     workerInfo->hapPath = options.hapPath;
     workerInfo->isStageModel = options.isStageModel;
+    workerInfo->moduleName = options.moduleName;
     if (options.isJsFramework) {
         SetJsFramework();
     }
@@ -1273,6 +1353,71 @@ void JsRuntime::SetRequestAotCallback()
     };
 
     jsEnv_->SetRequestAotCallback(callback);
+}
+
+void JsRuntime::SetDeviceDisconnectCallback(const std::function<bool()> &cb)
+{
+    HILOG_DEBUG("Start.");
+    CHECK_POINTER(jsEnv_);
+    jsEnv_->SetDeviceDisconnectCallback(cb);
+}
+
+std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
+{
+    std::vector<panda::HmsMap> systemKitsMap;
+    nlohmann::json jsonBuf;
+    if (access(SYSTEM_KITS_CONFIG_PATH.c_str(), F_OK) != 0) {
+        return systemKitsMap;
+    }
+
+    std::fstream in;
+    char errBuf[256];
+    errBuf[0] = '\0';
+    in.open(SYSTEM_KITS_CONFIG_PATH, std::ios_base::in);
+    if (!in.is_open()) {
+        strerror_r(errno, errBuf, sizeof(errBuf));
+        return systemKitsMap;
+    }
+
+    in.seekg(0, std::ios::end);
+    int64_t size = in.tellg();
+    if (size <= 0) {
+        HILOG_ERROR("the file is an empty file");
+        in.close();
+        return systemKitsMap;
+    }
+
+    in.seekg(0, std::ios::beg);
+    jsonBuf = nlohmann::json::parse(in, nullptr, false);
+    in.close();
+    if (jsonBuf.is_discarded()) {
+        HILOG_ERROR("bad profile file");
+        return systemKitsMap;
+    }
+
+    if (!jsonBuf.contains(SYSTEM_KITS)) {
+        HILOG_ERROR("json config doesn't contain systemkits.");
+        return systemKitsMap;
+    }
+    for (auto &item : jsonBuf.at(SYSTEM_KITS).items()) {
+        nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.contains(NAMESPACE) || !jsonObject.at(NAMESPACE).is_string() ||
+            !jsonObject.contains(TARGET_OHM) || !jsonObject.at(TARGET_OHM).is_string() ||
+            !jsonObject.contains(SINCE_VERSION) || !jsonObject.at(SINCE_VERSION).is_number()) {
+            continue;
+        }
+        uint32_t sinceVersion = jsonObject.at(SINCE_VERSION).get<uint32_t>();
+        if (version >= sinceVersion) {
+            panda::HmsMap hmsMap = {
+                .originalPath = jsonObject.at(NAMESPACE).get<std::string>(),
+                .targetPath = jsonObject.at(TARGET_OHM).get<std::string>(),
+                .sinceVersion = sinceVersion
+            };
+            systemKitsMap.emplace_back(hmsMap);
+        }
+    }
+    HILOG_DEBUG("The size of the map is %{public}zu", systemKitsMap.size());
+    return systemKitsMap;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

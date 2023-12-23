@@ -16,11 +16,12 @@
 
 #include <regex>
 
-#include "constants.h"
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
 #include "app_context.h"
 #include "bundle_constants.h"
+#include "bundle_mgr_helper.h"
+#include "constants.h"
 #include "hilog_wrapper.h"
 #include "parameters.h"
 
@@ -112,12 +113,12 @@ std::shared_ptr<Context> ContextContainer::GetContext()
     }
 }
 
-sptr<IBundleMgr> ContextContainer::GetBundleManager() const
+std::shared_ptr<BundleMgrHelper> ContextContainer::GetBundleManager() const
 {
     if (baseContext_ != nullptr) {
         return baseContext_->GetBundleManager();
     } else {
-        HILOG_ERROR("ContextContainer::GetBundleManager baseContext_ is nullptr");
+        HILOG_ERROR("The baseContext_ is nullptr.");
         return nullptr;
     }
 }
@@ -239,7 +240,7 @@ std::string ContextContainer::GetProcessName()
 std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundleName, int flag, int accountId)
 {
     if (bundleName.empty()) {
-        HILOG_ERROR("ContextContainer::CreateBundleContext bundleName is empty");
+        HILOG_ERROR("The bundleName is empty.");
         return nullptr;
     }
 
@@ -247,14 +248,14 @@ std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundl
         return GetApplicationContext();
     }
 
-    sptr<IBundleMgr> bundleMgr = GetBundleManager();
+    std::shared_ptr<BundleMgrHelper> bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
-        HILOG_ERROR("ContextContainer::CreateBundleContext GetBundleManager is nullptr");
+        HILOG_ERROR("The bundleMgr is nullptr.");
         return nullptr;
     }
 
     BundleInfo bundleInfo;
-    HILOG_INFO("CreateBundleContext length: %{public}zu, bundleName: %{public}s, accountId is %{public}d",
+    HILOG_INFO("Length: %{public}zu, bundleName: %{public}s, accountId is %{public}d.",
         bundleName.length(),
         bundleName.c_str(),
         accountId);
@@ -265,7 +266,7 @@ std::shared_ptr<Context> ContextContainer::CreateBundleContext(std::string bundl
     bundleMgr->GetBundleInfo(bundleName, BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, realAccountId);
 
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
-        HILOG_ERROR("ContextContainer::CreateBundleContext GetBundleInfo is error");
+        HILOG_ERROR("Failed to get Bundle Info.");
         return nullptr;
     }
 
@@ -288,20 +289,20 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         HILOG_ERROR("InitResourceManager deal is nullptr");
         return;
     }
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    std::string moduleName;
+    std::string hapPath;
+    std::vector<std::string> overlayPaths;
+    int32_t appType;
+    if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE)) {
+        appType = TYPE_RESERVE;
+    } else if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
+        appType = TYPE_OTHERS;
+    } else {
+        appType = 0;
+    }
     if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE) ||
         bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
-        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-        std::string moduleName;
-        std::string hapPath;
-        std::vector<std::string> overlayPaths;
-        int32_t appType;
-        if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_RESERVE)) {
-            appType = TYPE_RESERVE;
-        } else if (bundleInfo.applicationInfo.codePath == std::to_string(TYPE_OTHERS)) {
-            appType = TYPE_OTHERS;
-        } else {
-            appType = 0;
-        }
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
             bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
         if (resourceManager == nullptr) {
@@ -312,7 +313,8 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         return;
     }
 
-    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager(
+        bundleInfo.name, moduleName, hapPath, overlayPaths, *resConfig, appType));
     if (resourceManager == nullptr) {
         HILOG_ERROR("ContextContainer::InitResourceManager create resourceManager failed");
         return;
@@ -338,7 +340,6 @@ void ContextContainer::InitResourceManager(BundleInfo &bundleInfo, std::shared_p
         }
     }
 
-    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     resConfig->SetLocaleInfo("zh", "Hans", "CN");
 #ifdef SUPPORT_GRAPHICS
     if (resConfig->GetLocaleInfo() != nullptr) {
