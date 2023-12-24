@@ -9412,18 +9412,15 @@ bool AbilityManagerService::GenerateDialogSessionRecord(AbilityRequest &abilityR
 int AbilityManagerService::CreateModalDialog(const Want &replaceWant, sptr<IRemoteObject> callerToken,
     std::string dialogSessionId)
 {
+    (const_cast<Want &>(replaceWant)).SetParam("dialogSessionId", dialogSessionId);
     auto connection = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
     if (connection == nullptr) {
         HILOG_ERROR("connect ModalSystemUiExtension failed");
         return INNER_ERR;
     }
-    if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+    if (callerToken == nullptr) {
         HILOG_DEBUG("create modal ui extension for system");
         return connection->CreateModalUIExtension(replaceWant);
-    }
-    if (callerToken == nullptr) {
-        HILOG_ERROR("callerToken is nullptr");
-        return ERR_INVALID_VALUE;
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!callerRecord) {
@@ -9438,7 +9435,6 @@ int AbilityManagerService::CreateModalDialog(const Want &replaceWant, sptr<IRemo
         return ERR_INVALID_VALUE;
     }
 
-    (const_cast<Want &>(replaceWant)).SetParam("dialogSessionId", dialogSessionId);
     if (callerRecord->GetAbilityInfo().type == AppExecFwk::AbilityType::PAGE && token == callerToken) {
         HILOG_DEBUG("create modal ui extension for application");
         return callerRecord->CreateModalUIExtension(replaceWant);
