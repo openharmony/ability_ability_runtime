@@ -290,6 +290,12 @@ std::shared_ptr<Context> ApplicationContext::CreateModuleContext(const std::stri
     return contextImpl_ ? contextImpl_->CreateModuleContext(bundleName, moduleName) : nullptr;
 }
 
+std::shared_ptr<Global::Resource::ResourceManager> ApplicationContext::CreateModuleResourceManager(
+    const std::string &bundleName, const std::string &moduleName)
+{
+    return contextImpl_ ? contextImpl_->CreateModuleResourceManager(bundleName, moduleName) : nullptr;
+}
+
 std::shared_ptr<AppExecFwk::ApplicationInfo> ApplicationContext::GetApplicationInfo() const
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetApplicationInfo() : nullptr;
@@ -341,6 +347,20 @@ std::string ApplicationContext::GetCacheDir()
 std::string ApplicationContext::GetTempDir()
 {
     return (contextImpl_ != nullptr) ? contextImpl_->GetTempDir() : "";
+}
+
+void ApplicationContext::GetAllTempDir(std::vector<std::string> &tempPaths)
+{
+    if (contextImpl_ == nullptr) {
+        HILOG_ERROR("The contextimpl is nullptr");
+        return;
+    }
+    contextImpl_->GetAllTempDir(tempPaths);
+}
+
+std::string ApplicationContext::GetResourceDir()
+{
+    return (contextImpl_ != nullptr) ? contextImpl_->GetResourceDir() : "";
 }
 
 std::string ApplicationContext::GetFilesDir()
@@ -450,6 +470,12 @@ void ApplicationContext::SetLanguage(const std::string &language)
     }
 }
 
+void ApplicationContext::ClearUpApplicationData()
+{
+    if (contextImpl_ != nullptr) {
+        contextImpl_->ClearUpApplicationData();
+    }
+}
 
 int ApplicationContext::GetArea()
 {

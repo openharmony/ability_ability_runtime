@@ -35,6 +35,7 @@ constexpr static char MEDIA_CONTROL_EXTENSION[] = "MediaControlExtensionAbility"
 constexpr static char USER_AUTH_EXTENSION[] = "UserAuthExtensionAbility";
 constexpr static char ACTION_EXTENSION[] = "ActionExtensionAbility";
 constexpr static char SHARE_EXTENSION[] = "ShareExtensionAbility";
+constexpr static char AUTO_FILL_EXTENSION[] = "AutoFillExtensionAbility";
 #endif
 constexpr static char BASE_SERVICE_EXTENSION[] = "ServiceExtension";
 constexpr static char BASE_DRIVER_EXTENSION[] = "DriverExtension";
@@ -47,6 +48,7 @@ constexpr static char FILEACCESS_EXT_ABILITY[] = "FileAccessExtension";
 constexpr static char ENTERPRISE_ADMIN_EXTENSION[] = "EnterpriseAdminExtension";
 constexpr static char INPUTMETHOD_EXTENSION[] = "InputMethodExtensionAbility";
 constexpr static char APP_ACCOUNT_AUTHORIZATION_EXTENSION[] = "AppAccountAuthorizationExtension";
+constexpr static char VPN_EXTENSION[] = "VpnExtension";
 }
 
 ExtensionAbilityThread::ExtensionAbilityThread() : extensionImpl_(nullptr), currentExtension_(nullptr) {}
@@ -96,6 +98,8 @@ std::string ExtensionAbilityThread::CreateAbilityName(
             abilityName = SHARE_EXTENSION;
         } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::ACTION) {
             abilityName = ACTION_EXTENSION;
+        } else if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD) {
+            abilityName = AUTO_FILL_EXTENSION;
         } else {
             abilityName = UI_EXTENSION;
         }
@@ -143,6 +147,9 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SYSDIALOG_USERAUTH) {
         abilityName = USER_AUTH_EXTENSION;
+    }
+    if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN) {
+        abilityName = VPN_EXTENSION;
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
         abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
@@ -309,6 +316,22 @@ void ExtensionAbilityThread::HandleCommandExtension(const Want &want, bool resta
     HILOG_DEBUG("End.");
 }
 
+void ExtensionAbilityThread::HandleInsightIntent(const Want &want)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_DEBUG("Begin.");
+    if (extensionImpl_ == nullptr) {
+        HILOG_ERROR("extensionImpl_ is nullptr.");
+        return;
+    }
+    auto ret = extensionImpl_->HandleInsightIntent(want);
+    if (!ret) {
+        HILOG_ERROR("extensionImpl_ HandleInsightIntent failed.");
+        return;
+    }
+    HILOG_DEBUG("End.");
+}
+
 void ExtensionAbilityThread::HandleCommandExtensionWindow(
     const Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
 {
@@ -437,6 +460,15 @@ void ExtensionAbilityThread::ScheduleCommandAbility(const Want &want, bool resta
         HILOG_ERROR("abilityHandler_ is nullptr.");
         return;
     }
+    ScheduleCommandAbilityInner(want, restart, startId);
+    if (AppExecFwk::InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
+        ScheduleInsightIntentInner(want);
+    }
+    HILOG_DEBUG("End.");
+}
+
+void ExtensionAbilityThread::ScheduleCommandAbilityInner(const Want &want, bool restart, int32_t startId)
+{
     wptr<ExtensionAbilityThread> weak = this;
     auto task = [weak, want, restart, startId]() {
         auto abilityThread = weak.promote();
@@ -450,13 +482,29 @@ void ExtensionAbilityThread::ScheduleCommandAbility(const Want &want, bool resta
     if (!ret) {
         HILOG_ERROR("PostTask error.");
     }
-    HILOG_DEBUG("End.");
+}
+
+void ExtensionAbilityThread::ScheduleInsightIntentInner(const Want &want)
+{
+    wptr<ExtensionAbilityThread> weak = this;
+    auto task = [weak, want]() {
+        auto abilityThread = weak.promote();
+        if (abilityThread == nullptr) {
+            HILOG_ERROR("AbilityThread is nullptr.");
+            return;
+        }
+        abilityThread->HandleInsightIntent(want);
+    };
+    bool ret = abilityHandler_->PostTask(task);
+    if (!ret) {
+        HILOG_ERROR("PostTask error.");
+    }
 }
 
 void ExtensionAbilityThread::ScheduleCommandAbilityWindow(
     const Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd)
 {
-    HILOG_DEBUG("Begin.");
+    HILOG_DEBUG("Begin, winCmd: %{public}d.", winCmd);
     if (abilityHandler_ == nullptr) {
         HILOG_ERROR("abilityHandler_ is nullptr.");
         return;

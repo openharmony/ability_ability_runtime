@@ -82,6 +82,7 @@ ohos_moduletest("running_infos_module_test") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_base:view_data",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_deps_wrapper",
@@ -109,11 +110,13 @@ ohos_moduletest("running_infos_module_test") {
     "relational_store:native_dataability",
     "relational_store:native_rdb",
     "safwk:system_ability_fwk",
+    "window_manager:libmodal_system_ui_extension_client",
     "window_manager:libwsutils",
     "window_manager:sms",
   ]
 
   if (efficiency_manager) {
+    sources += [ "${ability_runtime_services_path}/abilitymgr/src/process_frozen_state_observer.cpp" ]
     cflags_cc += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
   }
@@ -131,6 +134,8 @@ ohos_moduletest("running_infos_module_test") {
     external_deps += [
       "input:libmmi-client",
       "window_manager:libdm",
+      "window_manager:libwsutils",
+      "window_manager:sms",
     ]
   }
 }

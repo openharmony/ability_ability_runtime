@@ -15,9 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#include "event_report.h"
 #include "istorage_manager.h"
 #include "storage_manager_proxy.h"
 #include "system_ability_definition.h"
+#include "tokenid_kit.h"
 #define private public
 #include "uri_permission_manager_stub_impl.h"
 #undef private
@@ -57,8 +59,7 @@ HWTEST_F(UriPermissionTest, Upms_GrantUriPermission_001, TestSize.Level1)
     Uri uri(uriStr);
     unsigned int flag = 1;
     std::string targetBundleName = "name2";
-    int autoremove = 1;
-    upms->GrantUriPermission(uri, flag, targetBundleName, autoremove);
+    upms->GrantUriPermission(uri, flag, targetBundleName);
 }
 
 /*

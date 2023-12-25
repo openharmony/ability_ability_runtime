@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_MAIN_THREAD_H
 
 #include <string>
+#include <signal.h>
 #include <mutex>
 #include "event_handler.h"
 #include "extension_config_mgr.h"
@@ -139,8 +140,9 @@ public:
      *
      * @brief Schedule the terminate lifecycle of application.
      *
+     * @param isLastProcess When it is the last application process, pass in true.
      */
-    void ScheduleTerminateApplication() override;
+    void ScheduleTerminateApplication(bool isLastProcess = false) override;
 
     /**
      *
@@ -252,6 +254,8 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
+    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
+
     /**
      *
      * @brief Check the App main thread state.
@@ -276,11 +280,11 @@ public:
      *
      * @return Is the status change completed.
      */
-    int32_t ScheduleOnGcStateChange(int32_t state) override;
+    int32_t ScheduleChangeAppGcState(int32_t state) override;
 
     void AttachAppDebug() override;
     void DetachAppDebug() override;
-
+    bool NotifyDeviceDisConnect();
 private:
     /**
      *
@@ -290,6 +294,8 @@ private:
     void HandleTerminateApplicationLocal();
 
     void HandleScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName);
+
+    void HandleScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
 
     /**
      *
@@ -371,7 +377,7 @@ private:
      * @brief Terminate the application.
      *
      */
-    void HandleTerminateApplication();
+    void HandleTerminateApplication(bool isLastProcess = false);
 
     /**
      *
@@ -516,7 +522,9 @@ private:
     void UpdateRuntimeModuleChecker(const std::unique_ptr<AbilityRuntime::Runtime> &runtime);
 
     static void HandleDumpHeap(bool isPrivate);
-    static void HandleSignal(int signal);
+    static void DestroyHeapProfiler();
+    static void ForceFullGC();
+    static void HandleSignal(int signal, siginfo_t *siginfo, void *context);
 
     void NotifyAppFault(const FaultData &faultData);
 
@@ -535,7 +543,7 @@ private:
 
     std::vector<std::string> GetRemoveOverlayPaths(const std::vector<OverlayModuleInfo> &overlayModuleInfos);
 
-    int32_t OnGcStateChange(int32_t state);
+    int32_t ChangeAppGcState(int32_t state);
 
     class MainHandler : public EventHandler {
     public:
@@ -620,6 +628,14 @@ private:
     bool GetHqfFileAndHapPath(const std::string &bundleName,
         std::vector<std::pair<std::string, std::string>> &fileMap);
     void GetNativeLibPath(const BundleInfo &bundleInfo, const HspList &hspList, AppLibPathMap &appLibPaths);
+    
+    /**
+     * @brief Whether MainThread is started by ChildProcessManager.
+     *
+     * @param info The child process info to be set from appMgr.
+     * @return true if started by ChildProcessManager, false otherwise.
+     */
+    static bool IsStartChild(ChildProcessInfo &info);
 
     std::vector<std::string> fileEntries_;
     std::vector<std::string> nativeFileEntries_;

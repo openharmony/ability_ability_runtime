@@ -183,6 +183,8 @@ public:
 
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) override;
 
+    virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) override;
+
     virtual void SetCurrentUserId(const int32_t userId) override;
 
     virtual int32_t GetBundleNameByPid(const int pid, std::string &bundleName, int32_t &uid) override;
@@ -228,6 +230,13 @@ public:
      * @return Returns true if it is an attach debug application, otherwise it returns false.
      */
     bool IsAttachDebug(const std::string &bundleName) override;
+
+    /**
+     * To clear the process by ability token.
+     *
+     * @param token the unique identification to the ability.
+     */
+    virtual void ClearProcessByToken(sptr<IRemoteObject> token) override;
 
 private:
     /**

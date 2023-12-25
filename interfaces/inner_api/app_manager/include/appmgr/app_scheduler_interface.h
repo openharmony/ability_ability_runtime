@@ -52,9 +52,9 @@ public:
      * ScheduleTerminateApplication, call ScheduleTerminateApplication() through proxy project,
      * Notify application to terminate.
      *
-     * @return
+     * @param isLastProcess When it is the last application process, pass in true.
      */
-    virtual void ScheduleTerminateApplication() = 0;
+    virtual void ScheduleTerminateApplication(bool isLastProcess = false) = 0;
 
     /**
      * ScheduleShrinkMemory, call ScheduleShrinkMemory() through proxy project,
@@ -163,6 +163,8 @@ public:
 
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) = 0;
 
+    virtual void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) = 0;
+
     /**
      * @brief Notify application load patch.
      *
@@ -207,7 +209,7 @@ public:
      *
      * @return Is the status change completed.
      */
-    virtual int32_t ScheduleOnGcStateChange(int32_t state) = 0;
+    virtual int32_t ScheduleChangeAppGcState(int32_t state) = 0;
 
     /**
      * @brief Attach app debug.
@@ -240,9 +242,10 @@ public:
         SCHEDULE_UPDATE_APPLICATION_INFO_INSTALLED,
         SCHEDULE_HEAPMEMORY_APPLICATION_TRANSACTION,
         SCHEDULE_NOTIFY_FAULT,
-        APP_ON_GC_STATE_CHANGE,
+        APP_GC_STATE_CHANGE,
         SCHEDULE_ATTACH_APP_DEBUG,
         SCHEDULE_DETACH_APP_DEBUG,
+        SCHEDULE_NEW_PROCESS_REQUEST,
     };
 };
 }  // namespace AppExecFwk

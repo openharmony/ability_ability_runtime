@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,9 +27,12 @@
 #include "event_handler_wrap.h"
 #include "ability_record.h"
 #include "ability_running_info.h"
+#include "extension_config.h"
 #include "extension_running_info.h"
 #include "connection_record.h"
 #include "element_name.h"
+#include "ui_extension_ability_connect_info.h"
+#include "extension_record_manager.h"
 #include "want.h"
 #include "iremote_object.h"
 #include "nocopyable.h"
@@ -37,6 +40,9 @@
 namespace OHOS {
 namespace AAFwk {
 using OHOS::AppExecFwk::AbilityType;
+using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
+using UIExtensionAbilityConnectManager = AbilityRuntime::ExtensionRecordManager;
+
 /**
  * @class AbilityConnectManager
  * AbilityConnectManager provides a facility for managing service ability connection.
@@ -86,10 +92,12 @@ public:
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
      * @param callerToken, caller ability token.
      * @param sessionInfo the extension session info of the ability to connect.
+     * @param connectInfo the connect info.
      * @return Returns ERR_OK on success, others on failure.
      */
     int ConnectAbilityLocked(const AbilityRequest &abilityRequest, const sptr<IAbilityConnection> &connect,
-        const sptr<IRemoteObject> &callerToken, sptr<SessionInfo> sessionInfo = nullptr);
+        const sptr<IRemoteObject> &callerToken, sptr<SessionInfo> sessionInfo = nullptr,
+        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr);
 
     /**
      * DisconnectAbilityLocked, disconnect session with callback.
@@ -198,16 +206,6 @@ public:
     }
 
     /**
-     * GetConnectMap.
-     *
-     * @return Returns connection record list.
-     */
-    inline const ConnectMapType &GetConnectMap() const
-    {
-        return connectMap_;
-    }
-
-    /**
      * GetServiceMap.
      *
      * @return Returns service ability record map.
@@ -229,7 +227,7 @@ public:
     void DumpStateByUri(std::vector<std::string> &info, bool isClient, const std::string &args,
         std::vector<std::string> &params);
 
-    void StopAllExtensions();
+    void PauseExtensions();
 
     void StartRootLauncher(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void OnTimeOut(uint32_t msgId, int64_t abilityRecordId);
@@ -248,6 +246,19 @@ public:
     bool IsUIExtensionFocused(uint32_t uiExtensionTokenId, const sptr<IRemoteObject>& focusToken);
 
     bool IsWindowExtensionFocused(uint32_t extensionTokenId, const sptr<IRemoteObject>& focusToken);
+
+    void HandleProcessFrozen(const std::vector<int32_t> &pidList, int32_t uid);
+
+    void ForegroundAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        const sptr<SessionInfo> &sessionInfo);
+
+    void BackgroundAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        const sptr<SessionInfo> &sessionInfo);
+
+    void TerminateAbilityWindowLocked(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        const sptr<SessionInfo> &sessionInfo);
+
+    void RemoveLauncherDeathRecipient();
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -342,6 +353,7 @@ private:
     void HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleCommandWindowTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
+    void HandleForegroundTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleRestartResidentTask(const AbilityRequest &abilityRequest);
     void HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
         std::shared_ptr<ConnectionRecord> &connectRecord);
@@ -453,6 +465,11 @@ private:
     void HandleInactiveTimeout(const std::shared_ptr<AbilityRecord> &ability);
     void MoveToTerminatingMap(const std::shared_ptr<AbilityRecord>& abilityRecord);
 
+    void DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord, const AbilityRequest &abilityRequest);
+    void SaveUIExtRequestSessionInfo(std::shared_ptr<AbilityRecord> abilityRecord, sptr<SessionInfo> sessionInfo);
+    void DoBackgroundAbilityWindow(const std::shared_ptr<AbilityRecord> &abilityRecord,
+        const sptr<SessionInfo> &sessionInfo);
+
     /**
      * When a service is under starting, enque the request and handle it after the service starting completes
      */
@@ -467,6 +484,21 @@ private:
     void OnUIExtWindowDied(const wptr<IRemoteObject> &remote);
     void HandleUIExtWindowDiedTask(const sptr<IRemoteObject> &remote);
 
+    /**
+     * Post an extension's disconnect task, auto disconnect when extension conected timeout.
+     */
+    void PostExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
+
+    /**
+     * Remove the extension's disconnect task.
+     */
+    void RemoveExtensionDelayDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
+
+    /**
+     * Handle extension disconnect task.
+     */
+    void HandleExtensionDisconnectTask(const std::shared_ptr<ConnectionRecord> &connectRecord);
+
 private:
     void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);
     int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord) const;
@@ -475,6 +507,15 @@ private:
     std::shared_ptr<AbilityRecord> GetExtensionFromServiceMapInner(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionFromTerminatingMapInner(const sptr<IRemoteObject> &token);
     int TerminateAbilityInner(const sptr<IRemoteObject> &token);
+    bool IsLauncher(std::shared_ptr<AbilityRecord> serviceExtension) const;
+    bool IsSceneBoard(std::shared_ptr<AbilityRecord> serviceExtension) const;
+    void KillProcessesByUserId() const;
+    inline bool IsUIExtensionAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    inline bool CheckUIExtensionAbilityLoaded(const AbilityRequest &abilityRequest);
+    inline bool CheckUIExtensionAbilitySessionExistLocked(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    inline void RemoveUIExtensionAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    int32_t GetOrCreateExtensionRecord(const AbilityRequest &abilityRequest, bool isCreatedByConnect,
+        const std::string &hostBundleName, std::shared_ptr<AbilityRecord> &extensionRecord, bool &isLoaded);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
@@ -484,6 +525,8 @@ private:
     ConnectMapType connectMap_;
     ServiceMapType serviceMap_;
     ServiceMapType terminatingExtensionMap_;
+
+    std::mutex recipientMapMutex_;
     RecipientMapType recipientMap_;
     RecipientMapType uiExtRecipientMap_;
     std::shared_ptr<TaskHandlerWrap> taskHandler_;
@@ -494,6 +537,7 @@ private:
     ffrt::mutex startServiceReqListLock_;
     UIExtensionMapType uiExtensionMap_;
     WindowExtensionMapType windowExtensionMap_;
+    std::unique_ptr<UIExtensionAbilityConnectManager> uiExtensionAbilityRecordMgr_ = nullptr;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };

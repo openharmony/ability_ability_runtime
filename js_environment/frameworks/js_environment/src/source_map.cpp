@@ -49,6 +49,7 @@ const std::string NOT_FOUNDMAP = "Cannot get SourceMap info, dump raw stack:\n";
 const std::string MEGER_SOURCE_MAP_PATH = "ets/sourceMaps.map";
 } // namespace
 ReadSourceMapCallback SourceMap::readSourceMapFunc_ = nullptr;
+GetHapPathCallback SourceMap::getHapPathFunc_ = nullptr;
 std::mutex SourceMap::sourceMapMutex_;
 
 int32_t StringToInt(const std::string& value)
@@ -164,7 +165,7 @@ std::string SourceMap::TranslateBySourceMap(const std::string& stackStr)
             sourceInfo = GetSourceInfo(line, column, *nonModularMap_, key + ".ts");
         }
         if (sourceInfo.empty()) {
-            break;
+            continue;
         }
         temp.replace(openBracePos, closeBracePos - openBracePos + 1, sourceInfo);
         replace(temp.begin(), temp.end(), '\\', '/');
@@ -550,6 +551,20 @@ bool SourceMap::GetLineAndColumnNumbers(int& line, int& column, SourceMapData& t
         line = mapInfo.row;
         column = mapInfo.col;
         return true;
+    }
+}
+
+void SourceMap::RegisterGetHapPathCallback(GetHapPathCallback getFunc)
+{
+    std::lock_guard<std::mutex> lock(sourceMapMutex_);
+    getHapPathFunc_ = getFunc;
+}
+
+void SourceMap::GetHapPath(const std::string &bundleName, std::vector<std::string> &hapList)
+{
+    std::lock_guard<std::mutex> lock(sourceMapMutex_);
+    if (getHapPathFunc_) {
+        getHapPathFunc_(bundleName, hapList);
     }
 }
 }   // namespace JsEnv

@@ -15,7 +15,9 @@
 
 #include "ability_thread.h"
 
+#include "extension_ability_thread.h"
 #include "fa_ability_thread.h"
+#include "ui_ability_thread.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 
@@ -24,13 +26,30 @@ namespace AppExecFwk {
 #ifdef ABILITY_COMMAND_FOR_TEST
 const int32_t BLOCK_ABILITY_TIME = 20;
 #endif
-void AbilityThread::AbilityThreadMain(std::shared_ptr<OHOSApplication> &application,
+void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &application,
     const std::shared_ptr<AbilityLocalRecord> &abilityRecord, const std::shared_ptr<EventRunner> &mainRunner,
     const std::shared_ptr<AbilityRuntime::Context> &stageContext)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("begin");
-    sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::FAAbilityThread());
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr");
+        return;
+    }
+    std::shared_ptr<AbilityInfo> abilityInfo = abilityRecord->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        HILOG_ERROR("abilityInfo is nullptr");
+        return;
+    }
+
+    sptr<AbilityThread> thread = nullptr;
+    if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
+        thread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    } else if (abilityInfo->type == AbilityType::EXTENSION) {
+        thread = new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    } else {
+        thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
+    }
     if (thread == nullptr) {
         HILOG_ERROR("thread is nullptr");
         return;
@@ -39,13 +58,31 @@ void AbilityThread::AbilityThreadMain(std::shared_ptr<OHOSApplication> &applicat
     HILOG_DEBUG("end");
 }
 
-void AbilityThread::AbilityThreadMain(std::shared_ptr<OHOSApplication> &application,
+void AbilityThread::AbilityThreadMain(const std::shared_ptr<OHOSApplication> &application,
     const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
     const std::shared_ptr<AbilityRuntime::Context> &stageContext)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("begin");
-    sptr<AbilityThread> thread(new (std::nothrow) AbilityRuntime::FAAbilityThread());
+    if (abilityRecord == nullptr) {
+        HILOG_ERROR("abilityRecord is nullptr");
+        return;
+    }
+
+    std::shared_ptr<AbilityInfo> abilityInfo = abilityRecord->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        HILOG_ERROR("abilityInfo is nullptr");
+        return;
+    }
+
+    sptr<AbilityThread> thread = nullptr;
+    if (abilityInfo->type == AbilityType::PAGE && abilityInfo->isStageBasedModel) {
+        thread = new (std::nothrow) AbilityRuntime::UIAbilityThread();
+    } else if (abilityInfo->type == AbilityType::EXTENSION) {
+        thread = new (std::nothrow) AbilityRuntime::ExtensionAbilityThread();
+    } else {
+        thread = new (std::nothrow) AbilityRuntime::FAAbilityThread();
+    }
     if (thread == nullptr) {
         HILOG_ERROR("thread is nullptr");
         return;
@@ -227,12 +264,28 @@ void AbilityThread::CallRequest()
     HILOG_DEBUG("called");
 }
 
+void AbilityThread::OnExecuteIntent(const Want &want)
+{
+    HILOG_DEBUG("called");
+}
+
 std::vector<std::shared_ptr<AppExecFwk::DataAbilityResult>> AbilityThread::ExecuteBatch(
     const std::vector<std::shared_ptr<AppExecFwk::DataAbilityOperation>> &operations)
 {
     HILOG_DEBUG("called");
     std::vector<std::shared_ptr<DataAbilityResult>> results;
     return results;
+}
+
+int AbilityThread::CreateModalUIExtension(const Want &want)
+{
+    HILOG_DEBUG("called");
+    return ERR_INVALID_VALUE;
+}
+
+void AbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
+{
+    HILOG_DEBUG("called");
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

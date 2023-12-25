@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,14 @@
 
 namespace OHOS {
 namespace AAFwk {
+namespace {
+const int MAX_URI_COUNT = 500;
+}
 UriPermissionManagerProxy::UriPermissionManagerProxy(const sptr<IRemoteObject> &impl)
     : IRemoteProxy<IUriPermissionManager>(impl) {}
 
 int UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int flag,
-    const std::string targetBundleName, int autoremove, int32_t appIndex)
+    const std::string targetBundleName, int32_t appIndex)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::GrantUriPermission is called.");
     MessageParcel data;
@@ -45,17 +48,13 @@ int UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int f
         HILOG_ERROR("Write targetBundleName failed.");
         return INNER_ERR;
     }
-    if (!data.WriteInt32(autoremove)) {
-        HILOG_ERROR("Write autoremove failed.");
-        return INNER_ERR;
-    }
     if (!data.WriteInt32(appIndex)) {
         HILOG_ERROR("Write appIndex failed.");
         return INNER_ERR;
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_GRANT_URI_PERMISSION, data, reply, option);
+    int error = SendTransactCmd(UriPermMgrCmd::ON_GRANT_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fial, error: %{public}d", error);
         return INNER_ERR;
@@ -64,7 +63,7 @@ int UriPermissionManagerProxy::GrantUriPermission(const Uri &uri, unsigned int f
 }
 
 int UriPermissionManagerProxy::GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-    const std::string targetBundleName, int autoremove, int32_t appIndex)
+    const std::string targetBundleName, int32_t appIndex)
 {
     HILOG_DEBUG("UriPermissionManagerProxy::GrantUriPermission is called.");
     MessageParcel data;
@@ -90,8 +89,39 @@ int UriPermissionManagerProxy::GrantUriPermission(const std::vector<Uri> &uriVec
         HILOG_ERROR("Write targetBundleName failed.");
         return INNER_ERR;
     }
-    if (!data.WriteInt32(autoremove)) {
-        HILOG_ERROR("Write autoremove failed.");
+    if (!data.WriteInt32(appIndex)) {
+        HILOG_ERROR("Write appIndex failed.");
+        return INNER_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = SendTransactCmd(UriPermMgrCmd::ON_BATCH_GRANT_URI_PERMISSION, data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("SendRequest fial, error: %{public}d", error);
+        return INNER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
+int UriPermissionManagerProxy::GrantUriPermissionFor2In1(
+    const Uri &uri, unsigned int flag, const std::string &targetBundleName, int32_t appIndex)
+{
+    HILOG_DEBUG("Called.");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
+        HILOG_ERROR("Write interface token failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteParcelable(&uri)) {
+        HILOG_ERROR("Write uri failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(flag)) {
+        HILOG_ERROR("Write flag failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteString(targetBundleName)) {
+        HILOG_ERROR("Write targetBundleName failed.");
         return INNER_ERR;
     }
     if (!data.WriteInt32(appIndex)) {
@@ -100,7 +130,56 @@ int UriPermissionManagerProxy::GrantUriPermission(const std::vector<Uri> &uriVec
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_BATCH_GRANT_URI_PERMISSION, data, reply, option);
+    int error = SendTransactCmd(UriPermMgrCmd::ON_GRANT_URI_PERMISSION_FOR_2_IN_1, data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("SendRequest fial, error: %{public}d", error);
+        return INNER_ERR;
+    }
+    return reply.ReadInt32();
+}
+
+int UriPermissionManagerProxy::GrantUriPermissionFor2In1(const std::vector<Uri> &uriVec, unsigned int flag,
+    const std::string &targetBundleName, int32_t appIndex, bool isSystemAppCall)
+{
+    HILOG_DEBUG("Called.");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
+        HILOG_ERROR("Write interface token failed.");
+        return INNER_ERR;
+    }
+    if (uriVec.size() > MAX_URI_COUNT) {
+        HILOG_ERROR("Exceeded maximum uri count.");
+        return INNER_ERR;
+    }
+    if (!data.WriteUint32(uriVec.size())) {
+        HILOG_ERROR("Write size of uriVec failed.");
+        return INNER_ERR;
+    }
+    for (const auto &uri : uriVec) {
+        if (!data.WriteParcelable(&uri)) {
+            HILOG_ERROR("Write uri failed.");
+            return INNER_ERR;
+        }
+    }
+    if (!data.WriteInt32(flag)) {
+        HILOG_ERROR("Write flag failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteString(targetBundleName)) {
+        HILOG_ERROR("Write targetBundleName failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(appIndex)) {
+        HILOG_ERROR("Write appIndex failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteBool(isSystemAppCall)) {
+        HILOG_ERROR("Write isSystemAppCall failed.");
+        return INNER_ERR;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = SendTransactCmd(UriPermMgrCmd::ON_BATCH_GRANT_URI_PERMISSION_FOR_2_IN_1, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fial, error: %{public}d", error);
         return INNER_ERR;
@@ -122,7 +201,7 @@ void UriPermissionManagerProxy::RevokeUriPermission(const Security::AccessToken:
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION, data, reply, option);
+    int error = SendTransactCmd(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
     }
@@ -142,7 +221,7 @@ int UriPermissionManagerProxy::RevokeAllUriPermissions(const Security::AccessTok
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_ALL_URI_PERMISSION, data, reply, option);
+    int error = SendTransactCmd(UriPermMgrCmd::ON_REVOKE_ALL_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
         return INNER_ERR;
@@ -168,7 +247,7 @@ int UriPermissionManagerProxy::RevokeUriPermissionManually(const Uri &uri, const
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY, data, reply, option);
+    int error = SendTransactCmd(UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
         return INNER_ERR;
@@ -198,7 +277,7 @@ bool UriPermissionManagerProxy::CheckPersistableUriPermissionProxy(const Uri& ur
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_CHECK_PERSISTABLE_URIPERMISSION_PROXY, data, reply, option);
+    int error = SendTransactCmd(UriPermMgrCmd::ON_CHECK_PERSISTABLE_URIPERMISSION_PROXY, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
         return false;
@@ -228,12 +307,51 @@ bool UriPermissionManagerProxy::VerifyUriPermission(const Uri& uri, uint32_t fla
     }
     MessageParcel reply;
     MessageOption option;
-    int error = Remote()->SendRequest(UriPermMgrCmd::ON_VERIFY_URI_PERMISSION, data, reply, option);
+    int error = SendTransactCmd(UriPermMgrCmd::ON_VERIFY_URI_PERMISSION, data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("SendRequest fail, error: %{public}d", error);
         return false;
     }
     return reply.ReadBool();
+}
+
+bool UriPermissionManagerProxy::IsAuthorizationUriAllowed(uint32_t fromTokenId)
+{
+    HILOG_DEBUG("UriPermissionManagerProxy::IsAuthorizationUriAllowed is called.");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(IUriPermissionManager::GetDescriptor())) {
+        HILOG_ERROR("Write interface token failed.");
+        return false;
+    }
+    if (!data.WriteInt32(fromTokenId)) {
+        HILOG_ERROR("Write fromTokenId failed.");
+        return false;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = SendTransactCmd(UriPermMgrCmd::ON_IS_Authorization_URI_ALLOWED, data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("SendRequest fail, error: %{public}d", error);
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+int32_t UriPermissionManagerProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote object is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    int32_t ret = remote->SendRequest(code, data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_ERROR("SendRequest failed. code is %{public}d, ret is %{public}d.", code, ret);
+        return ret;
+    }
+    return NO_ERROR;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -317,7 +317,7 @@ private:
     napi_value OnGetMissionInfos(napi_env env, size_t argc, napi_value* argv)
     {
         HILOG_INFO("%{public}s is called", __FUNCTION__);
-        if (argc < 2) { // at least 2 parameters.
+        if (argc < ARG_COUNT_TWO) {
             HILOG_ERROR("Not enough params");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
@@ -651,6 +651,11 @@ private:
         }
         uint32_t nativeArrayLen = 0;
         napi_get_array_length(env, argv[0], &nativeArrayLen);
+        if (nativeArrayLen == 0) {
+            HILOG_ERROR("OnMoveMissionsToForeground MissionId is null");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return CreateJsUndefined(env);
+        }
         napi_value element = nullptr;
         for (uint32_t i = 0; i < nativeArrayLen; i++) {
             int32_t missionId = 0;
@@ -705,6 +710,11 @@ private:
         }
         uint32_t nativeArrayLen = 0;
         napi_get_array_length(env, argv[0], &nativeArrayLen);
+        if (nativeArrayLen == 0) {
+            HILOG_ERROR("OnMoveMissionsToBackground MissionId is null");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return CreateJsUndefined(env);
+        }
         napi_value element = nullptr;
         for (uint32_t i = 0; i < nativeArrayLen; i++) {
             int32_t missionId;

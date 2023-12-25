@@ -121,6 +121,10 @@ class ApplicationContext {
     return this.__context_impl__.createModuleContext(bundleName, moduleName);
   }
 
+  createModuleResourceManager(bundleName, moduleName) {
+    return this.__context_impl__.createModuleResourceManager(bundleName, moduleName);
+  }
+
   getGroupDir(groupId, callback) {
     return this.__context_impl__.getGroupDir(groupId, callback);
   }
@@ -149,6 +153,26 @@ class ApplicationContext {
     return this.__context_impl__.setLanguage(language);
   }
 
+  setAutoStartup(info, callback) {
+    return this.__context_impl__.setAutoStartup(info, callback);
+  }
+
+  cancelAutoStartup(info, callback) {
+    return this.__context_impl__.cancelAutoStartup(info, callback);
+  }
+
+  isAutoStartup(info, callback) {
+    return this.__context_impl__.isAutoStartup(info, callback);
+  }
+
+  clearUpApplicationData() {
+    return this.__context_impl__.clearUpApplicationData();
+  }
+
+  clearUpApplicationData(callback) {
+    return this.__context_impl__.clearUpApplicationData(callback);
+  }
+
   set area(mode) {
     return this.__context_impl__.switchArea(mode);
   }
@@ -171,6 +195,10 @@ class ApplicationContext {
 
   get tempDir() {
     return this.__context_impl__.tempDir;
+  }
+
+  get resourceDir() {
+    return this.__context_impl__.resourceDir;
   }
 
   get filesDir() {

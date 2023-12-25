@@ -52,6 +52,8 @@ AppSchedulerHost::AppSchedulerHost()
         &AppSchedulerHost::HandleScheduleAbilityStage;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_ACCEPT_WANT)] =
         &AppSchedulerHost::HandleScheduleAcceptWant;
+    memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NEW_PROCESS_REQUEST)] =
+        &AppSchedulerHost::HandleScheduleNewProcessRequest;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NOTIFY_LOAD_REPAIR_PATCH)] =
         &AppSchedulerHost::HandleNotifyLoadRepairPatch;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NOTIFY_HOT_RELOAD_PAGE)] =
@@ -64,8 +66,8 @@ AppSchedulerHost::AppSchedulerHost()
         &AppSchedulerHost::HandleScheduleHeapMemory;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_NOTIFY_FAULT)] =
         &AppSchedulerHost::HandleNotifyAppFault;
-    memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::APP_ON_GC_STATE_CHANGE)] =
-        &AppSchedulerHost::HandleOnGcStateChange;
+    memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::APP_GC_STATE_CHANGE)] =
+        &AppSchedulerHost::HandleScheduleChangeAppGcState;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_ATTACH_APP_DEBUG)] =
         &AppSchedulerHost::HandleAttachAppDebug;
     memberFuncMap_[static_cast<uint32_t>(IAppScheduler::Message::SCHEDULE_DETACH_APP_DEBUG)] =
@@ -95,6 +97,7 @@ int AppSchedulerHost::OnRemoteRequest(uint32_t code, MessageParcel &data, Messag
             return (this->*memberFunc)(data, reply);
         }
     }
+    HILOG_DEBUG("AppSchedulerHost::OnRemoteRequest end");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -115,7 +118,8 @@ int32_t AppSchedulerHost::HandleScheduleBackgroundApplication(MessageParcel &dat
 int32_t AppSchedulerHost::HandleScheduleTerminateApplication(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    ScheduleTerminateApplication();
+    auto isLastProcess = data.ReadBool();
+    ScheduleTerminateApplication(isLastProcess);
     return NO_ERROR;
 }
 
@@ -267,6 +271,21 @@ int32_t AppSchedulerHost::HandleScheduleAcceptWant(MessageParcel &data, MessageP
     return NO_ERROR;
 }
 
+int32_t AppSchedulerHost::HandleScheduleNewProcessRequest(MessageParcel &data, MessageParcel &reply)
+{
+    HILOG_DEBUG("call.");
+    HITRACE_METER(HITRACE_TAG_APP);
+    AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    auto moduleName = data.ReadString();
+    ScheduleNewProcessRequest(*want, moduleName);
+    delete want;
+    return NO_ERROR;
+}
+
 int32_t AppSchedulerHost::HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
@@ -312,10 +331,10 @@ int32_t AppSchedulerHost::HandleNotifyAppFault(MessageParcel &data, MessageParce
     return NO_ERROR;
 }
 
-int32_t AppSchedulerHost::HandleOnGcStateChange(MessageParcel &data, MessageParcel &reply)
+int32_t AppSchedulerHost::HandleScheduleChangeAppGcState(MessageParcel &data, MessageParcel &reply)
 {
     int32_t state = data.ReadInt32();
-    int32_t result = ScheduleOnGcStateChange(state);
+    int32_t result = ScheduleChangeAppGcState(state);
     if (!reply.WriteInt32(result)) {
         HILOG_ERROR("reply write failed.");
         return ERR_INVALID_VALUE;

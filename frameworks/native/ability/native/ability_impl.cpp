@@ -18,21 +18,27 @@
 #include "ability_runtime/js_ability.h"
 #include "ability_transaction_callback_info.h"
 #include "data_ability_predicates.h"
+#include "freeze_util.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
 #include "scene_board_judgement.h"
+#include "time_util.h"
 #include "values_bucket.h"
 
 namespace OHOS {
+using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
 namespace {
 const std::string PERMISSION_KEY = "ohos.user.grant.permission";
 const std::string GRANTED_RESULT_KEY = "ohos.user.grant.permission.result";
 }
 
-void AbilityImpl::Init(std::shared_ptr<OHOSApplication> &application, const std::shared_ptr<AbilityLocalRecord> &record,
-    std::shared_ptr<Ability> &ability, std::shared_ptr<AbilityHandler> &handler, const sptr<IRemoteObject> &token)
+void AbilityImpl::Init(const std::shared_ptr<OHOSApplication> &application,
+                       const std::shared_ptr<AbilityLocalRecord> &record,
+                       std::shared_ptr<Ability> &ability,
+                       std::shared_ptr<AbilityHandler> &handler,
+                       const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_DEBUG("AbilityImpl::init begin");
@@ -95,7 +101,6 @@ void AbilityImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
     }
 #endif
 
-    abilityLifecycleCallbacks_->OnAbilityStart(ability_);
     HILOG_DEBUG("%{public}s end.", __func__);
 }
 
@@ -165,7 +170,6 @@ void AbilityImpl::StopCallback()
 #ifdef SUPPORT_GRAPHICS
     }
 #endif
-    abilityLifecycleCallbacks_->OnAbilityStop(ability_);
     ability_->DestroyInstance(); // Release window and ability.
 }
 
@@ -185,7 +189,6 @@ void AbilityImpl::Active()
     }
 #endif
     lifecycleState_ = AAFwk::ABILITY_STATE_ACTIVE;
-    abilityLifecycleCallbacks_->OnAbilityActive(ability_);
     HILOG_DEBUG("%{public}s end.", __func__);
 }
 
@@ -205,7 +208,6 @@ void AbilityImpl::Inactive()
     }
 #endif
     lifecycleState_ = AAFwk::ABILITY_STATE_INACTIVE;
-    abilityLifecycleCallbacks_->OnAbilityInactive(ability_);
     HILOG_DEBUG("%{public}s end.", __func__);
 }
 
@@ -269,7 +271,6 @@ sptr<IRemoteObject> AbilityImpl::ConnectAbility(const Want &want)
     }
     sptr<IRemoteObject> object = ability_->OnConnect(want);
     lifecycleState_ = AAFwk::ABILITY_STATE_ACTIVE;
-    abilityLifecycleCallbacks_->OnAbilityActive(ability_);
     HILOG_DEBUG("%{public}s end.", __func__);
 
     return object;
@@ -294,7 +295,6 @@ void AbilityImpl::CommandAbility(const Want &want, bool restart, int startId)
     }
     ability_->OnCommand(want, restart, startId);
     lifecycleState_ = AAFwk::ABILITY_STATE_ACTIVE;
-    abilityLifecycleCallbacks_->OnAbilityActive(ability_);
     HILOG_DEBUG("%{public}s end.", __func__);
 }
 
@@ -465,7 +465,6 @@ bool AbilityImpl::CheckAndSave()
     }
 
     ability_->OnSaveAbilityState(restoreData_);
-    abilityLifecycleCallbacks_->OnAbilitySaveState(restoreData_);
 
     needSaveDate_ = false;
 
@@ -625,12 +624,17 @@ void AbilityImpl::AfterFocusedCommon(bool isFocused)
 void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Call.");
+    HILOG_INFO("Lifecycle: Call.");
     auto owner = owner_.lock();
     if (owner == nullptr || !owner->IsStageBasedModel()) {
         HILOG_ERROR("Not stage mode ability or abilityImpl is nullptr.");
         return;
     }
+    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
+    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
+        "; AbilityImpl::WindowLifeCycleImpl::AfterForeground; the foreground lifecycle.";
+    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
+
     bool needNotifyAMS = false;
     {
         std::lock_guard<std::mutex> lock(owner->notifyForegroundLock_);
@@ -644,27 +648,36 @@ void AbilityImpl::WindowLifeCycleImpl::AfterForeground()
     }
 
     if (needNotifyAMS) {
-        HILOG_INFO("Stage mode ability, window after foreground, notify ability manager service.");
+        HILOG_INFO("Lifecycle: window notify ability manager service.");
         PacMap restoreData;
-        AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
+        auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
             AbilityLifeCycleState::ABILITY_STATE_FOREGROUND_NEW, restoreData);
+        if (ret == ERR_OK) {
+            FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+        }
     }
 }
 
 void AbilityImpl::WindowLifeCycleImpl::AfterBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("Call.");
     auto owner = owner_.lock();
     if (owner && !owner->IsStageBasedModel()) {
         HILOG_WARN("Not stage.");
         return;
     }
+    FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
+    std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
+        "; AbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
+    FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
-    HILOG_INFO("UIAbility, window after background.");
+    HILOG_INFO("Lifecycle: window after background.");
     PacMap restoreData;
-    AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
+    auto ret = AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_,
         AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
+    if (ret == ERR_OK) {
+        FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+    }
 }
 
 void AbilityImpl::WindowLifeCycleImpl::AfterFocused()
@@ -743,7 +756,6 @@ void AbilityImpl::Foreground(const Want &want)
         std::lock_guard<std::mutex> lock(notifyForegroundLock_);
         notifyForegroundByAbility_ = true;
     }
-    abilityLifecycleCallbacks_->OnAbilityForeground(ability_);
     HILOG_INFO("%{public}s end.", __func__);
 }
 
@@ -772,7 +784,6 @@ void AbilityImpl::Background()
     } else {
         lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND;
     }
-    abilityLifecycleCallbacks_->OnAbilityBackground(ability_);
     HILOG_INFO("%{public}s end.", __func__);
 }
 

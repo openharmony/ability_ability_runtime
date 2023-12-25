@@ -68,13 +68,13 @@ ErrCode WantAgentClient::GetWantSender(
         data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
-        return ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_TIMEOUT;
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
     wantSender = iface_cast<IWantSender>(reply.ReadRemoteObject());
     return ERR_OK;
 }
 
-ErrCode WantAgentClient::SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo)
+ErrCode WantAgentClient::SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo)
 {
     CHECK_POINTER_AND_RETURN(target, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
     auto abms = GetAbilityManager();
@@ -105,14 +105,14 @@ ErrCode WantAgentClient::SendWantSender(const sptr<IWantSender> &target, const S
 
 ErrCode WantAgentClient::CancelWantSender(const sptr<IWantSender> &sender)
 {
-    CHECK_POINTER_AND_RETURN(sender, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
+    CHECK_POINTER_AND_RETURN(sender, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
     auto abms = GetAbilityManager();
     CHECK_POINTER_AND_RETURN(abms, ERR_ABILITY_RUNTIME_EXTERNAL_SERVICE_BUSY);
     ErrCode error;
     MessageParcel reply;
     if (!SendRequest(static_cast<int32_t>(AbilityManagerInterfaceCode::CANCEL_PENDING_WANT_SENDER),
         abms, sender->AsObject(), reply, error)) {
-        return error;
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT;
     }
     return ERR_OK;
 }
@@ -177,7 +177,7 @@ ErrCode WantAgentClient::GetPendingWantCode(const sptr<IWantSender> &target, int
     return ERR_OK;
 }
 
-ErrCode WantAgentClient::GetPendingWantType(const sptr<IWantSender> &target, int32_t &type)
+ErrCode WantAgentClient::GetPendingWantType(sptr<IWantSender> target, int32_t &type)
 {
     CHECK_POINTER_AND_RETURN(target, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_WANTAGENT);
     auto abms = GetAbilityManager();

@@ -18,8 +18,10 @@
 #include "module_checker_delegate.h"
 #include "utils/log.h"
 
-bool AppModuleChecker::CheckModuleLoadable(const char* moduleName)
+bool AppModuleChecker::CheckModuleLoadable(const char *moduleName,
+                                           std::unique_ptr<ApiAllowListChecker> &apiAllowListChecker)
 {
+    apiAllowListChecker = nullptr;
     HILOG_INFO("check blocklist, moduleName = %{public}s, processExtensionType_ = %{public}d",
         moduleName, static_cast<int32_t>(processExtensionType_));
     const auto& blockListIter = moduleBlocklist_.find(processExtensionType_);
@@ -30,5 +32,10 @@ bool AppModuleChecker::CheckModuleLoadable(const char* moduleName)
     if (blockList.find(moduleName) == blockList.end()) {
         return true;
     }
+    return false;
+}
+
+bool AppModuleChecker::DiskCheckOnly()
+{
     return false;
 }

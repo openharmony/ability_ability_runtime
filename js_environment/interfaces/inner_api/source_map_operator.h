@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_JS_ENVIRONMENT_SOURCE_MAP_OPERATOR_H
 #define OHOS_ABILITY_JS_ENVIRONMENT_SOURCE_MAP_OPERATOR_H
 #include <memory>
+#include <set>
 #include <string>
 
 #include "js_env_logger.h"
@@ -25,27 +26,39 @@ namespace OHOS {
 namespace JsEnv {
 class SourceMapOperator {
 public:
-    SourceMapOperator(const std::string hapPath, bool isModular)
-        : hapPath_(hapPath), isModular_(isModular) {}
+    SourceMapOperator(const std::string bundleName, bool isModular)
+        : bundleName_(bundleName), isModular_(isModular) {}
 
     ~SourceMapOperator() = default;
 
     std::string TranslateBySourceMap(const std::string& stackStr)
     {
         SourceMap sourceMapObj;
-        sourceMapObj.Init(isModular_, hapPath_);
+        std::vector<std::string> hapList;
+        sourceMapObj.GetHapPath(bundleName_, hapList);
+        for (auto &hapInfo : hapList) {
+            if (!hapInfo.empty()) {
+                sourceMapObj.Init(isModular_, hapInfo);
+            }
+        }
         return sourceMapObj.TranslateBySourceMap(stackStr);
     }
 
     bool TranslateUrlPositionBySourceMap(std::string& url, int& line, int& column)
     {
         SourceMap sourceMapObj;
-        sourceMapObj.Init(isModular_, hapPath_);
+        std::vector<std::string> hapList;
+        sourceMapObj.GetHapPath(bundleName_, hapList);
+        for (auto &hapInfo : hapList) {
+            if (!hapInfo.empty()) {
+                sourceMapObj.Init(isModular_, hapInfo);
+            }
+        }
         return sourceMapObj.TranslateUrlPositionBySourceMap(url, line, column);
     }
 
 private:
-    const std::string hapPath_;
+    const std::string bundleName_;
     bool isModular_ = false;
 };
 } // namespace JsEnv

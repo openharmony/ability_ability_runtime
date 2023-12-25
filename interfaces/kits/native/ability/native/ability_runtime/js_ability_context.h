@@ -27,11 +27,11 @@
 #include "event_handler.h"
 
 class NativeReference;
-class NativeValue;
 
 namespace OHOS {
 namespace AbilityRuntime {
 struct NapiCallbackInfo;
+class JsEmbeddableUIAbilityContext;
 class JsAbilityContext final {
 public:
     explicit JsAbilityContext(const std::shared_ptr<AbilityContext>& context) : context_(context) {}
@@ -60,12 +60,10 @@ public:
     static napi_value IsTerminating(napi_env env, napi_callback_info info);
     static napi_value ReportDrawnCompleted(napi_env env, napi_callback_info info);
     static napi_value SetMissionContinueState(napi_env env, napi_callback_info info);
+    static napi_value StartAbilityByType(napi_env env, napi_callback_info info);
+    static napi_value RequestModalUIExtension(napi_env env, napi_callback_info info);
 
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
-        const std::shared_ptr<AppExecFwk::Configuration> &config);
-
-    // to do
-    static void ConfigurationUpdated(NativeEngine* engine, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
 
     std::shared_ptr<AbilityContext> GetAbilityContext()
@@ -107,6 +105,8 @@ private:
     napi_value OnIsTerminating(napi_env env, NapiCallbackInfo& info);
     napi_value OnReportDrawnCompleted(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetMissionContinueState(napi_env env, NapiCallbackInfo& info);
+    napi_value OnStartAbilityByType(napi_env env, NapiCallbackInfo& info);
+    napi_value OnRequestModalUIExtension(napi_env env, NapiCallbackInfo& info);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
     static napi_value WrapWant(napi_env env, const AAFwk::Want& want);
@@ -120,11 +120,10 @@ private:
     std::weak_ptr<AbilityContext> context_;
     int curRequestCode_ = 0;
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
+    friend class JsEmbeddableUIAbilityContext;
 };
 
 napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> context);
-// to do
-NativeValue* CreateJsAbilityContext(NativeEngine& engine, std::shared_ptr<AbilityContext> context);
 
 struct ConnectCallback {
     std::unique_ptr<NativeReference> jsConnectionObject_ = nullptr;

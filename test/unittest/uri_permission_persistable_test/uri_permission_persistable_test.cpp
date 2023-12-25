@@ -15,10 +15,12 @@
 
 #include <gtest/gtest.h>
 #include "ability_manager_errors.h"
+#include "event_report.h"
 #include "mock_permission_verification.h"
 #include "mock_native_token.h"
 #include "system_ability_definition.h"
 #include "system_ability_manager_client.h"
+#include "tokenid_kit.h"
 #define private public
 #include "uri_permission_manager_stub_impl.h"
 #undef private
@@ -276,7 +278,9 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_009, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
+    upms->isGrantPersistableUriPermissionEnable_ = true;
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     bool res = upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     ASSERT_EQ(res, true);
@@ -303,7 +307,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_010, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
     unsigned int tmpReadFlag = Want::FLAG_AUTH_READ_URI_PERMISSION;
     std::string targetBundleName = "com.example.test";
@@ -331,7 +336,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_011, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
@@ -354,7 +360,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_012, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
@@ -380,7 +387,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_013, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
@@ -409,7 +417,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_014, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
@@ -439,7 +448,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_015, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
@@ -468,7 +478,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_016, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
@@ -494,7 +505,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_017, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
     auto uriStr = "file://docs/storage/Users/currentUser/test.txt";
@@ -525,7 +537,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_018, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
@@ -550,7 +563,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_019, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
     upms->uriPermissionRdb_->DeleteData(absRdbPredicates);
@@ -581,7 +595,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_020, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
     upms->isGrantPersistableUriPermissionEnable_ = true;
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);
@@ -604,7 +619,8 @@ HWTEST_F(UriPermissionPersistableTest, UriPermissionPersistableTest_021, TestSiz
 {
     auto upms = std::make_shared<UriPermissionManagerStubImpl>();
     ASSERT_NE(upms, nullptr);
-    upms->Init();
+    upms->uriPermissionRdb_ = std::make_shared<UriPermissionRdb>();
+    ASSERT_NE(upms->uriPermissionRdb_, nullptr);
     upms->storageManager_ = new StorageManager::StorageManagerServiceMock();
     upms->isGrantPersistableUriPermissionEnable_ = true;
     NativeRdb::AbsRdbPredicates absRdbPredicates(URI_PERMISSION_TABLE_NAME);

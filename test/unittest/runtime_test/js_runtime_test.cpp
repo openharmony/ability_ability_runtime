@@ -144,22 +144,24 @@ HWTEST_F(JsRuntimeTest, JsRuntimeTest_0200, TestSize.Level0)
 HWTEST_F(JsRuntimeTest, JsRuntimeUtilsTest_0100, TestSize.Level0)
 {
     auto runtime = AbilityRuntime::Runtime::Create(options_);
-    auto& jsEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
+    auto env = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNapiEnv();
 
-    NativeReference* callbackRef = jsEngine.CreateReference(jsEngine.CreateUndefined(), 1);
-    std::unique_ptr<AsyncTask> task = std::make_unique<AsyncTask>(callbackRef, nullptr, nullptr);
-    task->ResolveWithNoError(jsEngine, jsEngine.CreateUndefined());
+    napi_ref callbackRef = nullptr;
+    napi_create_reference(env, CreateJsUndefined(env), 1, &callbackRef);
+    std::unique_ptr<NapiAsyncTask> task = std::make_unique<NapiAsyncTask>(callbackRef, nullptr, nullptr);
+    task->ResolveWithNoError(env, CreateJsUndefined(env));
     EXPECT_TRUE(task->callbackRef_ == nullptr);
 
-    NativeDeferred* nativeDeferred = nullptr;
-    jsEngine.CreatePromise(&nativeDeferred);
-    task = std::make_unique<AsyncTask>(nativeDeferred, nullptr, nullptr);
-    task->ResolveWithNoError(jsEngine, jsEngine.CreateUndefined());
+    napi_deferred nativeDeferred = nullptr;
+    napi_value result;
+    napi_create_promise(env, &nativeDeferred, &result);
+    task = std::make_unique<NapiAsyncTask>(nativeDeferred, nullptr, nullptr);
+    task->ResolveWithNoError(env, CreateJsUndefined(env));
     EXPECT_TRUE(task->deferred_ == nullptr);
 
     task->deferred_ = nullptr;
     task->callbackRef_ = nullptr;
-    task->ResolveWithNoError(jsEngine, jsEngine.CreateUndefined());
+    task->ResolveWithNoError(env, CreateJsUndefined(env));
     EXPECT_TRUE(task->deferred_ == nullptr);
     EXPECT_TRUE(task->callbackRef_ == nullptr);
 }
@@ -298,11 +300,11 @@ HWTEST_F(JsRuntimeTest, JsRuntimeLoadSystemModuleByEngineTest_0100, TestSize.Lev
     HILOG_INFO("LoadSystemModuleByEngine start");
 
     auto runtime = AbilityRuntime::JsRuntime::Create(options_);
-    auto& jsEngine = (static_cast<AbilityRuntime::MockJsRuntime&>(*runtime)).GetNativeEngine();
+    auto env = (static_cast<AbilityRuntime::MockJsRuntime&>(*runtime)).GetNapiEnv();
 
     std::string moduleName = "";
-    std::unique_ptr<NativeReference> ref = MockJsRuntime::LoadSystemModuleByEngine(&jsEngine, moduleName, nullptr, 0);
-    EXPECT_NE(ref, nullptr);
+    std::unique_ptr<NativeReference> ref = MockJsRuntime::LoadSystemModuleByEngine(env, moduleName, nullptr, 0);
+    EXPECT_EQ(ref, nullptr);
 
     HILOG_INFO("LoadSystemModuleByEngine end");
 }
@@ -355,9 +357,78 @@ HWTEST_F(JsRuntimeTest, RuntimeSavePreloadedTest_0100, TestSize.Level0)
 {
     HILOG_INFO("SavePreloaded start");
 
-    Runtime::SavePreloaded(nullptr);
+    auto runtime = AbilityRuntime::Runtime::Create(options_);
+    runtime->SavePreloaded(nullptr);
+    EXPECT_TRUE(runtime != nullptr);
 
     HILOG_INFO("SavePreloaded end");
+}
+
+/**
+ * @tc.name: RuntimeSetModuleLoadCheckerTest_0100
+ * @tc.desc: Runtime test for SetModuleLoadChecker.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, RuntimeSetModuleLoadCheckerTest_0100, TestSize.Level0)
+{
+    HILOG_INFO("SetModuleLoadChecker start");
+
+    auto runtime = AbilityRuntime::Runtime::Create(options_);
+    runtime->SetModuleLoadChecker(nullptr);
+    EXPECT_TRUE(runtime != nullptr);
+
+    HILOG_INFO("SetModuleLoadChecker end");
+}
+
+/**
+ * @tc.name: JsRuntimeSuspendVMTest_0100
+ * @tc.desc: JsRuntime test for SuspendVM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeSuspendVMTest_0100, TestSize.Level0)
+{
+    HILOG_INFO("SuspendVM start");
+
+    auto runtime = AbilityRuntime::JsRuntime::Create(options_);
+    auto result = runtime->SuspendVM(gettid());
+    EXPECT_EQ(result, false);
+
+    HILOG_INFO("SuspendVM end");
+}
+
+/**
+ * @tc.name: JsRuntimeResumeVMTest_0100
+ * @tc.desc: JsRuntime test for ResumeVM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeResumeVMTest_0100, TestSize.Level0)
+{
+    HILOG_INFO("ResumeVM start");
+
+    auto runtime = AbilityRuntime::JsRuntime::Create(options_);
+    runtime->ResumeVM(gettid());
+    EXPECT_TRUE(runtime != nullptr);
+
+    HILOG_INFO("ResumeVM end");
+}
+
+/**
+ * @tc.name: JsRuntimeSetDeviceDisconnectCallbackTest_0100
+ * @tc.desc: JsRuntime test for SetDeviceDisconnectCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsRuntimeTest, JsRuntimeSetDeviceDisconnectCallbackTest_0100, TestSize.Level0)
+{
+    HILOG_INFO("SetDeviceDisconnectCallback start");
+
+    auto runtime = AbilityRuntime::JsRuntime::Create(options_);
+    std::function<bool()> task = [&]() {
+        return true;
+    };
+    runtime->SetDeviceDisconnectCallback(task);
+    EXPECT_TRUE(runtime != nullptr);
+
+    HILOG_INFO("SetDeviceDisconnectCallback end");
 }
 
 /**
@@ -370,10 +441,10 @@ HWTEST_F(JsRuntimeTest, JsRuntimeDetachCallbackFuncTest_0100, TestSize.Level0)
     HILOG_INFO("DetachCallbackFunc start");
 
     auto runtime = AbilityRuntime::JsRuntime::Create(options_);
-    auto& jsEngine = (static_cast<AbilityRuntime::MockJsRuntime&>(*runtime)).GetNativeEngine();
+    auto env = (static_cast<AbilityRuntime::MockJsRuntime&>(*runtime)).GetNapiEnv();
     int32_t value = 1;
     int32_t number = 1;
-    auto result = AbilityRuntime::DetachCallbackFunc(&jsEngine, &value, &number);
+    auto result = AbilityRuntime::DetachCallbackFunc(env, &value, &number);
     EXPECT_EQ(result, &value);
 
     HILOG_INFO("DetachCallbackFunc end");
@@ -412,7 +483,9 @@ HWTEST_F(JsRuntimeTest, JsRuntimeStartDebugModeTest_0100, TestSize.Level0)
     EXPECT_TRUE(jsRuntime != nullptr);
 
     bool needBreakPoint = true;
-    jsRuntime->StartDebugMode(needBreakPoint);
+    bool debugApp = true;
+    const std::string processName = "test";
+    jsRuntime->StartDebugMode(needBreakPoint, processName, debugApp);
     jsRuntime->StopDebugMode();
 
     HILOG_INFO("StartDebugMode end");
@@ -819,8 +892,10 @@ HWTEST_F(JsRuntimeTest, JsRuntimeStartProfilerTest_0100, TestSize.Level1)
     uint32_t instanceId = 1;
     jsRuntime->StartDebugger(needBreakPoint, instanceId);
 
-    std::string perfCmd = "profile jsperf 100";
-    jsRuntime->StartProfiler(perfCmd);
+    const std::string perfCmd = "profile jsperf 100";
+    bool debugApp = true;
+    const std::string processName = "test";
+    jsRuntime->StartProfiler(perfCmd, needBreakPoint, processName, debugApp);
     ASSERT_NE(jsRuntime, nullptr);
 }
 

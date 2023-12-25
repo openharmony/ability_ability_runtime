@@ -19,6 +19,7 @@
 #include "accesstoken_kit.h"
 #include "hilog_wrapper.h"
 #include "permission_constants.h"
+#include "support_system_ability_permission.h"
 #include "tokenid_kit.h"
 
 namespace OHOS {
@@ -106,8 +107,8 @@ bool PermissionVerification::CheckSpecificSystemAbilityAccessPermission() const
 
 bool PermissionVerification::VerifyRunningInfoPerm() const
 {
-    if (IsSACall()) {
-        HILOG_DEBUG("%{public}s: the interface called by SA.", __func__);
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_GET_RUNNING_INFO)) {
@@ -120,8 +121,8 @@ bool PermissionVerification::VerifyRunningInfoPerm() const
 
 bool PermissionVerification::VerifyControllerPerm() const
 {
-    if (IsSACall()) {
-        HILOG_DEBUG("%{public}s: the interface called by SA.", __func__);
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_SET_ABILITY_CONTROLLER)) {
@@ -148,7 +149,8 @@ bool PermissionVerification::VerifyDlpPermission(Want &want) const
 
 int PermissionVerification::VerifyAccountPermission() const
 {
-    if (IsSACall()) {
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return ERR_OK;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)) {
@@ -160,7 +162,8 @@ int PermissionVerification::VerifyAccountPermission() const
 
 bool PermissionVerification::VerifyMissionPermission() const
 {
-    if (IsSACall()) {
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGE_MISSION)) {
@@ -173,7 +176,8 @@ bool PermissionVerification::VerifyMissionPermission() const
 
 int PermissionVerification::VerifyAppStateObserverPermission() const
 {
-    if (IsSACall()) {
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return ERR_OK;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_RUNNING_STATE_OBSERVER)) {
@@ -186,7 +190,7 @@ int PermissionVerification::VerifyAppStateObserverPermission() const
 
 int32_t PermissionVerification::VerifyUpdateConfigurationPerm() const
 {
-    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_UPDATE_CONFIGURATION)) {
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_UPDATE_CONFIGURATION)) {
         HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_UPDATE_CONFIGURATION);
         return ERR_OK;
     }
@@ -196,7 +200,7 @@ int32_t PermissionVerification::VerifyUpdateConfigurationPerm() const
 
 bool PermissionVerification::VerifyInstallBundlePermission() const
 {
-    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_INSTALL_BUNDLE)) {
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_INSTALL_BUNDLE)) {
         HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_INSTALL_BUNDLE);
         return true;
     }
@@ -207,13 +211,22 @@ bool PermissionVerification::VerifyInstallBundlePermission() const
 
 bool PermissionVerification::VerifyGetBundleInfoPrivilegedPermission() const
 {
-    if (IsSACall() || VerifyCallingPermission(PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED)) {
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED)) {
         HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
         return true;
     }
 
     HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_GET_BUNDLE_INFO_PRIVILEGED);
     return false;
+}
+
+bool PermissionVerification::VerifyStartRecentAbilityPermission() const
+{
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_RECENT_ABILITY)) {
+        HILOG_INFO("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_START_RECENT_ABILITY);
+        return true;
+    }
+    return VerifyMissionPermission();
 }
 
 int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInfo &verificationInfo, bool isShell) const
@@ -237,7 +250,8 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
 
 int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const
 {
-    if (IsSACall()) {
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return ERR_OK;
     }
 
@@ -270,10 +284,6 @@ int PermissionVerification::CheckCallServiceExtensionPermission(const Verificati
 
 int PermissionVerification::CheckStartByCallPermission(const VerificationInfo &verificationInfo) const
 {
-    if (IsSACall()) {
-        return ERR_OK;
-    }
-
     if (IsCallFromSameAccessToken(verificationInfo.accessTokenId)) {
         HILOG_ERROR("Not remote call, Caller is from same APP, StartAbilityByCall reject");
         return CHECK_PERMISSION_FAILED;
@@ -358,7 +368,8 @@ bool PermissionVerification::JudgeAssociatedWakeUp(const uint32_t accessTokenId,
 
 int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &verificationInfo) const
 {
-    if (IsSACall()) {
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return ERR_OK;
     }
     if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
@@ -388,7 +399,8 @@ bool PermissionVerification::IsSystemAppCall() const
 
 bool PermissionVerification::VerifyPrepareTerminatePermission() const
 {
-    if (IsSACall()) {
+    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
+        HILOG_DEBUG("Support SA call");
         return true;
     }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_PREPARE_TERMINATE)) {
@@ -409,6 +421,17 @@ bool PermissionVerification::VerifyPrepareTerminatePermission(const int &tokenId
     }
     HILOG_DEBUG("verify AccessToken success");
     return true;
+}
+
+bool PermissionVerification::VerifyStartAbilityWithAnimationPermission() const
+{
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITY_WITH_ANIMATION)) {
+        HILOG_INFO("Verify permission %{public}s succeed.",
+            PermissionConstants::PERMISSION_START_ABILITY_WITH_ANIMATION);
+        return true;
+    }
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_START_ABILITY_WITH_ANIMATION);
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

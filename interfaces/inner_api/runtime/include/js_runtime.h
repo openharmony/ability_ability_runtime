@@ -29,6 +29,9 @@
 namespace panda::ecmascript {
 class EcmaVM;
 } // namespace panda::ecmascript
+namespace panda {
+struct HmsMap;
+}
 namespace OHOS {
 namespace AppExecFwk {
 class EventHandler;
@@ -49,11 +52,6 @@ using AppLibPathMap = std::map<std::string, std::vector<std::string>>;
 namespace AbilityRuntime {
 class TimerTask;
 
-inline void *DetachCallbackFunc(NativeEngine *engine, void *value, void *)
-{
-    return value;
-}
-
 inline void *DetachCallbackFunc(napi_env env, void *value, void *)
 {
     return value;
@@ -62,9 +60,6 @@ inline void *DetachCallbackFunc(napi_env env, void *value, void *)
 class JsRuntime : public Runtime {
 public:
     static std::unique_ptr<JsRuntime> Create(const Options& options);
-
-    static std::unique_ptr<NativeReference> LoadSystemModuleByEngine(NativeEngine* engine,
-        const std::string& moduleName, NativeValue* const* argv, size_t argc);
 
     static void SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp = false);
 
@@ -81,12 +76,12 @@ public:
         return Language::JS;
     }
 
-    std::unique_ptr<NativeReference> LoadSystemModule(
-        const std::string& moduleName, NativeValue* const* argv = nullptr, size_t argc = 0);
     void PostTask(const std::function<void()>& task, const std::string& name, int64_t delayTime);
     void PostSyncTask(const std::function<void()>& task, const std::string& name);
     void RemoveTask(const std::string& name);
     void DumpHeapSnapshot(bool isPrivate) override;
+    void DestroyHeapProfiler() override;
+    void ForceFullGC() override;
     bool BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames) override;
     void NotifyApplicationState(bool isBackground) override;
     bool SuspendVM(uint32_t tid) override;
@@ -96,7 +91,8 @@ public:
     bool RunScript(const std::string& path, const std::string& hapPath, bool useCommonChunk = false);
 
     void PreloadSystemModule(const std::string& moduleName) override;
-    void StartDebugMode(bool needBreakPoint) override;
+
+    void StartDebugMode(bool needBreakPoint, const std::string &processName, bool isDebug = true) override;
     void StopDebugMode();
     bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
     bool UnLoadRepairPatch(const std::string& hqfFile) override;
@@ -117,7 +113,8 @@ public:
     void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorImpl);
     void FreeNativeReference(std::unique_ptr<NativeReference> reference);
     void FreeNativeReference(std::shared_ptr<NativeReference>&& reference);
-    void StartProfiler(const std::string &perfCmd) override;
+    void StartProfiler(
+        const std::string &perfCmd, bool needBreakPoint, const std::string &processName, bool isDebug = true) override;
 
     void ReloadFormComponent(); // Reload ArkTS-Card component
     void DoCleanWorkAfterStageCleaned() override;
@@ -129,6 +126,7 @@ public:
         const std::string& hapPath, bool esmodule = false, bool useCommonChunk = false);
     std::unique_ptr<NativeReference> LoadSystemModule(
         const std::string& moduleName, const napi_value* argv = nullptr, size_t argc = 0);
+    void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override;
 
 private:
     void FinishPreload() override;
@@ -141,7 +139,6 @@ private:
     napi_value LoadJsBundle(const std::string& path, const std::string& hapPath, bool useCommonChunk = false);
     napi_value LoadJsModule(const std::string& path, const std::string& hapPath);
 
-    bool debugMode_ = false;
     bool preloaded_ = false;
     bool isBundle_ = true;
     std::string codePath_;
@@ -169,6 +166,8 @@ private:
     void PostPreload(const Options& options);
     void LoadAotFile(const Options& options);
     void SetRequestAotCallback();
+
+    std::vector<panda::HmsMap> GetSystemKitsMap(uint32_t version);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

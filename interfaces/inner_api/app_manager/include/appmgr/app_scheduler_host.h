@@ -49,13 +49,14 @@ private:
     int32_t HandleScheduleConfigurationUpdated(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleProcessSecurityExit(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleAcceptWant(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleScheduleNewProcessRequest(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyUnLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleUpdateApplicationInfoInstalled(MessageParcel &data, MessageParcel &reply);
     int32_t HandleScheduleHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyAppFault(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleOnGcStateChange(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleScheduleChangeAppGcState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachAppDebug(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDetachAppDebug(MessageParcel &data, MessageParcel &reply);
 

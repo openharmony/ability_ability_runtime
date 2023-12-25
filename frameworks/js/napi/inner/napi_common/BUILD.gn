@@ -32,6 +32,8 @@ ohos_shared_library("napi_common") {
 
   sources = [
     "napi_common_configuration.cpp",
+    "napi_common_execute_param.cpp",
+    "napi_common_execute_result.cpp",
     "napi_common_start_options.cpp",
     "napi_common_util.cpp",
     "napi_common_want.cpp",
@@ -52,7 +54,7 @@ ohos_shared_library("napi_common") {
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "ipc:ipc_napi_common",
+    "ipc:ipc_napi",
     "napi:ace_napi",
   ]
 

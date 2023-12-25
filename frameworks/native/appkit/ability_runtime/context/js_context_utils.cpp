@@ -46,9 +46,11 @@ public:
     static napi_value SwitchArea(napi_env env, napi_callback_info info);
     static napi_value GetArea(napi_env env, napi_callback_info info);
     static napi_value CreateModuleContext(napi_env env, napi_callback_info info);
+    static napi_value CreateModuleResourceManager(napi_env env, napi_callback_info info);
 
     napi_value OnGetCacheDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetTempDir(napi_env env, NapiCallbackInfo& info);
+    napi_value OnGetResourceDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetFilesDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetDistributedFilesDir(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetDatabaseDir(napi_env env, NapiCallbackInfo& info);
@@ -58,6 +60,7 @@ public:
 
     static napi_value GetCacheDir(napi_env env, napi_callback_info info);
     static napi_value GetTempDir(napi_env env, napi_callback_info info);
+    static napi_value GetResourceDir(napi_env env, napi_callback_info info);
     static napi_value GetFilesDir(napi_env env, napi_callback_info info);
     static napi_value GetDistributedFilesDir(napi_env env, napi_callback_info info);
     static napi_value GetDatabaseDir(napi_env env, napi_callback_info info);
@@ -74,6 +77,7 @@ private:
     napi_value OnSwitchArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo& info);
+    napi_value OnCreateModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     bool CheckCallerIsSystemApp();
 };
 
@@ -121,12 +125,13 @@ napi_value JsBaseContext::OnSwitchArea(napi_env env, NapiCallbackInfo& info)
     context->SwitchArea(mode);
 
     napi_value object = info.thisVar;
-    if (CheckTypeForNapiValue(env, object, napi_object)) {
+    if (!CheckTypeForNapiValue(env, object, napi_object)) {
         HILOG_ERROR("Check type failed");
         return CreateJsUndefined(env);
     }
     BindNativeProperty(env, object, "cacheDir", GetCacheDir);
     BindNativeProperty(env, object, "tempDir", GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", GetResourceDir);
     BindNativeProperty(env, object, "filesDir", GetFilesDir);
     BindNativeProperty(env, object, "distributedFilesDir", GetDistributedFilesDir);
     BindNativeProperty(env, object, "databaseDir", GetDatabaseDir);
@@ -183,9 +188,8 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
         return CreateJsUndefined(env);
     }
 
-    NativeValue* value = reinterpret_cast<NativeValue*>(CreateJsBaseContext(env, moduleContext, true));
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(
-        reinterpret_cast<NativeEngine*>(env), "application.Context", &value, 1);
+    napi_value value = CreateJsBaseContext(env, moduleContext, true);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
         HILOG_WARN("invalid systemModule.");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -206,6 +210,48 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
         },
         nullptr, nullptr);
     return object;
+}
+
+napi_value JsBaseContext::CreateModuleResourceManager(napi_env env, napi_callback_info info)
+{
+    HILOG_DEBUG("called");
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnCreateModuleResourceManager, BASE_CONTEXT_NAME);
+}
+
+napi_value JsBaseContext::OnCreateModuleResourceManager(napi_env env, NapiCallbackInfo& info)
+{
+    auto context = context_.lock();
+    if (!context) {
+        HILOG_WARN("applicationContext is already released");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+
+    std::string bundleName;
+    if (!ConvertFromJsValue(env, info.argv[0], bundleName)) {
+        HILOG_ERROR("Parse bundleName failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    std::string moduleName;
+    if (!ConvertFromJsValue(env, info.argv[1], moduleName)) {
+        HILOG_ERROR("Parse moduleName failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    if (!CheckCallerIsSystemApp()) {
+        HILOG_ERROR("This application is not system-app, can not use system-api");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+    auto resourceManager = context->CreateModuleResourceManager(bundleName, moduleName);
+    if (resourceManager == nullptr) {
+        HILOG_ERROR("Failed to create resourceManager");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    auto jsResourceManager = CreateJsResourceManager(env, resourceManager, nullptr);
+    return jsResourceManager;
 }
 
 napi_value JsBaseContext::GetArea(napi_env env, napi_callback_info info)
@@ -256,6 +302,23 @@ napi_value JsBaseContext::OnGetTempDir(napi_env env, NapiCallbackInfo& info)
         return CreateJsUndefined(env);
     }
     std::string path = context->GetTempDir();
+    return CreateJsValue(env, path);
+}
+
+napi_value JsBaseContext::GetResourceDir(napi_env env, napi_callback_info info)
+{
+    HILOG_DEBUG("JsBaseContext::GetResourceDir is called");
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsBaseContext, OnGetResourceDir, BASE_CONTEXT_NAME);
+}
+
+napi_value JsBaseContext::OnGetResourceDir(napi_env env, NapiCallbackInfo& info)
+{
+    auto context = context_.lock();
+    if (!context) {
+        HILOG_WARN("context is already released");
+        return CreateJsUndefined(env);
+    }
+    std::string path = context->GetResourceDir();
     return CreateJsValue(env, path);
 }
 
@@ -420,9 +483,8 @@ napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& 
         return CreateJsUndefined(env);
     }
 
-    NativeValue* value = reinterpret_cast<NativeValue*>(CreateJsBaseContext(env, bundleContext, true));
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(
-        reinterpret_cast<NativeEngine*>(env), "application.Context", &value, 1);
+    napi_value value = CreateJsBaseContext(env, bundleContext, true);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
         HILOG_WARN("OnCreateBundleContext, invalid systemModule.");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -471,9 +533,8 @@ napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo
         }
     }
 
-    NativeValue* value = reinterpret_cast<NativeValue*>(JsApplicationContextUtils::CreateJsApplicationContext(env));
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(reinterpret_cast<NativeEngine*>(env),
-        "application.ApplicationContext", &value, 1);
+    napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
         HILOG_WARN("OnGetApplicationContext, invalid systemModule.");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
@@ -524,9 +585,8 @@ napi_value AttachBaseContext(napi_env env, void* value, void* hint)
         HILOG_WARN("invalid context.");
         return nullptr;
     }
-    NativeValue* object = reinterpret_cast<NativeValue*>(CreateJsBaseContext(env, ptr, true));
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(reinterpret_cast<NativeEngine*>(env),
-        "application.Context", &object, 1);
+    napi_value object = CreateJsBaseContext(env, ptr, true);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &object, 1);
     if (systemModule == nullptr) {
         HILOG_WARN("AttachBaseContext, invalid systemModule.");
         return nullptr;
@@ -560,9 +620,8 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
         HILOG_WARN("invalid context.");
         return nullptr;
     }
-    NativeValue* object = reinterpret_cast<NativeValue*>(JsApplicationContextUtils::CreateJsApplicationContext(env));
-    auto systemModule = JsRuntime::LoadSystemModuleByEngine(reinterpret_cast<NativeEngine*>(env),
-        "application.ApplicationContext", &object, 1);
+    napi_value object = JsApplicationContextUtils::CreateJsApplicationContext(env);
+    auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &object, 1);
     if (systemModule == nullptr) {
         HILOG_WARN("invalid systemModule.");
         return nullptr;
@@ -615,6 +674,7 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
 
     BindNativeProperty(env, object, "cacheDir", JsBaseContext::GetCacheDir);
     BindNativeProperty(env, object, "tempDir", JsBaseContext::GetTempDir);
+    BindNativeProperty(env, object, "resourceDir", JsBaseContext::GetResourceDir);
     BindNativeProperty(env, object, "filesDir", JsBaseContext::GetFilesDir);
     BindNativeProperty(env, object, "distributedFilesDir", JsBaseContext::GetDistributedFilesDir);
     BindNativeProperty(env, object, "databaseDir", JsBaseContext::GetDatabaseDir);
@@ -627,15 +687,10 @@ napi_value CreateJsBaseContext(napi_env env, std::shared_ptr<Context> context, b
     BindNativeFunction(env, object, "switchArea", moduleName, JsBaseContext::SwitchArea);
     BindNativeFunction(env, object, "getArea", moduleName, JsBaseContext::GetArea);
     BindNativeFunction(env, object, "createModuleContext", moduleName, JsBaseContext::CreateModuleContext);
+    BindNativeFunction(env, object, "createModuleResourceManager", moduleName,
+        JsBaseContext::CreateModuleResourceManager);
     BindNativeFunction(env, object, "getGroupDir", moduleName, JsBaseContext::GetGroupDir);
     return object;
-}
-
-// to do
-NativeValue* CreateJsBaseContext(NativeEngine& engine, std::shared_ptr<Context> context, bool keepContext)
-{
-    return reinterpret_cast<NativeValue*>(
-        CreateJsBaseContext(reinterpret_cast<napi_env>(&engine), context, keepContext));
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

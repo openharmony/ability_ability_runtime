@@ -59,6 +59,11 @@ std::string MockContextImpl::GetTempDir()
     return "/temp";
 }
 
+std::string MockContextImpl::GetResourceDir()
+{
+    return "/resfile";
+}
+
 std::string MockContextImpl::GetFilesDir()
 {
     return "/files";
@@ -95,6 +100,12 @@ std::shared_ptr<Context> MockContextImpl::CreateModuleContext(const std::string 
 {
     std::shared_ptr<ContextImpl> appContext = std::make_shared<ContextImpl>();
     return appContext;
+}
+
+std::shared_ptr<Global::Resource::ResourceManager> MockContextImpl::CreateModuleResourceManager(
+    const std::string &bundleName, const std::string &moduleName)
+{
+    return nullptr;
 }
 
 int MockContextImpl::GetArea()

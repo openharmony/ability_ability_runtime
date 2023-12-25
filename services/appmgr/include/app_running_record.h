@@ -35,6 +35,7 @@
 #include "app_mgr_constants.h"
 #include "app_scheduler_proxy.h"
 #include "app_record_id.h"
+#include "child_process_record.h"
 #include "fault_data.h"
 #include "profile.h"
 #include "priority_object.h"
@@ -42,6 +43,7 @@
 #include "module_running_record.h"
 #include "app_spawn_msg_wrapper.h"
 #include "app_malloc_info.h"
+#include "window_visibility_changed_listener.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -192,6 +194,20 @@ public:
     const std::string &GetProcessName() const;
 
     /**
+     * @brief Obtains the the flag of specified process.
+     *
+     * @return Returns the the flag of specified process.
+     */
+    const std::string &GetSpecifiedProcessFlag() const;
+
+    /**
+     * @brief Setting the the flag of specified process.
+     *
+     * @param flag, the the flag of specified process.
+     */
+    void SetSpecifiedProcessFlag(const std::string &flag);
+
+    /**
      * @brief Obtains the sign code.
      *
      * @return Returns the sign code.
@@ -331,6 +347,8 @@ public:
     void AddAbilityStage();
 
     void AddAbilityStageBySpecifiedAbility(const std::string &bundleName);
+
+    void AddAbilityStageBySpecifiedProcess(const std::string &bundleName);
 
     /**
      * AddAbilityStage Result returned.
@@ -542,7 +560,10 @@ public:
      * @param state, ability or extension state.
      */
     void StateChangedNotifyObserver(
-        const std::shared_ptr<AbilityRunningRecord> &ability, int32_t state, bool isAbility);
+        const std::shared_ptr<AbilityRunningRecord> &ability,
+        int32_t state,
+        bool isAbility,
+        bool isFromWindowFocusChanged);
 
     void insertAbilityStageInfo(std::vector<HapModuleInfo> moduleInfos);
 
@@ -553,11 +574,17 @@ public:
 
     void SetProcessAndExtensionType(const std::shared_ptr<AbilityInfo> &abilityInfo);
     void SetSpecifiedAbilityFlagAndWant(const bool flag, const AAFwk::Want &want, const std::string &moduleName);
+    void SetScheduleNewProcessRequestState(const bool isNewProcessRequest, const AAFwk::Want &want,
+        const std::string &moduleName);
+    bool IsNewProcessRequest() const;
     bool IsStartSpecifiedAbility() const;
     void ScheduleAcceptWant(const std::string &moduleName);
     void ScheduleAcceptWantDone();
+    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
+    void ScheduleNewProcessRequestDone();
     void ApplicationTerminated();
     const AAFwk::Want &GetSpecifiedWant() const;
+    const AAFwk::Want &GetNewProcessRequestWant() const;
     void SetDebugApp(bool isDebugApp);
     bool IsDebugApp();
     void SetNativeDebug(bool isNativeDebug);
@@ -627,6 +654,10 @@ public:
 
     int32_t NotifyAppFault(const FaultData &faultData);
 
+    void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
+
+    bool IsAbilitytiesBackground();
+
     inline void SetAbilityForegroundingFlag()
     {
         isAbilityForegrounding_.store(true);
@@ -654,11 +685,20 @@ public:
      *
      * @return Is the status change completed.
      */
-    int32_t OnGcStateChange(const int32_t state);
+    int32_t ChangeAppGcState(const int32_t state);
 
     void SetAttachDebug(const bool &isAttachDebug);
     bool isAttachDebug() const;
 
+    void SetApplicationPendingState(ApplicationPendingState pendingState);
+    ApplicationPendingState GetApplicationPendingState() const;
+
+    void GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode);
+
+    void AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record);
+    void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
+    std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
+    std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -724,6 +764,7 @@ private:
     bool isEmptyKeepAliveApp_ = false;  // Only empty resident processes can be set to true, please choose carefully
     bool isStageBasedModel_ = false;
     ApplicationState curState_ = ApplicationState::APP_STATE_CREATE;  // current state of this process
+    ApplicationPendingState pendingState_ = ApplicationPendingState::READY;
     bool isFocused_ = false; // if process is focused.
     /**
      * If there is an ability is foregrounding, this flag will be true,
@@ -735,6 +776,7 @@ private:
     int32_t appRecordId_ = 0;
     std::string appName_;
     std::string processName_;  // the name of this process
+    std::string specifiedProcessFlag_; // the flag of specified Process
     int64_t eventId_ = 0;
     int64_t startProcessSpecifiedAbilityEventId_ = 0;
     int64_t addAbilityStageInfoEventId_ = 0;
@@ -760,6 +802,8 @@ private:
     bool isSpecifiedAbility_ = false;
     AAFwk::Want SpecifiedWant_;
     std::string moduleName_;
+    bool isNewProcessRequest_;
+    AAFwk::Want newProcessRequestWant_;
     bool isDebugApp_ = false;
     bool isNativeDebug_ = false;
     bool isAttachDebug_ = false;
@@ -788,6 +832,10 @@ private:
     int32_t callerTokenId_ = -1;
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
+
+    std::set<uint32_t> windowIds_;
+    std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
+    ffrt::mutex childProcessRecordMapLock_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

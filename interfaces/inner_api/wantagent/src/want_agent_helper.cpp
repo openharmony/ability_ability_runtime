@@ -56,6 +56,26 @@ unsigned int WantAgentHelper::FlagsTransformer(const std::vector<WantAgentConsta
             case WantAgentConstant::Flags::CONSTANT_FLAG:
                 wantFlags |= static_cast<unsigned int>(FLAG_IMMUTABLE);
                 break;
+            case WantAgentConstant::Flags::REPLACE_ELEMENT:
+                wantFlags |= static_cast<unsigned int>(FLAG_UPDATE_CURRENT);
+                WANT_AGENT_LOGE("Invalid flag:REPLACE_ELEMENT.");
+                break;
+            case WantAgentConstant::Flags::REPLACE_ACTION:
+                wantFlags |= static_cast<unsigned int>(FLAG_UPDATE_CURRENT);
+                WANT_AGENT_LOGE("Invalid flag:REPLACE_ACTION.");
+                break;
+            case WantAgentConstant::Flags::REPLACE_URI:
+                wantFlags |= static_cast<unsigned int>(FLAG_UPDATE_CURRENT);
+                WANT_AGENT_LOGE("Invalid flag:REPLACE_URI.");
+                break;
+            case WantAgentConstant::Flags::REPLACE_ENTITIES:
+                wantFlags |= static_cast<unsigned int>(FLAG_UPDATE_CURRENT);
+                WANT_AGENT_LOGE("Invalid flag:REPLACE_ENTITIES.");
+                break;
+            case WantAgentConstant::Flags::REPLACE_BUNDLE:
+                wantFlags |= static_cast<unsigned int>(FLAG_UPDATE_CURRENT);
+                WANT_AGENT_LOGE("Invalid flag:REPLACE_BUNDLE.");
+                break;
             default:
                 WANT_AGENT_LOGE("WantAgentHelper::flags is error.");
                 break;
@@ -166,7 +186,7 @@ std::shared_ptr<WantAgent> WantAgentHelper::GetWantAgent(const WantAgentInfo &pa
     return agent;
 }
 
-WantAgentConstant::OperationType WantAgentHelper::GetType(const std::shared_ptr<WantAgent> &agent)
+WantAgentConstant::OperationType WantAgentHelper::GetType(std::shared_ptr<WantAgent> agent)
 {
     if ((agent == nullptr) || (agent->GetPendingWant() == nullptr)) {
         return WantAgentConstant::OperationType::UNKNOWN_TYPE;
@@ -175,7 +195,7 @@ WantAgentConstant::OperationType WantAgentHelper::GetType(const std::shared_ptr<
     return agent->GetPendingWant()->GetType(agent->GetPendingWant()->GetTarget());
 }
 
-ErrCode WantAgentHelper::TriggerWantAgent(const std::shared_ptr<WantAgent> &agent,
+ErrCode WantAgentHelper::TriggerWantAgent(std::shared_ptr<WantAgent> agent,
     const std::shared_ptr<CompletedCallback> &callback, const TriggerInfo &paramsInfo)
 {
     HILOG_INFO("call");

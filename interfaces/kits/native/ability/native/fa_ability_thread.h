@@ -50,7 +50,7 @@ public:
      * @param mainRunner The runner which main_thread holds.
      * @param appContext the AbilityRuntime context
      */
-    void Attach(std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+    void Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AppExecFwk::EventRunner> &mainRunner,
         const std::shared_ptr<Context> &appContext) override;
@@ -61,7 +61,7 @@ public:
      * @param abilityRecord current running ability record
      * @param appContext the AbilityRuntime context
      */
-    void Attach(std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+    void Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<Context> &appContext) override;
 
@@ -332,6 +332,18 @@ public:
     std::vector<std::shared_ptr<AppExecFwk::DataAbilityResult>> ExecuteBatch(
         const std::vector<std::shared_ptr<AppExecFwk::DataAbilityOperation>> &operations) override;
 
+    /**
+     * @brief create modal UIExtension.
+     * @param want Create modal UIExtension with want object.
+     */
+    int CreateModalUIExtension(const Want &want) override;
+
+    /**
+     * @brief Update sessionToken.
+     * @param sessionToken The token of session.
+     */
+    void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override;
+
 private:
     /**
      * @brief Dump Ability Runner info.
@@ -352,7 +364,7 @@ private:
      * @param abilityRecord current running ability record
      * @param mainRunner The runner which main_thread holds.
      */
-    void AttachExtension(std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+    void AttachExtension(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AppExecFwk::EventRunner> &mainRunner);
 
@@ -367,7 +379,7 @@ private:
      * @param application Indicates the main process.
      * @param abilityRecord current running ability record
      */
-    void AttachExtension(std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+    void AttachExtension(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord);
 
     /**
@@ -376,7 +388,7 @@ private:
      * @param abilityRecord current running ability record
      * @param stageContext the AbilityRuntime context
      */
-    void AttachInner(std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+    void AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<Context> &stageContext);
 
@@ -387,7 +399,7 @@ private:
      * @return Returns the abilityname.
      */
     std::string CreateAbilityName(const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
-        std::shared_ptr<AppExecFwk::OHOSApplication> &application);
+        const std::shared_ptr<AppExecFwk::OHOSApplication> &application);
 
     /**
      * @brief Create the extension abilityname.
@@ -414,7 +426,7 @@ private:
      * @return Returns the contextDeal.
      */
     std::shared_ptr<AppExecFwk::ContextDeal> CreateAndInitContextDeal(
-        std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+        const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AppExecFwk::AbilityContext> &abilityObject);
 
@@ -551,12 +563,15 @@ private:
     std::shared_ptr<AbilityContext> BuildAbilityContext(const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
         const std::shared_ptr<AppExecFwk::OHOSApplication> &application, const sptr<IRemoteObject> &token,
         const std::shared_ptr<Context> &stageContext);
+    
+    void AddLifecycleEvent(uint32_t state, std::string &methodName) const;
 
     std::shared_ptr<AppExecFwk::AbilityImpl> abilityImpl_;
     std::shared_ptr<AppExecFwk::Ability> currentAbility_;
     std::shared_ptr<ExtensionImpl> extensionImpl_;
     std::shared_ptr<Extension> currentExtension_;
     bool isExtension_ = false;
+    bool isUIAbility_ = false;
     bool isPrepareTerminate_ = false;
     std::atomic_bool isPrepareTerminateAbilityDone_ = false;
     std::mutex mutex_;

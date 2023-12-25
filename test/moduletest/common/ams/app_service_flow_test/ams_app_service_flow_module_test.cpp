@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ protected:
 protected:
     std::shared_ptr<AppMgrServiceInner> serviceInner_ = nullptr;
     std::shared_ptr<AMSEventHandler> handler_ = nullptr;
-    sptr<BundleMgrService> mockBundleMgr_{ nullptr };
+    std::shared_ptr<BundleMgrHelper> mockBundleMgr_{ nullptr };
 };
 
 void AmsAppServiceFlowModuleTest::SetUpTestCase()
@@ -92,8 +92,8 @@ void AmsAppServiceFlowModuleTest::SetUp()
     handler_ = std::make_shared<AMSEventHandler>(taskHandler, serviceInner_);
     serviceInner_->SetTaskHandler(taskHandler);
     serviceInner_->SetEventHandler(handler_);
-    mockBundleMgr_ = new (std::nothrow) BundleMgrService();
-    serviceInner_->SetBundleManager(mockBundleMgr_);
+    mockBundleMgr_ = DelayedSingleton<BundleMgrHelper>::GetInstance();
+    serviceInner_->SetBundleManagerHelper(mockBundleMgr_);
 }
 
 void AmsAppServiceFlowModuleTest::TearDown()
@@ -130,7 +130,7 @@ TestApplicationPreRunningRecord AmsAppServiceFlowModuleTest::TestCreateApplicati
 
     BundleInfo bundleInfo;
     HapModuleInfo hapModuleInfo;
-    EXPECT_TRUE(serviceInner_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
+    EXPECT_FALSE(serviceInner_->GetBundleAndHapInfo(*abilityInfo, appInfo, bundleInfo, hapModuleInfo));
 
     auto appRecord = serviceInner_->appRunningManager_->CheckAppRunningRecordIsExist(
         appInfo->name, appName, appInfo->uid, bundleInfo);

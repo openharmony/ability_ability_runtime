@@ -13,19 +13,28 @@
  * limitations under the License.
  */
 
+#include <cstdio>
+#include <cstring>
+#include <fcntl.h>
+
+#include <sys/stat.h>
+
 #include "ohos_application.h"
 
 #include "ability.h"
 #include "ability_record_mgr.h"
 #include "ability_thread.h"
 #include "app_loader.h"
+#include "application_context.h"
 #include "application_impl.h"
+#include "bundle_mgr_helper.h"
 #include "context_impl.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "runtime.h"
 #include "system_ability_definition.h"
+#include "ui_ability.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window.h"
 #endif
@@ -33,6 +42,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
+constexpr char MARK_SYMBOL[] = "_useless";
 
 OHOSApplication::OHOSApplication()
 {
@@ -246,7 +256,7 @@ void OHOSApplication::UnregisterAbilityLifecycleCallbacks(const std::shared_ptr<
  *
  * @param Ability Indicates the ability object that calls the onStart() method.
  */
-void OHOSApplication::OnAbilityStart(const std::shared_ptr<Ability> &ability)
+void OHOSApplication::OnAbilityStart(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
 {
     if (ability == nullptr) {
         HILOG_ERROR("ContextDeal::OnAbilityStart failed, ability is nullptr");
@@ -267,7 +277,7 @@ void OHOSApplication::OnAbilityStart(const std::shared_ptr<Ability> &ability)
  *
  * @param Ability Indicates the Ability object that calls the onInactive() method.
  */
-void OHOSApplication::OnAbilityInactive(const std::shared_ptr<Ability> &ability)
+void OHOSApplication::OnAbilityInactive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
 {
     if (ability == nullptr) {
         HILOG_ERROR("ContextDeal::OnAbilityInactive failed, ability is nullptr");
@@ -288,7 +298,7 @@ void OHOSApplication::OnAbilityInactive(const std::shared_ptr<Ability> &ability)
  *
  * @param Ability Indicates the Ability object that calls the onBackground() method.
  */
-void OHOSApplication::OnAbilityBackground(const std::shared_ptr<Ability> &ability)
+void OHOSApplication::OnAbilityBackground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
 {
     if (ability == nullptr) {
         HILOG_ERROR("ContextDeal::OnAbilityBackground failed, ability is nullptr");
@@ -309,7 +319,7 @@ void OHOSApplication::OnAbilityBackground(const std::shared_ptr<Ability> &abilit
  *
  * @param Ability Indicates the Ability object that calls the onForeground() method.
  */
-void OHOSApplication::OnAbilityForeground(const std::shared_ptr<Ability> &ability)
+void OHOSApplication::OnAbilityForeground(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
 {
     if (ability == nullptr) {
         HILOG_ERROR("ContextDeal::OnAbilityForeground failed, ability is nullptr");
@@ -330,7 +340,7 @@ void OHOSApplication::OnAbilityForeground(const std::shared_ptr<Ability> &abilit
  *
  * @param Ability Indicates the Ability object that calls the onActive() method.
  */
-void OHOSApplication::OnAbilityActive(const std::shared_ptr<Ability> &ability)
+void OHOSApplication::OnAbilityActive(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
 {
     if (ability == nullptr) {
         HILOG_ERROR("ContextDeal::OnAbilityActive failed, ability is nullptr");
@@ -351,7 +361,7 @@ void OHOSApplication::OnAbilityActive(const std::shared_ptr<Ability> &ability)
  *
  * @param Ability Indicates the Ability object that calls the onStop() method.
  */
-void OHOSApplication::OnAbilityStop(const std::shared_ptr<Ability> &ability)
+void OHOSApplication::OnAbilityStop(const std::shared_ptr<AbilityRuntime::UIAbility> &ability)
 {
     if (ability == nullptr) {
         HILOG_ERROR("ContextDeal::OnAbilityStop failed, ability is nullptr");
@@ -417,13 +427,16 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
     }
     std::string language = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
     std::string colorMode = config.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
-    std::string languageIsSetByApp = config.GetItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP);
-    std::string colorModeIsSetByApp = config.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
-    std::string globalColorMode = configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    std::string languageIsSetByApp =
+        config.GetItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP);
+    std::string colorModeIsSetByApp =
+        config.GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+    std::string globalColorMode =
+        configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     std::string globalLanguageIsSetByApp =
-                configuration_->GetItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP);
+        configuration_->GetItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP);
     std::string globalColorModeIsSetByApp =
-                configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+        configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
     if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0) {
         HILOG_DEBUG("colorMode is auto");
         configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_AUTO);
@@ -534,7 +547,6 @@ void OHOSApplication::OnStart()
 /**
  *
  * @brief Will be called the application ends
- *
  */
 void OHOSApplication::OnTerminate()
 {
@@ -729,6 +741,25 @@ void OHOSApplication::ScheduleAcceptWant(const AAFwk::Want &want, const std::str
     }
 }
 
+void OHOSApplication::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName,
+    std::string &flag)
+{
+    HILOG_DEBUG("call.");
+    if (abilityStages_.empty()) {
+        HILOG_ERROR("abilityStages_ is empty.");
+        return;
+    }
+    auto iter = abilityStages_.find(moduleName);
+    if (iter == abilityStages_.end()) {
+        HILOG_ERROR("%{public}s is not in abilityStage", moduleName.c_str());
+        return;
+    }
+    auto abilityStage = iter->second;
+    if (abilityStage) {
+        flag = abilityStage->OnNewProcessRequest(want);
+    }
+}
+
 std::shared_ptr<Configuration> OHOSApplication::GetConfiguration()
 {
     return configuration_;
@@ -767,6 +798,43 @@ bool OHOSApplication::NotifyUnLoadRepairPatch(const std::string &hqfFile)
     }
 
     return runtime_->UnLoadRepairPatch(hqfFile);
+}
+
+void OHOSApplication::CleanAppTempData(bool isLastProcess)
+{
+    HILOG_DEBUG("Called");
+    if (!isLastProcess) {
+        HILOG_ERROR("There are other survival processes in the current application.");
+        return;
+    }
+    if (abilityRuntimeContext_ == nullptr) {
+        HILOG_ERROR("Context is nullptr.");
+        return;
+    }
+    auto bundleMgrHelpers = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelpers == nullptr) {
+        HILOG_ERROR("Get bundle mgr is nullptr.");
+        return;
+    }
+
+    std::vector<std::string> tempPaths;
+    abilityRuntimeContext_->GetAllTempDir(tempPaths);
+    if (tempPaths.empty()) {
+        HILOG_ERROR("Get app temp path list is empty.");
+        return;
+    }
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count();
+    std::ostringstream stream;
+    stream << std::hex << now;
+    for (const auto &path : tempPaths) {
+        auto newPath = path + MARK_SYMBOL + stream.str();
+        if (rename(path.c_str(), newPath.c_str()) != 0) {
+            HILOG_ERROR("Rename temp dir failed, msg is %{public}s", strerror(errno));
+        }
+    }
+
+    bundleMgrHelpers->CleanObsoleteBundleTempFiles();
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

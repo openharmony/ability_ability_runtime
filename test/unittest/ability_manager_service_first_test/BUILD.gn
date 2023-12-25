@@ -27,6 +27,7 @@ ohos_unittest("ability_manager_service_first_test") {
     "${ability_runtime_test_path}/mock/frameworks_kits_ability_native_test/include",
     "${ability_runtime_test_path}/mock/prepare_terminate_callback",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit/include",
+    "${ability_runtime_test_path}/unittest/app_debug_listener_stub_test",
     "mock/include",
   ]
 
@@ -62,11 +63,14 @@ ohos_unittest("ability_manager_service_first_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "window_manager:scene_session",
   ]
 
   if (ecologic_rule_enabled) {
     external_deps += [ "ecological_rule_manager:erms_client" ]
+  }
+
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:scene_session" ]
   }
 }
 

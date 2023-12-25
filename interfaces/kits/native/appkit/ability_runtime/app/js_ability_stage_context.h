@@ -27,7 +27,7 @@ public:
     explicit JsAbilityStageContext(const std::shared_ptr<Context>& context) : context_(context) {}
     ~JsAbilityStageContext() = default;
 
-    static void ConfigurationUpdated(NativeEngine* engine, std::shared_ptr<NativeReference> &jsContext,
+    static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
 
     std::shared_ptr<Context> GetContext()
@@ -39,8 +39,8 @@ private:
     std::weak_ptr<Context> context_;
 };
 
-NativeValue* CreateJsAbilityStageContext(NativeEngine& engine,
-    std::shared_ptr<Context> context, DetachCallback detach, AttachCallback attach);
+napi_value CreateJsAbilityStageContext(napi_env env,
+    std::shared_ptr<Context> context, DetachCallback detach, NapiAttachCallback attach);
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_CONTEXT_H
