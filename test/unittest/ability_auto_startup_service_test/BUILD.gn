@@ -24,12 +24,15 @@ ohos_unittest("ability_auto_startup_service_test") {
     "${ability_runtime_abilitymgr_path}/include",
     "${ability_runtime_services_path}/common/include",
     "${distributeddatamgr_path}/kv_store/interfaces/innerkits/distributeddata/include",
+    "mock/include",
   ]
 
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_data_manager.cpp",
     "${ability_runtime_services_path}/abilitymgr/src/ability_auto_startup_service.cpp",
     "ability_auto_startup_service_test.cpp",
+    "mock/src/mock_my_flag.cpp",
+    "mock/src/mock_permission_verification.cpp",
   ]
 
   configs = []
@@ -42,6 +45,7 @@ ohos_unittest("ability_auto_startup_service_test") {
     "${ability_runtime_native_path}/ability:ability_context_native",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
     "${ability_runtime_services_path}/common:perm_verification",
+    "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -50,6 +54,8 @@ ohos_unittest("ability_auto_startup_service_test") {
     "ability_base:zuri",
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
