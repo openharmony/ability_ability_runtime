@@ -1,6 +1,14 @@
 {
     "blocklist": {
         "ServiceExtension": [],
+	"VpnExtension":[],
+        "AdsServiceExtension": [
+            "multimedia.camera",
+            "multimedia.mediaLibrary",
+            "telephony.sim",
+            "telephony.sms",
+            "contact"
+        ],
         "FormExtension": [
             "ability.particleAbility",
             "resourceschedule.backgroundTaskManager",
@@ -160,7 +168,6 @@
             "prompt",
             "promptAction",
             "window",
-            "system.prompt",
             "hms.core.liveview.liveViewManager"
         ],
         "DriverExtension": [
@@ -278,7 +285,6 @@
             "prompt",
             "promptAction",
             "window",
-            "system.prompt",
             "hms.core.liveview.liveViewManager"
         ],
         "RemoteLocationExtension": [

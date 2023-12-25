@@ -130,7 +130,7 @@ void AppScheduler::OnAppStateChanged(const AppExecFwk::AppProcessData& appData)
     HILOG_INFO("Test AppScheduler::OnAppStateChanged()");
 }
 
-int AppScheduler::ClearUpApplicationData(const std::string& bundleName)
+int AppScheduler::ClearUpApplicationData(const std::string& bundleName, const int32_t userId)
 {
     HILOG_INFO("Test AppScheduler::ClearUpApplicationData()");
     return ERR_OK;
@@ -186,6 +186,31 @@ int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Appli
 }
 
 int AppScheduler::GetAbilityRecordsByProcessID(const int pid, std::vector<sptr<IRemoteObject>>& tokens)
+{
+    return 0;
+}
+
+int32_t AppScheduler::RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener)
+{
+    return 0;
+}
+
+int32_t AppScheduler::UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener)
+{
+    return 0;
+}
+    
+int32_t AppScheduler::AttachAppDebug(const std::string &bundleName)
+{
+    return 0;
+}
+
+int32_t AppScheduler::DetachAppDebug(const std::string &bundleName)
+{
+    return 0;
+}
+
+int32_t AppScheduler::RegisterAbilityDebugResponse(const sptr<AppExecFwk::IAbilityDebugResponse> &response)
 {
     return 0;
 }

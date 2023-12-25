@@ -64,7 +64,8 @@ public:
      * @return process record.
      */
     std::shared_ptr<AppRunningRecord> CheckAppRunningRecordIsExist(const std::string &appName,
-        const std::string &processName, const int uid, const BundleInfo &bundleInfo);
+        const std::string &processName, const int uid, const BundleInfo &bundleInfo,
+        const std::string &specifiedProcessFlag = "");
 
     /**
      * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
@@ -209,6 +210,7 @@ public:
     bool IsApplicationBackground(const std::string &bundleName);
     bool IsApplicationFirstFocused(const AppRunningRecord &foregroundingRecord);
     bool IsApplicationUnfocused(const std::string &bundleName);
+    void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
 
     /**
      * @brief Set attach app debug mode.
@@ -231,6 +233,16 @@ public:
      * @param abilityTokens Specify the stored ability token based on bundle name output.
      */
     void GetAbilityTokensByBundleName(const std::string &bundleName, std::vector<sptr<IRemoteObject>> &abilityTokens);
+
+    std::shared_ptr<AppRunningRecord> GetAppRunningRecordByChildProcessPid(const pid_t pid);
+    std::shared_ptr<ChildProcessRecord> OnChildProcessRemoteDied(const wptr<IRemoteObject> &remote);
+    
+    /**
+     * @brief Obtain number of app through bundlename.
+     * @param bundleName The application bundle name.
+     * @return Returns the number of queries.
+     */
+    int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
  
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
@@ -238,6 +250,7 @@ private:
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByPidInner(const pid_t pid);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByTokenInner(const sptr<IRemoteObject> &abilityToken);
+    bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;

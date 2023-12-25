@@ -28,8 +28,13 @@
 #include "hisysevent.h"
 #include "mission_info_mgr.h"
 #include "in_process_call_wrapper.h"
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+#include "res_sched_client.h"
+#include "res_type.h"
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 
 namespace OHOS {
+using AbilityRuntime::FreezeUtil;
 namespace AAFwk {
 namespace {
 constexpr uint32_t DELAY_NOTIFY_LABEL_TIME = 30; // 30ms
@@ -67,6 +72,17 @@ std::string GetCurrentTime()
         static_cast<uint64_t>(tn.tv_nsec);
     return std::to_string(uTime);
 }
+const std::unordered_map<uint32_t, FreezeUtil::TimeoutState> stateMap = {
+    { AbilityManagerService::LOAD_TIMEOUT_MSG, FreezeUtil::TimeoutState::LOAD },
+    { AbilityManagerService::FOREGROUND_TIMEOUT_MSG, FreezeUtil::TimeoutState::FOREGROUND },
+    { AbilityManagerService::BACKGROUND_TIMEOUT_MSG, FreezeUtil::TimeoutState::BACKGROUND }
+};
+
+auto g_deleteLifecycleEventTask = [](const sptr<Token> &token, FreezeUtil::TimeoutState state) {
+    CHECK_POINTER_LOG(token, "token is nullptr.");
+    FreezeUtil::LifecycleFlow flow = { token->AsObject(), state };
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
+};
 } // namespace
 
 MissionListManager::MissionListManager(int userId) : userId_(userId) {}
@@ -139,7 +155,7 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 
     auto currentTopAbility = GetCurrentTopAbilityLocked();
     if (currentTopAbility) {
-        std::string element = currentTopAbility->GetWant().GetElement().GetURI();
+        std::string element = currentTopAbility->GetElementName().GetURI();
         auto state = currentTopAbility->GetAbilityState();
         HILOG_DEBUG("current top: %{public}s, state: %{public}s",
             element.c_str(), AbilityRecord::ConvertAbilityState(state).c_str());
@@ -152,7 +168,7 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 
     auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
     if (callerAbility) {
-        std::string element = callerAbility->GetWant().GetElement().GetURI();
+        std::string element = callerAbility->GetElementName().GetURI();
         auto state = callerAbility->GetAbilityState();
         HILOG_DEBUG("callerAbility is: %{public}s, state: %{public}s",
             element.c_str(), AbilityRecord::ConvertAbilityState(state).c_str());
@@ -160,7 +176,12 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 
     abilityRequest.callerAccessTokenId = IPCSkeleton::GetCallingTokenID();
     int ret = StartAbility(currentTopAbility, callerAbility, abilityRequest);
+    if (ret == 0 && !abilityRequest.abilityInfo.visible) {
+        SendKeyEvent(abilityRequest);
+    }
     NotifyStartAbilityResult(abilityRequest, ret);
+    ReportAbilitAssociatedStartInfoToRSS(abilityRequest.abilityInfo, static_cast<int64_t>(
+        ResourceSchedule::ResType::AssociatedStartType::MISSION_LIST_START_ABILITY), callerAbility);
     return ret;
 }
 
@@ -314,7 +335,9 @@ void MissionListManager::StartWaitingAbility()
         HILOG_INFO("name:%{public}s", abilityRequest.abilityInfo.name.c_str());
         waitingAbilityQueue_.pop();
         auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
-        StartAbility(topAbility, callerAbility, abilityRequest);
+        if (StartAbility(topAbility, callerAbility, abilityRequest) == 0 && !abilityRequest.abilityInfo.visible) {
+            SendKeyEvent(abilityRequest);
+        }
         return;
     }
 }
@@ -990,6 +1013,8 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     auto eventHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     eventHandler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
+    FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
 
     abilityRecord->SetScheduler(scheduler);
 
@@ -1028,7 +1053,7 @@ void MissionListManager::OnAbilityRequestDone(const sptr<IRemoteObject> &token, 
     if (abilityState == AppAbilityState::ABILITY_STATE_FOREGROUND) {
         auto abilityRecord = GetAliveAbilityRecordByToken(token);
         CHECK_POINTER(abilityRecord);
-        std::string element = abilityRecord->GetWant().GetElement().GetURI();
+        std::string element = abilityRecord->GetElementName().GetURI();
         HILOG_DEBUG("Ability is %{public}s, start to foreground.", element.c_str());
         abilityRecord->ForegroundAbility(abilityRecord->lifeCycleStateInfo_.sceneFlagBak);
     }
@@ -1169,7 +1194,7 @@ int MissionListManager::AbilityTransactionDone(const sptr<IRemoteObject> &token,
         CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     }
 
-    std::string element = abilityRecord->GetWant().GetElement().GetURI();
+    std::string element = abilityRecord->GetElementName().GetURI();
     HILOG_DEBUG("ability: %{public}s, state: %{public}s", element.c_str(), abilityState.c_str());
 
     if (targetState == AbilityState::BACKGROUND) {
@@ -1220,6 +1245,7 @@ int MissionListManager::DispatchForeground(const std::shared_ptr<AbilityRecord> 
     auto eventHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     eventHandler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::FOREGROUND);
     auto self(weak_from_this());
     auto taskHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER_AND_RETURN_LOG(taskHandler, ERR_INVALID_VALUE, "Fail to get AbilityTaskHandler.");
@@ -1261,7 +1287,7 @@ void MissionListManager::CompleteForegroundSuccess(const std::shared_ptr<Ability
     CHECK_POINTER(abilityRecord);
     // ability do not save window mode
     abilityRecord->RemoveWindowMode();
-    std::string element = abilityRecord->GetWant().GetElement().GetURI();
+    std::string element = abilityRecord->GetElementName().GetURI();
     HILOG_DEBUG("ability: %{public}s", element.c_str());
 
     abilityRecord->SetAbilityState(AbilityState::FOREGROUND);
@@ -1350,6 +1376,7 @@ int MissionListManager::DispatchBackground(const std::shared_ptr<AbilityRecord> 
 
     // remove background timeout task.
     handler->CancelTask("background_" + std::to_string(abilityRecord->GetAbilityRecordId()));
+    g_deleteLifecycleEventTask(abilityRecord->GetToken(), FreezeUtil::TimeoutState::BACKGROUND);
     auto self(shared_from_this());
     auto task = [self, abilityRecord]() { self->CompleteBackground(abilityRecord); };
     handler->SubmitTask(task);
@@ -1491,13 +1518,13 @@ void MissionListManager::RemoveBackgroundingAbility(const std::shared_ptr<Abilit
         abilityRecord->SetNeedBackToOtherMissionStack(false);
     }
 
-    AppExecFwk::ElementName elementName = needTopAbility->GetWant().GetElement();
-    HILOG_DEBUG("Next top ability is %{public}s, state is %{public}d, minimizeReason is %{public}d.",
+    AppExecFwk::ElementName elementName = needTopAbility->GetElementName();
+    HILOG_DEBUG("Next top ability is %{public}s, state is %{public}d, minimizeReason is %{public}d!",
         elementName.GetURI().c_str(), needTopAbility->GetAbilityState(), needTopAbility->IsMinimizeFromUser());
 
     if (elementName.GetBundleName() == AbilityConfig::LAUNCHER_BUNDLE_NAME &&
         elementName.GetAbilityName() == AbilityConfig::LAUNCHER_RECENT_ABILITY_NAME) {
-        HILOG_DEBUG("Next to need is recent, just to launcher.");
+        HILOG_DEBUG("Next to need is recent, just to launcher!");
         needTopAbility = launcherList_->GetLauncherRoot();
     }
 
@@ -1521,7 +1548,7 @@ int MissionListManager::TerminateAbilityInner(const std::shared_ptr<AbilityRecor
     int resultCode, const Want *resultWant, bool flag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    std::string element = abilityRecord->GetWant().GetElement().GetURI();
+    std::string element = abilityRecord->GetElementName().GetURI();
     HILOG_DEBUG("Terminate ability, ability is %{public}s.", element.c_str());
     if (abilityRecord->IsTerminating() && !abilityRecord->IsForeground()) {
         HILOG_ERROR("Ability is on terminating.");
@@ -1553,7 +1580,7 @@ int MissionListManager::TerminateAbilityInner(const std::shared_ptr<AbilityRecor
 
 int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
 {
-    std::string element = abilityRecord->GetWant().GetElement().GetURI();
+    std::string element = abilityRecord->GetElementName().GetURI();
     HILOG_DEBUG("Terminate ability locked, ability is %{public}s.", element.c_str());
     // remove AbilityRecord out of list
     RemoveTerminatingAbility(abilityRecord, flag);
@@ -1606,7 +1633,7 @@ int MissionListManager::TerminateAbilityLocked(const std::shared_ptr<AbilityReco
  */
 void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, bool flag)
 {
-    std::string element = abilityRecord->GetWant().GetElement().GetURI();
+    std::string element = abilityRecord->GetElementName().GetURI();
     HILOG_DEBUG("Remove terminating ability, ability is %{public}s.", element.c_str());
     if (GetAbilityFromTerminateListInner(abilityRecord->GetToken())) {
         abilityRecord->SetNextAbilityRecord(nullptr);
@@ -1660,7 +1687,7 @@ void MissionListManager::RemoveTerminatingAbility(const std::shared_ptr<AbilityR
         }
         abilityRecord->SetNeedBackToOtherMissionStack(false);
     }
-    AppExecFwk::ElementName elementName = needTopAbility->GetWant().GetElement();
+    AppExecFwk::ElementName elementName = needTopAbility->GetElementName();
     HILOG_DEBUG("Next top ability is %{public}s, state is %{public}d, minimizeReason is %{public}d.",
         elementName.GetURI().c_str(), needTopAbility->GetAbilityState(), needTopAbility->IsMinimizeFromUser());
 
@@ -2074,6 +2101,48 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
     }
     int typeId = AppExecFwk::AppfreezeManager::TypeAttribute::NORMAL_TIMEOUT;
     std::string msgContent = "ability:" + ability->GetAbilityInfo().name + " ";
+    FreezeUtil::TimeoutState state = FreezeUtil::TimeoutState::UNKNOWN;
+    auto search = stateMap.find(msgId);
+    if (search != stateMap.end()) {
+        state = search->second;
+    }
+    if (!GetContentAndTypeId(msgId, msgContent, typeId)) {
+        HILOG_WARN("msgId is invalid!");
+        return;
+    }
+
+    std::string eventName = isHalf ?
+        AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT : AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT;
+    HILOG_WARN("%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
+        "msg: %{public}s!", eventName.c_str(),
+        processInfo.uid_, processInfo.pid_, ability->GetAbilityInfo().bundleName.c_str(),
+        ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
+
+    AppExecFwk::AppfreezeManager::ParamInfo info = {
+        .typeId = typeId,
+        .pid = processInfo.pid_,
+        .eventName = eventName,
+        .bundleName = ability->GetAbilityInfo().bundleName,
+    };
+    if (state != FreezeUtil::TimeoutState::UNKNOWN) {
+        auto flow = std::make_unique<FreezeUtil::LifecycleFlow>();
+        if (ability->GetToken() != nullptr) {
+            flow->token = ability->GetToken()->AsObject();
+            flow->state = state;
+        }
+        info.msg = msgContent + "\nserver:\n" + FreezeUtil::GetInstance().GetLifecycleEvent(*flow);
+        if (!isHalf) {
+            FreezeUtil::GetInstance().DeleteLifecycleEvent(*flow);
+        }
+        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info, std::move(flow));
+    } else {
+        info.msg = msgContent;
+        AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(info);
+    }
+}
+
+bool MissionListManager::GetContentAndTypeId(uint32_t msgId, std::string &msgContent, int &typeId) const
+{
     switch (msgId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG:
             msgContent += "load timeout";
@@ -2096,18 +2165,9 @@ void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &a
             msgContent += "terminate timeout";
             break;
         default:
-            return;
+            return false;
     }
-
-    std::string eventName = isHalf ?
-        AppExecFwk::AppFreezeType::LIFECYCLE_HALF_TIMEOUT : AppExecFwk::AppFreezeType::LIFECYCLE_TIMEOUT;
-    HILOG_WARN("%{public}s: uid: %{public}d, pid: %{public}d, bundleName: %{public}s, abilityName: %{public}s,"
-        "msg: %{public}s", eventName.c_str(),
-        processInfo.uid_, processInfo.pid_, ability->GetAbilityInfo().bundleName.c_str(),
-        ability->GetAbilityInfo().name.c_str(), msgContent.c_str());
-
-    AppExecFwk::AppfreezeManager::GetInstance()->LifecycleTimeoutHandle(
-        typeId, processInfo.pid_, eventName, ability->GetAbilityInfo().bundleName, msgContent);
+    return true;
 }
 
 void MissionListManager::UpdateMissionSnapshot(const std::shared_ptr<AbilityRecord>& abilityRecord) const
@@ -2405,7 +2465,7 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
         HILOG_ERROR("OnAbilityDied come, abilityRecord is nullptr.");
         return;
     }
-    std::string element = abilityRecord->GetWant().GetElement().GetURI();
+    std::string element = abilityRecord->GetElementName().GetURI();
     HILOG_DEBUG("OnAbilityDied come, ability is %{public}s", element.c_str());
     if (abilityRecord->GetAbilityInfo().type != AbilityType::PAGE) {
         HILOG_ERROR("Ability type is not page.");
@@ -2427,7 +2487,7 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
     }
 
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
-    CHECK_POINTER_LOG(handler, "Fail to get AbilityEventHandler.");
+    CHECK_POINTER_LOG(handler, "Get AbilityEventHandler failed.");
     if (abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
         handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
     }
@@ -2834,14 +2894,14 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
 
 void MissionListManager::ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const
 {
-    auto bms = AbilityUtil::GetBundleManager();
-    CHECK_POINTER(bms);
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER(bundleMgrHelper);
     auto abilityInfo = record->GetAbilityInfo();
     Want want;
     want.SetElementName(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
     auto uid = record->GetUid();
     want.SetParam("uid", uid);
-    bms->ProcessPreload(want);
+    bundleMgrHelper->ProcessPreload(want);
 }
 
 Closure MissionListManager::GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const
@@ -3062,6 +3122,14 @@ int MissionListManager::ResolveLocked(const AbilityRequest &abilityRequest)
     return CallAbilityLocked(abilityRequest);
 }
 
+bool MissionListManager::IsAbilityStarted(AbilityRequest &abilityRequest,
+    std::shared_ptr<AbilityRecord> &targetRecord)
+{
+    std::shared_ptr<Mission> targetMission;
+
+    return HandleReusedMissionAndAbility(abilityRequest, targetMission, targetRecord);
+}
+
 int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
 {
     HILOG_INFO("call ability.");
@@ -3117,7 +3185,7 @@ int MissionListManager::CallAbilityLocked(const AbilityRequest &abilityRequest)
     }
 
     // schedule target ability
-    std::string element = targetAbilityRecord->GetWant().GetElement().GetURI();
+    std::string element = targetAbilityRecord->GetElementName().GetURI();
     HILOG_DEBUG("load ability record: %{public}s", element.c_str());
 
     // flag the first ability.
@@ -3147,14 +3215,14 @@ int MissionListManager::ReleaseCallLocked(
     };
     auto findRecord = std::find_if(abilityRecords.begin(), abilityRecords.end(), isExist);
     if (findRecord == abilityRecords.end()) {
-        HILOG_ERROR("not found ability record by callback");
+        HILOG_ERROR("not found ability record by callback!");
         return RELEASE_CALL_ABILITY_INNER_ERR;
     }
     auto abilityRecord = *findRecord;
     CHECK_POINTER_AND_RETURN(abilityRecord, RELEASE_CALL_ABILITY_INNER_ERR);
 
     if (!abilityRecord->ReleaseCall(connect)) {
-        HILOG_ERROR("ability release call record failed.");
+        HILOG_ERROR("ability release call record failed!");
         return RELEASE_CALL_ABILITY_INNER_ERR;
     }
     return ERR_OK;
@@ -3353,7 +3421,9 @@ void MissionListManager::OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Wan
 
     auto currentTopAbility = GetCurrentTopAbilityLocked();
     auto callerAbility = GetAbilityRecordByTokenInner(abilityRequest.callerToken);
-    StartAbility(currentTopAbility, callerAbility, abilityRequest);
+    if (StartAbility(currentTopAbility, callerAbility, abilityRequest) == 0 && !abilityRequest.abilityInfo.visible) {
+        SendKeyEvent(abilityRequest);
+    }
 }
 
 std::shared_ptr<Mission> MissionListManager::GetMissionBySpecifiedFlag(
@@ -4078,6 +4148,38 @@ int32_t MissionListManager::TerminateMission(int32_t missionId)
     }
     std::lock_guard guard(managerLock_);
     return TerminateAbilityInner(abilityRecord, DEFAULT_INVAL_VALUE, nullptr, true);
+}
+
+void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
+{
+    auto abilityInfo = abilityRequest.abilityInfo;
+    EventInfo eventInfo;
+    eventInfo.abilityName = abilityInfo.name;
+    eventInfo.bundleName = abilityInfo.bundleName;
+    eventInfo.moduleName = abilityInfo.moduleName;
+    EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
+}
+
+void MissionListManager::ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
+    int64_t type, const std::shared_ptr<AbilityRecord> &callerAbility)
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    if (callerAbility == nullptr) {
+        HILOG_WARN("associated start caller record is nullptr");
+        return;
+    }
+    int32_t callerUid = callerAbility->GetUid();
+    int32_t callerPid = callerAbility->GetPid();
+    std::unordered_map<std::string, std::string> eventParams {
+        { "name", "associated_start" },
+        { "caller_uid", std::to_string(callerUid) },
+        { "caller_pid", std::to_string(callerPid) },
+        { "callee_uid", std::to_string(abilityInfo.applicationInfo.uid) },
+        { "callee_bundle_name", abilityInfo.applicationInfo.bundleName }
+    };
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(
+        ResourceSchedule::ResType::RES_TYPE_APP_ASSOCIATED_START, type, eventParams);
+#endif
 }
 }  // namespace AAFwk
 }  // namespace OHOS

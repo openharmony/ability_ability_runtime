@@ -29,8 +29,6 @@
 #include "window.h"
 
 class NativeReference;
-class NativeValue;
-class NativeObject;
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -39,7 +37,7 @@ class JsRuntime;
 /**
  * @brief Js ui extension base.
  */
-class JsUIExtensionBase {
+class JsUIExtensionBase : public std::enable_shared_from_this<JsUIExtensionBase> {
 public:
     explicit JsUIExtensionBase(const std::unique_ptr<Runtime> &runtime);
     virtual ~JsUIExtensionBase();
@@ -108,7 +106,7 @@ public:
      * The extension in the <b>STATE_FOREGROUND</b> state is visible.
      * You can override this function to implement your own processing logic.
      */
-    void OnForeground(const Want &want);
+    void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo);
 
     /**
      * @brief Called when this extension enters the <b>STATE_BACKGROUND</b> state.
@@ -150,22 +148,25 @@ public:
     void SetContext(const std::shared_ptr<UIExtensionContext> &context);
 
 private:
-    void BindContext(NativeEngine &engine, NativeObject *obj);
-    NativeValue *CallObjectMethod(const char *name, NativeValue *const *argv = nullptr, size_t argc = 0);
+    void BindContext(napi_env env, napi_value obj);
+    napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0);
     void ForegroundWindow(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     bool CallJsOnSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-        const sptr<Rosen::Window> &uiWindow, const sptr<IRemoteObject> &sessionToken);
-    bool ParseDumpParams(
-        const std::vector<std::string> &params, NativeValue *method, NativeValue *arrayValue, NativeValue *value);
+        const sptr<Rosen::Window> &uiWindow, const uint64_t &uiExtensionComponentId);
+    void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd);
+    bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
+    bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
+    void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
+        const AppExecFwk::InsightIntentExecuteResult &result);
 
     JsRuntime &jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_;
-    std::map<sptr<IRemoteObject>, sptr<Rosen::Window>> uiWindowMap_;
-    std::set<sptr<IRemoteObject>> foregroundWindows_;
-    std::map<sptr<IRemoteObject>, std::shared_ptr<NativeReference>> contentSessions_;
+    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
+    std::set<uint64_t> foregroundWindows_;
+    std::map<uint64_t, std::shared_ptr<NativeReference>> contentSessions_;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
     std::shared_ptr<UIExtensionContext> context_;
 };

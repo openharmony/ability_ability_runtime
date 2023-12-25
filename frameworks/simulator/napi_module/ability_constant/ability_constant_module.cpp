@@ -30,6 +30,7 @@ enum class MemoryLevel {
 
 static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
 {
+    HILOG_DEBUG("SetEnumItem start");
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -39,6 +40,7 @@ static napi_status SetEnumItem(napi_env env, napi_value object, const char* name
 
     NAPI_CALL_BASE(env, status = napi_set_property(env, object, itemName, itemValue), status);
     NAPI_CALL_BASE(env, status = napi_set_property(env, object, itemValue, itemName), status);
+    HILOG_DEBUG("SetEnumItem end");
 
     return napi_ok;
 }
@@ -54,6 +56,7 @@ static napi_value InitLaunchReasonObject(napi_env env)
     NAPI_CALL(env, SetEnumItem(env, object, "CONTINUATION", LAUNCHREASON_CONTINUATION));
     NAPI_CALL(env, SetEnumItem(env, object, "APP_RECOVERY", LAUNCHREASON_APP_RECOVERY));
     NAPI_CALL(env, SetEnumItem(env, object, "SHARE", LAUNCHREASON_SHARE));
+    NAPI_CALL(env, SetEnumItem(env, object, "AUTO_STARTUP", LAUNCHREASON_AUTO_STARTUP));
 
     return object;
 }

@@ -121,6 +121,8 @@ public:
      */
     virtual std::string GetFilesDir() = 0;
 
+    virtual std::string GetResourceDir() = 0;
+
     /**
      * @brief Checks whether the configuration of this ability is changing.
      *
@@ -221,6 +223,18 @@ public:
      */
     virtual std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName,
                                                           const std::string &moduleName) = 0;
+
+    /**
+     * @brief Creates a ResourceManager object for a hap with the given hap name and app name.
+     *
+     * @param bundleName Indicates the app name of the application.
+
+     * @param moduleName Indicates the module name of the hap.
+     *
+     * @return Returns a ResourceManager object created for the specified hap and app.
+     */
+    virtual std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
+        const std::string &bundleName, const std::string &moduleName) = 0;
 
     /**
      * @brief Get file area

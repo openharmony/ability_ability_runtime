@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,9 +29,14 @@ public:
 
     virtual void OnTimeoutResponse(const AAFwk::Want &want) override;
 
+    virtual void OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag) override;
+    
+    virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want) override;
+
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     static inline BrokerDelegator<StartSpecifiedAbilityResponseProxy> delegator_;
+    int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

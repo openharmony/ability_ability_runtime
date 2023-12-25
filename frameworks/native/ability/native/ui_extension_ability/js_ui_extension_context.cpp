@@ -43,7 +43,7 @@ constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 } // namespace
 
-static std::map<ConnectionKey, sptr<JSUIExtensionConnection>, key_compare> g_connects;
+static std::map<UIExtensionConnectionKey, sptr<JSUIExtensionConnection>, key_compare> g_connects;
 static int64_t g_serialNumber = 0;
 void RemoveConnection(int64_t connectId)
 {
@@ -86,7 +86,7 @@ bool CheckConnectionParam(napi_env env, napi_value value, sptr<JSUIExtensionConn
         return false;
     }
     connection->SetJsConnectionObject(value);
-    ConnectionKey key;
+    UIExtensionConnectionKey key;
     key.id = g_serialNumber;
     key.want = want;
     connection->SetConnectionId(key.id);
@@ -152,6 +152,11 @@ napi_value JsUIExtensionContext::OnStartAbility(napi_env env, NapiCallbackInfo& 
     if (!CheckStartAbilityInputParam(env, info, want, startOptions, unwrapArgc)) {
         HILOG_DEBUG("Failed, input param type invalid");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+        return CreateJsUndefined(env);
+    }
+
+    if (want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::IDLE_SCREEN_MODE) == AAFwk::HALF_SCREEN_MODE) {
+        HILOG_ERROR("Not support half screen pulling up half screen");
         return CreateJsUndefined(env);
     }
 
@@ -414,13 +419,6 @@ napi_value JsUIExtensionContext::CreateJsUIExtensionContext(napi_env env,
     return objValue;
 }
 
-// to do
-NativeValue* JsUIExtensionContext::CreateJsUIExtensionContext(
-    NativeEngine& engine, std::shared_ptr<UIExtensionContext> context)
-{
-    return reinterpret_cast<NativeValue*>(CreateJsUIExtensionContext(reinterpret_cast<napi_env>(&engine), context));
-}
-
 bool JsUIExtensionContext::CheckStartAbilityInputParam(napi_env env, NapiCallbackInfo& info,
     AAFwk::Want& want, AAFwk::StartOptions& startOptions, size_t& unwrapArgc) const
 {
@@ -530,7 +528,7 @@ void JSUIExtensionConnection::HandleOnAbilityConnectDone(const AppExecFwk::Eleme
         HILOG_ERROR("jsConnectionObject_ null");
         return;
     }
-    napi_value obj = reinterpret_cast<napi_value>(jsConnectionObject_->Get());
+    napi_value obj = jsConnectionObject_->GetNapiValue();
     if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
         HILOG_ERROR("Failed to get object");
         return;
@@ -573,7 +571,7 @@ void JSUIExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFwk::El
         HILOG_ERROR("jsConnectionObject_ nullptr");
         return;
     }
-    napi_value obj = reinterpret_cast<napi_value>(jsConnectionObject_->Get());
+    napi_value obj = jsConnectionObject_->GetNapiValue();
     if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
         HILOG_ERROR("Failed to get object");
         return;
@@ -609,7 +607,7 @@ void JSUIExtensionConnection::CallJsFailed(int32_t errorCode)
         HILOG_ERROR("jsConnectionObject_ nullptr.");
         return;
     }
-    napi_value obj = reinterpret_cast<napi_value>(jsConnectionObject_->Get());
+    napi_value obj = jsConnectionObject_->GetNapiValue();
     if (!CheckTypeForNapiValue(env_, obj, napi_object)) {
         HILOG_ERROR("wrong to get object");
         return;

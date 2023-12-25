@@ -18,6 +18,7 @@
 
 #include "ability_state_data.h"
 #include "app_state_data.h"
+#include "page_state_data.h"
 #include "process_data.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -72,11 +73,18 @@ public:
 
     /**
      * Application state changed callback.
+     * Only observe APP_STATE_CREATE and APP_STATE_TERMINATED
      *
      * @param appStateData Application state data.
      */
     virtual void OnApplicationStateChanged(const AppStateData &appStateData) = 0;
 
+    /**
+     * Application state changed callback.
+     * Only observe APP_STATE_FOREGROUND and APP_STATE_BACKGROUND
+     *
+     * @param appStateData Application state data.
+     */
     virtual void OnAppStateChanged(const AppStateData &appStateData) {}
 
     virtual void OnProcessReused(const ProcessData &processData) {}
@@ -95,6 +103,20 @@ public:
      */
     virtual void OnAppStopped(const AppStateData &appStateData) {};
 
+    /**
+     * Will be called when page show.
+     *
+     * @param pageStateData Page state data.
+     */
+    virtual void OnPageShow(const PageStateData &pageStateData) {};
+
+    /**
+     * Will be called whe page hide.
+     *
+     * @param pageStateData Page state data.
+     */
+    virtual void OnPageHide(const PageStateData &pageStateData) {};
+
     enum class Message {
         TRANSACT_ON_FOREGROUND_APPLICATION_CHANGED = 0,
         TRANSACT_ON_ABILITY_STATE_CHANGED,
@@ -107,6 +129,8 @@ public:
         TRANSACT_ON_PROCESS_REUSED,
         TRANSACT_ON_APP_STARTED,
         TRANSACT_ON_APP_STOPPED,
+        TRANSACT_ON_PAGE_SHOW,
+        TRANSACT_ON_PAGE_HIDE,
     };
 };
 }  // namespace AppExecFwk

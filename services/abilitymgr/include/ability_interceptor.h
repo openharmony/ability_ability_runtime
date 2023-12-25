@@ -17,17 +17,21 @@
 #define OHOS_ABILITY_RUNTIME_ABILITY_INTERCEPTOR_H
 
 #include "ability_util.h"
+#include "cpp/mutex.h"
 #ifdef SUPPORT_ERMS
 #include "ecological_rule_mgr_service_client.h"
 #else
 #include "erms_mgr_param.h"
 #include "erms_mgr_interface.h"
 #endif
+#include "disposed_observer.h"
 #include "in_process_call_wrapper.h"
+#include "task_handler_wrap.h"
 #include "want.h"
 
 namespace OHOS {
 namespace AAFwk {
+class DisposedObserver;
 #ifdef SUPPORT_ERMS
 using ErmsCallerInfo = OHOS::EcologicalRuleMgrService::CallerInfo;
 using ExperienceRule = OHOS::EcologicalRuleMgrService::ExperienceRule;
@@ -38,38 +42,77 @@ using ExperienceRule = OHOS::AppExecFwk::ErmsParams::ExperienceRule;
 
 class AbilityInterceptor {
 public:
-    virtual ~AbilityInterceptor();
+    virtual ~AbilityInterceptor() = default;
 
     /**
      * Excute interception processing.
      */
-    virtual ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) = 0;
+    virtual ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
+        const sptr<IRemoteObject> &callerToken) = 0;
+    virtual void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler) {};
 };
 
 // start ability interceptor
 class CrowdTestInterceptor : public AbilityInterceptor {
 public:
-    CrowdTestInterceptor();
-    ~CrowdTestInterceptor();
-    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
+    CrowdTestInterceptor() = default;
+    ~CrowdTestInterceptor() = default;
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
+        const sptr<IRemoteObject> &callerToken) override;
+    virtual void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler) override
+    {
+        return;
+    };
 private:
     bool CheckCrowdtest(const Want &want, int32_t userId);
 };
 
 class ControlInterceptor : public AbilityInterceptor {
 public:
-    ControlInterceptor();
-    ~ControlInterceptor();
-    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
+    ControlInterceptor() = default;
+    ~ControlInterceptor() = default;
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
+        const sptr<IRemoteObject> &callerToken) override;
+    virtual void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler) override
+    {
+        return;
+    };
 private:
     bool CheckControl(const Want &want, int32_t userId, AppExecFwk::AppRunningControlRuleResult &controlRule);
 };
 
+class DisposedRuleInterceptor : public AbilityInterceptor,
+                                public std::enable_shared_from_this<DisposedRuleInterceptor> {
+public:
+    DisposedRuleInterceptor() = default;
+    ~DisposedRuleInterceptor() = default;
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
+        const sptr<IRemoteObject> &callerToken) override;
+    void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler) override
+    {
+        taskHandler_ = taskHandler;
+    };
+    void UnregisterObserver(const std::string &bundleName);
+private:
+    bool CheckControl(const Want &want, int32_t userId, AppExecFwk::DisposedRule &disposedRule);
+    bool CheckDisposedRule(const Want &want, AppExecFwk::DisposedRule &disposedRule);
+    ErrCode StartNonBlockRule(const Want &want, AppExecFwk::DisposedRule &disposedRule);
+private:
+    std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
+    std::map<std::string, sptr<DisposedObserver>> disposedObserverMap_;
+    ffrt::mutex observerLock_;
+};
+
 class EcologicalRuleInterceptor : public AbilityInterceptor {
 public:
-    EcologicalRuleInterceptor();
-    ~EcologicalRuleInterceptor();
-    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
+    EcologicalRuleInterceptor() = default;
+    ~EcologicalRuleInterceptor() = default;
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
+        const sptr<IRemoteObject> &callerToken) override;
+    virtual void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler) override
+    {
+        return;
+    };
 private:
 #ifdef SUPPORT_ERMS
     void GetEcologicalCallerInfo(const Want &want, ErmsCallerInfo &callerInfo, int32_t userId);
@@ -81,19 +124,24 @@ private:
 // ability jump interceptor
 class AbilityJumpInterceptor : public AbilityInterceptor {
 public:
-    AbilityJumpInterceptor();
-    ~AbilityJumpInterceptor();
-    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground) override;
+    AbilityJumpInterceptor() = default;
+    ~AbilityJumpInterceptor() = default;
+    ErrCode DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
+        const sptr<IRemoteObject> &callerToken) override;
+    virtual void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler) override
+    {
+        return;
+    };
 
 private:
-    bool CheckControl(sptr<AppExecFwk::IBundleMgr> &bms, const Want &want, int32_t userId,
+    bool CheckControl(std::shared_ptr<AppExecFwk::BundleMgrHelper> &undleMgrHelper, const Want &want, int32_t userId,
         AppExecFwk::AppJumpControlRule &controlRule);
-    bool CheckIfJumpExempt(sptr<AppExecFwk::IBundleMgr> &bms, AppExecFwk::AppJumpControlRule &controlRule,
-        int32_t userId);
-    bool CheckIfExemptByBundleName(sptr<AppExecFwk::IBundleMgr> &bms, const std::string &bundleName,
-        const std::string &permission, int32_t userId);
-    bool LoadAppLabelInfo(sptr<AppExecFwk::IBundleMgr> &bms, Want &want, AppExecFwk::AppJumpControlRule &controlRule,
-        int32_t userId);
+    bool CheckIfJumpExempt(std::shared_ptr<AppExecFwk::BundleMgrHelper> &undleMgrHelper,
+        AppExecFwk::AppJumpControlRule &controlRule, int32_t userId);
+    bool CheckIfExemptByBundleName(std::shared_ptr<AppExecFwk::BundleMgrHelper> &undleMgrHelper,
+        const std::string &bundleName, const std::string &permission, int32_t userId);
+    bool LoadAppLabelInfo(std::shared_ptr<AppExecFwk::BundleMgrHelper> &undleMgrHelper, Want &want,
+        AppExecFwk::AppJumpControlRule &controlRule, int32_t userId);
 };
 } // namespace AAFwk
 } // namespace OHOS

@@ -57,12 +57,14 @@ public:
     std::condition_variable condition;
 };
 
+static std::mutex g_connectsMutex;
 static std::map<ConnectionKey, sptr<JSServiceExtensionConnection>, key_compare> g_connects;
 static int64_t g_serialNumber = 0;
 
 void RemoveConnection(int64_t connectId)
 {
     HILOG_DEBUG("enter");
+    std::lock_guard guard(g_connectsMutex);
     auto item = std::find_if(g_connects.begin(), g_connects.end(),
     [&connectId](const auto &obj) {
         return connectId == obj.first.id;
@@ -154,6 +156,11 @@ public:
         GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnStopExtensionAbilityWithAccount);
     }
 
+    static napi_value RequestModalUIExtension(napi_env env, napi_callback_info info)
+    {
+        GET_NAPI_INFO_AND_CALL(env, info, JsServiceExtensionContext, OnRequestModalUIExtension);
+    }
+
 private:
     std::weak_ptr<ServiceExtensionContext> context_;
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
@@ -175,7 +182,7 @@ private:
         // adapter free install async return install and start result
         int ret = 0;
         if (freeInstallObserver_ == nullptr) {
-            freeInstallObserver_ = new JsFreeInstallObserver(*reinterpret_cast<NativeEngine*>(env));
+            freeInstallObserver_ = new JsFreeInstallObserver(env);
             ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(freeInstallObserver_);
         }
 
@@ -187,7 +194,7 @@ private:
             std::string abilityName = want.GetElement().GetAbilityName();
             std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
             freeInstallObserver_->AddJsObserverObject(
-                bundleName, abilityName, startTime, reinterpret_cast<NativeValue*>(callback));
+                bundleName, abilityName, startTime, callback);
         }
     }
 
@@ -221,36 +228,9 @@ private:
         }
 
         auto innerErrorCode = std::make_shared<int>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, startOptions, unwrapArgc, innerErrorCode,
-            &observer = freeInstallObserver_]() {
-            HILOG_DEBUG("startAbility begin");
-            auto context = weak.lock();
-            if (!context) {
-                HILOG_WARN("context is released");
-                *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-                return;
-            }
-
-            (unwrapArgc == 1) ? *innerErrorCode = context->StartAbility(want) :
-                *innerErrorCode = context->StartAbility(want, startOptions);
-            if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
-                *innerErrorCode != 0 && observer != nullptr) {
-                std::string bundleName = want.GetElement().GetBundleName();
-                std::string abilityName = want.GetElement().GetAbilityName();
-                std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
-                observer->OnInstallFinished(bundleName, abilityName, startTime, *innerErrorCode);
-            }
-        };
-
-        NapiAsyncTask::CompleteCallback complete =
-            [innerErrorCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                if (*innerErrorCode == 0) {
-                    HILOG_ERROR("success to StartAbility");
-                    task.Resolve(env, CreateJsUndefined(env));
-                } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
-                }
-            };
+        auto execute = GetStartAbilityExecFunc(want, startOptions, DEFAULT_INVAL_VALUE,
+            unwrapArgc != 1, innerErrorCode);
+        auto complete = GetSimpleCompleteFunc(innerErrorCode);
 
         napi_value lastParam = (info.argc == unwrapArgc) ? nullptr : info.argv[unwrapArgc];
         napi_value result = nullptr;
@@ -514,35 +494,8 @@ private:
             want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
         }
         auto innerErrorCode = std::make_shared<int>(ERR_OK);
-        NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, accountId, startOptions, unwrapArgc,
-            innerErrorCode, &observer = freeInstallObserver_]() {
-            auto context = weak.lock();
-            if (!context) {
-                HILOG_WARN("context is released");
-                *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
-                return;
-            }
-
-            (unwrapArgc == ARGC_TWO) ? *innerErrorCode = context->StartAbilityWithAccount(want, accountId) :
-                *innerErrorCode = context->StartAbilityWithAccount(want, accountId, startOptions);
-            if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
-                *innerErrorCode != 0 && observer != nullptr) {
-                std::string bundleName = want.GetElement().GetBundleName();
-                std::string abilityName = want.GetElement().GetAbilityName();
-                std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
-                observer->OnInstallFinished(bundleName, abilityName, startTime, *innerErrorCode);
-            }
-        };
-
-        NapiAsyncTask::CompleteCallback complete =
-            [innerErrorCode](napi_env env, NapiAsyncTask& task, int32_t status) {
-                if (*innerErrorCode == 0) {
-                    HILOG_ERROR("StartAbility is success");
-                    task.Resolve(env, CreateJsUndefined(env));
-                } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
-                }
-            };
+        auto execute = GetStartAbilityExecFunc(want, startOptions, accountId, unwrapArgc != ARGC_TWO, innerErrorCode);
+        auto complete = GetSimpleCompleteFunc(innerErrorCode);
 
         napi_value lastParam = (info.argc == unwrapArgc) ? nullptr : info.argv[unwrapArgc];
         napi_value result = nullptr;
@@ -701,14 +654,17 @@ private:
         }
         connection->SetJsConnectionObject(value);
         ConnectionKey key;
-        key.id = g_serialNumber;
-        key.want = want;
-        connection->SetConnectionId(key.id);
-        g_connects.emplace(key, connection);
-        if (g_serialNumber < INT32_MAX) {
-            g_serialNumber++;
-        } else {
-            g_serialNumber = 0;
+        {
+            std::lock_guard guard(g_connectsMutex);
+            key.id = g_serialNumber;
+            key.want = want;
+            connection->SetConnectionId(key.id);
+            g_connects.emplace(key, connection);
+            if (g_serialNumber < INT32_MAX) {
+                g_serialNumber++;
+            } else {
+                g_serialNumber = 0;
+            }
         }
         HILOG_DEBUG("Unable to find connection, make new one");
         return true;
@@ -742,7 +698,7 @@ private:
                     return;
                 }
                 if (connection == nullptr) {
-                    HILOG_WARN("connection nullptr");
+                    HILOG_WARN("connection null");
                     task.Reject(env, CreateJsError(env, ERROR_CODE_TWO, "not found connection"));
                     return;
                 }
@@ -765,6 +721,7 @@ private:
     void FindConnection(AAFwk::Want& want, sptr<JSServiceExtensionConnection>& connection, int64_t& connectId) const
     {
         HILOG_INFO("Disconnect ability begin, connection:%{public}d.", static_cast<int32_t>(connectId));
+        std::lock_guard guard(g_connectsMutex);
         auto item = std::find_if(g_connects.begin(),
             g_connects.end(),
             [&connectId](const auto &obj) {
@@ -931,6 +888,91 @@ private:
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
+
+    napi_value OnRequestModalUIExtension(napi_env env, NapiCallbackInfo& info)
+    {
+        HILOG_DEBUG("called");
+
+        if (info.argc < ARGC_ONE) {
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+
+        AAFwk::Want want;
+        if (!AppExecFwk::UnwrapWant(env, info.argv[0], want)) {
+            HILOG_ERROR("Failed to parse want!");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return CreateJsUndefined(env);
+        }
+
+        NapiAsyncTask::CompleteCallback complete =
+            [weak = context_, want](napi_env env, NapiAsyncTask& task, int32_t status) {
+            auto context = weak.lock();
+            if (!context) {
+                HILOG_WARN("context is released");
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT));
+                return;
+            }
+            auto errcode = context->RequestModalUIExtension(want);
+            if (errcode == 0) {
+                task.Resolve(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, errcode));
+            }
+        };
+
+        napi_value lastParam = (info.argc > ARGC_ONE) ? info.argv[ARGC_ONE] : nullptr;
+        napi_value result = nullptr;
+        NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnRequestModalUIExtension",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        return result;
+    }
+
+    NapiAsyncTask::ExecuteCallback GetStartAbilityExecFunc(const AAFwk::Want &want,
+        const AAFwk::StartOptions &startOptions, int32_t userId, bool useOption, std::shared_ptr<int> retCode)
+    {
+        return [weak = context_, want, startOptions, useOption, userId, retCode,
+            &observer = freeInstallObserver_]() {
+            HILOG_DEBUG("startAbility exec begin");
+            if (!retCode) {
+                HILOG_ERROR("retCode null");
+                return;
+            }
+            auto context = weak.lock();
+            if (!context) {
+                HILOG_WARN("context is released");
+                *retCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
+            }
+
+            useOption ? *retCode = context->StartAbilityWithAccount(want, userId, startOptions) :
+                *retCode = context->StartAbilityWithAccount(want, userId);
+            if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
+                *retCode != 0 && observer != nullptr) {
+                std::string bundleName = want.GetElement().GetBundleName();
+                std::string abilityName = want.GetElement().GetAbilityName();
+                std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
+                observer->OnInstallFinished(bundleName, abilityName, startTime, *retCode);
+            }
+        };
+    }
+
+    NapiAsyncTask::CompleteCallback GetSimpleCompleteFunc(std::shared_ptr<int> retCode)
+    {
+        return [retCode](napi_env env, NapiAsyncTask& task, int32_t) {
+            if (!retCode) {
+                HILOG_ERROR("StartAbility is success");
+                task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                return;
+            }
+            if (*retCode == 0) {
+                HILOG_INFO("StartAbility is success");
+                task.Resolve(env, CreateJsUndefined(env));
+            } else {
+                task.Reject(env, CreateJsErrorByNativeErr(env, *retCode));
+            }
+        };
+    }
 };
 } // namespace
 
@@ -977,15 +1019,9 @@ napi_value CreateJsServiceExtensionContext(napi_env env, std::shared_ptr<Service
         JsServiceExtensionContext::StopServiceExtensionAbilityWithAccount);
     BindNativeFunction(env, object, "startRecentAbility", moduleName,
         JsServiceExtensionContext::StartRecentAbility);
-
+    BindNativeFunction(env, object, "requestModalUIExtension", moduleName,
+        JsServiceExtensionContext::RequestModalUIExtension);
     return object;
-}
-
-// to do
-NativeValue* CreateJsServiceExtensionContext(NativeEngine& engine, std::shared_ptr<ServiceExtensionContext> context)
-{
-    return reinterpret_cast<NativeValue*>(CreateJsServiceExtensionContext(
-        reinterpret_cast<napi_env>(&engine), context));
 }
 
 JSServiceExtensionConnection::JSServiceExtensionConnection(napi_env env) : env_(env) {}
@@ -1132,21 +1168,24 @@ void JSServiceExtensionConnection::HandleOnAbilityDisconnectDone(const AppExecFw
     }
 
     // release connect
-    HILOG_DEBUG("OnAbilityDisconnectDone g_connects.size:%{public}zu", g_connects.size());
-    std::string bundleName = element.GetBundleName();
-    std::string abilityName = element.GetAbilityName();
-    auto item = std::find_if(g_connects.begin(),
-        g_connects.end(),
-        [bundleName, abilityName, connectionId = connectionId_](
-            const auto &obj) {
-            return (bundleName == obj.first.want.GetBundle()) &&
-                   (abilityName == obj.first.want.GetElement().GetAbilityName()) &&
-                   connectionId == obj.first.id;
-        });
-    if (item != g_connects.end()) {
-        // match bundlename && abilityname
-        g_connects.erase(item);
-        HILOG_DEBUG("OnAbilityDisconnectDone erase g_connects.size:%{public}zu", g_connects.size());
+    {
+        std::lock_guard guard(g_connectsMutex);
+        HILOG_DEBUG("OnAbilityDisconnectDone g_connects.size:%{public}zu", g_connects.size());
+        std::string bundleName = element.GetBundleName();
+        std::string abilityName = element.GetAbilityName();
+        auto item = std::find_if(g_connects.begin(),
+            g_connects.end(),
+            [bundleName, abilityName, connectionId = connectionId_](
+                const auto &obj) {
+                return (bundleName == obj.first.want.GetBundle()) &&
+                    (abilityName == obj.first.want.GetElement().GetAbilityName()) &&
+                    connectionId == obj.first.id;
+            });
+        if (item != g_connects.end()) {
+            // match bundlename && abilityname
+            g_connects.erase(item);
+            HILOG_DEBUG("OnAbilityDisconnectDone erase g_connects.size:%{public}zu", g_connects.size());
+        }
     }
     napi_call_function(env_, obj, method, ARGC_ONE, argv, nullptr);
 }

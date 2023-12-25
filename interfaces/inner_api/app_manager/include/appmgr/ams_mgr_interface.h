@@ -176,6 +176,8 @@ public:
 
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) = 0;
 
+    virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) = 0;
+
     virtual int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) = 0;
 
     /**
@@ -239,6 +241,13 @@ public:
      */
     virtual bool IsAttachDebug(const std::string &bundleName) = 0;
 
+    /**
+     * To clear the process by ability token.
+     *
+     * @param token the unique identification to the ability.
+     */
+    virtual void ClearProcessByToken(sptr<IRemoteObject> token) {}
+
     enum class Message {
         LOAD_ABILITY = 0,
         TERMINATE_ABILITY,
@@ -271,6 +280,8 @@ public:
         DETACH_APP_DEBUG,
         REGISTER_ABILITY_DEBUG_RESPONSE,
         IS_ATTACH_DEBUG,
+        START_SPECIFIED_PROCESS,
+        CLEAR_PROCESS_BY_TOKEN,
     };
 };
 }  // namespace AppExecFwk

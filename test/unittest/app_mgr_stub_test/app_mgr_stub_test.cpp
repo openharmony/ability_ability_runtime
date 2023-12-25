@@ -15,7 +15,13 @@
 
 #include <gtest/gtest.h>
 
+#define private public
+#define protected public
+#include "app_foreground_state_observer_stub.h"
 #include "app_mgr_stub.h"
+#undef private
+#undef protected
+
 #include "hilog_wrapper.h"
 #include "mock_app_mgr_service.h"
 
@@ -27,6 +33,14 @@ namespace AppExecFwk {
 namespace {
 const int32_t USER_ID = 100;
 }  // namespace
+
+class AppForegroundStateObserverMock : public AppForegroundStateObserverStub {
+public:
+    AppForegroundStateObserverMock() = default;
+    virtual ~AppForegroundStateObserverMock() = default;
+    void OnAppStateChanged(const AppStateData &appStateData) override
+    {}
+};
 
 class AppMgrStubTest : public testing::Test {
 public:
@@ -293,7 +307,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyFault_001, TestSize.Level1)
     data.WriteParcelable(&faultData);
     EXPECT_CALL(*mockAppMgrService_, NotifyAppFault(_)).Times(1);
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
 
@@ -318,8 +332,111 @@ HWTEST_F(AppMgrStubTest, HandleNotifyFaultBySA_001, TestSize.Level1)
     data.WriteParcelable(&faultData);
     EXPECT_CALL(*mockAppMgrService_, NotifyAppFaultBySA(_)).Times(1);
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(IAppMgr::Message::NOTIFY_APP_FAULT_BY_SA), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_APP_FAULT_BY_SA), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
-}  // namespace AppExecFwk
-}  // namespace OHOS
+
+/**
+ * @tc.name: HandleChangeAppGcState_001
+ * @tc.desc: Handle change app Gc state.
+ * @tc.type: FUNC
+ * @tc.require: issuesI85VVU
+ */
+HWTEST_F(AppMgrStubTest, HandleChangeAppGcState_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    WriteInterfaceToken(data);
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    auto result = mockAppMgrService_->OnRemoteRequest(
+            static_cast<uint32_t>(AppMgrInterfaceCode::CHANGE_APP_GC_STATE), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: IsApplicationRunning_001
+ * @tc.desc: On remote request to query the running status of the application.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, IsApplicationRunning_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    WriteInterfaceToken(data);
+    std::string bundleName = "testBundleName";
+    bool isRunning = false;
+    data.WriteString(bundleName);
+    data.WriteBool(isRunning);
+
+    EXPECT_CALL(*mockAppMgrService_, IsApplicationRunning(_, _)).Times(1);
+
+    auto result = mockAppMgrService_->OnRemoteRequest(
+        static_cast<uint32_t>(AppMgrInterfaceCode::IS_APPLICATION_RUNNING), data, reply, option);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.number: HandleRegisterAbilityForegroundStateObserver_0100
+ * @tc.desc: Verify it when write result success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleRegisterAbilityForegroundStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = mockAppMgrService_->HandleRegisterAbilityForegroundStateObserver(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.number: HandleUnregisterAbilityForegroundStateObserver_0100
+ * @tc.desc: Verify it when write result success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUnregisterAbilityForegroundStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto result = mockAppMgrService_->HandleUnregisterAbilityForegroundStateObserver(data, reply);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleRegisterAppForegroundStateObserver_0100
+ * @tc.desc: Test when callback is not nullptr the return of writeInt32 is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleRegisterAppForegroundStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> object = new (std::nothrow) AppForegroundStateObserverMock();
+    data.WriteRemoteObject(object);
+    int32_t pid = 1;
+    reply.WriteInt32(pid);
+    auto res = mockAppMgrService_->HandleRegisterAppForegroundStateObserver(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleUnregisterAppForegroundStateObserver_0100
+ * @tc.desc: Test when callback is not nullptr the return of writeInt32 is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUnregisterAppForegroundStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> object = new (std::nothrow) AppForegroundStateObserverMock();
+    data.WriteRemoteObject(object);
+    int32_t pid = 1;
+    reply.WriteInt32(pid);
+    auto res = mockAppMgrService_->HandleUnregisterAppForegroundStateObserver(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+} // namespace AppExecFwk
+} // namespace OHOS

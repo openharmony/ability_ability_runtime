@@ -197,13 +197,13 @@ public:
             return ERR_INVALID_VALUE;
         }
     }
-    ErrCode GetRunningFormInfos(std::vector<RunningFormInfo> &runningFormInfos)
+    ErrCode GetRunningFormInfos(bool isUnusedIncluded, std::vector<RunningFormInfo> &runningFormInfos)
     {
         return ERR_OK;
     }
 
-    ErrCode GetRunningFormInfosByBundleName(const std::string &bundleName,
-        std::vector<RunningFormInfo> &runningFormInfos)
+    ErrCode GetRunningFormInfosByBundleName(
+        const std::string &bundleName, bool isUnusedIncluded, std::vector<RunningFormInfo> &runningFormInfos)
     {
         return ERR_OK;
     }
@@ -216,6 +216,18 @@ public:
 
     ErrCode RegisterFormRemoveObserverByBundle(const std::string bundleName,
         const sptr<IRemoteObject> &callerToken)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode RegisterClickEventObserver(
+        const std::string &bundleName, const std::string &formEventType, const sptr<IRemoteObject> &observer) override
+    {
+        return ERR_OK;
+    }
+
+    ErrCode UnregisterClickEventObserver(
+        const std::string &bundleName, const std::string &formEventType, const sptr<IRemoteObject> &observer) override
     {
         return ERR_OK;
     }

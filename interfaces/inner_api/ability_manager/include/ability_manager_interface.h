@@ -26,13 +26,17 @@
 #include "ability_scheduler_interface.h"
 #include "ability_start_setting.h"
 #include "ability_state.h"
+#include "ability_state_data.h"
 #include "app_debug_listener_interface.h"
+#include "auto_startup_info.h"
 #include "extension_running_info.h"
 #include "free_install_observer_interface.h"
 #include "iability_controller.h"
 #include "iability_manager_collaborator.h"
 #include "iacquire_share_data_callback_interface.h"
 #include "icomponent_interception.h"
+#include "insight_intent_execute_param.h"
+#include "insight_intent_execute_result.h"
 #include "iprepare_terminate_callback_interface.h"
 #include "mission_info.h"
 #include "mission_listener_interface.h"
@@ -45,18 +49,24 @@
 #include "start_options.h"
 #include "stop_user_callback.h"
 #include "system_memory_attr.h"
+#include "ui_extension_ability_connect_info.h"
 #include "ui_extension_window_command.h"
 #include "uri.h"
 #include "want.h"
 #include "want_receiver_interface.h"
 #include "want_sender_info.h"
 #include "want_sender_interface.h"
+#include "dialog_session_info.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window_manager_service_handler.h"
 #endif
 
 namespace OHOS {
 namespace AAFwk {
+using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
+using InsightIntentExecuteParam = AppExecFwk::InsightIntentExecuteParam;
+using InsightIntentExecuteResult = AppExecFwk::InsightIntentExecuteResult;
+using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
 constexpr const char* ABILITY_MANAGER_SERVICE_NAME = "AbilityManagerService";
 const int DEFAULT_INVAL_VALUE = -1;
 const int DELAY_LOCAL_FREE_INSTALL_TIMEOUT = 40000;
@@ -99,6 +109,21 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE) = 0;
 
     /**
+     * StartAbility by insight intent, send want to ability manager service.
+     *
+     * @param want Ability want.
+     * @param callerToken caller ability token.
+     * @param intentId insight intent id.
+     * @param userId userId of target ability.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t StartAbilityByInsightIntent(
+        const Want &want,
+        const sptr<IRemoteObject> &callerToken,
+        uint64_t intentId,
+        int32_t userId = DEFAULT_INVAL_VALUE) = 0;
+
+    /**
      * Starts a new ability with specific start settings.
      *
      * @param want Indicates the ability to start.
@@ -136,6 +161,7 @@ public:
      *
      * @param want the want of the ability to start.
      * @param callerToken caller ability token.
+     * @param asCallerSourceToken source caller ability token.
      * @param userId Designation User ID.
      * @param requestCode the resultCode of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
@@ -143,8 +169,10 @@ public:
     virtual int StartAbilityAsCaller(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
+        sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE)
+        int requestCode = DEFAULT_INVAL_VALUE,
+        bool isSendDialogResult = false)
     {
         return 0;
     }
@@ -155,6 +183,7 @@ public:
      * @param want the want of the ability to start.
      * @param startOptions Indicates the options used to start.
      * @param callerToken caller ability token.
+     * @param asCallerSourceToken source caller ability token.
      * @param userId Designation User ID.
      * @param requestCode the resultCode of the ability to start.
      * @return Returns ERR_OK on success, others on failure.
@@ -163,6 +192,7 @@ public:
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,
+        sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE)
     {
@@ -229,6 +259,16 @@ public:
         return 0;
     }
 
+  /**
+     * Create UIExtension with want, send want to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int RequestModalUIExtension(const Want &want)
+    {
+        return 0;
+    }
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
      *
@@ -287,7 +327,7 @@ public:
         return {};
     }
 
-    virtual AppExecFwk::ElementName GetElementNameByToken(const sptr<IRemoteObject> &token,
+    virtual AppExecFwk::ElementName GetElementNameByToken(sptr<IRemoteObject> token,
         bool isNeedLocalDeviceId = true)
     {
         return {};
@@ -440,10 +480,12 @@ public:
      * @param connect, callback used to notify caller the result of connecting or disconnecting.
      * @param sessionInfo the extension session info of the ability to connect.
      * @param userId, the extension runs in.
+     * @param connectInfo the connect info.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int ConnectUIExtensionAbility(const Want &want, const sptr<IAbilityConnection> &connect,
-        const sptr<SessionInfo> &sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE)
+        const sptr<SessionInfo> &sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE,
+        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr)
     {
         return 0;
     }
@@ -488,10 +530,10 @@ public:
     virtual int AttachAbilityThread(const sptr<IAbilityScheduler> &scheduler, const sptr<IRemoteObject> &token) = 0;
 
     /**
-     * AbilityTransitionDone, ability call this interface after lift cycle was changed.
+     * AbilityTransitionDone, ability call this interface after life cycle was changed.
      *
      * @param token,.ability's token.
-     * @param state,.the state of ability lift cycle.
+     * @param state,.the state of ability life cycle.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData) = 0;
@@ -575,7 +617,7 @@ public:
      * @param bundleName, bundle name in Application record.
      * @return
      */
-    virtual int ClearUpApplicationData(const std::string &bundleName) = 0;
+    virtual int ClearUpApplicationData(const std::string &bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
     /**
      * Uninstall app
@@ -589,7 +631,7 @@ public:
     virtual sptr<IWantSender> GetWantSender(
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) = 0;
 
-    virtual int SendWantSender(const sptr<IWantSender> &target, const SenderInfo &senderInfo) = 0;
+    virtual int SendWantSender(sptr<IWantSender> target, const SenderInfo &senderInfo) = 0;
 
     virtual void CancelWantSender(const sptr<IWantSender> &sender) = 0;
 
@@ -703,6 +745,11 @@ public:
 
     virtual int StopUser(int userId, const sptr<IStopUserCallback> &callback) = 0;
 
+    virtual int LogoutUser(int32_t userId)
+    {
+        return 0;
+    }
+
     virtual int SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state)
     {
         return 0;
@@ -748,6 +795,17 @@ public:
     {
         return 0;
     }
+
+    virtual int GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &dialogSessionInfo)
+    {
+        return 0;
+    }
+
+    virtual int SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllow)
+    {
+        return 0;
+    }
+
 #endif
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) = 0;
@@ -1139,6 +1197,107 @@ public:
     }
 
     /**
+     * @brief Register auto start up callback for system api.
+     * @param callback The point of JsAbilityAutoStartupCallBack.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Unregister auto start up callback for system api.
+     * @param callback The point of JsAbilityAutoStartupCallBack.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Set every application auto start up state.
+     * @param info The auto startup info,include bundle name, module name, ability name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationAutoStartup(const AutoStartupInfo &info)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Cancel every application auto start up .
+     * @param info The auto startup info,include bundle name, module name, ability name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CancelApplicationAutoStartup(const AutoStartupInfo &info)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Query auto startup state all application.
+     * @param infoList Output parameters, return auto startup info list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Register auto start up callback.
+     * @param callback The point of JsAbilityAutoStartupCallBack.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterAutoStartupCallback(const sptr<IRemoteObject> &callback)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Unregister auto start up callback.
+     * @param callback The point of JsAbilityAutoStartupCallBack.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterAutoStartupCallback(const sptr<IRemoteObject> &callback)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Set current application auto start up state.
+     * @param info The auto startup info,include bundle name, module name, ability name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetAutoStartup(const AutoStartupInfo &info)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Cancel current application auto start up state.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CancelAutoStartup(const AutoStartupInfo &info)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Check current application auto start up state.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @param isAutoStartup Output parameters, return auto start up state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t IsAutoStartup(const AutoStartupInfo &info, bool &isAutoStartup)
+    {
+        return 0;
+    }
+
+    /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
      *
      * @param sessionInfo the session info of the ability to start.
@@ -1155,14 +1314,14 @@ public:
      * @param listener App debug listener.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) = 0;
+    virtual int32_t RegisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener) = 0;
 
     /**
      * @brief Unregister app debug listener.
      * @param listener App debug listener.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener) = 0;
+    virtual int32_t UnregisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener) = 0;
 
     /**
      * @brief Attach app debug.
@@ -1179,6 +1338,16 @@ public:
     virtual int32_t DetachAppDebug(const std::string &bundleName) = 0;
 
     /**
+     * @brief Execute intent.
+     * @param key The key of intent executing client.
+     * @param callerToken Caller ability token.
+     * @param param The Intent execute param.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ExecuteIntent(uint64_t key, const sptr<IRemoteObject> &callerToken,
+        const InsightIntentExecuteParam &param) = 0;
+
+    /**
      * @brief Check if ability controller can start.
      * @param want The want of ability to start.
      * @return Return true to allow ability to start, or false to reject.
@@ -1187,6 +1356,57 @@ public:
     {
         return true;
     }
+
+    /**
+     * @brief Called when insight intent execute finished.
+     *
+     * @param token ability's token.
+     * @param intentId insight intent id.
+     * @param result insight intent execute result.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
+        const InsightIntentExecuteResult &result) = 0;
+
+    /**
+     * @brief Set application auto start up state by EDM.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @param flag Indicate whether to allow the application to change the auto start up state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) = 0;
+
+    /**
+     * @brief Cancel application auto start up state by EDM.
+     * @param info The auto startup info, include bundle name, module name, ability name.
+     * @param flag Indicate whether to allow the application to change the auto start up state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) = 0;
+
+    /**
+     * @brief Get foreground ui abilities.
+     * @param list Foreground ui abilities.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list) = 0;
+
+    /**
+     * @brief Open file by uri.
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @return int The file descriptor.
+     */
+    virtual int32_t OpenFile(const Uri& uri, uint32_t flag)
+    {
+        return 0;
+    }
+
+    /**
+     * @brief Update session info.
+     * @param sessionInfos The vector of session info.
+     */
+    virtual void UpdateSessionInfoBySCB(const std::vector<SessionInfo> &sessionInfos, int32_t userId) {}
 };
 }  // namespace AAFwk
 }  // namespace OHOS

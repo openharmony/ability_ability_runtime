@@ -17,6 +17,9 @@
 #define OHOS_ABILITY_RUNTIME_JS_SERVICE_EXTENSION_H
 
 #include "configuration.h"
+#include "insight_intent_execute_param.h"
+#include "insight_intent_execute_result.h"
+#include "insight_intent_executor_info.h"
 #ifdef SUPPORT_GRAPHICS
 #include "display_manager.h"
 #include "system_ability_status_change_stub.h"
@@ -24,8 +27,6 @@
 #include "service_extension.h"
 
 class NativeReference;
-class NativeValue;
-class NativeObject;
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -124,6 +125,13 @@ public:
      * value of startId is 6.
      */
     virtual void OnCommand(const AAFwk::Want &want, bool restart, int startId) override;
+    
+    /**
+     * @brief Called back when Service is started by intent driver.
+     *
+     * @param want Indicates the want of intent to handle.
+     */
+    bool HandleInsightIntent(const AAFwk::Want &want) override;
 
     /**
      * @brief Called when this extension enters the <b>STATE_STOP</b> state.
@@ -155,21 +163,27 @@ public:
     virtual void Dump(const std::vector<std::string> &params, std::vector<std::string> &info) override;
 
 private:
-    NativeValue* CallObjectMethod(const char* name, NativeValue* const* argv = nullptr, size_t argc = 0);
+    napi_value CallObjectMethod(const char* name, napi_value const *argv = nullptr, size_t argc = 0);
 
-    void BindContext(NativeEngine& engine, NativeObject* obj);
+    void BindContext(napi_env env, napi_value obj);
 
     void GetSrcPath(std::string &srcPath);
 
-    NativeValue *CallOnConnect(const AAFwk::Want &want);
+    napi_value CallOnConnect(const AAFwk::Want &want);
 
-    NativeValue *CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
+    napi_value CallOnDisconnect(const AAFwk::Want &want, bool withResult = false);
 
-    bool CheckPromise(NativeValue *result);
+    bool CheckPromise(napi_value result);
 
-    bool CallPromise(NativeValue *result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
+    bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
 
     void ListenWMS();
+    
+    bool GetInsightIntentExecutorInfo(const Want &want,
+        const std::shared_ptr<AppExecFwk::InsightIntentExecuteParam> &executeParam,
+        InsightIntentExecutorInfo &executorInfo);
+
+    bool OnInsightIntentExecuteDone(uint64_t intentId, const AppExecFwk::InsightIntentExecuteResult &result) override;
 
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;

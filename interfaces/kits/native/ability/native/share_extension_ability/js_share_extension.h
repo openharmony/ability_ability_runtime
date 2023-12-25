@@ -20,8 +20,6 @@
 #include "share_extension.h"
 
 class NativeReference;
-class NativeValue;
-class NativeObject;
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -107,7 +105,7 @@ public:
      * The extension in the <b>STATE_FOREGROUND</b> state is visible.
      * You can override this function to implement your own processing logic.
      */
-    void OnForeground(const Want &want) override;
+    void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo) override;
 
     /**
      * @brief Called when this extension enters the <b>STATE_BACKGROUND</b> state.

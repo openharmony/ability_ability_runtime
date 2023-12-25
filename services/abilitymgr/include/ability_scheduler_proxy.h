@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -321,6 +321,15 @@ public:
      */
     void DumpAbilityInfo(const std::vector<std::string> &params, std::vector<std::string> &info) override;
     void CallRequest() override;
+    int32_t CreateModalUIExtension(const Want &want) override;
+
+    void OnExecuteIntent(const Want &want) override;
+
+    /**
+     * @brief Update sessionToken.
+     * @param sessionToken The token of session.
+     */
+    void UpdateSessionToken(sptr<IRemoteObject> sessionToken) override;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     int BlockAbility() override;
@@ -328,6 +337,7 @@ public:
 
 private:
     bool WriteInterfaceToken(MessageParcel &data);
+    int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
 private:
     static inline BrokerDelegator<AbilitySchedulerProxy> delegator_;

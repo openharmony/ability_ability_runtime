@@ -35,10 +35,8 @@ public:
      * @param uri The file uri.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetBundleName The user of uri.
-     * @param autoremove the uri is temperarily or not
      */
-    int GrantUriPermission(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName, int autoremove, int32_t appIndex = 0);
+    int GrantUriPermission(const Uri &uri, unsigned int flag, const std::string targetBundleName, int32_t appIndex = 0);
 
     /**
      * @brief Authorize the uri permission of to targetBundleName.
@@ -46,10 +44,34 @@ public:
      * @param uriVec The file uri list.
      * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
      * @param targetBundleName The user of uri.
-     * @param autoremove the uri is temperarily or not
      */
     int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string targetBundleName, int autoremove, int32_t appIndex = 0);
+        const std::string targetBundleName, int32_t appIndex = 0);
+
+    /**
+     * @brief Authorize the uri permission to targetBundleName for 2in1.
+     *
+     * @param uri The file uri.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param targetBundleName The user of uri.
+     * @param appIndex The index of application in sandbox.
+     * @return Returns true if the authorization is successful, otherwise returns false.
+     */
+    int GrantUriPermissionFor2In1(
+        const Uri &uri, unsigned int flag, const std::string &targetBundleName, int32_t appIndex = 0);
+
+    /**
+     * @brief Authorize the uri permission to targetBundleName for 2in1.
+     *
+     * @param uriVec The file urilist.
+     * @param flag Want::FLAG_AUTH_READ_URI_PERMISSION or Want::FLAG_AUTH_WRITE_URI_PERMISSION.
+     * @param targetBundleName The user of uri.
+     * @param appIndex The index of application in sandbox.
+     * @param isSystemAppCall The flag of system application called.
+     * @return Returns true if the authorization is successful, otherwise returns false.
+     */
+    int GrantUriPermissionFor2In1(const std::vector<Uri> &uriVec, unsigned int flag,
+        const std::string &targetBundleName, int32_t appIndex = 0, bool isSystemAppCall = false);
 
     /**
      * @brief Clear user's uri authorization record with auto remove flag.
@@ -90,6 +112,8 @@ public:
      * @param tokenId A tokenId of an application.
      */
     bool VerifyUriPermission(const Uri& uri, uint32_t flag, uint32_t tokenId);
+
+    bool IsAuthorizationUriAllowed(uint32_t fromTokenId);
 
     void OnLoadSystemAbilitySuccess(const sptr<IRemoteObject> &remoteObject);
     void OnLoadSystemAbilityFail();

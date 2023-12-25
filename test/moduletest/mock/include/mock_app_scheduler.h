@@ -33,7 +33,7 @@ public:
 
     MOCK_METHOD0(ScheduleForegroundApplication, void());
     MOCK_METHOD0(ScheduleBackgroundApplication, void());
-    MOCK_METHOD0(ScheduleTerminateApplication, void());
+    MOCK_METHOD1(ScheduleTerminateApplication, void(bool));
     MOCK_METHOD2(ScheduleLaunchApplication, void(const AppExecFwk::AppLaunchData&, const Configuration& config));
     MOCK_METHOD3(ScheduleLaunchAbility, void(const AppExecFwk::AbilityInfo&, const sptr<IRemoteObject>&,
         const std::shared_ptr<AAFwk::Want>&));
@@ -45,7 +45,7 @@ public:
     MOCK_METHOD2(ScheduleHeapMemory, void(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo));
     MOCK_METHOD0(ScheduleLowMemory, void());
     MOCK_METHOD1(ScheduleNotifyAppFault, int32_t(const FaultData &));
-    MOCK_METHOD1(ScheduleOnGcStateChange, int32_t(int32_t state));
+    MOCK_METHOD1(ScheduleChangeAppGcState, int32_t(int32_t state));
     MOCK_METHOD1(RegisterAppDebugListener, int32_t(const sptr<AppExecFwk::IAppDebugListener> &listener));
     MOCK_METHOD1(UnregisterAppDebugListener, int32_t(const sptr<AppExecFwk::IAppDebugListener> &listener));
     MOCK_METHOD1(AttachAppDebug, int32_t(const std::string &bundleName));

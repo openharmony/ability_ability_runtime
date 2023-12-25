@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,24 +15,24 @@
 
 #include "napi_common_want.h"
 
-#include "hilog_wrapper.h"
-#include "ipc_skeleton.h"
 #include "napi_common_util.h"
 #include "array_wrapper.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
+#include "hilog_wrapper.h"
 #include "int_wrapper.h"
+#include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "long_wrapper.h"
+#include "napi_remote_object.h"
+#include "remote_object_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
 #include "tokenid_kit.h"
-#include "zchar_wrapper.h"
-#include "remote_object_wrapper.h"
 #include "want_params_wrapper.h"
-#include "napi_remote_object.h"
+#include "zchar_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -1209,11 +1209,6 @@ bool UnWrapAbilityResult(napi_env env, napi_value param, int &resultCode, AAFwk:
     return true;
 }
 
-NativeValue* CreateJsWant(NativeEngine &engine, const Want &want)
-{
-    return reinterpret_cast<NativeValue*>(CreateJsWant(reinterpret_cast<napi_env>(&engine), want));
-}
-
 napi_value CreateJsWant(napi_env env, const Want &want)
 {
     napi_value object = nullptr;
@@ -1230,11 +1225,6 @@ napi_value CreateJsWant(napi_env env, const Want &want)
     napi_set_named_property(env, object, "parameters", CreateJsWantParams(env, want.GetParams()));
     napi_set_named_property(env, object, "entities", CreateNativeArray(env, want.GetEntities()));
     return object;
-}
-
-NativeValue* CreateJsWantParams(NativeEngine &engine, const AAFwk::WantParams &wantParams)
-{
-    return reinterpret_cast<NativeValue*>(CreateJsWantParams(reinterpret_cast<napi_env>(&engine), wantParams));
 }
 
 napi_value CreateJsWantParams(napi_env env, const AAFwk::WantParams &wantParams)

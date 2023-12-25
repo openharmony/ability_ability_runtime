@@ -518,11 +518,11 @@ bool UnwrapParamVerifySelfPermission(
 
 void VerifySelfPermissionExecuteCallbackWork(napi_env env, void *data)
 {
-    HILOG_INFO("called.");
+    HILOG_INFO("start.");
 
     AsyncJSCallbackInfo *asyncCallbackInfo = static_cast<AsyncJSCallbackInfo *>(data);
     if (asyncCallbackInfo == nullptr) {
-        HILOG_INFO("called. asyncCallbackInfo is null");
+        HILOG_INFO("called. asyncCallbackInfo is nullptr");
         return;
     }
 
@@ -1450,7 +1450,7 @@ napi_value GetProcessInfoWrap(napi_env env, napi_callback_info info, ProcessInfo
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        HILOG_ERROR("%{public}s, Wrong argument count.", __func__);
+        HILOG_ERROR("%{public}s, argument count fail.", __func__);
         return nullptr;
     }
 
@@ -1695,7 +1695,7 @@ napi_value GetElementNameWrap(napi_env env, napi_callback_info info, ElementName
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        HILOG_ERROR("%{public}s, Wrong argument count.", __func__);
+        HILOG_ERROR("%{public}s, argument count fail.", __func__);
         return nullptr;
     }
 
@@ -1886,7 +1886,7 @@ napi_value GetProcessNameWrap(napi_env env, napi_callback_info info, ProcessName
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        HILOG_ERROR("%{public}s, Wrong argument count.", __func__);
+        HILOG_ERROR("%{public}s, parameter count error.", __func__);
         return nullptr;
     }
 
@@ -2078,7 +2078,7 @@ napi_value GetCallingBundleWrap(napi_env env, napi_callback_info info, CallingBu
 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argcAsync, args, nullptr, nullptr));
     if (argcAsync > argCountWithAsync || argcAsync > ARGS_MAX_COUNT) {
-        HILOG_ERROR("%{public}s, Wrong argument count.", __func__);
+        HILOG_ERROR("%{public}s, parameter count fail.", __func__);
         return nullptr;
     }
 
@@ -3213,7 +3213,7 @@ napi_value NapiJsContext::OnRequestPermissionsFromUser(napi_env env, napi_callba
 
     auto callback = argc == ARGS_THREE ? argv[PARAM2] : nullptr;
     napi_value result = nullptr;
-    auto napiAsyncTask = 
+    auto napiAsyncTask =
         AbilityRuntime::CreateAsyncTaskWithLastParam(env, callback, nullptr, nullptr, &result).release();
 
     int32_t errorCode = NAPI_ERR_NO_ERROR;
@@ -3258,12 +3258,12 @@ napi_value NapiJsContext::OnGetBundleName(napi_env env, napi_callback_info info)
     auto execute = [obj = this, name = bundleName, value = errorVal] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            HILOG_ERROR("task execute error, the ability is nullptr");
+            HILOG_ERROR("task execute wrong, the ability is nullptr");
             return;
         }
         if (name == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
-            HILOG_ERROR("task execute error, name is nullptr");
+            HILOG_ERROR("task execute wrong, name is nullptr");
             return;
         }
         name->name = obj->ability_->GetBundleName();
@@ -3295,14 +3295,14 @@ napi_value NapiJsContext::OnVerifyPermission(napi_env env, napi_callback_info in
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc == ARGS_ZERO || argc > ARGS_THREE) {
         HILOG_ERROR("input params count error, argc=%{public}zu", argc);
-        return CreateJsUndefined(env);
+        return CreateJsNull(env);
     }
 
     auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     std::string permission("");
     if (!ConvertFromJsValue(env, argv[PARAM0], permission)) {
         HILOG_ERROR("input params string error");
-        return CreateJsUndefined(env);
+        return CreateJsNull(env);
     }
     JsPermissionOptions options;
     bool flagCall = UnwarpVerifyPermissionParams(env, info, options);
@@ -3320,7 +3320,7 @@ napi_value NapiJsContext::OnVerifyPermission(napi_env env, napi_callback_info in
     };
     auto complete = [obj = this, value = errorVal] (napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*value == static_cast<int32_t>(NAPI_ERR_ACE_ABILITY)) {
-            task.Reject(env, CreateJsError( env, *value, obj->ConvertErrorCode(*value)));
+            task.Reject(env, CreateJsError(env, *value, obj->ConvertErrorCode(*value)));
             return;
         }
         task.Resolve(env, CreateJsValue(env, *value));
@@ -3336,7 +3336,7 @@ napi_value NapiJsContext::OnVerifyPermission(napi_env env, napi_callback_info in
 
 napi_value NapiJsContext::OnGetApplicationInfo(napi_env env, napi_callback_info info)
 {
-    HILOG_DEBUG("called");
+    HILOG_DEBUG("OnGetApplicationInfo called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3364,6 +3364,7 @@ napi_value NapiJsContext::OnGetApplicationInfo(napi_env env, napi_callback_info 
     auto complete = [obj = this, info = infoData, value = errorVal]
         (napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
+            HILOG_DEBUG("errorVal is 0 or JsHapModuleInfo is null");
             auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(env, CreateJsError(env, ecode, obj->ConvertErrorCode(ecode)));
             return;
@@ -3381,7 +3382,7 @@ napi_value NapiJsContext::OnGetApplicationInfo(napi_env env, napi_callback_info 
 
 napi_value NapiJsContext::OnGetProcessInfo(napi_env env, napi_callback_info info)
 {
-    HILOG_DEBUG("called");
+    HILOG_DEBUG("OnGetProcessInfo called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3427,7 +3428,7 @@ napi_value NapiJsContext::OnGetProcessInfo(napi_env env, napi_callback_info info
 
 napi_value NapiJsContext::OnGetElementName(napi_env env, napi_callback_info info)
 {
-    HILOG_DEBUG("called");
+    HILOG_DEBUG("OnGetElementName called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3476,7 +3477,7 @@ napi_value NapiJsContext::OnGetElementName(napi_env env, napi_callback_info info
 
 napi_value NapiJsContext::OnGetProcessName(napi_env env, napi_callback_info info)
 {
-    HILOG_DEBUG("called");
+    HILOG_DEBUG("OnGetProcessName called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3490,12 +3491,12 @@ napi_value NapiJsContext::OnGetProcessName(napi_env env, napi_callback_info info
     auto execute = [obj = this, name = processName, value = errorVal] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            HILOG_ERROR("task execute error, the ability is nullptr");
+            HILOG_ERROR("task execute error, the ability is null");
             return;
         }
         if (name == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
-            HILOG_ERROR("task execute error, name is nullptr");
+            HILOG_ERROR("task execute error, name is null");
             return;
         }
         name->name = obj->ability_->GetProcessName();
@@ -3521,7 +3522,7 @@ napi_value NapiJsContext::OnGetProcessName(napi_env env, napi_callback_info info
 
 napi_value NapiJsContext::OnGetCallingBundle(napi_env env, napi_callback_info info)
 {
-    HILOG_DEBUG("called");
+    HILOG_DEBUG("OnGetCallingBundle called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3565,7 +3566,7 @@ napi_value NapiJsContext::OnGetCallingBundle(napi_env env, napi_callback_info in
 
 napi_value NapiJsContext::OnGetOrCreateLocalDir(napi_env env, napi_callback_info info)
 {
-    HILOG_DEBUG("called");
+    HILOG_DEBUG("OnGetOrCreateLocalDir called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -3598,6 +3599,7 @@ napi_value NapiJsContext::OnGetOrCreateLocalDir(napi_env env, napi_callback_info
     auto complete = [obj = this, dir = createDir, value = errorVal]
         (napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || dir == nullptr) {
+            HILOG_DEBUG("errorVal is error or JsCacheDir is nullptr");
             auto ecode = dir == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(env, CreateJsError(env, ecode, obj->ConvertErrorCode(ecode)));
             return;
@@ -3701,7 +3703,7 @@ napi_value NapiJsContext::OnSetDisplayOrientation(napi_env env, napi_callback_in
     int32_t maxRange = 3;
     if (orientation < 0 || orientation > maxRange) {
         HILOG_ERROR("wrong parameter orientation : %{public}d", orientation);
-        return CreateJsUndefined(env);
+        return CreateJsNull(env);
     }
     auto complete = [obj = this, orientationData = orientation]
         (napi_env env, NapiAsyncTask &task, int32_t status) {

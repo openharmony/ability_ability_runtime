@@ -73,9 +73,11 @@ public:
      * ScheduleTerminate, call ScheduleTerminateApplication() through proxy project,
      * Notify application to terminate.
      *
+     * @param isLastProcess When it is the last application process, pass in true.
+     *
      * @return
      */
-    void ScheduleTerminate();
+    void ScheduleTerminate(bool isLastProcess = false);
 
     /**
      * ScheduleForegroundRunning, call ScheduleForegroundApplication() through proxy project,
@@ -123,7 +125,7 @@ public:
      * @return
      */
     void ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
-    
+
     /**
      * LowMemoryWarning, call ScheduleLowMemory() through proxy project,
      * Notify application to low memory.
@@ -165,6 +167,8 @@ public:
 
     void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName);
 
+    void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName);
+
     /**
      * UpdateConfiguration, ANotify application update system environment changes.
      *
@@ -190,12 +194,20 @@ public:
      *
      * @return Is the status change completed.
      */
-    int32_t OnGcStateChange(int32_t state);
+    int32_t ChangeAppGcState(int32_t state);
 
     int32_t AttachAppDebug();
     int32_t DetachAppDebug();
 
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcess();
+
 private:
+    mutable std::mutex schedulerMutex_;
     sptr<IAppScheduler> appThread_ = nullptr;
 };
 }  // namespace AppExecFwk

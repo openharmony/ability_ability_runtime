@@ -56,6 +56,7 @@ class ConnectionRecord;
 class Mission;
 class MissionList;
 class CallContainer;
+class AbilityAppStateObserver;
 
 constexpr const char* ABILITY_TOKEN_NAME = "AbilityToken";
 constexpr const char* LAUNCHER_BUNDLE_NAME = "com.ohos.launcher";
@@ -223,14 +224,18 @@ struct AbilityRequest {
     int callerUid = -1;
     AbilityCallType callType = AbilityCallType::INVALID_TYPE;
     sptr<IRemoteObject> callerToken = nullptr;
+    sptr<IRemoteObject> asCallerSoureToken = nullptr;
     uint32_t callerAccessTokenId = -1;
     sptr<IAbilityConnection> connect = nullptr;
 
     std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
     std::string specifiedFlag;
+    int32_t userId = -1;
+    bool callSpecifiedFlagTimeout = false;
     sptr<IRemoteObject> abilityInfoCallback = nullptr;
 
     AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED;
+    AppExecFwk::ExtensionProcessMode extensionProcessMode = AppExecFwk::ExtensionProcessMode::UNDEFINED;
 
     sptr<SessionInfo> sessionInfo;
 
@@ -288,6 +293,16 @@ enum ResolveResultType {
     OK_HAS_REMOTE_OBJ,
     NG_INNER_ERROR,
 };
+
+enum class AbilityWindowState {
+    FOREGROUND = 0,
+    BACKGROUND,
+    TERMINATE,
+    FOREGROUNDING,
+    BACKGROUNDING,
+    TERMINATING
+};
+
 /**
  * @class AbilityRecord
  * AbilityRecord records ability info and states and used to schedule ability life.
@@ -326,7 +341,7 @@ public:
      *
      */
     void ForegroundAbility(uint32_t sceneFlag = 0);
-    void ForegroundAbility(const Closure &task, uint32_t sceneFlag = 0);
+    void ForegroundAbility(const Closure &task, sptr<SessionInfo> sessionInfo = nullptr, uint32_t sceneFlag = 0);
 
     /**
      * process request of foregrounding the ability.
@@ -401,9 +416,16 @@ public:
         return scheduler_;
     }
 
-    inline sptr<SessionInfo> GetSessionInfo() const
+    sptr<SessionInfo> GetSessionInfo() const;
+
+    sptr<SessionInfo> GetUIExtRequestSessionInfo() const
     {
-        return sessionInfo_;
+        return uiExtRequestSessionInfo_;
+    }
+
+    void SetUIExtRequestSessionInfo(sptr<SessionInfo> sessionInfo)
+    {
+        uiExtRequestSessionInfo_ = sessionInfo;
     }
 
     /**
@@ -536,7 +558,7 @@ public:
      * set the ability is created by connect ability mode.
      *
      */
-    void SetCreateByConnectMode();
+    void SetCreateByConnectMode(bool isCreatedByConnect = true);
 
     /**
      * active the ability.
@@ -605,7 +627,7 @@ public:
      * get the want for start ability.
      *
      */
-    const Want &GetWant() const;
+    Want GetWant() const;
 
     /**
      * get request code of the ability to start.
@@ -653,6 +675,8 @@ public:
      *
      */
     void SaveResult(int resultCode, const Want *resultWant, std::shared_ptr<CallerRecord> caller);
+
+    bool NeedConnectAfterCommand();
 
     /**
      * add connect record to the list.
@@ -807,6 +831,7 @@ public:
     int32_t GetRestartCount() const;
     void SetRestartCount(int32_t restartCount);
     void SetKeepAlive();
+    bool GetKeepAlive() const;
     int64_t GetRestartTime();
     void SetRestartTime(const int64_t restartTime);
     void SetAppIndex(const int32_t appIndex);
@@ -847,6 +872,7 @@ public:
     bool IsStartToForeground() const;
     void SetStartToForeground(const bool flag);
     void SetSessionInfo(sptr<SessionInfo> sessionInfo);
+    void UpdateSessionInfo(sptr<IRemoteObject> sessionToken);
     void SetMinimizeReason(bool fromUser);
     bool IsMinimizeFromUser() const;
     void SetClearMissionFlag(bool clearMissionFlag);
@@ -890,6 +916,34 @@ public:
     bool GetLockedState();
 
     void SetAttachDebug(const bool isAttachDebug);
+    int32_t CreateModalUIExtension(const Want &want);
+
+    AppExecFwk::ElementName GetElementName() const;
+    bool IsDebugApp() const;
+    bool IsDebug() const;
+
+    void AddAbilityWindowStateMap(uint64_t uiExtensionComponentId,
+        AbilityWindowState abilityWindowState);
+
+    void RemoveAbilityWindowStateMap(uint64_t uiExtensionComponentId);
+
+    bool IsAbilityWindowReady();
+
+    void SetAbilityWindowState(const sptr<SessionInfo> &sessionInfo,
+        WindowCommand winCmd, bool isFinished);
+
+    void SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId);
+    int32_t GetUIExtensionAbilityId() const;
+
+    void OnProcessDied();
+
+    void SetProcessName(const std::string &process);
+
+    void SetURI(const std::string &uri);
+    std::string GetURI() const;
+
+    void DoBackgroundAbilityWindowDelayed(bool needBackground);
+    bool BackgroundAbilityWindowDelayed();
 
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1);
@@ -906,9 +960,10 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
+    void RemoveAppStateObserver();
     void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
     void GrantDmsUriPermission(Want &want, std::string targetBundleName);
-    bool IsDmsCall();
+    bool IsDmsCall(Want &want);
     int32_t GetCurrentAccountId() const;
 
     /**
@@ -928,6 +983,13 @@ private:
     {
         callerAccessTokenId_ = callerAccessTokenId;
     }
+
+    bool GrantPermissionToShell(const std::vector<std::string> &uriVec, uint32_t flag, std::string targetPkg);
+
+    void GrantUriPermissionInner(
+        Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
+    void GrantUriPermissionFor2In1Inner(
+        Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
 
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
@@ -973,6 +1035,7 @@ private:
 
     static int64_t abilityRecordId;
     int recordId_ = 0;                                // record id
+    int32_t uiExtensionAbilityId_ = 0;                // uiextension ability id
     AppExecFwk::AbilityInfo abilityInfo_ = {};             // the ability info get from BMS
     AppExecFwk::ApplicationInfo applicationInfo_ = {};     // the ability info get from BMS
     std::weak_ptr<AbilityRecord> preAbilityRecord_ = {};   // who starts this ability record
@@ -1007,6 +1070,7 @@ private:
     bool isAbilityForegrounding_ = false;
 
     // service(ability) can be connected by multi-pages(abilites), so need to store this service's connections
+    mutable ffrt::mutex connRecordListMutex_;
     std::list<std::shared_ptr<ConnectionRecord>> connRecordList_ = {};
     // service(ability) onConnect() return proxy of service ability
     sptr<IRemoteObject> connRemoteObject_ = {};
@@ -1047,9 +1111,11 @@ private:
     int32_t restartCount_ = -1;
     int32_t restartMax_ = -1;
     std::string specifiedFlag_;
+    std::string uri_;
     ffrt::mutex lock_;
     mutable ffrt::mutex dumpInfoLock_;
     mutable ffrt::mutex dumpLock_;
+    mutable ffrt::mutex wantLock_;
     mutable ffrt::condition_variable dumpCondition_;
     mutable bool isDumpTimeout_ = false;
     std::vector<std::string> dumpInfos_;
@@ -1057,7 +1123,10 @@ private:
 
     // scene session
     sptr<SessionInfo> sessionInfo_ = nullptr;
-    std::unordered_set<uint64_t> sessionIds_;
+    mutable ffrt::mutex sessionLock_;
+    sptr<AbilityAppStateObserver> abilityAppStateObserver_;
+    std::map<uint64_t, AbilityWindowState> abilityWindowStateMap_;
+    sptr<SessionInfo> uiExtRequestSessionInfo_ = nullptr;
 
 #ifdef SUPPORT_GRAPHICS
     bool isStartingWindow_ = false;
@@ -1076,6 +1145,9 @@ private:
     std::string missionAffinity_ = "";
     bool lockedState_ = false;
     bool isAttachDebug_ = false;
+    bool isAppAutoStartup_ = false;
+    bool isConnected = false;
+    std::atomic_bool backgroundAbilityWindowDelayed_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

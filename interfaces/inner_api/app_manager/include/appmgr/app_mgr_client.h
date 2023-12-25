@@ -23,9 +23,11 @@
 #include "app_mem_info.h"
 #include "app_mgr_constants.h"
 #include "app_mgr_interface.h"
+#include "app_running_status_listener_interface.h"
 #include "application_info.h"
 #include "bundle_info.h"
 #include "fault_data.h"
+#include "iapplication_state_observer.h"
 #include "iapp_state_callback.h"
 #include "iconfiguration_observer.h"
 #include "iremote_object.h"
@@ -173,9 +175,11 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param userId, the user id.
      * @return
      */
-    virtual AppMgrResultCode ClearUpApplicationData(const std::string &bundleName);
+    virtual AppMgrResultCode ClearUpApplicationData(const std::string &bundleName,
+        const int32_t userId = -1);
 
     /**
      * GetAllRunningProcesses, call GetAllRunningProcesses() through proxy project.
@@ -347,6 +351,23 @@ public:
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response);
 
     /**
+     * Start specified process.
+     *
+     * @param want Want contains information wish to start.
+     * @param abilityInfo Ability information.
+     */
+    virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo);
+
+    /**
+     * Schedule new process request done.
+     *
+     * @param recordId Application record.
+     * @param want Want.
+     * @param flag flag get from OnNewProcessRequest.
+     */
+    virtual void ScheduleNewProcessRequest(const int32_t recordId, const AAFwk::Want &want, const std::string &flag);
+
+    /**
      * Schedule accept want done.
      *
      * @param recordId Application record.
@@ -471,7 +492,7 @@ public:
      * @param pid pid
      * @return Is the status change completed..
      */
-    int32_t OnGcStateChange(pid_t pid, int32_t state);
+    int32_t ChangeAppGcState(pid_t pid, int32_t state);
 
      /**
      * @brief Register app debug listener.
@@ -514,6 +535,67 @@ public:
      * @return Returns true if it is an attach debug application, otherwise it returns false.
      */
     bool IsAttachDebug(const std::string &bundleName);
+
+    /**
+     * Register application or process state observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer,
+        const std::vector<std::string> &bundleNameList = {});
+
+    /**
+     * Unregister application or process state observer.
+     * @param observer, ability token.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterApplicationStateObserver(const sptr<IApplicationStateObserver> &observer);
+
+    /**
+     * @brief Notify AbilityManagerService the page show.
+     * @param token Ability identify.
+     * @param pageStateData The data of ability's page state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyPageShow(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
+
+    /**
+     * @brief Notify AbilityManagerService the page hide.
+     * @param token Ability identify.
+     * @param pageStateData The data of ability's page state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyPageHide(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
+
+    /**
+     * Register appRunning status listener.
+     *
+     * @param listener Running status listener.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RegisterAppRunningStatusListener(const sptr<IRemoteObject> &listener);
+
+    /**
+     * Unregister appRunning status listener.
+     *
+     * @param listener Running status listener.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener);
+
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcess();
+
+    /**
+     * To clear the process by ability token.
+     *
+     * @param token the unique identification to the ability.
+     */
+    void ClearProcessByToken(sptr<IRemoteObject> token) const;
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

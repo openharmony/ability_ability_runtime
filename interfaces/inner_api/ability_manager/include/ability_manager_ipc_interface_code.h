@@ -224,6 +224,18 @@ enum class AbilityManagerInterfaceCode {
     // Deatch app debug (71)
     DETACH_APP_DEBUG = 71,
 
+    // Execute intent (72)
+    EXECUTE_INTENT = 72,
+
+    // execute insight intent done with result (73)
+    EXECUTE_INSIGHT_INTENT_DONE = 73,
+
+    // ipc id for logout user (74)
+    LOGOUT_USER = 74,
+	
+    // Get forgeround UI abilities(75)
+    GET_FOREGROUND_UI_ABILITIES = 75,
+
     // ipc id 1001-2000 for DMS
     // ipc id for starting ability (1001)
     START_ABILITY = 1001,
@@ -347,6 +359,18 @@ enum class AbilityManagerInterfaceCode {
 
     START_UI_SESSION_ABILITY_FOR_OPTIONS = 1052,
 
+    // start ability by insigt intent
+    START_ABILITY_BY_INSIGHT_INTENT = 1053,
+
+    // get dialog session info
+    GET_DIALOG_SESSION_INFO = 1054,
+
+    // send dialog result
+    SEND_DIALOG_RESULT = 1055,
+
+    // request modal UIExtension by want
+    REQUESET_MODAL_UIEXTENSION = 1056,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
@@ -422,14 +446,49 @@ enum class AbilityManagerInterfaceCode {
     MOVE_MISSION_TO_BACKGROUND = 4052,
     TERMINATE_MISSION = 4053,
     IS_ABILITY_CONTROLLER_START = 4054,
+    OPEN_FILE = 4055,
 
     GET_ABILITY_TOKEN = 5001,
 
     FORCE_EXIT_APP = 6001,
     RECORD_APP_EXIT_REASON = 6002,
 
+    // ipc id for register auto startup system callback
+    REGISTER_AUTO_STARTUP_SYSTEM_CALLBACK = 6101,
+    // ipc id for unregister auto startup system callback
+    UNREGISTER_AUTO_STARTUP_SYSTEM_CALLBACK = 6102,
+    // ipc id for set application auto startup
+    SET_APPLICATION_AUTO_STARTUP = 6103,
+    // ipc id for cancel application auto startup
+    CANCEL_APPLICATION_AUTO_STARTUP = 6104,
+    // ipc id for auery all auto startup application
+    QUERY_ALL_AUTO_STARTUP_APPLICATION = 6105,
+
+    // ipc id for register auto startup callback
+    REGISTER_AUTO_STARTUP_CALLBACK = 6106,
+    // ipc id for unregister auto startup callback
+    UNREGISTER_AUTO_STARTUP_CALLBACK = 6107,
+    // ipc id for set auto startup
+    SET_AUTO_STARTUP = 6108,
+    // ipc id for cancel auto startup
+    CANCEL_AUTO_STARTUP = 6109,
+    // ipc id for is auto startup
+    IS_AUTO_STARTUP = 6110,
+
+    // ipc id for on auto starup on
+    ON_AUTO_STARTUP_ON = 6111,
+    // ipc id for on auto starup off
+    ON_AUTO_STARTUP_OFF = 6112,
+
     // ipc id for register session handler
     REGISTER_SESSION_HANDLER = 6010,
+    // ipc id for update session info
+    UPDATE_SESSION_INFO = 6011,
+
+    // ipc id for set application auto startup by EDM
+    SET_APPLICATION_AUTO_STARTUP_BY_EDM = 6113,
+    // ipc id for cancel application auto startup by EDM
+    CANCEL_APPLICATION_AUTO_STARTUP_BY_EDM = 6114,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

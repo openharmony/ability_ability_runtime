@@ -97,15 +97,19 @@ void AmsMgrStub::CreateMemberFuncMap()
         &AmsMgrStub::HandleRegisterAbilityDebugResponse;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::IS_ATTACH_DEBUG)] =
         &AmsMgrStub::HandleIsAttachDebug;
+    memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::CLEAR_PROCESS_BY_TOKEN)] =
+        &AmsMgrStub::HandleClearProcessByToken;
 }
 
 int AmsMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    HILOG_INFO("AmsMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code, option.GetFlags());
+    if (code != static_cast<uint32_t>(IAmsMgr::Message::Get_BUNDLE_NAME_BY_PID)) {
+        HILOG_INFO("AmsMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code, option.GetFlags());
+    }
     std::u16string descriptor = AmsMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        HILOG_ERROR("local descriptor is not equal to remote");
+        HILOG_ERROR("local descriptor is unequal to remote");
         return ERR_INVALID_STATE;
     }
 
@@ -407,7 +411,7 @@ int32_t AmsMgrStub::HandleRegisterAppDebugListener(MessageParcel &data, MessageP
     HILOG_DEBUG("Called.");
     auto appDebugLister = iface_cast<IAppDebugListener>(data.ReadRemoteObject());
     if (appDebugLister == nullptr) {
-        HILOG_ERROR("App debug lister is nullptr.");
+        HILOG_ERROR("App debug lister is null.");
         return ERR_INVALID_VALUE;
     }
 
@@ -501,6 +505,14 @@ int32_t AmsMgrStub::HandleIsAttachDebug(MessageParcel &data, MessageParcel &repl
         HILOG_ERROR("Fail to write result.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleClearProcessByToken(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    sptr<IRemoteObject> token = data.ReadRemoteObject();
+    ClearProcessByToken(token);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

@@ -80,6 +80,7 @@ class AbilityWindow;
 #endif
 class ILifeCycle;
 class ContinuationManager;
+class ContinuationHandler;
 class AbilityRecovery;
 class ContinuationRegisterManager;
 class Ability : public IAbilityEvent,
@@ -736,18 +737,6 @@ public:
     virtual int StopBackgroundRunning() final;
 
     /**
-     * @brief Acquire a bundle manager, if it not existed,
-     * @return returns the bundle manager ipc object, or nullptr for failed.
-     */
-    sptr<IBundleMgr> GetBundleMgr();
-
-    /**
-     * @brief Add the bundle manager instance for debug.
-     * @param bundleManager the bundle manager ipc object.
-     */
-    void SetBundleManager(const sptr<IBundleMgr> &bundleManager);
-
-    /**
      * @brief Prepare user data of local Ability.
      *
      * @param wantParams Indicates the user data to be saved.
@@ -1143,6 +1132,18 @@ public:
      */
     Ace::UIContent* GetUIContent() override;
 
+    /**
+     * @brief create modal UIExtension.
+     * @param want Create modal UIExtension with want object.
+     */
+    int CreateModalUIExtension(const Want &want);
+
+    /**
+     * @brief Update sessionToken.
+     * @param sessionToken The token of session.
+     */
+    void UpdateSessionToken(sptr<IRemoteObject> sessionToken);
+
 protected:
     class AbilityDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
     public:
@@ -1236,6 +1237,8 @@ protected:
      */
     virtual void ContinuationRestore(const Want &want);
 
+    void SetSessionToken(sptr<IRemoteObject> sessionToken);
+
     std::shared_ptr<Rosen::WindowScene> scene_ = nullptr;
     sptr<Rosen::IWindowLifeCycle> sceneListener_ = nullptr;
     sptr<AbilityDisplayListener> abilityDisplayListener_ = nullptr;
@@ -1273,7 +1276,6 @@ protected:
 
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext_ = nullptr;
     std::shared_ptr<AbilityStartSetting> setting_ = nullptr;
-    std::shared_ptr<AbilityRecovery> abilityRecovery_ = nullptr;
     std::shared_ptr<AbilityInfo> abilityInfo_ = nullptr;
     LaunchParam launchParam_;
     int32_t appIndex_ = 0;
@@ -1341,7 +1343,6 @@ private:
 
     // If session id cannot get from want, assign it as default.
     static const int DEFAULT_DMS_SESSION_ID;
-    sptr<IBundleMgr> iBundleMgr_;
 
     bool isNewRuleFlagSetted_ = false;
     bool startUpNewRule_ = false;

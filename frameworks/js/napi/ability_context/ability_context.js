@@ -182,6 +182,14 @@ class AbilityContext extends Context {
   reportDrawnCompleted(callback) {
     return this.__context_impl__.reportDrawnCompleted(callback);
   }
+
+  startAbilityByType(type, wantParam, abilityStartCallback, callback) {
+    return this.__context_impl__.startAbilityByType(type, wantParam, abilityStartCallback, callback);
+  }
+
+  requestModalUIExtension(want, callback) {
+    return this.__context_impl__.requestModalUIExtension(want, callback);
+  }
 }
 
 export default AbilityContext;

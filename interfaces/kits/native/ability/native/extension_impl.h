@@ -48,7 +48,7 @@ public:
      * @param handler the extension handler.
      * @param token the remote token.
      */
-    void Init(std::shared_ptr<AppExecFwk::OHOSApplication> &application,
+    void Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &application,
         const std::shared_ptr<AppExecFwk::AbilityLocalRecord> &record,
         std::shared_ptr<Extension> &extension,
         std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token);
@@ -133,6 +133,13 @@ public:
      */
     void CommandExtension(const Want &want, bool restart, int startId);
 
+    /**
+     * @brief Handle insight intent.
+     *
+     * @param want The Want object with insight intent to handle.
+     */
+    bool HandleInsightIntent(const Want &want);
+
     void CommandExtensionWindow(const Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
         AAFwk::WindowCommand winCmd);
 
@@ -175,7 +182,7 @@ protected:
      *
      * @param want The Want object to switch the life cycle.
      */
-    void Foreground(const Want &want);
+    void Foreground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo);
 
     /**
      * @brief Toggles the lifecycle status of Extension to AAFwk::ABILITY_STATE_BACKGROUND. And notifies the
@@ -188,6 +195,7 @@ private:
     int lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     sptr<IRemoteObject> token_;
     std::shared_ptr<Extension> extension_;
+    bool skipCommandExtensionWithIntent_ = false;
 
 class ExtensionWindowLifeCycleImpl : public Rosen::IWindowLifeCycle {
 public:

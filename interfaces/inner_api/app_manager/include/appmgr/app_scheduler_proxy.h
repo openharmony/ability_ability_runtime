@@ -47,9 +47,9 @@ public:
      * ScheduleTerminateApplication, call ScheduleTerminateApplication() through proxy project,
      * Notify application to terminate.
      *
-     * @return
+     * @param isLastProcess When it is the last application process, pass in true.
      */
-    virtual void ScheduleTerminateApplication() override;
+    virtual void ScheduleTerminateApplication(bool isLastProcess = false) override;
 
     /**
      * ScheduleShrinkMemory, call ScheduleShrinkMemory() through proxy project,
@@ -164,6 +164,8 @@ public:
 
     virtual void ScheduleAcceptWant(const AAFwk::Want &want, const std::string &moduleName) override;
 
+    virtual void ScheduleNewProcessRequest(const AAFwk::Want &want, const std::string &moduleName) override;
+
     int32_t ScheduleNotifyLoadRepairPatch(const std::string &bundleName,
         const sptr<IQuickFixCallback> &callback, const int32_t recordId) override;
 
@@ -174,7 +176,7 @@ public:
 
     int32_t ScheduleNotifyAppFault(const FaultData &faultData) override;
 
-    virtual int32_t ScheduleOnGcStateChange(int32_t state) override;
+    virtual int32_t ScheduleChangeAppGcState(int32_t state) override;
 
     void AttachAppDebug() override;
     void DetachAppDebug() override;
@@ -182,7 +184,7 @@ public:
 private:
     bool WriteInterfaceToken(MessageParcel &data);
     void ScheduleMemoryCommon(const int32_t level, const uint32_t operation);
-    void SendRequest(const IAppScheduler::Message &message);
+    int32_t SendTransactCmd(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
     static inline BrokerDelegator<AppSchedulerProxy> delegator_;
 };
 }  // namespace AppExecFwk

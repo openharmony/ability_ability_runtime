@@ -2053,8 +2053,6 @@ HWTEST_F(AbilityBaseTest, AbilityBackgroundRunning_0100, TestSize.Level1)
     auto handler = std::make_shared<AbilityHandler>(eventRunner);
     ability->Init(pageAbilityInfo, nullptr, handler, nullptr);
 
-    auto bundleMgr = ability->GetBundleMgr();
-    ability->SetBundleManager(bundleMgr);
     ability->StartBackgroundRunning(wantAgent);
 
     int id = 0;
@@ -2277,6 +2275,31 @@ HWTEST_F(AbilityBaseTest, AbilitySetShowOnLockScreen_0100, TestSize.Level1)
     ability->SetShowOnLockScreen(true);
     ability->SetShowOnLockScreen(false);
 
+    HILOG_INFO("%{public}s end.", __func__);
+}
+
+/**
+ * @tc.name: AbilitySetShowOnLockScreen_0200
+ * @tc.desc: Ability SetShowOnLockScreen test
+ * @tc.type: FUNC
+ * @tc.require: issueI60B7N
+ */
+HWTEST_F(AbilityBaseTest, AbilitySetShowOnLockScreen_0200, TestSize.Level1)
+{
+    HILOG_INFO("%{public}s start.", __func__);
+    std::shared_ptr<Ability> ability = std::make_shared<Ability>();
+    ASSERT_NE(ability, nullptr);
+    std::shared_ptr<AbilityInfo> pageAbilityInfo = std::make_shared<AbilityInfo>();
+    pageAbilityInfo->type = AppExecFwk::AbilityType::PAGE;
+    auto eventRunner = EventRunner::Create(pageAbilityInfo->name);
+    auto handler = std::make_shared<AbilityHandler>(eventRunner);
+    ability->Init(pageAbilityInfo, nullptr, handler, nullptr);
+    sptr<AAFwk::SessionInfo> session = new (std::nothrow) AAFwk::SessionInfo();
+    int32_t displayId = 0;
+    sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
+    ability->InitWindow(displayId, option);
+    ability->abilityInfo_  = nullptr;
+    ability->SetShowOnLockScreen(true);
     HILOG_INFO("%{public}s end.", __func__);
 }
 

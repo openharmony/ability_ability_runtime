@@ -61,7 +61,7 @@ void AbilityConnectionProxy::OnAbilityConnectDone(
         return;
     }
 
-    error = Remote()->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+    error = SendTransactCmd(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Connect done fail, error: %{public}d", error);
         return;
@@ -85,11 +85,28 @@ void AbilityConnectionProxy::OnAbilityDisconnectDone(const AppExecFwk::ElementNa
         return;
     }
 
-    error = Remote()->SendRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
+    error = SendTransactCmd(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Disconnect done fail, error: %d", error);
         return;
     }
+}
+
+int32_t AbilityConnectionProxy::SendTransactCmd(uint32_t code, MessageParcel &data,
+    MessageParcel &reply, MessageOption &option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote object is nullptr.");
+        return ERR_NULL_OBJECT;
+    }
+
+    int32_t ret = remote->SendRequest(code, data, reply, option);
+    if (ret != NO_ERROR) {
+        HILOG_ERROR("SendRequest failed. code is %{public}d, ret is %{public}d.", code, ret);
+        return ret;
+    }
+    return NO_ERROR;
 }
 
 AbilityConnectionStub::AbilityConnectionStub()
@@ -109,7 +126,7 @@ int AbilityConnectionStub::OnRemoteRequest(
         return ERR_INVALID_STATE;
     }
 
-    auto element = data.ReadParcelable<AppExecFwk::ElementName>();
+    std::unique_ptr<AppExecFwk::ElementName> element(data.ReadParcelable<AppExecFwk::ElementName>());
     if (element == nullptr) {
         HILOG_ERROR("callback stub receive element is nullptr");
         return ERR_INVALID_VALUE;
@@ -120,35 +137,27 @@ int AbilityConnectionStub::OnRemoteRequest(
             auto remoteObject = data.ReadRemoteObject();
             if (remoteObject == nullptr) {
                 HILOG_ERROR("callback stub receive remoteObject is nullptr");
-                delete element;
                 return ERR_INVALID_VALUE;
             }
             auto resultCode = data.ReadInt32();
             HILOG_INFO("AbilityConnectionStub ON_ABILITY_CONNECT_DONE");
             OnAbilityConnectDone(*element, remoteObject, resultCode);
-            HILOG_INFO("AbilityConnectionStub ON_ABILITY_CONNECT_DONE end");
-            delete element;
+            HILOG_DEBUG("AbilityConnectionStub ON_ABILITY_CONNECT_DONE end");
             return NO_ERROR;
         }
         case IAbilityConnection::ON_ABILITY_DISCONNECT_DONE: {
             auto resultCode = data.ReadInt32();
-            HILOG_INFO("AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE");
             OnAbilityDisconnectDone(*element, resultCode);
-            delete element;
+            HILOG_DEBUG("AbilityConnectionStub ON_ABILITY_DISCONNECT_DONE");
             return NO_ERROR;
         }
         case IAbilityConnection::ON_REMOTE_STATE_CHANGED: {
             int32_t abilityState = data.ReadInt32();
-            HILOG_INFO("AbilityConnectionStub ON_REMOTE_STATE_CHANGED");
             OnRemoteStateChanged(*element, abilityState);
-            delete element;
             return NO_ERROR;
         }
         default: {
             HILOG_INFO("AbilityConnectionStub default");
-            if (element != nullptr) {
-                delete element;
-            }
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }

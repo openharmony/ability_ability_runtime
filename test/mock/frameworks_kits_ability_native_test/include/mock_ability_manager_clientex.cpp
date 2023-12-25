@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 #include <mutex>
+#define private public
+#define protected public
 #include "ability_manager_client.h"
+#undef private
+#undef protected
 #include "ability_manager_interface.h"
 #include "string_ex.h"
 #include "hilog_wrapper.h"
@@ -47,7 +51,7 @@ AbilityManagerClient::~AbilityManagerClient()
 {}
 
 ErrCode AbilityManagerClient::AttachAbilityThread(
-    const sptr<IAbilityScheduler>& scheduler, const sptr<IRemoteObject>& token)
+    sptr<IAbilityScheduler> scheduler, sptr<IRemoteObject> token)
 {
     HILOG_INFO("AbilityManagerClient::AttachAbilityThread start");
     ErrCode err = Connect();
@@ -59,7 +63,7 @@ ErrCode AbilityManagerClient::AttachAbilityThread(
     return abms->AttachAbilityThread(scheduler, token);
 }
 
-ErrCode AbilityManagerClient::AbilityTransitionDone(const sptr<IRemoteObject>& token, int state, const PacMap& saveData)
+ErrCode AbilityManagerClient::AbilityTransitionDone(sptr<IRemoteObject> token, int state, const PacMap& saveData)
 {
     if (remoteObject_ == nullptr) {
         return ABILITY_SERVICE_NOT_CONNECTED;
@@ -69,7 +73,7 @@ ErrCode AbilityManagerClient::AbilityTransitionDone(const sptr<IRemoteObject>& t
 }
 
 ErrCode AbilityManagerClient::ScheduleConnectAbilityDone(
-    const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& remoteObject)
+    sptr<IRemoteObject> token, sptr<IRemoteObject> remoteObject)
 {
     if (remoteObject_ == nullptr) {
         return ABILITY_SERVICE_NOT_CONNECTED;
@@ -78,7 +82,7 @@ ErrCode AbilityManagerClient::ScheduleConnectAbilityDone(
     return abms->ScheduleConnectAbilityDone(token, remoteObject);
 }
 
-ErrCode AbilityManagerClient::ScheduleDisconnectAbilityDone(const sptr<IRemoteObject>& token)
+ErrCode AbilityManagerClient::ScheduleDisconnectAbilityDone(sptr<IRemoteObject> token)
 {
     if (remoteObject_ == nullptr) {
         return ABILITY_SERVICE_NOT_CONNECTED;
@@ -87,7 +91,7 @@ ErrCode AbilityManagerClient::ScheduleDisconnectAbilityDone(const sptr<IRemoteOb
     return abms->ScheduleDisconnectAbilityDone(token);
 }
 
-ErrCode AbilityManagerClient::ScheduleCommandAbilityDone(const sptr<IRemoteObject>& token)
+ErrCode AbilityManagerClient::ScheduleCommandAbilityDone(sptr<IRemoteObject> token)
 {
     if (remoteObject_ == nullptr) {
         HILOG_ERROR("%{private}s:ability service not command", __func__);
@@ -98,8 +102,8 @@ ErrCode AbilityManagerClient::ScheduleCommandAbilityDone(const sptr<IRemoteObjec
 }
 
 ErrCode AbilityManagerClient::ScheduleCommandAbilityWindowDone(
-    const sptr<IRemoteObject> &token,
-    const sptr<SessionInfo> &sessionInfo,
+    sptr<IRemoteObject> token,
+    sptr<SessionInfo> sessionInfo,
     WindowCommand winCmd,
     AbilityCommand abilityCmd)
 {
@@ -119,7 +123,7 @@ ErrCode AbilityManagerClient::StartAbility(const Want& want, int requestCode, in
     return abms->StartAbility(want, requestCode);
 }
 
-ErrCode AbilityManagerClient::TerminateAbility(const sptr<IRemoteObject>& token, int resultCode, const Want* resultWant)
+ErrCode AbilityManagerClient::TerminateAbility(sptr<IRemoteObject> token, int resultCode, const Want* resultWant)
 {
     HILOG_INFO("AbilityManagerClient::TerminateAbility start");
     if (remoteObject_ == nullptr) {
@@ -132,7 +136,7 @@ ErrCode AbilityManagerClient::TerminateAbility(const sptr<IRemoteObject>& token,
 }
 
 ErrCode AbilityManagerClient::ConnectAbility(
-    const Want& want, const sptr<IAbilityConnection>& connect, const sptr<IRemoteObject>& callerToken, int32_t userId)
+    const Want& want, sptr<IAbilityConnection> connect, sptr<IRemoteObject> callerToken, int32_t userId)
 {
     if (remoteObject_ == nullptr) {
         remoteObject_ =
@@ -142,7 +146,7 @@ ErrCode AbilityManagerClient::ConnectAbility(
     return abms->ConnectAbility(want, connect, callerToken);
 }
 
-ErrCode AbilityManagerClient::DisconnectAbility(const sptr<IAbilityConnection>& connect)
+ErrCode AbilityManagerClient::DisconnectAbility(sptr<IAbilityConnection> connect)
 {
     if (remoteObject_ == nullptr) {
         remoteObject_ =
@@ -175,7 +179,7 @@ ErrCode AbilityManagerClient::Connect()
     return ERR_OK;
 }
 
-ErrCode AbilityManagerClient::StopServiceAbility(const Want& want, const sptr<IRemoteObject> &token)
+ErrCode AbilityManagerClient::StopServiceAbility(const Want& want, sptr<IRemoteObject> token)
 {
     if (remoteObject_ == nullptr) {
         remoteObject_ =
@@ -186,7 +190,7 @@ ErrCode AbilityManagerClient::StopServiceAbility(const Want& want, const sptr<IR
 }
 
 sptr<IAbilityScheduler> AbilityManagerClient::AcquireDataAbility(
-    const Uri& uri, bool tryBind, const sptr<IRemoteObject>& callerToken)
+    const Uri& uri, bool tryBind, sptr<IRemoteObject> callerToken)
 {
     remoteObject_ =
         OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
@@ -199,7 +203,7 @@ sptr<IAbilityScheduler> AbilityManagerClient::AcquireDataAbility(
 }
 
 ErrCode AbilityManagerClient::ReleaseDataAbility(
-    sptr<IAbilityScheduler> dataAbilityScheduler, const sptr<IRemoteObject>& callerToken)
+    sptr<IAbilityScheduler> dataAbilityScheduler, sptr<IRemoteObject> callerToken)
 {
     remoteObject_ =
         OHOS::DelayedSingleton<AppExecFwk::SysMrgClient>::GetInstance()->GetSystemAbility(ABILITY_MGR_SERVICE_ID);
