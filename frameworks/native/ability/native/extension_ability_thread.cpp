@@ -149,7 +149,6 @@ void ExtensionAbilityThread::CreateExtensionAbilityName(
         abilityName = USER_AUTH_EXTENSION;
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::VPN) {
-        HILOG_INFO("ExtensionAbilityThread abilityInfo type = vpn");
         abilityName = VPN_EXTENSION;
     }
     if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED &&
