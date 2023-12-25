@@ -787,7 +787,7 @@ int AbilityConnectManager::ScheduleConnectAbilityDoneLocked(
             PostExtensionDelayDisconnectTask(connectRecord);
         }
     }
-
+    CompleteStartServiceReq(abilityRecord->GetURI());
     return ERR_OK;
 }
 
