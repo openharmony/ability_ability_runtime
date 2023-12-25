@@ -178,16 +178,12 @@ int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, const
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::ClearUpApplicationDataBySelf(const std::string &bundleName, const int32_t userId)
+int32_t AppMgrProxy::ClearUpApplicationDataBySelf(int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_SYNC);
     if (!WriteInterfaceToken(data)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (!data.WriteString(bundleName)) {
-        HILOG_ERROR("parcel WriteString failed");
         return ERR_FLATTEN_OBJECT;
     }
     if (!data.WriteInt32(userId)) {
