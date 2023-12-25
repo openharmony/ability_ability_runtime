@@ -120,11 +120,10 @@ public:
      * ClearUpApplicationDataBySelf, call ClearUpApplicationDataBySelf() through proxy project,
      * clear the application data by self.
      *
-     * @param bundleName, bundle name in Application record.
+     * @param userId, user ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t ClearUpApplicationDataBySelf(const std::string &bundleName,
-        const int32_t userId = -1) override;
+    virtual int32_t ClearUpApplicationDataBySelf(int32_t userId = -1) override;
 
     /**
      * GetAllRunningProcesses, call GetAllRunningProcesses() through proxy project.

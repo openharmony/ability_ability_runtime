@@ -106,8 +106,7 @@ public:
      * @param bundleName, bundle name in Application record.
      * @return
      */
-    virtual int32_t ClearUpApplicationDataBySelf(const std::string &bundleName,
-        const int32_t userId = -1) override;
+    virtual int32_t ClearUpApplicationDataBySelf(int32_t userId = -1) override;
 
     /**
      * GetAllRunningProcesses, call GetAllRunningProcesses() through proxy project.

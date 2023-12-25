@@ -267,9 +267,8 @@ int32_t AppMgrStub::HandleClearUpApplicationData(MessageParcel &data, MessagePar
 int32_t AppMgrStub::HandleClearUpApplicationDataBySelf(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
-    std::string bundleName = data.ReadString();
     int32_t userId = data.ReadInt32();
-    int32_t result = ClearUpApplicationDataBySelf(bundleName, userId);
+    int32_t result = ClearUpApplicationDataBySelf(userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
