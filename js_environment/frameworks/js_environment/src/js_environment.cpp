@@ -324,6 +324,25 @@ void JsEnvironment::SetDeviceDisconnectCallback(const std::function<bool()> &cb)
     panda::JSNApi::SetDeviceDisconnectCallback(vm_, std::move(cb));
 }
 
+void JsEnvironment::StartMonitorJSHeapUsage()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid native engine.");
+        return;
+    }
+    engine_->StartMonitorJSHeapUsage();
+}
+
+void JsEnvironment::StopMonitorJSHeapUsage()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid native engine.");
+        return;
+    }
+    engine_->StopMonitorJSHeapUsage();
+}
+
+
 void JsEnvironment::NotifyDebugMode(
     uint32_t tid, const char* libraryPath, uint32_t instanceId, bool debug, bool debugMode)
 {
