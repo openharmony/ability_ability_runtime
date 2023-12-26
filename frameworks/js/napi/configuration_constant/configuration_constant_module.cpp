@@ -16,6 +16,7 @@
 #include "res_common.h"
 #include "napi/native_api.h"
 #include "napi/native_common.h"
+#include "i18n_res.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -51,9 +52,9 @@ static napi_value InitTimeFormatObject(napi_env env)
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
-    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_NOT_SET", Global::Resource::HOUR_NOT_SET));
-    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_12", Global::Resource::HOUR_12));
-    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_24", Global::Resource::HOUR_24));
+    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_NOT_SET", Global::I18n::HOUR_NOT_SET));
+    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_12", Global::I18n::HOUR_12));
+    NAPI_CALL(env, SetEnumItem(env, object, "HOUR_24", Global::I18n::HOUR_24));
 
     return object;
 }

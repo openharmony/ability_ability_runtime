@@ -32,7 +32,7 @@ ohos_shared_library("configurationconstant_napi") {
 }
 
 ohos_shared_library("configurationconstant") {
-  include_dirs = []
+  include_dirs = [ "//base/global/i18n/frameworks/intl/include" ]
 
   sources = [ "configuration_constant_module.cpp" ]
 
