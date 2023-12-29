@@ -320,7 +320,8 @@ ErrCode BundleMgrHelper::GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleI
     return bundleMgr->GetBundleInfoForSelf(flags, bundleInfo);
 }
 
-ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleName, BundleInfo &sharedBundleInfo)
+ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleName, BundleInfo &sharedBundleInfo,
+    GetDependentBundleInfoFlag flag)
 {
     HILOG_DEBUG("Called.");
     auto bundleMgr = Connect();
@@ -329,7 +330,7 @@ ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleN
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
-    return bundleMgr->GetDependentBundleInfo(sharedBundleName, sharedBundleInfo);
+    return bundleMgr->GetDependentBundleInfo(sharedBundleName, sharedBundleInfo, flag);
 }
 
 bool BundleMgrHelper::GetGroupDir(const std::string &dataGroupId, std::string &dir)
