@@ -89,9 +89,10 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
         HILOG_ERROR("UIContent or fillCallback&saveCallback is nullptr.");
         return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
     }
-    std::lock_guard<std::mutex> lock(mutexLock_);
-    SetTimeOutEvent(++eventId_);
-
+    {
+        std::lock_guard<std::mutex> lock(mutexLock_);
+        SetTimeOutEvent(++eventId_);
+    }
     AAFwk::Want want;
     want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_EXTENSION_TYPE);
     want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, viewdata.ToJsonString());
@@ -114,7 +115,6 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
     callback.onError = std::bind(&AutoFillExtensionCallback::OnError,
         extensionCallback, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     callback.onReceive = std::bind(&AutoFillExtensionCallback::OnReceive, extensionCallback, std::placeholders::_1);
-
     Ace::ModalUIExtensionConfig config;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
@@ -125,6 +125,7 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
     extensionCallback->SetUIContent(uiContent);
     extensionCallback->SetSessionId(sessionId);
     extensionCallback->SetEventId(eventId_);
+    std::lock_guard<std::mutex> lock(mutexLock_);
     extensionCallbacks_.emplace(eventId_, extensionCallback);
     return AutoFill::AUTO_FILL_SUCCESS;
 }
