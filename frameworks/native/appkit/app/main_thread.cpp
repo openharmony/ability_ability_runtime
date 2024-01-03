@@ -1294,6 +1294,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.arkNativeFilePath = bundleInfo.applicationInfo.arkNativeFilePath;
         options.uid = bundleInfo.applicationInfo.uid;
         options.apiTargetVersion = appInfo.apiTargetVersion;
+        if (!bundleInfo.hapModuleInfos.empty()) {
+            for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+                options.hapModulePath[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
+            }
+        }
         auto runtime = AbilityRuntime::Runtime::Create(options);
         if (!runtime) {
             HILOG_ERROR("Failed to create runtime");
@@ -2864,7 +2869,7 @@ std::vector<std::string> MainThread::GetRemoveOverlayPaths(const std::vector<Ove
 
 int32_t MainThread::ScheduleChangeAppGcState(int32_t state)
 {
-    HILOG_DEBUG("called.");
+    HILOG_DEBUG("called, state is %{public}d.", state);
     if (mainHandler_ == nullptr) {
         HILOG_ERROR("mainHandler is nullptr");
         return ERR_INVALID_VALUE;

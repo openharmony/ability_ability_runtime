@@ -4748,7 +4748,7 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
 
 int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state)
 {
-    HILOG_DEBUG("called.");
+    HILOG_DEBUG("called, pid:%{public}d, state:%{public}d.", pid, state);
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
         HILOG_ERROR("no such appRecord");
@@ -4954,7 +4954,8 @@ bool AppMgrServiceInner::JudgeSelfCalledByToken(const sptr<IRemoteObject> &token
         return false;
     }
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if (appRecord == nullptr || ((appRecord->GetApplicationInfo())->accessTokenId) != callingTokenId) {
+    if (appRecord->GetApplicationInfo() == nullptr ||
+        ((appRecord->GetApplicationInfo())->accessTokenId) != callingTokenId) {
         HILOG_ERROR("Is not self, not enabled");
         return false;
     }
