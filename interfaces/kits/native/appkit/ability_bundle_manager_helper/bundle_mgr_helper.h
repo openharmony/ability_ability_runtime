@@ -59,6 +59,8 @@ public:
     sptr<IAppControlMgr> GetAppControlProxy();
     bool QueryExtensionAbilityInfos(const Want &want, const int32_t &flag, const int32_t &userId,
         std::vector<ExtensionAbilityInfo> &extensionInfos);
+    ErrCode GetBundleInfoV9(
+        const std::string &bundleName, int32_t flags, BundleInfo &bundleInfo, int32_t userId);
     bool GetApplicationInfo(
         const std::string &appName, const ApplicationFlag flag, const int32_t userId, ApplicationInfo &appInfo);
     bool GetApplicationInfo(const std::string &appName, int32_t flags, int32_t userId, ApplicationInfo &appInfo);
@@ -87,6 +89,7 @@ public:
     ErrCode QueryExtensionAbilityInfosOnlyWithTypeName(const std::string &extensionTypeName,
         const uint32_t flag, const int32_t userId, std::vector<ExtensionAbilityInfo> &extensionInfos);
     sptr<IDefaultApp> GetDefaultAppProxy();
+    ErrCode CleanObsoleteBundleTempFiles();
 
 private:
     sptr<IBundleMgr> Connect();

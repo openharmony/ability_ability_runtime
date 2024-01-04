@@ -363,7 +363,7 @@ void JsRuntime::StartProfiler(
     }
 
     HILOG_DEBUG("profiler:%{public}d interval:%{public}d.", profiler, interval);
-    jsEnv_->StartProfiler(ARK_DEBUGGER_LIB_PATH, instanceId_, profiler, interval, gettid());
+    jsEnv_->StartProfiler(ARK_DEBUGGER_LIB_PATH, instanceId_, profiler, interval, gettid(), isDebugApp);
 }
 
 bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer)
@@ -497,7 +497,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
     HILOG_DEBUG("JsRuntime::LoadSystemModule(%{public}s)", moduleName.c_str());
     if (env == nullptr) {
         HILOG_INFO("JsRuntime::LoadSystemModule: invalid engine.");
-        return std::unique_ptr<NativeReference>();
+        return nullptr;
     }
 
     napi_value globalObj = nullptr;
@@ -524,7 +524,7 @@ std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(
     napi_new_instance(env, classValue, argc, argv, &instanceValue);
     if (instanceValue == nullptr) {
         HILOG_ERROR("Failed to create object instance");
-        return std::unique_ptr<NativeReference>();
+        return nullptr;
     }
 
     napi_ref resultRef = nullptr;
@@ -646,6 +646,14 @@ bool JsRuntime::Initialize(const Options& options)
             panda::JSNApi::SetHostResolveBufferTracker(
                 vm, JsModuleReader(options.bundleName, options.hapPath, options.isUnique));
             isModular = !panda::JSNApi::IsBundle(vm);
+            panda::JSNApi::SetSearchHapPathTracker(
+                vm, [options](const std::string moduleName, std::string &hapPath) -> bool {
+                    if (options.hapModulePath.find(moduleName) == options.hapModulePath.end()) {
+                        return false;
+                    }
+                    hapPath = options.hapModulePath.find(moduleName)->second;
+                    return true;
+                });
             std::vector<panda::HmsMap> systemKitsMap = GetSystemKitsMap(apiTargetVersion_);
             panda::JSNApi::SetHmsModuleList(vm, systemKitsMap);
         }
@@ -787,7 +795,7 @@ void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> op
     CHECK_POINTER(jsEnv_);
     jsEnv_->InitSourceMap(operatorObj);
     JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
-    JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetPresetAppHapPath);
+    JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetHapPathList);
 }
 
 void JsRuntime::Deinitialize()

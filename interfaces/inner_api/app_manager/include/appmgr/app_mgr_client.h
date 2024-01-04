@@ -182,6 +182,15 @@ public:
         const int32_t userId = -1);
 
     /**
+     * ClearUpApplicationDataBySelf, call ClearUpApplicationDataBySelf() through proxy project,
+     * clear the application data.
+     *
+     * @param userId, the user id.
+     * @return
+     */
+    virtual AppMgrResultCode ClearUpApplicationDataBySelf(int32_t userId = -1);
+
+    /**
      * GetAllRunningProcesses, call GetAllRunningProcesses() through proxy project.
      * Obtains information about application processes that are running on the device.
      *
@@ -583,6 +592,20 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener);
+
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcess();
+
+    /**
+     * To clear the process by ability token.
+     *
+     * @param token the unique identification to the ability.
+     */
+    void ClearProcessByToken(sptr<IRemoteObject> token) const;
 
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);

@@ -318,6 +318,12 @@ void AppRunningRecord::SetState(const ApplicationState state)
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         restartResidentProcCount_ = MAX_RESTART_COUNT;
     }
+    std::string foreTag = "ForeApp:";
+    if (state == ApplicationState::APP_STATE_FOREGROUND) {
+        StartAsyncTrace(HITRACE_TAG_APP, foreTag + mainBundleName_, 0);
+    } else if (state == ApplicationState::APP_STATE_BACKGROUND) {
+        FinishAsyncTrace(HITRACE_TAG_APP, foreTag + mainBundleName_, 0);
+    }
     curState_ = state;
 }
 
@@ -567,7 +573,12 @@ void AppRunningRecord::ScheduleTerminate()
         HILOG_WARN("appLifeCycleDeal_ is null");
         return;
     }
-    appLifeCycleDeal_->ScheduleTerminate();
+    bool isLastProcess = false;
+    auto serviceInner = appMgrServiceInner_.lock();
+    if (serviceInner != nullptr) {
+        isLastProcess = serviceInner->IsFinalAppProcessByBundleName(GetBundleName());
+    }
+    appLifeCycleDeal_->ScheduleTerminate(isLastProcess);
 }
 
 void AppRunningRecord::LaunchPendingAbilities()
