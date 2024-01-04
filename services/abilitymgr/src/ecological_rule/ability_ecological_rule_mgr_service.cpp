@@ -146,6 +146,10 @@ void AbilityEcologicalRuleMgrServiceDeathRecipient::OnRemoteDied(const wptr<IRem
     AbilityEcologicalRuleMgrServiceClient::GetInstance()->OnRemoteSaDied(object);
 }
 
+AbilityEcologicalRuleMgrServiceProxy::AbilityEcologicalRuleMgrServiceProxy(
+    const sptr<IRemoteObject>& impl) : IRemoteProxy<IAbilityEcologicalRuleMgrService>(impl)
+{}
+
 int32_t AbilityEcologicalRuleMgrServiceProxy::EvaluateResolveInfos(const Want &want,
     const AbilityCallerInfo &callerInfo, int32_t type, std::vector<AbilityInfo> &abilityInfos)
 {

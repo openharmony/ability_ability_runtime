@@ -62,13 +62,10 @@ private:
     DISALLOW_COPY_AND_MOVE(AbilityEcologicalRuleMgrServiceDeathRecipient);
 };
 
-class AbilityEcologicalRuleMgrServiceProxy : public OHOS::IRemoteProxy<IAbilityEcologicalRuleMgrService> {
+class AbilityEcologicalRuleMgrServiceProxy : public IRemoteProxy<IAbilityEcologicalRuleMgrService> {
 public:
-    explicit AbilityEcologicalRuleMgrServiceProxy(const sptr<IRemoteObject> &object) :
-        IRemoteProxy<IAbilityEcologicalRuleMgrService>(object)
-    {}
-    ~AbilityEcologicalRuleMgrServiceProxy() = default;
-    DISALLOW_COPY_AND_MOVE(AbilityEcologicalRuleMgrServiceProxy);
+    explicit AbilityEcologicalRuleMgrServiceProxy(const sptr<IRemoteObject>& impl);
+    virtual ~AbilityEcologicalRuleMgrServiceProxy() = default;
 
     int32_t EvaluateResolveInfos(const Want &want, const AbilityCallerInfo &callerInfo, int32_t type,
         vector<AbilityInfo> &abilityInfo) override;
