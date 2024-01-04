@@ -296,7 +296,8 @@ std::string BundleMgrHelper::GetAppType(const std::string &bundleName)
 }
 
 ErrCode BundleMgrHelper::GetBaseSharedBundleInfos(
-    const std::string &bundleName, std::vector<BaseSharedBundleInfo> &baseSharedBundleInfos)
+    const std::string &bundleName, std::vector<BaseSharedBundleInfo> &baseSharedBundleInfos,
+    GetDependentBundleInfoFlag flag)
 {
     HILOG_DEBUG("Called.");
     auto bundleMgr = Connect();
@@ -305,7 +306,7 @@ ErrCode BundleMgrHelper::GetBaseSharedBundleInfos(
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
-    return bundleMgr->GetBaseSharedBundleInfos(bundleName, baseSharedBundleInfos);
+    return bundleMgr->GetBaseSharedBundleInfos(bundleName, baseSharedBundleInfos, flag);
 }
 
 ErrCode BundleMgrHelper::GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleInfo)
