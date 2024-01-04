@@ -22,10 +22,12 @@
 
 #include "ability_record.h"
 #include "bundle_mgr_helper.h"
-#include "ecological_rule/ability_ecological_rule_mgr_service.h"
 #include "system_dialog_scheduler.h"
 
 namespace OHOS {
+namespace EcologicalRuleMgrService {
+struct AbilityCallerInfo;
+}
 namespace AAFwk {
 struct IdentityNode {
     int32_t tokenId;
@@ -93,7 +95,7 @@ private:
 
     bool IsExistDefaultApp(int32_t userId, const std::string &typeName);
 
-    bool IsCallFromAncoShell(const sptr<IRemoteObject> &token);
+    bool IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &token);
 
 private:
     const static std::vector<std::string> blackList;

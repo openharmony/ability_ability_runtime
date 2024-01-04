@@ -21,6 +21,7 @@
 #include "app_gallery_enable_util.h"
 #include "default_app_interface.h"
 #include "errors.h"
+#include "ecological_rule/ability_ecological_rule_mgr_service.h"
 #include "event_report.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
@@ -31,6 +32,7 @@
 namespace OHOS {
 namespace AAFwk {
 const size_t IDENTITY_LIST_MAX_SIZE = 10;
+const int32_t BROKER_UID = 5557;
 
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 const std::string STR_PHONE = "phone";
@@ -261,7 +263,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         ImplicitStartProcessor::QueryBmsAppInfos(request, userId, dialogAppInfos);
     }
 
-    if (!IsCallFromAncoShell(request.callerToken)) {
+    if (!IsCallFromAncoShellOrBroker(request.callerToken)) {
         request.want.RemoveParam(ANCO_PENDING_REQUEST);
     }
     IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(
@@ -612,8 +614,12 @@ bool ImplicitStartProcessor::IsExistDefaultApp(int32_t userId, const std::string
     }
 }
 
-bool ImplicitStartProcessor::IsCallFromAncoShell(const sptr<IRemoteObject> &token)
+bool ImplicitStartProcessor::IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &token)
 {
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (callingUid == BROKER_UID) {
+        return true;
+    }
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     if (!abilityRecord) {
         return false;

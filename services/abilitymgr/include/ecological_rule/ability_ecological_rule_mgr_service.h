@@ -17,6 +17,8 @@
 #define SERVICES_INCLUDE_ECOLOGICAL_RULE_MANAGER_SERVICE_PROXY_H
 
 #include <mutex>
+#include "iremote_broker.h"
+#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "ability_ecological_rule_mgr_service_interface.h"
 
