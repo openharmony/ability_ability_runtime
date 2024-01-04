@@ -2709,6 +2709,8 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         return;
     }
 
+    appRecord->SetKeepAliveAppState(true, isEmptyKeepAliveApp);
+
     StartProcess(appInfo->name, processName, 0, appRecord, appInfo->uid, appInfo->bundleName, 0, appExistFlag);
 
     // If it is empty, the startup failed
@@ -2716,8 +2718,6 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         HILOG_ERROR("start process [%{public}s] failed!", processName.c_str());
         return;
     }
-
-    appRecord->SetKeepAliveAppState(true, isEmptyKeepAliveApp);
 
     if (restartCount > 0) {
         HILOG_INFO("StartEmptyResidentProcess restartCount : [%{public}d], ", restartCount);
