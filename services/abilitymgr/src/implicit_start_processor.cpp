@@ -125,8 +125,12 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
             return ERR_IMPLICIT_START_ABILITY_FAIL;
         }
         if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-            want = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, request.callerToken);
-            return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
+            ret = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, request.callerToken);
+            if (ret != ERR_OK) {
+                HILOG_ERROR("GetSelectorDialogWant failed.");
+                return ret;
+            }
+            return NotifyCreateModalDialog(request, request.want, userId, dialogAppInfos);
         }
         HILOG_ERROR("implicit query ability infos failed, show tips dialog.");
         want = sysDialogScheduler->GetTipsDialogWant(request.callerToken);
@@ -135,9 +139,13 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     } else if (dialogAppInfos.size() == 0 && deviceType != STR_PHONE && deviceType != STR_DEFAULT) {
         if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
             std::string type = MatchTypeAndUri(request.want);
-            want = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, type,
+            ret = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, type,
                 userId, request.callerToken);
-            return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
+            if (ret != ERR_OK) {
+                HILOG_ERROR("GetPcSelectorDialogWant failed.");
+                return ret;
+            }
+            return NotifyCreateModalDialog(request, request.want, userId, dialogAppInfos);
         }
         std::vector<DialogAppInfo> dialogAllAppInfos;
         bool isMoreHapList = true;
@@ -155,9 +163,13 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
             abilityMgr->StartAbility(dialogWant);
             return ERR_IMPLICIT_START_ABILITY_FAIL;
         }
-        want = sysDialogScheduler->GetPcSelectorDialogWant(dialogAllAppInfos, request.want,
+        ret = sysDialogScheduler->GetPcSelectorDialogWant(dialogAllAppInfos, request.want,
             TYPE_ONLY_MATCH_WILDCARD, userId, request.callerToken);
-        ret = abilityMgr->StartAbility(want, request.callerToken);
+        if (ret != ERR_OK) {
+            HILOG_ERROR("GetPcSelectorDialogWant failed.");
+            return ret;
+        }
+        ret = abilityMgr->StartAbility(request.want, request.callerToken);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
         return ret;
@@ -174,11 +186,15 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
 
     if (deviceType == STR_PHONE || deviceType == STR_DEFAULT) {
         HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose.");
-        want = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, request.callerToken);
-        if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-            return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
+        ret = sysDialogScheduler->GetSelectorDialogWant(dialogAppInfos, request.want, request.callerToken);
+        if (ret != ERR_OK) {
+            HILOG_ERROR("GetSelectorDialogWant failed.");
+            return ret;
         }
-        ret = abilityMgr->StartAbilityAsCaller(want, request.callerToken, nullptr);
+        if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+            return NotifyCreateModalDialog(request, request.want, userId, dialogAppInfos);
+        }
+        ret = abilityMgr->StartAbilityAsCaller(request.want, request.callerToken, nullptr);
         // reset calling indentity
         IPCSkeleton::SetCallingIdentity(identity);
         return ret;
@@ -187,11 +203,15 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
     HILOG_INFO("ImplicitQueryInfos success, Multiple apps to choose in pc.");
     std::string type = MatchTypeAndUri(request.want);
 
-    want = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, type, userId, request.callerToken);
-    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        return NotifyCreateModalDialog(request, want, userId, dialogAppInfos);
+    ret = sysDialogScheduler->GetPcSelectorDialogWant(dialogAppInfos, request.want, type, userId, request.callerToken);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("GetPcSelectorDialogWant failed.");
+        return ret;
     }
-    ret = abilityMgr->StartAbilityAsCaller(want, request.callerToken, nullptr);
+    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        return NotifyCreateModalDialog(request, request.want, userId, dialogAppInfos);
+    }
+    ret = abilityMgr->StartAbilityAsCaller(request.want, request.callerToken, nullptr);
     // reset calling indentity
     IPCSkeleton::SetCallingIdentity(identity);
     return ret;
@@ -202,7 +222,7 @@ int ImplicitStartProcessor::NotifyCreateModalDialog(AbilityRequest &abilityReque
 {
     auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
     std::string dialogSessionId;
-    if (abilityMgr->GenerateDialogSessionRecord(abilityRequest, userId, dialogSessionId, dialogAppInfos)) {
+    if (abilityMgr->GenerateDialogSessionRecord(abilityRequest, userId, dialogSessionId, dialogAppInfos, true)) {
         HILOG_DEBUG("create dialog by ui extension");
         return abilityMgr->CreateModalDialog(want, abilityRequest.callerToken, dialogSessionId);
     }
@@ -247,7 +267,8 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     bool withDefault = false;
     withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault) ? false : true;
 
-    if (IPCSkeleton::GetCallingUid() == NFC_CALLER_UID && !request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS).empty()) {
+    if (IPCSkeleton::GetCallingUid() == NFC_CALLER_UID &&
+        !request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS).empty()) {
         HILOG_INFO("The NFCNeed caller source is NFC.");
         ImplicitStartProcessor::QueryBmsAppInfos(request, userId, dialogAppInfos);
     }
@@ -318,7 +339,9 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     return ERR_OK;
 }
 
-int ImplicitStartProcessor::QueryBmsAppInfos(AbilityRequest &request, int32_t userId, std::vector<DialogAppInfo> &dialogAppInfos) {
+int ImplicitStartProcessor::QueryBmsAppInfos(AbilityRequest &request, int32_t userId,
+    std::vector<DialogAppInfo> &dialogAppInfos)
+{
     auto bundleMgrHelper = GetBundleManagerHelper();
     std::vector<AppExecFwk::AbilityInfo> bmsApps;
     auto abilityInfoFlag = AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
@@ -357,14 +380,15 @@ int ImplicitStartProcessor::QueryBmsAppInfos(AbilityRequest &request, int32_t us
     return ERR_OK;
 }
 
-std::vector<std::string> ImplicitStartProcessor::SplitStr(const std::string& str, char delimiter) {
-    std::stringstream ss(str);  
-    std::vector<std::string> result;  
-    std::string s;  
-    while (std::getline(ss, s, delimiter)) {  
-        result.push_back(s);  
-    }  
-    return result;  
+std::vector<std::string> ImplicitStartProcessor::SplitStr(const std::string& str, char delimiter)
+{
+    std::stringstream ss(str);
+    std::vector<std::string> result;
+    std::string s;
+    while (std::getline(ss, s, delimiter)) {
+        result.push_back(s);
+    }
+    return result;
 }
 
 bool ImplicitStartProcessor::CheckImplicitStartExtensionIsValid(const AbilityRequest &request,

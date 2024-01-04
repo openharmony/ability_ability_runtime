@@ -653,7 +653,6 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
         HILOG_ERROR("get app record failed");
         return;
     }
-    appRecord->PopForegroundingAbilityTokens();
     ApplicationState appState = appRecord->GetState();
     if (appState == ApplicationState::APP_STATE_READY || appState == ApplicationState::APP_STATE_BACKGROUND) {
         appRecord->SetState(ApplicationState::APP_STATE_FOREGROUND);
@@ -666,6 +665,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
     }
     appRecord->SetUpdateStateFromService(false);
     appRecord->SetApplicationPendingState(ApplicationPendingState::READY);
+    appRecord->PopForegroundingAbilityTokens();
 
     // push the foregrounded app front of RecentAppList.
     PushAppFront(recordId);
@@ -1017,7 +1017,7 @@ int32_t AppMgrServiceInner::KillApplicationByUserIdLocked(const std::string &bun
     int64_t startTime = SystemTimeMillisecond();
     std::list<pid_t> pids;
     if (remoteClientManager_ == nullptr) {
-        HILOG_ERROR("The remoteClientManager_ is nullptr.");
+        HILOG_ERROR("remoteClientManager_ is nullptr.");
         return ERR_NO_INIT;
     }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
@@ -1059,8 +1059,28 @@ int32_t AppMgrServiceInner::ClearUpApplicationData(const std::string &bundleName
     return ClearUpApplicationDataByUserId(bundleName, callerUid, callerPid, newUserId);
 }
 
+int32_t AppMgrServiceInner::ClearUpApplicationDataBySelf(int32_t callerUid, pid_t callerPid, int32_t userId)
+{
+    if (!appRunningManager_) {
+        HILOG_ERROR("appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!appRecord) {
+        HILOG_ERROR("no such appRecord, callerPid:%{public}d", callerPid);
+        return ERR_INVALID_VALUE;
+    }
+    auto callerbundleName = appRecord->GetBundleName();
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    int32_t newUserId = userId;
+    if (userId == DEFAULT_INVAL_VALUE) {
+        newUserId = GetUserIdByUid(callerUid);
+    }
+    return ClearUpApplicationDataByUserId(callerbundleName, callerUid, callerPid, newUserId, true);
+}
+
 int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(
-    const std::string &bundleName, int32_t callerUid, pid_t callerPid, const int userId)
+    const std::string &bundleName, int32_t callerUid, pid_t callerPid, const int userId, bool isBySelf)
 {
     if (callerPid <= 0) {
         HILOG_ERROR("invalid callerPid:%{public}d", callerPid);
@@ -1090,7 +1110,11 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(
     }
     // 3.kill application
     // 4.revoke user rights
-    result = KillApplicationByUserId(bundleName, userId);
+    if (isBySelf) {
+        result = KillApplicationSelf();
+    } else {
+        result = KillApplicationByUserId(bundleName, userId);
+    }
     if (result < 0) {
         HILOG_ERROR("Kill Application by bundle name is fail");
         return ERR_INVALID_OPERATION;
@@ -4724,7 +4748,7 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
 
 int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state)
 {
-    HILOG_DEBUG("called.");
+    HILOG_DEBUG("called, pid:%{public}d, state:%{public}d.", pid, state);
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
         HILOG_ERROR("no such appRecord");
@@ -4930,7 +4954,8 @@ bool AppMgrServiceInner::JudgeSelfCalledByToken(const sptr<IRemoteObject> &token
         return false;
     }
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    if (appRecord == nullptr || ((appRecord->GetApplicationInfo())->accessTokenId) != callingTokenId) {
+    if (appRecord->GetApplicationInfo() == nullptr ||
+        ((appRecord->GetApplicationInfo())->accessTokenId) != callingTokenId) {
         HILOG_ERROR("Is not self, not enabled");
         return false;
     }
