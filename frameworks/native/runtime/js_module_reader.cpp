@@ -125,40 +125,8 @@ std::string JsModuleReader::GetCommonAppHspPath(const std::string& inputPath) co
     return realHapPath;
 }
 
-std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName)
-{
-    std::string presetAppHapPath = inputPath;
-    std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
-    if (moduleName.empty()) {
-        HILOG_ERROR("Failed to obtain moduleName.");
-        return presetAppHapPath;
-    }
-    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
-    if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("The bundleMgrHelper is nullptr.");
-        return presetAppHapPath;
-    }
-    if (inputPath.find_first_of("/") == inputPath.find_last_of("/")) {
-        AppExecFwk::BundleInfo bundleInfo;
-        auto getInfoResult = bundleMgrHelper->GetBundleInfoForSelf(static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::
-            GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
-        if (getInfoResult != 0 || bundleInfo.hapModuleInfos.empty()) {
-            HILOG_ERROR("GetBundleInfoForSelf failed.");
-            return presetAppHapPath;
-        }
-        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
-            if (hapModuleInfo.moduleName == moduleName) {
-                presetAppHapPath = hapModuleInfo.hapPath;
-                break;
-            }
-        }
-    } else {
-        return GetOtherHspPath(bundleName, moduleName, presetAppHapPath);
-    }
-    return presetAppHapPath;
-}
-
-std::string GetOtherHspPath(const std::string& bundleName, const std::string& moduleName, const std::string& inputPath)
+std::string JsModuleReader::GetOtherHspPath(const std::string& bundleName, const std::string& moduleName,
+    const std::string& inputPath)
 {
     std::string presetAppHapPath = inputPath;
 
@@ -195,6 +163,64 @@ std::string GetOtherHspPath(const std::string& bundleName, const std::string& mo
         }
     }
     return presetAppHapPath;
+}
+
+std::string JsModuleReader::GetPresetAppHapPath(const std::string& inputPath, const std::string& bundleName)
+{
+    std::string presetAppHapPath = inputPath;
+    std::string moduleName = inputPath.substr(inputPath.find_last_of("/") + 1);
+    if (moduleName.empty()) {
+        HILOG_ERROR("Failed to obtain moduleName.");
+        return presetAppHapPath;
+    }
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
+        return presetAppHapPath;
+    }
+    if (inputPath.find_first_of("/") == inputPath.find_last_of("/")) {
+        AppExecFwk::BundleInfo bundleInfo;
+        auto getInfoResult = bundleMgrHelper->GetBundleInfoForSelf(static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::
+            GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+        if (getInfoResult != 0 || bundleInfo.hapModuleInfos.empty()) {
+            HILOG_ERROR("GetBundleInfoForSelf failed.");
+            return presetAppHapPath;
+        }
+        for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+            if (hapModuleInfo.moduleName == moduleName) {
+                presetAppHapPath = hapModuleInfo.hapPath;
+                break;
+            }
+        }
+    } else {
+        presetAppHapPath = GetOtherHspPath(bundleName, moduleName, presetAppHapPath);
+    }
+    return presetAppHapPath;
+}
+
+void JsModuleReader::GetHapPathList(const std::string &bundleName, std::vector<std::string> &hapList)
+{
+    auto systemAbilityManagerClient = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityManagerClient) {
+        HILOG_ERROR("fail to get system ability mgr.");
+        return;
+    }
+    auto remoteObject = systemAbilityManagerClient->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (!remoteObject) {
+        HILOG_ERROR("fail to get bundle manager proxy.");
+        return;
+    }
+    auto bundleMgrProxy = iface_cast<IBundleMgr>(remoteObject);
+    AppExecFwk::BundleInfo bundleInfo;
+    auto getInfoResult = bundleMgrProxy->GetBundleInfoForSelf(static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::
+        GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+    if (getInfoResult != 0 || bundleInfo.hapModuleInfos.empty()) {
+        HILOG_ERROR("GetBundleInfoForSelf failed.");
+        return;
+    }
+    for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
+        hapList.emplace_back(hapModuleInfo.hapPath);
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
