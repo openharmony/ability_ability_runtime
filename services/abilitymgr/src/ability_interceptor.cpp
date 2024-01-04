@@ -24,6 +24,7 @@
 #include "app_jump_control_rule.h"
 #include "app_running_control_rule_result.h"
 #include "bundle_constants.h"
+#include "ecological_rule/ability_ecological_rule_mgr_service.h"
 #include "hilog_wrapper.h"
 #include "iservice_registry.h"
 #include "in_process_call_wrapper.h"

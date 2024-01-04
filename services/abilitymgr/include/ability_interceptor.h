@@ -18,12 +18,15 @@
 
 #include "ability_util.h"
 #include "disposed_observer.h"
-#include "ecological_rule/ability_ecological_rule_mgr_service.h"
 #include "in_process_call_wrapper.h"
 #include "task_handler_wrap.h"
 #include "want.h"
 
 namespace OHOS {
+namespace EcologicalRuleMgrService {
+struct AbilityCallerInfo;
+struct AbilityExperienceRule;
+}
 namespace AAFwk {
 using namespace OHOS::EcologicalRuleMgrService;
 using ErmsCallerInfo = OHOS::EcologicalRuleMgrService::AbilityCallerInfo;

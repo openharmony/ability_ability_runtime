@@ -39,6 +39,7 @@ ohos_fuzztest("ApplicationAnrListenerFuzzTest") {
   ]
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/ecological_rule/ability_ecological_rule_mgr_service.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/ecological_rule/ability_ecological_rule_mgr_service_param.cpp",
     "applicationanrlistener_fuzzer.cpp",
   ]
 

@@ -34,10 +34,7 @@ ohos_fuzztest("AppMgrServiceFirstFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [
-    "${ability_runtime_services_path}/abilitymgr/src/ecological_rule/ability_ecological_rule_mgr_service.cpp",
-    "appmgrservicefirst_fuzzer.cpp",
-  ]
+  sources = [ "appmgrservicefirst_fuzzer.cpp" ]
 
   configs = [ "${ability_runtime_innerkits_path}/ability_manager:ability_manager_public_config" ]
 
