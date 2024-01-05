@@ -441,7 +441,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 void AbilityRecord::ForegroundAbility(const Closure &task, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("name:%{public}s.", abilityInfo_.name.c_str());
+    HILOG_INFO("ability: %{public}s.", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
     // grant uri permission
     {
@@ -1163,8 +1163,7 @@ bool AbilityRecord::IsCompleteFirstFrameDrawing() const
 void AbilityRecord::BackgroundAbility(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("BackgroundLifecycle: begin, bundle: %{public}s, ability: %{public}s.", abilityInfo_.bundleName.c_str(),
-        abilityInfo_.name.c_str());
+    HILOG_INFO("BackgroundLifecycle: ability: %{public}s.", GetURI().c_str());
     if (lifecycleDeal_ == nullptr) {
         HILOG_ERROR("Move the ability to background fail, lifecycleDeal_ is null.");
         return;
@@ -1491,7 +1490,7 @@ void AbilityRecord::Inactivate()
 void AbilityRecord::Terminate(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("ability:%{public}s.", abilityInfo_.name.c_str());
+    HILOG_INFO("ability: %{public}s.", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
     if (!IsDebug()) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -1512,7 +1511,7 @@ void AbilityRecord::Terminate(const Closure &task)
     // schedule background after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     SetAbilityStateInner(AbilityState::TERMINATING);
-    lifecycleDeal_->Terminate(GetWant(), lifeCycleStateInfo_);
+    lifecycleDeal_->Terminate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
 }
 
 void AbilityRecord::ShareData(const int32_t &uniqueId)
