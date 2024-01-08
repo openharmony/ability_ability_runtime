@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,10 +43,6 @@ AutoFillManager::~AutoFillManager()
     HILOG_DEBUG("Called.");
     if (eventHandler_ != nullptr) {
         eventHandler_.reset();
-    }
-
-    if (taskHandler_ != nullptr) {
-        taskHandler_.reset();
     }
 }
 
@@ -133,14 +129,10 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
 void AutoFillManager::SetTimeOutEvent(uint32_t eventId)
 {
     HILOG_DEBUG("Called.");
-    if (taskHandler_ == nullptr) {
-        HILOG_DEBUG("Taskhandler is nullptr.");
-        taskHandler_ = AAFwk::TaskHandlerWrap::CreateQueueHandler(AUTO_FILL_MANAGER_THREAD);
-    }
-
+    auto runner = AppExecFwk::EventRunner::Create(AUTO_FILL_MANAGER_THREAD);
     if (eventHandler_ == nullptr) {
         HILOG_DEBUG("Eventhandler is nullptr.");
-        eventHandler_ = std::make_shared<AutoFillEventHandler>(taskHandler_);
+        eventHandler_ = std::make_shared<AutoFillEventHandler>(runner);
     }
     eventHandler_->SendEvent(eventId, AUTO_FILL_REQUEST_TIME_OUT_VALUE);
 }
