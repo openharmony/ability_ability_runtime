@@ -1110,20 +1110,16 @@ int32_t AppMgrServiceInner::ClearUpApplicationDataByUserId(
     }
     // 3.kill application
     // 4.revoke user rights
-    if (isBySelf) {
-        result = KillApplicationSelf();
-    } else {
-        result = KillApplicationByUserId(bundleName, userId);
-    }
+    result = isBySelf ? KillApplicationSelf() : KillApplicationByUserId(bundleName, userId);
     if (result < 0) {
         HILOG_ERROR("Kill Application by bundle name is fail");
         return ERR_INVALID_OPERATION;
     }
     // 5.revoke uri permission rights
-    result = AAFwk::UriPermissionManagerClient::GetInstance().RevokeAllUriPermissions(tokenId);
-    if (result != 0) {
-        HILOG_ERROR("Revoke all uri permissions is fail");
-        return ERR_PERMISSION_DENIED;
+    auto ret = IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().RevokeAllUriPermissions(tokenId));
+    if (ret != ERR_OK) {
+        HILOG_ERROR("Revoke all uri permissions is failed");
+        return ret;
     }
     auto dataMgr = OHOS::DistributedKv::DistributedDataMgr();
     auto dataRet = dataMgr.ClearAppStorage(bundleName, userId, 0, tokenId);
@@ -2106,7 +2102,8 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     }
 
     HspList hspList;
-    ErrCode ret = bundleMgrHelper->GetBaseSharedBundleInfos(bundleName, hspList);
+    ErrCode ret = bundleMgrHelper->GetBaseSharedBundleInfos(bundleName, hspList,
+        AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
     if (ret != ERR_OK) {
         HILOG_ERROR("GetBaseSharedBundleInfos failed: %{public}d", ret);
         appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
@@ -2755,6 +2752,8 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         return;
     }
 
+    appRecord->SetKeepAliveAppState(true, isEmptyKeepAliveApp);
+
     StartProcess(appInfo->name, processName, 0, appRecord, appInfo->uid, appInfo->bundleName, 0, appExistFlag);
 
     // If it is empty, the startup failed
@@ -2762,8 +2761,6 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         HILOG_ERROR("start process [%{public}s] failed!", processName.c_str());
         return;
     }
-
-    appRecord->SetKeepAliveAppState(true, isEmptyKeepAliveApp);
 
     if (restartCount > 0) {
         HILOG_INFO("StartEmptyResidentProcess restartCount : [%{public}d], ", restartCount);
@@ -4126,7 +4123,9 @@ void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> 
     }
 
     bool needNotifyApp = appRunningManager_->IsApplicationFirstFocused(*appRecord);
-    OnAppStateChanged(appRecord, appRecord->GetState(), needNotifyApp, true);
+    if (appRecord->GetState() == ApplicationState::APP_STATE_FOREGROUND) {
+        OnAppStateChanged(appRecord, ApplicationState::APP_STATE_FOREGROUND, needNotifyApp, true);
+    }
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
 }
 

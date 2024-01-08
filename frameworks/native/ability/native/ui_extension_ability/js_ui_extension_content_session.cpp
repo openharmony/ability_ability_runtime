@@ -59,7 +59,7 @@ do {                                                                            
         ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);                   \
         return CreateJsUndefined(env);                                                  \
     }                                                                                   \
-} while(0)
+} while (0)
 
 void UISessionAbilityResultListener::OnAbilityResult(int requestCode, int resultCode, const Want &resultData)
 {
@@ -248,6 +248,10 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionHostWindowProxy(napi_env
         return CreateJsUndefined(env);
     }
     auto value = JsRuntime::LoadSystemModuleByEngine(env, "application.extensionWindow", &jsExtensionWindow, 1);
+    if (value == nullptr) {
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return CreateJsUndefined(env);
+    }
     return value->GetNapiValue();
 }
 
