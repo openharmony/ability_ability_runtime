@@ -47,7 +47,6 @@ static const int RESULT_ERR = -1;
 } // namespace
 void ApplicationCleaner::RenameTempData()
 {
-    HILOG_DEBUG("Called");
     if (context_ == nullptr) {
         HILOG_ERROR("Context is null.");
         return;
@@ -58,22 +57,17 @@ void ApplicationCleaner::RenameTempData()
         HILOG_ERROR("Get app temp path list is empty.");
         return;
     }
-
-    auto renameTask = [tempdir]() {
-        int64_t now =
-            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
-                .count();
-        std::ostringstream stream;
-        stream << std::hex << now;
-        for (const auto &path : tempdir) {
-            auto newPath = path + MARK_SYMBOL + stream.str();
-            if (rename(path.c_str(), newPath.c_str()) != 0) {
-                HILOG_ERROR("Rename temp dir failed, msg is %{public}s", strerror(errno));
-            }
+    int64_t now =
+        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+    std::ostringstream stream;
+    stream << std::hex << now;
+    for (const auto &path : tempdir) {
+        auto newPath = path + MARK_SYMBOL + stream.str();
+        if (rename(path.c_str(), newPath.c_str()) != 0) {
+            HILOG_ERROR("Rename temp dir failed, msg is %{public}s", strerror(errno));
         }
-    };
-
-    ffrt::submit(renameTask);
+    }
 }
 
 void ApplicationCleaner::ClearTempData()
