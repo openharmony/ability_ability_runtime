@@ -1314,8 +1314,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
                 abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_WIDTH, startOptions.GetWindowHeight());
             }
             bool withAnimation = startOptions.GetWithAnimation();
-            if (!withAnimation &&
-                AAFwk::PermissionVerification::GetInstance()->VerifyStartAbilityWithAnimationPermission()) {
+            auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+            if (!withAnimation && abilityRecord != nullptr &&
+                abilityRecord->GetAbilityInfo().bundleName == abilityRequest.want.GetBundle()) {
                 abilityRequest.want.SetParam(Want::PARAM_RESV_WITH_ANIMATION, withAnimation);
             }
         }
@@ -1423,8 +1424,9 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_WIDTH, startOptions.GetWindowWidth());
         }
         bool withAnimation = startOptions.GetWithAnimation();
-        if (!withAnimation &&
-            AAFwk::PermissionVerification::GetInstance()->VerifyStartAbilityWithAnimationPermission()) {
+        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+        if (!withAnimation && abilityRecord != nullptr &&
+            abilityRecord->GetAbilityInfo().bundleName == abilityRequest.want.GetBundle()) {
             abilityRequest.want.SetParam(Want::PARAM_RESV_WITH_ANIMATION, withAnimation);
         }
     }
