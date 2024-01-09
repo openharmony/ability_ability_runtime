@@ -1728,6 +1728,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
 
 bool AbilityManagerService::CheckCallingTokenId(const std::string &bundleName)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto bms = GetBundleManager();
     if (bms == nullptr) {
         HILOG_ERROR("bms is invalid.");
@@ -2049,6 +2050,7 @@ void AbilityManagerService::UnsubscribeBundleEventCallback()
 void AbilityManagerService::ReportAbilitStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityInfo.type == AppExecFwk::AbilityType::PAGE &&
         abilityInfo.launchMode != AppExecFwk::LaunchMode::SPECIFIED) {
         std::vector<AppExecFwk::RunningProcessInfo> runningProcessInfos;
@@ -5486,6 +5488,7 @@ std::shared_ptr<AppExecFwk::BundleMgrHelper> AbilityManagerService::GetBundleMan
 
 int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (bundleName.empty()) {
         HILOG_ERROR("Invalid bundle name when app data abilities preloading.");
         return ERR_INVALID_VALUE;
@@ -5507,8 +5510,6 @@ int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName
         HILOG_ERROR("Failed to get bundle info when app data abilities preloading, userId is %{public}d", userId);
         return RESOLVE_APP_ERR;
     }
-
-    HILOG_DEBUG("App data abilities preloading for bundle '%{public}s'...", bundleName.data());
 
     auto begin = system_clock::now();
     AbilityRequest dataAbilityRequest;
@@ -5536,7 +5537,6 @@ int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName
     }
 
     HILOG_INFO("App data abilities preloading done.");
-
     return ERR_OK;
 }
 
