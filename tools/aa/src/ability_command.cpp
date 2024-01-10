@@ -35,7 +35,7 @@ namespace AAFwk {
 namespace {
 constexpr size_t PARAM_LENGTH = 1024;
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:CDSN";
+const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:k:CDSN";
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"device", required_argument, nullptr, 'd'},
@@ -807,6 +807,42 @@ bool AbilityManagerShellCommand::CheckPerfCmdString(
     return true;
 }
 
+std::vector<std::string> Split(const std::string& str, char delim)
+{
+    std::stringstream ss(str);
+    std::string item;
+    std::vector<std::string> elems;
+    while (std::getline(ss, item, delim))
+    {
+        if (!item.empty())
+            elems.push_back(item);
+    }
+    return elems;
+}
+
+void ParseToKeyValuePairs(const std::string& str, std::map<std::string, std::string>& m)
+{
+    auto vs = Split(str, ';');
+    for (auto s : vs)
+    {
+        auto v = Split(s, ':');
+        if (v.size == 2) m.insert(v[0], v[1]);
+    }
+}
+
+void PrintMapMessage(std::string& str, const std::map<std::string, std::string>& m)
+{
+    std::map<std::string, std::string>::iterator it;
+    for (it = m.begin(); it != m.end(); it++)
+    {
+        str.append("received key: ");
+        str.append(it->first);
+        str.append(" value: ");
+        str.append(it->second);
+        str.append("\n");
+    }
+}
+
 ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
 {
     int result = OHOS::ERR_OK;
@@ -818,6 +854,7 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
     std::string moduleName = "";
     std::string perfCmd = "";
     std::string debugCmd = "";
+    std::map<std::string, std::string> mapKeyValues;
     bool isPerf = false;
     bool isSandboxApp = false;
 
@@ -881,6 +918,15 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     // 'aa process -p' with no argument
                     HILOG_INFO("'aa %{public}s -p' with no argument.", cmd_.c_str());
 
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'k': {
+                    // 'aa process -k' with no argument
+                    HILOG_INFO("'aa %{public}s -k' with no argument.", cmd_.c_str());
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
 
@@ -957,6 +1003,15 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     perfCmd = optarg;
                     isPerf = true;
                 }
+                break;
+            }
+            case 'k': {
+                // 'aa process -k k1:v1;k2:v2'
+                // save key value maps
+                ParseToKeyValuePairs(optarg, mapKeyValues);
+                // print the map
+                PrintMapMessage(resultReceiver_, mapKeyValues);
+
                 break;
             }
             case 'D': {
@@ -1114,6 +1169,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
     std::string abilityName = "";
     std::string moduleName;
     std::string perfCmd;
+    std::map<std::string, std::string> mapKeyValues;
     bool isColdStart = false;
     bool isDebugApp = false;
     bool isContinuation = false;
@@ -1221,6 +1277,17 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
+                case 'k': {
+                    // 'aa start -k' with no argumnet
+                    // 'aa stop-service -k' with no argument
+                    HILOG_INFO("'aa %{public}s -k' with no argument.", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
                 case 0: {
                     // 'aa start' with an unknown option: aa start --x
                     // 'aa start' with an unknown option: aa start --xxx
@@ -1311,6 +1378,13 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     HILOG_ERROR("input perfCmd is invalid %{public}s", perfCmd.c_str());
                     result = OHOS::ERR_INVALID_VALUE;
                 }
+                break;
+            }
+            case 'k': {
+                ParseToKeyValuePairs(optarg, mapKeyValues);
+                // print map
+                PrintMapMessage(resultReceiver_, mapKeyValues);
+
                 break;
             }
             case 'C': {
