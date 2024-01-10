@@ -75,6 +75,8 @@ const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 const int32_t API11 = 11;
 const int32_t API_VERSION_MOD = 100;
+const int AREA2 = 2;
+const int AREA3 = 3;
 
 std::string ContextImpl::GetBundleName() const
 {
@@ -321,7 +323,7 @@ std::string ContextImpl::GetDistributedFilesDir()
         dir = CONTEXT_DISTRIBUTEDFILES_BASE_BEFORE + std::to_string(GetCurrentAccountId()) +
             CONTEXT_DISTRIBUTEDFILES_BASE_MIDDLE + GetBundleName();
     } else {
-        if (currArea_ == CONTEXT_ELS[1] || currArea_ == CONTEXT_ELS[2] || currArea_ == CONTEXT_ELS[3]) {
+        if (currArea_ == CONTEXT_ELS[1] || currArea_ == CONTEXT_ELS[AREA2] || currArea_ == CONTEXT_ELS[AREA3]) {
             //when areamode swith to el3/el4, the distributedfiles dir should be always el2's distributedfilesdir dir
             dir = CONTEXT_DATA_STORAGE + CONTEXT_ELS[1] + CONTEXT_FILE_SEPARATOR + CONTEXT_DISTRIBUTEDFILES;
         } else {
@@ -369,7 +371,8 @@ std::shared_ptr<Context> ContextImpl::CreateModuleContext(const std::string &bun
     GetBundleInfo(bundleName, bundleInfo, accountId);
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
         HILOG_ERROR("GetBundleInfo is error");
-        ErrCode ret = bundleMgr_->GetDependentBundleInfo(bundleName, bundleInfo);
+        ErrCode ret = bundleMgr_->GetDependentBundleInfo(bundleName, bundleInfo,
+            AppExecFwk::GetDependentBundleInfoFlag::GET_ALL_DEPENDENT_BUNDLE_INFO);
         if (ret != ERR_OK) {
             HILOG_ERROR("GetDependentBundleInfo failed:%{public}d", ret);
             return nullptr;
@@ -699,6 +702,8 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceMana
                 loadPath = std::regex_replace(loadPath, inner_pattern, LOCAL_CODE_PATH);
             } else if (bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::SHARED) {
                 loadPath = std::regex_replace(loadPath, hsp_pattern, hsp_sandbox);
+            } else if (bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::APP_SERVICE_FWK) {
+                HILOG_DEBUG("System hsp path, not need translate.");
             } else {
                 loadPath = std::regex_replace(loadPath, outer_pattern, LOCAL_BUNDLES);
             }

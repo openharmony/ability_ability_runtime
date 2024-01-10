@@ -296,7 +296,8 @@ std::string BundleMgrHelper::GetAppType(const std::string &bundleName)
 }
 
 ErrCode BundleMgrHelper::GetBaseSharedBundleInfos(
-    const std::string &bundleName, std::vector<BaseSharedBundleInfo> &baseSharedBundleInfos)
+    const std::string &bundleName, std::vector<BaseSharedBundleInfo> &baseSharedBundleInfos,
+    GetDependentBundleInfoFlag flag)
 {
     HILOG_DEBUG("Called.");
     auto bundleMgr = Connect();
@@ -305,7 +306,7 @@ ErrCode BundleMgrHelper::GetBaseSharedBundleInfos(
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
-    return bundleMgr->GetBaseSharedBundleInfos(bundleName, baseSharedBundleInfos);
+    return bundleMgr->GetBaseSharedBundleInfos(bundleName, baseSharedBundleInfos, flag);
 }
 
 ErrCode BundleMgrHelper::GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleInfo)
@@ -320,7 +321,8 @@ ErrCode BundleMgrHelper::GetBundleInfoForSelf(int32_t flags, BundleInfo &bundleI
     return bundleMgr->GetBundleInfoForSelf(flags, bundleInfo);
 }
 
-ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleName, BundleInfo &sharedBundleInfo)
+ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleName, BundleInfo &sharedBundleInfo,
+    GetDependentBundleInfoFlag flag)
 {
     HILOG_DEBUG("Called.");
     auto bundleMgr = Connect();
@@ -329,7 +331,7 @@ ErrCode BundleMgrHelper::GetDependentBundleInfo(const std::string &sharedBundleN
         return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
     }
 
-    return bundleMgr->GetDependentBundleInfo(sharedBundleName, sharedBundleInfo);
+    return bundleMgr->GetDependentBundleInfo(sharedBundleName, sharedBundleInfo, flag);
 }
 
 bool BundleMgrHelper::GetGroupDir(const std::string &dataGroupId, std::string &dir)
@@ -713,16 +715,5 @@ ErrCode BundleMgrHelper::GetJsonProfile(ProfileType profileType, const std::stri
     return bundleMgr->GetJsonProfile(profileType, bundleName, moduleName, profile, userId);
 }
 
-ErrCode BundleMgrHelper::CleanObsoleteBundleTempFiles()
-{
-    HILOG_DEBUG("Called.");
-    auto bundleMgr = Connect();
-    if (bundleMgr == nullptr) {
-        HILOG_ERROR("Failed to connect.");
-        return ERR_APPEXECFWK_SERVICE_INTERNAL_ERROR;
-    }
-
-    return bundleMgr->CleanObsoleteBundleTempFiles();
-}
 }  // namespace AppExecFwk
 }  // namespace OHOS
