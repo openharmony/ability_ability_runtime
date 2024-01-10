@@ -22,7 +22,6 @@
 #include <thread>
 #include <unordered_map>
 
-#include "StageContext.h"
 #include "ability_context.h"
 #include "ability_stage_context.h"
 #include "bundle_container.h"
