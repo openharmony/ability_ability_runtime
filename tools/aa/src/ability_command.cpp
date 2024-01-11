@@ -1436,7 +1436,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 want.SetParam("nativeDebug", isNativeDebug);
             }
             if (!parameters.empty()) {
-                for (std::map<std::string, std::string>::iterator it = parameters.begin(); it != parameters.end{}. it++) {
+                for (std::map<std::string, std::string>::iterator it = parameters.begin(); it != parameters.end(). it++) {
                     want.SetParam(it->first, it->second);
                 }
             }
