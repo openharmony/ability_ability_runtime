@@ -827,7 +827,7 @@ void ParseToKeyValuePairs(const std::string& str, std::map<std::string, std::str
     for (auto s : vs)
     {
         auto v = Split(s, ':');
-        if (v.size() == 2) m.insert(v[0], v[1]);
+        if (v.size() == 2) m[v[0]] = v[1];
     }
 }
 
@@ -1436,7 +1436,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 want.SetParam("nativeDebug", isNativeDebug);
             }
             if (!parameters.empty()) {
-                for (std::map<std::string, std::string>::iterator it = parameters.begin(); it != parameters.end(). it++) {
+                for (std::map<std::string, std::string>::iterator it = parameters.begin(); it != parameters.end()； it++) {
                     want.SetParam(it->first, it->second);
                 }
             }
