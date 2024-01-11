@@ -35,7 +35,7 @@ namespace AAFwk {
 namespace {
 constexpr size_t PARAM_LENGTH = 1024;
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:k:CDSN";
+const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:P:CDSN";
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"device", required_argument, nullptr, 'd'},
@@ -47,6 +47,7 @@ constexpr struct option LONG_OPTIONS[] = {
     {"cold-start", no_argument, nullptr, 'C'},
     {"debug", no_argument, nullptr, 'D'},
     {"native-debug", no_argument, nullptr, 'N'},
+    {"parameters", required_argument, nullptr, 'P'},
     {nullptr, 0, nullptr, 0},
 };
 const std::string SHORT_OPTIONS_APPLICATION_NOT_RESPONDING = "hp:";
@@ -830,19 +831,6 @@ void ParseToKeyValuePairs(const std::string& str, std::map<std::string, std::str
     }
 }
 
-void PrintMapMessage(std::string& str, const std::map<std::string, std::string>& m)
-{
-    std::map<std::string, std::string>::iterator it;
-    for (it = m.begin(); it != m.end(); it++)
-    {
-        str.append("received key: ");
-        str.append(it->first);
-        str.append(" value: ");
-        str.append(it->second);
-        str.append("\n");
-    }
-}
-
 ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
 {
     int result = OHOS::ERR_OK;
@@ -854,7 +842,6 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
     std::string moduleName = "";
     std::string perfCmd = "";
     std::string debugCmd = "";
-    std::map<std::string, std::string> mapKeyValues;
     bool isPerf = false;
     bool isSandboxApp = false;
 
@@ -918,15 +905,6 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     // 'aa process -p' with no argument
                     HILOG_INFO("'aa %{public}s -p' with no argument.", cmd_.c_str());
 
-                    resultReceiver_.append("error: option ");
-                    resultReceiver_.append("requires a value.\n");
-
-                    result = OHOS::ERR_INVALID_VALUE;
-                    break;
-                }
-                case 'k': {
-                    // 'aa process -k' with no argument
-                    HILOG_INFO("'aa %{public}s -k' with no argument.", cmd_.c_str());
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
 
@@ -1003,15 +981,6 @@ ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
                     perfCmd = optarg;
                     isPerf = true;
                 }
-                break;
-            }
-            case 'k': {
-                // 'aa process -k k1:v1;k2:v2'
-                // save key value maps
-                ParseToKeyValuePairs(optarg, mapKeyValues);
-                // print the map
-                PrintMapMessage(resultReceiver_, mapKeyValues);
-
                 break;
             }
             case 'D': {
@@ -1169,7 +1138,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
     std::string abilityName = "";
     std::string moduleName;
     std::string perfCmd;
-    std::map<std::string, std::string> mapKeyValues;
+    std::map<std::string, std::string> parameters;
     bool isColdStart = false;
     bool isDebugApp = false;
     bool isContinuation = false;
@@ -1277,15 +1246,17 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     result = OHOS::ERR_INVALID_VALUE;
                     break;
                 }
-                case 'k': {
-                    // 'aa start -k' with no argumnet
-                    // 'aa stop-service -k' with no argument
-                    HILOG_INFO("'aa %{public}s -k' with no argument.", cmd_.c_str());
+                case 'P': {
+                    if (strcmp(cmd_.c_str(), "start") == 0) {
+                        // parameters are only valid for the start command
+                        // 'aa start -P' with no argumnet
+                        HILOG_INFO("'aa %{public}s -k' with no argument.", cmd_.c_str());
 
-                    resultReceiver_.append("error: option ");
-                    resultReceiver_.append("requires a value.\n");
+                        resultReceiver_.append("error: option ");
+                        resultReceiver_.append("requires a value.\n");
 
-                    result = OHOS::ERR_INVALID_VALUE;
+                        result = OHOS::ERR_INVALID_VALUE;
+                    }
                     break;
                 }
                 case 0: {
@@ -1380,10 +1351,11 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 }
                 break;
             }
-            case 'k': {
-                ParseToKeyValuePairs(optarg, mapKeyValues);
-                // print map
-                PrintMapMessage(resultReceiver_, mapKeyValues);
+            case 'P': {
+                // 'aa start -P xxx'
+
+                // parse option arguments into a key-value map
+                ParseToKeyValuePairs(optarg, parameters);
 
                 break;
             }
@@ -1462,6 +1434,11 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             }
             if (isNativeDebug) {
                 want.SetParam("nativeDebug", isNativeDebug);
+            }
+            if (!parameters.empty()) {
+                for (std::map<std::string, std::string>::iterator it = parameters.begin(); it != parameters.end{}. it++) {
+                    want.SetParam(it->first, it->second);
+                }
             }
         }
     }
