@@ -827,7 +827,7 @@ void ParseToKeyValuePairs(const std::string& str, std::map<std::string, std::str
     for (auto s : vs)
     {
         auto v = Split(s, ':');
-        if (v.size == 2) m.insert(v[0], v[1]);
+        if (v.size() == 2) m.insert(v[0], v[1]);
     }
 }
 
