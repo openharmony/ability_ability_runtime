@@ -63,7 +63,9 @@ const std::string HELP_MSG_START =
     "options list:\n"
     "  -h, --help                                                   list available commands\n"
     "  [-d <device-id>] -a <ability-name> -b <bundle-name> [-m <module-name>] [-p <perf-cmd>] [-D] [-S] [-N] "
-    "  [-P key1:value1;key2:value2]"
+    "  [-P <key:value pairs, separated by ;>] "
+    "  [-A <action-name>] "
+    "  [-U <URI>] "
     "  start ability with an element name\n";
 
 const std::string HELP_MSG_STOP_SERVICE =

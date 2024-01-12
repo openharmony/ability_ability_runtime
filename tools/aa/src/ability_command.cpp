@@ -35,7 +35,7 @@ namespace AAFwk {
 namespace {
 constexpr size_t PARAM_LENGTH = 1024;
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:P:CDSN";
+const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:P:A:U:CDSN";
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"device", required_argument, nullptr, 'd'},
@@ -48,6 +48,8 @@ constexpr struct option LONG_OPTIONS[] = {
     {"debug", no_argument, nullptr, 'D'},
     {"native-debug", no_argument, nullptr, 'N'},
     {"parameters", required_argument, nullptr, 'P'},
+    {"action", required_argument, nullptr, "A"},
+    {"URI", required_argument, nullptr, "U"},
     {nullptr, 0, nullptr, 0},
 };
 const std::string SHORT_OPTIONS_APPLICATION_NOT_RESPONDING = "hp:";
@@ -1139,6 +1141,8 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
     std::string moduleName;
     std::string perfCmd;
     std::map<std::string, std::string> parameters;
+    std::string uri;
+    std::string action;
     bool isColdStart = false;
     bool isDebugApp = false;
     bool isContinuation = false;
@@ -1250,7 +1254,33 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     if (strcmp(cmd_.c_str(), "start") == 0) {
                         // parameters are only valid for the start command
                         // 'aa start -P' with no argumnet
-                        HILOG_INFO("'aa %{public}s -k' with no argument.", cmd_.c_str());
+                        HILOG_INFO("'aa %{public}s -P' with no argument.", cmd_.c_str());
+
+                        resultReceiver_.append("error: option ");
+                        resultReceiver_.append("requires a value.\n");
+
+                        result = OHOS::ERR_INVALID_VALUE;
+                    }
+                    break;
+                }
+                case 'A': {
+                    if (strcmp(cmd_.c_str(), "start") == 0) {
+                        // action is only valid for the start command
+                        // 'aa start -A' with no argumnet
+                        HILOG_INFO("'aa %{public}s -A' with no argument.", cmd_.c_str());
+
+                        resultReceiver_.append("error: option ");
+                        resultReceiver_.append("requires a value.\n");
+
+                        result = OHOS::ERR_INVALID_VALUE;
+                    }
+                    break;
+                }
+                case 'U': {
+                    if (strcmp(cmd_.c_str(), "start") == 0) {
+                        // URI is only valid for the start command
+                        // 'aa start -U' with no argumnet
+                        HILOG_INFO("'aa %{public}s -U' with no argument.", cmd_.c_str());
 
                         resultReceiver_.append("error: option ");
                         resultReceiver_.append("requires a value.\n");
@@ -1359,6 +1389,20 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                 break;
             }
+            case 'U': {
+                // 'aa start -U xxx'
+
+                // save URI
+                uri = optarg;
+                break;
+            }
+            case 'A': {
+                // 'aa start -A xxx'
+
+                // save action
+                action = optarg;
+                break;
+            }
             case 'C': {
                 // 'aa start -C'
                 // cold start app
@@ -1439,6 +1483,12 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 for (std::map<std::string, std::string>::iterator it = parameters.begin(); it != parameters.end(); it++) {
                     want.SetParam(it->first, it->second);
                 }
+            }
+            if (!action.empty()) {
+                want.SetAction(action);
+            }
+            if (!uri.empty()) {
+                want.SetUri(uri);
             }
         }
     }
