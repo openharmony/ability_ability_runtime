@@ -48,8 +48,8 @@ constexpr struct option LONG_OPTIONS[] = {
     {"debug", no_argument, nullptr, 'D'},
     {"native-debug", no_argument, nullptr, 'N'},
     {"parameters", required_argument, nullptr, 'P'},
-    {"action", required_argument, nullptr, "A"},
-    {"URI", required_argument, nullptr, "U"},
+    {"action", required_argument, nullptr, 'A'},
+    {"URI", required_argument, nullptr, 'U'},
     {nullptr, 0, nullptr, 0},
 };
 const std::string SHORT_OPTIONS_APPLICATION_NOT_RESPONDING = "hp:";
