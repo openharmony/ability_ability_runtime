@@ -1258,42 +1258,36 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     break;
                 }
                 case 'P': {
-                    if (cmd_ == "start") {
-                        // parameters are only valid for the start command
-                        // 'aa start -P' with no argumnet
-                        HILOG_INFO("'aa %{public}s -P' with no argument.", cmd_.c_str());
+                    // 'aa start -P' with no argumnet
+                    HILOG_INFO("'aa %{public}s -P' with no argument.", cmd_.c_str());
 
-                        resultReceiver_.append("error: option ");
-                        resultReceiver_.append("requires a value.\n");
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
 
-                        result = OHOS::ERR_INVALID_VALUE;
-                    }
+                    result = OHOS::ERR_INVALID_VALUE;
+
                     break;
                 }
                 case 'A': {
-                    if (cmd_ == "start") {
-                        // action is only valid for the start command
-                        // 'aa start -A' with no argumnet
-                        HILOG_INFO("'aa %{public}s -A' with no argument.", cmd_.c_str());
+                    // 'aa start -A' with no argumnet
+                    HILOG_INFO("'aa %{public}s -A' with no argument.", cmd_.c_str());
 
-                        resultReceiver_.append("error: option ");
-                        resultReceiver_.append("requires a value.\n");
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
 
-                        result = OHOS::ERR_INVALID_VALUE;
-                    }
+                    result = OHOS::ERR_INVALID_VALUE;
+
                     break;
                 }
                 case 'U': {
-                    if (cmd_ == "start") {
-                        // URI is only valid for the start command
-                        // 'aa start -U' with no argumnet
-                        HILOG_INFO("'aa %{public}s -U' with no argument.", cmd_.c_str());
+                    // 'aa start -U' with no argumnet
+                    HILOG_INFO("'aa %{public}s -U' with no argument.", cmd_.c_str());
 
-                        resultReceiver_.append("error: option ");
-                        resultReceiver_.append("requires a value.\n");
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
 
-                        result = OHOS::ERR_INVALID_VALUE;
-                    }
+                    result = OHOS::ERR_INVALID_VALUE;
+
                     break;
                 }
                 case 0: {
