@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,9 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
+constexpr int INPUT_ZERO = 0;
+constexpr int INPUT_ONE = 1;
+constexpr int INPUT_THREE = 3;
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr uint8_t ENABLE = 2;
@@ -47,7 +50,8 @@ constexpr size_t OFFSET_TWO = 8;
 uint32_t GetU32Data(const char* ptr)
 {
     // convert fuzz input data to an integer
-    return (ptr[0] << OFFSET_ZERO) | (ptr[1] << OFFSET_ONE) | (ptr[2] << OFFSET_TWO) | ptr[3];
+    return (ptr[INPUT_ZERO] << OFFSET_ZERO) | (ptr[INPUT_ONE] << OFFSET_ONE) | (ptr[ENABLE] << OFFSET_TWO) |
+        ptr[INPUT_THREE];
 }
 sptr<Token> GetFuzzAbilityToken()
 {
@@ -116,12 +120,12 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     appSpawnSocket.ReadMessage(reinterpret_cast<void*>(*data), len);
     appSpawnSocket.CloseAppSpawnConnection();
     RemoteClientManager remoteClientManager;
-    sptr<IBundleMgr> bundleManager = nullptr;
-    remoteClientManager.SetBundleManager(bundleManager);
+    std::shared_ptr<BundleMgrHelper> bundleManagerHelper = nullptr;
+    remoteClientManager.SetBundleManagerHelper(bundleManagerHelper);
     std::shared_ptr<AppSpawnClient> appSpawnClientptr;
     remoteClientManager.SetSpawnClient(appSpawnClientptr);
     remoteClientManager.GetSpawnClient();
-    remoteClientManager.GetBundleManager();
+    remoteClientManager.GetBundleManagerHelper();
     remoteClientManager.GetNWebSpawnClient();
     std::shared_ptr<AppMgrServiceInner> owner;
     WindowFocusChangedListener windowFocusChangedListener(owner, handler);

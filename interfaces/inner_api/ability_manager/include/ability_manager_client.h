@@ -39,7 +39,6 @@ using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
  */
 class AbilityManagerClient {
 public:
-    AbilityManagerClient();
     virtual ~AbilityManagerClient();
     static std::shared_ptr<AbilityManagerClient> GetInstance();
 
@@ -263,6 +262,15 @@ public:
         sptr<IRemoteObject> callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
+    
+     /**
+     * Create UIExtension with want, send want to ability manager service.
+     *
+     * @param want, the want of the ability to start.
+     * @param userId, Designation User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RequestModalUIExtension(const Want &want);
 
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
@@ -435,10 +443,12 @@ public:
      * @param connect, callback used to notify caller the result of connecting or disconnecting.
      * @param sessionInfo the extension session info of the ability to connect.
      * @param userId, the extension runs in.
+     * @param connectInfo the connect info.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode ConnectUIExtensionAbility(const Want &want, sptr<IAbilityConnection> connect,
-        sptr<SessionInfo> sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE);
+        sptr<SessionInfo> sessionInfo, int32_t userId = DEFAULT_INVAL_VALUE,
+        sptr<UIExtensionAbilityConnectInfo> connectInfo = nullptr);
 
     /**
      * DisconnectAbility, disconnect session with service ability.
@@ -518,9 +528,10 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param userId User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ClearUpApplicationData(const std::string &bundleName);
+    ErrCode ClearUpApplicationData(const std::string &bundleName, const int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
      * ContinueMission, continue ability from mission center.
@@ -998,6 +1009,9 @@ public:
      */
     void UpdateMissionSnapShot(sptr<IRemoteObject> token,
         std::shared_ptr<OHOS::Media::PixelMap> pixelMap);
+
+    ErrCode GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &info);
+    ErrCode SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllow);
 #endif
 
     /**
@@ -1359,7 +1373,16 @@ public:
      */
     int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list);
 
+    /**
+     * @brief Update session info.
+     * @param sessionInfos The vector of session info.
+     */
+    void UpdateSessionInfoBySCB(const std::vector<SessionInfo> &sessionInfos, int32_t userId);
+
 private:
+    AbilityManagerClient();
+    DISALLOW_COPY_AND_MOVE(AbilityManagerClient);
+
     class AbilityMgrDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
         AbilityMgrDeathRecipient() = default;
@@ -1373,7 +1396,8 @@ private:
     void ResetProxy(wptr<IRemoteObject> remote);
     void HandleDlpApp(Want &want);
 
-    static std::recursive_mutex mutex_;
+    static std::once_flag singletonFlag_;
+    std::recursive_mutex mutex_;
     static std::shared_ptr<AbilityManagerClient> instance_;
     sptr<IAbilityManager> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;

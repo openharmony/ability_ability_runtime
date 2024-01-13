@@ -173,17 +173,12 @@ bool JsEnvironment::StartDebugger(
         JSENV_LOG_E("Invalid vm.");
         return false;
     }
-    int identifierId = ParseHdcRegisterOption(option);
-    panda::JSNApi::DebugOption debugOption = {libraryPath, needBreakPoint};
-    auto debuggerPostTask = [weak = weak_from_this()](std::function<void()>&& task) {
-        auto jsEnv = weak.lock();
-        if (jsEnv == nullptr) {
-            JSENV_LOG_E("JsEnv is invalid.");
-            return;
-        }
-        jsEnv->PostTask(task, "JsEnvironment:StartDebugger");
-    };
-    debugMode_ = panda::JSNApi::StartDebuggerForSocketPair(identifierId, debugOption, socketFd, debuggerPostTask);
+    int32_t identifierId = ParseHdcRegisterOption(option);
+    if (identifierId == -1) {
+        JSENV_LOG_E("Abnormal parsing of tid results.");
+        return false;
+    }
+    debugMode_ = panda::JSNApi::StartDebuggerForSocketPair(identifierId, socketFd);
     return debugMode_;
 }
 
@@ -199,7 +194,12 @@ void JsEnvironment::StopDebugger()
 
 void JsEnvironment::StopDebugger(std::string& option)
 {
-    panda::JSNApi::StopDebugger(ParseHdcRegisterOption(option));
+    int32_t identifierId = ParseHdcRegisterOption(option);
+    if (identifierId == -1) {
+        JSENV_LOG_E("Abnormal parsing of tid results.");
+        return;
+    }
+    panda::JSNApi::StopDebugger(identifierId);
 }
 
 void JsEnvironment::InitConsoleModule()
@@ -250,7 +250,7 @@ bool JsEnvironment::LoadScript(const std::string& path, uint8_t* buffer, size_t 
 }
 
 void JsEnvironment::StartProfiler(const char* libraryPath, uint32_t instanceId, PROFILERTYPE profiler,
-    int32_t interval, uint32_t tid)
+    int32_t interval, int tid, bool isDebugApp)
 {
     if (vm_ == nullptr) {
         JSENV_LOG_E("Invalid vm.");
@@ -271,7 +271,16 @@ void JsEnvironment::StartProfiler(const char* libraryPath, uint32_t instanceId, 
     option.profilerType = ConvertProfilerType(profiler);
     option.interval = interval;
 
-    panda::DFXJSNApi::StartProfiler(vm_, option, tid, instanceId, debuggerPostTask);
+    panda::DFXJSNApi::StartProfiler(vm_, option, tid, instanceId, debuggerPostTask, isDebugApp);
+}
+
+void JsEnvironment::DestroyHeapProfiler()
+{
+    if (vm_ == nullptr) {
+        JSENV_LOG_E("Invalid vm.");
+        return;
+    }
+    panda::DFXJSNApi::DestroyHeapProfiler(vm_);
 }
 
 void JsEnvironment::ReInitJsEnvImpl(std::unique_ptr<JsEnvironmentImpl> impl)
@@ -305,14 +314,33 @@ void JsEnvironment::SetDeviceDisconnectCallback(const std::function<bool()> &cb)
     panda::JSNApi::SetDeviceDisconnectCallback(vm_, std::move(cb));
 }
 
+void JsEnvironment::StartMonitorJSHeapUsage()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid native engine.");
+        return;
+    }
+    engine_->StartMonitorJSHeapUsage();
+}
+
+void JsEnvironment::StopMonitorJSHeapUsage()
+{
+    if (engine_ == nullptr) {
+        JSENV_LOG_E("Invalid native engine.");
+        return;
+    }
+    engine_->StopMonitorJSHeapUsage();
+}
+
+
 void JsEnvironment::NotifyDebugMode(
-    uint32_t tid, const char* libraryPath, uint32_t instanceId, bool debug, bool debugMode)
+    int tid, const char* libraryPath, uint32_t instanceId, bool debug, bool debugMode)
 {
     if (vm_ == nullptr) {
         JSENV_LOG_E("Invalid vm.");
         return;
     }
-    panda::JSNApi::DebugOption debugOption = {libraryPath, debugMode};
+    panda::JSNApi::DebugOption debugOption = {libraryPath, debug ? debugMode : false};
     auto debuggerPostTask = [weak = weak_from_this()](std::function<void()>&& task) {
         auto jsEnv = weak.lock();
         if (jsEnv == nullptr) {
@@ -321,10 +349,10 @@ void JsEnvironment::NotifyDebugMode(
         }
         jsEnv->PostTask(task, "JsEnvironment:NotifyDebugMode");
     };
-    panda::JSNApi::NotifyDebugMode(tid, vm_, libraryPath, debugOption, instanceId, debuggerPostTask, debug, debugMode);
+    panda::JSNApi::NotifyDebugMode(tid, vm_, debugOption, instanceId, debuggerPostTask, debug);
 }
 
-int JsEnvironment::ParseHdcRegisterOption(std::string& option)
+int32_t JsEnvironment::ParseHdcRegisterOption(std::string& option)
 {
     JSENV_LOG_D("Start.");
     std::size_t pos = option.find_first_of(":");
@@ -341,7 +369,7 @@ int JsEnvironment::ParseHdcRegisterOption(std::string& option)
     if (pos != std::string::npos) {
         idStr = idStr.substr(pos + 1);
     }
-    return static_cast<int>(std::atol(idStr.c_str()));
+    return std::atoi(idStr.c_str());
 }
 
 bool JsEnvironment::GetDebugMode() const

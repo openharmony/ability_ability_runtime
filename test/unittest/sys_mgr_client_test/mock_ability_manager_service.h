@@ -65,7 +65,7 @@ public:
         const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
-    int DisconnectAbility(const sptr<IAbilityConnection>& connect) override;
+    int DisconnectAbility(sptr<IAbilityConnection> connect) override;
 
     sptr<IAbilityScheduler> AcquireDataAbility(const Uri& uri, bool tryBind, const sptr<IRemoteObject>& callerToken);
 
@@ -107,8 +107,8 @@ public:
         const sptr<IRemoteObject>& callerToken, int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbilityByInsightIntent, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
         uint64_t intentId, int32_t userId));
-    MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
+    MOCK_METHOD6(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isSendDialogResult));
     MOCK_METHOD6(StartAbilityAsCaller, int(const Want &want, const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken, sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId, int requestCode));
@@ -154,7 +154,7 @@ public:
     MOCK_METHOD1(BlockAbility, int(int32_t abilityRecordId));
 #endif
 
-    int ClearUpApplicationData(const std::string& bundleName) override
+    int ClearUpApplicationData(const std::string& bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }
@@ -261,6 +261,16 @@ public:
     }
 
     int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override
+    {
+        return 0;
+    }
+
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;
     }

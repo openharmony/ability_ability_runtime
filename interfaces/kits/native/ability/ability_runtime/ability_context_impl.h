@@ -36,6 +36,7 @@ public:
     std::string GetBundleCodeDir() override;
     std::string GetCacheDir() override;
     std::string GetTempDir() override;
+    std::string GetResourceDir() override;
     std::string GetFilesDir() override;
     bool IsUpdatingConfigurations() override;
     bool PrintDrawnCompleted() override;
@@ -207,6 +208,8 @@ public:
     ErrCode StartAbilityByType(const std::string &type,
         AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
 
+    ErrCode RequestModalUIExtension(const Want &want) override;
+
 #ifdef SUPPORT_GRAPHICS
     /**
      * @brief Set mission label of this ability.
@@ -266,10 +269,12 @@ private:
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
     int32_t missionId_ = -1;
+    std::mutex sessionTokenMutex_;
     wptr<IRemoteObject> sessionToken_;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);
+    sptr<IRemoteObject> GetSessionToken();
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

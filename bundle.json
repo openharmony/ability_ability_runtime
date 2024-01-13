@@ -18,10 +18,10 @@
         "SystemCapability.Ability.AbilityRuntime.AbilityCore",
         "SystemCapability.Ability.AbilityRuntime.Mission",
         "SystemCapability.Ability.AbilityRuntime.QuickFix",
-        "SystemCapability.Ability.AbilityRuntime.AutoFill",
         "SystemCapability.Ability.AbilityTools.AbilityAssistant"
       ],
       "features": [
+        "ability_runtime_auto_fill_ability",
         "ability_runtime_graphics",
         "ability_runtime_power"
       ],
@@ -43,11 +43,11 @@
             "background_task_mgr",
             "bundle_framework",
             "common_event_service",
+            "config_policy",
             "c_utils",
             "data_share",
             "dlp_permission_service",
             "dsoftbus",
-            "ecological_rule_manager",
             "efficiency_manager",
             "eventhandler",
             "ets_runtime",
@@ -73,7 +73,6 @@
             "napi",
             "netmanager_base",
             "os_account",
-            "previewer",
             "relational_store",
             "resource_management",
             "resource_schedule_service",

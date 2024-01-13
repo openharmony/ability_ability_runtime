@@ -20,6 +20,7 @@
 #undef private
 #include "ability_manager_client.h"
 #include "appexecfwk_errors.h"
+#include "app_utils.h"
 #include "form_mgr.h"
 #include "form_mgr_errors.h"
 #include "hilog_wrapper.h"
@@ -57,7 +58,7 @@ void FormExtensionContextTest::TearDown(void)
  * CaseDescription: Verify startAbility
  */
 HWTEST_F(FormExtensionContextTest, form_extension_context_startAbility_001, TestSize.Level1)
-{   
+{
     FormExtensionContext formExtensionContext;
     Want want;
     int result = formExtensionContext.StartAbility(want);
@@ -73,7 +74,7 @@ HWTEST_F(FormExtensionContextTest, form_extension_context_startAbility_001, Test
  * CaseDescription: Verify startAbility
  */
 HWTEST_F(FormExtensionContextTest, form_extension_context_GetAbilityInfoType_001, TestSize.Level1)
-{   
+{
     FormExtensionContext formExtensionContext;
     EXPECT_EQ(AppExecFwk::AbilityType::UNKNOWN, formExtensionContext.GetAbilityInfoType());
 }

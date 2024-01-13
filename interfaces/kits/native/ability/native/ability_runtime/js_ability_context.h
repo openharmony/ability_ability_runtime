@@ -31,6 +31,7 @@ class NativeReference;
 namespace OHOS {
 namespace AbilityRuntime {
 struct NapiCallbackInfo;
+class JsEmbeddableUIAbilityContext;
 class JsAbilityContext final {
 public:
     explicit JsAbilityContext(const std::shared_ptr<AbilityContext>& context) : context_(context) {}
@@ -60,6 +61,7 @@ public:
     static napi_value ReportDrawnCompleted(napi_env env, napi_callback_info info);
     static napi_value SetMissionContinueState(napi_env env, napi_callback_info info);
     static napi_value StartAbilityByType(napi_env env, napi_callback_info info);
+    static napi_value RequestModalUIExtension(napi_env env, napi_callback_info info);
 
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
@@ -104,6 +106,7 @@ private:
     napi_value OnReportDrawnCompleted(napi_env env, NapiCallbackInfo& info);
     napi_value OnSetMissionContinueState(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityByType(napi_env env, NapiCallbackInfo& info);
+    napi_value OnRequestModalUIExtension(napi_env env, NapiCallbackInfo& info);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
     static napi_value WrapWant(napi_env env, const AAFwk::Want& want);
@@ -113,10 +116,13 @@ private:
     static napi_value WrapRequestDialogResult(napi_env env, int32_t resultCode, const AAFwk::Want& want);
     void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback,
         bool isAbilityResult = false);
+    bool CheckStartAbilityByCallParams(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
+        int32_t &userId, napi_value &lastParam);
 
     std::weak_ptr<AbilityContext> context_;
     int curRequestCode_ = 0;
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
+    friend class JsEmbeddableUIAbilityContext;
 };
 
 napi_value CreateJsAbilityContext(napi_env env, std::shared_ptr<AbilityContext> context);

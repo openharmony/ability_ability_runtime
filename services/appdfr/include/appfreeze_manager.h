@@ -72,9 +72,11 @@ private:
     std::map<int, std::set<int>> BinderParser(std::ifstream& fin, std::string& stack) const;
     void ParseBinderPids(const std::map<int, std::set<int>>& binderInfo, std::set<int>& pids, int pid, int layer) const;
     std::set<int> GetBinderPeerPids(std::string& stack, int pid) const;
+    std::string CatchJsonStacktrace(int pid) const;
     std::string CatcherStacktrace(int pid) const;
     int AcquireStack(const FaultData& faultData, const AppInfo& appInfo);
-    int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo);
+    int NotifyANR(const FaultData& faultData, const AppfreezeManager::AppInfo& appInfo, const std::string& binderInfo);
+    bool IsProcessDebug(int32_t pid, std::string processName);
 
     static const inline std::string LOGGER_DEBUG_PROC_PATH = "/proc/transaction_proc";
     std::string name_;

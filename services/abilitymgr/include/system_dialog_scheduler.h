@@ -68,9 +68,9 @@ public:
     virtual ~SystemDialogScheduler() = default;
 
     bool GetANRDialogWant(int userId, int pid, AAFwk::Want &want);
-    Want GetPcSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
+    int GetPcSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
         const std::string &type, int32_t userId, const sptr<IRemoteObject> &callerToken);
-    Want GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
+    int GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
         const sptr<IRemoteObject> &callerToken);
     Want GetTipsDialogWant(const sptr<IRemoteObject> &callerToken);
     Want GetJumpInterceptorDialogWant(Want &targetWant);
@@ -107,13 +107,10 @@ private:
         DialogPosition &position, float densityPixels, int lineNums) const;
     void DialogPositionAdaptive(DialogPosition &position, int lineNums) const;
 
-    sptr<AppExecFwk::IBundleMgr> GetBundleManager();
-
     void GetAppNameFromResource(int32_t labelId,
         const std::string &bundleName, int32_t userId, std::string &appName);
 
 private:
-    sptr<AppExecFwk::IBundleMgr> iBundleManager_;
     std::string deviceType_ = {};
 };
 }  // namespace AAFwk

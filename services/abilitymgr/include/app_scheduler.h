@@ -21,6 +21,7 @@
 
 #include "ability_debug_response_interface.h"
 #include "ability_info.h"
+#include "ability_manager_client.h"
 #include "app_debug_listener_interface.h"
 #include "application_info.h"
 #include "appmgr/app_mgr_client.h"
@@ -243,7 +244,7 @@ public:
      *
      * @param bundleName.
      */
-    int ClearUpApplicationData(const std::string &bundleName);
+    int ClearUpApplicationData(const std::string &bundleName, const int32_t userId = -1);
 
     void AttachTimeOut(const sptr<IRemoteObject> &token);
 
@@ -396,6 +397,13 @@ public:
      * @return Returns true if it is an attach debug application, otherwise it returns false.
      */
     bool IsAttachDebug(const std::string &bundleName);
+
+    /**
+     * To clear the process by ability token.
+     *
+     * @param token the unique identification to the ability.
+     */
+    void ClearProcessByToken(sptr<IRemoteObject> token) const;
 
 protected:
     /**

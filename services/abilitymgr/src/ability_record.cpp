@@ -21,10 +21,12 @@
 #include <unordered_map>
 
 #include "constants.h"
+#include "ability_app_state_observer.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_scheduler_stub.h"
 #include "ability_util.h"
+#include "app_utils.h"
 #include "appfreeze_manager.h"
 #include "array_wrapper.h"
 #include "accesstoken_kit.h"
@@ -231,6 +233,7 @@ AbilityRecord::~AbilityRecord()
             object->RemoveDeathRecipient(schedulerDeathRecipient_);
         }
     }
+    RemoveAppStateObserver();
 }
 
 std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityRequest &abilityRequest)
@@ -256,7 +259,26 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     }
     abilityRecord->collaboratorType_ = abilityRequest.collaboratorType;
     abilityRecord->missionAffinity_ = abilityRequest.want.GetStringParam(PARAM_MISSION_AFFINITY_KEY);
+
+    if (abilityRecord->IsDebug()) {
+        abilityRecord->abilityAppStateObserver_ = sptr<AbilityAppStateObserver>(
+            new AbilityAppStateObserver(abilityRecord));
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->RegisterApplicationStateObserver(
+            abilityRecord->abilityAppStateObserver_, {abilityRequest.abilityInfo.bundleName});
+    }
     return abilityRecord;
+}
+
+void AbilityRecord::RemoveAppStateObserver()
+{
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    if (handler && abilityAppStateObserver_) {
+        handler->SubmitTask([appStateObserver = abilityAppStateObserver_]() {
+                DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->UnregisterApplicationStateObserver(
+                    appStateObserver);
+            });
+        abilityAppStateObserver_ = nullptr;
+    }
 }
 
 bool AbilityRecord::Init()
@@ -289,6 +311,24 @@ int32_t AbilityRecord::GetPid()
     return pid_;
 }
 
+void AbilityRecord::LoadUIAbility()
+{
+    SetLoading(true);
+    int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
+    if (applicationInfo_.asanEnabled) {
+        loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_ASANENABLED;
+        SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout / HALF_TIMEOUT);
+    } else {
+        int coldStartTimeout =
+            AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COLDSTART_TIMEOUT_MULTIPLE;
+        std::lock_guard guard(wantLock_);
+        auto delayTime = want_.GetBoolParam("coldStart", false) ? coldStartTimeout : loadTimeout;
+        SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, delayTime / HALF_TIMEOUT);
+    }
+    std::string methodName = "LoadAbility";
+    g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::LOAD, methodName);
+}
+
 int AbilityRecord::LoadAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -297,19 +337,7 @@ int AbilityRecord::LoadAbility()
     CHECK_POINTER_AND_RETURN(token_, ERR_INVALID_VALUE);
     // only for UIAbility
     if (!IsDebug() && abilityInfo_.type != AppExecFwk::AbilityType::DATA) {
-        int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
-        if (applicationInfo_.asanEnabled) {
-            loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_ASANENABLED;
-            SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout / HALF_TIMEOUT);
-        } else {
-            int coldStartTimeout =
-                AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * COLDSTART_TIMEOUT_MULTIPLE;
-            std::lock_guard guard(wantLock_);
-            auto delayTime = want_.GetBoolParam("coldStart", false) ? coldStartTimeout : loadTimeout;
-            SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, delayTime / HALF_TIMEOUT);
-        }
-        std::string methodName = "LoadAbility";
-        g_addLifecycleEventTask(token_, FreezeUtil::TimeoutState::LOAD, methodName);
+        LoadUIAbility();
     }
 
     std::string appName = applicationInfo_.name;
@@ -334,6 +362,7 @@ int AbilityRecord::LoadAbility()
             callerToken_ = caller->GetToken();
         }
     }
+
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
     want_.SetParam("ohos.ability.launch.reason", static_cast<int>(lifeCycleStateInfo_.launchParam.launchReason));
@@ -398,7 +427,7 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     // earlier than above actions
     SetAbilityStateInner(AbilityState::FOREGROUNDING);
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
-    lifecycleDeal_->ForegroundNew(GetWant(), lifeCycleStateInfo_, sessionInfo_);
+    lifecycleDeal_->ForegroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
     lifeCycleStateInfo_.sceneFlag = 0;
     lifeCycleStateInfo_.sceneFlagBak = 0;
     {
@@ -416,10 +445,10 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
     }
 }
 
-void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
+void AbilityRecord::ForegroundAbility(const Closure &task, sptr<SessionInfo> sessionInfo, uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("name:%{public}s.", abilityInfo_.name.c_str());
+    HILOG_INFO("ability: %{public}s.", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
     // grant uri permission
     {
@@ -443,7 +472,7 @@ void AbilityRecord::ForegroundAbility(const Closure &task, uint32_t sceneFlag)
     // earlier than above actions.
     SetAbilityStateInner(AbilityState::FOREGROUNDING);
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
-    lifecycleDeal_->ForegroundNew(GetWant(), lifeCycleStateInfo_, sessionInfo_);
+    lifecycleDeal_->ForegroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
     lifeCycleStateInfo_.sceneFlag = 0;
     lifeCycleStateInfo_.sceneFlagBak = 0;
     {
@@ -1141,8 +1170,7 @@ bool AbilityRecord::IsCompleteFirstFrameDrawing() const
 void AbilityRecord::BackgroundAbility(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("BackgroundLifecycle: begin, bundle: %{public}s, ability: %{public}s.", abilityInfo_.bundleName.c_str(),
-        abilityInfo_.name.c_str());
+    HILOG_INFO("BackgroundLifecycle: ability: %{public}s.", GetURI().c_str());
     if (lifecycleDeal_ == nullptr) {
         HILOG_ERROR("Move the ability to background fail, lifecycleDeal_ is null.");
         return;
@@ -1172,7 +1200,7 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
     // schedule background after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     SetAbilityStateInner(AbilityState::BACKGROUNDING);
-    lifecycleDeal_->BackgroundNew(GetWant(), lifeCycleStateInfo_, sessionInfo_);
+    lifecycleDeal_->BackgroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
 }
 
 bool AbilityRecord::PrepareTerminateAbility()
@@ -1236,11 +1264,12 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
             static_cast<int32_t>(state));
         int ret = ERR_OK;
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-            if (sessionInfo_ == nullptr) {
-                HILOG_ERROR("sessionInfo_ is nullptr");
+            auto sessionInfo = GetSessionInfo();
+            if (sessionInfo == nullptr) {
+                HILOG_ERROR("sessionInfo is nullptr");
                 return;
             }
-            int32_t persistentId = sessionInfo_->persistentId;
+            int32_t persistentId = sessionInfo->persistentId;
             switch (state) {
                 case AbilityState::BACKGROUNDING: {
                     ret = collaborator->NotifyMoveMissionToBackground(persistentId);
@@ -1323,6 +1352,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
                     }
                 });
         }
+        RemoveAppStateObserver();
         isReady_ = true;
         scheduler_ = scheduler;
         lifecycleDeal_->SetScheduler(scheduler);
@@ -1416,9 +1446,9 @@ bool AbilityRecord::IsCreateByConnect() const
     return isCreateByConnect_;
 }
 
-void AbilityRecord::SetCreateByConnectMode()
+void AbilityRecord::SetCreateByConnectMode(bool isCreatedByConnect)
 {
-    isCreateByConnect_ = true;
+    isCreateByConnect_ = isCreatedByConnect;
 }
 
 void AbilityRecord::Activate()
@@ -1461,13 +1491,13 @@ void AbilityRecord::Inactivate()
     // schedule inactive after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     SetAbilityStateInner(AbilityState::INACTIVATING);
-    lifecycleDeal_->Inactivate(GetWant(), lifeCycleStateInfo_, sessionInfo_);
+    lifecycleDeal_->Inactivate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
 }
 
 void AbilityRecord::Terminate(const Closure &task)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("ability:%{public}s.", abilityInfo_.name.c_str());
+    HILOG_INFO("ability: %{public}s.", GetURI().c_str());
     CHECK_POINTER(lifecycleDeal_);
     if (!IsDebug()) {
         auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -1488,7 +1518,7 @@ void AbilityRecord::Terminate(const Closure &task)
     // schedule background after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
     SetAbilityStateInner(AbilityState::TERMINATING);
-    lifecycleDeal_->Terminate(GetWant(), lifeCycleStateInfo_);
+    lifecycleDeal_->Terminate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
 }
 
 void AbilityRecord::ShareData(const int32_t &uniqueId)
@@ -1508,7 +1538,11 @@ void AbilityRecord::ConnectAbility()
 {
     HILOG_INFO("Connect ability.");
     CHECK_POINTER(lifecycleDeal_);
+    if (isConnected) {
+        HILOG_WARN("connect state error.");
+    }
     lifecycleDeal_->ConnectAbility(GetWant());
+    isConnected = true;
 }
 
 void AbilityRecord::DisconnectAbility()
@@ -1517,6 +1551,7 @@ void AbilityRecord::DisconnectAbility()
     HILOG_INFO("ability:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(GetWant());
+    isConnected = false;
 }
 
 void AbilityRecord::CommandAbility()
@@ -1744,6 +1779,11 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
     if (result != ERR_OK) {
         HILOG_ERROR("SendResultToSystemAbility error = %{public}d", result);
     }
+}
+
+bool AbilityRecord::NeedConnectAfterCommand()
+{
+    return !IsConnectListEmpty() && !isConnected;
 }
 
 void AbilityRecord::AddConnectRecordToList(const std::shared_ptr<ConnectionRecord> &connRecord)
@@ -2187,6 +2227,33 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
     FreezeUtil::GetInstance().DeleteLifecycleEvent(object);
 }
 
+void AbilityRecord::OnProcessDied()
+{
+    std::lock_guard<ffrt::mutex> guard(lock_);
+    RemoveAppStateObserver();
+    isWindowAttached_ = false;
+
+    auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+    CHECK_POINTER(handler);
+
+    HILOG_INFO("Ability on scheduler died: '%{public}s'", abilityInfo_.name.c_str());
+    auto task = [ability = shared_from_this()]() {
+        DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
+    };
+    handler->SubmitTask(task);
+    auto uriTask = [want = GetWant(), ability = shared_from_this()]() {
+        ability->SaveResultToCallers(-1, &want);
+        ability->SendResultToCallers(true);
+    };
+    handler->SubmitTask(uriTask);
+#ifdef SUPPORT_GRAPHICS
+    NotifyAnimationAbilityDied();
+#endif
+    HandleDlpClosed();
+    NotifyRemoveShellProcess(CollaboratorType::RESERVE_TYPE);
+    NotifyRemoveShellProcess(CollaboratorType::OTHERS_TYPE);
+}
+
 void AbilityRecord::NotifyAnimationAbilityDied()
 {
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
@@ -2382,6 +2449,16 @@ bool AbilityRecord::GetKeepAlive() const
     return isKeepAlive_;
 }
 
+void AbilityRecord::SetLoading(bool status)
+{
+    isLoading_ = status;
+}
+
+bool AbilityRecord::IsLoading() const
+{
+    return isLoading_;
+}
+
 int64_t AbilityRecord::GetRestartTime()
 {
     return restartTime_;
@@ -2448,7 +2525,28 @@ void AbilityRecord::SetMission(const std::shared_ptr<Mission> &mission)
 
 void AbilityRecord::SetSessionInfo(sptr<SessionInfo> sessionInfo)
 {
+    std::lock_guard guard(sessionLock_);
     sessionInfo_ = sessionInfo;
+}
+
+sptr<SessionInfo> AbilityRecord::GetSessionInfo() const
+{
+    std::lock_guard guard(sessionLock_);
+    return sessionInfo_;
+}
+
+void AbilityRecord::UpdateSessionInfo(sptr<IRemoteObject> sessionToken)
+{
+    {
+        std::lock_guard guard(sessionLock_);
+        if (sessionInfo_ == nullptr) {
+            HILOG_WARN("sessionInfo_ is nullptr.");
+            return;
+        }
+        sessionInfo_->sessionToken = sessionToken;
+    }
+    CHECK_POINTER(lifecycleDeal_);
+    lifecycleDeal_->UpdateSessionToken(sessionToken);
 }
 
 void AbilityRecord::SetMinimizeReason(bool fromUser)
@@ -2722,8 +2820,6 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         HILOG_WARN("Do not call uriPermissionMgr.");
         return;
     }
-    auto bms = AbilityUtil::GetBundleManager();
-    CHECK_POINTER_IS_NULLPTR(bms);
     if (IsDmsCall(want)) {
         GrantDmsUriPermission(want, targetBundleName);
         return;
@@ -2749,65 +2845,80 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         HILOG_INFO("permission to shell");
         return;
     }
-
-    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    uint32_t fromTokenId = 0;
-    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        fromTokenId = tokenId;
-    } else {
-        fromTokenId = IPCSkeleton::GetCallingTokenID();
+    if (AppUtils::GetInstance().JudgePCDevice()) {
+        GrantUriPermissionFor2In1Inner(want, uriVec, targetBundleName, tokenId);
+        return;
     }
+    GrantUriPermissionInner(want, uriVec, targetBundleName, tokenId);
+}
 
-    auto permission =
-        PermissionVerification::GetInstance()->VerifyCallingPermission(PERMISSION_PROXY_AUTHORIZATION_URI) ||
-        PermissionVerification::GetInstance()->VerifyPermissionByTokenId(tokenId, PERMISSION_PROXY_AUTHORIZATION_URI);
+bool AbilityRecord::CheckUriPermission(Uri &uri, uint32_t &flag, uint32_t callerTokenId, bool permission,
+    int32_t userId)
+{
+    auto bundleFlag = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+    auto &&authority = uri.GetAuthority();
+    HILOG_INFO("uri authority is %{public}s.", authority.c_str());
+    if (!isGrantPersistableUriPermissionEnable_ || authority != "docs") {
+        flag &= (~Want::FLAG_AUTH_PERSISTABLE_URI_PERMISSION);
+    }
+    if (permission) {
+        return true;
+    }
+    if (authority == "media") {
+        HILOG_WARN("the type of uri media, have no permission.");
+        return false;
+    }
+    if (authority == "docs") {
+        if (!isGrantPersistableUriPermissionEnable_ ||
+            !AAFwk::UriPermissionManagerClient::GetInstance().CheckPersistableUriPermissionProxy(
+                uri, flag, callerTokenId)) {
+            HILOG_WARN("the type of uri docs, have no permission.");
+            return false;
+        }
+        flag |= Want::FLAG_AUTH_PERSISTABLE_URI_PERMISSION;
+        return true;
+    }
+    // uri of bundle name type
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        HILOG_ERROR("bundleMgrHelper is nullptr");
+        return false;
+    };
+    AppExecFwk::BundleInfo uriBundleInfo;
+    if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
+        HILOG_WARN("To fail to get bundle info according to uri.");
+        return false;
+    }
+    auto authorityAccessTokenId = uriBundleInfo.applicationInfo.accessTokenId;
+    if (authorityAccessTokenId != callerAccessTokenId_ && authorityAccessTokenId != callerTokenId) {
+        HILOG_ERROR("the uri does not belong to caller, have not permission");
+        return false;
+    }
+    return true;
+}
+
+void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string> &uriVec,
+    const std::string &targetBundleName, uint32_t tokenId)
+{
+    auto callerTokenId = static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId));
+    auto permission = AAFwk::UriPermissionManagerClient::GetInstance().IsAuthorizationUriAllowed(callerTokenId);
     auto userId = GetCurrentAccountId();
-    auto callerTokenId = static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
+    HILOG_INFO("callerTokenId = %{public}u, tokenId = %{public}u, permission = %{public}i",
+        callerTokenId, tokenId, static_cast<int>(permission));
     std::unordered_map<uint32_t, std::vector<Uri>> uriVecMap; // flag, vector
+    uint32_t flag = want.GetFlags();
     for (auto&& str : uriVec) {
         Uri uri(str);
-        auto&& scheme = uri.GetScheme();
-        HILOG_INFO("uri scheme is %{public}s.", scheme.c_str());
+        auto &&scheme = uri.GetScheme();
+        HILOG_INFO("uri is %{private}s, scheme is %{public}s.", str.c_str(), scheme.c_str());
         // only support file scheme
         if (scheme != "file") {
             HILOG_WARN("only support file uri.");
             continue;
         }
-        auto&& authority = uri.GetAuthority();
-        HILOG_INFO("uri authority is %{public}s.", authority.c_str());
-        bool authorityFlag = authority == "media" || authority == "docs";
-        uint32_t flag = want.GetFlags();
-        if (authorityFlag && !isGrantPersistableUriPermissionEnable_) {
-            flag &= (~Want::FLAG_AUTH_PERSISTABLE_URI_PERMISSION);
-            if (!permission) {
-                HILOG_WARN("Do not have uri permission proxy.");
-                continue;
-            }
-        }
-
-        if (authorityFlag && isGrantPersistableUriPermissionEnable_ && !permission) {
-            if (!AAFwk::UriPermissionManagerClient::GetInstance().CheckPersistableUriPermissionProxy(
-                uri, flag, fromTokenId)) {
-                HILOG_WARN("Do not have persistable uri permission proxy.");
-                continue;
-            }
-            flag |= Want::FLAG_AUTH_PERSISTABLE_URI_PERMISSION;
-        }
-
-        if (!authorityFlag) {
-            AppExecFwk::BundleInfo uriBundleInfo;
-            if (!IN_PROCESS_CALL(bms->GetBundleInfo(authority, bundleFlag, uriBundleInfo, userId))) {
-                HILOG_WARN("To fail to get bundle info according to uri.");
-                continue;
-            }
-            bool notBelong2Caller = uriBundleInfo.applicationInfo.accessTokenId != fromTokenId &&
-                uriBundleInfo.applicationInfo.accessTokenId != callerAccessTokenId_ &&
-                uriBundleInfo.applicationInfo.accessTokenId != callerTokenId;
-            if (notBelong2Caller) {
-                HILOG_ERROR("the uri does not belong to caller.");
-                continue;
-            }
-            flag &= (~Want::FLAG_AUTH_PERSISTABLE_URI_PERMISSION);
+        if (!CheckUriPermission(uri, flag, callerTokenId, permission, userId)) {
+            HILOG_ERROR("no permission to grant uri.");
+            continue;
         }
         if (uriVecMap.find(flag) == uriVecMap.end()) {
             std::vector<Uri> uriVec;
@@ -2847,6 +2958,31 @@ bool AbilityRecord::GrantPermissionToShell(const std::vector<std::string> &strUr
         }
     }
     return true;
+}
+
+void AbilityRecord::GrantUriPermissionFor2In1Inner(Want &want, std::vector<std::string> &uriVec,
+    const std::string &targetBundleName, uint32_t tokenId)
+{
+    std::vector<std::string> uriOtherVec;
+    std::vector<Uri> uri2In1Vec;
+    for (auto &&str : uriVec) {
+        Uri uri(str);
+        auto &&authority = uri.GetAuthority();
+        if (authority == "docs") {
+            uri2In1Vec.emplace_back(uri);
+        } else {
+            uriOtherVec.emplace_back(str);
+        }
+    }
+    if (!uri2In1Vec.empty()) {
+        uint32_t flag = want.GetFlags();
+        auto isSystemAppCall = PermissionVerification::GetInstance()->IsSystemAppCall();
+        IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().GrantUriPermissionFor2In1(
+            uri2In1Vec, flag, targetBundleName, appIndex_, isSystemAppCall));
+    }
+    if (!uriOtherVec.empty()) {
+        GrantUriPermissionInner(want, uriOtherVec, targetBundleName, tokenId);
+    }
 }
 
 bool AbilityRecord::IsDmsCall(Want &want)
@@ -3054,16 +3190,13 @@ void AbilityRecord::SetAttachDebug(const bool isAttachDebug)
     isAttachDebug_ = isAttachDebug;
 }
 
-void AbilityRecord::AddAbilityWindowStateMap(int64_t uiExtensionComponentId,
+void AbilityRecord::AddAbilityWindowStateMap(uint64_t uiExtensionComponentId,
     AbilityWindowState abilityWindowState)
 {
-    if (abilityWindowState == AbilityWindowState::FOREGROUNDING ||
-        abilityWindowStateMap_.find(uiExtensionComponentId) != abilityWindowStateMap_.end()) {
-        abilityWindowStateMap_[uiExtensionComponentId] = abilityWindowState;
-    }
+    abilityWindowStateMap_[uiExtensionComponentId] = abilityWindowState;
 }
 
-void AbilityRecord::RemoveAbilityWindowStateMap(int64_t uiExtensionComponentId)
+void AbilityRecord::RemoveAbilityWindowStateMap(uint64_t uiExtensionComponentId)
 {
     if (abilityWindowStateMap_.find(uiExtensionComponentId) != abilityWindowStateMap_.end()) {
         abilityWindowStateMap_.erase(uiExtensionComponentId);
@@ -3111,6 +3244,45 @@ int32_t AbilityRecord::CreateModalUIExtension(const Want &want)
     HILOG_DEBUG("call");
     CHECK_POINTER_AND_RETURN(scheduler_, INNER_ERR);
     return scheduler_->CreateModalUIExtension(want);
+}
+
+void AbilityRecord::SetURI(const std::string &uri)
+{
+    uri_ = uri;
+}
+
+std::string AbilityRecord::GetURI() const
+{
+    if (uri_.empty()) {
+        return AppExecFwk::ElementName(abilityInfo_.deviceId, abilityInfo_.bundleName,
+            abilityInfo_.name, abilityInfo_.moduleName).GetURI();
+    }
+    return uri_;
+}
+
+void AbilityRecord::SetProcessName(const std::string &process)
+{
+    abilityInfo_.process = process;
+}
+
+void AbilityRecord::SetUIExtensionAbilityId(const int32_t uiExtensionAbilityId)
+{
+    uiExtensionAbilityId_ = uiExtensionAbilityId;
+}
+
+int32_t AbilityRecord::GetUIExtensionAbilityId() const
+{
+    return uiExtensionAbilityId_;
+}
+
+bool AbilityRecord::BackgroundAbilityWindowDelayed()
+{
+    return backgroundAbilityWindowDelayed_.load();
+}
+
+void AbilityRecord::DoBackgroundAbilityWindowDelayed(bool needBackground)
+{
+    backgroundAbilityWindowDelayed_.store(needBackground);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

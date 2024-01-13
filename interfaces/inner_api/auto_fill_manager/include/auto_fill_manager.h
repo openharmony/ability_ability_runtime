@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,11 @@
 
 #include <string>
 
+#include "auto_fill_event_handler.h"
+#include "auto_fill_extension_callback.h"
 #include "fill_request_callback_interface.h"
 #include "save_request_callback_interface.h"
+#include "task_handler_wrap.h"
 #include "ui_content.h"
 #include "view_data.h"
 
@@ -28,7 +31,7 @@ namespace AbilityRuntime {
 class AutoFillManager {
 public:
     AutoFillManager() = default;
-    ~AutoFillManager() = default;
+    ~AutoFillManager();
 
     static AutoFillManager &GetInstance();
 
@@ -43,13 +46,21 @@ public:
         const AbilityBase::ViewData &viewdata,
         const std::shared_ptr<ISaveRequestCallback> &saveCallback);
 
+    void HandleTimeOut(uint32_t eventId);
+    void RemoveEvent(uint32_t eventId);
 private:
+    void SetTimeOutEvent(uint32_t eventId);
     int32_t HandleRequestExecuteInner(
         const AbilityBase::AutoFillType &autoFillType,
         Ace::UIContent *uiContent,
         const AbilityBase::ViewData &viewdata,
         const std::shared_ptr<IFillRequestCallback> &fillCallback,
         const std::shared_ptr<ISaveRequestCallback> &saveCallback);
+
+    std::mutex mutexLock_;
+    std::map<uint32_t, std::weak_ptr<AutoFillExtensionCallback>> extensionCallbacks_;
+    uint32_t eventId_ = 0;
+    std::shared_ptr<AutoFillEventHandler> eventHandler_;
 };
 } // AbilityRuntime
 } // OHOS

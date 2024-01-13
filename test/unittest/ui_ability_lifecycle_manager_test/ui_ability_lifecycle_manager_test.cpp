@@ -21,6 +21,7 @@
 #include "ability_record.h"
 #include "ability_start_setting.h"
 #include "app_scheduler.h"
+#include "app_utils.h"
 #include "scene_board/ui_ability_lifecycle_manager.h"
 #undef protected
 #undef private
@@ -2305,7 +2306,7 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_002, TestSize.Level
     abilityRecord->abilityInfo_.moduleName = "entry";
     abilityRecord->SetAppIndex(1);
     abilityRecord->SetSpecifiedFlag(flag);
-    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1,abilityRecord);
+    uiAbilityLifecycleManager->sessionAbilityMap_.emplace(1, abilityRecord);
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
 
     UIAbilityLifecycleManager::SpecifiedInfo specifiedInfo;

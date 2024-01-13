@@ -35,6 +35,7 @@
 #include "app_mgr_constants.h"
 #include "app_scheduler_proxy.h"
 #include "app_record_id.h"
+#include "child_process_record.h"
 #include "fault_data.h"
 #include "profile.h"
 #include "priority_object.h"
@@ -694,6 +695,10 @@ public:
 
     void GetSplitModeAndFloatingMode(bool &isSplitScreenMode, bool &isFloatingWindowMode);
 
+    void AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record);
+    void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
+    std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
+    std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -744,7 +749,7 @@ private:
 
     void SendClearTask(uint32_t msg, int64_t timeOut);
 
-    void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record);
+    void RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &record, bool isExtensionDebug = false);
 
 private:
     class RemoteObjHash {
@@ -829,6 +834,8 @@ private:
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
 
     std::set<uint32_t> windowIds_;
+    std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
+    ffrt::mutex childProcessRecordMapLock_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

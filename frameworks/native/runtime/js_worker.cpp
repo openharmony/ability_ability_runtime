@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,16 +22,19 @@
 #include <vector>
 #include <unistd.h>
 
+#include "bundle_mgr_helper.h"
 #include "connect_server_manager.h"
 #include "commonlibrary/c_utils/base/include/refbase.h"
 #ifdef SUPPORT_GRAPHICS
 #include "core/common/container_scope.h"
 #endif
+#include "declarative_module_preloader.h"
 #include "extractor.h"
 #include "foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include/bundle_info.h"
 #include "foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_core/include/bundlemgr/bundle_mgr_proxy.h"
 #include "foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include/iservice_registry.h"
 #include "foundation/communication/ipc/interfaces/innerkits/ipc_core/include/iremote_object.h"
+#include "singleton.h"
 #include "system_ability_definition.h"
 #include "hilog_wrapper.h"
 #include "js_runtime_utils.h"
@@ -79,6 +82,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
     }
 
     OHOS::JsSysModule::Console::InitConsoleModule(reinterpret_cast<napi_env>(nativeEngine));
+    OHOS::Ace::DeclarativeModulePreloader::PreloadWorker(*nativeEngine);
 
     auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
     // load jsfwk
@@ -95,8 +99,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
         };
         panda::JSNApi::DebugOption debugOption = {ARK_DEBUGGER_LIB_PATH, needBreakPoint};
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
-        panda::JSNApi::NotifyDebugMode(
-            instanceId, vm, ARK_DEBUGGER_LIB_PATH, debugOption, instanceId, workerPostTask, g_debugApp, needBreakPoint);
+        panda::JSNApi::NotifyDebugMode(instanceId, vm, debugOption, instanceId, workerPostTask, g_debugApp);
     }
 }
 
@@ -156,7 +159,8 @@ void AssetHelper::operator()(const std::string& uri, std::vector<uint8_t>& conte
         // the @bundle:bundlename/modulename only exist in esmodule.
         // 1.1 start with /modulename
         // 1.2 start with ../
-        // 1.3 start with modulename
+        // 1.3 start with @namespace [not support]
+        // 1.4 start with modulename
         HILOG_DEBUG("The application is packaged using jsbundle mode.");
         if (uri.find_first_of("/") == 0) {
             HILOG_DEBUG("uri start with /modulename");
@@ -164,13 +168,16 @@ void AssetHelper::operator()(const std::string& uri, std::vector<uint8_t>& conte
         } else if (uri.find("../") == 0 && !workerInfo_->isStageModel) {
             HILOG_DEBUG("uri start with ../");
             realPath = uri.substr(PATH_THREE);
+        } else if (uri.find_first_of("@") == 0) {
+            HILOG_DEBUG("uri start with @namespace");
+            realPath = uri.substr(uri.find_first_of("/") + 1);
         } else {
             HILOG_DEBUG("uri start with modulename");
             realPath = uri;
         }
 
         filePath = NormalizedFileName(realPath);
-        HILOG_INFO("filePath %{public}s", filePath.c_str());
+        HILOG_INFO("filePath %{private}s", filePath.c_str());
 
         if (!workerInfo_->isStageModel) {
             GetAmi(ami, filePath);
@@ -189,7 +196,8 @@ void AssetHelper::operator()(const std::string& uri, std::vector<uint8_t>& conte
     } else {
         // 2.1 start with @bundle:bundlename/modulename
         // 2.2 start with /modulename
-        // 2.3 start with modulename
+        // 2.3 start with @namespace
+        // 2.4 start with modulename
         HILOG_DEBUG("The application is packaged using esmodule mode.");
         if (uri.find(BUNDLE_NAME_FLAG) == 0) {
             HILOG_DEBUG("uri start with @bundle:");
@@ -205,6 +213,9 @@ void AssetHelper::operator()(const std::string& uri, std::vector<uint8_t>& conte
         } else if (uri.find_first_of("/") == 0) {
             HILOG_DEBUG("uri start with /modulename");
             realPath = uri.substr(1);
+        } else if (uri.find_first_of("@") == 0) {
+            HILOG_DEBUG("uri start with @namespace");
+            realPath = workerInfo_->moduleName + uri;
         } else {
             HILOG_DEBUG("uri start with modulename");
             realPath = uri;
@@ -221,27 +232,6 @@ void AssetHelper::operator()(const std::string& uri, std::vector<uint8_t>& conte
             HILOG_ERROR("Get asset content by filepath failed.");
         }
     }
-}
-
-sptr<IBundleMgr> AssetHelper::GetBundleMgrProxy()
-{
-    std::lock_guard<std::mutex> lock(g_mutex);
-    if (bundleMgrProxy_ == nullptr) {
-        auto systemAbilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-        if (!systemAbilityManager) {
-            HILOG_ERROR("fail to get system ability mgr.");
-            return nullptr;
-        }
-        auto remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-        if (!remoteObject) {
-            HILOG_ERROR("fail to get bundle manager proxy.");
-            return nullptr;
-        }
-        bundleMgrProxy_ = iface_cast<IBundleMgr>(remoteObject);
-    }
-
-    HILOG_DEBUG("get bundle manager proxy success.");
-    return bundleMgrProxy_;
 }
 
 bool AssetHelper::ReadAmiData(const std::string& ami, std::vector<uint8_t>& content) const
@@ -273,21 +263,21 @@ bool AssetHelper::ReadAmiData(const std::string& ami, std::vector<uint8_t>& cont
 
 bool AssetHelper::ReadFilePathData(const std::string& filePath, std::vector<uint8_t>& content)
 {
-    auto bundleMgrProxy = GetBundleMgrProxy();
-    if (!bundleMgrProxy) {
-        HILOG_ERROR("bundle mgr proxy is nullptr.");
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        HILOG_ERROR("The bundleMgrHelper is nullptr.");
         return false;
     }
 
     AppExecFwk::BundleInfo bundleInfo;
-    auto getInfoResult = bundleMgrProxy->GetBundleInfoForSelf(
+    auto getInfoResult = bundleMgrHelper->GetBundleInfoForSelf(
         static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
     if (getInfoResult != 0) {
         HILOG_ERROR("GetBundleInfoForSelf failed.");
         return false;
     }
     if (bundleInfo.hapModuleInfos.size() == 0) {
-        HILOG_ERROR("get hapModuleInfo of bundleInfo failed.");
+        HILOG_ERROR("Get hapModuleInfo of bundleInfo failed.");
         return false;
     }
 
@@ -308,7 +298,7 @@ bool AssetHelper::ReadFilePathData(const std::string& filePath, std::vector<uint
     std::string loadPath = ExtractorUtil::GetLoadFilePath(newHapPath);
     std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(loadPath, newCreate);
     if (extractor == nullptr) {
-        HILOG_ERROR("loadPath %{private}s GetExtractor failed", loadPath.c_str());
+        HILOG_ERROR("LoadPath %{private}s GetExtractor failed", loadPath.c_str());
         return false;
     }
     std::unique_ptr<uint8_t[]> dataPtr = nullptr;
@@ -361,7 +351,7 @@ void AssetHelper::GetAmi(std::string& ami, const std::string& filePath)
     std::vector<std::string> files;
     for (const auto& basePath : workerInfo_->assetBasePathStr) {
         std::string assetPath = basePath + path;
-        HILOG_INFO("assetPath: %{public}s", assetPath.c_str());
+        HILOG_INFO("assetPath: %{private}s", assetPath.c_str());
         bool res = extractor->IsDirExist(assetPath);
         if (!res) {
             continue;
