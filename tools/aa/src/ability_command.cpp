@@ -835,8 +835,7 @@ void ParseToKeyValuePairs(const std::string& str, std::map<std::string, std::str
 
 void SetParamWithMap(const std::map<std::string, std::string>& m, Want& want)
 {
-    std::map<std::string, std::string>::iterator it;
-    for (it = m.begin(); it != m.end(); it++) {
+    for (auto it = m.begin(); it != m.end(); it++) {
         want.SetParam(it->first, it->second);
     }
 }
