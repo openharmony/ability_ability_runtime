@@ -27,6 +27,10 @@ namespace OHOS {
 namespace AAFwk {
 class AbilityManagerStubImplMock : public AbilityManagerStub {
 public:
+    const int ABILITY_STATE_FIRST_UID = 3000;
+    const int ABILITY_STATE_SECOND_UID = 3001;
+    const int ABILITY_STATE_FIRST_PID = 11291450;
+    const int ABILITY_STATE_SECOND_PID = 11291506;
     AbilityManagerStubImplMock()
     {}
     virtual ~AbilityManagerStubImplMock()
@@ -36,8 +40,8 @@ public:
         int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbilityByInsightIntent, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
         uint64_t intentId, int32_t userId));
-    MOCK_METHOD5(StartAbilityAsCaller, int(const Want &want, const sptr<IRemoteObject> &callerToken,
-            sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
+    MOCK_METHOD6(StartAbilityAsCaller, int(const Want &want, const sptr<IRemoteObject> &callerToken,
+        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isSendDialogResult));
     MOCK_METHOD2(
         GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken));
     MOCK_METHOD2(SendWantSender, int(sptr<IWantSender> target, const SenderInfo& senderInfo));
@@ -88,11 +92,6 @@ public:
     }
 
     int code_ = 0;
-
-    virtual int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list)
-    {
-        return 0;
-    }
 
     virtual int StartAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = -1)
     {
@@ -158,7 +157,7 @@ public:
         return 0;
     }
 
-    virtual int DisconnectAbility(const sptr<IAbilityConnection>& connect)
+    virtual int DisconnectAbility(sptr<IAbilityConnection> connect)
     {
         return 0;
     }
@@ -231,7 +230,7 @@ public:
         return 0;
     }
 
-    int ClearUpApplicationData(const std::string& bundleName) override
+    int ClearUpApplicationData(const std::string& bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }
@@ -397,6 +396,40 @@ public:
     int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override
     {
         return 0;
+    }
+
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list) override
+    {
+        AppExecFwk::AbilityStateData abilityStateDataOne;
+        abilityStateDataOne.bundleName = "com.example.getforegrounduiabilitiesone";
+        abilityStateDataOne.moduleName = "entry";
+        abilityStateDataOne.abilityName = "EntryAbility";
+        abilityStateDataOne.abilityState = AbilityState::FOREGROUND;
+        abilityStateDataOne.pid = ABILITY_STATE_FIRST_UID;
+        abilityStateDataOne.uid = ABILITY_STATE_FIRST_PID;
+        abilityStateDataOne.abilityType = static_cast<int32_t>(AppExecFwk::AbilityType::PAGE);
+        list.emplace_back(abilityStateDataOne);
+
+        AppExecFwk::AbilityStateData abilityStateDataTwo;
+        abilityStateDataTwo.bundleName = "com.example.getforegrounduiabilitiestwo";
+        abilityStateDataTwo.moduleName = "entry";
+        abilityStateDataTwo.abilityName = "EntryAbility";
+        abilityStateDataTwo.abilityState = AbilityState::INACTIVE;
+        abilityStateDataTwo.pid = ABILITY_STATE_SECOND_UID;
+        abilityStateDataTwo.uid = ABILITY_STATE_SECOND_PID;
+        abilityStateDataTwo.abilityType = static_cast<int32_t>(AppExecFwk::AbilityType::PAGE);
+        list.emplace_back(abilityStateDataTwo);
+        return ERR_OK;
     }
 
 #ifdef ABILITY_COMMAND_FOR_TEST

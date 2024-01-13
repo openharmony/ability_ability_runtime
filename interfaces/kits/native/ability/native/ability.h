@@ -57,6 +57,7 @@ namespace OHOS {
 namespace NativeRdb {
 class AbsSharedResultSet;
 class DataAbilityPredicates;
+class ValueObject;
 class ValuesBucket;
 } // namespace NativeRdb
 namespace AbilityRuntime {
@@ -737,18 +738,6 @@ public:
     virtual int StopBackgroundRunning() final;
 
     /**
-     * @brief Acquire a bundle manager, if it not existed,
-     * @return returns the bundle manager ipc object, or nullptr for failed.
-     */
-    sptr<IBundleMgr> GetBundleMgr();
-
-    /**
-     * @brief Add the bundle manager instance for debug.
-     * @param bundleManager the bundle manager ipc object.
-     */
-    void SetBundleManager(const sptr<IBundleMgr> &bundleManager);
-
-    /**
      * @brief Prepare user data of local Ability.
      *
      * @param wantParams Indicates the user data to be saved.
@@ -1150,6 +1139,12 @@ public:
      */
     int CreateModalUIExtension(const Want &want);
 
+    /**
+     * @brief Update sessionToken.
+     * @param sessionToken The token of session.
+     */
+    void UpdateSessionToken(sptr<IRemoteObject> sessionToken);
+
 protected:
     class AbilityDisplayListener : public OHOS::Rosen::DisplayManager::IDisplayListener {
     public:
@@ -1243,6 +1238,8 @@ protected:
      */
     virtual void ContinuationRestore(const Want &want);
 
+    void SetSessionToken(sptr<IRemoteObject> sessionToken);
+
     std::shared_ptr<Rosen::WindowScene> scene_ = nullptr;
     sptr<Rosen::IWindowLifeCycle> sceneListener_ = nullptr;
     sptr<AbilityDisplayListener> abilityDisplayListener_ = nullptr;
@@ -1322,6 +1319,17 @@ private:
     void InitConfigurationProperties(const Configuration& changeConfiguration, std::string& language,
         std::string& colormode, std::string& hasPointerDevice);
 
+    void ParseIntValue(const NativeRdb::ValueObject &obj, const std::string &key,
+        NativeRdb::ValuesBucket &retValueBucket) const;
+    void ParseDoubleValue(const NativeRdb::ValueObject &obj, const std::string &key,
+        NativeRdb::ValuesBucket &retValueBucket) const;
+    void ParseStringValue(const NativeRdb::ValueObject &obj, const std::string &key,
+        NativeRdb::ValuesBucket &retValueBucket) const;
+    void ParseBlobValue(const NativeRdb::ValueObject &obj, const std::string &key,
+        NativeRdb::ValuesBucket &retValueBucket) const;
+    void ParseBoolValue(const NativeRdb::ValueObject &obj, const std::string &key,
+        NativeRdb::ValuesBucket &retValueBucket) const;
+
     std::shared_ptr<ContinuationHandler> continuationHandler_ = nullptr;
     std::shared_ptr<ContinuationManager> continuationManager_ = nullptr;
     std::shared_ptr<ContinuationRegisterManager> continuationRegisterManager_ = nullptr;
@@ -1347,13 +1355,15 @@ private:
 
     // If session id cannot get from want, assign it as default.
     static const int DEFAULT_DMS_SESSION_ID;
-    sptr<IBundleMgr> iBundleMgr_;
 
     bool isNewRuleFlagSetted_ = false;
     bool startUpNewRule_ = false;
 
 #ifdef SUPPORT_GRAPHICS
 private:
+    void InitFAWindow(const Want &want, int32_t displayId);
+    bool UpdateResMgrAndConfiguration(int32_t displayId);
+
     std::shared_ptr<AbilityWindow> abilityWindow_ = nullptr;
     bool bWindowFocus_ = false;
     bool showOnLockScreen_ = false;

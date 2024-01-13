@@ -107,6 +107,7 @@ private:
     int DumpSysStateInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityForSettingsInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityForOptionsInner(MessageParcel &data, MessageParcel &reply);
+    int RequestModalUIExtensionInner(MessageParcel &data, MessageParcel &reply);
 
     int GetWantSenderInner(MessageParcel &data, MessageParcel &reply);
     int SendWantSenderInner(MessageParcel &data, MessageParcel &reply);
@@ -199,6 +200,8 @@ private:
     int RegisterWindowManagerServiceHandlerInner(MessageParcel &data, MessageParcel &reply);
     int CompleteFirstFrameDrawingInner(MessageParcel &data, MessageParcel &reply);
     int PrepareTerminateAbilityInner(MessageParcel &data, MessageParcel &reply);
+    int GetDialogSessionInfoInner(MessageParcel &data, MessageParcel &reply);
+    int SendDialogResultInner(MessageParcel &data, MessageParcel &reply);
 #endif
 
     #ifdef ABILITY_COMMAND_FOR_TEST
@@ -260,12 +263,16 @@ private:
 
     int PrepareTerminateAbilityBySCBInner(MessageParcel &data, MessageParcel &reply);
     int RegisterSessionHandlerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UpdateSessionInfoBySCBInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t RegisterAppDebugListenerInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterAppDebugListenerInner(MessageParcel &data, MessageParcel &reply);
     int32_t AttachAppDebugInner(MessageParcel &data, MessageParcel &reply);
     int32_t DetachAppDebugInner(MessageParcel &data, MessageParcel &reply);
     int32_t ExecuteIntentInner(MessageParcel &data, MessageParcel &reply);
+
+    int32_t SetApplicationAutoStartupByEDMInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CancelApplicationAutoStartupByEDMInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t IsAbilityControllerStartInner(MessageParcel &data, MessageParcel &reply);
     int32_t OpenFileInner(MessageParcel &data, MessageParcel &reply);

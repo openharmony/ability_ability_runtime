@@ -64,6 +64,7 @@ constexpr int32_t TRACE_ATOMIC_SERVICE_ID = 201;
 const std::string TRACE_ATOMIC_SERVICE = "StartAtomicService";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
+const int GET_TARGET_MISSION_OVER = 200;
 std::string GetCurrentTime()
 {
     struct timespec tn;
@@ -181,7 +182,7 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
     }
     NotifyStartAbilityResult(abilityRequest, ret);
     ReportAbilitAssociatedStartInfoToRSS(abilityRequest.abilityInfo, static_cast<int64_t>(
-        ResourceSchedule::ResType::AssociatedStartType::MISSION_LIST_START_ABILITY));
+        ResourceSchedule::ResType::AssociatedStartType::MISSION_LIST_START_ABILITY), callerAbility);
     return ret;
 }
 
@@ -342,22 +343,26 @@ void MissionListManager::StartWaitingAbility()
     }
 }
 
-int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> &currentTopAbility,
-    const std::shared_ptr<AbilityRecord> &callerAbility, const AbilityRequest &abilityRequest)
+void MissionListManager::AddRecord(const AbilityRequest &abilityRequest,
+    std::shared_ptr<AbilityRecord> &targetAbilityRecord)
 {
-    std::string connector = "##";
-    auto element = abilityRequest.want.GetElement();
-    std::string traceName = __PRETTY_FUNCTION__ + connector + element.GetBundleName() + connector +
-        element.GetAbilityName();
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceName);
-    HILOG_DEBUG("Start ability locked.");
-    // 1. choose target mission list
-    auto targetList = GetTargetMissionList(callerAbility, abilityRequest);
-    CHECK_POINTER_AND_RETURN(targetList, ERR_INVALID_CALLER);
+    std::string srcAbilityId = "";
+    if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
+        std::string srcDeviceId = abilityRequest.want.GetStringParam(DMS_SRC_NETWORK_ID);
+        int missionId = abilityRequest.want.GetIntParam(DMS_MISSION_ID, DEFAULT_DMS_MISSION_ID);
+        HILOG_DEBUG("Get srcNetWorkId = %s, missionId = %d", srcDeviceId.c_str(), missionId);
+        Want* newWant = const_cast<Want*>(&abilityRequest.want);
+        newWant->RemoveParam(DMS_SRC_NETWORK_ID);
+        newWant->RemoveParam(DMS_MISSION_ID);
+        newWant->RemoveParam(Want::PARAM_RESV_FOR_RESULT);
+        srcAbilityId = srcDeviceId + "_" + std::to_string(missionId);
+    }
+    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, srcAbilityId);
+}
 
-    // 2. get target mission
-    std::shared_ptr<AbilityRecord> targetAbilityRecord;
-    std::shared_ptr<Mission> targetMission;
+int MissionListManager::GetTargetMission(const AbilityRequest &abilityRequest, std::shared_ptr<Mission> &targetMission,
+    std::shared_ptr<AbilityRecord> &targetAbilityRecord)
+{
     bool isReachToLimit = false;
     GetTargetMissionAndAbility(abilityRequest, targetMission, targetAbilityRecord, isReachToLimit);
     if (isReachToLimit) {
@@ -381,21 +386,14 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
     } else {
         HILOG_DEBUG("pending state is not FOREGROUND.");
         targetAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+        if (targetAbilityRecord->IsLoading()) {
+            HILOG_INFO("ability: %{public}s is loading.", abilityRequest.abilityInfo.name.c_str());
+            return ERR_OK;
+        }
     }
 
     UpdateAbilityRecordLaunchReason(abilityRequest, targetAbilityRecord);
-    std::string srcAbilityId = "";
-    if (abilityRequest.want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
-        std::string srcDeviceId = abilityRequest.want.GetStringParam(DMS_SRC_NETWORK_ID);
-        int missionId = abilityRequest.want.GetIntParam(DMS_MISSION_ID, DEFAULT_DMS_MISSION_ID);
-        HILOG_DEBUG("Get srcNetWorkId = %s, missionId = %d", srcDeviceId.c_str(), missionId);
-        Want* newWant = const_cast<Want*>(&abilityRequest.want);
-        newWant->RemoveParam(DMS_SRC_NETWORK_ID);
-        newWant->RemoveParam(DMS_MISSION_ID);
-        newWant->RemoveParam(Want::PARAM_RESV_FOR_RESULT);
-        srcAbilityId = srcDeviceId + "_" + std::to_string(missionId);
-    }
-    targetAbilityRecord->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode, srcAbilityId);
+    AddRecord(abilityRequest, targetAbilityRecord);
 
     if (abilityRequest.collaboratorType != CollaboratorType::DEFAULT_TYPE) {
         auto collaborator = DelayedSingleton<AbilityManagerService>::GetInstance()->GetCollaborator(
@@ -413,7 +411,30 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
         }
         HILOG_INFO("collaborator notify broker load ability success.");
     }
+    return GET_TARGET_MISSION_OVER;
+}
 
+int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> &currentTopAbility,
+    const std::shared_ptr<AbilityRecord> &callerAbility, const AbilityRequest &abilityRequest)
+{
+    std::string connector = "##";
+    auto element = abilityRequest.want.GetElement();
+    std::string traceName = __PRETTY_FUNCTION__ + connector + element.GetBundleName() + connector +
+        element.GetAbilityName();
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, traceName);
+    HILOG_DEBUG("Start ability locked.");
+    // 1. choose target mission list
+    auto targetList = GetTargetMissionList(callerAbility, abilityRequest);
+    CHECK_POINTER_AND_RETURN(targetList, ERR_INVALID_CALLER);
+
+    // 2. get target mission
+    std::shared_ptr<Mission> targetMission;
+    std::shared_ptr<AbilityRecord> targetAbilityRecord;
+    int ret = GetTargetMission(abilityRequest, targetMission, targetAbilityRecord);
+    if (ret != GET_TARGET_MISSION_OVER) {
+        return ret;
+    }
+    
     // 3. move mission to target list
     bool isCallerFromLauncher = (callerAbility && callerAbility->IsLauncherAbility());
     MoveMissionToTargetList(isCallerFromLauncher, targetList, targetMission);
@@ -1013,6 +1034,7 @@ int MissionListManager::AttachAbilityThread(const sptr<IAbilityScheduler> &sched
     auto eventHandler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
     CHECK_POINTER_AND_RETURN_LOG(eventHandler, ERR_INVALID_VALUE, "Fail to get AbilityEventHandler.");
     eventHandler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+    abilityRecord->SetLoading(false);
     FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
     FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
 
@@ -1569,7 +1591,9 @@ int MissionListManager::TerminateAbilityInner(const std::shared_ptr<AbilityRecor
     abilityRecord->SetTerminatingState();
     // save result to caller AbilityRecord
     if (resultWant != nullptr) {
-        abilityRecord->SaveResultToCallers(resultCode, resultWant);
+        Want* newWant = const_cast<Want*>(resultWant);
+        newWant->RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
+        abilityRecord->SaveResultToCallers(resultCode, newWant);
     } else {
         Want want;
         abilityRecord->SaveResultToCallers(resultCode, &want);
@@ -2211,6 +2235,7 @@ void MissionListManager::OnTimeOut(uint32_t msgId, int64_t abilityRecordId, bool
     }
     switch (msgId) {
         case AbilityManagerService::LOAD_TIMEOUT_MSG:
+            abilityRecord->SetLoading(false);
             HandleLoadTimeout(abilityRecord);
             break;
         case AbilityManagerService::ACTIVE_TIMEOUT_MSG:
@@ -2490,6 +2515,7 @@ void MissionListManager::OnAbilityDied(std::shared_ptr<AbilityRecord> abilityRec
     CHECK_POINTER_LOG(handler, "Get AbilityEventHandler failed.");
     if (abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
         handler->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+        abilityRecord->SetLoading(false);
     }
     if (abilityRecord->GetAbilityState() == AbilityState::FOREGROUNDING) {
         handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
@@ -2894,14 +2920,14 @@ void MissionListManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &ab
 
 void MissionListManager::ProcessPreload(const std::shared_ptr<AbilityRecord> &record) const
 {
-    auto bms = AbilityUtil::GetBundleManager();
-    CHECK_POINTER(bms);
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    CHECK_POINTER(bundleMgrHelper);
     auto abilityInfo = record->GetAbilityInfo();
     Want want;
     want.SetElementName(abilityInfo.deviceId, abilityInfo.bundleName, abilityInfo.name, abilityInfo.moduleName);
     auto uid = record->GetUid();
     want.SetParam("uid", uid);
-    bms->ProcessPreload(want);
+    bundleMgrHelper->ProcessPreload(want);
 }
 
 Closure MissionListManager::GetCancelStartingWindowTask(const std::shared_ptr<AbilityRecord> &abilityRecord) const
@@ -4160,12 +4186,16 @@ void MissionListManager::SendKeyEvent(const AbilityRequest &abilityRequest)
     EventReport::SendKeyEvent(EventName::START_PRIVATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 }
 
-void MissionListManager::ReportAbilitAssociatedStartInfoToRSS(
-    const AppExecFwk::AbilityInfo &abilityInfo, int64_t type)
+void MissionListManager::ReportAbilitAssociatedStartInfoToRSS(const AppExecFwk::AbilityInfo &abilityInfo,
+    int64_t type, const std::shared_ptr<AbilityRecord> &callerAbility)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
-    int32_t callerUid = IPCSkeleton::GetCallingUid();
-    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    if (callerAbility == nullptr) {
+        HILOG_WARN("associated start caller record is nullptr");
+        return;
+    }
+    int32_t callerUid = callerAbility->GetUid();
+    int32_t callerPid = callerAbility->GetPid();
     std::unordered_map<std::string, std::string> eventParams {
         { "name", "associated_start" },
         { "caller_uid", std::to_string(callerUid) },

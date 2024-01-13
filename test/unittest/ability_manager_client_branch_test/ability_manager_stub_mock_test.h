@@ -148,7 +148,7 @@ public:
         return 0;
     }
 
-    virtual int DisconnectAbility(const sptr<IAbilityConnection>& connect)
+    virtual int DisconnectAbility(sptr<IAbilityConnection> connect)
     {
         return 0;
     }
@@ -220,7 +220,7 @@ public:
         return;
     }
 
-    int ClearUpApplicationData(const std::string& bundleName) override
+    int ClearUpApplicationData(const std::string& bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }
@@ -309,8 +309,8 @@ public:
         int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbilityByInsightIntent, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
         uint64_t intentId, int32_t userId));
-    MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-            sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
+    MOCK_METHOD6(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isSendDialogResult));
     MOCK_METHOD2(
         GetWantSender, sptr<IWantSender>(const WantSenderInfo& wantSenderInfo, const sptr<IRemoteObject>& callerToken));
     MOCK_METHOD2(SendWantSender, int(sptr<IWantSender> target, const SenderInfo& senderInfo));
@@ -411,6 +411,16 @@ public:
     }
 
     int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override
+    {
+        return 0;
+    }
+
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;
     }

@@ -318,6 +318,12 @@ void AppRunningRecord::SetState(const ApplicationState state)
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         restartResidentProcCount_ = MAX_RESTART_COUNT;
     }
+    std::string foreTag = "ForeApp:";
+    if (state == ApplicationState::APP_STATE_FOREGROUND) {
+        StartAsyncTrace(HITRACE_TAG_APP, foreTag + mainBundleName_, 0);
+    } else if (state == ApplicationState::APP_STATE_BACKGROUND) {
+        FinishAsyncTrace(HITRACE_TAG_APP, foreTag + mainBundleName_, 0);
+    }
     curState_ = state;
 }
 
@@ -366,7 +372,8 @@ std::shared_ptr<AbilityRunningRecord> AppRunningRecord::GetAbilityRunningRecord(
     return nullptr;
 }
 
-void AppRunningRecord::RemoveModuleRecord(const std::shared_ptr<ModuleRunningRecord> &moduleRecord)
+void AppRunningRecord::RemoveModuleRecord(
+    const std::shared_ptr<ModuleRunningRecord> &moduleRecord, bool isExtensionDebug)
 {
     HILOG_INFO("Remove module record.");
 
@@ -378,7 +385,7 @@ void AppRunningRecord::RemoveModuleRecord(const std::shared_ptr<ModuleRunningRec
         if (iter != item.second.end()) {
             HILOG_DEBUG("Removed a record.");
             iter = item.second.erase(iter);
-            if (item.second.empty()) {
+            if (item.second.empty() && !isExtensionDebug) {
                 {
                     std::lock_guard<ffrt::mutex> appInfosLock(appInfosLock_);
                     HILOG_DEBUG("Removed an appInfo.");
@@ -567,7 +574,12 @@ void AppRunningRecord::ScheduleTerminate()
         HILOG_WARN("appLifeCycleDeal_ is null");
         return;
     }
-    appLifeCycleDeal_->ScheduleTerminate();
+    bool isLastProcess = false;
+    auto serviceInner = appMgrServiceInner_.lock();
+    if (serviceInner != nullptr) {
+        isLastProcess = serviceInner->IsFinalAppProcessByBundleName(GetBundleName());
+    }
+    appLifeCycleDeal_->ScheduleTerminate(isLastProcess);
 }
 
 void AppRunningRecord::LaunchPendingAbilities()
@@ -932,8 +944,6 @@ void AppRunningRecord::AbilityBackground(const std::shared_ptr<AbilityRunningRec
             }
         }
 
-
-
         // Then schedule application background when all ability is not foreground.
         if (foregroundSize == 0 && mainBundleName_ != LAUNCHER_NAME && windowIds_.empty()) {
             SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
@@ -1057,7 +1067,7 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
 
     if (moduleRecord->GetAbilities().empty() && (!IsKeepAliveApp()
         || AAFwk::UIExtensionUtils::IsUIExtension(GetExtensionType()))) {
-        RemoveModuleRecord(moduleRecord);
+        RemoveModuleRecord(moduleRecord, isExtensionDebug);
     }
 
     auto moduleRecordList = GetAllModuleRecord();
@@ -1747,13 +1757,22 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         }
     }
 
-    if (!windowIds_.empty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) {
+    bool isScheduleForeground = (!windowIds_.empty() && curState_ != ApplicationState::APP_STATE_FOREGROUND) ||
+        (!windowIds_.empty() && curState_ == ApplicationState::APP_STATE_FOREGROUND &&
+        pendingState_ == ApplicationPendingState::BACKGROUNDING);
+    if (isScheduleForeground) {
+        SetApplicationPendingState(ApplicationPendingState::FOREGROUNDING);
         SetUpdateStateFromService(true);
         ScheduleForegroundRunning();
         return;
     }
 
-    if (windowIds_.empty() && IsAbilitytiesBackground() && curState_ == ApplicationState::APP_STATE_FOREGROUND) {
+    bool isScheduleBackground = (windowIds_.empty() && IsAbilitytiesBackground() &&
+        curState_ == ApplicationState::APP_STATE_FOREGROUND) ||
+        (windowIds_.empty() && IsAbilitytiesBackground() && curState_ == ApplicationState::APP_STATE_BACKGROUND &&
+        pendingState_ == ApplicationPendingState::FOREGROUNDING);
+    if (isScheduleBackground) {
+        SetApplicationPendingState(ApplicationPendingState::BACKGROUNDING);
         SetUpdateStateFromService(true);
         ScheduleBackgroundRunning();
     }
@@ -1854,6 +1873,52 @@ void AppRunningRecord::SetApplicationPendingState(ApplicationPendingState pendin
 ApplicationPendingState AppRunningRecord::GetApplicationPendingState() const
 {
     return pendingState_;
+}
+
+void AppRunningRecord::AddChildProcessRecord(pid_t pid, const std::shared_ptr<ChildProcessRecord> record)
+{
+    if (!record) {
+        HILOG_ERROR("record is null.");
+        return;
+    }
+    if (pid <= 0) {
+        HILOG_ERROR("pid <= 0.");
+        return;
+    }
+    std::lock_guard lock(childProcessRecordMapLock_);
+    childProcessRecordMap_.emplace(pid, record);
+}
+
+void AppRunningRecord::RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record)
+{
+    HILOG_INFO("Removing child process record, pid: %{public}d", record->GetPid());
+    if (!record) {
+        HILOG_ERROR("record is null.");
+        return;
+    }
+    auto pid = record->GetPid();
+    if (pid <= 0) {
+        HILOG_ERROR("record.pid <= 0.");
+        return;
+    }
+    std::lock_guard lock(childProcessRecordMapLock_);
+    childProcessRecordMap_.erase(pid);
+}
+
+std::shared_ptr<ChildProcessRecord> AppRunningRecord::GetChildProcessRecordByPid(const pid_t pid)
+{
+    std::lock_guard lock(childProcessRecordMapLock_);
+    auto iter = childProcessRecordMap_.find(pid);
+    if (iter == childProcessRecordMap_.end()) {
+        return nullptr;
+    }
+    return iter->second;
+}
+
+std::map<int32_t, std::shared_ptr<ChildProcessRecord>> AppRunningRecord::GetChildProcessRecordMap()
+{
+    std::lock_guard lock(childProcessRecordMapLock_);
+    return childProcessRecordMap_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

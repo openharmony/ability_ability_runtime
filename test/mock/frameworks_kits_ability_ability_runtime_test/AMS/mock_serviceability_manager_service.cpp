@@ -46,7 +46,7 @@ int MockServiceAbilityManagerService::StartAbility(
 
 int MockServiceAbilityManagerService::StartAbilityAsCaller(
     const Want& want, const sptr<IRemoteObject>& callerToken, sptr<IRemoteObject> asCallerSourceToken,
-    int32_t userId, int requestCode)
+    int32_t userId, int requestCode, bool isSendDialogResult)
 {
     return 0;
 }
@@ -90,7 +90,7 @@ int MockServiceAbilityManagerService::ConnectAbility(
     return 0;
 }
 
-int MockServiceAbilityManagerService::DisconnectAbility(const sptr<IAbilityConnection>& connect)
+int MockServiceAbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
 {
     return 0;
 }

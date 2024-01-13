@@ -320,8 +320,11 @@ HWTEST_F(WatchdogTest, WatchdogTest_Timer_003, TestSize.Level1)
     bool appMainThreadState = true;
     EXPECT_FALSE(watchdog_->appMainThreadIsAlive_);
     watchdog_->SetAppMainThreadState(appMainThreadState);
+    watchdog_->Timer();
     bool isInBackground = false;
     watchdog_->SetBackgroundStatus(isInBackground);
+    watchdog_->Timer();
+    watchdog_->stopWatchdog_ = true;
     watchdog_->Timer();
     EXPECT_TRUE(watchdog_->needReport_);
     EXPECT_FALSE(watchdog_->isInBackground_);
@@ -441,6 +444,21 @@ HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_008, TestSize.Level1)
     watchdog_->isSixSecondEvent_.store(true);
     EXPECT_TRUE(watchdog_->needReport_);
     watchdog_->ReportEvent();
+}
+
+/**
+ * @tc.number: WatchdogTest_ReportEvent_009
+ * @tc.name: ReportEvent
+ * @tc.desc: Verify that function ReportEvent.
+ */
+HWTEST_F(WatchdogTest, WatchdogTest_ReportEvent_009, TestSize.Level1)
+{
+    watchdog_->lastWatchTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count() - TEST_INTERVAL_TIME;
+    watchdog_->isInBackground_ = true;
+    watchdog_->backgroundReportCount_ = 0;
+    watchdog_->ReportEvent();
+    EXPECT_EQ(watchdog_->backgroundReportCount_, 1);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

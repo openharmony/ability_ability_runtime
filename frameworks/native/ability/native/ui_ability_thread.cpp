@@ -170,7 +170,7 @@ void UIAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     HILOG_INFO("LoadLifecycle: Attach uiability.");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
     std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
-        "; AbilityThread::Attach; the load lifecycle.";
+        "; AbilityThread::Attach start; the load lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
     ErrCode err = AbilityManagerClient::GetInstance()->AttachAbilityThread(this, token_);
     if (err != ERR_OK) {
@@ -229,7 +229,7 @@ void UIAbilityThread::Attach(const std::shared_ptr<AppExecFwk::OHOSApplication> 
 }
 
 void UIAbilityThread::HandleAbilityTransaction(
-    const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AppExecFwk::SessionInfo> sessionInfo)
+    const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     std::string connector = "##";
     std::string traceName = __PRETTY_FUNCTION__ + connector + want.GetElement().GetAbilityName();
@@ -335,7 +335,7 @@ void UIAbilityThread::HandleUpdateConfiguration(const AppExecFwk::Configuration 
 }
 
 void UIAbilityThread::ScheduleAbilityTransaction(
-    const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AppExecFwk::SessionInfo> sessionInfo)
+    const Want &want, const LifeCycleStateInfo &lifeCycleStateInfo, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     HILOG_INFO("Lifecycle: name:%{public}s,targeState:%{public}d,isNewWant:%{public}d",
@@ -693,6 +693,15 @@ int UIAbilityThread::CreateModalUIExtension(const Want &want)
         return ERR_INVALID_VALUE;
     }
     return currentAbility_->CreateModalUIExtension(want);
+}
+
+void UIAbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
+{
+    if (currentAbility_ == nullptr) {
+        HILOG_ERROR("current ability is nullptr");
+        return;
+    }
+    currentAbility_->UpdateSessionToken(sessionToken);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

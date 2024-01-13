@@ -106,7 +106,7 @@ public:
      * The extension in the <b>STATE_FOREGROUND</b> state is visible.
      * You can override this function to implement your own processing logic.
      */
-    void OnForeground(const Want &want);
+    void OnForeground(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo);
 
     /**
      * @brief Called when this extension enters the <b>STATE_BACKGROUND</b> state.
@@ -154,21 +154,25 @@ private:
     void BackgroundWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     void DestroyWindow(const sptr<AAFwk::SessionInfo> &sessionInfo);
     bool CallJsOnSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
-        const sptr<Rosen::Window> &uiWindow, const sptr<IRemoteObject> &sessionToken);
+        const sptr<Rosen::Window> &uiWindow, const uint64_t &uiExtensionComponentId);
     void OnCommandWindowDone(const sptr<AAFwk::SessionInfo> &sessionInfo, AAFwk::WindowCommand winCmd);
-    bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
+    bool ForegroundWindowWithInsightIntent(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo,
+        bool needForeground);
     bool HandleSessionCreate(const AAFwk::Want &want, const sptr<AAFwk::SessionInfo> &sessionInfo);
     void OnInsightIntentExecuteDone(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result);
+    void PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
+        const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground);
 
     JsRuntime &jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;
     std::shared_ptr<NativeReference> shellContextRef_;
-    std::map<sptr<IRemoteObject>, sptr<Rosen::Window>> uiWindowMap_;
-    std::set<sptr<IRemoteObject>> foregroundWindows_;
-    std::map<sptr<IRemoteObject>, std::shared_ptr<NativeReference>> contentSessions_;
+    std::map<uint64_t, sptr<Rosen::Window>> uiWindowMap_;
+    std::set<uint64_t> foregroundWindows_;
+    std::map<uint64_t, std::shared_ptr<NativeReference>> contentSessions_;
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo_;
     std::shared_ptr<UIExtensionContext> context_;
+    sptr<IRemoteObject> token_ = nullptr;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -362,6 +362,15 @@ enum class AbilityManagerInterfaceCode {
     // start ability by insigt intent
     START_ABILITY_BY_INSIGHT_INTENT = 1053,
 
+    // get dialog session info
+    GET_DIALOG_SESSION_INFO = 1054,
+
+    // send dialog result
+    SEND_DIALOG_RESULT = 1055,
+
+    // request modal UIExtension by want
+    REQUESET_MODAL_UIEXTENSION = 1056,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
@@ -473,6 +482,13 @@ enum class AbilityManagerInterfaceCode {
 
     // ipc id for register session handler
     REGISTER_SESSION_HANDLER = 6010,
+    // ipc id for update session info
+    UPDATE_SESSION_INFO = 6011,
+
+    // ipc id for set application auto startup by EDM
+    SET_APPLICATION_AUTO_STARTUP_BY_EDM = 6113,
+    // ipc id for cancel application auto startup by EDM
+    CANCEL_APPLICATION_AUTO_STARTUP_BY_EDM = 6114,
 };
 }  // namespace AAFwk
 }  // namespace OHOS

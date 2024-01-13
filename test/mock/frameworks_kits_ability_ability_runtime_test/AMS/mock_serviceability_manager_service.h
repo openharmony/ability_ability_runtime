@@ -55,7 +55,8 @@ public:
         const sptr<IRemoteObject>& callerToken,
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE) override;
+        int requestCode = DEFAULT_INVAL_VALUE,
+        bool isSendDialogResult = false) override;
     int StartAbilityAsCaller(
         const Want& want,
         const StartOptions& startOptions,
@@ -91,7 +92,7 @@ public:
         const sptr<IAbilityConnection>& connect,
         const sptr<IRemoteObject>& callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
-    int DisconnectAbility(const sptr<IAbilityConnection>& connect) override;
+    int DisconnectAbility(sptr<IAbilityConnection> connect) override;
 
     int AttachAbilityThread(const sptr<IAbilityScheduler>& scheduler, const sptr<IRemoteObject>& token) override;
 
@@ -187,7 +188,7 @@ public:
         return 0;
     }
 
-    int ClearUpApplicationData(const std::string& bundleName) override
+    int ClearUpApplicationData(const std::string& bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }
@@ -230,7 +231,7 @@ public:
     {
         return 0;
     }
-    
+
     int SetMissionContinueState(const sptr<IRemoteObject>& abilityToken, const AAFwk::ContinueState &state) override
     {
         return commonMockResultFlag_ ? 0 : -1;
@@ -310,6 +311,16 @@ public:
     }
 
     int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler) override
+    {
+        return 0;
+    }
+
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;
     }

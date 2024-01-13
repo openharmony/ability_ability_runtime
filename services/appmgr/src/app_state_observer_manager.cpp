@@ -245,6 +245,7 @@ void AppStateObserverManager::OnAppStateChanged(
             return;
         }
         HILOG_DEBUG("OnAppStateChanged come.");
+        self->dummyCode_ = __LINE__;
         self->HandleAppStateChanged(appRecord, state, needNotifyApp, isFromWindowFocusChanged);
     };
     handler_->SubmitTask(task);
@@ -320,7 +321,6 @@ void AppStateObserverManager::OnProcessCreated(const std::shared_ptr<AppRunningR
             HILOG_ERROR("self is nullptr, OnProcessCreated failed.");
             return;
         }
-        HILOG_DEBUG("OnProcessCreated come.");
         self->HandleOnAppProcessCreated(appRecord);
     };
     handler_->SubmitTask(task);
@@ -430,10 +430,12 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
     if (appRecord == nullptr) {
         return;
     }
+    dummyCode_ = __LINE__;
     if (state == ApplicationState::APP_STATE_FOREGROUND || state == ApplicationState::APP_STATE_BACKGROUND) {
         if (needNotifyApp && !isFromWindowFocusChanged) {
             AppStateData data = WrapAppStateData(appRecord, state);
             appRecord->GetSplitModeAndFloatingMode(data.isSplitScreenMode, data.isFloatingWindowMode);
+            dummyCode_ = __LINE__;
             std::lock_guard<ffrt::mutex> lockForeground(appForegroundObserverLock_);
             for (auto it : appForegroundStateObserverSet_) {
                 if (it != nullptr) {
@@ -441,11 +443,13 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
                 }
             }
         }
+        dummyCode_ = __LINE__;
         if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) &&
             !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
             AppStateData data = WrapAppStateData(appRecord, state);
             HILOG_DEBUG("HandleAppStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
                 data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
+            dummyCode_ = __LINE__;
             std::lock_guard<ffrt::mutex> lockNotify(observerLock_);
             for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
                 std::vector<std::string>::iterator iter =
@@ -460,10 +464,12 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
             }
         }
     }
+    dummyCode_ = __LINE__;
     if (state == ApplicationState::APP_STATE_CREATE || state == ApplicationState::APP_STATE_TERMINATED) {
         AppStateData data = WrapAppStateData(appRecord, state);
         HILOG_DEBUG("OnApplicationStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d",
             data.bundleName.c_str(), data.uid, data.state);
+        dummyCode_ = __LINE__;
         std::lock_guard<ffrt::mutex> lockNotify(observerLock_);
         for (auto it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
             std::vector<std::string>::iterator iter = std::find(it->second.begin(),
@@ -641,7 +647,7 @@ ProcessData AppStateObserverManager::WrapProcessData(const std::shared_ptr<AppRu
     processData.requestProcCode = appRecord->GetRequestProcCode();
     processData.processChangeReason = static_cast<int32_t>(appRecord->GetProcessChangeReason());
     processData.processName = appRecord->GetProcessName();
-    processData.extensionType = AAFwk::UIExtensionUtils::ConvertType(appRecord->GetExtensionType());
+    processData.extensionType = appRecord->GetExtensionType();
     processData.processType = appRecord->GetProcessType();
     return processData;
 }
@@ -791,7 +797,7 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
     appStateData.bundleName = appRecord->GetBundleName();
     appStateData.state = static_cast<int32_t>(state);
     appStateData.uid = appRecord->GetUid();
-    appStateData.extensionType = AAFwk::UIExtensionUtils::ConvertType(appRecord->GetExtensionType());
+    appStateData.extensionType = appRecord->GetExtensionType();
     if (appRecord->GetApplicationInfo() != nullptr) {
         appStateData.accessTokenId = static_cast<int32_t>(appRecord->GetApplicationInfo()->accessTokenId);
     }
@@ -806,14 +812,13 @@ AppStateData AppStateObserverManager::WrapAppStateData(const std::shared_ptr<App
         }
     }
     std::shared_ptr<RemoteClientManager> remoteClientManager = std::make_shared<RemoteClientManager>();
-    auto bundleMgr = remoteClientManager->GetBundleManager();
+    auto bundleMgr = remoteClientManager->GetBundleManagerHelper();
     std::string callerBundleName;
     if (bundleMgr != nullptr &&
         IN_PROCESS_CALL(bundleMgr->GetNameForUid(appRecord->GetCallerUid(), callerBundleName)) == ERR_OK) {
         appStateData.callerBundleName = callerBundleName;
     } else {
         appStateData.callerBundleName = "";
-        HILOG_ERROR("Get caller bundleName failed.");
     }
     HILOG_DEBUG("Handle state change, bundle:%{public}s, state:%{public}d,"
         "pid:%{public}d ,uid:%{public}d, isFocused:%{public}d, callerBUndleName: %{public}s",

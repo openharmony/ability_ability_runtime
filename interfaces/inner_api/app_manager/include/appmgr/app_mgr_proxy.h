@@ -96,7 +96,17 @@ public:
      * @param bundleName, bundle name in Application record.
      * @return
      */
-    virtual int32_t ClearUpApplicationData(const std::string &bundleName) override;
+    virtual int32_t ClearUpApplicationData(const std::string &bundleName,
+        const int32_t userId = -1) override;
+
+    /**
+     * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
+     * clear the application data.
+     *
+     * @param bundleName, bundle name in Application record.
+     * @return
+     */
+    virtual int32_t ClearUpApplicationDataBySelf(int32_t userId = -1) override;
 
     /**
      * GetAllRunningProcesses, call GetAllRunningProcesses() through proxy project.
@@ -427,12 +437,47 @@ public:
 
     /**
      * Check whether the bundle is running.
-     * 
+     *
      * @param bundleName Indicates the bundle name of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return Return ERR_OK if success, others fail.
      */
     int32_t IsApplicationRunning(const std::string &bundleName, bool &isRunning) override;
+    
+    /**
+     * Start child process, called by ChildProcessManager.
+     *
+     * @param srcEntry Child process source file entrance path to be started.
+     * @param childPid Created child process pid.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartChildProcess(const std::string &srcEntry, pid_t &childPid) override;
+
+    /**
+     * Get child process record for self.
+     *
+     * @return child process info.
+     */
+    int32_t GetChildProcessInfoForSelf(ChildProcessInfo &info) override;
+
+    /**
+     * Attach child process scheduler to app manager service.
+     *
+     * @param childScheduler scheduler of child process.
+     */
+    void AttachChildProcess(const sptr<IRemoteObject> &childScheduler) override;
+    
+    /**
+     * Exit child process, called by itself.
+     */
+    void ExitChildProcessSafely() override;
+
+    /**
+     * Whether the current application process is the last surviving process.
+     *
+     * @return Returns true is final application process, others return false.
+     */
+    bool IsFinalAppProcess() override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);

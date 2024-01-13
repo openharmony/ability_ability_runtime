@@ -72,7 +72,7 @@ public:
         const sptr<IRemoteObject>& callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
-    int DisconnectAbility(const sptr<IAbilityConnection>& connect) override;
+    int DisconnectAbility(sptr<IAbilityConnection> connect) override;
 
     int AttachAbilityThread(const sptr<IAbilityScheduler>& scheduler, const sptr<IRemoteObject>& token) override;
 
@@ -147,8 +147,8 @@ public:
     MOCK_METHOD4(StartAbilityByCall,
         int(const Want&, const sptr<IAbilityConnection>&, const sptr<IRemoteObject>&, int32_t));
 
-    MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
+    MOCK_METHOD6(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isSendDialogResult));
     MOCK_METHOD6(StartAbilityAsCaller, int(const Want &want, const StartOptions &startOptions,
         const sptr<IRemoteObject>& callerToken, sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId, int requestCode));
@@ -177,7 +177,7 @@ public:
 
     int UninstallApp(const std::string& bundleName, int32_t uid) override;
 
-    int ClearUpApplicationData(const std::string& bundleName) override
+    int ClearUpApplicationData(const std::string& bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) override
     {
         return 0;
     }
@@ -191,7 +191,7 @@ public:
     {
         return 0;
     }
-    
+
     int LogoutUser(int32_t userId) override
     {
         return 0;
@@ -280,6 +280,16 @@ public:
     }
 
     int32_t ReportDrawnCompleted(const sptr<IRemoteObject>& callerToken) override
+    {
+        return 0;
+    }
+
+    int32_t SetApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
+    {
+        return 0;
+    }
+
+    int32_t CancelApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool flag) override
     {
         return 0;
     }
