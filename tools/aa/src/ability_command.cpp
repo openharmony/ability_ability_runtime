@@ -34,6 +34,7 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr size_t PARAM_LENGTH = 1024;
+constexpr size_t VALID_KV_VECTOR_SIZE = 2;
 
 const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:P:A:U:CDSN";
 constexpr struct option LONG_OPTIONS[] = {
@@ -815,8 +816,7 @@ std::vector<std::string> Split(const std::string& str, char delim)
     std::stringstream ss(str);
     std::string item;
     std::vector<std::string> elems;
-    while (std::getline(ss, item, delim))
-    {
+    while (std::getline(ss, item, delim)) {
         if (!item.empty())
             elems.push_back(item);
     }
@@ -826,10 +826,18 @@ std::vector<std::string> Split(const std::string& str, char delim)
 void ParseToKeyValuePairs(const std::string& str, std::map<std::string, std::string>& m)
 {
     auto vs = Split(str, ';');
-    for (auto s : vs)
-    {
+    for (auto s : vs) {
         auto v = Split(s, ':');
-        if (v.size() == 2) m[v[0]] = v[1];
+        if (v.size() == VALID_KV_VECTOR_SIZE)
+            m[v[0]] = v[1];
+    }
+}
+
+void SetParamWithMap(const std::map<std::string, std::string>& m, Want& want)
+{
+    std::map<std::string, std::string>::iterator it;
+    for (it = m.begin(); it != m.end(); it++) {
+        want.SetParam(it->first, it->second);
     }
 }
 
@@ -1251,7 +1259,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     break;
                 }
                 case 'P': {
-                    if (strcmp(cmd_.c_str(), "start") == 0) {
+                    if (cmd_ == "start") {
                         // parameters are only valid for the start command
                         // 'aa start -P' with no argumnet
                         HILOG_INFO("'aa %{public}s -P' with no argument.", cmd_.c_str());
@@ -1264,7 +1272,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     break;
                 }
                 case 'A': {
-                    if (strcmp(cmd_.c_str(), "start") == 0) {
+                    if (cmd_ == "start") {
                         // action is only valid for the start command
                         // 'aa start -A' with no argumnet
                         HILOG_INFO("'aa %{public}s -A' with no argument.", cmd_.c_str());
@@ -1277,7 +1285,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     break;
                 }
                 case 'U': {
-                    if (strcmp(cmd_.c_str(), "start") == 0) {
+                    if (cmd_ == "start") {
                         // URI is only valid for the start command
                         // 'aa start -U' with no argumnet
                         HILOG_INFO("'aa %{public}s -U' with no argument.", cmd_.c_str());
@@ -1480,9 +1488,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 want.SetParam("nativeDebug", isNativeDebug);
             }
             if (!parameters.empty()) {
-                for (std::map<std::string, std::string>::iterator it = parameters.begin(); it != parameters.end(); it++) {
-                    want.SetParam(it->first, it->second);
-                }
+                SetParamWithMap(parameters, want);
             }
             if (!action.empty()) {
                 want.SetAction(action);
