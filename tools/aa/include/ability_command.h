@@ -70,7 +70,7 @@ const std::string HELP_MSG_START =
     "  [-Ps <key> <string value>] "
     "  [-Pi <key> <integer value>] "
     "  [-Pb <key> <boolean value>] "
-    "  [-Psn] <key> "
+    "  [-Psn <key>] "
     "  [-A <action-name>] "
     "  [-U <URI>] "
     "  [-e <entity>] "
