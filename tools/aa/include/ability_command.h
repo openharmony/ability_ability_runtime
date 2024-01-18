@@ -24,6 +24,10 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
+using ParametersInteger = std::map<std::string, int>;
+using ParametersString = std::map<std::string, std::string>;
+using ParametersBool = std::map<std::string, bool>;
+
 const std::string TOOL_NAME = "aa";
 
 const std::string HELP_MSG = "usage: aa <command> <options>\n"
@@ -63,7 +67,10 @@ const std::string HELP_MSG_START =
     "options list:\n"
     "  -h, --help                                                   list available commands\n"
     "  [-d <device-id>] -a <ability-name> -b <bundle-name> [-m <module-name>] [-p <perf-cmd>] [-D] [-S] [-N] "
-    "  [-P <key:value pairs, separated by ;>] "
+    "  [-Ps <key> <string value>] "
+    "  [-Pi <key> <integer value>] "
+    "  [-Pb <key> <boolean value>] "
+    "  [-Psn] <key> "
     "  [-A <action-name>] "
     "  [-U <URI>] "
     "  start ability with an element name\n";
@@ -212,6 +219,14 @@ private:
     ErrCode RunAsProcessCommand();
     ErrCode RunAsAttachDebugCommand();
     ErrCode RunAsDetachDebugCommand();
+    bool CheckParameters(int target);
+    ErrCode ParseParam(ParametersInteger& pi);
+    ErrCode ParseParam(ParametersString& ps, bool isNull);
+    ErrCode ParseParam(ParametersBool& pb);
+    ErrCode ParseParam(ParametersInteger& pi, ParametersBool& pb, ParametersString& ps);
+    void SetParams(const ParametersInteger& pi, Want& want);
+    void SetParams(const ParametersString& ps, Want& want);
+    void SetParams(const ParametersBool& pb, Want& want);
 #ifdef ABILITY_COMMAND_FOR_TEST
     ErrCode RunForceTimeoutForTest();
     ErrCode RunAsSendAppNotRespondingProcessID();

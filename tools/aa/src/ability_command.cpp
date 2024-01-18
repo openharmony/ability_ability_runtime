@@ -34,9 +34,16 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 constexpr size_t PARAM_LENGTH = 1024;
-constexpr size_t VALID_KV_VECTOR_SIZE = 2;
+constexpr size_t PARAMETER_VALUE_OFFSET = 1;
+constexpr size_t NEXT_OPTION_OFFSET = 2;
+constexpr int VALID_KEY_VALUE_PAIR_SIZE = 2;
+constexpr size_t VALID_NULL_STRING_KEY_SIZE = 1;
+const std::string OPTION_PARAMETERS_INTERGER = "i";
+const std::string OPTION_PARAMETERS_STRING = "s";
+const std::string OPTION_PARAMETERS_STRING_NULL = "sn";
+const std::string OPTION_PARAMETERS_BOOL = "b";
 
-const std::string SHORT_OPTIONS = "ch:d:a:b:p:s:m:P:A:U:CDSN";
+const std::string SHORT_OPTIONS = "ch:d:a:b:e:t:p:s:m:P::A:U:CDSN";
 constexpr struct option LONG_OPTIONS[] = {
     {"help", no_argument, nullptr, 'h'},
     {"device", required_argument, nullptr, 'd'},
@@ -51,6 +58,8 @@ constexpr struct option LONG_OPTIONS[] = {
     {"parameters", required_argument, nullptr, 'P'},
     {"action", required_argument, nullptr, 'A'},
     {"URI", required_argument, nullptr, 'U'},
+    {"entity", required_argument, nullptr, 'e'},
+    {"type", required_argument, nullptr, 't'},
     {nullptr, 0, nullptr, 0},
 };
 const std::string SHORT_OPTIONS_APPLICATION_NOT_RESPONDING = "hp:";
@@ -811,33 +820,139 @@ bool AbilityManagerShellCommand::CheckPerfCmdString(
     return true;
 }
 
-std::vector<std::string> Split(const std::string& str, char delim)
+bool IsNum(const std::string& s)
 {
-    std::stringstream ss(str);
-    std::string item;
-    std::vector<std::string> elems;
-    while (std::getline(ss, item, delim)) {
-        if (!item.empty())
-            elems.push_back(item);
-    }
-    return elems;
+    for (auto c : s)
+        if (!std::isdigit(c))
+            return false;
+    return true;
 }
 
-void ParseToKeyValuePairs(const std::string& str, std::map<std::string, std::string>& m)
+// parse integer parameters
+ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi)
 {
-    auto vs = Split(str, ';');
-    for (auto s : vs) {
-        auto v = Split(s, ':');
-        if (v.size() == VALID_KV_VECTOR_SIZE)
-            m[v[0]] = v[1];
+    std::string key = argv_[optind];
+    std::string intString = argv_[optind+1];
+    if (!IsNum(intString)) {
+        resultReceiver_.append("invalid parameter ");
+        resultReceiver_.append(intString);
+        resultReceiver_.append(" for integer option\n");
+
+        return OHOS::ERR_INVALID_VALUE;
     }
+    pi[key] = atoi(argv_[optind+1]);
+    return OHOS::ERR_OK;
 }
 
-void SetParamWithMap(const std::map<std::string, std::string>& m, Want& want)
+// parse string parameters
+ErrCode AbilityManagerShellCommand::ParseParam(ParametersString& ps, bool isNull = false)
 {
-    for (auto it = m.begin(); it != m.end(); it++) {
+    std::string key = argv_[optind];
+    std::string value = "";
+    if (!isNull)
+        value = argv_[optind + PARAMETER_VALUE_OFFSET];
+
+    ps[key] = value;
+
+    return OHOS::ERR_OK;
+}
+
+// parse bool parameters
+ErrCode AbilityManagerShellCommand::ParseParam(ParametersBool& pb)
+{
+    std::string key = argv_[optind];
+    std::string boolString = argv_[optind+1];
+    std::transform(boolString.begin(), boolString.end(), boolString.begin(), ::tolower);
+    bool value;
+    if (boolString == "true" || boolString == "t"){
+        value = true;
+    } else if (boolString == "false" || boolString == "f") {
+        value = false;
+    } else {
+        resultReceiver_.append("invalid parameter ");
+        resultReceiver_.append(argv_[optind+1]);
+        resultReceiver_.append(" for bool option\n");
+
+        return OHOS::ERR_INVALID_VALUE;
+    }
+
+    pb[key] = value;
+
+    return OHOS::ERR_OK;
+}
+
+ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi, ParametersBool& pb, ParametersString& ps) {
+    int result = OHOS::ERR_OK;
+    if (std::strcmp(optarg, OPTION_PARAMETERS_INTERGER.c_str()) == 0) {
+        if (!CheckParameters(VALID_KEY_VALUE_PAIR_SIZE)) {
+            resultReceiver_.append("invalid number of parameters for option -pi\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        result = ParseParam(pi);
+        optind += NEXT_OPTION_OFFSET;
+        return result;
+    }
+
+    if (std::strcmp(optarg, OPTION_PARAMETERS_STRING.c_str()) == 0) {
+        if (!CheckParameters(VALID_KEY_VALUE_PAIR_SIZE)) {
+            resultReceiver_.append("invalid number of parameters for option -ps\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        result = ParseParam(ps, true);
+        optind += NEXT_OPTION_OFFSET;
+        return result;
+    }
+
+    if (std::strcmp(optarg, OPTION_PARAMETERS_STRING_NULL.c_str()) == 0) {
+        if (!CheckParameters(VALID_NULL_STRING_KEY_SIZE)) {
+            resultReceiver_.append("invalid number of parameters for option -psn\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        result = ParseParam(ps);
+        optind++;
+        return result;
+    }
+
+    if (std::strcmp(optarg, OPTION_PARAMETERS_BOOL.c_str()) == 0) {
+        if (!CheckParameters(VALID_KEY_VALUE_PAIR_SIZE)) {
+            resultReceiver_.append("invalid number of parameters for option -pb\n");
+            return OHOS::ERR_INVALID_VALUE;
+        }
+        result = ParseParam(pb);
+        optind += NEXT_OPTION_OFFSET;
+        return result;
+    }
+
+    resultReceiver_.append("invlid option: ");
+    resultReceiver_.append(optarg);
+    resultReceiver_.append("\n");
+    return OHOS::ERR_INVALID_VALUE;
+}
+
+void AbilityManagerShellCommand::SetParams(const ParametersInteger& pi, Want& want)
+{
+    for (auto it = pi.begin(); it != pi.end(); it++) {
         want.SetParam(it->first, it->second);
     }
+}
+
+void AbilityManagerShellCommand::SetParams(const ParametersString& ps, Want& want)
+{
+    for (auto it = ps.begin(); it != ps.end(); it++) {
+        want.SetParam(it->first, it->second);
+    }
+}
+
+void AbilityManagerShellCommand::SetParams(const ParametersBool& pb, Want& want)
+{
+    for (auto it = pb.begin(); it != pb.end(); it++) {
+        want.SetParam(it->first, it->second);
+    }
+}
+
+void AddEntities(const std::vector<std::string>& entities, Want& want) {
+    for (auto entity : entities)
+        want.AddEntity(entity);
 }
 
 ErrCode AbilityManagerShellCommand::MakeWantForProcess(Want& want)
@@ -1135,6 +1250,18 @@ ErrCode AbilityManagerShellCommand::RunForceTimeoutForTest()
 }
 #endif
 
+bool AbilityManagerShellCommand::CheckParameters(int target)
+{
+    if (optind + target > argc_) return false;
+    int index = optind;
+    int count = 0;
+    while (index < argc_ && argv_[index][0] != '-') {
+        count++;
+        index++;
+    }
+    return count == target;
+}
+
 ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& windowMode)
 {
     int result = OHOS::ERR_OK;
@@ -1147,9 +1274,13 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
     std::string abilityName = "";
     std::string moduleName;
     std::string perfCmd;
-    std::map<std::string, std::string> parameters;
+    ParametersInteger parametersInteger;
+    ParametersString parametersString;
+    ParametersBool parametersBool;
     std::string uri;
     std::string action;
+    std::vector<std::string> entities;
+    std::string typeVal;
     bool isColdStart = false;
     bool isDebugApp = false;
     bool isContinuation = false;
@@ -1216,6 +1347,26 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                     // 'aa start -b' with no argument
                     // 'aa stop-service -b' with no argument
                     HILOG_INFO("'aa %{public}s -b' with no argument.", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 'e': {
+                    // 'aa start -e' with no argument
+                    HILOG_INFO("'aa %{public}s -e with no argument.", cmd_.c_str());
+
+                    resultReceiver_.append("error: option ");
+                    resultReceiver_.append("requires a value.\n");
+
+                    result = OHOS::ERR_INVALID_VALUE;
+                    break;
+                }
+                case 't': {
+                    // 'aa start -t' with no argument
+                    HILOG_INFO("'aa %{public}s -t with no argument.", cmd_.c_str());
 
                     resultReceiver_.append("error: option ");
                     resultReceiver_.append("requires a value.\n");
@@ -1357,6 +1508,19 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 bundleName = optarg;
                 break;
             }
+            case 'e': {
+                // 'aa start -e xxx'
+
+                // save entity
+                entities.push_back(optarg);
+                break;
+            }
+            case 't': {
+                // 'aa start -t xxx'
+
+                // save type
+                typeVal = optarg;
+            }
             case 's': {
                 // 'aa start -s xxx'
                 // save windowMode
@@ -1386,7 +1550,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 // 'aa start -P xxx'
 
                 // parse option arguments into a key-value map
-                ParseToKeyValuePairs(optarg, parameters);
+                result = ParseParam(parametersInteger, parametersBool, parametersString);
 
                 break;
             }
@@ -1480,14 +1644,26 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             if (isNativeDebug) {
                 want.SetParam("nativeDebug", isNativeDebug);
             }
-            if (!parameters.empty()) {
-                SetParamWithMap(parameters, want);
+            if (!parametersInteger.empty()) {
+                SetParams(parametersInteger, want);
+            }
+            if (!parametersBool.empty()) {
+                SetParams(parametersBool, want);
+            }
+            if(!parametersString.empty()) {
+                SetParams(parametersString, want);
             }
             if (!action.empty()) {
                 want.SetAction(action);
             }
             if (!uri.empty()) {
                 want.SetUri(uri);
+            }
+            if (!entities.empty()) {
+                AddEntities(entities, want);
+            }
+            if (!typeVal.empty()) {
+                want.SetType(typeVal);
             }
         }
     }
