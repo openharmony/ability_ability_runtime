@@ -1522,6 +1522,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
 
                 // save type
                 typeVal = optarg;
+                break;
             }
             case 's': {
                 // 'aa start -s xxx'
