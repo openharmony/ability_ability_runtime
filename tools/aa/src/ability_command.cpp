@@ -864,7 +864,7 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersBool& pb)
     std::string boolString = argv_[optind+1];
     std::transform(boolString.begin(), boolString.end(), boolString.begin(), ::tolower);
     bool value;
-    if (boolString == "true" || boolString == "t"){
+    if (boolString == "true" || boolString == "t") {
         value = true;
     } else if (boolString == "false" || boolString == "f") {
         value = false;
@@ -881,7 +881,8 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersBool& pb)
     return OHOS::ERR_OK;
 }
 
-ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi, ParametersBool& pb, ParametersString& ps) {
+ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi, ParametersBool& pb, ParametersString& ps)
+{
     int result = OHOS::ERR_OK;
     if (std::strcmp(optarg, OPTION_PARAMETERS_INTERGER.c_str()) == 0) {
         if (!CheckParameters(VALID_KEY_VALUE_PAIR_SIZE)) {
@@ -950,7 +951,8 @@ void AbilityManagerShellCommand::SetParams(const ParametersBool& pb, Want& want)
     }
 }
 
-void AddEntities(const std::vector<std::string>& entities, Want& want) {
+void AddEntities(const std::vector<std::string>& entities, Want& want)
+{
     for (auto entity : entities)
         want.AddEntity(entity);
 }
@@ -1650,7 +1652,7 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
             if (!parametersBool.empty()) {
                 SetParams(parametersBool, want);
             }
-            if(!parametersString.empty()) {
+            if (!parametersString.empty()) {
                 SetParams(parametersString, want);
             }
             if (!action.empty()) {
