@@ -886,7 +886,7 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi, Parameters
     int result = OHOS::ERR_OK;
     if (std::strcmp(optarg, OPTION_PARAMETERS_INTERGER.c_str()) == 0) {
         if (!CheckParameters(VALID_KEY_VALUE_PAIR_SIZE)) {
-            resultReceiver_.append("invalid number of parameters for option -pi\n");
+            resultReceiver_.append("invalid number of parameters for option -Pi\n");
             return OHOS::ERR_INVALID_VALUE;
         }
         result = ParseParam(pi);
@@ -896,7 +896,7 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi, Parameters
 
     if (std::strcmp(optarg, OPTION_PARAMETERS_STRING.c_str()) == 0) {
         if (!CheckParameters(VALID_KEY_VALUE_PAIR_SIZE)) {
-            resultReceiver_.append("invalid number of parameters for option -ps\n");
+            resultReceiver_.append("invalid number of parameters for option -Ps\n");
             return OHOS::ERR_INVALID_VALUE;
         }
         result = ParseParam(ps, true);
@@ -906,7 +906,7 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi, Parameters
 
     if (std::strcmp(optarg, OPTION_PARAMETERS_STRING_NULL.c_str()) == 0) {
         if (!CheckParameters(VALID_NULL_STRING_KEY_SIZE)) {
-            resultReceiver_.append("invalid number of parameters for option -psn\n");
+            resultReceiver_.append("invalid number of parameters for option -Psn\n");
             return OHOS::ERR_INVALID_VALUE;
         }
         result = ParseParam(ps);
@@ -916,7 +916,7 @@ ErrCode AbilityManagerShellCommand::ParseParam(ParametersInteger& pi, Parameters
 
     if (std::strcmp(optarg, OPTION_PARAMETERS_BOOL.c_str()) == 0) {
         if (!CheckParameters(VALID_KEY_VALUE_PAIR_SIZE)) {
-            resultReceiver_.append("invalid number of parameters for option -pb\n");
+            resultReceiver_.append("invalid number of parameters for option -Pb\n");
             return OHOS::ERR_INVALID_VALUE;
         }
         result = ParseParam(pb);
