@@ -73,6 +73,8 @@ const std::string HELP_MSG_START =
     "  [-Psn] <key> "
     "  [-A <action-name>] "
     "  [-U <URI>] "
+    "  [-e <entity>] "
+    "  [-t <mime-type>] "
     "  start ability with an element name\n";
 
 const std::string HELP_MSG_STOP_SERVICE =
