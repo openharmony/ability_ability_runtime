@@ -60,7 +60,7 @@ constexpr struct option LONG_OPTIONS[] = {
     {"entity", required_argument, nullptr, 'e'},
     {"type", required_argument, nullptr, 't'},
     {"pi", required_argument, nullptr, OPTION_PARAMETER_INTEGER},
-    {"ps", required_argument, nullptr, OPTION_PARAMETER_STRING}, 
+    {"ps", required_argument, nullptr, OPTION_PARAMETER_STRING},
     {"pb", required_argument, nullptr, OPTION_PARAMETER_BOOL},
     {"psn", required_argument, nullptr, OPTION_PARAMETER_NULL_STRING},
     {nullptr, 0, nullptr, 0},
