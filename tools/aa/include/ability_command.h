@@ -67,10 +67,10 @@ const std::string HELP_MSG_START =
     "options list:\n"
     "  -h, --help                                                   list available commands\n"
     "  [-d <device-id>] -a <ability-name> -b <bundle-name> [-m <module-name>] [-p <perf-cmd>] [-D] [-S] [-N] "
-    "  [-Ps <key> <string-value>] "
-    "  [-Pi <key> <integer-value>] "
-    "  [-Pb <key> <boolean-value>] "
-    "  [-Psn <key>] "
+    "  [--ps <key> <string-value>] "
+    "  [--pi <key> <integer-value>] "
+    "  [--pb <key> <boolean-value>] "
+    "  [--psn <key>] "
     "  [-A <action-name>] "
     "  [-U <URI>] "
     "  [-e <entity>] "
@@ -225,7 +225,6 @@ private:
     ErrCode ParseParam(ParametersInteger& pi);
     ErrCode ParseParam(ParametersString& ps, bool isNull);
     ErrCode ParseParam(ParametersBool& pb);
-    ErrCode ParseParam(ParametersInteger& pi, ParametersBool& pb, ParametersString& ps);
     void SetParams(const ParametersInteger& pi, Want& want);
     void SetParams(const ParametersString& ps, Want& want);
     void SetParams(const ParametersBool& pb, Want& want);
