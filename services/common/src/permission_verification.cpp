@@ -81,16 +81,6 @@ bool PermissionVerification::IsShellCall() const
     return false;
 }
 
-bool PermissionVerification::IsGatewayCall() const
-{
-    if (VerifyCallingPermission(PermissionConstants::PERMISSION_MANAGER_ABILITY_FROM_GATEWAY)) {
-        HILOG_DEBUG("Permission verification succeeded.");
-        return true;
-    }
-    HILOG_DEBUG("Permission verification failed.");
-    return false;
-}
-
 bool PermissionVerification::CheckSpecificSystemAbilityAccessPermission() const
 {
     HILOG_DEBUG("PermissionVerification::CheckSpecifidSystemAbilityAccessToken is called.");
@@ -148,10 +138,6 @@ bool PermissionVerification::VerifyDlpPermission(Want &want) const
 
 int PermissionVerification::VerifyAccountPermission() const
 {
-    if (SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
-        HILOG_DEBUG("Support SA call");
-        return ERR_OK;
-    }
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)) {
         return ERR_OK;
     }
