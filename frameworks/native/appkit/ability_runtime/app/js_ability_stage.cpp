@@ -213,6 +213,34 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
     }
 }
 
+void JsAbilityStage::OnDestroy() const
+{
+    HILOG_DEBUG("called");
+    AbilityStage::OnDestroy();
+
+    if (!jsAbilityStageObj_) {
+        HILOG_WARN("Not found AbilityStage.js");
+        return;
+    }
+
+    HandleScope handleScope(jsRuntime_);
+    auto env = jsRuntime_.GetNapiEnv();
+
+    napi_value obj = jsAbilityStageObj_->GetNapiValue();
+    if (!CheckTypeForNapiValue(env, obj, napi_object)) {
+        HILOG_ERROR("Failed to get AbilityStage object");
+        return;
+    }
+
+    napi_value methodOnCreate = nullptr;
+    napi_get_named_property(env, obj, "onDestroy", &methodOnCreate);
+    if (methodOnCreate == nullptr) {
+        HILOG_ERROR("Failed to get 'onDestroy' from AbilityStage object");
+        return;
+    }
+    napi_call_function(env, obj, methodOnCreate, 0, nullptr, nullptr);
+}
+
 std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want)
 {
     HILOG_DEBUG("called");

@@ -38,6 +38,8 @@ public:
 
     void OnCreate(const AAFwk::Want &want) const override;
 
+    void OnDestroy() const override;
+
     std::string OnAcceptWant(const AAFwk::Want &want) override;
 
     std::string OnNewProcessRequest(const AAFwk::Want &want) override;

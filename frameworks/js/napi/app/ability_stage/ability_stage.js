@@ -16,6 +16,7 @@
 class AbilityStage {
   constructor() { }
   onCreate() { }
+  onDestroy() { }
   onAcceptWant(want) {
     console.log('onAcceptWant, want:' + want.abilityName);
   }
