@@ -271,7 +271,8 @@ HWTEST_F(AaCommandStartModuleTest, Aa_Command_Start_ModuleTest_0700, Function | 
 /**
  * @tc.number: Aa_Command_Start_ModuleTest_0800
  * @tc.name: ExecCommand
- * @tc.desc: Verify the "aa start -d <device-id> -a <ability-name> -b <bundle-name> --psn <key> <integer-value>" command.
+ * @tc.desc: Verify the "aa start -d <device-id> -a <ability-name> -b <bundle-name> \
+ * --psn <key> <integer-value>" command.
  * @tc.type: FUNC
  * @tc.require: AR000GJUN4
  */
