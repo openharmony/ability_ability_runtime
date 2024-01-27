@@ -35,7 +35,8 @@ public:
         return DistributedKv::Status::SUCCESS;
     };
 
-    DistributedKv::Status Get(const DistributedKv::Key &key, const std::string &networkId, DistributedKv::Value &value) override
+    DistributedKv::Status Get(
+        const DistributedKv::Key &key, const std::string &networkId, DistributedKv::Value &value) override
     {
         return DistributedKv::Status::SUCCESS;
     };
