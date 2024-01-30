@@ -19,6 +19,8 @@
 #include <new>
 #include <regex>
 #include <sys/prctl.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "constants.h"
@@ -112,6 +114,8 @@ constexpr int32_t DISTRIBUTE_TIME = 100;
 constexpr int32_t START_HIGH_SENSITIVE = 1;
 constexpr int32_t EXIT_HIGH_SENSITIVE = 2;
 constexpr int32_t UNSPECIFIED_USERID = -2;
+constexpr int32_t TIME_OUT = 120;
+constexpr int32_t DEFAULT_SLEEP_TIME = 100000;
 
 enum class SignalType {
     SIGNAL_JSHEAP_OLD,
@@ -215,7 +219,7 @@ void GetPatchNativeLibPath(const HapModuleInfo &hapInfo, std::string &patchNativ
     std::string appLibPathKey = hapInfo.bundleName + "/" + hapInfo.moduleName;
     std::string patchLibPath = LOCAL_CODE_PATH;
     patchLibPath += (patchLibPath.back() == '/') ? patchNativeLibraryPath : "/" + patchNativeLibraryPath;
-    HILOG_INFO("appLibPathKey: %{public}s, patch lib path: %{private}s", appLibPathKey.c_str(), patchLibPath.c_str());
+    HILOG_DEBUG("appLibPathKey: %{public}s, patch lib path: %{private}s", appLibPathKey.c_str(), patchLibPath.c_str());
     appLibPaths[appLibPathKey].emplace_back(patchLibPath);
 }
 } // namespace
@@ -699,7 +703,7 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     const std::shared_ptr<AAFwk::Want> &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("ability %{public}s, type is %{public}d.", info.name.c_str(), info.type);
+    HILOG_DEBUG("ability %{public}s, type is %{public}d.", info.name.c_str(), info.type);
 
     AAFwk::Want newWant(*want);
     newWant.CloseAllFd();
@@ -1841,7 +1845,7 @@ void MainThread::HandleCleanAbilityLocal(const sptr<IRemoteObject> &token)
         HILOG_ERROR("record->GetAbilityInfo() failed");
         return;
     }
-    HILOG_INFO("ability name: %{public}s", abilityInfo->name.c_str());
+    HILOG_DEBUG("ability name: %{public}s", abilityInfo->name.c_str());
 
     abilityRecordMgr_->RemoveAbilityRecord(token);
     application_->CleanAbilityStage(token, abilityInfo);
@@ -2137,36 +2141,39 @@ void MainThread::HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, v
         return;
     }
     HILOG_INFO("sival_int is %{public}d", siginfo->si_value.sival_int);
+    if (static_cast<SignalType>(siginfo->si_value.sival_int) != SignalType::SIGNAL_FORCE_FULLGC) {
+        HandleDumpHeapPrepare();
+    }
     switch (static_cast<SignalType>(siginfo->si_value.sival_int)) {
         case SignalType::SIGNAL_JSHEAP_OLD: {
             auto heapFunc = std::bind(&MainThread::HandleDumpHeap, false);
-            signalHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP_OLD");
+            mainHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP_OLD");
             break;
         }
         case SignalType::SIGNAL_JSHEAP: {
             auto heapFunc = std::bind(&MainThread::HandleDumpHeap, false);
-            signalHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP");
+            mainHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP");
             break;
         }
         case SignalType::SIGNAL_JSHEAP_PRIV: {
             auto privateHeapFunc = std::bind(&MainThread::HandleDumpHeap, true);
-            signalHandler_->PostTask(privateHeapFunc, "MainThread:SIGNAL_JSHEAP_PRIV");
+            mainHandler_->PostTask(privateHeapFunc, "MainThread:SIGNAL_JSHEAP_PRIV");
             break;
         }
         case SignalType::SIGNAL_NO_TRIGGERID: {
             auto heapFunc = std::bind(&MainThread::HandleDumpHeap, false);
-            signalHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP");
+            mainHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP");
 
             auto noTriggerIdFunc = std::bind(&MainThread::DestroyHeapProfiler);
-            signalHandler_->PostTask(noTriggerIdFunc, "MainThread::SIGNAL_NO_TRIGGERID");
+            mainHandler_->PostTask(noTriggerIdFunc, "MainThread::SIGNAL_NO_TRIGGERID");
             break;
         }
         case SignalType::SIGNAL_NO_TRIGGERID_PRIV: {
             auto privateHeapFunc = std::bind(&MainThread::HandleDumpHeap, true);
-            signalHandler_->PostTask(privateHeapFunc, "MainThread:SIGNAL_JSHEAP_PRIV");
+            mainHandler_->PostTask(privateHeapFunc, "MainThread:SIGNAL_JSHEAP_PRIV");
 
             auto noTriggerIdFunc = std::bind(&MainThread::DestroyHeapProfiler);
-            signalHandler_->PostTask(noTriggerIdFunc, "MainThread::SIGNAL_NO_TRIGGERID_PRIV");
+            mainHandler_->PostTask(noTriggerIdFunc, "MainThread::SIGNAL_NO_TRIGGERID_PRIV");
             break;
         }
         case SignalType::SIGNAL_FORCE_FULLGC: {
@@ -2179,23 +2186,71 @@ void MainThread::HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, v
     }
 }
 
+void MainThread::HandleDumpHeapPrepare()
+{
+    HILOG_DEBUG("HandleDumpHeapPrepare start.");
+    if (mainHandler_ == nullptr) {
+        HILOG_ERROR("HandleDumpHeapPrepare failed, mainHandler is nullptr");
+        return;
+    }
+    auto app = applicationForDump_.lock();
+    auto &runtime = app->GetRuntime();
+    if (app == nullptr || runtime == nullptr) {
+        HILOG_ERROR("HandleDumpHeapPrepare runtime is nullptr");
+        return;
+    }
+    runtime->GetHeapPrepare();
+}
+
 void MainThread::HandleDumpHeap(bool isPrivate)
 {
-    HILOG_DEBUG("Dump heap start.");
+    HILOG_DEBUG("HandleDump Heap start.");
     if (mainHandler_ == nullptr) {
         HILOG_ERROR("HandleDumpHeap failed, mainHandler is nullptr");
         return;
     }
-
-    auto task = [isPrivate] {
-        auto app = applicationForDump_.lock();
-        if (app == nullptr || app->GetRuntime() == nullptr) {
-            HILOG_ERROR("runtime is nullptr.");
+    auto app = applicationForDump_.lock();
+    auto &runtime = app->GetRuntime();
+    if (app == nullptr || runtime == nullptr) {
+        HILOG_ERROR("HandleDumpHeap runtime is nullptr");
+        return;
+    }
+    auto taskFork = [&runtime, &isPrivate] {
+        time_t startTime = time(nullptr);
+        int pid = -1;
+        if ((pid = fork()) < 0) {
+            HILOG_ERROR("HandleDumpHeap Fork error, err:%{public}d", errno);
             return;
         }
-        app->GetRuntime()->DumpHeapSnapshot(isPrivate);
+        if (pid == 0) {
+            runtime->AllowCrossThreadExecution();
+            runtime->DumpHeapSnapshot(isPrivate);
+            HILOG_INFO("HandleDumpHeap successful, now you can check some file");
+            _exit(0);
+        }
+        while (true) {
+            int status = 0;
+            pid_t p = waitpid(pid, &status, 0);
+            if (p < 0) {
+                HILOG_ERROR("HandleDumpHeap waitpid return p=%{public}d, err:%{public}d", p, errno);
+                break;
+            }
+            if (p == pid) {
+                HILOG_ERROR("HandleDumpHeap dump process exited status is %{public}d", status);
+                break;
+            }
+            if (time(nullptr) > startTime + TIME_OUT) {
+                HILOG_ERROR("time out to wait childprocess, killing forkpid %{public}d", pid);
+                kill(pid, SIGKILL);
+                break;
+            }
+            usleep(DEFAULT_SLEEP_TIME);
+        }
     };
-    mainHandler_->PostTask(task, "MainThread:DumpHeap");
+    if (!signalHandler_->PostTask(taskFork, "MainThread::HandleDumpHeap",
+                                  0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+        HILOG_ERROR("HandleDumpHeap postTask false");
+    }
 }
 
 void MainThread::DestroyHeapProfiler()
@@ -2239,7 +2294,7 @@ void MainThread::ForceFullGC()
 void MainThread::Start()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    HILOG_INFO("called");
+    HILOG_DEBUG("called");
 
     if (AAFwk::AppUtils::GetInstance().isMultiProcessModel()) {
         ChildProcessInfo info;
@@ -2686,7 +2741,7 @@ bool MainThread::GetHqfFileAndHapPath(const std::string &bundleName,
             (!hapInfo.hqfInfo.hqfFilePath.empty())) {
             std::string resolvedHapPath(AbilityBase::GetLoadPath(hapInfo.hapPath));
             std::string resolvedHqfFile(AbilityBase::GetLoadPath(hapInfo.hqfInfo.hqfFilePath));
-            HILOG_INFO("bundleName: %{public}s, moduleName: %{public}s, processName: %{private}s, "
+            HILOG_DEBUG("bundleName: %{public}s, moduleName: %{public}s, processName: %{private}s, "
                 "hqf file: %{private}s, hap path: %{private}s.", bundleName.c_str(), hapInfo.moduleName.c_str(),
                 hapInfo.process.c_str(), resolvedHqfFile.c_str(), resolvedHapPath.c_str());
             fileMap.push_back(std::pair<std::string, std::string>(resolvedHqfFile, resolvedHapPath));
@@ -2780,7 +2835,7 @@ void MainThread::SetProcessExtensionType(const std::shared_ptr<AbilityLocalRecor
         HILOG_ERROR("abilityInfo is null");
         return;
     }
-    HILOG_INFO("type = %{public}d",
+    HILOG_DEBUG("type = %{public}d",
         static_cast<int32_t>(abilityRecord->GetAbilityInfo()->extensionAbilityType));
     extensionConfigMgr_->SetProcessExtensionType(
         static_cast<int32_t>(abilityRecord->GetAbilityInfo()->extensionAbilityType));
