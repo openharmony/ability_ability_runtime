@@ -553,8 +553,8 @@ void AbilityManagerClient::RemoveDeathRecipient()
     if (serviceRemote != nullptr && serviceRemote->RemoveDeathRecipient(deathRecipient_)) {
         proxy_ = nullptr;
         deathRecipient_ = nullptr;
+        HILOG_INFO("Remove DeathRecipient success");
     }
-    HILOG_INFO("Remove DeathRecipient success");
 }
 
 __attribute__((destructor)) void DeathRecipientDestructor()
