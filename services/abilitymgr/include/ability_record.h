@@ -201,13 +201,6 @@ enum CollaboratorType {
     OTHERS_TYPE
 };
 
-struct ComponentRequest {
-    sptr<IRemoteObject> callerToken = nullptr;
-    int requestCode = 0;
-    int componentStatus = 0;
-    int requestResult = 0;
-};
-
 struct AbilityRequest {
     Want want;
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1000,6 +993,8 @@ private:
         Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
 
     bool CheckUriPermission(Uri &uri, uint32_t &flag, uint32_t callerTokenId, bool permission, int32_t userId);
+
+    void NotifyMissionBindPid();
 
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;

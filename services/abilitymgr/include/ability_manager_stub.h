@@ -172,8 +172,6 @@ private:
     int SendANRProcessIDInner(MessageParcel &data, MessageParcel &reply);
 
     int SetAbilityControllerInner(MessageParcel &data, MessageParcel &reply);
-    int SetComponentInterceptionInner(MessageParcel &data, MessageParcel &reply);
-    int SendResultToAbilityByTokenInner(MessageParcel &data, MessageParcel &reply);
 
     int StartUserTestInner(MessageParcel &data, MessageParcel &reply);
     int FinishUserTestInner(MessageParcel &data, MessageParcel &reply);
@@ -247,8 +245,6 @@ private:
 
     int32_t RegisterIAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterIAbilityManagerCollaboratorInner(MessageParcel &data, MessageParcel &reply);
-    int32_t MoveMissionToBackgroundInner(MessageParcel &data, MessageParcel &reply);
-    int32_t TerminateMissionInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t RegisterAutoStartupSystemCallbackInner(MessageParcel &data, MessageParcel &reply);
     int32_t UnregisterAutoStartupSystemCallbackInner(MessageParcel &data, MessageParcel &reply);
