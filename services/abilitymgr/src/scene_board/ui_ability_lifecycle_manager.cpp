@@ -802,7 +802,6 @@ int UIAbilityLifecycleManager::CloseUIAbility(const std::shared_ptr<AbilityRecor
         abilityRecord->SaveResultToCallers(-1, &want);
     }
 
-    terminateAbilityList_.push_back(abilityRecord);
     EraseAbilityRecord(abilityRecord);
     if (abilityRecord->GetAbilityState() == AbilityState::INITIAL) {
         if (abilityRecord->GetScheduler() == nullptr) {
