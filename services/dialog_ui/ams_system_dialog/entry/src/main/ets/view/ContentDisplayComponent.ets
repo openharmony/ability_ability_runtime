@@ -48,6 +48,7 @@ export struct ContentDisplayComponent {
     }
 
     onTargetInfoChanged() {
+        this.isChange = true;
         this.getTargetsToDisplay();
     }
 

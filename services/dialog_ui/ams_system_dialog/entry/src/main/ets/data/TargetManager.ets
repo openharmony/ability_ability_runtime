@@ -38,9 +38,13 @@ export namespace TargetManager {
             return availableTargetsWithCallWant.get(callerWant);
         }
         let extensionInfos: Array<bundleManager.ExtensionAbilityInfo> = [];
+        if (!(callerWant?.paramters?.['ability.want.params.uiExtensionTargetType'])){
+            return extensionInfos;
+        }
         try {
             extensionInfos = bundleManager.queryExtensionAbilityInfoSync
-            ("photoEditor", bundleManager.ExtensionAbilityFlag.GET_EXTENSION_ABILITY_INFO_DEFAULT);
+            (callerWant.paramters['ability.want.params.uiExtensionTargetType'] as string,
+                    bundleManager.ExtensionAbilityFlag.GET_EXTENSION_ABILITY_INFO_DEFAULT);
         } catch (e) {
             console.info(TAG, `there are no target uiextension: ${e}`)
         }
@@ -55,10 +59,11 @@ export namespace TargetManager {
     }
 
     function buildUIExtensionTargetAction(callerWant: Want, params: TargetActionBuilderParam): TargetAction {
+        if (callerWant.parameters){
+            callerWant.parameters['ability.want.params.uiExtensionType'] = callerWant.parameters['ability.want.params.uiExtensionTargetType'];
+            callerWant.parameters['ability.want.params.uiExtensionTargetType'] = '';
+        }
         return new TargetAction(TargetType.UI_EXTENSION, (storage?: LocalStorage) => {
-            if (callerWant.parameters) {
-                callerWant.parameters['ability.want.params.uiExtensionType'] = 'photoEditor';
-            }
             return new UIExtensionInfo(params.bundleName, params.abilityName, callerWant.parameters)
         })
     }
