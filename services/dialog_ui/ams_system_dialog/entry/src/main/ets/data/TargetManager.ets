@@ -38,12 +38,12 @@ export namespace TargetManager {
             return availableTargetsWithCallWant.get(callerWant);
         }
         let extensionInfos: Array<bundleManager.ExtensionAbilityInfo> = [];
-        if (!(callerWant?.paramters?.['ability.want.params.uiExtensionTargetType'])){
+        if (!(callerWant?.parameters?.['ability.want.params.uiExtensionTargetType'])){
             return extensionInfos;
         }
         try {
             extensionInfos = bundleManager.queryExtensionAbilityInfoSync
-            (callerWant.paramters['ability.want.params.uiExtensionTargetType'] as string,
+            (callerWant.parameters['ability.want.params.uiExtensionTargetType'] as string,
                     bundleManager.ExtensionAbilityFlag.GET_EXTENSION_ABILITY_INFO_DEFAULT);
         } catch (e) {
             console.info(TAG, `there are no target uiextension: ${e}`)
