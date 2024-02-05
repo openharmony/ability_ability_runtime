@@ -214,26 +214,12 @@ struct PhonePage {
                 this.session.terminateSelf();
                 storage.clear();
             })
-            .onRemoteReady((Proxy) => {
-                const callerWant: Want | undefined = storage?.get(LocalStorageKeyConstants.CALLER_WANT);
-                const uri: string = (callerWant?.parameters??{})['ability.params.stream'] as string ?? '';
-                uriPermissionManager.grantUriPermission(uri, wantConstant.Flags.FLAG_AUTH_READ_URI_PERMISSION,
-                    uiExtension?.bundleName, (result) => {
-                        console.log(TAG, `grantUrlPermission result: ${result}}`);
-                    })
-            })
             .onError((err) => {
                 console.error(TAG, `Start ui extension with err: ${err}`)
                 this.session.terminateSelf();
                 storage.clear();
             })
             .onResult((data) => {
-                if (data.want) {
-                    const callerWant: Want | undefined = storage?.get(LocalStorageKeyConstants.CALLER_WANT);
-                    const bundleName: string = callerWant ? callerWant.parameters ?
-                                                                callerWant.parameters['ohos.aafwk.param.callerBundleName'] as string ?? '' : '' : '';
-                    uriPermissionManager.grantUriPermission(data.want.uri, wantConstant.Flags.FLAG_AUTH_READ_URI_PERMISSION, bundleName)
-                }
                 this.session.terminateSelfWithResult({ resultCode: data.code, want: data.want });
                 storage.clear();
             })

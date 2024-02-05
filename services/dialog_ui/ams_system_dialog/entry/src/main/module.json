@@ -53,7 +53,7 @@
         "type": "service"
       },
       {
-        "name": "SelectorExtensionAbility",
+        "name": "CommonSelectPickerAbility",
         "srcEntrance": "./ets/ServiceExtAbility/SelectorExtensionAbility.ets",
         "description": "SelectorExtensionAbility",
         "icon": "$media:icon",
