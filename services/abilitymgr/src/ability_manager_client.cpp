@@ -79,9 +79,7 @@ AbilityManagerClient::AbilityManagerClient()
 {}
 
 AbilityManagerClient::~AbilityManagerClient()
-{
-    HILOG_INFO("~AbilityManagerClient");
-}
+{}
 
 ErrCode AbilityManagerClient::AttachAbilityThread(
     sptr<IAbilityScheduler> scheduler, sptr<IRemoteObject> token)
@@ -550,13 +548,6 @@ void AbilityManagerClient::RemoveDeathRecipient()
         deathRecipient_ = nullptr;
     }
     HILOG_INFO("Remove DeathRecipient success");
-}
-
-__attribute__((destructor)) void DeathRecipientDestructor()
-{
-    HILOG_INFO("DeathRecipientDestructor");
-    AbilityManagerClient::GetInstance()->RemoveDeathRecipient();
-    HILOG_INFO("DeathRecipientDestructor end");
 }
 
 ErrCode AbilityManagerClient::StopServiceAbility(const Want &want, sptr<IRemoteObject> token)
