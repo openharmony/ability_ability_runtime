@@ -39,7 +39,7 @@ export namespace TargetManager {
         }
         let extensionInfos: Array<bundleManager.ExtensionAbilityInfo> = [];
         if (!(callerWant?.parameters?.['ability.want.params.uiExtensionTargetType'])){
-            return extensionInfos;
+            return [];
         }
         try {
             extensionInfos = bundleManager.queryExtensionAbilityInfoSync
