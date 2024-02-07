@@ -102,6 +102,24 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         }
     }
     if (iter == sessionAbilityMap_.end()) {
+        HILOG_DEBUG("sxn StartUIAbility iter == sessionAbilityMap_.end()");
+        auto abilityInfo = abilityRequest.abilityInfo;
+        HILOG_DEBUG("sxn StartUIAbility abilityInfo.bundleName: %{public}s", abilityInfo.bundleName.c_str());
+        HILOG_DEBUG("sxn StartUIAbility abilityInfo.name: %{public}s", abilityInfo.name.c_str());
+        for (auto [persistentId, record] : sessionAbilityMap_) {
+            auto recordAbilityInfo = record->GetAbilityInfo();
+            HILOG_DEBUG("sxn StartUIAbility recordAbilityInfo.bundleName: %{public}s", recordAbilityInfo.bundleName.c_str());
+            HILOG_DEBUG("sxn StartUIAbility recordAbilityInfo.name: %{public}s", recordAbilityInfo.name.c_str());
+            if (abilityInfo.bundleName == recordAbilityInfo.bundleName && abilityInfo.name == recordAbilityInfo.name){
+                EventInfo eventInfo;
+                eventInfo.userId = abilityRequest.userId;
+                eventInfo.abilityName = abilityInfo.name;
+                eventInfo.bundleName = abilityInfo.bundleName;
+                eventInfo.moduleName = abilityInfo.moduleName;
+                EventReport::SendAbilityEvent(EventName::START_STANDARD_ABILITYS, HiSysEventType::BEHAVIOR, eventInfo);
+            }
+        }
+        
         sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     }
 

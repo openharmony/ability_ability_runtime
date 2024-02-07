@@ -320,3 +320,10 @@ RESTART_PROCESS_BY_SAME_APP:
   CALLER_PROCESS_NAME: {type: STRING, desc: caller process name}
   PROCESS_NAME: {type: STRING, desc: process name}
   BUNDLE_NAME: {type: STRING, desc: bundle name}
+
+START_STANDARD_ABILITYS:
+  __BASE: {type: BEHAVIOR, level: MINOR, tag: PowerStats, desc: start more than one standard ability}
+  USER_ID: {type: INT32, desc: userId}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
+  MODULE_NAME: {type: STRING, desc: module name}
+  ABILITY_NAME: {type: STRING, desc: ability name}
