@@ -94,6 +94,7 @@ enum class EventName {
     FA_SHOW_ON_LOCK,
     START_PRIVATE_ABILITY,
     RESTART_PROCESS_BY_SAME_APP,
+    START_STANDARD_ABILITYS
 };
 
 class EventReport {
