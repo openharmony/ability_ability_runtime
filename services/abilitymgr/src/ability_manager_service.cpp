@@ -1670,11 +1670,23 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
 
     if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
         HILOG_DEBUG("afterCheckExecuter_ called.");
-        result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE : afterCheckExecuter_->DoProcess(
-            abilityRequest.want, requestCode, GetUserId(), true, sessionInfo->callerToken);
-        if (result != ERR_OK) {
-            HILOG_ERROR("afterCheckExecuter_ is nullptr or DoProcess return error.");
+        Want newWant = abilityRequest.want;
+        result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
+            afterCheckExecuter_->DoProcess(newWant, requestCode, GetUserId(), true, sessionInfo->callerToken);
+        bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
+        newWant.RemoveParam("queryWantFromErms");
+        if (result != ERR_OK && isReplaceWantExist == false) {
+            HILOG_ERROR("DoProcess failed or replaceWant not exist");
             return result;
+        }
+        if (result != ERR_OK && isReplaceWantExist) {
+            auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
+            int ret = systemUIExtension->CreateModalUIExtension(newWant);
+            if (!ret) {
+                HILOG_ERROR("CreateModalUIExtension failed");
+                return INNER_ERR;
+            }
+            return ERR_ECOLOGICAL_CONTROL_STATUS;
         }
     }
 
