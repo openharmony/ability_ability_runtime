@@ -1675,11 +1675,11 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
             afterCheckExecuter_->DoProcess(newWant, requestCode, GetUserId(), true, sessionInfo->callerToken);
         bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
         newWant.RemoveParam("queryWantFromErms");
-        if (result != ERR_OK && isReplaceWantExist == false) {
-            HILOG_ERROR("DoProcess failed or replaceWant not exist");
-            return result;
-        }
-        if (result != ERR_OK && isReplaceWantExist) {
+        if (result != ERR_OK) {
+            if (isReplaceWantExist == false) {
+                HILOG_ERROR("DoProcess failed or replaceWant not exist");
+                return result;
+            }
             auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
             return systemUIExtension->CreateModalUIExtension(newWant) ?
                 ERR_ECOLOGICAL_CONTROL_STATUS : INNER_ERR;
