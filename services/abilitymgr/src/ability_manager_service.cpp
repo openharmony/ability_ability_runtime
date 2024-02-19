@@ -1681,12 +1681,8 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
         }
         if (result != ERR_OK && isReplaceWantExist) {
             auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
-            bool ret = systemUIExtension->CreateModalUIExtension(newWant);
-            if (!ret) {
-                HILOG_ERROR("CreateModalUIExtension failed");
-                return INNER_ERR;
-            }
-            return ERR_ECOLOGICAL_CONTROL_STATUS;
+            return systemUIExtension->CreateModalUIExtension(newWant) ?
+                ERR_ECOLOGICAL_CONTROL_STATUS : INNER_ERR;
         }
     }
 
