@@ -998,6 +998,8 @@ private:
 
     void NotifyMissionBindPid();
 
+    void DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const;
+
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
     void SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo, sptr<AbilityTransitionInfo> &info) const;
