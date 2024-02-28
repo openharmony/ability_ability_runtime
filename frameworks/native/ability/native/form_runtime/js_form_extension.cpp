@@ -262,7 +262,7 @@ void JsFormExtension::OnUpdate(const int64_t formId, const std::map<std::string,
         napi_set_named_property(env, nativeObj, (item->first).c_str(), CreateJsValue(env, item->second));
     }
     napi_value argv[] = {napiFormId, nativeObj};
-    CallObjectMethod("onUpdateForm", "onUpdate", argv, 2);
+    CallObjectMethod("onUpdateForm", "onUpdate", argv, ARGC_TWO);
 }
 
 void JsFormExtension::OnCastToNormal(const int64_t formId)
