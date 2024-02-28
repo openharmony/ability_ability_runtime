@@ -1648,7 +1648,7 @@ bool Ability::OnShare(int64_t formId, AAFwk::WantParams &wantParams)
 void Ability::OnDelete(const int64_t formId)
 {}
 
-void Ability::OnUpdate(const int64_t formId)
+void Ability::OnUpdate(const int64_t formId, const std::map<std::string, std::string>& formParamsMap)
 {}
 
 void Ability::OnCastTemptoNormal(const int64_t formId)

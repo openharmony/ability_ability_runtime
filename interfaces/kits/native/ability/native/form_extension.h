@@ -108,7 +108,7 @@ public:
      * @param formId Indicates the ID of the form to update.
      * @return none.
      */
-    virtual void OnUpdate(const int64_t formId);
+    virtual void OnUpdate(const int64_t formId, const std::map<std::string, std::string>& formParamsMap);
 
     /**
      * @brief Called when the form provider is notified that a temporary form is successfully converted to
