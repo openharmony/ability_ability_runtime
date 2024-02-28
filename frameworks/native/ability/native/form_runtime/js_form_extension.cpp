@@ -36,6 +36,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 using namespace OHOS::AppExecFwk;
 const int ON_EVENT_PARAMS_SIZE = 2;
+const int ARGC_TWO = 2;
 
 napi_value AttachFormExtensionContext(napi_env env, void* value, void*)
 {
