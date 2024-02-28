@@ -2338,7 +2338,8 @@ HWTEST_F(AbilityBaseTest, AbilityFormFunction_0100, TestSize.Level1)
     ASSERT_NE(ability, nullptr);
 
     int64_t formId = 0;
-    ability->OnUpdate(formId);
+    std::map<std::string, std::string> formParamsMap;
+    ability->OnUpdate(formId, formParamsMap);
 
     Want want;
     auto ret = ability->OnAcquireFormState(want);
