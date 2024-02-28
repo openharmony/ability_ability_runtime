@@ -80,7 +80,7 @@ void FormExtension::OnEvent(const int64_t formId, const std::string& message)
     HILOG_INFO("call");
 }
 
-void FormExtension::OnUpdate(const int64_t formId)
+void FormExtension::OnUpdate(const int64_t formId, const std::map<std::string, std::string>& formParamsMap)
 {
     HILOG_DEBUG("call");
 }
