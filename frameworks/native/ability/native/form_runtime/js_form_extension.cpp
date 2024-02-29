@@ -249,7 +249,7 @@ void JsFormExtension::OnEvent(const int64_t formId, const std::string& message)
 void JsFormExtension::OnUpdate(const int64_t formId, const AAFwk::WantParams &wantParams)
 {
     HILOG_INFO("OnUpdate, formId: %{public}" PRId64 ".", formId);
-    FormExtension::OnUpdate(formId, formParamsMap);
+    FormExtension::OnUpdate(formId, wantParams);
 
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
@@ -258,7 +258,7 @@ void JsFormExtension::OnUpdate(const int64_t formId, const AAFwk::WantParams &wa
     napi_create_string_utf8(env, std::to_string(formId).c_str(),
         NAPI_AUTO_LENGTH, &napiFormId);
     // wrap wantParams
-    napi_value nativeObj WrapWantParams(env, wantParams);
+    napi_value nativeObj = WrapWantParams(env, wantParams);
     napi_value argv[] = {napiFormId, nativeObj};
     CallObjectMethod("onUpdateForm", "onUpdate", argv, ARGC_TWO);
 }
