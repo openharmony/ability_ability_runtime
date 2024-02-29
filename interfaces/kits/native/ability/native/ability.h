@@ -1051,7 +1051,7 @@ public:
      * @param formId Indicates the ID of the form to update.
      * @return none.
      */
-    virtual void OnUpdate(const int64_t formId, const std::map<std::string, std::string>& formParamsMap);
+    virtual void OnUpdate(const int64_t formId, const AAFwk::WantParams &wantParams);
 
     /**
      * @brief Called when the form provider receives form events from the fms.
