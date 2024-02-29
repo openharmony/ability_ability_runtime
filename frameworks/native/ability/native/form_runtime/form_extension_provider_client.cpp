@@ -228,13 +228,7 @@ void FormExtensionProviderClient::NotifyFormExtensionUpdate(const int64_t formId
         HILOG_ERROR("Owner is nullptr.");
         errorCode = ERR_APPEXECFWK_FORM_NO_SUCH_ABILITY;
     } else {
-        std::map<std::string, std::string> formParamsMap;
-        if (want.HasParameter(Constants::PARAM_HOST_BG_INVERSE_COLOR_KEY)) {
-            std::string reverseColor = want.GetStringParam(Constants::PARAM_HOST_BG_INVERSE_COLOR_KEY);
-            formParamsMap.insert(std::make_pair(Constants::PARAM_HOST_BG_INVERSE_COLOR_KEY, reverseColor));
-            HILOG_INFO("find reverseColor: %{public}s.", reverseColor.c_str());
-        }
-        ownerFormExtension->OnUpdate(formId, formParamsMap);
+        ownerFormExtension->OnUpdate(formId, want.GetParams());
     }
 
     if (want.HasParameter(Constants::FORM_CONNECT_ID)) {
