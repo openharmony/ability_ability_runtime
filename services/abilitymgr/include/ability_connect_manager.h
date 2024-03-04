@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -244,6 +244,8 @@ public:
         const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
 
     bool IsUIExtensionFocused(uint32_t uiExtensionTokenId, const sptr<IRemoteObject>& focusToken);
+
+    sptr<IRemoteObject> GetUIExtensionSourceToken(const sptr<IRemoteObject> &token);
 
     bool IsWindowExtensionFocused(uint32_t extensionTokenId, const sptr<IRemoteObject>& focusToken);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -378,6 +378,12 @@ enum class AbilityManagerInterfaceCode {
 
     // get root host info of uiextesnion
     GET_UI_EXTENSION_ROOT_HOST_INFO = 1057,
+
+    // ipc id for start ability for result as caller
+    START_ABILITY_FOR_RESULT_AS_CALLER = 1060,
+
+    // ipc id for start ability for result as caller
+    START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS = 1061,
 
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
