@@ -692,7 +692,7 @@ int32_t AbilityManagerStub::UpgradeAppInner(MessageParcel &data, MessageParcel &
 
 int AbilityManagerStub::StartAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
@@ -701,13 +701,12 @@ int AbilityManagerStub::StartAbilityInner(MessageParcel &data, MessageParcel &re
     int requestCode = data.ReadInt32();
     int32_t result = StartAbility(*want, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
 int AbilityManagerStub::StartAbilityInnerSpecifyTokenId(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr.");
         return ERR_INVALID_VALUE;
@@ -722,7 +721,6 @@ int AbilityManagerStub::StartAbilityInnerSpecifyTokenId(MessageParcel &data, Mes
     int requestCode = data.ReadInt32();
     int32_t result = StartAbilityWithSpecifyTokenId(*want, callerToken, specifyTokenId, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
@@ -797,7 +795,7 @@ int AbilityManagerStub::StartAbilityByUIContentSessionForOptionsInner(MessagePar
 
 int AbilityManagerStub::StartExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
@@ -811,20 +809,18 @@ int AbilityManagerStub::StartExtensionAbilityInner(MessageParcel &data, MessageP
     int32_t result = StartExtensionAbility(*want, callerToken, userId,
         static_cast<AppExecFwk::ExtensionAbilityType>(extensionType));
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
 int AbilityManagerStub::RequestModalUIExtensionInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
     }
     int32_t result = RequestModalUIExtension(*want);
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
@@ -844,7 +840,7 @@ int AbilityManagerStub::StartUIExtensionAbilityInner(MessageParcel &data, Messag
 
 int AbilityManagerStub::StopExtensionAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    Want* want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr.");
         return ERR_INVALID_VALUE;
@@ -858,13 +854,12 @@ int AbilityManagerStub::StopExtensionAbilityInner(MessageParcel& data, MessagePa
     int32_t result =
         StopExtensionAbility(*want, callerToken, userId, static_cast<AppExecFwk::ExtensionAbilityType>(extensionType));
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
 int AbilityManagerStub::StartAbilityAddCallerInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr.");
         return ERR_INVALID_VALUE;
@@ -879,13 +874,12 @@ int AbilityManagerStub::StartAbilityAddCallerInner(MessageParcel &data, MessageP
     int requestCode = data.ReadInt32();
     int32_t result = StartAbility(*want, callerToken, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
 int AbilityManagerStub::StartAbilityAsCallerByTokenInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr!");
         return ERR_INVALID_VALUE;
@@ -905,13 +899,12 @@ int AbilityManagerStub::StartAbilityAsCallerByTokenInner(MessageParcel &data, Me
     int32_t result = StartAbilityAsCaller(*want, callerToken, asCallerSourceToken, userId, requestCode,
         isSendDialogResult);
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
 int AbilityManagerStub::StartAbilityAsCallerForOptionInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
@@ -919,7 +912,6 @@ int AbilityManagerStub::StartAbilityAsCallerForOptionInner(MessageParcel &data, 
     StartOptions *startOptions = data.ReadParcelable<StartOptions>();
     if (startOptions == nullptr) {
         HILOG_ERROR("startOptions is nullptr");
-        delete want;
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> callerToken = nullptr;
@@ -934,14 +926,13 @@ int AbilityManagerStub::StartAbilityAsCallerForOptionInner(MessageParcel &data, 
     int requestCode = data.ReadInt32();
     int32_t result = StartAbilityAsCaller(*want, *startOptions, callerToken, asCallerSourceToken, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
     delete startOptions;
     return NO_ERROR;
 }
 
 int AbilityManagerStub::ConnectAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr.");
         return ERR_INVALID_VALUE;
@@ -957,15 +948,12 @@ int AbilityManagerStub::ConnectAbilityInner(MessageParcel &data, MessageParcel &
     int32_t userId = data.ReadInt32();
     int32_t result = ConnectAbilityCommon(*want, callback, token, AppExecFwk::ExtensionAbilityType::SERVICE, userId);
     reply.WriteInt32(result);
-    if (want != nullptr) {
-        delete want;
-    }
     return NO_ERROR;
 }
 
 int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("%{public}s, want is nullptr!", __func__);
         return ERR_INVALID_VALUE;
@@ -983,15 +971,12 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     bool isQueryExtensionOnly = data.ReadBool();
     int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly);
     reply.WriteInt32(result);
-    if (want != nullptr) {
-        delete want;
-    }
     return NO_ERROR;
 }
 
 int AbilityManagerStub::ConnectUIExtensionAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("%{public}s, want is nullptr", __func__);
         return ERR_INVALID_VALUE;
@@ -1017,9 +1002,6 @@ int AbilityManagerStub::ConnectUIExtensionAbilityInner(MessageParcel &data, Mess
     }
 
     reply.WriteInt32(result);
-    if (want != nullptr) {
-        delete want;
-    }
     return NO_ERROR;
 }
 
@@ -1034,7 +1016,7 @@ int AbilityManagerStub::DisconnectAbilityInner(MessageParcel &data, MessageParce
 
 int AbilityManagerStub::StopServiceAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
@@ -1046,7 +1028,6 @@ int AbilityManagerStub::StopServiceAbilityInner(MessageParcel &data, MessageParc
     }
     int32_t result = StopServiceAbility(*want, userId, token);
     reply.WriteInt32(result);
-    delete want;
     return NO_ERROR;
 }
 
@@ -1090,7 +1071,7 @@ int AbilityManagerStub::DumpStateInner(MessageParcel &data, MessageParcel &reply
 
 int AbilityManagerStub::StartAbilityForSettingsInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
@@ -1098,7 +1079,6 @@ int AbilityManagerStub::StartAbilityForSettingsInner(MessageParcel &data, Messag
     AbilityStartSetting *abilityStartSetting = data.ReadParcelable<AbilityStartSetting>();
     if (abilityStartSetting == nullptr) {
         HILOG_ERROR("abilityStartSetting is nullptr");
-        delete want;
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> callerToken = nullptr;
@@ -1109,14 +1089,13 @@ int AbilityManagerStub::StartAbilityForSettingsInner(MessageParcel &data, Messag
     int requestCode = data.ReadInt32();
     int32_t result = StartAbility(*want, *abilityStartSetting, callerToken, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
     delete abilityStartSetting;
     return NO_ERROR;
 }
 
 int AbilityManagerStub::StartAbilityForOptionsInner(MessageParcel &data, MessageParcel &reply)
 {
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr.");
         return ERR_INVALID_VALUE;
@@ -1124,7 +1103,6 @@ int AbilityManagerStub::StartAbilityForOptionsInner(MessageParcel &data, Message
     StartOptions *startOptions = data.ReadParcelable<StartOptions>();
     if (startOptions == nullptr) {
         HILOG_ERROR("startOptions is nullptr.");
-        delete want;
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> callerToken = nullptr;
@@ -1135,7 +1113,6 @@ int AbilityManagerStub::StartAbilityForOptionsInner(MessageParcel &data, Message
     int requestCode = data.ReadInt32();
     int32_t result = StartAbility(*want, *startOptions, callerToken, userId, requestCode);
     reply.WriteInt32(result);
-    delete want;
     delete startOptions;
     return NO_ERROR;
 }
@@ -1637,7 +1614,7 @@ int AbilityManagerStub::MoveMissionsToBackgroundInner(MessageParcel &data, Messa
 int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParcel &reply)
 {
     HILOG_DEBUG("AbilityManagerStub::StartAbilityByCallInner begin.");
-    Want *want = data.ReadParcelable<Want>();
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_INVALID_VALUE;
@@ -1655,7 +1632,6 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     HILOG_DEBUG("resolve call ability ret = %d", result);
 
     reply.WriteInt32(result);
-    delete want;
 
     HILOG_DEBUG("AbilityManagerStub::StartAbilityByCallInner end.");
 
