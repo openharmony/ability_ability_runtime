@@ -16,14 +16,15 @@
 #ifndef ABILITY_ABILITY_RUNTIME_NATIVE_RUNTIME_IMPL_H
 #define ABILITY_ABILITY_RUNTIME_NATIVE_RUNTIME_IMPL_H
 
-#include "js_runtime.h"
-
 #include <mutex>
 #include <thread>
 #include <unordered_map>
 #include <unordered_set>
 
-#include "native_err_code.h"
+#include "js_environment.h"
+#include "native_engine/native_engine.h"
+#include "runtime.h"
+
 using Options = OHOS::AbilityRuntime::Runtime::Options;
 namespace OHOS {
 namespace AbilityRuntime {
@@ -32,14 +33,14 @@ public:
     NativeRuntimeImpl(const NativeRuntimeImpl&) = delete;
     NativeRuntimeImpl& operator=(const NativeRuntimeImpl&) = delete;
     static NativeRuntimeImpl& GetNativeRuntimeImpl();
-    int32_t CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
-    int32_t RemoveJsEnv(napi_env env);
-    int32_t Init(const Options& options, napi_env env);
+    napi_status CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
+    napi_status RemoveJsEnv(napi_env env);
+    napi_status Init(const Options& options, napi_env env);
     
 private:
     NativeRuntimeImpl();
     ~NativeRuntimeImpl();
-    int32_t AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv);
+    napi_status AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv);
     panda::ecmascript::EcmaVM* GetEcmaVm(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv) const;
     std::shared_ptr<JsEnv::JsEnvironment> GetJsEnv(napi_env env);
     void LoadAotFile(const Options& options, const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv);
@@ -57,6 +58,6 @@ private:
     bool preloaded_ = false;
     std::mutex envMutex_;
 };
-}
-}
+} // namespace AbilityRuntime
+} // namespace OHOS
 #endif // ABILITY_ABILITY_RUNTIME_NATIVE_RUNTIME_IMPL_H

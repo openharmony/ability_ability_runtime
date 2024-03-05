@@ -47,7 +47,9 @@
 #include "module_checker_delegate.h"
 #include "napi/native_api.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
+#include "native_engine/native_create_env.h"
 #include "native_engine/native_engine.h"
+#include "native_runtime_impl.h"
 #include "ohos_js_env_logger.h"
 #include "ohos_js_environment_impl.h"
 #include "parameters.h"
@@ -143,6 +145,47 @@ int32_t PrintVmLog(int32_t, int32_t, const char*, const char*, const char* messa
     HILOG_INFO("ArkLog: %{public}s", message);
     return 0;
 }
+
+napi_status CreateNapiEnv(napi_env *env)
+{
+    HILOG_DEBUG("Called");
+    if (env == nullptr) {
+        HILOG_ERROR("Invalid arg");
+        return napi_status::napi_invalid_arg;
+    }
+    auto options = JsRuntime::GetChildOptions();
+    if (options == nullptr) {
+        HILOG_ERROR("options is null, it maybe application startup failed!");
+        return napi_status::napi_generic_failure;
+    }
+    std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
+    auto errCode = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(*options, jsEnv);
+    if (errCode != napi_status::napi_ok) {
+        HILOG_ERROR("CreateJsEnv failed");
+        return errCode;
+    }
+    *env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
+    if (env == nullptr) {
+        HILOG_ERROR("CreateJsEnv failed");
+        return napi_status::napi_generic_failure;
+    }
+    return NativeRuntimeImpl::GetNativeRuntimeImpl().Init(*options, *env);
+}
+
+napi_status DestroyNapiEnv(napi_env *env)
+{
+    HILOG_DEBUG("Called");
+    if (env == nullptr) {
+        HILOG_ERROR("Invalid arg");
+        return napi_status::napi_invalid_arg;
+    }
+    auto errCode = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(*env);
+    if (errCode == napi_status::napi_ok) {
+        *env = nullptr;
+    }
+    return errCode;
+}
+
 } // namespace
 
 std::atomic<bool> JsRuntime::hasInstance(false);
@@ -605,6 +648,8 @@ bool JsRuntime::Initialize(const Options& options)
             HILOG_ERROR("Create js environment failed.");
             return false;
         }
+        NativeCreateEnv::RegCreateNapiEnvCallback(CreateNapiEnv);
+        NativeCreateEnv::RegDestroyNapiEnvCallback(DestroyNapiEnv);
     } else {
         jsEnv_->StartMonitorJSHeapUsage();
     }

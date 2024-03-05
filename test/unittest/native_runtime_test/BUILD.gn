@@ -19,19 +19,13 @@ module_output_path = "ability_runtime/native_runtime"
 
 ohos_unittest("native_runtime_test") {
   module_out_path = module_output_path
-  include_dirs = [
-    "${ability_runtime_path}/services/common/include",
-    "${ability_runtime_path}/interfaces/ndk/ability_runtime/include",
-  ]
+  include_dirs = [ "${ability_runtime_innerkits_path}/runtime/include" ]
 
-  sources = [
-    "native_runtime_test.cpp",
-  ]
-
+  sources = [ "native_runtime_test.cpp" ]
 
   deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
     "${ability_runtime_path}/js_environment/frameworks/js_environment:js_environment",
-    "${ability_runtime_path}/interfaces/ndk/ability_runtime:runtime_ndk",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]

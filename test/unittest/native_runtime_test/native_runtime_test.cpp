@@ -42,54 +42,69 @@ void NativeRuntimeImplTest::SetUp() {}
 
 void NativeRuntimeImplTest::TearDown() {}
 
+/**
+ * @tc.name: NativeRuntimeImplTest_001
+ * @tc.desc: basic function test.
+ * @tc.type: FUNC
+ */
 HWTEST_F(NativeRuntimeImplTest, NativeRuntimeImplTest_001, TestSize.Level1)
 {
     HILOG_INFO("NativeRuntimeImplTest_001 start");
     Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
-    EXPECT_EQ(err, NATIVE_RUNTIME_ERR_OK);
+    EXPECT_EQ(err, napi_status::napi_ok);
 
     err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
-    EXPECT_EQ(err, NATIVE_RUNTIME_ERR_OK);
+    EXPECT_EQ(err, napi_status::napi_ok);
     HILOG_INFO("NativeRuntimeImplTest_001 end");
 }
 
+/**
+ * @tc.name: NativeRuntimeImplTest_002
+ * @tc.desc: basic function test.
+ * @tc.type: FUNC
+ */
 HWTEST_F(NativeRuntimeImplTest, NativeRuntimeImplTest_002, TestSize.Level1)
 {
     HILOG_INFO("NativeRuntimeImplTest_002 start");
     Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
-    EXPECT_EQ(err, NATIVE_RUNTIME_ERR_OK);
+    EXPECT_EQ(err, napi_status::napi_ok);
 
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv2 = nullptr;
     err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv2);
-    EXPECT_EQ(err, NATIVE_RUNTIME_THREAD_ONLY_ONE_RUNENV);
+    EXPECT_EQ(err, napi_status::napi_create_ark_runtime_only_one_env_per_thread);
 
     err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()));
-    EXPECT_EQ(err, NATIVE_RUNTIME_ERR_OK);
+    EXPECT_EQ(err, napi_status::napi_ok);
 
     err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(reinterpret_cast<napi_env>(jsEnv2->GetNativeEngine()));
-    EXPECT_EQ(err, NATIVE_RUNTIME_DESTROY_FAILED);
+    EXPECT_EQ(err, napi_status::napi_destroy_ark_runtime_env_not_exist);
     HILOG_INFO("NativeRuntimeImplTest_002 end");
 }
 
+/**
+ * @tc.name: NativeRuntimeImplTest_003
+ * @tc.desc: basic function test.
+ * @tc.type: FUNC
+ */
 HWTEST_F(NativeRuntimeImplTest, NativeRuntimeImplTest_003, TestSize.Level1)
 {
     HILOG_INFO("NativeRuntimeImplTest_003 start");
     Options options;
     std::shared_ptr<OHOS::JsEnv::JsEnvironment> jsEnv = nullptr;
     auto err = NativeRuntimeImpl::GetNativeRuntimeImpl().CreateJsEnv(options, jsEnv);
-    EXPECT_EQ(err, NATIVE_RUNTIME_ERR_OK);
+    EXPECT_EQ(err, napi_status::napi_ok);
 
     napi_env env = reinterpret_cast<napi_env>(jsEnv->GetNativeEngine());
     err = NativeRuntimeImpl::GetNativeRuntimeImpl().Init(options, env);
-    EXPECT_EQ(err, NATIVE_RUNTIME_ERR_OK);
+    EXPECT_EQ(err, napi_status::napi_ok);
 
     err = NativeRuntimeImpl::GetNativeRuntimeImpl().RemoveJsEnv(env);
-    EXPECT_EQ(err, NATIVE_RUNTIME_ERR_OK);
+    EXPECT_EQ(err, napi_status::napi_ok);
     HILOG_INFO("NativeRuntimeImplTest_003 end");
 }
-}  // namespace AAFwk
+}  // namespace AbilityRuntime
 }  // namespace OHOS
