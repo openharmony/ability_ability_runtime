@@ -15,6 +15,8 @@
 
 #include "native_runtime_impl.h"
 
+#include <regex>
+
 #include "bundle_mgr_interface.h"
 #include "hilog_wrapper.h"
 #include "iservice_registry.h"
@@ -61,7 +63,7 @@ NativeRuntimeImpl& NativeRuntimeImpl::GetNativeRuntimeImpl()
     return nativeRuntimeImpl;
 }
 
-int32_t NativeRuntimeImpl::CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
+napi_status NativeRuntimeImpl::CreateJsEnv(const Options& options, std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
 {
     HILOG_DEBUG("called");
     panda::RuntimeOption pandaOption;
@@ -95,26 +97,27 @@ int32_t NativeRuntimeImpl::CreateJsEnv(const Options& options, std::shared_ptr<J
     OHOSJsEnvLogger::RegisterJsEnvLogger();
     // options eventRunner is nullptr
     jsEnv = std::make_shared<JsEnv::JsEnvironment>(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
-    if (jsEnv == nullptr || !jsEnv->Initialize(pandaOption, static_cast<void*>(this))) {
+    if (jsEnv == nullptr || !jsEnv->Initialize(pandaOption, static_cast<void*>(this))
+        || jsEnv->GetNativeEngine() == nullptr) {
         HILOG_ERROR("Initialize js environment failed.");
-        return NATIVE_RUNTIME_INNER_ERROR;
+        return napi_status::napi_ok;
     }
-
+    jsEnv->GetNativeEngine()->MarkNativeThread();
     return AddEnv(reinterpret_cast<napi_env>(jsEnv->GetNativeEngine()), jsEnv);
 }
 
-int32_t NativeRuntimeImpl::Init(const Options& options, napi_env env)
+napi_status NativeRuntimeImpl::Init(const Options& options, napi_env env)
 {
     auto jsEnv = GetJsEnv(env);
     if (jsEnv == nullptr) {
         HILOG_ERROR("jsEnv is nullptr.");
-        return NATIVE_RUNTIME_INNER_ERROR;
+        return napi_status::napi_generic_failure;
     }
 
     auto vm = GetEcmaVm(jsEnv);
     if (!vm) {
         HILOG_ERROR("vm is nullptr.");
-        return NATIVE_RUNTIME_INNER_ERROR;
+        return napi_status::napi_generic_failure;
     }
 
     bool isModular = false;
@@ -151,37 +154,37 @@ int32_t NativeRuntimeImpl::Init(const Options& options, napi_env env)
 
         if (!InitLoop(jsEnv)) {
             HILOG_ERROR("Initialize loop failed.");
-            return NATIVE_RUNTIME_INNER_ERROR;
+            return napi_status::napi_generic_failure;
         }
     }
 
     preloaded_ = options.preload;
-    return NATIVE_RUNTIME_ERR_OK;
+    return napi_status::napi_ok;
 }
 
-int32_t NativeRuntimeImpl::AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv)
+napi_status NativeRuntimeImpl::AddEnv(napi_env env, std::shared_ptr<JsEnv::JsEnvironment> jsEnv)
 {
     std::lock_guard<std::mutex> lock(envMutex_);
     pid_t threadId = gettid();
     if (threadIds_.find(threadId) != threadIds_.end()) {
         HILOG_ERROR("already created!");
-        return NATIVE_RUNTIME_THREAD_ONLY_ONE_RUNENV;
+        return napi_status::napi_create_ark_runtime_only_one_env_per_thread;
     }
     if (envMap_.size() >= MAX_ENV_COUNT) {
         HILOG_ERROR("the maximum number of runtime environments that can be created is 16!");
-        return NATIVE_RUNTIME_THREAD_COUNT_OVERLOAD;
+        return napi_status::napi_create_ark_runtime_too_many_envs;
     }
     threadIds_.insert(threadId);
     HILOG_DEBUG("add threadId %{public}zu", threadId);
     auto it = envMap_.find(env);
     if (it == envMap_.end()) {
         envMap_[env] = jsEnv;
-        return NATIVE_RUNTIME_ERR_OK;
+        return napi_status::napi_ok;
     }
-    return NATIVE_RUNTIME_INNER_ERROR;
+    return napi_status::napi_generic_failure;
 }
 
-int32_t NativeRuntimeImpl::RemoveJsEnv(napi_env env)
+napi_status NativeRuntimeImpl::RemoveJsEnv(napi_env env)
 {
     std::lock_guard<std::mutex> lock(envMutex_);
     pid_t threadId = gettid();
@@ -192,9 +195,9 @@ int32_t NativeRuntimeImpl::RemoveJsEnv(napi_env env)
         it->second.reset();
         it->second = nullptr;
         envMap_.erase(env);
-        return NATIVE_RUNTIME_ERR_OK;
+        return napi_status::napi_ok;
     }
-    return NATIVE_RUNTIME_DESTROY_FAILED;
+    return napi_status::napi_destroy_ark_runtime_env_not_exist;
 }
 
 panda::ecmascript::EcmaVM* NativeRuntimeImpl::GetEcmaVm(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv) const
@@ -248,8 +251,6 @@ void NativeRuntimeImpl::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOper
         return;
     }
     jsEnv->InitSourceMap(operatorObj);
-    JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
-    JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetHapPathList);
 }
 
 void NativeRuntimeImpl::InitTimerModule(const std::shared_ptr<JsEnv::JsEnvironment>& jsEnv)
@@ -334,5 +335,5 @@ void NativeRuntimeImpl::InitWorkerModule(const Options& options, const std::shar
     }
     jsEnv->InitWorkerModule(workerInfo);
 }
-}
-}
+} // namespace AbilityRuntime
+} // namespace OHOS
