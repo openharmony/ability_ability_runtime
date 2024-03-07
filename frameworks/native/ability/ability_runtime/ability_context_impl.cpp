@@ -492,6 +492,16 @@ ErrCode AbilityContextImpl::MoveAbilityToBackground()
     return err;
 }
 
+ErrCode AbilityContextImpl::MoveUIAbilityToBackground()
+{
+    HILOG_DEBUG("call");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->MoveUIAbilityToBackground(token_);
+    if (err != ERR_OK) {
+        HILOG_ERROR("MoveAbilityToBackground failed: %{public}d", err);
+    }
+    return err;
+}
+
 ErrCode AbilityContextImpl::TerminateSelf()
 {
     HILOG_INFO("TerminateSelf");
@@ -707,6 +717,30 @@ void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &wid
     }
 }
 
+void AbilityContextImpl::RegisterAbilityLifecycleObserver(
+    const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer)
+{
+    HILOG_DEBUG("call");
+    auto abilityCallback = abilityCallback_.lock();
+    if (abilityCallback == nullptr) {
+        HILOG_ERROR("register ability lifecycle observer failed, abilityCallback is nullptr.");
+        return;
+    }
+    abilityCallback->RegisterAbilityLifecycleObserver(observer);
+}
+
+void AbilityContextImpl::UnregisterAbilityLifecycleObserver(
+    const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer)
+{
+    HILOG_DEBUG("call");
+    auto abilityCallback = abilityCallback_.lock();
+    if (abilityCallback == nullptr) {
+        HILOG_ERROR("unregister ability lifecycle observer failed, abilityCallback is nullptr.");
+        return;
+    }
+    abilityCallback->UnregisterAbilityLifecycleObserver(observer);
+}
+
 #ifdef SUPPORT_GRAPHICS
 ErrCode AbilityContextImpl::SetMissionLabel(const std::string& label)
 {
@@ -856,6 +890,15 @@ ErrCode AbilityContextImpl::RequestModalUIExtension(const AAFwk::Want& want)
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->RequestModalUIExtension(want);
     if (err != ERR_OK) {
         HILOG_ERROR("RequestModalUIExtension is failed %{public}d", err);
+    }
+    return err;
+}
+
+ErrCode AbilityContextImpl::ChangeAbilityVisibility(bool isShow)
+{
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ChangeAbilityVisibility(token_, isShow);
+    if (err != ERR_OK) {
+        HILOG_ERROR("ChangeAbilityVisibility is failed %{public}d", err);
     }
     return err;
 }

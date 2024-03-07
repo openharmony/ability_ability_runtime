@@ -191,8 +191,20 @@ class AbilityContext extends Context {
     return this.__context_impl__.requestModalUIExtension(want, callback);
   }
 
+  showAbility() {
+    return this.__context_impl__.showAbility();
+  }
+
+  hideAbility() {
+    return this.__context_impl__.hideAbility();
+  }
+
   openAtomicService(appId, callback) {
     return this.__context_impl__.openAtomicService(appId, callback);
+  }
+  
+  moveAbilityToBackground(callback) {
+    return this.__context_impl__.moveAbilityToBackground(callback);
   }
 }
 

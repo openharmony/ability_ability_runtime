@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_RDB_RDB_CONFIG_H
-#define OHOS_ABILITY_RUNTIME_RDB_RDB_CONFIG_H
+#ifndef OHOS_ABILITY_RUNTIME_APP_JSHEAP_MEM_INFO_H
+#define OHOS_ABILITY_RUNTIME_APP_JSHEAP_MEM_INFO_H
 
-#include <string>
-#include <vector>
+#include "parcel.h"
+#include "iremote_object.h"
 
 namespace OHOS {
-namespace AAFwk {
-struct RdbConfig {
-    std::string dbPath = "/data/service/el1/public/AbilityManagerService";
-    std::string dbName;
-    std::string tableName;
-    std::string createTableSql;
-    std::vector<std::string> insertColumnSql;
-    int32_t version = 1;
+namespace AppExecFwk {
+struct JsHeapDumpInfo : public Parcelable {
+    uint32_t pid;
+    uint32_t tid;
+    bool needGc;
+    bool needSnapshot;
+    virtual bool Marshalling(Parcel &parcel) const override;
+    static JsHeapDumpInfo *Unmarshalling(Parcel &parcel);
 };
-}  // namespace AAFwk
-}  // namespace OHOS
-#endif
+} // namespace AppExecFwk
+} // namespace OHOS
+
+#endif // OHOS_ABILITY_RUNTIME_APP_JSHEAP_MEM_INFO_H

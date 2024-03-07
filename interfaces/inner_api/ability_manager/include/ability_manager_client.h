@@ -306,6 +306,10 @@ public:
      */
     ErrCode RequestModalUIExtension(const Want &want);
 
+    ErrCode ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
+
+    ErrCode ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
+
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
      *
@@ -379,13 +383,21 @@ public:
      */
     ErrCode SendResultToAbility(int requestCode, int resultCode, Want& resultWant);
 
-/**
+    /**
      * MoveAbilityToBackground.
      *
      * @param token Ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode MoveAbilityToBackground(sptr<IRemoteObject> token);
+
+    /**
+     * Move the UIAbility to background, called by app self.
+     *
+     * @param token the token of the ability to move.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MoveUIAbilityToBackground(const sptr<IRemoteObject> token);
 
     /**
      * CloseAbility with want, return want from ability manager service.

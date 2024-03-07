@@ -20,6 +20,7 @@
 
 #include "ability_connect_callback.h"
 #include "ability_info.h"
+#include "ability_lifecycle_observer_interface.h"
 #include "caller_callback.h"
 #include "configuration.h"
 #include "iability_callback.h"
@@ -168,6 +169,8 @@ public:
     
     virtual ErrCode OpenAtomicService(AAFwk::Want& want, int requestCode, RuntimeTask &&task) = 0;
 
+    virtual ErrCode ChangeAbilityVisibility(bool isShow) { return 0; }
+
     /**
     * @brief Connects the current ability to an ability using the AbilityInfo.AbilityType.SERVICE template.
     *
@@ -219,6 +222,8 @@ public:
     virtual ErrCode OnBackPressedCallBack(bool &needMoveToBackground) = 0;
 
     virtual ErrCode MoveAbilityToBackground() = 0;
+
+    virtual ErrCode MoveUIAbilityToBackground() = 0;
 
     virtual ErrCode TerminateSelf() = 0;
 
@@ -302,6 +307,21 @@ public:
      * @return Returns ERR_OK if success.
      */
     virtual ErrCode SetMissionContinueState(const AAFwk::ContinueState &state) = 0;
+
+    /**
+     * Register lifecycle observer on ability.
+     *
+     * @param observer the lifecycle observer to be registered on ability.
+     */
+    virtual void RegisterAbilityLifecycleObserver(const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer) = 0;
+
+    /**
+     * Unregister lifecycle observer on ability.
+     *
+     * @param observer the lifecycle observer to be unregistered on ability.
+     */
+    virtual void UnregisterAbilityLifecycleObserver(
+        const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer) = 0;
 
 #ifdef SUPPORT_GRAPHICS
     /**

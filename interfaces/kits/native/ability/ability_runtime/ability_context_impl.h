@@ -91,6 +91,8 @@ public:
 
     ErrCode MoveAbilityToBackground() override;
 
+    ErrCode MoveUIAbilityToBackground() override;
+
     ErrCode TerminateSelf() override;
 
     ErrCode CloseAbility() override;
@@ -210,7 +212,13 @@ public:
 
     ErrCode RequestModalUIExtension(const Want &want) override;
 
+    ErrCode ChangeAbilityVisibility(bool isShow) override;
+
     ErrCode OpenAtomicService(AAFwk::Want& want, int requestCode, RuntimeTask &&task) override;
+
+    void RegisterAbilityLifecycleObserver(const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer) override;
+
+    void UnregisterAbilityLifecycleObserver(const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer) override;
 
 #ifdef SUPPORT_GRAPHICS
     /**

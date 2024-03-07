@@ -201,7 +201,7 @@ void AppRunningRecord::SetApplicationClient(const sptr<IAppScheduler> &thread)
 
     auto moduleRecordList = GetAllModuleRecord();
     if (moduleRecordList.empty()) {
-        HILOG_ERROR("moduleRecordList is empty");
+        HILOG_DEBUG("moduleRecordList is empty");
         return;
     }
     for (const auto &moduleRecord : moduleRecordList) {
@@ -636,6 +636,13 @@ void AppRunningRecord::ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::M
 {
     if (appLifeCycleDeal_) {
         appLifeCycleDeal_->ScheduleHeapMemory(pid, mallocInfo);
+    }
+}
+
+void AppRunningRecord::ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
+{
+    if (appLifeCycleDeal_) {
+        appLifeCycleDeal_->ScheduleJsHeapMemory(info);
     }
 }
 
@@ -1116,7 +1123,7 @@ void AppRunningRecord::RemoveAppDeathRecipient() const
     auto object = appLifeCycleDeal_->GetApplicationClient()->AsObject();
     if (object) {
         if (!object->RemoveDeathRecipient(appDeathRecipient_)) {
-            HILOG_WARN("Failed to remove deathRecipient.");
+            HILOG_DEBUG("Failed to remove deathRecipient.");
         }
     }
 }

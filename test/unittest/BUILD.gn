@@ -203,6 +203,7 @@ ohos_source_set("abilityms_test_source") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   deps = [
+    "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/app_manager:app_manager",
     "${ability_runtime_innerkits_path}/connectionobs_manager:connection_obs_manager",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
@@ -387,6 +388,7 @@ group("unittest") {
     "app_spawn_client_test:unittest",
     "app_spawn_socket_test:unittest",
     "app_state_observer_manager_test:unittest",
+    "app_utils_test:unittest",
     "appkit:unittest",
     "application_context_test:unittest",
     "atomic_service_status_callback_proxy_test:unittest",
