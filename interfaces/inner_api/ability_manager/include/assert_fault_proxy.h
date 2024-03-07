@@ -24,8 +24,6 @@
 #include "ability_connect_callback_stub.h"
 #include "assert_fault_interface.h"
 
-
-
 namespace OHOS {
 namespace AbilityRuntime {
 class AssertFaultProxy : public IRemoteProxy<IAssertFaultInterface> {
