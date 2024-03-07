@@ -85,7 +85,6 @@ AbilityConnectManager::~AbilityConnectManager()
 
 int AbilityConnectManager::StartAbility(const AbilityRequest &abilityRequest)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard guard(Lock_);
     return StartAbilityLocked(abilityRequest);
 }
@@ -1765,6 +1764,7 @@ void AbilityConnectManager::HandleInactiveTimeout(const std::shared_ptr<AbilityR
 
 bool AbilityConnectManager::IsAbilityNeedKeepAlive(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (IsSpecialAbility(abilityRecord->GetAbilityInfo())) {
         return true;
     }
