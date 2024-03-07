@@ -11,59 +11,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-ohos_moduletest("ui_extension_stability_test") {
-  module_out_path = "ability_runtime/ui_extension"
+module_output_path = "ability_runtime/app_utils"
 
-  include_dirs = [
-    "../include",
-    "${ability_runtime_test_path}/mock/mock_sa_call",
-  ]
-
-  sources = [
-    "../src/ui_extension_connect_module_test_observer.cpp",
-    "ui_extension_stability_test.cpp",
-  ]
+ohos_unittest("app_utils_test") {
+  module_out_path = module_output_path
 
   configs = [ "${ability_runtime_services_path}/common:common_config" ]
 
-  cflags = []
-
   if (target_cpu == "arm") {
-    cflags += [ "-DBINDER_IPC_32BIT" ]
+    cflags = [ "-DBINDER_IPC_32BIT" ]
   }
 
+  sources = [ "app_utils_test.cpp" ]
+
   deps = [
-    "${ability_runtime_path}/test/moduletest/ui_extension_ability_test/ohos_test:copy_ohos_test",
+    "${ability_runtime_services_path}/common:app_util",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
-    "ability_base:base",
-    "ability_base:session_info",
-    "ability_base:want",
-    "ability_runtime:ability_manager",
-    "ability_runtime:app_manager",
-    "access_token:libaccesstoken_sdk",
-    "access_token:libnativetoken",
-    "access_token:libtoken_setproc",
+    "ability_runtime:abilitykit_native",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "ffrt:libffrt",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-    "window_manager:scene_session_manager",
   ]
 }
 
-group("moduletest") {
+group("unittest") {
   testonly = true
-  deps = [ ":ui_extension_stability_test" ]
+  deps = [ ":app_utils_test" ]
 }

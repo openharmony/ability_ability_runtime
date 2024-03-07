@@ -639,6 +639,54 @@ int AbilityManagerProxy::RequestModalUIExtension(const Want &want)
     return reply.ReadInt32();
 }
 
+int AbilityManagerProxy::ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    if (!data.WriteRemoteObject(token)) {
+        HILOG_ERROR("write token failed.");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    if (!data.WriteBool(isShow)) {
+        HILOG_ERROR("write isShow failed.");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    auto error = SendRequest(AbilityManagerInterfaceCode::CHANGE_ABILITY_VISIBILITY, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int AbilityManagerProxy::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    if (!data.WriteParcelable(sessionInfo)) {
+        HILOG_ERROR("write sessionInfo failed.");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    if (!data.WriteBool(isShow)) {
+        HILOG_ERROR("write isShow failed.");
+        return ERR_NATIVE_IPC_PARCEL_FAILED;
+    }
+    auto error = SendRequest(AbilityManagerInterfaceCode::CHANGE_UI_ABILITY_VISIBILITY_BY_SCB, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
 int AbilityManagerProxy::StartUIExtensionAbility(const sptr<SessionInfo> &extensionSessionInfo, int32_t userId)
 {
     int error;
@@ -905,6 +953,26 @@ int AbilityManagerProxy::MoveAbilityToBackground(const sptr<IRemoteObject> &toke
         }
     }
     error = SendRequest(AbilityManagerInterfaceCode::MOVE_ABILITY_TO_BACKGROUND, data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("Send request error: %{public}d.", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+int32_t AbilityManagerProxy::MoveUIAbilityToBackground(const sptr<IRemoteObject> token)
+{
+    CHECK_POINTER_AND_RETURN_LOG(token, ERR_INVALID_VALUE, "MoveUIAbilityToBackground fail, token is null");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
+        return IPC_PROXY_ERR;
+    }
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, RemoteObject, token);
+    int32_t error = SendRequest(AbilityManagerInterfaceCode::MOVE_UI_ABILITY_TO_BACKGROUND, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d.", error);
         return error;

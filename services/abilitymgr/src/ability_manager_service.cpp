@@ -70,6 +70,7 @@
 #include "modal_system_ui_extension.h"
 #include "parameters.h"
 #include "permission_constants.h"
+#include "process_options.h"
 #include "recovery_param.h"
 #include "restart_app_manager.h"
 #include "sa_mgr_client.h"
@@ -245,6 +246,7 @@ const std::string PERMISSIONMGR_ABILITY_NAME = "com.ohos.permissionmanager.Grant
 const std::string IS_CALL_BY_SCB = "isCallBySCB";
 const std::string SPECIFY_TOKEN_ID = "specifyTokenId";
 const std::string PROCESS_SUFFIX = "embeddable";
+const char* PARAM_START_OPTIONS_WITH_PROCESS_OPTION = "persist.sys.abilityms.start_options_with_process_option";
 const int DEFAULT_DMS_MISSION_ID = -1;
 const std::map<std::string, AbilityManagerService::DumpKey> AbilityManagerService::dumpMap = {
     std::map<std::string, AbilityManagerService::DumpKey>::value_type("--all", KEY_DUMP_ALL),
@@ -371,7 +373,6 @@ bool AbilityManagerService::Init()
     std::string deviceType = OHOS::system::GetDeviceType();
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         uiAbilityLifecycleManager_ = std::make_shared<UIAbilityLifecycleManager>();
-        uiAbilityLifecycleManager_->SetDevice(deviceType);
     } else {
         InitMissionListManager(MAIN_USER_ID, true);
     }
@@ -562,11 +563,17 @@ int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObje
 int AbilityManagerService::StartAbilityWithSpecifyTokenId(const Want &want, const sptr<IRemoteObject> &callerToken,
     uint32_t specifyTokenId, int32_t userId, int requestCode)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
         HILOG_ERROR("StartAbility with specialId, the current process is not foundation process.");
         return ERR_INVALID_CONTINUATION_FLAG;
     }
+    return StartAbilityWithSpecifyTokenIdInner(want, callerToken, specifyTokenId, userId, requestCode);
+}
+
+int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want, const sptr<IRemoteObject> &callerToken,
+    uint32_t specifyTokenId, int32_t userId, int requestCode)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
     auto flags = want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(want, userId);
@@ -578,10 +585,10 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenId(const Want &want, cons
         return ERR_INVALID_CONTINUATION_FLAG;
     }
 
-    HILOG_INFO("Start ability come, ability is %{public}s, userId is %{public}d.",
-        want.GetElement().GetAbilityName().c_str(), userId);
+    HILOG_INFO("Start ability come, ability is %{public}s, userId is %{public}d, specifyTokenId is %{public}u.",
+        want.GetElement().GetAbilityName().c_str(), userId, specifyTokenId);
 
-    int32_t ret = StartAbilityWrap(want, callerToken, requestCode, userId, specifyTokenId);
+    int32_t ret = StartAbilityWrap(want, callerToken, requestCode, userId, false, false, specifyTokenId);
     if (ret != ERR_OK) {
         eventInfo.errCode = ret;
         EventReport::SendAbilityEvent(EventName::START_ABILITY_ERROR, HiSysEventType::FAULT, eventInfo);
@@ -946,7 +953,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             HILOG_ERROR("Check permission failed");
             return result;
         }
-    } else if ((callerBundleName == SHELL_ASSISTANT_BUNDLENAME && OHOS::system::GetDeviceType() == STR_PHONE) ||
+    } else if ((callerBundleName == SHELL_ASSISTANT_BUNDLENAME && AppUtils::GetInstance().IsSupportAncoApp()) ||
         IPCSkeleton::GetCallingUid() == BROKER_UID) {
         // temp add for broker, remove when delete issacall
         if (abilityRequest.collaboratorType != CollaboratorType::RESERVE_TYPE && !abilityInfo.visible) {
@@ -966,7 +973,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     } else if (!isSendDialogResult || want.GetBoolParam("isSelector", false)) {
         HILOG_DEBUG("Check call ability permission, name is %{public}s.", abilityInfo.name.c_str());
-        result = CheckCallAbilityPermission(abilityRequest);
+        result = CheckCallAbilityPermission(abilityRequest, specifyTokenId);
         if (result != ERR_OK) {
             HILOG_ERROR("Check permission failed");
             return result;
@@ -1227,6 +1234,10 @@ int AbilityManagerService::StartAbility(const Want &want, const StartOptions &st
     const sptr<IRemoteObject> &callerToken, int32_t userId, int requestCode)
 {
     HILOG_DEBUG("Start ability with startOptions.");
+    auto ret = CheckProcessOptions(want, startOptions);
+    if (ret != ERR_OK) {
+        return ret;
+    }
     return StartAbilityForOptionWrap(want, startOptions, callerToken, userId, requestCode, false);
 }
 
@@ -1369,7 +1380,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
         }
         abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
-        if (AppUtils::GetInstance().JudgePCDevice()) {
+        if (AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
             if (startOptions.windowLeftUsed_) {
                 abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_LEFT, startOptions.GetWindowLeft());
             }
@@ -1476,7 +1487,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
     }
     abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
-    if (AppUtils::GetInstance().JudgePCDevice()) {
+    if (AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
         if (startOptions.windowLeftUsed_) {
             abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_LEFT, startOptions.GetWindowLeft());
         }
@@ -1520,6 +1531,7 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         abilityRequest.userId = oriValidUserId;
         abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
+        abilityRequest.processOptions = startOptions.processOptions;
         return uiAbilityLifecycleManager_->NotifySCBToStartUIAbility(abilityRequest, oriValidUserId);
     }
     auto missionListManager = GetListManagerByUserId(oriValidUserId);
@@ -2164,11 +2176,18 @@ void AbilityManagerService::ReportAbilitAssociatedStartInfoToRSS(
 void AbilityManagerService::ReportEventToSuspendManager(const AppExecFwk::AbilityInfo &abilityInfo)
 {
 #ifdef EFFICIENCY_MANAGER_ENABLE
+    if (taskHandler_ == nullptr) {
+        HILOG_ERROR("taskhandler null");
+        return;
+    }
     std::string reason = (abilityInfo.type == AppExecFwk::AbilityType::PAGE) ?
         "THAW_BY_START_PAGE_ABILITY" : "THAW_BY_START_NOT_PAGE_ABILITY";
-    SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-        abilityInfo.applicationInfo.uid,
-        abilityInfo.applicationInfo.bundleName, reason);
+    const auto uid = abilityInfo.applicationInfo.uid;
+    const auto bundleName = abilityInfo.applicationInfo.bundleName;
+    taskHandler_->SubmitTask([reason, uid, bundleName]() {
+        SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
+            uid, bundleName, reason);
+        });
 #endif // EFFICIENCY_MANAGER_ENABLE
 }
 
@@ -2237,6 +2256,27 @@ int AbilityManagerService::RequestModalUIExtensionInner(const Want &want)
     HILOG_DEBUG("Window Modal System Create UIExtension is called!");
     auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
     return connection->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
+}
+
+int AbilityManagerService::ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow)
+{
+    bool isEnable = system::GetBoolParameter(PARAM_START_OPTIONS_WITH_PROCESS_OPTION, false);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() || !isEnable) {
+        HILOG_ERROR("Capability not support.");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    CHECK_POINTER_AND_RETURN(uiAbilityLifecycleManager_, ERR_INVALID_VALUE);
+    return uiAbilityLifecycleManager_->ChangeAbilityVisibility(token, isShow);
+}
+
+int AbilityManagerService::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow)
+{
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+        HILOG_ERROR("Not sceneboard called, not allowed.");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+    CHECK_POINTER_AND_RETURN(uiAbilityLifecycleManager_, ERR_INVALID_VALUE);
+    return uiAbilityLifecycleManager_->ChangeUIAbilityVisibilityBySCB(sessionInfo, isShow);
 }
 
 int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
@@ -2425,7 +2465,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         CHECK_POINTER_AND_RETURN(bms, ERR_INVALID_VALUE);
         AppExecFwk::ApplicationInfo appInfo;
         if (!IN_PROCESS_CALL(bms->GetApplicationInfo(extensionSessionInfo->want.GetBundle(),
-            AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, userId, appInfo))) {
+            AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, GetValidUserId(userId), appInfo))) {
             HILOG_ERROR("VerifyPermission failed to get application info");
             return CHECK_PERMISSION_FAILED;
         }
@@ -2476,7 +2516,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     }
 
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(extensionSessionInfo->want, 0, GetUserId(), false);
+        interceptorExecuter_->DoProcess(extensionSessionInfo->want, 0, GetUserId(), true);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         eventInfo.errCode = result;
@@ -2741,6 +2781,44 @@ int AbilityManagerService::MoveAbilityToBackground(const sptr<IRemoteObject> &to
         HILOG_ERROR("missionListManager is Null. ownerUserId=%{public}d", ownerUserId);
         return ERR_INVALID_VALUE;
     }
+    return missionListManager->MoveAbilityToBackground(abilityRecord);
+}
+
+int32_t AbilityManagerService::MoveUIAbilityToBackground(const sptr<IRemoteObject> token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    HILOG_INFO("MoveUIAbilityToBackground called.");
+    if (!AppUtils::GetInstance().EnableMoveUIAbilityToBackgroundApi()) {
+        return ERR_OPERATION_NOT_SUPPORTED_ON_CURRENT_DEVICE;
+    }
+    if (!VerificationAllToken(token)) {
+        return ERR_INVALID_VALUE;
+    }
+    auto abilityRecord = Token::GetAbilityRecordByToken(token);
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    if (!IsAppSelfCalled(abilityRecord)) {
+        return CHECK_PERMISSION_FAILED;
+    }
+    if (!IsAbilityControllerForeground(abilityRecord->GetAbilityInfo().bundleName)) {
+        HILOG_ERROR("Can not move ability to background in Wukong mode.");
+        return ERR_WUKONG_MODE_CANT_MOVE_STATE;
+    }
+    if (!abilityRecord->IsAbilityState(FOREGROUND) && !abilityRecord->IsAbilityState(FOREGROUNDING)) {
+        HILOG_ERROR("Ability not in foregorund state.");
+        return ERR_ABILITY_NOT_FOREGROUND;
+    }
+    if (abilityRecord->GetAbilityInfo().type != AppExecFwk::AbilityType::PAGE) {
+        HILOG_ERROR("Cannot background non UIAbility.");
+        return RESOLVE_CALL_ABILITY_TYPE_ERR;
+    }
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        CHECK_POINTER_AND_RETURN(abilityRecord, ERR_NULL_OBJECT);
+        uiAbilityLifecycleManager_->NotifySCBToMinimizeUIAbility(abilityRecord, token);
+    }
+
+    auto ownerUserId = abilityRecord->GetOwnerMissionUserId();
+    auto missionListManager = GetListManagerByUserId(ownerUserId);
+    CHECK_POINTER_AND_RETURN(missionListManager, ERR_INVALID_VALUE);
     return missionListManager->MoveAbilityToBackground(abilityRecord);
 }
 
@@ -5289,7 +5367,7 @@ int AbilityManagerService::GenerateAbilityRequest(
         HILOG_ERROR("Get app info failed.");
         return RESOLVE_APP_ERR;
     }
-    if (request.want.GetIntParam(AAFwk::SCREEN_MODE_KEY, AAFwk::ScreenMode::IDLE_SCREEN_MODE) == 0 &&
+    if (request.want.GetIntParam(SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE) == ScreenMode::JUMP_SCREEN_MODE &&
         (request.abilityInfo.applicationInfo.bundleType != AppExecFwk::BundleType::ATOMIC_SERVICE ||
         request.abilityInfo.launchMode != AppExecFwk::LaunchMode::SINGLETON)) {
         HILOG_ERROR("The interface of starting atomicService can start only atomicService.");
@@ -5301,6 +5379,11 @@ int AbilityManagerService::GenerateAbilityRequest(
         request.appInfo.name.c_str(), request.abilityInfo.moduleName.c_str(), request.uid);
 
     request.want.SetModuleName(request.abilityInfo.moduleName);
+    request.want.SetParam("targetBundleType", static_cast<int>(request.abilityInfo.applicationInfo.bundleType));
+    if (!request.abilityInfo.skillUri.empty()) {
+        request.want.SetParam("targetLinkFeature", request.abilityInfo.skillUri.front().linkFeature);
+    }
+    request.want.SetParam("targetAppDistType", request.abilityInfo.applicationInfo.appDistributionType);
 
     if (want.GetBoolParam(Want::PARAM_RESV_START_RECENT, false) &&
         AAFwk::PermissionVerification::GetInstance()->VerifyStartRecentAbilityPermission()) {
@@ -5582,27 +5665,46 @@ std::shared_ptr<AppExecFwk::BundleMgrHelper> AbilityManagerService::GetBundleMan
 
 int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName, const int32_t userId)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (bundleName.empty()) {
         HILOG_ERROR("Invalid bundle name when app data abilities preloading.");
         return ERR_INVALID_VALUE;
     }
 
-    auto dataAbilityManager = GetDataAbilityManagerByUserId(userId);
-    if (dataAbilityManager == nullptr) {
-        HILOG_ERROR("Invalid data ability manager when app data abilities preloading.");
+    if (taskHandler_ == nullptr) {
+        HILOG_ERROR("taskHandler nullptr.");
         return ERR_INVALID_STATE;
     }
 
+    taskHandler_->SubmitTask([weak = weak_from_this(), bundleName, userId]() {
+        auto pthis = weak.lock();
+        if (pthis == nullptr) {
+            HILOG_ERROR("pthis nullptr.");
+            return;
+        }
+        pthis->PreLoadAppDataAbilitiesTask(bundleName, userId);
+        });
+
+    return ERR_OK;
+}
+
+void AbilityManagerService::PreLoadAppDataAbilitiesTask(const std::string &bundleName, const int32_t userId)
+{
+    HILOG_INFO("called");
+    auto dataAbilityManager = GetDataAbilityManagerByUserId(userId);
+    if (dataAbilityManager == nullptr) {
+        HILOG_ERROR("Invalid data ability manager when app data abilities preloading.");
+        return;
+    }
+
     auto bms = GetBundleManager();
-    CHECK_POINTER_AND_RETURN(bms, GET_ABILITY_SERVICE_FAILED);
+    CHECK_POINTER(bms);
 
     AppExecFwk::BundleInfo bundleInfo;
     bool ret = IN_PROCESS_CALL(
         bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES, bundleInfo, userId));
     if (!ret) {
         HILOG_ERROR("Failed to get bundle info when app data abilities preloading, userId is %{public}d", userId);
-        return RESOLVE_APP_ERR;
+        return;
     }
 
     auto begin = system_clock::now();
@@ -5615,7 +5717,7 @@ int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName
         }
         if ((system_clock::now() - begin) >= DATA_ABILITY_START_TIMEOUT) {
             HILOG_ERROR("App data ability preloading for '%{public}s' timeout.", bundleName.c_str());
-            return ERR_TIMED_OUT;
+            return;
         }
         dataAbilityRequest.abilityInfo = *it;
         dataAbilityRequest.uid = bundleInfo.uid;
@@ -5626,12 +5728,9 @@ int AbilityManagerService::PreLoadAppDataAbilities(const std::string &bundleName
         if (dataAbility == nullptr) {
             HILOG_ERROR(
                 "Failed to preload data ability '%{public}s.%{public}s'.", it->bundleName.c_str(), it->name.c_str());
-            return ERR_NULL_OBJECT;
+            return;
         }
     }
-
-    HILOG_DEBUG("App data abilities preloading done.");
-    return ERR_OK;
 }
 
 bool AbilityManagerService::IsSystemUiApp(const AppExecFwk::AbilityInfo &info) const
@@ -6217,7 +6316,7 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     }
 
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
+        interceptorExecuter_->DoProcess(want, 0, GetUserId(), true);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -8585,6 +8684,18 @@ bool AbilityManagerService::JudgeSelfCalled(const std::shared_ptr<AbilityRecord>
     return true;
 }
 
+bool AbilityManagerService::IsAppSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord)
+{
+    CHECK_POINTER_RETURN_BOOL(abilityRecord);
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenID = abilityRecord->GetApplicationInfo().accessTokenId;
+    if (callingTokenId != tokenID) {
+        HILOG_ERROR("Is not app self called.");
+        return false;
+    }
+    return true;
+}
+
 std::shared_ptr<AbilityRecord> AbilityManagerService::GetFocusAbility()
 {
 #ifdef SUPPORT_GRAPHICS
@@ -9016,6 +9127,58 @@ bool AbilityManagerService::CheckUserIdActive(int32_t userId)
     if (iter == osActiveAccountIds.end()) {
         return false;
     }
+    return true;
+}
+
+int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const StartOptions &startOptions)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    if (startOptions.processOptions == nullptr ||
+        !ProcessOptions::IsNewProcessMode(startOptions.processOptions->processMode)) {
+        return ERR_OK;
+    }
+
+    HILOG_DEBUG("start ability in new process mode.");
+    bool isEnable = system::GetBoolParameter(PARAM_START_OPTIONS_WITH_PROCESS_OPTION, false);
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() || !isEnable) {
+        HILOG_ERROR("Not support process options.");
+        return ERR_CAPABILITY_NOT_SUPPORT;
+    }
+
+    auto element = want.GetElement();
+    if (element.GetAbilityName().empty() || want.GetAction().compare(ACTION_CHOOSE) == 0) {
+        HILOG_ERROR("Not allow implicit start.");
+        return ERR_NOT_ALLOW_IMPLICIT_START;
+    }
+
+    if (!CheckCallingTokenId(element.GetBundleName())) {
+        HILOG_ERROR("Not self application.");
+        return ERR_NOT_SELF_APPLICATION;
+    }
+
+    if (startOptions.processOptions->processMode == ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM &&
+        !IsCallerInStatusBar()) {
+        HILOG_ERROR("Caller is not in status bar in NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM mode.");
+        return ERR_START_OPTIONS_CHECK_FAILED;
+    }
+
+    if (uiAbilityLifecycleManager_ == nullptr) {
+        HILOG_ERROR("uiAbilityLifecycleManager_ is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    auto abilityRecords = uiAbilityLifecycleManager_->GetAbilityRecordsByName(element);
+    if (!abilityRecords.empty() && abilityRecords[0] &&
+        abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::STANDARD) {
+        HILOG_ERROR("If it is not in STANDARD mode, repeated starts are not allowed");
+        return ERR_ABILITY_ALREADY_RUNNING;
+    }
+
+    return ERR_OK;
+}
+
+bool AbilityManagerService::IsCallerInStatusBar()
+{
+    // Add function implementation later
     return true;
 }
 
@@ -9606,11 +9769,8 @@ int32_t AbilityManagerService::CheckRestartAppWant(const AAFwk::Want &want)
     auto userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
     AppExecFwk::AbilityInfo abilityInfo;
     bool queryResult = IN_PROCESS_CALL(bms->QueryAbilityInfo(want, abilityInfoFlag, userId, abilityInfo));
-    if (!queryResult) {
-        HILOG_ERROR("Query ability info fail.");
-        return INNER_ERR;
-    }
-    if (abilityInfo.name.empty() || abilityInfo.bundleName.empty() || abilityInfo.type != AbilityType::PAGE) {
+    if (!queryResult || abilityInfo.name.empty() ||
+        abilityInfo.bundleName.empty() || abilityInfo.type != AbilityType::PAGE) {
         HILOG_ERROR("Ability is invalid or not UIAbility.");
         return AAFwk::ERR_RESTART_APP_INCORRECT_ABILITY;
     }
@@ -9670,6 +9830,10 @@ bool AbilityManagerService::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToke
     auto callerAbility = Token::GetAbilityRecordByToken(callerToken);
     if (callerAbility == nullptr) {
         HILOG_ERROR("The caller is invalid.");
+        return false;
+    }
+    if (callerAbility->GetApplicationInfo().accessTokenId != accessTokenId) {
+        HILOG_ERROR("The callerToken does not belong to the caller.");
         return false;
     }
     if (!callerAbility->IsForeground() && !callerAbility->GetAbilityForegroundingFlag()) {

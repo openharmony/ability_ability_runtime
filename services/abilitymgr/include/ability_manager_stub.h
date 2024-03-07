@@ -110,6 +110,8 @@ private:
     int StartAbilityForSettingsInner(MessageParcel &data, MessageParcel &reply);
     int StartAbilityForOptionsInner(MessageParcel &data, MessageParcel &reply);
     int RequestModalUIExtensionInner(MessageParcel &data, MessageParcel &reply);
+    int ChangeAbilityVisibilityInner(MessageParcel &data, MessageParcel &reply);
+    int ChangeUIAbilityVisibilityBySCBInner(MessageParcel &data, MessageParcel &reply);
 
     int GetWantSenderInner(MessageParcel &data, MessageParcel &reply);
     int SendWantSenderInner(MessageParcel &data, MessageParcel &reply);
@@ -193,6 +195,7 @@ private:
     int GetDlpConnectionInfosInner(MessageParcel &data, MessageParcel &reply);
     int GetConnectionDataInner(MessageParcel &data, MessageParcel &reply);
     int MoveAbilityToBackgroundInner(MessageParcel &data, MessageParcel &reply);
+    int32_t MoveUIAbilityToBackgroundInner(MessageParcel &data, MessageParcel &reply);
     int SetMissionContinueStateInner(MessageParcel &data, MessageParcel &reply);
 #ifdef SUPPORT_GRAPHICS
     int SetMissionLabelInner(MessageParcel &data, MessageParcel &reply);

@@ -379,6 +379,12 @@ enum class AbilityManagerInterfaceCode {
     // get root host info of uiextesnion
     GET_UI_EXTENSION_ROOT_HOST_INFO = 1057,
 
+    // change current ability visibility
+    CHANGE_ABILITY_VISIBILITY = 1058,
+
+    // change ui ability visibility by scb
+    CHANGE_UI_ABILITY_VISIBILITY_BY_SCB = 1059,
+
     // ipc id for start ability for result as caller
     START_ABILITY_FOR_RESULT_AS_CALLER = 1060,
 
@@ -469,6 +475,7 @@ enum class AbilityManagerInterfaceCode {
     RECORD_APP_EXIT_REASON = 6002,
     RECORD_PROCESS_EXIT_REASON = 6003,
     UPGRADE_APP = 6004,
+    MOVE_UI_ABILITY_TO_BACKGROUND = 6005,
 
     // ipc id for register auto startup system callback
     REGISTER_AUTO_STARTUP_SYSTEM_CALLBACK = 6101,
