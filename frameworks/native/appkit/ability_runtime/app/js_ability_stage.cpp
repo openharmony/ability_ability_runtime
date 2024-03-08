@@ -215,7 +215,7 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
 
 void JsAbilityStage::OnDestroy() const
 {
-    HILOG_DEBUG("called");
+    HILOG_DEBUG("Called");
     AbilityStage::OnDestroy();
 
     if (!jsAbilityStageObj_) {
@@ -232,13 +232,13 @@ void JsAbilityStage::OnDestroy() const
         return;
     }
 
-    napi_value methodOnCreate = nullptr;
-    napi_get_named_property(env, obj, "onDestroy", &methodOnCreate);
-    if (methodOnCreate == nullptr) {
+    napi_value methodOnDestroy = nullptr;
+    napi_get_named_property(env, obj, "onDestroy", &methodOnDestroy);
+    if (methodOnDestroy == nullptr) {
         HILOG_ERROR("Failed to get 'onDestroy' from AbilityStage object");
         return;
     }
-    napi_call_function(env, obj, methodOnCreate, 0, nullptr, nullptr);
+    napi_call_function(env, obj, methodOnDestroy, 0, nullptr, nullptr);
 }
 
 std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want)
