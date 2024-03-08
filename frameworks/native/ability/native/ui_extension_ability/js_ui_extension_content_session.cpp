@@ -241,7 +241,8 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionHostWindowProxy(napi_env
 {
     HILOG_DEBUG("OnGetUIExtensionHostWindowProxy is called");
     CHECK_IS_SYSTEM_APP;
-    napi_value jsExtensionWindow = Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_);
+    napi_value jsExtensionWindow =
+    Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
     if (jsExtensionWindow == nullptr) {
         HILOG_ERROR("Failed to create jsExtensionWindow object.");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
