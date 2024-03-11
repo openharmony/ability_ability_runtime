@@ -247,7 +247,7 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionHostWindowProxy(napi_env
         return CreateJsUndefined(env);
     }
     napi_value jsExtensionWindow =
-    Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
+        Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
     if (jsExtensionWindow == nullptr) {
         HILOG_ERROR("Failed to create jsExtensionWindow object.");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
