@@ -241,6 +241,11 @@ napi_value JsUIExtensionContentSession::OnGetUIExtensionHostWindowProxy(napi_env
 {
     HILOG_DEBUG("OnGetUIExtensionHostWindowProxy is called");
     CHECK_IS_SYSTEM_APP;
+    if (sessionInfo_ == nullptr) {
+        HILOG_ERROR("sessionInfo_ is nullptr");
+        ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
+        return CreateJsUndefined(env);
+    }
     napi_value jsExtensionWindow =
     Rosen::JsExtensionWindow::CreateJsExtensionWindow(env, uiWindow_, sessionInfo_->hostWindowId);
     if (jsExtensionWindow == nullptr) {
