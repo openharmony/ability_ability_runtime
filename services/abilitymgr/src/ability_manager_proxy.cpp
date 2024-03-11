@@ -434,9 +434,8 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(
     const Want &want, const sptr<IRemoteObject> &callerToken, int requestCode, int32_t userId)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
     if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
         return INNER_ERR;
     }
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Parcelable, &want);
@@ -448,6 +447,8 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(
     }
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, requestCode);
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, userId);
+    MessageParcel reply;
+    MessageOption option;
     int error = SendRequest(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER, data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("Send request error: %{public}d", error);
@@ -460,9 +461,8 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(const Want &want, const S
     const sptr<IRemoteObject> &callerToken, int requestCode, int32_t userId)
 {
     MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
     if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("Write interface token failed.");
         return INNER_ERR;
     }
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Parcelable, &want);
@@ -475,6 +475,8 @@ int AbilityManagerProxy::StartAbilityForResultAsCaller(const Want &want, const S
     }
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, requestCode);
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, userId);
+    MessageParcel reply;
+    MessageOption option;
     int error =
         SendRequest(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS, data, reply, option);
     if (error != NO_ERROR) {
