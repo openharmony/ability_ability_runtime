@@ -252,7 +252,7 @@ public:
      * @param userId Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbilityForResultAsCaller(
+    int StartAbilityForResultAsCaller(
         const Want &want,
         const sptr<IRemoteObject> &callerToken,
         int requestCode = DEFAULT_INVAL_VALUE,
@@ -268,7 +268,7 @@ public:
      * @param userId Designation User ID.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartAbilityForResultAsCaller(
+    int StartAbilityForResultAsCaller(
         const Want &want,
         const StartOptions &startOptions,
         const sptr<IRemoteObject> &callerToken,

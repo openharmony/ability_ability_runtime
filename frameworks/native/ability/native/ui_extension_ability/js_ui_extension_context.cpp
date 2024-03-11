@@ -363,9 +363,9 @@ napi_value JsUIExtensionContext::OnStartAbilityForResultAsCaller(napi_env env, N
     }
     want.SetParam(Want::PARAM_RESV_FOR_RESULT, true);
     int curRequestCode = context->GenerateCurRequestCode();
-    (unwrapArgc == INDEX_ONE)
-        ? context->StartAbilityForResultAsCaller(want, curRequestCode, std::move(task))
-        : context->StartAbilityForResultAsCaller(want, startOptions, curRequestCode, std::move(task));
+    unwrapArgc == INDEX_ONE ?
+        context->StartAbilityForResultAsCaller(want, curRequestCode, std::move(task)) :
+        context->StartAbilityForResultAsCaller(want, startOptions, curRequestCode, std::move(task));
     HILOG_DEBUG("End.");
     return result;
 }

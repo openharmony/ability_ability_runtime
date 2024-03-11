@@ -2953,7 +2953,7 @@ int AbilityManagerStub::StartAbilityForResultAsCallerInner(MessageParcel &data, 
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
     }
-    int requestCode = data.ReadInt32();
+    int32_t requestCode = data.ReadInt32();
     int32_t userId = data.ReadInt32();
     int32_t result = StartAbilityForResultAsCaller(*want, callerToken, requestCode, userId);
     reply.WriteInt32(result);
@@ -2977,7 +2977,7 @@ int AbilityManagerStub::StartAbilityForResultAsCallerForOptionsInner(MessageParc
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
     }
-    int requestCode = data.ReadInt32();
+    int32_t requestCode = data.ReadInt32();
     int32_t userId = data.ReadInt32();
     int32_t result = StartAbilityForResultAsCaller(*want, *startOptions, callerToken, requestCode, userId);
     reply.WriteInt32(result);
