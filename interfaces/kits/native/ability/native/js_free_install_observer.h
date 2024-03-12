@@ -22,6 +22,7 @@
 
 #include "native_engine/native_engine.h"
 #include "free_install_observer_stub.h"
+#include "js_runtime_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -29,7 +30,8 @@ struct JsFreeInstallObserverObject {
     std::string bundleName;
     std::string abilityName;
     std::string startTime;
-    std::shared_ptr<NativeReference> callback;
+    napi_deferred deferred;
+    napi_ref callback;
     bool isAbilityResult = false;
 };
 
@@ -61,7 +63,8 @@ public:
         const std::string &startTime, napi_value jsObserverObject, bool isAbilityResult = false);
 
 private:
-    void CallJsFunction(napi_value value, napi_value const *argv, size_t argc);
+    void CallPromise(napi_deferred deferred, int32_t resultCode);
+    void CallCallback(napi_ref callback, int32_t resultCode);
     void HandleOnInstallFinished(const std::string &bundleName, const std::string &abilityName,
         const std::string &startTime, const int &resultCode);
     napi_env env_;
