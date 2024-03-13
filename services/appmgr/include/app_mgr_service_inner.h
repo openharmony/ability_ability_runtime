@@ -1155,6 +1155,8 @@ private:
 
     void KillChildProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
 
+    void KillAttachedChildProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
+
 private:
     /**
      * ClearUpApplicationData, clear the application data.
