@@ -398,9 +398,9 @@ napi_value JsAbilityContext::OnStartAbility(napi_env env, NapiCallbackInfo& info
     napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
     napi_value result = nullptr;
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
-        AddFreeInstallObserver(env, want, lastParam);
+        AddFreeInstallObserver(env, want, lastParam, &result);
         NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbility", env,
-            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, &result));
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, nullptr));
     } else {
         NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbility", env,
             CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
@@ -523,9 +523,9 @@ napi_value JsAbilityContext::OnStartAbilityWithAccount(napi_env env, NapiCallbac
     napi_value lastParam = (info.argc > unwrapArgc) ? info.argv[unwrapArgc] : nullptr;
     napi_value result = nullptr;
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
-        AddFreeInstallObserver(env, want, lastParam);
+        AddFreeInstallObserver(env, want, lastParam, &result);
         NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityWithAccount", env,
-            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, &result));
+            CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, nullptr));
     } else {
         NapiAsyncTask::ScheduleHighQos("JsAbilityContext::OnStartAbilityWithAccount", env,
             CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
@@ -652,36 +652,38 @@ napi_value JsAbilityContext::OnStartAbilityForResult(napi_env env, NapiCallbackI
 
     napi_value lastParam = info.argc > unwrapArgc ? info.argv[unwrapArgc] : nullptr;
     napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> uasyncTask;
+    std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count());
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
-        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
-            system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
-        AddFreeInstallObserver(env, want, lastParam, true);
+        AddFreeInstallObserver(env, want, lastParam, &result, true);
+        uasyncTask = CreateAsyncTaskWithLastParam(env, nullptr, nullptr, nullptr, nullptr);
+    } else {
+        uasyncTask = CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, &result);
     }
-    std::unique_ptr<NapiAsyncTask> uasyncTask =
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, &result);
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
-    RuntimeTask task = [env, asyncTask, &observer = freeInstallObserver_](int resultCode, const AAFwk::Want& want,
-        bool isInner) {
+    RuntimeTask task = [env, asyncTask, element = want.GetElement(), flags = want.GetFlags(), startTime,
+        &observer = freeInstallObserver_]
+        (int resultCode, const AAFwk::Want& want, bool isInner) {
         HILOG_DEBUG("OnStartAbilityForResult async callback is begin");
         HandleScope handleScope(env);
+        std::string bundleName = element.GetBundleName();
+        std::string abilityName = element.GetAbilityName();
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
-            HILOG_WARN("wrap abilityResult error");
-            asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            HILOG_WARN("wrap abilityResult failed");
+            isInner = true;
+            resultCode = ERR_INVALID_VALUE;
+        }
+        bool freeInstallEnable = (flags & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
+            observer != nullptr;
+        if (freeInstallEnable) {
+            isInner ? observer->OnInstallFinished(bundleName, abilityName, startTime, resultCode) :
+                observer->OnInstallFinished(bundleName, abilityName, startTime, abilityResult);
         } else {
-            if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
-                resultCode != 0 && observer != nullptr) {
-                std::string bundleName = want.GetElement().GetBundleName();
-                std::string abilityName = want.GetElement().GetAbilityName();
-                std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
-                observer->OnInstallFinished(bundleName, abilityName, startTime,
-                    static_cast<int>(GetJsErrorCodeByNativeError(resultCode)));
-            } else if (isInner) {
-                asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode));
-            } else {
+            isInner ? asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode)) :
                 asyncTask->Resolve(env, abilityResult);
-            }
         }
     };
     auto context = context_.lock();
@@ -735,36 +737,38 @@ napi_value JsAbilityContext::OnStartAbilityForResultWithAccount(napi_env env, Na
     }
     napi_value lastParam = info.argc > unwrapArgc ? info.argv[unwrapArgc] : nullptr;
     napi_value result = nullptr;
+    std::unique_ptr<NapiAsyncTask> uasyncTask;
+    std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
+        system_clock::now().time_since_epoch()).count());
     if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND) {
-        std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
-            system_clock::now().time_since_epoch()).count());
         want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
-        AddFreeInstallObserver(env, want, lastParam, true);
+        AddFreeInstallObserver(env, want, lastParam, &result, true);
+        uasyncTask = CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, nullptr);
+    } else {
+        uasyncTask = CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, &result);
     }
-    std::unique_ptr<NapiAsyncTask> uasyncTask =
-        CreateAsyncTaskWithLastParam(env, lastParam, nullptr, nullptr, &result);
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
-    RuntimeTask task = [env, asyncTask, &observer = freeInstallObserver_](int resultCode, const AAFwk::Want& want,
-        bool isInner) {
+    RuntimeTask task = [env, asyncTask, element = want.GetElement(), flags = want.GetFlags(), startTime,
+        &observer = freeInstallObserver_]
+        (int resultCode, const AAFwk::Want& want, bool isInner) {
         HILOG_DEBUG("async callback is called");
+        std::string bundleName = element.GetBundleName();
+        std::string abilityName = element.GetAbilityName();
         HandleScope handleScope(env);
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
             HILOG_WARN("wrap abilityResult failed");
-            asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            isInner = true;
+            resultCode = ERR_INVALID_VALUE;
+        }
+        bool freeInstallEnable = (flags & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
+            observer != nullptr;
+        if (freeInstallEnable) {
+            isInner ? observer->OnInstallFinished(bundleName, abilityName, startTime, resultCode) :
+                observer->OnInstallFinished(bundleName, abilityName, startTime, abilityResult);
         } else {
-            if ((want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
-                resultCode != 0 && observer != nullptr) {
-                std::string bundleName = want.GetElement().GetBundleName();
-                std::string abilityName = want.GetElement().GetAbilityName();
-                std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
-                observer->OnInstallFinished(bundleName, abilityName, startTime,
-                    static_cast<int>(GetJsErrorCodeByNativeError(resultCode)));
-            } else if (isInner) {
-                asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode));
-            } else {
+            isInner ? asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode)) :
                 asyncTask->Resolve(env, abilityResult);
-            }
         }
         HILOG_DEBUG("async callback is called end");
     };
@@ -1362,7 +1366,7 @@ void JsAbilityContext::ConfigurationUpdated(napi_env env, std::shared_ptr<Native
 }
 
 void JsAbilityContext::AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback,
-    bool isAbilityResult)
+    napi_value *result, bool isAbilityResult)
 {
     // adapter free install async return install and start result
     HILOG_DEBUG("ConvertWindowSize begin.");
@@ -1376,12 +1380,11 @@ void JsAbilityContext::AddFreeInstallObserver(napi_env env, const AAFwk::Want &w
         HILOG_ERROR("AddFreeInstallObserver error.");
     } else {
         HILOG_INFO("AddJsObserverObject");
-        // build a callback observer with last param
         std::string bundleName = want.GetElement().GetBundleName();
         std::string abilityName = want.GetElement().GetAbilityName();
         std::string startTime = want.GetStringParam(Want::PARAM_RESV_START_TIME);
         freeInstallObserver_->AddJsObserverObject(
-            bundleName, abilityName, startTime, callback, isAbilityResult);
+            bundleName, abilityName, startTime, callback, result, isAbilityResult);
     }
 }
 
@@ -1986,23 +1989,30 @@ napi_value JsAbilityContext::OpenAtomicServiceInner(napi_env env, NapiCallbackIn
     std::string startTime = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::
         system_clock::now().time_since_epoch()).count());
     want.SetParam(Want::PARAM_RESV_START_TIME, startTime);
-    AddFreeInstallObserver(env, want, nullptr, true);
     napi_value result = nullptr;
-    auto uasyncTask = CreateAsyncTaskWithLastParam(env, nullptr, nullptr, nullptr, &result);
+    AddFreeInstallObserver(env, want, nullptr, &result, true);
+    auto uasyncTask = CreateAsyncTaskWithLastParam(env, nullptr, nullptr, nullptr, nullptr);
     std::shared_ptr<NapiAsyncTask> asyncTask = std::move(uasyncTask);
-    RuntimeTask task = [env, asyncTask](int resultCode, const AAFwk::Want& want, bool isInner) {
+    RuntimeTask task = [env, asyncTask, element = want.GetElement(), flags = want.GetFlags(), startTime,
+        &observer = freeInstallObserver_](
+        int resultCode, const AAFwk::Want& want, bool isInner) {
         HILOG_DEBUG("OnOpenAtomicService async callback is begin");
         HandleScope handleScope(env);
+        std::string bundleName = element.GetBundleName();
+        std::string abilityName = element.GetAbilityName();
         napi_value abilityResult = AppExecFwk::WrapAbilityResult(env, resultCode, want);
         if (abilityResult == nullptr) {
-            HILOG_WARN("wrap abilityResult error");
-            asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+            HILOG_WARN("wrap abilityResult failed");
+            isInner = true;
+            resultCode = ERR_INVALID_VALUE;
+        }
+        if ((flags & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
+            observer != nullptr) {
+            isInner ? observer->OnInstallFinished(bundleName, abilityName, startTime, resultCode) :
+                observer->OnInstallFinished(bundleName, abilityName, startTime, abilityResult);
         } else {
-            if (isInner) {
-                asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode));
-            } else {
+            isInner ? asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode)) :
                 asyncTask->Resolve(env, abilityResult);
-            }
         }
     };
     auto context = context_.lock();
