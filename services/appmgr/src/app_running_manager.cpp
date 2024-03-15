@@ -493,7 +493,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
             HILOG_ERROR("Pid error.");
             return;
         }
-        auto result = inner->KillProcessByPid(pid);
+        auto result = inner->KillProcessByPid(pid, "TerminateAbility");
         if (result < 0) {
             HILOG_WARN("Kill application directly failed, pid: %{public}d", pid);
         }
