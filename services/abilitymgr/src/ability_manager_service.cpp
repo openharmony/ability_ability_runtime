@@ -9162,6 +9162,28 @@ int32_t AbilityManagerService::UnregisterAppDebugListener(sptr<AppExecFwk::IAppD
     return DelayedSingleton<AppScheduler>::GetInstance()->UnregisterAppDebugListener(listener);
 }
 
+std::shared_ptr<AbilityDebugDeal> AbilityManagerService::ConnectInitAbilityDebugDeal()
+{
+    if (abilityDebugDeal_ != nullptr) {
+        return abilityDebugDeal_;
+    }
+
+    std::unique_lock<ffrt::mutex> lock(abilityDebugDealLock_);
+    if (abilityDebugDeal_ != nullptr) {
+        return abilityDebugDeal_;
+    }
+
+    HILOG_DEBUG("Creat ability debug deal object.");
+    abilityDebugDeal_ = std::make_shared<AbilityDebugDeal>();
+    if (abilityDebugDeal_ == nullptr) {
+        HILOG_ERROR("Creat ability debug deal object failed.");
+        return nullptr;
+    }
+
+    abilityDebugDeal_->RegisterAbilityDebugResponse();
+    return abilityDebugDeal_;
+}
+
 int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
@@ -9176,13 +9198,7 @@ int32_t AbilityManagerService::AttachAppDebug(const std::string &bundleName)
         return CHECK_PERMISSION_FAILED;
     }
 
-    if (abilityDebugDeal_ == nullptr) {
-        HILOG_DEBUG("Creat ability debug deal object.");
-        abilityDebugDeal_ = std::make_shared<AbilityDebugDeal>();
-        if (abilityDebugDeal_ != nullptr) {
-            abilityDebugDeal_->RegisterAbilityDebugResponse();
-        }
-    }
+    ConnectInitAbilityDebugDeal();
     return DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName);
 }
 
@@ -9635,9 +9651,10 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
         return ERR_INVALID_VALUE;
     }
 
+    auto debugDeal = ConnectInitAbilityDebugDeal();
     auto sysDialog = DelayedSingleton<SystemDialogScheduler>::GetInstance();
-    if (sysDialog == nullptr) {
-        HILOG_ERROR("SystemDialogScheduler is nullptr.");
+    if (sysDialog == nullptr || debugDeal == nullptr) {
+        HILOG_ERROR("sysDialog or debugDeal is nullptr.");
         return ERR_INVALID_VALUE;
     }
 
