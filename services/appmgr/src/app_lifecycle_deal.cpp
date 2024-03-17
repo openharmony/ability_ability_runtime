@@ -80,7 +80,7 @@ void AppLifeCycleDeal::LaunchAbility(const std::shared_ptr<AbilityRunningRecord>
         }
         HILOG_DEBUG("Launch ability.");
         appThread->ScheduleLaunchAbility(*abilityInfo, ability->GetToken(),
-            ability->GetWant());
+            ability->GetWant(), ability->GetAbilityRecordId());
     } else {
         HILOG_WARN("LoadLifecycle.");
     }
