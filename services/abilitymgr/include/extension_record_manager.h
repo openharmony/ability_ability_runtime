@@ -74,6 +74,13 @@ public:
 
     int32_t GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo);
 
+    void LoadTimeout(int32_t extensionRecordId);
+    void ForegroundTimeout(int32_t extensionRecordId);
+    void BackgroundTimeout(int32_t extensionRecordId);
+    void TerminateTimeout(int32_t extensionRecordId);
+private:
+    inline std::shared_ptr<ExtensionRecord> GetUIExtensionRecordById(int32_t extensionRecordId);
+
 private:
     int32_t userId_;
     static std::atomic_int32_t extensionRecordId_;

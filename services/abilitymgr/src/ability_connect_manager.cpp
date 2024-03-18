@@ -1257,6 +1257,11 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
     HILOG_DEBUG("Complete connect or load ability timeout.");
     std::lock_guard guard(Lock_);
     CHECK_POINTER(abilityRecord);
+    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
+        uiExtensionAbilityRecordMgr_ != nullptr) {
+        HILOG_DEBUG("Start load timeout.");
+        uiExtensionAbilityRecordMgr_->LoadTimeout(abilityRecord->GetUIExtensionAbilityId());
+    }
     auto connectingList = abilityRecord->GetConnectingRecordList();
     for (auto &connectRecord : connectingList) {
         if (connectRecord == nullptr) {
@@ -1340,6 +1345,11 @@ void AbilityConnectManager::HandleStopTimeoutTask(const std::shared_ptr<AbilityR
     HILOG_DEBUG("Complete stop ability timeout start.");
     std::lock_guard guard(Lock_);
     CHECK_POINTER(abilityRecord);
+    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
+        uiExtensionAbilityRecordMgr_ != nullptr) {
+        HILOG_DEBUG("Start terminate timeout.");
+        uiExtensionAbilityRecordMgr_->TerminateTimeout(abilityRecord->GetUIExtensionAbilityId());
+    }
     TerminateDone(abilityRecord);
 }
 
@@ -2268,6 +2278,12 @@ void AbilityConnectManager::MoveToBackground(const std::shared_ptr<AbilityRecord
             HILOG_WARN("mgr is invalid.");
             return;
         }
+        CHECK_POINTER(abilityRecord);
+        if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
+            selfObj->uiExtensionAbilityRecordMgr_ != nullptr) {
+            HILOG_DEBUG("Start background timeout.");
+            selfObj->uiExtensionAbilityRecordMgr_->BackgroundTimeout(abilityRecord->GetUIExtensionAbilityId());
+        }
         HILOG_ERROR("move to background timeout.");
         selfObj->PrintTimeOutLog(abilityRecord, AbilityManagerService::BACKGROUND_TIMEOUT_MSG);
         selfObj->CompleteBackground(abilityRecord);
@@ -2302,6 +2318,11 @@ void AbilityConnectManager::HandleForegroundTimeoutTask(const std::shared_ptr<Ab
     if (abilityRecord == nullptr) {
         HILOG_ERROR("abilityRecord is nullptr");
         return;
+    }
+    if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType) &&
+        uiExtensionAbilityRecordMgr_ != nullptr) {
+        HILOG_DEBUG("Start foreground timeout.");
+        uiExtensionAbilityRecordMgr_->ForegroundTimeout(abilityRecord->GetUIExtensionAbilityId());
     }
     abilityRecord->SetAbilityState(AbilityState::BACKGROUND);
     abilityRecord->DoBackgroundAbilityWindowDelayed(false);
