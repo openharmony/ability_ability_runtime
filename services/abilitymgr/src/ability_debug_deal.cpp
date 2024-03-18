@@ -17,6 +17,7 @@
 
 #include "ability_record.h"
 #include "hilog_wrapper.h"
+#include "hitrace_meter.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -60,7 +61,8 @@ void AbilityDebugDeal::OnAbilitysDebugStoped(const std::vector<sptr<IRemoteObjec
 void AbilityDebugDeal::OnAbilitysAssertDebugChange(const std::vector<sptr<IRemoteObject>> &tokens, bool isAssertDebug)
 {
     HILOG_DEBUG("Called. %{public}s", isAssertDebug ? "start assert debug" : "stop assert debug");
-    for (auto &token : tokens) {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    for (const auto &token : tokens) {
         auto abilityRecord = Token::GetAbilityRecordByToken(token);
         if (abilityRecord == nullptr) {
             HILOG_ERROR("Ability record is nullptr.");
