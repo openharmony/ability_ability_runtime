@@ -65,8 +65,8 @@ void AbilityDebugResponseProxy::OnAbilitysAssertDebugChange(
         return;
     }
 
-    for (auto iter = tokens.begin(); iter != tokens.end(); iter++) {
-        if (!data.WriteRemoteObject(iter->GetRefPtr())) {
+    for (const auto &item : tokens) {
+        if (!data.WriteRemoteObject(item)) {
             HILOG_ERROR("Write token failed.");
             return;
         }

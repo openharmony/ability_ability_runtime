@@ -4402,7 +4402,7 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
             return ERR_OK;
         }
 
-        if (appRecord->IsDebugApp() || appRecord->IsAssertionPause()) {
+        if (appRecord->IsDebugging()) {
             return ERR_OK;
         }
 
@@ -4497,8 +4497,7 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
         }
         const int64_t timeout = 11000;
         if (faultData.faultType == FaultDataType::APP_FREEZE) {
-            if (!AppExecFwk::AppfreezeManager::GetInstance()->IsHandleAppfreeze(bundleName) ||
-                record->IsDebugApp() || record->IsAssertionPause()) {
+            if (!AppExecFwk::AppfreezeManager::GetInstance()->IsHandleAppfreeze(bundleName) || record->IsDebugging()) {
                 return ERR_OK;
             }
             auto timeoutNotifyApp = std::bind(&AppMgrServiceInner::TimeoutNotifyApp, this,
@@ -4905,6 +4904,7 @@ int32_t AppMgrServiceInner::NotifyAbilitysDebugChange(const std::string &bundleN
 int32_t AppMgrServiceInner::NotifyAbilitysAssertDebugChange(
     const std::shared_ptr<AppRunningRecord> &appRecord, bool isAssertDebug)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (appRecord == nullptr || abilityDebugResponse_ == nullptr) {
         HILOG_ERROR("Record or abilityDebugResponse is nullptr.");
         return ERR_NO_INIT;
@@ -5452,6 +5452,7 @@ int32_t AppMgrServiceInner::UnregisterRenderStateObserver(const sptr<IRenderStat
 
 void AppMgrServiceInner::SetAppAssertionPauseState(int32_t pid, bool flag)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     HILOG_DEBUG("Called.");
     if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
         HILOG_ERROR("Product of assert fault dialog is not enabled.");
@@ -5472,7 +5473,6 @@ void AppMgrServiceInner::SetAppAssertionPauseState(int32_t pid, bool flag)
         HILOG_ERROR("No such appRecord pid is %{public}d.", pid);
         return;
     }
-
     appRecord->SetAssertionPauseFlag(flag);
     auto isDebugStart = appRecord->IsDebugApp() || appRecord->isAttachDebug();
     if (!isDebugStart) {

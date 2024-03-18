@@ -9607,6 +9607,7 @@ int32_t AbilityManagerService::GenerateEmbeddableUIAbilityRequest(
 int32_t AbilityManagerService::CheckDebugAssertPermission()
 {
     HILOG_DEBUG("Called.");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
         HILOG_ERROR("Product of assert fault dialog is not enabled.");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
@@ -9639,6 +9640,7 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
     const sptr<IRemoteObject> &callback, const AAFwk::WantParams &wantParams)
 {
     HILOG_DEBUG("Request to display assert fault dialog begin.");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto checkRet = CheckDebugAssertPermission();
     if (checkRet != ERR_OK) {
         HILOG_ERROR("Check debug assert permission error.");
@@ -9686,6 +9688,7 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
 
 int32_t AbilityManagerService::NotifyDebugAssertResult(uint64_t assertFaultSessionId, AAFwk::UserStatus userStatus)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
         HILOG_ERROR("Product of assert fault dialog is not enabled.");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;

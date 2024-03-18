@@ -16,6 +16,7 @@
 #include "app_scheduler.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "hilog_wrapper.h"
+#include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 
 namespace OHOS {
@@ -36,6 +37,7 @@ AssertFaultCallbackDeathMgr::~AssertFaultCallbackDeathMgr()
 void AssertFaultCallbackDeathMgr::AddAssertFaultCallback(sptr<IRemoteObject> &remote)
 {
     HILOG_DEBUG("Called.");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (remote == nullptr) {
         HILOG_ERROR("Params remote is nullptr.");
         return;
@@ -68,6 +70,7 @@ void AssertFaultCallbackDeathMgr::AddAssertFaultCallback(sptr<IRemoteObject> &re
 void AssertFaultCallbackDeathMgr::RemoveAssertFaultCallback(const wptr<IRemoteObject> &remote)
 {
     HILOG_DEBUG("Called.");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto callback = remote.promote();
     if (callback == nullptr) {
         HILOG_ERROR("Invalid dead remote object.");
@@ -92,6 +95,7 @@ void AssertFaultCallbackDeathMgr::RemoveAssertFaultCallback(const wptr<IRemoteOb
 void AssertFaultCallbackDeathMgr::CallAssertFaultCallback(uint64_t assertFaultSessionId, AAFwk::UserStatus status)
 {
     HILOG_DEBUG("Called.");
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     DeathItem item;
     {
         std::unique_lock<std::mutex> lock(assertFaultSessionMutex_);
