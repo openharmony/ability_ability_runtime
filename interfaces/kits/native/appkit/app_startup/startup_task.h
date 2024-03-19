@@ -50,6 +50,7 @@ public:
     void SetWaitOnMainThread(bool waitOnMainThread);
 
     void SetIsAutoStartup(bool isAutoStartup);
+    uint32_t getDependenceCount() const;
 
     virtual int32_t RunTaskInit() = 0;
 

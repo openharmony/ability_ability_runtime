@@ -78,5 +78,10 @@ void StartupTask::SetIsAutoStartup(bool isAutoStartup)
 {
     isAutoStartup = isAutoStartup_;
 }
+
+uint32_t StartupTask::getDependenceCount() const
+{
+    return dependencies_.size();
+}
 } // namespace AbilityRuntime
 } // namespace OHOS
