@@ -14,7 +14,7 @@
 */
 #include <limits>
 #include "dataobs_mgr_changeinfo.h"
-#include "itypes_util.h"
+#include "dataobs_utils.h"
 #include "securec.h"
 
 namespace OHOS {
@@ -48,7 +48,7 @@ bool ChangeInfo::Marshalling(const ChangeInfo &input, MessageParcel &parcel)
         return false;
     }
 
-    if (!ITypesUtil::Marshal(parcel, input.valuesBucket_)) {
+    if (!DataObsUtils::Marshal(parcel, input.valuesBucket_)) {
         return false;
     }
     return true;
@@ -88,7 +88,7 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
         return false;
     }
     VBuckets bucket;
-    if (!(ITypesUtil::Unmarshal(parcel, bucket))) {
+    if (!(DataObsUtils::Unmarshal(parcel, bucket))) {
         return false;
     }
     output.changeType_ = static_cast<ChangeType>(changeType);
