@@ -941,6 +941,7 @@ public:
 
     void SetAppAssertionPauseState(int32_t pid, bool flag);
 
+    int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1185,8 +1186,6 @@ private:
     int32_t ClearUpApplicationDataByUserId(const std::string &bundleName,
         int32_t callerUid, pid_t callerPid, const int userId, bool isBySelf = false);
 
-    uint32_t BuildStartFlags(const AAFwk::Want &want, const AbilityInfo &abilityInfo);
-
     bool CheckGetRunningInfoPermission() const;
 
     int32_t KillApplicationByBundleName(const std::string &bundleName);
@@ -1220,6 +1219,7 @@ private:
     void ProcessAppDebug(const std::shared_ptr<AppRunningRecord> &appRecord, const bool &isDebugStart);
     AppDebugInfo MakeAppDebugInfo(const std::shared_ptr<AppRunningRecord> &appRecord, const bool &isDebugStart);
     int32_t NotifyAbilitysDebugChange(const std::string &bundleName, const bool &isAppDebug);
+    int32_t NotifyAbilitysAssertDebugChange(const std::shared_ptr<AppRunningRecord> &appRecord, bool isAssertDebug);
 
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
 
@@ -1260,6 +1260,8 @@ private:
         const std::shared_ptr<AppRunningRecord> &appRecord);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleConfigurationChange(const Configuration &config);
+    bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
+    int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData);
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     std::vector<const sptr<IAppStateCallback>> appStateCallbacks_;
     std::shared_ptr<AppProcessManager> appProcessManager_;
@@ -1290,6 +1292,7 @@ private:
     mutable std::map<int64_t, std::string> killedPorcessMap_;
     std::shared_ptr<AbilityRuntime::AppRunningStatusModule> appRunningStatusModule_;
     std::vector<std::string> serviceExtensionWhiteList_;
+    std::shared_ptr<AAFwk::TaskHandlerWrap> dfxTaskHandler_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
