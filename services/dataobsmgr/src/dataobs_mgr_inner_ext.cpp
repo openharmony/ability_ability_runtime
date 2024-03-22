@@ -102,7 +102,7 @@ Status DataObsMgrInnerExt::HandleNotifyChange(const ChangeInfo &changeInfo)
     for (const auto &[obs, value] : changeRes) {
         if (obs != nullptr && !value.empty()) {
             obs->OnChangeExt(
-                { changeInfo.changeType_, move(value), changeInfo.data_, changeInfo.size_, changeInfo.valuesBucket_ });
+                { changeInfo.changeType_, move(value), changeInfo.data_, changeInfo.size_, changeInfo.valueBuckets_ });
         }
     }
 
