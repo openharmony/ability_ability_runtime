@@ -85,6 +85,7 @@
 #include "start_ability_utils.h"
 #include "string_ex.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "system_ability_definition.h"
 #include "system_ability_token_callback.h"
 #include "extension_record_manager.h"
@@ -167,6 +168,7 @@ const std::string STR_PHONE = "phone";
 
 const std::string DEBUG_APP = "debugApp";
 const std::string AUTO_FILL_PASSWORD_TPYE = "autoFill/password";
+const std::string AUTO_FILL_SMART_TPYE = "autoFill/smart";
 constexpr size_t INDEX_ZERO = 0;
 constexpr size_t INDEX_ONE = 1;
 constexpr size_t INDEX_TWO = 2;
@@ -2214,7 +2216,7 @@ int AbilityManagerService::RequestModalUIExtension(const Want &want)
     return RequestModalUIExtensionInner(want);
 }
 
-int AbilityManagerService::RequestModalUIExtensionInner(const Want &want)
+int AbilityManagerService::RequestModalUIExtensionInner(Want want)
 {
     sptr<IRemoteObject> token = nullptr;
     int ret = IN_PROCESS_CALL(GetTopAbility(token));
@@ -2248,6 +2250,9 @@ int AbilityManagerService::RequestModalUIExtensionInner(const Want &want)
     }
 
     HILOG_DEBUG("Window Modal System Create UIExtension is called!");
+    WantParams &parameters = const_cast<WantParams &>(want.GetParams());
+    parameters.SetParam("ability.want.params.modalType", AAFwk::Integer::Box(1));
+    want.SetParams(parameters);
     auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
     return connection->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
 }
@@ -2433,11 +2438,16 @@ void AbilityManagerService::SetAutoFillElementName(const sptr<SessionInfo> &exte
 {
     HILOG_DEBUG("Called.");
     CHECK_POINTER_IS_NULLPTR(extensionSessionInfo);
-    if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) != AUTO_FILL_PASSWORD_TPYE) {
+    std::vector<std::string> argList;
+    if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) == AUTO_FILL_PASSWORD_TPYE) {
+        SplitStr(KEY_AUTO_FILL_ABILITY, "/", argList);
+    } else if (extensionSessionInfo->want.GetStringParam(UIEXTENSION_TYPE_KEY) == AUTO_FILL_SMART_TPYE) {
+        SplitStr(KEY_SMART_AUTO_FILL_ABILITY, "/", argList);
+    } else {
+        HILOG_WARN("It is not autofill type.");
         return;
     }
-    std::vector<std::string> argList;
-    SplitStr(KEY_AUTO_FILL_ABILITY, "/", argList);
+
     if (argList.size() != ARGC_THREE) {
         HILOG_ERROR("Parse auto fill extension element name failed.");
         return;
@@ -8283,7 +8293,8 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     if (extensionType == AppExecFwk::ExtensionAbilityType::ADS_SERVICE) {
         return ERR_OK;
     }
-    if (extensionType == AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD) {
+    if (extensionType == AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD ||
+        extensionType == AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART) {
         if (!abilityRequest.appInfo.isSystemApp) {
             HILOG_ERROR("The application requesting the call is a non system application.");
             return CHECK_PERMISSION_FAILED;
