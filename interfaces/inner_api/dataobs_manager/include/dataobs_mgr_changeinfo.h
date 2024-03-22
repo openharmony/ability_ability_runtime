@@ -31,7 +31,6 @@ struct ChangeInfo {
         INVAILD,
     };
     using Value = std::variant<std::monostate, int64_t, double, std::string, bool, std::vector<uint8_t>>;
-    using Values = std::vector<Value>;
     using VBucket = std::map<std::string, Value>;
     using VBuckets = std::vector<VBucket>;
 
@@ -42,7 +41,7 @@ struct ChangeInfo {
     mutable std::list<Uri> uris_ = {};
     void *data_ = nullptr;
     uint32_t size_ = 0;
-    VBuckets valuesBucket_ = {};
+    VBuckets valueBuckets_ = {};
     static constexpr int LIST_MAX_COUNT = 3000;
 };
 } // namespace AAFwk

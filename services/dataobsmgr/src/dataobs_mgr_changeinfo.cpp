@@ -20,7 +20,6 @@
 namespace OHOS {
 namespace AAFwk {
 using Value = std::variant<std::monostate, int64_t, double, std::string, bool, std::vector<uint8_t>>;
-using Values = std::vector<Value>;
 using VBucket = std::map<std::string, Value>;
 using VBuckets = std::vector<VBucket>;
 bool ChangeInfo::Marshalling(const ChangeInfo &input, MessageParcel &parcel)
@@ -48,7 +47,7 @@ bool ChangeInfo::Marshalling(const ChangeInfo &input, MessageParcel &parcel)
         return false;
     }
 
-    if (!DataObsUtils::Marshal(parcel, input.valuesBucket_)) {
+    if (!DataObsUtils::Marshal(parcel, input.valueBuckets_)) {
         return false;
     }
     return true;
@@ -87,15 +86,15 @@ bool ChangeInfo::Unmarshalling(ChangeInfo &output, MessageParcel &parcel)
     if (size > 0 && data == nullptr) {
         return false;
     }
-    VBuckets bucket;
-    if (!(DataObsUtils::Unmarshal(parcel, bucket))) {
+    VBuckets buckets;
+    if (!(DataObsUtils::Unmarshal(parcel, buckets))) {
         return false;
     }
     output.changeType_ = static_cast<ChangeType>(changeType);
     std::swap(output.uris_, uris);
     output.data_ = const_cast<uint8_t*>(data);
     output.size_ = size;
-    output.valuesBucket_ = std::move(bucket);
+    output.valueBuckets_ = std::move(buckets);
     return true;
 }
 } // namespace AAFwk
