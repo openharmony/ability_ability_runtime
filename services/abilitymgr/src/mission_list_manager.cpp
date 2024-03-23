@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -558,17 +558,16 @@ bool MissionListManager::CreateOrReusedMissionInfo(const AbilityRequest &ability
         reUsedMissionInfo = true;
     }
     HILOG_INFO("result:%{public}d", reUsedMissionInfo);
-
     BuildInnerMissionInfo(info, missionName, abilityRequest);
     auto abilityRecord = GetAbilityRecordByNameFromCurrentMissionLists(abilityRequest.want.GetElement());
-    if(reUsedMissionInfo == false && abilityRecord != nullptr) {
+    if (reUsedMissionInfo == false && abilityRecord != nullptr) {
         auto abilityInfo = abilityRequest.abilityInfo;
         EventInfo eventInfo;
         eventInfo.userId = abilityRequest.userId;
         eventInfo.abilityName = abilityInfo.name;
         eventInfo.bundleName = abilityInfo.bundleName;
         eventInfo.moduleName = abilityInfo.moduleName;
-        EventReport::SendAbilityEvent(EventName::START_STANDARD_ABILITYS, HiSysEventType::BEHAVIOR, eventInfo);
+        EventReport::SendAbilityEvent(EventName::START_STANDARD_ABILITIES, HiSysEventType::BEHAVIOR, eventInfo);
     }
 
     return reUsedMissionInfo;
@@ -3234,36 +3233,27 @@ std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByName(const 
     return defaultSingleList_->GetAbilityRecordByName(element);
 }
 
-std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByNameFromCurrentMissionLists(const AppExecFwk::ElementName &element) const
+std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByNameFromCurrentMissionLists(
+    const AppExecFwk::ElementName &element) const
 {
     // find in currentMissionLists_
     for (auto missionList : currentMissionLists_) {
         if (missionList != nullptr) {
-            HILOG_DEBUG("SXN missionList != nullptr");
             auto ability = missionList->GetAbilityRecordByName(element);
             if (ability != nullptr) {
-                HILOG_DEBUG("SXN ability != nullptr");
                 return ability;
             }
-            HILOG_DEBUG("SXN ability == nullptr");
         }
-        HILOG_DEBUG("SXN missionList == nullptr");
     }
 
+    // find in defaultStandardList_
     auto defaultStandardAbility = defaultStandardList_->GetAbilityRecordByName(element);
     if (defaultStandardAbility != nullptr) {
         return defaultStandardAbility;
     }
-    // return nullptr;
-    
-    // find in launcherMissionList_
-    auto ability = launcherList_->GetAbilityRecordByName(element);
-    if (ability != nullptr) {
-        return ability;
-    }
 
-    // find in default singlelist_
-    return defaultSingleList_->GetAbilityRecordByName(element);
+    // find in launcherMissionList_
+    return launcherList_->GetAbilityRecordByName(element);
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> MissionListManager::GetAbilityRecordsByName(
