@@ -54,6 +54,7 @@
 #include "errors.h"
 #include "extension_config.h"
 #include "freeze_util.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hisysevent.h"
 #include "hitrace_meter.h"
@@ -143,7 +144,6 @@ const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
-const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 // UIExtension type
 const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 const std::string UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
@@ -186,25 +186,6 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
 };
 std::atomic<bool> g_isDmsAlive = false;
-
-bool CheckCallerIsDlpManager(const std::shared_ptr<AppExecFwk::BundleMgrHelper> &bundleManager)
-{
-    if (!bundleManager) {
-        return false;
-    }
-
-    std::string bundleName;
-    auto callerUid = IPCSkeleton::GetCallingUid();
-    if (IN_PROCESS_CALL(bundleManager->GetNameForUid(callerUid, bundleName)) != ERR_OK) {
-        HILOG_WARN("Get Bundle Name failed.");
-        return false;
-    }
-    if (bundleName != DLP_BUNDLE_NAME) {
-        HILOG_WARN("Wrong Caller.");
-        return false;
-    }
-    return true;
-}
 } // namespace
 
 using namespace std::chrono;
@@ -6445,9 +6426,9 @@ int AbilityManagerService::JudgeAbilityVisibleControl(const AppExecFwk::AbilityI
 
 int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback)
 {
-    HILOG_DEBUG("%{public}s, userId:%{public}d", __func__, userId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartUser in service:%{public}d.", userId);
     if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
-        HILOG_ERROR("Permission verification failed, not account process");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser permission verification failed, not account process.");
         if (callback != nullptr) {
             callback->OnStartUserDone(userId, CHECK_PERMISSION_FAILED);
         }
@@ -6462,9 +6443,9 @@ int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback)
 
 int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callback)
 {
-    HILOG_DEBUG("%{public}s", __func__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StopUser in service:%{public}d", userId);
     if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
-        HILOG_ERROR("Permission verification failed, not account process");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StopUser permission verification failed, not account process");
         if (callback != nullptr) {
             callback->OnStopUserDone(userId, CHECK_PERMISSION_FAILED);
         }
@@ -8788,7 +8769,7 @@ int32_t AbilityManagerService::NotifySaveAsResult(const Want &want, int resultCo
     HILOG_DEBUG("requestCode is %{public}d.", requestCode);
 
     //caller check
-    if (!CheckCallerIsDlpManager(GetBundleManager())) {
+    if (!DlpUtils::CheckCallerIsDlpManager(GetBundleManager())) {
         HILOG_WARN("caller check failed");
         return ERR_INVALID_CALLER;
     }
