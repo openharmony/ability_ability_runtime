@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,25 +101,23 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
             return ERR_OK;
         }
     }
+
     if (iter == sessionAbilityMap_.end()) {
-        HILOG_DEBUG("sxn StartUIAbility iter == sessionAbilityMap_.end()");
         auto abilityInfo = abilityRequest.abilityInfo;
-        HILOG_DEBUG("sxn StartUIAbility abilityInfo.bundleName: %{public}s", abilityInfo.bundleName.c_str());
-        HILOG_DEBUG("sxn StartUIAbility abilityInfo.name: %{public}s", abilityInfo.name.c_str());
         for (auto [persistentId, record] : sessionAbilityMap_) {
             auto recordAbilityInfo = record->GetAbilityInfo();
-            HILOG_DEBUG("sxn StartUIAbility recordAbilityInfo.bundleName: %{public}s", recordAbilityInfo.bundleName.c_str());
-            HILOG_DEBUG("sxn StartUIAbility recordAbilityInfo.name: %{public}s", recordAbilityInfo.name.c_str());
-            if (abilityInfo.bundleName == recordAbilityInfo.bundleName && abilityInfo.name == recordAbilityInfo.name){
+            if (abilityInfo.bundleName == recordAbilityInfo.bundleName && abilityInfo.name == recordAbilityInfo.name &&
+                abilityInfo.moduleName == recordAbilityInfo.moduleName) {
                 EventInfo eventInfo;
                 eventInfo.userId = abilityRequest.userId;
                 eventInfo.abilityName = abilityInfo.name;
                 eventInfo.bundleName = abilityInfo.bundleName;
                 eventInfo.moduleName = abilityInfo.moduleName;
-                EventReport::SendAbilityEvent(EventName::START_STANDARD_ABILITYS, HiSysEventType::BEHAVIOR, eventInfo);
+                EventReport::SendAbilityEvent(
+                    EventName::START_STANDARD_ABILITIES, HiSysEventType::BEHAVIOR, eventInfo);
+                break;
             }
         }
-        
         sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     }
 
