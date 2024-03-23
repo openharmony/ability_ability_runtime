@@ -4915,9 +4915,7 @@ int32_t AppMgrServiceInner::SetAppWaitingDebug(const std::string &bundleName, bo
         return ERR_INVALID_VALUE;
     }
 
-    if (!isInitAppWaitingDebugListExecuted_) {
-        InitAppWaitingDebugList();
-    }
+    InitAppWaitingDebugList();
 
     bool isClear = false;
     {
@@ -4965,9 +4963,7 @@ int32_t AppMgrServiceInner::GetWaitingDebugApp(std::vector<std::string> &debugIn
         return AAFwk::ERR_NOT_DEVELOPER_MODE;
     }
 
-    if (!isInitAppWaitingDebugListExecuted_) {
-        InitAppWaitingDebugList();
-    }
+    InitAppWaitingDebugList();
 
     std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
     if (waitingDebugBundleList_.empty()) {
@@ -4990,7 +4986,7 @@ void AppMgrServiceInner::InitAppWaitingDebugList()
     {
         std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
         if (isInitAppWaitingDebugListExecuted_) {
-            HILOG_ERROR("Illegal called.");
+            HILOG_DEBUG("No need to initialize again.");
             return;
         }
         isInitAppWaitingDebugListExecuted_ = true;
@@ -5009,9 +5005,7 @@ void AppMgrServiceInner::InitAppWaitingDebugList()
 bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
 {
     HILOG_DEBUG("Called.");
-    if (!isInitAppWaitingDebugListExecuted_) {
-        InitAppWaitingDebugList();
-    }
+    InitAppWaitingDebugList();
 
     std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
     if (waitingDebugBundleList_.empty()) {

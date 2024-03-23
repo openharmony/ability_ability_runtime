@@ -422,7 +422,7 @@ int32_t AmsMgrScheduler::DetachAppDebug(const std::string &bundleName)
 int32_t AmsMgrScheduler::SetAppWaitingDebug(const std::string &bundleName, bool isPersist)
 {
     if (!IsReady()) {
-        HILOG_ERROR("AmsMgrService is not ready.");
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->SetAppWaitingDebug(bundleName, isPersist);
@@ -431,7 +431,7 @@ int32_t AmsMgrScheduler::SetAppWaitingDebug(const std::string &bundleName, bool 
 int32_t AmsMgrScheduler::CancelAppWaitingDebug()
 {
     if (!IsReady()) {
-        HILOG_ERROR("AmsMgrService is not ready.");
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->CancelAppWaitingDebug();
@@ -440,7 +440,7 @@ int32_t AmsMgrScheduler::CancelAppWaitingDebug()
 int32_t AmsMgrScheduler::GetWaitingDebugApp(std::vector<std::string> &debugInfoList)
 {
     if (!IsReady()) {
-        HILOG_ERROR("AmsMgrService is not ready.");
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return ERR_INVALID_OPERATION;
     }
     return amsMgrServiceInner_->GetWaitingDebugApp(debugInfoList);
@@ -449,7 +449,7 @@ int32_t AmsMgrScheduler::GetWaitingDebugApp(std::vector<std::string> &debugInfoL
 bool AmsMgrScheduler::IsWaitingDebugApp(const std::string &bundleName)
 {
     if (!IsReady()) {
-        HILOG_ERROR("AmsMgrService is not ready.");
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return false;
     }
     return amsMgrServiceInner_->IsWaitingDebugApp(bundleName);
@@ -458,7 +458,7 @@ bool AmsMgrScheduler::IsWaitingDebugApp(const std::string &bundleName)
 void AmsMgrScheduler::ClearNonPersistWaitingDebugFlag()
 {
     if (!IsReady()) {
-        HILOG_ERROR("AmsMgrService is not ready.");
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return;
     }
     amsMgrServiceInner_->ClearNonPersistWaitingDebugFlag();
