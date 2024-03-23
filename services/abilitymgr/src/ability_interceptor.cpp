@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "app_running_control_rule_result.h"
 #include "bundle_constants.h"
 #include "ecological_rule/ability_ecological_rule_mgr_service.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
@@ -69,13 +70,13 @@ ErrCode CrowdTestInterceptor::DoProcess(const Want &want, int requestCode, int32
     const sptr<IRemoteObject> &callerToken)
 {
     if (CheckCrowdtest(want, userId)) {
-        HILOG_ERROR("Crowdtest expired.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Crowdtest expired.");
 #ifdef SUPPORT_GRAPHICS
         if (isForeground) {
             int ret = IN_PROCESS_CALL(AbilityUtil::StartAppgallery(want.GetBundle(), requestCode, userId,
                 ACTION_MARKET_CROWDTEST));
             if (ret != ERR_OK) {
-                HILOG_ERROR("Crowdtest implicit start appgallery failed.");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "Crowdtest implicit start appgallery failed.");
                 return ret;
             }
         }
@@ -90,7 +91,7 @@ bool CrowdTestInterceptor::CheckCrowdtest(const Want &want, int32_t userId)
     // get crowdtest status and time
     AppExecFwk::ApplicationInfo appInfo;
     if (!StartAbilityUtils::GetApplicationInfo(want.GetBundle(), userId, appInfo)) {
-        HILOG_ERROR("failed to get application info.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get application info.");
         return false;
     }
 
@@ -100,7 +101,7 @@ bool CrowdTestInterceptor::CheckCrowdtest(const Want &want, int32_t userId)
         system_clock::now().time_since_epoch()).count();
     if (appDistributionType == AppExecFwk::Constants::APP_DISTRIBUTION_TYPE_CROWDTESTING &&
         appCrowdtestDeadline < now) {
-        HILOG_INFO("The application is expired, expired time is %{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "The application is expired, expired time is %{public}s",
             std::to_string(appCrowdtestDeadline).c_str());
         return true;
     }
@@ -112,10 +113,11 @@ ErrCode ControlInterceptor::DoProcess(const Want &want, int requestCode, int32_t
 {
     AppExecFwk::AppRunningControlRuleResult controlRule;
     if (CheckControl(want, userId, controlRule)) {
-        HILOG_INFO("The target application is intercpted. %{public}s", controlRule.controlMessage.c_str());
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "The target application is intercpted. %{public}s",
+            controlRule.controlMessage.c_str());
 #ifdef SUPPORT_GRAPHICS
         if (!isForeground || controlRule.controlWant == nullptr) {
-            HILOG_ERROR("Can not start control want");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start control want");
             RETURN_BY_ISEDM(controlRule.isEdm);
         }
         if (controlRule.controlWant->GetBoolParam(IS_FROM_PARENTCONTROL, false)) {
@@ -134,7 +136,7 @@ ErrCode ControlInterceptor::DoProcess(const Want &want, int requestCode, int32_t
         int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*controlRule.controlWant,
             requestCode, userId));
         if (ret != ERR_OK) {
-            HILOG_ERROR("Control implicit start appgallery failed.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Control implicit start appgallery failed.");
             return ret;
         }
 #endif
@@ -150,7 +152,7 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
         return false;
     }
 
@@ -158,13 +160,13 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
     std::string bundleName = want.GetBundle();
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
     if (appControlMgr == nullptr) {
-        HILOG_ERROR("The appControlMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The appControlMgr is nullptr.");
         return false;
     }
 
     auto ret = IN_PROCESS_CALL(appControlMgr->GetAppRunningControlRule(bundleName, userId, controlRule));
     if (ret != ERR_OK) {
-        HILOG_DEBUG("Get No AppRunningControlRule.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No AppRunningControlRule.");
         return false;
     }
     return true;
@@ -173,34 +175,35 @@ bool ControlInterceptor::CheckControl(const Want &want, int32_t userId,
 ErrCode DisposedRuleInterceptor::DoProcess(const Want &want, int requestCode, int32_t userId, bool isForeground,
     const sptr<IRemoteObject> &callerToken)
 {
-    HILOG_DEBUG("Call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     AppExecFwk::DisposedRule disposedRule;
     if (CheckControl(want, userId, disposedRule)) {
-        HILOG_INFO("The target ability is intercpted, disposedType is %{public}d, controlType is %{public}d, "
-            "componentType is %{public}d.", disposedRule.disposedType, disposedRule.controlType,
-            disposedRule.componentType);
+        TAG_LOGI(AAFwkTag::ABILITYMGR,
+            "The target ability is intercpted, disposedType is %{public}d, controlType is %{public}d, "
+            "componentType is %{public}d.",
+            disposedRule.disposedType, disposedRule.controlType, disposedRule.componentType);
 #ifdef SUPPORT_GRAPHICS
         if (!isForeground || disposedRule.want == nullptr
             || disposedRule.disposedType == AppExecFwk::DisposedType::NON_BLOCK) {
-            HILOG_ERROR("Can not start disposed want");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed want");
             RETURN_BY_ISEDM(disposedRule.isEdm);
         }
         if (disposedRule.want->GetBundle() == want.GetBundle()) {
-            HILOG_ERROR("Can not start disposed want with same bundleName");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed want with same bundleName");
             RETURN_BY_ISEDM(disposedRule.isEdm);
         }
         if (disposedRule.componentType == AppExecFwk::ComponentType::UI_ABILITY) {
             int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule.want,
                 requestCode, userId));
             if (ret != ERR_OK) {
-                HILOG_ERROR("DisposedRuleInterceptor start ability failed.");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "DisposedRuleInterceptor start ability failed.");
                 return ret;
             }
         }
         if (disposedRule.componentType == AppExecFwk::ComponentType::UI_EXTENSION) {
             int ret = CreateModalUIExtension(*disposedRule.want, callerToken);
             if (ret != ERR_OK) {
-                HILOG_ERROR("failed to start disposed UIExtension");
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to start disposed UIExtension");
                 return ret;
             }
         }
@@ -220,7 +223,7 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
         return false;
     }
 
@@ -228,7 +231,7 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
     std::string bundleName = want.GetBundle();
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
     if (appControlMgr == nullptr) {
-        HILOG_ERROR("The appControlMgr is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The appControlMgr is nullptr.");
         return false;
     }
     std::vector<AppExecFwk::DisposedRule> disposedRuleList;
@@ -236,7 +239,7 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
     auto ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
         userId, disposedRuleList));
     if (ret != ERR_OK || disposedRuleList.empty()) {
-        HILOG_DEBUG("Get No DisposedRule");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
         return false;
     }
 
@@ -284,20 +287,20 @@ bool DisposedRuleInterceptor::CheckDisposedRule(const Want &want, AppExecFwk::Di
 ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk::DisposedRule &disposedRule)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_INFO("not block");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "not block");
     if (disposedRule.want == nullptr) {
-        HILOG_ERROR("Can not start disposed app, want is nullptr");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed app, want is nullptr");
         return ERR_OK;
     }
     if (disposedRule.want->GetBundle() == want.GetBundle()) {
-        HILOG_ERROR("Can not start disposed app with same bundleName");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed app with same bundleName");
         return ERR_OK;
     }
     std::string bundleName = want.GetBundle();
     {
         std::lock_guard<ffrt::mutex> guard(observerLock_);
         if (disposedObserverMap_.find(bundleName) != disposedObserverMap_.end()) {
-            HILOG_DEBUG("start same disposed app, do not need to register again");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "start same disposed app, do not need to register again");
             return ERR_OK;
         }
     }
@@ -309,7 +312,7 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
     bundleNameList.push_back(bundleName);
     int32_t ret = IN_PROCESS_CALL(appManager->RegisterApplicationStateObserver(disposedObserver, bundleNameList));
     if (ret != 0) {
-        HILOG_ERROR("register to appmanager failed. err:%{public}d", ret);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "register to appmanager failed. err:%{public}d", ret);
         disposedObserver = nullptr;
         return ret;
     }
@@ -321,7 +324,7 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
         std::lock_guard<ffrt::mutex> guard{interceptor->observerLock_};
         auto iter = interceptor->disposedObserverMap_.find(bundleName);
         if (iter != interceptor->disposedObserverMap_.end()) {
-            HILOG_ERROR("start disposed app time out, need to unregister observer");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "start disposed app time out, need to unregister observer");
             IN_PROCESS_CALL(appManager->UnregisterApplicationStateObserver(iter->second));
             interceptor->disposedObserverMap_.erase(iter);
         }
@@ -335,12 +338,12 @@ sptr<OHOS::AppExecFwk::IAppMgr> DisposedRuleInterceptor::GetAppMgr()
     OHOS::sptr<OHOS::ISystemAbilityManager> systemAbilityManager =
         OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (!systemAbilityManager) {
-        HILOG_ERROR("get systemAbilityManager failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get systemAbilityManager failed");
         return nullptr;
     }
     OHOS::sptr<OHOS::IRemoteObject> object = systemAbilityManager->GetSystemAbility(OHOS::APP_MGR_SERVICE_ID);
     if (!object) {
-        HILOG_ERROR("get systemAbilityManager failed");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "get systemAbilityManager failed");
         return nullptr;
     }
     sptr<OHOS::AppExecFwk::IAppMgr> appMgr = iface_cast<AppExecFwk::IAppMgr>(object);
@@ -352,13 +355,13 @@ sptr<OHOS::AppExecFwk::IAppMgr> DisposedRuleInterceptor::GetAppMgr()
 
 void DisposedRuleInterceptor::UnregisterObserver(const std::string &bundleName)
 {
-    HILOG_DEBUG("Call");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Call");
     taskHandler_->CancelTask(UNREGISTER_TIMEOUT_OBSERVER_TASK);
     auto unregisterTask = [bundleName, interceptor = shared_from_this()] () {
         std::lock_guard<ffrt::mutex> guard{interceptor->observerLock_};
         auto iter = interceptor->disposedObserverMap_.find(bundleName);
         if (iter == interceptor->disposedObserverMap_.end()) {
-            HILOG_ERROR("Can not find observer");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not find observer");
         } else {
             auto disposedObserver = iter->second;
             CHECK_POINTER(disposedObserver);
@@ -388,7 +391,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
 {
     if (want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME) ==
         want.GetElement().GetBundleName()) {
-        HILOG_DEBUG("The same bundle, do not intercept.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "The same bundle, do not intercept.");
         return ERR_OK;
     }
     ErmsCallerInfo callerInfo;
@@ -396,26 +399,26 @@ ErrCode EcologicalRuleInterceptor::DoProcess(const Want &want, int requestCode, 
     if (callerToken != nullptr) {
         auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
         if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
-            HILOG_DEBUG("callerModelType is FA.");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "callerModelType is FA.");
             callerInfo.callerModelType = ErmsCallerInfo::MODEL_FA;
         }
     }
     GetEcologicalCallerInfo(want, callerInfo, userId);
     std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE, "true");
     if (supportErms == "false") {
-        HILOG_ERROR("Abilityms not support Erms between applications.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Abilityms not support Erms between applications.");
         return ERR_OK;
     }
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
         callerInfo, rule));
     if (ret != ERR_OK) {
-        HILOG_DEBUG("check ecological rule failed, keep going.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "check ecological rule failed, keep going.");
         return ERR_OK;
     }
-    HILOG_DEBUG("check ecological rule success");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "check ecological rule success");
     if (rule.isAllow) {
-        HILOG_DEBUG("ecological rule is allow, keep going.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ecological rule is allow, keep going.");
         return ERR_OK;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -439,41 +442,41 @@ void EcologicalRuleInterceptor::GetEcologicalCallerInfo(const Want &want, ErmsCa
     callerInfo.targetAppDistType = want.GetStringParam("send_to_erms_targetAppDistType");
     (const_cast<Want &>(want)).RemoveParam("send_to_erms_targetLinkFeature");
     (const_cast<Want &>(want)).RemoveParam("send_to_erms_targetAppDistType");
-    HILOG_DEBUG("get callerInfo targetLinkFeature is %{public}s, targetAppDistType is %{public}s",
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "get callerInfo targetLinkFeature is %{public}s, targetAppDistType is %{public}s",
         callerInfo.targetLinkFeature.c_str(), callerInfo.targetAppDistType.c_str());
 
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
         return;
     }
 
     auto targetBundleType = static_cast<AppExecFwk::BundleType>(want.GetIntParam("send_to_erms_targetBundleType", -1));
     (const_cast<Want &>(want)).RemoveParam("send_to_erms_targetBundleType");
     if (targetBundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
-        HILOG_DEBUG("the target type  is atomic service");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "the target type  is atomic service");
         callerInfo.targetAppType = ErmsCallerInfo::TYPE_ATOM_SERVICE;
     } else if (targetBundleType == AppExecFwk::BundleType::APP) {
-        HILOG_DEBUG("the target type is app");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "the target type is app");
         callerInfo.targetAppType = ErmsCallerInfo::TYPE_HARMONY_APP;
     }
 
     std::string callerBundleName;
     ErrCode err = IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callerInfo.uid, callerBundleName));
     if (err != ERR_OK) {
-        HILOG_ERROR("Get callerBundleName failed,uid: %{public}d.", callerInfo.uid);
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get callerBundleName failed,uid: %{public}d.", callerInfo.uid);
         return;
     }
     AppExecFwk::ApplicationInfo callerAppInfo;
     bool getCallerResult = IN_PROCESS_CALL(bundleMgrHelper->GetApplicationInfo(callerBundleName,
         AppExecFwk::ApplicationFlag::GET_BASIC_APPLICATION_INFO, userId, callerAppInfo));
     if (!getCallerResult) {
-        HILOG_DEBUG("Get callerAppInfo failed.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Get callerAppInfo failed.");
     } else if (callerAppInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE) {
-        HILOG_DEBUG("the caller type  is atomic service");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "the caller type  is atomic service");
         callerInfo.callerAppType = ErmsCallerInfo::TYPE_ATOM_SERVICE;
     } else if (callerAppInfo.bundleType == AppExecFwk::BundleType::APP) {
-        HILOG_DEBUG("the caller type is app");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "the caller type is app");
         callerInfo.callerAppType = ErmsCallerInfo::TYPE_HARMONY_APP;
         if (callerInfo.packageName == "" && callerAppInfo.name == BUNDLE_NAME_SCENEBOARD) {
             callerInfo.packageName = BUNDLE_NAME_SCENEBOARD;
@@ -485,31 +488,32 @@ ErrCode AbilityJumpInterceptor::DoProcess(const Want &want, int requestCode, int
     const sptr<IRemoteObject> &callerToken)
 {
     if (!isForeground) {
-        HILOG_INFO("This startup is not foreground, keep going.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "This startup is not foreground, keep going.");
         return ERR_OK;
     }
     bool isStartIncludeAtomicService = AbilityUtil::IsStartIncludeAtomicService(want, userId);
     if (isStartIncludeAtomicService) {
-        HILOG_INFO("This startup contain atomic service, keep going.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "This startup contain atomic service, keep going.");
         return ERR_OK;
     }
     // get bms
     auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
-        HILOG_ERROR("The bundleMgrHelper is nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The bundleMgrHelper is nullptr.");
         return ERR_OK;
     }
     AppExecFwk::AbilityInfo targetAbilityInfo;
     IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(want,
         AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, userId, targetAbilityInfo));
     if (targetAbilityInfo.type != AppExecFwk::AbilityType::PAGE) {
-        HILOG_INFO("Target is not page Ability, keep going, abilityType:%{public}d.", targetAbilityInfo.type);
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Target is not page Ability, keep going, abilityType:%{public}d.",
+            targetAbilityInfo.type);
         return ERR_OK;
     }
     AppExecFwk::AppJumpControlRule controlRule;
     if (CheckControl(bundleMgrHelper, want, userId, controlRule)) {
 #ifdef SUPPORT_GRAPHICS
-        HILOG_INFO("app jump need to be intercepted, caller:%{public}s, target:%{public}s",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "app jump need to be intercepted, caller:%{public}s, target:%{public}s",
             controlRule.callerPkg.c_str(), controlRule.targetPkg.c_str());
         auto sysDialogScheduler = DelayedSingleton<SystemDialogScheduler>::GetInstance();
         Want targetWant = want;
@@ -519,7 +523,7 @@ ErrCode AbilityJumpInterceptor::DoProcess(const Want &want, int requestCode, int
         int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(dialogWant,
             requestCode, userId));
         if (ret != ERR_OK) {
-            HILOG_INFO("appInterceptor Dialog StartAbility error, ret:%{public}d", ret);
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "appInterceptor Dialog StartAbility error, ret:%{public}d", ret);
             return ret;
         }
 #endif
@@ -539,34 +543,34 @@ bool AbilityJumpInterceptor::CheckControl(std::shared_ptr<AppExecFwk::BundleMgrH
     controlRule.callerPkg = callerBundleName;
     controlRule.targetPkg = targetBundleName;
     if (result != ERR_OK) {
-        HILOG_ERROR("GetBundleName from bms fail.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleName from bms fail.");
         return false;
     }
     if (controlRule.callerPkg.empty() || controlRule.targetPkg.empty()) {
-        HILOG_INFO("This startup is not explicitly, keep going.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "This startup is not explicitly, keep going.");
         return false;
     }
     if (controlRule.callerPkg == controlRule.targetPkg) {
-        HILOG_INFO("Jump within the same app.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump within the same app.");
         return false;
     }
     if (CheckIfJumpExempt(controlRule, userId)) {
-        HILOG_INFO("Jump from or to system or exempt apps.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump from or to system or exempt apps.");
         return false;
     }
     // get disposed status
     auto appControlMgr = bundleMgrHelper->GetAppControlProxy();
     if (appControlMgr == nullptr) {
-        HILOG_ERROR("Get appControlMgr failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get appControlMgr failed.");
         return false;
     }
 
     if (IN_PROCESS_CALL(appControlMgr->GetAppJumpControlRule(callerBundleName, targetBundleName,
         userId, controlRule)) != ERR_OK) {
-        HILOG_INFO("No jump control rule found.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "No jump control rule found.");
         return true;
     }
-    HILOG_INFO("Get appJumpControlRule, jumpMode:%d.", controlRule.jumpMode);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Get appJumpControlRule, jumpMode:%d.", controlRule.jumpMode);
     return controlRule.jumpMode != AppExecFwk::AbilityJumpMode::DIRECT;
 }
 
@@ -574,15 +578,15 @@ bool AbilityJumpInterceptor::CheckIfJumpExempt(AppExecFwk::AppJumpControlRule &c
 {
     if (CheckIfExemptByBundleName(controlRule.callerPkg,
         PermissionConstants::PERMISSION_EXEMPT_AS_CALLER, userId)) {
-        HILOG_INFO("Jump from exempt caller app, No need to intercept.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump from exempt caller app, No need to intercept.");
         return true;
     }
     if (CheckIfExemptByBundleName(controlRule.targetPkg,
         PermissionConstants::PERMISSION_EXEMPT_AS_TARGET, userId)) {
-        HILOG_INFO("Jump to exempt target app, No need to intercept.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Jump to exempt target app, No need to intercept.");
         return true;
     }
-    HILOG_INFO("Third-party apps jump to third-party apps.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Third-party apps jump to third-party apps.");
     return false;
 }
 
@@ -592,20 +596,21 @@ bool AbilityJumpInterceptor::CheckIfExemptByBundleName(const std::string &bundle
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     AppExecFwk::ApplicationInfo appInfo;
     if (!StartAbilityUtils::GetApplicationInfo(bundleName, userId, appInfo)) {
-        HILOG_ERROR("failed to get application info.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "failed to get application info.");
         return false;
     }
 
     if (appInfo.isSystemApp) {
-        HILOG_INFO("Bundle:%{public}s is system app.", bundleName.c_str());
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Bundle:%{public}s is system app.", bundleName.c_str());
         return true;
     }
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId, permission, false);
     if (ret == Security::AccessToken::PermissionState::PERMISSION_DENIED) {
-        HILOG_DEBUG("VerifyPermission %{public}d: PERMISSION_DENIED.", appInfo.accessTokenId);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "VerifyPermission %{public}d: PERMISSION_DENIED.", appInfo.accessTokenId);
         return false;
     }
-    HILOG_INFO("Bundle:%{public}s verify permission:%{public}s successed.", bundleName.c_str(), permission.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bundle:%{public}s verify permission:%{public}s successed.", bundleName.c_str(),
+        permission.c_str());
     return true;
 }
 
