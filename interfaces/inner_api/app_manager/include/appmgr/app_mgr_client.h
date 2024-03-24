@@ -61,8 +61,9 @@ public:
      * @param want Want.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo, const AAFwk::Want &want);
+    virtual AppMgrResultCode LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
+        const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo, const AAFwk::Want &want,
+        int32_t abilityRecordId);
 
     /**
      * Terminate ability.
@@ -631,6 +632,8 @@ public:
     int32_t UnregisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
 
     int32_t UpdateRenderState(pid_t renderPid, int32_t state);
+
+    int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**
