@@ -281,6 +281,12 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     }
 }
 
+[[maybe_unused]] static bool IsSceneBoard(const std::string &bundleName, const std::string &AbilityName)
+{
+    return AbilityName == AbilityConfig::SCENEBOARD_ABILITY_NAME &&
+        bundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME;
+}
+
 [[maybe_unused]] static int StartAppgallery(const std::string &bundleName, const int requestCode, const int32_t userId,
     const std::string &action)
 {
@@ -298,6 +304,14 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     want.SetAction(action);
     want.SetParam(MARKET_CROWD_TEST_BUNDLE_PARAM, bundleName);
     return AbilityManagerClient::GetInstance()->StartAbility(want, requestCode, userId);
+}
+
+inline ErrCode EdmErrorType(bool isEdm)
+{
+    if (isEdm) {
+        return ERR_EDM_APP_CONTROLLED;
+    }
+    return ERR_APP_CONTROLLED;
 }
 }  // namespace AbilityUtil
 }  // namespace AAFwk
