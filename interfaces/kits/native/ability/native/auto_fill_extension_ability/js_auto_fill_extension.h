@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_JS_AUTO_FILL_EXTENSION_H
 
 #include "auto_fill_extension.h"
+#include "auto_fill_extension_context.h"
 #include "configuration.h"
 #include "session_info.h"
 #include "view_data.h"
@@ -29,7 +30,7 @@ class JsUIExtensionBase;
 /**
  * @brief Basic js auto fill extension.
  */
-class JsAutoFillExtension : public AutoFillExtension {
+class JsAutoFillExtension : public AutoFillExtension, public IAutoFillExtensionCallback {
 public:
     explicit JsAutoFillExtension(JsRuntime &jsRuntime);
     virtual ~JsAutoFillExtension() override;
@@ -114,6 +115,8 @@ public:
      * @param wantParams Indicates the view data of the update request.
      */
     void UpdateRequest(const AAFwk::WantParams &wantParams);
+
+    int32_t OnReloadInModal(const sptr<AAFwk::SessionInfo> &sessionInfo, const CustomData &customData) override;
 
 private:
     virtual void BindContext(napi_env env, napi_value obj);
