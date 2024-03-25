@@ -90,9 +90,9 @@ public:
      *
      * @return
      */
-    virtual void LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want);
+    virtual void LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
+        std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     /**
      * TerminateAbility, terminate the token ability.
@@ -365,14 +365,15 @@ public:
     int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) const;
 
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
-        const sptr<IRemoteObject> &token,
-        const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AbilityInfo> &abilityInfo,
+        sptr<IRemoteObject> token,
+        sptr<IRemoteObject> preToken,
+        std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &processName,
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
-        const std::shared_ptr<AAFwk::Want> &want);
+        std::shared_ptr<AAFwk::Want> want,
+        int32_t abilityRecordId);
 
     /**
      * OnStop, Application management service stopped.
@@ -681,10 +682,11 @@ public:
      * KillProcessByPid, Kill process by PID.
      *
      * @param pid_t, the app record pid.
+     * @param reason, the reason why the process is killed, default to "foundation"
      *
      * @return ERR_OK, return back success，others fail.
      */
-    int32_t KillProcessByPid(const pid_t pid) const;
+    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation") const;
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName);
 
@@ -823,6 +825,38 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t DetachAppDebug(const std::string &bundleName);
+
+    /**
+     * @brief Set app waiting debug mode.
+     * @param bundleName The application bundle name.
+     * @param isPersist The persist flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetAppWaitingDebug(const std::string &bundleName, bool isPersist);
+
+    /**
+     * @brief Cancel app waiting debug mode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t CancelAppWaitingDebug();
+
+    /**
+     * @brief Get waiting debug mode application.
+     * @param bundleNameList The application bundle name list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetWaitingDebugApp(std::vector<std::string> &bundleNameList);
+
+    /**
+     * @brief Determine whether it is a waiting debug application based on the bundle name.
+     * @return Returns true if it is a waiting debug application, otherwise it returns false.
+     */
+    bool IsWaitingDebugApp(const std::string &bundleName);
+
+    /**
+     * @brief Clear non persist waiting debug flag.
+     */
+    void ClearNonPersistWaitingDebugFlag();
 
     /**
      * @brief Registering ability debug mode response.
@@ -983,9 +1017,9 @@ private:
      *
      * @return
      */
-    void StartAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<AppRunningRecord> &appRecord,
-        const HapModuleInfo &hapModuleInfo, const std::shared_ptr<AAFwk::Want> &want);
+    void StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
+        std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AppRunningRecord> appRecord,
+        const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     int32_t StartPerfProcess(const std::shared_ptr<AppRunningRecord> &appRecord, const std::string& perfCmd,
         const std::string& debugCmd, bool isSandboxApp) const;
@@ -1258,6 +1292,7 @@ private:
     void SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
         const std::shared_ptr<AppRunningRecord> &appRecord);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void InitAppWaitingDebugList();
     void HandleConfigurationChange(const Configuration &config);
     bool CheckAppFault(const std::shared_ptr<AppRunningRecord> &appRecord, const FaultData &faultData);
     int32_t KillFaultApp(int32_t pid, const std::string &bundleName, const FaultData &faultData);
@@ -1280,6 +1315,9 @@ private:
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
+    std::map<std::string, bool> waitingDebugBundleList_;
+    ffrt::mutex waitingDebugLock_;
+    bool isInitAppWaitingDebugListExecuted_ = false;
     std::unordered_set<int32_t> renderUidSet_;
     std::string supportIsolationMode_ {"false"};
     std::string supportServiceExtMultiProcess_ {"false"};
