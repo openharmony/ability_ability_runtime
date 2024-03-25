@@ -199,7 +199,6 @@ void PendingWantManager::CancelWantSender(const bool isSystemApp, const sptr<IWa
         return;
     }
 
-    std::lock_guard<ffrt::mutex> locker(mutex_);
     auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
     if (!isSaCall && !isSystemApp) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "is not allowed to send");
@@ -217,8 +216,8 @@ void PendingWantManager::CancelWantSender(const bool isSystemApp, const sptr<IWa
 
 void PendingWantManager::CancelWantSenderLocked(PendingWantRecord &record, bool cleanAbility)
 {
-    TAG_LOGD(AAFwkTag::WANTAGENT, "begin.");
-
+    HILOG_DEBUG("begin.");
+    std::lock_guard<ffrt::mutex> locker(mutex_);
     MakeWantSenderCanceledLocked(record);
     if (cleanAbility) {
         wantRecords_.erase(record.GetKey());
