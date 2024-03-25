@@ -41,10 +41,10 @@ public:
     void TerminateTimeout();
 private:
     enum ErrorCode {
-        LOAD_TIMEOUT = 1,
-        FOREGROUND_TIMEOUT = 2,
-        BACKGROUND_TIMEOUT = 3,
-        TERMINATE_TIMEOUT = 4
+        LOAD_TIMEOUT = 0,
+        FOREGROUND_TIMEOUT = 1,
+        BACKGROUND_TIMEOUT = 2,
+        TERMINATE_TIMEOUT = 3
     };
     void HandleNotifyUIExtensionTimeout(ErrorCode code);
 };

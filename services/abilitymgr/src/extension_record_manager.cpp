@@ -73,6 +73,21 @@ void ExtensionRecordManager::RemoveExtensionRecord(const int32_t extensionRecord
     HILOG_DEBUG("extensionRecordId %{public}d.", extensionRecordId);
     std::lock_guard<std::mutex> lock(mutex_);
     extensionRecords_.erase(extensionRecordId);
+    terminateRecords_.erase(extensionRecordId);
+}
+
+void ExtensionRecordManager::AddExtensionRecordToTerminatedList(const int32_t extensionRecordId)
+{
+    HILOG_DEBUG("extensionRecordId %{public}d.", extensionRecordId);
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    auto findRecord = extensionRecords_.find(extensionRecordId);
+    if (findRecord == extensionRecords_.end()) {
+        HILOG_ERROR("extensionRecordId %{public}d not found.", extensionRecordId);
+        return;
+    }
+    terminateRecords_.emplace(*findRecord);
+    extensionRecords_.erase(extensionRecordId);
 }
 
 int32_t ExtensionRecordManager::GetExtensionRecord(const int32_t extensionRecordId,
@@ -369,11 +384,15 @@ int32_t ExtensionRecordManager::GetUIExtensionRootHostInfo(const sptr<IRemoteObj
     return ERR_OK;
 }
 
-std::shared_ptr<ExtensionRecord> ExtensionRecordManager::GetUIExtensionRecordById(int32_t extensionRecordId)
+std::shared_ptr<ExtensionRecord> ExtensionRecordManager::GetExtensionRecordById(int32_t extensionRecordId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto findRecord = extensionRecords_.find(extensionRecordId);
-    if (findRecord == extensionRecords_.end()) {
+    if (findRecord != extensionRecords_.end()) {
+        return findRecord->second;
+    }
+    findRecord = terminateRecords_.find(extensionRecordId);
+    if (findRecord == terminateRecords_.end()) {
         HILOG_ERROR("Ui extension record not found, id: %{public}d.", extensionRecordId);
         return nullptr;
     }
@@ -384,7 +403,7 @@ std::shared_ptr<ExtensionRecord> ExtensionRecordManager::GetUIExtensionRecordByI
 void ExtensionRecordManager::LoadTimeout(int32_t extensionRecordId)
 {
     HILOG_DEBUG("Called.");
-    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetUIExtensionRecordById(extensionRecordId));
+    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetExtensionRecordById(extensionRecordId));
     if (uiExtensionRecord == nullptr) {
         HILOG_ERROR("Parsing ui extension record failed.");
         return;
@@ -396,7 +415,7 @@ void ExtensionRecordManager::LoadTimeout(int32_t extensionRecordId)
 void ExtensionRecordManager::ForegroundTimeout(int32_t extensionRecordId)
 {
     HILOG_DEBUG("Called.");
-    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetUIExtensionRecordById(extensionRecordId));
+    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetExtensionRecordById(extensionRecordId));
     if (uiExtensionRecord == nullptr) {
         HILOG_ERROR("Parsing ui extension record failed.");
         return;
@@ -408,7 +427,11 @@ void ExtensionRecordManager::ForegroundTimeout(int32_t extensionRecordId)
 void ExtensionRecordManager::BackgroundTimeout(int32_t extensionRecordId)
 {
     HILOG_DEBUG("Called.");
-    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetUIExtensionRecordById(extensionRecordId));
+    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetExtensionRecordById(extensionRecordId));
+    if (uiExtensionRecord == nullptr) {
+        HILOG_ERROR("Parsing ui extension record failed.");
+        return;
+    }
     HILOG_DEBUG("Start background timeout.");
     uiExtensionRecord->BackgroundTimeout();
 }
@@ -416,7 +439,7 @@ void ExtensionRecordManager::BackgroundTimeout(int32_t extensionRecordId)
 void ExtensionRecordManager::TerminateTimeout(int32_t extensionRecordId)
 {
     HILOG_DEBUG("Called.");
-    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetUIExtensionRecordById(extensionRecordId));
+    auto uiExtensionRecord = std::static_pointer_cast<UIExtensionRecord>(GetExtensionRecordById(extensionRecordId));
     if (uiExtensionRecord == nullptr) {
         HILOG_ERROR("Parsing ui extension record failed.");
         return;

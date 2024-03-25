@@ -50,7 +50,7 @@ void UIExtensionRecord::HandleNotifyUIExtensionTimeout(ErrorCode code)
         HILOG_DEBUG("Parsing session failed, is nullptr.");
         return;
     }
-    sessionProxy->NotifyExtensionTimeOut(code);
+    sessionProxy->NotifyExtensionTimeout(code);
 }
 
 void UIExtensionRecord::LoadTimeout()
