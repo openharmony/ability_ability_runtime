@@ -3247,13 +3247,19 @@ std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByNameFromCur
     }
 
     // find in defaultStandardList_
-    auto defaultStandardAbility = defaultStandardList_->GetAbilityRecordByName(element);
-    if (defaultStandardAbility != nullptr) {
-        return defaultStandardAbility;
+    if (defaultStandardList_ != nullptr) {
+        auto defaultStandardAbility = defaultStandardList_->GetAbilityRecordByName(element);
+        if (defaultStandardAbility != nullptr) {
+            return defaultStandardAbility;
+        }
+    }
+    
+    // find in launcherList_
+    if (launcherList_ != nullptr) {
+        return launcherList_->GetAbilityRecordByName(element);
     }
 
-    // find in launcherMissionList_
-    return launcherList_->GetAbilityRecordByName(element);
+    return nullptr;
 }
 
 std::vector<std::shared_ptr<AbilityRecord>> MissionListManager::GetAbilityRecordsByName(
