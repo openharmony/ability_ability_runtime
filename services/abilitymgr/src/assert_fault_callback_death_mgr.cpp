@@ -102,7 +102,7 @@ void AssertFaultCallbackDeathMgr::CallAssertFaultCallback(uint64_t assertFaultSe
         std::unique_lock<std::mutex> lock(assertFaultSessionMutex_);
         auto iter = assertFaultSessionDailogs_.find(assertFaultSessionId);
         if (iter == assertFaultSessionDailogs_.end()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not find assert fault session by id.");
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Not find assert fault session by id.");
             return;
         }
 
