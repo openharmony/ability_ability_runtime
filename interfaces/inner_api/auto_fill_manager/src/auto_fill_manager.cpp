@@ -29,6 +29,7 @@ namespace {
 const std::string WANT_PARAMS_EXTENSION_TYPE = "autoFill/password";
 const std::string WANT_PARAMS_SMART_EXTENSION_TYPE = "autoFill/smart";
 constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewData";
+constexpr static char WANT_PARAMS_CUSTOM_DATA_KEY[] = "ohos.ability.params.customData";
 constexpr static char WANT_PARAMS_AUTO_FILL_CMD_KEY[] = "ohos.ability.params.autoFillCmd";
 constexpr static char WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY[] = "ohos.ability.params.popupWindow";
 constexpr static char WANT_PARAMS_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
@@ -105,16 +106,7 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
         extensionCallback->SetSaveRequestCallback(saveCallback);
     }
     Ace::ModalUIExtensionCallbacks callback;
-    callback.onResult = std::bind(
-        &AutoFillExtensionCallback::OnResult, extensionCallback, std::placeholders::_1, std::placeholders::_2);
-    callback.onRelease = std::bind(
-        &AutoFillExtensionCallback::OnRelease, extensionCallback, std::placeholders::_1);
-    callback.onError = std::bind(&AutoFillExtensionCallback::OnError,
-        extensionCallback, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-    callback.onReceive = std::bind(&AutoFillExtensionCallback::OnReceive, extensionCallback, std::placeholders::_1);
-    callback.onRemoteReady = std::bind(&AutoFillExtensionCallback::onRemoteReady,
-        extensionCallback, std::placeholders::_1);
-    callback.onDestroy = std::bind(&AutoFillExtensionCallback::onDestroy, extensionCallback);
+    BindModalUIExtensionCallback(extensionCallback, callback);
 
     bool isSmartAutoFill = false;
     auto autoFillWindowType = ConvertAutoFillWindowType(request, isSmartAutoFill);
@@ -128,6 +120,7 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
     extensionCallback->SetUIContent(uiContent);
     extensionCallback->SetSessionId(sessionId);
     extensionCallback->SetEventId(eventId_);
+    extensionCallback->SetViewData(request.viewData);
     extensionCallback->SetWindowType(autoFillWindowType);
     std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
     extensionCallbacks_.emplace(eventId_, extensionCallback);
@@ -191,6 +184,67 @@ void AutoFillManager::RemoveAutoFillExtensionProxy(Ace::UIContent *uiContent)
     if (it != modalUIExtensionProxyMap_.end()) {
         modalUIExtensionProxyMap_.erase(it);
     }
+}
+
+void AutoFillManager::BindModalUIExtensionCallback(
+    const std::shared_ptr<AutoFillExtensionCallback> &extensionCallback, Ace::ModalUIExtensionCallbacks &callback)
+{
+    HILOG_DEBUG("Called.");
+    callback.onResult = std::bind(
+        &AutoFillExtensionCallback::OnResult, extensionCallback, std::placeholders::_1, std::placeholders::_2);
+    callback.onRelease = std::bind(
+        &AutoFillExtensionCallback::OnRelease, extensionCallback, std::placeholders::_1);
+    callback.onError = std::bind(&AutoFillExtensionCallback::OnError,
+        extensionCallback, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+    callback.onReceive = std::bind(&AutoFillExtensionCallback::OnReceive, extensionCallback, std::placeholders::_1);
+    callback.onRemoteReady = std::bind(&AutoFillExtensionCallback::onRemoteReady,
+        extensionCallback, std::placeholders::_1);
+    callback.onDestroy = std::bind(&AutoFillExtensionCallback::onDestroy, extensionCallback);
+}
+
+int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &request)
+{
+    HILOG_DEBUG("Called.");
+    if (request.uiContent == nullptr) {
+        HILOG_ERROR("Content is nullptr.");
+        return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
+    }
+
+    if (request.extensionCallback == nullptr) {
+        HILOG_ERROR("ExtensionCallback is nullptr.");
+        return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
+    }
+    
+    {
+        std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
+        SetTimeOutEvent(++eventId_);
+    }
+
+    AAFwk::Want want;
+    want.SetParam(WANT_PARAMS_AUTO_FILL_CMD_KEY, static_cast<int32_t>(AutoFill::AutoFillCommand::RELOAD_IN_MODAL));
+    want.SetParam(WANT_PARAMS_CUSTOM_DATA_KEY, request.customData);
+    want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_EXTENSION_TYPE);
+    want.SetParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, static_cast<int32_t>(AbilityBase::AutoFillType::PASSWORD));
+    want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, request.extensionCallback->GetViewData().ToJsonString());
+    want.SetParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);
+    Ace::ModalUIExtensionCallbacks callback;
+    BindModalUIExtensionCallback(request.extensionCallback, callback);
+    Ace::ModalUIExtensionConfig config;
+    config.isAsyncModalBinding = true;
+    int32_t sessionId = AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID;
+    sessionId = request.uiContent->CreateModalUIExtension(want, callback, config);
+    if (sessionId == AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID) {
+        HILOG_ERROR("Create ui extension is failed.");
+        RemoveEvent(eventId_);
+        return AutoFill::AUTO_FILL_CREATE_MODULE_UI_EXTENSION_FAILED;
+    }
+    request.extensionCallback->SetUIContent(request.uiContent);
+    request.extensionCallback->SetSessionId(sessionId);
+    request.extensionCallback->SetEventId(eventId_);
+    request.extensionCallback->SetWindowType(AutoFill::AutoFillWindowType::MODAL_WINDOW);
+    std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
+    extensionCallbacks_.emplace(eventId_, request.extensionCallback);
+    return AutoFill::AUTO_FILL_SUCCESS;
 }
 
 int32_t AutoFillManager::CreateAutoFillExtension(Ace::UIContent *uiContent,

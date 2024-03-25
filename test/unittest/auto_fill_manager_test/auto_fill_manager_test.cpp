@@ -27,7 +27,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
-namespace AAFwk {
+namespace AbilityRuntime {
 class AutoFillManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -38,6 +38,8 @@ public:
     {
         return nullptr;
     }
+
+    std::shared_ptr<AutoFillManager> autoFillManager_ = std::make_shared<AutoFillManager>();
 };
 
 void AutoFillManagerTest::SetUpTestCase(void)
@@ -51,5 +53,18 @@ void AutoFillManagerTest::SetUp()
 
 void AutoFillManagerTest::TearDown()
 {}
+
+/**
+ * @tc.name: ReloadInModal_0100
+ * @tc.desc: Js auto fill extension ReloadInModal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AutoFillManagerTest, ReloadInModal_0100, TestSize.Level1)
+{
+    AutoFill::ReloadInModalRequest request;
+    ASSERT_NE(autoFillManager_, nullptr);
+    auto ret = autoFillManager_->ReloadInModal(request);
+    EXPECT_EQ(ret, AutoFill::AUTO_FILL_OBJECT_IS_NULL);
+}
 } // namespace AppExecFwk
 } // namespace OHOS
