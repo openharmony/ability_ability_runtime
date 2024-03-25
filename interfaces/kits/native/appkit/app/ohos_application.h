@@ -174,7 +174,7 @@ public:
      *
      * @param config Indicates the new Configuration object.
      */
-    virtual void OnConfigurationUpdated(const Configuration &config);
+    virtual void OnConfigurationUpdated(Configuration config);
 
     /**
      *
