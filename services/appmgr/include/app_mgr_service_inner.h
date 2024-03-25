@@ -90,9 +90,9 @@ public:
      *
      * @return
      */
-    virtual void LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want);
+    virtual void LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
+        std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     /**
      * TerminateAbility, terminate the token ability.
@@ -365,14 +365,15 @@ public:
     int32_t StartNativeProcessForDebugger(const AAFwk::Want &want) const;
 
     std::shared_ptr<AppRunningRecord> CreateAppRunningRecord(
-        const sptr<IRemoteObject> &token,
-        const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AbilityInfo> &abilityInfo,
+        sptr<IRemoteObject> token,
+        sptr<IRemoteObject> preToken,
+        std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AbilityInfo> abilityInfo,
         const std::string &processName,
         const BundleInfo &bundleInfo,
         const HapModuleInfo &hapModuleInfo,
-        const std::shared_ptr<AAFwk::Want> &want);
+        std::shared_ptr<AAFwk::Want> want,
+        int32_t abilityRecordId);
 
     /**
      * OnStop, Application management service stopped.
@@ -681,10 +682,11 @@ public:
      * KillProcessByPid, Kill process by PID.
      *
      * @param pid_t, the app record pid.
+     * @param reason, the reason why the process is killed, default to "foundation"
      *
      * @return ERR_OK, return back success，others fail.
      */
-    int32_t KillProcessByPid(const pid_t pid) const;
+    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation") const;
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName);
 
@@ -983,9 +985,9 @@ private:
      *
      * @return
      */
-    void StartAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<AppRunningRecord> &appRecord,
-        const HapModuleInfo &hapModuleInfo, const std::shared_ptr<AAFwk::Want> &want);
+    void StartAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
+        std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AppRunningRecord> appRecord,
+        const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     int32_t StartPerfProcess(const std::shared_ptr<AppRunningRecord> &appRecord, const std::string& perfCmd,
         const std::string& debugCmd, bool isSandboxApp) const;
