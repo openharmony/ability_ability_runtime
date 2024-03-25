@@ -33,7 +33,6 @@
 #include "ability_background_connection.h"
 #include "ability_debug_deal.h"
 #include "ability_info.h"
-#include "ability_interceptor.h"
 #include "ability_manager_constants.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_radar.h"
@@ -54,6 +53,7 @@
 #include "errors.h"
 #include "extension_config.h"
 #include "freeze_util.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hisysevent.h"
 #include "hitrace_meter.h"
@@ -61,6 +61,11 @@
 #include "in_process_call_wrapper.h"
 #include "insight_intent_execute_callback_proxy.h"
 #include "insight_intent_execute_manager.h"
+#include "interceptor/ability_jump_interceptor.h"
+#include "interceptor/control_interceptor.h"
+#include "interceptor/crowd_test_interceptor.h"
+#include "interceptor/disposed_rule_interceptor.h"
+#include "interceptor/ecological_rule_interceptor.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "iservice_registry.h"
@@ -85,6 +90,7 @@
 #include "start_ability_utils.h"
 #include "string_ex.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "system_ability_definition.h"
 #include "system_ability_token_callback.h"
 #include "extension_record_manager.h"
@@ -142,7 +148,6 @@ const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
-const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 // UIExtension type
 const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
 const std::string UIEXTENSION_TARGET_TYPE_KEY = "ability.want.params.uiExtensionTargetType";
@@ -185,25 +190,6 @@ const std::unordered_set<std::string> COMMON_PICKER_TYPE = {
     "share", "action"
 };
 std::atomic<bool> g_isDmsAlive = false;
-
-bool CheckCallerIsDlpManager(const std::shared_ptr<AppExecFwk::BundleMgrHelper> &bundleManager)
-{
-    if (!bundleManager) {
-        return false;
-    }
-
-    std::string bundleName;
-    auto callerUid = IPCSkeleton::GetCallingUid();
-    if (IN_PROCESS_CALL(bundleManager->GetNameForUid(callerUid, bundleName)) != ERR_OK) {
-        HILOG_WARN("Get Bundle Name failed.");
-        return false;
-    }
-    if (bundleName != DLP_BUNDLE_NAME) {
-        HILOG_WARN("Wrong Caller.");
-        return false;
-    }
-    return true;
-}
 } // namespace
 
 using namespace std::chrono;
@@ -525,6 +511,7 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
         CHECK_CALLER_IS_SYSTEM_APP;
     }
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
     EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     int32_t ret = StartAbilityWrap(want, nullptr, requestCode, userId);
@@ -538,6 +525,14 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
 
 int AbilityManagerService::StartAbility(const Want &want, const sptr<IRemoteObject> &callerToken,
     int32_t userId, int requestCode)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    return StartAbilityByFreeInstall(want, callerToken, userId, requestCode);
+}
+
+int32_t AbilityManagerService::StartAbilityByFreeInstall(const Want &want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int32_t requestCode)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     bool startWithAccount = want.GetBoolParam(START_ABILITY_TYPE, false);
@@ -582,6 +577,7 @@ int AbilityManagerService::StartAbilityWithSpecifyTokenIdInner(const Want &want,
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     InsightIntentExecuteParam::RemoveInsightIntent(const_cast<Want &>(want));
+    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     auto flags = want.GetFlags();
     EventInfo eventInfo = BuildEventInfo(want, userId);
     EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
@@ -699,6 +695,7 @@ int AbilityManagerService::StartAbilityAsCaller(const Want &want, const sptr<IRe
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     CHECK_CALLER_IS_SYSTEM_APP;
     auto flags = want.GetFlags();
+    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
     EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
@@ -755,8 +752,10 @@ int AbilityManagerService::StartAbilityPublicPrechainCheck(StartAbilityParams &p
 
 int AbilityManagerService::StartAbilityPrechainInterceptor(StartAbilityParams &params)
 {
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(params.want, params.requestCode,
+        GetUserId(), true, nullptr);
     auto interceptorResult = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(params.want, params.requestCode, GetUserId(), true);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (interceptorResult != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return interceptorResult;
@@ -829,7 +828,6 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
 
-    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     std::string dialogSessionId = want.GetStringParam("dialogSessionId");
     isSendDialogResult = false;
     if (!dialogSessionId.empty() && dialogSessionRecord_->GetDialogCallerInfo(dialogSessionId) != nullptr) {
@@ -851,8 +849,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
 
     StartAbilityInfoWrap threadLocalInfo(want, validUserId,
         StartAbilityUtils::GetAppIndex(want, callerToken));
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
+        true, nullptr);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -991,8 +991,10 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
     }
 
     Want newWant = abilityRequest.want;
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
+        true, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(newWant, requestCode, GetUserId(), true, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
     newWant.RemoveParam("queryWantFromErms");
     if (result != ERR_OK && isReplaceWantExist == false) {
@@ -1107,8 +1109,10 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
     int32_t validUserId = oriValidUserId;
     StartAbilityInfoWrap threadLocalInfo(want, validUserId,
         StartAbilityUtils::GetAppIndex(want, callerToken));
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
+        true, nullptr);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         eventInfo.errCode = result;
@@ -1189,8 +1193,10 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         return ERR_WRONG_INTERFACE_CALL;
     }
 
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, requestCode,
+        GetUserId(), true, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(abilityRequest.want, requestCode, GetUserId(), true, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
         HILOG_ERROR("afterCheckExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -1283,6 +1289,7 @@ int AbilityManagerService::StartAbilityForResultAsCaller(
     HILOG_DEBUG("Called.");
     CHECK_CALLER_IS_SYSTEM_APP;
 
+    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     AAFwk::Want newWant = want;
     CHECK_POINTER_AND_RETURN(connectManager_, ERR_NO_INIT);
     auto asCallerSourceToken = connectManager_->GetUIExtensionSourceToken(callerToken);
@@ -1362,8 +1369,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     int32_t validUserId = oriValidUserId;
     StartAbilityInfoWrap threadLocalInfo(want, validUserId,
         StartAbilityUtils::GetAppIndex(want, callerToken));
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
+        true, nullptr);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         eventInfo.errCode = result;
@@ -1530,8 +1539,10 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     }
 
     Want newWant = abilityRequest.want;
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode, GetUserId(),
+        true, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(newWant, requestCode, GetUserId(), true, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
     newWant.RemoveParam("queryWantFromErms");
     if (result != ERR_OK && isReplaceWantExist == false) {
@@ -1633,8 +1644,10 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
     }
 
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, requestCode, GetUserId(),
+        true, nullptr);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, requestCode, GetUserId(), true);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -1685,8 +1698,10 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
         return ERR_WRONG_INTERFACE_CALL;
     }
 
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, requestCode,
+        GetUserId(), true, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(abilityRequest.want, requestCode, GetUserId(), true, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
         HILOG_ERROR("afterCheckExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -1757,8 +1772,10 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
         StartAbilityUtils::GetAppIndex(sessionInfo->want, sessionInfo->callerToken));
     if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
         HILOG_DEBUG("interceptorExecuter_ called.");
+        AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(sessionInfo->want, requestCode,
+            currentUserId, true, nullptr);
         auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(sessionInfo->want, requestCode, currentUserId, true);
+        interceptorExecuter_->DoProcess(interceptorParam);
         if (result != ERR_OK) {
             HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
             eventInfo.errCode = result;
@@ -1786,8 +1803,10 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
     if (sessionInfo->want.GetBoolParam(IS_CALL_BY_SCB, true)) {
         HILOG_DEBUG("afterCheckExecuter_ called.");
         Want newWant = abilityRequest.want;
+        AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(newWant, requestCode,
+            GetUserId(), true, sessionInfo->callerToken);
         result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-            afterCheckExecuter_->DoProcess(newWant, requestCode, GetUserId(), true, sessionInfo->callerToken);
+            afterCheckExecuter_->DoProcess(afterCheckParam);
         bool isReplaceWantExist = newWant.GetBoolParam("queryWantFromErms", false);
         newWant.RemoveParam("queryWantFromErms");
         if (result != ERR_OK) {
@@ -2215,7 +2234,7 @@ int AbilityManagerService::RequestModalUIExtension(const Want &want)
     return RequestModalUIExtensionInner(want);
 }
 
-int AbilityManagerService::RequestModalUIExtensionInner(const Want &want)
+int AbilityManagerService::RequestModalUIExtensionInner(Want want)
 {
     sptr<IRemoteObject> token = nullptr;
     int ret = IN_PROCESS_CALL(GetTopAbility(token));
@@ -2249,6 +2268,9 @@ int AbilityManagerService::RequestModalUIExtensionInner(const Want &want)
     }
 
     HILOG_DEBUG("Window Modal System Create UIExtension is called!");
+    WantParams &parameters = const_cast<WantParams &>(want.GetParams());
+    parameters.SetParam("ability.want.params.modalType", AAFwk::Integer::Box(1));
+    want.SetParams(parameters);
     auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
     return connection->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
 }
@@ -2299,8 +2321,9 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
         return ERR_INVALID_CALLER;
     }
 
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         eventInfo.errCode = result;
@@ -2353,8 +2376,10 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
         return result;
     }
 
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, 0, GetUserId(),
+        false, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(abilityRequest.want, 0, GetUserId(), false, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
         HILOG_ERROR("afterCheckExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -2520,8 +2545,10 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         return ERR_INVALID_CALLER;
     }
 
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(extensionSessionInfo->want, 0, GetUserId(),
+        true, nullptr);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(extensionSessionInfo->want, 0, GetUserId(), true);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         eventInfo.errCode = result;
@@ -2589,8 +2616,10 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         return result;
     }
 
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, 0, GetUserId(),
+        false, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(abilityRequest.want, 0, GetUserId(), false, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
         HILOG_ERROR("afterCheckExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -3229,8 +3258,9 @@ int AbilityManagerService::ConnectAbilityCommon(
         return result;
     }
 
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         eventInfo.errCode = result;
@@ -3338,8 +3368,9 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
         return result;
     }
 
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), false, nullptr);
     result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, 0, GetUserId(), false);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         eventInfo.errCode = result;
@@ -3497,8 +3528,10 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         return TARGET_ABILITY_NOT_SERVICE;
     }
 
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, 0, GetUserId(),
+        false, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(abilityRequest.want, 0, GetUserId(), false, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     if (result != ERR_OK) {
         HILOG_ERROR("afterCheckExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -5345,7 +5378,7 @@ int AbilityManagerService::GenerateAbilityRequest(
         HILOG_ERROR("Get app info failed.");
         return RESOLVE_APP_ERR;
     }
-    if (request.want.GetIntParam(SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE) == ScreenMode::JUMP_SCREEN_MODE &&
+    if (want.GetIntParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE) == ScreenMode::JUMP_SCREEN_MODE &&
         (request.abilityInfo.applicationInfo.bundleType != AppExecFwk::BundleType::ATOMIC_SERVICE ||
         request.abilityInfo.launchMode != AppExecFwk::LaunchMode::SINGLETON)) {
         HILOG_ERROR("The interface of starting atomicService can start only atomicService.");
@@ -5366,6 +5399,7 @@ int AbilityManagerService::GenerateAbilityRequest(
         request.startRecent = true;
     }
 
+    SetDebugAppByWaitingDebugFlag(want, request.want, request.appInfo.bundleName, request.appInfo.debug);
     return ERR_OK;
 }
 
@@ -5427,6 +5461,7 @@ int AbilityManagerService::GenerateExtensionAbilityRequest(
     HILOG_DEBUG("GenerateExtensionAbilityRequest, moduleName: %{public}s.", request.abilityInfo.moduleName.c_str());
     request.want.SetModuleName(request.abilityInfo.moduleName);
 
+    SetDebugAppByWaitingDebugFlag(want, request.want, request.appInfo.bundleName, request.appInfo.debug);
     return ERR_OK;
 }
 
@@ -6295,8 +6330,9 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     StartAbilityInfoWrap threadLocalInfo(want, GetUserId(),
         StartAbilityUtils::GetAppIndex(want, callerToken));
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), true, nullptr);
     auto result = interceptorExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        interceptorExecuter_->DoProcess(want, 0, GetUserId(), true);
+        interceptorExecuter_->DoProcess(interceptorParam);
     if (result != ERR_OK) {
         HILOG_ERROR("interceptorExecuter_ is nullptr or DoProcess return error.");
         return result;
@@ -6340,8 +6376,10 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
     HILOG_DEBUG("abilityInfo.applicationInfo.singleton is %{public}s",
         abilityRequest.abilityInfo.applicationInfo.singleton ? "true" : "false");
     UpdateCallerInfo(abilityRequest.want, callerToken);
+    AbilityInterceptorParam afterCheckParam = AbilityInterceptorParam(abilityRequest.want, 0, GetUserId(),
+        false, callerToken);
     result = afterCheckExecuter_ == nullptr ? ERR_INVALID_VALUE :
-        afterCheckExecuter_->DoProcess(abilityRequest.want, 0, GetUserId(), false, callerToken);
+        afterCheckExecuter_->DoProcess(afterCheckParam);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         ReportEventToSuspendManager(abilityRequest.abilityInfo);
         abilityRequest.want.SetParam(IS_CALL_BY_SCB, false);
@@ -6430,9 +6468,9 @@ int AbilityManagerService::JudgeAbilityVisibleControl(const AppExecFwk::AbilityI
 
 int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback)
 {
-    HILOG_DEBUG("%{public}s, userId:%{public}d", __func__, userId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartUser in service:%{public}d.", userId);
     if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
-        HILOG_ERROR("Permission verification failed, not account process");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StartUser permission verification failed, not account process.");
         if (callback != nullptr) {
             callback->OnStartUserDone(userId, CHECK_PERMISSION_FAILED);
         }
@@ -6447,9 +6485,9 @@ int AbilityManagerService::StartUser(int userId, sptr<IUserCallback> callback)
 
 int AbilityManagerService::StopUser(int userId, const sptr<IUserCallback> &callback)
 {
-    HILOG_DEBUG("%{public}s", __func__);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StopUser in service:%{public}d", userId);
     if (IPCSkeleton::GetCallingUid() != ACCOUNT_MGR_SERVICE_UID) {
-        HILOG_ERROR("Permission verification failed, not account process");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "StopUser permission verification failed, not account process");
         if (callback != nullptr) {
             callback->OnStopUserDone(userId, CHECK_PERMISSION_FAILED);
         }
@@ -8773,7 +8811,7 @@ int32_t AbilityManagerService::NotifySaveAsResult(const Want &want, int resultCo
     HILOG_DEBUG("requestCode is %{public}d.", requestCode);
 
     //caller check
-    if (!CheckCallerIsDlpManager(GetBundleManager())) {
+    if (!DlpUtils::CheckCallerIsDlpManager(GetBundleManager())) {
         HILOG_WARN("caller check failed");
         return ERR_INVALID_CALLER;
     }
@@ -9248,6 +9286,7 @@ int32_t AbilityManagerService::StartAbilityWithInsightIntent(const Want &want, i
         (const_cast<Want &>(want)).RemoveParam(START_ABILITY_TYPE);
         CHECK_CALLER_IS_SYSTEM_APP;
     }
+    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
     EventInfo eventInfo = BuildEventInfo(want, userId);
     EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     int32_t ret = StartAbilityWrap(want, nullptr, requestCode, userId);
@@ -9749,6 +9788,18 @@ int32_t AbilityManagerService::GetUIExtensionRootHostInfo(const sptr<IRemoteObje
     return ERR_OK;
 }
 
+void AbilityManagerService::SetDebugAppByWaitingDebugFlag(
+    const Want &want, Want &requestWant, const std::string &bundleName, bool isDebugApp)
+{
+    bool isWaitingDebugApp =
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsWaitingDebugApp(bundleName);
+    if (isWaitingDebugApp && isDebugApp && system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        (const_cast<Want &>(want)).SetParam(DEBUG_APP, true);
+        requestWant.SetParam(DEBUG_APP, true);
+        DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag();
+    }
+}
+
 int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want)
 {
     HILOG_DEBUG("call.");
@@ -9898,8 +9949,11 @@ bool AbilityManagerService::IsEmbeddedOpenAllowedInner(sptr<IRemoteObject> calle
         return false;
     }
     launchWant.SetParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME, callerAbility->GetElementName().GetBundleName());
+    launchWant.SetParam("send_to_erms_targetBundleType", static_cast<int32_t>(appInfo.bundleType));
     auto erms = std::make_shared<EcologicalRuleInterceptor>();
-    auto queryRet = erms->DoProcess(launchWant, 0, GetUserId(), true, callerToken);
+    AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(launchWant, 0,
+        GetUserId(), true, callerToken);
+    auto queryRet = erms->DoProcess(interceptorParam);
     if (queryRet == ERR_OK) {
         return true;
     }
