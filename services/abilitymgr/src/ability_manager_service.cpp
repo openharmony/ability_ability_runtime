@@ -183,6 +183,7 @@ constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewDat
 constexpr int32_t FOUNDATION_UID = 5523;
 const std::string FRS_BUNDLE_NAME = "com.ohos.formrenderservice";
 const std::string FOUNDATION_PROCESS_NAME = "foundation";
+const std::string UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
 
 constexpr char ASSERT_FAULT_DETAIL[] = "assertFaultDialogDetail";
 constexpr char PRODUCT_ASSERT_FAULT_DIALOG_ENABLED[] = "persisit.sys.abilityms.support_assert_fault_dialog";
@@ -831,6 +832,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
         }
     }
 
+    AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
     std::string dialogSessionId = want.GetStringParam("dialogSessionId");
     isSendDialogResult = false;
     if (!dialogSessionId.empty() && dialogSessionRecord_->GetDialogCallerInfo(dialogSessionId) != nullptr) {
@@ -1077,7 +1079,7 @@ int AbilityManagerService::StartAbility(const Want &want, const AbilityStartSett
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Developer Mode is false.");
         return ERR_NOT_DEVELOPER_MODE;
     }
-    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
     StartAbilityParams startParams(const_cast<Want &>(want));
     startParams.callerToken = callerToken;
     startParams.userId = userId;
@@ -1280,7 +1282,7 @@ int AbilityManagerService::StartAbilityAsCaller(const Want &want, const StartOpt
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start ability as caller with startOptions.");
     CHECK_CALLER_IS_SYSTEM_APP;
 
-    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
     AAFwk::Want newWant = want;
     if (asCallerSoureToken != nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "start as caller, UpdateCallerInfo");
@@ -1416,7 +1418,6 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
         } else {
             abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
         }
-        abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
         if (AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
             if (startOptions.windowLeftUsed_) {
                 abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_LEFT, startOptions.GetWindowLeft());
@@ -1443,7 +1444,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
             TAG_LOGD(AAFwkTag::ABILITYMGR, "do not start as caller, UpdateCallerInfo");
             UpdateCallerInfo(abilityRequest.want, callerToken);
         }
-        result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId);
+        result = implicitStartProcessor_->ImplicitStartAbility(abilityRequest, validUserId,
+            startOptions.GetWindowMode());
         if (result != ERR_OK) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "implicit start ability error.");
             eventInfo.errCode = result;
@@ -1523,7 +1525,8 @@ int AbilityManagerService::StartAbilityForOptionInner(const Want &want, const St
     } else {
         abilityRequest.want.SetParam(Want::PARAM_RESV_DISPLAY_ID, startOptions.GetDisplayID());
     }
-    abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_MODE, startOptions.GetWindowMode());
+    AbilityUtil::ProcessWindowMode(abilityRequest.want, abilityInfo.applicationInfo.accessTokenId,
+        startOptions.GetWindowMode());
     if (AppUtils::GetInstance().IsStartOptionsWithAnimation()) {
         if (startOptions.windowLeftUsed_) {
             abilityRequest.want.SetParam(Want::PARAM_RESV_WINDOW_LEFT, startOptions.GetWindowLeft());
@@ -1823,6 +1826,7 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
                 return result;
             }
             auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
+            (const_cast<Want &>(newWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
             return systemUIExtension->CreateModalUIExtension(newWant) ?
                 ERR_ECOLOGICAL_CONTROL_STATUS : INNER_ERR;
         }
@@ -2275,10 +2279,8 @@ int AbilityManagerService::RequestModalUIExtensionInner(Want want)
         return record->CreateModalUIExtension(want);
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Window Modal System Create UIExtension is called!");
-    WantParams &parameters = const_cast<WantParams &>(want.GetParams());
-    parameters.SetParam("ability.want.params.modalType", AAFwk::Integer::Box(1));
-    want.SetParams(parameters);
+    HILOG_DEBUG("Window Modal System Create UIExtension is called!");
+    want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
     auto connection = std::make_shared<Rosen::ModalSystemUiExtension>();
     return connection->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
 }
@@ -6353,7 +6355,7 @@ int AbilityManagerService::StartAbilityByCall(const Want &want, const sptr<IAbil
         return CHECK_PERMISSION_FAILED;
     }
 
-    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
     StartAbilityInfoWrap threadLocalInfo(want, GetUserId(),
         StartAbilityUtils::GetAppIndex(want, callerToken));
     AbilityInterceptorParam interceptorParam = AbilityInterceptorParam(want, 0, GetUserId(), true, nullptr);
@@ -7439,6 +7441,7 @@ int AbilityManagerService::DelegatorMoveMissionToFront(int32_t missionId)
 
 void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObject> &callerToken)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
@@ -7525,8 +7528,6 @@ void AbilityManagerService::UpdateCallerInfoFromToken(Want& want, const sptr<IRe
 
 bool AbilityManagerService::JudgeMultiUserConcurrency(const int32_t userId)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-
     if (userId == U0_USER_ID) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s, userId is 0.", __func__);
         return true;
@@ -9356,7 +9357,7 @@ int32_t AbilityManagerService::StartAbilityByCallWithInsightIntent(const Want &w
         return ERR_INVALID_VALUE;
     }
 
-    AbilityUtil::RemoveShowModeKey(const_cast<Want &>(want));
+    AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
     AbilityRequest abilityRequest;
     abilityRequest.callType = AbilityCallType::CALL_REQUEST_TYPE;
     abilityRequest.callerUid = IPCSkeleton::GetCallingUid();
@@ -9553,7 +9554,8 @@ int AbilityManagerService::CreateModalDialog(const Want &replaceWant, sptr<IRemo
     (const_cast<Want &>(replaceWant)).SetParam("dialogSessionId", dialogSessionId);
     auto connection = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
     if (callerToken == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
+        HILOG_DEBUG("create modal ui extension for system");
+        (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
         return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
@@ -9565,7 +9567,8 @@ int AbilityManagerService::CreateModalDialog(const Want &replaceWant, sptr<IRemo
     sptr<IRemoteObject> token;
     int ret = IN_PROCESS_CALL(GetTopAbility(token));
     if (ret != ERR_OK || token == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
+        HILOG_DEBUG("create modal ui extension for system");
+        (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
         return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
     }
 
@@ -9573,7 +9576,8 @@ int AbilityManagerService::CreateModalDialog(const Want &replaceWant, sptr<IRemo
         TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for application");
         return callerRecord->CreateModalUIExtension(replaceWant);
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
+    HILOG_DEBUG("create modal ui extension for system");
+    (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
     return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
 }
 
@@ -9699,6 +9703,7 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
     want.SetParam(ASSERT_FAULT_DETAIL, wantParams.GetStringParam(ASSERT_FAULT_DETAIL));
 
     auto connection = std::make_shared<ModalSystemAssertUIExtension>();
+    want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
     if (connection == nullptr || !IN_PROCESS_CALL(connection->CreateModalUIExtension(want))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Connection is nullptr or create modal ui extension failed.");
         return ERR_INVALID_VALUE;
