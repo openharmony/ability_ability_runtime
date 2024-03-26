@@ -1054,11 +1054,7 @@ ErrCode AbilityManagerClient::StartSyncRemoteMissions(const std::string &devId, 
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StartSyncRemoteMissions(devId, fixConflict, tag);
 }
-/**
- * Stop synchronizing remote device mission
- * @param devId, deviceId.
- * @return Returns ERR_OK on success, others on failure.
- */
+
 ErrCode AbilityManagerClient::StopSyncRemoteMissions(const std::string &devId)
 {
     auto abms = GetAbilityManager();
@@ -1068,12 +1064,15 @@ ErrCode AbilityManagerClient::StopSyncRemoteMissions(const std::string &devId)
 
 ErrCode AbilityManagerClient::StartUser(int accountId, sptr<IUserCallback> callback)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StartUser in client:%{public}d.", accountId);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StartUser(accountId, callback);
 }
+
 ErrCode AbilityManagerClient::StopUser(int accountId, sptr<IUserCallback> callback)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "StopUser in client:%{public}d.", accountId);
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
     return abms->StopUser(accountId, callback);
