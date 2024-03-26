@@ -26,6 +26,8 @@
       *MainThread*;
       *MixStackDumper*;
       *OHOSApplication*;
+      *StartupManager*;
+      *StartupTaskResult*;
       *Watchdog*;
     };
   local:
