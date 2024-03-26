@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,24 @@
  * limitations under the License.
  */
 
-#include "mock_test_runner.h"
-#include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
+#ifndef OHOS_ABILITY_RUNTIME_ADVANCED_SECURITY_MODE_MANAGER_H
+#define OHOS_ABILITY_RUNTIME_ADVANCED_SECURITY_MODE_MANAGER_H
+
+#include <string>
 
 namespace OHOS {
 namespace AppExecFwk {
-bool MockTestRunner::prepareFlag_ = false;
-bool MockTestRunner::runFlag_ = false;
+class AdvancedSecurityModeManager {
+public:
+    AdvancedSecurityModeManager();
+    virtual ~AdvancedSecurityModeManager();
 
-void MockTestRunner::Prepare()
-{
-    TAG_LOGI(AAFwkTag::TEST, "enter");
-    prepareFlag_ = true;
-}
+    void Init();
+    bool IsJITEnabled();
 
-void MockTestRunner::Run()
-{
-    TAG_LOGI(AAFwkTag::TEST, "enter");
-    runFlag_ = true;
-}
-} // namespace AppExecFwk
-} // namespace OHOS
-
+private:
+    bool isAdvSecModeEnabled_ = false;
+};
+}  // namespace AppExecFwk
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_ADVANCED_SECURITY_MODE_MANAGER_H
