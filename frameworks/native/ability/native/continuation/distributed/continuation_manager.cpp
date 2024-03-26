@@ -637,7 +637,8 @@ bool ContinuationManager::DoRestoreFromRemote(const WantParams &restoreData)
 
     bool ret = ability->OnRestoreData(abilityRestoreData);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::CONTINUATION, "ContinuationManager::DoRestoreFromRemote failed. Ability restore data failed.");
+        TAG_LOGE(AAFwkTag::CONTINUATION,
+            "ContinuationManager::DoRestoreFromRemote failed. Ability restore data failed.");
     }
     TAG_LOGI(AAFwkTag::CONTINUATION, "%{public}s called end", __func__);
     return ret;
