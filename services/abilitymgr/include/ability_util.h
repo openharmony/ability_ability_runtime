@@ -275,10 +275,45 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     return false;
 }
 
-[[maybe_unused]] static void RemoveShowModeKey(AAFwk::Want &want)
+[[maybe_unused]] static void RemoveShowModeKey(Want &want)
 {
     if (want.HasParameter(AAFwk::SCREEN_MODE_KEY)) {
         want.RemoveParam(AAFwk::SCREEN_MODE_KEY);
+    }
+}
+
+[[maybe_unused]] static bool IsSceneBoard(const std::string &bundleName, const std::string &AbilityName)
+{
+    return AbilityName == AbilityConfig::SCENEBOARD_ABILITY_NAME &&
+        bundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME;
+}
+
+[[maybe_unused]] static void RemoveWindowModeKey(Want &want)
+{
+    if (want.HasParameter(Want::PARAM_RESV_WINDOW_MODE)) {
+        want.RemoveParam(Want::PARAM_RESV_WINDOW_MODE);
+    }
+}
+
+[[maybe_unused]] static void RemoveWantKey(Want &want)
+{
+    RemoveShowModeKey(want);
+    RemoveWindowModeKey(want);
+}
+
+[[maybe_unused]] static void ProcessWindowMode(Want &want, uint32_t accessTokenId, int32_t windowMode)
+{
+    if (PermissionVerification::GetInstance()->IsSystemAppCall()) {
+        want.SetParam(Want::PARAM_RESV_WINDOW_MODE, windowMode);
+        return;
+    }
+    if (IPCSkeleton::GetCallingTokenID() == accessTokenId && (
+        windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_PRIMARY ||
+        windowMode == AbilityWindowConfiguration::MULTI_WINDOW_DISPLAY_SECONDARY)) {
+        want.SetParam(Want::PARAM_RESV_WINDOW_MODE, windowMode);
+        HILOG_INFO("set parameter windownMode for inner application split-screen mode");
+    } else {
+        RemoveWindowModeKey(want);
     }
 }
 
@@ -299,6 +334,14 @@ static constexpr int64_t MICROSECONDS = 1000000;    // MICROSECONDS mean 10^6 mi
     want.SetAction(action);
     want.SetParam(MARKET_CROWD_TEST_BUNDLE_PARAM, bundleName);
     return AbilityManagerClient::GetInstance()->StartAbility(want, requestCode, userId);
+}
+
+inline ErrCode EdmErrorType(bool isEdm)
+{
+    if (isEdm) {
+        return ERR_EDM_APP_CONTROLLED;
+    }
+    return ERR_APP_CONTROLLED;
 }
 }  // namespace AbilityUtil
 }  // namespace AAFwk

@@ -32,6 +32,9 @@ void AbilityAppStateObserver::OnProcessDied(const AppExecFwk::ProcessData &proce
             abilityInfo.type == AppExecFwk::AbilityType::PAGE) {
             abilityRecord->OnProcessDied();
         }
+        if (abilityRecord->IsSceneBoard() && abilityRecord->GetPid() == processData.pid) {
+            abilityRecord->OnProcessDied();
+        }
     } else {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "AbilityRecord null");
     }

@@ -97,6 +97,7 @@ const int TERMINATE_TIMEOUT_ASANENABLED = 150;
 const int HALF_TIMEOUT = 2;
 const int MAX_URI_COUNT = 500;
 const int32_t BROKER_UID = 5557;
+const int RESTART_SCENEBOARD_DELAY = 500;
 #ifdef SUPPORT_ASAN
 const int COLDSTART_TIMEOUT_MULTIPLE = 15000;
 const int LOAD_TIMEOUT_MULTIPLE = 15000;
@@ -178,7 +179,6 @@ Token::~Token()
 
 std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemoteObject> &token)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (token == nullptr) {
         return nullptr;
     }
@@ -235,7 +235,7 @@ AbilityRecord::~AbilityRecord()
             object->RemoveDeathRecipient(schedulerDeathRecipient_);
         }
     }
-    RemoveAppStateObserver();
+    RemoveAppStateObserver(true);
 }
 
 std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityRequest &abilityRequest)
@@ -262,7 +262,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     abilityRecord->collaboratorType_ = abilityRequest.collaboratorType;
     abilityRecord->missionAffinity_ = abilityRequest.want.GetStringParam(PARAM_MISSION_AFFINITY_KEY);
 
-    if (abilityRecord->IsDebug()) {
+    if (abilityRecord->IsDebug() || abilityRecord->IsSceneBoard()) {
         abilityRecord->abilityAppStateObserver_ = sptr<AbilityAppStateObserver>(
             new AbilityAppStateObserver(abilityRecord));
         DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->RegisterApplicationStateObserver(
@@ -271,8 +271,12 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     return abilityRecord;
 }
 
-void AbilityRecord::RemoveAppStateObserver()
+void AbilityRecord::RemoveAppStateObserver(bool force)
 {
+    if (!force && IsSceneBoard()) {
+        HILOG_INFO("Special ability no need to RemoveAppStateObserver.");
+        return;
+    }
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     if (handler && abilityAppStateObserver_) {
         handler->SubmitTask([appStateObserver = abilityAppStateObserver_]() {
@@ -369,7 +373,7 @@ int AbilityRecord::LoadAbility()
     want_.SetParam("ohos.ability.launch.reason", static_cast<int>(lifeCycleStateInfo_.launchParam.launchReason));
     want_.SetParam(WANT_PARAMS_ATTACHE_TO_PARENT, CheckNeedAttachToParent());
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token_, callerToken_, abilityInfo_, applicationInfo_, want_);
+        token_, callerToken_, abilityInfo_, applicationInfo_, want_, recordId_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
     want_.RemoveParam(WANT_PARAMS_ATTACHE_TO_PARENT);
 
@@ -2212,7 +2216,8 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
                       std::to_string(GetStartTime()) + "]");
     info.emplace_back("      main name [" + GetAbilityInfo().name + "]");
     info.emplace_back("      bundle name [" + GetAbilityInfo().bundleName + "]");
-    if (UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+    bool isUIExtension = UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType);
+    if (isUIExtension) {
         info.emplace_back("      ability type [UIEXTENSION]");
     } else {
         info.emplace_back("      ability type [SERVICE]");
@@ -2239,6 +2244,24 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
     // add dump client info
     DumpClientInfo(info, params, isClient);
     DumpUIExtensionRootHostInfo(info);
+    DumpUIExtensionPid(info, isUIExtension);
+}
+
+void AbilityRecord::DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const
+{
+    if (!isUIExtension) {
+        HILOG_DEBUG("Not ui extension type.");
+        return;
+    }
+
+    auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
+    if (appScheduler == nullptr) {
+        HILOG_ERROR("Get appScheduler is invalid.");
+        return;
+    }
+    AppExecFwk::RunningProcessInfo processInfo;
+    appScheduler->GetRunningProcessInfoByToken(GetToken(), processInfo);
+    info.emplace_back("      pid: " + std::to_string(processInfo.pid_));
 }
 
 void AbilityRecord::RemoveAbilityDeathRecipient() const
@@ -2316,17 +2339,21 @@ void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 void AbilityRecord::OnProcessDied()
 {
     std::lock_guard<ffrt::mutex> guard(lock_);
-    RemoveAppStateObserver();
+    RemoveAppStateObserver(true);
     isWindowAttached_ = false;
 
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER(handler);
 
-    HILOG_DEBUG("Ability on scheduler died: '%{public}s'", abilityInfo_.name.c_str());
+    HILOG_INFO("OnProcessDied: '%{public}s'", abilityInfo_.name.c_str());
     auto task = [ability = shared_from_this()]() {
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
-    handler->SubmitTask(task);
+    if (IsSceneBoard()) {
+        handler->SubmitTask(task, RESTART_SCENEBOARD_DELAY);
+    } else {
+        handler->SubmitTask(task);
+    }
     auto uriTask = [want = GetWant(), ability = shared_from_this()]() {
         ability->SaveResultToCallers(-1, &want);
         ability->SendResultToCallers(true);
@@ -3427,8 +3454,7 @@ void AbilityRecord::DoBackgroundAbilityWindowDelayed(bool needBackground)
 
 bool AbilityRecord::IsSceneBoard() const
 {
-    return GetAbilityInfo().name == AbilityConfig::SCENEBOARD_ABILITY_NAME &&
-        GetAbilityInfo().bundleName == AbilityConfig::SCENEBOARD_BUNDLE_NAME;
+    return AbilityUtil::IsSceneBoard(abilityInfo_.bundleName, abilityInfo_.name);
 }
 
 void AbilityRecord::SetRestartAppFlag(bool isRestartApp)

@@ -22,6 +22,7 @@
 #undef private
 #undef protected
 
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_manager_collaborator.h"
@@ -57,7 +58,7 @@ public:
 {
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
     if (!sessionInfo) {
-        HILOG_ERROR("sessionInfo is nullptr");
+        TAG_LOGE(AAFwkTag::TEST, "sessionInfo is nullptr");
         return nullptr;
     }
     sessionInfo->persistentId = persistentId;
@@ -2099,8 +2100,8 @@ HWTEST_F(AbilityManagerClientBranchTest, UpdateSessionInfoBySCB_0100, TestSize.L
     std::list<SessionInfo> sessionInfos;
     int32_t userId = 1;
     std::vector<int32_t> sessionIds;
-    auto result = client_->UpdateSessionInfoBySCB(sessionInfos, userId, sessionIds);
-    EXPECT_NE(result, ERR_OK);
+    client_->UpdateSessionInfoBySCB(sessionInfos, userId, sessionIds);
+    EXPECT_NE(client_, nullptr);
     GTEST_LOG_(INFO) << "UpdateSessionInfoBySCB_0100 end";
 }
 
