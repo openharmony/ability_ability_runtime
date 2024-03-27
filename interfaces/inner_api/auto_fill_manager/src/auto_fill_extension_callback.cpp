@@ -70,6 +70,7 @@ void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wan
 {
     HILOG_DEBUG("Called.");
     isReloadInModal_ = true;
+    AutoFillManager::GetInstance().RemoveAutoFillExtensionProxy(uiContent_);
     auto customDataString(wantParams.GetStringParam(WANT_PARAMS_CUSTOM_DATA_KEY));
     AutoFill::ReloadInModalRequest request = {
         .uiContent = uiContent_,
@@ -83,11 +84,14 @@ void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wan
         SendAutoFillFailed(resultCode);
         return;
     }
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("UI content is nullptr.");
+        return;
+    }
     if (request.autoFillWindowType == AutoFill::AutoFillWindowType::POPUP_WINDOW) {
-        AutoFillManager::GetInstance().RemoveAutoFillExtensionProxy(request.uiContent);
-        request.uiContent->DestroyCustomPopupUIExtension(request.nodeId);
+        uiContent_->DestroyCustomPopupUIExtension(request.nodeId);
     } else if (request.autoFillWindowType == AutoFill::AutoFillWindowType::MODAL_WINDOW) {
-        request.uiContent->CloseModalUIExtension(request.nodeId);
+        uiContent_->CloseModalUIExtension(request.nodeId);
     }
 }
 
