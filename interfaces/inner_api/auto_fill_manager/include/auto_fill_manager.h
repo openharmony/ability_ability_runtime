@@ -55,7 +55,7 @@ struct AutoFillRequest {
  * @struct ReloadInModalRequest
  * ReloadInModalRequest is used to define the reload in modal request parameter structure.
  */
- struct ReloadInModalRequest {
+struct ReloadInModalRequest {
     Ace::UIContent *uiContent = nullptr;
     int32_t nodeId;
     std::string customData;
@@ -96,7 +96,7 @@ private:
     int32_t CreateAutoFillExtension(Ace::UIContent *uiContent,
         const AutoFill::AutoFillRequest &request,
         const Ace::ModalUIExtensionCallbacks &callback,
-        const AutoFill::AutoFillWindowType autoFillWindowType,
+        const AutoFill::AutoFillWindowType &autoFillWindowType,
         bool isSmartAutoFill);
     void BindModalUIExtensionCallback(
         const std::shared_ptr<AutoFillExtensionCallback> &extensionCallback, Ace::ModalUIExtensionCallbacks &callback);
