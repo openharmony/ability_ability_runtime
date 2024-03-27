@@ -15,6 +15,7 @@
 
 #include "js_auto_fill_extension_context.h"
 
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "js_error_utils.h"
 #include "js_extension_context.h"
@@ -30,7 +31,7 @@ constexpr size_t ARGC_ONE = 1;
 }
 void JsAutoFillExtensionContext::Finalizer(napi_env env, void *data, void *hint)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Called.");
     std::unique_ptr<JsAutoFillExtensionContext>(static_cast<JsAutoFillExtensionContext*>(data));
 }
 
@@ -93,7 +94,7 @@ napi_value JsAutoFillExtensionContext::OnReloadInModal(napi_env env, NapiCallbac
 napi_value JsAutoFillExtensionContext::CreateJsAutoFillExtensionContext(
     napi_env env, const std::shared_ptr<AutoFillExtensionContext> &context)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILL_EXT, "Called.");
     std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo = nullptr;
     if (context != nullptr) {
         abilityInfo = context->GetAbilityInfo();
