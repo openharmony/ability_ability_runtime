@@ -146,7 +146,7 @@ bool Marshal(MessageParcel &parcel, const T &first, const Types &...others);
 
 template<typename T, typename... Types>
 bool Unmarshal(MessageParcel &parcel, T &first, Types &...others);
-}// namespace DataObsUtils
+} // namespace DataObsUtils
 
 template<typename _OutTp>
 bool DataObsUtils::ReadVariant(uint32_t step, uint32_t index, const _OutTp &output, MessageParcel &data)
