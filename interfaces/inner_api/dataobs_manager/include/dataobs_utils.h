@@ -36,8 +36,6 @@ template<class T>
 struct is_container<std::list<T>> : std::true_type {
 };
 namespace DataObsUtils {
-inline constexpr size_t MAX_COUNT = 100000;
-inline constexpr size_t MAX_SIZE = 1 * 1024 * 1024 * 1024; //1G
 static inline bool Marshal(MessageParcel &data)
 {
     return true;
@@ -46,46 +44,6 @@ static inline bool Marshal(MessageParcel &data)
 static inline bool Unmarshal(MessageParcel &data)
 {
     return true;
-}
-
-static inline bool Marshalling(int16_t input, MessageParcel &data)
-{
-    return data.WriteInt16(input);
-}
-
-static inline bool Unmarshalling(int16_t &output, MessageParcel &data)
-{
-    return data.ReadInt16(output);
-}
-
-static inline bool Marshalling(uint32_t input, MessageParcel &data)
-{
-    return data.WriteUint32(input);
-}
-
-static inline bool Unmarshalling(uint32_t &output, MessageParcel &data)
-{
-    return data.ReadUint32(output);
-}
-
-static inline bool Marshalling(int32_t input, MessageParcel &data)
-{
-    return data.WriteInt32(input);
-}
-
-static inline bool Unmarshalling(int32_t &output, MessageParcel &data)
-{
-    return data.ReadInt32(output);
-}
-
-static inline bool Marshalling(uint64_t input, MessageParcel &data)
-{
-    return data.WriteUint64(input);
-}
-
-static inline bool Unmarshalling(uint64_t &output, MessageParcel &data)
-{
-    return data.ReadUint64(output);
 }
 
 static inline bool Marshalling(int64_t input, MessageParcel &data)
@@ -138,16 +96,6 @@ static inline bool Unmarshalling(std::string &output, MessageParcel &data)
     return data.ReadString(output);
 }
 
-static inline bool Marshalling(const std::u16string &input, MessageParcel &data)
-{
-    return data.WriteString16(input);
-}
-
-static inline bool Unmarshalling(std::u16string &output, MessageParcel &data)
-{
-    return data.ReadString16(output);
-}
-
 static inline bool Marshalling(const std::vector<uint8_t> &input, MessageParcel &data)
 {
     return data.WriteUInt8Vector(input);
@@ -156,22 +104,6 @@ static inline bool Marshalling(const std::vector<uint8_t> &input, MessageParcel 
 static inline bool Unmarshalling(std::vector<uint8_t> &output, MessageParcel &data)
 {
     return data.ReadUInt8Vector(&output);
-}
-
-static inline bool Marshalling(const sptr<IRemoteObject> &input, MessageParcel &data)
-{
-    return data.WriteRemoteObject(input);
-}
-
-static inline bool Unmarshalling(sptr<IRemoteObject> &output, MessageParcel &data)
-{
-    output = data.ReadRemoteObject();
-    return true;
-}
-
-static inline bool Marshalling(IRemoteObject *input, MessageParcel &data)
-{
-    return data.WriteRemoteObject(input);
 }
 
 template<typename _OutTp>
@@ -194,30 +126,10 @@ bool Marshalling(const std::map<K, V> &result, MessageParcel &parcel);
 template<class K, class V>
 bool Unmarshalling(std::map<K, V> &val, MessageParcel &parcel);
 
-template<class F, class S, class T>
-bool Marshalling(const std::tuple<F, S, T> &result, MessageParcel &parcel);
-template<class F, class S, class T>
-bool Unmarshalling(std::tuple<F, S, T> &val, MessageParcel &parcel);
-
-template<class F, class S>
-bool Marshalling(const std::pair<F, S> &result, MessageParcel &parcel);
-template<class F, class S>
-bool Unmarshalling(std::pair<F, S> &val, MessageParcel &parcel);
-
 template<class T>
 bool Marshalling(const std::vector<T> &val, MessageParcel &parcel);
 template<class T>
 bool Unmarshalling(std::vector<T> &val, MessageParcel &parcel);
-
-template<class T>
-bool Marshalling(const std::list<T> &val, MessageParcel &parcel);
-template<class T>
-bool Unmarshalling(std::list<T> &val, MessageParcel &parcel);
-
-template<typename T, typename std::enable_if<std::is_pointer<T>{}, int>::type = 0>
-bool Marshalling(const T &input, MessageParcel &data) = delete;
-template<typename T, typename std::enable_if<std::is_pointer<T>{}, int>::type = 0>
-bool Unmarshalling(T &output, MessageParcel &data) = delete;
 
 template<typename T>
 bool Marshalling(const T &input, MessageParcel &data);
@@ -229,22 +141,12 @@ bool MarshalToContainer(const T &val, MessageParcel &parcel);
 template<class T, typename std::enable_if<is_container<T>{}, int>::type = 0>
 bool UnmarshalFromContainer(T &val, MessageParcel &parcel);
 
-template<typename T>
-bool MarshalToBuffer(const T &input, int size, MessageParcel &data);
-template<typename T>
-bool MarshalToBuffer(const std::vector<T> &input, int size, MessageParcel &data);
-
-template<typename T>
-bool UnmarshalFromBuffer(MessageParcel &data, T &output);
-template<typename T>
-bool UnmarshalFromBuffer(MessageParcel &data, std::vector<T> &output);
-
 template<typename T, typename... Types>
 bool Marshal(MessageParcel &parcel, const T &first, const Types &...others);
 
 template<typename T, typename... Types>
 bool Unmarshal(MessageParcel &parcel, T &first, Types &...others);
-} // namespace ITypesUtil
+}// namespace DataObsUtils
 
 template<typename _OutTp>
 bool DataObsUtils::ReadVariant(uint32_t step, uint32_t index, const _OutTp &output, MessageParcel &data)
@@ -346,67 +248,6 @@ bool DataObsUtils::Unmarshalling(std::map<K, V> &val, MessageParcel &parcel)
     return true;
 }
 
-template<class F, class S, class T>
-bool DataObsUtils::Marshalling(const std::tuple<F, S, T> &result, MessageParcel &parcel)
-{
-    if (!DataObsUtils::Marshalling(std::get<0>(result), parcel)) {
-        return false;
-    }
-    if (!DataObsUtils::Marshalling(std::get<1>(result), parcel)) {
-        return false;
-    }
-    if (!DataObsUtils::Marshalling(std::get<2>(result), parcel)) { // 2 is the last element in tuple
-        return false;
-    }
-    return true;
-}
-
-template<class F, class S, class T>
-bool DataObsUtils::Unmarshalling(std::tuple<F, S, T> &val, MessageParcel &parcel)
-{
-    F first;
-    if (!DataObsUtils::Unmarshalling(first, parcel)) {
-        return false;
-    }
-    S second;
-    if (!DataObsUtils::Unmarshalling(second, parcel)) {
-        return false;
-    }
-    T third;
-    if (!DataObsUtils::Unmarshalling(third, parcel)) {
-        return false;
-    }
-    val = { first, second, third };
-    return true;
-}
-
-template<class F, class S>
-bool DataObsUtils::Marshalling(const std::pair<F, S> &result, MessageParcel &parcel)
-{
-    if (!DataObsUtils::Marshalling(result.first, parcel)) {
-        return false;
-    }
-    if (!DataObsUtils::Marshalling(result.second, parcel)) {
-        return false;
-    }
-    return true;
-}
-
-template<class F, class S>
-bool DataObsUtils::Unmarshalling(std::pair<F, S> &val, MessageParcel &parcel)
-{
-    F first;
-    if (!DataObsUtils::Unmarshalling(first, parcel)) {
-        return false;
-    }
-    S second;
-    if (!DataObsUtils::Unmarshalling(second, parcel)) {
-        return false;
-    }
-    val = { first, second };
-    return true;
-}
-
 template<class T>
 bool DataObsUtils::Marshalling(const std::vector<T> &val, MessageParcel &parcel)
 {
@@ -415,18 +256,6 @@ bool DataObsUtils::Marshalling(const std::vector<T> &val, MessageParcel &parcel)
 
 template<class T>
 bool DataObsUtils::Unmarshalling(std::vector<T> &val, MessageParcel &parcel)
-{
-    return DataObsUtils::UnmarshalFromContainer(val, parcel);
-}
-
-template<class T>
-bool DataObsUtils::Marshalling(const std::list<T> &val, MessageParcel &parcel)
-{
-    return DataObsUtils::MarshalToContainer(val, parcel);
-}
-
-template<class T>
-bool DataObsUtils::Unmarshalling(std::list<T> &val, MessageParcel &parcel)
 {
     return DataObsUtils::UnmarshalFromContainer(val, parcel);
 }
@@ -471,99 +300,6 @@ bool DataObsUtils::UnmarshalFromContainer(T &val, MessageParcel &parcel)
             return false;
         }
         val.emplace_back(std::move(value));
-    }
-    return true;
-}
-
-template<typename T>
-bool DataObsUtils::MarshalToBuffer(const T &input, int size, MessageParcel &data)
-{
-    if (size < 0 || static_cast<size_t>(size) > MAX_SIZE || !data.WriteInt32(size)) {
-        return false;
-    }
-    if (size == 0) {
-        return true;
-    }
-    std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(size);
-    if (buffer == nullptr) {
-        return false;
-    }
-
-    int leftSize = size;
-    uint8_t *cursor = buffer.get();
-    if (!input.WriteToBuffer(cursor, leftSize)) {
-        return false;
-    }
-    return data.WriteRawData(buffer.get(), size);
-}
-
-template<typename T>
-bool DataObsUtils::MarshalToBuffer(const std::vector<T> &input, int size, MessageParcel &data)
-{
-    if (size < 0 || static_cast<size_t>(size) > MAX_SIZE || input.size() > MAX_COUNT || !data.WriteInt32(size)) {
-        return false;
-    }
-    if (size == 0) {
-        return true;
-    }
-    if (!data.WriteInt32(input.size())) {
-        return false;
-    }
-
-    std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(size);
-    if (buffer == nullptr) {
-        return false;
-    }
-
-    uint8_t *cursor = buffer.get();
-    int32_t left = size;
-    for (const auto &entry : input) {
-        if (!entry.WriteToBuffer(cursor, left)) {
-            return false;
-        }
-    }
-    return data.WriteRawData(buffer.get(), size);
-}
-
-template<typename T>
-bool DataObsUtils::UnmarshalFromBuffer(MessageParcel &data, T &output)
-{
-    int32_t size = data.ReadInt32();
-    if (size == 0) {
-        return true;
-    }
-    if (size < 0 || static_cast<size_t>(size) > MAX_SIZE) {
-        return false;
-    }
-    const uint8_t *buffer = reinterpret_cast<const uint8_t *>(data.ReadRawData(size));
-    if (buffer == nullptr) {
-        return false;
-    }
-    return output.ReadFromBuffer(buffer, size);
-}
-
-template<typename T>
-bool DataObsUtils::UnmarshalFromBuffer(MessageParcel &data, std::vector<T> &output)
-{
-    int size = data.ReadInt32();
-    if (size == 0) {
-        return true;
-    }
-    if (size < 0 || static_cast<size_t>(size) > MAX_SIZE) {
-        return false;
-    }
-    int count = data.ReadInt32();
-    const uint8_t *buffer = reinterpret_cast<const uint8_t *>(data.ReadRawData(size));
-    if (count < 0 || static_cast<size_t>(count) > MAX_COUNT || buffer == nullptr) {
-        return false;
-    }
-
-    output.resize(count);
-    for (auto &entry : output) {
-        if (!entry.ReadFromBuffer(buffer, size)) {
-            output.clear();
-            return false;
-        }
     }
     return true;
 }
