@@ -13,15 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_STARTUP_TASK_EXECUTOR_H
-#define OHOS_ABILITY_RUNTIME_STARTUP_TASK_EXECUTOR_H
+class StartupConfigEntry {
+  onConfig() {
+    return {}
+  }
+}
 
-#include "ability_manager_errors.h"
-
-namespace OHOS {
-namespace AbilityRuntime {
-class StartupTaskExecutor {
-};
-} // namespace AbilityRuntime
-} // namespace OHOS
-#endif // OHOS_ABILITY_RUNTIME_STARTUP_TASK_EXECUTOR_H
+export default StartupConfigEntry;

@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-#include "js_startup_task_main_thread_executor.h"
+class StartupTask {
+  onDependenceCompleted(dependence, result) {
+    console.log('onDependenceCompleted');
+  }
 
-namespace OHOS {
-namespace AbilityRuntime {
-JsStartupTaskMainThreadExecutor::JsStartupTaskMainThreadExecutor() = default;
-
-JsStartupTaskMainThreadExecutor::~JsStartupTaskMainThreadExecutor() = default;
-
-int32_t JsStartupTaskMainThreadExecutor::Run(JsRuntime &jsRuntime)
-{
-    return ERR_OK;
+  isManualDispatch() {
+    return false;
+  }
 }
-} // namespace AbilityRuntime
-} // namespace OHOS
+
+export default StartupTask;
