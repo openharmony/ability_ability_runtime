@@ -43,7 +43,8 @@ public:
         return nullptr;
     }
 
-    std::shared_ptr<AbilityRuntime::AutoFillManager> autoFillManager_ = std::make_shared<AbilityRuntime::AutoFillManager>();
+    std::shared_ptr<AbilityRuntime::AutoFillManager> autoFillManager_ =
+        std::make_shared<AbilityRuntime::AutoFillManager>();
 };
 
 class MockModalUIExtensionProxy : public Ace::ModalUIExtensionProxy {

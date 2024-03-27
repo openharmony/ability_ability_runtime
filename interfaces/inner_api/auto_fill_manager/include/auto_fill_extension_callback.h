@@ -65,7 +65,7 @@ private:
     uint32_t eventId_ = 0;
     AutoFill::AutoFillWindowType autoFillWindowType_ = AutoFill::AutoFillWindowType::MODAL_WINDOW;
     AbilityBase::ViewData viewData_;
-    bool isActiveShutDown_ = false;
+    bool isReloadInModal_ = false;
 };
 } // AbilityRuntime
 } // OHOS

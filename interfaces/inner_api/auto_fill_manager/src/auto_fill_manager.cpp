@@ -211,7 +211,7 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
     }
 
     if (request.extensionCallback == nullptr) {
-        HILOG_ERROR("ExtensionCallback is nullptr.");
+        HILOG_ERROR("Extension callback is nullptr.");
         return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
     }
     
@@ -238,7 +238,6 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
         RemoveEvent(eventId_);
         return AutoFill::AUTO_FILL_CREATE_MODULE_UI_EXTENSION_FAILED;
     }
-    request.extensionCallback->SetUIContent(request.uiContent);
     request.extensionCallback->SetSessionId(sessionId);
     request.extensionCallback->SetEventId(eventId_);
     request.extensionCallback->SetWindowType(AutoFill::AutoFillWindowType::MODAL_WINDOW);
@@ -250,7 +249,7 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
 int32_t AutoFillManager::CreateAutoFillExtension(Ace::UIContent *uiContent,
     const AutoFill::AutoFillRequest &request,
     const Ace::ModalUIExtensionCallbacks &callback,
-    const AutoFill::AutoFillWindowType autoFillWindowType,
+    const AutoFill::AutoFillWindowType &autoFillWindowType,
     bool isSmartAutoFill)
 {
     int32_t sessionId = AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID;

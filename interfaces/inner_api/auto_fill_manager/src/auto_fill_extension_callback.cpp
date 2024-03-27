@@ -23,7 +23,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewData";
-constexpr static char WANT_PARAMS_CUSTOM_DATA[] = "ohos.ability.params.customData";
+constexpr static char WANT_PARAMS_CUSTOM_DATA_KEY[] = "ohos.ability.params.customData";
 constexpr static char WANT_PARAMS_AUTO_FILL_CMD_KEY[] = "ohos.ability.params.autoFillCmd";
 constexpr static char WANT_PARAMS_AUTO_FILL_EVENT_KEY[] = "ability.want.params.AutoFillEvent";
 } // namespace
@@ -67,7 +67,9 @@ void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name
 
 void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wantParams)
 {
-    std::string customDataString(wantParams.GetStringParam(WANT_PARAMS_CUSTOM_DATA));
+    HILOG_DEBUG("Called.");
+    isReloadInModal_ = true;
+    auto customDataString(wantParams.GetStringParam(WANT_PARAMS_CUSTOM_DATA_KEY));
     AutoFill::ReloadInModalRequest request = {
         .uiContent = uiContent_,
         .nodeId = sessionId_,
@@ -76,7 +78,6 @@ void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wan
         .extensionCallback = shared_from_this(),
     };
     CloseModalUIExtension();
-    isActiveShutDown_ = true;
     int32_t resultCode = AutoFillManager::GetInstance().ReloadInModal(request);
     if (resultCode != AutoFill::AUTO_FILL_SUCCESS) {
         SendAutoFillFailed(resultCode);
@@ -89,12 +90,11 @@ void AutoFillExtensionCallback::OnReceive(const AAFwk::WantParams &wantParams)
     int32_t cmdValue = wantParams.GetIntParam(WANT_PARAMS_AUTO_FILL_CMD_KEY, 0);
     if (cmdValue == static_cast<int32_t>(AutoFill::AutoFillCommand::RELOAD_IN_MODAL)) {
         HandleReloadInModal(wantParams);
-    }
-    if (wantParams.GetIntParam(WANT_PARAMS_AUTO_FILL_EVENT_KEY, 0) != AutoFill::AUTO_FILL_CANCEL_TIME_OUT) {
-        HILOG_ERROR("Event is invalid.");
         return;
     }
-    AutoFillManager::GetInstance().RemoveEvent(eventId_);
+    if (wantParams.GetIntParam(WANT_PARAMS_AUTO_FILL_EVENT_KEY, 0) == AutoFill::AUTO_FILL_CANCEL_TIME_OUT) {
+        AutoFillManager::GetInstance().RemoveEvent(eventId_);
+    }
 }
 
 void AutoFillExtensionCallback::onRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy> &modalUIExtensionProxy)
@@ -110,8 +110,8 @@ void AutoFillExtensionCallback::onRemoteReady(const std::shared_ptr<Ace::ModalUI
 void AutoFillExtensionCallback::onDestroy()
 {
     HILOG_DEBUG("Called.");
-    if (isActiveShutDown_) {
-        isActiveShutDown_ = false;
+    if (isReloadInModal_) {
+        isReloadInModal_ = false;
         return;
     }
     AutoFillManager::GetInstance().RemoveEvent(eventId_);
@@ -210,7 +210,9 @@ void AutoFillExtensionCallback::CloseModalUIExtension()
     } else if (autoFillWindowType_ == AutoFill::AutoFillWindowType::MODAL_WINDOW) {
         uiContent_->CloseModalUIExtension(sessionId_);
     }
-    uiContent_ = nullptr;
+    if (!isReloadInModal_) {
+        uiContent_ = nullptr;
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

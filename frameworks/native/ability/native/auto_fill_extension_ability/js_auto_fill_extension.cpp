@@ -431,7 +431,7 @@ int32_t JsAutoFillExtension::OnReloadInModal(const sptr<AAFwk::SessionInfo> &ses
     AAFwk::WantParamWrapper wrapper(customData.data);
     auto customDataString = wrapper.ToString();
     auto obj = sessionInfo->sessionToken;
-    auto& uiWindow = uiWindowMap_[obj];
+    auto &uiWindow = uiWindowMap_[obj];
     if (uiWindow == nullptr) {
         HILOG_ERROR("UI window is nullptr.");
         return ERR_NULL_OBJECT;
