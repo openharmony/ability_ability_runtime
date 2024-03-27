@@ -77,10 +77,16 @@ void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wan
         .autoFillWindowType = autoFillWindowType_,
         .extensionCallback = shared_from_this(),
     };
-    CloseModalUIExtension();
     int32_t resultCode = AutoFillManager::GetInstance().ReloadInModal(request);
     if (resultCode != AutoFill::AUTO_FILL_SUCCESS) {
         SendAutoFillFailed(resultCode);
+        return;
+    }
+    if (request.autoFillWindowType == AutoFill::AutoFillWindowType::POPUP_WINDOW) {
+        AutoFillManager::GetInstance().RemoveAutoFillExtensionProxy(request.uiContent);
+        request.uiContent->DestroyCustomPopupUIExtension(request.nodeId);
+    } else if (request.autoFillWindowType == AutoFill::AutoFillWindowType::MODAL_WINDOW) {
+        request.uiContent->CloseModalUIExtension(request.nodeId);
     }
 }
 
@@ -114,12 +120,8 @@ void AutoFillExtensionCallback::onDestroy()
         isReloadInModal_ = false;
         return;
     }
-    AutoFillManager::GetInstance().RemoveEvent(eventId_);
-    if (uiContent_ != nullptr && autoFillWindowType_ == AutoFill::AutoFillWindowType::POPUP_WINDOW) {
-        AutoFillManager::GetInstance().RemoveAutoFillExtensionProxy(uiContent_);
-    }
-    uiContent_ = nullptr;
     SendAutoFillFailed(AutoFill::AUTO_FILL_CANCEL);
+    CloseModalUIExtension();
 }
 
 void AutoFillExtensionCallback::SetFillRequestCallback(const std::shared_ptr<IFillRequestCallback> &callback)
@@ -204,15 +206,13 @@ void AutoFillExtensionCallback::CloseModalUIExtension()
         return;
     }
 
+    AutoFillManager::GetInstance().RemoveAutoFillExtensionProxy(uiContent_);
     if (autoFillWindowType_ == AutoFill::AutoFillWindowType::POPUP_WINDOW) {
-        AutoFillManager::GetInstance().RemoveAutoFillExtensionProxy(uiContent_);
         uiContent_->DestroyCustomPopupUIExtension(sessionId_);
     } else if (autoFillWindowType_ == AutoFill::AutoFillWindowType::MODAL_WINDOW) {
         uiContent_->CloseModalUIExtension(sessionId_);
     }
-    if (!isReloadInModal_) {
-        uiContent_ = nullptr;
-    }
+    uiContent_ = nullptr;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
