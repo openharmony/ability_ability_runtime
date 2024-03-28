@@ -185,6 +185,7 @@ HWTEST_F(JsAutoFillExtensionTest, OnReloadInModal_0100, TestSize.Level1)
 {
     CustomData customData;
     ASSERT_NE(jsAutoFillExtension_, nullptr);
+    jsAutoFillExtension_->isPopup_ = true;
     auto ret = jsAutoFillExtension_->OnReloadInModal(nullptr, customData);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
 

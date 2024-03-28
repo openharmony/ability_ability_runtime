@@ -74,24 +74,27 @@ void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wan
     auto customDataString(wantParams.GetStringParam(WANT_PARAMS_CUSTOM_DATA_KEY));
     AutoFill::ReloadInModalRequest request = {
         .uiContent = uiContent_,
+        .isSmartAutoFill = isSmartAutoFill_,
         .nodeId = sessionId_,
         .customData = customDataString,
+        .autoFillType = autoFillType_,
         .autoFillWindowType = autoFillWindowType_,
         .extensionCallback = shared_from_this(),
     };
     int32_t resultCode = AutoFillManager::GetInstance().ReloadInModal(request);
     if (resultCode != AutoFill::AUTO_FILL_SUCCESS) {
         SendAutoFillFailed(resultCode);
-        return;
     }
+
     if (uiContent_ == nullptr) {
         HILOG_ERROR("UI content is nullptr.");
         return;
     }
+
     if (request.autoFillWindowType == AutoFill::AutoFillWindowType::POPUP_WINDOW) {
         uiContent_->DestroyCustomPopupUIExtension(request.nodeId);
-    } else if (request.autoFillWindowType == AutoFill::AutoFillWindowType::MODAL_WINDOW) {
-        uiContent_->CloseModalUIExtension(request.nodeId);
+    } else {
+        HILOG_WARN("Window type is not popup, the window can not be destroyed.");
     }
 }
 
@@ -162,6 +165,16 @@ void AutoFillExtensionCallback::SetWindowType(const AutoFill::AutoFillWindowType
 void AutoFillExtensionCallback::SetViewData(const AbilityBase::ViewData &viewData)
 {
     viewData_ = viewData;
+}
+
+void AutoFillExtensionCallback::SetExtensionType(bool isSmartAutoFill)
+{
+    isSmartAutoFill_ = isSmartAutoFill;
+}
+
+void AutoFillExtensionCallback::SetAutoFillType(const AbilityBase::AutoFillType &autoFillType)
+{
+    autoFillType_ = autoFillType;
 }
 
 AbilityBase::ViewData AutoFillExtensionCallback::GetViewData()

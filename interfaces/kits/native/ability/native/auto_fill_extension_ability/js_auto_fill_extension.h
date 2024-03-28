@@ -141,6 +141,7 @@ private:
     std::set<sptr<IRemoteObject>> foregroundWindows_;
     std::map<sptr<IRemoteObject>, std::shared_ptr<NativeReference>> contentSessions_;
     std::map<sptr<IRemoteObject>, std::shared_ptr<NativeReference>> callbacks_;
+    bool isPopup_ = false;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

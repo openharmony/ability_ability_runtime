@@ -57,9 +57,11 @@ struct AutoFillRequest {
  */
 struct ReloadInModalRequest {
     Ace::UIContent *uiContent = nullptr;
+    bool isSmartAutoFill = false;
     int32_t nodeId;
     std::string customData;
     AutoFillWindowType autoFillWindowType;
+    AbilityBase::AutoFillType autoFillType = AbilityBase::AutoFillType::UNSPECIFIED;
     std::shared_ptr<AutoFillExtensionCallback> extensionCallback;
 };
 }
