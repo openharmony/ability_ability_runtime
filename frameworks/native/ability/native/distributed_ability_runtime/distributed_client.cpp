@@ -214,8 +214,10 @@ ErrCode DistributedClient::NotifyCompleteContinuation(
         return ERR_FLATTEN_OBJECT;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = {MessageOption::TF_ASYNC};
+    TAG_LOGI(AAFwkTag::DISTRIBUTED, "SendRequest NotifyCompleteContinuation begin");
     int32_t result = remote->SendRequest(NOTIFY_COMPLETE_CONTINUATION, data, reply, option);
+    TAG_LOGI(AAFwkTag::DISTRIBUTED, "SendRequest NotifyCompleteContinuation end");
     if (result != ERR_NONE) {
         TAG_LOGE(AAFwkTag::DISTRIBUTED, "SendRequest failed, result = %{public}d", result);
         return result;
