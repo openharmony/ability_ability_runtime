@@ -69,6 +69,9 @@
 #endif
 
 namespace OHOS {
+namespace AbilityRuntime {
+class IStatusBarDelegate;
+}
 namespace AAFwk {
 using AutoStartupInfo = AbilityRuntime::AutoStartupInfo;
 enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
@@ -1364,6 +1367,10 @@ public:
      */
     int32_t GetUserId() const;
 
+    virtual int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate) override;
+
+    virtual int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids) override;
+
     /**
      * @brief Register auto start up callback for system api.
      * @param callback The point of JsAbilityAutoStartupCallBack.
@@ -1926,8 +1933,6 @@ private:
     bool CheckUserIdActive(int32_t userId);
 
     int32_t CheckProcessOptions(const Want &want, const StartOptions &startOptions);
-
-    bool IsCallerInStatusBar();
 
     void GetConnectManagerAndUIExtensionBySessionInfo(const sptr<SessionInfo> &sessionInfo,
         std::shared_ptr<AbilityConnectManager> &connectManager, std::shared_ptr<AbilityRecord> &targetAbility);
