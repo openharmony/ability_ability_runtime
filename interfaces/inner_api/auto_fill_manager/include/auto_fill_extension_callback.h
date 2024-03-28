@@ -48,6 +48,8 @@ public:
     void SetUIContent(Ace::UIContent *uiContent);
     void SetEventId(uint32_t eventId);
     void SetWindowType(const AutoFill::AutoFillWindowType &autoFillWindowType);
+    void SetExtensionType(bool isSmartAutoFill);
+    void SetAutoFillType(const AbilityBase::AutoFillType &autoFillType);
     void SetViewData(const AbilityBase::ViewData &viewData);
     AbilityBase::ViewData GetViewData();
     void HandleTimeOut();
@@ -66,6 +68,8 @@ private:
     AutoFill::AutoFillWindowType autoFillWindowType_ = AutoFill::AutoFillWindowType::MODAL_WINDOW;
     AbilityBase::ViewData viewData_;
     bool isReloadInModal_ = false;
+    bool isSmartAutoFill_ = false;
+    AbilityBase::AutoFillType autoFillType_ = AbilityBase::AutoFillType::UNSPECIFIED;
 };
 } // AbilityRuntime
 } // OHOS

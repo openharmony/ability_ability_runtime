@@ -53,6 +53,7 @@ constexpr size_t ARGC_THREE = 3;
 constexpr const char *WANT_PARAMS_AUTO_FILL_CMD = "ohos.ability.params.autoFillCmd";
 constexpr static char WANT_PARAMS_AUTO_FILL_EVENT_KEY[] = "ability.want.params.AutoFillEvent";
 constexpr const char *WANT_PARAMS_CUSTOM_DATA = "ohos.ability.params.customData";
+constexpr const char *WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY = "ohos.ability.params.popupWindow";
 }
 napi_value AttachAutoFillExtensionContext(napi_env env, void *value, void *)
 {
@@ -426,10 +427,16 @@ void JsAutoFillExtension::OnBackground()
 int32_t JsAutoFillExtension::OnReloadInModal(const sptr<AAFwk::SessionInfo> &sessionInfo, const CustomData &customData)
 {
     HILOG_DEBUG("Called.");
+    if (!isPopup_) {
+        HILOG_ERROR("The current window type is not popup.");
+        return ERR_INVALID_OPERATION;
+    }
+
     if (sessionInfo == nullptr) {
         HILOG_ERROR("SessionInfo is nullptr.");
         return ERR_NULL_OBJECT;
     }
+
     AAFwk::WantParamWrapper wrapper(customData.data);
     auto customDataString = wrapper.ToString();
     auto obj = sessionInfo->sessionToken;
@@ -516,6 +523,10 @@ void JsAutoFillExtension::ForegroundWindow(const AAFwk::Want &want, const sptr<A
         return;
     }
     context->SetSessionInfo(sessionInfo);
+
+    if (want.HasParameter(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY)) {
+        isPopup_ = want.GetBoolParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);
+    }
 
     if (!HandleAutoFillCreate(want, sessionInfo)) {
         TAG_LOGE(AAFwkTag::AUTOFILL_EXT, "Handle auto fill create failed.");

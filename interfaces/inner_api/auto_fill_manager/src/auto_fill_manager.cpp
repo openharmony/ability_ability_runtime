@@ -123,6 +123,8 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
     extensionCallback->SetEventId(eventId_);
     extensionCallback->SetViewData(request.viewData);
     extensionCallback->SetWindowType(autoFillWindowType);
+    extensionCallback->SetExtensionType(isSmartAutoFill);
+    extensionCallback->SetAutoFillType(request.autoFillType);
     std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
     extensionCallbacks_.emplace(eventId_, extensionCallback);
     return AutoFill::AUTO_FILL_SUCCESS;
@@ -215,7 +217,12 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
         HILOG_ERROR("Extension callback is nullptr.");
         return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
     }
-    
+
+    if (request.autoFillType == AbilityBase::AutoFillType::UNSPECIFIED) {
+        HILOG_ERROR("Auto fill type is invalid.");
+        return AutoFill::AUTO_FILL_TYPE_INVALID;
+    }
+
     {
         std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
         SetTimeOutEvent(++eventId_);
@@ -224,8 +231,9 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
     AAFwk::Want want;
     want.SetParam(WANT_PARAMS_AUTO_FILL_CMD_KEY, static_cast<int32_t>(AutoFill::AutoFillCommand::RELOAD_IN_MODAL));
     want.SetParam(WANT_PARAMS_CUSTOM_DATA_KEY, request.customData);
-    want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_EXTENSION_TYPE);
-    want.SetParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, static_cast<int32_t>(AbilityBase::AutoFillType::PASSWORD));
+    request.isSmartAutoFill ? want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_SMART_EXTENSION_TYPE) :
+        want.SetParam(WANT_PARAMS_EXTENSION_TYPE_KEY, WANT_PARAMS_EXTENSION_TYPE);
+    want.SetParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, static_cast<int32_t>(request.autoFillType));
     want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, request.extensionCallback->GetViewData().ToJsonString());
     want.SetParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);
     Ace::ModalUIExtensionCallbacks callback;
