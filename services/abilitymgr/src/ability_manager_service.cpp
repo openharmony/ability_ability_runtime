@@ -88,6 +88,7 @@
 #include "start_ability_handler/start_ability_sandbox_savefile.h"
 #include "start_options.h"
 #include "start_ability_utils.h"
+#include "status_bar_delegate_interface.h"
 #include "string_ex.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
@@ -1728,17 +1729,6 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
     return connectManager->StartAbility(abilityRequest);
 }
 
-AppExecFwk::ElementName AbilityManagerService::GetElementNameByAppId(const std::string &appId)
-{
-    auto bms = GetBundleManager();
-    if (bms == nullptr) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "bms is invalid.");
-        return {};
-    }
-    auto launchWant = IN_PROCESS_CALL(bms->GetLaunchWantByAppId(appId, GetUserId()));
-    return launchWant.GetElement();
-}
-
 int32_t AbilityManagerService::OpenAtomicService(AAFwk::Want& want, const StartOptions &options,
     sptr<IRemoteObject> callerToken, int32_t requestCode, int32_t userId)
 {
@@ -2317,7 +2307,6 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
     }
     EventInfo eventInfo = BuildEventInfo(want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
-    EventReport::SendExtensionEvent(EventName::START_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
 
     auto result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::START_EXTENSION_ERROR);
     if (result != ERR_OK) {
@@ -2521,7 +2510,6 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
         AppExecFwk::ExtensionAbilityType::UI : AppExecFwk::ConvertToExtensionAbilityType(extensionTypeStr);
     EventInfo eventInfo = BuildEventInfo(extensionSessionInfo->want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
-    EventReport::SendExtensionEvent(EventName::START_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
 
     if (InsightIntentExecuteParam::IsInsightIntentExecute(extensionSessionInfo->want)) {
         int32_t result = DelayedSingleton<InsightIntentExecuteManager>::GetInstance()->CheckAndUpdateWant(
@@ -2663,7 +2651,6 @@ int AbilityManagerService::StopExtensionAbility(const Want &want, const sptr<IRe
     }
     EventInfo eventInfo = BuildEventInfo(want, userId);
     eventInfo.extensionType = static_cast<int32_t>(extensionType);
-    EventReport::SendExtensionEvent(EventName::STOP_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
 
     auto result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::STOP_EXTENSION_ERROR);
     if (result != ERR_OK) {
@@ -2769,7 +2756,6 @@ void AbilityManagerService::StopSwitchUserDialogInner(const Want &want, const in
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Stop switch user dialog inner come");
     EventInfo eventInfo = BuildEventInfo(want, lastUserId);
     eventInfo.extensionType = static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SERVICE);
-    EventReport::SendExtensionEvent(EventName::STOP_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
     AbilityRequest abilityRequest;
     auto result =
         GenerateExtensionAbilityRequest(want, abilityRequest, nullptr, lastUserId);
@@ -3263,7 +3249,6 @@ int AbilityManagerService::ConnectAbilityCommon(
         CHECK_CALLER_IS_SYSTEM_APP;
     }
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
 
     auto result = CheckDlpForExtension(want, callerToken, userId, eventInfo, EventName::CONNECT_SERVICE_ERROR);
     if (result != ERR_OK) {
@@ -3367,7 +3352,6 @@ int AbilityManagerService::ConnectUIExtensionAbility(const Want &want, const spt
     }
 
     EventInfo eventInfo = BuildEventInfo(want, userId);
-    EventReport::SendExtensionEvent(EventName::CONNECT_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
     sptr<IRemoteObject> callerToken = sessionInfo->callerToken;
 
     if (callerToken != nullptr && !VerificationAllToken(callerToken)) {
@@ -3455,7 +3439,6 @@ int AbilityManagerService::DisconnectAbility(sptr<IAbilityConnection> connect)
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Disconnect ability begin.");
     EventInfo eventInfo;
-    EventReport::SendExtensionEvent(EventName::DISCONNECT_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
     CHECK_POINTER_AND_RETURN(connect, ERR_INVALID_VALUE);
     CHECK_POINTER_AND_RETURN(connect->AsObject(), ERR_INVALID_VALUE);
 
@@ -6968,7 +6951,6 @@ void AbilityManagerService::StartSwitchUserDialogInner(const Want &want, int32_t
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start switch user dialog inner come");
     EventInfo eventInfo = BuildEventInfo(want, lastUserId);
     eventInfo.extensionType = static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SERVICE);
-    EventReport::SendExtensionEvent(EventName::START_SERVICE, HiSysEventType::BEHAVIOR, eventInfo);
     AbilityRequest abilityRequest;
     auto result = GenerateExtensionAbilityRequest(want, abilityRequest, nullptr, lastUserId);
     if (result != ERR_OK) {
@@ -8363,6 +8345,11 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
 
     auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "OtherExtension type: %{public}d.", static_cast<int32_t>(extensionType));
+    if (system::GetBoolParameter(DEVELOPER_MODE_STATE, false) &&
+        PermissionVerification::GetInstance()->VerifyShellStartExtensionType(static_cast<int32_t>(extensionType))) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "CheckCallOtherExtensionPermission, allow aa start with debug mode.");
+        return ERR_OK;
+    }
     if (extensionType == AppExecFwk::ExtensionAbilityType::WINDOW) {
         return ERR_OK;
     }
@@ -9012,6 +8999,32 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
     }
 }
 
+int32_t AbilityManagerService::RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate)
+{
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+    if (uiAbilityLifecycleManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityLifecycleManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return uiAbilityLifecycleManager_->RegisterStatusBarDelegate(delegate);
+}
+
+int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids)
+{
+    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
+    if (uiAbilityLifecycleManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityLifecycleManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return uiAbilityLifecycleManager_->KillProcessWithPrepareTerminate(pids);
+}
+
 int32_t AbilityManagerService::RegisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
 {
     if (abilityAutoStartupService_ == nullptr) {
@@ -9141,16 +9154,17 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
         return ERR_NOT_SELF_APPLICATION;
     }
 
-    if (startOptions.processOptions->processMode == ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM &&
-        !IsCallerInStatusBar()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller is not in status bar in NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM mode.");
-        return ERR_START_OPTIONS_CHECK_FAILED;
-    }
-
     if (uiAbilityLifecycleManager_ == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityLifecycleManager_ is nullptr");
         return ERR_INVALID_VALUE;
     }
+
+    if (startOptions.processOptions->processMode == ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM &&
+        !uiAbilityLifecycleManager_->IsCallerInStatusBar()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller is not in status bar in NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM mode.");
+        return ERR_START_OPTIONS_CHECK_FAILED;
+    }
+
     auto abilityRecords = uiAbilityLifecycleManager_->GetAbilityRecordsByName(element);
     if (!abilityRecords.empty() && abilityRecords[0] &&
         abilityRecords[0]->GetAbilityInfo().launchMode != AppExecFwk::LaunchMode::STANDARD) {
@@ -9159,12 +9173,6 @@ int32_t AbilityManagerService::CheckProcessOptions(const Want &want, const Start
     }
 
     return ERR_OK;
-}
-
-bool AbilityManagerService::IsCallerInStatusBar()
-{
-    // Add function implementation later
-    return true;
 }
 
 int32_t AbilityManagerService::RegisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener)

@@ -17,16 +17,15 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-
-StartupListener::StartupListener(const OnCompletedCallback &callback) : onCompletedCallback_(callback)
+StartupListener::StartupListener(const std::shared_ptr<OnCompletedCallback> &callback) : onCompletedCallback_(callback)
 {}
 
 StartupListener::~StartupListener() = default;
 
-void StartupListener::OnCompleted(const StartupTaskResult &result)
+void StartupListener::OnCompleted(const std::shared_ptr<StartupTaskResult> &result)
 {
     if (onCompletedCallback_ != nullptr) {
-        onCompletedCallback_(result);
+        onCompletedCallback_->Call(result);
     }
 }
 } // namespace AbilityRuntime
