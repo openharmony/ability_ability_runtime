@@ -547,8 +547,15 @@ private:
      */
     virtual int32_t GetForegroundApplications(std::vector<AppStateData> &list) override;
 
-    void Dump(const std::vector<std::u16string>& args, std::string& result) const;
+    int Dump(const std::vector<std::u16string>& args, std::string& result);
     void ShowHelp(std::string& result) const;
+    int DumpIpc(const std::vector<std::u16string>& args, std::string& result);
+    int DumpIpcAllStart(std::string& result);
+    int DumpIpcAllStop(std::string& result);
+    int DumpIpcAllStat(std::string& result);
+    int DumpIpcStart(const int32_t pid, std::string& result);
+    int DumpIpcStop(const int32_t pid, std::string& result);
+    int DumpIpcStat(const int32_t pid, std::string& result);
 
     bool JudgeAppSelfCalled(int32_t recordId);
 
@@ -584,6 +591,19 @@ private:
      */
     bool IsFinalAppProcess() override;
 
+    enum DumpIpcKey {
+        KEY_DUMP_IPC_START = 0,
+        KEY_DUMP_IPC_STOP,
+        KEY_DUMP_IPC_STAT,
+    };
+
+private:
+    void DumpIpcAllFuncInit();
+    void DumpIpcFuncInit();
+    int DumpIpcAllInner(const AppMgrService::DumpIpcKey key, std::string& result);
+    int DumpIpcWithPidInner(const AppMgrService::DumpIpcKey key,
+        const std::string& optionPid, std::string& result);
+
 private:
     std::shared_ptr<AppMgrServiceInner> appMgrServiceInner_;
     AppMgrServiceState appMgrServiceState_;
@@ -591,6 +611,14 @@ private:
     std::shared_ptr<AMSEventHandler> eventHandler_;
     sptr<ISystemAbilityManager> systemAbilityMgr_;
     sptr<IAmsMgr> amsMgrScheduler_;
+
+    const static std::map<std::string, AppMgrService::DumpIpcKey> dumpIpcMap;
+
+    using DumpIpcAllFuncType = int (AppMgrService::*)(std::string& result);
+    std::map<uint32_t, DumpIpcAllFuncType> dumpIpcAllFuncMap_;
+
+    using DumpIpcFuncType = int (AppMgrService::*)(const int32_t pid, std::string& result);
+    std::map<uint32_t, DumpIpcFuncType> dumpIpcFuncMap_;
 
     DISALLOW_COPY_AND_MOVE(AppMgrService);
 };
