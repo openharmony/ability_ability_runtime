@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_JS_UI_EXTENSION_H
 
 #include "configuration.h"
+#include "js_ui_extension_content_session.h"
 #include "ui_extension.h"
 #include <unordered_set>
 
@@ -29,27 +30,6 @@ class JsRuntime;
 /**
  * @brief Basic ui extension components.
  */
-
-
-class AbilityResultListener {
-public:
-    AbilityResultListener() = default;
-    virtual ~AbilityResultListener() = default;
-    virtual void OnAbilityResult(int requestCode, int resultCode, const Want &resultData) = 0;
-    virtual bool IsMatch(int requestCode) = 0;
-};
-
-class AbilityResultListeners {
-public:
-    AbilityResultListeners() = default;
-    virtual ~AbilityResultListeners() = default;
-    void AddListener(const uint64_t &uiExtensionComponentId, std::shared_ptr<AbilityResultListener> listener);
-    void RemoveListener(const uint64_t &uiExtensionComponentId);
-    void OnAbilityResult(int requestCode, int resultCode, const Want &resultData);
-private:
-    std::map<uint64_t, std::shared_ptr<AbilityResultListener>> listeners_;
-};
-
 class JsUIExtension : public UIExtension {
 public:
     explicit JsUIExtension(JsRuntime& jsRuntime);
@@ -207,6 +187,10 @@ private:
         const AppExecFwk::InsightIntentExecuteResult &result) override;
     void PostInsightIntentExecuted(const sptr<AAFwk::SessionInfo> &sessionInfo,
         const AppExecFwk::InsightIntentExecuteResult &result, bool needForeground);
+    std::unique_ptr<NativeReference> CreateAppWindowStage(sptr<Rosen::Window> uiWindow,
+        sptr<AAFwk::SessionInfo> sessionInfo);
+    sptr<Rosen::Window> CreateUIWindow(const std::shared_ptr<UIExtensionContext> context,
+        const sptr<AAFwk::SessionInfo> &sessionInfo);
 
     JsRuntime& jsRuntime_;
     std::unique_ptr<NativeReference> jsObj_;

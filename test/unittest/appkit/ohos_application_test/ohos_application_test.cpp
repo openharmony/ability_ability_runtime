@@ -24,6 +24,7 @@
 #include "context_deal.h"
 #include "context_impl.h"
 #include "fa_ability_thread.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "mock_ability_lifecycle_callbacks.h"
 #include "mock_element_callback.h"
@@ -753,7 +754,7 @@ HWTEST_F(OHOSApplicationTest, OnConfigurationUpdated_0600, TestSize.Level1)
     resourceManager->GetResConfig(*resConfigAfter);
     const icu::Locale *localeInfo = resConfigAfter->GetLocaleInfo();
     ASSERT_NE(localeInfo, nullptr);
-    HILOG_INFO("Update config language %{public}s succeed.", localeInfo->getLanguage());
+    TAG_LOGI(AAFwkTag::TEST, "Update config language %{public}s succeed.", localeInfo->getLanguage());
     EXPECT_EQ(strcmp(localeInfo->getLanguage(), "zh"), 0);
 }
 
@@ -1295,6 +1296,24 @@ HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_NotifyUnLoadRepairP
     ohosApplication_->NotifyUnLoadRepairPatch(hqfFile);
     EXPECT_TRUE(ohosApplication_->runtime_ != nullptr);
     GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_NotifyUnLoadRepairPatch_0200 end.";
+}
+
+/*
+* @tc.number: AppExecFwk_OHOSApplicationTest_SetAppEnv_0100
+* @tc.name: SetAppEnv
+* @tc.desc: Verify SetAppEnv function
+*/
+HWTEST_F(OHOSApplicationTest, AppExecFwk_OHOSApplicationTest_SetAppEnv_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_SetAppEnv_0100 start.";
+    AppEnvironment appEnvironment;
+    appEnvironment.name = "env_key_demo";
+    appEnvironment.value = "env_value_demo";
+    std::vector<AppEnvironment> appEnvironments = {appEnvironment};
+    ohosApplication_->SetAppEnv(appEnvironments);
+    std::string appEnvVal = getenv(appEnvironment.name.c_str());
+    EXPECT_EQ(appEnvVal, appEnvironment.value);
+    GTEST_LOG_(INFO) << "AppExecFwk_OHOSApplicationTest_SetAppEnv_0100 end.";
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

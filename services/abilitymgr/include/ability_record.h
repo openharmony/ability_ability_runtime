@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,6 +223,7 @@ struct AbilityRequest {
     sptr<IAbilityConnection> connect = nullptr;
 
     std::shared_ptr<AbilityStartSetting> startSetting = nullptr;
+    std::shared_ptr<ProcessOptions> processOptions = nullptr;
     std::string specifiedFlag;
     int32_t userId = -1;
     bool callSpecifiedFlagTimeout = false;
@@ -295,6 +296,13 @@ enum class AbilityWindowState {
     FOREGROUNDING,
     BACKGROUNDING,
     TERMINATING
+};
+
+enum class AbilityVisibilityState {
+    INITIAL = 0,
+    FOREGROUND_HIDE,
+    FOREGROUND_SHOW,
+    UNSPECIFIED,
 };
 
 /**
@@ -404,6 +412,11 @@ public:
 
     bool IsForeground() const;
 
+    AbilityVisibilityState GetAbilityVisibilityState() const;
+    void SetAbilityVisibilityState(AbilityVisibilityState state);
+
+    void UpdateAbilityVisibilityState();
+
     /**
      * set ability scheduler for accessing ability thread.
      *
@@ -474,8 +487,6 @@ public:
 
     bool GetRecoveryInfo();
 
-    void InitPersistableUriPermissionConfig();
-
 #ifdef SUPPORT_GRAPHICS
     /**
      * check whether the ability 's window is attached.
@@ -503,6 +514,8 @@ public:
     void ProcessForegroundAbility(bool isRecent, const AbilityRequest &abilityRequest,
         std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
         uint32_t sceneFlag = 0);
+
+    void GrantUriPermissionForServiceExtension();
 
     void ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit = true,
         uint32_t sceneFlag = 0);
@@ -918,6 +931,7 @@ public:
     bool GetLockedState();
 
     void SetAttachDebug(const bool isAttachDebug);
+    void SetAssertDebug(bool isAssertDebug);
     int32_t CreateModalUIExtension(const Want &want);
 
     AppExecFwk::ElementName GetElementName() const;
@@ -941,12 +955,18 @@ public:
 
     void SetProcessName(const std::string &process);
 
+    std::string GetProcessName() const;
+
     void SetURI(const std::string &uri);
     std::string GetURI() const;
 
     void DoBackgroundAbilityWindowDelayed(bool needBackground);
     bool BackgroundAbilityWindowDelayed();
 
+    bool IsSceneBoard() const;
+
+    void SetRestartAppFlag(bool isRestartApp);
+    bool GetRestartAppFlag() const;
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1);
 
@@ -962,7 +982,7 @@ private:
      */
     void GetAbilityTypeString(std::string &typeStr);
     void OnSchedulerDied(const wptr<IRemoteObject> &remote);
-    void RemoveAppStateObserver();
+    void RemoveAppStateObserver(bool force = false);
     void GrantUriPermission(Want &want, std::string targetBundleName, bool isSandboxApp, uint32_t tokenId);
     void GrantDmsUriPermission(Want &want, std::string targetBundleName);
     bool IsDmsCall(Want &want);
@@ -988,15 +1008,23 @@ private:
 
     bool GrantPermissionToShell(const std::vector<std::string> &uriVec, uint32_t flag, std::string targetPkg);
 
-    void GrantUriPermissionInner(
-        Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
+    void GrantUriPermissionInner(Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName,
+         uint32_t tokenId, uint32_t specifyTokenId = 0);
     void GrantUriPermissionFor2In1Inner(
         Want &want, std::vector<std::string> &uriVec, const std::string &targetBundleName, uint32_t tokenId);
 
-    bool CheckUriPermission(Uri &uri, uint32_t &flag, uint32_t callerTokenId, bool permission, int32_t userId);
+    bool CheckUriPermission(Uri &uri, uint32_t callerTokenId, int32_t userId);
     LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason);
 
     void NotifyMissionBindPid();
+
+    void DumpUIExtensionRootHostInfo(std::vector<std::string> &info) const;
+
+    void DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const;
+
+    bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
+
+    bool CheckNeedAttachToParent() const;
 
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
@@ -1128,6 +1156,7 @@ private:
     mutable bool isDumpTimeout_ = false;
     std::vector<std::string> dumpInfos_;
     std::atomic<AbilityState> pendingState_ = AbilityState::INITIAL;    // pending life state
+    std::atomic<AbilityVisibilityState> abilityVisibilityState_ = AbilityVisibilityState::INITIAL;
 
     // scene session
     sptr<SessionInfo> sessionInfo_ = nullptr;
@@ -1149,13 +1178,15 @@ private:
     bool isNeedBackToOtherMissionStack_ = false;
     std::weak_ptr<AbilityRecord> otherMissionStackAbilityRecord_; // who starts this ability record by SA
     int32_t collaboratorType_ = 0;
-    bool isGrantPersistableUriPermissionEnable_ = false;
     std::string missionAffinity_ = "";
     bool lockedState_ = false;
     bool isAttachDebug_ = false;
+    bool isAssertDebug_ = false;
     bool isAppAutoStartup_ = false;
     bool isConnected = false;
     std::atomic_bool backgroundAbilityWindowDelayed_ = false;
+
+    bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
 };
 }  // namespace AAFwk
 }  // namespace OHOS

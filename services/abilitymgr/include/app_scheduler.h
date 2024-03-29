@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,9 +127,9 @@ public:
      * @param want ability want
      * @return true on success ,false on failure.
      */
-    int LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
+    int LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
         const AppExecFwk::AbilityInfo &abilityInfo, const AppExecFwk::ApplicationInfo &applicationInfo,
-        const Want &want);
+        const Want &want, int32_t abilityRecordId);
 
     /**
      * terminate ability with token.
@@ -362,14 +362,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t RegisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener);
-    
+
     /**
      * @brief Unregister app debug listener.
      * @param listener App debug listener.
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t UnregisterAppDebugListener(const sptr<AppExecFwk::IAppDebugListener> &listener);
-    
+
     /**
      * @brief Attach app debug.
      * @param bundleName The application bundle name.
@@ -404,6 +404,14 @@ public:
      * @param token the unique identification to the ability.
      */
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
+
+    /**
+     * Set application assertion pause state.
+     *
+     * @param pid App process pid.
+     * @param flag assertion pause state.
+     */
+    void SetAppAssertionPauseState(int32_t pid, bool flag);
 
 protected:
     /**

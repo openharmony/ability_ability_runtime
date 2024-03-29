@@ -27,16 +27,26 @@ namespace OHOS {
 namespace AbilityRuntime {
 class UIExtensionRecord : public ExtensionRecord {
 public:
-    UIExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
-        const std::string &hostBundleName, int32_t extensionRecordId);
+    UIExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord);
 
     ~UIExtensionRecord() override;
 
     bool ContinueToGetCallerToken() override;
 
-    static int32_t NeedReuse(const AAFwk::AbilityRequest &abilityRequest);
-
     void Update(const AAFwk::AbilityRequest &abilityRequest) override;
+
+    void LoadTimeout();
+    void ForegroundTimeout();
+    void BackgroundTimeout();
+    void TerminateTimeout();
+private:
+    enum ErrorCode {
+        LOAD_TIMEOUT = 0,
+        FOREGROUND_TIMEOUT = 1,
+        BACKGROUND_TIMEOUT = 2,
+        TERMINATE_TIMEOUT = 3
+    };
+    void HandleNotifyUIExtensionTimeout(ErrorCode code);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

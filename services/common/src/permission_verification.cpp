@@ -27,7 +27,10 @@ namespace AAFwk {
 const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
 const std::string DLP_PARAMS_SECURITY_FLAG = "ohos.dlp.params.securityFlag";
 namespace {
+const int32_t SHELL_START_EXTENSION_FLOOR = 0; // FORM
+const int32_t SHELL_START_EXTENSION_CEIL = 21; // EMBEDDED_UI
 const int32_t BROKER_UID = 5557;
+const std::string FOUNDATION_PROCESS_NAME = "foundation";
 const std::set<std::string> OBSERVER_NATIVE_CALLER = {
     "memmgrservice",
     "resource_schedule_service",
@@ -45,10 +48,13 @@ bool PermissionVerification::VerifyPermissionByTokenId(const int &tokenId, const
     return true;
 }
 
-bool PermissionVerification::VerifyCallingPermission(const std::string &permissionName) const
+bool PermissionVerification::VerifyCallingPermission(
+    const std::string &permissionName, const uint32_t specifyTokenId) const
 {
-    HILOG_DEBUG("VerifyCallingPermission permission %{public}s", permissionName.c_str());
-    auto callerToken = GetCallingTokenID();
+    HILOG_DEBUG("VerifyCallingPermission permission %{public}s, specifyTokenId is %{public}u",
+        permissionName.c_str(), specifyTokenId);
+    auto callerToken = specifyTokenId == 0 ? GetCallingTokenID() : specifyTokenId;
+    HILOG_DEBUG("callerToken is %{public}u", callerToken);
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(callerToken, permissionName, false);
     if (ret != Security::AccessToken::PermissionState::PERMISSION_GRANTED) {
         HILOG_ERROR("permission %{public}s: PERMISSION_DENIED", permissionName.c_str());
@@ -244,9 +250,8 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
 
 int PermissionVerification::CheckCallServiceAbilityPermission(const VerificationInfo &verificationInfo) const
 {
-    if (IPCSkeleton::GetCallingUid() != BROKER_UID &&
-        SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
-        HILOG_DEBUG("Add switch for suites");
+    if (CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS_NAME)) {
+        HILOG_DEBUG("Allow fms to connect service ability.");
         return ERR_OK;
     }
     if ((verificationInfo.apiTargetVersion > API8 || IsShellCall()) &&
@@ -304,17 +309,22 @@ unsigned int PermissionVerification::GetCallingTokenID() const
     return callerToken;
 }
 
-bool PermissionVerification::JudgeStartInvisibleAbility(const uint32_t accessTokenId, const bool visible) const
+bool PermissionVerification::JudgeStartInvisibleAbility(const uint32_t accessTokenId, const bool visible,
+    const uint32_t specifyTokenId) const
 {
     if (visible) {
         HILOG_DEBUG("TargetAbility visible is true, PASS.");
+        return true;
+    }
+    if (specifyTokenId > 0 && accessTokenId == specifyTokenId) {
+        HILOG_DEBUG("AccessTokenId is the same as specifyTokenId, targetAbility is in same APP, PASS.");
         return true;
     }
     if (IsCallFromSameAccessToken(accessTokenId)) {
         HILOG_DEBUG("TargetAbility is in same APP, PASS.");
         return true;
     }
-    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_INVISIBLE_ABILITY)) {
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_START_INVISIBLE_ABILITY, specifyTokenId)) {
         HILOG_DEBUG("Caller has PERMISSION_START_INVISIBLE_ABILITY, PASS.");
         return true;
     }
@@ -362,12 +372,15 @@ bool PermissionVerification::JudgeAssociatedWakeUp(const uint32_t accessTokenId,
 
 int PermissionVerification::JudgeInvisibleAndBackground(const VerificationInfo &verificationInfo) const
 {
-    if (IPCSkeleton::GetCallingUid() != BROKER_UID &&
+    uint32_t specifyTokenId = verificationInfo.specifyTokenId;
+    HILOG_INFO("specifyTokenId = %{public}u", specifyTokenId);
+    if (specifyTokenId == 0 && IPCSkeleton::GetCallingUid() != BROKER_UID &&
         SupportSystemAbilityPermission::IsSupportSaCallPermission() && IsSACall()) {
         HILOG_DEBUG("Support SA call");
         return ERR_OK;
     }
-    if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
+    if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible,
+        specifyTokenId)) {
         return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
     if (!JudgeStartAbilityFromBackground(verificationInfo.isBackgroundCall, verificationInfo.withContinuousTask)) {
@@ -412,6 +425,15 @@ bool PermissionVerification::VerifyPrepareTerminatePermission(const int &tokenId
     }
     HILOG_DEBUG("verify AccessToken success");
     return true;
+}
+
+bool PermissionVerification::VerifyShellStartExtensionType(int32_t type) const
+{
+    if (IsShellCall() && type >= SHELL_START_EXTENSION_FLOOR && type <= SHELL_START_EXTENSION_CEIL) {
+        return true;
+    }
+    HILOG_DEBUG("VerifyShellStartExtensionType, reject start.");
+    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -65,6 +65,7 @@ public:
 
     static bool ReadSourceMapData(const std::string& hapPath, const std::string& sourceMapPath, std::string& content);
 
+    static std::shared_ptr<Options> GetChildOptions();
     JsRuntime();
     ~JsRuntime() override;
 
@@ -80,8 +81,11 @@ public:
     void PostSyncTask(const std::function<void()>& task, const std::string& name);
     void RemoveTask(const std::string& name);
     void DumpHeapSnapshot(bool isPrivate) override;
+    void DumpCpuProfile(bool isPrivate) override;
     void DestroyHeapProfiler() override;
     void ForceFullGC() override;
+    void ForceFullGC(uint32_t tid) override;
+    void DumpHeapSnapshot(uint32_t tid, bool isFullGC) override;
     void AllowCrossThreadExecution() override;
     void GetHeapPrepare() override;
     bool BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames) override;
@@ -135,6 +139,7 @@ private:
 
     bool Initialize(const Options& options);
     void Deinitialize();
+    static void SetChildOptions(const Options& options);
 
     int32_t JsperfProfilerCommandParse(const std::string &command, int32_t defaultValue);
 
@@ -154,6 +159,8 @@ private:
 
     static std::atomic<bool> hasInstance;
 
+    static std::shared_ptr<Options> childOptions_;
+    
 private:
     bool CreateJsEnv(const Options& options);
     void PreloadAce(const Options& options);

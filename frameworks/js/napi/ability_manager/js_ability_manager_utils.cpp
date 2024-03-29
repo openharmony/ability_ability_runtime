@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <cstdint>
 
 #include "ability_state.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
@@ -103,7 +104,7 @@ napi_value CreateJsExtensionRunningInfo(napi_env env, const AAFwk::ExtensionRunn
 
 napi_value AbilityStateInit(napi_env env)
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     napi_value objValue = nullptr;
     napi_create_object(env, &objValue);
 
@@ -116,13 +117,26 @@ napi_value AbilityStateInit(napi_env env)
     return objValue;
 }
 
+napi_value UserStatusInit(napi_env env)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    napi_value objValue = nullptr;
+    napi_create_object(env, &objValue);
+
+    napi_set_named_property(
+        env, objValue, "ASSERT_TERMINATE", CreateJsValue(env, AAFwk::UserStatus::ASSERT_TERMINATE));
+    napi_set_named_property(env, objValue, "ASSERT_CONTINUE", CreateJsValue(env, AAFwk::UserStatus::ASSERT_CONTINUE));
+    napi_set_named_property(env, objValue, "ASSERT_RETRY", CreateJsValue(env, AAFwk::UserStatus::ASSERT_RETRY));
+    return objValue;
+}
+
 napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilityStateData)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        HILOG_ERROR("ObjValue nullptr.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ObjValue nullptr.");
         return nullptr;
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, abilityStateData.bundleName));
@@ -132,6 +146,7 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
     napi_set_named_property(env, object, "uid", CreateJsValue(env, abilityStateData.uid));
     napi_set_named_property(env, object, "state", CreateJsValue(env, abilityStateData.abilityState));
     napi_set_named_property(env, object, "abilityType", CreateJsValue(env, abilityStateData.abilityType));
+    napi_set_named_property(env, object, "isAtomicService", CreateJsValue(env, abilityStateData.isAtomicService));
     return object;
 }
 

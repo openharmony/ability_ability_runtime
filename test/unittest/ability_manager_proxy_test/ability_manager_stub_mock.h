@@ -62,6 +62,15 @@ public:
         return 0;
     }
 
+    virtual int StartAbilityWithSpecifyTokenId(const Want& want,
+        const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
+
     virtual int StartAbility(
         const Want& want,
         const StartOptions& startOptions,
@@ -211,6 +220,11 @@ public:
         return 0;
     }
 
+    virtual int32_t UpgradeApp(const std::string &bundleName, const int32_t uid, const std::string &exitMsg)
+    {
+        return 0;
+    }
+
     int32_t GetMissionIdByToken(const sptr<IRemoteObject>& token) override
     {
         return 0;
@@ -297,11 +311,6 @@ public:
         return true;
     }
 
-    int SendANRProcessID(int pid) override
-    {
-        return 0;
-    }
-
     MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbilityByInsightIntent, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
@@ -353,6 +362,8 @@ public:
     MOCK_METHOD2(AcquireShareData, int32_t(const int32_t &missionId, const sptr<IAcquireShareDataCallback> &shareData));
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
+    MOCK_METHOD1(MoveUIAbilityToBackground, int(const sptr<IRemoteObject> token));
+
 #ifdef ABILITY_COMMAND_FOR_TEST
     MOCK_METHOD0(BlockAppService, int());
     MOCK_METHOD0(BlockAmsService, int());

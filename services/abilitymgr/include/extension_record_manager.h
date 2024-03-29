@@ -23,11 +23,10 @@
 
 #include "ability_record.h"
 #include "extension_record.h"
+#include "ui_extension_host_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
-constexpr int32_t INVALID_EXTENSION_RECORD_ID = 0;
-
 class ExtensionRecordManager : public std::enable_shared_from_this<ExtensionRecordManager> {
 public:
     using ExtensionAbilityRecordMap = std::map<int32_t, std::shared_ptr<ExtensionRecord>>;
@@ -58,6 +57,13 @@ public:
      */
     void RemoveExtensionRecord(const int32_t extensionRecordId);
 
+    /**
+     * @brief Add extension record to terminate list by id
+     *
+     * @param extensionRecordId extension record id.
+     */
+    void AddExtensionRecordToTerminatedList(const int32_t extensionRecordId);
+
     static bool IsBelongToManager(const AppExecFwk::AbilityInfo &abilityInfo);
 
     bool IsFocused(int32_t extensionRecordId, const sptr<IRemoteObject>& focusToken);
@@ -73,12 +79,22 @@ public:
 
     std::shared_ptr<AAFwk::AbilityRecord> GetAbilityRecordBySessionInfo(const sptr<AAFwk::SessionInfo> &sessionInfo);
 
+    int32_t GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo);
+
+    void LoadTimeout(int32_t extensionRecordId);
+    void ForegroundTimeout(int32_t extensionRecordId);
+    void BackgroundTimeout(int32_t extensionRecordId);
+    void TerminateTimeout(int32_t extensionRecordId);
+private:
+    inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
+
 private:
     int32_t userId_;
     static std::atomic_int32_t extensionRecordId_;
     std::mutex mutex_;
     std::set<int32_t> extensionRecordIdSet_;
     ExtensionAbilityRecordMap extensionRecords_;
+    ExtensionAbilityRecordMap terminateRecords_;
 
     sptr<IRemoteObject> GetRootCallerTokenLocked(int32_t extensionRecordId);
 
@@ -88,8 +104,10 @@ private:
     int32_t GetExtensionRecord(const int32_t extensionRecordId, const std::string &hostBundleName,
         std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);
 
-    void UpdateProcessName(const AAFwk::AbilityRequest &abilityRequest,
-        std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord);
+    int32_t UpdateProcessName(const AAFwk::AbilityRequest &abilityRequest, std::shared_ptr<ExtensionRecord> &record);
+
+    bool IsHostSpecifiedProcessValid(const AAFwk::AbilityRequest &abilityRequest,
+        std::shared_ptr<ExtensionRecord> &record, const std::string &process);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
