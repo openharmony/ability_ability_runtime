@@ -157,6 +157,13 @@ public:
 
     void HandleExecuteInsightIntentBackground(const AAFwk::Want &want, bool onlyExecuteIntent = false);
 
+    void SetAbilityRecordId(int32_t abilityRecordId)
+    {
+        if (ability_ != nullptr) {
+            ability_->SetAbilityRecordId(abilityRecordId);
+        }
+    }
+
 #ifdef SUPPORT_GRAPHICS
 public:
 
@@ -212,6 +219,7 @@ protected:
 
 private:
     void AfterFocusedCommon(bool isFocused);
+    void UpdateSilentForeground(const AAFwk::LifeCycleStateInfo &targetState, sptr<AAFwk::SessionInfo> sessionInfo);
 
     std::shared_ptr<AppExecFwk::AbilityLifecycleCallbacks> abilityLifecycleCallbacks_;
     bool hasSaveData_ = false;

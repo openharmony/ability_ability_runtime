@@ -55,6 +55,8 @@ public:
         }
     };
 
+    void SignRestartAppFlag(const std::string &bundleName);
+
     /**
      * StartUIAbility with request.
      *
@@ -98,6 +100,15 @@ public:
      * @return Returns true on alive.
      */
     bool IsContainsAbility(const sptr<IRemoteObject> &token) const;
+
+    /**
+     * Notify SCB to minimize UIAbility
+     *
+     * @param abilityRecord the abilityRecord to minimize
+     * @param token ability's token
+     */
+    int32_t NotifySCBToMinimizeUIAbility(const std::shared_ptr<AbilityRecord> abilityRecord,
+        const sptr<IRemoteObject> token);
 
     /**
      * MinimizeUIAbility, minimize the special ability by scb.
@@ -295,8 +306,6 @@ public:
 
     int MoveMissionToFront(int32_t sessionId, std::shared_ptr<StartOptions> startOptions = nullptr);
 
-    void SetDevice(std::string deviceType);
-
     bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord,
         const int32_t oriValidUserId);
 
@@ -304,14 +313,23 @@ public:
      * @brief Update session info.
      * @param sessionInfos The vector of session info.
      */
-    void UpdateSessionInfoBySCB(const std::vector<SessionInfo> &sessionInfos, int32_t userId);
+    int32_t UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, int32_t userId,
+        std::vector<int32_t> &sessionIds);
+
+    int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
+
+    int ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
+
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+
+    std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
 
 private:
-    std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     int32_t GetReusedCollaboratorPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
+    void UpdateProcessName(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord);
     void UpdateAbilityRecordLaunchReason(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void EraseAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -344,7 +362,7 @@ private:
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
 
     void EnqueueAbilityToFront(const AbilityRequest &abilityRequest);
     void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
@@ -380,7 +398,6 @@ private:
     std::queue<AbilityRequest> abilityQueue_;
     std::queue<SpecifiedInfo> specifiedInfoQueue_;
     sptr<ISessionHandler> handler_;
-    bool isPcDevice_ = false;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

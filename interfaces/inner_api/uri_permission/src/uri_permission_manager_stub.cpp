@@ -15,6 +15,7 @@
 
 #include "uri_permission_manager_stub.h"
 
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
@@ -26,7 +27,7 @@ int UriPermissionManagerStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != IUriPermissionManager::GetDescriptor()) {
-        HILOG_ERROR("InterfaceToken not equal IUriPermissionManager's descriptor.");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "InterfaceToken not equal IUriPermissionManager's descriptor.");
         return ERR_INVALID_VALUE;
     }
     ErrCode errCode = ERR_OK;
@@ -45,9 +46,6 @@ int UriPermissionManagerStub::OnRemoteRequest(
         }
         case UriPermMgrCmd::ON_REVOKE_URI_PERMISSION_MANUALLY : {
             return HandleRevokeUriPermissionManually(data, reply);
-        }
-        case UriPermMgrCmd::ON_CHECK_PERSISTABLE_URIPERMISSION_PROXY : {
-            return HandleCheckPerSiSTableUriPermissionProxy(data, reply);
         }
         case UriPermMgrCmd::ON_VERIFY_URI_PERMISSION : {
             return HandleVerifyUriPermission(data, reply);
@@ -83,13 +81,14 @@ int UriPermissionManagerStub::HandleGrantUriPermission(MessageParcel &data, Mess
 {
     std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
     if (!uri) {
-        HILOG_ERROR("To read uri failed.");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "To read uri failed.");
         return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadInt32();
     auto targetBundleName = data.ReadString();
     auto appIndex = data.ReadInt32();
-    int result = GrantUriPermission(*uri, flag, targetBundleName, appIndex);
+    auto initiatorTokenId = data.ReadUint32();
+    int result = GrantUriPermission(*uri, flag, targetBundleName, appIndex, initiatorTokenId);
     reply.WriteInt32(result);
     return ERR_OK;
 }
@@ -98,14 +97,14 @@ int UriPermissionManagerStub::HandleBatchGrantUriPermission(MessageParcel &data,
 {
     auto size = data.ReadUint32();
     if (size <= 0 || size > MAX_URI_COUNT) {
-        HILOG_ERROR("size is invalid.");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "size is invalid.");
         return ERR_DEAD_OBJECT;
     }
     std::vector<Uri> uriVec;
     for (uint32_t i = 0; i < size; i++) {
         std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
         if (!uri) {
-            HILOG_ERROR("To read uri failed.");
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "To read uri failed.");
             return ERR_DEAD_OBJECT;
         }
         uriVec.emplace_back(*uri);
@@ -113,7 +112,8 @@ int UriPermissionManagerStub::HandleBatchGrantUriPermission(MessageParcel &data,
     auto flag = data.ReadInt32();
     auto targetBundleName = data.ReadString();
     auto appIndex = data.ReadInt32();
-    int result = GrantUriPermission(uriVec, flag, targetBundleName, appIndex);
+    auto initiatorTokenId = data.ReadUint32();
+    int result = GrantUriPermission(uriVec, flag, targetBundleName, appIndex, initiatorTokenId);
     reply.WriteInt32(result);
     return ERR_OK;
 }
@@ -122,7 +122,7 @@ int UriPermissionManagerStub::HandleRevokeUriPermissionManually(MessageParcel &d
 {
     std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
     if (!uri) {
-        HILOG_ERROR("To read uri failed.");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "To read uri failed.");
         return ERR_DEAD_OBJECT;
     }
     auto bundleName = data.ReadString();
@@ -131,25 +131,11 @@ int UriPermissionManagerStub::HandleRevokeUriPermissionManually(MessageParcel &d
     return ERR_OK;
 }
 
-int UriPermissionManagerStub::HandleCheckPerSiSTableUriPermissionProxy(MessageParcel &data, MessageParcel &reply)
-{
-    std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
-    if (!uri) {
-        HILOG_ERROR("To read uri failed.");
-        return ERR_DEAD_OBJECT;
-    }
-    auto flag = data.ReadInt32();
-    auto tokenId = data.ReadInt32();
-    bool result = CheckPersistableUriPermissionProxy(*uri, flag, tokenId);
-    reply.WriteBool(result);
-    return ERR_OK;
-}
-
 int UriPermissionManagerStub::HandleVerifyUriPermission(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
     if (!uri) {
-        HILOG_ERROR("To read uri failed.");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "To read uri failed.");
         return ERR_DEAD_OBJECT;
     }
     auto flag = data.ReadInt32();
@@ -163,14 +149,14 @@ int UriPermissionManagerStub::HandleBatchGrantUriPermissionFor2In1(MessageParcel
 {
     auto size = data.ReadUint32();
     if (size == 0 || size > MAX_URI_COUNT) {
-        HILOG_ERROR("size is invalid.");
+        TAG_LOGE(AAFwkTag::URIPERMMGR, "size is invalid.");
         return ERR_DEAD_OBJECT;
     }
     std::vector<Uri> uriVec;
     for (uint32_t i = 0; i < size; i++) {
         std::unique_ptr<Uri> uri(data.ReadParcelable<Uri>());
         if (uri == nullptr) {
-            HILOG_ERROR("To read uri failed.");
+            TAG_LOGE(AAFwkTag::URIPERMMGR, "To read uri failed.");
             return ERR_DEAD_OBJECT;
         }
         uriVec.emplace_back(*uri);

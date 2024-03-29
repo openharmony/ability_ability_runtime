@@ -24,7 +24,9 @@
 #include "ability_handler.h"
 #include "ability_recovery.h"
 #include "fa_ability_thread.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
+#include "mock_lifecycle_observer.h"
 #include "ohos_application.h"
 #include "runtime.h"
 
@@ -127,13 +129,13 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_GetLifecycle_0100, Function | MediumT
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_Create_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     AbilityRuntime::Runtime::Options options;
     options.lang = AbilityRuntime::Runtime::Language::JS;
     auto runtime = AbilityRuntime::Runtime::Create(options);
     auto ability = AbilityRuntime::UIAbility::Create(runtime);
     EXPECT_NE(ability, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -143,10 +145,10 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_Create_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_Create_0200, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     auto ability = AbilityRuntime::UIAbility::Create(nullptr);
     EXPECT_NE(ability, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -264,7 +266,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStart_0200, Function | MediumTest |
  */
 HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStart_0300, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     auto abilityInfo = std::make_shared<AbilityInfo>();
@@ -284,7 +286,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStart_0300, TestSize.Level1)
     ability->Init(abilityRecord, application, handler, token);
     Want want;
     ability->OnStart(want);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -295,7 +297,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStart_0300, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStart_0400, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     auto abilityInfo = std::make_shared<AbilityInfo>();
@@ -308,7 +310,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStart_0400, TestSize.Level1)
     auto lifecycleExecutor = std::make_shared<AbilityLifecycleExecutor>();
     ability->abilityLifecycleExecutor_ = lifecycleExecutor;
     ability->OnStart(want);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -361,7 +363,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStop_0200, Function | MediumTest | 
  */
 HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStop_0300, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     auto abilityRecovery = std::make_shared<AbilityRecovery>();
@@ -379,7 +381,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStop_0300, TestSize.Level1)
     auto lifecycleExecutor = std::make_shared<AbilityLifecycleExecutor>();
     ability->abilityLifecycleExecutor_ = lifecycleExecutor;
     ability->OnStop();
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -390,7 +392,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnStop_0300, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, DestroyInstance_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     auto abilityInfo = std::make_shared<AbilityInfo>();
@@ -407,7 +409,7 @@ HWTEST_F(UIAbilityBaseTest, DestroyInstance_0100, TestSize.Level1)
     std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, abilityToken);
     ability->Init(abilityRecord, application, handler, token);
     ability->DestroyInstance();
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -567,7 +569,7 @@ HWTEST_F(UIAbilityBaseTest, AaFwk_Ability_OnBackground_0300, Function | MediumTe
  */
 HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnBackground_0400, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     // ability info is nullptr
@@ -590,7 +592,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnBackground_0400, TestSize.Level1)
     sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
     ability->InitWindow(displayId, option);
     ability->OnBackground();
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -601,7 +603,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityRuntime_OnBackground_0400, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityCreate_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     AbilityRuntime::Runtime::Options options;
     auto runtime = AbilityRuntime::Runtime::Create(options);
     auto ability = AbilityRuntime::UIAbility::Create(runtime);
@@ -611,7 +613,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityCreate_0100, TestSize.Level1)
     auto anotherRuntime = AbilityRuntime::Runtime::Create(anotherOptions);
     auto anotherAbility = AbilityRuntime::UIAbility::Create(anotherRuntime);
     EXPECT_NE(anotherAbility, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -622,12 +624,12 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityCreate_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityOnStop_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     bool isAsyncCallback = true;
     ability_->OnStop(nullptr, isAsyncCallback);
     ability_->OnStopCallback();
     EXPECT_EQ(isAsyncCallback, false);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -638,7 +640,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityOnStop_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
 
@@ -660,7 +662,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0100, TestSize.Level1)
     // branch when contentStorage_ is nullptr
     ret = ability->IsRestoredInContinuation();
     EXPECT_EQ(ret, false);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -671,7 +673,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0200, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
 
@@ -703,7 +705,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0200, TestSize.Level1)
     want.SetParam(Want::PARAM_ABILITY_RECOVERY_RESTART, true);
     ret = ability->ShouldRecoverState(want);
     EXPECT_EQ(ret, false);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -714,7 +716,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0200, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0300, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     std::shared_ptr<AbilityInfo> pageAbilityInfo = std::make_shared<AbilityInfo>();
@@ -728,7 +730,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0300, TestSize.Level1)
     Want want;
     bool success = false;
     ability->NotifyContinuationResult(want, success);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -739,7 +741,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityContinuation_0300, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, InitConfigurationProperties_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     Configuration config;
@@ -761,7 +763,7 @@ HWTEST_F(UIAbilityBaseTest, InitConfigurationProperties_0100, TestSize.Level1)
     EXPECT_EQ(language, "en");
     EXPECT_EQ(colormode, "dark");
     EXPECT_EQ(hasPointerDevice, "true");
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -772,7 +774,7 @@ HWTEST_F(UIAbilityBaseTest, InitConfigurationProperties_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityOnMemoryLevel_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     int level = 0;
@@ -781,7 +783,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityOnMemoryLevel_0100, TestSize.Level1)
     ability->OnMemoryLevel(level);
     auto contentInfo = ability->GetContentInfo();
     EXPECT_EQ(contentInfo, "");
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -792,7 +794,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityOnMemoryLevel_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     Configuration configuration;
@@ -804,7 +806,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0100, TestSize.Level1)
     std::vector<std::string> params;
     std::vector<std::string> info;
     ability->Dump(params, info);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -815,7 +817,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0200, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     bool ret = ability->OnStartContinuation();
@@ -833,7 +835,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0200, TestSize.Level1)
     AAFwk::LaunchParam launchParam;
     ability->SetLaunchParam(launchParam);
     (void)ability->GetLaunchParam();
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -844,7 +846,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityVirtualFunc_0200, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, DispatchLifecycleOnForeground_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
 
@@ -856,7 +858,7 @@ HWTEST_F(UIAbilityBaseTest, DispatchLifecycleOnForeground_0100, TestSize.Level1)
     auto lifecycleExecutor = std::make_shared<AbilityLifecycleExecutor>();
     ability->abilityLifecycleExecutor_ = lifecycleExecutor;
     ability->DispatchLifecycleOnForeground(want);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -867,7 +869,7 @@ HWTEST_F(UIAbilityBaseTest, DispatchLifecycleOnForeground_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityFuncList_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     ability->CallRequest();
@@ -878,7 +880,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityFuncList_0100, TestSize.Level1)
     EXPECT_EQ(isNewRule, true);
     auto abilityRecovery = std::make_shared<AbilityRecovery>();
     ability->EnableAbilityRecovery(abilityRecovery);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -889,11 +891,11 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityFuncList_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityFuncList_0200, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     ability->OnLeaveForeground();
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -904,7 +906,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityFuncList_0200, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityScene_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     ability->OnSceneCreated();
@@ -912,7 +914,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityScene_0100, TestSize.Level1)
     ability->onSceneDestroyed();
     auto scene = ability->GetScene();
     EXPECT_EQ(scene, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -923,7 +925,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityScene_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, AbilityGetCurrentWindowMode_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
 
@@ -938,7 +940,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityGetCurrentWindowMode_0100, TestSize.Level1)
     ability->InitWindow(displayId, option);
     windowMode = ability->GetCurrentWindowMode();
     EXPECT_EQ(windowMode, static_cast<int>(Rosen::WindowMode::WINDOW_MODE_UNDEFINED));
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -949,7 +951,7 @@ HWTEST_F(UIAbilityBaseTest, AbilityGetCurrentWindowMode_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilitySetMissionLabel_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     std::string label = "test_label";
@@ -972,7 +974,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilitySetMissionLabel_0100, TestSize.Level1)
     ability->InitWindow(displayId, option);
     ret = ability->SetMissionLabel(label);
     EXPECT_EQ(ret, -1);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -983,7 +985,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilitySetMissionLabel_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilitySetMissionIcon_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     auto icon = std::make_shared<Media::PixelMap>();
@@ -1006,7 +1008,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilitySetMissionIcon_0100, TestSize.Level1)
     ability->InitWindow(displayId, option);
     ret = ability->SetMissionIcon(icon);
     EXPECT_EQ(ret, -1);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1017,7 +1019,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilitySetMissionIcon_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityOnChange_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     std::shared_ptr<AbilityInfo> pageAbilityInfo = std::make_shared<AbilityInfo>();
@@ -1041,7 +1043,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityOnChange_0100, TestSize.Level1)
     application->SetConfiguration(config);
     ability->Init(abilityRecord, application, handler, nullptr);
     ability->OnChange(displayId);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1052,7 +1054,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityOnChange_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityOnDisplayMove_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
     std::shared_ptr<AbilityInfo> pageAbilityInfo = std::make_shared<AbilityInfo>();
@@ -1076,7 +1078,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityOnDisplayMove_0100, TestSize.Level1)
     application->SetConfiguration(config);
     ability->Init(abilityRecord, application, handler, nullptr);
     ability->OnDisplayMove(fromDisplayId, toDisplayId);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1087,7 +1089,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityOnDisplayMove_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbilityRequestFocus_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     ASSERT_NE(ability, nullptr);
 
@@ -1110,7 +1112,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityRequestFocus_0100, TestSize.Level1)
     sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
     ability->InitWindow(displayId, option);
     ability->RequestFocus(want);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1120,11 +1122,11 @@ HWTEST_F(UIAbilityBaseTest, UIAbilityRequestFocus_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_GetResourceManager_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
     auto resourceMgr = ability->GetResourceManager();
     EXPECT_EQ(resourceMgr, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1134,7 +1136,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_GetResourceManager_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_OnStop_AsyncCallback_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->type = AbilityType::PAGE;
     std::shared_ptr<OHOSApplication> application = nullptr;
@@ -1150,7 +1152,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_OnStop_AsyncCallback_0100, TestSize.Level1
     LifeCycle::Event lifeCycleState = lifeCycle->GetLifecycleState();
     EXPECT_EQ(AbilityLifecycleExecutor::LifecycleState::INITIAL, state);
     EXPECT_EQ(LifeCycle::Event::ON_STOP, lifeCycleState);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1160,11 +1162,11 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_OnStop_AsyncCallback_0100, TestSize.Level1
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_OnConfigurationUpdatedNotify_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     Configuration configuration;
     ability_->OnConfigurationUpdatedNotify(configuration);
     EXPECT_NE(ability_, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1174,7 +1176,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_OnConfigurationUpdatedNotify_0100, TestSiz
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_InitWindow_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "ability";
     AbilityType type = AbilityType::PAGE;
@@ -1191,7 +1193,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_InitWindow_0100, TestSize.Level1)
     sptr<Rosen::WindowOption> option = new Rosen::WindowOption();
     ability_->InitWindow(displayId, option);
     ASSERT_NE(ability_, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1201,11 +1203,11 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_InitWindow_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_SetSceneListener_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     sptr<Rosen::IWindowLifeCycle> listener;
     ability_->SetSceneListener(listener);
     ASSERT_NE(ability_, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1215,7 +1217,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_SetSceneListener_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_GetWindowOption_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "ability";
     AbilityType type = AbilityType::PAGE;
@@ -1235,7 +1237,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_GetWindowOption_0100, TestSize.Level1)
     Want want;
     auto option = ability_->GetWindowOption(want);
     ASSERT_NE(option, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1245,7 +1247,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_GetWindowOption_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_DoOnForeground_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "ability";
     AbilityType type = AbilityType::PAGE;
@@ -1261,7 +1263,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_DoOnForeground_0100, TestSize.Level1)
     Want want;
     ability_->DoOnForeground(want);
     ASSERT_NE(ability_, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1271,7 +1273,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_DoOnForeground_0100, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_DoOnForeground_0200, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     abilityInfo->name = "ability";
     AbilityType type = AbilityType::PAGE;
@@ -1287,7 +1289,7 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_DoOnForeground_0200, TestSize.Level1)
     Want want;
     ability_->DoOnForeground(want);
     ASSERT_NE(ability_, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -1297,10 +1299,48 @@ HWTEST_F(UIAbilityBaseTest, UIAbility_DoOnForeground_0200, TestSize.Level1)
  */
 HWTEST_F(UIAbilityBaseTest, UIAbility_GetAbilityContext_0100, TestSize.Level1)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     auto abilityContext = ability_->GetAbilityContext();
     ASSERT_EQ(abilityContext, nullptr);
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
+}
+
+/**
+ * @tc.number: UIAbility_RegisterAbilityLifecycleObserver_0100
+ * @tc.name: UIAbility RegisterAbilityLifecycleObserver/UnregisterAbilityLifecycleObserver test.
+ * @tc.desc: Verify function RegisterAbilityLifecycleObserver/UnregisterAbilityLifecycleObserver.
+ */
+HWTEST_F(UIAbilityBaseTest, UIAbility_RegisterAbilityLifecycleObserver_0100, Function | MediumTest | Level1)
+{
+    std::shared_ptr<AbilityRuntime::UIAbility> ability = std::make_shared<AbilityRuntime::UIAbility>();
+    EXPECT_NE(ability, nullptr);
+
+    // init UIAbility to make sure lifecycle is created.
+    std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
+    std::shared_ptr<AbilityLocalRecord> abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, nullptr);
+    std::shared_ptr<AbilityHandler> handler = std::make_shared<AbilityHandler>(nullptr);
+    ability->Init(abilityRecord, nullptr, handler, nullptr);
+    std::shared_ptr<LifeCycle> lifeCycle = ability->GetLifecycle();
+    EXPECT_NE(lifeCycle, nullptr);
+
+    // register lifecycle observer on UIAbility, so that it can receive lifecycle callback from UIAbility.
+    std::shared_ptr<MockLifecycleObserver> observer = std::make_shared<MockLifecycleObserver>();
+    EXPECT_EQ(LifeCycle::Event::UNDEFINED, observer->GetLifecycleState());
+    ability->RegisterAbilityLifecycleObserver(observer);
+
+    // mock UIAbility lifecycle events, expecting that observer can observe them.
+    Want want;
+    ability->OnStart(want);
+    EXPECT_EQ(LifeCycle::Event::ON_START, lifeCycle->GetLifecycleState());
+    EXPECT_EQ(LifeCycle::Event::ON_START, observer->GetLifecycleState());
+    LifeCycle::Event finalObservedState = observer->GetLifecycleState();
+
+    // unregister lifecycle observer on UIAbility, expecting that observer remains in the previous state,
+    // can not observe later lifecycle events anymore.
+    ability->UnregisterAbilityLifecycleObserver(observer);
+    ability->OnStop();
+    EXPECT_EQ(LifeCycle::Event::ON_STOP, lifeCycle->GetLifecycleState());
+    EXPECT_EQ(finalObservedState, observer->GetLifecycleState());
 }
 } // namespace AppExecFwk
 } // namespace OHOS

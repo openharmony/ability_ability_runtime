@@ -121,6 +121,10 @@ class ApplicationContext {
     return this.__context_impl__.createModuleContext(bundleName, moduleName);
   }
 
+  createSystemHspModuleResourceManager(bundleName, moduleName) {
+    return this.__context_impl__.createSystemHspModuleResourceManager(bundleName, moduleName);
+  }
+
   createModuleResourceManager(bundleName, moduleName) {
     return this.__context_impl__.createModuleResourceManager(bundleName, moduleName);
   }
@@ -171,6 +175,10 @@ class ApplicationContext {
 
   clearUpApplicationData(callback) {
     return this.__context_impl__.clearUpApplicationData(callback);
+  }
+
+  restartApp(want) {
+    return this.__context_impl__.restartApp(want);
   }
 
   set area(mode) {

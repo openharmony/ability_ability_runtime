@@ -62,6 +62,10 @@ public:
     static napi_value SetMissionContinueState(napi_env env, napi_callback_info info);
     static napi_value StartAbilityByType(napi_env env, napi_callback_info info);
     static napi_value RequestModalUIExtension(napi_env env, napi_callback_info info);
+    static napi_value ShowAbility(napi_env env, napi_callback_info info);
+    static napi_value HideAbility(napi_env env, napi_callback_info info);
+    static napi_value OpenAtomicService(napi_env env, napi_callback_info info);
+    static napi_value MoveAbilityToBackground(napi_env env, napi_callback_info info);
 
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
@@ -107,6 +111,13 @@ private:
     napi_value OnSetMissionContinueState(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityByType(napi_env env, NapiCallbackInfo& info);
     napi_value OnRequestModalUIExtension(napi_env env, NapiCallbackInfo& info);
+    napi_value OnShowAbility(napi_env env, NapiCallbackInfo& info);
+    napi_value OnHideAbility(napi_env env, NapiCallbackInfo& info);
+    napi_value ChangeAbilityVisibility(napi_env env, NapiCallbackInfo& info, bool isShow);
+    napi_value OnOpenAtomicService(napi_env env, NapiCallbackInfo& info);
+    napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
+        AAFwk::StartOptions &options);
+    napi_value OnMoveAbilityToBackground(napi_env env, NapiCallbackInfo& info);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
     static napi_value WrapWant(napi_env env, const AAFwk::Want& want);
@@ -114,7 +125,7 @@ private:
     static napi_value WrapAbilityResult(napi_env env, const int& resultCode, const AAFwk::Want& want);
     void InheritWindowMode(AAFwk::Want &want);
     static napi_value WrapRequestDialogResult(napi_env env, int32_t resultCode, const AAFwk::Want& want);
-    void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback,
+    void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback, napi_value* result,
         bool isAbilityResult = false);
     bool CheckStartAbilityByCallParams(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         int32_t &userId, napi_value &lastParam);

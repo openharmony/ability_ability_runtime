@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,6 +43,9 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/app/js_app_manager:appmanager",
     "${ability_runtime_napi_path}/app/recovery:apprecovery_napi",
     "${ability_runtime_napi_path}/app/test_runner:testrunner_napi",
+    "${ability_runtime_napi_path}/app_startup/startup_config_entry:startupconfigentry_napi",
+    "${ability_runtime_napi_path}/app_startup/startup_listener:startuplistener_napi",
+    "${ability_runtime_napi_path}/app_startup/startup_task:startuptask_napi",
     "${ability_runtime_napi_path}/application_context_constant:contextconstant_napi",
     "${ability_runtime_napi_path}/auto_fill_extension_ability:autofillextensionability_napi",
     "${ability_runtime_napi_path}/auto_fill_extension_context:autofillextensioncontext_napi",
@@ -54,6 +57,7 @@ group("napi_packages") {
     "${ability_runtime_napi_path}/dataUriUtils:datauriutils_napi",
     "${ability_runtime_napi_path}/embeddable_ui_ability:embeddableuiability_napi",
     "${ability_runtime_napi_path}/embeddable_ui_ability_context:embeddableuiabilitycontext_napi",
+    "${ability_runtime_napi_path}/embedded_ui_extension_ability:embeddeduiextensionability_napi",
     "${ability_runtime_napi_path}/extension_ability:extensionability_napi",
     "${ability_runtime_napi_path}/extensioncontext:extensioncontext_napi",
     "${ability_runtime_napi_path}/featureAbility:featureability",

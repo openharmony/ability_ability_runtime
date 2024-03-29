@@ -18,7 +18,8 @@
         "SystemCapability.Ability.AbilityRuntime.AbilityCore",
         "SystemCapability.Ability.AbilityRuntime.Mission",
         "SystemCapability.Ability.AbilityRuntime.QuickFix",
-        "SystemCapability.Ability.AbilityTools.AbilityAssistant"
+        "SystemCapability.Ability.AbilityTools.AbilityAssistant",
+        "SystemCapability.Ability.AppStartup"
       ],
       "features": [
         "ability_runtime_auto_fill_ability",
@@ -364,6 +365,15 @@
             "header": {
               "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
               "header_files": [
+                "process_options.h"
+              ]
+            },
+            "name": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager:process_options"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include",
+              "header_files": [
                 "mission_info.h",
                 "mission_snapshot.h"
               ]
@@ -412,6 +422,7 @@
           "//foundation/ability/ability_runtime/test/moduletest:moduletest",
           "//foundation/ability/ability_runtime/test/fuzztest:fuzztest",
           "//foundation/ability/ability_runtime/test/unittest:unittest",
+          "//foundation/ability/ability_runtime/test/sample:sample",
           "//foundation/ability/ability_runtime/tools/test:moduletest",
           "//foundation/ability/ability_runtime/tools/test:systemtest",
           "//foundation/ability/ability_runtime/tools/test:unittest",

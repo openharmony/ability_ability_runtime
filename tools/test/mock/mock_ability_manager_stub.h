@@ -218,11 +218,6 @@ public:
 
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 
-    virtual int SendANRProcessID(int pid)
-    {
-        return 0;
-    }
-
     int SetAbilityController(const sptr<AppExecFwk::IAbilityController>& abilityController,
         bool imAStabilityTest) override
     {
@@ -296,7 +291,8 @@ public:
         const InsightIntentExecuteParam &param));
     MOCK_METHOD3(ExecuteInsightIntentDone, int32_t(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result));
-
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
 public:
     std::string powerState_;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,8 +71,14 @@ private:
     int32_t HandleUnregisterAppDebugListener(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAttachAppDebug(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDetachAppDebug(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetAppWaitingDebug(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCancelAppWaitingDebug(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetWaitingDebugApp(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsWaitingDebugApp(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleClearNonPersistWaitingDebugFlag(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterAbilityDebugResponse(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsAttachDebug(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply);
     int32_t HandleClearProcessByToken(MessageParcel &data, MessageParcel &reply);
 
     using AmsMgrFunc = int32_t (AmsMgrStub::*)(MessageParcel &data, MessageParcel &reply);

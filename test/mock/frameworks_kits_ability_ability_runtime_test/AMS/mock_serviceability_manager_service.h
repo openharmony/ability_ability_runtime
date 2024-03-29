@@ -274,11 +274,6 @@ public:
         return true;
     }
 
-    int SendANRProcessID(int pid) override
-    {
-        return 0;
-    }
-
     int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override
     {
         return 0;
@@ -325,6 +320,11 @@ public:
         return 0;
     }
 
+    int32_t MoveUIAbilityToBackground(const sptr<IRemoteObject> token) override
+    {
+        return 0;
+    }
+
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 
 #ifdef ABILITY_COMMAND_FOR_TEST
@@ -352,6 +352,8 @@ public:
     Want want_;
     bool startAbility = false;
     bool commonMockResultFlag_ = true;
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
 };
 } // namespace AAFwk
 } // namespace OHOS

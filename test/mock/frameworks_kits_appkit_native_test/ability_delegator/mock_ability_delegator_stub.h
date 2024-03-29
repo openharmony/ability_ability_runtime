@@ -142,7 +142,6 @@ public:
     int GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
         MissionSnapshot& snapshot, bool isLowResolution) override;
     int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
-    int SendANRProcessID(int pid) override;
     int SetAbilityController(const sptr<AppExecFwk::IAbilityController>& abilityController,
         bool imAStabilityTest) override;
     bool IsRunningInStabilityTest() override;
@@ -195,6 +194,8 @@ public:
         const InsightIntentExecuteParam &param));
     MOCK_METHOD3(ExecuteInsightIntentDone, int32_t(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result));
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
 public:
     std::string powerState_;
     static bool finishFlag_;
@@ -326,7 +327,6 @@ public:
     int GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
         MissionSnapshot& snapshot, bool isLowResolution) override;
     int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
-    int SendANRProcessID(int pid) override;
     int SetAbilityController(const sptr<AppExecFwk::IAbilityController>& abilityController,
         bool imAStabilityTest) override;
     bool IsRunningInStabilityTest() override;
@@ -375,6 +375,8 @@ public:
         const InsightIntentExecuteParam &param));
     MOCK_METHOD3(ExecuteInsightIntentDone, int32_t(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result));
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
 public:
     std::string powerState_;
     static bool finishFlag_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -217,6 +217,38 @@ public:
             int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * Starts a new ability for result using the original caller information.
+     *
+     * @param want the want of the ability to start.
+     * @param callerToken current caller ability token.
+     * @param requestCode the resultCode of the ability to start.
+     * @param userId Designation User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityForResultAsCaller(
+        const Want &want,
+        sptr<IRemoteObject> callerToken,
+        int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * Starts a new ability for result using the original caller information.
+     *
+     * @param want the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param callerToken current caller ability token.
+     * @param requestCode the resultCode of the ability to start.
+     * @param userId Designation User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityForResultAsCaller(
+        const Want &want,
+        const StartOptions &startOptions,
+        sptr<IRemoteObject> callerToken,
+        int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
      * Start ui session ability with extension session info, send session info to ability manager service.
      *
      * @param want Ability want.
@@ -264,7 +296,7 @@ public:
         sptr<IRemoteObject> callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
-    
+
      /**
      * Create UIExtension with want, send want to ability manager service.
      *
@@ -273,6 +305,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestModalUIExtension(const Want &want);
+
+    ErrCode ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
+
+    ErrCode ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
 
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
@@ -347,13 +383,21 @@ public:
      */
     ErrCode SendResultToAbility(int requestCode, int resultCode, Want& resultWant);
 
-/**
+    /**
      * MoveAbilityToBackground.
      *
      * @param token Ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode MoveAbilityToBackground(sptr<IRemoteObject> token);
+
+    /**
+     * Move the UIAbility to background, called by app self.
+     *
+     * @param token the token of the ability to move.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MoveUIAbilityToBackground(const sptr<IRemoteObject> token);
 
     /**
      * CloseAbility with want, return want from ability manager service.
@@ -1052,14 +1096,6 @@ public:
     virtual int SetAbilityController(sptr<AppExecFwk::IAbilityController> abilityController,
         bool imAStabilityTest);
 
-    /**
-     * Send not response process ID to ability manager service.
-     *
-     * @param pid The not response process ID.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SendANRProcessID(int pid);
-
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * Block ability manager service.
@@ -1337,7 +1373,63 @@ public:
      * @brief Update session info.
      * @param sessionInfos The vector of session info.
      */
-    void UpdateSessionInfoBySCB(const std::vector<SessionInfo> &sessionInfos, int32_t userId);
+    int32_t UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, int32_t userId,
+        std::vector<int32_t> &sessionIds);
+
+    /**
+     * @brief Get host info of root caller.
+     *
+     * @param token The ability token.
+     * @param hostInfo The host info of root caller.
+     * @param userId The user id.
+     * @return ErrCode Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want);
+
+    /**
+     * Pop-up launch of full-screen atomic service.
+     *
+     * @param want The want with parameters.
+     * @param callerToken caller ability token.
+     * @param requestCode Ability request code.
+     * @param userId The User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t OpenAtomicService(Want& want, const StartOptions &options, sptr<IRemoteObject> callerToken,
+        int32_t requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * @brief Querying whether to allow embedded startup of atomic service.
+     *
+     * @param token The caller UIAbility token.
+     * @param appId The ID of the application to which this bundle belongs.
+     * @return Returns true to allow ability to start, or false to reject.
+     */
+    bool IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToken, const std::string &appId);
+
+    /**
+     * @brief Request to display assert fault dialog.
+     * @param callback Listen for user operation callbacks.
+     * @param wantParams Assert dialog box display information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RequestAssertFaultDialog(const sptr<IRemoteObject> &callback, const AAFwk::WantParams &wantParams);
+
+    /**
+     * @brief Notify the operation status of the user.
+     * @param assertFaultSessionId Indicates the request ID of AssertFault.
+     * @param userStatus Operation status of the user.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyDebugAssertResult(uint64_t assertFaultSessionId, AAFwk::UserStatus userStatus);
 
 private:
     AbilityManagerClient();

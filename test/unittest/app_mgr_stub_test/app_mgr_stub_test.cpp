@@ -22,8 +22,10 @@
 #undef private
 #undef protected
 
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "mock_app_mgr_service.h"
+#include "render_state_observer_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,6 +41,14 @@ public:
     AppForegroundStateObserverMock() = default;
     virtual ~AppForegroundStateObserverMock() = default;
     void OnAppStateChanged(const AppStateData &appStateData) override
+    {}
+};
+
+class RenderStateObserverMock : public RenderStateObserverStub {
+public:
+    RenderStateObserverMock() = default;
+    virtual ~RenderStateObserverMock() = default;
+    void OnRenderStateChanged(const RenderStateData &renderStateData) override
     {}
 };
 
@@ -111,7 +121,7 @@ HWTEST_F(AppMgrStubTest, AppMgrStub_GetProcessRunningInfosByUserId_0100, TestSiz
  */
 HWTEST_F(AppMgrStubTest, HandleGetAppRunningStateByBundleName_0100, TestSize.Level0)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
     MessageParcel data;
     MessageParcel reply;
@@ -127,7 +137,7 @@ HWTEST_F(AppMgrStubTest, HandleGetAppRunningStateByBundleName_0100, TestSize.Lev
         static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_STATE), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -138,7 +148,7 @@ HWTEST_F(AppMgrStubTest, HandleGetAppRunningStateByBundleName_0100, TestSize.Lev
  */
 HWTEST_F(AppMgrStubTest, HandleNotifyLoadRepairPatch_0100, TestSize.Level0)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
     MessageParcel data;
     MessageParcel reply;
@@ -154,7 +164,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyLoadRepairPatch_0100, TestSize.Level0)
         static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_LOAD_REPAIR_PATCH), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -165,7 +175,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyLoadRepairPatch_0100, TestSize.Level0)
  */
 HWTEST_F(AppMgrStubTest, HandleNotifyHotReloadPage_0100, TestSize.Level0)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
     MessageParcel data;
     MessageParcel reply;
@@ -181,7 +191,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyHotReloadPage_0100, TestSize.Level0)
         static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_HOT_RELOAD_PAGE), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -192,7 +202,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyHotReloadPage_0100, TestSize.Level0)
  */
 HWTEST_F(AppMgrStubTest, HandleNotifyUnLoadRepairPatch_0100, TestSize.Level0)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
 
     MessageParcel data;
     MessageParcel reply;
@@ -208,7 +218,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyUnLoadRepairPatch_0100, TestSize.Level0)
         static_cast<uint32_t>(AppMgrInterfaceCode::NOTIFY_UNLOAD_REPAIR_PATCH), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -219,7 +229,7 @@ HWTEST_F(AppMgrStubTest, HandleNotifyUnLoadRepairPatch_0100, TestSize.Level0)
  */
 HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -230,7 +240,7 @@ HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
         static_cast<uint32_t>(AppMgrInterfaceCode::PRE_START_NWEBSPAWN_PROCESS), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -241,7 +251,7 @@ HWTEST_F(AppMgrStubTest, PreStartNWebSpawnProcess_001, TestSize.Level0)
  */
 HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level0)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -256,7 +266,7 @@ HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level0)
         static_cast<uint32_t>(AppMgrInterfaceCode::GET_PROCESS_MEMORY_BY_PID), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -267,7 +277,7 @@ HWTEST_F(AppMgrStubTest, GetProcessMemoryByPid_001, TestSize.Level0)
  */
 HWTEST_F(AppMgrStubTest, GetRunningProcessInformation_001, TestSize.Level0)
 {
-    HILOG_INFO("%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -284,7 +294,7 @@ HWTEST_F(AppMgrStubTest, GetRunningProcessInformation_001, TestSize.Level0)
         static_cast<uint32_t>(AppMgrInterfaceCode::GET_PIDS_BY_BUNDLENAME), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 
-    HILOG_INFO("%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
 
 /**
@@ -436,6 +446,71 @@ HWTEST_F(AppMgrStubTest, HandleUnregisterAppForegroundStateObserver_0100, TestSi
     int32_t pid = 1;
     reply.WriteInt32(pid);
     auto res = mockAppMgrService_->HandleUnregisterAppForegroundStateObserver(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleRegisterRenderStateObserver_0100
+ * @tc.desc: Test register observer success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleRegisterRenderStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> object = new (std::nothrow) RenderStateObserverMock();
+    data.WriteRemoteObject(object);
+    EXPECT_CALL(*mockAppMgrService_, RegisterRenderStateObserver(_)).Times(1);
+    auto res = mockAppMgrService_->HandleRegisterRenderStateObserver(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleUnregisterRenderStateObserver_0100
+ * @tc.desc: Test unregister observer success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUnregisterRenderStateObserver_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> object = new (std::nothrow) RenderStateObserverMock();
+    data.WriteRemoteObject(object);
+    EXPECT_CALL(*mockAppMgrService_, UnregisterRenderStateObserver(_)).Times(1);
+    auto res = mockAppMgrService_->HandleUnregisterRenderStateObserver(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleUpdateRenderState_0100
+ * @tc.desc: Test update render state success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleUpdateRenderState_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    pid_t renderPid = 0;
+    data.WriteInt32(renderPid);
+    int32_t state = 0;
+    data.WriteInt32(state);
+    EXPECT_CALL(*mockAppMgrService_, UpdateRenderState(_, _)).Times(1);
+    auto res = mockAppMgrService_->HandleUpdateRenderState(data, reply);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/**
+ * @tc.name: HandleSignRestartAppFlag_0100
+ * @tc.desc: Test sign restart app flag success.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrStubTest, HandleSignRestartAppFlag_0100, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "testBundleName";
+    data.WriteString(bundleName);
+    auto res = mockAppMgrService_->HandleSignRestartAppFlag(data, reply);
     EXPECT_EQ(res, NO_ERROR);
 }
 } // namespace AppExecFwk

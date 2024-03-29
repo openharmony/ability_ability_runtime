@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@
 #include "app_spawn_msg_wrapper.h"
 #include "app_malloc_info.h"
 #include "window_visibility_changed_listener.h"
+#include "app_jsheap_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -290,9 +291,9 @@ public:
      */
     sptr<IAppScheduler> GetApplicationClient() const;
 
-    void AddModule(const std::shared_ptr<ApplicationInfo> &appInfo, const std::shared_ptr<AbilityInfo> &abilityInfo,
-        const sptr<IRemoteObject> &token, const HapModuleInfo &hapModuleInfo,
-        const std::shared_ptr<AAFwk::Want> &want);
+    void AddModule(std::shared_ptr<ApplicationInfo> appInfo, std::shared_ptr<AbilityInfo> abilityInfo,
+        sptr<IRemoteObject> token, const HapModuleInfo &hapModuleInfo,
+        std::shared_ptr<AAFwk::Want> want, int32_t abilityRecordId);
 
     void AddModules(const std::shared_ptr<ApplicationInfo> &appInfo, const std::vector<HapModuleInfo> &moduleInfos);
 
@@ -426,6 +427,15 @@ public:
      * @return
      */
     void ScheduleHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
+
+    /**
+     * ScheduleJsHeapMemory, triggerGC and dump the application's jsheap memory info.
+     *
+     * @param info, pid, tid, needGc, needSnapshot
+     *
+     * @return
+     */
+    void ScheduleJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
     /**
      * GetAbilityRunningRecordByToken, Obtaining the ability record through token.
@@ -580,6 +590,7 @@ public:
     const AAFwk::Want &GetNewProcessRequestWant() const;
     void SetDebugApp(bool isDebugApp);
     bool IsDebugApp();
+    bool IsDebugging() const;
     void SetNativeDebug(bool isNativeDebug);
     void SetPerfCmd(const std::string &perfCmd);
     void AddRenderRecord(const std::shared_ptr<RenderRecord> &record);
@@ -671,6 +682,14 @@ public:
         return isSpawned_.load();
     }
 
+    std::map<pid_t, std::weak_ptr<AppRunningRecord>> GetChildAppRecordMap() const;
+    void AddChildAppRecord(pid_t pid, std::shared_ptr<AppRunningRecord> appRecord);
+    void RemoveChildAppRecord(pid_t pid);
+    void ClearChildAppRecordMap();
+
+    void SetParentAppRecord(std::shared_ptr<AppRunningRecord> appRecord);
+    std::shared_ptr<AppRunningRecord> GetParentAppRecord();
+
     /**
      * @brief Notify NativeEngine GC of status change.
      *
@@ -692,6 +711,29 @@ public:
     void RemoveChildProcessRecord(const std::shared_ptr<ChildProcessRecord> record);
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
+
+    /**
+     * @brief Obtains the app record assign tokenId.
+     *
+     * @return Returns app record AssignTokenId.
+     */
+    int32_t GetAssignTokenId() const;
+
+    /**
+     * @brief Setting the assign tokenId.
+     *
+     * @param AssignTokenId, the assign tokenId.
+     */
+    void SetAssignTokenId(int32_t tokenId);
+
+    void SetRestartAppFlag(bool isRestartApp);
+    bool GetRestartAppFlag() const;
+
+    void SetAssertionPauseFlag(bool flag);
+    bool IsAssertionPause() const;
+    
+    void SetJITEnabled(const bool jitEnabled);
+    bool IsJITEnabled() const;
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -803,12 +845,16 @@ private:
     std::string perfCmd_;
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
+    bool jitEnabled_ = false;
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
     bool isKilling_ = false;
     bool isContinuousTask_ = false;    // Only continuesTask processes can be set to true, please choose carefully
     std::atomic_bool isSpawned_ = false;
+
+    std::weak_ptr<AppRunningRecord> parentAppRecord_;
+    std::map<pid_t, std::weak_ptr<AppRunningRecord>> childAppRecordMap_;
 
     // render record
     std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap_;
@@ -823,12 +869,16 @@ private:
     int32_t callerPid_ = -1;
     int32_t callerUid_ = -1;
     int32_t callerTokenId_ = -1;
+    int32_t assignTokenId_ = 0;
     ProcessType processType_ = ProcessType::NORMAL;
     ExtensionAbilityType extensionType_ = ExtensionAbilityType::UNSPECIFIED;
 
     std::set<uint32_t> windowIds_;
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> childProcessRecordMap_;
     ffrt::mutex childProcessRecordMapLock_;
+
+    bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
+    bool isAssertPause_ = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

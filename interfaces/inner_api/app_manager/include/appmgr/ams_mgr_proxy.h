@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ public:
      */
     virtual void LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const std::shared_ptr<ApplicationInfo> &appInfo,
-        const std::shared_ptr<AAFwk::Want> &want) override;
+        const std::shared_ptr<AAFwk::Want> &want, int32_t abilityRecordId) override;
 
     /**
      * TerminateAbility, call TerminateAbility() through the proxy object, terminate the token ability.
@@ -116,7 +116,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillProcessWithAccount(const std::string &bundleName, const int accountId) override;
- 
+
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
      * update the application info after new module installed.
@@ -205,6 +205,38 @@ public:
     int32_t DetachAppDebug(const std::string &bundleName) override;
 
     /**
+     * @brief Set app waiting debug mode.
+     * @param bundleName The application bundle name.
+     * @param isPersist The persist flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetAppWaitingDebug(const std::string &bundleName, bool isPersist) override;
+
+    /**
+     * @brief Cancel app waiting debug mode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t CancelAppWaitingDebug() override;
+
+    /**
+     * @brief Get waiting debug mode application.
+     * @param debugInfoList The debug info list, including bundle name and persist flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetWaitingDebugApp(std::vector<std::string> &debugInfoList) override;
+
+    /**
+     * @brief Determine whether it is a waiting debug application based on the bundle name.
+     * @return Returns true if it is a waiting debug application, otherwise it returns false.
+     */
+    bool IsWaitingDebugApp(const std::string &bundleName) override;
+
+    /**
+     * @brief Clear non persist waiting debug flag.
+     */
+    void ClearNonPersistWaitingDebugFlag() override;
+
+    /**
      * @brief Registering ability debug mode response.
      * @param response Response for ability debug object.
      * @return Returns ERR_OK on success, others on failure.
@@ -217,6 +249,14 @@ public:
      * @return Returns true if it is an attach debug application, otherwise it returns false.
      */
     bool IsAttachDebug(const std::string &bundleName) override;
+
+    /**
+     * Set application assertion pause state.
+     *
+     * @param pid App process pid.
+     * @param flag assertion pause state.
+     */
+    void SetAppAssertionPauseState(int32_t pid, bool flag) override;
 
     /**
      * To clear the process by ability token.

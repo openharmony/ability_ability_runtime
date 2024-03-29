@@ -21,6 +21,7 @@
 #include "mock_application_state_change_callback.h"
 #include "mock_context_impl.h"
 #include "running_process_info.h"
+#include "want.h"
 #include "configuration_convertor.h"
 using namespace testing::ext;
 
@@ -1143,6 +1144,24 @@ HWTEST_F(ApplicationContextTest, CreateModuleResourceManager_0100, TestSize.Leve
 }
 
 /**
+ * @tc.number: CreateSystemHspModuleResourceManager_0100
+ * @tc.name: CreateSystemHspModuleResourceManager
+ * @tc.desc: Create ModuleContext failed
+ */
+HWTEST_F(ApplicationContextTest, CreateSystemHspModuleResourceManager_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateSystemHspModuleResourceManager_0100 start";
+    std::shared_ptr<ContextImpl> contextImpl = std::make_shared<ContextImpl>();
+    context_->AttachContextImpl(contextImpl);
+    std::string moduleName = "moduleName";
+    std::string bundleName = "com.test.bundleName";
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager = nullptr;
+    context_->CreateSystemHspModuleResourceManager(bundleName, moduleName, resourceManager);
+    EXPECT_NE(context_, nullptr);
+    GTEST_LOG_(INFO) << "CreateModuleResourceManager_0100 end";
+}
+
+/**
  * @tc.number: GetAllTempDir_0100
  * @tc.name: GetAllTempDir
  * @tc.desc: GetAllTempDir
@@ -1154,6 +1173,18 @@ HWTEST_F(ApplicationContextTest, GetAllTempDir_0100, TestSize.Level1)
     context_->GetAllTempDir(tempPaths);
     EXPECT_NE(context_, nullptr);
     GTEST_LOG_(INFO) << "GetAllTempDir_0100 end";
+}
+
+/**
+ * @tc.number: RestartApp_0100
+ * @tc.name: RestartApp
+ * @tc.desc: RestartApp
+ */
+HWTEST_F(ApplicationContextTest, RestartApp_0100, TestSize.Level1)
+{
+    AAFwk::Want want;
+    int32_t res = context_->RestartApp(want);
+    EXPECT_EQ(res, OHOS::ERR_INVALID_VALUE);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

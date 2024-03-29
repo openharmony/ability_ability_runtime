@@ -44,6 +44,7 @@
 namespace OHOS {
 namespace AppExecFwk {
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
+constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
 
 OHOSApplication::OHOSApplication()
 {
@@ -569,6 +570,24 @@ void OHOSApplication::OnAbilitySaveState(const PacMap &outState)
     DispatchAbilitySavedState(outState);
 }
 
+void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironments)
+{
+    if (!appEnvironments.size()) {
+        HILOG_INFO("appEnvironments empty.");
+        return;
+    }
+
+    for (const auto &appEnvironment : appEnvironments) {
+        if (setenv(appEnvironment.name.c_str(), appEnvironment.value.c_str(), APP_ENVIRONMENT_OVERWRITE)) {
+            HILOG_ERROR("appEnvironment: %{public}s set failed.", appEnvironment.name.c_str());
+            return;
+        }
+        HILOG_INFO("appEnvironment set successfully: %{public}s = %{public}s.", appEnvironment.name.c_str(),
+                   appEnvironment.value.c_str());
+    }
+    return;
+}
+
 std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
 {
@@ -595,6 +614,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             HILOG_ERROR("hapModuleInfo is nullptr");
             return nullptr;
         }
+        SetAppEnv(hapModuleInfo->appEnvironments);
 
         if (abilityInfo->applicationInfo.multiProjects) {
             auto moduleContext = stageContext->CreateModuleContext(hapModuleInfo->moduleName);
@@ -604,6 +624,13 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
 
         abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *hapModuleInfo);
         abilityStage->Init(stageContext);
+        bool waitingForStartup = false;
+        int32_t result = abilityStage->RunAutoStartupTask(waitingForStartup);
+        if (result == ERR_OK && waitingForStartup) {
+            HILOG_INFO("waiting for startup");
+            return nullptr;
+        }
+
         Want want;
         if (abilityRecord->GetWant()) {
             HILOG_DEBUG("want is ok, transport to abilityStage");
