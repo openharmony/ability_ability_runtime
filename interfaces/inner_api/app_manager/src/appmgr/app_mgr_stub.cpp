@@ -182,6 +182,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleGetAllUIExtensionProviderPid;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_BY_BUNDLE_NAME)] =
         &AppMgrStub::HandleUpdateConfigurationByBundleName;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::SET_SUPPORT_PROCESS_CACHE_SELF)] =
+        &AppMgrStub::HandleSetSupportProcessCacheSelf;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -1210,6 +1212,18 @@ int32_t AppMgrStub::HandleGetAllUIExtensionProviderPid(MessageParcel &data, Mess
         return ERR_INVALID_VALUE;
     }
 
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleSetSupportProcessCacheSelf(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    bool isSupport = data.ReadBool();
+    auto ret = SetSupportProcessCacheSelf(isSupport);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

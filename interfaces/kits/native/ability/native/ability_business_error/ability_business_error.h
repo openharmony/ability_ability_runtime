@@ -155,6 +155,8 @@ enum class AbilityErrorCode {
 
     // observer not found.
     ERROR_CODE_OBSERVER_NOT_FOUND = 16300004,
+
+    ERROR_CODE_SET_SUPPORT_PROCESS_CACHE_AGAIN = 16300005,
 };
 
 std::string GetErrorMsg(const AbilityErrorCode& errCode);

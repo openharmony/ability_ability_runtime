@@ -181,6 +181,10 @@ class ApplicationContext {
     return this.__context_impl__.restartApp(want);
   }
 
+  setSupportProcessCache(isSupport) {
+    return this.__context_impl__.setSupportProcessCache(isSupport);
+  }
+
   set area(mode) {
     return this.__context_impl__.switchArea(mode);
   }
