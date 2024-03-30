@@ -1599,7 +1599,7 @@ void AbilityRecord::DisconnectAbility()
     isConnected = false;
 }
 
-void AbilityRecord::GrantUriPermissionForServiceExtension()
+bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
     if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
         std::lock_guard guard(wantLock_);
@@ -1607,7 +1607,9 @@ void AbilityRecord::GrantUriPermissionForServiceExtension()
         auto callerName = want_.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
         HILOG_INFO("CallerName is %{public}s, callerTokenId is %{public}u", callerName.c_str(), callerTokenId);
         GrantUriPermission(want_, applicationInfo_.bundleName, false, callerTokenId);
+        return true;
     }
+    return false;
 }
 
 void AbilityRecord::CommandAbility()
