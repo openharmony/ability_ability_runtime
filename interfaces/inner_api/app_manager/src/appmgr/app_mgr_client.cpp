@@ -1145,5 +1145,16 @@ bool AppMgrClient::IsMemorySizeSufficent() const
     }
     return amsService->IsMemorySizeSufficent();
 }
+
+int32_t AppMgrClient::SetSupportProcessCacheSelf(bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+    }
+    return service->SetSupportProcessCacheSelf(isSupport);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

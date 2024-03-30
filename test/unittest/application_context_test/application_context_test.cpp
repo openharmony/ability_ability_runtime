@@ -23,7 +23,14 @@
 #include "running_process_info.h"
 #include "want.h"
 #include "configuration_convertor.h"
+#include "ability_manager_errors.h"
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
 using namespace testing::ext;
+
+namespace {
+const char *g_perms[] = { "ohos.permission.SET_PROCESS_CACHE_STATE" };
+}
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -31,6 +38,22 @@ class ApplicationContextTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static void SetNativeToken()
+    {
+        NativeTokenInfoParams infoInstance = {
+            .dcapsNum = 0,
+            .permsNum = static_cast<int32_t>(sizeof(g_perms) / sizeof(g_perms[0])),
+            .aclsNum = 0,
+            .dcaps = nullptr,
+            .perms = g_perms,
+            .acls = nullptr,
+            .aplStr = "system_basic",
+        };
+
+        infoInstance.processName = "SetUpTestCase";
+        auto tokenId = GetAccessTokenId(&infoInstance);
+        SetSelfTokenID(tokenId);
+    }
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<ApplicationContext> context_ = nullptr;
@@ -1179,6 +1202,44 @@ HWTEST_F(ApplicationContextTest, RestartApp_0100, TestSize.Level1)
     AAFwk::Want want;
     int32_t res = context_->RestartApp(want);
     EXPECT_EQ(res, OHOS::ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.number: SetSupportProcessCacheSelf_0100
+ * @tc.name: SetSupportProcessCacheSelf
+ * @tc.desc: SetSupportProcessCacheSelf fail with no permission
+ */
+HWTEST_F(ApplicationContextTest, SetSupportProcessCacheSelf_0100, TestSize.Level1)
+{
+    bool isSupport = false;
+    int32_t res = context_->SetSupportProcessCacheSelf(isSupport);
+    EXPECT_EQ(res, OHOS::AAFwk::CHECK_PERMISSION_FAILED);
+}
+
+/**
+ * @tc.number: SetSupportProcessCacheSelf_0200
+ * @tc.name: SetSupportProcessCacheSelf
+ * @tc.desc: SetSupportProcessCacheSelf first time success
+ */
+HWTEST_F(ApplicationContextTest, SetSupportProcessCacheSelf_0200, TestSize.Level1)
+{
+    ApplicationContextTest::SetNativeToken();
+    bool isSupport = false;
+    int32_t res = context_->SetSupportProcessCacheSelf(isSupport);
+    EXPECT_EQ(res, OHOS::ERR_OK);
+}
+
+/**
+ * @tc.number: SetSupportProcessCacheSelf_0300
+ * @tc.name: SetSupportProcessCacheSelf
+ * @tc.desc: SetSupportProcessCacheSelf second time failed
+ */
+HWTEST_F(ApplicationContextTest, SetSupportProcessCacheSelf_0300, TestSize.Level1)
+{
+    ApplicationContextTest::SetNativeToken();
+    bool isSupport = false;
+    int32_t res = context_->SetSupportProcessCacheSelf(isSupport);
+    EXPECT_EQ(res, OHOS::AAFwk::ERR_SET_SUPPORT_PROCESS_CACHE_AGAIN);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

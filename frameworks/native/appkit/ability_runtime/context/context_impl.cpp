@@ -1203,5 +1203,15 @@ void ContextImpl::ClearUpApplicationData()
         return;
     }
 }
+
+int32_t ContextImpl::SetSupportProcessCacheSelf(bool isSupport)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "Called");
+    auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
+    if (appMgrClient == nullptr) {
+        return ERR_INVALID_VALUE;
+    }
+    return appMgrClient->SetSupportProcessCacheSelf(isSupport);
+}
 }  // namespace AbilityRuntime
 }  // namespace OHOS

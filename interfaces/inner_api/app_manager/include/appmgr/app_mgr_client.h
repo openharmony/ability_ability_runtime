@@ -721,6 +721,7 @@ public:
      */
     bool IsMemorySizeSufficent() const;
 
+    int32_t SetSupportProcessCacheSelf(bool isSupport);
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

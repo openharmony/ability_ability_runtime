@@ -1021,6 +1021,9 @@ public:
 
     virtual int DumpIpcStat(const int32_t pid, std::string& result);
 
+    int32_t SetSupportProcessCacheSelf(bool isSupport);
+
+    void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1330,6 +1333,7 @@ private:
      */
     bool NotifyMemMgrPriorityChanged(const std::shared_ptr<AppRunningRecord> appRecord);
 
+    int32_t CheckSetProcessCachePermission() const;
 private:
     /**
      * Notify application status.

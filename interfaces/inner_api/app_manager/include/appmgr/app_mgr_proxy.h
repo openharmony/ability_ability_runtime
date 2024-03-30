@@ -543,6 +543,7 @@ public:
      */
     virtual int32_t NotifyMemonySizeStateChanged(bool isMemorySizeSufficent) override;
 
+    int32_t SetSupportProcessCacheSelf(bool isSupport) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);
