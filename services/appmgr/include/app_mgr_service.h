@@ -476,6 +476,7 @@ public:
 
     int32_t GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids) override;
 
+    int32_t SetSupportProcessCacheSelf(bool isSupport) override;
 private:
     /**
      * Init, Initialize application services.

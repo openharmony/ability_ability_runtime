@@ -708,6 +708,7 @@ public:
      */
     int32_t GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids);
 
+    int32_t SetSupportProcessCacheSelf(bool isSupport);
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

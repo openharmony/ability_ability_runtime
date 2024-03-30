@@ -457,6 +457,8 @@ enum {
      * Native error(2097239) for start other app failed.
      */
     ERR_START_OTHER_APP_FAILED,
+
+    ERR_SET_SUPPORT_PROCESS_CACHE_AGAIN,
 };
 
 enum {
