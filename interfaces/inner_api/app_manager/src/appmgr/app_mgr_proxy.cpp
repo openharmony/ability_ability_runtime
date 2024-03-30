@@ -1895,5 +1895,28 @@ int32_t AppMgrProxy::NotifyMemonySizeStateChanged(bool isMemorySizeSufficent)
     }
     return reply.ReadInt32();
 }
+
+int32_t AppMgrProxy::SetSupportProcessCacheSelf(bool isSupport)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return ERR_INVALID_DATA;
+    }
+    if (!data.WriteBool(isSupport)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "isSupport write failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    auto error = SendRequest(AppMgrInterfaceCode::SET_SUPPORT_PROCESS_CACHE_SELF, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

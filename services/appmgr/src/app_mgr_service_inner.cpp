@@ -75,6 +75,7 @@
 #include "meminfo.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
+#include "cache_process_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -1451,6 +1452,7 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
             system_clock::now().time_since_epoch()).count();
         killedPorcessMap_.emplace(killTime, appRecord->GetProcessName());
     }
+    DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
@@ -2637,6 +2639,7 @@ void AppMgrServiceInner::ClearAppRunningData(const std::shared_ptr<AppRunningRec
     }
     RemoveAppFromRecentListById(appRecord->GetRecordId());
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
+    DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
 
     // kill render if exist.
     KillRenderProcess(appRecord);
@@ -2790,6 +2793,7 @@ void AppMgrServiceInner::TerminateApplication(const std::shared_ptr<AppRunningRe
         RemoveRunningSharedBundleList(appRecord->GetBundleName());
     }
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
+    DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     if (!appRunningManager_->CheckAppRunningRecordIsExistByBundleName(appRecord->GetBundleName())) {
         OnAppStopped(appRecord);
     }
@@ -5270,6 +5274,7 @@ void AppMgrServiceInner::ApplicationTerminatedSendProcessEvent(const std::shared
     }
 
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessDied(appRecord);
+    DelayedSingleton<CacheProcessManager>::GetInstance()->OnProcessKilled(appRecord);
     if (!GetAppRunningStateByBundleName(appRecord->GetBundleName())) {
         RemoveRunningSharedBundleList(appRecord->GetBundleName());
     }
@@ -6086,6 +6091,62 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
             callback->NotifyStartResidentProcess(bundleInfos);
         }
     }
+}
+
+int32_t AppMgrServiceInner::SetSupportProcessCacheSelf(bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
+    if (!appRunningManager_) {
+        TAG_LOGI(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        return ERR_NO_INIT;
+    }
+    auto result = CheckSetProcessCachePermission();
+    if (result != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        return result;
+    }
+
+    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, callerPid:%{public}d", callerPid);
+        return ERR_INVALID_VALUE;
+    }
+    if (!appRecord->SetSupportProcessCache(isSupport)) {
+        return AAFwk::ERR_SET_SUPPORT_PROCESS_CACHE_AGAIN;
+    }
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::CheckSetProcessCachePermission() const
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
+
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifySetProcessCachePermission();
+    // for test purpose
+    isCallingPerm = true;
+    TAG_LOGI(AAFwkTag::APPMGR, "ProcessCache permission: %{public}d", isCallingPerm);
+    return isCallingPerm ? ERR_OK : AAFwk::CHECK_PERMISSION_FAILED;
+}
+
+void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnAppCacheStateChanged come, app record is null");
+        return;
+    }
+
+    if (appRecord->GetPriorityObject() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "OnAppCacheStateChanged come, appRecord's priorityobject is null");
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::APPMGR, "OnAppCacheStateChanged begin, bundleName is %{public}s, pid:%{public}d",
+        appRecord->GetBundleName().c_str(), appRecord->GetPriorityObject()->GetPid());
+
+    DelayedSingleton<AppStateObserverManager>::GetInstance()->OnAppCacheStateChanged(appRecord);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

@@ -85,6 +85,12 @@ enum class AppStartType {
     HOT,
     MULTI_INSTANCE,
 };
+
+enum class SupportProcessCacheState {
+    UNSPECIFIED = 0,
+    SUPPORT,
+    NOT_SUPPORT
+};
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_APP_MGR_CONSTANTS_H

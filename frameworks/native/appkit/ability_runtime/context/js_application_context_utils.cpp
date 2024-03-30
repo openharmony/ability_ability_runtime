@@ -1332,6 +1332,55 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
     return object;
 }
 
+napi_value JsApplicationContextUtils::SetSupportProcessCacheSelf(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
+        OnSetSupportProcessCacheSelf, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnSetSupportProcessCacheSelf(napi_env env, NapiCallbackInfo& info)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+
+    if (!CheckCallerIsSystemApp()) {
+        TAG_LOGE(AAFwkTag::APPKIT, "This application is not system-app, can not use system-api.");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_NOT_SYSTEM_APP);
+        return CreateJsUndefined(env);
+    }
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        return CreateJsUndefined(env);
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (applicationContext == nullptr) {
+        TAG_LOGW(AAFwkTag::APPKIT, "applicationContext is already released");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_CONTEXT_NOT_EXIST);
+        return CreateJsUndefined(env);
+    }
+
+    bool isSupport = false;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], isSupport)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse isSupport failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+        return CreateJsUndefined(env);
+    }
+
+    int32_t errCode = applicationContext->SetSupportProcessCacheSelf(isSupport);
+    if (errCode == AAFwk::CHECK_PERMISSION_FAILED) {
+        TAG_LOGE(AAFwkTag::APPKIT, "check permission failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_NO_ACCESS_PERMISSION);
+    } else if (errCode == AAFwk::ERR_SET_SUPPORT_PROCESS_CACHE_AGAIN) {
+        TAG_LOGE(AAFwkTag::APPKIT, "cannot set more than once");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_SET_SUPPORT_PROCESS_CACHE_AGAIN);
+    } else if (errCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "set failed");
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
+    }
+    return CreateJsUndefined(env);
+}
+
 void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_value object)
 {
     BindNativeProperty(env, object, "cacheDir", JsApplicationContextUtils::GetCacheDir);
@@ -1375,6 +1424,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetGroupDir);
     BindNativeFunction(env, object, "restartApp", MD_NAME,
         JsApplicationContextUtils::RestartApp);
+    BindNativeFunction(env, object, "setProcessCacheSelf", MD_NAME,
+        JsApplicationContextUtils::SetSupportProcessCacheSelf);
 }
 
 JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(
