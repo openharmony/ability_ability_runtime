@@ -1513,6 +1513,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
         appRecord->SetCallerUid(want->GetIntParam(Want::PARAM_RESV_CALLER_UID, -1));
         appRecord->SetCallerTokenId(want->GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, -1));
         appRecord->SetAssignTokenId(want->GetIntParam("specifyTokenId", 0));
+        appRecord->SetNativeStart(want->GetBoolParam("native", false));
     }
 
     if (preToken) {
@@ -2121,6 +2122,12 @@ void AppMgrServiceInner::SetAppEnvInfo(const BundleInfo &bundleInfo, AppSpawnSta
         startMsg.appEnv.emplace(TSAN_FLAG_NAME, std::to_string(1));
     } else {
         startMsg.appEnv.emplace(TSAN_FLAG_NAME, std::to_string(0));
+    }
+
+    if (!bundleInfo.applicationInfo.appEnvironments.empty()) {
+        for (const auto& appEnvironment : bundleInfo.applicationInfo.appEnvironments) {
+            startMsg.appEnv.emplace(appEnvironment.name, appEnvironment.value);
+        }
     }
 }
 

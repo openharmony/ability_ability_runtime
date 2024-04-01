@@ -1384,9 +1384,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         if (perfCmd.find(PERFCMD_PROFILE) != std::string::npos ||
             perfCmd.find(PERFCMD_DUMPHEAP) != std::string::npos) {
             TAG_LOGD(AAFwkTag::APPKIT, "perfCmd is %{public}s", perfCmd.c_str());
-            runtime->StartProfiler(perfCmd, appLaunchData.GetDebugApp(), processName, appInfo.debug);
+            runtime->StartProfiler(perfCmd, appLaunchData.GetDebugApp(), processName, appInfo.debug,
+                appLaunchData.isNativeStart());
         } else {
-            runtime->StartDebugMode(appLaunchData.GetDebugApp(), processName, appInfo.debug);
+            runtime->StartDebugMode(appLaunchData.GetDebugApp(), processName, appInfo.debug,
+                appLaunchData.isNativeStart());
         }
 
         std::vector<HqfInfo> hqfInfos = appInfo.appQuickFix.deployedAppqfInfo.hqfInfos;
@@ -1857,14 +1859,25 @@ void MainThread::HandleLaunchAbility(const std::shared_ptr<AbilityLocalRecord> &
     }
 
     mainThreadState_ = MainThreadState::RUNNING;
-    auto callback = [this, abilityRecord](const std::shared_ptr<AbilityRuntime::Context> &stageContext) {
-        SetProcessExtensionType(abilityRecord);
-        auto& runtime = application_->GetRuntime();
-        UpdateRuntimeModuleChecker(runtime);
+    wptr<MainThread> weak = this;
+    auto callback = [weak, abilityRecord](const std::shared_ptr<AbilityRuntime::Context> &stageContext) {
+        auto appThread = weak.promote();
+        if (appThread == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "abilityThread is nullptr");
+            return;
+        }
+        appThread->SetProcessExtensionType(abilityRecord);
+        auto application = appThread->GetApplication();
+        if (application == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr");
+            return;
+        }
+        auto& runtime = application->GetRuntime();
+        appThread->UpdateRuntimeModuleChecker(runtime);
 #ifdef APP_ABILITY_USE_TWO_RUNNER
-        AbilityThread::AbilityThreadMain(application_, abilityRecord, stageContext);
+        AbilityThread::AbilityThreadMain(application, abilityRecord, stageContext);
 #else
-        AbilityThread::AbilityThreadMain(application_, abilityRecord, mainHandler_->GetEventRunner(), stageContext);
+        AbilityThread::AbilityThreadMain(application, abilityRecord, mainHandler_->GetEventRunner(), stageContext);
 #endif
     };
     bool isAsyncCallback = false;
