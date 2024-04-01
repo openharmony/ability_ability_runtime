@@ -627,19 +627,16 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
 
         abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *hapModuleInfo);
         abilityStage->Init(stageContext);
-        auto autoStartupCallback = [this, abilityStage, abilityRecord, moduleName, callback]() {
-            Want want;
-            if (abilityRecord->GetWant()) {
-                TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
-                want = *(abilityRecord->GetWant());
+
+        auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
+        std::weak_ptr<OHOSApplication> weak = application;
+        auto autoStartupCallback = [weak, abilityStage, abilityRecord, moduleName, callback]() {
+            auto ohosApplication = weak.lock();
+            if (ohosApplication == nullptr) {
+                TAG_LOGE(AAFwkTag::APPKIT, "ohosApplication is nullptr");
+                return;
             }
-            abilityStage->OnCreate(want);
-            abilityStages_[moduleName] = abilityStage;
-            const sptr<IRemoteObject> &token = abilityRecord->GetToken();
-            if (token == nullptr) {
-                TAG_LOGE(AAFwkTag::APPKIT, "token is null");
-            }
-            abilityStage->AddAbility(token, abilityRecord);
+            ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
             callback(abilityStage->GetContext());
         };
         abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback);
@@ -665,6 +662,28 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     }
     abilityStage->AddAbility(token, abilityRecord);
     return abilityStage->GetContext();
+}
+
+void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
+    const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName)
+{
+    Want want;
+    if (abilityRecord->GetWant()) {
+        TAG_LOGD(AAFwkTag::APPKIT, "want is ok, transport to abilityStage");
+        want = *(abilityRecord->GetWant());
+    }
+    if (abilityStage == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "abilityStage is nullptr");
+        return;
+    }
+    abilityStage->OnCreate(want);
+    abilityStages_[moduleName] = abilityStage;
+    const sptr<IRemoteObject> &token = abilityRecord->GetToken();
+    if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "token is null");
+        return;
+    }
+    abilityStage->AddAbility(token, abilityRecord);
 }
 
 /**
