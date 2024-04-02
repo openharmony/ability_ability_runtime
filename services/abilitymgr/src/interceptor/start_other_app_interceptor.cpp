@@ -26,10 +26,17 @@ namespace OHOS {
 namespace AAFwk {
 namespace {
 const uint32_t API_SINCE_VISION = 12;
+const std::string ABILITY_SUPPORT_START_OTHER_APP = "persist.sys.abilityms.support.start_other_app";
 }
 
 ErrCode StartOtherAppInterceptor::DoProcess(AbilityInterceptorParam param)
 {
+    std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_START_OTHER_APP, "false");
+    if (supportErms == "true") {
+        HILOG_ERROR("Abilityms support start other app.");
+        return ERR_OK;
+    }
+
     if (!param.isWithUI) {
         return ERR_OK;
     }
