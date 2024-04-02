@@ -1125,6 +1125,7 @@ private:
     ffrt::mutex lock_;
     mutable ffrt::mutex dumpInfoLock_;
     mutable ffrt::mutex dumpLock_;
+    mutable ffrt::mutex resultLock_;
     mutable ffrt::mutex wantLock_;
     mutable ffrt::condition_variable dumpCondition_;
     mutable bool isDumpTimeout_ = false;
