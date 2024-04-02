@@ -373,6 +373,7 @@ ohos_shared_library("extensionkit_native") {
     "${ability_runtime_native_path}/ability/native/extension_module_loader.cpp",
     "${ability_runtime_native_path}/ability/native/js_extension_common.cpp",
     "${ability_runtime_native_path}/appkit/ability_runtime/extension_context.cpp",
+    "${ability_runtime_services_path}/abilitymgr/src/launch_param.cpp",
   ]
 
   public_configs = [ ":extensionkit_public_config" ]

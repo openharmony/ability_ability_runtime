@@ -400,7 +400,7 @@ bool AbilityManagerService::Init()
 
     SubscribeScreenUnlockedEvent();
     appExitReasonHelper_ = std::make_shared<AppExitReasonHelper>(uiAbilityLifecycleManager_, missionListManagers_,
-        managersMutex_);
+        managersMutex_, connectManager_);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Init success.");
     return true;
 }
@@ -5681,6 +5681,8 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
     }
     if (!isUpgrade) {
         DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName);
+        CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
+        appExitReasonHelper_->DeleteAppExitReasonOfExtension(bundleName);
     }
     return ERR_OK;
 }

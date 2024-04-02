@@ -35,12 +35,12 @@ namespace AAFwk {
 namespace {
     constexpr int32_t U0_USER_ID = 0;
 }
-AppExitReasonHelper::AppExitReasonHelper(
-    std::shared_ptr<UIAbilityLifecycleManager> &uiAbilityLifecycleManager,
-    std::unordered_map<int, std::shared_ptr<MissionListManager>> &missionListManagers,
-    ffrt::mutex &managersMutex) : uiAbilityLifecycleManager_(uiAbilityLifecycleManager),
-    missionListManagers_(missionListManagers),
-    managersMutex_(managersMutex) {}
+AppExitReasonHelper::AppExitReasonHelper(std::shared_ptr<UIAbilityLifecycleManager> &uiAbilityLifecycleManager,
+    std::unordered_map<int, std::shared_ptr<MissionListManager>> &missionListManagers, ffrt::mutex &managersMutex,
+    std::shared_ptr<AbilityConnectManager> &connectManager)
+    : uiAbilityLifecycleManager_(uiAbilityLifecycleManager), missionListManagers_(missionListManagers),
+      managersMutex_(managersMutex), connectManager_(connectManager)
+{}
 
 void AppExitReasonHelper::SetCurrentMissionListManager(
     const std::shared_ptr<MissionListManager> currentMissionListManager)
@@ -112,13 +112,71 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const Ex
     } else {
         GetActiveAbilityListByUser(bundleName, abilityLists, targetUserId, pid);
     }
-
-    if (abilityLists.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Active abilityLists empty.");
-        return ERR_GET_ACTIVE_ABILITY_LIST_EMPTY;
+    if (!abilityLists.empty()) {
+        return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
+            bundleName, abilityLists, exitReason);
     }
-    return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(
-        bundleName, abilityLists, exitReason);
+
+    return RecordProcessExtensionExitReason(pid, bundleName, exitReason);
+}
+
+void AppExitReasonHelper::DeleteAppExitReasonOfExtension(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid bundle name.");
+        return;
+    }
+    if (connectManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Connect manager is nullptr.");
+        return;
+    }
+    std::vector<std::string> extensionList;
+    int32_t resultCode = connectManager_->GetActiveUIExtensionList(bundleName, extensionList);
+    if (resultCode != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get extensionList error.");
+        return;
+    }
+
+    if (extensionList.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ExtensionList is empty.");
+        return;
+    }
+
+    for (size_t i = 0; i < extensionList.size(); i++) {
+        DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReasonOfExtension(
+            bundleName, extensionList[i]);
+    }
+}
+
+int32_t AppExitReasonHelper::RecordProcessExtensionExitReason(
+    const int32_t pid, const std::string &bundleName, const ExitReason &exitReason)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    if (pid <= NO_PID) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Input pid is invalid value.");
+        return ERR_INVALID_VALUE;
+    }
+    CHECK_POINTER_AND_RETURN(connectManager_, ERR_NULL_OBJECT);
+    std::vector<std::string> extensionList;
+    int32_t resultCode = connectManager_->GetActiveUIExtensionList(pid, extensionList);
+    if (resultCode != ERR_OK) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ResultCode: %{public}d", resultCode);
+        return ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY;
+    }
+
+    if (extensionList.empty()) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ExtensionList is empty.");
+        return ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY;
+    }
+
+    auto appExitReasonDataMgr = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
+    if (appExitReasonDataMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get app exit reason data mgr instance is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+
+    return appExitReasonDataMgr->SetUIExtensionAbilityBeFinishReason(bundleName, extensionList, exitReason);
 }
 
 void AppExitReasonHelper::GetActiveAbilityListByU0(const std::string bundleName,

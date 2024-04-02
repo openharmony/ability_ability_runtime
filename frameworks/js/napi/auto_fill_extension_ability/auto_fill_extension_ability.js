@@ -16,7 +16,7 @@
 let ExtensionAbility = requireNapi('app.ability.ExtensionAbility');
 
 class AutoFillExtensionAbility extends ExtensionAbility {
-  onCreate() {
+  onCreate(launchParam) {
     console.log('onCreate');
   }
 
