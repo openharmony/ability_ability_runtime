@@ -8417,8 +8417,8 @@ int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityReques
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
-    if (isParaStartAbilityEnable_) {
-        bool stopContinuousTaskFlag = SholdPreventStartAbility(abilityRequest);
+    if (isParamStartAbilityEnable_) {
+        bool stopContinuousTaskFlag = ShouldPreventStartAbility(abilityRequest);
         if (stopContinuousTaskFlag) {
             HILOG_ERROR("Do not have permission to start ServiceExtension");
             return CHECK_PERMISSION_FAILED;
@@ -10080,7 +10080,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
 bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
     const std::string &calleeAbilityName)
 {
-    std::map<std::string, std::list<std::string>>::iterator iter = whiteListMap_find(callerBundleName);
+    std::map<std::string, std::list<std::string>>::iterator iter = whiteListMap_.find(callerBundleName);
     std::string uri = calleeBundleName + "/" + calleeAbilityName;
     if (iter != whiteListMap_.end()) {
         if (std::find(std::begin(iter->second), std::end(iter->second), uri) != std::end(iter->second)) {
