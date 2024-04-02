@@ -1680,7 +1680,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, ShouldPreventStartAbility_001, TestSiz
     const std::string appName = "amstest";
     const std::string bundleName = "com.example.amstest";
     const std::string moduleName = "entry";
-    AbilityRequest abilityRequest = AbilityManagerServiceSecondTest::GenerateAbilityRequest(deviceName, 
+    AbilityRequest abilityRequest = AbilityManagerServiceSecondTest::GenerateAbilityRequest(deviceName,
         abilityName, appName, bundleName, moduleName);
     EXPECT_FALSE(abilityMs_->ShouldPreventStartAbility(abilityRequest));
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceSecondTest ShouldPreventStartAbility_001 end");
