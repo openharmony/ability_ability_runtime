@@ -8424,6 +8424,7 @@ int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityReques
             return CHECK_PERMISSION_FAILED;
         }
     }
+
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceAbilityPermission(verificationInfo);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceAbility");
@@ -10041,7 +10042,8 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         return false;
     }
     if (abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD < API12) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "API version %{public}d pass", abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
+            abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
         return false;
     }
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -10073,7 +10075,8 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in white list Pass");
         return false;
     }
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.", abilityRecord->GetURI().c_str());
+    TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",
+        abilityRecord->GetURI().c_str());
     return true;
 }
 
