@@ -42,6 +42,9 @@ public:
     {
         return nullptr;
     }
+
+    std::shared_ptr<AbilityRuntime::AutoFillManager> autoFillManager_ =
+        std::make_shared<AbilityRuntime::AutoFillManager>();
 };
 
 class MockModalUIExtensionProxy : public Ace::ModalUIExtensionProxy {
@@ -60,6 +63,19 @@ void AutoFillManagerTest::SetUp()
 
 void AutoFillManagerTest::TearDown()
 {}
+
+/**
+ * @tc.name: ReloadInModal_0100
+ * @tc.desc: Js auto fill extension ReloadInModal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AutoFillManagerTest, ReloadInModal_0100, TestSize.Level1)
+{
+    AbilityRuntime::AutoFill::ReloadInModalRequest request;
+    ASSERT_NE(autoFillManager_, nullptr);
+    auto ret = autoFillManager_->ReloadInModal(request);
+    EXPECT_EQ(ret, AbilityRuntime::AutoFill::AUTO_FILL_OBJECT_IS_NULL);
+}
 
 /*
  * Feature: AutoFillManager
@@ -261,6 +277,33 @@ HWTEST_F(AutoFillManagerTest, HandleTimeOut_0100, TestSize.Level1)
     manager.HandleTimeOut(eventId);
     EXPECT_EQ(manager.extensionCallbacks_.size(), 0);
     manager.extensionCallbacks_.clear();
+}
+
+/*
+ * Feature: AutoFillManager
+ * Function: ConvertAutoFillWindowType
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify Based on whether the requestType value can correctly convert
+ * the windowType and extension types.
+ */
+HWTEST_F(AutoFillManagerTest, ConvertAutoFillWindowType_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AutoFillManagerTest, ConvertAutoFillWindowType_0100, TestSize.Level1";
+    AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
+    autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
+    autoFillRequest.autoFillType = AbilityBase::AutoFillType::PASSWORD;
+    auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
+    bool isSmartAutoFill = false;
+    auto autoFillWindowType = manager.ConvertAutoFillWindowType(autoFillRequest, isSmartAutoFill);
+    EXPECT_EQ(isSmartAutoFill, false);
+
+    autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::SAVE;
+    autoFillRequest.autoFillType = AbilityBase::AutoFillType::PERSON_FULL_NAME;
+    autoFillWindowType = manager.ConvertAutoFillWindowType(autoFillRequest, isSmartAutoFill);
+    EXPECT_EQ(isSmartAutoFill, true);
+    EXPECT_EQ(autoFillWindowType, AbilityRuntime::AutoFill::AutoFillWindowType::MODAL_WINDOW);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

@@ -29,6 +29,7 @@ const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
     AppExecFwk::ExtensionAbilityType::SHARE,
     AppExecFwk::ExtensionAbilityType::ACTION,
     AppExecFwk::ExtensionAbilityType::EMBEDDED_UI,
+    AppExecFwk::ExtensionAbilityType::INSIGHT_INTENT_UI,
     AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD,
     AppExecFwk::ExtensionAbilityType::UI,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL,
@@ -40,6 +41,7 @@ const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
     AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT,
     AppExecFwk::ExtensionAbilityType::ADS,
     AppExecFwk::ExtensionAbilityType::VOIP,
+    AppExecFwk::ExtensionAbilityType::ACCESS_VIEW,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_MEETIMECALL,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_MEETIMECONTACT,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_MEETIMEMESSAGE,
@@ -51,7 +53,8 @@ const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
     AppExecFwk::ExtensionAbilityType::SYSPICKER_NAVIGATION,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_APPSELECTOR,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_CAMERA,
-    AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART
+    AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART,
+    AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
 };
 const int EDM_SA_UID = 3057;
 

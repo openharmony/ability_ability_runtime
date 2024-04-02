@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,13 @@
 #include "js_ability_stage.h"
 
 #include "ability_delegator_registry.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "js_ability_stage_context.h"
 #include "js_context_utils.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
+#include "js_startup_config.h"
 #include "napi_common_configuration.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -48,25 +50,25 @@ constexpr const char* CONFIG_ENTRY = "configEntry";
     
 napi_value AttachAbilityStageContext(napi_env env, void *value, void *)
 {
-    HILOG_DEBUG("AttachAbilityStageContext");
+    TAG_LOGD(AAFwkTag::APPKIT, "AttachAbilityStageContext");
     if (env == nullptr || value == nullptr) {
-        HILOG_WARN("invalid parameter, env or value is nullptr.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid parameter, env or value is nullptr.");
         return nullptr;
     }
     auto ptr = reinterpret_cast<std::weak_ptr<AbilityContext> *>(value)->lock();
     if (ptr == nullptr) {
-        HILOG_WARN("invalid context.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid context.");
         return nullptr;
     }
     napi_value object = CreateJsAbilityStageContext(env, ptr, nullptr, nullptr);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.AbilityStageContext", &object, 1);
     if (systemModule == nullptr) {
-        HILOG_WARN("invalid systemModule.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid systemModule.");
         return nullptr;
     }
     auto contextObj = systemModule->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        HILOG_WARN("LoadSystemModuleByEngine or ConvertNativeValueTo failed.");
+        TAG_LOGW(AAFwkTag::APPKIT, "LoadSystemModuleByEngine or ConvertNativeValueTo failed.");
         return nullptr;
     }
     napi_coerce_to_native_binding_object(
@@ -74,7 +76,7 @@ napi_value AttachAbilityStageContext(napi_env env, void *value, void *)
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(ptr);
     napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
-            HILOG_DEBUG("Finalizer for weak_ptr ability stage context is called");
+            TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr ability stage context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::Context> *>(data);
         },
         nullptr, nullptr);
@@ -86,7 +88,7 @@ bool JsAbilityStage::UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleIn
     for (auto &md: hapModuleInfo.metadata) {
         if (md.name == "USE_COMMON_CHUNK") {
             if (md.value != "true") {
-                HILOG_WARN("USE_COMMON_CHUNK = %s{public}s", md.value.c_str());
+                TAG_LOGW(AAFwkTag::APPKIT, "USE_COMMON_CHUNK = %s{public}s", md.value.c_str());
                 return false;
             }
             return true;
@@ -99,7 +101,7 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
     if (runtime == nullptr) {
-        HILOG_WARN("invalid parameter, runtime is nullptr.");
+        TAG_LOGW(AAFwkTag::APPKIT, "invalid parameter, runtime is nullptr.");
         return nullptr;
     }
     auto& jsRuntime = static_cast<JsRuntime&>(*runtime);
@@ -129,7 +131,7 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
         srcPath.append(".abc");
         moduleObj = jsRuntime.LoadModule(moduleName, srcPath, hapModuleInfo.hapPath,
             hapModuleInfo.compileMode == AppExecFwk::CompileMode::ES_MODULE, commonChunkFlag);
-        HILOG_DEBUG("srcPath is %{public}s", srcPath.c_str());
+        TAG_LOGD(AAFwkTag::APPKIT, "srcPath is %{public}s", srcPath.c_str());
     }
     return std::make_shared<JsAbilityStage>(jsRuntime, std::move(moduleObj));
 }
@@ -140,7 +142,7 @@ JsAbilityStage::JsAbilityStage(JsRuntime& jsRuntime, std::unique_ptr<NativeRefer
 
 JsAbilityStage::~JsAbilityStage()
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto context = GetContext();
     if (context) {
         context->Unbind();
@@ -155,12 +157,12 @@ void JsAbilityStage::Init(const std::shared_ptr<Context> &context)
     AbilityStage::Init(context);
 
     if (!context) {
-        HILOG_ERROR("context is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "context is nullptr");
         return;
     }
 
     if (!jsAbilityStageObj_) {
-        HILOG_ERROR("stage is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "stage is nullptr");
         return;
     }
 
@@ -169,19 +171,19 @@ void JsAbilityStage::Init(const std::shared_ptr<Context> &context)
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        HILOG_ERROR("Failed to get AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get AbilityStage object");
         return;
     }
 
     napi_value contextObj = CreateJsAbilityStageContext(env, context, nullptr, nullptr);
     shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.AbilityStageContext", &contextObj, 1);
     if (shellContextRef_ == nullptr) {
-        HILOG_ERROR("Failed to get LoadSystemModuleByEngine");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get LoadSystemModuleByEngine");
         return;
     }
     contextObj = shellContextRef_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, contextObj, napi_object)) {
-        HILOG_ERROR("Failed to get context native object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get context native object");
         return;
     }
     auto workContext = new (std::nothrow) std::weak_ptr<AbilityRuntime::Context>(context);
@@ -189,10 +191,10 @@ void JsAbilityStage::Init(const std::shared_ptr<Context> &context)
         env, contextObj, DetachCallbackFunc, AttachAbilityStageContext, workContext, nullptr);
     context->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
-    HILOG_DEBUG("Set ability stage context");
+    TAG_LOGD(AAFwkTag::APPKIT, "Set ability stage context");
     napi_wrap(env, contextObj, workContext,
         [](napi_env, void* data, void*) {
-            HILOG_DEBUG("Finalizer for weak_ptr ability stage context is called");
+            TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr ability stage context is called");
             delete static_cast<std::weak_ptr<AbilityRuntime::Context>*>(data);
         },
         nullptr, nullptr);
@@ -200,11 +202,11 @@ void JsAbilityStage::Init(const std::shared_ptr<Context> &context)
 
 void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     AbilityStage::OnCreate(want);
 
     if (!jsAbilityStageObj_) {
-        HILOG_WARN("Not found AbilityStage.js");
+        TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
         return;
     }
 
@@ -213,32 +215,32 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        HILOG_ERROR("Failed to get AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get AbilityStage object");
         return;
     }
 
     napi_value methodOnCreate = nullptr;
     napi_get_named_property(env, obj, "onCreate", &methodOnCreate);
     if (methodOnCreate == nullptr) {
-        HILOG_ERROR("Failed to get 'onCreate' from AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get 'onCreate' from AbilityStage object");
         return;
     }
     napi_call_function(env, obj, methodOnCreate, 0, nullptr, nullptr);
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
-        HILOG_DEBUG("Call PostPerformStageStart");
+        TAG_LOGD(AAFwkTag::APPKIT, "Call PostPerformStageStart");
         delegator->PostPerformStageStart(CreateStageProperty());
     }
 }
 
 std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want)
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     AbilityStage::OnAcceptWant(want);
 
     if (!jsAbilityStageObj_) {
-        HILOG_WARN("Not found AbilityStage.js");
+        TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
         return "";
     }
 
@@ -247,7 +249,7 @@ std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want)
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        HILOG_ERROR("Failed to get AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get AbilityStage object");
         return "";
     }
 
@@ -255,7 +257,7 @@ std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want)
     napi_value methodOnAcceptWant = nullptr;
     napi_get_named_property(env, obj, "onAcceptWant", &methodOnAcceptWant);
     if (methodOnAcceptWant == nullptr) {
-        HILOG_ERROR("Failed to get 'OnAcceptWant' from AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get 'OnAcceptWant' from AbilityStage object");
         return "";
     }
 
@@ -268,11 +270,11 @@ std::string JsAbilityStage::OnAcceptWant(const AAFwk::Want &want)
 
 std::string JsAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     AbilityStage::OnNewProcessRequest(want);
 
     if (!jsAbilityStageObj_) {
-        HILOG_WARN("Not found AbilityStage.js");
+        TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
         return "";
     }
 
@@ -281,7 +283,7 @@ std::string JsAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        HILOG_ERROR("Failed to get AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get AbilityStage object");
         return "";
     }
 
@@ -289,7 +291,7 @@ std::string JsAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
     napi_value methodOnNewProcessRequest = nullptr;
     napi_get_named_property(env, obj, "onNewProcessRequest", &methodOnNewProcessRequest);
     if (methodOnNewProcessRequest == nullptr) {
-        HILOG_ERROR("Failed to get 'onNewProcessRequest' from AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get 'onNewProcessRequest' from AbilityStage object");
         return "";
     }
 
@@ -301,7 +303,7 @@ std::string JsAbilityStage::OnNewProcessRequest(const AAFwk::Want &want)
 
 void JsAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& configuration)
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     AbilityStage::OnConfigurationUpdated(configuration);
 
     HandleScope handleScope(jsRuntime_);
@@ -310,7 +312,7 @@ void JsAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& con
     // Notify Ability stage context
     auto fullConfig = GetContext()->GetConfiguration();
     if (!fullConfig) {
-        HILOG_ERROR("configuration is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "configuration is nullptr.");
         return;
     }
     JsAbilityStageContext::ConfigurationUpdated(env, shellContextRef_, fullConfig);
@@ -322,11 +324,11 @@ void JsAbilityStage::OnConfigurationUpdated(const AppExecFwk::Configuration& con
 
 void JsAbilityStage::OnMemoryLevel(int32_t level)
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     AbilityStage::OnMemoryLevel(level);
 
     if (!jsAbilityStageObj_) {
-        HILOG_WARN("Not found stage");
+        TAG_LOGW(AAFwkTag::APPKIT, "Not found stage");
         return;
     }
 
@@ -335,25 +337,20 @@ void JsAbilityStage::OnMemoryLevel(int32_t level)
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        HILOG_ERROR("OnMemoryLevel, Failed to get AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "OnMemoryLevel, Failed to get AbilityStage object");
         return;
     }
 
     napi_value jsLevel = CreateJsValue(env, level);
     napi_value argv[] = { jsLevel };
     CallObjectMethod("onMemoryLevel", argv, ArraySize(argv));
-    HILOG_DEBUG("end");
+    TAG_LOGD(AAFwkTag::APPKIT, "end");
 }
 
-int32_t JsAbilityStage::RunAutoStartupTask(bool &waitingForStartup)
+int32_t JsAbilityStage::RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback)
 {
-    HILOG_DEBUG("called.");
-    waitingForStartup = false;
-    return ERR_OK;
-}
-
-int32_t JsAbilityStage::RunAutoStartupTaskInner(bool &waitingForStartup)
-{
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
+    isAsyncCallback = false;
     auto context = GetContext();
     if (!context) {
         HILOG_ERROR("context invalid.");
@@ -375,14 +372,31 @@ int32_t JsAbilityStage::RunAutoStartupTaskInner(bool &waitingForStartup)
     if (result != ERR_OK) {
         return result;
     }
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    if (startupManager == nullptr) {
+        HILOG_ERROR("failed to get startupManager.");
+        return ERR_INVALID_VALUE;
+    }
     std::shared_ptr<StartupTaskManager> startupTaskManager = nullptr;
-    result = DelayedSingleton<StartupManager>::GetInstance()->BuildAutoStartupTaskManager(startupTaskManager);
+    result = startupManager->BuildAutoStartupTaskManager(startupTaskManager);
     if (result != ERR_OK) {
         return result;
     }
-    startupTaskManager->Prepare();
-    startupTaskManager->Run();
-    waitingForStartup = true;
+    result = startupTaskManager->Prepare();
+    if (result != ERR_OK) {
+        return result;
+    }
+    auto runAutoStartupCallback = std::make_shared<OnCompletedCallback>(
+        [callback](const std::shared_ptr<StartupTaskResult> &) {
+            HILOG_INFO("RunAutoStartupCallback");
+            callback();
+        });
+    result = startupTaskManager->Run(runAutoStartupCallback);
+    if (result != ERR_OK) {
+        isAsyncCallback = runAutoStartupCallback->IsCalled();
+        return result;
+    }
+    isAsyncCallback = true;
     return ERR_OK;
 }
 
@@ -395,7 +409,7 @@ int32_t JsAbilityStage::RegisterStartupTaskFromProfile(std::vector<JsStartupTask
         return ERR_INVALID_VALUE;
     }
     
-    if (!AnalyzeProfileInfoAndRegisterStartupTask(profileInfo, jsStartupTasks)) {
+    if (!AnalyzeProfileInfoAndRegisterStartupTask(profileInfo)) {
         HILOG_ERROR("appStartup config not exist.");
         return ERR_INVALID_VALUE;
     }
@@ -440,22 +454,22 @@ bool JsAbilityStage::GetProfileInfoFromResourceManager(std::vector<std::string> 
     return true;
 }
 
-std::unique_ptr<NativeReference> JsAbilityStage::LoadJsStartupTask(const std::string &srcEntry)
+std::unique_ptr<NativeReference> JsAbilityStage::LoadJsSrcEntry(const std::string &srcEntry)
 {
-    HILOG_DEBUG("LoadJsStartupTask called.");
+    HILOG_DEBUG("call.");
     if (srcEntry.empty()) {
         HILOG_ERROR("srcEntry invalid.");
-        return std::unique_ptr<NativeReference>();
+        return nullptr;
     }
     auto context = GetContext();
     if (!context) {
         HILOG_ERROR("context is nullptr.");
-        return std::unique_ptr<NativeReference>();
+        return nullptr;
     }
     auto hapModuleInfo = context->GetHapModuleInfo();
     if (!hapModuleInfo) {
         HILOG_ERROR("hapModuleInfo is nullptr.");
-        return std::unique_ptr<NativeReference>();
+        return nullptr;
     }
 
     bool esmodule = hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE;
@@ -464,7 +478,7 @@ std::unique_ptr<NativeReference> JsAbilityStage::LoadJsStartupTask(const std::st
     
     auto pos = srcPath.rfind('.');
     if (pos == std::string::npos) {
-        return std::unique_ptr<NativeReference>();
+        return nullptr;
     }
     srcPath.erase(pos);
     srcPath.append(".abc");
@@ -473,6 +487,31 @@ std::unique_ptr<NativeReference> JsAbilityStage::LoadJsStartupTask(const std::st
         jsRuntime_.LoadModule(moduleName, srcPath, hapModuleInfo->hapPath, esmodule));
     
     return jsCode;
+}
+
+bool JsAbilityStage::LoadJsStartupConfig(const std::string &srcEntry)
+{
+    std::unique_ptr<NativeReference> startupConfigEntry = LoadJsSrcEntry(srcEntry);
+    if (startupConfigEntry == nullptr) {
+        HILOG_ERROR("fail to load config src entry.");
+        return false;
+    }
+    auto env = jsRuntime_.GetNapiEnv();
+    std::shared_ptr<JsStartupConfig> startupConfig = std::make_shared<JsStartupConfig>(env);
+    if (startupConfig == nullptr) {
+        HILOG_ERROR("startupConfig is null.");
+        return false;
+    }
+    if (startupConfig->Init(startupConfigEntry) != ERR_OK) {
+        return false;
+    }
+    std::shared_ptr<StartupManager> startupManager = DelayedSingleton<StartupManager>::GetInstance();
+    if (startupManager == nullptr) {
+        HILOG_ERROR("failed to get startupManager.");
+        return false;
+    }
+    startupManager->SetDefaultConfig(startupConfig);
+    return true;
 }
 
 void JsAbilityStage::SetOptionalParameters(
@@ -489,26 +528,24 @@ void JsAbilityStage::SetOptionalParameters(
         }
         jsStartupTask.SetDependencies(dependencies);
     }
-    
+
     if (module.contains(EXCLUDE_FROM_AUTO_START) && module[EXCLUDE_FROM_AUTO_START].is_boolean()) {
-        jsStartupTask.SetIsAutoStartup(module.at(EXCLUDE_FROM_AUTO_START).get<bool>());
+        jsStartupTask.SetIsExcludeFromAutoStart(module.at(EXCLUDE_FROM_AUTO_START).get<bool>());
     } else {
-        jsStartupTask.SetIsAutoStartup(true);
+        jsStartupTask.SetIsExcludeFromAutoStart(false);
     }
-    
+
     // always true
-    jsStartupTask.SetIsAutoStartup(true);
+    jsStartupTask.SetCallCreateOnMainThread(true);
     
     if (module.contains(WAIT_ON_MAIN_THREAD) && module[WAIT_ON_MAIN_THREAD].is_boolean()) {
         jsStartupTask.SetWaitOnMainThread(module.at(WAIT_ON_MAIN_THREAD).get<bool>());
     } else {
-        jsStartupTask.SetWaitOnMainThread(false);
+        jsStartupTask.SetWaitOnMainThread(true);
     }
 }
 
-bool JsAbilityStage::AnalyzeProfileInfoAndRegisterStartupTask(
-    std::vector<std::string> &profileInfo,
-    std::vector<JsStartupTask> &jsStartupTasks)
+bool JsAbilityStage::AnalyzeProfileInfoAndRegisterStartupTask(const std::vector<std::string> &profileInfo)
 {
     HILOG_DEBUG("AnalyzeProfileInfoAndRegisterStartupTask called.");
     std::string startupInfo;
@@ -519,17 +556,27 @@ bool JsAbilityStage::AnalyzeProfileInfoAndRegisterStartupTask(
         HILOG_ERROR("startupInfo invalid.");
         return false;
     }
-    
+
     nlohmann::json startupInfoJson = nlohmann::json::parse(startupInfo, nullptr, false);
     if (startupInfoJson.is_discarded()) {
         HILOG_ERROR("Failed to parse json string.");
         return false;
     }
-    
+
+    if (!(startupInfoJson.contains(CONFIG_ENTRY) && startupInfoJson[CONFIG_ENTRY].is_string())) {
+        HILOG_ERROR("no config entry.");
+        return false;
+    }
+    if (!LoadJsStartupConfig(startupInfoJson.at(CONFIG_ENTRY).get<std::string>())) {
+        HILOG_ERROR("failed to load config entry.");
+        return false;
+    }
+
     if (!(startupInfoJson.contains(STARTUP_TASKS) && startupInfoJson[STARTUP_TASKS].is_array())) {
         HILOG_ERROR("startupTasks invalid.");
         return false;
     }
+    std::vector<std::shared_ptr<JsStartupTask>> jsStartupTasks;
     for (const auto& module : startupInfoJson.at(STARTUP_TASKS).get<nlohmann::json>()) {
         if (!module.contains(SRC_ENTRY) || !module[SRC_ENTRY].is_string() ||
         !module.contains(NAME) || !module[NAME].is_string()) {
@@ -537,29 +584,28 @@ bool JsAbilityStage::AnalyzeProfileInfoAndRegisterStartupTask(
             return false;
         }
         
-        std::shared_ptr<NativeReference> startupJsRef = LoadJsStartupTask(module.at(SRC_ENTRY).get<std::string>());
+        std::unique_ptr<NativeReference> startupJsRef = LoadJsSrcEntry(module.at(SRC_ENTRY).get<std::string>());
         if (startupJsRef == nullptr) {
             HILOG_ERROR("load js appStartup tasks failed.");
             return false;
         }
-        
-        std::shared_ptr<NativeReference> contextJsRef = nullptr;
-        JsStartupTask jsStartupTask = JsStartupTask(
-            module.at(NAME).get<std::string>(),
-            jsRuntime_,
-            startupJsRef,
-            contextJsRef);
-        SetOptionalParameters(module, jsStartupTask);
+
+        auto jsStartupTask = std::make_shared<JsStartupTask>(
+            module.at(NAME).get<std::string>(), jsRuntime_, startupJsRef, shellContextRef_);
+        SetOptionalParameters(module, *jsStartupTask);
         jsStartupTasks.push_back(jsStartupTask);
+    }
+    for (auto &iter : jsStartupTasks) {
+        DelayedSingleton<StartupManager>::GetInstance()->RegisterStartupTask(iter->GetName(), iter);
     }
     return true;
 }
 
 napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const * argv, size_t argc)
 {
-    HILOG_DEBUG("call %{public}s", name);
+    TAG_LOGD(AAFwkTag::APPKIT, "call %{public}s", name);
     if (!jsAbilityStageObj_) {
-        HILOG_WARN("Not found AbilityStage.js");
+        TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
         return nullptr;
     }
 
@@ -568,14 +614,14 @@ napi_value JsAbilityStage::CallObjectMethod(const char* name, napi_value const *
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        HILOG_ERROR("Failed to get AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get AbilityStage object");
         return nullptr;
     }
 
     napi_value method = nullptr;
     napi_get_named_property(env, obj, name, &method);
     if (!CheckTypeForNapiValue(env, method, napi_function)) {
-        HILOG_ERROR("Failed to get '%{public}s' from AbilityStage object", name);
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get '%{public}s' from AbilityStage object", name);
         return nullptr;
     }
 
@@ -597,12 +643,12 @@ std::string JsAbilityStage::GetHapModuleProp(const std::string &propName) const
 {
     auto context = GetContext();
     if (!context) {
-        HILOG_ERROR("Failed to get context");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get context");
         return std::string();
     }
     auto hapModuleInfo = context->GetHapModuleInfo();
     if (!hapModuleInfo) {
-        HILOG_ERROR("Failed to get hapModuleInfo");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get hapModuleInfo");
         return std::string();
     }
     if (propName.compare("name") == 0) {
@@ -611,7 +657,7 @@ std::string JsAbilityStage::GetHapModuleProp(const std::string &propName) const
     if (propName.compare("srcEntrance") == 0) {
         return hapModuleInfo->srcEntrance;
     }
-    HILOG_ERROR("name = %{public}s", propName.c_str());
+    TAG_LOGE(AAFwkTag::APPKIT, "name = %{public}s", propName.c_str());
     return std::string();
 }
 
