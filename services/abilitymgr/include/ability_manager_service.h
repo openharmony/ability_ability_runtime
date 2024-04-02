@@ -2083,7 +2083,7 @@ private:
 
     bool GetJsonFromFile(const char *filePath, Json::Value &root);
 
-    bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath, 
+    bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
         const std::string &WHITE_LIST);
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
