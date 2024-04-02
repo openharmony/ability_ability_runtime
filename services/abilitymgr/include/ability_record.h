@@ -515,7 +515,7 @@ public:
         std::shared_ptr<StartOptions> &startOptions, const std::shared_ptr<AbilityRecord> &callerAbility,
         uint32_t sceneFlag = 0);
 
-    void GrantUriPermissionForServiceExtension();
+    bool GrantUriPermissionForServiceExtension();
 
     void ProcessForegroundAbility(const std::shared_ptr<AbilityRecord> &callerAbility, bool needExit = true,
         uint32_t sceneFlag = 0);
@@ -1024,8 +1024,6 @@ private:
 
     bool GetUriListFromWant(Want &want, std::vector<std::string> &uriVec);
 
-    bool CheckNeedAttachToParent() const;
-
 #ifdef SUPPORT_GRAPHICS
     std::shared_ptr<Want> GetWantFromMission() const;
     void SetShowWhenLocked(const AppExecFwk::AbilityInfo &abilityInfo, sptr<AbilityTransitionInfo> &info) const;
@@ -1151,6 +1149,7 @@ private:
     ffrt::mutex lock_;
     mutable ffrt::mutex dumpInfoLock_;
     mutable ffrt::mutex dumpLock_;
+    mutable ffrt::mutex resultLock_;
     mutable ffrt::mutex wantLock_;
     mutable ffrt::condition_variable dumpCondition_;
     mutable bool isDumpTimeout_ = false;

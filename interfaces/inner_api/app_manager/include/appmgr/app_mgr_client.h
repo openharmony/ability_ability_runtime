@@ -139,6 +139,11 @@ public:
      */
     virtual AppMgrResultCode KillProcessesByUserId(int32_t userId);
 
+    virtual AppMgrResultCode KillProcessesByPids(std::vector<int32_t> &pids);
+
+    virtual AppMgrResultCode AttachPidToParent(const sptr<IRemoteObject> &token,
+        const sptr<IRemoteObject> &callerToken);
+
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
      * update the application info after new module installed.
@@ -238,6 +243,15 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual AppMgrResultCode NotifyMemoryLevel(MemoryLevel level);
+
+    /**
+     * NotifyProcMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify abilities the current memory level.
+     *
+     * @param procLevelMap ,<pid, level> map;
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual AppMgrResultCode NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap) const;
 
     /**
      * DumpHeapMemory, call DumpHeapMemory() through proxy project.

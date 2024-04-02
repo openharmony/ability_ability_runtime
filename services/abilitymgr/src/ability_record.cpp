@@ -72,7 +72,6 @@ const std::string DMS_PROCESS_NAME = "distributedsched";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 const std::string ABILITY_OWNER_USERID = "AbilityMS_Owner_UserId";
-const char* WANT_PARAMS_ATTACHE_TO_PARENT = "ohos.ability.params.attachToParent";
 const std::u16string SYSTEM_ABILITY_TOKEN_CALLBACK = u"ohos.aafwk.ISystemAbilityTokenCallback";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string DLP_INDEX = "ohos.dlp.params.index";
@@ -372,11 +371,9 @@ int AbilityRecord::LoadAbility()
     std::lock_guard guard(wantLock_);
     want_.SetParam(ABILITY_OWNER_USERID, ownerMissionUserId_);
     want_.SetParam("ohos.ability.launch.reason", static_cast<int>(lifeCycleStateInfo_.launchParam.launchReason));
-    want_.SetParam(WANT_PARAMS_ATTACHE_TO_PARENT, CheckNeedAttachToParent());
     auto result = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
         token_, callerToken_, abilityInfo_, applicationInfo_, want_, recordId_);
     want_.RemoveParam(ABILITY_OWNER_USERID);
-    want_.RemoveParam(WANT_PARAMS_ATTACHE_TO_PARENT);
 
     auto isAttachDebug = DelayedSingleton<AppScheduler>::GetInstance()->IsAttachDebug(abilityInfo_.bundleName);
     if (isAttachDebug) {
@@ -1603,7 +1600,7 @@ void AbilityRecord::DisconnectAbility()
     isConnected = false;
 }
 
-void AbilityRecord::GrantUriPermissionForServiceExtension()
+bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
     if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
         std::lock_guard guard(wantLock_);
@@ -1612,7 +1609,9 @@ void AbilityRecord::GrantUriPermissionForServiceExtension()
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "CallerName is %{public}s, callerTokenId is %{public}u", callerName.c_str(), callerTokenId);
         GrantUriPermission(want_, applicationInfo_.bundleName, false, callerTokenId);
+        return true;
     }
+    return false;
 }
 
 void AbilityRecord::CommandAbility()
@@ -1657,11 +1656,13 @@ int AbilityRecord::GetRequestCode() const
 
 void AbilityRecord::SetResult(const std::shared_ptr<AbilityResult> &result)
 {
+    std::lock_guard guard(resultLock_);
     result_ = result;
 }
 
 std::shared_ptr<AbilityResult> AbilityRecord::GetResult() const
 {
+    std::lock_guard guard(resultLock_);
     return result_;
 }
 
@@ -1670,11 +1671,12 @@ void AbilityRecord::SendResult(bool isSandboxApp, uint32_t tokeId)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
-    CHECK_POINTER(result_);
-    GrantUriPermission(result_->resultWant_, applicationInfo_.bundleName, isSandboxApp, tokeId);
-    scheduler_->SendResult(result_->requestCode_, result_->resultCode_, result_->resultWant_);
+    auto result = GetResult();
+    CHECK_POINTER(result);
+    GrantUriPermission(result->resultWant_, applicationInfo_.bundleName, isSandboxApp, tokeId);
+    scheduler_->SendResult(result->requestCode_, result->resultCode_, result->resultWant_);
     // reset result to avoid send result next time
-    result_.reset();
+    SetResult(nullptr);
 }
 
 void AbilityRecord::SendSandboxSavefileResult(const Want &want, int resultCode, int requestCode)
@@ -3473,16 +3475,6 @@ void AbilityRecord::SetRestartAppFlag(bool isRestartApp)
 bool AbilityRecord::GetRestartAppFlag() const
 {
     return isRestartApp_;
-}
-
-bool AbilityRecord::CheckNeedAttachToParent() const
-{
-    auto sessionInfo = GetSessionInfo();
-    if (sessionInfo && sessionInfo->processOptions &&
-        sessionInfo->processOptions->processMode == ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT) {
-        return true;
-    }
-    return false;
 }
 }  // namespace AAFwk
 }  // namespace OHOS
