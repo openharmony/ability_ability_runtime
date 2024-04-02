@@ -463,9 +463,9 @@ void AbilityManagerService::InitPushTask()
         }
     };
     if (!ParseJsonFromBoot(whiteListJsonObj, SUSPEND_SERVICE_CONFIG_FILE, WHITE_LIST)) {
-        HILOG_ERROR("Parse json from boot fail");
+        TAG_LOGE("Parse json from boot fail");
     }
-    isParamStartAbilityEnable_ = system.GetBoolParameter(PARAM_PREVENT_STARTABILITY, false);
+    isParamStartAbilityEnable_ = system::GetBoolParameter(PARAM_PREVENT_STARTABILITY, false);
     taskHandler_->SubmitTask(bootCompletedTask, "BootCompletedTask");
 }
 
@@ -10030,11 +10030,11 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
 {
     std::shared_ptr<AbilityRecord> abilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord == nullptr) {
-        HILOG_DEBUG("No matched token pass");
+        TAG_LOGD("No matched token pass");
         return false;
     }
-    if (AbilityRecord->GetApplicationInfo.apiTargetVersion % API_VERSION_MOD < API12) {
-        HILOG_DEBUG("API version %{public}d pass", abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
+    if (abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD < API12) {
+        TAG_LOGD("API version %{public}d pass", abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
         return false;
     }
     auto abilityInfo = abilityRequest.abilityInfo;
@@ -10047,33 +10047,34 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     }
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
-            HILOG_DEBUG("Process did not call service or datashare extension pass");
+            TAG_LOGD("Process did not call service or datashare extension Pass");
             return false;
     }
     if (!isUIAbility) {
-        HILOG_DEBUG("Is not UI Ability pass");
+        TAG_LOGD("Is not UI Ability Pass");
         return false;
     }
     if (abilityRecord->GetAbilityState() != AAFwk::AbilityState::BACKGROUND) {
-        HILOG_DEBUG("Process is not on background pass");
+        TAG_LOGD("Process is not on background Pass");
         return false;
     }
     if (continuousFlag) {
-        HILOG_DEBUG("Process has continuous task pass");
+        TAG_LOGD("Process has continuous task Pass");
         return false;
     }
     if (isInWhiteList(callerAbilityInfo.bundleName, abilityInfo.bundleName, abilityInfo.name)){
-        HILOG_DEBUG("Process is in white list pass");
+        TAG_LOGD("Process is in white list Pass");
+        return false;
     }
-    HILOG_ERROR("Do not have permission to start ServiceExteion %{public}s.", abilityRecord->GetURI().c_str());
+    TAG_LOGE("Do not have permission to start ServiceExtension %{public}s.", abilityRecord->GetURI().c_str());
     return true;
 }
 
-bool AbilityManagerService::IsInWhiteList(const std::string &callerAbilityName, const std::string &calleeBundleName,
+bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
         const std::string &calleeAbilityName)
 {
     std::map<std::string, std::list<std::string>>::iterator iter;
-    iter = whiteListMap_find(callerAbilityName);
+    iter = whiteListMap_find(callerBundleName);
     std::string uri = calleeBundleName + "/" + calleeAbilityName;
     if (iter != whiteListMap_.end()) {
         if (std::find(std::begin(iter->second), std::end(iter->second), uri) != std::end(iter->second)) {
@@ -10106,7 +10107,7 @@ bool AbilityManagerService::ParseJsonFromBoot(nlohmann::json jsonObj, const std:
             }
         }
     }
-    nlohmann::json exportWhiteJsonList = jsonObj["export_white_list"];
+    nlohmann::json exportWhiteJsonList = jsonObj["exposed_white_list"];
     for (const auto& it : exportWhiteJsonList) {
         if (it.is_string()) {
             exportWhiteList_.push_back(it);
@@ -10118,30 +10119,30 @@ bool AbilityManagerService::ParseJsonFromBoot(nlohmann::json jsonObj, const std:
 std::string AbilityManagerService::GetConfigFileAbsolutePath(const std::string &relativePath)
 {
     if (relativePath.empty()) {
-        HILOG_ERROR("relativePath is empty");
+        TAG_LOGE("relativePath is empty");
         return "";
     }
     char buf[PATH_MAX];
     char *tmpPath = GetOneCfgFile(relativePath.c_str(), buf, PATH_MAX);
     char absolutePath[PATH_MAX] = {0};
     if (!tmpPath || strlen(tmpPath) > PATH_MAX || !realpath(tmpPath, absolutePath)) {
-        HILOG_ERROR("get file fail");
+        TAG_LOGE("get file fail.");
         return "";
     }
-    return std::string(absolutepath);
+    return std::string(absolutePath);
 }
 
-int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, const std::string &filepath)
+int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, const std::string &filePath)
 {
     std::ifstream fin;
     std::string realPath;
     if (!ConvertFullPath(filePath, realPath)) {
-        HILOG_ERROR("Get real path failed");
+        TAG_LOGE("Get real path failed");
         return ERR_INVALID_VALUE;
     }
     fin.open(realPath, std::ios::in);
     if (!fin.is_open()) {
-        HILOG_ERROR("cannot open file %{private}s", realPath.c_str());
+        TAG_LOGE("cannot open file %{private}s", realPath.c_str());
         return ERR_INVALID_VALUE;
     }
     char buffer[MAX_BUFFER];
@@ -10149,17 +10150,17 @@ int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, con
     while (fin.getline(buffer, MAX_BUFFER)) {
         os << buffer;
     }
-    const std::string data = os.c_str();
+    const std::string data = os.str();
     value = nlohmann::json::parse(data, nullptr, false);
-    if (value.is_discatded()) {
-        HILOG_ERROR("failed due to data is discarded");
+    if (value.is_discarded()) {
+        TAG_LOGE("failed due to data is discarded");
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
 }
 
-bool AbilityManagerService::ConvertFullPath(const std::string& partialPath, std::string& fullpath) {
-    if (partialPath.empty() || patialPath.length() >= PATH_MAX) {
+bool AbilityManagerService::ConvertFullPath(const std::string& partialPath, std::string& fullPath) {
+    if (partialPath.empty() || partialPath.length() >= PATH_MAX) {
         return false;
     }
     char tmpPath[PATH_MAX] = {0};

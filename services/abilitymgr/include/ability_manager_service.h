@@ -2070,14 +2070,14 @@ private:
 
     bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
 
-    bool IsInWhiteList(const std::string &callerAbilityName, const std::string &callerBundleName,
+    bool IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
         const std::string &calleeAbilityName);
 
     bool isParamStartAbilityEnable_ = false;
 
     std::string GetConfigFileAbsolutePath(const std::string &relativePath);
 
-    int32_t ParseJsonValueFromFile(nlohmann::json &value, const std::string& fullpath);
+    int32_t ParseJsonValueFromFile(nlohmann::json &value, const std::string& fullPath);
 
     bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
 
