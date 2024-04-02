@@ -457,6 +457,16 @@ enum {
      * Native error(2097239) for start other app failed.
      */
     ERR_START_OTHER_APP_FAILED,
+
+    /**
+     * Result(2097240) for get active extension list empty when record exit reason.
+     */
+    ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY,
+
+    /**
+     * Result(2097241) for get ExtensionName by uid fail.
+     */
+    GET_EXTENSION_NAME_BY_UID_FAIL,
 };
 
 enum {

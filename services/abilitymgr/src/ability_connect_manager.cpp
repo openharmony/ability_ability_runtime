@@ -24,6 +24,7 @@
 #include "ability_manager_service.h"
 #include "ability_util.h"
 #include "appfreeze_manager.h"
+#include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
 #include "assert_fault_callback_death_mgr.h"
 #include "extension_config.h"
@@ -228,6 +229,8 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
 
     targetService->AddCallerRecord(abilityRequest.callerToken, abilityRequest.requestCode);
 
+    SetLastExitReason(abilityRequest, targetService);
+
     targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_EXTENSION);
 
     targetService->DoBackgroundAbilityWindowDelayed(false);
@@ -265,6 +268,21 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     }
     DelayedSingleton<AppScheduler>::GetInstance()->AbilityBehaviorAnalysis(token, preToken, 0, 1, 1);
     return ERR_OK;
+}
+
+void AbilityConnectManager::SetLastExitReason(
+    const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetService)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
+    if (UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
+        ExitReason exitReason = { REASON_UNKNOWN, "" };
+        auto abilityRuntime = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
+        const std::string keyEx = targetService->GetAbilityInfo().bundleName +
+            targetService->GetAbilityInfo().moduleName + targetService->GetAbilityInfo().name;
+        if (abilityRuntime->GetUIExtensionAbilityBeFinishReason(keyEx, exitReason)) {
+            targetService->SetLastExitReason(exitReason);
+        }
+    }
 }
 
 void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord,
@@ -1810,6 +1828,20 @@ void AbilityConnectManager::HandleCallBackDiedTask(const sptr<IRemoteObject> &co
     }
     sptr<IAbilityConnection> object = iface_cast<IAbilityConnection>(connect);
     DisconnectAbilityLocked(object, true);
+}
+
+int32_t AbilityConnectManager::GetActiveUIExtensionList(
+    const int32_t pid, std::vector<std::string> &extensionList)
+{
+    CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
+    return uiExtensionAbilityRecordMgr_->GetActiveUIExtensionList(pid, extensionList);
+}
+
+int32_t AbilityConnectManager::GetActiveUIExtensionList(
+    const std::string &bundleName, std::vector<std::string> &extensionList)
+{
+    CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
+    return uiExtensionAbilityRecordMgr_->GetActiveUIExtensionList(bundleName, extensionList);
 }
 
 void AbilityConnectManager::OnAbilityDied(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId)

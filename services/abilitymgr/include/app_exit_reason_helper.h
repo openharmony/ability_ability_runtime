@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 
+#include "ability_connect_manager.h"
 #include "bundle_info.h"
 #include "exit_reason.h"
 #include "mission_list_manager.h"
@@ -30,10 +31,13 @@ class AppExitReasonHelper {
 public:
     AppExitReasonHelper(std::shared_ptr<UIAbilityLifecycleManager> &uiAbilityLifecycleManager,
         std::unordered_map<int, std::shared_ptr<MissionListManager>> &missionListManagers,
-        ffrt::mutex &managersMutex);
+        ffrt::mutex &managersMutex, std::shared_ptr<AbilityConnectManager> &connectManager);
 
     void SetCurrentMissionListManager(const std::shared_ptr<MissionListManager> currentMissionListManager);
     int32_t RecordAppExitReason(const ExitReason &exitReason);
+    void DeleteAppExitReasonOfExtension(const std::string &bundleName);
+    int32_t RecordProcessExtensionExitReason(
+        const int32_t pid, const std::string &bundleName, const ExitReason &exitReason);
     int32_t RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason);
     int32_t RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason, const std::string bundleName,
         const int32_t uid);
@@ -50,6 +54,7 @@ private:
     std::unordered_map<int, std::shared_ptr<MissionListManager>> &missionListManagers_;
     std::shared_ptr<MissionListManager> currentMissionListManager_;
     ffrt::mutex &managersMutex_;
+    std::shared_ptr<AbilityConnectManager> &connectManager_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
