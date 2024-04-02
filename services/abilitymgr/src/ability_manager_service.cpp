@@ -10062,7 +10062,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD("Process has continuous task Pass");
         return false;
     }
-    if (isInWhiteList(callerAbilityInfo.bundleName, abilityInfo.bundleName, abilityInfo.name)){
+    if (isInWhiteList(callerAbilityInfo.bundleName, abilityInfo.bundleName, abilityInfo.name)) {
         TAG_LOGD("Process is in white list Pass");
         return false;
     }
@@ -10071,10 +10071,9 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
 }
 
 bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
-        const std::string &calleeAbilityName)
+    const std::string &calleeAbilityName)
 {
-    std::map<std::string, std::list<std::string>>::iterator iter;
-    iter = whiteListMap_find(callerBundleName);
+    std::map<std::string, std::list<std::string>>::iterator iter = whiteListMap_find(callerBundleName);
     std::string uri = calleeBundleName + "/" + calleeAbilityName;
     if (iter != whiteListMap_.end()) {
         if (std::find(std::begin(iter->second), std::end(iter->second), uri) != std::end(iter->second)) {
@@ -10159,7 +10158,8 @@ int32_t AbilityManagerService::ParseJsonValueFromFile(nlohmann::json &value, con
     return ERR_OK;
 }
 
-bool AbilityManagerService::ConvertFullPath(const std::string& partialPath, std::string& fullPath) {
+bool AbilityManagerService::ConvertFullPath(const std::string& partialPath, std::string& fullPath)
+{
     if (partialPath.empty() || partialPath.length() >= PATH_MAX) {
         return false;
     }
