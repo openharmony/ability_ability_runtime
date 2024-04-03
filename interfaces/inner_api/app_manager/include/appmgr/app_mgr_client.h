@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,12 +32,14 @@
 #include "iconfiguration_observer.h"
 #include "iremote_object.h"
 #include "irender_scheduler.h"
+#include "irender_state_observer.h"
 #include "istart_specified_ability_response.h"
 #include "refbase.h"
 #include "render_process_info.h"
 #include "running_process_info.h"
 #include "system_memory_attr.h"
 #include "want.h"
+#include "app_jsheap_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -59,8 +61,9 @@ public:
      * @param want Want.
      * @return Returns RESULT_OK on success, others on failure.
      */
-    virtual AppMgrResultCode LoadAbility(const sptr<IRemoteObject> &token, const sptr<IRemoteObject> &preToken,
-        const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo, const AAFwk::Want &want);
+    virtual AppMgrResultCode LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObject> preToken,
+        const AbilityInfo &abilityInfo, const ApplicationInfo &appInfo, const AAFwk::Want &want,
+        int32_t abilityRecordId);
 
     /**
      * Terminate ability.
@@ -135,6 +138,11 @@ public:
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode KillProcessesByUserId(int32_t userId);
+
+    virtual AppMgrResultCode KillProcessesByPids(std::vector<int32_t> &pids);
+
+    virtual AppMgrResultCode AttachPidToParent(const sptr<IRemoteObject> &token,
+        const sptr<IRemoteObject> &callerToken);
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -237,6 +245,15 @@ public:
     virtual AppMgrResultCode NotifyMemoryLevel(MemoryLevel level);
 
     /**
+     * NotifyProcMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify abilities the current memory level.
+     *
+     * @param procLevelMap ,<pid, level> map;
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual AppMgrResultCode NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap) const;
+
+    /**
      * DumpHeapMemory, call DumpHeapMemory() through proxy project.
      * Get the application's memory allocation info.
      *
@@ -245,6 +262,15 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual AppMgrResultCode DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
+
+    /**
+     * DumpJsHeapMemory, call DumpJsHeapMemory() through proxy project.
+     * triggerGC and dump the application's jsheap memory info.
+     *
+     * @param info, pid tid needGc needSnapshot
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual AppMgrResultCode DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
     /**
      * GetConfiguration
@@ -532,6 +558,38 @@ public:
     int32_t DetachAppDebug(const std::string &bundleName);
 
     /**
+     * @brief Set app waiting debug mode.
+     * @param bundleName The application bundle name.
+     * @param isPersist The persist flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetAppWaitingDebug(const std::string &bundleName, bool isPersist);
+
+    /**
+     * @brief Cancel app waiting debug mode.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t CancelAppWaitingDebug();
+
+    /**
+     * @brief Get waiting debug mode application.
+     * @param debugInfoList The debug bundle info list, including bundle name and persist flag.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetWaitingDebugApp(std::vector<std::string> &debugInfoList);
+
+    /**
+     * @brief Determine whether it is a waiting debug application based on the bundle name.
+     * @return Returns true if it is a waiting debug application, otherwise it returns false.
+     */
+    bool IsWaitingDebugApp(const std::string &bundleName);
+
+    /**
+     * @brief Clear non persist waiting debug flag.
+     */
+    void ClearNonPersistWaitingDebugFlag();
+
+    /**
      * @brief Registering ability Debug Mode response.
      * @param abilityResponse Response of ability debug object.
      * @return Returns ERR_OK on success, others on failure.
@@ -544,6 +602,14 @@ public:
      * @return Returns true if it is an attach debug application, otherwise it returns false.
      */
     bool IsAttachDebug(const std::string &bundleName);
+
+    /**
+     * Set application assertion pause state.
+     *
+     * @param pid App process pid.
+     * @param flag assertion pause state.
+     */
+    void SetAppAssertionPauseState(int32_t pid, bool flag);
 
     /**
      * Register application or process state observer.
@@ -607,6 +673,13 @@ public:
      */
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
 
+    int32_t RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
+
+    int32_t UnregisterRenderStateObserver(const sptr<IRenderStateObserver> &observer);
+
+    int32_t UpdateRenderState(pid_t renderPid, int32_t state);
+
+    int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

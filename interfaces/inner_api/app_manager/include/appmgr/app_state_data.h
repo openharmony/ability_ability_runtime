@@ -60,13 +60,14 @@ struct AppStateData : public Parcelable {
     int32_t pid = -1;
     int32_t uid = 0;
     int32_t state = 0;
-    int32_t accessTokenId = 0;
+    uint32_t accessTokenId = 0;
     bool isFocused = false;
     ExtensionAbilityType extensionType = ExtensionAbilityType::UNSPECIFIED;
     std::vector<int32_t> renderPids;
     std::string callerBundleName;
     bool isSplitScreenMode = false;
     bool isFloatingWindowMode = false;
+    bool isSpecifyTokenId = false;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

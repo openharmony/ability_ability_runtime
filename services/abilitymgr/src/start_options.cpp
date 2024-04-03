@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,10 @@
  */
 
 #include "start_options.h"
+
+#include "hilog_tag_wrapper.h"
+#include "hilog_wrapper.h"
+#include "process_options.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -30,6 +34,7 @@ StartOptions::StartOptions(const StartOptions &other)
     windowTopUsed_ = other.windowTopUsed_;
     windowWidthUsed_ = other.windowWidthUsed_;
     windowHeightUsed_ = other.windowHeightUsed_;
+    processOptions = other.processOptions;
 }
 
 StartOptions &StartOptions::operator=(const StartOptions &other)
@@ -46,6 +51,7 @@ StartOptions &StartOptions::operator=(const StartOptions &other)
         windowTopUsed_ = other.windowTopUsed_;
         windowWidthUsed_ = other.windowWidthUsed_;
         windowHeightUsed_ = other.windowHeightUsed_;
+        processOptions = other.processOptions;
     }
     return *this;
 }
@@ -63,6 +69,7 @@ bool StartOptions::ReadFromParcel(Parcel &parcel)
     windowTopUsed_ = parcel.ReadBool();
     windowWidthUsed_ = parcel.ReadBool();
     windowHeightUsed_ = parcel.ReadBool();
+    processOptions.reset(parcel.ReadParcelable<ProcessOptions>());
     return true;
 }
 
@@ -94,6 +101,10 @@ bool StartOptions::Marshalling(Parcel &parcel) const
     parcel.WriteBool(windowTopUsed_);
     parcel.WriteBool(windowWidthUsed_);
     parcel.WriteBool(windowHeightUsed_);
+    if (!parcel.WriteParcelable(processOptions.get())) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write processOptions failed.");
+        return false;
+    }
     return true;
 }
 

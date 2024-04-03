@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,9 @@
 #include "app_mgr_interface.h"
 #include "bundle_info.h"
 #include "iremote_proxy.h"
+#include "memory_level_info.h"
 #include "want.h"
+#include "app_jsheap_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -64,15 +66,6 @@ public:
      * @return
      */
     virtual void ApplicationTerminated(const int32_t recordId) override;
-
-    /**
-     * CheckPermission, call CheckPermission() through proxy object, check the permission.
-     *
-     * @param recordId, a unique record that identifies this Application from others.
-     * @param permission, check the permissions.
-     * @return ERR_OK, return back success, others fail.
-     */
-    virtual int32_t CheckPermission(const int32_t recordId, const std::string &permission) override;
 
     /**
      * AbilityCleaned,call through AbilityCleaned() proxy project, clean Ability record.
@@ -164,6 +157,15 @@ public:
     virtual int32_t NotifyMemoryLevel(int32_t level) override;
 
     /**
+     * NotifyProcMemoryLevel, call NotifyMemoryLevel() through proxy project.
+     * Notify abilities the current memory level.
+     *
+     * @param procLevelMap ,<pid, level> map;
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap) override;
+
+    /**
      * DumpHeapMemory, call DumpHeapMemory() through proxy project.
      * Get the application's memory allocation info.
      *
@@ -172,6 +174,15 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo) override;
+
+    /**
+     * DumpJsHeapMemory, call DumpJsHeapMemory() through proxy project.
+     * triggerGC and dump the application's jsheap memory info.
+     *
+     * @param info, pid tid needGc needSnapshot
+     * @return ERR_OK ,return back success, others fail.
+     */
+    virtual int32_t DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info) override;
 
     /**
      * Notify that the ability stage has been updated
@@ -479,6 +490,31 @@ public:
      */
     bool IsFinalAppProcess() override;
 
+    /**
+     * Register render state observer.
+     * @param observer Render process state observer.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t RegisterRenderStateObserver(const sptr<IRenderStateObserver> &observer) override;
+
+    /**
+     * Unregister render state observer.
+     * @param observer Render process state observer.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UnregisterRenderStateObserver(const sptr<IRenderStateObserver> &observer) override;
+
+    /**
+     * Update render state.
+     * @param renderPid Render pid.
+     * @param state foreground or background state.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UpdateRenderState(pid_t renderPid, int32_t state) override;
+
+    int32_t SignRestartAppFlag(const std::string &bundleName) override;
+
+    int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);

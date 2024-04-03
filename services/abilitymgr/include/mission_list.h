@@ -19,6 +19,7 @@
 #include <list>
 #include <memory>
 
+#include "ability_manager_constants.h"
 #include "ability_record.h"
 #include "iremote_object.h"
 #include "mission.h"
@@ -222,7 +223,10 @@ public:
     int32_t GetMissionCountByUid(int32_t targetUid) const;
     void FindEarliestMission(std::shared_ptr<Mission>& targetMission) const;
     int32_t GetMissionCount() const;
-    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList);
+    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList,
+        int32_t pid = NO_PID);
+    
+    void SignRestartAppFlag(const std::string &bundleName);
 
 private:
     std::string GetTypeName();

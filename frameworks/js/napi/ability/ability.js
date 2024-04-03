@@ -25,9 +25,6 @@ class Ability {
   onWindowStageDestroy() { }
   onForeground(want) { }
   onBackground() { }
-  onBackPressed() {
-    return false;
-  }
   onPrepareToTerminate() {
     return false;
   }

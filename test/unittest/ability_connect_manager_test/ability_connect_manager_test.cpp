@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "ability_scheduler.h"
 #include "ability_util.h"
 #include "bundlemgr/mock_bundle_manager.h"
+#include "hilog_tag_wrapper.h"
 #include "mock_ability_connect_callback.h"
 #include "sa_mgr_client.h"
 #include "system_ability_definition.h"
@@ -132,7 +133,7 @@ sptr<SessionInfo> AbilityConnectManagerTest::MockSessionInfo(int32_t persistentI
 {
     sptr<SessionInfo> sessionInfo = new (std::nothrow) SessionInfo();
     if (!sessionInfo) {
-        HILOG_ERROR("sessionInfo is nullptr");
+        TAG_LOGE(AAFwkTag::TEST, "sessionInfo is nullptr");
         return nullptr;
     }
     sessionInfo->persistentId = persistentId;
@@ -1307,13 +1308,6 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_027, TestSize.Level1)
 
     ConnectManager()->AddConnectDeathRecipient(nullptr);
     EXPECT_TRUE(ConnectManager()->recipientMap_.empty());
-
-    ConnectManager()->AddConnectDeathRecipient(callbackA_);
-    EXPECT_EQ(static_cast<int>(ConnectManager()->recipientMap_.size()), 1);
-
-    // Add twice, do not add repeatedly
-    ConnectManager()->AddConnectDeathRecipient(callbackA_);
-    EXPECT_EQ(static_cast<int>(ConnectManager()->recipientMap_.size()), 1);
 }
 
 /*
@@ -1329,13 +1323,10 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_028, TestSize.Level1)
     ConnectManager()->SetTaskHandler(TaskHandler());
     ConnectManager()->SetEventHandler(EventHandler());
 
-    ConnectManager()->AddConnectDeathRecipient(callbackA_);
-    EXPECT_EQ(static_cast<int>(ConnectManager()->recipientMap_.size()), 1);
+    ConnectManager()->AddConnectDeathRecipient(nullptr);
+    EXPECT_TRUE(ConnectManager()->recipientMap_.empty());
 
     ConnectManager()->RemoveConnectDeathRecipient(nullptr);
-    EXPECT_FALSE(ConnectManager()->recipientMap_.empty());
-
-    ConnectManager()->RemoveConnectDeathRecipient(callbackA_);
     EXPECT_TRUE(ConnectManager()->recipientMap_.empty());
 }
 
@@ -3160,6 +3151,24 @@ HWTEST_F(AbilityConnectManagerTest, IsUIExtensionFocused_002, TestSize.Level1)
 
 /*
  * Feature: AbilityConnectManager
+ * Function: GetUIExtensionSourceToken
+ * SubFunction: GetUIExtensionSourceToken
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: Verify AbilityConnectManager GetUIExtensionSourceToken
+ */
+HWTEST_F(AbilityConnectManagerTest, GetUIExtensionSourceToken_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(3);
+    ASSERT_NE(connectManager, nullptr);
+    connectManager->uiExtensionMap_.clear();
+    auto sourceToken = connectManager->GetUIExtensionSourceToken(nullptr);
+    EXPECT_EQ(sourceToken, nullptr);
+    connectManager.reset();
+}
+
+/*
+ * Feature: AbilityConnectManager
  * Function: PauseExtensions
  * SubFunction: PauseExtensions
  * FunctionPoints: NA
@@ -3179,6 +3188,43 @@ HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_PauseExtensions_001, TestSiz
     abilityRecord2->abilityInfo_.bundleName = AbilityConfig::LAUNCHER_BUNDLE_NAME;
     connectManager->serviceMap_.emplace("second", abilityRecord2);
     connectManager->PauseExtensions();
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: SignRestartAppFlag
+ * CaseDescription: Verify AbilityConnectManager SignRestartAppFlag
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_SignRestartAppFlag_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    std::string bundleName = "testBundleName";
+    std::shared_ptr<AbilityRecord> abilityRecord1 = serviceRecord_;
+    abilityRecord1->abilityInfo_.bundleName = bundleName;
+    connectManager->serviceMap_.emplace("first", abilityRecord1);
+    std::shared_ptr<AbilityRecord> abilityRecord2 = AbilityRecord::CreateAbilityRecord(abilityRequest_);
+    abilityRecord2->abilityInfo_.bundleName = "errTestBundleName";
+    connectManager->serviceMap_.emplace("second", abilityRecord2);
+    connectManager->SignRestartAppFlag(bundleName);
+}
+
+/*
+ * Feature: AbilityConnectManager
+ * Function: BuildEventInfo
+ * CaseDescription: Verify AbilityConnectManager BuildEventInfo
+ */
+HWTEST_F(AbilityConnectManagerTest, AAFwk_AbilityMS_BuildEventInfo_001, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    connectManager->BuildEventInfo(nullptr);
+    std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
+    connectManager->BuildEventInfo(abilityRecord);
+    abilityRecord->SetCreateByConnectMode(true);
+    connectManager->BuildEventInfo(abilityRecord);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

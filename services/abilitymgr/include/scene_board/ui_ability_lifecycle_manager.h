@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include <unordered_map>
 #include "cpp/mutex.h"
 
+#include "ability_manager_constants.h"
 #include "ability_record.h"
 #include "isession_handler_interface.h"
 #include "session/host/include/zidl/session_interface.h"
@@ -30,6 +31,7 @@
 namespace OHOS {
 namespace AAFwk {
 class SessionInfo;
+class StatusBarDelegateManager;
 struct AbilityRunningInfo;
 struct MissionValidResult;
 
@@ -53,6 +55,8 @@ public:
             return false;
         }
     };
+
+    void SignRestartAppFlag(const std::string &bundleName);
 
     /**
      * StartUIAbility with request.
@@ -97,6 +101,15 @@ public:
      * @return Returns true on alive.
      */
     bool IsContainsAbility(const sptr<IRemoteObject> &token) const;
+
+    /**
+     * Notify SCB to minimize UIAbility
+     *
+     * @param abilityRecord the abilityRecord to minimize
+     * @param token ability's token
+     */
+    int32_t NotifySCBToMinimizeUIAbility(const std::shared_ptr<AbilityRecord> abilityRecord,
+        const sptr<IRemoteObject> token);
 
     /**
      * MinimizeUIAbility, minimize the special ability by scb.
@@ -236,7 +249,8 @@ public:
      */
     int32_t GetSessionIdByAbilityToken(const sptr<IRemoteObject> &token);
 
-    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList);
+    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList,
+        int32_t pid = NO_PID);
 
     bool PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void SetSessionHandler(const sptr<ISessionHandler> &handler);
@@ -250,7 +264,7 @@ public:
     std::shared_ptr<AbilityRecord> GetAbilityRecordsById(int32_t sessionId) const;
 
     void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList,
-        int32_t targetUserId) const;
+        int32_t targetUserId, int32_t pid = NO_PID) const;
 
     void OnAppStateChanged(const AppInfo &info, int32_t targetUserId);
 
@@ -293,8 +307,6 @@ public:
 
     int MoveMissionToFront(int32_t sessionId, std::shared_ptr<StartOptions> startOptions = nullptr);
 
-    void SetDevice(std::string deviceType);
-
     bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord,
         const int32_t oriValidUserId);
 
@@ -302,14 +314,27 @@ public:
      * @brief Update session info.
      * @param sessionInfos The vector of session info.
      */
-    void UpdateSessionInfoBySCB(const std::vector<SessionInfo> &sessionInfos, int32_t userId);
+    int32_t UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, int32_t userId,
+        std::vector<int32_t> &sessionIds);
+
+    int32_t RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
+    bool IsCallerInStatusBar();
+    int32_t KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids);
+
+    int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
+
+    int ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
+
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+
+    std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
 
 private:
-    std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     int32_t GetReusedStandardPersistentId(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     int32_t GetReusedCollaboratorPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
+    void UpdateProcessName(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord);
     void UpdateAbilityRecordLaunchReason(const AbilityRequest &abilityRequest,
         std::shared_ptr<AbilityRecord> &abilityRecord) const;
     void EraseAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -342,7 +367,7 @@ private:
     sptr<SessionInfo> CreateSessionInfo(const AbilityRequest &abilityRequest) const;
     int NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo, const AbilityRequest &abilityRequest) const;
     int ResolveAbility(const std::shared_ptr<AbilityRecord> &targetAbility, const AbilityRequest &abilityRequest) const;
-    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByName(const AppExecFwk::ElementName &element);
+    std::vector<std::shared_ptr<AbilityRecord>> GetAbilityRecordsByNameInner(const AppExecFwk::ElementName &element);
 
     void EnqueueAbilityToFront(const AbilityRequest &abilityRequest);
     void NotifyStartSpecifiedAbility(AbilityRequest &request, const AAFwk::Want &want);
@@ -355,7 +380,6 @@ private:
     void EraseSpecifiedAbilityRecord(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     void SetLastExitReason(std::shared_ptr<AbilityRecord> &abilityRecord) const;
-    LastExitReason CovertAppExitReasonToLastReason(const Reason exitReason) const;
     void SetRevicerInfo(const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &abilityRecord) const;
 
     bool CheckPrepareTerminateEnable(const std::shared_ptr<AbilityRecord> &abilityRecord);
@@ -368,6 +392,10 @@ private:
         std::shared_ptr<AbilityRecord> uiAbilityRecord) const;
     void CheckSpecified(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> uiAbilityRecord);
     void SendKeyEvent(AbilityRequest &abilityRequest) const;
+    bool CheckPid(const std::shared_ptr<AbilityRecord> abilityRecord, const int32_t pid) const;
+    std::shared_ptr<StatusBarDelegateManager> GetStatusBarDelegateManager();
+    int32_t DoProcessAttachment(std::shared_ptr<AbilityRecord> abilityRecord);
+    void BatchCloseUIAbility(std::unordered_set<std::shared_ptr<AbilityRecord>>& abilitySet);
 
     mutable ffrt::mutex sessionLock_;
     std::unordered_map<int32_t, std::shared_ptr<AbilityRecord>> sessionAbilityMap_;
@@ -378,7 +406,8 @@ private:
     std::queue<AbilityRequest> abilityQueue_;
     std::queue<SpecifiedInfo> specifiedInfoQueue_;
     sptr<ISessionHandler> handler_;
-    bool isPcDevice_ = false;
+    ffrt::mutex statusBarDelegateManagerLock_;
+    std::shared_ptr<StatusBarDelegateManager> statusBarDelegateManager_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

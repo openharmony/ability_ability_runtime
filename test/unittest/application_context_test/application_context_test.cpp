@@ -21,6 +21,7 @@
 #include "mock_application_state_change_callback.h"
 #include "mock_context_impl.h"
 #include "running_process_info.h"
+#include "want.h"
 #include "configuration_convertor.h"
 using namespace testing::ext;
 
@@ -1048,11 +1049,9 @@ HWTEST_F(ApplicationContextTest, GetCacheDir_0100, TestSize.Level1)
 HWTEST_F(ApplicationContextTest, RegisterApplicationStateChangeCallback_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "RegisterApplicationStateChangeCallback_0100 start";
-    context_->applicationStateCallback_.reset();
     std::shared_ptr<MockApplicationStateChangeCallback> applicationStateCallback = nullptr;
     context_->RegisterApplicationStateChangeCallback(applicationStateCallback);
-    auto callback = context_->applicationStateCallback_.lock();
-    EXPECT_EQ(callback, nullptr);
+    EXPECT_EQ(1, context_->applicationStateCallback_.size());
     GTEST_LOG_(INFO) << "RegisterApplicationStateChangeCallback_0100 end";
 }
 
@@ -1065,15 +1064,13 @@ HWTEST_F(ApplicationContextTest, RegisterApplicationStateChangeCallback_0100, Te
 HWTEST_F(ApplicationContextTest, NotifyApplicationForeground_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NotifyApplicationForeground_0100 start";
-    auto callback = context_->applicationStateCallback_.lock();
-    EXPECT_EQ(callback, nullptr);
 
     auto applicationStateCallback = std::make_shared<MockApplicationStateChangeCallback>();
     context_->RegisterApplicationStateChangeCallback(applicationStateCallback);
     EXPECT_CALL(*applicationStateCallback, NotifyApplicationForeground()).Times(1);
     context_->NotifyApplicationForeground();
-    callback = context_->applicationStateCallback_.lock();
-    EXPECT_NE(callback, nullptr);
+    auto callback = context_->applicationStateCallback_[0];
+    EXPECT_NE(callback.lock(), nullptr);
     GTEST_LOG_(INFO) << "NotifyApplicationForeground_0100 end";
 }
 
@@ -1086,15 +1083,13 @@ HWTEST_F(ApplicationContextTest, NotifyApplicationForeground_0100, TestSize.Leve
 HWTEST_F(ApplicationContextTest, NotifyApplicationBackground_0100, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "NotifyApplicationBackground_0100 start";
-    auto callback = context_->applicationStateCallback_.lock();
-    EXPECT_EQ(callback, nullptr);
 
     auto applicationStateCallback = std::make_shared<MockApplicationStateChangeCallback>();
     context_->RegisterApplicationStateChangeCallback(applicationStateCallback);
     EXPECT_CALL(*applicationStateCallback, NotifyApplicationBackground()).Times(1);
     context_->NotifyApplicationBackground();
-    callback = context_->applicationStateCallback_.lock();
-    EXPECT_NE(callback, nullptr);
+    auto callback = context_->applicationStateCallback_[0];
+    EXPECT_NE(callback.lock(), nullptr);
     GTEST_LOG_(INFO) << "NotifyApplicationBackground_0100 end";
 }
 
@@ -1143,6 +1138,24 @@ HWTEST_F(ApplicationContextTest, CreateModuleResourceManager_0100, TestSize.Leve
 }
 
 /**
+ * @tc.number: CreateSystemHspModuleResourceManager_0100
+ * @tc.name: CreateSystemHspModuleResourceManager
+ * @tc.desc: Create ModuleContext failed
+ */
+HWTEST_F(ApplicationContextTest, CreateSystemHspModuleResourceManager_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "CreateSystemHspModuleResourceManager_0100 start";
+    std::shared_ptr<ContextImpl> contextImpl = std::make_shared<ContextImpl>();
+    context_->AttachContextImpl(contextImpl);
+    std::string moduleName = "moduleName";
+    std::string bundleName = "com.test.bundleName";
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager = nullptr;
+    context_->CreateSystemHspModuleResourceManager(bundleName, moduleName, resourceManager);
+    EXPECT_NE(context_, nullptr);
+    GTEST_LOG_(INFO) << "CreateModuleResourceManager_0100 end";
+}
+
+/**
  * @tc.number: GetAllTempDir_0100
  * @tc.name: GetAllTempDir
  * @tc.desc: GetAllTempDir
@@ -1154,6 +1167,18 @@ HWTEST_F(ApplicationContextTest, GetAllTempDir_0100, TestSize.Level1)
     context_->GetAllTempDir(tempPaths);
     EXPECT_NE(context_, nullptr);
     GTEST_LOG_(INFO) << "GetAllTempDir_0100 end";
+}
+
+/**
+ * @tc.number: RestartApp_0100
+ * @tc.name: RestartApp
+ * @tc.desc: RestartApp
+ */
+HWTEST_F(ApplicationContextTest, RestartApp_0100, TestSize.Level1)
+{
+    AAFwk::Want want;
+    int32_t res = context_->RestartApp(want);
+    EXPECT_EQ(res, OHOS::ERR_INVALID_VALUE);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

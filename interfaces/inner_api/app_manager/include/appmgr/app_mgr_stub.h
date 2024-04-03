@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,6 @@ private:
     int32_t HandleApplicationForegrounded(MessageParcel &data, MessageParcel &reply);
     int32_t HandleApplicationBackgrounded(MessageParcel &data, MessageParcel &reply);
     int32_t HandleApplicationTerminated(MessageParcel &data, MessageParcel &reply);
-    int32_t HandleCheckPermission(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAbilityCleaned(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAmsMgr(MessageParcel &data, MessageParcel &reply);
     int32_t HandleClearUpApplicationData(MessageParcel &data, MessageParcel &reply);
@@ -70,6 +69,7 @@ private:
     int32_t HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply);
     int32_t HandleAddAbilityStageDone(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemoryLevel(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyProcMemoryLevel(MessageParcel &data, MessageParcel &reply);
     int32_t HandleStartupResidentProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleRegisterApplicationStateObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterApplicationStateObserver(MessageParcel &data, MessageParcel &reply);
@@ -90,6 +90,7 @@ private:
     int32_t HandleRegisterConfigurationObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleUnregisterConfigurationObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDumpHeapMemory(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &reply);
 #ifdef ABILITY_COMMAND_FOR_TEST
     int32_t HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply);
 #endif
@@ -122,6 +123,11 @@ private:
     int32_t HandleExitChildProcessSafely(MessageParcel &data, MessageParcel &reply);
     int32_t HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply);
     int32_t HandleClearUpApplicationDataBySelf(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRegisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUnregisterRenderStateObserver(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleUpdateRenderState(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSignRestartAppFlag(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetAppRunningUniqueIdByPid(MessageParcel &data, MessageParcel &reply);
 
     using AppMgrFunc = int32_t (AppMgrStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, AppMgrFunc> memberFuncMap_;

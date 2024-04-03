@@ -31,6 +31,7 @@ class AbilityContext extends Context {
     this.abilityInfo = obj.abilityInfo;
     this.currentHapModuleInfo = obj.currentHapModuleInfo;
     this.config = obj.config;
+    this.windowStage = obj.windowStage;
   }
 
   onUpdateConfiguration(config) {
@@ -189,6 +190,22 @@ class AbilityContext extends Context {
 
   requestModalUIExtension(want, callback) {
     return this.__context_impl__.requestModalUIExtension(want, callback);
+  }
+
+  showAbility() {
+    return this.__context_impl__.showAbility();
+  }
+
+  hideAbility() {
+    return this.__context_impl__.hideAbility();
+  }
+
+  openAtomicService(appId, options, callback) {
+    return this.__context_impl__.openAtomicService(appId, options, callback);
+  }
+  
+  moveAbilityToBackground(callback) {
+    return this.__context_impl__.moveAbilityToBackground(callback);
   }
 }
 

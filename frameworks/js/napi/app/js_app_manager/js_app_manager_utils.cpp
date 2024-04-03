@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <cstdint>
 
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "iapplication_state_observer.h"
 #include "js_runtime.h"
@@ -26,11 +27,11 @@ namespace OHOS {
 namespace AbilityRuntime {
 napi_value CreateJsAppStateData(napi_env env, const AppStateData &appStateData)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        HILOG_ERROR("objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
         return nullptr;
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, appStateData.bundleName));
@@ -38,17 +39,17 @@ napi_value CreateJsAppStateData(napi_env env, const AppStateData &appStateData)
     napi_set_named_property(env, object, "state", CreateJsValue(env, appStateData.state));
     napi_set_named_property(env, object, "isSplitScreenMode", CreateJsValue(env, appStateData.isSplitScreenMode));
     napi_set_named_property(env, object, "isFloatingWindowMode", CreateJsValue(env, appStateData.isFloatingWindowMode));
-    HILOG_DEBUG("end.");
+    TAG_LOGD(AAFwkTag::APPMGR, "end.");
     return object;
 }
 
 napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilityStateData)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        HILOG_ERROR("objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
         return nullptr;
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, abilityStateData.bundleName));
@@ -58,17 +59,18 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
     napi_set_named_property(env, object, "uid", CreateJsValue(env, abilityStateData.uid));
     napi_set_named_property(env, object, "state", CreateJsValue(env, abilityStateData.abilityState));
     napi_set_named_property(env, object, "abilityType", CreateJsValue(env, abilityStateData.abilityType));
+    napi_set_named_property(env, object, "isAtomicService", CreateJsValue(env, abilityStateData.isAtomicService));
     HILOG_DEBUG("end.");
     return object;
 }
 
 napi_value CreateJsProcessData(napi_env env, const ProcessData &processData)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        HILOG_ERROR("objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
         return nullptr;
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, processData.bundleName));
@@ -77,7 +79,7 @@ napi_value CreateJsProcessData(napi_env env, const ProcessData &processData)
     napi_set_named_property(env, object, "state", CreateJsValue(env, processData.state));
     napi_set_named_property(env, object, "isContinuousTask", CreateJsValue(env, processData.isContinuousTask));
     napi_set_named_property(env, object, "isKeepAlive", CreateJsValue(env, processData.isKeepAlive));
-    HILOG_DEBUG("end.");
+    TAG_LOGD(AAFwkTag::APPMGR, "end.");
     return object;
 }
 
@@ -108,7 +110,7 @@ napi_value CreateJsRunningProcessInfo(napi_env env, const RunningProcessInfo &in
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        HILOG_ERROR("objValue nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
         return nullptr;
     }
 
@@ -116,23 +118,24 @@ napi_value CreateJsRunningProcessInfo(napi_env env, const RunningProcessInfo &in
     napi_set_named_property(env, object, "pid", CreateJsValue(env, info.pid_));
     napi_set_named_property(env, object, "uid", CreateJsValue(env, info.uid_));
     napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, info.bundleNames));
-    napi_set_named_property(env, object, "state", CreateJsValue(env, info.state_));
+    napi_set_named_property(env, object, "state", CreateJsValue(env,
+        ConvertToJsAppProcessState(info.state_, info.isFocused)));
     return object;
 }
 
 napi_value ApplicationStateInit(napi_env env)
 {
-    HILOG_DEBUG("ApplicationStateInit enter");
+    TAG_LOGD(AAFwkTag::APPMGR, "ApplicationStateInit enter");
 
     if (env == nullptr) {
-        HILOG_ERROR("Invalid input parameters");
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid input parameters");
         return nullptr;
     }
 
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        HILOG_ERROR("Wrong to get object");
+        TAG_LOGE(AAFwkTag::APPMGR, "Wrong to get object");
         return nullptr;
     }
 
@@ -152,17 +155,17 @@ napi_value ApplicationStateInit(napi_env env)
 
 napi_value ProcessStateInit(napi_env env)
 {
-    HILOG_DEBUG("ProcessStateInit enter");
+    TAG_LOGD(AAFwkTag::APPMGR, "ProcessStateInit enter");
 
     if (env == nullptr) {
-        HILOG_ERROR("Invalid input arguments");
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid input arguments");
         return nullptr;
     }
 
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        HILOG_ERROR("Failed to get object");
+        TAG_LOGE(AAFwkTag::APPMGR, "Failed to get object");
         return nullptr;
     }
     napi_set_named_property(env, object, "STATE_CREATE",
@@ -176,6 +179,33 @@ napi_value ProcessStateInit(napi_env env)
     napi_set_named_property(env, object, "STATE_DESTROY",
         CreateJsValue(env, static_cast<int32_t>(AppExecFwk::AppProcessState::APP_STATE_TERMINATED)));
     return object;
+}
+
+JsAppProcessState ConvertToJsAppProcessState(
+    const AppExecFwk::AppProcessState &appProcessState, const bool &isFocused)
+{
+    JsAppProcessState processState;
+    switch (appProcessState) {
+        case AppExecFwk::AppProcessState::APP_STATE_CREATE:
+        case AppExecFwk::AppProcessState::APP_STATE_READY:
+            processState = STATE_CREATE;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_FOREGROUND:
+            processState = isFocused ? STATE_ACTIVE : STATE_FOREGROUND;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_BACKGROUND:
+            processState = STATE_BACKGROUND;
+            break;
+        case AppExecFwk::AppProcessState::APP_STATE_TERMINATED:
+        case AppExecFwk::AppProcessState::APP_STATE_END:
+            processState = STATE_DESTROY;
+            break;
+        default:
+            HILOG_ERROR("Process state is invalid.");
+            processState = STATE_DESTROY;
+            break;
+    }
+    return processState;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

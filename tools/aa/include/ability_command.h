@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,10 @@
 namespace OHOS {
 namespace AAFwk {
 namespace {
+using ParametersInteger = std::map<std::string, int>;
+using ParametersString = std::map<std::string, std::string>;
+using ParametersBool = std::map<std::string, bool>;
+
 const std::string TOOL_NAME = "aa";
 
 const std::string HELP_MSG = "usage: aa <command> <options>\n"
@@ -62,7 +66,15 @@ const std::string HELP_MSG_START =
     "usage: aa start <options>\n"
     "options list:\n"
     "  -h, --help                                                   list available commands\n"
-    "  [-d <device-id>] -a <ability-name> -b <bundle-name> [-m <module-name>] [-p <perf-cmd>] [-D] [-S] [-N] "
+    "  [-d <device-id>] [-a <ability-name> -b <bundle-name>] [-m <module-name>] [-p <perf-cmd>] [-D] [-S] [-N] "
+    "  [--ps <key> <string-value>] "
+    "  [--pi <key> <integer-value>] "
+    "  [--pb <key> <boolean-value>] "
+    "  [--psn <key>] "
+    "  [-A <action-name>] "
+    "  [-U <URI>] "
+    "  [-e <entity>] "
+    "  [-t <mime-type>] "
     "  start ability with an element name\n";
 
 const std::string HELP_MSG_STOP_SERVICE =
@@ -127,6 +139,15 @@ const std::string HELP_MSG_DETACH_APP_DEBUG =
     "options list:\n"
     "  -h, --help                                             list available commands\n"
     "  -b <bundle-name>                                       let application exit debug mode by bundle name\n";
+
+const std::string HELP_MSG_APPDEBUG_APP_DEBUG =
+    "usage: aa appdebug <options>\n"
+    "options list:\n"
+    "  -h, --help                                  list available commands\n"
+    "  -b <bundle-name>                            let application set wait debug mode by bundle name with options\n"
+    "                  [-p, --persist]             option: persist flag\n"
+    "  -c, --cancel                                let application cancel wait debug\n"
+    "  -g, --get                                   get wait debug mode application bundle name and persist flag\n";
 
 const std::string HELP_MSG_FORCE_STOP = "usage: aa force-stop <bundle-name>\n";
 const std::string HELP_MSG_BLOCK_ABILITY = "usage: aa block-ability <abilityrecordid>\n";
@@ -206,9 +227,19 @@ private:
     ErrCode RunAsStopService();
     ErrCode RunAsDumpsysCommand();
     ErrCode RunAsForceStop();
+    void SwitchOptionForAppDebug(int32_t option, std::string &bundleName, bool &isPersist, bool &isCancel, bool &isGet);
+    void ParseAppDebugParameter(std::string &bundleName, bool &isPersist, bool &isCancel, bool &isGet);
+    ErrCode RunAsAppDebugDebugCommand();
     ErrCode RunAsProcessCommand();
     ErrCode RunAsAttachDebugCommand();
     ErrCode RunAsDetachDebugCommand();
+    bool CheckParameters(int target);
+    ErrCode ParseParam(ParametersInteger& pi);
+    ErrCode ParseParam(ParametersString& ps, bool isNull);
+    ErrCode ParseParam(ParametersBool& pb);
+    void SetParams(const ParametersInteger& pi, Want& want);
+    void SetParams(const ParametersString& ps, Want& want);
+    void SetParams(const ParametersBool& pb, Want& want);
 #ifdef ABILITY_COMMAND_FOR_TEST
     ErrCode RunForceTimeoutForTest();
     ErrCode RunAsSendAppNotRespondingProcessID();

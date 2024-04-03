@@ -31,6 +31,7 @@ struct VerificationInfo {
     uint32_t accessTokenId = 0;
     int32_t apiTargetVersion = 0;
     bool withContinuousTask = false;
+    uint32_t specifyTokenId = 0;
 };
 
     PermissionVerification() = default;
@@ -38,13 +39,15 @@ struct VerificationInfo {
 
     bool VerifyPermissionByTokenId(const int &tokenId, const std::string &permissionName) const;
 
-    bool VerifyCallingPermission(const std::string &permissionName) const;
+    bool VerifyCallingPermission(const std::string &permissionName, const uint32_t specifyTokenId = 0) const;
 
     bool IsSACall() const;
 
     bool IsShellCall() const;
 
-    bool CheckSpecificSystemAbilityAccessPermission() const;
+    bool CheckSpecificSystemAbilityAccessPermission(const std::string &processName) const;
+
+    bool CheckObserverCallerPermission() const;
 
     bool VerifyRunningInfoPerm() const;
 
@@ -90,6 +93,8 @@ struct VerificationInfo {
 
     bool VerifyPrepareTerminatePermission(const int &tokenId) const;
 
+    bool VerifyShellStartExtensionType(int32_t type) const;
+
 private:
     DISALLOW_COPY_AND_MOVE(PermissionVerification);
 
@@ -97,7 +102,8 @@ private:
 
     unsigned int GetCallingTokenID() const;
 
-    bool JudgeStartInvisibleAbility(const uint32_t accessTokenId, const bool visible) const;
+    bool JudgeStartInvisibleAbility(const uint32_t accessTokenId, const bool visible,
+        const uint32_t specifyTokenId = 0) const;
 
     bool JudgeStartAbilityFromBackground(const bool isBackgroundCall, bool withContinuousTask = false) const;
 

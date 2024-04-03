@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "pending_want_record.h"
 
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "pending_want_manager.h"
@@ -61,15 +62,21 @@ void PendingWantRecord::UnregisterCancelListener(const sptr<IWantReceiver> &rece
 
 int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
 {
-    HILOG_INFO("%{public}s:begin.", __func__);
+    TAG_LOGI(AAFwkTag::WANTAGENT, "%{public}s:begin.", __func__);
     std::lock_guard<ffrt::mutex> locker(lock_);
     if (canceled_) {
+        TAG_LOGI(AAFwkTag::WANTAGENT, "wantAgent is canceled!");
+        if (senderInfo.finishedReceiver != nullptr) {
+            Want want;
+            WantParams wantParams = {};
+            senderInfo.finishedReceiver->PerformReceive(want, senderInfo.code, "canceled", wantParams, false, false, 0);
+        }
         return START_CANCELED;
     }
 
     auto pendingWantManager = pendingWantManager_.lock();
     if (pendingWantManager == nullptr) {
-        HILOG_ERROR("%{public}s:pendingWantManager is nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::WANTAGENT, "%{public}s:pendingWantManager is nullptr.", __func__);
         return ERR_INVALID_VALUE;
     }
 
@@ -84,17 +91,18 @@ int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
     int res = NO_ERROR;
     switch (key_->GetType()) {
         case static_cast<int32_t>(OperationType::START_ABILITY):
-            res = pendingWantManager->PendingWantStartAbility(want, callerToken_, -1, callerUid_);
+            res = pendingWantManager->PendingWantStartAbility(want, callerToken_, -1, callerUid_, callerTokenId_);
             break;
         case static_cast<int32_t>(OperationType::START_ABILITIES): {
             std::vector<WantsInfo> allWantsInfos = key_->GetAllWantsInfos();
             allWantsInfos.back().want = want;
-            res = pendingWantManager->PendingWantStartAbilitys(allWantsInfos, callerToken_, -1, callerUid_);
+            res = pendingWantManager->PendingWantStartAbilitys(
+                allWantsInfos, callerToken_, -1, callerUid_, callerTokenId_);
             break;
         }
         case static_cast<int32_t>(OperationType::START_SERVICE):
         case static_cast<int32_t>(OperationType::START_FOREGROUND_SERVICE):
-            res = pendingWantManager->PendingWantStartAbility(want, callerToken_, -1, callerUid_);
+            res = pendingWantManager->PendingWantStartAbility(want, callerToken_, -1, callerUid_, callerTokenId_);
             break;
         case static_cast<int32_t>(OperationType::SEND_COMMON_EVENT):
             res = pendingWantManager->PendingWantPublishCommonEvent(want, senderInfo, callerUid_, callerTokenId_);

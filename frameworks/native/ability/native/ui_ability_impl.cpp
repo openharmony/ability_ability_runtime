@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,12 @@
 #include "ability_manager_client.h"
 #include "context/application_context.h"
 #include "freeze_util.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "js_ui_ability.h"
 #include "ohos_application.h"
+#include "process_options.h"
 #include "scene_board_judgement.h"
 #include "time_util.h"
 
@@ -33,10 +35,10 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     std::shared_ptr<AppExecFwk::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (token == nullptr || application == nullptr || handler == nullptr ||
         record == nullptr || ability == nullptr) {
-        HILOG_ERROR("Token or application or handler or record is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Token or application or handler or record is nullptr.");
         return;
     }
     token_ = record->GetToken();
@@ -49,15 +51,15 @@ void UIAbilityImpl::Init(const std::shared_ptr<AppExecFwk::OHOSApplication> &app
     ability_->Init(record, application, handler, token);
     lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
     abilityLifecycleCallbacks_ = application;
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::Start(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ or abilityLifecycleCallbacks_ is nullptr.");
         return;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -71,27 +73,27 @@ void UIAbilityImpl::Start(const AAFwk::Want &want, sptr<AAFwk::SessionInfo> sess
     lifecycleState_ = AAFwk::ABILITY_STATE_INACTIVE;
 #endif
     abilityLifecycleCallbacks_->OnAbilityStart(ability_);
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::Stop()
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
 
     ability_->OnStop();
     StopCallback();
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::Stop(bool &isAsyncCallback)
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         isAsyncCallback = false;
         return;
     }
@@ -107,7 +109,7 @@ void UIAbilityImpl::Stop(bool &isAsyncCallback)
     auto asyncCallback = [abilityImplWeakPtr = weakPtr, state = AAFwk::ABILITY_STATE_INITIAL]() {
         auto abilityImpl = abilityImplWeakPtr.lock();
         if (abilityImpl == nullptr) {
-            HILOG_ERROR("abilityImpl is nullptr.");
+            TAG_LOGE(AAFwkTag::UIABILITY, "abilityImpl is nullptr.");
             return;
         }
         abilityImpl->StopCallback();
@@ -120,13 +122,13 @@ void UIAbilityImpl::Stop(bool &isAsyncCallback)
         AppExecFwk::AbilityTransactionCallbackInfo<>::Destroy(callbackInfo);
     }
     // else: callbackInfo will be destroyed after the async callback
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::StopCallback()
 {
     if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ or abilityLifecycleCallbacks_ is nullptr.");
         return;
     }
 #ifdef SUPPORT_GRAPHICS
@@ -140,9 +142,9 @@ void UIAbilityImpl::StopCallback()
 
 int32_t UIAbilityImpl::Share(AAFwk::WantParams &wantParam)
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return ERR_INVALID_VALUE;
     }
     return ability_->OnShare(wantParam);
@@ -150,13 +152,13 @@ int32_t UIAbilityImpl::Share(AAFwk::WantParams &wantParam)
 
 void UIAbilityImpl::DispatchSaveAbilityState()
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Called.");
     needSaveDate_ = true;
 }
 
 void UIAbilityImpl::DispatchRestoreAbilityState(const AppExecFwk::PacMap &inState)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Called.");
     hasSaveData_ = true;
     restoreData_ = inState;
 }
@@ -165,8 +167,10 @@ void UIAbilityImpl::HandleAbilityTransaction(
     const AAFwk::Want &want, const AAFwk::LifeCycleStateInfo &targetState, sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Lifecycle: srcState:%{public}d; targetState: %{public}d; isNewWant: %{public}d, sceneFlag: %{public}d",
+    TAG_LOGD(AAFwkTag::UIABILITY,
+        "Lifecycle: srcState:%{public}d; targetState: %{public}d; isNewWant: %{public}d, sceneFlag: %{public}d",
         lifecycleState_, targetState.state, targetState.isNewWant, targetState.sceneFlag);
+    UpdateSilentForeground(targetState, sessionInfo);
 #ifdef SUPPORT_GRAPHICS
     if (ability_ != nullptr) {
         ability_->sceneFlag_ = targetState.sceneFlag;
@@ -177,7 +181,7 @@ void UIAbilityImpl::HandleAbilityTransaction(
             AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
                 token_, targetState.state, GetRestoreData());
         }
-        HILOG_ERROR("Org lifeCycleState equals to Dst lifeCycleState.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Org lifeCycleState equals to Dst lifeCycleState.");
         return;
     }
 #endif
@@ -200,16 +204,16 @@ void UIAbilityImpl::HandleAbilityTransaction(
 
 void UIAbilityImpl::HandleShareData(int32_t uniqueId)
 {
-    HILOG_DEBUG("Called sourceState: %{public}d.", lifecycleState_);
+    TAG_LOGD(AAFwkTag::UIABILITY, "Called sourceState: %{public}d.", lifecycleState_);
     WantParams wantParam;
     int32_t resultCode = Share(wantParam);
-    HILOG_DEBUG("WantParam size: %{public}d.", wantParam.Size());
+    TAG_LOGD(AAFwkTag::UIABILITY, "WantParam size: %{public}d.", wantParam.Size());
     AAFwk::AbilityManagerClient::GetInstance()->ShareDataDone(token_, resultCode, uniqueId, wantParam);
 }
 
 void UIAbilityImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleState &state)
 {
-    HILOG_DEBUG("Lifecycle: notify ability manager service.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Lifecycle: notify ability manager service.");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
     std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
         "; AbilityManagerClient::AbilityTransitionDone; the transaction start.";
@@ -225,42 +229,42 @@ void UIAbilityImpl::AbilityTransactionCallback(const AAFwk::AbilityLifeCycleStat
 
 void UIAbilityImpl::ExecuteInsightIntentDone(uint64_t intentId, const InsightIntentExecuteResult &result)
 {
-    HILOG_INFO("Notify execute done, intentId %{public}" PRIu64"", intentId);
+    TAG_LOGI(AAFwkTag::UIABILITY, "Notify execute done, intentId %{public}" PRIu64"", intentId);
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->ExecuteInsightIntentDone(token_, intentId, result);
     if (ret != ERR_OK) {
-        HILOG_ERROR("Notify execute done faild.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Notify execute done faild.");
     }
 }
 
 bool UIAbilityImpl::PrepareTerminateAbility()
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return false;
     }
     bool ret = ability_->OnPrepareTerminate();
-    HILOG_DEBUG("End ret is %{public}d.", ret);
+    TAG_LOGD(AAFwkTag::UIABILITY, "End ret is %{public}d.", ret);
     return ret;
 }
 
 void UIAbilityImpl::SendResult(int requestCode, int resultCode, const AAFwk::Want &resultData)
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
 
     ability_->OnAbilityResult(requestCode, resultCode, resultData);
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::NewWant(const AAFwk::Want &want)
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
     ability_->SetWant(want);
@@ -268,13 +272,13 @@ void UIAbilityImpl::NewWant(const AAFwk::Want &want)
 #ifdef SUPPORT_GRAPHICS
     ability_->ContinuationRestore(want);
 #endif
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::SetLifeCycleStateInfo(const AAFwk::LifeCycleStateInfo &info)
 {
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
     ability_->SetLifeCycleStateInfo(info);
@@ -282,18 +286,18 @@ void UIAbilityImpl::SetLifeCycleStateInfo(const AAFwk::LifeCycleStateInfo &info)
 
 bool UIAbilityImpl::CheckAndRestore()
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (!hasSaveData_) {
-        HILOG_ERROR("hasSaveData_ is false.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "hasSaveData_ is false.");
         return false;
     }
 
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return false;
     }
     ability_->OnRestoreAbilityState(restoreData_);
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
     return true;
 }
 
@@ -312,23 +316,23 @@ void UIAbilityImpl::SetCallingContext(const std::string &deviceId, const std::st
 
 void UIAbilityImpl::ScheduleUpdateConfiguration(const AppExecFwk::Configuration &config)
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
 
     if (lifecycleState_ != AAFwk::ABILITY_STATE_INITIAL) {
-        HILOG_DEBUG("Ability name: [%{public}s].", ability_->GetAbilityName().c_str());
+        TAG_LOGD(AAFwkTag::UIABILITY, "Ability name: [%{public}s].", ability_->GetAbilityName().c_str());
         ability_->OnConfigurationUpdatedNotify(config);
     }
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::ContinueAbility(const std::string &deviceId, uint32_t versionCode)
 {
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
     ability_->ContinueAbilityWithStack(deviceId, versionCode);
@@ -337,7 +341,7 @@ void UIAbilityImpl::ContinueAbility(const std::string &deviceId, uint32_t versio
 void UIAbilityImpl::NotifyContinuationResult(int32_t result)
 {
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
     ability_->OnCompleteContinuation(result);
@@ -346,10 +350,31 @@ void UIAbilityImpl::NotifyContinuationResult(int32_t result)
 void UIAbilityImpl::NotifyMemoryLevel(int32_t level)
 {
     if (ability_ == nullptr) {
-        HILOG_ERROR("ability_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ is nullptr.");
         return;
     }
     ability_->OnMemoryLevel(level);
+}
+
+void UIAbilityImpl::UpdateSilentForeground(const AAFwk::LifeCycleStateInfo &targetState,
+    sptr<AAFwk::SessionInfo> sessionInfo)
+{
+    if (ability_ == nullptr) {
+        TAG_LOGD(AAFwkTag::UIABILITY, "ability_ is null");
+        return;
+    }
+    if (ability_->CheckIsSilentForeground() && targetState.state == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
+        lifecycleState_ = AAFwk::ABILITY_STATE_STARTED_NEW;
+    }
+    if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL &&
+        sessionInfo && sessionInfo->processOptions &&
+        AAFwk::ProcessOptions::IsNewProcessMode(sessionInfo->processOptions->processMode) &&
+        sessionInfo->processOptions->startupVisibility == AAFwk::StartupVisibility::STARTUP_HIDE) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "Set IsSilentForeground to true.");
+        ability_->SetIsSilentForeground(true);
+        return;
+    }
+    ability_->SetIsSilentForeground(false);
 }
 
 #ifdef SUPPORT_GRAPHICS
@@ -368,23 +393,23 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
     auto task = [abilityImpl = weak_from_this(), focuseMode = isFocused]() {
         auto impl = abilityImpl.lock();
         if (impl == nullptr) {
-            HILOG_ERROR("impl is nullptr.");
+            TAG_LOGE(AAFwkTag::UIABILITY, "impl is nullptr.");
             return;
         }
 
         if (!impl->ability_ || !impl->ability_->GetAbilityInfo()) {
-            HILOG_ERROR("%{public}s failed.", focuseMode ? "AfterFocused" : "AfterUnFocused");
+            TAG_LOGE(AAFwkTag::UIABILITY, "%{public}s failed.", focuseMode ? "AfterFocused" : "AfterUnFocused");
             return;
         }
 
         auto abilityContext = impl->ability_->GetAbilityContext();
         if (abilityContext == nullptr) {
-            HILOG_ERROR("abilityContext is nullptr.");
+            TAG_LOGE(AAFwkTag::UIABILITY, "abilityContext is nullptr.");
             return;
         }
         auto applicationContext = abilityContext->GetApplicationContext();
         if (applicationContext == nullptr || applicationContext->IsAbilityLifecycleCallbackEmpty()) {
-            HILOG_ERROR("applicationContext or lifecycleCallback is nullptr.");
+            TAG_LOGE(AAFwkTag::UIABILITY, "applicationContext or lifecycleCallback is nullptr.");
             return;
         }
         auto &jsAbility = static_cast<JsUIAbility &>(*(impl->ability_));
@@ -398,16 +423,16 @@ void UIAbilityImpl::AfterFocusedCommon(bool isFocused)
     if (handler_) {
         handler_->PostTask(task);
     }
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Lifecycle: Call.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Lifecycle: Call.");
     auto owner = owner_.lock();
     if (owner == nullptr) {
-        HILOG_ERROR("Owner is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Owner is nullptr.");
         return;
     }
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::FOREGROUND };
@@ -422,13 +447,13 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
             owner->notifyForegroundByAbility_ = false;
             needNotifyAMS = true;
         } else {
-            HILOG_DEBUG("Notify foreground by window, but client's foreground is running.");
+            TAG_LOGD(AAFwkTag::UIABILITY, "Notify foreground by window, but client's foreground is running.");
             owner->notifyForegroundByWindow_ = true;
         }
     }
 
     if (needNotifyAMS) {
-        HILOG_INFO("Lifecycle: window notify ability manager service.");
+        TAG_LOGI(AAFwkTag::UIABILITY, "Lifecycle: window notify ability manager service.");
         entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
             "; AbilityManagerClient::AbilityTransitionDone; the transaction start.";
         FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
@@ -445,13 +470,13 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterForeground()
 void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Called.");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::BACKGROUND };
     std::string entry = std::to_string(TimeUtil::SystemTimeMillisecond()) +
         "; UIAbilityImpl::WindowLifeCycleImpl::AfterBackground; the background lifecycle.";
     FreezeUtil::GetInstance().AddLifecycleEvent(flow, entry);
 
-    HILOG_DEBUG("Lifecycle: window after background.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Lifecycle: window after background.");
     AppExecFwk::PacMap restoreData;
     auto ret = AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
         token_, AAFwk::AbilityLifeCycleState::ABILITY_STATE_BACKGROUND_NEW, restoreData);
@@ -462,37 +487,37 @@ void UIAbilityImpl::WindowLifeCycleImpl::AfterBackground()
 
 void UIAbilityImpl::WindowLifeCycleImpl::AfterFocused()
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     auto owner = owner_.lock();
     if (owner) {
         owner->AfterFocused();
     }
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::WindowLifeCycleImpl::AfterUnfocused()
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     auto owner = owner_.lock();
     if (owner) {
         owner->AfterUnFocused();
     }
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     AppExecFwk::PacMap restoreData;
     switch (type) {
         case static_cast<int32_t>(OHOS::Rosen::WMError::WM_ERROR_INVALID_OPERATION): {
-            HILOG_DEBUG("Window was freezed.");
+            TAG_LOGD(AAFwkTag::UIABILITY, "Window was freezed.");
             AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
                 token_, AAFwk::AbilityLifeCycleState::ABILITY_STATE_WINDOW_FREEZED, restoreData);
             break;
         }
         case static_cast<int32_t>(OHOS::Rosen::WMError::WM_ERROR_INVALID_WINDOW_MODE_OR_SIZE): {
-            HILOG_DEBUG("The ability is stage mode, schedule foreground invalid mode.");
+            TAG_LOGD(AAFwkTag::UIABILITY, "The ability is stage mode, schedule foreground invalid mode.");
             AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
                 token_, AAFwk::AbilityLifeCycleState::ABILITY_STATE_INVALID_WINDOW_MODE, restoreData);
             break;
@@ -513,25 +538,31 @@ void UIAbilityImpl::WindowLifeCycleImpl::ForegroundFailed(int32_t type)
 void UIAbilityImpl::Foreground(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ or abilityLifecycleCallbacks_ is nullptr.");
         return;
     }
 
-    HILOG_DEBUG("Call onForeground.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Call onForeground.");
     ability_->OnForeground(want);
+    if (ability_->CheckIsSilentForeground()) {
+        TAG_LOGI(AAFwkTag::UIABILITY, "Is silent foreground.");
+        std::lock_guard<std::mutex> lock(notifyForegroundLock_);
+        notifyForegroundByWindow_ = true;
+        return;
+    }
     {
         std::lock_guard<std::mutex> lock(notifyForegroundLock_);
         notifyForegroundByAbility_ = true;
     }
     abilityLifecycleCallbacks_->OnAbilityForeground(ability_);
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 
 void UIAbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Called.");
     if (type == static_cast<int32_t>(OHOS::Rosen::WMError::WM_DO_NOTHING)) {
         AppExecFwk::PacMap restoreData;
         AAFwk::AbilityManagerClient::GetInstance()->AbilityTransitionDone(
@@ -541,23 +572,23 @@ void UIAbilityImpl::WindowLifeCycleImpl::BackgroundFailed(int32_t type)
 
 void UIAbilityImpl::Background()
 {
-    HILOG_DEBUG("Begin.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "Begin.");
     if (ability_ == nullptr || ability_->GetAbilityInfo() == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("ability_ or abilityLifecycleCallbacks_ is nullptr.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "ability_ or abilityLifecycleCallbacks_ is nullptr.");
         return;
     }
     ability_->OnLeaveForeground();
     ability_->OnBackground();
     lifecycleState_ = AAFwk::ABILITY_STATE_BACKGROUND_NEW;
     abilityLifecycleCallbacks_->OnAbilityBackground(ability_);
-    HILOG_DEBUG("End.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "End.");
 }
 #endif
 
 bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::LifeCycleStateInfo &targetState)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("begin");
+    TAG_LOGD(AAFwkTag::UIABILITY, "begin");
     bool ret = true;
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
@@ -596,7 +627,7 @@ bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::Lif
             if (!InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
                 Background();
             } else {
-                HILOG_DEBUG("HandleExecuteInsightIntentBackground");
+                TAG_LOGD(AAFwkTag::UIABILITY, "HandleExecuteInsightIntentBackground");
                 HandleExecuteInsightIntentBackground(want);
             }
 #endif
@@ -604,11 +635,11 @@ bool UIAbilityImpl::AbilityTransaction(const AAFwk::Want &want, const AAFwk::Lif
         }
         default: {
             ret = false;
-            HILOG_ERROR("State error.");
+            TAG_LOGE(AAFwkTag::UIABILITY, "State error.");
             break;
         }
     }
-    HILOG_DEBUG("End retVal is %{public}d.", static_cast<int>(ret));
+    TAG_LOGD(AAFwkTag::UIABILITY, "End retVal is %{public}d.", static_cast<int>(ret));
     return ret;
 }
 
@@ -636,23 +667,24 @@ void UIAbilityImpl::HandleForegroundNewState(const AAFwk::Want &want, bool &bfla
 
 void UIAbilityImpl::HandleExecuteInsightIntentForeground(const AAFwk::Want &want, bool &bflag)
 {
-    HILOG_INFO("Execute insight intent in foreground mode.");
+    TAG_LOGI(AAFwkTag::UIABILITY, "Execute insight intent in foreground mode.");
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret) {
-        HILOG_ERROR("Generate execute param failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Generate execute param failed.");
         HandleForegroundNewState(want, bflag);
         return;
     }
 
-    HILOG_DEBUG("Insight intent bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
+    TAG_LOGD(AAFwkTag::UIABILITY,
+        "Insight intent bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
         "insightIntentName: %{public}s, executeMode: %{public}d, intentId: %{public}" PRIu64"",
         executeParam->bundleName_.c_str(), executeParam->moduleName_.c_str(), executeParam->abilityName_.c_str(),
         executeParam->insightIntentName_.c_str(), executeParam->executeMode_, executeParam->insightIntentId_);
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr) {
-        HILOG_ERROR("Create async callback failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Create async callback failed.");
         HandleForegroundNewState(want, bflag);
         return;
     }
@@ -670,13 +702,13 @@ void UIAbilityImpl::ExecuteInsightIntentRepeateForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            HILOG_DEBUG("Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::UIABILITY, "Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                HILOG_ERROR("Ability impl is nullptr.");
+                TAG_LOGE(AAFwkTag::UIABILITY, "Ability impl is nullptr.");
                 return;
             }
             abilityImpl->ExecuteInsightIntentDone(intentId, result);
@@ -692,7 +724,7 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
 
     {
         std::lock_guard<std::mutex> lock(notifyForegroundLock_);
@@ -701,10 +733,10 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
 
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            HILOG_DEBUG("Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::UIABILITY, "Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                HILOG_ERROR("Ability impl is nullptr.");
+                TAG_LOGE(AAFwkTag::UIABILITY, "Ability impl is nullptr.");
                 return;
             }
             abilityImpl->ExecuteInsightIntentDone(intentId, result);
@@ -718,9 +750,9 @@ void UIAbilityImpl::ExecuteInsightIntentMoveToForeground(const Want &want,
 
 void UIAbilityImpl::PostForegroundInsightIntent()
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called");
     if (ability_ == nullptr || abilityLifecycleCallbacks_ == nullptr) {
-        HILOG_ERROR("Ability params invalid.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Ability params invalid.");
         return;
     }
 
@@ -750,16 +782,17 @@ void UIAbilityImpl::PostForegroundInsightIntent()
 
 void UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want, bool onlyExecuteIntent)
 {
-    HILOG_INFO("Execute insight intent in background mode.");
+    TAG_LOGI(AAFwkTag::UIABILITY, "Execute insight intent in background mode.");
     auto executeParam = std::make_shared<InsightIntentExecuteParam>();
     auto ret = InsightIntentExecuteParam::GenerateFromWant(want, *executeParam);
     if (!ret && !onlyExecuteIntent) {
-        HILOG_ERROR("Generate execute param failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Generate execute param failed.");
         Background();
         return;
     }
 
-    HILOG_DEBUG("Insight intent bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
+    TAG_LOGD(AAFwkTag::UIABILITY,
+        "Insight intent bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s"
         "insightIntentName: %{public}s, executeMode: %{public}d, intentId: %{public}" PRIu64"",
         executeParam->bundleName_.c_str(), executeParam->moduleName_.c_str(), executeParam->abilityName_.c_str(),
         executeParam->insightIntentName_.c_str(), executeParam->executeMode_, executeParam->insightIntentId_);
@@ -767,11 +800,11 @@ void UIAbilityImpl::HandleExecuteInsightIntentBackground(const AAFwk::Want &want
     auto intentCb = std::make_unique<InsightIntentExecutorAsyncCallback>();
     intentCb.reset(InsightIntentExecutorAsyncCallback::Create());
     if (intentCb == nullptr && !onlyExecuteIntent) {
-        HILOG_ERROR("Create async callback failed.");
+        TAG_LOGE(AAFwkTag::UIABILITY, "Create async callback failed.");
         Background();
         return;
     }
-    HILOG_DEBUG("lifecycleState_: %{public}d", lifecycleState_);
+    TAG_LOGD(AAFwkTag::UIABILITY, "lifecycleState_: %{public}d", lifecycleState_);
     if (lifecycleState_ == AAFwk::ABILITY_STATE_INITIAL
         || lifecycleState_ == AAFwk::ABILITY_STATE_STARTED_NEW) {
         ExecuteInsightIntentBackgroundByColdBoot(want, executeParam, std::move(intentCb));
@@ -784,13 +817,13 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundByColdBoot(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            HILOG_DEBUG("Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::UIABILITY, "Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                HILOG_ERROR("Ability impl is nullptr.");
+                TAG_LOGE(AAFwkTag::UIABILITY, "Ability impl is nullptr.");
                 return;
             }
             abilityImpl->Background();
@@ -806,14 +839,14 @@ void UIAbilityImpl::ExecuteInsightIntentBackgroundAlreadyStart(const Want &want,
     const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
     std::unique_ptr<InsightIntentExecutorAsyncCallback> callback)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::UIABILITY, "called.");
 
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
-            HILOG_DEBUG("Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
+            TAG_LOGD(AAFwkTag::UIABILITY, "Execute insight intent finshed, intentId %{public}" PRIu64"", intentId);
             auto abilityImpl = weak.lock();
             if (abilityImpl == nullptr) {
-                HILOG_ERROR("Ability impl is nullptr.");
+                TAG_LOGE(AAFwkTag::UIABILITY, "Ability impl is nullptr.");
                 return;
             }
             abilityImpl->ExecuteInsightIntentDone(intentId, result);

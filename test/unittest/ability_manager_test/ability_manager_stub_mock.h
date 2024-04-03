@@ -67,6 +67,15 @@ public:
         return 0;
     }
 
+    virtual int StartAbilityWithSpecifyTokenId(const Want& want,
+        const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE)
+    {
+        return 0;
+    }
+
     virtual int StartAbility(
         const Want& want,
         const StartOptions& startOptions,
@@ -214,12 +223,12 @@ public:
         return 0;
     }
 
-    int StartUser(int userId) override
+    int StartUser(int userId, sptr<IUserCallback> callback) override
     {
         return 0;
     }
 
-    int StopUser(int userId, const sptr<IStopUserCallback>& callback) override
+    int StopUser(int userId, const sptr<IUserCallback>& callback) override
     {
         return 0;
     }
@@ -279,11 +288,6 @@ public:
     bool IsRunningInStabilityTest() override
     {
         return true;
-    }
-
-    int SendANRProcessID(int pid) override
-    {
-        return 0;
     }
 
     int SetMissionIcon(const sptr<IRemoteObject>& token,

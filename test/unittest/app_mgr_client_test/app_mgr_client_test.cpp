@@ -21,10 +21,12 @@
 #include "app_mgr_client.h"
 #include "ability_record.h"
 #include "app_mgr_constants.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "mock_ability_debug_response_stub.h"
 #include "mock_app_debug_listener_stub.h"
 #include "mock_native_token.h"
+#include "mock_sa_call.h"
 #undef protected
 #undef private
 
@@ -132,7 +134,8 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UpdateExtensionState_001, TestSize.Level
  */
 HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Level0)
 {
-    HILOG_INFO("GetAllRunningProcesses_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 start");
+    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 
@@ -140,7 +143,8 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Lev
     appMgrClient->GetAllRunningProcesses(info);
     EXPECT_NE(info.size(), APP_NUMBER_ZERO);
     for (int i = 0; i < info.size(); i++) {
-        HILOG_DEBUG("running %{public}d: name: %{public}s, processType: %{public}d, extensionType: %{public}d",
+        TAG_LOGD(AAFwkTag::TEST,
+            "running %{public}d: name: %{public}s, processType: %{public}d, extensionType: %{public}d",
             i, info[i].processName_.c_str(), info[i].processType_, info[i].extensionType_);
         if (info[i].processName_ == "com.ohos.systemui") {
             EXPECT_EQ(info[i].processType_, ProcessType::EXTENSION);
@@ -150,7 +154,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRunningProcesses_001, TestSize.Lev
             EXPECT_EQ(info[i].extensionType_, ExtensionAbilityType::SERVICE);
         }
     }
-    HILOG_INFO("GetAllRunningProcesses_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRunningProcesses_001 end");
 }
 
 /**
@@ -233,14 +237,14 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_GetApplicationInfoByProcessID_001, TestS
  */
 HWTEST_F(AppMgrClientTest, AppMgrClient_GetAllRenderProcesses_001, TestSize.Level0)
 {
-    HILOG_INFO("GetAllRenderProcesses_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRenderProcesses_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 
     std::vector<RenderProcessInfo> info;
     auto result = appMgrClient->GetAllRenderProcesses(info);
     EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-    HILOG_INFO("GetAllRenderProcesses_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "GetAllRenderProcesses_001 end");
 }
 
 /**
@@ -771,6 +775,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_RegisterAbilityDebugResponse_001, TestSi
  */
 HWTEST_F(AppMgrClientTest, AppMgrClient_AttachAppDebug_001, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 
@@ -949,7 +954,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_UnregisterAppRunningStatusListener_001, 
  */
 HWTEST_F(AppMgrClientTest, AppMgrClient_IsFinalAppProcess_001, TestSize.Level0)
 {
-    HILOG_INFO("AppMgrClient_IsFinalAppProcess_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrClient_IsFinalAppProcess_001 start");
     auto appMgrClient = std::make_unique<AppMgrClient>();
     EXPECT_NE(appMgrClient, nullptr);
 
@@ -958,7 +963,7 @@ HWTEST_F(AppMgrClientTest, AppMgrClient_IsFinalAppProcess_001, TestSize.Level0)
 
     auto ret = appMgrClient->IsFinalAppProcess();
     EXPECT_EQ(ret, false);
-    HILOG_INFO("AppMgrClient_IsFinalAppProcess_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "AppMgrClient_IsFinalAppProcess_001 end");
 }
 
 /**

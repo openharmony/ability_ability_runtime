@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -282,6 +282,7 @@ private:
     void RestorePageStack(const Want &want);
     void GetPageStackFromWant(const Want &want, std::string &pageStack);
     void AbilityContinuationOrRecover(const Want &want);
+    void UpdateJsWindowStage(napi_value windowStage);
     inline bool GetInsightIntentExecutorInfo(const Want &want,
         const std::shared_ptr<InsightIntentExecuteParam> &executeParam,
         InsightIntentExecutorInfo& executeInfo);
@@ -292,9 +293,10 @@ private:
 
 private:
     napi_value CallObjectMethod(const char *name, napi_value const *argv = nullptr, size_t argc = 0,
-        bool withResult = false);
+        bool withResult = false, bool showMethodNotFoundLog = true);
     bool CheckPromise(napi_value result);
     bool CallPromise(napi_value result, AppExecFwk::AbilityTransactionCallbackInfo<> *callbackInfo);
+    bool CallPromise(napi_value result, int32_t &onContinueRes);
     std::unique_ptr<NativeReference> CreateAppWindowStage();
     std::shared_ptr<AppExecFwk::ADelegatorAbilityProperty> CreateADelegatorAbilityProperty();
     sptr<IRemoteObject> SetNewRuleFlagToCallee(napi_env env, napi_value remoteJsObj);
@@ -306,6 +308,8 @@ private:
     void AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
     void AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState state, const std::string &methodName) const;
     void CreateJSContext(napi_env env, napi_value &contextObj, int32_t screenMode);
+    bool CheckSatisfyTargetAPIVersion(int32_t targetAPIVersion);
+    bool BackPressDefaultValue();
 
     JsRuntime &jsRuntime_;
     std::shared_ptr<NativeReference> shellContextRef_;
