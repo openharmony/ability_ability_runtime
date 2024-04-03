@@ -8417,13 +8417,6 @@ int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityReques
     if (IsCallFromBackground(abilityRequest, verificationInfo.isBackgroundCall) != ERR_OK) {
         return ERR_INVALID_VALUE;
     }
-    if (isParamStartAbilityEnable_) {
-        bool stopContinuousTaskFlag = ShouldPreventStartAbility(abilityRequest);
-        if (stopContinuousTaskFlag) {
-            HILOG_ERROR("Do not have permission to start ServiceExtension");
-            return CHECK_PERMISSION_FAILED;
-        }
-    }
 
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceAbilityPermission(verificationInfo);
     if (result != ERR_OK) {
