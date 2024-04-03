@@ -236,11 +236,11 @@ void JsAbilityStage::OnCreate(const AAFwk::Want &want) const
 
 void JsAbilityStage::OnDestroy() const
 {
-    HILOG_DEBUG("Called");
+    TAG_LOGD(AAFwkTag::APPKIT, "Called");
     AbilityStage::OnDestroy();
 
     if (!jsAbilityStageObj_) {
-        HILOG_WARN("Not found AbilityStage.js");
+        TAG_LOGW(AAFwkTag::APPKIT, "Not found AbilityStage.js");
         return;
     }
 
@@ -249,14 +249,14 @@ void JsAbilityStage::OnDestroy() const
 
     napi_value obj = jsAbilityStageObj_->GetNapiValue();
     if (!CheckTypeForNapiValue(env, obj, napi_object)) {
-        HILOG_ERROR("Failed to get AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get AbilityStage object");
         return;
     }
 
     napi_value methodOnDestroy = nullptr;
     napi_get_named_property(env, obj, "onDestroy", &methodOnDestroy);
     if (methodOnDestroy == nullptr) {
-        HILOG_ERROR("Failed to get 'onDestroy' from AbilityStage object");
+        TAG_LOGE(AAFwkTag::APPKIT, "Failed to get 'onDestroy' from AbilityStage object");
         return;
     }
     napi_call_function(env, obj, methodOnDestroy, 0, nullptr, nullptr);
