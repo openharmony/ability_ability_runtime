@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "ability_info.h"
 #include "app_debug_listener_interface.h"
 #include "app_malloc_info.h"
+#include "app_mem_info.h"
 #include "app_running_record.h"
 #include "app_state_data.h"
 #include "application_info.h"
@@ -32,6 +33,7 @@
 #include "record_query_result.h"
 #include "refbase.h"
 #include "running_process_info.h"
+#include "app_jsheap_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -153,6 +155,14 @@ public:
     */
     int32_t NotifyMemoryLevel(int32_t level);
 
+    /**
+     * Notify applications the current memory level.
+     *
+     * @param  procLevelMap , <pid_t, MemoryLevel>.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyProcMemoryLevel(const std::map<pid_t, MemoryLevel> &procLevelMap);
+
     /*
     * Get the application's memory allocation info.
     *
@@ -162,6 +172,15 @@ public:
     * @return Returns ERR_OK on success, others on failure.
     */
     int32_t DumpHeapMemory(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo);
+
+    /**
+     * DumpJsHeapMemory, call DumpJsHeapMemory() through proxy project.
+     * triggerGC and dump the application's jsheap memory info.
+     *
+     * @param info, pid, tid, needGc, needSnapshot
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info);
 
     /**
      * Set AbilityForegroundingFlag of an app-record to true.
@@ -243,7 +262,10 @@ public:
      * @return Returns the number of queries.
      */
     int32_t GetAllAppRunningRecordCountByBundleName(const std::string &bundleName);
- 
+
+    int32_t SignRestartAppFlag(const std::string &bundleName);
+
+    int32_t GetAppRunningUniqueIdByPid(pid_t pid, std::string &appRunningUniqueId);
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
     void AssignRunningProcessInfoByAppRecord(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,8 @@ class AbilityManagerClient {
 public:
     virtual ~AbilityManagerClient();
     static std::shared_ptr<AbilityManagerClient> GetInstance();
+
+    void RemoveDeathRecipient();
 
     /**
      * AttachAbilityThread, ability call this interface after loaded.
@@ -215,6 +217,38 @@ public:
             int32_t userId = DEFAULT_INVAL_VALUE);
 
     /**
+     * Starts a new ability for result using the original caller information.
+     *
+     * @param want the want of the ability to start.
+     * @param callerToken current caller ability token.
+     * @param requestCode the resultCode of the ability to start.
+     * @param userId Designation User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityForResultAsCaller(
+        const Want &want,
+        sptr<IRemoteObject> callerToken,
+        int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * Starts a new ability for result using the original caller information.
+     *
+     * @param want the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param callerToken current caller ability token.
+     * @param requestCode the resultCode of the ability to start.
+     * @param userId Designation User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode StartAbilityForResultAsCaller(
+        const Want &want,
+        const StartOptions &startOptions,
+        sptr<IRemoteObject> callerToken,
+        int requestCode = DEFAULT_INVAL_VALUE,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
      * Start ui session ability with extension session info, send session info to ability manager service.
      *
      * @param want Ability want.
@@ -262,7 +296,7 @@ public:
         sptr<IRemoteObject> callerToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         AppExecFwk::ExtensionAbilityType extensionType = AppExecFwk::ExtensionAbilityType::UNSPECIFIED);
-    
+
      /**
      * Create UIExtension with want, send want to ability manager service.
      *
@@ -271,6 +305,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode RequestModalUIExtension(const Want &want);
+
+    ErrCode ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow);
+
+    ErrCode ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow);
 
     /**
      * Start ui extension ability with extension session info, send extension session info to ability manager service.
@@ -345,13 +383,21 @@ public:
      */
     ErrCode SendResultToAbility(int requestCode, int resultCode, Want& resultWant);
 
-/**
+    /**
      * MoveAbilityToBackground.
      *
      * @param token Ability token.
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode MoveAbilityToBackground(sptr<IRemoteObject> token);
+
+    /**
+     * Move the UIAbility to background, called by app self.
+     *
+     * @param token the token of the ability to move.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode MoveUIAbilityToBackground(const sptr<IRemoteObject> token);
 
     /**
      * CloseAbility with want, return want from ability manager service.
@@ -843,7 +889,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StartUser(int accountId);
+    ErrCode StartUser(int accountId, sptr<IUserCallback> callback);
 
     /**
      * @brief stop user.
@@ -852,7 +898,7 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode StopUser(int accountId, sptr<IStopUserCallback> callback);
+    ErrCode StopUser(int accountId, sptr<IUserCallback> callback);
 
     /**
      * @brief logout user.
@@ -877,6 +923,10 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode PrepareTerminateAbility(sptr<IRemoteObject> token, sptr<IPrepareTerminateCallback> callback);
+
+    ErrCode RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate);
+
+    ErrCode KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids);
 
     /**
      * @brief Register auto start up callback for system api.
@@ -912,42 +962,6 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     ErrCode QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList);
-
-    /**
-     * @brief Register auto start up callback.
-     * @param callback The point of JsAbilityAutoStartupCallBack.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode RegisterAutoStartupCallback(sptr<IRemoteObject> callback);
-
-    /**
-     * @brief Unregister auto start up callback.
-     * @param callback The point of JsAbilityAutoStartupCallBack.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode UnregisterAutoStartupCallback(sptr<IRemoteObject> callback);
-
-    /**
-     * @brief Set current application auto start up state.
-     * @param info The auto startup info,include bundle name, module name, ability name.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SetAutoStartup(const AutoStartupInfo &info);
-
-    /**
-     * @brief Cancel current application auto start up state.
-     * @param info The auto startup info, include bundle name, module name, ability name.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode CancelAutoStartup(const AutoStartupInfo &info);
-
-    /**
-     * @brief Check current application auto start up state.
-     * @param info The auto startup info, include bundle name, module name, ability name.
-     * @param isAutoStartup Output parameters, return auto start up state.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode IsAutoStartup(const AutoStartupInfo &info, bool &isAutoStartup);
 
     /**
      * PrepareTerminateAbilityBySCB, prepare to terminate ability by scb.
@@ -1086,14 +1100,6 @@ public:
     virtual int SetAbilityController(sptr<AppExecFwk::IAbilityController> abilityController,
         bool imAStabilityTest);
 
-    /**
-     * Send not response process ID to ability manager service.
-     *
-     * @param pid The not response process ID.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    ErrCode SendANRProcessID(int pid);
-
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * Block ability manager service.
@@ -1215,14 +1221,22 @@ public:
      * @param exitReason The reason of app exit.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode ForceExitApp(const int32_t pid, Reason exitReason);
+    ErrCode ForceExitApp(const int32_t pid, const ExitReason &exitReason);
 
     /**
      * Record app exit reason.
      * @param exitReason The reason of app exit.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RecordAppExitReason(Reason exitReason);
+    ErrCode RecordAppExitReason(const ExitReason &exitReason);
+
+    /**
+     * Record the process exit reason before the process being killed.
+     * @param pid The process id.
+     * @param exitReason The reason of process exit.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason);
 
     /**
      * Set rootSceneSession by SCB.
@@ -1363,7 +1377,63 @@ public:
      * @brief Update session info.
      * @param sessionInfos The vector of session info.
      */
-    void UpdateSessionInfoBySCB(const std::vector<SessionInfo> &sessionInfos, int32_t userId);
+    int32_t UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, int32_t userId,
+        std::vector<int32_t> &sessionIds);
+
+    /**
+     * @brief Get host info of root caller.
+     *
+     * @param token The ability token.
+     * @param hostInfo The host info of root caller.
+     * @param userId The user id.
+     * @return ErrCode Returns ERR_OK on success, others on failure.
+     */
+    ErrCode GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * @brief Restart app self.
+     * @param want The ability type must be UIAbility.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RestartApp(const AAFwk::Want &want);
+
+    /**
+     * Pop-up launch of full-screen atomic service.
+     *
+     * @param want The want with parameters.
+     * @param callerToken caller ability token.
+     * @param requestCode Ability request code.
+     * @param userId The User ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t OpenAtomicService(Want& want, const StartOptions &options, sptr<IRemoteObject> callerToken,
+        int32_t requestCode = DEFAULT_INVAL_VALUE, int32_t userId = DEFAULT_INVAL_VALUE);
+
+    /**
+     * @brief Querying whether to allow embedded startup of atomic service.
+     *
+     * @param token The caller UIAbility token.
+     * @param appId The ID of the application to which this bundle belongs.
+     * @return Returns true to allow ability to start, or false to reject.
+     */
+    bool IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToken, const std::string &appId);
+
+    /**
+     * @brief Request to display assert fault dialog.
+     * @param callback Listen for user operation callbacks.
+     * @param wantParams Assert dialog box display information.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t RequestAssertFaultDialog(const sptr<IRemoteObject> &callback, const AAFwk::WantParams &wantParams);
+
+    /**
+     * @brief Notify the operation status of the user.
+     * @param assertFaultSessionId Indicates the request ID of AssertFault.
+     * @param userStatus Operation status of the user.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t NotifyDebugAssertResult(uint64_t assertFaultSessionId, AAFwk::UserStatus userStatus);
 
 private:
     AbilityManagerClient();

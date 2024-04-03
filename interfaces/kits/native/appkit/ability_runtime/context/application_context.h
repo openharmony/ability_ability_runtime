@@ -25,6 +25,9 @@
 #include "context_impl.h"
 #include "environment_callback.h"
 namespace OHOS {
+namespace AAFwk {
+class Want;
+}
 namespace AbilityRuntime {
 using AppConfigUpdateCallback = std::function<void(const AppExecFwk::Configuration &config)>;
 class ApplicationContext : public Context {
@@ -62,6 +65,8 @@ public:
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
     std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
         const std::string &bundleName, const std::string &moduleName) override;
+    int32_t CreateSystemHspModuleResourceManager(const std::string &bundleName,
+        const std::string &moduleName, std::shared_ptr<Global::Resource::ResourceManager> &resourceManager) override;
     std::shared_ptr<AppExecFwk::ApplicationInfo> GetApplicationInfo() const override;
     void SetApplicationInfo(const std::shared_ptr<AppExecFwk::ApplicationInfo> &info);
     std::shared_ptr<Global::Resource::ResourceManager> GetResourceManager() const override;
@@ -92,6 +97,7 @@ public:
     Global::Resource::DeviceType GetDeviceType() const override;
     void KillProcessBySelf();
     int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
+    int32_t RestartApp(const AAFwk::Want& want);
 
     void AttachContextImpl(const std::shared_ptr<ContextImpl> &contextImpl);
 
@@ -104,14 +110,19 @@ public:
     void SetApplicationInfoUpdateFlag(bool flag);
     void RegisterAppConfigUpdateObserver(AppConfigUpdateCallback appConfigChangeCallback);
 
+    std::string GetAppRunningUniqueIdByPid() const;
+    void SetAppRunningUniqueIdByPid(const std::string &appRunningUniqueId);
 private:
     std::shared_ptr<ContextImpl> contextImpl_;
     static std::vector<std::shared_ptr<AbilityLifecycleCallback>> callbacks_;
     static std::vector<std::shared_ptr<EnvironmentCallback>> envCallbacks_;
-    static std::weak_ptr<ApplicationStateChangeCallback> applicationStateCallback_;
-    std::mutex callbackLock_;
+    static std::vector<std::weak_ptr<ApplicationStateChangeCallback>> applicationStateCallback_;
+    std::recursive_mutex callbackLock_;
+    std::recursive_mutex envCallbacksLock_;
+    std::recursive_mutex applicationStateCallbackLock_;
     bool applicationInfoUpdateFlag_ = false;
     AppConfigUpdateCallback appConfigChangeCallback_ = nullptr;
+    std::string appRunningUniqueId_;
 };
 }  // namespace AbilityRuntime
 }  // namespace OHOS

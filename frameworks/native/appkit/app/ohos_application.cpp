@@ -29,12 +29,14 @@
 #include "application_cleaner.h"
 #include "application_impl.h"
 #include "bundle_mgr_helper.h"
+#include "configuration_utils.h"
 #include "context_impl.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iservice_registry.h"
 #include "runtime.h"
 #include "system_ability_definition.h"
+#include "syspara/parameter.h"
 #include "ui_ability.h"
 #ifdef SUPPORT_GRAPHICS
 #include "window.h"
@@ -42,7 +44,11 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+namespace {
+    constexpr const char* PERSIST_DARKMODE_KEY = "persist.ace.darkmode";
+}
 REGISTER_APPLICATION(OHOSApplication, OHOSApplication)
+constexpr int32_t APP_ENVIRONMENT_OVERWRITE = 1;
 
 OHOSApplication::OHOSApplication()
 {
@@ -418,7 +424,7 @@ void OHOSApplication::UnregisterElementsCallbacks(const std::shared_ptr<Elements
  *
  * @param config Indicates the new Configuration object.
  */
-void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
+void OHOSApplication::OnConfigurationUpdated(Configuration config)
 {
     HILOG_DEBUG("called");
     if (!abilityRecordMgr_ || !configuration_) {
@@ -440,7 +446,16 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
     if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0) {
         HILOG_DEBUG("colorMode is auto");
         configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_AUTO);
-        return;
+        constexpr int buffSize = 64;
+        char valueGet[buffSize] = { 0 };
+        auto res = GetParameter(PERSIST_DARKMODE_KEY, colorMode.c_str(), valueGet, buffSize);
+        if (res <= 0) {
+            HILOG_ERROR("get parameter failed.");
+            return;
+        }
+        colorMode = valueGet;
+        HILOG_INFO("colorMode is: [%{public}s]", colorMode.c_str());
+        config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, colorMode);
     }
     if (!colorMode.empty() && colorModeIsSetByApp.empty()) {
         if (!globalColorModeIsSetByApp.empty() && globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) != 0) {
@@ -458,6 +473,9 @@ void OHOSApplication::OnConfigurationUpdated(const Configuration &config)
     if (globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 && colorModeIsSetByApp.empty()) {
         configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_AUTO);
     }
+
+    // Update resConfig of resource manager, which belongs to application context.
+    UpdateAppContextResMgr(config);
 
     // Notify all abilities
     HILOG_INFO(
@@ -565,8 +583,27 @@ void OHOSApplication::OnAbilitySaveState(const PacMap &outState)
     DispatchAbilitySavedState(outState);
 }
 
+void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironments)
+{
+    if (!appEnvironments.size()) {
+        HILOG_INFO("appEnvironments empty.");
+        return;
+    }
+
+    for (const auto &appEnvironment : appEnvironments) {
+        if (setenv(appEnvironment.name.c_str(), appEnvironment.value.c_str(), APP_ENVIRONMENT_OVERWRITE)) {
+            HILOG_ERROR("appEnvironment: %{public}s set failed.", appEnvironment.name.c_str());
+            return;
+        }
+        HILOG_INFO("appEnvironment set successfully: %{public}s = %{public}s.", appEnvironment.name.c_str(),
+                   appEnvironment.value.c_str());
+    }
+    return;
+}
+
 std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
-    const std::shared_ptr<AbilityLocalRecord> &abilityRecord)
+    const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
+    const std::function<void(const std::shared_ptr<AbilityRuntime::Context> &)> &callback, bool &isAsyncCallback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (abilityRecord == nullptr) {
@@ -591,6 +628,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             HILOG_ERROR("hapModuleInfo is nullptr");
             return nullptr;
         }
+        SetAppEnv(hapModuleInfo->appEnvironments);
 
         if (abilityInfo->applicationInfo.multiProjects) {
             auto moduleContext = stageContext->CreateModuleContext(hapModuleInfo->moduleName);
@@ -600,6 +638,24 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
 
         abilityStage = AbilityRuntime::AbilityStage::Create(runtime_, *hapModuleInfo);
         abilityStage->Init(stageContext);
+
+        auto application = std::static_pointer_cast<OHOSApplication>(shared_from_this());
+        std::weak_ptr<OHOSApplication> weak = application;
+        auto autoStartupCallback = [weak, abilityStage, abilityRecord, moduleName, callback]() {
+            auto ohosApplication = weak.lock();
+            if (ohosApplication == nullptr) {
+                HILOG_ERROR("ohosApplication is nullptr");
+                return;
+            }
+            ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
+            callback(abilityStage->GetContext());
+        };
+        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback);
+        if (isAsyncCallback) {
+            HILOG_INFO("waiting for startup");
+            return nullptr;
+        }
+
         Want want;
         if (abilityRecord->GetWant()) {
             HILOG_DEBUG("want is ok, transport to abilityStage");
@@ -617,6 +673,28 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     }
     abilityStage->AddAbility(token, abilityRecord);
     return abilityStage->GetContext();
+}
+
+void OHOSApplication::AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
+    const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName)
+{
+    Want want;
+    if (abilityRecord->GetWant()) {
+        HILOG_DEBUG("want is ok, transport to abilityStage");
+        want = *(abilityRecord->GetWant());
+    }
+    if (abilityStage == nullptr) {
+        HILOG_ERROR("abilityStage is nullptr");
+        return;
+    }
+    abilityStage->OnCreate(want);
+    abilityStages_[moduleName] = abilityStage;
+    const sptr<IRemoteObject> &token = abilityRecord->GetToken();
+    if (token == nullptr) {
+        HILOG_ERROR("token is null");
+        return;
+    }
+    abilityStage->AddAbility(token, abilityRecord);
 }
 
 /**
@@ -830,6 +908,18 @@ void OHOSApplication::CleanUselessTempData()
         cleaner->SetRuntimeContext(abilityRuntimeContext_);
         cleaner->ClearTempData();
     }
+}
+
+void OHOSApplication::UpdateAppContextResMgr(const Configuration &config)
+{
+    auto context = GetAppContext();
+    if (context == nullptr) {
+        HILOG_ERROR("Application context is nullptr.");
+        return;
+    }
+
+    auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
+    configUtils->UpdateGlobalConfig(config, context->GetResourceManager());
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

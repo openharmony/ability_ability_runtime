@@ -26,6 +26,9 @@ namespace AppExecFwk {
 struct RunningProcessInfo;
 class BundleMgrHelper;
 }
+namespace AAFwk {
+class Want;
+}
 namespace AbilityRuntime {
 class ContextImpl : public Context {
 public:
@@ -225,6 +228,9 @@ public:
     std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
         const std::string &bundleName, const std::string &moduleName) override;
 
+    int32_t CreateSystemHspModuleResourceManager(const std::string &bundleName, const std::string &moduleName,
+        std::shared_ptr<Global::Resource::ResourceManager> &resourceManager) override;
+
     /**
     * @brief Obtains an IBundleMgr instance.
     * You can use this instance to obtain information about the application bundle.
@@ -320,6 +326,13 @@ public:
     int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
 
     /**
+     * @brief Restart app
+     *
+     * @return error code
+     */
+    int32_t RestartApp(const AAFwk::Want& want);
+
+    /**
      * @brief Get the token witch the app launched.
      *
      * @return token The token which the is launched by app.
@@ -405,6 +418,7 @@ private:
     void UpdateResConfig(std::shared_ptr<Global::Resource::ResourceManager> &resourceManager);
     int32_t GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, bool &currentBundle);
     void GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, const int &accountId);
+    ErrCode GetOverlayMgrProxy();
 
     static Global::Resource::DeviceType deviceType_;
     std::shared_ptr<AppExecFwk::ApplicationInfo> applicationInfo_ = nullptr;
@@ -419,6 +433,8 @@ private:
 
     std::mutex bundleManagerMutex_;
     std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgr_;
+    std::mutex overlayMgrProxyMutex_;
+    sptr<AppExecFwk::IOverlayManager> overlayMgrProxy_ = nullptr;
 
     // True: need to get a new fms remote object,
     // False: no need to get a new fms remote object.

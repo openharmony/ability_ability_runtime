@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "ability_record.h"
 #include "app_debug_listener_stub_mock.h"
 #include "ability_scheduler.h"
+#include "hilog_tag_wrapper.h"
 #include "mission_snapshot.h"
 #include "want_sender_info.h"
 
@@ -73,7 +74,7 @@ void AbilityManagerProxyTest::SetUp()
  */
 HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_DumpSysState_0100, TestSize.Level1)
 {
-    HILOG_INFO("AbilityManagerProxy_DumpSysState_0100 start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_DumpSysState_0100 start");
 
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
@@ -87,7 +88,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_DumpSysState_0100, TestSiz
     proxy_->DumpSysState(args, info, isClient, isUserID, USER_ID);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::DUMPSYS_STATE), mock_->code_);
 
-    HILOG_INFO("AbilityManagerProxy_DumpSysState_0100 end");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerProxy_DumpSysState_0100 end");
 }
 
 /*
@@ -596,6 +597,24 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_032, TestSize.Level1)
     EXPECT_NE(res, NO_ERROR);
 }
 
+/**
+ * @tc.name: AbilityManagerProxy_033
+ * @tc.desc: test StartContinuation send async request succeeded
+ * @tc.type: FUNC
+ * @tc.require: AR000GI8IL
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_033, TestSize.Level0)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    Want want;
+    sptr<IRemoteObject> abilityToken = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+    int res = proxy_->StartContinuation(want, abilityToken, 0);
+    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_CONTINUATION), mock_->code_);
+}
+
 /*
  * Feature: AbilityManagerService
  * Function: AcquireDataAbility
@@ -1054,6 +1073,27 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_UninstallApp_001, TestSize
 
 /*
  * Feature: AbilityManagerService
+ * Function: UpgradeApp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UpgradeApp
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of UpgradeApp
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_UpgradeApp_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    std::string bundleName = "";
+    int32_t uid = 1;
+    std::string exitMsg = "App upgrade.";
+    auto res = proxy_->UpgradeApp(bundleName, uid, exitMsg);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::UPGRADE_APP), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: GetWantSender
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService GetWantSender
@@ -1504,7 +1544,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartUser_001, TestSize.Le
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
     int userId = 1;
-    auto res = proxy_->StartUser(userId);
+    auto res = proxy_->StartUser(userId, nullptr);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_USER), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
@@ -1523,7 +1563,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StopUser_001, TestSize.Lev
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
     int userId = 1;
-    sptr<IStopUserCallback> callback = nullptr;
+    sptr<IUserCallback> callback = nullptr;
     auto res = proxy_->StopUser(userId, callback);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::STOP_USER), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
@@ -1833,22 +1873,19 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_DoAbilityBackground_001, T
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
-/*
- * Feature: AbilityManagerService
- * Function: SendANRProcessID
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService SendANRProcessID
- * EnvConditions: NA
- * CaseDescription: Verify the normal process of SendANRProcessID
+/**
+ * @tc.name: AbilityManagerProxyTest_MoveUIAbilityToBackground_0100
+ * @tc.desc: Test the state of MoveUIAbilityToBackground
+ * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_SendANRProcessID_001, TestSize.Level1)
+HWTEST_F(AbilityManagerProxyTest, MoveUIAbilityToBackground_0100, TestSize.Level1)
 {
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    int pid = 0;
-    auto res = proxy_->SendANRProcessID(pid);
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_APP_NOT_RESPONSE_PROCESS_ID), mock_->code_);
+    auto token = sptr<MockAbilityToken>::MakeSptr();
+    auto res = proxy_->MoveUIAbilityToBackground(token);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::MOVE_UI_ABILITY_TO_BACKGROUND), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -2016,6 +2053,27 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbility_001, TestSize
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartAbilityWithSpecifyTokenId
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityWithSpecifyTokenId
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of startability with specify token id
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityWithSpecifyTokenId_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    const Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    uint32_t specifyTokenId = 0;
+    auto res = proxy_->StartAbilityWithSpecifyTokenId(want, callerToken, specifyTokenId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_WITH_SPECIFY_TOKENID), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: StartAbilityAsCaller
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService StartAbilityAsCaller
@@ -2052,6 +2110,52 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityAsCaller_002, 
     StartOptions startOptions;
     auto res = proxy_->StartAbilityAsCaller(want, startOptions, callerToken, nullptr);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_AS_CALLER_FOR_OPTIONS), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityForResultAsCaller
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityForResultAsCaller
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartAbilityForResultAsCaller
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityForResultAsCaller_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    const Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int requestCode = 1;
+    int32_t userId = 2;
+    auto res = proxy_->StartAbilityForResultAsCaller(want, callerToken, requestCode, userId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityForResultAsCaller
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityForResultAsCaller
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of StartAbilityForResultAsCaller
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_StartAbilityForResultAsCaller_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    const Want want;
+    sptr<IRemoteObject> callerToken = nullptr;
+    StartOptions startOptions;
+    int requestCode = 1;
+    int32_t userId = 2;
+    auto res = proxy_->StartAbilityForResultAsCaller(want, startOptions, callerToken, requestCode, userId);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::START_ABILITY_FOR_RESULT_AS_CALLER_FOR_OPTIONS),
+        mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -2226,7 +2330,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_ForceExitApp_001, TestSize
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
     int32_t pid = 0;
-    Reason exitReason = REASON_JS_ERROR;
+    ExitReason exitReason = { REASON_JS_ERROR, "Js Error." };
     auto res = proxy_->ForceExitApp(pid, exitReason);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::FORCE_EXIT_APP), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
@@ -2245,9 +2349,29 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RecordAppExitReason_001, T
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
         .Times(1)
         .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    Reason exitReason = REASON_JS_ERROR;
+    ExitReason exitReason = { REASON_JS_ERROR, "Js Error." };
     auto res = proxy_->RecordAppExitReason(exitReason);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RECORD_APP_EXIT_REASON), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: RecordProcessExitReason
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService RecordProcessExitReason
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of RecordProcessExitReason
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RecordProcessExitReason_001, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    int32_t pid = 1;
+    ExitReason exitReason = { REASON_JS_ERROR, "Js Error." };
+    auto res = proxy_->RecordProcessExitReason(pid, exitReason);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RECORD_PROCESS_EXIT_REASON), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -2581,92 +2705,41 @@ HWTEST_F(AbilityManagerProxyTest, QueryAllAutoStartupApplications_0100, TestSize
 }
 
 /**
- * @tc.name: AbilityManagerProxyTest_RegisterAutoStartupCallback_0100
- * @tc.desc: Test the state of RegisterAutoStartupCallback
+ * @tc.name: AbilityManagerProxy_GetUIExtensionRootHostInfo_0100
+ * @tc.desc: GetUIExtensionRootHostInfo
  * @tc.type: FUNC
+ * @tc.require: issueI92G6Z
  */
-HWTEST_F(AbilityManagerProxyTest, RegisterAutoStartupCallback_0100, TestSize.Level1)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_GetUIExtensionRootHostInfo_0100, TestSize.Level1)
 {
-    OHOS::sptr<IRemoteObject> callback = nullptr;
-    EXPECT_EQ(callback, nullptr);
-    auto res = proxy_->RegisterAutoStartupCallback(callback);
-    EXPECT_EQ(res, INNER_ERR);
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    auto token = sptr<MockAbilityToken>::MakeSptr();
+    UIExtensionHostInfo hostInfo;
+    proxy_->GetUIExtensionRootHostInfo(token, hostInfo, USER_ID);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO), mock_->code_);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
 }
 
 /**
- * @tc.name: AbilityManagerProxyTest_RegisterAutoStartupCallback_0200
- * @tc.desc: Test the state of RegisterAutoStartupCallback
+ * @tc.name: AbilityManagerProxy_RestartApp_0100
+ * @tc.desc: RestartApp
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerProxyTest, RegisterAutoStartupCallback_0200, TestSize.Level1)
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RestartApp_0100, TestSize.Level1)
 {
-    OHOS::sptr<IRemoteObject> callback = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    EXPECT_NE(callback, nullptr);
-    auto res = proxy_->RegisterAutoStartupCallback(callback);
-    EXPECT_EQ(res, NO_ERROR);
-}
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
 
-/**
- * @tc.name: AbilityManagerProxyTest_UnregisterAutoStartupCallback_0100
- * @tc.desc: Test the state of UnregisterAutoStartupCallback
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerProxyTest, UnregisterAutoStartupCallback_0100, TestSize.Level1)
-{
-    OHOS::sptr<IRemoteObject> callback = nullptr;
-    EXPECT_EQ(callback, nullptr);
-    auto res = proxy_->UnregisterAutoStartupCallback(callback);
-    EXPECT_EQ(res, INNER_ERR);
-}
-
-/**
- * @tc.name: AbilityManagerProxyTest_UnregisterAutoStartupCallback_0200
- * @tc.desc: Test the state of UnregisterAutoStartupCallback
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerProxyTest, UnregisterAutoStartupCallback_0200, TestSize.Level1)
-{
-    OHOS::sptr<IRemoteObject> callback = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
-    EXPECT_NE(callback, nullptr);
-    auto res = proxy_->UnregisterAutoStartupCallback(callback);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/**
- * @tc.name: AbilityManagerProxyTest_SetAutoStartup_0100
- * @tc.desc: Test the state of SetAutoStartup
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerProxyTest, SetAutoStartup_0100, TestSize.Level1)
-{
-    AutoStartupInfo info;
-    auto res = proxy_->SetAutoStartup(info);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/**
- * @tc.name: AbilityManagerProxyTest_CancelAutoStartup_0100
- * @tc.desc: Test the state of CancelAutoStartup
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerProxyTest, CancelAutoStartup_0100, TestSize.Level1)
-{
-    AutoStartupInfo info;
-    auto res = proxy_->CancelAutoStartup(info);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/**
- * @tc.name: AbilityManagerProxyTest_IsAutoStartup_0100
- * @tc.desc: Test the state of IsAutoStartup
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerProxyTest, IsAutoStartup_0100, TestSize.Level1)
-{
-    AutoStartupInfo info;
-    bool isAutoStartup;
-    auto res = proxy_->IsAutoStartup(info, isAutoStartup);
-    EXPECT_EQ(res, NO_ERROR);
+    AAFwk::Want want;
+    proxy_->RestartApp(want);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RESTART_APP), mock_->code_);
 }
 } // namespace AAFwk
 } // namespace OHOS

@@ -19,12 +19,12 @@
 #include "ability_manager_client.h"
 #include "ability_state.h"
 #include "app_recovery.h"
+#include "exit_reason.h"
 #include "ffrt.h"
 #include "freeze_util.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "hisysevent.h"
-#include "mix_stack_dumper.h"
 #include "parameter.h"
 #include "xcollie/watchdog.h"
 #include "time_util.h"
@@ -119,6 +119,19 @@ bool AppfreezeInner::IsExitApp(const std::string& name)
     return false;
 }
 
+void AppfreezeInner::SendProcessKillEvent(const std::string& killReason)
+{
+    auto applicationInfo = applicationInfo_.lock();
+    if (applicationInfo != nullptr) {
+        int32_t pid = static_cast<int32_t>(getpid());
+        int result = HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+            HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_PID, pid,
+            EVENT_PROCESS_NAME, applicationInfo->process, EVENT_MESSAGE, killReason);
+        HILOG_INFO("hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], msg=%{public}s",
+            result, killReason.c_str());
+    }
+}
+
 int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
 {
     HITRACE_METER_FMT(HITRACE_TAG_APP, "AppfreezeInner::AcquireStack name:%s", info.errorObject.name.c_str());
@@ -157,7 +170,9 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         if (isExit) {
             faultData.forceExit = true;
             faultData.waitSaveState = AppRecovery::GetInstance().IsEnabled();
-            AbilityManagerClient::GetInstance()->RecordAppExitReason(REASON_APP_FREEZE);
+            AAFwk::ExitReason exitReason = {REASON_APP_FREEZE, "Kill Reason:" + faultData.errorObject.name};
+            AbilityManagerClient::GetInstance()->RecordAppExitReason(exitReason);
+            SendProcessKillEvent("Kill Reason:" + faultData.errorObject.name);
         }
         NotifyANR(faultData);
         if (isExit) {

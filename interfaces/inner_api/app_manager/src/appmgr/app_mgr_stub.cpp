@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,13 +21,16 @@
 #include "app_scheduler_interface.h"
 #include "appexecfwk_errors.h"
 #include "bundle_info.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iapp_state_callback.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
+#include "memory_level_info.h"
 #include "want.h"
+#include "app_jsheap_mem_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -42,8 +45,6 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleApplicationBackgrounded;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_APPLICATION_TERMINATED)] =
         &AppMgrStub::HandleApplicationTerminated;
-    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_CHECK_PERMISSION)] =
-        &AppMgrStub::HandleCheckPermission;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_ABILITY_CLEANED)] =
         &AppMgrStub::HandleAbilityCleaned;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_MGR_INSTANCE)] = &AppMgrStub::HandleGetAmsMgr;
@@ -53,6 +54,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleGetAllRunningProcesses;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_NOTIFY_MEMORY_LEVEL)] =
         &AppMgrStub::HandleNotifyMemoryLevel;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_NOTIFY_PROC_MEMORY_LEVEL)] =
+        &AppMgrStub::HandleNotifyProcMemoryLevel;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_GET_RUNNING_PROCESSES_BY_USER_ID)] =
         &AppMgrStub::HandleGetProcessRunningInfosByUserId;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_ADD_ABILITY_STAGE_INFO_DONE)] =
@@ -95,6 +98,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleGetProcessRunningInformation;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_HEAP_MEMORY_PROCESS)] =
         &AppMgrStub::HandleDumpHeapMemory;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_JSHEAP_MEMORY_PROCESS)] =
+        &AppMgrStub::HandleDumpJsHeapMemory;
 #ifdef ABILITY_COMMAND_FOR_TEST
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::BLOCK_APP_SERVICE)] =
         &AppMgrStub::HandleBlockAppServiceDone;
@@ -161,6 +166,16 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleIsFinalAppProcess;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::APP_CLEAR_UP_APPLICATION_DATA_BY_SELF)] =
         &AppMgrStub::HandleClearUpApplicationDataBySelf;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::REGISTER_RENDER_STATUS_OBSERVER)] =
+        &AppMgrStub::HandleRegisterRenderStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UNREGISTER_RENDER_STATUS_OBSERVER)] =
+        &AppMgrStub::HandleUnregisterRenderStateObserver;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_RENDER_STATUS)] =
+        &AppMgrStub::HandleUpdateRenderState;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::SIGN_RESTART_APP_FLAG)] =
+        &AppMgrStub::HandleSignRestartAppFlag;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_UNIQUE_ID_BY_PID)] =
+        &AppMgrStub::HandleGetAppRunningUniqueIdByPid;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -170,11 +185,12 @@ AppMgrStub::~AppMgrStub()
 
 int AppMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    HILOG_DEBUG("AppMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code, option.GetFlags());
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::OnReceived, code = %{public}u, flags= %{public}d.", code,
+        option.GetFlags());
     std::u16string descriptor = AppMgrStub::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        HILOG_ERROR("local descriptor is not equal to remote");
+        TAG_LOGE(AAFwkTag::APPMGR, "local descriptor is not equal to remote");
         return ERR_INVALID_STATE;
     }
 
@@ -185,7 +201,7 @@ int AppMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
             return (this->*memberFunc)(data, reply);
         }
     }
-    HILOG_DEBUG("AppMgrStub::OnRemoteRequest end");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::OnRemoteRequest end");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -218,16 +234,6 @@ int32_t AppMgrStub::HandleApplicationTerminated(MessageParcel &data, MessageParc
     return NO_ERROR;
 }
 
-int32_t AppMgrStub::HandleCheckPermission(MessageParcel &data, MessageParcel &reply)
-{
-    HITRACE_METER(HITRACE_TAG_APP);
-    int32_t recordId = data.ReadInt32();
-    std::string permission = data.ReadString();
-    int32_t result = CheckPermission(recordId, permission);
-    reply.WriteInt32(result);
-    return NO_ERROR;
-}
-
 int32_t AppMgrStub::HandleAbilityCleaned(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
@@ -242,11 +248,11 @@ int32_t AppMgrStub::HandleGetAmsMgr(MessageParcel &data, MessageParcel &reply)
     int32_t result = NO_ERROR;
     sptr<IAmsMgr> amsMgr = GetAmsMgr();
     if (!amsMgr) {
-        HILOG_ERROR("abilitymgr instance is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "abilitymgr instance is nullptr");
         result = ERR_NO_INIT;
     } else {
         if (!reply.WriteRemoteObject(amsMgr->AsObject())) {
-            HILOG_ERROR("failed to reply abilitymgr instance to client, for write parcel error");
+            TAG_LOGE(AAFwkTag::APPMGR, "failed to reply abilitymgr instance to client, for write parcel error");
             result = ERR_APPEXECFWK_PARCEL_ERROR;
         }
     }
@@ -305,7 +311,7 @@ int32_t AppMgrStub::HandleGetProcessRunningInfosByUserId(MessageParcel &data, Me
     if (!reply.WriteInt32(result)) {
         return ERR_INVALID_VALUE;
     }
-    HILOG_DEBUG("AppMgrStub::HandleGetAllRunningProcesses end");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::HandleGetAllRunningProcesses end");
     return NO_ERROR;
 }
 
@@ -373,9 +379,23 @@ int32_t AppMgrStub::HandleNotifyMemoryLevel(MessageParcel &data, MessageParcel &
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleNotifyProcMemoryLevel(MessageParcel &data, MessageParcel &reply)
+{
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::unique_ptr<MemoryLevelInfo> memoryLevelInfo(data.ReadParcelable<MemoryLevelInfo>());
+    if (memoryLevelInfo.get() == nullptr) {
+        return ERR_INVALID_VALUE;
+    }
+    auto result = NotifyProcMemoryLevel(memoryLevelInfo->GetProcLevelMap());
+    if (!reply.WriteInt32(result)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleDumpHeapMemory(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_DEBUG("AppMgrStub::HandleDumpHeapMemory.");
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::HandleDumpHeapMemory.");
     HITRACE_METER(HITRACE_TAG_APP);
     int32_t pid = data.ReadInt32();
     struct OHOS::AppExecFwk::MallocInfo mallocInfo;
@@ -387,19 +407,36 @@ int32_t AppMgrStub::HandleDumpHeapMemory(MessageParcel &data, MessageParcel &rep
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "AppMgrStub::HandleDumpJsHeapMemory.");
+    HITRACE_METER(HITRACE_TAG_APP);
+    std::unique_ptr<JsHeapDumpInfo> info(data.ReadParcelable<JsHeapDumpInfo>());
+    if (info == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
+        return ERR_INVALID_VALUE;
+    }
+    auto result = DumpJsHeapMemory(*info);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write result error");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleStartupResidentProcess(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     int32_t infoSize = data.ReadInt32();
     if (infoSize > CYCLE_LIMIT) {
-        HILOG_ERROR("infoSize is too large");
+        TAG_LOGE(AAFwkTag::APPMGR, "infoSize is too large");
         return ERR_INVALID_VALUE;
     }
     for (int32_t i = 0; i < infoSize; i++) {
         std::unique_ptr<AppExecFwk::BundleInfo> bundleInfo(data.ReadParcelable<AppExecFwk::BundleInfo>());
         if (!bundleInfo) {
-            HILOG_ERROR("Read Parcelable infos failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "Read Parcelable infos failed.");
             return ERR_INVALID_VALUE;
         }
         bundleInfos.emplace_back(*bundleInfo);
@@ -431,7 +468,7 @@ int32_t AppMgrStub::HandleRegisterAbilityForegroundStateObserver(MessageParcel &
     auto callback = iface_cast<AppExecFwk::IAbilityForegroundStateObserver>(data.ReadRemoteObject());
     int32_t result = RegisterAbilityForegroundStateObserver(callback);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -442,7 +479,7 @@ int32_t AppMgrStub::HandleUnregisterAbilityForegroundStateObserver(MessageParcel
     auto callback = iface_cast<AppExecFwk::IAbilityForegroundStateObserver>(data.ReadRemoteObject());
     int32_t result = UnregisterAbilityForegroundStateObserver(callback);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -468,12 +505,12 @@ int32_t AppMgrStub::HandleStartUserTestProcess(MessageParcel &data, MessageParce
 {
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("want is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
     std::unique_ptr<BundleInfo> bundleInfo(data.ReadParcelable<BundleInfo>());
     if (bundleInfo == nullptr) {
-        HILOG_ERROR("want is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
     auto observer = data.ReadRemoteObject();
@@ -514,7 +551,7 @@ int32_t AppMgrStub::HandleScheduleAcceptWantDone(MessageParcel &data, MessagePar
     auto recordId = data.ReadInt32();
     AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
     if (want == nullptr) {
-        HILOG_ERROR("want is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
     auto flag = data.ReadString();
@@ -529,7 +566,7 @@ int32_t AppMgrStub::HandleScheduleNewProcessRequestDone(MessageParcel &data, Mes
     auto recordId = data.ReadInt32();
     AAFwk::Want *want = data.ReadParcelable<AAFwk::Want>();
     if (want == nullptr) {
-        HILOG_ERROR("want is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
     auto flag = data.ReadString();
@@ -548,7 +585,7 @@ int32_t AppMgrStub::HandleGetAbilityRecordsByProcessID(MessageParcel &data, Mess
     reply.WriteInt32(tokens.size());
     for (auto &it : tokens) {
         if (!reply.WriteRemoteObject(it)) {
-            HILOG_ERROR("failed to write query result.");
+            TAG_LOGE(AAFwkTag::APPMGR, "failed to write query result.");
             return ERR_FLATTEN_OBJECT;
         }
     }
@@ -560,10 +597,10 @@ int32_t AppMgrStub::HandleGetAbilityRecordsByProcessID(MessageParcel &data, Mess
 
 int32_t AppMgrStub::HandlePreStartNWebSpawnProcess(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_INFO("HandlePreNWebSpawnProcess");
+    TAG_LOGI(AAFwkTag::APPMGR, "HandlePreNWebSpawnProcess");
     int32_t result = PreStartNWebSpawnProcess();
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("write result error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "write result error.");
         return ERR_INVALID_VALUE;
     }
     return result;
@@ -579,11 +616,11 @@ int32_t AppMgrStub::HandleStartRenderProcess(MessageParcel &data, MessageParcel 
     int32_t result =
         StartRenderProcess(renderParam, ipcFd, sharedFd, crashFd, renderPid);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("write result error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "write result error.");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(renderPid)) {
-        HILOG_ERROR("write renderPid error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "write renderPid error.");
         return ERR_INVALID_VALUE;
     }
     return result;
@@ -600,17 +637,17 @@ int32_t AppMgrStub::HandleGetRenderProcessTerminationStatus(MessageParcel &data,
 {
     int32_t renderPid = data.ReadInt32();
     if (renderPid <= 0) {
-        HILOG_ERROR("invalid renderPid value");
+        TAG_LOGE(AAFwkTag::APPMGR, "invalid renderPid value");
         return ERR_INVALID_VALUE;
     }
     int status = 0;
     int32_t result = GetRenderProcessTerminationStatus(renderPid, status);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("write result error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "write result error.");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(status)) {
-        HILOG_ERROR("write status error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "write status error.");
         return ERR_INVALID_VALUE;
     }
     return result;
@@ -621,11 +658,11 @@ int32_t AppMgrStub::HandleGetConfiguration(MessageParcel &data, MessageParcel &r
     Configuration config;
     int ret = GetConfiguration(config);
     if (ret != ERR_OK) {
-        HILOG_ERROR("AppMgrStub GetConfiguration error");
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub GetConfiguration error");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteParcelable(&config)) {
-        HILOG_ERROR("AppMgrStub GetConfiguration error");
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub GetConfiguration error");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(ret)) {
@@ -638,7 +675,7 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
 {
     std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
     if (!config) {
-        HILOG_ERROR("AppMgrStub read configuration error");
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
         return ERR_INVALID_VALUE;
     }
     int32_t ret = UpdateConfiguration(*config);
@@ -667,7 +704,7 @@ int32_t AppMgrStub::HandleUnregisterConfigurationObserver(MessageParcel &data, M
 #ifdef ABILITY_COMMAND_FOR_TEST
 int32_t AppMgrStub::HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_INFO("%{public}s", __func__);
+    TAG_LOGI(AAFwkTag::APPMGR, "%{public}s", __func__);
     int32_t result = BlockAppService();
     reply.WriteInt32(result);
     return result;
@@ -677,7 +714,7 @@ int32_t AppMgrStub::HandleBlockAppServiceDone(MessageParcel &data, MessageParcel
 int32_t AppMgrStub::HandleGetAppRunningStateByBundleName(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
     std::string bundleName = data.ReadString();
     auto ret = GetAppRunningStateByBundleName(bundleName);
     if (!reply.WriteBool(ret)) {
@@ -689,7 +726,7 @@ int32_t AppMgrStub::HandleGetAppRunningStateByBundleName(MessageParcel &data, Me
 int32_t AppMgrStub::HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
     std::string bundleName = data.ReadString();
     auto callback = iface_cast<IQuickFixCallback>(data.ReadRemoteObject());
     auto ret = NotifyLoadRepairPatch(bundleName, callback);
@@ -702,7 +739,7 @@ int32_t AppMgrStub::HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParc
 int32_t AppMgrStub::HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
     std::string bundleName = data.ReadString();
     auto callback = iface_cast<IQuickFixCallback>(data.ReadRemoteObject());
     auto ret = NotifyHotReloadPage(bundleName, callback);
@@ -716,7 +753,7 @@ int32_t AppMgrStub::HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel
 int32_t AppMgrStub::HandleSetContinuousTaskProcess(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
     int32_t pid = data.ReadInt32();
     bool isContinuousTask = data.ReadBool();
     auto ret = SetContinuousTaskProcess(pid, isContinuousTask);
@@ -730,7 +767,7 @@ int32_t AppMgrStub::HandleSetContinuousTaskProcess(MessageParcel &data, MessageP
 int32_t AppMgrStub::HandleNotifyUnLoadRepairPatch(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
     std::string bundleName = data.ReadString();
     auto callback = iface_cast<IQuickFixCallback>(data.ReadRemoteObject());
     auto ret = NotifyUnLoadRepairPatch(bundleName, callback);
@@ -743,7 +780,7 @@ int32_t AppMgrStub::HandleNotifyUnLoadRepairPatch(MessageParcel &data, MessagePa
 int32_t AppMgrStub::HandleIsSharedBundleRunning(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
     std::string bundleName = data.ReadString();
     uint32_t versionCode = data.ReadUint32();
     bool result = IsSharedBundleRunning(bundleName, versionCode);
@@ -756,15 +793,15 @@ int32_t AppMgrStub::HandleIsSharedBundleRunning(MessageParcel &data, MessageParc
 int32_t AppMgrStub::HandleStartNativeProcessForDebugger(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
-        HILOG_ERROR("want is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "want is nullptr");
         return ERR_INVALID_VALUE;
     }
     auto result = StartNativeProcessForDebugger(*want);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -794,13 +831,13 @@ int32_t AppMgrStub::HandleNotifyFault(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<FaultData> faultData(data.ReadParcelable<FaultData>());
     if (faultData == nullptr) {
-        HILOG_ERROR("ReadParcelable<FaultData> failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<FaultData> failed");
         return ERR_INVALID_VALUE;
     }
 
     int32_t result = NotifyAppFault(*faultData);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("reply write failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "reply write failed.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -810,13 +847,13 @@ int32_t AppMgrStub::HandleNotifyFaultBySA(MessageParcel &data, MessageParcel &re
 {
     std::unique_ptr<AppFaultDataBySA> faultData(data.ReadParcelable<AppFaultDataBySA>());
     if (faultData == nullptr) {
-        HILOG_ERROR("ReadParcelable<AppFaultDataBySA> failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "ReadParcelable<AppFaultDataBySA> failed");
         return ERR_INVALID_VALUE;
     }
 
     int32_t result = NotifyAppFaultBySA(*faultData);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("reply write failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "reply write failed.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -829,11 +866,11 @@ int32_t AppMgrStub::HandleGetProcessMemoryByPid(MessageParcel &data, MessageParc
     int32_t memorySize = 0;
     auto result = GetProcessMemoryByPid(pid, memorySize);
     if (!reply.WriteInt32(memorySize)) {
-        HILOG_ERROR("Memory size write failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Memory size write failed.");
         return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -853,7 +890,7 @@ int32_t AppMgrStub::HandleGetRunningProcessInformation(MessageParcel &data, Mess
         }
     }
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -874,13 +911,13 @@ int32_t AppMgrStub::HandleNotifyPageShow(MessageParcel &data, MessageParcel &rep
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
     if (token == nullptr || pageStateData == nullptr) {
-        HILOG_ERROR("read data failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "read data failed");
         return ERR_INVALID_VALUE;
     }
 
     auto result = NotifyPageShow(token, *pageStateData);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -891,13 +928,13 @@ int32_t AppMgrStub::HandleNotifyPageHide(MessageParcel &data, MessageParcel &rep
     sptr<IRemoteObject> token = data.ReadRemoteObject();
     std::unique_ptr<PageStateData> pageStateData(data.ReadParcelable<PageStateData>());
     if (token == nullptr || pageStateData == nullptr) {
-        HILOG_ERROR("read data failed");
+        TAG_LOGE(AAFwkTag::APPMGR, "read data failed");
         return ERR_INVALID_VALUE;
     }
 
     auto result = NotifyPageHide(token, *pageStateData);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -907,13 +944,13 @@ int32_t AppMgrStub::HandleRegisterAppRunningStatusListener(MessageParcel &data, 
 {
     auto listener = data.ReadRemoteObject();
     if (listener == nullptr) {
-        HILOG_ERROR("Read data failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Read data failed.");
         return ERR_INVALID_VALUE;
     }
 
     auto result = RegisterAppRunningStatusListener(listener);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -923,13 +960,13 @@ int32_t AppMgrStub::HandleUnregisterAppRunningStatusListener(MessageParcel &data
 {
     auto listener = data.ReadRemoteObject();
     if (listener == nullptr) {
-        HILOG_ERROR("Read data failed.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Read data failed.");
         return ERR_INVALID_VALUE;
     }
 
     auto result = UnregisterAppRunningStatusListener(listener);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -939,12 +976,12 @@ int32_t AppMgrStub::HandleRegisterAppForegroundStateObserver(MessageParcel &data
 {
     auto callback = iface_cast<AppExecFwk::IAppForegroundStateObserver>(data.ReadRemoteObject());
     if (callback == nullptr) {
-        HILOG_ERROR("Callback is null.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
         return ERR_INVALID_VALUE;
     }
     int32_t result = RegisterAppForegroundStateObserver(callback);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -954,12 +991,12 @@ int32_t AppMgrStub::HandleUnregisterAppForegroundStateObserver(MessageParcel &da
 {
     auto callback = iface_cast<AppExecFwk::IAppForegroundStateObserver>(data.ReadRemoteObject());
     if (callback == nullptr) {
-        HILOG_ERROR("Callback is null.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
         return ERR_INVALID_VALUE;
     }
     int32_t result = UnregisterAppForegroundStateObserver(callback);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Fail to write result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -968,7 +1005,7 @@ int32_t AppMgrStub::HandleUnregisterAppForegroundStateObserver(MessageParcel &da
 int32_t AppMgrStub::HandleIsApplicationRunning(MessageParcel &data, MessageParcel &reply)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     std::string bundleName = data.ReadString();
     bool isRunning = false;
     int32_t result = IsApplicationRunning(bundleName, isRunning);
@@ -983,16 +1020,16 @@ int32_t AppMgrStub::HandleIsApplicationRunning(MessageParcel &data, MessageParce
 
 int32_t AppMgrStub::HandleStartChildProcess(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     std::string srcEntry = data.ReadString();
     int32_t childPid = 0;
     int32_t result = StartChildProcess(srcEntry, childPid);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Write result error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result error.");
         return ERR_INVALID_VALUE;
     }
     if (result == ERR_OK && !reply.WriteInt32(childPid)) {
-        HILOG_ERROR("Write childPid error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Write childPid error.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -1000,11 +1037,11 @@ int32_t AppMgrStub::HandleStartChildProcess(MessageParcel &data, MessageParcel &
 
 int32_t AppMgrStub::HandleGetChildProcessInfoForSelf(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     ChildProcessInfo info;
     auto result = GetChildProcessInfoForSelf(info);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Write result error.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result error.");
         return ERR_INVALID_VALUE;
     }
     if (result == ERR_OK && !reply.WriteParcelable(&info)) {
@@ -1015,7 +1052,7 @@ int32_t AppMgrStub::HandleGetChildProcessInfoForSelf(MessageParcel &data, Messag
 
 int32_t AppMgrStub::HandleAttachChildProcess(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     sptr<IRemoteObject> scheduler = data.ReadRemoteObject();
     AttachChildProcess(scheduler);
     return NO_ERROR;
@@ -1023,17 +1060,91 @@ int32_t AppMgrStub::HandleAttachChildProcess(MessageParcel &data, MessageParcel 
 
 int32_t AppMgrStub::HandleExitChildProcessSafely(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_DEBUG("called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
     ExitChildProcessSafely();
     return NO_ERROR;
 }
 
 int32_t AppMgrStub::HandleIsFinalAppProcess(MessageParcel &data, MessageParcel &reply)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     if (!reply.WriteBool(IsFinalAppProcess())) {
-        HILOG_ERROR("Fail to write bool result.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write bool result.");
         return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleRegisterRenderStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    auto callback = iface_cast<AppExecFwk::IRenderStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = RegisterRenderStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUnregisterRenderStateObserver(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    auto callback = iface_cast<AppExecFwk::IRenderStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnregisterRenderStateObserver(callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleUpdateRenderState(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    int32_t pid = data.ReadInt32();
+    int32_t state = data.ReadInt32();
+    int32_t result = UpdateRenderState(pid, state);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleSignRestartAppFlag(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    std::string bundleName = data.ReadString();
+    auto ret = SignRestartAppFlag(bundleName);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAppRunningUniqueIdByPid(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    int32_t pid = data.ReadInt32();
+    std::string appRunningUniqueId;
+    int32_t result = GetAppRunningUniqueIdByPid(pid, appRunningUniqueId);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result error.");
+        return IPC_STUB_ERR;
+    }
+    if (result == ERR_OK && !reply.WriteString(appRunningUniqueId)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "GetAppRunningUniqueIdByPid err or Write appRunningUniqueId error.");
+        return IPC_STUB_ERR;
     }
     return NO_ERROR;
 }

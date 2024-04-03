@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,10 +17,7 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 config("upms_config") {
   visibility = [ ":*" ]
   visibility += [ "${ability_runtime_test_path}/unittest/*" ]
-  include_dirs = [
-    "include",
-    "include/rdb",
-  ]
+  include_dirs = [ "include" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -29,9 +26,6 @@ config("upms_config") {
 
 libupms_sources = [
   "src/proxy_authorization_uri_config.cpp",
-  "src/rdb/ability_rdb_open_callback.cpp",
-  "src/rdb/rdb_data_manager.cpp",
-  "src/rdb/uri_permission_rdb.cpp",
   "src/uri_permission_manager_service.cpp",
   "src/uri_permission_manager_stub_impl.cpp",
 ]
@@ -53,6 +47,7 @@ ohos_shared_library("libupms") {
     "${ability_runtime_innerkits_path}/deps_wrapper:ability_deps_wrapper",
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
     "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:event_report",
     "${ability_runtime_services_path}/common:perm_verification",
   ]
@@ -73,7 +68,6 @@ ohos_shared_library("libupms") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",
@@ -97,6 +91,7 @@ ohos_static_library("libupms_static") {
 
   deps = [
     "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    "${ability_runtime_services_path}/common:app_util",
     "${ability_runtime_services_path}/common:perm_verification",
   ]
 
@@ -114,7 +109,6 @@ ohos_static_library("libupms_static") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "relational_store:native_rdb",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "storage_service:storage_manager_sa_proxy",

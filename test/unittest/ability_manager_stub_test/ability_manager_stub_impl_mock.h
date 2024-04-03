@@ -292,11 +292,11 @@ public:
     {
         return 0;
     }
-    int StartUser(int userId) override
+    int StartUser(int userId, sptr<IUserCallback> callback) override
     {
         return 0;
     }
-    int StopUser(int userId, const sptr<IStopUserCallback>& callback) override
+    int StopUser(int userId, const sptr<IUserCallback>& callback) override
     {
         return 0;
     }
@@ -360,11 +360,6 @@ public:
     bool IsRunningInStabilityTest() override
     {
         return true;
-    }
-
-    int SendANRProcessID(int pid) override
-    {
-        return 0;
     }
 
     int StartUserTest(const Want& want, const sptr<IRemoteObject>& observer) override
@@ -438,6 +433,8 @@ public:
         return 0;
     }
 #endif
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
     MOCK_METHOD2(IsValidMissionIds, int32_t(const std::vector<int32_t>&, std::vector<MissionValidResult>&));
     MOCK_METHOD2(PrepareTerminateAbilityBySCB, int32_t(const sptr<SessionInfo> &sessionInfo, bool &isPrepareTerminate));
     MOCK_METHOD1(RegisterAppDebugListener, int32_t(sptr<AppExecFwk::IAppDebugListener> listener));
@@ -449,6 +446,8 @@ public:
         const InsightIntentExecuteParam &param));
     MOCK_METHOD3(ExecuteInsightIntentDone, int32_t(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result));
+    MOCK_METHOD3(GetUIExtensionRootHostInfo, int32_t(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo,
+        int32_t userId));
 };
 }  // namespace AAFwk
 }  // namespace OHOS

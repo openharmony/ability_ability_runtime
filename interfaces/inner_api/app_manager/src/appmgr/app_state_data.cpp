@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "app_state_data.h"
 
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "ui_extension_utils.h"
 
@@ -23,7 +24,7 @@ namespace AppExecFwk {
 bool AppStateData::Marshalling(Parcel &parcel) const
 {
     return (parcel.WriteString(bundleName) && parcel.WriteInt32(uid) && parcel.WriteInt32(state)
-        && parcel.WriteInt32(pid) && parcel.WriteInt32(accessTokenId) && parcel.WriteBool(isFocused)
+        && parcel.WriteInt32(pid) && parcel.WriteUint32(accessTokenId) && parcel.WriteBool(isFocused)
         && parcel.WriteInt32(static_cast<int32_t>(extensionType)) && parcel.WriteInt32Vector(renderPids)
         && parcel.WriteString(callerBundleName) && parcel.WriteBool(isSplitScreenMode)
         && parcel.WriteBool(isFloatingWindowMode));
@@ -35,7 +36,7 @@ bool AppStateData::ReadFromParcel(Parcel &parcel)
     uid = parcel.ReadInt32();
     state = parcel.ReadInt32();
     pid = parcel.ReadInt32();
-    accessTokenId = parcel.ReadInt32();
+    accessTokenId = parcel.ReadUint32();
     isFocused = parcel.ReadBool();
     extensionType = static_cast<ExtensionAbilityType>(parcel.ReadInt32());
     parcel.ReadInt32Vector(&renderPids);
@@ -50,7 +51,7 @@ AppStateData *AppStateData::Unmarshalling(Parcel &parcel)
 {
     AppStateData *appStateData = new (std::nothrow) AppStateData();
     if (appStateData && !appStateData->ReadFromParcel(parcel)) {
-        HILOG_WARN("appStateData failed, because ReadFromParcel failed");
+        TAG_LOGW(AAFwkTag::APPMGR, "appStateData failed, because ReadFromParcel failed");
         delete appStateData;
         appStateData = nullptr;
     }

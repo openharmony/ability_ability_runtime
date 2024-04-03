@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "ability_manager_stub_impl_mock.h"
 #include "ability_scheduler.h"
 #include "app_debug_listener_stub_mock.h"
+#include "hilog_tag_wrapper.h"
 #include "iremote_proxy.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_token.h"
@@ -65,7 +66,7 @@ void AbilityManagerStubTest::WriteInterfaceToken(MessageParcel& data)
  */
 HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DumpSysStateInner_0100, TestSize.Level1)
 {
-    HILOG_INFO("AbilityManagerStub_DumpSysStateInner_0100 start");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerStub_DumpSysStateInner_0100 start");
 
     MessageParcel data;
     MessageParcel reply;
@@ -88,7 +89,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DumpSysStateInner_0100, Test
         data, reply, option);
     EXPECT_EQ(res, NO_ERROR);
 
-    HILOG_INFO("AbilityManagerStub_DumpSysStateInner_0100 end");
+    TAG_LOGI(AAFwkTag::TEST, "AbilityManagerStub_DumpSysStateInner_0100 end");
 }  // namespace AAFwk
 
 /*
@@ -849,6 +850,38 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityAsCallerForOptio
 
 /*
  * Feature: AbilityManagerService
+ * Function: StartAbilityForResultAsCallerInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityForResultAsCallerInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function StartAbilityForResultAsCallerInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityForResultAsCallerInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->StartAbilityForResultAsCallerInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityForResultAsCallerForOptionsInner
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityForResultAsCallerForOptionsInner
+ * EnvConditions: NA
+ * CaseDescription: Verify the function StartAbilityForResultAsCallerForOptionsInner is normal flow.
+ */
+HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartAbilityForResultAsCallerForOptionsInner_001, TestSize.Level1)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    auto res = stub_->StartAbilityForResultAsCallerForOptionsInner(data, reply);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: ConnectAbilityInner
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService ConnectAbilityInner
@@ -1449,7 +1482,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_MoveMissionToFrontInner_001,
  */
 HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_MoveMissionsToForegroundInner_001, TestSize.Level1)
 {
-    HILOG_DEBUG("%{public}s is called.", __func__);
+    TAG_LOGD(AAFwkTag::TEST, "%{public}s is called.", __func__);
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->MoveMissionsToForegroundInner(data, reply);
@@ -1466,7 +1499,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_MoveMissionsToForegroundInne
  */
 HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_MoveMissionsToBackgroundInner_001, TestSize.Level1)
 {
-    HILOG_DEBUG("%{public}s is called.", __func__);
+    TAG_LOGD(AAFwkTag::TEST, "%{public}s is called.", __func__);
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->MoveMissionsToBackgroundInner(data, reply);
@@ -1550,7 +1583,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_StartUserInner_001, TestSize
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->StartUserInner(data, reply);
-    EXPECT_EQ(res, NO_ERROR);
+    EXPECT_NE(res, NO_ERROR);
 }
 
 /*
@@ -1951,22 +1984,6 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_DoAbilityBackgroundInner_001
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->DoAbilityBackgroundInner(data, reply);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: SendANRProcessIDInner
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService SendANRProcessIDInner
- * EnvConditions: NA
- * CaseDescription: Verify the function SendANRProcessIDInner is normal flow.
- */
-HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_SendANRProcessIDInner_001, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto res = stub_->SendANRProcessIDInner(data, reply);
     EXPECT_EQ(res, NO_ERROR);
 }
 
@@ -2723,131 +2740,47 @@ HWTEST_F(AbilityManagerStubTest, QueryAllAutoStartupApplicationsInner_0100, Test
 }
 
 /**
- * @tc.name: AbilityManagerStubTest_RegisterAutoStartupCallbackInner_0100
- * @tc.desc: Test the state of RegisterAutoStartupCallbackInner
+ * @tc.name: GetUIExtensionRootHostInfo_0100
+ * @tc.desc: GetUIExtensionRootHostInfo
  * @tc.type: FUNC
+ * @tc.require: issueI92G6Z
  */
-HWTEST_F(AbilityManagerStubTest, RegisterAutoStartupCallbackInner_0100, TestSize.Level1)
+HWTEST_F(AbilityManagerStubTest, GetUIExtensionRootHostInfo_0100, TestSize.Level1)
 {
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
     MessageParcel data;
+    bool writeRet = data.WriteInterfaceToken(AbilityManagerStubImplMock::GetDescriptor());
+    auto token = sptr<AppExecFwk::MockAbilityToken>::MakeSptr();
+    auto userId = USER_ID;
+    writeRet &= data.WriteBool(true);
+    writeRet &= data.WriteRemoteObject(token);
+    writeRet &= data.WriteInt32(userId);
+    EXPECT_EQ(writeRet, true);
+
+    EXPECT_CALL(*stub_, GetUIExtensionRootHostInfo(_, _, _)).Times(1);
+
     MessageParcel reply;
-    sptr<AppExecFwk::MockAbilityToken> token = new (std::nothrow) AppExecFwk::MockAbilityToken();
-    EXPECT_NE(token, nullptr);
-    data.WriteRemoteObject(token);
-    auto result = stub_->RegisterAutoStartupCallbackInner(data, reply);
-    EXPECT_EQ(result, NO_ERROR);
+    MessageOption option;
+    auto ret = stub_->OnRemoteRequest(
+        static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO), data, reply, option);
+    EXPECT_EQ(ret, NO_ERROR);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
 }
 
 /**
- * @tc.name: AbilityManagerStubTest_RegisterAutoStartupCallbackInner_0200
- * @tc.desc: Test the state of RegisterAutoStartupCallbackInner
+ * @tc.name: RestartAppInner_0100
+ * @tc.desc: RestartAppInner
  * @tc.type: FUNC
  */
-HWTEST_F(AbilityManagerStubTest, RegisterAutoStartupCallbackInner_0200, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto result = stub_->RegisterAutoStartupCallbackInner(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_UnregisterAutoStartupCallbackInner_0100
- * @tc.desc: Test the state of UnregisterAutoStartupCallbackInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, UnregisterAutoStartupCallbackInner_0100, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    sptr<AppExecFwk::MockAbilityToken> token = new (std::nothrow) AppExecFwk::MockAbilityToken();
-    EXPECT_NE(token, nullptr);
-    data.WriteRemoteObject(token);
-    auto result = stub_->UnregisterAutoStartupCallbackInner(data, reply);
-    EXPECT_EQ(result, NO_ERROR);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_UnregisterAutoStartupCallbackInner_0200
- * @tc.desc: Test the state of UnregisterAutoStartupCallbackInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, UnregisterAutoStartupCallbackInner_0200, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto result = stub_->UnregisterAutoStartupCallbackInner(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_SetAutoStartupInner_0100
- * @tc.desc: Test the state of SetAutoStartupInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, SetAutoStartupInner_0100, TestSize.Level1)
+HWTEST_F(AbilityManagerStubTest, RestartAppInner_0100, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
     Want want;
     data.WriteParcelable(&want);
-    auto result = stub_->SetAutoStartupInner(data, reply);
-    EXPECT_EQ(result, NO_ERROR);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_SetAutoStartupInner_0200
- * @tc.desc: Test the state of SetAutoStartupInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, SetAutoStartupInner_0200, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto result = stub_->SetAutoStartupInner(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_CancelAutoStartupInner_0100
- * @tc.desc: Test the state of CancelAutoStartupInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, CancelAutoStartupInner_0100, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    Want want;
-    data.WriteParcelable(&want);
-    auto result = stub_->CancelAutoStartupInner(data, reply);
-    EXPECT_EQ(result, NO_ERROR);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_CancelAutoStartupInner_0200
- * @tc.desc: Test the state of CancelAutoStartupInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, CancelAutoStartupInner_0200, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto result = stub_->CancelAutoStartupInner(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: AbilityManagerStubTest_IsAutoStartupInner_0100
- * @tc.desc: Test the state of IsAutoStartupInner
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerStubTest, IsAutoStartupInner_0100, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    Want want;
-    data.WriteParcelable(&want);
-    auto result = stub_->IsAutoStartupInner(data, reply);
+    auto result = stub_->RestartAppInner(data, reply);
     EXPECT_EQ(result, NO_ERROR);
 }
 } // namespace AAFwk

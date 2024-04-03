@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include <cmath>
 #include <regex>
 
+#include "app_utils.h"
 #include "display_info.h"
 #include "constants.h"
 #include "ability_record.h"
@@ -26,6 +27,7 @@
 #include "dm_common.h"
 #include "display_manager.h"
 #include "errors.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "locale_config.h"
@@ -109,6 +111,7 @@ const std::string DIALOG_POSITION = "position";
 const std::string VERTICAL_SCREEN_DIALOG_POSITION = "landscapeScreen";
 const std::string ABILITY_NAME_ANR_DIALOG = "AnrDialog";
 const std::string ABILITY_NAME_FREEZE_DIALOG = "SwitchUserDialog";
+const std::string ABILITY_NAME_ASSERT_FAULT_DIALOG = "AssertFaultDialog";
 const std::string ABILITY_NAME_TIPS_DIALOG = "TipsDialog";
 const std::string ABILITY_NAME_SELECTOR_DIALOG = "SelectorDialog";
 const std::string ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG = "AppSelectorExtensionAbility";
@@ -131,12 +134,12 @@ const float SETX_WIDTH_MULTIPLE = 0.1;
 
 bool SystemDialogScheduler::GetANRDialogWant(int userId, int pid, AAFwk::Want &want)
 {
-    HILOG_DEBUG("GetANRDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "GetANRDialogWant start");
     AppExecFwk::ApplicationInfo appInfo;
     bool debug;
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (appScheduler->GetApplicationInfoByProcessID(pid, appInfo, debug) != ERR_OK) {
-        HILOG_ERROR("Get application info failed.");
+        TAG_LOGE(AAFwkTag::DIALOG, "Get application info failed.");
         return false;
     }
 
@@ -169,7 +172,7 @@ const std::string SystemDialogScheduler::GetAnrParams(const DialogPosition posit
 
 Want SystemDialogScheduler::GetTipsDialogWant(const sptr<IRemoteObject> &callerToken)
 {
-    HILOG_DEBUG("GetTipsDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "GetTipsDialogWant start");
 
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_TIPS, position);
@@ -191,7 +194,7 @@ Want SystemDialogScheduler::GetTipsDialogWant(const sptr<IRemoteObject> &callerT
 
 Want SystemDialogScheduler::GetJumpInterceptorDialogWant(Want &targetWant)
 {
-    HILOG_DEBUG("GetJumpInterceptorDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "GetJumpInterceptorDialogWant start");
 
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_JUMP_INTERCEPTOR, position);
@@ -224,13 +227,13 @@ void SystemDialogScheduler::DialogPortraitPositionAdaptive(
         return;
     }
 
-    HILOG_DEBUG("dialog portrait lineNums is zero.");
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog portrait lineNums is zero.");
 }
 
 void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     DialogPosition &position, int32_t height, int32_t width, int lineNums, float densityPixels) const
 {
-    HILOG_DEBUG("PortraitPosition height %{public}d width %{public}d density %{public}f.",
+    TAG_LOGD(AAFwkTag::DIALOG, "PortraitPosition height %{public}d width %{public}d density %{public}f.",
         height, width, densityPixels);
     position.width = static_cast<int32_t>(width * UI_SELECTOR_PORTRAIT_WIDTH_RATIO);
     position.height = static_cast<int32_t>(UI_SELECTOR_DIALOG_HEIGHT * densityPixels);
@@ -238,7 +241,7 @@ void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     position.height_narrow = static_cast<int32_t>(UI_SELECTOR_DIALOG_HEIGHT_NARROW * densityPixels);
 
     if (width < UI_WIDTH_780DP) {
-        HILOG_INFO("show dialog narrow.");
+        TAG_LOGI(AAFwkTag::DIALOG, "show dialog narrow.");
         position.width = position.width_narrow;
         position.height = position.height_narrow;
     }
@@ -249,12 +252,12 @@ void SystemDialogScheduler::GetSelectorDialogPortraitPosition(
     if (portraitMax < position.height) {
         position.oversizeHeight = true;
         position.height = static_cast<int32_t>(UI_SELECTOR_PORTRAIT_PHONE_H1 * densityPixels);
-        HILOG_INFO("portrait ratio 0.9 height is %{public}d.", portraitMax);
+        TAG_LOGI(AAFwkTag::DIALOG, "portrait ratio 0.9 height is %{public}d.", portraitMax);
     }
 
     position.offsetX = static_cast<int32_t>(width * UI_SELECTOR_PORTRAIT_WIDTH_EDGE_RATIO);
     position.offsetY = static_cast<int32_t>((height * UI_SELECTOR_PORTRAIT_HEIGHT_RATIO - position.height));
-    HILOG_DEBUG("dialog offset x:%{public}d y:%{public}d h:%{public}d w:%{public}d",
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog offset x:%{public}d y:%{public}d h:%{public}d w:%{public}d",
         position.offsetX, position.offsetY, position.height, position.width);
 }
 
@@ -272,13 +275,13 @@ void SystemDialogScheduler::DialogLandscapePositionAdaptive(
         return;
     }
 
-    HILOG_DEBUG("dialog landscape lineNums is zero.");
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog landscape lineNums is zero.");
 }
 
 void SystemDialogScheduler::GetSelectorDialogLandscapePosition(
     DialogPosition &position, int32_t height, int32_t width, int lineNums, float densityPixels) const
 {
-    HILOG_DEBUG("LandscapePosition height %{public}d width %{public}d density %{public}f.",
+    TAG_LOGD(AAFwkTag::DIALOG, "LandscapePosition height %{public}d width %{public}d density %{public}f.",
         height, width, densityPixels);
     position.width = static_cast<int32_t>(width *
         (UI_SELECTOR_LANDSCAPE_GRILLE_LARGE * UI_SELECTOR_LANDSCAPE_COUNT_FOUR +
@@ -295,46 +298,46 @@ void SystemDialogScheduler::GetSelectorDialogLandscapePosition(
     if (position.height > landscapeMax) {
         position.oversizeHeight = true;
         position.height = static_cast<int32_t>(UI_SELECTOR_LANDSCAPE_PHONE_H1 * densityPixels);
-        HILOG_INFO("landscape ratio 0.9 height is %{public}d.", landscapeMax);
+        TAG_LOGI(AAFwkTag::DIALOG, "landscape ratio 0.9 height is %{public}d.", landscapeMax);
     }
 
-    HILOG_DEBUG("dialog height is %{public}d.", position.height);
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog height is %{public}d.", position.height);
     position.offsetX = static_cast<int32_t>((width - position.width) / UI_HALF);
     position.offsetY = static_cast<int32_t>((height * UI_SELECTOR_PORTRAIT_HEIGHT_RATIO - position.height));
-    HILOG_DEBUG("dialog offset x:%{public}d y:%{public}d h:%{public}d w:%{public}d",
+    TAG_LOGD(AAFwkTag::DIALOG, "dialog offset x:%{public}d y:%{public}d h:%{public}d w:%{public}d",
         position.offsetX, position.offsetY, position.height, position.width);
 }
 
 void SystemDialogScheduler::GetSelectorDialogPositionAndSize(
     DialogPosition &portraitPosition, DialogPosition &landscapePosition, int lineNums) const
 {
-    portraitPosition.wideScreen = (deviceType_ != STR_PHONE) && (deviceType_ != STR_DEFAULT);
-    portraitPosition.align = ((deviceType_ == STR_PHONE) || (deviceType_ == STR_DEFAULT)) ?
+    portraitPosition.wideScreen = !AppUtils::GetInstance().IsSelectorDialogDefaultPossion();
+    portraitPosition.align = AppUtils::GetInstance().IsSelectorDialogDefaultPossion() ?
         DialogAlign::BOTTOM : DialogAlign::CENTER;
     landscapePosition.wideScreen = portraitPosition.wideScreen;
     landscapePosition.align = portraitPosition.align;
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
-        HILOG_ERROR("share dialog GetDefaultDisplay fail, try again.");
+        TAG_LOGE(AAFwkTag::DIALOG, "share dialog GetDefaultDisplay fail, try again.");
         display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
     if (display == nullptr) {
-        HILOG_ERROR("share dialog GetDefaultDisplay fail.");
+        TAG_LOGE(AAFwkTag::DIALOG, "share dialog GetDefaultDisplay fail.");
         return;
     }
 
     auto displayInfo = display->GetDisplayInfo();
     if (displayInfo == nullptr) {
-        HILOG_ERROR("share dialog GetDisplayInfo fail.");
+        TAG_LOGE(AAFwkTag::DIALOG, "share dialog GetDisplayInfo fail.");
         return;
     }
 
-    HILOG_DEBUG("GetDialogPositionAndSize GetOrientation, %{public}d %{public}f",
+    TAG_LOGD(AAFwkTag::DIALOG, "GetDialogPositionAndSize GetOrientation, %{public}d %{public}f",
         displayInfo->GetDisplayOrientation(), display->GetVirtualPixelRatio());
     if (displayInfo->GetDisplayOrientation() == Rosen::DisplayOrientation::PORTRAIT ||
         displayInfo->GetDisplayOrientation() == Rosen::DisplayOrientation::PORTRAIT_INVERTED) {
-        HILOG_INFO("GetDialogPositionAndSize GetOrientation, PORTRAIT or PORTRAIT_INVERTED");
+        TAG_LOGI(AAFwkTag::DIALOG, "GetDialogPositionAndSize GetOrientation, PORTRAIT or PORTRAIT_INVERTED");
         GetSelectorDialogPortraitPosition(portraitPosition, display->GetHeight(), display->GetWidth(),
             lineNums, display->GetVirtualPixelRatio());
         GetSelectorDialogLandscapePosition(landscapePosition, display->GetWidth(), display->GetHeight(),
@@ -342,7 +345,7 @@ void SystemDialogScheduler::GetSelectorDialogPositionAndSize(
         return;
     }
 
-    HILOG_INFO("GetDialogPositionAndSize GetOrientation, LANDSCAPE or LANDSCAPE_INVERTED");
+    TAG_LOGI(AAFwkTag::DIALOG, "GetDialogPositionAndSize GetOrientation, LANDSCAPE or LANDSCAPE_INVERTED");
     GetSelectorDialogPortraitPosition(portraitPosition, display->GetWidth(), display->GetHeight(),
         lineNums, display->GetVirtualPixelRatio());
     GetSelectorDialogLandscapePosition(landscapePosition, display->GetHeight(), display->GetWidth(),
@@ -352,7 +355,7 @@ void SystemDialogScheduler::GetSelectorDialogPositionAndSize(
 int SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
     const sptr<IRemoteObject> &callerToken)
 {
-    HILOG_DEBUG("GetSelectorDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "GetSelectorDialogWant start");
     DialogPosition portraitPosition;
     DialogPosition landscapePosition;
     GetSelectorDialogPositionAndSize(portraitPosition, landscapePosition, static_cast<int>(dialogAppInfos.size()));
@@ -362,42 +365,13 @@ int SystemDialogScheduler::GetSelectorDialogWant(const std::vector<DialogAppInfo
     targetWant.SetParam(DIALOG_POSITION, GetDialogPositionParams(portraitPosition));
     targetWant.SetParam(VERTICAL_SCREEN_DIALOG_POSITION, GetDialogPositionParams(landscapePosition));
     targetWant.SetParam(DIALOG_PARAMS, params);
-    bool isCallerStageBasedModel = true;
-    if (callerToken != nullptr) {
-        HILOG_DEBUG("set callertoken to targetWant");
-        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-        if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
-            isCallerStageBasedModel = false;
-        }
-        if (abilityRecord && UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
-            targetWant.RemoveParam(CALLER_TOKEN);
-        } else {
-            targetWant.SetParam(CALLER_TOKEN, callerToken);
-        }
-    }
-    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()
-        && isCallerStageBasedModel) {
-        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-        if (bundleMgrHelper == nullptr) {
-            HILOG_ERROR("The bundleMgrHelper is nullptr.");
-            return INNER_ERR;
-        }
-        std::string bundleName;
-        if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName))) {
-            HILOG_ERROR("QueryAppGalleryBundleName failed.");
-            return INNER_ERR;
-        }
-        targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
-        targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
-        targetWant.SetParam("isCreateAppGallerySelector", true);
-    }
-    return ERR_OK;
+    return GetSelectorDialogWantCommon(dialogAppInfos, targetWant, callerToken);
 }
 
 const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<DialogAppInfo> &infos) const
 {
     if (infos.empty()) {
-        HILOG_WARN("Invalid abilityInfos.");
+        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos.");
         return {};
     }
 
@@ -422,7 +396,7 @@ const std::string SystemDialogScheduler::GetSelectorParams(const std::vector<Dia
 int SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos,
     Want &targetWant, const std::string &type, int32_t userId, const sptr<IRemoteObject> &callerToken)
 {
-    HILOG_DEBUG("GetPcSelectorDialogWant start");
+    TAG_LOGD(AAFwkTag::DIALOG, "GetPcSelectorDialogWant start");
     DialogPosition position;
     GetDialogPositionAndSize(DialogType::DIALOG_SELECTOR, position, static_cast<int>(dialogAppInfos.size()));
 
@@ -430,42 +404,15 @@ int SystemDialogScheduler::GetPcSelectorDialogWant(const std::vector<DialogAppIn
     targetWant.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_SELECTOR_DIALOG);
     targetWant.SetParam(DIALOG_POSITION, GetDialogPositionParams(position));
     targetWant.SetParam(DIALOG_PARAMS, params);
-    bool isCallerStageBasedModel = true;
-    auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
-    if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
-        isCallerStageBasedModel = false;
-    }
-    if (abilityRecord && UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
-        // SelectorDialog can't bind to the window of UIExtension, so set CALLER_TOKEN to null.
-        targetWant.RemoveParam(CALLER_TOKEN);
-    } else {
-        targetWant.SetParam(CALLER_TOKEN, callerToken);
-    }
-    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()
-        && isCallerStageBasedModel) {
-        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
-        if (bundleMgrHelper == nullptr) {
-            HILOG_ERROR("The bundleMgrHelper is nullptr.");
-            return INNER_ERR;
-        }
-        std::string bundleName;
-        if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName))) {
-            HILOG_ERROR("QueryAppGalleryBundleName failed.");
-            return INNER_ERR;
-        }
-        targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
-        targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
-        targetWant.SetParam("isCreateAppGallerySelector", true);
-    }
-    return ERR_OK;
+    return GetSelectorDialogWantCommon(dialogAppInfos, targetWant, callerToken);
 }
 
 const std::string SystemDialogScheduler::GetPcSelectorParams(const std::vector<DialogAppInfo> &infos,
     const std::string &type, int32_t userId, const std::string &action) const
 {
-    HILOG_DEBUG("GetPcSelectorParams start");
+    TAG_LOGD(AAFwkTag::DIALOG, "GetPcSelectorParams start");
     if (infos.empty()) {
-        HILOG_WARN("Invalid abilityInfos.");
+        TAG_LOGW(AAFwkTag::DIALOG, "Invalid abilityInfos.");
         return {};
     }
 
@@ -495,6 +442,43 @@ const std::string SystemDialogScheduler::GetPcSelectorParams(const std::vector<D
     return jsonObject.dump();
 }
 
+int SystemDialogScheduler::GetSelectorDialogWantCommon(const std::vector<DialogAppInfo> &dialogAppInfos,
+    Want &targetWant, const sptr<IRemoteObject> &callerToken)
+{
+    HILOG_DEBUG("GetSelectorDialogWantCommon start");
+    bool isCallerStageBasedModel = true;
+    if (callerToken != nullptr) {
+        HILOG_DEBUG("set callertoken to targetWant");
+        auto abilityRecord = Token::GetAbilityRecordByToken(callerToken);
+        if (abilityRecord && !abilityRecord->GetAbilityInfo().isStageBasedModel) {
+            isCallerStageBasedModel = false;
+        }
+        if (abilityRecord && UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
+            // SelectorDialog can't bind to the window of UIExtension, so set CALLER_TOKEN to null.
+            targetWant.RemoveParam(CALLER_TOKEN);
+        } else {
+            targetWant.SetParam(CALLER_TOKEN, callerToken);
+        }
+    }
+    if (AppGalleryEnableUtil::IsEnableAppGallerySelector() && Rosen::SceneBoardJudgement::IsSceneBoardEnabled()
+        && isCallerStageBasedModel) {
+        auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+        if (bundleMgrHelper == nullptr) {
+            HILOG_ERROR("The bundleMgrHelper is nullptr.");
+            return INNER_ERR;
+        }
+        std::string bundleName;
+        if (!IN_PROCESS_CALL(bundleMgrHelper->QueryAppGalleryBundleName(bundleName))) {
+            HILOG_ERROR("QueryAppGalleryBundleName failed.");
+            return INNER_ERR;
+        }
+        targetWant.SetElementName(bundleName, ABILITY_NAME_APPGALLERY_SELECTOR_DIALOG);
+        targetWant.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
+        targetWant.SetParam("isCreateAppGallerySelector", true);
+    }
+    return ERR_OK;
+}
+
 const std::string SystemDialogScheduler::GetDialogPositionParams(const DialogPosition position) const
 {
     nlohmann::json dialogPositionData;
@@ -508,8 +492,8 @@ const std::string SystemDialogScheduler::GetDialogPositionParams(const DialogPos
 
 void SystemDialogScheduler::InitDialogPosition(DialogType type, DialogPosition &position) const
 {
-    position.wideScreen = (deviceType_ == STR_PHONE) ? false : (deviceType_ != STR_DEFAULT);
-    position.align = ((deviceType_ == STR_PHONE) ? true : (deviceType_ == STR_DEFAULT)) ?
+    position.wideScreen = !AppUtils::GetInstance().IsSelectorDialogDefaultPossion();
+    position.align = AppUtils::GetInstance().IsSelectorDialogDefaultPossion() ?
         DialogAlign::BOTTOM : DialogAlign::CENTER;
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
 
@@ -585,13 +569,14 @@ void SystemDialogScheduler::GetDialogPositionAndSize(DialogType type, DialogPosi
 
     auto display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     if (display == nullptr) {
-        HILOG_WARN("share dialog GetDefaultDisplay fail, try again.");
+        TAG_LOGW(AAFwkTag::DIALOG, "share dialog GetDefaultDisplay fail, try again.");
         display = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
     if (display != nullptr) {
-        HILOG_INFO("display width: %{public}d, height: %{public}d", display->GetWidth(), display->GetHeight());
+        TAG_LOGI(AAFwkTag::DIALOG, "display width: %{public}d, height: %{public}d", display->GetWidth(),
+            display->GetHeight());
         if (display->GetWidth() < UI_WIDTH_780DP) {
-            HILOG_INFO("show dialog narrow.");
+            TAG_LOGI(AAFwkTag::DIALOG, "show dialog narrow.");
             position.width = position.width_narrow;
             position.height = position.height_narrow;
         }
@@ -623,7 +608,7 @@ void SystemDialogScheduler::GetDialogPositionAndSize(DialogType type, DialogPosi
                 break;
         }
     } else {
-        HILOG_WARN("share dialog get display fail, use default wide.");
+        TAG_LOGW(AAFwkTag::DIALOG, "share dialog get display fail, use default wide.");
         if (type == DialogType::DIALOG_SELECTOR) {
             DialogPositionAdaptive(position, lineNums);
         }
@@ -637,7 +622,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
 {
     std::shared_ptr<Global::Resource::ResourceManager> resourceManager(Global::Resource::CreateResourceManager());
     if (resourceManager == nullptr) {
-        HILOG_ERROR("The resourceManager is nullptr.");
+        TAG_LOGE(AAFwkTag::DIALOG, "The resourceManager is nullptr.");
         return;
     }
 
@@ -646,7 +631,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
     CHECK_POINTER(bundleMgrHelper);
     if (!IN_PROCESS_CALL(
         bundleMgrHelper->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, userId))) {
-        HILOG_ERROR("Failed to get bundle info.");
+        TAG_LOGE(AAFwkTag::DIALOG, "Failed to get bundle info.");
         return;
     }
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
@@ -659,7 +644,7 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
         std::string(AbilityBase::Constants::FILE_SEPARATOR) + bundleInfo.name);
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
         std::string loadPath;
-        HILOG_DEBUG("make a judgment.");
+        TAG_LOGD(AAFwkTag::DIALOG, "make a judgment.");
         if (!hapModuleInfo.hapPath.empty()) {
             loadPath = hapModuleInfo.hapPath;
         } else {
@@ -668,18 +653,40 @@ void SystemDialogScheduler::GetAppNameFromResource(int32_t labelId,
         if (loadPath.empty()) {
             continue;
         }
-        HILOG_DEBUG("GetAppNameFromResource loadPath: %{public}s.", loadPath.c_str());
+        TAG_LOGD(AAFwkTag::DIALOG, "GetAppNameFromResource loadPath: %{public}s.", loadPath.c_str());
         if (!resourceManager->AddResource(loadPath.c_str())) {
-            HILOG_ERROR("ResourceManager add %{public}s resource path failed.", bundleInfo.name.c_str());
+            TAG_LOGE(AAFwkTag::DIALOG, "ResourceManager add %{public}s resource path failed.", bundleInfo.name.c_str());
         }
     }
     resourceManager->GetStringById(static_cast<uint32_t>(labelId), appName);
-    HILOG_DEBUG("Get app display info, labelId: %{public}d, appname: %{public}s.", labelId, appName.c_str());
+    TAG_LOGD(
+        AAFwkTag::DIALOG, "Get app display info, labelId: %{public}d, appname: %{public}s.", labelId, appName.c_str());
+}
+
+bool SystemDialogScheduler::GetAssertFaultDialogWant(Want &want)
+{
+    auto bundleMgrHelper = AbilityUtil::GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::DIALOG, "Failed to get bms.");
+        return false;
+    }
+
+    std::string bundleName;
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (IN_PROCESS_CALL(bundleMgrHelper->GetNameForUid(callingUid, bundleName)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::DIALOG, "VerifyPermission failed to get bundle name by uid");
+        return false;
+    }
+
+    want.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_ASSERT_FAULT_DIALOG);
+    want.SetParam(BUNDLE_NAME, bundleName);
+    want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
+    return true;
 }
 
 Want SystemDialogScheduler::GetSwitchUserDialogWant()
 {
-    HILOG_DEBUG("start");
+    TAG_LOGD(AAFwkTag::DIALOG, "start");
     AAFwk::Want dialogWant;
     dialogWant.SetElementName(BUNDLE_NAME_DIALOG, ABILITY_NAME_FREEZE_DIALOG);
 

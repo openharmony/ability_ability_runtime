@@ -56,6 +56,8 @@ public:
     std::shared_ptr<Context> CreateModuleContext(const std::string &bundleName, const std::string &moduleName) override;
     std::shared_ptr<Global::Resource::ResourceManager> CreateModuleResourceManager(
         const std::string &bundleName, const std::string &moduleName) override;
+    int32_t CreateSystemHspModuleResourceManager(const std::string &bundleName,
+        const std::string &moduleName, std::shared_ptr<Global::Resource::ResourceManager> &resourceManager) override;
 
     std::string GetBundleCodePath() const override;
     ErrCode StartAbility(const AAFwk::Want &want, int requestCode) override;
@@ -90,6 +92,8 @@ public:
     ErrCode OnBackPressedCallBack(bool &needMoveToBackground) override;
 
     ErrCode MoveAbilityToBackground() override;
+
+    ErrCode MoveUIAbilityToBackground() override;
 
     ErrCode TerminateSelf() override;
 
@@ -185,6 +189,8 @@ public:
     }
 
     void SetWeakSessionToken(const wptr<IRemoteObject>& sessionToken) override;
+    void SetAbilityRecordId(int32_t abilityRecordId) override;
+    int32_t GetAbilityRecordId() override;
 
     void SetTerminating(bool state) override
     {
@@ -196,7 +202,7 @@ public:
     ErrCode ReportDrawnCompleted() override;
 
     ErrCode GetMissionId(int32_t &missionId) override;
-    
+
     /**
      * @brief Set mission continue state of this ability.
      *
@@ -209,6 +215,15 @@ public:
         AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
 
     ErrCode RequestModalUIExtension(const Want &want) override;
+
+    ErrCode ChangeAbilityVisibility(bool isShow) override;
+
+    ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
+        RuntimeTask &&task) override;
+
+    void RegisterAbilityLifecycleObserver(const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer) override;
+
+    void UnregisterAbilityLifecycleObserver(const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer) override;
 
 #ifdef SUPPORT_GRAPHICS
     /**
@@ -256,6 +271,8 @@ public:
      * @param want Create modal UIExtension with want object.
      */
     ErrCode CreateModalUIExtensionWithApp(const Want &want) override;
+    void EraseUIExtension(int32_t sessionId) override;
+    bool IsUIExtensionExist(const AAFwk::Want &want);
 #endif
 
 private:
@@ -269,8 +286,11 @@ private:
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
     bool isTerminating_ = false;
     int32_t missionId_ = -1;
+    int32_t abilityRecordId_ = 0;
     std::mutex sessionTokenMutex_;
     wptr<IRemoteObject> sessionToken_;
+    std::mutex uiExtensionMutex_;
+    std::map<int32_t, Want> uiExtensionMap_;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

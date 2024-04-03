@@ -65,6 +65,7 @@ public:
 
     static bool ReadSourceMapData(const std::string& hapPath, const std::string& sourceMapPath, std::string& content);
 
+    static std::shared_ptr<Options> GetChildOptions();
     JsRuntime();
     ~JsRuntime() override;
 
@@ -80,8 +81,13 @@ public:
     void PostSyncTask(const std::function<void()>& task, const std::string& name);
     void RemoveTask(const std::string& name);
     void DumpHeapSnapshot(bool isPrivate) override;
+    void DumpCpuProfile(bool isPrivate) override;
     void DestroyHeapProfiler() override;
     void ForceFullGC() override;
+    void ForceFullGC(uint32_t tid) override;
+    void DumpHeapSnapshot(uint32_t tid, bool isFullGC) override;
+    void AllowCrossThreadExecution() override;
+    void GetHeapPrepare() override;
     bool BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames) override;
     void NotifyApplicationState(bool isBackground) override;
     bool SuspendVM(uint32_t tid) override;
@@ -92,7 +98,8 @@ public:
 
     void PreloadSystemModule(const std::string& moduleName) override;
 
-    void StartDebugMode(bool needBreakPoint, const std::string &processName, bool isDebug = true) override;
+    void StartDebugMode(bool needBreakPoint, const std::string &processName, bool isDebug = true,
+        bool isNativeStart = false) override;
     void StopDebugMode();
     bool LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath) override;
     bool UnLoadRepairPatch(const std::string& hqfFile) override;
@@ -113,8 +120,8 @@ public:
     void InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> operatorImpl);
     void FreeNativeReference(std::unique_ptr<NativeReference> reference);
     void FreeNativeReference(std::shared_ptr<NativeReference>&& reference);
-    void StartProfiler(
-        const std::string &perfCmd, bool needBreakPoint, const std::string &processName, bool isDebug = true) override;
+    void StartProfiler(const std::string &perfCmd, bool needBreakPoint, const std::string &processName,
+        bool isDebug = true, bool isNativeStart = false) override;
 
     void ReloadFormComponent(); // Reload ArkTS-Card component
     void DoCleanWorkAfterStageCleaned() override;
@@ -133,6 +140,7 @@ private:
 
     bool Initialize(const Options& options);
     void Deinitialize();
+    static void SetChildOptions(const Options& options);
 
     int32_t JsperfProfilerCommandParse(const std::string &command, int32_t defaultValue);
 
@@ -152,6 +160,8 @@ private:
 
     static std::atomic<bool> hasInstance;
 
+    static std::shared_ptr<Options> childOptions_;
+    
 private:
     bool CreateJsEnv(const Options& options);
     void PreloadAce(const Options& options);

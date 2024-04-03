@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,8 @@ namespace UIExtensionUtils {
 const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
     AppExecFwk::ExtensionAbilityType::SHARE,
     AppExecFwk::ExtensionAbilityType::ACTION,
+    AppExecFwk::ExtensionAbilityType::EMBEDDED_UI,
+    AppExecFwk::ExtensionAbilityType::INSIGHT_INTENT_UI,
     AppExecFwk::ExtensionAbilityType::AUTO_FILL_PASSWORD,
     AppExecFwk::ExtensionAbilityType::UI,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_MEDIACONTROL,
@@ -39,6 +41,7 @@ const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
     AppExecFwk::ExtensionAbilityType::HMS_ACCOUNT,
     AppExecFwk::ExtensionAbilityType::ADS,
     AppExecFwk::ExtensionAbilityType::VOIP,
+    AppExecFwk::ExtensionAbilityType::ACCESS_VIEW,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_MEETIMECALL,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_MEETIMECONTACT,
     AppExecFwk::ExtensionAbilityType::SYSDIALOG_MEETIMEMESSAGE,
@@ -46,7 +49,12 @@ const std::unordered_set<AppExecFwk::ExtensionAbilityType> UI_EXTENSION_SET = {
     AppExecFwk::ExtensionAbilityType::SYSPICKER_MEETIMECONTACT,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_MEETIMECALLLOG,
     AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOPICKER,
-    AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI
+    AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI,
+    AppExecFwk::ExtensionAbilityType::SYSPICKER_NAVIGATION,
+    AppExecFwk::ExtensionAbilityType::SYSPICKER_APPSELECTOR,
+    AppExecFwk::ExtensionAbilityType::SYSPICKER_CAMERA,
+    AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART,
+    AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
 };
 const int EDM_SA_UID = 3057;
 

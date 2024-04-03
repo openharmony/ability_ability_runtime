@@ -25,19 +25,19 @@ namespace OHOS {
 namespace AppExecFwk {
 class MockAppMgrService : public AppMgrStub {
 public:
-    MOCK_METHOD5(LoadAbility,
+    MOCK_METHOD6(LoadAbility,
         void(const sptr<IRemoteObject>& token, const sptr<IRemoteObject>& preToken,
             const std::shared_ptr<AbilityInfo>& abilityInfo, const std::shared_ptr<ApplicationInfo>& appInfo,
-            const std::shared_ptr<AAFwk::Want>& want));
+            const std::shared_ptr<AAFwk::Want>& want, int32_t abilityRecordId));
     MOCK_METHOD2(TerminateAbility, void(const sptr<IRemoteObject>& token, bool clearMissionFlag));
     MOCK_METHOD2(UpdateAbilityState, void(const sptr<IRemoteObject>& token, const AbilityState state));
     MOCK_METHOD1(AttachApplication, void(const sptr<IRemoteObject>& app));
     MOCK_METHOD1(NotifyMemoryLevel, int(int32_t level));
+    MOCK_METHOD1(NotifyProcMemoryLevel, int32_t(const std::map<pid_t, MemoryLevel> &procLevelMap));
     MOCK_METHOD2(DumpHeapMemory, int(const int32_t pid, OHOS::AppExecFwk::MallocInfo &mallocInfo));
     MOCK_METHOD1(ApplicationForegrounded, void(const int32_t recordId));
     MOCK_METHOD1(ApplicationBackgrounded, void(const int32_t recordId));
     MOCK_METHOD1(ApplicationTerminated, void(const int32_t recordId));
-    MOCK_METHOD2(CheckPermission, int32_t(const int32_t recordId, const std::string& permission));
     MOCK_METHOD1(AbilityCleaned, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD2(UpdateApplicationInfoInstalled, int(const std::string&, const int uid));
     MOCK_METHOD1(KillApplication, int32_t(const std::string& appName));
@@ -91,6 +91,9 @@ public:
     MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
     MOCK_METHOD1(AttachChildProcess, void(const sptr<IRemoteObject> &childScheduler));
     MOCK_METHOD0(ExitChildProcessSafely, void());
+    MOCK_METHOD1(RegisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
+    MOCK_METHOD1(UnregisterRenderStateObserver, int32_t(const sptr<IRenderStateObserver> &observer));
+    MOCK_METHOD2(UpdateRenderState, int32_t(pid_t renderPid, int32_t state));
 
     MOCK_METHOD0(IsFinalAppProcess, bool());
     virtual int StartUserTestProcess(
@@ -222,6 +225,11 @@ public:
     }
 
     int32_t UnregisterAppRunningStatusListener(const sptr<IRemoteObject> &listener)
+    {
+        return 0;
+    }
+
+    int32_t DumpJsHeapMemory(OHOS::AppExecFwk::JsHeapDumpInfo &info)
     {
         return 0;
     }

@@ -27,6 +27,9 @@
 
 namespace OHOS {
 namespace JsEnv {
+namespace {
+const std::string NOT_FOUNDMAP = "Cannot get SourceMap info, dump raw stack:\n";
+}
 using ErrorPos = std::pair<uint32_t, uint32_t>;
 struct SourceMapInfo {
     int32_t beforeRow = 0;
@@ -77,7 +80,7 @@ public:
     static bool ReadSourceMapData(const std::string& hapPath, const std::string& sourceMapPath, std::string& content);
     static void RegisterGetHapPathCallback(GetHapPathCallback getFunc);
     static void GetHapPath(const std::string &bundleName, std::vector<std::string> &hapList);
-    bool GetLineAndColumnNumbers(int& line, int& column, SourceMapData& targetMap, std::string& key);
+    bool GetLineAndColumnNumbers(int& line, int& column, SourceMapData& targetMap);
     static void ExtractStackInfo(const std::string& stackStr, std::vector<std::string>& res);
 
 private:
@@ -86,11 +89,10 @@ private:
     void ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo);
     std::vector<std::string> HandleMappings(const std::string& mapping);
     bool VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans);
-    MappingInfo Find(int32_t row, int32_t col, const SourceMapData& targetMap, const std::string& key);
+    MappingInfo Find(int32_t row, int32_t col, const SourceMapData& targetMap);
     void GetPosInfo(const std::string& temp, int32_t start, std::string& line, std::string& column);
     std::string GetRelativePath(const std::string& sources);
-    std::string GetSourceInfo(const std::string& line, const std::string& column,
-        const SourceMapData& targetMap, const std::string& key);
+    std::string GetSourceInfo(const std::string& line, const std::string& column, const SourceMapData& targetMap);
 
 private:
     bool isModular_ = true;

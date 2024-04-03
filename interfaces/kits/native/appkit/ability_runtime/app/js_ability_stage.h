@@ -17,8 +17,15 @@
 #define OHOS_ABILITY_RUNTIME_JS_ABILITY_STAGE_H
 
 #include "ability_delegator_infos.h"
+
+#include <memory>
+#include <vector>
+
 #include "ability_stage.h"
 #include "configuration.h"
+#include "js_startup_task.h"
+#include "resource_manager.h"
+#include "nlohmann/json.hpp"
 #include "native_engine/native_value.h"
 
 class NativeReference;
@@ -48,6 +55,8 @@ public:
 
     void OnMemoryLevel(int32_t level) override;
 
+    int32_t RunAutoStartupTask(const std::function<void()> &callback, bool &isAsyncCallback) override;
+
 private:
     napi_value CallObjectMethod(const char* name, napi_value const * argv = nullptr, size_t argc = 0);
 
@@ -56,6 +65,27 @@ private:
     std::string GetHapModuleProp(const std::string &propName) const;
 
     static bool UseCommonChunk(const AppExecFwk::HapModuleInfo& hapModuleInfo);
+
+    int32_t RegisterStartupTaskFromProfile(std::vector<JsStartupTask> &jsStartupTasks);
+    
+    bool GetProfileInfoFromResourceManager(std::vector<std::string> &profileInfo);
+    
+    bool AnalyzeProfileInfoAndRegisterStartupTask(const std::vector<std::string> &profileInfo);
+
+    void SetOptionalParameters(const nlohmann::json &module, JsStartupTask &jsStartupTask);
+    
+    std::unique_ptr<NativeReference> LoadJsSrcEntry(const std::string &srcEntry);
+
+    bool LoadJsStartupConfig(const std::string &srcEntry);
+    
+    bool GetResFromResMgr(
+        const std::string &resName,
+        const std::shared_ptr<Global::Resource::ResourceManager> &resMgr,
+        bool isCompressed, std::vector<std::string> &profileInfo);
+        
+    bool IsFileExisted(const std::string &filePath);
+    
+    bool TransformFileToJsonString(const std::string &resPath, std::string &profile);
 
     JsRuntime& jsRuntime_;
     std::shared_ptr<NativeReference> jsAbilityStageObj_;

@@ -77,6 +77,7 @@ ohos_unittest("context_deal_interface_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
@@ -90,6 +91,7 @@ ohos_unittest("application_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "${ability_runtime_services_path}/common/include",
     "${ability_runtime_test_path}/mock/common/include",
     "${resource_management_path}/frameworks/resmgr/include",
   ]
@@ -137,6 +139,7 @@ ohos_unittest("application_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -186,6 +189,7 @@ ohos_unittest("context_container_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
@@ -247,6 +251,7 @@ ohos_unittest("context_deal_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -301,6 +306,7 @@ ohos_unittest("application_impl_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
@@ -339,32 +345,6 @@ ohos_unittest("ability_start_setting_test") {
     "c_utils:utilsbase",
     "hilog:libhilog",
     "ipc:ipc_core",
-  ]
-}
-
-ohos_unittest("mix_stack_dumper_test") {
-  module_out_path = module_output_path
-
-  include_dirs = [
-    "${ability_runtime_path}/interfaces/kits/native/appkit/app",
-    "${ability_runtime_test_path}/mock/frameworks_kits_runtime_test/",
-  ]
-
-  sources = [ "mix_stack_dumper_test.cpp" ]
-
-  deps = [
-    "${ability_runtime_native_path}/appkit:appkit_native",
-    "//third_party/googletest:gtest_main",
-  ]
-
-  external_deps = [
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:runtime",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
-    "faultloggerd:libbacktrace_local",
-    "hilog:libhilog",
-    "napi:ace_napi",
   ]
 }
 
@@ -413,6 +393,7 @@ ohos_unittest("ability_stage_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -461,6 +442,7 @@ ohos_unittest("form_extension_context_test") {
     "form_fwk:form_manager",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "samgr:samgr_proxy",
@@ -475,6 +457,7 @@ ohos_unittest("bms_context_impl_test") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "${ability_runtime_services_path}/common/include",
     "${resource_management_path}/frameworks/resmgr/include",
     "${ability_runtime_test_path}/mock/common/include",
   ]
@@ -515,6 +498,7 @@ ohos_unittest("bms_context_impl_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
@@ -553,6 +537,7 @@ ohos_unittest("context_container_by_mock_bms_test") {
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "napi:ace_napi",
   ]
@@ -574,7 +559,6 @@ group("unittest") {
     ":context_container_test",
     ":context_deal_test",
     ":form_extension_context_test",
-    ":mix_stack_dumper_test",
   ]
 
   deps += [ "ability_delegator:unittest" ]

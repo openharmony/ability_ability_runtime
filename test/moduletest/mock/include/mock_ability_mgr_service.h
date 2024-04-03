@@ -134,12 +134,12 @@ public:
         return 0;
     }
 
-    virtual int StartUser(int userId) override
+    virtual int StartUser(int userId, sptr<IUserCallback> callback) override
     {
         return 0;
     }
 
-    virtual int StopUser(int userId, const sptr<IStopUserCallback>& callback) override
+    virtual int StopUser(int userId, const sptr<IUserCallback>& callback) override
     {
         return 0;
     }
@@ -206,11 +206,6 @@ public:
     virtual bool IsRunningInStabilityTest() override
     {
         return true;
-    }
-
-    virtual int SendANRProcessID(int pid) override
-    {
-        return 0;
     }
 
     virtual int StartUserTest(const Want& want, const sptr<IRemoteObject>& observer) override
@@ -285,6 +280,8 @@ public:
         const InsightIntentExecuteParam &param));
     MOCK_METHOD3(ExecuteInsightIntentDone, int32_t(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result));
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
 
 private:
     Semaphore sem_;

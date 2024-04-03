@@ -27,6 +27,7 @@
 #include "app_process_data.h"
 #include "app_state_call_back_mock.h"
 #include "element_name.h"
+#include "mock_sa_call.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -229,7 +230,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_oprator_004, TestSize.Level1)
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = nullptr;
     EXPECT_NE((int)ERR_OK,
         DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-            token, pretoken, record->GetAbilityInfo(), record->GetApplicationInfo(), record->GetWant()));
+            token, pretoken, record->GetAbilityInfo(), record->GetApplicationInfo(), record->GetWant(), 0));
 }
 
 /*
@@ -242,7 +243,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_oprator_004, TestSize.Level1)
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_LoadAbility_001, TestSize.Level1)
 {
-    EXPECT_CALL(*clientMock_, LoadAbility(_, _, _, _, _)).Times(1)
+    EXPECT_CALL(*clientMock_, LoadAbility(_, _, _, _, _, _)).Times(1)
         .WillOnce(Return(AppMgrResultCode::ERROR_SERVICE_NOT_READY));
     sptr<IRemoteObject> token;
     sptr<IRemoteObject> preToken;
@@ -251,7 +252,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_LoadAbility_001, TestSize.Level1)
     Want want;
     DelayedSingleton<AppScheduler>::GetInstance()->appMgrClient_ = std::move(clientMock_);
     int res = DelayedSingleton<AppScheduler>::GetInstance()->LoadAbility(
-        token, preToken, abilityInfo, applicationInfo, want);
+        token, preToken, abilityInfo, applicationInfo, want, 0);
     EXPECT_EQ(res, INNER_ERR);
 }
 
@@ -1181,6 +1182,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_RegisterAppDebugListener_001, TestSize.L
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_RegisterAppDebugListener_002, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     auto listener = new AppDebugListenerStubMock();
     int res = DelayedSingleton<AppScheduler>::GetInstance()->RegisterAppDebugListener(listener);
     EXPECT_EQ(res, ERR_OK);
@@ -1205,6 +1207,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_UnregisterAppDebugListener_001, TestSize
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_UnregisterAppDebugListener_002, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     auto listener = new AppDebugListenerStubMock();
     int res = DelayedSingleton<AppScheduler>::GetInstance()->UnregisterAppDebugListener(listener);
     EXPECT_EQ(res, ERR_OK);
@@ -1217,6 +1220,7 @@ HWTEST_F(AppSchedulerTest, AppScheduler_UnregisterAppDebugListener_002, TestSize
  */
 HWTEST_F(AppSchedulerTest, AppScheduler_AttachAppDebug_001, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     std::string bundleName = "bundleName";
     int res = DelayedSingleton<AppScheduler>::GetInstance()->AttachAppDebug(bundleName);
     EXPECT_EQ(res, ERR_OK);

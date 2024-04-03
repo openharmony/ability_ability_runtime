@@ -20,9 +20,11 @@
 #include "app_utils.h"
 #undef private
 #include "child_main_thread.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "mock_app_mgr_service_inner.h"
 #include "mock_native_token.h"
+#include "mock_sa_call.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -42,11 +44,15 @@ public:
 
 void AppMgrServiceTest::SetUpTestCase(void)
 {
-    AAFwk::AppUtils::GetInstance().isMultiProcessModel_ = true;
+    AAFwk::AppUtils::GetInstance().isMultiProcessModel_.isLoaded = true;
+    AAFwk::AppUtils::GetInstance().isMultiProcessModel_.value = true;
 }
 
 void AppMgrServiceTest::TearDownTestCase(void)
-{}
+{
+    AAFwk::AppUtils::GetInstance().isMultiProcessModel_.isLoaded = false;
+    AAFwk::AppUtils::GetInstance().isMultiProcessModel_.value = false;
+}
 
 void AppMgrServiceTest::SetUp()
 {
@@ -1062,7 +1068,7 @@ HWTEST_F(AppMgrServiceTest, NotifyLoadRepairPatch_002, TestSize.Level0)
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     OHOS::AppExecFwk::MockNativeToken::SetNativeToken();
     int32_t res = appMgrService->NotifyLoadRepairPatch(bundleName, callback);
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
 
 /*
@@ -1101,7 +1107,7 @@ HWTEST_F(AppMgrServiceTest, NotifyHotReloadPage_002, TestSize.Level0)
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     OHOS::AppExecFwk::MockNativeToken::SetNativeToken();
     int32_t res = appMgrService->NotifyHotReloadPage(bundleName, callback);
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
@@ -1180,7 +1186,7 @@ HWTEST_F(AppMgrServiceTest, NotifyUnLoadRepairPatch_002, TestSize.Level0)
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
     OHOS::AppExecFwk::MockNativeToken::SetNativeToken();
     int32_t res = appMgrService->NotifyUnLoadRepairPatch(bundleName, callback);
-    EXPECT_NE(res, ERR_INVALID_OPERATION);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
 
 /*
@@ -1215,7 +1221,7 @@ HWTEST_F(AppMgrServiceTest, GetProcessMemoryByPid_002, TestSize.Level0)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
-    
+
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
@@ -1259,7 +1265,7 @@ HWTEST_F(AppMgrServiceTest, GetRunningProcessInformation_002, TestSize.Level0)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
-    
+
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
@@ -1341,10 +1347,11 @@ HWTEST_F(AppMgrServiceTest, ChangeAppGcState_001, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceTest, IsApplicationRunning_001, TestSize.Level1)
 {
+    AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     ASSERT_NE(appMgrService, nullptr);
     appMgrService->SetInnerService(nullptr);
-    
+
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
@@ -1392,7 +1399,7 @@ HWTEST_F(AppMgrServiceTest, UnregisterAbilityForegroundStateObserver_0100, TestS
  */
 HWTEST_F(AppMgrServiceTest, StartChildProcess_001, TestSize.Level1)
 {
-    HILOG_DEBUG("StartChildProcess_001 called.");
+    TAG_LOGD(AAFwkTag::TEST, "StartChildProcess_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     ASSERT_NE(appMgrService, nullptr);
 
@@ -1415,7 +1422,7 @@ HWTEST_F(AppMgrServiceTest, StartChildProcess_001, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceTest, GetChildProcessInfoForSelf_001, TestSize.Level1)
 {
-    HILOG_DEBUG("GetChildProcessInfoForSelf_001 called.");
+    TAG_LOGD(AAFwkTag::TEST, "GetChildProcessInfoForSelf_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     ASSERT_NE(appMgrService, nullptr);
 
@@ -1438,7 +1445,7 @@ HWTEST_F(AppMgrServiceTest, GetChildProcessInfoForSelf_001, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceTest, AttachChildProcess_001, TestSize.Level1)
 {
-    HILOG_DEBUG("AttachChildProcess_001 called.");
+    TAG_LOGD(AAFwkTag::TEST, "AttachChildProcess_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     ASSERT_NE(appMgrService, nullptr);
 
@@ -1459,7 +1466,7 @@ HWTEST_F(AppMgrServiceTest, AttachChildProcess_001, TestSize.Level1)
  */
 HWTEST_F(AppMgrServiceTest, ExitChildProcessSafely_001, TestSize.Level1)
 {
-    HILOG_DEBUG("ExitChildProcessSafely_001 called.");
+    TAG_LOGD(AAFwkTag::TEST, "ExitChildProcessSafely_001 called.");
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
     ASSERT_NE(appMgrService, nullptr);
 
@@ -1497,6 +1504,48 @@ HWTEST_F(AppMgrServiceTest, UnregisterAppForegroundStateObserver_001, TestSize.L
     appMgrService->appMgrServiceInner_ = nullptr;
     sptr<IAppForegroundStateObserver> observer = nullptr;
     auto res = appMgrService->UnregisterAppForegroundStateObserver(observer);
+    EXPECT_EQ(ERR_INVALID_OPERATION, res);
+}
+
+/**
+ * @tc.name: RegisterRenderStateObserver_0100
+ * @tc.desc: Test registerRenderStateObserver when inpit is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, RegisterRenderStateObserver_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->appMgrServiceInner_ = nullptr;
+    sptr<IRenderStateObserver> observer = nullptr;
+    auto res = appMgrService->RegisterRenderStateObserver(observer);
+    EXPECT_EQ(ERR_INVALID_OPERATION, res);
+}
+
+/**
+ * @tc.name: UnregisterRenderStateObserver_0100
+ * @tc.desc: Test unregisterRenderStateObserver when input is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, UnregisterRenderStateObserver_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    appMgrService->appMgrServiceInner_ = nullptr;
+    sptr<IRenderStateObserver> observer = nullptr;
+    auto res = appMgrService->UnregisterRenderStateObserver(observer);
+    EXPECT_EQ(ERR_INVALID_OPERATION, res);
+}
+
+/**
+ * @tc.name: UpdateRenderState_0100
+ * @tc.desc: Test updateRenderState when appMgrServiceInner_ is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, UpdateRenderState_001, TestSize.Level1)
+{
+    auto appMgrService = std::make_shared<AppMgrService>();
+    pid_t renderPid = 0;
+    int32_t state = 0;
+    auto res = appMgrService->UpdateRenderState(renderPid, state);
     EXPECT_EQ(ERR_INVALID_OPERATION, res);
 }
 } // namespace AppExecFwk

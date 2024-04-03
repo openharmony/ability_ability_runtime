@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,18 +28,15 @@ public:
     virtual ~UriPermissionManagerProxy() = default;
 
     virtual int GrantUriPermission(const Uri &uri, unsigned int flag,
-        const std::string targetBundleName, int32_t appIndex = 0) override;
+        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
 
     virtual int GrantUriPermission(const std::vector<Uri> &uriVec, unsigned int flag,
-        const std::string targetBundleName, int32_t appIndex = 0) override;
-    virtual int GrantUriPermissionFor2In1(
-        const Uri &uri, unsigned int flag, const std::string &targetBundleName, int32_t appIndex = 0) override;
+        const std::string targetBundleName, int32_t appIndex = 0, uint32_t initiatorTokenId = 0) override;
     virtual int GrantUriPermissionFor2In1(const std::vector<Uri> &uriVec, unsigned int flag,
         const std::string &targetBundleName, int32_t appIndex = 0, bool isSystemAppCall = false) override;
     virtual void RevokeUriPermission(const Security::AccessToken::AccessTokenID tokenId) override;
     virtual int RevokeAllUriPermissions(const Security::AccessToken::AccessTokenID tokenId) override;
     virtual int RevokeUriPermissionManually(const Uri &uri, const std::string bundleName) override;
-    virtual bool CheckPersistableUriPermissionProxy(const Uri& uri, uint32_t flag, uint32_t tokenId) override;
     virtual bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
     virtual bool IsAuthorizationUriAllowed(uint32_t fromTokenId) override;
 

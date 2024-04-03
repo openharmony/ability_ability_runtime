@@ -125,8 +125,8 @@ public:
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
     MOCK_METHOD2(SetMissionContinueState, int(const sptr<IRemoteObject>& token, const AAFwk::ContinueState& state));
-    int StartUser(int userId) override;
-    int StopUser(int userId, const sptr<IStopUserCallback>& callback) override;
+    int StartUser(int userId, sptr<IUserCallback> callback) override;
+    int StopUser(int userId, const sptr<IUserCallback>& callback) override;
     int LogoutUser(int32_t userId) override;
     int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
     int StopSyncRemoteMissions(const std::string& devId) override;
@@ -142,7 +142,6 @@ public:
     int GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
         MissionSnapshot& snapshot, bool isLowResolution) override;
     int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
-    int SendANRProcessID(int pid) override;
     int SetAbilityController(const sptr<AppExecFwk::IAbilityController>& abilityController,
         bool imAStabilityTest) override;
     bool IsRunningInStabilityTest() override;
@@ -195,6 +194,8 @@ public:
         const InsightIntentExecuteParam &param));
     MOCK_METHOD3(ExecuteInsightIntentDone, int32_t(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result));
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
 public:
     std::string powerState_;
     static bool finishFlag_;
@@ -305,8 +306,8 @@ public:
     MOCK_METHOD4(ShareDataDone, int32_t(const sptr<IRemoteObject> &token,
         const int32_t &resultCode, const int32_t &uniqueId, WantParams &wantParam));
     MOCK_METHOD2(SetMissionContinueState, int(const sptr<IRemoteObject>& token, const AAFwk::ContinueState& state));
-    int StartUser(int userId) override;
-    int StopUser(int userId, const sptr<IStopUserCallback>& callback) override;
+    int StartUser(int userId, sptr<IUserCallback> callback) override;
+    int StopUser(int userId, const sptr<IUserCallback>& callback) override;
     int LogoutUser(int32_t userId) override;
     int StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
     int StopSyncRemoteMissions(const std::string& devId) override;
@@ -326,7 +327,6 @@ public:
     int GetMissionSnapshot(const std::string& deviceId, int32_t missionId,
         MissionSnapshot& snapshot, bool isLowResolution) override;
     int RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handler) override;
-    int SendANRProcessID(int pid) override;
     int SetAbilityController(const sptr<AppExecFwk::IAbilityController>& abilityController,
         bool imAStabilityTest) override;
     bool IsRunningInStabilityTest() override;
@@ -375,6 +375,8 @@ public:
         const InsightIntentExecuteParam &param));
     MOCK_METHOD3(ExecuteInsightIntentDone, int32_t(const sptr<IRemoteObject> &token, uint64_t intentId,
         const InsightIntentExecuteResult &result));
+    MOCK_METHOD5(StartAbilityWithSpecifyTokenId, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        uint32_t specifyTokenId, int32_t userId, int requestCode));
 public:
     std::string powerState_;
     static bool finishFlag_;

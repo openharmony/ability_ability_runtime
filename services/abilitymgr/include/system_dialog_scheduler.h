@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,8 @@ public:
     virtual ~SystemDialogScheduler() = default;
 
     bool GetANRDialogWant(int userId, int pid, AAFwk::Want &want);
+    int GetSelectorDialogWantCommon(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
+        const sptr<IRemoteObject> &callerToken);
     int GetPcSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
         const std::string &type, int32_t userId, const sptr<IRemoteObject> &callerToken);
     int GetSelectorDialogWant(const std::vector<DialogAppInfo> &dialogAppInfos, Want &targetWant,
@@ -75,6 +77,7 @@ public:
     Want GetTipsDialogWant(const sptr<IRemoteObject> &callerToken);
     Want GetJumpInterceptorDialogWant(Want &targetWant);
     Want GetSwitchUserDialogWant();
+    bool GetAssertFaultDialogWant(Want &want);
 
     void SetDeviceType(const std::string &deviceType)
     {
