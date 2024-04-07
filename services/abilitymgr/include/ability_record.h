@@ -524,6 +524,8 @@ public:
 
     void SetCompleteFirstFrameDrawing(const bool flag);
     bool IsCompleteFirstFrameDrawing() const;
+    bool GetColdStartFlag();
+    void SetColdStartFlag(bool isColdStart);
 #endif
 
     /**
@@ -1170,6 +1172,7 @@ private:
     std::shared_ptr<Media::PixelMap> startingWindowBg_ = nullptr;
 
     bool isCompleteFirstFrameDrawing_ = false;
+    bool coldStart_ = false;
 #endif
 
     bool isGrantedUriPermission_ = false;

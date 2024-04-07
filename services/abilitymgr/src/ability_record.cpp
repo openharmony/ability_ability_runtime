@@ -87,6 +87,9 @@ const std::string SHELL_ASSISTANT_ABILITYNAME = "MainAbility";
 const std::string SHELL_ASSISTANT_DIEREASON = "crash_die";
 const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
+#ifdef SUPPORT_GRAPHICS
+const std::string ABMS_SUPPORT_SCENEBOARD_ENABLED = "persist.sys.abms.support.sceneboard.enable";
+#endif
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -366,6 +369,16 @@ int AbilityRecord::LoadAbility()
         if (caller) {
             callerToken_ = caller->GetToken();
         }
+    }
+
+    std::string supportSCB = OHOS::system::GetParameter(ABMS_SUPPORT_SCENEBOARD_ENABLED, "false");
+    if (supportSCB == "true") {
+        auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
+        CHECK_POINTER_AND_RETURN_LOG(handler, ERR_INVALID_VALUE, "handler is nullptr");
+        auto task = [abilityToken = token_]() {
+            DelayedSingleton<AbilityManagerService>::GetInstance()->CompleteFirstFrameDrawing(abilityToken);
+        };
+        handler->SubmitTask(task, RESTART_SCENEBOARD_DELAY);
     }
 
     std::lock_guard guard(wantLock_);
@@ -1177,6 +1190,16 @@ void AbilityRecord::SetCompleteFirstFrameDrawing(const bool flag)
 bool AbilityRecord::IsCompleteFirstFrameDrawing() const
 {
     return isCompleteFirstFrameDrawing_;
+}
+
+bool AbilityRecord::GetColdStartFlag()
+{
+    return coldStart_;
+}
+
+void AbilityRecord::SetColdStartFlag(bool isColdStart)
+{
+    coldStart_ = isColdStart;
 }
 #endif
 
