@@ -1540,12 +1540,6 @@ int32_t AbilityManagerService::RequestDialogServiceInner(const Want &want, const
         HILOG_ERROR("Multi-user non-concurrent mode is not satisfied.");
         return ERR_CROSS_USER;
     }
-
-    if (ImplicitStartProcessor::IsImplicitStartAction(want)) {
-        HILOG_ERROR("RequestDialogService does not support implicit start");
-        return ERR_WRONG_INTERFACE_CALL;
-    }
-
     AbilityRequest abilityRequest;
     result = GenerateExtensionAbilityRequest(want, abilityRequest, callerToken, validUserId);
     if (result != ERR_OK) {
