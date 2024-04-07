@@ -329,6 +329,10 @@ public:
 
     std::shared_ptr<AbilityRecord> GetAbilityRecordByToken(const sptr<IRemoteObject> &token) const;
 
+#ifdef SUPPORT_GRAPHICS
+    void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &token);
+#endif
+
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
