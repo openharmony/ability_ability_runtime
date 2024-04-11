@@ -206,6 +206,7 @@ private:
     int SendDialogResultInner(MessageParcel &data, MessageParcel &reply);
     int RegisterAbilityFirstFrameStateObserverInner(MessageParcel &data, MessageParcel &reply);
     int UnregisterAbilityFirstFrameStateObserverInner(MessageParcel &data, MessageParcel &reply);
+    int CompleteFirstFrameDrawingBySCBInner(MessageParcel &data, MessageParcel &reply);
 #endif
 
     #ifdef ABILITY_COMMAND_FOR_TEST
