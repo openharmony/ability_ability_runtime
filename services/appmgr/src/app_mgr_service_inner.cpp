@@ -34,7 +34,6 @@
 #include "app_utils.h"
 #include "appfreeze_manager.h"
 #include "application_state_observer_stub.h"
-#include "appspawn_mount_permission.h"
 #include "appspawn_util.h"
 #include "bundle_constants.h"
 #include "common_event.h"
@@ -133,6 +132,8 @@ const std::string KEEP_ALIVE = ":KeepAlive";
 const std::string PARAM_SPECIFIED_PROCESS_FLAG = "ohoSpecifiedProcessFlag";
 const std::string TSAN_FLAG_NAME = "tsanEnabled";
 const std::string MEMMGR_PROC_NAME = "memmgrservice";
+const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
+const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -388,10 +389,43 @@ void AppMgrServiceInner::LoadAbility(sptr<IRemoteObject> token, sptr<IRemoteObje
         }
         StartAbility(token, preToken, abilityInfo, appRecord, hapModuleInfo, want, abilityRecordId);
     }
+
+    if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType) &&
+        appRunningManager_ != nullptr && appRunningManager_->GetAppRunningRecordByAbilityToken(token)) {
+        AddUIExtensionLauncherItem(want, appRecord);
+    }
+
     PerfProfile::GetInstance().SetAbilityLoadEndTime(GetTickCount());
     PerfProfile::GetInstance().Dump();
     PerfProfile::GetInstance().Reset();
     appRecord->UpdateAbilityState(token, AbilityState::ABILITY_STATE_CREATE);
+}
+
+void AppMgrServiceInner::AddUIExtensionLauncherItem(std::shared_ptr<AAFwk::Want> want,
+    std::shared_ptr<AppRunningRecord> appRecord)
+{
+    if (want == nullptr || appRecord == nullptr || appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid input params.");
+        return;
+    }
+
+    auto uiExtensionAbilityId = want->GetIntParam(UIEXTENSION_ABILITY_ID, -1);
+    auto hostPid = want->GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1);
+    pid_t providerPid = -1;
+    if (appRecord->GetPriorityObject() != nullptr) {
+        providerPid = appRecord->GetPriorityObject()->GetPid();
+    }
+    if (uiExtensionAbilityId == -1 || hostPid == -1 || providerPid == -1) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid want params.");
+        return;
+    }
+
+    TAG_LOGD(AAFwkTag::APPMGR, "Add uiextension launcher info, uiExtensionAbilityId: %{public}d, hostPid: %{public}d, "
+        "providerPid: %{public}d.", uiExtensionAbilityId, hostPid, providerPid);
+    appRunningManager_->AddUIExtensionLauncherItem(uiExtensionAbilityId, hostPid, providerPid);
+
+    want->RemoveParam(UIEXTENSION_ABILITY_ID);
+    want->RemoveParam(UIEXTENSION_ROOT_HOST_PID);
 }
 
 bool AppMgrServiceInner::CheckLoadAbilityConditions(const sptr<IRemoteObject> &token,
@@ -2088,10 +2122,10 @@ int32_t AppMgrServiceInner::StartPerfProcess(const std::shared_ptr<AppRunningRec
     }
 
     auto&& startMsg = appRecord->GetStartMsg();
-    startMsg.code = static_cast<int32_t>(AppSpawn::ClientSocket::AppOperateCode::SPAWN_NATIVE_PROCESS);
+    startMsg.code = static_cast<int32_t>(MSG_SPAWN_NATIVE_PROCESS);
     if (!isSandboxApp) {
         TAG_LOGD(AAFwkTag::APPMGR, "debuggablePipe sandbox: false.");
-        startMsg.flags |= (AppSpawn::ClientSocket::APPSPAWN_COLD_BOOT << StartFlags::NO_SANDBOX);
+        startMsg.flags |= (START_FLAG_BASE << StartFlags::NO_SANDBOX);
     } else {
         TAG_LOGI(AAFwkTag::APPMGR, "debuggablePipe sandbox: true");
     }
@@ -2203,8 +2237,9 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
         }
     }
 
-    std::set<std::string> mountPermissionList = AppSpawn::AppspawnMountPermission::GetMountPermissionList();
-    for (std::string permission : mountPermissionList) {
+    int32_t maxPermissionIndex = GetMaxPermissionIndex();
+    for (int i = 0; i < maxPermissionIndex; i++) {
+        std::string permission = std::string(GetPermissionByIndex(i));
         if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, permission, false) ==
             Security::AccessToken::PERMISSION_GRANTED) {
             permissions.insert(permission);
@@ -2255,11 +2290,10 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     uint8_t setAllowInternet = 0;
     uint8_t allowInternet = 1;
     std::vector<int32_t> gids;
-    std::set<std::string> permissions;
-    StartProcessVerifyPermission(bundleInfo, hasAccessBundleDirReq, setAllowInternet, allowInternet, gids,
-                                 permissions);
 
     AppSpawnStartMsg startMsg;
+    StartProcessVerifyPermission(bundleInfo, hasAccessBundleDirReq, setAllowInternet, allowInternet,
+        gids, startMsg.permissions);
     startMsg.uid = bundleInfo.uid;
     startMsg.gid = bundleInfo.gid;
     startMsg.gids = gids;
@@ -2275,14 +2309,13 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     startMsg.dataGroupInfoList = dataGroupInfoList;
     startMsg.hapFlags = bundleInfo.isPreInstallApp ? 1 : 0;
 
-    startMsg.mountPermissionFlags = AppSpawn::AppspawnMountPermission::GenPermissionCode(permissions);
     startMsg.ownerId = bundleInfo.signatureInfo.appIdentifier;
     if (hasAccessBundleDirReq) {
-        startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
+        startMsg.flags = startMsg.flags | StartFlags::ACCESS_BUNDLE_DIR;
     }
 
     if (VerifyPermission(bundleInfo, PERMISSION_GET_BUNDLE_RESOURCES)) {
-        startMsg.flags = startMsg.flags | GET_BUNDLE_RESOURCES_FLAG;
+        startMsg.flags = startMsg.flags | StartFlags::BUNDLE_RESOURCES;
     }
 
     SetOverlayInfo(bundleName, userId, startMsg);
@@ -4124,7 +4157,7 @@ int AppMgrServiceInner::GetRenderProcessTerminationStatus(pid_t renderPid, int &
 
     AppSpawnStartMsg startMsg;
     startMsg.pid = renderPid;
-    startMsg.code = 1; // 1: GET_RENDER_TERMINATION_STATUS
+    startMsg.code = MSG_GET_RENDER_TERMINATION_STATUS;
     ErrCode errCode = nwebSpawnClient->GetRenderProcessTerminationStatus(startMsg, status);
     if (FAILED(errCode)) {
         TAG_LOGE(AAFwkTag::APPMGR, "failed to get render process termination status, errCode %{public}08x", errCode);
@@ -5438,17 +5471,20 @@ int32_t AppMgrServiceInner::StartChildProcessImpl(const std::shared_ptr<ChildPro
     AppSpawnStartMsg startMsg = appRecord->GetStartMsg();
     startMsg.procName = childProcessRecord->GetProcessName();
     pid_t pid = 0;
-    ErrCode errCode = spawnClient->StartProcess(startMsg, pid);
-    if (FAILED(errCode)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "failed to spawn new child process, errCode %{public}08x", errCode);
-        return ERR_APPEXECFWK_BAD_APPSPAWN_CLIENT;
-    }
+    {
+        std::lock_guard<ffrt::mutex> lock(startChildProcessLock_);
+        ErrCode errCode = spawnClient->StartProcess(startMsg, pid);
+        if (FAILED(errCode)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "failed to spawn new child process, errCode %{public}08x", errCode);
+            return ERR_APPEXECFWK_BAD_APPSPAWN_CLIENT;
+        }
 
-    childPid = pid;
-    childProcessRecord->SetPid(pid);
-    childProcessRecord->SetUid(startMsg.uid);
-    appRecord->AddChildProcessRecord(pid, childProcessRecord);
-    TAG_LOGI(AAFwkTag::APPMGR, "Start child process success, pid:%{public}d, hostPid:%{public}d, uid:%{public}d",
+        childPid = pid;
+        childProcessRecord->SetPid(pid);
+        childProcessRecord->SetUid(startMsg.uid);
+        appRecord->AddChildProcessRecord(pid, childProcessRecord);
+    }
+    TAG_LOGI(AAFwkTag::APPMGR, "Start child process success, pid:%{public}d, hostPid:%{public}d,uid:%{public}d",
         pid, childProcessRecord->GetHostPid(), startMsg.uid);
     return ERR_OK;
 }
@@ -5465,6 +5501,7 @@ int32_t AppMgrServiceInner::GetChildProcessInfoForSelf(ChildProcessInfo &info)
         TAG_LOGD(AAFwkTag::APPMGR, "record of callingPid is not child record.");
         return ERR_NAME_NOT_FOUND;
     }
+    std::lock_guard<ffrt::mutex> lock(startChildProcessLock_);
     auto appRecord = appRunningManager_->GetAppRunningRecordByChildProcessPid(callingPid);
     if (!appRecord) {
         TAG_LOGW(AAFwkTag::APPMGR, "No such appRecord, childPid:%{public}d", callingPid);
@@ -5871,6 +5908,38 @@ bool AppMgrServiceInner::NotifyMemMgrPriorityChanged(const std::shared_ptr<AppRu
         return false;
     }
     return true;
+}
+
+int32_t AppMgrServiceInner::GetAllUIExtensionRootHostPid(pid_t pid, std::vector<pid_t> &hostPids)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app running manager is nullptr.");
+        return ERR_NO_INIT;
+    }
+
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission deny.");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    return appRunningManager_->GetAllUIExtensionRootHostPid(pid, hostPids);
+}
+
+int32_t AppMgrServiceInner::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids)
+{
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "app running manager is nullptr.");
+        return ERR_NO_INIT;
+    }
+
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission deny.");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    return appRunningManager_->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

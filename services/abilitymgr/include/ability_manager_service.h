@@ -1733,6 +1733,8 @@ private:
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     void DumpSysProcess(
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
+    void DumpUIExtensionRootHostRunningInfos(pid_t pid, std::vector<std::string> &info);
+    void DumpUIExtensionProviderRunningInfos(pid_t pid, std::vector<std::string> &info);
     void DataDumpSysStateInner(
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     ErrCode ProcessMultiParam(std::vector<std::string>& argsStr, std::string& result);
@@ -1767,6 +1769,9 @@ private:
     std::shared_ptr<DataAbilityManager> GetDataAbilityManagerByToken(const sptr<IRemoteObject> &token);
     bool JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
     bool IsAppSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    void SetConnectManager(std::shared_ptr<AbilityConnectManager> connectManager);
+    std::shared_ptr<AbilityConnectManager> GetConnectManager() const;
 
     int32_t GetValidUserId(const int32_t userId);
 
@@ -2016,6 +2021,7 @@ private:
     std::shared_ptr<AbilityEventHandler> eventHandler_;
     ServiceRunningState state_;
     std::unordered_map<int, std::shared_ptr<AbilityConnectManager>> connectManagers_;
+    mutable std::mutex connectManagerMutex_;
     std::shared_ptr<AbilityConnectManager> connectManager_;
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
     std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper_;
@@ -2073,6 +2079,28 @@ private:
     std::shared_ptr<AbilityRuntime::AbilityManagerEventSubscriber> screenSubscriber_;
 
     std::shared_ptr<AbilityAutoStartupService> abilityAutoStartupService_;
+
+    std::map<std::string, std::list<std::string>> whiteListMap_;
+
+    std::list<std::string> exportWhiteList_;
+
+    bool ShouldPreventStartAbility(const AbilityRequest &abilityRequest);
+
+    bool IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
+        const std::string &calleeAbilityName);
+
+    bool isParamStartAbilityEnable_ = false;
+
+    std::string GetConfigFileAbsolutePath(const std::string &relativePath);
+
+    int32_t ParseJsonValueFromFile(nlohmann::json &value, const std::string& fullPath);
+
+    bool ConvertFullPath(const std::string& partialPath, std::string& fullPath);
+
+    bool GetJsonFromFile(const char *filePath, Json::Value &root);
+
+    bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
+        const std::string &WHITE_LIST);
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;

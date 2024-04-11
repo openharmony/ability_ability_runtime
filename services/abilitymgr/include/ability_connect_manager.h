@@ -263,7 +263,7 @@ public:
 
     void RemoveLauncherDeathRecipient();
 
-    int32_t GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo);
+    std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
     void SignRestartAppFlag(const std::string &bundleName);
 
@@ -515,6 +515,7 @@ private:
     std::shared_ptr<AbilityRecord> GetExtensionFromServiceMapInner(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionFromServiceMapInner(int32_t abilityRecordId);
     std::shared_ptr<AbilityRecord> GetExtensionFromTerminatingMapInner(const sptr<IRemoteObject> &token);
+    std::shared_ptr<AbilityRecord> GetAutoFillExtFromTerminatingMap(const sptr<IRemoteObject> &token);
     int TerminateAbilityInner(const sptr<IRemoteObject> &token);
     bool IsLauncher(std::shared_ptr<AbilityRecord> serviceExtension) const;
     void KillProcessesByUserId() const;
@@ -531,6 +532,7 @@ private:
         std::shared_ptr<AbilityRecord> &targetService, bool &isLoadedAbility);
     void HandleNotifyAssertFaultDialogDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
     EventInfo BuildEventInfo(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void UpdateUIExtensionInfo(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
