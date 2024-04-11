@@ -332,6 +332,7 @@ public:
 #ifdef SUPPORT_GRAPHICS
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &token);
 #endif
+    void CompleteFirstFrameDrawing(int32_t sessionId) const;
 
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse, int32_t userId) const;
