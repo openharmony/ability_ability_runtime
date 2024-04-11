@@ -969,6 +969,9 @@ public:
 
     void SetRestartAppFlag(bool isRestartApp);
     bool GetRestartAppFlag() const;
+
+    void UpdateUIExtensionInfo(const WantParams &wantParams);
+
 protected:
     void SendEvent(uint32_t msg, uint32_t timeOut, int32_t param = -1);
 
