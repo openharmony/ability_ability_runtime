@@ -449,8 +449,6 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
         configuration_->GetItem(AAFwk::GlobalConfigurationKey::LANGUAGE_IS_SET_BY_APP);
     std::string globalColorModeIsSetByApp =
         configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
-    std::string globalColorModeNeedRemoveIsSetBySa =
-        configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA);
     std::string globalColorModeIsSetBySa =
         configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
     if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0) {
@@ -467,8 +465,7 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
         HILOG_INFO("colorMode is: [%{public}s]", colorMode.c_str());
         config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, colorMode);
     }
-    if (!colorMode.empty() && colorModeIsSetByApp.empty() && colorModeIsSetBySa.empty() &&
-        colorModeNeedRemoveIsSetBySa.empty()) {
+    if (!colorMode.empty() && colorModeIsSetByApp.empty() && colorModeIsSetBySa.empty()) {
         if ((!globalColorModeIsSetByApp.empty() || !globalColorModeIsSetBySa.empty()) &&
             globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) != 0) {
             TAG_LOGD(AAFwkTag::APPKIT, "colormode has been set by app or sa");
@@ -487,9 +484,7 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
     }
     if (!colorModeNeedRemoveIsSetBySa.empty() && !globalColorModeIsSetBySa.empty()) {
         configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-    }
-    if (!colorModeNeedRemoveIsSetBySa.empty() && globalColorModeIsSetBySa.empty()) {
-        configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA);
+        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA);
     }
     std::vector<std::string> changeKeyV;
     configuration_->CompareDifferent(changeKeyV, config);
