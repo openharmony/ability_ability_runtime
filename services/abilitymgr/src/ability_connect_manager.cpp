@@ -232,7 +232,7 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     SetLastExitReason(abilityRequest, targetService);
 
     targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_EXTENSION);
-    if(IsUIExtensionAbility(targetService)){
+    if (IsUIExtensionAbility(targetService)) {
         targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
     }
 
@@ -281,12 +281,12 @@ void AbilityConnectManager::SetLastExitReason(
         return;
     }
     auto abilityRuntime = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
-    if(abilityRuntime == nullptr){
+    if (abilityRuntime == nullptr) {
         return;
     }
     ExitReason exitReason = { REASON_UNKNOWN, "" };
-    const std::string keyEx = targetRecord->GetAbilityInfo().bundleName +
-        targetRecord->GetAbilityInfo().moduleName + targetRecord->GetAbilityInfo().name;
+    const std::string keyEx = targetRecord->GetAbilityInfo().bundleName + targetRecord->GetAbilityInfo().moduleName +
+                              targetRecord->GetAbilityInfo().name;
     if (!abilityRuntime->GetUIExtensionAbilityBeFinishReason(keyEx, exitReason)) {
         return;
     }
