@@ -118,11 +118,11 @@ HWTEST_F(
 HWTEST_F(
     AppExitReasonDataManagerTest, AppExitReasonDataManager_GetUIExtensionAbilityBeFinishReason_001, TestSize.Level1)
 {
-    std::string keyEx = "com.test.demotestEntryUIExtAbility";
+    std::string keyEx = "com.test.demotestnoEntryUIExtAbility";
     AAFwk::ExitReason exitReason = { AAFwk::REASON_UNKNOWN, "" };
     auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetUIExtensionAbilityBeFinishReason(
         keyEx, exitReason);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 }
 
 /**

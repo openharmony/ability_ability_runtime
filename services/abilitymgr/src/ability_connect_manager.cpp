@@ -232,6 +232,9 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     SetLastExitReason(abilityRequest, targetService);
 
     targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_EXTENSION);
+    if(IsUIExtensionAbility(targetService)){
+        targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
+    }
 
     targetService->DoBackgroundAbilityWindowDelayed(false);
 
@@ -271,18 +274,23 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
 }
 
 void AbilityConnectManager::SetLastExitReason(
-    const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetService)
+    const AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
-    if (UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
-        ExitReason exitReason = { REASON_UNKNOWN, "" };
-        auto abilityRuntime = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
-        const std::string keyEx = targetService->GetAbilityInfo().bundleName +
-            targetService->GetAbilityInfo().moduleName + targetService->GetAbilityInfo().name;
-        if (abilityRuntime->GetUIExtensionAbilityBeFinishReason(keyEx, exitReason)) {
-            targetService->SetLastExitReason(exitReason);
-        }
+    if (targetRecord == nullptr || !UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
+        return;
     }
+    auto abilityRuntime = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
+    if(abilityRuntime == nullptr){
+        return;
+    }
+    ExitReason exitReason = { REASON_UNKNOWN, "" };
+    const std::string keyEx = targetRecord->GetAbilityInfo().bundleName +
+        targetRecord->GetAbilityInfo().moduleName + targetRecord->GetAbilityInfo().name;
+    if (!abilityRuntime->GetUIExtensionAbilityBeFinishReason(keyEx, exitReason)) {
+        return;
+    }
+    targetRecord->SetLastExitReason(exitReason);
 }
 
 void AbilityConnectManager::DoForegroundUIExtension(std::shared_ptr<AbilityRecord> abilityRecord,

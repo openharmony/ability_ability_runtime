@@ -28,7 +28,6 @@
 #include "int_wrapper.h"
 #include "js_auto_fill_extension_util.h"
 #include "js_auto_fill_extension_context.h"
-#include "js_data_struct_converter.h"
 #include "js_fill_request_callback.h"
 #include "js_save_request_callback.h"
 #include "js_extension_common.h"
@@ -211,15 +210,8 @@ void JsAutoFillExtension::OnStart(const AAFwk::Want &want)
     HandleScope handleScope(jsRuntime_);
     napi_env env = jsRuntime_.GetNapiEnv();
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(env, want);
-    auto launchParam = Extension::GetLaunchParam();
-    if (InsightIntentExecuteParam::IsInsightIntentExecute(want)) {
-        launchParam.launchReason = AAFwk::LaunchReason::LAUNCHREASON_INSIGHT_INTENT;
-    }
-    napi_value argv[] = {
-        CreateJsLaunchParam(env, launchParam),
-        napiWant
-    };
-    CallObjectMethod("onCreate", argv, ARGC_TWO);
+    napi_value argv[] = { napiWant };
+    CallObjectMethod("onCreate", argv, ARGC_ONE);
 }
 
 void JsAutoFillExtension::OnStop()

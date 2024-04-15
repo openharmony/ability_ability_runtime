@@ -22,8 +22,8 @@
 #include "napi_remote_object.h"
 #include "iremote_object.h"
 #include "session_info.h"
-#include "foundation/ability/ability_runtime/interfaces/inner_api/ability_manager/include/launch_param.h"
 #include "foundation/window/window_manager/interfaces/innerkits/wm/window.h"
+#include "launch_param.h"
 #include "ui_extension_window_command.h"
 #include "want.h"
 

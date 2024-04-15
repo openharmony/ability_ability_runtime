@@ -69,12 +69,17 @@ public:
     bool IsFocused(int32_t extensionRecordId, const sptr<IRemoteObject>& focusToken);
 
     /**
-     * @brief Get extensionList by pid or bundleName.
+     * @brief Get extensionList by pid.
      * @param pid Process id.
-     * @param bundleName The application bundle name.
-     * @param extensionList A collection of extensionList name.
+     * @param extensionList UIExtensionAbility name list.
      */
     int32_t GetActiveUIExtensionList(const int32_t pid, std::vector<std::string> &extensionList);
+
+    /**
+     * @brief Get extensionList by bundleName.
+     * @param bundleName The application bundle name.
+     * @param extensionList UIExtensionAbility name list.
+     */
     int32_t GetActiveUIExtensionList(const std::string &bundleName, std::vector<std::string> &extensionList);
 
     int32_t StartAbility(const AAFwk::AbilityRequest &abilityRequest);
