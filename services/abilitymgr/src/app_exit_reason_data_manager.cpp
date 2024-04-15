@@ -513,7 +513,7 @@ int32_t AppExitReasonDataManager::SetUIExtensionAbilityBeFinishReason(
         }
 
         if (status != DistributedKv::Status::SUCCESS) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Insert data to kvStore error: %{public}d", status);
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "Insert data to kvStore error: %{public}d", status);
         }
     }
 

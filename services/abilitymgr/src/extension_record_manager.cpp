@@ -126,14 +126,13 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto &it : extensionRecords_) {
-        if (it.second == nullptr || it.second->abilityRecord_ == nullptr) {
+        if (it.second == nullptr || it.second->abilityRecord_ == nullptr ||
+            pid != it.second->abilityRecord_->GetPid()) {
             continue;
         }
 
-        if (pid == it.second->abilityRecord_->GetPid()) {
-            extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName +
-                it.second->abilityRecord_->GetAbilityInfo().name);
-        }
+        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName +
+            it.second->abilityRecord_->GetAbilityInfo().name);
     }
     return ERR_OK;
 }
@@ -144,14 +143,13 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto &it : extensionRecords_) {
-        if (it.second == nullptr || it.second->abilityRecord_ == nullptr) {
+        if (it.second == nullptr || it.second->abilityRecord_ == nullptr ||
+            bundleName.compare(it.second->abilityRecord_->GetAbilityInfo().bundleName) != 0) {
             continue;
         }
 
-        if (bundleName.compare(it.second->abilityRecord_->GetAbilityInfo().bundleName) == 0) {
-            extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName +
-                it.second->abilityRecord_->GetAbilityInfo().name);
-        }
+        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName +
+            it.second->abilityRecord_->GetAbilityInfo().name);
     }
     return ERR_OK;
 }

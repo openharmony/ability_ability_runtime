@@ -219,14 +219,14 @@ public:
     /**
      * @brief Get extensionList by pid.
      * @param pid Process id.
-     * @param extensionList A collection of extensionList name..
+     * @param extensionList UIExtensionAbility name list.
      */
     int32_t GetActiveUIExtensionList(const int32_t pid, std::vector<std::string> &extensionList);
 
     /**
      * @brief Get extensionList by bundleName.
      * @param bundleName The application bundle name.
-     * @param extensionList A collection of extensionList name..
+     * @param extensionList UIExtensionAbility name list.
      */
     int32_t GetActiveUIExtensionList(const std::string &bundleName, std::vector<std::string> &extensionList);
 
