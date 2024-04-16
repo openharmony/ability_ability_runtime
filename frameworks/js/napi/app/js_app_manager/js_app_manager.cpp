@@ -171,7 +171,7 @@ public:
         }
         napi_ref ref = nullptr;
         napi_create_reference(env, para, 1, &ref);
-        NativeReference* nativeReferece= reinterpret_cast<NativeReference *>(ref);
+        NativeReference* nativeReferece = reinterpret_cast<NativeReference *>(ref);
         auto object = nativeReferece->GetNapiValue();
         napi_value method = nullptr;
         napi_get_named_property(env, object, methodName.c_str(), &method);
