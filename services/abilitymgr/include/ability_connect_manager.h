@@ -277,7 +277,7 @@ public:
 
     void RemoveLauncherDeathRecipient();
 
-    int32_t GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token, UIExtensionHostInfo &hostInfo);
+    std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
     void SignRestartAppFlag(const std::string &bundleName);
 
@@ -546,6 +546,7 @@ private:
         std::shared_ptr<AbilityRecord> &targetService, bool &isLoadedAbility);
     void HandleNotifyAssertFaultDialogDied(const std::shared_ptr<AbilityRecord> &abilityRecord);
     EventInfo BuildEventInfo(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void UpdateUIExtensionInfo(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";

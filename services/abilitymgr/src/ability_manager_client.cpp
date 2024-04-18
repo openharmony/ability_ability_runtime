@@ -1255,6 +1255,13 @@ void AbilityManagerClient::CompleteFirstFrameDrawing(sptr<IRemoteObject> ability
     abms->CompleteFirstFrameDrawing(abilityToken);
 }
 
+void AbilityManagerClient::CompleteFirstFrameDrawing(int32_t sessionId)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN(abms);
+    abms->CompleteFirstFrameDrawing(sessionId);
+}
+
 ErrCode AbilityManagerClient::PrepareTerminateAbility(sptr<IRemoteObject> token,
     sptr<IPrepareTerminateCallback> callback)
 {
@@ -1402,17 +1409,14 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDevi
         std::lock_guard<std::recursive_mutex> lock_l(mutex_);
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
             AppExecFwk::ElementName elementName = {};
-            sptr<IRemoteObject> token = nullptr;
-            auto ret = GetTopAbility(token);
-            if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "get top ability token failed");
+            auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+            if (sceneSessionManager == nullptr) {
+                TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get sceneSessionManager.");
                 return elementName;
             }
-            if (token == nullptr) {
-                TAG_LOGE(AAFwkTag::ABILITYMGR, "token is nullptr");
-                return elementName;
-            }
-            return GetElementNameByToken(token, isNeedLocalDeviceId);
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+            (void)sceneSessionManager->GetFocusSessionElement(elementName);
+            return elementName;
         }
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "enter.");
@@ -1800,6 +1804,14 @@ bool AbilityManagerClient::IsEmbeddedOpenAllowed(sptr<IRemoteObject> callerToken
         return false;
     }
     return abms->IsEmbeddedOpenAllowed(callerToken, appId);
+}
+
+int32_t AbilityManagerClient::StartShortcut(const Want &want, const StartOptions &startOptions)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "start short cut.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_INVALID_VALUE(abms);
+    return abms->StartShortcut(want, startOptions);
 }
 } // namespace AAFwk
 } // namespace OHOS

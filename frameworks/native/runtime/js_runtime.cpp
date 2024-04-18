@@ -26,7 +26,9 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
+#include "file_ex.h"
 #include "accesstoken_kit.h"
+#include "config_policy_utils.h"
 #include "constants.h"
 #include "connect_server_manager.h"
 #include "ecmascript/napi/include/jsnapi.h"
@@ -73,7 +75,7 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr size_t PARAM_TWO = 2;
-constexpr uint8_t SYSCAP_MAX_SIZE = 64;
+constexpr uint8_t SYSCAP_MAX_SIZE = 100;
 constexpr int64_t DEFAULT_GC_POOL_SIZE = 0x10000000; // 256MB
 constexpr int32_t DEFAULT_INTER_VAL = 500;
 constexpr int32_t TRIGGER_GC_AFTER_CLEAR_STAGE_MS = 3000;
@@ -86,12 +88,21 @@ constexpr char MERGE_ABC_PATH[] = "/ets/modules.abc";
 constexpr char BUNDLE_INSTALL_PATH[] = "/data/storage/el1/bundle/";
 constexpr const char* PERMISSION_RUN_ANY_CODE = "ohos.permission.RUN_ANY_CODE";
 
+const std::string CONFIG_PATH = "/etc/system_kits_config.json";
 const std::string SYSTEM_KITS_CONFIG_PATH = "/system/etc/system_kits_config.json";
 
 const std::string SYSTEM_KITS = "systemkits";
 const std::string NAMESPACE = "namespace";
 const std::string TARGET_OHM = "targetohm";
 const std::string SINCE_VERSION = "sinceVersion";
+
+const std::string PACKAGE_NAME = "packageName";
+const std::string BUNDLE_NAME = "bundleName";
+const std::string MODULE_NAME = "moduleName";
+const std::string VERSION = "version";
+const std::string ENTRY_PATH = "entryPath";
+const std::string IS_SO = "isSO";
+const std::string DEPENDENCY_ALIAS = "dependencyAlias";
 
 static auto PermissionCheckFunc = []() {
     Security::AccessToken::AccessTokenID callerToken = IPCSkeleton::GetCallingTokenID();
@@ -544,14 +555,14 @@ bool JsRuntime::NotifyHotReloadPage()
 
 bool JsRuntime::LoadScript(const std::string& path, std::vector<uint8_t>* buffer, bool isBundle)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "function called.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "Load script, path: %{private}s.", path.c_str());
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
     return jsEnv_->LoadScript(path, buffer, isBundle);
 }
 
 bool JsRuntime::LoadScript(const std::string& path, uint8_t* buffer, size_t len, bool isBundle)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "function called.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "Load script, path: %{private}s.", path.c_str());
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
     return jsEnv_->LoadScript(path, buffer, len, isBundle);
 }
@@ -727,6 +738,12 @@ bool JsRuntime::Initialize(const Options& options)
                 });
             std::vector<panda::HmsMap> systemKitsMap = GetSystemKitsMap(apiTargetVersion_);
             panda::JSNApi::SetHmsModuleList(vm, systemKitsMap);
+            std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
+            std::map<std::string, std::string> pkgAliasMap;
+            GetPkgContextInfoListMap(options.pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
+            panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
+            panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
+            panda::JSNApi::SetPkgNameList(vm, options.packageNameList);
         }
     }
 
@@ -749,7 +766,7 @@ bool JsRuntime::Initialize(const Options& options)
         SetModuleLoadChecker(options.moduleCheckerDelegate);
         SetRequestAotCallback();
 
-        if (!InitLoop()) {
+        if (!InitLoop(options.isStageModel)) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "Initialize loop failed.");
             return false;
         }
@@ -764,10 +781,12 @@ bool JsRuntime::CreateJsEnv(const Options& options)
     panda::RuntimeOption pandaOption;
     int arkProperties = OHOS::system::GetIntParameter<int>("persist.ark.properties", -1);
     std::string bundleName = OHOS::system::GetParameter("persist.ark.arkbundlename", "");
+    std::string memConfigProperty = OHOS::system::GetParameter("persist.ark.mem_config_property", "");
     size_t gcThreadNum = OHOS::system::GetUintParameter<size_t>("persist.ark.gcthreads", 7);
     size_t longPauseTime = OHOS::system::GetUintParameter<size_t>("persist.ark.longpausetime", 40);
     pandaOption.SetArkProperties(arkProperties);
     pandaOption.SetArkBundleName(bundleName);
+    pandaOption.SetMemConfigProperty(memConfigProperty);
     pandaOption.SetGcThreadNum(gcThreadNum);
     pandaOption.SetLongPauseTime(longPauseTime);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "JSRuntime::Initialize ark properties = %{public}d bundlename = %{public}s",
@@ -838,10 +857,10 @@ void JsRuntime::DoCleanWorkAfterStageCleaned()
     PostTask(gcTask, "ability_destruct_gc", TRIGGER_GC_AFTER_CLEAR_STAGE_MS);
 }
 
-bool JsRuntime::InitLoop()
+bool JsRuntime::InitLoop(bool isStage)
 {
     CHECK_POINTER_AND_RETURN(jsEnv_, false);
-    return jsEnv_->InitLoop();
+    return jsEnv_->InitLoop(isStage);
 }
 
 void JsRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths, const bool& isSystemApp)
@@ -1480,18 +1499,29 @@ void JsRuntime::SetDeviceDisconnectCallback(const std::function<bool()> &cb)
     jsEnv_->SetDeviceDisconnectCallback(cb);
 }
 
+std::string JsRuntime::GetSystemKitPath()
+{
+    char buf[MAX_PATH_LEN] = { 0 };
+    char *configPath = GetOneCfgFile(CONFIG_PATH.c_str(), buf, MAX_PATH_LEN);
+    if (configPath == nullptr || configPath[0] == '\0' || strlen(configPath) > MAX_PATH_LEN) {
+        return SYSTEM_KITS_CONFIG_PATH;
+    }
+    return configPath;
+}
+
 std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
 {
     std::vector<panda::HmsMap> systemKitsMap;
     nlohmann::json jsonBuf;
-    if (access(SYSTEM_KITS_CONFIG_PATH.c_str(), F_OK) != 0) {
+    std::string configPath = GetSystemKitPath();
+    if (configPath == "" || access(configPath.c_str(), F_OK) != 0) {
         return systemKitsMap;
     }
 
     std::fstream in;
     char errBuf[256];
     errBuf[0] = '\0';
-    in.open(SYSTEM_KITS_CONFIG_PATH, std::ios_base::in);
+    in.open(configPath, std::ios_base::in);
     if (!in.is_open()) {
         strerror_r(errno, errBuf, sizeof(errBuf));
         return systemKitsMap;
@@ -1533,6 +1563,82 @@ std::vector<panda::HmsMap> JsRuntime::GetSystemKitsMap(uint32_t version)
     }
     TAG_LOGD(AAFwkTag::JSRUNTIME, "The size of the map is %{public}zu", systemKitsMap.size());
     return systemKitsMap;
+}
+
+void JsRuntime::GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
+    std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
+    std::map<std::string, std::string> &pkgAliasMap)
+{
+    for (auto it = contextInfoMap.begin(); it != contextInfoMap.end(); it++) {
+        std::vector<std::vector<std::string>> pkgContextInfoList;
+        auto jsonObject = nlohmann::json::parse(it->second);
+        if (jsonObject.is_discarded()) {
+            HILOG_ERROR("moduleName: %{public}s parse json error", it->first.c_str());
+            continue;
+        }
+        for (nlohmann::json::iterator it = jsonObject.begin(); it != jsonObject.end(); it++) {
+            std::vector<std::string> items;
+            items.emplace_back(it.key());
+            nlohmann::json itemObject = it.value();
+            std::string pkgName = "";
+            items.emplace_back(PACKAGE_NAME);
+            if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
+                items.emplace_back(pkgName);
+            } else {
+                pkgName = itemObject[PACKAGE_NAME].get<std::string>();
+                items.emplace_back(pkgName);
+            }
+
+            items.emplace_back(BUNDLE_NAME);
+            if (itemObject[BUNDLE_NAME].is_null() || !itemObject[BUNDLE_NAME].is_string()) {
+                items.emplace_back("");
+            } else {
+                items.emplace_back(itemObject[BUNDLE_NAME].get<std::string>());
+            }
+
+            items.emplace_back(MODULE_NAME);
+            if (itemObject[MODULE_NAME].is_null() || !itemObject[MODULE_NAME].is_string()) {
+                items.emplace_back("");
+            } else {
+                items.emplace_back(itemObject[MODULE_NAME].get<std::string>());
+            }
+
+            items.emplace_back(VERSION);
+            if (itemObject[VERSION].is_null() || !itemObject[VERSION].is_string()) {
+                items.emplace_back("");
+            } else {
+                items.emplace_back(itemObject[VERSION].get<std::string>());
+            }
+
+            items.emplace_back(ENTRY_PATH);
+            if (itemObject[ENTRY_PATH].is_null() || !itemObject[ENTRY_PATH].is_string()) {
+                items.emplace_back("");
+            } else {
+                items.emplace_back(itemObject[ENTRY_PATH].get<std::string>());
+            }
+
+            items.emplace_back(IS_SO);
+            if (itemObject[IS_SO].is_null() || !itemObject[IS_SO].is_boolean()) {
+                items.emplace_back("false");
+            } else {
+                bool isSo = itemObject[IS_SO].get<bool>();
+                if (isSo) {
+                    items.emplace_back("true");
+                } else {
+                    items.emplace_back("false");
+                }
+            }
+            if (!itemObject[DEPENDENCY_ALIAS].is_null() && itemObject[DEPENDENCY_ALIAS].is_string()) {
+                std::string pkgAlias = itemObject[DEPENDENCY_ALIAS].get<std::string>();
+                if (!pkgAlias.empty()) {
+                    pkgAliasMap[pkgAlias] = pkgName;
+                }
+            }
+            pkgContextInfoList.emplace_back(items);
+        }
+        HILOG_INFO("moduleName: %{public}s parse json success", it->first.c_str());
+        pkgContextInfoMap[it->first] = pkgContextInfoList;
+    }
 }
 
 void JsRuntime::SetChildOptions(const Options& options)

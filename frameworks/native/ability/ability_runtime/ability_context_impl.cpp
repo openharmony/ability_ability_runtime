@@ -726,6 +726,12 @@ ErrCode AbilityContextImpl::SetMissionContinueState(const AAFwk::ContinueState &
     return err;
 }
 
+void AbilityContextImpl::InsertResultCallbackTask(int requestCode, RuntimeTask &&task)
+{
+    HILOG_DEBUG("InsertResultCallbackTask");
+    resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
+}
+
 void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height)
 {
     HILOG_DEBUG("call");
@@ -830,6 +836,8 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
     Ace::ModalUIExtensionCallbacks callback;
     callback.onError = std::bind(&JsUIExtensionCallback::OnError, uiExtensionCallbacks, std::placeholders::_1);
     callback.onRelease = std::bind(&JsUIExtensionCallback::OnRelease, uiExtensionCallbacks, std::placeholders::_1);
+    callback.onResult = std::bind(
+        &JsUIExtensionCallback::OnResult, uiExtensionCallbacks, std::placeholders::_1, std::placeholders::_2);
     Ace::ModalUIExtensionConfig config;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {

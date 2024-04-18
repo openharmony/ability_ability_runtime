@@ -165,7 +165,7 @@ private:
 private:
     bool CreateJsEnv(const Options& options);
     void PreloadAce(const Options& options);
-    bool InitLoop();
+    bool InitLoop(bool isStage = true);
     inline bool IsUseAbilityRuntime(const Options& options) const;
     void FreeNativeReference(std::unique_ptr<NativeReference> uniqueNativeRef,
         std::shared_ptr<NativeReference>&& sharedNativeRef);
@@ -177,7 +177,12 @@ private:
     void LoadAotFile(const Options& options);
     void SetRequestAotCallback();
 
+    std::string GetSystemKitPath();
     std::vector<panda::HmsMap> GetSystemKitsMap(uint32_t version);
+
+    void GetPkgContextInfoListMap(const std::map<std::string, std::string> &contextInfoMap,
+        std::map<std::string, std::vector<std::vector<std::string>>> &pkgContextInfoMap,
+        std::map<std::string, std::string> &pkgAliasMap);
 };
 } // namespace AbilityRuntime
 } // namespace OHOS

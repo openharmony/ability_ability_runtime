@@ -710,12 +710,20 @@ public:
 
     virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) override;
 
+    virtual void CompleteFirstFrameDrawing(int32_t sessionId) override;
+
     virtual int PrepareTerminateAbility(
         const sptr<IRemoteObject> &token, sptr<IPrepareTerminateCallback> &callback) override;
 
     virtual int GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &info) override;
 
     virtual int SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllow) override;
+
+    virtual int RegisterAbilityFirstFrameStateObserver(const sptr<IAbilityFirstFrameStateObserver> &observer,
+        const std::string &targetBundleName) override;
+
+    virtual int UnregisterAbilityFirstFrameStateObserver(
+        const sptr<IAbilityFirstFrameStateObserver> &observer) override;
 #endif
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) override;
@@ -1194,6 +1202,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t NotifyDebugAssertResult(uint64_t assertFaultSessionId, AAFwk::UserStatus userStatus) override;
+
+    /**
+     * Starts a new ability with specific start options.
+     *
+     * @param want, the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t StartShortcut(const Want &want, const StartOptions &startOptions) override;
 
 private:
     template <typename T>

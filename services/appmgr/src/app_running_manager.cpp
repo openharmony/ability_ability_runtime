@@ -29,9 +29,11 @@
 #include "quick_fix_callback_with_record.h"
 #include "scene_board_judgement.h"
 #include "ui_extension_utils.h"
+#include "app_mgr_service_const.h"
 #ifdef EFFICIENCY_MANAGER_ENABLE
 #include "suspend_manager_client.h"
 #endif
+#include "app_mgr_service_dump_error_code.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -318,29 +320,38 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::OnRemoteDied(const wptr<IRe
         TAG_LOGE(AAFwkTag::APPMGR, "object is null");
         return nullptr;
     }
-    std::lock_guard<ffrt::mutex> guard(lock_);
-    const auto &iter =
-        std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&object](const auto &pair) {
-            if (pair.second && pair.second->GetApplicationClient() != nullptr) {
-                return pair.second->GetApplicationClient()->AsObject() == object;
-            }
-            return false;
-        });
-    if (iter == appRunningRecordMap_.end()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "remote is not exist in the map.");
-        return nullptr;
-    }
-    auto appRecord = iter->second;
-    if (appRecord != nullptr) {
-        appRecord->RemoveAppDeathRecipient();
-        appRecord->SetApplicationClient(nullptr);
-        TAG_LOGI(AAFwkTag::APPMGR, "processName: %{public}s.", appRecord->GetProcessName().c_str());
-        auto priorityObject = appRecord->GetPriorityObject();
-        if (priorityObject != nullptr) {
-            TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}d.", priorityObject->GetPid());
+
+    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> guard(lock_);
+        const auto &iter =
+            std::find_if(appRunningRecordMap_.begin(), appRunningRecordMap_.end(), [&object](const auto &pair) {
+                if (pair.second && pair.second->GetApplicationClient() != nullptr) {
+                    return pair.second->GetApplicationClient()->AsObject() == object;
+                }
+                return false;
+            });
+        if (iter == appRunningRecordMap_.end()) {
+            TAG_LOGE(AAFwkTag::APPMGR, "remote is not exist in the map.");
+            return nullptr;
         }
+        appRecord = iter->second;
+        if (appRecord != nullptr) {
+            appRecord->RemoveAppDeathRecipient();
+            appRecord->SetApplicationClient(nullptr);
+            TAG_LOGI(AAFwkTag::APPMGR, "processName: %{public}s.", appRecord->GetProcessName().c_str());
+            auto priorityObject = appRecord->GetPriorityObject();
+            if (priorityObject != nullptr) {
+                TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}d.", priorityObject->GetPid());
+            }
+        }
+        appRunningRecordMap_.erase(iter);
     }
-    appRunningRecordMap_.erase(iter);
+
+    if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
+        RemoveUIExtensionLauncherItem(appRecord->GetPriorityObject()->GetPid());
+    }
+
     return appRecord;
 }
 
@@ -352,8 +363,16 @@ std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> AppRunningManag
 
 void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
 {
-    std::lock_guard<ffrt::mutex> guard(lock_);
-    appRunningRecordMap_.erase(recordId);
+    std::shared_ptr<AppRunningRecord> appRecord = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> guard(lock_);
+        appRecord = appRunningRecordMap_.at(recordId);
+        appRunningRecordMap_.erase(recordId);
+    }
+
+    if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
+        RemoveUIExtensionLauncherItem(appRecord->GetPriorityObject()->GetPid());
+    }
 }
 
 void AppRunningManager::ClearAppRunningRecordMap()
@@ -670,6 +689,24 @@ int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
     return result;
 }
 
+int32_t AppRunningManager::UpdateConfigurationByBundleName(const Configuration &config, const std::string &name)
+{
+    std::lock_guard<ffrt::mutex> guard(lock_);
+    int32_t result = ERR_OK;
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetState() == ApplicationState::APP_STATE_CREATE) {
+            TAG_LOGD(AAFwkTag::APPMGR, "app not ready, appName is %{public}s", appRecord->GetBundleName().c_str());
+            continue;
+        }
+        if (appRecord && !isCollaboratorReserveType(appRecord) && appRecord->GetBundleName() == name) {
+            TAG_LOGD(AAFwkTag::APPMGR, "Notification app [%{public}s]", appRecord->GetName().c_str());
+            result = appRecord->UpdateConfiguration(config);
+        }
+    }
+    return result;
+}
+
 bool AppRunningManager::isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
     std::string bundleName = appRecord->GetApplicationInfo()->name;
@@ -711,7 +748,10 @@ int32_t AppRunningManager::NotifyMemoryLevel(int32_t level)
         }
         auto pid = priorityObject->GetPid();
         if (frozenPids.count(pid) == 0) {
+            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] memory level = %{public}d", pid, level);
             appRecord->ScheduleMemoryLevel(level);
+        } else {
+            TAG_LOGD(AAFwkTag::APPMGR, "proc[pid=%{public}d] is frozen", pid);
         }
     }
     return ERR_OK;
@@ -1235,9 +1275,152 @@ int32_t AppRunningManager::GetAppRunningUniqueIdByPid(pid_t pid, std::string &ap
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr.");
         return ERR_INVALID_VALUE;
     }
-    appRunningUniqueId = std::to_string(appRecord->GetRecordId());
+    appRunningUniqueId = std::to_string(appRecord->GetAppStartTime());
     TAG_LOGD(AAFwkTag::APPMGR, "appRunningUniqueId = %{public}s.", appRunningUniqueId.c_str());
     return ERR_OK;
+}
+
+int32_t AppRunningManager::GetAllUIExtensionRootHostPid(pid_t pid, std::vector<pid_t> &hostPids)
+{
+    std::lock_guard<ffrt::mutex> guard(uiExtensionMapLock_);
+    for (auto &item: uiExtensionLauncherMap_) {
+        auto temp = item.second.second;
+        if (temp == pid) {
+            hostPids.emplace_back(item.second.first);
+        }
+    }
+
+    return ERR_OK;
+}
+
+int32_t AppRunningManager::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<pid_t> &providerPids)
+{
+    std::lock_guard<ffrt::mutex> guard(uiExtensionMapLock_);
+    for (auto &item: uiExtensionLauncherMap_) {
+        auto temp = item.second.first;
+        if (temp == hostPid) {
+            providerPids.emplace_back(item.second.second);
+        }
+    }
+
+    return ERR_OK;
+}
+
+int32_t AppRunningManager::AddUIExtensionLauncherItem(int32_t uiExtensionAbilityId, pid_t hostPid, pid_t providerPid)
+{
+    std::lock_guard<ffrt::mutex> guard(uiExtensionMapLock_);
+    uiExtensionLauncherMap_.emplace(uiExtensionAbilityId, std::pair<pid_t, pid_t>(hostPid, providerPid));
+    return ERR_OK;
+}
+
+int32_t AppRunningManager::RemoveUIExtensionLauncherItem(pid_t pid)
+{
+    std::lock_guard<ffrt::mutex> guard(uiExtensionMapLock_);
+    for (auto it = uiExtensionLauncherMap_.begin(); it != uiExtensionLauncherMap_.end();) {
+        if (it->second.first == pid || it->second.second == pid) {
+            it = uiExtensionLauncherMap_.erase(it);
+            continue;
+        }
+        it++;
+    }
+
+    return ERR_OK;
+}
+
+int AppRunningManager::DumpIpcAllStart(std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    int errCode = DumpErrorCode::ERR_OK;
+    for (const auto &item : GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        TAG_LOGD(AAFwkTag::APPMGR, "AppRunningManager::DumpIpcAllStart::pid:%{public}d",
+            appRecord->GetPriorityObject()->GetPid());
+        std::string currentResult;
+        errCode = appRecord->DumpIpcStart(currentResult);
+        result += currentResult + "\n";
+        if (errCode != DumpErrorCode::ERR_OK) {
+            return errCode;
+        }
+    }
+    return errCode;
+}
+
+int AppRunningManager::DumpIpcAllStop(std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    int errCode = DumpErrorCode::ERR_OK;
+    for (const auto &item : GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        TAG_LOGD(AAFwkTag::APPMGR, "AppRunningManager::DumpIpcAllStop::pid:%{public}d",
+            appRecord->GetPriorityObject()->GetPid());
+        std::string currentResult;
+        errCode = appRecord->DumpIpcStop(currentResult);
+        result += currentResult + "\n";
+        if (errCode != DumpErrorCode::ERR_OK) {
+            return errCode;
+        }
+    }
+    return errCode;
+}
+
+int AppRunningManager::DumpIpcAllStat(std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    int errCode = DumpErrorCode::ERR_OK;
+    for (const auto &item : GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        TAG_LOGD(AAFwkTag::APPMGR, "AppRunningManager::DumpIpcAllStat::pid:%{public}d",
+            appRecord->GetPriorityObject()->GetPid());
+        std::string currentResult;
+        errCode = appRecord->DumpIpcStat(currentResult);
+        result += currentResult + "\n";
+        if (errCode != DumpErrorCode::ERR_OK) {
+            return errCode;
+        }
+    }
+    return errCode;
+}
+
+int AppRunningManager::DumpIpcStart(const int32_t pid, std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    const auto& appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        result.append(MSG_DUMP_IPC_START_STAT)
+            .append(MSG_DUMP_IPC_FAIL)
+            .append(MSG_DUMP_IPC_FAIL_REASON_INVALILD_PID);
+        TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
+        return DumpErrorCode::ERR_INVALID_PID_ERROR;
+    }
+    return appRecord->DumpIpcStart(result);
+}
+
+int AppRunningManager::DumpIpcStop(const int32_t pid, std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    const auto& appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        result.append(MSG_DUMP_IPC_STOP_STAT)
+            .append(MSG_DUMP_IPC_FAIL)
+            .append(MSG_DUMP_IPC_FAIL_REASON_INVALILD_PID);
+        TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
+        return DumpErrorCode::ERR_INVALID_PID_ERROR;
+    }
+    return appRecord->DumpIpcStop(result);
+}
+
+int AppRunningManager::DumpIpcStat(const int32_t pid, std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    const auto& appRecord = GetAppRunningRecordByPid(pid);
+    if (!appRecord) {
+        result.append(MSG_DUMP_IPC_STAT)
+            .append(MSG_DUMP_IPC_FAIL)
+            .append(MSG_DUMP_IPC_FAIL_REASON_INVALILD_PID);
+        TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
+        return DumpErrorCode::ERR_INVALID_PID_ERROR;
+    }
+    return appRecord->DumpIpcStat(result);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

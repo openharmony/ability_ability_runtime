@@ -41,7 +41,7 @@
 #include "priority_object.h"
 #include "app_lifecycle_deal.h"
 #include "module_running_record.h"
-#include "app_spawn_msg_wrapper.h"
+#include "app_spawn_client.h"
 #include "app_malloc_info.h"
 #include "window_visibility_changed_listener.h"
 #include "app_jsheap_mem_info.h"
@@ -746,6 +746,10 @@ public:
     
     void SetJITEnabled(const bool jitEnabled);
     bool IsJITEnabled() const;
+
+    int DumpIpcStart(std::string& result);
+    int DumpIpcStop(std::string& result);
+    int DumpIpcStat(std::string& result);
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
