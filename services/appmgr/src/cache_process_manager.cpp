@@ -59,13 +59,16 @@ bool CacheProcessManager::QueryEnableProcessCache()
 
 bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Called");
-    if (!QueryEnableProcessCache() || appRecord == nullptr) {
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    if (!QueryEnableProcessCache()) {
+        return;
+    }
+    if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "nullptr precheck failed");
         return false;
     }
     if (appRecord->IsKeepAliveApp()) {
-        TAG_LOGD(AAFwkTag::APPMGR, "Not cache keepalive process");
+        TAG_LOGW(AAFwkTag::APPMGR, "Not cache keepalive process");
         return false;
     }
     {
@@ -80,9 +83,12 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
 
 bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Called");
-    if (!QueryEnableProcessCache() || appRecord == nullptr) {
-        TAG_LOGW(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
+    if (!QueryEnableProcessCache()) {
+        return;
+    }
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
         return false;
     }
     if (!IsCachedProcess(appRecord)) {
@@ -124,8 +130,11 @@ bool CacheProcessManager::IsCachedProcess(const std::shared_ptr<AppRunningRecord
 
 void CacheProcessManager::OnProcessKilled(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    if (!QueryEnableProcessCache() || appRecord == nullptr) {
-        TAG_LOGI(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
+    if (!QueryEnableProcessCache()) {
+        return;
+    }
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
         return;
     }
     if (!IsCachedProcess(appRecord)) {
@@ -138,8 +147,11 @@ void CacheProcessManager::OnProcessKilled(const std::shared_ptr<AppRunningRecord
 
 void CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
-    if (!QueryEnableProcessCache() || appRecord == nullptr) {
-        TAG_LOGI(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
+    if (!QueryEnableProcessCache()) {
+        return;
+    }
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
         return;
     }
     if (!IsCachedProcess(appRecord)) {
@@ -223,7 +235,7 @@ void CacheProcessManager::RemoveCacheRecord(const std::shared_ptr<AppRunningReco
 
 void CacheProcessManager::ShrinkAndKillCache()
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (maxProcCacheNum_ <= 0) {
         TAG_LOGI(AAFwkTag::APPMGR, "Cache disabled.");
         return;
