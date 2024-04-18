@@ -549,6 +549,7 @@ int32_t ApplicationContext::SetSupportProcessCacheSelf(bool isSupport)
     if (contextImpl_ != nullptr) {
         return contextImpl_->SetSupportProcessCacheSelf(isSupport);
     }
+    TAG_LOGE(AAFwkTag::APPKIT, "contextImpl_ is nullptr.");
     return ERR_INVALID_VALUE;
 }
 }  // namespace AbilityRuntime
