@@ -163,17 +163,15 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
         TAG_LOGI(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
         return false;
     }
-    auto appInfoList = appRecord->GetAppInfoList();
-    for (auto& it : appInfoList) {
-        if (it == nullptr) {
-            continue;
-        }
-        auto actualVer = it->apiTargetVersion % API_VERSION_MOD;
-        if (actualVer < API12) {
-            TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s 's apiTargetVersion has %{public}d",
-                appRecord->GetName().c_str(), actualVer);
-            return false;
-        }
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo == nullptr) {
+        return false;
+    }
+    auto actualVer = appInfo->apiTargetVersion % API_VERSION_MOD;
+    if (actualVer < API12) {
+        TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s 's apiTargetVersion has %{public}d",
+            appRecord->GetName().c_str(), actualVer);
+        return false;
     }
     auto supportState = appRecord->GetSupportProcessCacheState();
     switch (supportState) {
