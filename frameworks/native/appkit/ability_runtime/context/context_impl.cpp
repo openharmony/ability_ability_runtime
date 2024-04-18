@@ -1209,6 +1209,7 @@ int32_t ContextImpl::SetSupportProcessCacheSelf(bool isSupport)
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
     if (appMgrClient == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "appMgrClient is nullptr");
         return ERR_INVALID_VALUE;
     }
     return appMgrClient->SetSupportProcessCacheSelf(isSupport);
