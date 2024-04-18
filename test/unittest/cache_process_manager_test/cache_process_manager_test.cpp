@@ -271,6 +271,7 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_RefreshCacheNum_0100, Test
 {
     auto cacheProcMgr = std::make_shared<CacheProcessManager>();
     EXPECT_NE(cacheProcMgr, nullptr);
+    cacheProcMgr->maxProcCacheNum_ = 2;
     cacheProcMgr->RefreshCacheNum();
 }
 
@@ -292,26 +293,6 @@ HWTEST_F(CacheProcessManagerTest, CacheProcessManager_GetCurrentCachedProcNum_01
     EXPECT_NE(appRecord2, nullptr);
     EXPECT_EQ(cacheProcMgr->PenddingCacheProcess(appRecord2), true);
     EXPECT_EQ(cacheProcMgr->GetCurrentCachedProcNum(), 2);
-}
-
-/**
- * @tc.name: AppRunningManager_RemoveCacheRecord_0100
- * @tc.desc: Test the state of RemoveCacheRecord
- * @tc.type: FUNC
- */
-HWTEST_F(CacheProcessManagerTest, CacheProcessManager_RemoveCacheRecord_0100, TestSize.Level1)
-{
-    // 在reuse中测试
-}
-
-/**
- * @tc.name: AppRunningManager_ShrinkAndKillCache_0100
- * @tc.desc: Test the state of ShrinkAndKillCache
- * @tc.type: FUNC
- */
-HWTEST_F(CacheProcessManagerTest, CacheProcessManager_ShrinkAndKillCache_0100, TestSize.Level1)
-{
-    // 在PenddingCacheProcess中测试
 }
 
 /**
