@@ -21,21 +21,21 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-#define CHECK_POINTER(object)                                                  \
-  do {                                                                         \
-    if ((object) == nullptr) {                                                 \
-      TAG_LOGE(AAFwkTag::JSRUNTIME, "pointer is nullptr.");                    \
-      return;                                                                  \
-    }                                                                          \
-  } while (0)
+#define CHECK_POINTER(object)                                     \
+    do {                                                          \
+        if ((object) == nullptr) {                                \
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "pointer is nullptr."); \
+            return;                                               \
+        }                                                         \
+    } while (0)
 
-#define CHECK_POINTER_AND_RETURN(object, value)                                \
-  do {                                                                         \
-    if ((object) == nullptr) {                                                 \
-      TAG_LOGE(AAFwkTag::JSRUNTIME, "pointer is nullptr.");                    \
-      return value;                                                            \
-    }                                                                          \
-  } while (0)
+#define CHECK_POINTER_AND_RETURN(object, value)                   \
+    do {                                                          \
+        if ((object) == nullptr) {                                \
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "pointer is nullptr."); \
+            return value;                                         \
+        }                                                         \
+    } while (0)
 }  // namespace AbilityRuntime
 }  // namespace OHOS
 

@@ -244,7 +244,8 @@ int PermissionVerification::CheckCallDataAbilityPermission(const VerificationInf
         return CHECK_PERMISSION_FAILED;
     }
     if (!JudgeStartInvisibleAbility(verificationInfo.accessTokenId, verificationInfo.visible)) {
-        TAG_LOGE(AAFwkTag::DEFAULT, "Target DataAbility is not visible, and caller does not have INVISIBLE permission.");
+        TAG_LOGE(AAFwkTag::DEFAULT,
+            "Target DataAbility is not visible, and caller does not have INVISIBLE permission.");
         return ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
     if (!JudgeAssociatedWakeUp(verificationInfo.accessTokenId, verificationInfo.associatedWakeUp)) {
