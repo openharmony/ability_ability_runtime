@@ -6097,7 +6097,7 @@ int32_t AppMgrServiceInner::SetSupportProcessCacheSelf(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called.");
     if (!appRunningManager_) {
-        TAG_LOGI(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
         return ERR_NO_INIT;
     }
     auto result = CheckSetProcessCachePermission();
@@ -6113,6 +6113,7 @@ int32_t AppMgrServiceInner::SetSupportProcessCacheSelf(bool isSupport)
         return ERR_INVALID_VALUE;
     }
     if (!appRecord->SetSupportProcessCache(isSupport)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetSupportProcessCache more than once");
         return AAFwk::ERR_SET_SUPPORT_PROCESS_CACHE_AGAIN;
     }
     return ERR_OK;
