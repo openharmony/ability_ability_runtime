@@ -204,7 +204,7 @@ bool ConnectionManager::DisconnectCaller(const sptr<IRemoteObject>& connectCalle
             ErrCode ret =
                 AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(connectionInfo.abilityConnection);
             if (ret != ERR_OK) {
-                TAG_LOGE(AAFwkTag::CONNECTION, "ams->DisconnectAbility error, ret=%{public}d", ret);
+                TAG_LOGE(AAFwkTag::CONNECTION, "ability manager service->DisconnectAbility error, ret=%{public}d", ret);
             }
             iter = abilityConnections_.erase(iter);
             isDisconnect = true;
