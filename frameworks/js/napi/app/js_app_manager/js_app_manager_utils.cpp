@@ -60,7 +60,7 @@ napi_value CreateJsAbilityStateData(napi_env env, const AbilityStateData &abilit
     napi_set_named_property(env, object, "state", CreateJsValue(env, abilityStateData.abilityState));
     napi_set_named_property(env, object, "abilityType", CreateJsValue(env, abilityStateData.abilityType));
     napi_set_named_property(env, object, "isAtomicService", CreateJsValue(env, abilityStateData.isAtomicService));
-    HILOG_DEBUG("end.");
+    TAG_LOGD(AAFwkTag::APPMGR, "end.");
     return object;
 }
 
@@ -221,7 +221,7 @@ JsAppProcessState ConvertToJsAppProcessState(
             processState = STATE_DESTROY;
             break;
         default:
-            HILOG_ERROR("Process state is invalid.");
+            TAG_LOGE(AAFwkTag::APPMGR, "Process state is invalid.");
             processState = STATE_DESTROY;
             break;
     }

@@ -69,7 +69,7 @@ bool ImplicitStartProcessor::IsImplicitStartAction(const Want &want)
     }
 
     if (want.GetIntParam(AAFwk::SCREEN_MODE_KEY, ScreenMode::IDLE_SCREEN_MODE) != ScreenMode::IDLE_SCREEN_MODE) {
-        HILOG_INFO("The implicit startup process is not used for the startup of EmbeddaUIAbility");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "The implicit startup process is not used for the startup of EmbeddaUIAbility");
         return false;
     }
 
@@ -294,12 +294,12 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         extensionInfos.size());
 
     if (isOpenLink && abilityInfos.size() == 0) {
-        HILOG_ERROR("There isn't match app.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "There isn't match app.");
         return ERR_IMPLICIT_START_ABILITY_FAIL;
     }
 
     if (appLinkingOnly && abilityInfos.size() == 0) {
-        HILOG_ERROR("There isn't match app.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "There isn't match app.");
         return ERR_IMPLICIT_START_ABILITY_FAIL;
     }
 

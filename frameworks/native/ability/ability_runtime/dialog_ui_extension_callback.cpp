@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "dialog_ui_extension_callback.h"
+#include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 
 namespace OHOS {
@@ -22,10 +23,10 @@ DialogUIExtensionCallback::DialogUIExtensionCallback(const std::weak_ptr<AppExec
 {}
 void DialogUIExtensionCallback::OnRelease()
 {
-    HILOG_DEBUG("Called");
+    TAG_LOGD(AAFwkTag::DIALOG, "Called");
 
     if (uiContent_ == nullptr) {
-        HILOG_ERROR("uiContent_ is nullptr.");
+        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ is nullptr.");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
@@ -33,16 +34,16 @@ void DialogUIExtensionCallback::OnRelease()
 
 void DialogUIExtensionCallback::OnError()
 {
-    HILOG_DEBUG("Called");
+    TAG_LOGD(AAFwkTag::DIALOG, "Called");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        HILOG_ERROR("abilityCallback is nullptr");
+        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
         return;
     }
     abilityCallback->EraseUIExtension(sessionId_);
 
     if (uiContent_ == nullptr) {
-        HILOG_ERROR("uiContent_ is nullptr.");
+        TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ is nullptr.");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
@@ -50,10 +51,10 @@ void DialogUIExtensionCallback::OnError()
 
 void DialogUIExtensionCallback::OnDestroy()
 {
-    HILOG_DEBUG("Called");
+    TAG_LOGD(AAFwkTag::DIALOG, "Called");
     auto abilityCallback = abilityCallback_.lock();
     if (abilityCallback == nullptr) {
-        HILOG_ERROR("abilityCallback is nullptr");
+        TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
         return;
     }
     abilityCallback->EraseUIExtension(sessionId_);
