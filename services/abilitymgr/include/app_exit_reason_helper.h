@@ -22,18 +22,15 @@
 #include "ability_connect_manager.h"
 #include "bundle_info.h"
 #include "exit_reason.h"
-#include "mission_list_manager.h"
-#include "scene_board/ui_ability_lifecycle_manager.h"
+#include "sub_managers_helper.h"
 
 namespace OHOS {
 namespace AAFwk {
 class AppExitReasonHelper {
 public:
-    AppExitReasonHelper(std::shared_ptr<UIAbilityLifecycleManager> &uiAbilityLifecycleManager,
-        std::unordered_map<int, std::shared_ptr<MissionListManager>> &missionListManagers,
-        ffrt::mutex &managersMutex, std::shared_ptr<AbilityConnectManager> &connectManager);
+    explicit AppExitReasonHelper(std::shared_ptr<SubManagersHelper> subManagersHelper);
+    ~AppExitReasonHelper() = default;
 
-    void SetCurrentMissionListManager(const std::shared_ptr<MissionListManager> currentMissionListManager);
     int32_t RecordAppExitReason(const ExitReason &exitReason);
     void DeleteAppExitReasonOfExtension(const std::string &bundleName);
     int32_t RecordProcessExtensionExitReason(
@@ -47,14 +44,11 @@ private:
         const int32_t pid);
     void GetActiveAbilityListByUser(const std::string bundleName, std::vector<std::string> &abilityLists,
         const int32_t targetUserId, const int32_t pid);
-    std::shared_ptr<MissionListManager> GetListManagerByUserId(const int32_t userId);
+    void GetActiveAbilityListFromUIAabilityManager(const std::string bundleName,
+        std::vector<std::string> &abilityLists, const int32_t targetUserId, const int32_t pid);
     bool IsExitReasonValid(const ExitReason &exitReason);
 
-    std::shared_ptr<UIAbilityLifecycleManager> &uiAbilityLifecycleManager_;
-    std::unordered_map<int, std::shared_ptr<MissionListManager>> &missionListManagers_;
-    std::shared_ptr<MissionListManager> currentMissionListManager_;
-    ffrt::mutex &managersMutex_;
-    std::shared_ptr<AbilityConnectManager> &connectManager_;
+    std::shared_ptr<SubManagersHelper> subManagersHelper_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

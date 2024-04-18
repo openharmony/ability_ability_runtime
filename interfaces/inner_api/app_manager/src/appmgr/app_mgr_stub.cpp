@@ -176,6 +176,12 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleSignRestartAppFlag;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_APP_RUNNING_UNIQUE_ID_BY_PID)] =
         &AppMgrStub::HandleGetAppRunningUniqueIdByPid;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_UI_EXTENSION_ROOT_HOST_PID)] =
+        &AppMgrStub::HandleGetAllUIExtensionRootHostPid;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_ALL_UI_EXTENSION_PROVIDER_PID)] =
+        &AppMgrStub::HandleGetAllUIExtensionProviderPid;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::UPDATE_CONFIGURATION_BY_BUNDLE_NAME)] =
+        &AppMgrStub::HandleUpdateConfigurationByBundleName;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -685,6 +691,21 @@ int32_t AppMgrStub::HandleUpdateConfiguration(MessageParcel &data, MessageParcel
     return NO_ERROR;
 }
 
+int32_t AppMgrStub::HandleUpdateConfigurationByBundleName(MessageParcel &data, MessageParcel &reply)
+{
+    std::unique_ptr<Configuration> config(data.ReadParcelable<Configuration>());
+    if (!config) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrStub read configuration error");
+        return ERR_INVALID_VALUE;
+    }
+    std::string name = data.ReadString();
+    int32_t ret = UpdateConfigurationByBundleName(*config, name);
+    if (!reply.WriteInt32(ret)) {
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
 int32_t AppMgrStub::HandleRegisterConfigurationObserver(MessageParcel &data, MessageParcel &reply)
 {
     auto observer = iface_cast<AppExecFwk::IConfigurationObserver>(data.ReadRemoteObject());
@@ -1146,6 +1167,49 @@ int32_t AppMgrStub::HandleGetAppRunningUniqueIdByPid(MessageParcel &data, Messag
         TAG_LOGE(AAFwkTag::APPMGR, "GetAppRunningUniqueIdByPid err or Write appRunningUniqueId error.");
         return IPC_STUB_ERR;
     }
+
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllUIExtensionRootHostPid(MessageParcel &data, MessageParcel &reply)
+{
+    pid_t pid = data.ReadInt32();
+    std::vector<pid_t> hostPids;
+    auto result = GetAllUIExtensionRootHostPid(pid, hostPids);
+    reply.WriteInt32(hostPids.size());
+    for (auto &it : hostPids) {
+        if (!reply.WriteInt32(it)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write host pid failed.");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleGetAllUIExtensionProviderPid(MessageParcel &data, MessageParcel &reply)
+{
+    pid_t hostPid = data.ReadInt32();
+    std::vector<pid_t> providerPids;
+    auto result = GetAllUIExtensionProviderPid(hostPid, providerPids);
+    reply.WriteInt32(providerPids.size());
+    for (auto &it : providerPids) {
+        if (!reply.WriteInt32(it)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Write provider pid failed.");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");
+        return ERR_INVALID_VALUE;
+    }
+
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

@@ -354,6 +354,12 @@ void AbilityManagerStub::ThirdStepInit()
         &AbilityManagerStub::GetDialogSessionInfoInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::SEND_DIALOG_RESULT)] =
         &AbilityManagerStub::SendDialogResultInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REGISTER_ABILITY_FIRST_FRAME_STATE_OBSERVER)] =
+        &AbilityManagerStub::RegisterAbilityFirstFrameStateObserverInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::UNREGISTER_ABILITY_FIRST_FRAME_STATE_OBSERVER)]
+        = &AbilityManagerStub::UnregisterAbilityFirstFrameStateObserverInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::COMPLETE_FIRST_FRAME_DRAWING_BY_SCB)] =
+        &AbilityManagerStub::CompleteFirstFrameDrawingBySCBInner;
 #endif
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REQUEST_DIALOG_SERVICE)] =
         &AbilityManagerStub::HandleRequestDialogService;
@@ -422,6 +428,8 @@ void AbilityManagerStub::FourthStepInit()
         &AbilityManagerStub::ChangeAbilityVisibilityInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CHANGE_UI_ABILITY_VISIBILITY_BY_SCB)] =
         &AbilityManagerStub::ChangeUIAbilityVisibilityBySCBInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SHORTCUT)] =
+        &AbilityManagerStub::StartShortcutInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -2502,7 +2510,15 @@ int AbilityManagerStub::CompleteFirstFrameDrawingInner(MessageParcel &data, Mess
         return ERR_NULL_OBJECT;
     }
     CompleteFirstFrameDrawing(abilityToken);
-    return 0;
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::CompleteFirstFrameDrawingBySCBInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawingBySCBInner, called.");
+    int32_t sessionId = data.ReadInt32();
+    CompleteFirstFrameDrawing(sessionId);
+    return NO_ERROR;
 }
 
 int AbilityManagerStub::PrepareTerminateAbilityInner(MessageParcel &data, MessageParcel &reply)
@@ -2557,6 +2573,40 @@ int AbilityManagerStub::SendDialogResultInner(MessageParcel &data, MessageParcel
     int result = SendDialogResult(*want, dialogSessionId, isAllow);
     if (!reply.WriteInt32(result)) {
         return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::RegisterAbilityFirstFrameStateObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    auto callback = iface_cast<AppExecFwk::IAbilityFirstFrameStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::string targetBundleName = data.ReadString();
+    auto ret = RegisterAbilityFirstFrameStateObserver(callback, targetBundleName);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::UnregisterAbilityFirstFrameStateObserverInner(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    auto callback = iface_cast<AppExecFwk::IAbilityFirstFrameStateObserver>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Callback is null.");
+        return ERR_INVALID_VALUE;
+    }
+    auto ret = UnregisterAbilityFirstFrameStateObserver(callback);
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write ret error.");
+        return IPC_STUB_ERR;
     }
     return NO_ERROR;
 }
@@ -3264,6 +3314,26 @@ int32_t AbilityManagerStub::IsEmbeddedOpenAllowedInner(MessageParcel &data, Mess
         return ERR_INVALID_VALUE;
     }
 
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::StartShortcutInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::shared_ptr<Want> want(data.ReadParcelable<Want>());
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    StartOptions *startOptions = data.ReadParcelable<StartOptions>();
+    if (startOptions == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "startOptions is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    startOptions->processOptions = nullptr;
+
+    int32_t result = StartShortcut(*want, *startOptions);
+    reply.WriteInt32(result);
+    delete startOptions;
     return NO_ERROR;
 }
 } // namespace AAFwk

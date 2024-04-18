@@ -46,14 +46,16 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
             callerInfo.callerModelType = ErmsCallerInfo::MODEL_FA;
         }
     }
-    GetEcologicalCallerInfo(param.want, callerInfo, param.userId);
+    AAFwk::Want newWant = param.want;
+    newWant.RemoveAllFd();
+    GetEcologicalCallerInfo(newWant, callerInfo, param.userId);
     std::string supportErms = OHOS::system::GetParameter(ABILITY_SUPPORT_ECOLOGICAL_RULEMGRSERVICE, "true");
     if (supportErms == "false") {
         HILOG_ERROR("Abilityms not support Erms between applications.");
         return ERR_OK;
     }
 
-    int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(param.want,
+    int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));
     if (ret != ERR_OK) {
         HILOG_DEBUG("check ecological rule failed, keep going.");
@@ -109,7 +111,9 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     ErmsCallerInfo callerInfo;
     GetEcologicalCallerInfo(want, callerInfo, userId);
     ExperienceRule rule;
-    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(want,
+    AAFwk::Want newWant = want;
+    newWant.RemoveAllFd();
+    auto ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));
     if (ret != ERR_OK) {
         HILOG_DEBUG("check ecological rule failed, keep going.");
@@ -152,6 +156,9 @@ void EcologicalRuleInterceptor::GetEcologicalCallerInfo(const Want &want, ErmsCa
         if (callerInfo.packageName == "" && callerAppInfo.name == BUNDLE_NAME_SCENEBOARD) {
             callerInfo.packageName = BUNDLE_NAME_SCENEBOARD;
         }
+    } else if (callerAppInfo.bundleType == AppExecFwk::BundleType::APP_SERVICE_FWK) {
+        HILOG_DEBUG("the caller type is app service");
+        callerInfo.callerAppType = ErmsCallerInfo::TYPE_APP_SERVICE;
     }
 }
 
@@ -180,6 +187,10 @@ void EcologicalRuleInterceptor::InitErmsCallerInfo(Want &want, ErmsCallerInfo &c
     if (targetBundleType == static_cast<int32_t>(AppExecFwk::BundleType::APP)) {
         HILOG_DEBUG("the target type is app");
         callerInfo.targetAppType = ErmsCallerInfo::TYPE_HARMONY_APP;
+    }
+    if (targetBundleType == static_cast<int32_t>(AppExecFwk::BundleType::APP_SERVICE_FWK)) {
+        HILOG_DEBUG("the target type is app service");
+        callerInfo.targetAppType = ErmsCallerInfo::TYPE_APP_SERVICE;
     }
 }
 } // namespace AAFwk

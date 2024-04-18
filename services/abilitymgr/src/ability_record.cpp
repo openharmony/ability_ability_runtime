@@ -37,6 +37,7 @@
 #include "hitrace_meter.h"
 #include "image_source.h"
 #include "in_process_call_wrapper.h"
+#include "int_wrapper.h"
 #include "errors.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
@@ -87,6 +88,8 @@ const std::string SHELL_ASSISTANT_ABILITYNAME = "MainAbility";
 const std::string SHELL_ASSISTANT_DIEREASON = "crash_die";
 const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
+const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
+const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -235,6 +238,7 @@ AbilityRecord::~AbilityRecord()
             object->RemoveDeathRecipient(schedulerDeathRecipient_);
         }
     }
+    want_.CloseAllFd();
     RemoveAppStateObserver(true);
 }
 
@@ -320,7 +324,7 @@ void AbilityRecord::LoadUIAbility()
 {
     SetLoading(true);
     int loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_MULTIPLE;
-    if (applicationInfo_.asanEnabled) {
+    if (applicationInfo_.asanEnabled || applicationInfo_.tsanEnabled) {
         loadTimeout = AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * LOAD_TIMEOUT_ASANENABLED;
         SendEvent(AbilityManagerService::LOAD_TIMEOUT_MSG, loadTimeout / HALF_TIMEOUT);
     } else {
@@ -1177,6 +1181,16 @@ void AbilityRecord::SetCompleteFirstFrameDrawing(const bool flag)
 bool AbilityRecord::IsCompleteFirstFrameDrawing() const
 {
     return isCompleteFirstFrameDrawing_;
+}
+
+bool AbilityRecord::GetColdStartFlag()
+{
+    return coldStart_;
+}
+
+void AbilityRecord::SetColdStartFlag(bool isColdStart)
+{
+    coldStart_ = isColdStart;
 }
 #endif
 
@@ -2458,6 +2472,7 @@ void AbilityRecord::SetWant(const Want &want)
     auto debugApp = want_.GetBoolParam(DEBUG_APP, false);
     auto nativeDebug = want_.GetBoolParam(NATIVE_DEBUG, false);
     auto perfCmd = want_.GetStringParam(PERF_CMD);
+    want_.CloseAllFd();
 
     want_ = want;
     if (debugApp) {
@@ -3020,8 +3035,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         GrantUriPermissionFor2In1Inner(want, uriVec, targetBundleName, tokenId);
         return;
     }
-    uint32_t specifyTokenId = static_cast<uint32_t>(want.GetIntParam("specifyTokenId", 0));
-    GrantUriPermissionInner(want, uriVec, targetBundleName, tokenId, specifyTokenId);
+    GrantUriPermissionInner(want, uriVec, targetBundleName, tokenId);
 }
 
 bool AbilityRecord::CheckUriPermission(Uri &uri, uint32_t callerTokenId, int32_t userId)
@@ -3053,15 +3067,15 @@ bool AbilityRecord::CheckUriPermission(Uri &uri, uint32_t callerTokenId, int32_t
 }
 
 void AbilityRecord::GrantUriPermissionInner(Want &want, std::vector<std::string> &uriVec,
-    const std::string &targetBundleName, uint32_t tokenId, uint32_t specifyTokenId)
+    const std::string &targetBundleName, uint32_t tokenId)
 {
-    auto callerTokenId = specifyTokenId > 0 ? specifyTokenId :
+    auto callerTokenId = specifyTokenId_ > 0 ? specifyTokenId_ :
         static_cast<uint32_t>(want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId));
     auto permission = AAFwk::UriPermissionManagerClient::GetInstance().IsAuthorizationUriAllowed(callerTokenId);
     auto userId = GetCurrentAccountId();
-    TAG_LOGI(AAFwkTag::ABILITYMGR,
+    TAG_LOGD(AAFwkTag::ABILITYMGR,
         "callerTokenId=%{public}u, tokenId=%{public}u, permission=%{public}i, specifyTokenId=%{public}u",
-        callerTokenId, tokenId, static_cast<int>(permission), specifyTokenId);
+        callerTokenId, tokenId, static_cast<int>(permission), specifyTokenId_);
     uint32_t flag = want.GetFlags();
     std::vector<Uri> validUriList = {};
     for (auto &&uriStr : uriVec) {
@@ -3475,6 +3489,29 @@ void AbilityRecord::SetRestartAppFlag(bool isRestartApp)
 bool AbilityRecord::GetRestartAppFlag() const
 {
     return isRestartApp_;
+}
+
+void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
+{
+    if (!UIExtensionUtils::IsUIExtension(GetAbilityInfo().extensionAbilityType)) {
+        return;
+    }
+
+    std::lock_guard guard(wantLock_);
+    if (want_.HasParameter(UIEXTENSION_ABILITY_ID)) {
+        want_.RemoveParam(UIEXTENSION_ABILITY_ID);
+    }
+    want_.SetParam(UIEXTENSION_ABILITY_ID, wantParams.GetIntParam(UIEXTENSION_ABILITY_ID, -1));
+
+    if (want_.HasParameter(UIEXTENSION_ROOT_HOST_PID)) {
+        want_.RemoveParam(UIEXTENSION_ROOT_HOST_PID);
+    }
+    want_.SetParam(UIEXTENSION_ROOT_HOST_PID, wantParams.GetIntParam(UIEXTENSION_ROOT_HOST_PID, -1));
+}
+
+void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
+{
+    specifyTokenId_ = specifyTokenId;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

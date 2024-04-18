@@ -1017,6 +1017,13 @@ public:
     void CompleteFirstFrameDrawing(sptr<IRemoteObject> abilityToken);
 
     /**
+     * WindowManager notification AbilityManager after the first frame is drawn.
+     *
+     * @param sessionId Indidate session id.
+     */
+    void CompleteFirstFrameDrawing(int32_t sessionId);
+
+    /**
      * Called to update mission snapshot.
      * @param token The target ability.
      * @param pixelMap The snapshot.
@@ -1434,6 +1441,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t NotifyDebugAssertResult(uint64_t assertFaultSessionId, AAFwk::UserStatus userStatus);
+
+    /**
+     * Starts a new ability with specific start options.
+     *
+     * @param want, the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartShortcut(const Want &want, const StartOptions &startOptions);
 
 private:
     AbilityManagerClient();

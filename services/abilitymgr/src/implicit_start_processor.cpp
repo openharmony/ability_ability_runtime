@@ -46,6 +46,7 @@ const std::string ANCO_PENDING_REQUEST = "ancoPendingRequest";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const int NFC_CALLER_UID = 1027;
 const int NFC_QUERY_LENGTH = 2;
+const std::string OPEN_LINK_APP_LINKING_ONLY = "appLinkingOnly";
 
 const std::vector<std::string> ImplicitStartProcessor::blackList = {
     std::vector<std::string>::value_type(BLACK_ACTION_SELECT_DATA),
@@ -94,7 +95,7 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         TAG_LOGE(AAFwkTag::ABILITYMGR, "generate ability request by action failed.");
         return ret;
     }
-    AbilityUtil::ProcessWindowMode(request.want, request.abilityInfo.applicationInfo.accessTokenId, windowMode);
+    AbilityUtil::WantSetParameterWindowMode(request.want, windowMode);
 
     auto identity = IPCSkeleton::ResetCallingIdentity();
     auto startAbilityTask = [imp = shared_from_this(), request, userId, identity]
@@ -146,7 +147,8 @@ int ImplicitStartProcessor::ImplicitStartAbility(AbilityRequest &request, int32_
         }
         if (request.want.GetBoolParam("isCreateAppGallerySelector", false)) {
             request.want.RemoveParam("isCreateAppGallerySelector");
-            return NotifyCreateModalDialog(request, request.want, userId, dialogAppInfos);
+            NotifyCreateModalDialog(request, request.want, userId, dialogAppInfos);
+            return ERR_IMPLICIT_START_ABILITY_FAIL;
         }
         std::vector<DialogAppInfo> dialogAllAppInfos;
         bool isMoreHapList = true;
@@ -270,6 +272,10 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     bool withDefault = false;
     withDefault = request.want.GetBoolParam(SHOW_DEFAULT_PICKER_FLAG, withDefault) ? false : true;
+    bool appLinkingOnly = false;
+    bool isOpenLink = false;
+    isOpenLink = request.want.HasParameter(OPEN_LINK_APP_LINKING_ONLY);
+    appLinkingOnly = request.want.GetBoolParam(OPEN_LINK_APP_LINKING_ONLY, false);
 
     if (IPCSkeleton::GetCallingUid() == NFC_CALLER_UID &&
         !request.want.GetStringArrayParam(PARAM_ABILITY_APPINFOS).empty()) {
@@ -286,6 +292,16 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu.", abilityInfos.size(),
         extensionInfos.size());
+
+    if (isOpenLink && abilityInfos.size() == 0) {
+        HILOG_ERROR("There isn't match app.");
+        return ERR_IMPLICIT_START_ABILITY_FAIL;
+    }
+
+    if (appLinkingOnly && abilityInfos.size() == 0) {
+        HILOG_ERROR("There isn't match app.");
+        return ERR_IMPLICIT_START_ABILITY_FAIL;
+    }
 
     if (abilityInfos.size() == 1) {
         auto skillUri =  abilityInfos.front().skillUri;
@@ -339,7 +355,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     }
 
     for (const auto &info : extensionInfos) {
-        if (!isExtension || !CheckImplicitStartExtensionIsValid(request, info)) {
+        if (isOpenLink || !isExtension || !CheckImplicitStartExtensionIsValid(request, info)) {
             continue;
         }
         DialogAppInfo dialogAppInfo;
