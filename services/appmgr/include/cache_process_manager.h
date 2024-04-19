@@ -50,6 +50,7 @@ private:
     std::deque<std::shared_ptr<AppRunningRecord>> cachedAppRecordQueue_;
     ffrt::recursive_mutex cacheQueueMtx;
     std::weak_ptr<AppMgrServiceInner> appMgr_;
+    bool shouldCheckApi = true;
 };
 } // namespace OHOS
 } // namespace AppExecFwk
