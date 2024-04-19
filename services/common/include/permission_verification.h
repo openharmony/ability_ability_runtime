@@ -95,6 +95,8 @@ struct VerificationInfo {
 
     bool VerifyShellStartExtensionType(int32_t type) const;
 
+    bool VerifyPreloadApplicationPermission() const;
+
     bool VerifySetProcessCachePermission() const;
 
 private:

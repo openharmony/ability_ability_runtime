@@ -437,6 +437,16 @@ bool PermissionVerification::VerifyShellStartExtensionType(int32_t type) const
     return false;
 }
 
+bool PermissionVerification::VerifyPreloadApplicationPermission() const
+{
+    if (VerifyCallingPermission(PermissionConstants::PERMISSION_PRELOAD_APPLICATION)) {
+        HILOG_DEBUG("Verify permission %{public}s succeed.", PermissionConstants::PERMISSION_PRELOAD_APPLICATION);
+        return true;
+    }
+    HILOG_ERROR("Verify permission %{public}s failed.", PermissionConstants::PERMISSION_PRELOAD_APPLICATION);
+    return false;
+}
+
 bool PermissionVerification::VerifySetProcessCachePermission() const
 {
     if (VerifyCallingPermission(PermissionConstants::PERMISSION_SET_PROCESS_CACHE_STATE)) {
