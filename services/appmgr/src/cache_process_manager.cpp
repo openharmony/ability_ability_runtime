@@ -61,7 +61,7 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (!QueryEnableProcessCache()) {
-        return;
+        return false;
     }
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "nullptr precheck failed");
@@ -85,7 +85,7 @@ bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningR
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (!QueryEnableProcessCache()) {
-        return;
+        return false;
     }
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord nullptr precheck failed");
