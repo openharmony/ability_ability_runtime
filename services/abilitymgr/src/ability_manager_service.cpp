@@ -806,7 +806,8 @@ bool AbilityManagerService::StartAbilityInChain(StartAbilityParams &params, int 
 }
 
 int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemoteObject> &callerToken,
-    int requestCode, int32_t userId, bool isStartAsCaller, bool isSendDialogResult, uint32_t specifyToken)
+    int requestCode, int32_t userId, bool isStartAsCaller, bool isSendDialogResult, uint32_t specifyToken,
+    bool isForegroundToRestartApp)
 {
     StartAbilityParams startParams(const_cast<Want &>(want));
     startParams.callerToken = callerToken;
@@ -820,11 +821,13 @@ int AbilityManagerService::StartAbilityWrap(const Want &want, const sptr<IRemote
         return result;
     }
 
-    return StartAbilityInner(want, callerToken, requestCode, userId, isStartAsCaller, isSendDialogResult, specifyToken);
+    return StartAbilityInner(want, callerToken,
+        requestCode, userId, isStartAsCaller, isSendDialogResult, specifyToken, isForegroundToRestartApp);
 }
 
 int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemoteObject> &callerToken,
-    int requestCode, int32_t userId, bool isStartAsCaller, bool isSendDialogResult, uint32_t specifyTokenId)
+    int requestCode, int32_t userId, bool isStartAsCaller, bool isSendDialogResult, uint32_t specifyTokenId,
+    bool isForegroundToRestartApp)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     {
@@ -1007,7 +1010,7 @@ int AbilityManagerService::StartAbilityInner(const Want &want, const sptr<IRemot
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Check permission failed from broker.");
             return CHECK_PERMISSION_FAILED;
         }
-    } else if (!isSendDialogResult || want.GetBoolParam("isSelector", false)) {
+    } else if (!isForegroundToRestartApp && (!isSendDialogResult || want.GetBoolParam("isSelector", false))) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Check call ability permission, name is %{public}s.", abilityInfo.name.c_str());
         result = CheckCallAbilityPermission(abilityRequest, specifyTokenId);
         if (result != ERR_OK) {
@@ -5672,7 +5675,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName)
         return GET_BUNDLE_INFO_FAILED;
     }
 
-    if (bundleInfo.isKeepAlive) {
+    if (bundleInfo.isKeepAlive && DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not kill keep alive process.");
         return KILL_PROCESS_KEEP_ALIVE;
     }
@@ -5681,6 +5684,10 @@ int AbilityManagerService::KillProcess(const std::string &bundleName)
     if (ret != ERR_OK) {
         return KILL_PROCESS_FAILED;
     }
+
+    auto connectMgr = GetConnectManagerByUserId(userId);
+    CHECK_POINTER_AND_RETURN(connectMgr, ERR_NO_INIT);
+    connectMgr->DeleteInvalidServiceRecord(bundleName);
     return ERR_OK;
 }
 
@@ -6836,17 +6843,6 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
     }
 }
 
-void AbilityManagerService::RecoverAbilityRestart(const Want& want)
-{
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-    int32_t userId = GetValidUserId(DEFAULT_INVAL_VALUE);
-    int32_t ret = StartAbility(want, userId, 0);
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s AppRecovery::failed to restart ability.  %{public}d", __func__, ret);
-    }
-    IPCSkeleton::SetCallingIdentity(identity);
-}
-
 void AbilityManagerService::ReportAppRecoverResult(const int32_t appId, const AppExecFwk::ApplicationInfo &appInfo,
     const std::string& abilityName, const std::string& result)
 {
@@ -6978,14 +6974,8 @@ void AbilityManagerService::ScheduleRecoverAbility(const sptr<IRemoteObject>& to
         curWant.SetParam(AAFwk::Want::PARAM_ABILITY_RECOVERY_RESTART, true);
 
         ReportAppRecoverResult(record->GetUid(), appInfo, abilityInfo.name, "SUCCESS");
-        AppRecoverKill(record->GetPid(), reason);
     }
-
-    constexpr int delaytime = 1000;
-    std::string taskName = "AppRecovery_kill:" + std::to_string(record->GetPid());
-    auto task = std::bind(&AbilityManagerService::RecoverAbilityRestart, this, curWant);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "AppRecovery RecoverAbilityRestart task begin");
-    taskHandler_->SubmitTask(task, taskName, delaytime);
+    RestartApp(curWant);
 }
 
 int32_t AbilityManagerService::GetRemoteMissionSnapshotInfo(const std::string& deviceId, int32_t missionId,
@@ -9555,6 +9545,14 @@ void AbilityManagerService::NotifyConfigurationChange(const AppExecFwk::Configur
     collaborator->UpdateConfiguration(config, userId);
 }
 
+void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos);
+    if (!bundleInfos.empty()) {
+        DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
+    }
+}
+
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
@@ -9925,6 +9923,13 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want)
         return AAFwk::ERR_RESTART_APP_FREQUENT;
     }
 
+    bool isForegroundToRestartApp = RestartAppManager::GetInstance().IsForegroundToRestartApp();
+    if (!isForegroundToRestartApp) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "RestartApp, IsForegroundToRestartApp failed.");
+        // temporary use, need add new errorcode here, only allow to call when app is foreground
+        return INNER_ERR;
+    }
+
     result = SignRestartAppFlag(userId, bundleName);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "SignRestartAppFlag error.");
@@ -9936,8 +9941,9 @@ int32_t AbilityManagerService::RestartApp(const AAFwk::Want &want)
         return result;
     }
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartAbility begin.");
-    result = OHOS::AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "RestartApp, start ability without CheckCallAbilityPermission.");
+    result = StartAbilityWrap(want, nullptr,
+        DEFAULT_INVAL_VALUE, DEFAULT_INVAL_VALUE, false, false, 0, isForegroundToRestartApp);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "StartAbility error.");
         return result;
