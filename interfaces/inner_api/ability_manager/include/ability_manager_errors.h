@@ -462,14 +462,29 @@ enum {
      * Native error(2097240) for memory size state unchanged.
      */
     ERR_NATIVE_MEMORY_SIZE_STATE_UNCHANGED,
+    
+    /**
+     * Native error(2097241) for target bundle not exist.
+     */
+    ERR_TARGET_BUNDLE_NOT_EXIST,
 
     /**
-     * Result(2097241) for get active extension list empty when record exit reason.
+     * Native error(2097242) for get launch ability info failed.
+     */
+    ERR_GET_LAUNCH_ABILITY_INFO_FAILED,
+
+    /**
+     * Native error(2097243) for check preload conditions failed.
+     */
+    ERR_CHECK_PRELOAD_CONDITIONS_FAILED,
+
+    /**
+     * Result(2097244) for get active extension list empty when record exit reason.
      */
     ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY,
 
     /**
-     * Result(2097242) for get ExtensionName by uid fail.
+     * Result(2097245) for get ExtensionName by uid fail.
      */
     GET_EXTENSION_NAME_BY_UID_FAIL,
 };
