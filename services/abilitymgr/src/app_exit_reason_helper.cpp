@@ -120,7 +120,7 @@ void AppExitReasonHelper::DeleteAppExitReasonOfExtension(const std::string &bund
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid bundle name.");
         return;
     }
-    CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
+    CHECK_POINTER(subManagersHelper_);
     std::vector<std::string> extensionList;
     int32_t resultCode =
         subManagersHelper_->GetCurrentConnectManager()->GetActiveUIExtensionList(bundleName, extensionList);

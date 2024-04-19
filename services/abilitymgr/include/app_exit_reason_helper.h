@@ -19,7 +19,6 @@
 #include <memory>
 #include <mutex>
 
-#include "ability_connect_manager.h"
 #include "bundle_info.h"
 #include "exit_reason.h"
 #include "sub_managers_helper.h"
