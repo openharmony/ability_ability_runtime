@@ -87,6 +87,11 @@ SpawnConnectionState AppSpawnClient::QueryConnectionState() const
     return state_;
 }
 
+AppSpawnClientHandle AppSpawnClient::GetAppSpawnClientHandle() const
+{
+    return handle_;
+}
+
 static std::string DumpDataGroupInfoListToJson(const DataGroupInfoList &dataGroupInfoList)
 {
     nlohmann::json dataGroupInfoListJson;
@@ -146,7 +151,7 @@ int32_t AppSpawnClient::SetMountPermission(const AppSpawnStartMsg &startMsg, App
     int32_t ret = 0;
     std::set<std::string> mountPermissionList = startMsg.permissions;
     for (std::string permission : mountPermissionList) {
-        ret = AppSpawnReqMsgAddPermission(reqHandle, permission.c_str());
+        ret = AppSpawnClientAddPermission(handle_, reqHandle, permission.c_str());
         if (ret != 0) {
             HILOG_ERROR("AppSpawnReqMsgAddPermission %{public}s failed", permission.c_str());
             return ret;
