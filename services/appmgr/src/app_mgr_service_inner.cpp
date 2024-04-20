@@ -2360,9 +2360,10 @@ void AppMgrServiceInner::StartProcessVerifyPermission(const BundleInfo &bundleIn
         }
     }
 
-    int32_t maxPermissionIndex = GetMaxPermissionIndex();
+    auto handle = remoteClientManager_->GetSpawnClient()->GetAppSpawnClientHandle();
+    int32_t maxPermissionIndex = GetMaxPermissionIndex(handle);
     for (int i = 0; i < maxPermissionIndex; i++) {
-        std::string permission = std::string(GetPermissionByIndex(i));
+        std::string permission = std::string(GetPermissionByIndex(handle, i));
         if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(token, permission, false) ==
             Security::AccessToken::PERMISSION_GRANTED) {
             permissions.insert(permission);
