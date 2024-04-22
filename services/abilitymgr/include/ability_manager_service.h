@@ -2109,6 +2109,8 @@ private:
     bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
         const std::string &WHITE_LIST);
 
+    void CloseAssertDialog(const std::string &assertSessionId);
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif
