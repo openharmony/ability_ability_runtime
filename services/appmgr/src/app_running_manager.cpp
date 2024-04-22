@@ -493,8 +493,7 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token)
     if (appRecord->IsLastAbilityRecord(token) && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
-        if (cacheProcMgr != nullptr && cacheProcMgr->QueryEnableProcessCache()
-            && cacheProcMgr->IsAppSupportProcessCache(appRecord)) {
+        if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s supports process cache, not terminate record.",
                 appRecord->GetBundleName().c_str());
@@ -554,8 +553,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
-        if (cacheProcMgr != nullptr && cacheProcMgr->QueryEnableProcessCache()
-            && cacheProcMgr->IsCachedProcess(appRecord)) {
+        if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s is cached, not terminate app.",
                 appRecord->GetBundleName().c_str());
             return;

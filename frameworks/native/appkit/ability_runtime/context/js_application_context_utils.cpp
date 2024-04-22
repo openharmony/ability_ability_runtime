@@ -1425,7 +1425,7 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetGroupDir);
     BindNativeFunction(env, object, "restartApp", MD_NAME,
         JsApplicationContextUtils::RestartApp);
-    BindNativeFunction(env, object, "setProcessCacheSelf", MD_NAME,
+    BindNativeFunction(env, object, "setSupportProcessCache", MD_NAME,
         JsApplicationContextUtils::SetSupportProcessCacheSelf);
 }
 

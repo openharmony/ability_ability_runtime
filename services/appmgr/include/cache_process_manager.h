@@ -38,6 +38,7 @@ public:
     void OnProcessKilled(const std::shared_ptr<AppRunningRecord> &appRecord);
     void ReuseCachedProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
     bool IsAppSupportProcessCache(const std::shared_ptr<AppRunningRecord> &appRecord);
+    bool IsAppShouldCache(const std::shared_ptr<AppRunningRecord> &appRecord);
     void RefreshCacheNum();
     std::string PrintCacheQueue();
 private:
