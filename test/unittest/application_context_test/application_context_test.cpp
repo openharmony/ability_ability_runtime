@@ -1184,6 +1184,65 @@ HWTEST_F(ApplicationContextTest, RestartApp_0100, TestSize.Level1)
 }
 
 /**
+ * @tc.number: DispatchConfigurationUpdated_0100
+ * @tc.name: DispatchConfigurationUpdated
+ * @tc.desc: DispatchConfigurationUpdated
+ */
+HWTEST_F(ApplicationContextTest, DispatchConfigurationUpdated_0100, TestSize.Level1)
+{
+    AppExecFwk::Configuration config;
+    context_->DispatchConfigurationUpdated(config);
+    EXPECT_NE(context_, nullptr);
+}
+
+/**
+ * @tc.number: DispatchMemoryLevel_0100
+ * @tc.name: DispatchMemoryLevel
+ * @tc.desc: DispatchMemoryLevel
+ */
+HWTEST_F(ApplicationContextTest, DispatchMemoryLevel_0100, TestSize.Level1)
+{
+    int level = 0;
+    context_->DispatchMemoryLevel(level);
+    EXPECT_NE(context_, nullptr);
+}
+
+/**
+ * @tc.number: RegisterAppConfigUpdateObserver_0100
+ * @tc.name: RegisterAppConfigUpdateObserver
+ * @tc.desc: RegisterAppConfigUpdateObserver
+ */
+HWTEST_F(ApplicationContextTest, RegisterAppConfigUpdateObserver_0100, TestSize.Level1)
+{
+    AppConfigUpdateCallback appConfigChangeCallback;
+    context_->RegisterAppConfigUpdateObserver(appConfigChangeCallback);
+    EXPECT_NE(context_, nullptr);
+}
+
+/**
+ * @tc.number: GetAppRunningUniqueId_0100
+ * @tc.name: GetAppRunningUniqueId
+ * @tc.desc: GetAppRunningUniqueId
+ */
+HWTEST_F(ApplicationContextTest, GetAppRunningUniqueId_0100, TestSize.Level1)
+{
+    context_->GetAppRunningUniqueId();
+    EXPECT_NE(context_, nullptr);
+}
+
+/**
+ * @tc.number: SetAppRunningUniqueId_0100
+ * @tc.name: SetAppRunningUniqueId
+ * @tc.desc: SetAppRunningUniqueId
+ */
+HWTEST_F(ApplicationContextTest, SetAppRunningUniqueId_0100, TestSize.Level1)
+{
+    std::string appRunningUniqueId;
+    context_->SetAppRunningUniqueId(appRunningUniqueId);
+    EXPECT_NE(context_, nullptr);
+}
+
+/**
  * @tc.number: SetSupportProcessCacheSelf_0100
  * @tc.name: SetSupportProcessCacheSelf
  * @tc.desc: SetSupportProcessCacheSelf fail with no permission
