@@ -788,9 +788,9 @@ int AbilityConnectManager::AbilityTransitionDone(const sptr<IRemoteObject> &toke
     int targetState = AbilityRecord::ConvertLifeCycleToAbilityState(static_cast<AbilityLifeCycleState>(state));
     std::string abilityState = AbilityRecord::ConvertAbilityState(static_cast<AbilityState>(targetState));
     std::shared_ptr<AbilityRecord> abilityRecord;
-    if (targetState == AbilityState::INACTIVE ||
-        targetState == AbilityState::FOREGROUND ||
-        targetState == AbilityState::BACKGROUND) {
+    if (targetState == AbilityState::INACTIVE) {
+        abilityRecord = GetExtensionFromServiceMapInner(token);
+    } else if (targetState == AbilityState::FOREGROUND || targetState == AbilityState::BACKGROUND) {
         abilityRecord = GetExtensionFromServiceMapInner(token);
         if (abilityRecord == nullptr) {
             abilityRecord = GetExtensionFromTerminatingMapInner(token);
@@ -1926,7 +1926,10 @@ void AbilityConnectManager::HandleAbilityDiedTask(
             IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->ClearProcessByToken(
                 token->AsObject()));
         }
-        RestartAbility(abilityRecord, currentUserId);
+        if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent() ||
+            IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard()) {
+            RestartAbility(abilityRecord, currentUserId);
+        }
     } else {
         if (isRemove) {
             HandleNotifyAssertFaultDialogDied(abilityRecord);
@@ -2728,6 +2731,18 @@ void AbilityConnectManager::SignRestartAppFlag(const std::string &bundleName)
             continue;
         }
         abilityRecord->SetRestartAppFlag(true);
+    }
+}
+
+void AbilityConnectManager::DeleteInvalidServiceRecord(const std::string &bundleName)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Delete invalid record by %{public}s.", bundleName.c_str());
+    for (auto it = serviceMap_.begin(); it != serviceMap_.end();) {
+        if (it->second != nullptr && it->second->GetApplicationInfo().bundleName == bundleName) {
+            serviceMap_.erase(it++);
+        } else {
+            it++;
+        }
     }
 }
 
