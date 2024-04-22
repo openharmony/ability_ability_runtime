@@ -14,12 +14,13 @@
  */
 
 #include <vector>
+#include <sstream>
+#include "hitrace_meter.h"
 #include "parameters.h"
 #include "hilog_tag_wrapper.h"
 #include "app_state_observer_manager.h"
 #include "app_mgr_service_inner.h"
 #include "cache_process_manager.h"
-#include <sstream>
 
 namespace {
 const std::string MAX_PROC_CACHE_NUM = "persist.sys.abilityms.maxProcessCacheNum";
@@ -61,6 +62,7 @@ bool CacheProcessManager::QueryEnableProcessCache()
 
 bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (!QueryEnableProcessCache()) {
         return false;
@@ -85,6 +87,7 @@ bool CacheProcessManager::PenddingCacheProcess(const std::shared_ptr<AppRunningR
 
 bool CacheProcessManager::CheckAndCacheProcess(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Called");
     if (!QueryEnableProcessCache()) {
         return false;
@@ -132,6 +135,7 @@ bool CacheProcessManager::IsCachedProcess(const std::shared_ptr<AppRunningRecord
 
 void CacheProcessManager::OnProcessKilled(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!QueryEnableProcessCache()) {
         return;
     }
@@ -149,6 +153,7 @@ void CacheProcessManager::OnProcessKilled(const std::shared_ptr<AppRunningRecord
 
 void CacheProcessManager::ReuseCachedProcess(const std::shared_ptr<AppRunningRecord> &appRecord)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!QueryEnableProcessCache()) {
         return;
     }
@@ -198,6 +203,23 @@ bool CacheProcessManager::IsAppSupportProcessCache(const std::shared_ptr<AppRunn
         default:
             return true;
     }
+}
+
+bool CacheProcessManager::IsAppShouldCache(const std::shared_ptr<AppRunningRecord> &appRecord)
+{
+    if (appRecord == nullptr) {
+        return false;
+    }
+    if (!QueryEnableProcessCache()) {
+        return false;
+    }
+    if (IsCachedProcess(appRecord)) {
+        return true;
+    }
+    if (!IsAppSupportProcessCache(appRecord)) {
+        return false;
+    }
+    return true;
 }
 
 bool CacheProcessManager::IsAppAbilitiesEmpty(const std::shared_ptr<AppRunningRecord> &appRecord)

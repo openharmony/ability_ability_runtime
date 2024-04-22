@@ -6220,6 +6220,7 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
 int32_t AppMgrServiceInner::SetSupportProcessCacheSelf(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called.");
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
         return ERR_NO_INIT;
@@ -6246,7 +6247,7 @@ int32_t AppMgrServiceInner::SetSupportProcessCacheSelf(bool isSupport)
 int32_t AppMgrServiceInner::CheckSetProcessCachePermission() const
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called.");
-
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     CHECK_CALLER_IS_SYSTEM_APP;
     auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifySetProcessCachePermission();
     // for test purpose
