@@ -265,6 +265,9 @@ void JSAppStateObserver::HandleOnAppStarted(const AppStateData &appStateData)
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     auto tmpMap = jsObserverObjectMap_;
     for (auto &item : tmpMap) {
+        if (item.second == nullptr) {
+            continue;
+        }
         napi_value obj = (item.second)->GetNapiValue();
         napi_value argv[] = {CreateJsAppStateData(env_, appStateData)};
         CallJsFunction(obj, "onAppStarted", argv, ARGC_ONE);
@@ -302,6 +305,9 @@ void JSAppStateObserver::HandleOnAppStopped(const AppStateData &appStateData)
         appStateData.bundleName.c_str(), appStateData.uid, appStateData.state);
     auto tmpMap = jsObserverObjectMap_;
     for (auto &item : tmpMap) {
+        if (item.second == nullptr) {
+            continue;
+        }
         napi_value obj = (item.second)->GetNapiValue();
         napi_value argv[] = {CreateJsAppStateData(env_, appStateData)};
         CallJsFunction(obj, "onAppStopped", argv, ARGC_ONE);

@@ -24,13 +24,8 @@
 #include "want.h"
 #include "configuration_convertor.h"
 #include "ability_manager_errors.h"
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
 using namespace testing::ext;
 
-namespace {
-const char *g_perms[] = { "ohos.permission.SET_PROCESS_CACHE_STATE" };
-}
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -38,22 +33,6 @@ class ApplicationContextTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    static void SetNativeToken()
-    {
-        NativeTokenInfoParams infoInstance = {
-            .dcapsNum = 0,
-            .permsNum = static_cast<int32_t>(sizeof(g_perms) / sizeof(g_perms[0])),
-            .aclsNum = 0,
-            .dcaps = nullptr,
-            .perms = g_perms,
-            .acls = nullptr,
-            .aplStr = "system_basic",
-        };
-
-        infoInstance.processName = "SetUpTestCase";
-        auto tokenId = GetAccessTokenId(&infoInstance);
-        SetSelfTokenID(tokenId);
-    }
     void SetUp() override;
     void TearDown() override;
     std::shared_ptr<ApplicationContext> context_ = nullptr;
