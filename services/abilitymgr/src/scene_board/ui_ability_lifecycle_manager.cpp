@@ -807,6 +807,24 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
         return;
     }
 
+    HILOG_DEBUG("sxn, sessionInfo->want.GetElement().GetBundleName():%{public}s, sessionInfo->want.GetElement().GetAbilityName():%{public}s, sessionInfo->want.GetElement().GetModuleName():%{public}s", sessionInfo->want.GetElement().GetBundleName().c_str(), sessionInfo->want.GetElement().GetAbilityName().c_str(), sessionInfo->want.GetElement().GetModuleName().c_str());
+    // auto abilityInfo = abilityRequest.abilityInfo;
+    for (auto [persistentId, record] : sessionAbilityMap_) {
+        auto recordAbilityInfo = record->GetAbilityInfo();
+        if (sessionInfo->want.GetElement().GetBundleName() == recordAbilityInfo.bundleName && sessionInfo->want.GetElement().GetAbilityName() == recordAbilityInfo.name &&
+            sessionInfo->want.GetElement().GetModuleName() == recordAbilityInfo.moduleName) {
+            EventInfo eventInfo;
+            eventInfo.userId = sessionInfo->userId;
+            eventInfo.abilityName = sessionInfo->want.GetElement().GetAbilityName();
+            eventInfo.bundleName = sessionInfo->want.GetElement().GetBundleName();
+            eventInfo.moduleName = sessionInfo->want.GetElement().GetModuleName();
+            EventReport::SendAbilityEvent(
+                EventName::START_STANDARD_ABILITIES, HiSysEventType::BEHAVIOR, eventInfo);
+            break;
+        }
+    }
+
+
     sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     tmpAbilityMap_.erase(search);
     uiAbilityRecord->SetSessionInfo(sessionInfo);
