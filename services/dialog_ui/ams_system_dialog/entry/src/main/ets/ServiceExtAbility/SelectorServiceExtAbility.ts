@@ -93,7 +93,7 @@ export default class SelectorServiceExtensionAbility extends extension {
     let appIcon = '';
     let type = '';
     let userId = Number('0');
-    if (globalThis.params.isDefaultSelector) {
+    if (!globalThis.params.isDefaultSelector) {
       type = hap.type;
       userId = Number(hap.userId);
     }
