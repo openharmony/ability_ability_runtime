@@ -1931,7 +1931,7 @@ int32_t AppMgrProxy::NotifyMemonySizeStateChanged(bool isMemorySizeSufficent)
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::SetSupportProcessCacheSelf(bool isSupport)
+int32_t AppMgrProxy::SetSupportedProcessCacheSelf(bool isSupport)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     MessageParcel data;
@@ -1946,7 +1946,7 @@ int32_t AppMgrProxy::SetSupportProcessCacheSelf(bool isSupport)
 
     MessageParcel reply;
     MessageOption option;
-    auto error = SendRequest(AppMgrInterfaceCode::SET_SUPPORT_PROCESS_CACHE_SELF, data, reply, option);
+    auto error = SendRequest(AppMgrInterfaceCode::SET_SUPPORTED_PROCESS_CACHE_SELF, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPMGR, "Send request error: %{public}d", error);
         return error;

@@ -757,7 +757,7 @@ public:
     int DumpIpcStop(std::string& result);
     int DumpIpcStat(std::string& result);
 
-    bool SetSupportProcessCache(bool isSupport);
+    bool SetSupportedProcessCache(bool isSupport);
     SupportProcessCacheState GetSupportProcessCacheState();
 private:
     /**

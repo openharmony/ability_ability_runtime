@@ -2105,7 +2105,7 @@ int AppRunningRecord::DumpIpcStat(std::string& result)
     return appLifeCycleDeal_->DumpIpcStat(result);
 }
 
-bool AppRunningRecord::SetSupportProcessCache(bool isSupport)
+bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     if (procCacheSupportState_ != SupportProcessCacheState::UNSPECIFIED) {

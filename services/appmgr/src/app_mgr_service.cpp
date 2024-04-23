@@ -1332,14 +1332,14 @@ int32_t AppMgrService::NotifyMemonySizeStateChanged(bool isMemorySizeSufficent)
     return appMgrServiceInner_->NotifyMemonySizeStateChanged(isMemorySizeSufficent);
 }
 
-int32_t AppMgrService::SetSupportProcessCacheSelf(bool isSupport)
+int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->SetSupportProcessCacheSelf(isSupport);
+    return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
