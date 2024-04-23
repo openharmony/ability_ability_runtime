@@ -45,6 +45,7 @@ ohos_moduletest("AppRunningProcessesInfoModuleTest") {
     "bundle_framework:appexecfwk_base",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
   ]
