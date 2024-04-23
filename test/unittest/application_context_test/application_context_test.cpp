@@ -1243,14 +1243,14 @@ HWTEST_F(ApplicationContextTest, SetAppRunningUniqueId_0100, TestSize.Level1)
 }
 
 /**
- * @tc.number: SetSupportProcessCacheSelf_0100
- * @tc.name: SetSupportProcessCacheSelf
- * @tc.desc: SetSupportProcessCacheSelf fail with no permission
+ * @tc.number: SetSupportedProcessCacheSelf_0100
+ * @tc.name: SetSupportedProcessCacheSelf
+ * @tc.desc: SetSupportedProcessCacheSelf fail with no permission
  */
-HWTEST_F(ApplicationContextTest, SetSupportProcessCacheSelf_0100, TestSize.Level1)
+HWTEST_F(ApplicationContextTest, SetSupportedProcessCacheSelf_0100, TestSize.Level1)
 {
     bool isSupport = false;
-    int32_t res = context_->SetSupportProcessCacheSelf(isSupport);
+    int32_t res = context_->SetSupportedProcessCacheSelf(isSupport);
     EXPECT_EQ(res, OHOS::ERR_INVALID_VALUE);
 }
 }  // namespace AbilityRuntime

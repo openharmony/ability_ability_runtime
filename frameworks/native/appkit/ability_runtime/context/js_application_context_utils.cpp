@@ -1333,13 +1333,13 @@ napi_value JsApplicationContextUtils::CreateJsApplicationContext(napi_env env)
     return object;
 }
 
-napi_value JsApplicationContextUtils::SetSupportProcessCacheSelf(napi_env env, napi_callback_info info)
+napi_value JsApplicationContextUtils::SetSupportedProcessCacheSelf(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils,
-        OnSetSupportProcessCacheSelf, APPLICATION_CONTEXT_NAME);
+        OnSetSupportedProcessCacheSelf, APPLICATION_CONTEXT_NAME);
 }
 
-napi_value JsApplicationContextUtils::OnSetSupportProcessCacheSelf(napi_env env, NapiCallbackInfo& info)
+napi_value JsApplicationContextUtils::OnSetSupportedProcessCacheSelf(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "called");
 
@@ -1368,13 +1368,13 @@ napi_value JsApplicationContextUtils::OnSetSupportProcessCacheSelf(napi_env env,
         return CreateJsUndefined(env);
     }
 
-    int32_t errCode = applicationContext->SetSupportProcessCacheSelf(isSupport);
+    int32_t errCode = applicationContext->SetSupportedProcessCacheSelf(isSupport);
     if (errCode == AAFwk::CHECK_PERMISSION_FAILED) {
         TAG_LOGE(AAFwkTag::APPKIT, "check permission failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_NO_ACCESS_PERMISSION);
-    } else if (errCode == AAFwk::ERR_SET_SUPPORT_PROCESS_CACHE_AGAIN) {
+    } else if (errCode == AAFwk::ERR_SET_SUPPORTED_PROCESS_CACHE_AGAIN) {
         TAG_LOGE(AAFwkTag::APPKIT, "cannot set more than once");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_SET_SUPPORT_PROCESS_CACHE_AGAIN);
+        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_SET_SUPPORTED_PROCESS_CACHE_AGAIN);
     } else if (errCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "set failed");
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INTERNAL_ERROR);
@@ -1425,8 +1425,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetGroupDir);
     BindNativeFunction(env, object, "restartApp", MD_NAME,
         JsApplicationContextUtils::RestartApp);
-    BindNativeFunction(env, object, "setSupportProcessCache", MD_NAME,
-        JsApplicationContextUtils::SetSupportProcessCacheSelf);
+    BindNativeFunction(env, object, "setSupportedProcessCache", MD_NAME,
+        JsApplicationContextUtils::SetSupportedProcessCacheSelf);
 }
 
 JsAppProcessState JsApplicationContextUtils::ConvertToJsAppProcessState(

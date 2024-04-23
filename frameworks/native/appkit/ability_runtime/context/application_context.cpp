@@ -544,10 +544,10 @@ void ApplicationContext::SetAppRunningUniqueId(const std::string &appRunningUniq
     appRunningUniqueId_ = appRunningUniqueId;
 }
 
-int32_t ApplicationContext::SetSupportProcessCacheSelf(bool isSupport)
+int32_t ApplicationContext::SetSupportedProcessCacheSelf(bool isSupport)
 {
     if (contextImpl_ != nullptr) {
-        return contextImpl_->SetSupportProcessCacheSelf(isSupport);
+        return contextImpl_->SetSupportedProcessCacheSelf(isSupport);
     }
     TAG_LOGE(AAFwkTag::APPKIT, "contextImpl_ is nullptr.");
     return ERR_INVALID_VALUE;

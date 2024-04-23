@@ -6217,7 +6217,7 @@ void AppMgrServiceInner::NotifyStartResidentProcess(std::vector<AppExecFwk::Bund
     }
 }
 
-int32_t AppMgrServiceInner::SetSupportProcessCacheSelf(bool isSupport)
+int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called.");
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
@@ -6237,9 +6237,9 @@ int32_t AppMgrServiceInner::SetSupportProcessCacheSelf(bool isSupport)
         TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, callerPid:%{public}d", callerPid);
         return ERR_INVALID_VALUE;
     }
-    if (!appRecord->SetSupportProcessCache(isSupport)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "SetSupportProcessCache more than once");
-        return AAFwk::ERR_SET_SUPPORT_PROCESS_CACHE_AGAIN;
+    if (!appRecord->SetSupportedProcessCache(isSupport)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetSupportedProcessCache more than once");
+        return AAFwk::ERR_SET_SUPPORTED_PROCESS_CACHE_AGAIN;
     }
     return ERR_OK;
 }

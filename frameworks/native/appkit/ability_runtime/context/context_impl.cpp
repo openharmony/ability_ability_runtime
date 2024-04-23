@@ -1204,7 +1204,7 @@ void ContextImpl::ClearUpApplicationData()
     }
 }
 
-int32_t ContextImpl::SetSupportProcessCacheSelf(bool isSupport)
+int32_t ContextImpl::SetSupportedProcessCacheSelf(bool isSupport)
 {
     TAG_LOGD(AAFwkTag::APPKIT, "Called");
     auto appMgrClient = DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance();
@@ -1212,7 +1212,7 @@ int32_t ContextImpl::SetSupportProcessCacheSelf(bool isSupport)
         TAG_LOGE(AAFwkTag::APPKIT, "appMgrClient is nullptr");
         return ERR_INVALID_VALUE;
     }
-    return appMgrClient->SetSupportProcessCacheSelf(isSupport);
+    return appMgrClient->SetSupportedProcessCacheSelf(isSupport);
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

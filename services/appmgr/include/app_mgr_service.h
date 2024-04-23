@@ -490,7 +490,7 @@ public:
 
     int32_t NotifyMemonySizeStateChanged(bool isMemorySizeSufficent) override;
 
-    int32_t SetSupportProcessCacheSelf(bool isSupport) override;
+    int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
 private:
     /**
      * Init, Initialize application services.
