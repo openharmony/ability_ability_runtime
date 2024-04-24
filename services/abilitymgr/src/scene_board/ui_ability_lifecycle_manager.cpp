@@ -120,7 +120,23 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
             return ERR_OK;
         }
     }
+
     if (iter == sessionAbilityMap_.end()) {
+        auto abilityInfo = abilityRequest.abilityInfo;
+        for (auto [persistentId, record] : sessionAbilityMap_) {
+            auto recordAbilityInfo = record->GetAbilityInfo();
+            if (abilityInfo.bundleName == recordAbilityInfo.bundleName && abilityInfo.name == recordAbilityInfo.name &&
+                abilityInfo.moduleName == recordAbilityInfo.moduleName) {
+                EventInfo eventInfo;
+                eventInfo.userId = abilityRequest.userId;
+                eventInfo.abilityName = abilityInfo.name;
+                eventInfo.bundleName = abilityInfo.bundleName;
+                eventInfo.moduleName = abilityInfo.moduleName;
+                EventReport::SendAbilityEvent(
+                    EventName::START_STANDARD_ABILITIES, HiSysEventType::BEHAVIOR, eventInfo);
+                break;
+            }
+        }
         sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     }
 
@@ -160,7 +176,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::CreateAbilityRecord(Ab
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uiAbilityRecord is invalid.");
         return nullptr;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "user id: %{public}d.", sessionInfo->userId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "user id: %{public}d.", userId_);
     uiAbilityRecord->SetOwnerMissionUserId(userId_);
     SetRevicerInfo(abilityRequest, uiAbilityRecord);
     SetLastExitReason(uiAbilityRecord);
