@@ -75,7 +75,6 @@ accessibility_path = "//foundation/barrierfree/accessibility"
 declare_args() {
   background_task_mgr_continuous_task_enable = true
   resource_schedule_service_enable = true
-  ability_runtime_graphics = true
   ability_runtime_power = true
   ability_runtime_relational = true
   ability_runtime_ces = true
