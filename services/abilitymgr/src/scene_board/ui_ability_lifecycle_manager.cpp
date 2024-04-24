@@ -823,7 +823,6 @@ void UIAbilityLifecycleManager::CallUIAbilityBySCB(const sptr<SessionInfo> &sess
         }
     }
 
-
     sessionAbilityMap_.emplace(sessionInfo->persistentId, uiAbilityRecord);
     tmpAbilityMap_.erase(search);
     uiAbilityRecord->SetSessionInfo(sessionInfo);
