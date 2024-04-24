@@ -98,6 +98,7 @@
 #include "extension_record_manager.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
+#include "uri_utils.h"
 #include "view_data.h"
 #include "xcollie/watchdog.h"
 #include "config_policy_utils.h"
@@ -1784,22 +1785,19 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
         return ERR_INVALID_VALUE;
     }
 
-    if (sessionInfo->userId == DEFAULT_INVAL_VALUE) {
-        sessionInfo->userId = GetUserId();
-    } else if (sessionInfo->userId != GetUserId()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "this userId is not valid");
-        return ERR_CROSS_USER;
-    }
-
-    auto currentUserId = GetUserId();
-    (sessionInfo->want).RemoveParam(AAFwk::SCREEN_MODE_KEY);
-    EventInfo eventInfo = BuildEventInfo(sessionInfo->want, currentUserId);
-    EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-
     if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
+
+    auto currentUserId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    if (sessionInfo->userId == DEFAULT_INVAL_VALUE) {
+        sessionInfo->userId = currentUserId;
+    }
+
+    (sessionInfo->want).RemoveParam(AAFwk::SCREEN_MODE_KEY);
+    EventInfo eventInfo = BuildEventInfo(sessionInfo->want, currentUserId);
+    EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 
     auto requestCode = sessionInfo->requestCode;
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId,
@@ -3113,6 +3111,7 @@ int AbilityManagerService::StartRemoteAbility(const Want &want, int requestCode,
 
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    UriUtils::GetInstance().FilterUriWithPermissionDms(remoteWant, accessToken);
     DistributedClient dmsClient;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "get callerUid = %d, AccessTokenID = %u", callerUid, accessToken);
     int result = dmsClient.StartRemoteAbility(remoteWant, callerUid, requestCode, accessToken);
@@ -7098,9 +7097,12 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
     }
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     StartHighestPriorityAbility(userId, isBoot, callback);
-    if (AmsConfigurationParameter::GetInstance().MultiUserType() == 0) {
-        PauseOldConnectManager(oldUserId);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
+        AmsConfigurationParameter::GetInstance().MultiUserType() != 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no need to terminate old scb.");
+        return;
     }
+    PauseOldConnectManager(oldUserId);
 }
 
 void AbilityManagerService::SwitchManagers(int32_t userId, bool switchUser)
@@ -8387,7 +8389,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
         return ERR_OK;
     }
     if (AAFwk::UIExtensionUtils::IsUIExtension(extensionType)) {
-        return ERR_OK;
+        return CheckUIExtensionPermission(abilityRequest);
     }
     if (extensionType == AppExecFwk::ExtensionAbilityType::VPN) {
         return ERR_OK;
@@ -8403,6 +8405,16 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
     return CHECK_PERMISSION_FAILED;
 }
 
+int AbilityManagerService::CheckUIExtensionPermission(const AbilityRequest &abilityRequest)
+{
+    auto extensionType = abilityRequest.abilityInfo.extensionAbilityType;
+    if (AAFwk::UIExtensionUtils::IsSystemUIExtension(extensionType) && !abilityRequest.appInfo.isSystemApp) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Bundle %{public}s wanna to start isn't system app, not allowed.",
+            abilityRequest.appInfo.bundleName.c_str());
+        return CHECK_PERMISSION_FAILED;
+    }
+    return ERR_OK;
+}
 
 int AbilityManagerService::CheckCallServiceAbilityPermission(const AbilityRequest &abilityRequest)
 {

@@ -37,6 +37,7 @@ const size_t IDENTITY_LIST_MAX_SIZE = 10;
 const int32_t BROKER_UID = 5557;
 
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
+const std::string ACTION_VIEW = "ohos.want.action.viewData";
 const std::string STR_PHONE = "phone";
 const std::string STR_DEFAULT = "default";
 const std::string TYPE_ONLY_MATCH_WILDCARD = "reserved/wildcard";
@@ -286,30 +287,30 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     if (!IsCallFromAncoShellOrBroker(request.callerToken)) {
         request.want.RemoveParam(ANCO_PENDING_REQUEST);
     }
+
+    if (appLinkingOnly) {
+        abilityInfoFlag = abilityInfoFlag |
+            static_cast<uint32_t>(AppExecFwk::GetAbilityInfoFlag::GET_ABILITY_INFO_WITH_APP_LINKING);
+    }
+
     IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->ImplicitQueryInfos(
         request.want, abilityInfoFlag, userId, withDefault, abilityInfos, extensionInfos));
-
+    if (isOpenLink && extensionInfos.size() > 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Clear extensionInfos when isOpenLink.");
+        extensionInfos.clear();
+    }
     TAG_LOGI(AAFwkTag::ABILITYMGR,
         "ImplicitQueryInfos, abilityInfo size : %{public}zu, extensionInfos size: %{public}zu.", abilityInfos.size(),
         extensionInfos.size());
 
-    if (isOpenLink && abilityInfos.size() == 0) {
-        HILOG_ERROR("There isn't match app.");
-        return ERR_IMPLICIT_START_ABILITY_FAIL;
-    }
-
     if (appLinkingOnly && abilityInfos.size() == 0) {
-        HILOG_ERROR("There isn't match app.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "There isn't match app.");
         return ERR_IMPLICIT_START_ABILITY_FAIL;
     }
 
     if (abilityInfos.size() == 1) {
         auto skillUri =  abilityInfos.front().skillUri;
-        for (const auto& iter : skillUri) {
-            if (iter.isMatch) {
-                request.want.SetParam("send_to_erms_targetLinkFeature", iter.linkFeature);
-            }
-        }
+        SetTargetLinkInfo(skillUri, request.want);
     }
 
     if (abilityInfos.size() + extensionInfos.size() > 1) {
@@ -355,7 +356,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
     }
 
     for (const auto &info : extensionInfos) {
-        if (isOpenLink || !isExtension || !CheckImplicitStartExtensionIsValid(request, info)) {
+        if (!isExtension || !CheckImplicitStartExtensionIsValid(request, info)) {
             continue;
         }
         DialogAppInfo dialogAppInfo;
@@ -670,6 +671,26 @@ bool ImplicitStartProcessor::IsCallFromAncoShellOrBroker(const sptr<IRemoteObjec
         return true;
     }
     return false;
+}
+
+void ImplicitStartProcessor::SetTargetLinkInfo(const std::vector<AppExecFwk::SkillUriForAbilityAndExtension> &skillUri,
+    Want &want)
+{
+    for (const auto& iter : skillUri) {
+        if (iter.isMatch) {
+            want.RemoveParam("send_to_erms_targetLinkFeature");
+            want.SetParam("send_to_erms_targetLinkFeature", iter.linkFeature);
+            want.RemoveParam("send_to_erms_targetLinkType");
+            if (want.GetBoolParam(OPEN_LINK_APP_LINKING_ONLY, false)) {
+                want.SetParam("send_to_erms_targetLinkType", AbilityCallerInfo::LINK_TYPE_UNIVERSAL_LINK);
+            } else if ((iter.scheme == "https" || iter.scheme == "http") &&
+                want.GetAction().compare(ACTION_VIEW)) {
+                want.SetParam("send_to_erms_targetLinkType", AbilityCallerInfo::LINK_TYPE_WEB_LINK);
+            } else {
+                want.SetParam("send_to_erms_targetLinkType", AbilityCallerInfo::LINK_TYPE_DEEP_LINK);
+            }
+        }
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
