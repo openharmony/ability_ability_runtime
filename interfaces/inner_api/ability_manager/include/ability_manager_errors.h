@@ -478,13 +478,20 @@ enum {
      */
     ERR_CHECK_PRELOAD_CONDITIONS_FAILED,
 
+    ERR_SET_SUPPORTED_PROCESS_CACHE_AGAIN,
+
+     /**
+     * Result(2097245) for size of uri list out of range.
+     */
+    ERR_URI_LIST_OUT_OF_RANGE,
+
     /**
-     * Result(2097244) for get active extension list empty when record exit reason.
+     * Result(2097246) for get active extension list empty when record exit reason.
      */
     ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY,
 
     /**
-     * Result(2097245) for get ExtensionName by uid fail.
+     * Result(2097247) for get ExtensionName by uid fail.
      */
     GET_EXTENSION_NAME_BY_UID_FAIL,
 };
