@@ -89,7 +89,10 @@ SpawnConnectionState AppSpawnClient::QueryConnectionState() const
 
 AppSpawnClientHandle AppSpawnClient::GetAppSpawnClientHandle() const
 {
-    return handle_;
+    if (state_ == SpawnConnectionState::STATE_CONNECTED) {
+        return handle_;
+    }
+    return nullptr;
 }
 
 static std::string DumpDataGroupInfoListToJson(const DataGroupInfoList &dataGroupInfoList)
