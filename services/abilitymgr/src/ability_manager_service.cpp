@@ -98,6 +98,7 @@
 #include "extension_record_manager.h"
 #include "ui_extension_utils.h"
 #include "uri_permission_manager_client.h"
+#include "uri_utils.h"
 #include "view_data.h"
 #include "xcollie/watchdog.h"
 #include "config_policy_utils.h"
@@ -149,7 +150,6 @@ const std::string BACKGROUND_JUDGE_FLAG = "component.startup.backgroundJudge.fla
 const std::string WHITE_LIST_ASS_WAKEUP_FLAG = "component.startup.whitelist.associatedWakeUp";
 // White list app
 const std::string BUNDLE_NAME_SETTINGSDATA = "com.ohos.settingsdata";
-const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 // Support prepare terminate
 constexpr int32_t PREPARE_TERMINATE_ENABLE_SIZE = 6;
 const char* PREPARE_TERMINATE_ENABLE_PARAMETER = "persist.sys.prepare_terminate";
@@ -376,14 +376,12 @@ bool AbilityManagerService::Init()
     subManagersHelper_ = std::make_shared<SubManagersHelper>(taskHandler_, eventHandler_);
     subManagersHelper_->InitSubManagers(MAIN_USER_ID, true);
     SwitchManagers(U0_USER_ID, false);
-    std::string deviceType = OHOS::system::GetDeviceType();
 #ifdef SUPPORT_GRAPHICS
     auto anrListenerTask = []() {
         auto anrListener = std::make_shared<ApplicationAnrListener>();
         MMI::InputManager::GetInstance()->SetAnrObserver(anrListener);
     };
     taskHandler_->SubmitTask(anrListenerTask, "AnrListenerTask");
-    DelayedSingleton<SystemDialogScheduler>::GetInstance()->SetDeviceType(deviceType);
     implicitStartProcessor_ = std::make_shared<ImplicitStartProcessor>();
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         InitFocusListener();
@@ -1784,22 +1782,19 @@ int AbilityManagerService::StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo)
         return ERR_INVALID_VALUE;
     }
 
-    if (sessionInfo->userId == DEFAULT_INVAL_VALUE) {
-        sessionInfo->userId = GetUserId();
-    } else if (sessionInfo->userId != GetUserId()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "this userId is not valid");
-        return ERR_CROSS_USER;
-    }
-
-    auto currentUserId = GetUserId();
-    (sessionInfo->want).RemoveParam(AAFwk::SCREEN_MODE_KEY);
-    EventInfo eventInfo = BuildEventInfo(sessionInfo->want, currentUserId);
-    EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
-
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
+
+    auto currentUserId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    if (sessionInfo->userId == DEFAULT_INVAL_VALUE) {
+        sessionInfo->userId = currentUserId;
+    }
+
+    (sessionInfo->want).RemoveParam(AAFwk::SCREEN_MODE_KEY);
+    EventInfo eventInfo = BuildEventInfo(sessionInfo->want, currentUserId);
+    EventReport::SendAbilityEvent(EventName::START_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
 
     auto requestCode = sessionInfo->requestCode;
     StartAbilityInfoWrap threadLocalInfo(sessionInfo->want, currentUserId,
@@ -1893,6 +1888,18 @@ bool AbilityManagerService::CheckCallingTokenId(const std::string &bundleName, i
         return false;
     }
     return true;
+}
+
+bool AbilityManagerService::IsCallerSceneBoard()
+{
+    int32_t userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
+    auto connectManager = GetConnectManagerByUserId(userId);
+    CHECK_POINTER_AND_RETURN(connectManager, false);
+    auto sceneBoardTokenId = connectManager->GetSceneBoardTokenId();
+    if (sceneBoardTokenId != 0 && IPCSkeleton::GetCallingTokenID() == sceneBoardTokenId) {
+        return true;
+    }
+    return false;
 }
 
 bool AbilityManagerService::IsBackgroundTaskUid(const int uid)
@@ -2324,7 +2331,7 @@ int AbilityManagerService::ChangeAbilityVisibility(sptr<IRemoteObject> token, bo
 
 int AbilityManagerService::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -3017,7 +3024,7 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
         return ERR_INVALID_VALUE;
     }
 
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -3113,6 +3120,7 @@ int AbilityManagerService::StartRemoteAbility(const Want &want, int requestCode,
 
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    UriUtils::GetInstance().FilterUriWithPermissionDms(remoteWant, accessToken);
     DistributedClient dmsClient;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "get callerUid = %d, AccessTokenID = %u", callerUid, accessToken);
     int result = dmsClient.StartRemoteAbility(remoteWant, callerUid, requestCode, accessToken);
@@ -3259,7 +3267,7 @@ int AbilityManagerService::MinimizeUIAbilityBySCB(const sptr<SessionInfo> &sessi
         return ERR_INVALID_VALUE;
     }
 
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -4110,7 +4118,7 @@ int AbilityManagerService::UnlockMissionForCleanup(int32_t missionId)
 void AbilityManagerService::SetLockedState(int32_t sessionId, bool lockedState)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "request lock abilityRecord, sessionId :%{public}d", sessionId);
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return;
     }
@@ -7098,9 +7106,12 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
     }
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
     StartHighestPriorityAbility(userId, isBoot, callback);
-    if (AmsConfigurationParameter::GetInstance().MultiUserType() == 0) {
-        PauseOldConnectManager(oldUserId);
+    if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
+        AmsConfigurationParameter::GetInstance().MultiUserType() != 0) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "no need to terminate old scb.");
+        return;
     }
+    PauseOldConnectManager(oldUserId);
 }
 
 void AbilityManagerService::SwitchManagers(int32_t userId, bool switchUser)
@@ -8068,7 +8079,7 @@ void AbilityManagerService::CompleteFirstFrameDrawing(const sptr<IRemoteObject> 
 void AbilityManagerService::CompleteFirstFrameDrawing(int32_t sessionId)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawing, called.");
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return;
     }
@@ -8897,7 +8908,7 @@ int32_t AbilityManagerService::NotifySaveAsResult(const Want &want, int resultCo
 
 void AbilityManagerService::SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return;
     }
@@ -8908,7 +8919,7 @@ void AbilityManagerService::SetRootSceneSession(const sptr<IRemoteObject> &rootS
 
 void AbilityManagerService::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return;
     }
@@ -8919,7 +8930,7 @@ void AbilityManagerService::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionI
 
 int32_t AbilityManagerService::SetSessionManagerService(const sptr<IRemoteObject> &sessionManagerService)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -8949,7 +8960,7 @@ bool AbilityManagerService::CheckPrepareTerminateEnable()
 
 void AbilityManagerService::StartSpecifiedAbilityBySCB(const Want &want)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return;
     }
@@ -9045,7 +9056,7 @@ void AbilityManagerService::GetConnectManagerAndUIExtensionBySessionInfo(const s
 
 int32_t AbilityManagerService::RegisterStatusBarDelegate(sptr<AbilityRuntime::IStatusBarDelegate> delegate)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -9056,7 +9067,7 @@ int32_t AbilityManagerService::RegisterStatusBarDelegate(sptr<AbilityRuntime::IS
 
 int32_t AbilityManagerService::KillProcessWithPrepareTerminate(const std::vector<int32_t>& pids)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -9119,7 +9130,7 @@ int AbilityManagerService::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> 
         return ERR_INVALID_VALUE;
     }
 
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -9135,7 +9146,7 @@ int AbilityManagerService::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> 
 int AbilityManagerService::RegisterSessionHandler(const sptr<IRemoteObject> &object)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "call");
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -9598,8 +9609,10 @@ bool AbilityManagerService::GenerateDialogSessionRecord(AbilityRequest &abilityR
         dialogAppInfos.front().bundleName = abilityRequest.abilityInfo.bundleName;
         dialogAppInfos.front().moduleName = abilityRequest.abilityInfo.moduleName;
         dialogAppInfos.front().abilityName = abilityRequest.abilityInfo.name;
-        dialogAppInfos.front().iconId = abilityRequest.abilityInfo.iconId;
-        dialogAppInfos.front().labelId = abilityRequest.abilityInfo.labelId;
+        dialogAppInfos.front().abilityIconId = abilityRequest.abilityInfo.iconId;
+        dialogAppInfos.front().abilityLabelId = abilityRequest.abilityInfo.labelId;
+        dialogAppInfos.front().bundleIconId = abilityRequest.abilityInfo.applicationInfo.iconId;
+        dialogAppInfos.front().bundleLabelId = abilityRequest.abilityInfo.applicationInfo.labelId;
     }
     return dialogSessionRecord_->GenerateDialogSessionRecord(abilityRequest, userId,
         dialogSessionId, dialogAppInfos, isSelector);
@@ -9809,7 +9822,7 @@ int32_t AbilityManagerService::NotifyDebugAssertResult(uint64_t assertFaultSessi
 int32_t AbilityManagerService::UpdateSessionInfoBySCB(std::list<SessionInfo> &sessionInfos, int32_t userId,
     std::vector<int32_t> &sessionIds)
 {
-    if (!CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Not sceneboard called, not allowed.");
         return ERR_WRONG_INTERFACE_CALL;
     }
@@ -9876,7 +9889,7 @@ int32_t AbilityManagerService::GetUIExtensionRootHostInfo(const sptr<IRemoteObje
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Get ui extension host info.");
     CHECK_POINTER_AND_RETURN(token, ERR_INVALID_VALUE);
 
-    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() && !CheckCallingTokenId(BUNDLE_NAME_SCENEBOARD)) {
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall() && !IsCallerSceneBoard()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Permission deny.");
         return ERR_PERMISSION_DENIED;
     }
