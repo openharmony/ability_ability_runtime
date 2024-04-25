@@ -541,7 +541,7 @@ public:
      * @param isMemorySizeSufficent Indicates the memory size state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t NotifyMemonySizeStateChanged(bool isMemorySizeSufficent) override;
+    virtual int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent) override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
