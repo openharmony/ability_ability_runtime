@@ -19,6 +19,7 @@
 #include <thread>
 
 #include "ability_manager_service.h"
+#include "ability_resident_process_rdb.h"
 #include "ability_util.h"
 #include "connection_state_manager.h"
 #include "hilog_tag_wrapper.h"
@@ -647,7 +648,10 @@ void DataAbilityManager::RestartDataAbility(const std::shared_ptr<AbilityRecord>
     }
 
     for (size_t i = 0; i < bundleInfos.size(); i++) {
-        if (!bundleInfos[i].isKeepAlive || bundleInfos[i].applicationInfo.process.empty()) {
+        bool keepAliveEnable = false;
+        auto ref = AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfos[i].name, keepAliveEnable);
+        bool needStop = (ref == Rdb_OK && keepAliveEnable == false);
+        if (needStop || bundleInfos[i].applicationInfo.process.empty()) {
             continue;
         }
         for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {
