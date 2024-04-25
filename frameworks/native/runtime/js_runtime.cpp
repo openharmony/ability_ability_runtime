@@ -628,6 +628,8 @@ void JsRuntime::PostPreload(const Options& options)
         std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
         postOption.SetAnDir(sandBoxAnFilePath);
     }
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Mutile Thread Mode: %{public}d.", options.isMultiThread);
+    postOption.SetMutileThreadCheck(options.isMultiThread);
     bool profileEnabled = OHOS::system::GetBoolParameter("ark.profile", false);
     postOption.SetEnableProfile(profileEnabled);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify PostFork, jitEnabled: %{public}d", options.jitEnabled);
@@ -802,6 +804,9 @@ bool JsRuntime::CreateJsEnv(const Options& options)
     pandaOption.SetAsmOpcodeDisableRange(asmOpcodeDisableRange);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify CreateJsEnv, jitEnabled: %{public}d", options.jitEnabled);
     pandaOption.SetEnableJIT(options.jitEnabled);
+
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Mutile Thread Mode: %{public}d.", options.isMultiThread);
+    pandaOption.SetMutileThreadCheck(options.isMultiThread);
 
     if (IsUseAbilityRuntime(options)) {
         // aot related
