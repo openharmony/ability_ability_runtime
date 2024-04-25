@@ -22,6 +22,7 @@
 #include "ability_connect_callback_stub.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_service.h"
+#include "ability_resident_process_rdb.h"
 #include "ability_util.h"
 #include "appfreeze_manager.h"
 #include "app_utils.h"
@@ -146,7 +147,9 @@ bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo)
     GetKeepAliveAbilities();
     for (const auto &pair : g_keepAliveAbilities) {
         if (abilityInfo.bundleName == pair.first && abilityInfo.name == pair.second) {
-            return true;
+            bool keepAliveEnable = false;
+            AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(abilityInfo.bundleName, keepAliveEnable);
+            return keepAliveEnable;
         }
     }
     return false;
@@ -429,7 +432,6 @@ int32_t AbilityConnectManager::GetOrCreateExtensionRecord(const AbilityRequest &
             hostBundleName.c_str(), extensionRecordKey.c_str());
         serviceMap_.emplace(extensionRecordKey, extensionRecord);
         if (IsAbilityNeedKeepAlive(extensionRecord)) {
-            extensionRecord->SetKeepAlive();
             extensionRecord->SetRestartTime(abilityRequest.restartTime);
             extensionRecord->SetRestartCount(abilityRequest.restartCount);
         }
@@ -473,14 +475,13 @@ void AbilityConnectManager::GetOrCreateServiceRecord(const AbilityRequest &abili
         }
         if (targetService && abilityRequest.abilityInfo.name == AbilityConfig::LAUNCHER_ABILITY_NAME) {
             targetService->SetLauncherRoot();
-            targetService->SetKeepAlive();
             targetService->SetRestartTime(abilityRequest.restartTime);
             targetService->SetRestartCount(abilityRequest.restartCount);
         } else if (IsAbilityNeedKeepAlive(targetService)) {
-            targetService->SetKeepAlive();
             targetService->SetRestartTime(abilityRequest.restartTime);
             targetService->SetRestartCount(abilityRequest.restartCount);
         }
+
         if (FRS_BUNDLE_NAME == abilityRequest.abilityInfo.bundleName) {
             serviceMap_.emplace(frsKey, targetService);
         } else {
@@ -1897,7 +1898,6 @@ bool AbilityConnectManager::IsAbilityNeedKeepAlive(const std::shared_ptr<Ability
     }
 
     if (IsInKeepAliveList(abilityInfo)) {
-        abilityRecord->SetKeepAlive();
         return true;
     }
     return false;
