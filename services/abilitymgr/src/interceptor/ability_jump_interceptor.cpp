@@ -54,8 +54,12 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
         return ERR_OK;
     }
     AppExecFwk::AbilityInfo targetAbilityInfo;
-    IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(param.want,
-        AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, param.userId, targetAbilityInfo));
+    if (StartAbilityUtils::startAbilityInfo != nullptr) {
+        targetAbilityInfo = StartAbilityUtils::startAbilityInfo->abilityInfo;
+    } else {
+        IN_PROCESS_CALL_WITHOUT_RET(bundleMgrHelper->QueryAbilityInfo(param.want,
+            AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_APPLICATION, param.userId, targetAbilityInfo));
+    }
     if (targetAbilityInfo.type != AppExecFwk::AbilityType::PAGE) {
         TAG_LOGI(AAFwkTag::ABILITYMGR,
             "Target is not page Ability, keep going, abilityType:%{public}d.", targetAbilityInfo.type);

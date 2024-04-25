@@ -28,6 +28,9 @@ const std::string ACTION_MARKET_CROWDTEST = "ohos.want.action.marketCrowdTest";
 }
 ErrCode CrowdTestInterceptor::DoProcess(AbilityInterceptorParam param)
 {
+    if (StartAbilityUtils::skipCrowTest) {
+        return ERR_OK;
+    }
     if (CheckCrowdtest(param.want, param.userId)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Crowdtest expired.");
 #ifdef SUPPORT_GRAPHICS

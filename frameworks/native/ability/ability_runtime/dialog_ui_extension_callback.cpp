@@ -23,7 +23,13 @@ DialogUIExtensionCallback::DialogUIExtensionCallback(const std::weak_ptr<AppExec
 {}
 void DialogUIExtensionCallback::OnRelease()
 {
-    TAG_LOGD(AAFwkTag::DIALOG, "Called");
+    HILOG_DEBUG("Called");
+    auto abilityCallback = abilityCallback_.lock();
+    if (abilityCallback == nullptr) {
+        HILOG_ERROR("abilityCallback is nullptr");
+        return;
+    }
+    abilityCallback->EraseUIExtension(sessionId_);
 
     if (uiContent_ == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ is nullptr.");
