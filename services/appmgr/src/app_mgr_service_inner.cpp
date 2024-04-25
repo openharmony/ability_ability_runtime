@@ -6197,7 +6197,11 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
     }
 
     if (!isMemorySizeSufficent) {
-        return ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent();
+        auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent();
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "HandleMemorySizeInSufficent failed, ret is %{public}d.", ret);
+        }
+        return ret;
     }
     std::vector<std::string> exitBundleNames;
     auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficent(exitBundleNames);
