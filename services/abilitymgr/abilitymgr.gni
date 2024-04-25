@@ -45,6 +45,7 @@ abilityms_files = [
   "src/extension_running_info.cpp",
   "src/caller_info.cpp",
   "src/sender_info.cpp",
+  "src/sub_managers_helper.cpp",
   "src/wants_info.cpp",
   "src/want_sender_info.cpp",
   "src/pending_want_record.cpp",
@@ -66,6 +67,7 @@ abilityms_files = [
   "src/interceptor/disposed_rule_interceptor.cpp",
   "src/interceptor/ecological_rule_interceptor.cpp",
   "src/interceptor/start_other_app_interceptor.cpp",
+  "src/uri_utils.cpp",
   "src/window_focus_changed_listener.cpp",
 
   # start ability handler
