@@ -5310,23 +5310,11 @@ void AppMgrServiceInner::InitAppWaitingDebugList()
     }
 }
 
-bool AppMgrServiceInner::IsFoundationCall()
-{
-    auto callerTokenId = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeInfo;
-    Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(callerTokenId, nativeInfo);
-    TAG_LOGD(AAFwkTag::APPMGR, "Caller process name : %{public}s", nativeInfo.processName.c_str());
-    if (nativeInfo.processName == "foundation") {
-        return true;
-    }
-    return false;
-}
-
 bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
 
-    if (!IsFoundationCall()) {
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
         return false;
     }
@@ -5351,7 +5339,7 @@ void AppMgrServiceInner::ClearNonPersistWaitingDebugFlag()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
 
-    if (!IsFoundationCall()) {
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
         return;
     }
