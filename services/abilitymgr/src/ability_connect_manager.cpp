@@ -147,8 +147,11 @@ bool IsInKeepAliveList(const AppExecFwk::AbilityInfo &abilityInfo)
     GetKeepAliveAbilities();
     for (const auto &pair : g_keepAliveAbilities) {
         if (abilityInfo.bundleName == pair.first && abilityInfo.name == pair.second) {
-            bool keepAliveEnable = false;
+            // Fault tolerance processing, originally returning true here
+            bool keepAliveEnable = true;
             AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(abilityInfo.bundleName, keepAliveEnable);
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s get keep alive enable: %{public}d",
+                abilityInfo.bundleName.c_str(), static_cast<int32_t>(keepAliveEnable));
             return keepAliveEnable;
         }
     }

@@ -19,14 +19,6 @@
 #include "hilog_tag_wrapper.h"
 #include "parser_util.h"
 
-#define CHECK_RDB_RESULT_RETURN_IF_FAIL(errcode, errmsg)       \
-    do {                                                       \
-        if ((errcode) != NativeRdb::E_OK) {                    \
-            TAG_LOGE(AAFwkTag::ABILITYMGR, errmsg, errcode);   \
-            return errcode;                                    \
-        }                                                      \
-    } while (0)
-
 namespace OHOS {
 namespace AbilityRuntime {
 namespace {
@@ -76,7 +68,6 @@ int32_t AmsResidentProcessRdbCallBack::OnCreate(NativeRdb::RdbStore &rdbStore)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Ability mgr rdb batch insert error[%{public}d]", ret);
         return ret;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Insert num : %{public}lld", insertNum);
     return NativeRdb::E_OK;
 }
 
@@ -163,17 +154,23 @@ int32_t AmsResidentProcessRdb::VerifyConfigurationPermissions(
 
     ScopeGuard stateGuard([absSharedResultSet] { absSharedResultSet->Close(); });
     auto ret = absSharedResultSet->GoToFirstRow();
-    CHECK_RDB_RESULT_RETURN_IF_FAIL(ret, "Go to first row failed, ret: %{public}d");
+    if (ret != NativeRdb::E_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Go to first row failed, ret: %{public}d", ret);
+        return Rdb_Search_Record_Err;
+    }
 
     std::string KeepAliveConfiguredList;
     ret = absSharedResultSet->GetString(INDEX_KEEP_ALIVE_CONFIGURED_LIST, KeepAliveConfiguredList);
-    CHECK_RDB_RESULT_RETURN_IF_FAIL(ret, "Get configured list failed, ret: %{public}d");
+    if (ret != NativeRdb::E_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get configured list failed, ret: %{public}d", ret);
+        return Rdb_Search_Record_Err;
+    }
 
     if (KeepAliveConfiguredList.find(callerBundleName) != std::string::npos) {
         return Rdb_OK;
     }
 
-    return Rdb_Parameter_Err;
+    return Rdb_Permissions_Err;
 }
 
 int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundleName, bool &enable)
@@ -198,11 +195,17 @@ int32_t AmsResidentProcessRdb::GetResidentProcessEnable(const std::string &bundl
 
     ScopeGuard stateGuard([absSharedResultSet] { absSharedResultSet->Close(); });
     auto ret = absSharedResultSet->GoToFirstRow();
-    CHECK_RDB_RESULT_RETURN_IF_FAIL(ret, "Go to first row failed, ret: %{public}d");
+    if (ret != NativeRdb::E_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Go to first row failed, ret: %{public}d", ret);
+        return Rdb_Search_Record_Err;
+    }
 
     std::string flag;
     ret = absSharedResultSet->GetString(INDEX_KEEP_ALIVE_ENABLE, flag);
-    CHECK_RDB_RESULT_RETURN_IF_FAIL(ret, "Get enable status failed, ret: %{public}d");
+    if (ret != NativeRdb::E_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get enable status failed, ret: %{public}d", ret);
+        return Rdb_Search_Record_Err;
+    }
 
     enable = static_cast<bool>(std::stoul(flag));
     return Rdb_OK;

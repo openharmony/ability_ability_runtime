@@ -648,10 +648,9 @@ void DataAbilityManager::RestartDataAbility(const std::shared_ptr<AbilityRecord>
     }
 
     for (size_t i = 0; i < bundleInfos.size(); i++) {
-        bool keepAliveEnable = false;
-        auto ref = AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfos[i].name, keepAliveEnable);
-        bool needStop = (ref == Rdb_OK && keepAliveEnable == false);
-        if (needStop || bundleInfos[i].applicationInfo.process.empty()) {
+        bool keepAliveEnable = bundleInfos[i].isKeepAlive;
+        AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfos[i].name, keepAliveEnable);
+        if (!keepAliveEnable || bundleInfos[i].applicationInfo.process.empty()) {
             continue;
         }
         for (auto hapModuleInfo : bundleInfos[i].hapModuleInfos) {

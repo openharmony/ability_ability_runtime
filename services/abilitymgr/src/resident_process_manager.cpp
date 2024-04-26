@@ -47,11 +47,10 @@ void ResidentProcessManager::StartResidentProcessWithMainElement(std::vector<App
 
     for (size_t i = 0; i < bundleInfos.size(); i++) {
         std::string processName = bundleInfos[i].applicationInfo.process;
-        bool keepAliveEnable = false;
+        bool keepAliveEnable = bundleInfos[i].isKeepAlive;
         // Check startup permissions
-        auto ref = AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfos[i].name, keepAliveEnable);
-        auto needErase = (ref == Rdb_OK && keepAliveEnable == false);
-        if (needErase || processName.empty()) {
+        AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfos[i].name, keepAliveEnable);
+        if (!keepAliveEnable || processName.empty()) {
             needEraseIndexSet.insert(i);
             continue;
         }
