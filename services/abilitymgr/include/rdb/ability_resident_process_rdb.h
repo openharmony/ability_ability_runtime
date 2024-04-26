@@ -30,6 +30,8 @@ enum RdbResult : int32_t {
     Rdb_Parameter_Err,
     /* Failed to query permission settings for resident processes */
     Rdb_Permissions_Err,
+    /* Database query failed, key may not exist */
+    Rdb_Search_Record_Err
 };
 
 class ScopeGuard final {

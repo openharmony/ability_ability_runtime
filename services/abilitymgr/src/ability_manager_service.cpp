@@ -1965,7 +1965,7 @@ void AbilityManagerService::AppUpgradeCompleted(const std::string &bundleName, i
         return;
     }
 
-    bool keepAliveEnable = false;
+    bool keepAliveEnable = bundleInfo.isKeepAlive;
     AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleInfo.name, keepAliveEnable);
     if (!keepAliveEnable) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Not a resident application.");
@@ -5690,7 +5690,7 @@ int AbilityManagerService::KillProcess(const std::string &bundleName)
         return GET_BUNDLE_INFO_FAILED;
     }
 
-    bool keepAliveEnable = false;
+    bool keepAliveEnable = bundleInfo.isKeepAlive;
     AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(bundleName, keepAliveEnable);
     if (keepAliveEnable && DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not kill keep alive process.");
