@@ -131,7 +131,7 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
             continue;
         }
 
-        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName +
+        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName + SEPARATOR + 
             it.second->abilityRecord_->GetAbilityInfo().name);
     }
     return ERR_OK;
@@ -148,7 +148,7 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
             continue;
         }
 
-        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName +
+        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName + SEPARATOR + 
             it.second->abilityRecord_->GetAbilityInfo().name);
     }
     return ERR_OK;

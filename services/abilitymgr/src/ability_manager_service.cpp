@@ -5739,8 +5739,6 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
     }
     if (!isUpgrade) {
         DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName);
-        CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
-        appExitReasonHelper_->DeleteAppExitReasonOfExtension(bundleName);
     }
     return ERR_OK;
 }
