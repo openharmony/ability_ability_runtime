@@ -1985,7 +1985,7 @@ void AppMgrServiceInner::KillProcessesByPids(std::vector<int32_t> &pids)
         auto appRecord = GetAppRunningRecordByPid(pid);
         if (appRecord == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr.");
-            return;
+            continue;
         }
         auto result = KillProcessByPid(pid, "KillProcessesByPids");
         if (result < 0) {
@@ -5313,6 +5313,12 @@ void AppMgrServiceInner::InitAppWaitingDebugList()
 bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return false;
+    }
+
     InitAppWaitingDebugList();
 
     std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
@@ -5332,6 +5338,12 @@ bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
 void AppMgrServiceInner::ClearNonPersistWaitingDebugFlag()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return;
+    }
+
     bool isClear = false;
     {
         std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
