@@ -62,10 +62,8 @@ void PendingWantRecord::UnregisterCancelListener(const sptr<IWantReceiver> &rece
 
 int32_t PendingWantRecord::SenderInner(SenderInfo &senderInfo)
 {
-    TAG_LOGI(AAFwkTag::WANTAGENT, "%{public}s:begin.", __func__);
     std::lock_guard<ffrt::mutex> locker(lock_);
     if (canceled_) {
-        TAG_LOGI(AAFwkTag::WANTAGENT, "wantAgent is canceled!");
         if (senderInfo.finishedReceiver != nullptr) {
             Want want;
             WantParams wantParams = {};
