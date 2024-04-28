@@ -524,8 +524,8 @@ napi_value JsUIExtensionContext::OnConnectAbility(napi_env env, NapiCallbackInfo
     sptr<JSUIExtensionConnection> connection = new JSUIExtensionConnection(env);
     if (!AppExecFwk::UnwrapWant(env, info.argv[0], want) ||
         !CheckConnectionParam(env, info.argv[1], connection, want)) {
-        ThrowInvalidParamError(env, "Parse param want or connection failed,
-            want must be Want and connection must be Connection.");
+        ThrowInvalidParamError(env,
+            "Parse param want or connection failed, want must be Want and connection must be Connection.");
         return CreateJsUndefined(env);
     }
     int64_t connectId = connection->GetConnectionId();
@@ -653,8 +653,8 @@ napi_value JsUIExtensionContext::OnOpenAtomicService(napi_env env, NapiCallbackI
         TAG_LOGD(AAFwkTag::UI_EXT, "OnOpenAtomicService atomic service options is used.");
         if (!AppExecFwk::UnwrapStartOptionsAndWant(env, info.argv[INDEX_ONE], startOptions, want)) {
             TAG_LOGE(AAFwkTag::UI_EXT, "Fail to parse atomic service options.");
-            ThrowInvalidParamError(env, "Parse param startOptions failed,
-                startOptions must be StartOption.");
+            ThrowInvalidParamError(env,
+                "Parse param startOptions failed, startOptions must be StartOption.");
             return CreateJsUndefined(env);
         }
         unwrapArgc++;
