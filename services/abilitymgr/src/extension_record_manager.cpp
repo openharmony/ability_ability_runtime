@@ -143,7 +143,7 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto &it : extensionRecords_) {
         if (it.second == nullptr || it.second->abilityRecord_ == nullptr ||
-            bundleName.compare(it.second->abilityRecord_->GetAbilityInfo().bundleName) != 0) {
+            bundleName != it.second->abilityRecord_->GetAbilityInfo().bundleName) {
             continue;
         }
 
