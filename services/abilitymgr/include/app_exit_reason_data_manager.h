@@ -55,8 +55,6 @@ public:
 
     bool GetUIExtensionAbilityBeFinishReason(const std::string &keyEx, AAFwk::ExitReason &exitReason);
 
-    void DeleteAppExitReasonOfExtension(const std::string &bundleName);
-
     int32_t GetAbilitySessionId(const std::string &bundleName,
         const std::string &moduleName, const std::string &abilityName, int &sessionId);
 

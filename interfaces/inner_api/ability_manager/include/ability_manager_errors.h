@@ -480,18 +480,23 @@ enum {
 
     ERR_SET_SUPPORTED_PROCESS_CACHE_AGAIN,
 
-     /**
+    /**
      * Result(2097245) for size of uri list out of range.
      */
     ERR_URI_LIST_OUT_OF_RANGE,
 
     /**
-     * Result(2097246) for get active extension list empty when record exit reason.
+     * Native error(2097246) for not allow preload by rss.
+     */
+    ERR_NOT_ALLOW_PRELOAD_BY_RSS,
+
+    /**
+     * Result(2097247) for get active extension list empty when record exit reason.
      */
     ERR_GET_ACTIVE_EXTENSION_LIST_EMPTY,
 
     /**
-     * Result(2097247) for get ExtensionName by uid fail.
+     * Result(2097248) for get ExtensionName by uid fail.
      */
     GET_EXTENSION_NAME_BY_UID_FAIL,
 };
