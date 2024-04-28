@@ -120,8 +120,7 @@ bool ExtensionRecordManager::IsBelongToManager(const AppExecFwk::AbilityInfo &ab
     return AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo.extensionAbilityType);
 }
 
-int32_t ExtensionRecordManager::GetActiveUIExtensionList(
-    const int32_t pid, std::vector<std::string> &extensionList)
+int32_t ExtensionRecordManager::GetActiveUIExtensionList(const int32_t pid, std::vector<std::string> &extensionList)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
     std::lock_guard<std::mutex> lock(mutex_);
@@ -131,8 +130,8 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
             continue;
         }
 
-        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName + SEPARATOR + 
-            it.second->abilityRecord_->GetAbilityInfo().name);
+        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName + SEPARATOR +
+                                it.second->abilityRecord_->GetAbilityInfo().name);
     }
     return ERR_OK;
 }
@@ -148,8 +147,8 @@ int32_t ExtensionRecordManager::GetActiveUIExtensionList(
             continue;
         }
 
-        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName + SEPARATOR + 
-            it.second->abilityRecord_->GetAbilityInfo().name);
+        extensionList.push_back(it.second->abilityRecord_->GetAbilityInfo().moduleName + SEPARATOR +
+                                it.second->abilityRecord_->GetAbilityInfo().name);
     }
     return ERR_OK;
 }

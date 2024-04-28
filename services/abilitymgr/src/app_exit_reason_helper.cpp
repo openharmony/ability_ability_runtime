@@ -137,7 +137,7 @@ int32_t AppExitReasonHelper::RecordProcessExtensionExitReason(
     int32_t resultCode = ERR_OK;
     if (pid <= NO_PID) {
         resultCode = connectManager->GetActiveUIExtensionList(bundleName, extensionList);
-    }else{
+    } else {
         resultCode = connectManager->GetActiveUIExtensionList(pid, extensionList);
     }
     if (resultCode != ERR_OK) {
