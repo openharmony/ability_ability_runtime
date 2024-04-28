@@ -26,6 +26,7 @@
 #include "js_resource_manager_utils.h"
 #include "js_runtime_utils.h"
 #include "tokenid_kit.h"
+#include "js_error_utils.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
