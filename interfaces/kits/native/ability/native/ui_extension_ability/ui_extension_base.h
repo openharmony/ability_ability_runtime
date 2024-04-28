@@ -56,8 +56,8 @@ public:
     {
         Extension::OnStart(want);
         if (impl_ != nullptr) {
-            auto lunchParam = Extension::GetLaunchParam();
-            impl_->OnStart(want, lunchParam);
+            auto launchParam = Extension::GetLaunchParam();
+            impl_->OnStart(want, launchParam);
         }
     }
 

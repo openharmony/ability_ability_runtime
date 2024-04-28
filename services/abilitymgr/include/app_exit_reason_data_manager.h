@@ -50,10 +50,10 @@ public:
     int32_t GetAbilityRecoverInfo(const std::string &bundleName,
         const std::string &moduleName, const std::string &abilityName, bool &hasRecoverInfo);
 
-    int32_t SetUIExtensionAbilityBeFinishReason(const std::string &bundleName,
+    int32_t SetUIExtensionAbilityExitReason(const std::string &bundleName,
         const std::vector<std::string> &extensionList, const AAFwk::ExitReason &exitReason);
 
-    bool GetUIExtensionAbilityBeFinishReason(const std::string &keyEx, AAFwk::ExitReason &exitReason);
+    bool GetUIExtensionAbilityExitReason(const std::string &keyEx, AAFwk::ExitReason &exitReason);
 
     int32_t GetAbilitySessionId(const std::string &bundleName,
         const std::string &moduleName, const std::string &abilityName, int &sessionId);

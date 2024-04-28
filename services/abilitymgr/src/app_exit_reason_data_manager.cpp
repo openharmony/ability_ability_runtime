@@ -477,7 +477,7 @@ int32_t AppExitReasonDataManager::GetAbilitySessionId(const std::string &bundleN
     return ERR_OK;
 }
 
-int32_t AppExitReasonDataManager::SetUIExtensionAbilityBeFinishReason(
+int32_t AppExitReasonDataManager::SetUIExtensionAbilityExitReason(
     const std::string &bundleName, const std::vector<std::string> &extensionList, const AAFwk::ExitReason &exitReason)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
@@ -512,7 +512,7 @@ int32_t AppExitReasonDataManager::SetUIExtensionAbilityBeFinishReason(
     return ERR_OK;
 }
 
-bool AppExitReasonDataManager::GetUIExtensionAbilityBeFinishReason(const std::string &keyEx,
+bool AppExitReasonDataManager::GetUIExtensionAbilityExitReason(const std::string &keyEx,
     AAFwk::ExitReason &exitReason)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
