@@ -2474,6 +2474,7 @@ void AbilityRecord::SetWant(const Want &want)
     auto debugApp = want_.GetBoolParam(DEBUG_APP, false);
     auto nativeDebug = want_.GetBoolParam(NATIVE_DEBUG, false);
     auto perfCmd = want_.GetStringParam(PERF_CMD);
+    auto multiThread = want_.GetBoolParam(MULTI_THREAD, false);
     want_.CloseAllFd();
 
     want_ = want;
