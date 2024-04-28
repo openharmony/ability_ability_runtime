@@ -30,7 +30,8 @@ void AbilityDebugDeal::RegisterAbilityDebugResponse()
         return;
     }
 
-    DelayedSingleton<AppScheduler>::GetInstance()->RegisterAbilityDebugResponse(abilityDebugResponse_);
+    IN_PROCESS_DEBUG_DEAL_WITHOUT_RET(
+        DelayedSingleton<AppScheduler>::GetInstance()->RegisterAbilityDebugResponse(abilityDebugResponse_));
 }
 
 void AbilityDebugDeal::OnAbilitysDebugStarted(const std::vector<sptr<IRemoteObject>> &tokens)
