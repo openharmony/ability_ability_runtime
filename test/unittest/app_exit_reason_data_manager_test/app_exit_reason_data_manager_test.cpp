@@ -94,33 +94,33 @@ HWTEST_F(AppExitReasonDataManagerTest, AppExitReasonDataManager_DeleteAbilityRec
 }
 
 /**
- * @tc.name: AppExitReasonDataManager_SetUIExtensionAbilityBeFinishReason_001
- * @tc.desc: SetUIExtensionAbilityBeFinishReason
+ * @tc.name: AppExitReasonDataManager_SetUIExtensionAbilityExitReason_001
+ * @tc.desc: SetUIExtensionAbilityExitReason
  * @tc.type: FUNC
  */
 HWTEST_F(
-    AppExitReasonDataManagerTest, AppExitReasonDataManager_SetUIExtensionAbilityBeFinishReason_001, TestSize.Level1)
+    AppExitReasonDataManagerTest, AppExitReasonDataManager_SetUIExtensionAbilityExitReason_001, TestSize.Level1)
 {
     std::string bundleName = "com.test.demo";
     std::vector<std::string> extensionList;
     extensionList.push_back("testEntryUIExtAbility");
     AAFwk::ExitReason exitReason = { AAFwk::REASON_JS_ERROR, "Js Error." };
-    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetUIExtensionAbilityBeFinishReason(
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->SetUIExtensionAbilityExitReason(
         bundleName, extensionList, exitReason);
     EXPECT_EQ(result, ERR_OK);
 }
 
 /**
- * @tc.name: AppExitReasonDataManager_GetUIExtensionAbilityBeFinishReason_001
- * @tc.desc: GetUIExtensionAbilityBeFinishReason
+ * @tc.name: AppExitReasonDataManager_GetUIExtensionAbilityExitReason_001
+ * @tc.desc: GetUIExtensionAbilityExitReason
  * @tc.type: FUNC
  */
 HWTEST_F(
-    AppExitReasonDataManagerTest, AppExitReasonDataManager_GetUIExtensionAbilityBeFinishReason_001, TestSize.Level1)
+    AppExitReasonDataManagerTest, AppExitReasonDataManager_GetUIExtensionAbilityExitReason_001, TestSize.Level1)
 {
     std::string keyEx = "com.test.demotestnoEntryUIExtAbility";
     AAFwk::ExitReason exitReason = { AAFwk::REASON_UNKNOWN, "" };
-    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetUIExtensionAbilityBeFinishReason(
+    auto result = DelayedSingleton<AppExitReasonDataManager>::GetInstance()->GetUIExtensionAbilityExitReason(
         keyEx, exitReason);
     EXPECT_EQ(result, false);
 }

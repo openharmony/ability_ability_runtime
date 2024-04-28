@@ -156,7 +156,7 @@ int32_t AppExitReasonHelper::RecordProcessExtensionExitReason(
         return ERR_INVALID_VALUE;
     }
 
-    return appExitReasonDataMgr->SetUIExtensionAbilityBeFinishReason(bundleName, extensionList, exitReason);
+    return appExitReasonDataMgr->SetUIExtensionAbilityExitReason(bundleName, extensionList, exitReason);
 }
 
 void AppExitReasonHelper::GetActiveAbilityListByU0(const std::string bundleName,

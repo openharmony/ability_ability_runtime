@@ -280,10 +280,12 @@ void AbilityConnectManager::SetLastExitReason(
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     if (targetRecord == nullptr || !UIExtensionUtils::IsUIExtension(abilityRequest.abilityInfo.extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to set UIExtensionAbility last exit reason.");
         return;
     }
-    auto abilityRuntime = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
-    if (abilityRuntime == nullptr) {
+    auto appExitReasonDataMgr = DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance();
+    if (appExitReasonDataMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get app exit reason data mgr instance is nullptr.");
         return;
     }
 
@@ -291,7 +293,8 @@ void AbilityConnectManager::SetLastExitReason(
     const std::string keyEx = targetRecord->GetAbilityInfo().bundleName + SEPARATOR +
                               targetRecord->GetAbilityInfo().moduleName + SEPARATOR +
                               targetRecord->GetAbilityInfo().name;
-    if (!abilityRuntime->GetUIExtensionAbilityBeFinishReason(keyEx, exitReason)) {
+    if (!appExitReasonDataMgr->GetUIExtensionAbilityExitReason(keyEx, exitReason)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "There is no record of UIExtensionAbility's last exit reason in the database.");
         return;
     }
     targetRecord->SetLastExitReason(exitReason);
