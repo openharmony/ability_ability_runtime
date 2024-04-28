@@ -1083,8 +1083,8 @@ napi_value JsAbilityContext::OnStopExtensionAbilityWithAccount(napi_env env, Nap
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want) ||
         !AppExecFwk::UnwrapInt32FromJS2(env, info.argv[INDEX_ONE], accountId)) {
-        ThrowInvalidParamError(env, "Parse param want or accountId failed,
-            want must be Want and accountId must be number.");
+        ThrowInvalidParamError(env,
+            "Parse param want or accountId failed, want must be Want and accountId must be number.");
         return CreateJsUndefined(env);
     }
 
