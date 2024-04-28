@@ -30,7 +30,7 @@ void AbilityDebugDeal::RegisterAbilityDebugResponse()
         return;
     }
 
-    IN_PROCESS_DEBUG_DEAL_WITHOUT_RET(
+    IN_PROCESS_CALL_WITHOUT_RET(
         DelayedSingleton<AppScheduler>::GetInstance()->RegisterAbilityDebugResponse(abilityDebugResponse_));
 }
 
