@@ -165,7 +165,7 @@ bool PendingWantManager::CheckPendingWantRecordByKey(
         return false;
     }
 
-    if (!inputKey->GetRequestWantRef().IsEquals(key->GetRequestWantRef())) {
+    if (!inputKey->IsEqualsRequestWant(key->GetRequestWantRef())) {
         return false;
     }
 
@@ -216,7 +216,7 @@ void PendingWantManager::CancelWantSender(const bool isSystemApp, const sptr<IWa
 
 void PendingWantManager::CancelWantSenderLocked(PendingWantRecord &record, bool cleanAbility)
 {
-    HILOG_DEBUG("begin.");
+    TAG_LOGD(AAFwkTag::WANTAGENT, "begin.");
     std::lock_guard<ffrt::mutex> locker(mutex_);
     MakeWantSenderCanceledLocked(record);
     if (cleanAbility) {
