@@ -5423,6 +5423,11 @@ int32_t AppMgrServiceInner::NotifyAbilitysAssertDebugChange(
 bool AppMgrServiceInner::IsAttachDebug(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        TAG_LOGE(AAFwkTag::APPMGR, "callerToken is not SA %{public}s", __func__);
+        return ERR_INVALID_VALUE;
+    }
     if (appRunningManager_ == nullptr || bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ or bundleName is nullptr.");
         return false;
