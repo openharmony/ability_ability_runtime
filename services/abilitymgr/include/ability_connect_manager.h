@@ -241,6 +241,11 @@ public:
         return serviceMap_;
     }
 
+    uint32_t GetSceneBoardTokenId() const
+    {
+        return sceneBoardTokenId_;
+    }
+
     /**
      * OnAbilityDied.
      *
@@ -291,6 +296,8 @@ public:
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
     void SignRestartAppFlag(const std::string &bundleName);
+
+    void DeleteInvalidServiceRecord(const std::string &bundleName);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -379,13 +386,14 @@ private:
     int DispatchBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     int DispatchTerminate(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
-    void HandleStartTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord, int resultCode);
+    void HandleStartTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleStopTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleTerminateDisconnectTask(const ConnectListType& connectlist);
     void HandleCommandTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void HandleCommandWindowTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord,
         const sptr<SessionInfo> &sessionInfo, WindowCommand winCmd);
     void HandleForegroundTimeoutTask(const std::shared_ptr<AbilityRecord> &abilityRecord);
+    void HandleConnectTimeoutTask(std::shared_ptr<AbilityRecord> abilityRecord);
     void HandleRestartResidentTask(const AbilityRequest &abilityRequest);
     void HandleActiveAbility(std::shared_ptr<AbilityRecord> &targetService,
         std::shared_ptr<ConnectionRecord> &connectRecord);
@@ -540,7 +548,6 @@ private:
     std::shared_ptr<AbilityRecord> GetExtensionFromServiceMapInner(const sptr<IRemoteObject> &token);
     std::shared_ptr<AbilityRecord> GetExtensionFromServiceMapInner(int32_t abilityRecordId);
     std::shared_ptr<AbilityRecord> GetExtensionFromTerminatingMapInner(const sptr<IRemoteObject> &token);
-    std::shared_ptr<AbilityRecord> GetAutoFillExtFromTerminatingMap(const sptr<IRemoteObject> &token);
     int TerminateAbilityInner(const sptr<IRemoteObject> &token);
     bool IsLauncher(std::shared_ptr<AbilityRecord> serviceExtension) const;
     void KillProcessesByUserId() const;
@@ -581,6 +588,7 @@ private:
     UIExtensionMapType uiExtensionMap_;
     WindowExtensionMapType windowExtensionMap_;
     std::unique_ptr<UIExtensionAbilityConnectManager> uiExtensionAbilityRecordMgr_ = nullptr;
+    uint32_t sceneBoardTokenId_ = 0;
 
     DISALLOW_COPY_AND_MOVE(AbilityConnectManager);
 };

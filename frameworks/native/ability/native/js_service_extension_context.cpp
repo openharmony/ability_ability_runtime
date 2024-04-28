@@ -271,23 +271,23 @@ private:
         AAFwk::OpenLinkOptions &openLinkOptions, AAFwk::Want &want)
     {
         if (info.argc != ARGC_TWO) {
-            HILOG_ERROR("wrong arguments num");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "wrong arguments num");
             return false;
         }
 
         if (!CheckTypeForNapiValue(env, info.argv[ARGC_ZERO], napi_string)) {
-            HILOG_ERROR("link must be string");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "link must be string");
             return false;
         }
         if (!ConvertFromJsValue(env, info.argv[ARGC_ZERO], linkValue) || !CheckUrl(linkValue)) {
-            HILOG_ERROR("link parameter invalid");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "link parameter invalid");
             return false;
         }
 
         if (CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
-            HILOG_DEBUG("OpenLinkOptions is used.");
+            TAG_LOGD(AAFwkTag::SERVICE_EXT, "OpenLinkOptions is used.");
             if (!AppExecFwk::UnwrapOpenLinkOptions(env, info.argv[INDEX_ONE], openLinkOptions, want)) {
-                HILOG_ERROR("openLinkOptions parse failed");
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "openLinkOptions parse failed");
                 return false;
             }
         }
@@ -298,7 +298,7 @@ private:
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info)
     {
         HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-        HILOG_INFO("OnOpenLink");
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "OnOpenLink");
 
         std::string linkValue("");
         AAFwk::OpenLinkOptions openLinkOptions;
@@ -306,19 +306,19 @@ private:
         want.SetParam(AppExecFwk::APP_LINKING_ONLY, false);
 
         if (!ParseOpenLinkParams(env, info, linkValue, openLinkOptions, want)) {
-            HILOG_ERROR("parse openLink arguments failed");
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "parse openLink arguments failed");
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
         }
 
-        HILOG_INFO("open link:%{public}s.", linkValue.c_str());
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "open link:%{public}s.", linkValue.c_str());
         want.SetUri(linkValue);
         auto innerErrorCode = std::make_shared<int>(ERR_OK);
 
         NapiAsyncTask::ExecuteCallback execute = [weak = context_, want, innerErrorCode]() {
             auto context = weak.lock();
             if (!context) {
-                HILOG_WARN("context is released");
+                TAG_LOGW(AAFwkTag::SERVICE_EXT, "context is released");
                 *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
                 return;
             }
@@ -327,14 +327,14 @@ private:
 
         NapiAsyncTask::CompleteCallback complete = [innerErrorCode](napi_env env, NapiAsyncTask& task, int32_t status) {
             if (*innerErrorCode == 0) {
-                HILOG_INFO("OpenLink success.");
+                TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenLink success.");
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
-                HILOG_INFO("OpenLink failed.");
+                TAG_LOGI(AAFwkTag::SERVICE_EXT, "OpenLink failed.");
                 task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
             }
         };
-        
+
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSServiceExtensionContext::OnOpenLink", env,
             CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
@@ -672,29 +672,28 @@ private:
             ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
             return CreateJsUndefined(env);
         }
+
         int64_t connectId = connection->GetConnectionId();
-        NapiAsyncTask::CompleteCallback complete =
-            [weak = context_, want, connection, connectId](napi_env env, NapiAsyncTask& task, int32_t status) {
-                auto context = weak.lock();
-                if (!context) {
-                    TAG_LOGE(AAFwkTag::SERVICE_EXT, "context is released");
-                    task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
-                    RemoveConnection(connectId);
-                    return;
-                }
-                TAG_LOGD(
-                    AAFwkTag::SERVICE_EXT, "ConnectAbility connection:%{public}d", static_cast<int32_t>(connectId));
-                auto innerErrorCode = context->ConnectAbility(want, connection);
-                int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
-                if (errcode) {
-                    connection->CallJsFailed(errcode);
-                    RemoveConnection(connectId);
-                }
-                task.Resolve(env, CreateJsUndefined(env));
-            };
+        auto innerErrorCode = std::make_shared<int>(ERR_OK);
+        auto execute = GetConnectAbilityExecFunc(want, connection, connectId, innerErrorCode);
+        NapiAsyncTask::CompleteCallback complete = [connection, connectId, innerErrorCode](napi_env env,
+            NapiAsyncTask& task, int32_t status) {
+            if (*innerErrorCode == 0) {
+                HILOG_INFO("Connect ability success.");
+                task.ResolveWithNoError(env, CreateJsUndefined(env));
+                return;
+            }
+
+            HILOG_ERROR("Connect ability failed.");
+            int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(*innerErrorCode));
+            if (errcode) {
+                connection->CallJsFailed(errcode);
+                RemoveConnection(connectId);
+            }
+        };
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSServiceExtensionConnection::OnConnectAbility",
-            env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
+            env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), std::move(complete), &result));
         return CreateJsValue(env, connectId);
     }
 
@@ -721,23 +720,23 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [weak = context_, want, accountId, connection, connectId](
                 napi_env env, NapiAsyncTask& task, int32_t status) {
-                    auto context = weak.lock();
-                    if (!context) {
-                        TAG_LOGE(AAFwkTag::SERVICE_EXT, "context is released");
-                        task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
-                        RemoveConnection(connectId);
-                        return;
-                    }
-                    TAG_LOGD(AAFwkTag::SERVICE_EXT, "ConnectAbilityWithAccount connection:%{public}d",
-                        static_cast<int32_t>(connectId));
-                    auto innerErrorCode = context->ConnectAbilityWithAccount(want, accountId, connection);
-                    int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
-                    if (errcode) {
-                        connection->CallJsFailed(errcode);
-                        RemoveConnection(connectId);
-                    }
-                    task.Resolve(env, CreateJsUndefined(env));
-                };
+                auto context = weak.lock();
+                if (!context) {
+                    TAG_LOGE(AAFwkTag::SERVICE_EXT, "context is released");
+                    task.Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
+                    RemoveConnection(connectId);
+                    return;
+                }
+                TAG_LOGD(AAFwkTag::SERVICE_EXT, "ConnectAbilityWithAccount connection:%{public}d",
+                    static_cast<int32_t>(connectId));
+                auto innerErrorCode = context->ConnectAbilityWithAccount(want, accountId, connection);
+                int32_t errcode = static_cast<int32_t>(AbilityRuntime::GetJsErrorCodeByNativeError(innerErrorCode));
+                if (errcode) {
+                    connection->CallJsFailed(errcode);
+                    RemoveConnection(connectId);
+                }
+                task.Resolve(env, CreateJsUndefined(env));
+            };
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSServiceExtensionConnection::OnConnectAbilityWithAccount",
             env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
@@ -1061,7 +1060,7 @@ private:
     {
         return [retCode](napi_env env, NapiAsyncTask& task, int32_t) {
             if (!retCode) {
-                TAG_LOGE(AAFwkTag::SERVICE_EXT, "StartAbility is success");
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "StartAbility is fail");
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
@@ -1071,6 +1070,24 @@ private:
             } else {
                 task.Reject(env, CreateJsErrorByNativeErr(env, *retCode));
             }
+        };
+    }
+
+    NapiAsyncTask::ExecuteCallback GetConnectAbilityExecFunc(const AAFwk::Want &want,
+        sptr<JSServiceExtensionConnection> connection, int64_t connectId, std::shared_ptr<int> innerErrorCode)
+    {
+        return [weak = context_, want, connection, connectId, innerErrorCode]() {
+            TAG_LOGI(AAFwkTag::SERVICE_EXT, "Connect ability execute begin, connectId: %{public}d.",
+                static_cast<int32_t>(connectId));
+
+            auto context = weak.lock();
+            if (!context) {
+                TAG_LOGE(AAFwkTag::SERVICE_EXT, "context is released");
+                *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+                return;
+            }
+
+            *innerErrorCode = context->ConnectAbility(want, connection);
         };
     }
 };
