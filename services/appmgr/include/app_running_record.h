@@ -713,6 +713,12 @@ public:
     std::shared_ptr<ChildProcessRecord> GetChildProcessRecordByPid(const pid_t pid);
     std::map<pid_t, std::shared_ptr<ChildProcessRecord>> GetChildProcessRecordMap();
 
+    void SetPreloadState(PreloadState state);
+
+    bool IsPreloading() const;
+
+    bool IsPreloaded() const;
+
     /**
      * @brief Obtains the app record assign tokenId.
      *
@@ -751,6 +757,9 @@ public:
     int DumpIpcStart(std::string& result);
     int DumpIpcStop(std::string& result);
     int DumpIpcStat(std::string& result);
+
+    bool SetSupportedProcessCache(bool isSupport);
+    SupportProcessCacheState GetSupportProcessCacheState();
 private:
     /**
      * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
@@ -863,6 +872,7 @@ private:
     int64_t startTimeMillis_ = 0;   // The time of app start(CLOCK_MONOTONIC)
     int64_t restartTimeMillis_ = 0; // The time of last trying app restart
     bool jitEnabled_ = false;
+    PreloadState preloadState_ = PreloadState::NONE;
 
     std::shared_ptr<UserTestRecord> userTestRecord_ = nullptr;
 
@@ -898,7 +908,9 @@ private:
     bool isAssertPause_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
+    SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
 };
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
 #endif  // OHOS_ABILITY_RUNTIME_APP_RUNNING_RECORD_H
