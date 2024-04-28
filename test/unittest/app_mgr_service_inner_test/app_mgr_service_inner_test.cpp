@@ -1748,16 +1748,6 @@ HWTEST_F(AppMgrServiceInnerTest, StartProcess_001, TestSize.Level0)
     EXPECT_NE(appRecord, nullptr);
     appMgrServiceInner->StartProcess(appName, processName, 0, nullptr, 0, bundleInfo, bundleName, 0);
     appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 0);
-    appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 1);
-    appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 0, false);
-    appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 1, false);
-
-    appMgrServiceInner->SetBundleManagerHelper(nullptr);
-    appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 0);
-
-    appMgrServiceInner->SetAppSpawnClient(nullptr);
-    appMgrServiceInner->StartProcess(appName, processName, 0, nullptr, 0, bundleInfo, bundleName, 0);
-    appMgrServiceInner->StartProcess(appName, processName, 0, appRecord, 0, bundleInfo, bundleName, 0);
 
     TAG_LOGI(AAFwkTag::TEST, "StartProcess_001 end");
 }
@@ -2099,6 +2089,26 @@ HWTEST_F(AppMgrServiceInnerTest, CheckGetRunningInfoPermission_001, TestSize.Lev
     appMgrServiceInner->CheckGetRunningInfoPermission();
 
     TAG_LOGI(AAFwkTag::TEST, "CheckGetRunningInfoPermission_001 end");
+}
+
+/**
+ * @tc.name: IsMemorySizeSufficent_001
+ * @tc.desc: check get running info permission.
+ * @tc.type: FUNC
+ * @tc.require: issueI5W4S7
+ */
+HWTEST_F(AppMgrServiceInnerTest, IsMemorySizeSufficent_001, TestSize.Level0)
+{
+    TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficent start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    appMgrServiceInner->IsMemorySizeSufficent();
+
+    appMgrServiceInner->appRunningManager_ = nullptr;
+    appMgrServiceInner->IsMemorySizeSufficent();
+
+    TAG_LOGI(AAFwkTag::TEST, "IsMemorySizeSufficent_001 end");
 }
 
 /**
@@ -4157,10 +4167,31 @@ HWTEST_F(AppMgrServiceInnerTest, AddUIExtensionLauncherItem_0100, TestSize.Level
     ASSERT_NE(appRecord, nullptr);
     appRecord->GetPriorityObject()->SetPid(1001);
 
-    appMgrServiceInner->AddUIExtensionLauncherItem(want, appRecord);
+    sptr<IRemoteObject> token = sptr<IRemoteObject>(new (std::nothrow) MockAbilityToken());
+
+    appMgrServiceInner->AddUIExtensionLauncherItem(want, appRecord, token);
     // check want param has been erased.
     EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionAbilityId"), false);
     EXPECT_EQ(want->HasParameter("ability.want.params.uiExtensionRootHostPid"), false);
+    appMgrServiceInner->RemoveUIExtensionLauncherItem(appRecord, token);
+}
+
+/**
+ * @tc.name: PreloadApplication_0100
+ * @tc.desc: Preload Application.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceInnerTest, PreloadApplication_0100, TestSize.Level1)
+{
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    ASSERT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "com.acts.preloadtest";
+    int32_t userId = 100;
+    PreloadMode preloadMode = PreloadMode::PRE_MAKE;
+    int32_t appIndex = 0;
+    int32_t ret = appMgrServiceInner->PreloadApplication(bundleName, userId, preloadMode, appIndex);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 } // namespace AppExecFwk
 } // namespace OHOS

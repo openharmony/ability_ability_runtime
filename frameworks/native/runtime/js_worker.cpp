@@ -95,7 +95,7 @@ void InitWorkerFunc(NativeEngine* nativeEngine)
     }
 
     if (g_debugMode) {
-        auto instanceId = gettid();
+        auto instanceId = getproctid();
         std::string instanceName = "workerThread_" + std::to_string(instanceId);
         bool needBreakPoint = ConnectServerManager::Get().AddInstance(instanceId, instanceId, instanceName);
         if (g_nativeStart) {
@@ -123,7 +123,7 @@ void OffWorkerFunc(NativeEngine* nativeEngine)
     }
 
     if (g_debugMode) {
-        auto instanceId = gettid();
+        auto instanceId = getproctid();
         ConnectServerManager::Get().RemoveInstance(instanceId);
         auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
         auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
@@ -529,24 +529,16 @@ ContainerScope::UpdateCurrent(-1);
 #endif
 }
 
-void StartDebuggerInWorkerModule()
+void StartDebuggerInWorkerModule(bool isDebugApp, bool isNativeStart)
 {
     g_debugMode = true;
-}
-
-void SetDebuggerApp(bool isDebugApp)
-{
     g_debugApp = isDebugApp;
+    g_nativeStart = isNativeStart;
 }
 
 void SetJsFramework()
 {
     g_jsFramework = true;
-}
-
-void SetNativeStart(bool isNativeStart)
-{
-    g_nativeStart = isNativeStart;
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -432,6 +432,8 @@ void AbilityManagerStub::FourthStepInit()
         &AbilityManagerStub::ChangeUIAbilityVisibilityBySCBInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_SHORTCUT)] =
         &AbilityManagerStub::StartShortcutInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::GET_ABILITY_STATE_BY_PERSISTENT_ID)] =
+        &AbilityManagerStub::GetAbilityStateByPersistentIdInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -598,6 +600,10 @@ int AbilityManagerStub::MinimizeUIAbilityBySCBInner(MessageParcel &data, Message
 int AbilityManagerStub::AttachAbilityThreadInner(MessageParcel &data, MessageParcel &reply)
 {
     auto scheduler = iface_cast<IAbilityScheduler>(data.ReadRemoteObject());
+    if (scheduler == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     auto token = data.ReadRemoteObject();
     int32_t result = AttachAbilityThread(scheduler, token);
     reply.WriteInt32(result);
@@ -679,6 +685,10 @@ int AbilityManagerStub::AcquireDataAbilityInner(MessageParcel &data, MessageParc
 int AbilityManagerStub::ReleaseDataAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
     auto scheduler = iface_cast<IAbilityScheduler>(data.ReadRemoteObject());
+    if (scheduler == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "scheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     auto callerToken = data.ReadRemoteObject();
     int32_t result = ReleaseDataAbility(scheduler, callerToken);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "release data ability ret = %d", result);
@@ -745,7 +755,6 @@ int AbilityManagerStub::StartAbilityInner(MessageParcel &data, MessageParcel &re
     int requestCode = data.ReadInt32();
     int32_t result = StartAbility(*want, userId, requestCode);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -766,7 +775,6 @@ int AbilityManagerStub::StartAbilityInnerSpecifyTokenId(MessageParcel &data, Mes
     int requestCode = data.ReadInt32();
     int32_t result = StartAbilityWithSpecifyTokenId(*want, callerToken, specifyTokenId, userId, requestCode);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -856,7 +864,6 @@ int AbilityManagerStub::StartExtensionAbilityInner(MessageParcel &data, MessageP
     int32_t result = StartExtensionAbility(*want, callerToken, userId,
         static_cast<AppExecFwk::ExtensionAbilityType>(extensionType));
     reply.WriteInt32(result);
-    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -869,7 +876,6 @@ int AbilityManagerStub::RequestModalUIExtensionInner(MessageParcel &data, Messag
     }
     int32_t result = RequestModalUIExtension(*want);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -996,7 +1002,6 @@ int AbilityManagerStub::StartAbilityAsCallerByTokenInner(MessageParcel &data, Me
     int32_t result = StartAbilityAsCaller(*want, callerToken, asCallerSourceToken, userId, requestCode,
         isSendDialogResult);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -1025,7 +1030,6 @@ int AbilityManagerStub::StartAbilityAsCallerForOptionInner(MessageParcel &data, 
     int requestCode = data.ReadInt32();
     int32_t result = StartAbilityAsCaller(*want, *startOptions, callerToken, asCallerSourceToken, userId, requestCode);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     delete startOptions;
     return NO_ERROR;
 }
@@ -1071,7 +1075,6 @@ int AbilityManagerStub::ConnectAbilityWithTypeInner(MessageParcel &data, Message
     bool isQueryExtensionOnly = data.ReadBool();
     int32_t result = ConnectAbilityCommon(*want, callback, token, extensionType, userId, isQueryExtensionOnly);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     return NO_ERROR;
 }
 
@@ -1103,13 +1106,16 @@ int AbilityManagerStub::ConnectUIExtensionAbilityInner(MessageParcel &data, Mess
     }
 
     reply.WriteInt32(result);
-    want->CloseAllFd();
     return NO_ERROR;
 }
 
 int AbilityManagerStub::DisconnectAbilityInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IAbilityConnection> callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callback is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     int32_t result = DisconnectAbility(callback);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "disconnect ability ret = %d", result);
     reply.WriteInt32(result);
@@ -1191,7 +1197,6 @@ int AbilityManagerStub::StartAbilityForSettingsInner(MessageParcel &data, Messag
     int requestCode = data.ReadInt32();
     int32_t result = StartAbility(*want, *abilityStartSetting, callerToken, userId, requestCode);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     delete abilityStartSetting;
     return NO_ERROR;
 }
@@ -1216,7 +1221,6 @@ int AbilityManagerStub::StartAbilityForOptionsInner(MessageParcel &data, Message
     int requestCode = data.ReadInt32();
     int32_t result = StartAbility(*want, *startOptions, callerToken, userId, requestCode);
     reply.WriteInt32(result);
-    want->CloseAllFd();
     delete startOptions;
     return NO_ERROR;
 }
@@ -1728,6 +1732,10 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     }
 
     auto callback = iface_cast<IAbilityConnection>(data.ReadRemoteObject());
+    if (callback == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callback is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     sptr<IRemoteObject> callerToken = nullptr;
     if (data.ReadBool()) {
         callerToken = data.ReadRemoteObject();
@@ -1739,7 +1747,6 @@ int AbilityManagerStub::StartAbilityByCallInner(MessageParcel &data, MessageParc
     TAG_LOGD(AAFwkTag::ABILITYMGR, "resolve call ability ret = %d", result);
 
     reply.WriteInt32(result);
-    want->CloseAllFd();
 
     TAG_LOGD(AAFwkTag::ABILITYMGR, "AbilityManagerStub::StartAbilityByCallInner end.");
 
@@ -2233,6 +2240,10 @@ int AbilityManagerStub::AddFreeInstallObserverInner(MessageParcel &data, Message
 {
     sptr<AbilityRuntime::IFreeInstallObserver> observer =
         iface_cast<AbilityRuntime::IFreeInstallObserver>(data.ReadRemoteObject());
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     int32_t result = AddFreeInstallObserver(observer);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write failed.");
@@ -3239,7 +3250,7 @@ int32_t AbilityManagerStub::UpdateSessionInfoBySCBInner(MessageParcel &data, Mes
     }
     size = static_cast<int32_t>(sessionIds.size());
     if (size > threshold) {
-        HILOG_ERROR("Size of vector too large for sessionIds.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Size of vector too large for sessionIds.");
         return ERR_ENOUGH_DATA;
     }
     reply.WriteInt32(size);
@@ -3362,6 +3373,20 @@ int32_t AbilityManagerStub::StartShortcutInner(MessageParcel &data, MessageParce
     reply.WriteInt32(result);
     delete startOptions;
     return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::GetAbilityStateByPersistentIdInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t persistentId = data.ReadInt32();
+    bool state = false;
+    int32_t result = GetAbilityStateByPersistentId(persistentId, state);
+    if (result == ERR_OK) {
+        if (!reply.WriteBool(state)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write failed.");
+            return IPC_STUB_ERR;
+        }
+    }
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS
