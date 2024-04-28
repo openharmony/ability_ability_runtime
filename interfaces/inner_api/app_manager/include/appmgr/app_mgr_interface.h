@@ -634,10 +634,12 @@ public:
      * @param isMemorySizeSufficent Indicates the memory size state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t NotifyMemonySizeStateChanged(bool isMemorySizeSufficent)
+    virtual int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
     {
         return 0;
     }
+
+    virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
