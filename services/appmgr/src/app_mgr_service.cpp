@@ -33,6 +33,7 @@
 #include "base/security/access_token/interfaces/innerkits/accesstoken/include/accesstoken_kit.h"
 #include "app_mgr_service_const.h"
 #include "app_mgr_service_dump_error_code.h"
+#include "cache_process_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -168,6 +169,7 @@ ErrCode AppMgrService::Init()
     eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrServiceInner_);
     appMgrServiceInner_->SetTaskHandler(taskHandler_);
     appMgrServiceInner_->SetEventHandler(eventHandler_);
+    DelayedSingleton<CacheProcessManager>::GetInstance()->SetAppMgr(appMgrServiceInner_);
     std::function<void()> initAppMgrServiceInnerTask =
         std::bind(&AppMgrServiceInner::Init, appMgrServiceInner_);
     taskHandler_->SubmitTask(initAppMgrServiceInnerTask, TASK_INIT_APPMGRSERVICEINNER);
@@ -1320,14 +1322,24 @@ int32_t AppMgrService::GetAllUIExtensionProviderPid(pid_t hostPid, std::vector<p
     return appMgrServiceInner_->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrService::NotifyMemonySizeStateChanged(bool isMemorySizeSufficent)
+int32_t AppMgrService::NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
 {
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService is not ready.");
         return ERR_INVALID_OPERATION;
     }
 
-    return appMgrServiceInner_->NotifyMemonySizeStateChanged(isMemorySizeSufficent);
+    return appMgrServiceInner_->NotifyMemorySizeStateChanged(isMemorySizeSufficent);
+}
+
+int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

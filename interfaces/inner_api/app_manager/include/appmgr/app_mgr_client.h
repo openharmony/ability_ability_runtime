@@ -713,7 +713,7 @@ public:
      * @param isMemorySizeSufficent Indicates the memory size state.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t NotifyMemonySizeStateChanged(bool isMemorySizeSufficent);
+    int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent);
 
     /**
      * whether memory size is sufficent.
@@ -733,6 +733,7 @@ public:
     virtual int32_t PreloadApplication(const std::string &bundleName, int32_t userId,
         AppExecFwk::PreloadMode preloadMode, int32_t appIndex = 0);
 
+    int32_t SetSupportedProcessCacheSelf(bool isSupport);
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

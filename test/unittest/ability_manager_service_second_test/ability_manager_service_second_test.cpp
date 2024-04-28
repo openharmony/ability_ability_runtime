@@ -329,7 +329,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_003,
     abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
     abilityRequest_.appInfo.isSystemApp = false;
     abilityRequest_.appInfo.bundleName = "test.bundleName";
-    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), NO_FOUND_ABILITY_BY_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "testcase end.");
 }
 
@@ -346,7 +346,7 @@ HWTEST_F(AbilityManagerServiceSecondTest, CheckCallOtherExtensionPermission_004,
     abilityRequest_.abilityInfo.extensionAbilityType = AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI;
     abilityRequest_.appInfo.isSystemApp = true;
     abilityRequest_.appInfo.bundleName = "test.bundleName";
-    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), ERR_OK);
+    EXPECT_EQ(abilityMs_->CheckCallOtherExtensionPermission(abilityRequest_), NO_FOUND_ABILITY_BY_CALLER);
     TAG_LOGI(AAFwkTag::TEST, "testcase end.");
 }
 
@@ -394,6 +394,23 @@ HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_002, TestSize.Level1)
     sptr<IRemoteObject> callerToken = nullptr;
     int requestCode = 0;
     EXPECT_EQ(abilityMs_->StartAbility(want, abilityStartSetting, callerToken, 0, requestCode),
+        CHECK_PERMISSION_FAILED);
+}
+
+/*
+ * Feature: AbilityManagerService
+ * Function: StartAbilityDetails
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService StartAbilityDetails
+ */
+HWTEST_F(AbilityManagerServiceSecondTest, StartAbility_003, TestSize.Level1)
+{
+    auto abilityMs_ = std::make_shared<AbilityManagerService>();
+    Want want;
+    AbilityStartSetting abilityStartSetting;
+    sptr<IRemoteObject> callerToken = nullptr;
+    int requestCode = 0;
+    EXPECT_EQ(abilityMs_->StartAbilityDetails(want, abilityStartSetting, callerToken, 0, requestCode),
         CHECK_PERMISSION_FAILED);
 }
 
