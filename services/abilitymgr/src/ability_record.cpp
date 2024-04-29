@@ -279,7 +279,7 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
 void AbilityRecord::RemoveAppStateObserver(bool force)
 {
     if (!force && IsSceneBoard()) {
-        HILOG_INFO("Special ability no need to RemoveAppStateObserver.");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Special ability no need to RemoveAppStateObserver.");
         return;
     }
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -1895,6 +1895,12 @@ void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<Connection
     connRecordList_.remove(connRecord);
 }
 
+void AbilityRecord::RemoveSpecifiedWantParam(const std::string &key)
+{
+    std::lock_guard guard(wantLock_);
+    want_.RemoveParam(key);
+}
+
 void AbilityRecord::AddCallerRecord(const sptr<IRemoteObject> &callerToken, int requestCode, std::string srcAbilityId,
     uint32_t callingTokenId)
 {
@@ -2274,13 +2280,13 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
 void AbilityRecord::DumpUIExtensionPid(std::vector<std::string> &info, bool isUIExtension) const
 {
     if (!isUIExtension) {
-        HILOG_DEBUG("Not ui extension type.");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Not ui extension type.");
         return;
     }
 
     auto appScheduler = DelayedSingleton<AppScheduler>::GetInstance();
     if (appScheduler == nullptr) {
-        HILOG_ERROR("Get appScheduler is invalid.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get appScheduler is invalid.");
         return;
     }
     AppExecFwk::RunningProcessInfo processInfo;
@@ -2370,7 +2376,7 @@ void AbilityRecord::OnProcessDied()
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
     CHECK_POINTER(handler);
 
-    HILOG_INFO("OnProcessDied: '%{public}s'", abilityInfo_.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "OnProcessDied: '%{public}s'", abilityInfo_.name.c_str());
     auto task = [ability = shared_from_this()]() {
         DelayedSingleton<AbilityManagerService>::GetInstance()->OnAbilityDied(ability);
     };
