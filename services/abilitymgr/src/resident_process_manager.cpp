@@ -144,6 +144,7 @@ bool ResidentProcessManager::CheckMainElement(const AppExecFwk::HapModuleInfo &h
 int32_t ResidentProcessManager::SetResidentProcessEnabled(
     const std::string &bundleName, const std::string &callerName, bool updateEnable)
 {
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called");
     if (bundleName.empty() || callerName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Input parameter error");
         return INVALID_PARAMETERS_ERR;
@@ -187,7 +188,7 @@ int32_t ResidentProcessManager::SetResidentProcessEnabled(
 void ResidentProcessManager::UpdateResidentProcessesStatus(
     const std::string &bundleName, bool localEnable, bool updateEnable)
 {
-    TAG_LOGE(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
     if (bundleName.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Bundle name is empty!");
         return;

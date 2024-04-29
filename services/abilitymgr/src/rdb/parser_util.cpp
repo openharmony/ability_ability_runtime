@@ -17,9 +17,7 @@
 
 #include <fstream>
 
-#ifdef CONFIG_POLOCY_ENABLE
 #include "config_policy_utils.h"
-#endif
 #include "hilog_tag_wrapper.h"
 
 namespace OHOS {
@@ -48,6 +46,7 @@ void ParserUtil::GetResidentProcessRawData(std::vector<std::tuple<std::string, s
 
     for (auto &root : rootDirList) {
         auto fileDir = root.append(PRODUCT_SUFFIX).append(INSTALL_LIST_CAPABILITY_CONFIG);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Search file dir : %{public}s", fileDir.c_str());
         ParsePreInstallAbilityConfig(fileDir, list);
     }
 }
@@ -127,7 +126,6 @@ bool ParserUtil::FilterInfoFromJson(
 
 void ParserUtil::GetPreInstallRootDirList(std::vector<std::string> &rootDirList)
 {
-#ifdef CONFIG_POLOCY_ENABLE
     auto cfgDirList = GetCfgDirList();
     if (cfgDirList != nullptr) {
         for (const auto &cfgDir : cfgDirList->paths) {
@@ -139,7 +137,6 @@ void ParserUtil::GetPreInstallRootDirList(std::vector<std::string> &rootDirList)
 
         FreeCfgDirList(cfgDirList);
     }
-#endif
     bool ret = std::find(rootDirList.begin(), rootDirList.end(), DEFAULT_PRE_BUNDLE_ROOT_DIR) != rootDirList.end();
     if (!ret) {
         rootDirList.emplace_back(DEFAULT_PRE_BUNDLE_ROOT_DIR);
