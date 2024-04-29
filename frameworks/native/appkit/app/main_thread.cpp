@@ -1377,7 +1377,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.uid = bundleInfo.applicationInfo.uid;
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
-        if (applicationInfo_->appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG ) {
+        if (applicationInfo_->appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Mutile Thread Mode: %{public}d.", appLaunchData.GetMutileThread());
             options.isMultiThread = appLaunchData.GetMutileThread();
         }

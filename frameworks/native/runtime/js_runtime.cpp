@@ -619,7 +619,7 @@ void JsRuntime::PostPreload(const Options& options)
     }
     if (options.isMultiThread) {
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Mutile Thread Mode: %{public}d.", options.isMultiThread);
-        panda::JSNApi::SetMuitiThreadCheck();
+        panda::JSNApi::SetMultiThreadCheck();
     }
     bool profileEnabled = OHOS::system::GetBoolParameter("ark.profile", false);
     postOption.SetEnableProfile(profileEnabled);
@@ -798,7 +798,7 @@ bool JsRuntime::CreateJsEnv(const Options& options)
 
     if (options.isMultiThread) {
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Mutile Thread Mode: %{public}d.", options.isMultiThread);
-        panda::JSNApi::SetMuitiThreadCheck();
+        panda::JSNApi::SetMultiThreadCheck();
     }
 
     if (IsUseAbilityRuntime(options)) {
