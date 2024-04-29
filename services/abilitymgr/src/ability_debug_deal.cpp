@@ -19,6 +19,7 @@
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
+#include "in_process_call_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
