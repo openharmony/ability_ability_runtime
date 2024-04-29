@@ -28,6 +28,7 @@ constexpr const char* PERMISSION_MANAGE_MISSION = "ohos.permission.MANAGE_MISSIO
 constexpr const char* PERMISSION_RUNNING_STATE_OBSERVER = "ohos.permission.RUNNING_STATE_OBSERVER";
 constexpr const char* PERMISSION_SET_ABILITY_CONTROLLER = "ohos.permission.SET_ABILITY_CONTROLLER";
 constexpr const char* PERMISSION_UPDATE_CONFIGURATION = "ohos.permission.UPDATE_CONFIGURATION";
+constexpr const char* PERMISSION_UPDATE_APP_CONFIGURATION = "ohos.permission.UPDATE_APP_CONFIGURATION";
 constexpr const char* PERMISSION_INSTALL_BUNDLE = "ohos.permission.INSTALL_BUNDLE";
 constexpr const char* PERMISSION_GET_BUNDLE_INFO_PRIVILEGED = "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED";
 constexpr const char* PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_INVISIBLE_ABILITY";
@@ -54,6 +55,7 @@ constexpr const char* PERMISSION_NOTIFY_DEBUG_ASSERT_RESULT = "ohos.permission.N
 constexpr const char* PERMISSION_START_SHORTCUT = "ohos.permission.START_SHORTCUT";
 constexpr const char* PERMISSION_PRELOAD_APPLICATION = "ohos.permission.PRELOAD_APPLICATION";
 constexpr const char* PERMISSION_SET_PROCESS_CACHE_STATE = "ohos.permission.SET_PROCESS_CACHE_STATE";
+constexpr const char* PERMISSION_PRELOAD_UI_EXTENSION_ABILITY = "ohos.permission.PRELOAD_UI_EXTENSION_ABILITY";
 } // namespace PermissionConstants
 } // namespace AAFwk
 } // namespace OHOS

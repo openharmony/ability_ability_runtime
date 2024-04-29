@@ -290,8 +290,12 @@ int32_t AppMgrServiceInner::PreloadApplication(const std::string &bundleName, in
         TAG_LOGE(AAFwkTag::APPMGR, "PreloadApplication appPreloader is nullptr.");
         return ERR_INVALID_VALUE;
     }
+    auto allowPreload = appPreloader_->PreCheck(bundleName, preloadMode);
+    if (!allowPreload) {
+        HILOG_ERROR("BundleName: %{public}s preload preCheck failed.", bundleName.c_str());
+        return AAFwk::ERR_NOT_ALLOW_PRELOAD_BY_RSS;
+    }
 
-    // todo RSS preCheck
     PreloadRequest request;
     auto ret = appPreloader_->GeneratePreloadRequest(bundleName, userId, appIndex, request);
     if (ret != ERR_OK) {
@@ -1095,11 +1099,11 @@ void AppMgrServiceInner::SendProcessExitEventTask(
     const std::shared_ptr<AppRunningRecord> &appRecord, time_t exitTime, int32_t count)
 {
     if (appRecord == nullptr) {
-        HILOG_ERROR("appRecord is nullptr");
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
         return;
     }
     if (appRecord->GetPriorityObject() == nullptr) {
-        HILOG_ERROR("Get priority object is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Get priority object is nullptr.");
         return;
     }
     auto pid = appRecord->GetPriorityObject()->GetPid();
@@ -1586,11 +1590,14 @@ int32_t AppMgrServiceInner::KillProcessByPid(const pid_t pid, const std::string&
     eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     eventInfo.processName = appRecord->GetProcessName();
     AAFwk::EventReport::SendAppEvent(AAFwk::EventName::APP_TERMINATE, HiSysEventType::BEHAVIOR, eventInfo);
-    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
+    int result = HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::FRAMEWORK, "PROCESS_KILL",
         OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
         EVENT_KEY_PID, std::to_string(eventInfo.pid),
         EVENT_KEY_PROCESS_NAME, eventInfo.processName,
         EVENT_KEY_MESSAGE, killReason);
+    TAG_LOGI(AAFwkTag::APPMGR, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL], pid="
+        "%{public}d, processName=%{public}s, msg=%{public}s", result, pid, eventInfo.processName.c_str(),
+        killReason.c_str());
     return ret;
 }
 
@@ -1983,7 +1990,7 @@ void AppMgrServiceInner::KillProcessesByPids(std::vector<int32_t> &pids)
         auto appRecord = GetAppRunningRecordByPid(pid);
         if (appRecord == nullptr) {
             TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr.");
-            return;
+            continue;
         }
         auto result = KillProcessByPid(pid, "KillProcessesByPids");
         if (result < 0) {
@@ -2328,9 +2335,10 @@ void AppMgrServiceInner::SetAppEnvInfo(const BundleInfo &bundleInfo, AppSpawnSta
 void AppMgrServiceInner::AddMountPermission(uint32_t accessTokenId, std::set<std::string> &permissions)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    int32_t maxPermissionIndex = GetMaxPermissionIndex();
+    auto handle = remoteClientManager_->GetSpawnClient()->GetAppSpawnClientHandle();
+    int32_t maxPermissionIndex = GetMaxPermissionIndex(handle);
     for (int i = 0; i < maxPermissionIndex; i++) {
-        std::string permission = std::string(GetPermissionByIndex(i));
+        std::string permission = std::string(GetPermissionByIndex(handle, i));
         if (Security::AccessToken::AccessTokenKit::VerifyAccessToken(accessTokenId, permission, false) ==
             Security::AccessToken::PERMISSION_GRANTED) {
             permissions.insert(permission);
@@ -2510,11 +2518,11 @@ void AppMgrServiceInner::SetProcessJITState(const std::shared_ptr<AppRunningReco
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "SetProcessJITState called.");
     if (!appRecord) {
-        HILOG_ERROR("appRecord is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr.");
         return;
     }
     if (!securityModeManager_) {
-        HILOG_ERROR("securityModeManager_ is nullptr.");
+        TAG_LOGE(AAFwkTag::APPMGR, "securityModeManager_ is nullptr.");
         appRecord->SetJITEnabled(true);
         return;
     }
@@ -2630,7 +2638,7 @@ bool AppMgrServiceInner::SendProcessStartEvent(const std::shared_ptr<AppRunningR
     }
     eventInfo.processName = appRecord->GetProcessName();
     if (appRecord->GetPriorityObject() == nullptr) {
-        HILOG_ERROR("appRecord's priorityObject is null");
+        TAG_LOGE(AAFwkTag::APPMGR, "appRecord's priorityObject is null");
     } else {
         eventInfo.pid = appRecord->GetPriorityObject()->GetPid();
     }
@@ -3681,6 +3689,11 @@ int32_t AppMgrServiceInner::UpdateConfigurationByBundleName(const Configuration 
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is null");
         return ERR_INVALID_VALUE;
+    }
+    CHECK_CALLER_IS_SYSTEM_APP;
+    auto ret = AAFwk::PermissionVerification::GetInstance()->VerifyUpdateAPPConfigurationPerm();
+    if (ret != ERR_OK) {
+        return ret;
     }
 
     int32_t result = appRunningManager_->UpdateConfigurationByBundleName(config, name);
@@ -5113,7 +5126,12 @@ int32_t AppMgrServiceInner::GetRunningProcessInformation(
 
 int32_t AppMgrServiceInner::ChangeAppGcState(pid_t pid, int32_t state)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "called, pid:%{public}d, state:%{public}d.", pid, state);
+    auto callerUid = IPCSkeleton::GetCallingUid();
+    TAG_LOGD(AAFwkTag::APPMGR, "called, pid:%{public}d, state:%{public}d, uid:%{public}d.", pid, state, callerUid);
+    if (callerUid != ROOT_UID) { // The current UID for resource management is 0
+        TAG_LOGE(AAFwkTag::APPMGR, "The caller is not a resource manager.");
+        return ERR_INVALID_VALUE;
+    }
     auto appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord");
@@ -5209,14 +5227,15 @@ int32_t AppMgrServiceInner::DetachAppDebug(const std::string &bundleName)
 
 int32_t AppMgrServiceInner::SetAppWaitingDebug(const std::string &bundleName, bool isPersist)
 {
-    HILOG_DEBUG("Called, bundle name is %{public}s, persist flag is %{public}d.", bundleName.c_str(), isPersist);
+    TAG_LOGD(AAFwkTag::APPMGR,
+        "Called, bundle name is %{public}s, persist flag is %{public}d.", bundleName.c_str(), isPersist);
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        HILOG_ERROR("Developer mode is false.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Developer mode is false.");
         return AAFwk::ERR_NOT_DEVELOPER_MODE;
     }
 
     if (bundleName.empty()) {
-        HILOG_ERROR("The bundle name is empty.");
+        TAG_LOGE(AAFwkTag::APPMGR, "The bundle name is empty.");
         return ERR_INVALID_VALUE;
     }
 
@@ -5247,9 +5266,9 @@ int32_t AppMgrServiceInner::SetAppWaitingDebug(const std::string &bundleName, bo
 
 int32_t AppMgrServiceInner::CancelAppWaitingDebug()
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        HILOG_ERROR("Developer mode is false.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Developer mode is false.");
         return AAFwk::ERR_NOT_DEVELOPER_MODE;
     }
 
@@ -5262,9 +5281,9 @@ int32_t AppMgrServiceInner::CancelAppWaitingDebug()
 
 int32_t AppMgrServiceInner::GetWaitingDebugApp(std::vector<std::string> &debugInfoList)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
-        HILOG_ERROR("Developer mode is false.");
+        TAG_LOGE(AAFwkTag::APPMGR, "Developer mode is false.");
         return AAFwk::ERR_NOT_DEVELOPER_MODE;
     }
 
@@ -5272,7 +5291,7 @@ int32_t AppMgrServiceInner::GetWaitingDebugApp(std::vector<std::string> &debugIn
 
     std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
     if (waitingDebugBundleList_.empty()) {
-        HILOG_DEBUG("The waiting debug bundle list is empty.");
+        TAG_LOGD(AAFwkTag::APPMGR, "The waiting debug bundle list is empty.");
         return ERR_OK;
     }
 
@@ -5287,11 +5306,11 @@ int32_t AppMgrServiceInner::GetWaitingDebugApp(std::vector<std::string> &debugIn
 
 void AppMgrServiceInner::InitAppWaitingDebugList()
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     {
         std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
         if (isInitAppWaitingDebugListExecuted_) {
-            HILOG_DEBUG("No need to initialize again.");
+            TAG_LOGD(AAFwkTag::APPMGR, "No need to initialize again.");
             return;
         }
         isInitAppWaitingDebugListExecuted_ = true;
@@ -5309,12 +5328,18 @@ void AppMgrServiceInner::InitAppWaitingDebugList()
 
 bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return false;
+    }
+
     InitAppWaitingDebugList();
 
     std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
     if (waitingDebugBundleList_.empty()) {
-        HILOG_DEBUG("The waiting debug bundle list is empty.");
+        TAG_LOGD(AAFwkTag::APPMGR, "The waiting debug bundle list is empty.");
         return false;
     }
 
@@ -5328,7 +5353,13 @@ bool AppMgrServiceInner::IsWaitingDebugApp(const std::string &bundleName)
 
 void AppMgrServiceInner::ClearNonPersistWaitingDebugFlag()
 {
-    HILOG_DEBUG("Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return;
+    }
+
     bool isClear = false;
     {
         std::lock_guard<ffrt::mutex> lock(waitingDebugLock_);
@@ -5350,6 +5381,10 @@ void AppMgrServiceInner::ClearNonPersistWaitingDebugFlag()
 
 int32_t AppMgrServiceInner::RegisterAbilityDebugResponse(const sptr<IAbilityDebugResponse> &response)
 {
+    if (IPCSkeleton::GetCallingUid() != FOUNDATION_UID) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not foundation call.");
+        return ERR_PERMISSION_DENIED;
+    }
     if (response == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "Response is nullptr.");
         return ERR_INVALID_VALUE;
@@ -5399,6 +5434,11 @@ int32_t AppMgrServiceInner::NotifyAbilitysAssertDebugChange(
 bool AppMgrServiceInner::IsAttachDebug(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
+    if (!isSaCall) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Caller token is not SA.");
+        return false;
+    }
     if (appRunningManager_ == nullptr || bundleName.empty()) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ or bundleName is nullptr.");
         return false;
@@ -6183,9 +6223,9 @@ int32_t AppMgrServiceInner::GetAllUIExtensionProviderPid(pid_t hostPid, std::vec
     return appRunningManager_->GetAllUIExtensionProviderPid(hostPid, providerPids);
 }
 
-int32_t AppMgrServiceInner::NotifyMemonySizeStateChanged(bool isMemorySizeSufficent)
+int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSufficent)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "NotifyMemonySizeStateChanged, isMemorySizeSufficent: %{public}d",
+    TAG_LOGI(AAFwkTag::APPMGR, "NotifyMemorySizeStateChanged, isMemorySizeSufficent: %{public}d",
         isMemorySizeSufficent);
     bool isMemmgrCall = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
         MEMMGR_PROC_NAME);
@@ -6195,7 +6235,11 @@ int32_t AppMgrServiceInner::NotifyMemonySizeStateChanged(bool isMemorySizeSuffic
     }
 
     if (!isMemorySizeSufficent) {
-        return ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent();
+        auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeInSufficent();
+        if (ret != ERR_OK) {
+            TAG_LOGE(AAFwkTag::APPMGR, "HandleMemorySizeInSufficent failed, ret is %{public}d.", ret);
+        }
+        return ret;
     }
     std::vector<std::string> exitBundleNames;
     auto ret = ExitResidentProcessManager::GetInstance().HandleMemorySizeSufficent(exitBundleNames);
