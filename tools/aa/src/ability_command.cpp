@@ -59,7 +59,7 @@ constexpr struct option LONG_OPTIONS[] = {
     {"cold-start", no_argument, nullptr, 'C'},
     {"debug", no_argument, nullptr, 'D'},
     {"native-debug", no_argument, nullptr, 'N'},
-    {"mutil-thread", no_argument, nullptr,'R'},
+    {"mutil-thread", no_argument, nullptr, 'R'},
     {"action", required_argument, nullptr, 'A'},
     {"URI", required_argument, nullptr, 'U'},
     {"entity", required_argument, nullptr, 'e'},
