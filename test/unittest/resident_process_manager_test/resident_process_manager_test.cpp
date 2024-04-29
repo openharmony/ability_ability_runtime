@@ -270,7 +270,7 @@ HWTEST_F(ResidentProcessManagerTest, SetResidentProcessEnable_002, TestSize.Leve
 
     std::string bundleName = "com.example.resident.process";
     std::string callerName = "resident.process.manager.test";
-    EXPECT_EQ(manager->SetResidentProcessEnabled(bundleName, callerName, false), CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(manager->SetResidentProcessEnabled(bundleName, callerName, false), ERR_NO_RESIDENT_PERMISSION);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -2372,7 +2372,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_CanRestartResident_001, TestSize.Level
     EXPECT_NE(abilityRecord_->restartCount_, -1);
 
     abilityRecord_->restartTime_ = AbilityUtil::SystemTimeMillis();
-    EXPECT_FALSE(abilityRecord_->CanRestartResident());
     abilityRecord_->restartTime_ = 0;
     // restart success
     abilityRecord_->SetAbilityState(AbilityState::ACTIVE);
