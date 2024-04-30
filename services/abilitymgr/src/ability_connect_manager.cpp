@@ -2277,7 +2277,6 @@ void AbilityConnectManager::GetExtensionRunningInfos(int upperLimit, std::vector
             }
         }
     };
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "std::for_each(");
     std::for_each(serviceMap_.begin(), serviceMap_.end(), queryInfo);
 }
 
@@ -2339,21 +2338,18 @@ void AbilityConnectManager::GetExtensionRunningInfo(std::shared_ptr<AbilityRecor
     extensionInfo.processName = processInfo.processName_;
     extensionInfo.startTime = abilityRecord->GetStartTime();
     ConnectListType connectRecordList = abilityRecord->GetConnectRecordList();
-    {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (auto &connectRecord : connectRecordList)");
-        for (auto &connectRecord : connectRecordList) {
-            if (connectRecord == nullptr) {
-                TAG_LOGD(AAFwkTag::ABILITYMGR, "connectRecord is nullptr.");
-                continue;
-            }
-            auto callerAbilityRecord = Token::GetAbilityRecordByToken(connectRecord->GetToken());
-            if (callerAbilityRecord == nullptr) {
-                TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityRecord is nullptr.");
-                continue;
-            }
-            std::string package = callerAbilityRecord->GetAbilityInfo().bundleName;
-            extensionInfo.clientPackage.emplace_back(package);
+    for (auto &connectRecord : connectRecordList) {
+        if (connectRecord == nullptr) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "connectRecord is nullptr.");
+            continue;
         }
+        auto callerAbilityRecord = Token::GetAbilityRecordByToken(connectRecord->GetToken());
+        if (callerAbilityRecord == nullptr) {
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "callerAbilityRecord is nullptr.");
+            continue;
+        }
+        std::string package = callerAbilityRecord->GetAbilityInfo().bundleName;
+        extensionInfo.clientPackage.emplace_back(package);
     }
     info.emplace_back(extensionInfo);
 }
