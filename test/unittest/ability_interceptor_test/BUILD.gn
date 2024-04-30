@@ -31,9 +31,9 @@ ohos_unittest("ability_interceptor_test") {
 
   sources = [
     # add mock file
+    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/appexecfwk_core/src/appmgr/mock_app_scheduler.cpp",
     "ability_interceptor_test.cpp",
-    "${ability_runtime_services_path}/abilitymgr/src/start_ability_utils.cpp",
   ]
 
   configs = [
