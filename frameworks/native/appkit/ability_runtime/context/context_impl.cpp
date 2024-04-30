@@ -773,7 +773,8 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::InitResourceMana
                 if (!moduleName.empty() && hapModuleInfo.moduleName != moduleName) {
                     continue;
                 }
-                std::string loadPath =  hapModuleInfo.hapPath.empty() ? hapModuleInfo.resourcePath : hapModuleInfo.hapPath;
+                std::string loadPath =
+                    hapModuleInfo.hapPath.empty() ? hapModuleInfo.resourcePath : hapModuleInfo.hapPath;
                 if (loadPath.empty()) {
                     TAG_LOGD(AAFwkTag::APPKIT, "loadPath is empty");
                     continue;
