@@ -9845,7 +9845,6 @@ int AbilityManagerService::CreateModalDialog(const Want &replaceWant, sptr<IRemo
         (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
         return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
     }
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "Token::GetAbilityRecordByToken");
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
     if (!callerRecord) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "callerRecord is nullptr.");

@@ -345,7 +345,6 @@ sptr<IRemoteObject> WantAgentClient::GetAbilityManager()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<std::mutex> lock(mutex_);
     if (proxy_ == nullptr) {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "GetSystemAbilityManager");
         auto systemManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (systemManager == nullptr) {
             TAG_LOGE(AAFwkTag::WANTAGENT, "Fail to get registry.");

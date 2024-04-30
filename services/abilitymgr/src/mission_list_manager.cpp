@@ -1119,7 +1119,6 @@ std::shared_ptr<AbilityRecord> MissionListManager::GetAbilityRecordByTokenInner(
         return nullptr;
     }
     // first find in terminating list
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (auto ability : terminateAbilityList_)");
     for (auto ability : terminateAbilityList_) {
         if (ability && token == ability->GetToken()->AsObject()) {
             return ability;
@@ -1138,12 +1137,9 @@ std::shared_ptr<AbilityRecord> MissionListManager::GetAliveAbilityRecordByToken(
     }
 
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
-    {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (auto missionList : currentMissionLists_)");
-        for (auto missionList : currentMissionLists_) {
-            if (missionList && (abilityRecord = missionList->GetAbilityRecordByToken(token)) != nullptr) {
-                return abilityRecord;
-            }
+    for (auto missionList : currentMissionLists_) {
+        if (missionList && (abilityRecord = missionList->GetAbilityRecordByToken(token)) != nullptr) {
+            return abilityRecord;
         }
     }
 
@@ -2606,12 +2602,9 @@ sptr<IRemoteObject> MissionListManager::GetAbilityTokenByMissionId(int32_t missi
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard guard(managerLock_);
     sptr<IRemoteObject> result = nullptr;
-    {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (auto missionList : currentMissionLists_)");
-        for (auto missionList : currentMissionLists_) {
-            if (missionList && (result = missionList->GetAbilityTokenByMissionId(missionId)) != nullptr) {
-                return result;
-            }
+    for (auto missionList : currentMissionLists_) {
+        if (missionList && (result = missionList->GetAbilityTokenByMissionId(missionId)) != nullptr) {
+            return result;
         }
     }
 

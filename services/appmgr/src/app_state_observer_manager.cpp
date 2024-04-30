@@ -90,8 +90,6 @@ int32_t AppStateObserverManager::UnregisterApplicationStateObserver(const sptr<I
         return ERR_INVALID_VALUE;
     }
     std::map<sptr<IApplicationStateObserver>, std::vector<std::string>>::iterator it;
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER,
-        "for (it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it)");
     for (it = appStateObserverMap_.begin(); it != appStateObserverMap_.end(); ++it) {
         if (it->first->AsObject() == observer->AsObject()) {
             appStateObserverMap_.erase(it);
@@ -139,7 +137,6 @@ int32_t AppStateObserverManager::UnregisterAppForegroundStateObserver(const sptr
         return ERR_PERMISSION_DENIED;
     }
     std::lock_guard<ffrt::mutex> lockUnregister(appForegroundObserverLock_);
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (auto &it : appForegroundStateObserverSet_)");
     for (auto &it : appForegroundStateObserverSet_) {
         if (it != nullptr && it->AsObject() == observer->AsObject()) {
             appForegroundStateObserverSet_.erase(it);
@@ -188,7 +185,6 @@ int32_t AppStateObserverManager::UnregisterAbilityForegroundStateObserver(
         return ERR_PERMISSION_DENIED;
     }
     std::lock_guard<ffrt::mutex> lockUnregister(abilityforegroundObserverLock_);
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "for (auto &it : abilityforegroundObserverSet_)");
     for (auto &it : abilityforegroundObserverSet_) {
         if (it != nullptr && it->AsObject() == observer->AsObject()) {
             abilityforegroundObserverSet_.erase(it);
