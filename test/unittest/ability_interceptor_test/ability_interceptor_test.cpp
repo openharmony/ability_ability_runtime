@@ -384,7 +384,7 @@ HWTEST_F(AbilityInterceptorTest, AbilityJumpInterceptor_003, TestSize.Level1)
 HWTEST_F(AbilityInterceptorTest, AbilityJumpInterceptor_004, TestSize.Level1)
 {
     std::shared_ptr<AbilityJumpInterceptor> interceptor = std::make_shared<AbilityJumpInterceptor>();
-    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper = std::make_shared<AppExecFwk::BundleMgrHelper>();    
+    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper = std::make_shared<AppExecFwk::BundleMgrHelper>();
     Want want;
     int32_t userId = 10;
     AppExecFwk::AppJumpControlRule controlRule;
