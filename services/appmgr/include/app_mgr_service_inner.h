@@ -1025,7 +1025,7 @@ public:
 
     int32_t SignRestartAppFlag(const std::string &bundleName);
 
-    void SetAppAssertionPauseState(int32_t pid, bool flag);
+    void SetAppAssertionPauseState(bool flag);
 
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
 

@@ -568,6 +568,13 @@ public:
     virtual int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent) override;
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
+
+    /**
+     * Set application assertion pause state.
+     *
+     * @param flag assertion pause state.
+     */
+    void SetAppAssertionPauseState(bool flag) override;
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);
     bool WriteInterfaceToken(MessageParcel &data);
