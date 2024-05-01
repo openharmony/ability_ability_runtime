@@ -652,6 +652,13 @@ public:
     }
 
     virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
+
+    /**
+     * Set application assertion pause state.
+     *
+     * @param flag assertion pause state.
+     */
+    virtual void SetAppAssertionPauseState(bool flag) {}
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

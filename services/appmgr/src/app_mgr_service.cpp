@@ -1352,5 +1352,15 @@ int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
     }
     return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
 }
+
+void AppMgrService::SetAppAssertionPauseState(bool flag)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
+        return;
+    }
+    return appMgrServiceInner_->SetAppAssertionPauseState(flag);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
