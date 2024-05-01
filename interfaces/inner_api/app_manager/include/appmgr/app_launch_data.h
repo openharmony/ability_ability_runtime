@@ -172,12 +172,12 @@ public:
         return perfCmd_;
     }
 
-    inline void SetMutileThread(const bool multiThread)
+    inline void SetMultiThread(const bool multiThread)
     {
         isMultiThread_ = multiThread;
     }
 
-    inline bool GetMutileThread() const
+    inline bool GetMultiThread() const
     {
         return isMultiThread_;
     }
