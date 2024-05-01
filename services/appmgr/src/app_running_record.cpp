@@ -435,7 +435,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetAppIndex(appIndex_);
     launchData.SetDebugApp(isDebugApp_);
     launchData.SetPerfCmd(perfCmd_);
-    launchData.SetMutileThread(isMultiThread_);
+    launchData.SetMultiThread(isMultiThread_);
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
@@ -1645,7 +1645,7 @@ void AppRunningRecord::SetPerfCmd(const std::string &perfCmd)
     perfCmd_ = perfCmd;
 }
 
-void AppRunningRecord::SetMultiThread(const bool multiThread)
+void AppRunningRecord::SetMultiThread(bool multiThread)
 {
     isMultiThread_ = multiThread;
 }
