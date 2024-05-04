@@ -901,7 +901,8 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
         CHECK_POINTER_AND_RETURN(callerSessionInfo, ERR_INVALID_VALUE);
         CHECK_POINTER_AND_RETURN(callerSessionInfo->sessionToken, ERR_INVALID_VALUE);
         auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
-        bool hasContinuousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->IsBackgroundTaskUid(abilityRecord->GetUid());
+        bool hasContinuousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->
+            IsBackgroundTaskUid(abilityRecord->GetUid());
         sessionInfo->hasContinuousTask = hasContinuousTask;
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by callerSession.");
         return static_cast<int>(callerSession->PendingSessionActivation(sessionInfo));
@@ -1611,7 +1612,8 @@ int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecor
         auto callerSessionInfo = callerAbility->GetSessionInfo();
         if (callerSessionInfo != nullptr && callerSessionInfo->sessionToken != nullptr) {
             auto callerSession = iface_cast<Rosen::ISession>(callerSessionInfo->sessionToken);
-            bool hasContinuousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->IsBackgroundTaskUid(callerAbility->GetUid());
+            bool hasContinuousTask = DelayedSingleton<AbilityManagerService>::GetInstance()->
+                IsBackgroundTaskUid(callerAbility->GetUid());
             sessionInfo->hasContinuousTask = hasContinuousTask;
             callerSession->PendingSessionActivation(sessionInfo);
         } else {
