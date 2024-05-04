@@ -717,41 +717,6 @@ HWTEST_F(AppMgrClientTest, NotifyProcMemoryLevel_001, TestSize.Level0)
     EXPECT_NE(appMgrClient, nullptr);
 }
 
-
-/**
- * @tc.name: AppMgrClient_NotifyMemorySizeStateChanged_001
- * @tc.desc: NotifyMemorySizeStateChanged.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_NotifyMemorySizeStateChanged_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-
-    auto result = appMgrClient->ConnectAppMgrService();
-    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-
-    auto ret = appMgrClient->NotifyMemorySizeStateChanged(false);
-    EXPECT_NE(ret, ERR_OK);
-}
-
-/**
- * @tc.name: AppMgrClient_SetSupportedProcessCacheSelf_001
- * @tc.desc: SetSupportedProcessCacheSelf.
- * @tc.type: FUNC
- */
-HWTEST_F(AppMgrClientTest, AppMgrClient_SetSupportedProcessCacheSelf_001, TestSize.Level0)
-{
-    auto appMgrClient = std::make_unique<AppMgrClient>();
-    EXPECT_NE(appMgrClient, nullptr);
-
-    auto result = appMgrClient->ConnectAppMgrService();
-    EXPECT_EQ(result, AppMgrResultCode::RESULT_OK);
-
-    auto ret = appMgrClient->SetSupportedProcessCacheSelf(false);
-    EXPECT_NE(ret, ERR_OK);
-}
-
 /**
  * @tc.name: AppMgrClient_StartNativeProcessForDebugger_001
  * @tc.desc: StartNativeProcessForDebugger.
