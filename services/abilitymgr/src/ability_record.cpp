@@ -24,6 +24,7 @@
 #include "ability_app_state_observer.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
+#include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
 #include "ability_util.h"
 #include "app_utils.h"
@@ -69,6 +70,7 @@ using namespace OHOS::AAFwk::PermissionConstants;
 const std::string DEBUG_APP = "debugApp";
 const std::string NATIVE_DEBUG = "nativeDebug";
 const std::string PERF_CMD = "perfCmd";
+const std::string MULTI_THREAD = "multiThread";
 const std::string DMS_PROCESS_NAME = "distributedsched";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
@@ -397,9 +399,10 @@ bool AbilityRecord::CanRestartRootLauncher()
 
 bool AbilityRecord::CanRestartResident()
 {
+    auto isKeepAlive = GetKeepAlive();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "isKeepAlive: %{public}d, isRestarting: %{public}d, restartCount: %{public}d",
-        isKeepAlive_, isRestarting_, restartCount_);
-    if (isKeepAlive_ && isRestarting_ && (restartCount_ < 0)) {
+        isKeepAlive, isRestarting_, restartCount_);
+    if (isKeepAlive && isRestarting_ && (restartCount_ < 0)) {
         int restartIntervalTime = 0;
         auto abilityMgr = DelayedSingleton<AbilityManagerService>::GetInstance();
         if (abilityMgr) {
@@ -2095,7 +2098,7 @@ void AbilityRecord::Dump(std::vector<std::string> &info)
     info.push_back(dumpInfo);
     dumpInfo = "        bundle name [" + GetAbilityInfo().bundleName + "]";
     info.push_back(dumpInfo);
-    std::string isKeepAlive = isKeepAlive_ ? "true" : "false";
+    std::string isKeepAlive = GetKeepAlive() ? "true" : "false";
     dumpInfo = "        isKeepAlive: " + isKeepAlive;
     info.push_back(dumpInfo);
     // get ability type(unknown/page/service/provider)
@@ -2200,7 +2203,7 @@ void AbilityRecord::DumpAbilityState(
         callContainer_->Dump(info);
     }
 
-    std::string isKeepAlive = isKeepAlive_ ? "true" : "false";
+    std::string isKeepAlive = GetKeepAlive() ? "true" : "false";
     dumpInfo = "        isKeepAlive: " + isKeepAlive;
     info.push_back(dumpInfo);
     if (isLauncherRoot_) {
@@ -2252,7 +2255,7 @@ void AbilityRecord::DumpService(std::vector<std::string> &info, std::vector<std:
     }
     info.emplace_back("      app state #" + AbilityRecord::ConvertAppState(appState_));
 
-    std::string isKeepAlive = isKeepAlive_ ? "true" : "false";
+    std::string isKeepAlive = GetKeepAlive() ? "true" : "false";
     info.emplace_back("        isKeepAlive: " + isKeepAlive);
     if (isLauncherRoot_) {
         info.emplace_back("      can restart num #" + std::to_string(restartCount_));
@@ -2479,6 +2482,7 @@ void AbilityRecord::SetWant(const Want &want)
     auto debugApp = want_.GetBoolParam(DEBUG_APP, false);
     auto nativeDebug = want_.GetBoolParam(NATIVE_DEBUG, false);
     auto perfCmd = want_.GetStringParam(PERF_CMD);
+    auto multiThread = want_.GetBoolParam(MULTI_THREAD, false);
     want_.CloseAllFd();
 
     want_ = want;
@@ -2490,6 +2494,9 @@ void AbilityRecord::SetWant(const Want &want)
     }
     if (!perfCmd.empty()) {
         want_.SetParam(PERF_CMD, perfCmd);
+    }
+    if (multiThread) {
+        want_.SetParam(MULTI_THREAD, true);
     }
 }
 
@@ -2563,7 +2570,7 @@ void AbilityRecord::SetRestarting(const bool isRestart)
 {
     isRestarting_ = isRestart;
     TAG_LOGD(AAFwkTag::ABILITYMGR, "SetRestarting: %{public}d", isRestarting_);
-    if ((isLauncherRoot_ && IsLauncherAbility()) || isKeepAlive_) {
+    if ((isLauncherRoot_ && IsLauncherAbility()) || GetKeepAlive()) {
         restartCount_ = isRestart ? (--restartCount_) : restartMax_;
         TAG_LOGD(AAFwkTag::ABILITYMGR, "root launcher or resident process's restart count: %{public}d", restartCount_);
     }
@@ -2575,7 +2582,7 @@ void AbilityRecord::SetRestarting(const bool isRestart, int32_t canRestartCount)
     TAG_LOGD(
         AAFwkTag::ABILITYMGR, "SetRestarting: %{public}d, restart count: %{public}d", isRestarting_, canRestartCount);
 
-    if ((isLauncherRoot_ && IsLauncherAbility()) || isKeepAlive_) {
+    if ((isLauncherRoot_ && IsLauncherAbility()) || GetKeepAlive()) {
         restartCount_ = isRestart ? canRestartCount : restartMax_;
         TAG_LOGI(AAFwkTag::ABILITYMGR, "root launcher or resident process's restart count: %{public}d", restartCount_);
     }
@@ -2596,14 +2603,22 @@ bool AbilityRecord::IsRestarting() const
     return isRestarting_;
 }
 
-void AbilityRecord::SetKeepAlive()
-{
-    isKeepAlive_ = true;
-}
-
 bool AbilityRecord::GetKeepAlive() const
 {
-    return isKeepAlive_;
+    // Special ability
+    std::vector<std::pair<std::string, std::string>> trustAbilities{
+        { AbilityConfig::SCENEBOARD_BUNDLE_NAME, AbilityConfig::SCENEBOARD_ABILITY_NAME },
+        { AbilityConfig::SYSTEM_UI_BUNDLE_NAME, AbilityConfig::SYSTEM_UI_ABILITY_NAME },
+        { AbilityConfig::LAUNCHER_BUNDLE_NAME, AbilityConfig::LAUNCHER_ABILITY_NAME }
+    };
+    for (const auto &pair : trustAbilities) {
+        if (pair.first == abilityInfo_.bundleName && pair.second == abilityInfo_.name) {
+            return true;
+        }
+    }
+    bool keepAliveEnable = false;
+    AmsResidentProcessRdb::GetInstance().GetResidentProcessEnable(applicationInfo_.bundleName, keepAliveEnable);
+    return keepAliveEnable;
 }
 
 void AbilityRecord::SetLoading(bool status)
