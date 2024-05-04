@@ -1778,7 +1778,7 @@ int32_t AbilityManagerService::ReportDrawnCompleted(const sptr<IRemoteObject> &c
 
     EventInfo eventInfo;
     eventInfo.userId = IPCSkeleton::GetCallingUid() / BASE_USER_RANGE;
-    eventInfo.pid = IPCSkeleton::GetCallingPid();
+    eventInfo.pid = IPCSkeleton::GetCallingRealPid();
     eventInfo.bundleName = abilityInfo.bundleName;
     eventInfo.moduleName = abilityInfo.moduleName;
     eventInfo.abilityName = abilityInfo.name;
@@ -5905,8 +5905,8 @@ int32_t AbilityManagerService::UpgradeApp(const std::string &bundleName, const i
 int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, const int32_t uid, const bool isUpgrade,
     const std::string &exitMsg)
 {
-    pid_t callingPid = IPCSkeleton::GetCallingPid();
-    pid_t pid = getpid();
+    pid_t callingPid = IPCSkeleton::GetCallingRealPid();
+    pid_t pid = getprocpid();
     if (callingPid != pid) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s: Not bundleMgr call.", __func__);
         return CHECK_PERMISSION_FAILED;
@@ -7507,7 +7507,7 @@ int AbilityManagerService::DelegatorDoAbilityForeground(const sptr<IRemoteObject
     CHECK_POINTER_AND_RETURN(token, ERR_INVALID_VALUE);
     auto &&abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
-    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    int32_t callerPid = IPCSkeleton::GetCallingRealPid();
     int32_t appPid = abilityRecord->GetPid();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "callerPid: %{public}d, appPid: %{public}d", callerPid, appPid);
     if (callerPid != appPid) {
@@ -7543,7 +7543,7 @@ int AbilityManagerService::DelegatorDoAbilityBackground(const sptr<IRemoteObject
     auto &&abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     int32_t appPid = abilityRecord->GetPid();
-    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    int32_t callerPid = IPCSkeleton::GetCallingRealPid();
     TAG_LOGD(AAFwkTag::ABILITYMGR, "callerPid: %{public}d, appPid: %{public}d", callerPid, appPid);
     if (callerPid != appPid) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Caller is not the application itself");
@@ -7620,7 +7620,7 @@ void AbilityManagerService::UpdateCallerInfo(Want& want, const sptr<IRemoteObjec
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     int32_t tokenId = static_cast<int32_t>(IPCSkeleton::GetCallingTokenID());
     int32_t callerUid = IPCSkeleton::GetCallingUid();
-    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    int32_t callerPid = IPCSkeleton::GetCallingRealPid();
     want.RemoveParam(Want::PARAM_RESV_CALLER_TOKEN);
     want.SetParam(Want::PARAM_RESV_CALLER_TOKEN, tokenId);
     want.RemoveParam(Want::PARAM_RESV_CALLER_UID);
@@ -8775,7 +8775,7 @@ int AbilityManagerService::IsCallFromBackground(const AbilityRequest &abilityReq
             return ERR_OK;
         }
     } else {
-        auto callerPid = IPCSkeleton::GetCallingPid();
+        auto callerPid = IPCSkeleton::GetCallingRealPid();
         DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(callerPid, processInfo);
         if (processInfo.processName_.empty()) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Can not find caller application by callerPid: %{private}d.", callerPid);
@@ -8947,7 +8947,7 @@ int AbilityManagerService::CheckDlpForExtension(
 
 bool AbilityManagerService::JudgeSelfCalled(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    if (IPCSkeleton::GetCallingPid() == getpid()) {
+    if (IPCSkeleton::GetCallingRealPid() == getprocpid()) {
         return true;
     }
 
@@ -10021,10 +10021,10 @@ int32_t AbilityManagerService::SetResidentProcessEnabled(const std::string &bund
         HILOG_ERROR("Get resident proces mgr is nullptr");
         return INNER_ERR;
     }
-    
+
     std::string callerName;
     int32_t uid = 0;
-    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto callerPid = IPCSkeleton::GetCallingRealPid();
     DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameByPid(callerPid, callerName, uid);
     if (callerName.empty()) {
         HILOG_ERROR("Failed to obtain caller name.");
