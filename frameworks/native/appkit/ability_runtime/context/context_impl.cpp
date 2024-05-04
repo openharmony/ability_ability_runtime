@@ -549,7 +549,6 @@ int32_t ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::Bu
 void ContextImpl::GetBundleInfo(const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo,
     const int &accountId)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
     if (bundleMgr_ == nullptr) {
         int errCode = GetBundleManager();
@@ -676,10 +675,8 @@ std::shared_ptr<Context> ContextImpl::CreateBundleContext(const std::string &bun
     }
     TAG_LOGD(AAFwkTag::APPKIT, "length: %{public}zu, bundleName: %{public}s",
         (size_t)bundleName.length(), bundleName.c_str());
-    {
-        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "bundleMgr_->GetBundleInfo");
-        bundleMgr_->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
-    }
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "bundleMgr_->GetBundleInfo");
+    bundleMgr_->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo, accountId);
 
     if (bundleInfo.name.empty() || bundleInfo.applicationInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::APPKIT, "bundleInfo is empty");
@@ -917,7 +914,6 @@ void ContextImpl::SetResourceManager(const std::shared_ptr<Global::Resource::Res
 
 std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::GetResourceManager() const
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (resourceManager_) {
         return resourceManager_;
     }
@@ -927,7 +923,6 @@ std::shared_ptr<Global::Resource::ResourceManager> ContextImpl::GetResourceManag
 
 std::shared_ptr<AppExecFwk::ApplicationInfo> ContextImpl::GetApplicationInfo() const
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (parentContext_ != nullptr) {
         return parentContext_->GetApplicationInfo();
     }
