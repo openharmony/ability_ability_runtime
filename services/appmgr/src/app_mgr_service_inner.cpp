@@ -57,6 +57,9 @@
 #include "mem_mgr_client.h"
 #include "mem_mgr_process_state_info.h"
 #include "os_account_manager_wrapper.h"
+#ifdef OHOS_ACCOUNT_ENABLED
+#include "ohos_account_kits.h"
+#endif // OHOS_ACCOUNT_ENABLED
 #include "parameter.h"
 #include "parameters.h"
 #include "perf_profile.h"
@@ -118,6 +121,7 @@ const std::string FUNC_NAME = "main";
 const std::string RENDER_PARAM = "invalidparam";
 const std::string COLD_START = "coldStart";
 const std::string PERF_CMD = "perfCmd";
+const std::string MULTI_THREAD = "multiThread";
 const std::string DEBUG_CMD = "debugCmd";
 const std::string ENTER_SANDBOX = "sandboxApp";
 const std::string DLP_PARAMS_INDEX = "ohos.dlp.params.index";
@@ -172,6 +176,8 @@ const std::string EVENT_MESSAGE_START_SPECIFIED_PROCESS_TIMEOUT = "Start Specifi
 const std::string EVENT_MESSAGE_START_SPECIFIED_ABILITY_TIMEOUT = "Start Specified Ability TimeOut!";
 const std::string EVENT_MESSAGE_START_PROCESS_SPECIFIED_ABILITY_TIMEOUT = "Start Process Specified Ability TimeOut!";
 const std::string EVENT_MESSAGE_DEFAULT = "AppMgrServiceInner HandleTimeOut!";
+const std::string SUPPORT_CALL_NOTIFY_MEMORY_CHANGED =
+    "persist.sys.abilityms.support_call_notify_memory_changed";
 
 const std::string SYSTEM_BASIC = "system_basic";
 const std::string SYSTEM_CORE = "system_core";
@@ -612,7 +618,7 @@ void AppMgrServiceInner::LoadAbilityNoAppRecord(const std::shared_ptr<AppRunning
         appRecord->SetSpecifiedProcessFlag(specifiedProcessFlag);
     }
     if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
-        appRecord->SetKeepAliveAppState(false, false);
+        appRecord->SetEmptyKeepAliveAppState(false);
         TAG_LOGI(AAFwkTag::APPMGR, "The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
     }
     // As taskHandler_ is busy now, the task should be submit to other task queue.
@@ -1350,7 +1356,7 @@ int32_t AppMgrServiceInner::GetAllRunningProcesses(std::vector<RunningProcessInf
     // check permission
     for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
         const auto &appRecord = item.second;
-        if (!appRecord->GetSpawned()) {
+        if (!appRecord || !appRecord->GetSpawned()) {
             continue;
         }
         if (isPerm) {
@@ -1365,6 +1371,28 @@ int32_t AppMgrServiceInner::GetAllRunningProcesses(std::vector<RunningProcessInf
             if (callingTokenId == tokenId) {
                 GetRunningProcesses(appRecord, info);
             }
+        }
+    }
+    return ERR_OK;
+}
+
+int32_t AppMgrServiceInner::GetRunningProcessesByBundleType(BundleType bundleType,
+    std::vector<RunningProcessInfo> &info)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "permission deny");
+        return ERR_PERMISSION_DENIED;
+    }
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (!appRecord || !appRecord->GetSpawned()) {
+            continue;
+        }
+        auto appInfo = appRecord->GetApplicationInfo();
+        if (appInfo && appInfo->bundleType == bundleType) {
+            GetRunningProcesses(appRecord, info);
         }
     }
     return ERR_OK;
@@ -1533,6 +1561,10 @@ void AppMgrServiceInner::GetRunningProcess(const std::shared_ptr<AppRunningRecor
     if (appRecord->GetUserTestInfo() != nullptr && system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         info.isTestMode = true;
     }
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo) {
+        info.bundleType = static_cast<int32_t>(appInfo->bundleType);
+    }
 }
 
 void AppMgrServiceInner::GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord,
@@ -1694,8 +1726,6 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     }
 
     appRecord->SetProcessAndExtensionType(abilityInfo);
-    bool isKeepAlive = bundleInfo.isKeepAlive && bundleInfo.singleton;
-    appRecord->SetKeepAliveAppState(isKeepAlive, false);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId);
@@ -1706,6 +1736,7 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
             appRecord->SetDebugApp(true);
         }
         appRecord->SetPerfCmd(want->GetStringParam(PERF_CMD));
+        appRecord->SetMultiThread(want->GetBoolParam(MULTI_THREAD, false));
         appRecord->SetAppIndex(want->GetIntParam(DLP_PARAMS_INDEX, 0));
         appRecord->SetSecurityFlag(want->GetBoolParam(DLP_PARAMS_SECURITY_FLAG, false));
         appRecord->SetRequestProcCode(want->GetIntParam(Want::PARAM_RESV_REQUEST_PROC_CODE, 0));
@@ -2468,6 +2499,25 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         startMsg.flags = startMsg.flags | APP_ACCESS_BUNDLE_DIR;
     }
 
+#ifdef OHOS_ACCOUNT_ENABLED
+    TAG_LOGI(AAFwkTag::APPMGR, "execute with OHOS_ACCOUNT_ENABLED on");
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo && appInfo->bundleType == BundleType::ATOMIC_SERVICE) {
+        TAG_LOGI(AAFwkTag::APPMGR, "application is of atomic service type");
+        AccountSA::OhosAccountInfo accountInfo;
+        auto errCode = AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(accountInfo);
+        if (errCode == ERR_OK) {
+            TAG_LOGI(AAFwkTag::APPMGR, "GetOhosAccountInfo succeeds, uid %{public}s", accountInfo.uid_.c_str());
+            startMsg.atomicServiceFlag = true;
+            startMsg.atomicAccount = accountInfo.uid_;
+        } else {
+            TAG_LOGE(AAFwkTag::APPMGR, "failed to get ohos account info:%{public}d", errCode);
+        }
+    }
+#else
+    TAG_LOGI(AAFwkTag::APPMGR, "execute with OHOS_ACCOUNT_ENABLED off");
+#endif // OHOS_ACCOUNT_ENABLED
+
     SetOverlayInfo(bundleName, userId, startMsg);
     SetAppEnvInfo(bundleInfo, startMsg);
 
@@ -3092,8 +3142,6 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         return;
     }
 
-    appRecord->SetKeepAliveAppState(true, isEmptyKeepAliveApp);
-
     StartProcess(appInfo->name, processName, 0, appRecord, appInfo->uid, info, appInfo->bundleName, 0, appExistFlag);
 
     // If it is empty, the startup failed
@@ -3106,6 +3154,8 @@ void AppMgrServiceInner::StartEmptyResidentProcess(
         TAG_LOGI(AAFwkTag::APPMGR, "StartEmptyResidentProcess restartCount : [%{public}d], ", restartCount);
         appRecord->SetRestartResidentProcCount(restartCount);
     }
+    appRecord->SetEmptyKeepAliveAppState(isEmptyKeepAliveApp);
+    appRecord->SetKeepAliveEnableState(true);
 
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
@@ -3508,7 +3558,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
             return;
         }
         if (hapModuleInfo.isStageBasedModel && !IsMainProcess(appInfo, hapModuleInfo)) {
-            appRecord->SetKeepAliveAppState(false, false);
+            appRecord->SetEmptyKeepAliveAppState(false);
             TAG_LOGD(AAFwkTag::APPMGR, "The process %{public}s will not keepalive", hapModuleInfo.process.c_str());
         }
         auto wantPtr = std::make_shared<AAFwk::Want>(want);
@@ -3525,6 +3575,7 @@ void AppMgrServiceInner::StartSpecifiedAbility(const AAFwk::Want &want, const Ap
                 appRecord->SetDebugApp(true);
             }
             appRecord->SetPerfCmd(wantPtr->GetStringParam(PERF_CMD));
+            appRecord->SetMultiThread(wantPtr->GetBoolParam(MULTI_THREAD, false));
         }
         appRecord->SetProcessAndExtensionType(abilityInfoPtr);
         appRecord->SetTaskHandler(taskHandler_);
@@ -6240,7 +6291,8 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
         isMemorySizeSufficent);
     bool isMemmgrCall = AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(
         MEMMGR_PROC_NAME);
-    if (!isMemmgrCall) {
+    bool isSupportCall = OHOS::system::GetBoolParameter(SUPPORT_CALL_NOTIFY_MEMORY_CHANGED, false);
+    if (!isMemmgrCall && !isSupportCall) {
         TAG_LOGE(AAFwkTag::APPMGR, "callerToken not %{public}s. %{public}s", MEMMGR_PROC_NAME.c_str(), __func__);
         return ERR_PERMISSION_DENIED;
     }
@@ -6271,6 +6323,29 @@ int32_t AppMgrServiceInner::NotifyMemorySizeStateChanged(bool isMemorySizeSuffic
     };
     taskHandler_->SubmitTask(StartExitKeepAliveProcessTask, "startexitkeepaliveprocess");
     return ERR_OK;
+}
+
+void AppMgrServiceInner::SetKeepAliveEnableState(const std::string &bundleName, bool enable)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Bundle name is empty.");
+        return;
+    }
+
+    if (appRunningManager_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "App running manager error.");
+        return;
+    }
+
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (appRecord != nullptr && appRecord->GetBundleName() == bundleName) {
+            TAG_LOGD(AAFwkTag::APPMGR, "%{public}s update state: %{public}d",
+                bundleName.c_str(), static_cast<int32_t>(enable));
+            appRecord->SetKeepAliveEnableState(enable);
+        }
+    }
 }
 
 bool AppMgrServiceInner::IsMemorySizeSufficent()
