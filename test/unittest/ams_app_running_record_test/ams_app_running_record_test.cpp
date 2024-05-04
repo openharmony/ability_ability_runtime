@@ -3034,7 +3034,6 @@ HWTEST_F(AmsAppRunningRecordTest, SetState_001, TestSize.Level1)
     std::shared_ptr<AppRunningRecord> appRunningRecord =
         std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
     EXPECT_NE(appRunningRecord, nullptr);
-
     appRunningRecord->SetState(ApplicationState::APP_STATE_SET_COLD_START);
     EXPECT_NE(appRunningRecord->GetState(), ApplicationState::APP_STATE_CACHED);
 }
@@ -3050,7 +3049,6 @@ HWTEST_F(AmsAppRunningRecordTest, UpdateApplicationInfoInstalled_001, TestSize.L
     std::shared_ptr<AppRunningRecord> appRunningRecord =
         std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
     EXPECT_NE(appRunningRecord, nullptr);
-
     appRunningRecord->UpdateApplicationInfoInstalled(*appInfo);
     EXPECT_NE(appRunningRecord, nullptr);
 }
@@ -3087,7 +3085,6 @@ HWTEST_F(AmsAppRunningRecordTest, SendEventForSpecifiedAbility_001, TestSize.Lev
     std::shared_ptr<ApplicationInfo> appInfo;
     std::shared_ptr<AppRunningRecord> appRunningRecord =
         std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
-
     appRunningRecord->SendEventForSpecifiedAbility(1, 100);
     EXPECT_NE(appRunningRecord, nullptr);
 }
@@ -3101,7 +3098,6 @@ HWTEST_F(AmsAppRunningRecordTest, AppRunningRecord_SendAppStartupTypeEvent_001, 
 {
     std::shared_ptr<AppRunningRecord> appRunningRecord =
         std::make_shared<AppRunningRecord>(nullptr, AppRecordId::Create(), GetTestProcessName());
-
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     std::shared_ptr<AbilityRunningRecord> abilityRecord =
         std::make_shared<AbilityRunningRecord>(abilityInfo, nullptr, 0);
