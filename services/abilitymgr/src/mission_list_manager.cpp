@@ -193,7 +193,6 @@ int MissionListManager::StartAbility(AbilityRequest &abilityRequest)
 int MissionListManager::StartAbility(const std::shared_ptr<AbilityRecord> &currentTopAbility,
     const std::shared_ptr<AbilityRecord> &callerAbility, const AbilityRequest &abilityRequest)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto isSpecified = (abilityRequest.abilityInfo.launchMode == AppExecFwk::LaunchMode::SPECIFIED);
     if (isSpecified) {
         EnqueueWaitingAbilityToFront(abilityRequest);
@@ -250,14 +249,12 @@ int MissionListManager::GetMissionInfos(int32_t numMax, std::vector<MissionInfo>
 
 int MissionListManager::GetMissionInfo(int32_t missionId, MissionInfo &missionInfo)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Get mission info by id:%{public}d.", missionId);
     return DelayedSingleton<MissionInfoMgr>::GetInstance()->GetMissionInfoById(missionId, missionInfo);
 }
 
 int MissionListManager::MoveMissionToFront(int32_t missionId, std::shared_ptr<StartOptions> startOptions)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard guard(managerLock_);
     return MoveMissionToFrontInner(missionId, true, true, nullptr, startOptions);
 }
@@ -265,7 +262,6 @@ int MissionListManager::MoveMissionToFront(int32_t missionId, std::shared_ptr<St
 int MissionListManager::MoveMissionToFront(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
     std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard guard(managerLock_);
     return MoveMissionToFrontInner(missionId, isCallerFromLauncher, isRecent, callerAbility, startOptions);
 }
@@ -273,7 +269,6 @@ int MissionListManager::MoveMissionToFront(int32_t missionId, bool isCallerFromL
 int MissionListManager::MoveMissionToFrontInner(int32_t missionId, bool isCallerFromLauncher, bool isRecent,
     std::shared_ptr<AbilityRecord> callerAbility, std::shared_ptr<StartOptions> startOptions)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "missionId:%{public}d.", missionId);
     std::shared_ptr<Mission> mission;
     bool isReachToLimit = false;
@@ -411,7 +406,6 @@ int MissionListManager::GetTargetMission(const AbilityRequest &abilityRequest, s
 int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> &currentTopAbility,
     const std::shared_ptr<AbilityRecord> &callerAbility, const AbilityRequest &abilityRequest)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::string connector = "##";
     auto element = abilityRequest.want.GetElement();
     std::string traceName = __PRETTY_FUNCTION__ + connector + element.GetBundleName() + connector +

@@ -127,7 +127,6 @@ void JsEnvironmentCallback::OnMemoryLevel(const int level)
 
 int32_t JsEnvironmentCallback::Register(napi_value jsCallback, bool isSync)
 {
-    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "start");
     if (env_ == nullptr) {
         return -1;
