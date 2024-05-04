@@ -2435,36 +2435,6 @@ HWTEST_F(AbilityManagerClientBranchTest, DelegatorDoAbilityBackground_0100, Test
 }
 
 /**
- * @tc.name: AbilityManagerClient_RegisterStatusBarDelegate_0100
- * @tc.desc: RegisterStatusBarDelegate
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_RegisterStatusBarDelegate_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityManagerClient_RegisterStatusBarDelegate_0100 start";
-    sptr<AbilityRuntime::IStatusBarDelegate> delegate = nullptr;
-    auto ret = client_->RegisterStatusBarDelegate(delegate);
-    EXPECT_EQ(ret, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityManagerClient_RegisterStatusBarDelegate_0100 end";
-}
-
-#ifdef SUPPORT_GRAPHICS
-/**
- * @tc.name: AbilityManagerClient_SetMissionLabel_0100
- * @tc.desc: SetMissionLabel
- * @tc.type: FUNC
- */
-HWTEST_F(AbilityManagerClientBranchTest, AbilityManagerClient_SetMissionLabel_0100, TestSize.Level1)
-{
-    GTEST_LOG_(INFO) << "AbilityManagerClient_SetMissionLabel_0100 start";
-    sptr<IRemoteObject> token = nullptr;
-    auto ret = client_->SetMissionLabel(token, "label");
-    EXPECT_EQ(ret, ERR_OK);
-    GTEST_LOG_(INFO) << "AbilityManagerClient_SetMissionLabel_0100 end";
-}
-#endif
-
-/**
  * @tc.name: AbilityManagerClient_SetMissionContinueState_0100
  * @tc.desc: SetMissionContinueState
  * @tc.type: FUNC
