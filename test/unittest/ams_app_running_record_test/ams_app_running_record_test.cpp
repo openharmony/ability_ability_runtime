@@ -3033,7 +3033,6 @@ HWTEST_F(AmsAppRunningRecordTest, SetState_001, TestSize.Level1)
     std::shared_ptr<ApplicationInfo> appInfo;
     std::shared_ptr<AppRunningRecord> appRunningRecord =
         std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
-    EXPECT_NE(appRunningRecord, nullptr);
     appRunningRecord->SetState(ApplicationState::APP_STATE_SET_COLD_START);
     EXPECT_NE(appRunningRecord->GetState(), ApplicationState::APP_STATE_CACHED);
 }
@@ -3048,7 +3047,6 @@ HWTEST_F(AmsAppRunningRecordTest, UpdateApplicationInfoInstalled_001, TestSize.L
     std::shared_ptr<ApplicationInfo> appInfo;
     std::shared_ptr<AppRunningRecord> appRunningRecord =
         std::make_shared<AppRunningRecord>(appInfo, AppRecordId::Create(), GetTestProcessName());
-    EXPECT_NE(appRunningRecord, nullptr);
     appRunningRecord->UpdateApplicationInfoInstalled(*appInfo);
     EXPECT_NE(appRunningRecord, nullptr);
 }
