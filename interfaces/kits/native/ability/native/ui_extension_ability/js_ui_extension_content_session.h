@@ -117,6 +117,8 @@ protected:
         napi_env env, NapiCallbackInfo& info, std::shared_ptr<int> &innerErrorCode);
     void StartAbilityForResultRuntimeTask(napi_env env, AAFwk::Want &want,
         std::shared_ptr<NapiAsyncTask> asyncTask, size_t& unwrapArgc, AAFwk::StartOptions startOptions);
+    void SetCallbackForTerminateWithResult(int32_t resultCode, AAFwk::Want& want,
+        NapiAsyncTask::CompleteCallback& complete);
 
 private:
     sptr<AAFwk::SessionInfo> sessionInfo_;
