@@ -435,6 +435,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetAppIndex(appIndex_);
     launchData.SetDebugApp(isDebugApp_);
     launchData.SetPerfCmd(perfCmd_);
+    launchData.SetMultiThread(isMultiThread_);
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
     launchData.SetAppRunningUniqueId(std::to_string(startTimeMillis_));
@@ -1346,14 +1347,18 @@ bool AppRunningRecord::IsKeepAliveApp() const
     return isKeepAliveApp_;
 }
 
+void AppRunningRecord::SetKeepAliveEnableState(bool isKeepAliveEnable)
+{
+    isKeepAliveApp_ = isKeepAliveEnable;
+}
+
 bool AppRunningRecord::IsEmptyKeepAliveApp() const
 {
     return isEmptyKeepAliveApp_;
 }
 
-void AppRunningRecord::SetKeepAliveAppState(bool isKeepAlive, bool isEmptyKeepAliveApp)
+void AppRunningRecord::SetEmptyKeepAliveAppState(bool isEmptyKeepAliveApp)
 {
-    isKeepAliveApp_ = isKeepAlive;
     isEmptyKeepAliveApp_ = isEmptyKeepAliveApp;
 }
 
@@ -1563,6 +1568,7 @@ const AAFwk::Want &AppRunningRecord::GetNewProcessRequestWant() const
 
 int32_t AppRunningRecord::UpdateConfiguration(const Configuration &config)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appLifeCycleDeal_) {
         TAG_LOGI(AAFwkTag::APPMGR, "appLifeCycleDeal_ is null");
@@ -1642,6 +1648,11 @@ void AppRunningRecord::SetNativeDebug(bool isNativeDebug)
 void AppRunningRecord::SetPerfCmd(const std::string &perfCmd)
 {
     perfCmd_ = perfCmd;
+}
+
+void AppRunningRecord::SetMultiThread(bool multiThread)
+{
+    isMultiThread_ = multiThread;
 }
 
 void AppRunningRecord::SetAppIndex(const int32_t appIndex)
