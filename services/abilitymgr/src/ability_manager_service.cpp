@@ -10411,20 +10411,26 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",
         abilityRecord->GetURI().c_str());
-    PreventStartAbilityHisysEvent(callerAbilityInfo, abilityInfo);
+    ReportPreventStartAbilityResult(callerAbilityInfo, abilityInfo);
     return true;
 }
 
-void AbilityManagerService::PreventStartAbilityHisysEvent(const AppExecFwk::AbilityInfo &callerAbilityInfo, const AppExecFwk::AbilityInfo &abilityInfo)
+void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo, const AppExecFwk::AbilityInfo &abilityInfo)
 {
-    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AMS, EVENT_NAME::HiSysEvent::EventType::BEHAVIOUR,
-    CALLER_UID, IPCSkeleton::GetCallingUid(),
-    CALLER_PID, IPCSkeleton::GetCallingPid(),
-    CALLER_PROCESS_NAME, callerAbilityInfo.name,
-    CALLER_BUNDLE_NAME, callerAbilityInfo.bundleName,
-    CALLEE_PROCESS_NAME, abilityInfo.name,
-    CALLEE_BUNDLE_NAME, abilityInfo.bundleName,
-    ExtensionAbilityType, abilityInfo.extensionAbilityType
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    int32_t extensionAbilityType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Prevent Start Ability CALLER_UID: %{public}d CALLER_PID: %{public}d CALLER_BUNDLE_NAME: 
+        %{public}s CALLEE_PROCESS_NAME: %{public}s CALLEE_BUNDLE_NAME: %{public}s EXTENSION_ABILITY_TYPE: %{public}d", 
+        callerUid, callerPid, callerAbilityInfo.bundleName.c_str(), abilityInfo.bundleName.c_str(), extensionAbilityType)
+    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "PREVENT_START_ABILITY", HiSysEvent::EventType::FAULT,
+    "CALLER_UID", callerUid,
+    "CALLER_PID", callerPid,
+    "CALLER_PROCESS_NAME", callerAbilityInfo.name,
+    "CALLER_BUNDLE_NAME", callerAbilityInfo.bundleName,
+    "CALLEE_PROCESS_NAME", abilityInfo.name,
+    "CALLEE_BUNDLE_NAME", abilityInfo.bundleName,
+    "EXTENSION_ABILITY_TYPE", extensionAbilityType
     );
 }
 
