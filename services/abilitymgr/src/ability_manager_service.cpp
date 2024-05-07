@@ -10411,7 +10411,21 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",
         abilityRecord->GetURI().c_str());
+    PreventStartAbilityHisysEvent(callerAbilityInfo, abilityInfo);
     return true;
+}
+
+void AbilityManagerService::PreventStartAbilityHisysEvent(const AppExecFwk::AbilityInfo &callerAbilityInfo, const AppExecFwk::AbilityInfo &abilityInfo)
+{
+    HiSysEventWrite(HiviewDFX::HiSysEvent::Domain::AMS, EVENT_NAME::HiSysEvent::EventType::BEHAVIOUR,
+    CALLER_UID, IPCSkeleton::GetCallingUid(),
+    CALLER_PID, IPCSkeleton::GetCallingPid(),
+    CALLER_PROCESS_NAME, callerAbilityInfo.name,
+    CALLER_BUNDLE_NAME, callerAbilityInfo.bundleName,
+    CALLEE_PROCESS_NAME, abilityInfo.name,
+    CALLEE_BUNDLE_NAME, abilityInfo.bundleName,
+    ExtensionAbilityType, abilityInfo.extensionAbilityType
+    );
 }
 
 bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
