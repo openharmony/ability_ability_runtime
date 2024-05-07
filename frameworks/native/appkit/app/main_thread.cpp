@@ -2340,15 +2340,11 @@ void MainThread::HandleDumpHeap(bool isPrivate)
         return;
     }
     auto app = applicationForDump_.lock();
-        if (app == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap app is nullptr");
+    if (app == nullptr || app->GetRuntime() == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap app or runtime is nullptr");
         return;
     }
     auto &runtime = app->GetRuntime();
-    if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap runtime is nullptr");
-        return;
-    }
     auto taskFork = [&runtime, &isPrivate] {
         time_t startTime = time(nullptr);
         int pid = -1;
