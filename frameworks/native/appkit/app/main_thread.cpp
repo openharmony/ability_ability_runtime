@@ -825,6 +825,7 @@ void MainThread::ScheduleProfileChanged(const Profile &profile)
  */
 void MainThread::ScheduleConfigurationUpdated(const Configuration &config)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     wptr<MainThread> weak = this;
     auto task = [weak, config]() {
@@ -1343,16 +1344,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
     for (auto hapModuleInfo : bundleInfo.hapModuleInfos) {
-        std::string pkgContextInfoJsonString;
-        ErrCode errCode = bundleMgrHelper->GetJsonProfile(
-            AppExecFwk::PKG_CONTEXT_PROFILE, appInfo.bundleName, hapModuleInfo.moduleName, pkgContextInfoJsonString,
-            AppExecFwk::OsAccountManagerWrapper::GetCurrentActiveAccountId());
-        if (ret != ERR_OK) {
-            TAG_LOGE(AAFwkTag::APPKIT, "GetJsonProfile failed: %{public}d.", ret);
-        }
-        if (!pkgContextInfoJsonString.empty()) {
-            pkgContextInfoJsonStringMap[hapModuleInfo.moduleName] = pkgContextInfoJsonString;
-        }
+        pkgContextInfoJsonStringMap[hapModuleInfo.moduleName] = hapModuleInfo.hapPath;
     }
 
     AppLibPathMap appLibPaths {};
@@ -1378,6 +1370,10 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         options.uid = bundleInfo.applicationInfo.uid;
         options.apiTargetVersion = appInfo.apiTargetVersion;
         options.pkgContextInfoJsonStringMap = pkgContextInfoJsonStringMap;
+        if (applicationInfo_->appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG) {
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Multi-Thread Mode: %{public}d.", appLaunchData.GetMultiThread());
+            options.isMultiThread = appLaunchData.GetMultiThread();
+        }
         options.jitEnabled = appLaunchData.IsJITEnabled();
         AbilityRuntime::ChildProcessManager::GetInstance().SetForkProcessJITEnabled(appLaunchData.IsJITEnabled());
         TAG_LOGD(AAFwkTag::APPKIT, "isStartWithDebug:%{public}d, debug:%{public}d, isNativeStart:%{public}d",

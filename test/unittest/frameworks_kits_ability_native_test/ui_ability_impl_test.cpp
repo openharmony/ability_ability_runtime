@@ -31,6 +31,8 @@
 #include "mock_ui_ability_impl.h"
 #include "ohos_application.h"
 #include "mock_ability_lifecycle_callbacks.h"
+#include "process_options.h"
+#include "session_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -2277,5 +2279,24 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ExecuteInsightIntentRepeateForeground
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0200 end";
 }
 #endif
+ * @tc.number: AbilityRuntime_UpdateSilentForeground_0100
+ * @tc.name: UpdateSilentForeground
+ * @tc.desc: Verify UpdateSilentForeground.
+ */
+HWTEST_F(UIAbilityImplTest, AbilityRuntime_UpdateSilentForeground_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityRuntime_UpdateSilentForeground_0100 start";
+    auto abilityImpl = std::make_shared<UIAbilityImpl>();
+    EXPECT_NE(abilityImpl, nullptr);
+    abilityImpl->lifecycleState_ = AAFwk::ABILITY_STATE_INITIAL;
+    sptr<AAFwk::SessionInfo> sessionInfo = new (std::nothrow) AAFwk::SessionInfo();
+    sessionInfo->processOptions = std::make_shared<AAFwk::ProcessOptions>();
+    sessionInfo->processOptions->processMode = AAFwk::ProcessMode::NEW_PROCESS_ATTACH_TO_PARENT;
+    sessionInfo->processOptions->startupVisibility = AAFwk::StartupVisibility::STARTUP_HIDE;
+    AAFwk::LifeCycleStateInfo targetState;
+    abilityImpl->UpdateSilentForeground(targetState, sessionInfo);
+    EXPECT_EQ(true, abilityImpl->ability_->CheckIsSilentForeground());
+    GTEST_LOG_(INFO) << "AbilityRuntime_UpdateSilentForeground_0100 end";
+}
 } // namespace AppExecFwk
 } // namespace OHOS
