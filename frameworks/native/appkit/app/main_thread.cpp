@@ -2346,7 +2346,7 @@ void MainThread::HandleDumpHeap(bool isPrivate)
     }
     auto &runtime = app->GetRuntime();
     if (runtime == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeapPrepare runtime is nullptr");
+        TAG_LOGE(AAFwkTag::APPKIT, "HandleDumpHeap runtime is nullptr");
         return;
     }
     auto taskFork = [&runtime, &isPrivate] {
