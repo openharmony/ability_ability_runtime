@@ -10415,7 +10415,8 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     return true;
 }
 
-void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo, const AppExecFwk::AbilityInfo &abilityInfo)
+void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
+    const AppExecFwk::AbilityInfo &abilityInfo)
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
