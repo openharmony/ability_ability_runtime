@@ -10420,8 +10420,8 @@ void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::Ab
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
     int32_t extensionAbilityType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Prevent start ability debug log CALLER_UID: %{public}d CALLER_PID: %{public}d CALLER_BUNDLE_NAME: 
-        %{public}s CALLEE_PROCESS_NAME: %{public}s CALLEE_BUNDLE_NAME: %{public}s EXTENSION_ABILITY_TYPE: %{public}d", 
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Prevent start ability debug log CALLER_UID: %{public}d CALLER_PID: %{public}d CALLER_BUNDLE_NAME: "
+        "%{public}s CALLEE_PROCESS_NAME: %{public}s CALLEE_BUNDLE_NAME: %{public}s EXTENSION_ABILITY_TYPE: %{public}d", 
         callerUid, callerPid, callerAbilityInfo.bundleName.c_str(), abilityInfo.name.c_str(), abilityInfo.bundleName.c_str(), extensionAbilityType);
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "PREVENT_START_ABILITY", HiSysEvent::EventType::FAULT,
     "CALLER_UID", callerUid,
