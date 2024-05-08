@@ -110,6 +110,11 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnIsRunningInStabilityTest);
     }
 
+    static napi_value GetRunningMultiAppInfo(napi_env env, napi_callback_info info)
+    {
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnGetRunningMultiAppInfo);
+    }
+
     static napi_value KillProcessWithAccount(napi_env env, napi_callback_info info)
     {
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnKillProcessWithAccount);
@@ -636,6 +641,43 @@ private:
         napi_value lastParam = (argc > ARGC_ZERO) ? argv[INDEX_ZERO] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JSAppManager::OnGetRunningProcessInformation",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        return result;
+    }
+
+    napi_value OnGetRunningMultiAppInfo(napi_env env, size_t argc, napi_value* argv)
+    {
+        TAG_LOGD(AAFwkTag::APPMGR, "called");
+        // only support 1 params
+        if (argc < ARGC_ONE) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Not enough arguments");
+            ThrowTooFewParametersError(env);
+            return CreateJsUndefined(env);
+        }
+        std::string bundleName;
+        if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+            TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed!");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            return CreateJsUndefined(env);
+        }
+        NapiAsyncTask::CompleteCallback complete =
+            [appManager = appManager_, bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (appManager == nullptr) {
+                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    return;
+                }
+                RunningMultiAppInfo info;
+                auto ret = appManager->GetRunningMultiAppInfoByBundleName(bundleName, info);
+                if (ret == 0) {
+                    task.Resolve(env, CreateJsRunningMultiAppInfo(env, info));
+                } else {
+                    task.Reject(env, CreateJsError(env, ret, "Get mission infos failed."));
+                }
+            };
+        napi_value lastParam = nullptr;
+        napi_value result = nullptr;
+        NapiAsyncTask::Schedule("JSAppManager::OnGetRunningMultiAppInfo",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
         return result;
     }
@@ -1186,6 +1228,8 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::GetProcessMemoryByPid);
     BindNativeFunction(env, exportObj, "getRunningProcessInfoByBundleName", moduleName,
         JsAppManager::GetRunningProcessInfoByBundleName);
+    BindNativeFunction(env, exportObj, "getRunningMultiAppInfo", moduleName,
+        JsAppManager::GetRunningMultiAppInfo);
     BindNativeFunction(env, exportObj, "isApplicationRunning", moduleName,
         JsAppManager::IsApplicationRunning);
     BindNativeFunction(env, exportObj, "preloadApplication", moduleName,

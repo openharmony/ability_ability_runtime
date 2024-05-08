@@ -1399,6 +1399,47 @@ int32_t AppMgrServiceInner::GetRunningProcessesByBundleType(BundleType bundleTyp
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
+    RunningMultiAppInfo &info)
+{
+    if (bundleName.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "bundlename is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    if (!appRunningManager_) {
+        TAG_LOGE(AAFwkTag::APPMGR, "The appRunningManager is nullptr!");
+        return ERR_INVALID_VALUE;
+    }
+    auto multiAppInfoMap = appRunningManager_->GetAppRunningRecordMap();
+    if (multiAppInfoMap.empty()) {
+        return ERR_INVALID_VALUE;
+    }
+    for (const auto &item : multiAppInfoMap) {
+        const auto &appRecord = item.second;
+        if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
+            continue;
+        }
+        info.bundleName = bundleName;
+        auto applicationInfo = appRecord->GetApplicationInfo();
+        if (!applicationInfo) {
+            TAG_LOGE(AAFwkTag::APPMGR, "applicationInfo is nullptr, can not get app information");
+        }
+        info.mode = static_cast<int32_t>(applicationInfo->appMode);
+        if (info.mode == AppExecFwk::AppMode::NOT_SUPPORTED) {
+            break;
+        }
+        if (info.mode == AppExecFwk::AppMode::APP_TWIN) {
+            RunningAppTwin twinInfo;
+            twinInfo.appTwinIndex = appRecord->GetAppIndex();
+            twinInfo.uid = appRecord->GetUid();
+            twinInfo.pids =appRecord->GetPriorityObject()->GetPid();
+
+            info.isolation.emplace_back(twinInfo);
+        }
+    }
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::GetProcessRunningInfosByUserId(std::vector<RunningProcessInfo> &info, int32_t userId)
 {
     if (VerifyAccountPermission(AAFwk::PermissionConstants::PERMISSION_GET_RUNNING_INFO, userId) ==

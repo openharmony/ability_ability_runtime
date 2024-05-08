@@ -378,6 +378,15 @@ int32_t AppMgrService::GetAllRunningProcesses(std::vector<RunningProcessInfo> &i
     return appMgrServiceInner_->GetAllRunningProcesses(info);
 }
 
+int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
+    RunningMultiAppInfo &info)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetRunningMultiAppInfoByBundleName(bundleName, info);
+}
+
 int32_t AppMgrService::GetRunningProcessesByBundleType(BundleType bundleType,
     std::vector<RunningProcessInfo> &info)
 {
