@@ -2279,6 +2279,8 @@ HWTEST_F(UIAbilityImplTest, AbilityRuntime_ExecuteInsightIntentRepeateForeground
     GTEST_LOG_(INFO) << "AbilityRuntime_ExecuteInsightIntentRepeateForeground_0200 end";
 }
 #endif
+
+/**
  * @tc.number: AbilityRuntime_UpdateSilentForeground_0100
  * @tc.name: UpdateSilentForeground
  * @tc.desc: Verify UpdateSilentForeground.
