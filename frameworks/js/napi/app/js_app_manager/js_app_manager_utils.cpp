@@ -185,9 +185,9 @@ napi_value CreateJsRunningAppTwin(napi_env env, const RunningAppTwin &info)
         TAG_LOGE(AAFwkTag::APPMGR, "objValue nullptr.");
         return nullptr;
     }
-    napi_set_named_property(env, object, "bundleName", CreateJsValue(env, info.appTwinIndex));
-    napi_set_named_property(env, object, "mode", CreateJsValue(env, info.uid));
-    napi_set_named_property(env, object, "instance", CreateNativeArray(env, info.pids));
+    napi_set_named_property(env, object, "appTwinIndex", CreateJsValue(env, info.appTwinIndex));
+    napi_set_named_property(env, object, "uid", CreateJsValue(env, info.uid));
+    napi_set_named_property(env, object, "pids", CreateNativeArray(env, info.pids));
 
     return object;
 }
