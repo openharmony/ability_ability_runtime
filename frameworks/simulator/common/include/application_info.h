@@ -55,6 +55,13 @@ enum class CompatiblePolicy {
     BACKWARD_COMPATIBILITY = 1,
 };
 
+//Type of app multi app mode
+enum class AppMode {
+    NOT_SUPPORTED = 0,
+    MULTI_INSTANCE = 1,
+    APP_TWIN = 2,
+};
+
 struct Metadata {
     std::string name;
     std::string value;
@@ -192,6 +199,9 @@ struct ApplicationInfo {
 
     std::string compileSdkVersion;
     std::string compileSdkType = DEFAULT_COMPILE_SDK_TYPE;
+
+    //Type of app multi app mode
+    AppMode appMode = AppMode::NOT_SUPPORTED;
 };
 } // namespace AppExecFwk
 } // namespace OHOS

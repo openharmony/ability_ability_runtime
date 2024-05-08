@@ -68,6 +68,7 @@
 #include "window_focus_changed_listener.h"
 #include "window_visibility_changed_listener.h"
 #include "app_jsheap_mem_info.h"
+#include "running_multi_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -304,6 +305,17 @@ public:
      * @return ERR_OK ,return back success，others fail.
      */
     virtual int32_t GetAllRunningProcesses(std::vector<RunningProcessInfo> &info);
+
+    /**
+     * GetRunningMultiAppInfoByBundleName, call GetRunningMultiAppInfoByBundleName() through proxy project.
+     * Obtains information about multiapp that are running on the device.
+     *
+     * @param bundlename, input.
+     * @param info, output multiapp information.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
+        RunningMultiAppInfo &info);
 
     /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
