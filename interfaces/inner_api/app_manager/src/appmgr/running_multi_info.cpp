@@ -68,8 +68,8 @@ bool RunningMultiAppInfo::Marshalling(Parcel &parcel) const
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, twin.appTwinIndex);
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, twin.uid);
         if (!parcel.WriteInt32Vector(twin.pids)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "read instance failed.");
-        return false;
+            TAG_LOGE(AAFwkTag::APPMGR, "read instance failed.");
+            return false;
         }   
     }
     return true;
