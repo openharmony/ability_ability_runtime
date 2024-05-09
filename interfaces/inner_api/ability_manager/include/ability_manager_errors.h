@@ -504,6 +504,11 @@ enum {
      * Native error(2097249) no resident process permissions set.
      */
     ERR_NO_RESIDENT_PERMISSION,
+
+    /**
+     * Result(2097250) not support twin.
+     */
+    ERR_TWIN_NOT_SUPPORTED,
 };
 
 enum {

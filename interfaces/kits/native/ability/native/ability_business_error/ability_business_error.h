@@ -141,6 +141,9 @@ enum class AbilityErrorCode {
     // Ability already running.
     ERROR_ABILITY_ALREADY_RUNNING = 16000068,
 
+    // not support twin app.
+    ERROR_CODE_TWIN_NOT_SUPPORTED = 16000072,
+
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
 

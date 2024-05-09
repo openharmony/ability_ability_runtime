@@ -648,6 +648,11 @@ private:
     napi_value OnGetRunningMultiAppInfo(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
+        if (!CheckCallerIsSystemApp()) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Current app is not system app");
+            ThrowError(env, AbilityErrorCode::ERROR_CODE_NOT_SYSTEM_APP);
+            return CreateJsUndefined(env);
+        }
         // only support 1 params
         if (argc < ARGC_ONE) {
             TAG_LOGE(AAFwkTag::APPMGR, "Not enough arguments");

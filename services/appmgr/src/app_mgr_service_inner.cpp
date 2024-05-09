@@ -1420,13 +1420,12 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
             continue;
         }
         info.bundleName = bundleName;
-        MultiAppModeData multiAppModeData;
-        info.mode = static_cast<int32_t>(multiAppModeData.type);
+        info.mode = static_cast<int32_t>(appRecord->GetApplicationInfo()->type);
         if (info.mode == static_cast<int32_t>(MultiAppModeType::UNSPECIFIED)) {
-            break;
+            return ERR_TWIN_NOT_SUPPORTED;
         }
         if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
-            auto childAppRecordMap = appRunnningRecord_->GetChildAppRecordMap();
+            auto childAppRecordMap = appRecord->GetChildAppRecordMap();
             if (childAppRecordMap.empty()) {
                 return ERR_INVALID_VALUE;
             }
