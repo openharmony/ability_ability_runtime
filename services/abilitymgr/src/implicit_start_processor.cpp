@@ -384,11 +384,6 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         ProcessLinkType(abilityInfos);
     }
 
-    if (abilityInfos.size() == 1) {
-        auto skillUri =  abilityInfos.front().skillUri;
-        SetTargetLinkInfo(skillUri, request.want);
-    }
-
     if (abilityInfos.size() + extensionInfos.size() > 1) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "More than one target application, filter by erms");
         bool ret = FilterAbilityList(request.want, abilityInfos, extensionInfos, userId);
@@ -423,6 +418,11 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         if (linkUriScheme == HTTPS_SCHEME_NAME || linkUriScheme == HTTP_SCHEME_NAME) {
             request.want.SetAction(ACTION_VIEW);
         }
+    }
+
+    if (abilityInfos.size() == 1) {
+        auto skillUri =  abilityInfos.front().skillUri;
+        SetTargetLinkInfo(skillUri, request.want);
     }
 
     {
@@ -632,7 +632,7 @@ void ImplicitStartProcessor::GetEcologicalCallerInfo(const Want &want, ErmsCalle
 {
     callerInfo.packageName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     callerInfo.uid = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
-    callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
+    callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingRealPid());
     callerInfo.targetAppType = ErmsCallerInfo::TYPE_INVALID;
     callerInfo.callerAppType = ErmsCallerInfo::TYPE_INVALID;
 
@@ -779,7 +779,7 @@ void ImplicitStartProcessor::SetTargetLinkInfo(const std::vector<AppExecFwk::Ski
             if (want.GetBoolParam(OPEN_LINK_APP_LINKING_ONLY, false)) {
                 want.SetParam("send_to_erms_targetLinkType", AbilityCallerInfo::LINK_TYPE_UNIVERSAL_LINK);
             } else if ((iter.scheme == "https" || iter.scheme == "http") &&
-                want.GetAction().compare(ACTION_VIEW)) {
+                want.GetAction().compare(ACTION_VIEW) == 0) {
                 want.SetParam("send_to_erms_targetLinkType", AbilityCallerInfo::LINK_TYPE_WEB_LINK);
             } else {
                 want.SetParam("send_to_erms_targetLinkType", AbilityCallerInfo::LINK_TYPE_DEEP_LINK);
