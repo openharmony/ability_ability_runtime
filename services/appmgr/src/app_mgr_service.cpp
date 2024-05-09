@@ -384,10 +384,6 @@ int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bun
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    auto isShellCall = AAFwk::PermissionVerification::GetInstance()->IsShellCall();
-    if (!isShellCall) {
-        TAG_LOGE(AAFwkTag::APPMGR, "permission denied, only called by shell.");
-        return ERR_INVALID_OPERATION;
     return appMgrServiceInner_->GetRunningMultiAppInfoByBundleName(bundleName, info);
 }
 
