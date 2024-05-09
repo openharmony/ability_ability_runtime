@@ -256,7 +256,6 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
 
     if (!isLoadedAbility) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Target service has not been loaded.");
-        targetService->GrantUriPermissionForServiceExtension();
         SetLastExitReason(abilityRequest, targetService);
         if (IsUIExtensionAbility(targetService)) {
             targetService->SetLaunchReason(LaunchReason::LAUNCHREASON_START_ABILITY);
@@ -265,7 +264,6 @@ int AbilityConnectManager::StartAbilityLocked(const AbilityRequest &abilityReque
     } else if (targetService->IsAbilityState(AbilityState::ACTIVE) && !IsUIExtensionAbility(targetService)) {
         // It may have been started through connect
         targetService->SetWant(abilityRequest.want);
-        targetService->GrantUriPermissionForServiceExtension();
         CommandAbility(targetService);
     } else if (IsUIExtensionAbility(targetService)) {
         DoForegroundUIExtension(targetService, abilityRequest);
@@ -568,6 +566,10 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     //get target service ability record, and check whether it has been loaded.
     std::shared_ptr<AbilityRecord> targetService = AbilityRecord::CreateAbilityRecord(abilityRequest);
     CHECK_POINTER_AND_RETURN(targetService, ERR_INVALID_VALUE);
+    if (!UIExtensionUtils::IsUIExtension(targetService->GetAbilityInfo().extensionAbilityType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Can't preload non-uiextension type.");
+        return ERR_WRONG_INTERFACE_CALL;
+    }
     std::shared_ptr<ExtensionRecord> extensionRecord = nullptr;
     CHECK_POINTER_AND_RETURN(uiExtensionAbilityRecordMgr_, ERR_NULL_OBJECT);
     int32_t extensionRecordId = INVALID_EXTENSION_RECORD_ID;
@@ -586,11 +588,12 @@ int AbilityConnectManager::PreloadUIExtensionAbilityInner(const AbilityRequest &
     return ERR_OK;
 }
 
-int AbilityConnectManager::UnloadUIExtension(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
+int AbilityConnectManager::UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord,
     std::string &hostBundleName)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
     //Get preLoadUIExtensionInfo
+    CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     auto preLoadUIExtensionInfo = std::make_tuple(abilityRecord->GetWant().GetElement().GetAbilityName(),
         abilityRecord->GetWant().GetElement().GetBundleName(),
         abilityRecord->GetWant().GetElement().GetModuleName(), hostBundleName);
@@ -804,6 +807,8 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
         }
     }
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
+    std::string element = abilityRecord->GetURI();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Ability: %{public}s", element.c_str());
     if (taskHandler_ != nullptr) {
         int recordId = abilityRecord->GetRecordId();
         std::string taskName = std::string("LoadTimeout_") + std::to_string(recordId);
@@ -813,8 +818,6 @@ int AbilityConnectManager::AttachAbilityThreadLocked(
         eventHandler_->RemoveEvent(AbilityManagerService::LOAD_TIMEOUT_MSG,
             abilityRecord->GetAbilityRecordId());
     }
-    std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability: %{public}s", element.c_str());
     if (abilityRecord->IsSceneBoard()) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Attach Ability: %{public}s", element.c_str());
         sceneBoardTokenId_ = abilityRecord->GetAbilityInfo().applicationInfo.accessTokenId;
@@ -1089,7 +1092,7 @@ int AbilityConnectManager::ScheduleCommandAbilityWindowDone(
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     CHECK_POINTER_AND_RETURN(abilityRecord, ERR_INVALID_VALUE);
     std::string element = abilityRecord->GetURI();
-    TAG_LOGD(AAFwkTag::ABILITYMGR,
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
         "Ability: %{public}s, persistentId: %{private}d, winCmd: %{public}d, abilityCmd: %{public}d", element.c_str(),
         sessionInfo->persistentId, winCmd, abilityCmd);
 
@@ -1429,7 +1432,7 @@ void AbilityConnectManager::HandleStartTimeoutTask(const std::shared_ptr<Ability
     CHECK_POINTER(abilityRecord);
     if (UIExtensionUtils::IsUIExtension(abilityRecord->GetAbilityInfo().extensionAbilityType)) {
         if (uiExtensionAbilityRecordMgr_ != nullptr && IsCallerValid(abilityRecord)) {
-            TAG_LOGD(AAFwkTag::ABILITYMGR, "Start load timeout.");
+            TAG_LOGW(AAFwkTag::ABILITYMGR, "Start load timeout.");
             uiExtensionAbilityRecordMgr_->LoadTimeout(abilityRecord->GetUIExtensionAbilityId());
         }
         PrintTimeOutLog(abilityRecord, AbilityManagerService::LOAD_TIMEOUT_MSG);
@@ -2883,7 +2886,7 @@ EventInfo AbilityConnectManager::BuildEventInfo(const std::shared_ptr<AbilityRec
     eventInfo.time = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     auto callerPid = abilityRecord->GetWant().GetIntParam(Want::PARAM_RESV_CALLER_PID, -1);
-    eventInfo.callerPid = callerPid == -1 ? IPCSkeleton::GetCallingPid() : callerPid;
+    eventInfo.callerPid = callerPid == -1 ? IPCSkeleton::GetCallingRealPid() : callerPid;
     DelayedSingleton<AppScheduler>::GetInstance()->GetRunningProcessInfoByPid(eventInfo.callerPid, processInfo);
     eventInfo.callerPid = processInfo.pid_;
     eventInfo.callerProcessName = processInfo.processName_;

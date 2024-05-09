@@ -1348,7 +1348,6 @@ private:
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
 
     void ParseServiceExtMultiProcessWhiteList();
-    int32_t GetFlag() const;
     void ClearData(std::shared_ptr<AppRunningRecord> appRecord);
 
     /**
