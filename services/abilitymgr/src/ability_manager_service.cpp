@@ -265,7 +265,7 @@ const std::string SPECIFY_TOKEN_ID = "specifyTokenId";
 const std::string PROCESS_SUFFIX = "embeddable";
 const int DEFAULT_DMS_MISSION_ID = -1;
 const char* PARAM_PREVENT_STARTABILITY = "persist.sys.abilityms.prevent_startability";
-const std::string SUSPEND_SERVICE_CONFIG_FILE = "/etc/efficiency_manager/prevent_startability_whitelist.json";
+const std::string SUSPEND_SERVICE_CONFIG_FILE = "/system/variant/phone/base/etc/efficiency_manager/prevent_startability_whitelist.json";
 const int32_t MAX_BUFFER = 2048;
 nlohmann::json whiteListJsonObj;
 const int32_t API12 = 12;
