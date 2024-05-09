@@ -1439,24 +1439,31 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
             if (childAppRecordMap.empty()) {
                 return ERR_INVALID_VALUE;
             }
+            unsigned int index = 0;
+            bool IsAppIndexExist = false;
             for (unsigned int i = 0; i < info.isolation.size(); i++) {
                 if (info.isolation[i].appTwinIndex == appRecord->GetAppIndex()) {
-                    info.isolation[i].uid = appRecord->GetUid();
-                    info.isolation[i].pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
-                    for (auto it : childAppRecordMap) {
-                        info.isolation[i].pids.emplace_back(it.first);
+                    index = i;
+                    IsAppIndexExist = true;
+                    break;
                     }
                 }
-                return ERR_OK;
+            if (IsAppIndexExist) {
+                info.isolation[index].uid = appRecord->GetUid();
+                info.isolation[index].pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
+                for (auto it : childAppRecordMap) {
+                    info.isolation[index].pids.emplace_back(it.first);
+                }
+            } else {
+                RunningAppTwin twinInfo;
+                twinInfo.appTwinIndex = appRecord->GetAppIndex();
+                twinInfo.uid = appRecord->GetUid();
+                twinInfo.pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
+                for (auto it : childAppRecordMap) {
+                    twinInfo.pids.emplace_back(it.first);
+                }
+                info.isolation.emplace_back(twinInfo);
             }
-            RunningAppTwin twinInfo;
-            twinInfo.appTwinIndex = appRecord->GetAppIndex();
-            twinInfo.uid = appRecord->GetUid();
-            twinInfo.pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
-            for (auto it : childAppRecordMap) {
-                twinInfo.pids.emplace_back(it.first);
-            }
-            info.isolation.emplace_back(twinInfo);
         }
     }
     return ERR_OK;
