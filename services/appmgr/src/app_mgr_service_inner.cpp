@@ -1435,18 +1435,18 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
                     info.isolation[i].pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
                     for (auto it : childAppRecordMap) {
                         info.isolation[i].pids.emplace_back(it.first);
-                        }
-                } else {
-                    RunningAppTwin twinInfo;
-                    twinInfo.appTwinIndex = appRecord->GetAppIndex();
-                    twinInfo.uid = appRecord->GetUid();
-                    twinInfo.pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
-                    for (auto it : childAppRecordMap) {
-                        twinInfo.pids.emplace_back(it.first);
-                        }
-                    info.isolation.emplace_back(twinInfo);
+                    }
                 }
+                return ERR_OK;
             }
+            RunningAppTwin twinInfo;
+            twinInfo.appTwinIndex = appRecord->GetAppIndex();
+            twinInfo.uid = appRecord->GetUid();
+            twinInfo.pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
+            for (auto it : childAppRecordMap) {
+                twinInfo.pids.emplace_back(it.first);
+            }
+            info.isolation.emplace_back(twinInfo);
         }
     }
     return ERR_OK;
