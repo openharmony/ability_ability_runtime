@@ -334,7 +334,7 @@ int32_t AppMgrStub::HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data
     RunningMultiAppInfo info;
     int32_t result = GetRunningMultiAppInfoByBundleName(bundleName, info);
     if (!reply.WriteParcelable(&info)) {
-            return ERR_INVALID_VALUE;
+        return ERR_INVALID_VALUE;
     }
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "fail to write result.");
