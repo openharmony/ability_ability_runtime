@@ -1432,7 +1432,7 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
         info.bundleName = bundleName;
         info.mode = static_cast<int32_t>(appRecord->GetApplicationInfo()->type);
         if (info.mode == static_cast<int32_t>(MultiAppModeType::UNSPECIFIED)) {
-            return ERR_TWIN_NOT_SUPPORTED;
+            return AAFwk::ERR_APP_TWIN_NOT_SUPPORTED;
         }
         if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
             auto childAppRecordMap = appRecord->GetChildAppRecordMap();
