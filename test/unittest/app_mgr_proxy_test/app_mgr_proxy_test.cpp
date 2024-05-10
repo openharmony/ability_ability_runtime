@@ -623,7 +623,6 @@ HWTEST_F(AppMgrProxyTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level
     appMgrProxy_->GetRunningMultiAppInfoByBundleName(bundleName, info);
     EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>
         (AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_BY_BUNDLENAME));
-    EXPECT_GE(info.size(), 0);
 
     TAG_LOGI(AAFwkTag::TEST, "%{public}s end.", __func__);
 }
