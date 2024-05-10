@@ -238,7 +238,7 @@ int32_t AppMgrProxy::GetAllRunningProcesses(std::vector<RunningProcessInfo> &inf
 }
 
 int32_t AppMgrProxy::GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
-        RunningMultiAppInfo &info)
+    RunningMultiAppInfo &info)
 {
     MessageParcel data;
     MessageParcel reply;

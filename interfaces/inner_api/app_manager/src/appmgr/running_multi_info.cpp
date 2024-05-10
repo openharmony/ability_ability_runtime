@@ -70,7 +70,7 @@ bool RunningMultiAppInfo::Marshalling(Parcel &parcel) const
         if (!parcel.WriteInt32Vector(twin.pids)) {
             TAG_LOGE(AAFwkTag::APPMGR, "read instance failed.");
             return false;
-        }   
+        }
     }
     return true;
 }
