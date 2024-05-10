@@ -1430,7 +1430,7 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
             continue;
         }
         info.bundleName = bundleName;
-        info.mode = static_cast<int32_t>(appRecord->GetApplicationInfo()->type);
+        info.mode = static_cast<int32_t>(appRecord->GetApplicationInfo()->multiAppMode.type);
         if (info.mode == static_cast<int32_t>(MultiAppModeType::UNSPECIFIED)) {
             return AAFwk::ERR_APP_TWIN_NOT_SUPPORTED;
         }
