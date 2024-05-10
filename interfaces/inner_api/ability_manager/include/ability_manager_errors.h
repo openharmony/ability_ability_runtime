@@ -508,7 +508,9 @@ enum {
     /**
      * Result(2097250) not support twin.
      */
-    ERR_TWIN_NOT_SUPPORTED,
+    ERR_APP_TWIN_NOT_SUPPORTED,
+
+    /**
      * Result(2097250) for app twin index does not exist.
      */
     ERR_APP_TWIN_INDEX_INVALID,
