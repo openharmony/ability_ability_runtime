@@ -10425,7 +10425,7 @@ void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::Ab
         "Prevent start ability debug log CALLER_BUNDLE_NAME %{public}s CALLEE_BUNDLE_NAME"
         "%{public}s ABILITY_NAME %{public}s",
         callerAbilityInfo.bundleName.c_str(), abilityInfo.name.c_str(), abilityInfo.name.c_str());
-    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "PREVENT_START_ABILITY", HiSysEvent::EventType::FAULT,
+    HiSysEventWrite(HiSysEvent::Domain::AAFWK, "PREVENT_START_ABILITY", HiSysEvent::EventType::BEHAVIOR,
         "CALLER_UID", callerUid,
         "CALLER_PID", callerPid,
         "CALLER_PROCESS_NAME", callerAbilityInfo.process,
