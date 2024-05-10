@@ -1436,12 +1436,9 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
         }
         if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
             auto childAppRecordMap = appRecord->GetChildAppRecordMap();
-            if (childAppRecordMap.empty()) {
-                return ERR_INVALID_VALUE;
-            }
-            unsigned int index = 0;
+            uint32_t index = 0;
             bool IsAppIndexExist = false;
-            for (unsigned int i = 0; i < info.isolation.size(); i++) {
+            for (uint32_t i = 0; i < info.isolation.size(); i++) {
                 if (info.isolation[i].appTwinIndex == appRecord->GetAppIndex()) {
                     index = i;
                     IsAppIndexExist = true;
