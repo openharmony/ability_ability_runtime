@@ -79,7 +79,7 @@ constexpr const char* ERROR_MSG_SET_SUPPORTED_PROCESS_CACHE_AGAIN = "Can not set
 constexpr const char* ERROR_MSG_NO_RESIDENT_PERMISSION =
     "The caller application can only set the resident status of the configured process.";
 constexpr const char* ERROR_MSG_APP_TWIN_INDEX_INVALID = "The target app twin with the specified index does not exist.";
-constexpr const char* ERROR_MSG_TWIN_NOT_SUPPORTED = "The target app not support clone twin.";
+constexpr const char* ERROR_MSG_TWIN_NOT_SUPPORTED = "App twin or multi-instance is not supported.";
 
 // follow ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST of appexecfwk_errors.h in bundle_framework
 constexpr int32_t ERR_BUNDLE_MANAGER_BUNDLE_NOT_EXIST = 8521220;
