@@ -506,14 +506,14 @@ enum {
     ERR_NO_RESIDENT_PERMISSION,
 
     /**
-     * Result(2097250) not support twin.
-     */
-    ERR_APP_TWIN_NOT_SUPPORTED,
-
-    /**
      * Result(2097250) for app twin index does not exist.
      */
     ERR_APP_TWIN_INDEX_INVALID,
+
+    /**
+     * Result(2097251) not support twin.
+     */
+    ERR_APP_TWIN_NOT_SUPPORTED,
 };
 
 enum {
