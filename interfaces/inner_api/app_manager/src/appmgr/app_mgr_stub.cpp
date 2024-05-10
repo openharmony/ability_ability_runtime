@@ -102,7 +102,7 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleDumpHeapMemory;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::DUMP_JSHEAP_MEMORY_PROCESS)] =
         &AppMgrStub::HandleDumpJsHeapMemory;
-    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_By_BUNDLENAME)] =
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_BY_BUNDLENAME)] =
         &AppMgrStub::HandleGetRunningMultiAppInfoByBundleName;
 #ifdef ABILITY_COMMAND_FOR_TEST
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::BLOCK_APP_SERVICE)] =
