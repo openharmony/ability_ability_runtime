@@ -1446,7 +1446,6 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
                     }
                 }
             if (IsAppIndexExist) {
-                info.isolation[index].uid = appRecord->GetUid();
                 info.isolation[index].pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
                 for (auto it : childAppRecordMap) {
                     info.isolation[index].pids.emplace_back(it.first);
