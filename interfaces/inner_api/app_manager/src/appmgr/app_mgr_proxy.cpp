@@ -250,7 +250,7 @@ int32_t AppMgrProxy::GetRunningMultiAppInfoByBundleName(const std::string &bundl
         TAG_LOGE(AAFwkTag::APPMGR, "bundleName write failed.");
         return ERR_INVALID_VALUE;
     }
-    int32_t ret = SendRequest(AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_By_BUNDLENAME, data, reply, option);
+    int32_t ret = SendRequest(AppMgrInterfaceCode::GET_RUNNING_MULTIAPP_INFO_BY_BUNDLENAME, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         return ret;
