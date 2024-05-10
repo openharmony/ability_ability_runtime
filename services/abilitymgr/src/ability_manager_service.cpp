@@ -10419,7 +10419,7 @@ void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::Ab
     const AppExecFwk::AbilityInfo &abilityInfo)
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
-    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    int32_t callerPid = IPCSkeleton::GetCallingRealPid();
     int32_t extensionAbilityType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
     TAG_LOGD(AAFwkTag::ABILITYMGR,
         "Prevent start ability debug log CALLER_BUNDLE_NAME %{public}s CALLEE_BUNDLE_NAME"
