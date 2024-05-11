@@ -10419,8 +10419,16 @@ void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::Ab
     const AppExecFwk::AbilityInfo &abilityInfo)
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
-    int32_t callerPid = IPCSkeleton::GetCallingRealPid();
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
     int32_t extensionAbilityType = static_cast<int32_t>(abilityInfo.extensionAbilityType);
+    std::string callerProcessName = callerAbilityInfo.process;
+    std::string calleeProcessName = abilityInfo.process;
+    if (callerProcessName.empty()) {
+        callerProcessName = "";
+    }
+    if (calleeProcessName.empty()) {
+        calleeProcessName = "";
+    }
     TAG_LOGD(AAFwkTag::ABILITYMGR,
         "Prevent start ability debug log CALLER_BUNDLE_NAME %{public}s CALLEE_BUNDLE_NAME"
         "%{public}s ABILITY_NAME %{public}s",
@@ -10428,12 +10436,13 @@ void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::Ab
     HiSysEventWrite(HiSysEvent::Domain::AAFWK, "PREVENT_START_ABILITY", HiSysEvent::EventType::BEHAVIOR,
         "CALLER_UID", callerUid,
         "CALLER_PID", callerPid,
-        "CALLER_PROCESS_NAME", callerAbilityInfo.process,
+        "CALLER_PROCESS_NAME", callerProcessName,
         "CALLER_BUNDLE_NAME", callerAbilityInfo.bundleName,
         "CALLEE_BUNDLE_NAME", abilityInfo.bundleName,
-        "CALLEE_PROCESS_NAME", abilityInfo.process,
+        "CALLEE_PROCESS_NAME", calleeProcessName,
         "EXTENSION_ABILITY_TYPE", extensionAbilityType,
-        "ABILITY_NAME", abilityInfo.name);
+        "ABILITY_NAME", abilityInfo.name
+    );
 }
 
 bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
