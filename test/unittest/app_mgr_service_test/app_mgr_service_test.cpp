@@ -1764,18 +1764,15 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Lev
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
-    appMgrService->SetInnerService(mockAppMgrServiceInner_);
+
+    appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->taskHandler_ = taskHandler_;
-    appMgrService->eventHandler_ = eventHandler_;
+    appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
 
-    std::string bundleName = "testbundlename";
-    RunningMultiAppInfo info;
-    EXPECT_CALL(*mockAppMgrServiceInner_, GetRunningMultiAppInfoByBundleName(_, _))
-    .Times(1)
-    .WillOnce(Return(ERR_OK));
-
-    int32_t ret = appMgrService->GetRunningMultiAppInfoByBundleName(bundleName,info);
-    EXPECT_EQ(ret, ERR_OK);
+    std::string bundleName = "testBundleName";
+    std::vector<RunningMultiAppInfo> info;
+    int32_t res = appMgrService->GetRunningMultiAppInfoByBundleName(bundleName, info);
+    EXPECT_EQ(res, ERR_OK);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
