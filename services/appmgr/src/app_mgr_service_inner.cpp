@@ -1439,7 +1439,8 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
     return ERR_OK;
 }
 
-void AppMgrServiceInner::GetRunningTwinAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord, RunningMultiAppInfo &info)
+void AppMgrServiceInner::GetRunningTwinAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+    RunningMultiAppInfo &info)
 {
     if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
         auto childAppRecordMap = appRecord->GetChildAppRecordMap();
