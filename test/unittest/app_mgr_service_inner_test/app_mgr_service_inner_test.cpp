@@ -4269,7 +4269,7 @@ HWTEST_F(AppMgrServiceInnerTest, OnAppCacheStateChanged_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI9HMAO
  */
-HWTEST_F(AppMgrServiceInnerTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "GetRunningMultiAppInfoByBundleName_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
