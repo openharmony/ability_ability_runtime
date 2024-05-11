@@ -1446,7 +1446,7 @@ void AppMgrServiceInner::GetRunningTwinAppInfo(const std::shared_ptr<AppRunningR
         auto childAppRecordMap = appRecord->GetChildAppRecordMap();
         size_t index = 0;
         for (; index < info.isolation.size(); index++) {
-            if (info.isolation[i].appTwinIndex == appRecord->GetAppIndex()) {
+            if (info.isolation[index].appTwinIndex == appRecord->GetAppIndex()) {
                 break;
             }
         }
