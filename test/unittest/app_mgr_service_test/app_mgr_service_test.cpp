@@ -1740,7 +1740,7 @@ HWTEST_F(AppMgrServiceTest, SetSupportedProcessCacheSelf_002, TestSize.Level0)
  * EnvConditions: NA
  * CaseDescription: Verify GetRunningMultiAppInfoByBundleName
  */
-HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
@@ -1760,7 +1760,7 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Lev
  * EnvConditions: NA
  * CaseDescription: Verify GetRunningMultiAppInfoByBundleName
  */
-HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Level0)
+HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Level1)
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
