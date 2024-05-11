@@ -377,6 +377,15 @@ int32_t AppMgrService::GetAllRunningProcesses(std::vector<RunningProcessInfo> &i
     return appMgrServiceInner_->GetAllRunningProcesses(info);
 }
 
+int32_t AppMgrService::GetRunningProcessesByBundleType(BundleType bundleType,
+    std::vector<RunningProcessInfo> &info)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetRunningProcessesByBundleType(bundleType, info);
+}
+
 int32_t AppMgrService::GetAllRenderProcesses(std::vector<RenderProcessInfo> &info)
 {
     if (!IsReady()) {
@@ -1168,14 +1177,16 @@ int32_t AppMgrService::IsApplicationRunning(const std::string &bundleName, bool 
     return appMgrServiceInner_->IsApplicationRunning(bundleName, isRunning);
 }
 
-int32_t AppMgrService::StartChildProcess(const std::string &srcEntry, pid_t &childPid)
+int32_t AppMgrService::StartChildProcess(const std::string &srcEntry, pid_t &childPid, int32_t childProcessCount,
+    bool isStartWithDebug)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "StartChildProcess failed, AppMgrService not ready.");
         return ERR_INVALID_OPERATION;
     }
-    return appMgrServiceInner_->StartChildProcess(IPCSkeleton::GetCallingPid(), srcEntry, childPid);
+    return appMgrServiceInner_->StartChildProcess(IPCSkeleton::GetCallingPid(), srcEntry, childPid, childProcessCount,
+        isStartWithDebug);
 }
 
 int32_t AppMgrService::GetChildProcessInfoForSelf(ChildProcessInfo &info)
