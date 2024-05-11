@@ -10441,8 +10441,7 @@ void AbilityManagerService::ReportPreventStartAbilityResult(const AppExecFwk::Ab
         "CALLEE_BUNDLE_NAME", abilityInfo.bundleName,
         "CALLEE_PROCESS_NAME", calleeProcessName,
         "EXTENSION_ABILITY_TYPE", extensionAbilityType,
-        "ABILITY_NAME", abilityInfo.name
-    );
+        "ABILITY_NAME", abilityInfo.name);
 }
 
 bool AbilityManagerService::IsInWhiteList(const std::string &callerBundleName, const std::string &calleeBundleName,
