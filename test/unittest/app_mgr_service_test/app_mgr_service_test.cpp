@@ -1770,7 +1770,7 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Lev
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
 
     std::string bundleName = "testBundleName";
-    std::vector<RunningMultiAppInfo> info;
+    RunningMultiAppInfo info;
     int32_t res = appMgrService->GetRunningMultiAppInfoByBundleName(bundleName, info);
     EXPECT_EQ(res, ERR_OK);
 }
