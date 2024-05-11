@@ -318,6 +318,17 @@ public:
         RunningMultiAppInfo &info);
 
     /**
+     * GetRunningMultiAppInfoByBundleName, call GetRunningTwinAppInfo() through proxy project.
+     * Obtains information about TwinApp that are running on the device.
+     *
+     * @param apprecord, input.
+     * @param info, output multiapp information.
+     * @return void.
+     */
+    virtual void GetRunningTwinAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
+
+    /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
      *
      * @param bundleType, the bundle type of the application process
