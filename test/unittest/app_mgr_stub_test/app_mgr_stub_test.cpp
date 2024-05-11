@@ -623,7 +623,7 @@ HWTEST_F(AppMgrStubTest, SetSupportedProcessCacheSelf_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: issueI9HMAO
  */
-HWTEST_F(AppMgrStubTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level0)
+HWTEST_F(AppMgrStubTest, GetRunningMultiAppInfoByBundleName_001, TestSize.Level1)
 {
     TAG_LOGI(AAFwkTag::TEST, "%{public}s start.", __func__);
     MessageParcel data;
