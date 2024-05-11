@@ -146,6 +146,25 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE);
 
     /**
+     * Starts a new ability with specific start options and specialId, send want to ability manager service.
+     *
+     * @param want the want of the ability to start.
+     * @param startOptions Indicates the options used to start.
+     * @param callerToken caller ability token.
+     * @param userId Designation User ID.
+     * @param requestCode the resultCode of the ability to start.
+     * @param specifyTokenId The Caller ID.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int StartAbilityWithSpecifyTokenIdInner(
+        const Want &want,
+        const StartOptions &startOptions,
+        const sptr<IRemoteObject> &callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE,
+        int requestCode = DEFAULT_INVAL_VALUE,
+        uint32_t specifyTokenId = 0);
+
+    /**
      * StartAbilityWithSpecifyTokenId with want and specialId, send want to ability manager service.
      *
      * @param want, the want of the ability to start.
@@ -360,6 +379,11 @@ public:
      */
     int RequestModalUIExtension(const Want &want) override;
 
+    int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    int UnloadUIExtension(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::string &bundleName);
+
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow) override;
 
     int ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow) override;
@@ -546,8 +570,8 @@ public:
      * @param wantParams, extended params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
-        const std::string &bundleName, const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams) override;
+    virtual int ContinueMission(AAFwk::ContinueMissionInfo continueMissionInfo,
+        const sptr<IRemoteObject> &callback) override;
 
     /**
      * ContinueAbility, continue ability to ability.
@@ -939,9 +963,13 @@ public:
         int32_t userId,
         AppExecFwk::ExtensionAbilityType extensionType,
         bool checkSystemCaller = true,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isDlp = false);
 
     int RequestModalUIExtensionInner(Want want);
+
+    int PreloadUIExtensionAbilityInner(const Want &want, std::string &bundleName,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     int StartAbilityForOptionWrap(
         const Want &want,
@@ -950,6 +978,7 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
+        uint32_t callerTokenId = 0,
         bool isImplicit = false);
 
     int StartAbilityForOptionInner(
@@ -959,6 +988,7 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
+        uint32_t specifyTokenId = 0,
         bool isImplicit = false);
 
     int ImplicitStartAbility(
@@ -1586,6 +1616,15 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Set the enable status for starting and stopping resident processes.
+     * The caller application can only set the resident status of the configured process.
+     * @param bundleName The bundle name of the resident process.
+     * @param enable Set resident process enable status.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetResidentProcessEnabled(const std::string &bundleName, bool enable) override;
+
+    /**
      * @brief Restart app self.
      * @param want The ability type must be UIAbility.
      * @return Returns ERR_OK on success, others on failure.
@@ -2088,7 +2127,7 @@ private:
     std::shared_ptr<AbilityDebugDeal> ConnectInitAbilityDebugDeal();
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
-        int32_t userId, int requestCode, bool isImplicit = false);
+        int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false);
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
@@ -2168,6 +2207,8 @@ private:
 
     bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
         const std::string &WHITE_LIST);
+
+    void CloseAssertDialog(const std::string &assertSessionId);
 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;

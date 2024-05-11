@@ -51,10 +51,9 @@ class BusinessError extends Error {
 
 class ThrowInvalidParamError extends Error {
   constructor(msg) {
-    this.code = ERROR_CODE_INVALID_PARAM;
-    let oriMsg = ERROR_MSG_INVALID_PARAM;
-    let message = oriMsg + msg;
+    let message = ERROR_MSG_INVALID_PARAM + msg;
     super(message);
+    this.code = ERROR_CODE_INVALID_PARAM;
   }
 }
 
