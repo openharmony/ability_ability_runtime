@@ -2270,12 +2270,9 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_001, TestSize.Level
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
 
     AbilityRequest abilityRequest;
-    uiAbilityLifecycleManager->EnqueueAbilityToFront(abilityRequest);
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
-    uiAbilityLifecycleManager->abilityQueue_.pop();
 
     abilityRequest.abilityInfo.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
-    uiAbilityLifecycleManager->EnqueueAbilityToFront(abilityRequest);
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
 
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, "");
@@ -2302,7 +2299,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_002, TestSize.Level
     abilityRequest.specifiedFlag = flag;
     want.SetParam(DLP_INDEX, 1);
     abilityRequest.want = want;
-    uiAbilityLifecycleManager->EnqueueAbilityToFront(abilityRequest);
     std::shared_ptr<AbilityRecord> abilityRecord = InitAbilityRecord();
     abilityRecord->abilityInfo_.launchMode = AppExecFwk::LaunchMode::SPECIFIED;
     abilityRecord->abilityInfo_.moduleName = "entry";
@@ -2320,7 +2316,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, OnAcceptWantResponse_002, TestSize.Level
 
     std::shared_ptr<AbilityRecord> callerAbility = InitAbilityRecord();
     abilityRequest.callerToken = callerAbility->GetToken()->AsObject();
-    uiAbilityLifecycleManager->EnqueueAbilityToFront(abilityRequest);
     uiAbilityLifecycleManager->OnAcceptWantResponse(want, flag);
     uiAbilityLifecycleManager.reset();
 }
