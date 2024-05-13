@@ -221,8 +221,30 @@ public:
     {
         return E_OK;
     }
+
+    virtual int32_t GenerateAppkey(uint32_t appUid, std::string &keyId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t DeleteAppkey(const std::string keyId) override
+    {
+        return E_OK;
+    }
     
     virtual int32_t UpdateKeyContext(uint32_t userId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t MountDfsDocs(int32_t userId, const std::string &relativePath,
+        const std::string &networkId, const std::string &deviceId) override
+    {
+        return E_OK;
+    }
+
+    virtual int32_t UMountDfsDocs(int32_t userId, const std::string &relativePath,
+        const std::string &networkId, const std::string &deviceId) override
     {
         return E_OK;
     }

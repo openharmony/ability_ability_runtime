@@ -119,6 +119,8 @@ protected:
         std::shared_ptr<NapiAsyncTask> asyncTask, size_t& unwrapArgc, AAFwk::StartOptions startOptions);
     void SetCallbackForTerminateWithResult(int32_t resultCode, AAFwk::Want& want,
         NapiAsyncTask::CompleteCallback& complete);
+    bool CheckStartAbilityByTypeParam(napi_env env, NapiCallbackInfo& info, std::string type,
+        AAFwk::WantParams wantParam);
 
 private:
     sptr<AAFwk::SessionInfo> sessionInfo_;
