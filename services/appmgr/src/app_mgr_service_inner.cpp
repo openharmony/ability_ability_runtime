@@ -6161,7 +6161,7 @@ void AppMgrServiceInner::SetAppAssertionPauseState(bool flag)
         return;
     }
 
-    auto callerPid = IPCSkeleton::GetCallingPid();
+    auto callerPid = IPCSkeleton::GetCallingRealPid();
     auto appRecord = GetAppRunningRecordByPid(callerPid);
     if (appRecord == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "No such appRecord pid is %{public}d.", callerPid);
