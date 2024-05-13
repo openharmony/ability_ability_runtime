@@ -44,6 +44,7 @@
 #include "bundle_constants.h"
 #include "bundle_mgr_helper.h"
 #include "data_ability_manager.h"
+#include "deeplink_reserve/deeplink_reserve_config.h"
 #include "event_report.h"
 #include "free_install_manager.h"
 #include "hilog_wrapper.h"
@@ -379,6 +380,11 @@ public:
      */
     int RequestModalUIExtension(const Want &want) override;
 
+    int PreloadUIExtensionAbility(const Want &want, std::string &hostBundleName,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    int UnloadUIExtensionAbility(const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, std::string &bundleName);
+
     int ChangeAbilityVisibility(sptr<IRemoteObject> token, bool isShow) override;
 
     int ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> sessionInfo, bool isShow) override;
@@ -398,9 +404,10 @@ public:
      * Start ui ability with want, send want to ability manager service.
      *
      * @param sessionInfo the session info of the ability to start.
+     * @param isColdStart the session info of the ability is or not cold start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo) override;
+    virtual int StartUIAbilityBySCB(sptr<SessionInfo> sessionInfo, bool &isColdStart) override;
 
     /**
      * Stop extension ability with want, send want to ability manager service.
@@ -565,8 +572,8 @@ public:
      * @param wantParams, extended params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
-        const std::string &bundleName, const sptr<IRemoteObject> &callBack, AAFwk::WantParams &wantParams) override;
+    virtual int ContinueMission(AAFwk::ContinueMissionInfo continueMissionInfo,
+        const sptr<IRemoteObject> &callback) override;
 
     /**
      * ContinueAbility, continue ability to ability.
@@ -958,9 +965,13 @@ public:
         int32_t userId,
         AppExecFwk::ExtensionAbilityType extensionType,
         bool checkSystemCaller = true,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isDlp = false);
 
     int RequestModalUIExtensionInner(Want want);
+
+    int PreloadUIExtensionAbilityInner(const Want &want, std::string &bundleName,
+        int32_t userId = DEFAULT_INVAL_VALUE);
 
     int StartAbilityForOptionWrap(
         const Want &want,
@@ -1027,11 +1038,12 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE,
         bool isSendDialogResult = false);
 
-    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag);
-    void OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want);
+    void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId = 0);
+    void OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
 
-    void OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag);
-    void OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want);
+    void OnStartSpecifiedProcessResponse(const AAFwk::Want &want, const std::string &flag,
+        int32_t requestId = 0);
+    void OnStartSpecifiedProcessTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
 
     virtual int GetAbilityRunningInfos(std::vector<AbilityRunningInfo> &info) override;
     virtual int GetExtensionRunningInfos(int upperLimit, std::vector<ExtensionRunningInfo> &info) override;
@@ -1607,6 +1619,15 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * Set the enable status for starting and stopping resident processes.
+     * The caller application can only set the resident status of the configured process.
+     * @param bundleName The bundle name of the resident process.
+     * @param enable Set resident process enable status.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t SetResidentProcessEnabled(const std::string &bundleName, bool enable) override;
+
+    /**
      * @brief Restart app self.
      * @param want The ability type must be UIAbility.
      * @return Returns ERR_OK on success, others on failure.
@@ -1900,6 +1921,12 @@ private:
         const std::string& args, std::vector<std::string>& state, bool isClient, bool isUserID, int UserID);
     std::map<uint32_t, DumpSysFuncType> dumpsysFuncMap_;
 
+    int CheckStaticCfgPermissionForAbility(const AppExecFwk::AbilityInfo &abilityInfo, uint32_t tokenId);
+
+    int CheckStaticCfgPermissionForSkill(const AppExecFwk::AbilityRequest &abilityRequest, uint32_t tokenId);
+
+    bool CheckOneSkillPermission(const AppExecFwk::Skill &skill, uint32_t tokenId);
+
     int CheckStaticCfgPermission(const AppExecFwk::AbilityRequest &abilityRequest, bool isStartAsCaller,
         uint32_t callerTokenId, bool isData = false, bool isSaCall = false, bool isImplicit = false);
 
@@ -2099,6 +2126,7 @@ private:
 
     void InitInterceptor();
     void InitPushTask();
+    void InitDeepLinkReserve();
 
     bool CheckSenderWantInfo(int32_t callerUid, const WantSenderInfo &wantSenderInfo);
 
@@ -2201,6 +2229,12 @@ private:
     bool ParseJsonFromBoot(nlohmann::json jsonObj, const std::string &relativePath,
         const std::string &WHITE_LIST);
 
+    void CloseAssertDialog(const std::string &assertSessionId);
+
+    void SetReserveInfo(const std::string &linkString);
+
+    void ReportPreventStartAbilityResult(const AppExecFwk::AbilityInfo &callerAbilityInfo,
+        const AppExecFwk::AbilityInfo &abilityInfo);
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     std::shared_ptr<BackgroundTaskObserver> bgtaskObserver_;
 #endif

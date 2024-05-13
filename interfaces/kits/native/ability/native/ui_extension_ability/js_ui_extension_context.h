@@ -57,8 +57,9 @@ protected:
     void SetCallbackForTerminateWithResult(int32_t resultCode, AAFwk::Want& want,
         NapiAsyncTask::CompleteCallback& complete);
 
-private:
+protected:
     std::weak_ptr<UIExtensionContext> context_;
+private:
     sptr<JsFreeInstallObserver> freeInstallObserver_ = nullptr;
     friend class JsEmbeddableUIAbilityContext;
 

@@ -194,6 +194,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilit
 std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByTokenInner(
     const sptr<IRemoteObject> &abilityToken)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetAbilityRunningRecordByToken(abilityToken)) {
@@ -370,8 +371,10 @@ void AppRunningManager::RemoveAppRunningRecordById(const int32_t recordId)
     std::shared_ptr<AppRunningRecord> appRecord = nullptr;
     {
         std::lock_guard<ffrt::mutex> guard(lock_);
-        appRecord = appRunningRecordMap_.at(recordId);
-        appRunningRecordMap_.erase(recordId);
+        if (appRunningRecordMap_.find(recordId) != appRunningRecordMap_.end()) {
+            appRecord = appRunningRecordMap_.at(recordId);
+            appRunningRecordMap_.erase(recordId);
+        }
     }
 
     if (appRecord != nullptr && appRecord->GetPriorityObject() != nullptr) {
@@ -569,6 +572,7 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 void AppRunningManager::GetRunningProcessInfoByToken(
     const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(lock_);
     auto appRecord = GetAppRunningRecordByTokenInner(token);
 
@@ -586,6 +590,7 @@ void AppRunningManager::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExe
 void AppRunningManager::AssignRunningProcessInfoByAppRecord(
     std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr");
         return;
@@ -605,6 +610,10 @@ void AppRunningManager::AssignRunningProcessInfoByAppRecord(
     info.isTestMode = info.isTestProcess && system::GetBoolParameter(DEVELOPER_MODE_STATE, false);
     info.extensionType_ = appRecord->GetExtensionType();
     info.processType_ = appRecord->GetProcessType();
+    auto appInfo = appRecord->GetApplicationInfo();
+    if (appInfo) {
+        info.bundleType = static_cast<int32_t>(appInfo->bundleType);
+    }
 }
 
 void AppRunningManager::SetAbilityForegroundingFlagToAppRecord(const pid_t pid)
@@ -692,6 +701,7 @@ void AppRunningManager::HandleStartSpecifiedAbilityTimeOut(const int64_t eventId
 
 int32_t AppRunningManager::UpdateConfiguration(const Configuration &config)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     std::lock_guard<ffrt::mutex> guard(lock_);
     TAG_LOGD(AAFwkTag::APPMGR, "current app size %{public}zu", appRunningRecordMap_.size());
     int32_t result = ERR_OK;
@@ -1420,9 +1430,9 @@ int AppRunningManager::DumpIpcStart(const int32_t pid, std::string& result)
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     const auto& appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
-        result.append(MSG_DUMP_IPC_START_STAT)
-            .append(MSG_DUMP_IPC_FAIL)
-            .append(MSG_DUMP_IPC_FAIL_REASON_INVALILD_PID);
+        result.append(MSG_DUMP_IPC_START_STAT, strlen(MSG_DUMP_IPC_START_STAT))
+            .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
+            .append(MSG_DUMP_FAIL_REASON_INVALILD_PID, strlen(MSG_DUMP_FAIL_REASON_INVALILD_PID));
         TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
         return DumpErrorCode::ERR_INVALID_PID_ERROR;
     }
@@ -1434,9 +1444,9 @@ int AppRunningManager::DumpIpcStop(const int32_t pid, std::string& result)
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     const auto& appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
-        result.append(MSG_DUMP_IPC_STOP_STAT)
-            .append(MSG_DUMP_IPC_FAIL)
-            .append(MSG_DUMP_IPC_FAIL_REASON_INVALILD_PID);
+        result.append(MSG_DUMP_IPC_STOP_STAT, strlen(MSG_DUMP_IPC_STOP_STAT))
+            .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
+            .append(MSG_DUMP_FAIL_REASON_INVALILD_PID, strlen(MSG_DUMP_FAIL_REASON_INVALILD_PID));
         TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
         return DumpErrorCode::ERR_INVALID_PID_ERROR;
     }
@@ -1448,13 +1458,44 @@ int AppRunningManager::DumpIpcStat(const int32_t pid, std::string& result)
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     const auto& appRecord = GetAppRunningRecordByPid(pid);
     if (!appRecord) {
-        result.append(MSG_DUMP_IPC_STAT)
-            .append(MSG_DUMP_IPC_FAIL)
-            .append(MSG_DUMP_IPC_FAIL_REASON_INVALILD_PID);
+        result.append(MSG_DUMP_IPC_STAT, strlen(MSG_DUMP_IPC_STAT))
+            .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
+            .append(MSG_DUMP_FAIL_REASON_INVALILD_PID, strlen(MSG_DUMP_FAIL_REASON_INVALILD_PID));
         TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
         return DumpErrorCode::ERR_INVALID_PID_ERROR;
     }
     return appRecord->DumpIpcStat(result);
+}
+
+int AppRunningManager::DumpFfrt(const std::vector<int32_t>& pids, std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    int errCode = DumpErrorCode::ERR_OK;
+    size_t count = 0;
+    for (const auto& pid : pids) {
+        TAG_LOGD(AAFwkTag::APPMGR, "DumpFfrt current pid:%{public}d", pid);
+        const auto& appRecord = GetAppRunningRecordByPid(pid);
+        if (!appRecord) {
+            TAG_LOGE(AAFwkTag::APPMGR, "pid %{public}d does not exist", pid);
+            ++count;
+            continue;
+        }
+        std::string currentResult;
+        errCode = appRecord->DumpFfrt(currentResult);
+        if (errCode != DumpErrorCode::ERR_OK) {
+            continue;
+        }
+        result += currentResult + "\n";
+    }
+    if (count == pids.size()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no valid pid");
+        return DumpErrorCode::ERR_INVALID_PID_ERROR;
+    }
+    if (result.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no ffrt usage is found");
+        return DumpErrorCode::ERR_INTERNAL_ERROR;
+    }
+    return DumpErrorCode::ERR_OK;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

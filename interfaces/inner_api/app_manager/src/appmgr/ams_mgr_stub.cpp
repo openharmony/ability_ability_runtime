@@ -27,6 +27,7 @@
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "iremote_object.h"
+#include "string_ex.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -74,6 +75,8 @@ AmsMgrStub::AmsMgrStub()
         &AmsMgrStub::HandleRegisterStartSpecifiedAbilityResponse;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::GET_APPLICATION_INFO_BY_PROCESS_ID)] =
         &AmsMgrStub::HandleGetApplicationInfoByProcessID;
+    memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::NOTIFY_APP_MGR_RECORD_EXIT_REASON)] =
+        &AmsMgrStub::HandleNotifyAppMgrRecordExitReason;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::UPDATE_APPLICATION_INFO_INSTALLED)] =
         &AmsMgrStub::HandleUpdateApplicationInfoInstalled;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::SET_CURRENT_USER_ID)] =
@@ -122,6 +125,8 @@ void AmsMgrStub::CreateMemberFuncMap()
         &AmsMgrStub::HandleAttachPidToParent;
     memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::IS_MEMORY_SIZE_SUFFICIENT)] =
         &AmsMgrStub::HandleIsMemorySizeSufficent;
+    memberFuncMap_[static_cast<uint32_t>(IAmsMgr::Message::SET_KEEP_ALIVE_ENABLE_STATE)] =
+        &AmsMgrStub::HandleSetKeepAliveEnableState;
 }
 
 int AmsMgrStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -392,7 +397,7 @@ int32_t AmsMgrStub::HandleStartSpecifiedAbility(MessageParcel &data, MessageParc
         delete want;
         return ERR_INVALID_VALUE;
     }
-    StartSpecifiedAbility(*want, *abilityInfo);
+    StartSpecifiedAbility(*want, *abilityInfo, data.ReadInt32());
     delete want;
     delete abilityInfo;
     return NO_ERROR;
@@ -424,6 +429,20 @@ int32_t AmsMgrStub::HandleGetApplicationInfoByProcessID(MessageParcel &data, Mes
     if (!reply.WriteBool(debug)) {
         TAG_LOGE(AAFwkTag::APPMGR, "write debug info failed");
         return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleNotifyAppMgrRecordExitReason(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "HandleNotifyAppMgrRecordExitReason called.");
+    int32_t pid = data.ReadInt32();
+    int32_t reason = data.ReadInt32();
+    std::string exitMsg = Str16ToStr8(data.ReadString16());
+    int32_t result = NotifyAppMgrRecordExitReason(pid, reason, exitMsg);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write result failed.");
+        return IPC_PROXY_ERR;
     }
     return NO_ERROR;
 }
@@ -595,6 +614,15 @@ int32_t AmsMgrStub::HandleIsWaitingDebugApp(MessageParcel &data, MessageParcel &
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;
     }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleSetKeepAliveEnableState(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    auto bundleName = data.ReadString();
+    auto enable = data.ReadBool();
+    SetKeepAliveEnableState(bundleName, enable);
     return NO_ERROR;
 }
 

@@ -717,6 +717,26 @@ HWTEST_F(AbilityConnectManagerTest, AAFWK_Connect_Service_017, TestSize.Level1)
 
 /*
  * Feature: AbilityConnectManager
+ * Function: GetActiveUIExtensionList
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions:NA
+ * CaseDescription: verify the GetActiveUIExtensionList function.
+ */
+HWTEST_F(AbilityConnectManagerTest, GetActiveUIExtensionList_01, TestSize.Level1)
+{
+    int32_t pid = 1;
+    std::vector<std::string> extensionList;
+    auto result = ConnectManager()->GetActiveUIExtensionList(pid, extensionList);
+    EXPECT_EQ(result, ERR_OK);
+
+    std::string bundleName = "com.test.demo";
+    result = ConnectManager()->GetActiveUIExtensionList(bundleName, extensionList);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/*
+ * Feature: AbilityConnectManager
  * Function: ScheduleConnectAbilityDoneLocked
  * SubFunction: NA
  * FunctionPoints: NA
@@ -3243,6 +3263,44 @@ HWTEST_F(AbilityConnectManagerTest, UpdateUIExtensionInfo_0100, TestSize.Level1)
     connectManager->UpdateUIExtensionInfo(abilityRecord);
     EXPECT_EQ(abilityRecord->GetWant().HasParameter("ability.want.params.uiExtensionAbilityId"), true);
     EXPECT_EQ(abilityRecord->GetWant().GetIntParam("ability.want.params.uiExtensionAbilityId", -1), 1000);
+}
+
+/**
+ * @tc.name: PreloadUIExtensionAbilityLocked_0100
+ * @tc.desc: preload uiextension ability
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, PreloadUIExtensionAbilityLocked_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    AppExecFwk::ElementName providerElement("0", "com.ohos.uiextensionprovider", "UIExtensionProvider", "entry");
+    abilityRequest.want.SetElement(providerElement);
+    abilityRequest.abilityInfo.type = AbilityType::EXTENSION;
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    auto ret = connectManager->PreloadUIExtensionAbilityLocked(abilityRequest, hostBundleName);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnloadUIExtensionAbility_0100
+ * @tc.desc: UnloadUIExtensionAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityConnectManagerTest, UnloadUIExtensionAbility_0100, TestSize.Level1)
+{
+    std::shared_ptr<AbilityConnectManager> connectManager = std::make_shared<AbilityConnectManager>(0);
+    ASSERT_NE(connectManager, nullptr);
+
+    AbilityRequest abilityRequest;
+    AppExecFwk::ElementName providerElement("0", "com.ohos.uiextensionprovider", "UIExtensionProvider", "entry");
+    abilityRequest.want.SetElement(providerElement);
+    std::shared_ptr<AbilityRecord> abilityRecord = AbilityRecord::CreateAbilityRecord(abilityRequest);
+    std::string hostBundleName = "com.ohos.uiextensionuser";
+    auto ret = connectManager->UnloadUIExtensionAbility(abilityRecord, hostBundleName);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
