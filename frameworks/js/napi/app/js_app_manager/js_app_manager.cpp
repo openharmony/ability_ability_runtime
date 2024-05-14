@@ -677,7 +677,7 @@ private:
                 if (ret == 0) {
                     task.Resolve(env, CreateJsRunningMultiAppInfo(env, info));
                 } else {
-                    task.Reject(env, CreateJsError(env, ret, "Get mission infos failed."));
+                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
                 }
             };
         napi_value lastParam = nullptr;
