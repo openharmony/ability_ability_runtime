@@ -18,19 +18,13 @@ config("appmgr_config") {
   include_dirs = [
     "include",
     "include/utils",
-    "//third_party/json/include",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
     "${ability_runtime_path}/tools/aa/include",
     "${ability_runtime_path}/utils/global/time/include",
-    "${distributeddatamgr_path}/kv_store/interfaces/innerkits/distributeddatamgr/include",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_utils_path}/global/constant",
   ]
-}
-
-config("appmgr_exception_config") {
-  cflags_cc = [ "-fexceptions" ]
 }
 
 group("appms_target") {
@@ -84,10 +78,7 @@ ohos_shared_library("libappms") {
     defines += [ "ABILITY_FAULT_AND_EXIT_TEST" ]
   }
 
-  configs = [
-    ":appmgr_config",
-    ":appmgr_exception_config",
-  ]
+  configs = [ ":appmgr_config" ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
@@ -123,6 +114,7 @@ ohos_shared_library("libappms") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "kv_store:distributeddata_inner",
     "kv_store:distributeddata_mgr",
     "memory_utils:libmeminfo",
@@ -131,6 +123,7 @@ ohos_shared_library("libappms") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  public_external_deps = [ "kv_store:distributeddata_mgr" ]
 
   defines += [ "OHOS_ACCOUNT_ENABLED" ]
 
