@@ -1348,9 +1348,7 @@ private:
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
 
     void ParseServiceExtMultiProcessWhiteList();
-    void ClearData(std::shared_ptr<AppRunningRecord> appRecord);\
-
-    
+    void ClearData(std::shared_ptr<AppRunningRecord> appRecord);
 
     /**
      * Notify the app running status.
