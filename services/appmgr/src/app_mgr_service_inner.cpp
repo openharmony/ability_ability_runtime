@@ -1429,10 +1429,14 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
         if (appRecord == nullptr || appRecord->GetBundleName() != bundleName) {
             continue;
         }
+        auto appInfo = appRecord->GetApplicationInfo();
+        if (!appInfo) {
+            continue;
+        }
         info.bundleName = bundleName;
         info.mode = static_cast<int32_t>(appRecord->GetApplicationInfo()->multiAppMode.multiAppModeType);
         if (info.mode == static_cast<int32_t>(MultiAppModeType::UNSPECIFIED)) {
-            return AAFwk::ERR_APP_TWIN_NOT_SUPPORTED;
+            return AAFwk::ERR_MULTI_APP_NOT_SUPPORTED;
         }
         GetRunningCloneAppInfo(appRecord, info);
     }
@@ -1442,6 +1446,15 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
 void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
     RunningMultiAppInfo &info)
 {
+    if (!appRecord) {
+        TAG_LOGE(AAFwkTag::APPMGR, "The appRecord is nullptr!");
+        return ERR_INVALID_VALUE;
+    }
+    auto PriorityObject = appRecord->GetPriorityObject();
+    if (!PriorityObject) {
+        TAG_LOGE(AAFwkTag::APPMGR, "The PriorityObject is nullptr!");
+        return ERR_INVALID_VALUE;
+    }
     if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
         auto childAppRecordMap = appRecord->GetChildAppRecordMap();
         size_t index = 0;
@@ -1451,7 +1464,7 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
             }
         }
         if (index < info.runningAppClones.size()) {
-            info.runningAppClones[index].pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
+            info.runningAppClones[index].pids.emplace_back(PriorityObject->GetPid());
             for (auto it : childAppRecordMap) {
                 info.runningAppClones[index].pids.emplace_back(it.first);
             }
@@ -1459,7 +1472,7 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
             RunningAppClone cloneInfo;
             cloneInfo.appCloneIndex = appRecord->GetAppIndex();
             cloneInfo.uid = appRecord->GetUid();
-            cloneInfo.pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
+            cloneInfo.pids.emplace_back(PriorityObject->GetPid());
             for (auto it : childAppRecordMap) {
                 cloneInfo.pids.emplace_back(it.first);
             }
