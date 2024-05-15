@@ -1434,36 +1434,36 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
         if (info.mode == static_cast<int32_t>(MultiAppModeType::UNSPECIFIED)) {
             return AAFwk::ERR_APP_TWIN_NOT_SUPPORTED;
         }
-        GetRunningTwinAppInfo(appRecord, info);
+        GetRunningCloneAppInfo(appRecord, info);
     }
     return ERR_OK;
 }
 
-void AppMgrServiceInner::GetRunningTwinAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
     RunningMultiAppInfo &info)
 {
     if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
         auto childAppRecordMap = appRecord->GetChildAppRecordMap();
         size_t index = 0;
-        for (; index < info.isolation.size(); index++) {
-            if (info.isolation[index].appTwinIndex == appRecord->GetAppIndex()) {
+        for (; index < info.runningAppClones.size(); index++) {
+            if (info.runningAppClones[index].appCloneIndex == appRecord->GetAppIndex()) {
                 break;
             }
         }
-        if (index < info.isolation.size()) {
-            info.isolation[index].pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
+        if (index < info.runningAppClones.size()) {
+            info.runningAppClones[index].pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
             for (auto it : childAppRecordMap) {
-                info.isolation[index].pids.emplace_back(it.first);
+                info.runningAppClones[index].pids.emplace_back(it.first);
             }
         } else {
-            RunningAppTwin twinInfo;
-            twinInfo.appTwinIndex = appRecord->GetAppIndex();
-            twinInfo.uid = appRecord->GetUid();
-            twinInfo.pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
+            RunningAppClone cloneInfo;
+            cloneInfo.appCloneIndex = appRecord->GetAppIndex();
+            cloneInfo.uid = appRecord->GetUid();
+            cloneInfo.pids.emplace_back(appRecord->GetPriorityObject()->GetPid());
             for (auto it : childAppRecordMap) {
-                twinInfo.pids.emplace_back(it.first);
+                cloneInfo.pids.emplace_back(it.first);
             }
-            info.isolation.emplace_back(twinInfo);
+            info.runningAppClones.emplace_back(cloneInfo);
         }
     }
 }
