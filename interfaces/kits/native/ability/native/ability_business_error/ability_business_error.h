@@ -142,7 +142,7 @@ enum class AbilityErrorCode {
     ERROR_ABILITY_ALREADY_RUNNING = 16000068,
 
     // not support twin app.
-    ERROR_CODE_TWIN_NOT_SUPPORTED = 16000072,
+    ERROR_CODE_MULTI_APP_NOT_SUPPORTED = 16000072,
     // app twin index does not exist.
     ERROR_APP_TWIN_INDEX_INVALID = 16000073,
 
