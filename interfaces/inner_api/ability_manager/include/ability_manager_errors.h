@@ -513,7 +513,7 @@ enum {
     /**
      * Result(2097251) not support twin.
      */
-    ERR_APP_TWIN_NOT_SUPPORTED,
+    ERR_MULTI_APP_NOT_SUPPORTED,
 };
 
 enum {

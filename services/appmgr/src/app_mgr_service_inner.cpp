@@ -1434,7 +1434,7 @@ int32_t AppMgrServiceInner::GetRunningMultiAppInfoByBundleName(const std::string
             continue;
         }
         info.bundleName = bundleName;
-        info.mode = static_cast<int32_t>(appRecord->GetApplicationInfo()->multiAppMode.multiAppModeType);
+        info.mode = static_cast<int32_t>(appInfo->multiAppMode.multiAppModeType);
         if (info.mode == static_cast<int32_t>(MultiAppModeType::UNSPECIFIED)) {
             return AAFwk::ERR_MULTI_APP_NOT_SUPPORTED;
         }
