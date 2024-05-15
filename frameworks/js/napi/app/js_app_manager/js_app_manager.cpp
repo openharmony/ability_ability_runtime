@@ -662,7 +662,7 @@ private:
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed!");
-            ThrowError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM);
+            ThrowInvalidParamError("Parse param bundleName failed, must be a string");
             return CreateJsUndefined(env);
         }
         NapiAsyncTask::CompleteCallback complete =
@@ -675,7 +675,7 @@ private:
                 RunningMultiAppInfo info;
                 auto ret = appManager->GetRunningMultiAppInfoByBundleName(bundleName, info);
                 if (ret == 0) {
-                    task.Resolve(env, CreateJsRunningMultiAppInfo(env, info));
+                    task.ResolveWithNoError(env, CreateJsRunningMultiAppInfo(env, info));
                 } else {
                     task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
                 }
