@@ -25,8 +25,8 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-struct RunningAppTwin {
-    int32_t appTwinIndex;
+struct RunningAppClone {
+    int32_t appCloneIndex;
     int32_t uid;
     std::vector<int32_t> pids;
 };
@@ -34,8 +34,8 @@ struct RunningAppTwin {
 struct RunningMultiAppInfo : public Parcelable {
     std::string bundleName;
     int32_t mode;
-    std::vector<std::string> instance;
-    std::vector<RunningAppTwin> isolation;
+    std::vector<std::string> runningMultiInstances;
+    std::vector<RunningAppClone> runningAppClones;
     
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

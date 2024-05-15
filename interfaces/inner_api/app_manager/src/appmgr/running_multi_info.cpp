@@ -28,18 +28,18 @@ bool RunningMultiAppInfo::ReadFromParcel(Parcel &parcel)
 {
     bundleName = Str16ToStr8(parcel.ReadString16());
     mode = parcel.ReadInt32();
-    if (!parcel.ReadStringVector(&instance)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "read instance failed.");
+    if (!parcel.ReadStringVector(&runningMultiInstances)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "read runningMultiInstances failed.");
         return false;
     }
-    int32_t isolationSize;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, isolationSize);
-    for (auto i = 0; i < isolationSize; i++) {
-        RunningAppTwin twin;
-        twin.appTwinIndex = parcel.ReadInt32();
-        twin.uid = parcel.ReadInt32();
-        parcel.ReadInt32Vector(&twin.pids);
-        isolation.emplace_back(twin);
+    int32_t runningAppClonesSize;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningAppClonesSize);
+    for (auto i = 0; i < runningAppClonesSize; i++) {
+        RunningAppClone clone;
+        clone.appCloneIndex = parcel.ReadInt32();
+        clone.uid = parcel.ReadInt32();
+        parcel.ReadInt32Vector(&clone.pids);
+        runningAppClones.emplace_back(clone);
     }
     return true;
 }
@@ -59,15 +59,15 @@ bool RunningMultiAppInfo::Marshalling(Parcel &parcel) const
 {
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(bundleName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, mode);
-    if (!parcel.WriteStringVector(instance)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write instance failed.");
+    if (!parcel.WriteStringVector(runningMultiInstances)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write runningMultiInstances failed.");
         return false;
     }
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, isolation.size());
-    for (auto &twin : isolation) {
-        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, twin.appTwinIndex);
-        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, twin.uid);
-        if (!parcel.WriteInt32Vector(twin.pids)) {
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningAppClones.size());
+    for (auto &clone : runningAppClones) {
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, clone.appCloneIndex);
+        WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, clone.uid);
+        if (!parcel.WriteInt32Vector(clone.pids)) {
             TAG_LOGE(AAFwkTag::APPMGR, "read instance failed.");
             return false;
         }
