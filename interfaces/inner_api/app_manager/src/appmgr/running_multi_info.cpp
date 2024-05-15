@@ -68,7 +68,7 @@ bool RunningMultiAppInfo::Marshalling(Parcel &parcel) const
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, clone.appCloneIndex);
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, clone.uid);
         if (!parcel.WriteInt32Vector(clone.pids)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "read instance failed.");
+            TAG_LOGE(AAFwkTag::APPMGR, "write runningAppClones failed.");
             return false;
         }
     }
