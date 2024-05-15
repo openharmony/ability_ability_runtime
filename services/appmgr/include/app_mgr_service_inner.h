@@ -307,28 +307,6 @@ public:
     virtual int32_t GetAllRunningProcesses(std::vector<RunningProcessInfo> &info);
 
     /**
-     * GetRunningMultiAppInfoByBundleName, call GetRunningMultiAppInfoByBundleName() through proxy project.
-     * Obtains information about multiapp that are running on the device.
-     *
-     * @param bundlename, input.
-     * @param info, output multiapp information.
-     * @return ERR_OK ,return back success，others fail.
-     */
-    virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
-        RunningMultiAppInfo &info);
-
-    /**
-     * GetRunningMultiAppInfoByBundleName, call GetRunningTwinAppInfo() through proxy project.
-     * Obtains information about TwinApp that are running on the device.
-     *
-     * @param apprecord, input.
-     * @param info, output multiapp information.
-     * @return void.
-     */
-    virtual void GetRunningTwinAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
-        RunningMultiAppInfo &info);
-
-    /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
      *
      * @param bundleType, the bundle type of the application process
@@ -1359,7 +1337,18 @@ private:
     bool JudgeSelfCalledByToken(const sptr<IRemoteObject> &token, const PageStateData &pageStateData);
 
     void ParseServiceExtMultiProcessWhiteList();
-    void ClearData(std::shared_ptr<AppRunningRecord> appRecord);
+    void ClearData(std::shared_ptr<AppRunningRecord> appRecord);\
+
+    /**
+     * GetRunningMultiAppInfoByBundleName, call GetRunningTwinAppInfo() through proxy project.
+     * Obtains information about TwinApp that are running on the device.
+     *
+     * @param apprecord, input.
+     * @param info, output multiapp information.
+     * @return void.
+     */
+    void GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
 
     /**
      * Notify the app running status.
