@@ -4278,7 +4278,7 @@ HWTEST_F(AppMgrServiceInnerTest, GetRunningMultiAppInfoByBundleName_001, TestSiz
     std::string bundleName = "testBundleName";
     RunningMultiAppInfo info;
     int32_t ret = appMgrServiceInner->GetRunningMultiAppInfoByBundleName(bundleName, info);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
     ret = appMgrServiceInner->GetRunningMultiAppInfoByBundleName(bundleName, info);

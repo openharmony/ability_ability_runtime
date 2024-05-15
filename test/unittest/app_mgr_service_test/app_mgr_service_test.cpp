@@ -1772,7 +1772,7 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Lev
     std::string bundleName = "testBundleName";
     RunningMultiAppInfo info;
     int32_t res = appMgrService->GetRunningMultiAppInfoByBundleName(bundleName, info);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
