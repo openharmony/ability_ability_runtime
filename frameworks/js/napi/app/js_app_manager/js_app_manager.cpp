@@ -662,7 +662,7 @@ private:
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[0], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed!");
-            ThrowInvalidParamError("Parse param bundleName failed, must be a string");
+            ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string");
             return CreateJsUndefined(env);
         }
         NapiAsyncTask::CompleteCallback complete =
