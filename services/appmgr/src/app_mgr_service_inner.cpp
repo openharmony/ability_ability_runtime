@@ -1448,12 +1448,12 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
 {
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "The appRecord is nullptr!");
-        return ERR_INVALID_VALUE;
+        return;
     }
     auto PriorityObject = appRecord->GetPriorityObject();
     if (!PriorityObject) {
         TAG_LOGE(AAFwkTag::APPMGR, "The PriorityObject is nullptr!");
-        return ERR_INVALID_VALUE;
+        return;
     }
     if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
         auto childAppRecordMap = appRecord->GetChildAppRecordMap();

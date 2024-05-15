@@ -307,6 +307,17 @@ public:
     virtual int32_t GetAllRunningProcesses(std::vector<RunningProcessInfo> &info);
 
     /**
+     * GetRunningMultiAppInfoByBundleName, call GetRunningMultiAppInfoByBundleName through proxy project.
+     * Obtains information about TwinApp that are running on the device.
+     *
+     * @param bundleName, input.
+     * @param info, output multiapp information.
+     * @return void.
+     */
+    virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
+        RunningMultiAppInfo &info) 
+
+    /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
      *
      * @param bundleType, the bundle type of the application process
@@ -1339,16 +1350,7 @@ private:
     void ParseServiceExtMultiProcessWhiteList();
     void ClearData(std::shared_ptr<AppRunningRecord> appRecord);\
 
-    /**
-     * GetRunningMultiAppInfoByBundleName, call GetRunningTwinAppInfo() through proxy project.
-     * Obtains information about TwinApp that are running on the device.
-     *
-     * @param apprecord, input.
-     * @param info, output multiapp information.
-     * @return void.
-     */
-    void GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
-        RunningMultiAppInfo &info);
+    
 
     /**
      * Notify the app running status.
@@ -1361,6 +1363,9 @@ private:
      */
     void NotifyAppRunningStatusEvent(
         const std::string &bundle, int32_t uid, AbilityRuntime::RunningStatus runningStatus);
+    
+    void GetRunningCloneAppInfo(const std::shared_ptr<AppRunningRecord> &appRecord,
+        RunningMultiAppInfo &info);
 
     /**
      * To Prevent process being killed when ability is starting in an existing process,
