@@ -668,7 +668,7 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (appManager == nullptr) {
-                    TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+                    TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                     return;
                 }
