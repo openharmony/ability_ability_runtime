@@ -315,7 +315,7 @@ public:
      * @return void.
      */
     virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
-        RunningMultiAppInfo &info) 
+        RunningMultiAppInfo &info);
 
     /**
      * GetRunningProcessesByBundleType, Obtains information about application processes by bundle type.
