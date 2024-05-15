@@ -633,7 +633,7 @@ napi_value JsUIExtensionContentSession::OnSetReceiveDataCallback(napi_env env, N
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-    
+
     if (!CheckTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
         ThrowInvalidParamError(env, "Parameter error: Callback must be a function.");
@@ -681,7 +681,7 @@ napi_value JsUIExtensionContentSession::OnSetReceiveDataForResultCallback(napi_e
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-    
+
     if (!CheckTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
         ThrowInvalidParamError(env, "Parameter error: Callback must be a function.");
@@ -733,7 +733,7 @@ napi_value JsUIExtensionContentSession::OnLoadContent(napi_env env, NapiCallback
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-    
+
     if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], contextPath)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
         ThrowInvalidParamError(env, "Parameter error: Path must be a string.");
@@ -761,7 +761,8 @@ napi_value JsUIExtensionContentSession::OnLoadContent(napi_env env, NapiCallback
         isFirstTriggerBindModal_ = false;
     }
     sptr<IRemoteObject> parentToken = sessionInfo_->parentToken;
-    Rosen::WMError ret = uiWindow_->NapiSetUIContent(contextPath, env, storage, false, parentToken);
+    Rosen::WMError ret = uiWindow_->NapiSetUIContent(contextPath, env, storage,
+        Rosen::BackupAndRestoreType::NONE, parentToken);
     if (ret == Rosen::WMError::WM_OK) {
         TAG_LOGD(AAFwkTag::UI_EXT, "NapiSetUIContent success");
     } else {
@@ -781,7 +782,7 @@ napi_value JsUIExtensionContentSession::OnSetWindowBackgroundColor(napi_env env,
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-    
+
     if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], color)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
         ThrowInvalidParamError(env, "Parameter error: Parse color failed! Color must be a string.");
@@ -812,7 +813,7 @@ napi_value JsUIExtensionContentSession::OnSetWindowPrivacyMode(napi_env env, Nap
         ThrowTooFewParametersError(env);
         return CreateJsUndefined(env);
     }
-    
+
     if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], isPrivacyMode)) {
         TAG_LOGE(AAFwkTag::UI_EXT, "invalid param");
         ThrowInvalidParamError(env, "Parameter error: Failed to parse isPrivacyMode! IsPrivacyMode must be a boolean.");
@@ -849,7 +850,7 @@ napi_value JsUIExtensionContentSession::OnSetWindowPrivacyMode(napi_env env, Nap
 napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiCallbackInfo& info)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "called");
-    
+
     std::string type;
     AAFwk::WantParams wantParam;
 
