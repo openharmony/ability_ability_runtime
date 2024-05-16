@@ -18,6 +18,7 @@ ohos_shared_library("abilityconstant_napi") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
+    "//third_party/json/include",
   ]
 
   sources = [ "ability_constant_module.cpp" ]
@@ -29,7 +30,6 @@ ohos_shared_library("abilityconstant_napi") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "json:json_static",
     "napi:ace_napi",
   ]
   public_external_deps = [ "ability_base:want" ]
@@ -42,6 +42,7 @@ ohos_shared_library("abilityconstant") {
   include_dirs = [
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_services_path}/common/include",
+    "//third_party/json/include",
   ]
 
   sources = [ "ability_constant_module.cpp" ]
@@ -53,7 +54,6 @@ ohos_shared_library("abilityconstant") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
-    "json:json_static",
     "napi:ace_napi",
   ]
   public_external_deps = [ "ability_base:want" ]
