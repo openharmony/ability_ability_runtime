@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "../include/mock_my_flag.h"
+#include "foundation/ability/ability_runtime/test/unittest/ability_first_frame_state_observer_manager_test/mock/include/mock_my_flag.h"
 
 namespace OHOS {
 namespace AAFwk {
