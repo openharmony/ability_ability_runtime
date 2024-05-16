@@ -3127,17 +3127,14 @@ HWTEST_F(AbilityConnectManagerTest, IsUIExtensionFocused_002, TestSize.Level1)
     auto request1 = GenerateAbilityRequest(device, abilityName1, appName1, bundleName1, moduleName1);
     auto uiExtension1 = AbilityRecord::CreateAbilityRecord(request1);
     EXPECT_NE(uiExtension1, nullptr);
+    int32_t ret = connectManager->uiExtensionAbilityRecordMgr_->CreateExtensionRecord(uiExtension1, bundleName1,
+        extensionRecord1, extensionId1);
     uiExtension1->abilityInfo_.extensionAbilityType = ExtensionAbilityType::SYS_COMMON_UI;
     sptr<SessionInfo> sessionInfo1 = new (std::nothrow) SessionInfo();
     sessionInfo1->callerToken = uiExtensionUser->GetToken();
     uiExtension1->sessionInfo_ = sessionInfo1;
     connectManager->uiExtensionMap_.emplace(
         callbackA_->AsObject(), AbilityConnectManager::UIExtWindowMapValType(uiExtension1, sessionInfo1));
-    int32_t extensionId1 = 1;
-    std::shared_ptr<AbilityRuntime::ExtensionRecord> extensionRecord1 = nullptr;
-    int32_t ret = connectManager->uiExtensionAbilityRecordMgr_->CreateExtensionRecord(uiExtension1, "",
-        extensionRecord1, extensionId1);
-    EXPECT_EQ(ret, ERR_OK);
     bool isFocused1 = connectManager->IsUIExtensionFocused(
         uiExtension1->GetApplicationInfo().accessTokenId, uiExtensionUser->GetToken());
     EXPECT_EQ(isFocused1, true);
@@ -3155,11 +3152,6 @@ HWTEST_F(AbilityConnectManagerTest, IsUIExtensionFocused_002, TestSize.Level1)
     uiExtension2->sessionInfo_ = sessionInfo2;
     connectManager->uiExtensionMap_.emplace(
         callbackA_->AsObject(), AbilityConnectManager::UIExtWindowMapValType(uiExtension2, sessionInfo2));
-    int32_t extensionId2 = 2;
-    std::shared_ptr<AbilityRuntime::ExtensionRecord> extensionRecord2 = nullptr;
-    ret = connectManager->uiExtensionAbilityRecordMgr_->CreateExtensionRecord(uiExtension2, "",
-        extensionRecord2, extensionId2);
-    EXPECT_EQ(ret, ERR_OK);
     bool isFocused2 = connectManager->IsUIExtensionFocused(
         uiExtension2->GetApplicationInfo().accessTokenId, uiExtensionUser->GetToken());
     EXPECT_EQ(isFocused2, true);
