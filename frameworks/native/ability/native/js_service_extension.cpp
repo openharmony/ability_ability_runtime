@@ -219,7 +219,7 @@ void JsServiceExtension::ListenWMS()
         return;
     }
 
-    auto listener = sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_);
+    auto listener = sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_, GetContext().GetToken());
     if (listener == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to create status change listener.");
         return;
@@ -237,7 +237,8 @@ void JsServiceExtension::SystemAbilityStatusChangeListener::OnAddSystemAbility(i
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "systemAbilityId: %{public}d add", systemAbilityId);
     if (systemAbilityId == WINDOW_MANAGER_SERVICE_ID) {
-        Rosen::DisplayManager::GetInstance().RegisterDisplayListener(tmpDisplayListener_);
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "RegisterDisplayInfoChangedListener");
+        Rosen::WindowManager::GetInstance().RegisterDisplayInfoChangedListener(token_, tmpDisplayListener_);
     }
 }
 
@@ -315,7 +316,8 @@ void JsServiceExtension::OnStop()
         ConnectionManager::GetInstance().ReportConnectionLeakEvent(getpid(), gettid());
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "The service extension connection is not disconnected.");
     }
-    Rosen::DisplayManager::GetInstance().UnregisterDisplayListener(displayListener_);
+    TAG_LOGI(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
+    (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(GetContext().GetToken(), displayListener_);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "ok");
 }
 
@@ -798,6 +800,43 @@ void JsServiceExtension::OnDestroy(Rosen::DisplayId displayId)
 {
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "exit.");
 }
+
+void JsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject> & token, Rosen::DisplayId displayId, float density,
+    Rosen::DisplayOrientation orientation)
+    {
+        TAG_LOGI(AAFwkTag::SERVICE_EXT, "displayId: %{public}" PRIu64"", displayId);
+        auto context = GetContext();
+        if (context == nullptr) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Context is invalid.");
+            return;
+        }
+
+        auto contextConfig = context->GetConfiguration();
+        if (contextConfig == nullptr) {
+            TAG_LOGE(AAFwkTag::SERVICE_EXT, "Configuration is invalid.");
+            return;
+        }
+
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump: %{public}s", contextConfig->GetName().c_str());
+        bool configChanged = false;
+        auto configUtils = std::make_shared<ConfigurationUtils>();
+        configUtils->UpdateDisplayConfig(displayId, contextConfig, context->GetResourceManager(), configChanged);
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump after update: %{public}s", contextConfig->GetName().c_str());
+
+        if (configChanged) {
+            auto jsServiceExtension = std::static_pointer_cast<JsServiceExtension>(shared_from_this());
+            auto task = [jsServiceExtension]() {
+                if (jsServiceExtension) {
+                    jsServiceExtension->ConfigurationUpdated();
+                }
+            };
+            if (handler_ != nullptr) {
+                handler_->PostTask(task, "JsServiceExtension:OnChange");
+            }
+        }
+
+        TAG_LOGD(AAFwkTag::SERVICE_EXT, "finished.");
+    };
 
 void JsServiceExtension::OnChange(Rosen::DisplayId displayId)
 {
