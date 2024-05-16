@@ -165,9 +165,10 @@ public:
      * @param pixelMap The snapshot.
      * @param isPrivate Indicates whether the window is private window.
      */
+#ifdef SUPPORT_GRAPHICS
     void UpdateMissionSnapshot(int32_t missionId, const std::shared_ptr<Media::PixelMap> &pixelMap, bool isPrivate);
 
-#ifdef SUPPORT_GRAPHICS
+
     /**
      * @brief Get the Snapshot object
      * @param missionId Indicates this mission id.

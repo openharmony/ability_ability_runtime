@@ -1915,7 +1915,9 @@ void UIAbilityLifecycleManager::OnAppStateChanged(const AppInfo &info)
             }
             if (info.processName == abilityRecord->GetAbilityInfo().process ||
                 info.processName == abilityRecord->GetApplicationInfo().bundleName) {
+#ifdef SUPPORT_GRAPHICS
                 abilityRecord->SetColdStartFlag(true);
+#endif // SUPPORT_GRAPHICS
                 break;
             }
         }
@@ -2316,9 +2318,11 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) con
         TAG_LOGW(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawing, get AbilityRecord by sessionId failed.");
         return;
     }
+#ifdef SUPPORT_GRAPHICS
     abilityRecord->SetCompleteFirstFrameDrawing(true);
     DelayedSingleton<AppExecFwk::AbilityFirstFrameStateObserverManager>::GetInstance()->
         HandleOnFirstFrameState(abilityRecord);
+#endif // SUPPORT_GRAPHICS
 }
 
 int UIAbilityLifecycleManager::StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest,

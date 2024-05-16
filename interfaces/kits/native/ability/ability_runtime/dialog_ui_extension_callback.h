@@ -17,7 +17,9 @@
 #define OHOS_ABILITY_RUNTIME_DIALOG_UI_EXTENSION_CALLBACK_H
 
 #include "ability_context.h"
+#ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
+#endif // SUPPORT_GRAPHICS
 #include "want.h"
 
 namespace OHOS {
@@ -30,10 +32,14 @@ public:
     void OnError();
     void OnDestroy();
     void SetSessionId(int32_t sessionId);
+#ifdef SUPPORT_GRAPHICS
     void SetUIContent(Ace::UIContent *uiContent);
+#endif // SUPPORT_GRAPHICS
 private:
     int32_t sessionId_ = 0;
+    #ifdef SUPPORT_GRAPHICS
     Ace::UIContent *uiContent_ = nullptr;
+    #endif // SUPPORT_GRAPHICS
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
 };
 } // AbilityRuntime

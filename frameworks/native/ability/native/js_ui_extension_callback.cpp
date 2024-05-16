@@ -19,13 +19,17 @@
 #include "js_runtime_utils.h"
 #include "napi/native_api.h"
 #include "napi_common_util.h"
+#ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
 #include "ws_common.h"
+#endif // SUPPORT_GRAPHICS
 #include "napi_common_want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
+#ifdef SUPPORT_GRAPHICS    
 constexpr const char* ERROR_MSG_INNER = "Inner error.";
+#endif // SUPPORT_GRAPHICS
 JsUIExtensionCallback::~JsUIExtensionCallback()
 {
     if (jsCallbackObject_  == nullptr) {
@@ -70,7 +74,7 @@ void JsUIExtensionCallback::SetSessionId(int32_t sessionId)
 {
     sessionId_ = sessionId;
 }
-
+#ifdef SUPPORT_GRAPHICS
 void JsUIExtensionCallback::SetUIContent(Ace::UIContent* uiContent)
 {
     uiContent_ = uiContent;
@@ -183,7 +187,7 @@ void JsUIExtensionCallback::OnRelease(int32_t code)
     }
     uiContent_->CloseModalUIExtension(sessionId_);
 }
-
+#endif // SUPPORT_GRAPHICS
 void JsUIExtensionCallback::CallJsError(int32_t number)
 {
     TAG_LOGI(AAFwkTag::UI_EXT, "call");
@@ -193,11 +197,13 @@ void JsUIExtensionCallback::CallJsError(int32_t number)
     }
     std::string name;
     std::string message;
+#ifdef SUPPORT_GRAPHICS
     if (number != static_cast<int32_t>(Rosen::WSError::WS_OK)) {
         number = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
         name = ERROR_MSG_INNER;
         message = "StartAbilityByType failed.";
     }
+#endif // SUPPORT_GRAPHICS
     napi_value nativeNumber = CreateJsValue(env_, number);
     napi_value nativeName = CreateJsValue(env_, name);
     napi_value nativeMessage = CreateJsValue(env_, message);

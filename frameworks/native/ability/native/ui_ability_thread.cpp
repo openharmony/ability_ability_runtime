@@ -670,7 +670,7 @@ void UIAbilityThread::HandlePrepareTermianteAbility()
     isPrepareTerminateAbilityDone_.store(true);
     cv_.notify_all();
 }
-
+#ifdef SUPPORT_GRAPHICS 
 int UIAbilityThread::CreateModalUIExtension(const Want &want)
 {
     TAG_LOGD(AAFwkTag::UIABILITY, "Call");
@@ -680,14 +680,16 @@ int UIAbilityThread::CreateModalUIExtension(const Want &want)
     }
     return currentAbility_->CreateModalUIExtension(want);
 }
-
+#endif //SUPPORT_GRAPHICS
 void UIAbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
 {
     if (currentAbility_ == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "current ability is nullptr");
         return;
     }
+#ifdef SUPPORT_GRAPHICS 
     currentAbility_->UpdateSessionToken(sessionToken);
+#endif //SUPPORT_GRAPHICS
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

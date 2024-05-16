@@ -19,8 +19,9 @@
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
+#ifdef SUPPORT_GRAPHICS
 #include "scene_board_judgement.h"
-
+#endif // SUPPORT_GRAPHICS
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {

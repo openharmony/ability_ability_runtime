@@ -26,11 +26,13 @@
 #include "hilog_wrapper.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
-#include "scene_board_judgement.h"
-#include "session/host/include/zidl/session_interface.h"
 #include "session_info.h"
 #include "string_wrapper.h"
+#ifdef SUPPORT_GRAPHICS
+#include "session/host/include/zidl/session_interface.h"
+#include "scene_board_judgement.h"
 #include "ui_content.h"
+#endif // SUPPORT_GRAPHICS
 #include "want_params_wrapper.h"
 
 namespace OHOS {
@@ -295,7 +297,7 @@ ErrCode AbilityContextImpl::StopServiceExtensionAbility(const AAFwk::Want& want,
     }
     return err;
 }
-
+#ifdef SUPPORT_GRAPHICS
 ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, int resultCode)
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "TerminateAbilityWithResult");
@@ -319,7 +321,7 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         return err;
     }
 }
-
+#endif // SUPPORT_GRAPHICS
 void AbilityContextImpl::SetWeakSessionToken(const wptr<IRemoteObject>& sessionToken)
 {
     std::lock_guard lock(sessionTokenMutex_);
@@ -503,7 +505,9 @@ ErrCode AbilityContextImpl::OnBackPressedCallBack(bool &needMoveToBackground)
         TAG_LOGE(AAFwkTag::CONTEXT, "abilityCallback is nullptr.");
         return ERR_INVALID_VALUE;
     }
+#ifdef SUPPORT_GRAPHICS
     needMoveToBackground = abilityCallback->OnBackPress();
+#endif // SUPPORT_GRAPHICS
     return ERR_OK;
 }
 
@@ -526,7 +530,7 @@ ErrCode AbilityContextImpl::MoveUIAbilityToBackground()
     }
     return err;
 }
-
+#ifdef SUPPORT_GRAPHICS
 ErrCode AbilityContextImpl::TerminateSelf()
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "TerminateSelf");
@@ -535,7 +539,6 @@ ErrCode AbilityContextImpl::TerminateSelf()
     if (sessionToken == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "sessionToken is null");
     }
-
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
         TAG_LOGI(AAFwkTag::CONTEXT, "TerminateSelf. SCB");
         AAFwk::Want resultWant;
@@ -554,7 +557,7 @@ ErrCode AbilityContextImpl::TerminateSelf()
         return err;
     }
 }
-
+#endif // SUPPORT_GRAPHICS
 ErrCode AbilityContextImpl::CloseAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -622,7 +625,7 @@ void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbil
     TAG_LOGD(AAFwkTag::CONTEXT, "call");
     abilityCallback_ = abilityCallback;
 }
-
+#ifdef SUPPORT_GRAPHICS
 ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want, RequestDialogResultTask &&task)
 {
     want.SetParam(RequestConstants::REQUEST_TOKEN_KEY, token_);
@@ -630,6 +633,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
     int32_t top;
     int32_t width;
     int32_t height;
+
     GetWindowRect(left, top, width, height);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_LEFT_KEY, left);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_TOP_KEY, top);
@@ -673,7 +677,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
     TAG_LOGD(AAFwkTag::CONTEXT, "RequestDialogService ret=%{public}d", static_cast<int32_t>(err));
     return err;
 }
-
+#endif // SUPPORT_GRAPHICS
 ErrCode AbilityContextImpl::ReportDrawnCompleted()
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called.");
@@ -738,7 +742,7 @@ void AbilityContextImpl::InsertResultCallbackTask(int requestCode, RuntimeTask &
     TAG_LOGD(AAFwkTag::CONTEXT, "InsertResultCallbackTask");
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
 }
-
+#ifdef SUPPORT_GRAPHICS
 void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "call");
@@ -747,7 +751,7 @@ void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &wid
         abilityCallback->GetWindowRect(left, top, width, height);
     }
 }
-
+#endif // SUPPORT_GRAPHICS
 void AbilityContextImpl::RegisterAbilityLifecycleObserver(
     const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer)
 {

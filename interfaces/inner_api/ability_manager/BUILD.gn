@@ -133,6 +133,7 @@ ohos_shared_library("ability_manager") {
 
   external_deps = [
     "ability_base:base",
+    "ability_base:session_info",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:libappexecfwk_common",
     "c_utils:utils",
@@ -215,7 +216,10 @@ ohos_shared_library("ability_manager_c") {
   libs = []
   ldflags = [ "-Wl,--exclude-libs=ALL" ]
   deps = [ ":ability_manager" ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "ability_base:session_info",
+    "c_utils:utils",
+  ]
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"

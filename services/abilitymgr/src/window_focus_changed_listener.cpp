@@ -35,7 +35,9 @@ void WindowFocusChangedListener::OnFocused(const sptr<FocusChangeInfo> &focusCha
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "OnUnfocused failed to get app mgr service inner.");
                 return;
             }
+#ifdef SUPPORT_GRAPHICS
             owner->HandleFocused(focusChangeInfo);
+#endif // SUPPORT_GRAPHICS
         };
         taskHandler_->SubmitTask(task);
     }
@@ -55,7 +57,9 @@ void WindowFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo> &focusC
                 TAG_LOGW(AAFwkTag::ABILITYMGR, "OnUnfocused failed to get app mgr service inner.");
                 return;
             }
+#ifdef SUPPORT_GRAPHICS
             owner->HandleUnfocused(focusChangeInfo);
+#endif // SUPPORT_GRAPHICS
         };
         taskHandler_->SubmitTask(task);
     }

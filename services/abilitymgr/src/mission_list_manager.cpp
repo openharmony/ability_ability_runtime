@@ -1058,7 +1058,9 @@ void MissionListManager::OnAppStateChanged(const AppInfo &info)
             }
         }
     } else if (info.state == AppState::COLD_START) {
+#ifdef SUPPORT_GRAPHICS
         UpdateAbilityRecordColdStartFlag(info, true);
+#endif // SUPPORT_GRAPHICS
     } else {
         for (const auto& missionList : currentMissionLists_) {
             auto missions = missionList->GetAllMissions();
@@ -1996,7 +1998,7 @@ int MissionListManager::SetMissionLockedState(int missionId, bool lockedState)
     DelayedSingleton<MissionInfoMgr>::GetInstance()->UpdateMissionInfo(innerMissionInfo);
     return ERR_OK;
 }
-
+#ifdef SUPPORT_GRAPHICS
 void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject> &token,
     const std::shared_ptr<Media::PixelMap> &pixelMap)
 {
@@ -2016,7 +2018,7 @@ void MissionListManager::UpdateSnapShot(const sptr<IRemoteObject> &token,
         listenerController_->NotifyMissionSnapshotChanged(missionId);
     }
 }
-
+#endif // SUPPORT_GRAPHICS
 void MissionListManager::MoveToBackgroundTask(const std::shared_ptr<AbilityRecord> &abilityRecord, bool isClose)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -2051,12 +2053,14 @@ void  MissionListManager::NotifyMissionCreated(const std::shared_ptr<AbilityReco
         mission->SetNotifyLabel(false);
 
         if (mission->NeedNotifyUpdateLabel()) {
+#ifdef SUPPORT_GRAPHICS
             PostMissionLabelUpdateTask(missionId);
+#endif // SUPPORT_GRAPHICS
             mission->SetNeedNotifyUpdateLabel(false);
         }
     }
 }
-
+#ifdef SUPPORT_GRAPHICS
 void MissionListManager::PostMissionLabelUpdateTask(int missionId) const
 {
     auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetTaskHandler();
@@ -2076,7 +2080,7 @@ void MissionListManager::PostMissionLabelUpdateTask(int missionId) const
     };
     handler->SubmitTask(task, "NotifyMissionLabelUpdated.", DELAY_NOTIFY_LABEL_TIME);
 }
-
+#endif // SUPPORT_GRAPHICS
 void MissionListManager::PrintTimeOutLog(const std::shared_ptr<AbilityRecord> &ability, uint32_t msgId, bool isHalf)
 {
     if (ability == nullptr) {

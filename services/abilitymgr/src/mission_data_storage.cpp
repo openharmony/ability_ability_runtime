@@ -96,7 +96,9 @@ void MissionDataStorage::SaveMissionInfo(const InnerMissionInfo &missionInfo)
             TAG_LOGE(AAFwkTag::ABILITYMGR, "create dir %{public}s failed.", dirPath.c_str());
             return;
         }
+#ifdef SUPPORT_GRAPHICS
         chmod(dirPath.c_str(), MODE);
+#endif // SUPPORT_GRAPHICS
     }
 
     std::string jsonStr = missionInfo.ToJsonStr();

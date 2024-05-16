@@ -442,7 +442,9 @@ void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions
+#ifdef SUPPORT_GRAPHICS
     SetAbilityStateInner(AbilityState::FOREGROUNDING);
+#endif // SUPPORT_GRAPHICS
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
     lifecycleDeal_->ForegroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
     lifeCycleStateInfo_.sceneFlag = 0;
@@ -488,7 +490,9 @@ void AbilityRecord::ForegroundAbility(const Closure &task, sptr<SessionInfo> ses
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
+#ifdef SUPPORT_GRAPHICS
     SetAbilityStateInner(AbilityState::FOREGROUNDING);
+#endif // SUPPORT_GRAPHICS
     lifeCycleStateInfo_.sceneFlag = sceneFlag;
     lifecycleDeal_->ForegroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
     lifeCycleStateInfo_.sceneFlag = 0;
@@ -1230,7 +1234,9 @@ void AbilityRecord::BackgroundAbility(const Closure &task)
 
     // schedule background after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
+#ifdef SUPPORT_GRAPHICS
     SetAbilityStateInner(AbilityState::BACKGROUNDING);
+#endif // SUPPORT_GRAPHICS
     lifecycleDeal_->BackgroundNew(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
 }
 
@@ -1308,7 +1314,7 @@ void AbilityRecord::UpdateAbilityVisibilityState()
         SetAbilityVisibilityState(state);
     }
 }
-
+#ifdef SUPPORT_GRAPHICS
 void AbilityRecord::SetAbilityStateInner(AbilityState state)
 {
     currentState_ = state;
@@ -1369,7 +1375,7 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
 
     DelayedSingleton<MissionInfoMgr>::GetInstance()->SetMissionAbilityState(missionId_, currentState_);
 }
-
+#endif // SUPPORT_GRAPHICS
 bool AbilityRecord::GetAbilityForegroundingFlag() const
 {
     return isAbilityForegrounding_;
@@ -1380,7 +1386,7 @@ void AbilityRecord::SetAbilityForegroundingFlag()
     isAbilityForegrounding_ = true;
     DelayedSingleton<AppScheduler>::GetInstance()->SetAbilityForegroundingFlagToAppRecord(pid_);
 }
-
+#ifdef SUPPORT_GRAPHICS
 void AbilityRecord::SetAbilityState(AbilityState state)
 {
     SetAbilityStateInner(state);
@@ -1388,7 +1394,7 @@ void AbilityRecord::SetAbilityState(AbilityState state)
         SetRestarting(false);
     }
 }
-
+#endif // SUPPORT_GRAPHICS
 void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "bundle:%{public}s, ability: %{public}s", applicationInfo_.bundleName.c_str(),
@@ -1527,7 +1533,9 @@ void AbilityRecord::Activate()
 
     // schedule active after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
+#ifdef SUPPORT_GRAPHICS
     SetAbilityStateInner(AbilityState::ACTIVATING);
+#endif // SUPPORT_GRAPHICS
     lifecycleDeal_->Activate(GetWant(), lifeCycleStateInfo_);
 
     // update ability state to appMgr service when restart
@@ -1554,7 +1562,9 @@ void AbilityRecord::Inactivate()
 
     // schedule inactive after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
+#ifdef SUPPORT_GRAPHICS
     SetAbilityStateInner(AbilityState::INACTIVATING);
+#endif // SUPPORT_GRAPHICS
     lifecycleDeal_->Inactivate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
 }
 
@@ -1582,7 +1592,9 @@ void AbilityRecord::Terminate(const Closure &task)
     HandleDlpClosed();
     // schedule background after updating AbilityState and sending timeout message to avoid ability async callback
     // earlier than above actions.
+#ifdef SUPPORT_GRAPHICS
     SetAbilityStateInner(AbilityState::TERMINATING);
+#endif // SUPPORT_GRAPHICS
     lifecycleDeal_->Terminate(GetWant(), lifeCycleStateInfo_, GetSessionInfo());
 }
 
@@ -1606,7 +1618,9 @@ void AbilityRecord::ConnectAbility()
     if (isConnected) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
     }
+#ifdef SUPPORT_GRAPHICS
     GrantUriPermissionForServiceExtension();
+#endif // SUPPORT_GRAPHICS
     lifecycleDeal_->ConnectAbility(GetWant());
     isConnected = true;
 }
@@ -1619,7 +1633,7 @@ void AbilityRecord::DisconnectAbility()
     lifecycleDeal_->DisconnectAbility(GetWant());
     isConnected = false;
 }
-
+#ifdef SUPPORT_GRAPHICS
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
     if (abilityInfo_.extensionAbilityType == AppExecFwk::ExtensionAbilityType::SERVICE) {
@@ -1633,12 +1647,14 @@ bool AbilityRecord::GrantUriPermissionForServiceExtension()
     }
     return false;
 }
-
+#endif // SUPPORT_GRAPHICS
 void AbilityRecord::CommandAbility()
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "startId_:%{public}d.", startId_);
     CHECK_POINTER(lifecycleDeal_);
+#ifdef SUPPORT_GRAPHICS
     GrantUriPermissionForServiceExtension();
+#endif // SUPPORT_GRAPHICS
     lifecycleDeal_->CommandAbility(GetWant(), false, startId_);
 }
 
@@ -2410,12 +2426,14 @@ void AbilityRecord::NotifyAnimationAbilityDied()
     }
     // notify winddow manager service the ability died
     if (missionId_ != -1) {
+#ifdef SUPPORT_GRAPHICS
         if (GetWMSHandler()) {
             sptr<AbilityTransitionInfo> info = new AbilityTransitionInfo();
             SetAbilityTransitionInfo(info);
             TAG_LOGI(AAFwkTag::ABILITYMGR, "Notification window manager UIAbiltiy abnormal death.");
             GetWMSHandler()->NotifyAnimationAbilityDied(info);
         }
+#endif // SUPPORT_GRAPHICS
     }
 }
 

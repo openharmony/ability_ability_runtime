@@ -38,7 +38,6 @@
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
-#include "hot_reloader.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "js_environment.h"
@@ -64,6 +63,7 @@
 #include "source_map_operator.h"
 
 #ifdef SUPPORT_GRAPHICS
+#include "hot_reloader.h"
 #include "ace_forward_compatibility.h"
 #include "declarative_module_preloader.h"
 #endif
@@ -562,7 +562,9 @@ bool JsRuntime::UnLoadRepairPatch(const std::string& hqfFile)
 bool JsRuntime::NotifyHotReloadPage()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "function called.");
+#ifdef SUPPORT_GRAPHICS
     Ace::HotReloader::HotReload();
+#endif // SUPPORT_GRAPHICS
     return true;
 }
 

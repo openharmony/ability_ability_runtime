@@ -30,6 +30,7 @@ namespace {
 const std::string WANT_PARAMS_EXTENSION_TYPE = "autoFill/password";
 const std::string WANT_PARAMS_SMART_EXTENSION_TYPE = "autoFill/smart";
 const std::string AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
+#ifdef SUPPORT_GRAPHICS
 constexpr static char WANT_PARAMS_VIEW_DATA_KEY[] = "ohos.ability.params.viewData";
 constexpr static char WANT_PARAMS_CUSTOM_DATA_KEY[] = "ohos.ability.params.customData";
 constexpr static char WANT_PARAMS_AUTO_FILL_CMD_KEY[] = "ohos.ability.params.autoFillCmd";
@@ -39,13 +40,14 @@ constexpr static char WANT_PARAMS_AUTO_FILL_TYPE_KEY[] = "ability.want.params.Au
 constexpr static char AUTO_FILL_MANAGER_THREAD[] = "AutoFillManager";
 constexpr static uint32_t AUTO_FILL_REQUEST_TIME_OUT_VALUE = 1000;
 constexpr static uint32_t AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID = 0;
+#endif //SUPPORT_GRAPHICS
 } // namespace
 AutoFillManager &AutoFillManager::GetInstance()
 {
     static AutoFillManager instance;
     return instance;
 }
-
+#ifdef SUPPORT_GRAPHICS
 AutoFillManager::~AutoFillManager()
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
@@ -53,7 +55,6 @@ AutoFillManager::~AutoFillManager()
         eventHandler_.reset();
     }
 }
-
 int32_t AutoFillManager::RequestAutoFill(
     Ace::UIContent *uiContent,
     const AutoFill::AutoFillRequest &request,
@@ -202,7 +203,6 @@ void AutoFillManager::RemoveAutoFillExtensionProxy(Ace::UIContent *uiContent)
         modalUIExtensionProxyMap_.erase(it);
     }
 }
-
 void AutoFillManager::BindModalUIExtensionCallback(
     const std::shared_ptr<AutoFillExtensionCallback> &extensionCallback, Ace::ModalUIExtensionCallbacks &callback)
 {
@@ -218,7 +218,6 @@ void AutoFillManager::BindModalUIExtensionCallback(
         extensionCallback, std::placeholders::_1);
     callback.onDestroy = std::bind(&AutoFillExtensionCallback::onDestroy, extensionCallback);
 }
-
 int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &request)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
@@ -250,9 +249,13 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
     want.SetParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, static_cast<int32_t>(request.autoFillType));
     want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, request.extensionCallback->GetViewData().ToJsonString());
     want.SetParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);
+
     Ace::ModalUIExtensionCallbacks callback;
+
     BindModalUIExtensionCallback(request.extensionCallback, callback);
+
     Ace::ModalUIExtensionConfig config;
+
     config.isAsyncModalBinding = true;
     int32_t sessionId = AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID;
     sessionId = request.uiContent->CreateModalUIExtension(want, callback, config);
@@ -268,7 +271,6 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
     extensionCallbacks_.emplace(eventId_, request.extensionCallback);
     return AutoFill::AUTO_FILL_SUCCESS;
 }
-
 int32_t AutoFillManager::CreateAutoFillExtension(Ace::UIContent *uiContent,
     const AutoFill::AutoFillRequest &request,
     const Ace::ModalUIExtensionCallbacks &callback,
@@ -301,7 +303,7 @@ int32_t AutoFillManager::CreateAutoFillExtension(Ace::UIContent *uiContent,
     }
     return sessionId;
 }
-
+#endif // SUPPORT_GRAPHICS
 AutoFill::AutoFillWindowType AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest &request,
     bool &isSmartAutoFill)
 {
@@ -326,7 +328,7 @@ AutoFill::AutoFillWindowType AutoFillManager::ConvertAutoFillWindowType(const Au
         AutoFill::AutoFillWindowType::MODAL_WINDOW : autoFillWindowType;
     return autoFillWindowType;
 }
-
+#ifdef SUPPORT_GRAPHICS
 void AutoFillManager::SetTimeOutEvent(uint32_t eventId)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
@@ -353,7 +355,7 @@ void AutoFillManager::RemoveEvent(uint32_t eventId)
         extensionCallbacks_.erase(ret);
     }
 }
-
+#endif //SUPPORT_GRAPHICS
 void AutoFillManager::HandleTimeOut(uint32_t eventId)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");

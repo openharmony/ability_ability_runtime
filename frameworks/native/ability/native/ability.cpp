@@ -42,7 +42,6 @@
 #include "reverse_continuation_scheduler_replica.h"
 #include "reverse_continuation_scheduler_replica_handler_interface.h"
 #include "runtime.h"
-#include "scene_board_judgement.h"
 #include "singleton.h"
 #include "system_ability_definition.h"
 #include "task_handler_client.h"
@@ -54,6 +53,7 @@
 #endif
 
 #ifdef SUPPORT_GRAPHICS
+#include "scene_board_judgement.h"
 #include "display_type.h"
 #include "key_event.h"
 #endif
