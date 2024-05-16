@@ -211,10 +211,10 @@ public:
      * @return Returns ERR_OK if success.
      */
     ErrCode SetMissionContinueState(const AAFwk::ContinueState &state) override;
-
+#ifdef SUPPORT_GRAPHICS
     ErrCode StartAbilityByType(const std::string &type,
         AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
-
+#endif // SUPPORT_GRAPHICS
     ErrCode RequestModalUIExtension(const Want &want) override;
 
     ErrCode ChangeAbilityVisibility(bool isShow) override;

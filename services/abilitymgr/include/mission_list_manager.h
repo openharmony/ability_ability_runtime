@@ -314,8 +314,9 @@ public:
      * @param token The target ability.
      * @param pixelMap The snapshot.
      */
+#ifdef SUPPORT_GRAPHICS
     void UpdateSnapShot(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &pixelMap);
-
+#endif // SUPPORT_GRAPHICS
     void EnableRecoverAbility(int32_t missionId);
 
     #ifdef ABILITY_COMMAND_FOR_TEST

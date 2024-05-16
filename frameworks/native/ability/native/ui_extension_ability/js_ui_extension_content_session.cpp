@@ -33,7 +33,9 @@
 #include "native_engine.h"
 #include "native_value.h"
 #include "tokenid_kit.h"
+#ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
+#endif // SUPPORT_GRAPHICS
 #include "want.h"
 #include "window.h"
 
@@ -875,12 +877,14 @@ napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiC
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
+#ifdef SUPPORT_GRAPHICS
             Ace::ModalUIExtensionCallbacks callback;
             callback.onError = std::bind(&JsUIExtensionCallback::OnError, uiExtensionCallback, std::placeholders::_1);
             callback.onRelease = std::bind(&JsUIExtensionCallback::OnRelease,
                 uiExtensionCallback, std::placeholders::_1);
             Ace::ModalUIExtensionConfig config;
             auto uiContent = uiWindow->GetUIContent();
+
             int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
             if (sessionId == 0) {
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -889,6 +893,7 @@ napi_value JsUIExtensionContentSession::OnStartAbilityByType(napi_env env, NapiC
                 uiExtensionCallback->SetSessionId(sessionId);
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             }
+#endif // SUPPORT_GRAPHICS
         };
 
     napi_value lastParam = (info.argc > ARGC_THREE) ? info.argv[INDEX_THREE] : nullptr;

@@ -436,6 +436,7 @@ napi_value JsUIExtensionContext::OnTerminateSelfWithResult(napi_env env, NapiCal
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
                 return;
             }
+#ifdef SUPPORT_GRAPHICS
             sptr<Rosen::Window> uiWindow = context->GetWindow();
             if (uiWindow == nullptr) {
                 TAG_LOGE(AAFwkTag::UI_EXT, "uiWindow is nullptr");
@@ -447,6 +448,7 @@ napi_value JsUIExtensionContext::OnTerminateSelfWithResult(napi_env env, NapiCal
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
                 return;
             }
+#endif // SUPPORT_GRAPHICS
             auto errorCode = context->TerminateSelf();
             if (errorCode == 0) {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));

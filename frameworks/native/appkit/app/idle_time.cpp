@@ -17,8 +17,9 @@
 
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
+#ifdef SUPPORT_GRAPHICS
 #include "transaction/rs_interfaces.h"
-
+#endif // SUPPORT_GRAPHICS
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
@@ -43,7 +44,7 @@ void IdleTime::InitVSyncReceiver()
     if (needStop_) {
         return;
     }
-
+#ifdef SUPPORT_GRAPHICS
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         receiver_ = rsClient.CreateVSyncReceiver("ABILITY", eventHandler_);
@@ -53,6 +54,7 @@ void IdleTime::InitVSyncReceiver()
         }
         receiver_->Init();
     }
+#endif // SUPPORT_GRAPHICS
 }
 
 void IdleTime::EventTask()

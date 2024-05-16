@@ -22,7 +22,9 @@
 #include "extension_context.h"
 #include "start_options.h"
 #include "want.h"
+#ifdef SUPPORT_GRAPHICS
 #include "window.h"
+#endif // SUPPORT_GRAPHICS
 
 namespace OHOS {
 namespace Ace {
@@ -135,11 +137,11 @@ public:
     virtual int GenerateCurRequestCode();
 
     virtual ErrCode ReportDrawnCompleted();
-
+#ifdef SUPPORT_GRAPHICS
     void SetWindow(sptr<Rosen::Window> window);
 
     sptr<Rosen::Window> GetWindow();
-
+#endif // SUPPORT_GRAPHICS
     Ace::UIContent* GetUIContent();
 
     ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
@@ -149,21 +151,21 @@ public:
 
     using SelfType = UIExtensionContext;
     static const size_t CONTEXT_TYPE_ID;
-
+#ifdef SUPPORT_GRAPHICS
 protected:
     bool IsContext(size_t contextTypeId) override
     {
         return contextTypeId == CONTEXT_TYPE_ID || ExtensionContext::IsContext(contextTypeId);
     }
-
+#endif // SUPPORT_GRAPHICS
 private:
     static int ILLEGAL_REQUEST_CODE;
     std::map<int, RuntimeTask> resultCallbacks_;
 
     int curRequestCode_ = 0;
-
+#ifdef SUPPORT_GRAPHICS
     sptr<Rosen::Window> window_ = nullptr;
-
+#endif // SUPPORT_GRAPHICS
     std::mutex mutexlock_;
     /**
      * @brief Get Current Ability Type

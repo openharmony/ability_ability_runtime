@@ -23,7 +23,9 @@
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "ohos_application.h"
+#ifdef SUPPORT_GRAPHICS
 #include "scene_board_judgement.h"
+#endif // SUPPORT_GRAPHICS
 #include "time_util.h"
 #include "values_bucket.h"
 

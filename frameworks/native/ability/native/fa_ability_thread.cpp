@@ -201,7 +201,7 @@ void FAAbilityThread::CreateExtensionAbilityNameSupportGraphics(
     if (abilityInfo->formEnabled || abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::FORM) {
         abilityName = FORM_EXTENSION;
     }
-#endif
+
     if (AAFwk::UIExtensionUtils::IsUIExtension(abilityInfo->extensionAbilityType)) {
         if (abilityInfo->extensionAbilityType == AppExecFwk::ExtensionAbilityType::SHARE) {
             abilityName = SHARE_EXTENSION;
@@ -221,6 +221,7 @@ void FAAbilityThread::CreateExtensionAbilityNameSupportGraphics(
         abilityInfo->type == AppExecFwk::AbilityType::EXTENSION) {
         abilityName = abilityInfo->extensionTypeName + CUSTOM_EXTENSION;
     }
+#endif
 }
 
 std::shared_ptr<AppExecFwk::ContextDeal> FAAbilityThread::CreateAndInitContextDeal(
@@ -1512,7 +1513,7 @@ void FAAbilityThread::HandlePrepareTermianteAbility()
     isPrepareTerminateAbilityDone_.store(true);
     cv_.notify_all();
 }
-
+#ifdef SUPPORT_GRAPHICS
 int FAAbilityThread::CreateModalUIExtension(const Want &want)
 {
     TAG_LOGD(AAFwkTag::FA, "Call");
@@ -1522,14 +1523,16 @@ int FAAbilityThread::CreateModalUIExtension(const Want &want)
     }
     return currentAbility_->CreateModalUIExtension(want);
 }
-
+#endif //SUPPORT_GRAPHICS
 void FAAbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
 {
     if (currentAbility_ == nullptr) {
         TAG_LOGE(AAFwkTag::FA, "current ability is nullptr");
         return;
     }
+#ifdef SUPPORT_GRAPHICS   
     currentAbility_->UpdateSessionToken(sessionToken);
+#endif //SUPPORT_GRAPHICS
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

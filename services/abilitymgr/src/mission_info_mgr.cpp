@@ -466,7 +466,7 @@ void MissionInfoMgr::RegisterSnapshotHandler(const sptr<ISnapshotHandler>& handl
     std::lock_guard<ffrt::mutex> lock(mutex_);
     snapshotHandler_ = handler;
 }
-
+#ifdef SUPPORT_GRAPHICS
 void MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const std::shared_ptr<Media::PixelMap> &pixelMap,
     bool isPrivate)
 {
@@ -494,18 +494,18 @@ void MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const std::shared_
     Snapshot snapshot;
     snapshot.SetPixelMap(pixelMap);
 
-#ifdef SUPPORT_GRAPHICS
+
     if (isPrivate) {
         CreateWhitePixelMap(snapshot);
     }
     savedSnapshot.snapshot = snapshot.GetPixelMap();
-#endif
+
 
     if (!taskDataPersistenceMgr_->SaveMissionSnapshot(missionId, savedSnapshot)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: save mission snapshot failed");
     }
 }
-
+#endif
 bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
     MissionSnapshot& missionSnapshot, bool isLowResolution)
 {

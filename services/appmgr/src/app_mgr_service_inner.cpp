@@ -84,7 +84,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+#ifdef SUPPORT_GRAPHICS
 using namespace OHOS::Rosen;
+#endif //SUPPORT_GRAPHICS
 using namespace OHOS::Security;
 
 namespace {
@@ -4536,11 +4538,13 @@ void AppMgrServiceInner::AddWatchParameter()
 void AppMgrServiceInner::InitFocusListener()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "begin initFocus listener.");
+#ifdef SUPPORT_GRAPHICS
     if (focusListener_) {
         return;
     }
 
     focusListener_ = new WindowFocusChangedListener(shared_from_this(), taskHandler_);
+#endif // SUPPORT_GRAPHICS
     auto registerTask = [innerService = shared_from_this()]() {
         if (innerService) {
             TAG_LOGI(AAFwkTag::APPMGR, "RegisterFocusListener task");
@@ -4556,26 +4560,30 @@ void AppMgrServiceInner::InitFocusListener()
 void AppMgrServiceInner::RegisterFocusListener()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "RegisterFocusListener begin");
+#ifdef SUPPORT_GRAPHICS
     if (!focusListener_) {
         TAG_LOGE(AAFwkTag::APPMGR, "no focusListener_");
         return;
     }
     WindowManager::GetInstance().RegisterFocusChangedListener(focusListener_);
+#endif // SUPPORT_GRAPHICS
     TAG_LOGI(AAFwkTag::APPMGR, "RegisterFocusListener end");
 }
 
 void AppMgrServiceInner::FreeFocusListener()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "FreeFocusListener begin");
+#ifdef SUPPORT_GRAPHICS
     if (!focusListener_) {
         TAG_LOGE(AAFwkTag::APPMGR, "no focusListener_");
         return;
     }
     WindowManager::GetInstance().UnregisterFocusChangedListener(focusListener_);
     focusListener_ = nullptr;
+#endif // SUPPORT_GRAPHICS
     TAG_LOGI(AAFwkTag::APPMGR, "FreeFocusListener end");
 }
-
+#ifdef SUPPORT_GRAPHICS
 void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo)
 {
     if (!focusChangeInfo) {
@@ -4639,6 +4647,7 @@ void AppMgrServiceInner::HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
 }
 
+
 void AppMgrServiceInner::InitWindowVisibilityChangedListener()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Begin.");
@@ -4693,7 +4702,7 @@ void AppMgrServiceInner::HandleWindowVisibilityChanged(
     }
     appRunningManager_->OnWindowVisibilityChanged(windowVisibilityInfos);
 }
-
+#endif // SUPPORT_GRAPHICS
 void AppMgrServiceInner::PointerDeviceEventCallback(const char *key, const char *value, void *context)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "%{public}s called.", __func__);
