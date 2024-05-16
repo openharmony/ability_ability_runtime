@@ -1195,11 +1195,9 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         TAG_LOGW(AAFwkTag::APPMGR, "env or exportObj null");
         return nullptr;
     }
-
     std::unique_ptr<JsAppManager> jsAppManager = std::make_unique<JsAppManager>(
         GetAppManagerInstance(), GetAbilityManagerInstance());
     napi_wrap(env, exportObj, jsAppManager.release(), JsAppManager::Finalizer, nullptr, nullptr);
-
     napi_set_named_property(env, exportObj, "ApplicationState", ApplicationStateInit(env));
     napi_set_named_property(env, exportObj, "ProcessState", ProcessStateInit(env));
     napi_set_named_property(env, exportObj, "PreloadMode", PreloadModeInit(env));
