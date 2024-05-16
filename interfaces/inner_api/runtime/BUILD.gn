@@ -40,6 +40,7 @@ config("runtime_public_config") {
   include_dirs = [
     "${ability_runtime_path}/interfaces/kits/native/ability/native/ability_business_error",
     "include",
+    "//third_party/json/include",
   ]
 }
 
@@ -116,7 +117,6 @@ ohos_shared_library("runtime") {
     "samgr:samgr_proxy",
     "zlib:shared_libz",
   ]
-  public_external_deps = [ "json:json_static" ]
 
   if (cj_frontend) {
     sources += [ "${ability_runtime_native_path}/runtime/cj_runtime.cpp" ]
