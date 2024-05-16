@@ -86,6 +86,8 @@ public:
     MOCK_METHOD1(SetSupportedProcessCacheSelf, int32_t(bool isSupported));
     MOCK_METHOD2(GetRunningMultiAppInfoByBundleName, int32_t(const std::string &bundleName,
         RunningMultiAppInfo &info));
+    MOCK_METHOD3(StartNativeChildProcess, int32_t(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback));
 
     void AttachApplication(const sptr<IRemoteObject>& app)
     {

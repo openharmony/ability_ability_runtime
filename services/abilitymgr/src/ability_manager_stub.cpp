@@ -1498,8 +1498,8 @@ int AbilityManagerStub::ContinueAbilityInner(MessageParcel &data, MessageParcel 
     std::string deviceId = data.ReadString();
     int32_t missionId = data.ReadInt32();
     uint32_t versionCode = data.ReadUint32();
+    AAFWK::ContinueRadar::GetInstance().SaveDataContinue("ContinueAbility");
     int32_t result = ContinueAbility(deviceId, missionId, versionCode);
-    AAFWK::ContinueRadar::GetInstance().SaveDataContinue("ContinueAbility", result);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ContinueAbilityInner result = %{public}d", result);
     return result;
 }
@@ -1774,7 +1774,9 @@ int AbilityManagerStub::StartUIAbilityBySCBInner(MessageParcel &data, MessagePar
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
-    int32_t result = StartUIAbilityBySCB(sessionInfo);
+    bool isColdStart = false;
+    int32_t result = StartUIAbilityBySCB(sessionInfo, isColdStart);
+    reply.WriteBool(isColdStart);
     reply.WriteInt32(result);
     return NO_ERROR;
 }

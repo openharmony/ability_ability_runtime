@@ -1764,6 +1764,17 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Lev
 {
     auto appMgrService = std::make_shared<AppMgrService>();
     ASSERT_NE(appMgrService, nullptr);
+/**
+ * @tc.name: StartNativeChildProcess_0100
+ * @tc.desc: Start native child process.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppMgrServiceTest, StartNativeChildProcess_0100, TestSize.Level1)
+{
+    TAG_LOGD(AAFwkTag::TEST, "StartNativeChildProcess_0100 called.");
+    sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
+    ASSERT_NE(appMgrService, nullptr);
+
     appMgrService->SetInnerService(mockAppMgrServiceInner_);
     appMgrService->taskHandler_ = taskHandler_;
     appMgrService->eventHandler_ = eventHandler_;
@@ -1778,5 +1789,6 @@ HWTEST_F(AppMgrServiceTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Lev
     int32_t ret = appMgrService->GetRunningMultiAppInfoByBundleName(bundleName, info);
     EXPECT_EQ(ret, ERR_OK);
 }
+
 } // namespace AppExecFwk
 } // namespace OHOS
