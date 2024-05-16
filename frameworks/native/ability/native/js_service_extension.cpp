@@ -219,7 +219,7 @@ void JsServiceExtension::ListenWMS()
         return;
     }
 
-    auto listener = sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_, GetContext().GetToken());
+    auto listener = sptr<SystemAbilityStatusChangeListener>::MakeSptr(displayListener_, GetContext()->GetToken());
     if (listener == nullptr) {
         TAG_LOGE(AAFwkTag::SERVICE_EXT, "Failed to create status change listener.");
         return;
@@ -317,7 +317,7 @@ void JsServiceExtension::OnStop()
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "The service extension connection is not disconnected.");
     }
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
-    (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(GetContext().GetToken(), displayListener_);
+    (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(GetContext()->GetToken(), displayListener_);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "ok");
 }
 
