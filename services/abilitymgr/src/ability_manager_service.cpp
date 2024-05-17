@@ -2432,6 +2432,12 @@ int AbilityManagerService::PreloadUIExtensionAbilityInner(const Want &want, std:
         return result;
     }
     abilityRequest.want.SetParam(IS_PRELOAD_UIEXTENSION_ABILITY, true);
+    auto abilityInfo = abilityRequest.abilityInfo;
+    auto res = JudgeAbilityVisibleControl(abilityInfo);
+    if (res != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Target ability is invisible");
+        return res;
+    }
     auto connectManager = GetConnectManagerByUserId(validUserId);
     if (connectManager == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "connectManager is nullptr, userId: %{public}d", validUserId);
@@ -9856,7 +9862,8 @@ void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::B
 int32_t AbilityManagerService::OpenFile(const Uri& uri, uint32_t flag)
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
-    if (!AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(uri, flag, accessTokenId)) {
+    if (!IN_PROCESS_CALL(AAFwk::UriPermissionManagerClient::GetInstance().VerifyUriPermission(
+        uri, flag, accessTokenId))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "premission check failed");
         return -1;
     }
