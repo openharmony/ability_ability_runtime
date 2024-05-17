@@ -317,7 +317,13 @@ void JsServiceExtension::OnStop()
         TAG_LOGD(AAFwkTag::SERVICE_EXT, "The service extension connection is not disconnected.");
     }
     TAG_LOGI(AAFwkTag::SERVICE_EXT, "UnregisterDisplayInfoChangedListener");
-    (void)Rosen::WindowManager::GetInstance().UnregisterDisplayInfoChangedListener(GetContext()->GetToken(), displayListener_);
+    auto context = GetContext();
+    if (context == nullptr || context->GetToken()) {
+        TAG_LOGE(AAFwkTag::SERVICE_EXT, "Param invalid.");
+        return;
+    }
+    Rosen::WindowManager::GetInstance()
+        .UnregisterDisplayInfoChangedListener(context->GetToken(), displayListener_);
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "ok");
 }
 
@@ -801,8 +807,8 @@ void JsServiceExtension::OnDestroy(Rosen::DisplayId displayId)
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "exit.");
 }
 
-void JsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject> & token, Rosen::DisplayId displayId, float density,
-    Rosen::DisplayOrientation orientation)
+void JsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject> & token, Rosen::DisplayId displayId,
+    float density, Rosen::DisplayOrientation orientation)
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "displayId: %{public}" PRIu64"", displayId);
         auto context = GetContext();

@@ -216,7 +216,7 @@ protected:
     void OnCreate(Rosen::DisplayId displayId);
     void OnDestroy(Rosen::DisplayId displayId);
     void OnChange(Rosen::DisplayId displayId);
-    void OnDisplayInfoChange(const sptr<IRemoteObject> & token, Rosen::DisplayId displayId, float density,
+    void OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
         Rosen::DisplayOrientation orientation);
 
 private:
