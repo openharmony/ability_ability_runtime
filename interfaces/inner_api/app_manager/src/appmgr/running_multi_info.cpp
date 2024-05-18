@@ -28,12 +28,11 @@ bool RunningMultiAppInfo::ReadFromParcel(Parcel &parcel)
 {
     bundleName = Str16ToStr8(parcel.ReadString16());
     mode = parcel.ReadInt32();
-    if (!parcel.ReadStringVector(&runningMultiInstances)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "read runningMultiInstances failed.");
-        return false;
-    }
     int32_t runningAppClonesSize;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningAppClonesSize);
+    if(runningAppClonesSize > MAX_CLONE_APP_NUM) {
+        return false;
+    }
     for (auto i = 0; i < runningAppClonesSize; i++) {
         RunningAppClone clone;
         clone.appCloneIndex = parcel.ReadInt32();
@@ -59,11 +58,10 @@ bool RunningMultiAppInfo::Marshalling(Parcel &parcel) const
 {
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(bundleName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, mode);
-    if (!parcel.WriteStringVector(runningMultiInstances)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "write runningMultiInstances failed.");
+    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningAppClones.size());
+    if(runningAppClones.size() > MAX_CLONE_APP_NUM) {
         return false;
     }
-    WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningAppClones.size());
     for (auto &clone : runningAppClones) {
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, clone.appCloneIndex);
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, clone.uid);

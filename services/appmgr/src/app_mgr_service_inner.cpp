@@ -1457,16 +1457,16 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
         return;
     }
     if (info.mode == static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
-        auto childAppRecordMap = appRecord->GetChildAppRecordMap();
         size_t index = 0;
         for (; index < info.runningAppClones.size(); index++) {
             if (info.runningAppClones[index].appCloneIndex == appRecord->GetAppIndex()) {
                 break;
             }
         }
+        auto childProcessRecordMap = appRecord->GetChildProcessRecordMap();
         if (index < info.runningAppClones.size()) {
             info.runningAppClones[index].pids.emplace_back(PriorityObject->GetPid());
-            for (auto it : childAppRecordMap) {
+            for (auto it : childProcessRecordMap) {
                 info.runningAppClones[index].pids.emplace_back(it.first);
             }
         } else {
@@ -1474,7 +1474,7 @@ void AppMgrServiceInner::GetRunningCloneAppInfo(const std::shared_ptr<AppRunning
             cloneInfo.appCloneIndex = appRecord->GetAppIndex();
             cloneInfo.uid = appRecord->GetUid();
             cloneInfo.pids.emplace_back(PriorityObject->GetPid());
-            for (auto it : childAppRecordMap) {
+            for (auto it : childProcessRecordMap) {
                 cloneInfo.pids.emplace_back(it.first);
             }
             info.runningAppClones.emplace_back(cloneInfo);

@@ -148,7 +148,7 @@ public:
      * GetRunningMultiAppInfoByBundleName, call GetRunningMultiAppInfoByBundleName() through proxy project.
      * Obtains information about multiapp that are running on the device.
      *
-     * @param bundlename, input.
+     * @param bundlename, bundle name in Application record.
      * @param info, output multiapp information.
      * @return ERR_OK ,return back success，others fail.
      */
