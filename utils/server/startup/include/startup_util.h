@@ -13,20 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_MY_FLAG_H
-#define MOCK_MY_FLAG_H
+#ifndef OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H
+#define OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H
+
+#include <cstdint>
+
 namespace OHOS {
 namespace AAFwk {
-class MyFlag {
+class Want;
+}  // namespace AAFwk
+namespace AbilityRuntime {
+class StartupUtil {
 public:
-    enum FLAG {
-        IS_INVALID_CALL = 0,
-        IS_SA_CALL,
-        IS_SHELL_CALL,
-        IS_SA_AND_SHELL_CALL,
-    };
-    static int flag_;
+    static int32_t GetAppIndex(const AAFwk::Want &want);
+    static int32_t BuildAbilityInfoFlag();
 };
-} // namespace AAFwk
-} // namespace OHOS
-#endif // MOCK_MY_FLAG_H
+}  // namespace AbilityRuntime
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H
