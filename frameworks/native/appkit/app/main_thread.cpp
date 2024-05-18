@@ -42,8 +42,11 @@
 #include "child_process_manager.h"
 #include "configuration_convertor.h"
 #include "common_event_manager.h"
+#include "global_constant.h"
 #include "context_deal.h"
 #include "context_impl.h"
+#include "dump_ffrt_helper.h"
+#include "dump_ipc_helper.h"
 #include "exit_reason.h"
 #include "extension_ability_info.h"
 #include "extension_module_loader.h"
@@ -81,7 +84,6 @@
 #include "js_runtime_utils.h"
 #include "context/application_context.h"
 #include "os_account_manager_wrapper.h"
-#include "dump_ipc_helper.h"
 
 #if defined(NWEB)
 #include <thread>
@@ -1169,6 +1171,7 @@ bool IsNeedLoadLibrary(const std::string &bundleName)
     std::vector<std::string> needLoadLibraryBundleNames{
         "com.ohos.contactsdataability",
         "com.ohos.medialibrary.medialibrarydata",
+        "com.ohos.ringtonelibrary.ringtonelibrarydata",
         "com.ohos.telephonydataability",
         "com.ohos.FusionSearch",
         "com.ohos.formrenderservice"
@@ -1186,7 +1189,7 @@ bool GetBundleForLaunchApplication(std::shared_ptr<BundleMgrHelper> bundleMgrHel
     int32_t appIndex, BundleInfo &bundleInfo)
 {
     bool queryResult;
-    if (appIndex != 0) {
+    if (appIndex > AbilityRuntime::GlobalConstant::MAX_APP_CLONE_INDEX) {
         TAG_LOGD(AAFwkTag::APPKIT, "The bundleName = %{public}s.", bundleName.c_str());
         queryResult = (bundleMgrHelper->GetSandboxBundleInfo(bundleName,
             appIndex, UNSPECIFIED_USERID, bundleInfo) == 0);
@@ -2417,7 +2420,7 @@ void MainThread::ForceFullGC()
 void MainThread::Start()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPKIT, "App main thread create, pid:%{public}d.", getpid());
+    TAG_LOGI(AAFwkTag::APPKIT, "App main thread create, pid:%{public}d.", getprocpid());
 
     if (AAFwk::AppUtils::GetInstance().IsMultiProcessModel()) {
         ChildProcessInfo info;
@@ -3175,23 +3178,29 @@ void MainThread::HandleCancelAssertFaultTask()
 
 int32_t MainThread::ScheduleDumpIpcStart(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpIpcStart::pid:%{public}d", getpid());
+    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpIpcStart::pid:%{public}d", getprocpid());
     DumpIpcHelper::DumpIpcStart(result);
     return ERR_OK;
 }
 
 int32_t MainThread::ScheduleDumpIpcStop(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpIpcStop::pid:%{public}d", getpid());
+    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpIpcStop::pid:%{public}d", getprocpid());
     DumpIpcHelper::DumpIpcStop(result);
     return ERR_OK;
 }
 
 int32_t MainThread::ScheduleDumpIpcStat(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpIpcStat::pid:%{public}d", getpid());
+    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpIpcStat::pid:%{public}d", getprocpid());
     DumpIpcHelper::DumpIpcStat(result);
     return ERR_OK;
+}
+
+int32_t MainThread::ScheduleDumpFfrt(std::string& result)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "MainThread::ScheduleDumpFfrt::pid:%{public}d", getprocpid());
+    return DumpFfrtHelper::DumpFfrt(result);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
