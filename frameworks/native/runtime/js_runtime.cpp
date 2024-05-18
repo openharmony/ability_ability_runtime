@@ -282,7 +282,9 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             if (isDebugApp) {
                 weak->StopDebugger(option);
             }
-            weak->StartDebugger(option, ARK_DEBUGGER_LIB_PATH, socketFd, isStartWithDebug, instanceId);
+            int32_t tid = weak->ParseHdcRegisterOption(option);
+            const auto &debuggerPostTask = ConnectServerManager::Get().GetDebuggerPostTask(tid);
+            weak->StartDebugger(option, socketFd, isDebugApp, debuggerPostTask);
         }
     });
     if (isDebugApp) {
@@ -293,7 +295,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
     EcmaVM* vm = GetEcmaVm();
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
-    ConnectServerManager::Get().StoreDebuggerInfo(instanceId_, reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
+    ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
     jsEnv_->NotifyDebugMode(getproctid(), ARK_DEBUGGER_LIB_PATH, instanceId_, isDebugApp, isStartWithDebug);
 }
 
@@ -408,7 +410,9 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             if (isDebugApp) {
                 weak->StopDebugger(option);
             }
-            weak->StartDebugger(option, ARK_DEBUGGER_LIB_PATH, socketFd, isStartWithDebug, instanceId);
+            int32_t tid = weak->ParseHdcRegisterOption(option);
+            const auto &debuggerPostTask = ConnectServerManager::Get().GetDebuggerPostTask(tid);
+            weak->StartDebugger(option, socketFd, isDebugApp, debuggerPostTask);
         }
     });
     if (isDebugApp) {
@@ -425,12 +429,13 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
     EcmaVM* vm = GetEcmaVm();
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
-    ConnectServerManager::Get().StoreDebuggerInfo(instanceId_, reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
+    ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "profiler:%{public}d interval:%{public}d.", profiler, interval);
     jsEnv_->StartProfiler(ARK_DEBUGGER_LIB_PATH, instanceId_, profiler, interval, getproctid(), isDebugApp);
 }
 
-bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer)
+bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer,
+                              bool isABC)
 {
     Extractor extractor(filePath);
     if (!extractor.Init()) {
@@ -439,7 +444,11 @@ bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFull
     }
 
     std::vector<std::string> fileNames;
-    extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
+    if (isABC) {
+        extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
+    } else {
+        extractor.GetSpecifiedTypeFiles(fileNames, ".map");
+    }
     if (fileNames.empty()) {
         TAG_LOGW(
             AAFwkTag::JSRUNTIME, "GetFileBuffer, There's no abc file in hap or hqf %{private}s.", filePath.c_str());
@@ -464,6 +473,21 @@ bool JsRuntime::LoadRepairPatch(const std::string& hqfFile, const std::string& h
     TAG_LOGD(AAFwkTag::JSRUNTIME, "LoadRepairPatch function called.");
     auto vm = GetEcmaVm();
     CHECK_POINTER_AND_RETURN(vm, false);
+
+    std::string patchSoureMapFile;
+    std::vector<uint8_t> soureMapBuffer;
+    if (!GetFileBuffer(hqfFile, patchSoureMapFile, soureMapBuffer, false)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "LoadRepairPatch, get patchSoureMap file buffer failed.");
+        return false;
+    }
+    std::string str(soureMapBuffer.begin(), soureMapBuffer.end());
+    auto sourceMapOperator = jsEnv_->GetSourceMapOperator();
+    if (sourceMapOperator != nullptr) {
+        auto sourceMapObj = sourceMapOperator->GetSourceMapObj();
+        if (sourceMapObj != nullptr) {
+            sourceMapObj->SplitSourceMap(str);
+        }
+    }
 
     std::string patchFile;
     std::vector<uint8_t> patchBuffer;
@@ -1569,15 +1593,28 @@ void JsRuntime::GetPkgContextInfoListMap(const std::map<std::string, std::string
 {
     for (auto it = contextInfoMap.begin(); it != contextInfoMap.end(); it++) {
         std::vector<std::vector<std::string>> pkgContextInfoList;
-        auto jsonObject = nlohmann::json::parse(it->second);
+        std::string filePath = it->second;
+        bool newCreate = false;
+        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(
+            ExtractorUtil::GetLoadFilePath(filePath), newCreate, false);
+        if (!extractor) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s load hapPath failed", it->first.c_str());
+            continue;
+        }
+        std::ostringstream outStream;
+        if (!extractor->ExtractByName("pkgContextInfo.json", outStream)) {
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
+            continue;
+        }
+        auto jsonObject = nlohmann::json::parse(outStream.str(), nullptr, false);
         if (jsonObject.is_discarded()) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
             continue;
         }
-        for (nlohmann::json::iterator it = jsonObject.begin(); it != jsonObject.end(); it++) {
+        for (nlohmann::json::iterator jsonIt = jsonObject.begin(); jsonIt != jsonObject.end(); jsonIt++) {
             std::vector<std::string> items;
-            items.emplace_back(it.key());
-            nlohmann::json itemObject = it.value();
+            items.emplace_back(jsonIt.key());
+            nlohmann::json itemObject = jsonIt.value();
             std::string pkgName = "";
             items.emplace_back(PACKAGE_NAME);
             if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
