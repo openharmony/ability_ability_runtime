@@ -397,7 +397,13 @@ int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bun
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
+
+    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The caller is not system-app, can not use system-api");
+        return ERR_INVALID_OPERATION;
+    }
+
+    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm() && GetInstance()->IsSACall() &&;
     if (!isCallingPermission) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetRunningMultiAppInfoByBundleName, Permission verification failed.");
         return ERR_PERMISSION_DENIED;

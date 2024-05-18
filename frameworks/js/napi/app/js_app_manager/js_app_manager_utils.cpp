@@ -160,7 +160,6 @@ napi_value CreateJsRunningMultiAppInfo(napi_env env, const RunningMultiAppInfo &
     }
     napi_set_named_property(env, object, "bundleName", CreateJsValue(env, info.bundleName));
     napi_set_named_property(env, object, "mode", CreateJsValue(env, info.mode));
-    napi_set_named_property(env, object, "runningMultiInstances", CreateNativeArray(env, info.runningMultiInstances));
     napi_set_named_property(env, object, "runningAppClones", CreateJsRunningAppCloneArray(env, info.runningAppClones));
 
     return object;

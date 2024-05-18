@@ -665,25 +665,29 @@ private:
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string");
             return CreateJsUndefined(env);
         }
-        NapiAsyncTask::CompleteCallback complete =
-            [appManager = appManager_, bundleName](napi_env env, NapiAsyncTask &task, int32_t status) {
+        auto info = std::make_shared<RunningMultiAppInfo>();
+        auto innerErrorCode = std::make_shared<int32_t>(ERR_OK);
+        NapiAsyncTask::ExecuteCallback execute =
+            [appManager = appManager_, bundleName, innerErrorCode, info]() {
                 if (appManager == nullptr) {
                     TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
+                    *innerErrorCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
                     return;
                 }
-                RunningMultiAppInfo info;
-                auto ret = appManager->GetRunningMultiAppInfoByBundleName(bundleName, info);
-                if (ret == 0) {
-                    task.ResolveWithNoError(env, CreateJsRunningMultiAppInfo(env, info));
+                *innerErrorCode = appManager->GetRunningMultiAppInfoByBundleName(bundleName, *info);
+            };     
+        NapiAsyncTask::CompleteCallback complete =
+            [innerErrorCode, info](napi_env env, NapiAsyncTask &task, int32_t status) {
+                if (*innerErrorCode == ERR_OK) {
+                    task.ResolveWithNoError(env, CreateJsRunningMultiAppInfo(env, *info));
                 } else {
-                    task.Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
+                    task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrorCode));
                 }
             };
         napi_value lastParam = nullptr;
         napi_value result = nullptr;
-        NapiAsyncTask::Schedule("JSAppManager::OnGetRunningMultiAppInfo",
-            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::OnGetRunningMultiAppInfo",
+            env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         return result;
     }
 
