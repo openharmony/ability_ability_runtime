@@ -13,10 +13,21 @@
  * limitations under the License.
  */
 
-class StartupTask {
-  onDependenceCompleted(dependence, result) {
-    console.log('onDependenceCompleted');
-  }
-}
+#ifndef OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H
+#define OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H
 
-export default StartupTask;
+#include <cstdint>
+
+namespace OHOS {
+namespace AAFwk {
+class Want;
+}  // namespace AAFwk
+namespace AbilityRuntime {
+class StartupUtil {
+public:
+    static int32_t GetAppIndex(const AAFwk::Want &want);
+    static int32_t BuildAbilityInfoFlag();
+};
+}  // namespace AbilityRuntime
+}  // namespace OHOS
+#endif  // OHOS_ABILITY_RUNTIME_STARTUP_UTIL_H

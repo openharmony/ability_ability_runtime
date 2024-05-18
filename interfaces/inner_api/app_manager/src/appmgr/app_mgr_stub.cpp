@@ -192,6 +192,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleGetRunningProcessesByBundleType;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::SET_APP_ASSERT_PAUSE_STATE_SELF)] =
         &AppMgrStub::HandleSetAppAssertionPauseState;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::START_NATIVE_CHILD_PROCESS)] =
+        &AppMgrStub::HandleStartNativeChildProcess;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -523,6 +525,7 @@ int32_t AppMgrStub::HandleUnregisterApplicationStateObserver(MessageParcel &data
 
 int32_t AppMgrStub::HandleRegisterAbilityForegroundStateObserver(MessageParcel &data, MessageParcel &reply)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     auto callback = iface_cast<AppExecFwk::IAbilityForegroundStateObserver>(data.ReadRemoteObject());
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "Callback is null.");
@@ -1321,5 +1324,21 @@ int32_t AppMgrStub::HandleSetAppAssertionPauseState(MessageParcel &data, Message
     SetAppAssertionPauseState(flag);
     return NO_ERROR;
 }
+
+int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    std::string libName = data.ReadString();
+    int32_t childCount = data.ReadInt32();
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+    int32_t result = StartNativeChildProcess(libName, childCount, callback);
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
+
+    return NO_ERROR;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS
