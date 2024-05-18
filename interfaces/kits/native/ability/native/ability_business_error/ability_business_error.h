@@ -143,8 +143,9 @@ enum class AbilityErrorCode {
 
     // not support twin app.
     ERROR_CODE_MULTI_APP_NOT_SUPPORTED = 16000072,
-    // app twin index does not exist.
-    ERROR_APP_TWIN_INDEX_INVALID = 16000073,
+
+    // app clone index does not exist.
+    ERROR_APP_CLONE_INDEX_INVALID = 16000073,
 
     // invalid caller.
     ERROR_CODE_INVALID_CALLER = 16200001,
