@@ -249,7 +249,8 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
 
     abilityRecord->SetScheduler(scheduler);
     if (DoProcessAttachment(abilityRecord) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "do process attachment failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "do process attachment failed, close the ability.");
+        BatchCloseUIAbility({abilityRecord});
         return ERR_INVALID_VALUE;
     }
     if (abilityRecord->IsStartedByCall()) {
@@ -2218,7 +2219,8 @@ int32_t UIAbilityLifecycleManager::KillProcessWithPrepareTerminate(const std::ve
     return ERR_OK;
 }
 
-void UIAbilityLifecycleManager::BatchCloseUIAbility(std::unordered_set<std::shared_ptr<AbilityRecord>>& abilitySet)
+void UIAbilityLifecycleManager::BatchCloseUIAbility(
+    const std::unordered_set<std::shared_ptr<AbilityRecord>>& abilitySet)
 {
     auto closeTask = [ self = shared_from_this(), abilitySet]() {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "The abilities need to be closed.");
@@ -2251,7 +2253,7 @@ int UIAbilityLifecycleManager::ChangeAbilityVisibility(sptr<IRemoteObject> token
     auto sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     if (sessionInfo->processOptions == nullptr ||
-        sessionInfo->processOptions->processMode != ProcessMode::NEW_PROCESS_ATTACH_TO_STATUS_BAR_ITEM) {
+        !ProcessOptions::IsAttachToStatusBarMode(sessionInfo->processOptions->processMode)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Process options check failed.");
         return ERR_START_OPTIONS_CHECK_FAILED;
     }
