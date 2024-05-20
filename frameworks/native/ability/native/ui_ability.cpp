@@ -803,7 +803,7 @@ void UIAbility::OnDestroy(Rosen::DisplayId displayId)
 void UIAbility::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
     Rosen::DisplayOrientation orientation)
 {
-    TAG_LOGI(AAFwkTag::UIABILITY, "Begin displayId: %{public}" PRIu64 "", displayId);
+    TAG_LOGI(AAFwkTag::UIABILITY, "Begin displayId: %{public}" PRIu64, displayId);
     // Get display
     auto display = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (!display) {
@@ -841,7 +841,7 @@ void UIAbility::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::Dis
 
     OnChangeForUpdateConfiguration(newConfig);
     TAG_LOGD(AAFwkTag::UIABILITY, "End.");
-};
+}
 
 void UIAbility::OnChange(Rosen::DisplayId displayId)
 {
