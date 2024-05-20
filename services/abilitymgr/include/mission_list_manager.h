@@ -319,7 +319,7 @@ public:
 #endif // SUPPORT_GRAPHICS
     void EnableRecoverAbility(int32_t missionId);
 
-    #ifdef ABILITY_COMMAND_FOR_TEST
+#ifdef ABILITY_COMMAND_FOR_TEST
     /**
      * Block ability.
      *
@@ -327,7 +327,7 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int BlockAbility(int abilityRecordId);
-    #endif
+#endif
 
     void UninstallApp(const std::string &bundleName, int32_t uid);
 

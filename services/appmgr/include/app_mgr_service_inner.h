@@ -692,7 +692,7 @@ public:
     virtual int32_t StartRenderProcess(const pid_t hostPid,
                                        const std::string &renderParam,
                                        int32_t ipcFd, int32_t sharedFd,
-                                       int32_t crashFd, pid_t &renderPid);
+                                       int32_t crashFd, pid_t &renderPid, bool isGPU = false);
 
     virtual void AttachRenderProcess(const pid_t pid, const sptr<IRenderScheduler> &scheduler);
 
@@ -996,6 +996,17 @@ public:
     virtual void ExitChildProcessSafelyByChildPid(const pid_t pid);
 
     /**
+     * Start native child process, callde by ChildProcessManager.
+     * @param hostPid Host process pid.
+     * @param childProcessCount current started child process count
+     * @param libName lib file name to be load in child process
+     * @param callback callback for notify start result
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t StartNativeChildProcess(const pid_t hostPid,
+        const std::string &libName, int32_t childProcessCount, const sptr<IRemoteObject> &callback);
+
+    /**
      * Whether the current application process is the last surviving process.
      * @param bundleName To query the bundle name of a process.
      * @return Returns true is final application process, others return false.
@@ -1057,6 +1068,8 @@ public:
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
     void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    virtual void SaveBrowserChannel(const pid_t hostPid, sptr<IRemoteObject> browser);
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1125,7 +1138,8 @@ private:
     void StartProcess(const std::string &appName, const std::string &processName, uint32_t startFlags,
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
-                      bool isPreload = false);
+                      bool isPreload = false, const std::string &moduleName = "", const std::string &abilityName = "",
+                      bool strictMode = false);
 
     /**
      * PushAppFront, Adjust the latest application record to the top level.
@@ -1253,7 +1267,7 @@ private:
     void GetRenderProcesses(const std::shared_ptr<AppRunningRecord> &appRecord, std::vector<RenderProcessInfo> &info);
 
     int StartRenderProcessImpl(const std::shared_ptr<RenderRecord> &renderRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid);
+        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &renderPid, bool isGPU = false);
 
     void OnRenderRemoteDied(const wptr<IRemoteObject> &remote);
 
@@ -1391,7 +1405,12 @@ private:
 
     int32_t CreateStartMsg(const std::string &processName, uint32_t startFlags, const int uid,
         const BundleInfo &bundleInfo, const int32_t bundleIndex, BundleType bundleType,
-        AppSpawnStartMsg &startMsg);
+        AppSpawnStartMsg &startMsg, const std::string &moduleName = "", const std::string &abilityName = "",
+        bool strictMode = false);
+
+    void QueryExtensionSandBox(const std::string &moduleName, const std::string &abilityName,
+        const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg, DataGroupInfoList& dataGroupInfoList,
+        bool strictMode);
 
     int32_t StartPerfProcessByStartMsg(AppSpawnStartMsg &startMsg, const std::string& perfCmd,
         const std::string& debugCmd, bool isSandboxApp);
@@ -1440,6 +1459,7 @@ private:
     ffrt::mutex appStateCallbacksLock_;
     ffrt::mutex renderUidSetLock_;
     ffrt::mutex exceptionLock_;
+    ffrt::mutex browserHostLock_;
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
