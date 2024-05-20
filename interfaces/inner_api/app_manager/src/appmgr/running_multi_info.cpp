@@ -30,7 +30,7 @@ bool RunningMultiAppInfo::ReadFromParcel(Parcel &parcel)
     mode = parcel.ReadInt32();
     int32_t runningAppClonesSize;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningAppClonesSize);
-    if(runningAppClonesSize > MAX_CLONE_APP_NUM) {
+    if (runningAppClonesSize > MAX_CLONE_APP_NUM) {
         return false;
     }
     for (auto i = 0; i < runningAppClonesSize; i++) {
@@ -59,7 +59,7 @@ bool RunningMultiAppInfo::Marshalling(Parcel &parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, Str8ToStr16(bundleName));
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, mode);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, runningAppClones.size());
-    if(runningAppClones.size() > MAX_CLONE_APP_NUM) {
+    if (runningAppClones.size() > MAX_CLONE_APP_NUM) {
         return false;
     }
     for (auto &clone : runningAppClones) {
