@@ -403,7 +403,7 @@ int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bun
         return ERR_INVALID_OPERATION;
     }
 
-    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm() && GetInstance()->IsSACall() &&;
+    bool isCallingPermission = AAFwk::PermissionVerification::GetInstance()->VerifyRunningInfoPerm();
     if (!isCallingPermission) {
         TAG_LOGE(AAFwkTag::APPMGR, "GetRunningMultiAppInfoByBundleName, Permission verification failed.");
         return ERR_PERMISSION_DENIED;
