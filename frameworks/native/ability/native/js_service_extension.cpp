@@ -807,7 +807,7 @@ void JsServiceExtension::OnDestroy(Rosen::DisplayId displayId)
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "exit.");
 }
 
-void JsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject> & token, Rosen::DisplayId displayId,
+void JsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId,
     float density, Rosen::DisplayOrientation orientation)
     {
         TAG_LOGI(AAFwkTag::SERVICE_EXT, "displayId: %{public}" PRIu64"", displayId);
