@@ -836,7 +836,7 @@ void JsServiceExtension::OnDisplayInfoChange(const sptr<IRemoteObject>& token, R
     TAG_LOGD(AAFwkTag::SERVICE_EXT, "Config dump after update: %{public}s", contextConfig->GetName().c_str());
 
     if (configChanged) {
-        auto jsServiceExtension = weak_from_this();
+        auto jsServiceExtension = std::static_pointer_cast<JsServiceExtension>(shared_from_this());
         auto task = [jsServiceExtension]() {
             if (jsServiceExtension) {
                 jsServiceExtension->ConfigurationUpdated();
