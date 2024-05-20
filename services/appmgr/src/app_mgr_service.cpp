@@ -398,7 +398,7 @@ int32_t AppMgrService::GetRunningMultiAppInfoByBundleName(const std::string &bun
         return ERR_INVALID_OPERATION;
     }
 
-    if (!PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
+    if (!AAFwk::PermissionVerification::GetInstance()->JudgeCallerIsAllowedToUseSystemAPI()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "The caller is not system-app, can not use system-api");
         return ERR_INVALID_OPERATION;
     }
