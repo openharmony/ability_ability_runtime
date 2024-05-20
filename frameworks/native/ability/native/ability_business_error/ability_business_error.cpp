@@ -78,7 +78,6 @@ constexpr const char* ERROR_MSG_TARGET_BUNDLE_NOT_EXIST = "The target bundle doe
 constexpr const char* ERROR_MSG_SET_SUPPORTED_PROCESS_CACHE_AGAIN = "Can not set process cache state more than once.";
 constexpr const char* ERROR_MSG_NO_RESIDENT_PERMISSION =
     "The caller application can only set the resident status of the configured process.";
-constexpr const char* ERROR_MSG_APP_TWIN_INDEX_INVALID = "The target app twin with the specified index does not exist.";
 constexpr const char* ERROR_MSG_MULTI_APP_NOT_SUPPORTED = "App clone or multi-instance is not supported.";
 constexpr const char* ERROR_MSG_APP_CLONE_INDEX_INVALID =
     "The target app clone with the specified index does not exist.";
