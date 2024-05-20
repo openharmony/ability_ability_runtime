@@ -200,7 +200,7 @@ protected:
             jsServiceExtension_ = jsServiceExtension;
         }
 
-        void OnDisplayInfoChange(const sptr<IRemoteObject> & token, Rosen::DisplayId displayId, float density,
+        void OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
             Rosen::DisplayOrientation orientation) override
             {
                 auto sptr = jsServiceExtension_.lock();

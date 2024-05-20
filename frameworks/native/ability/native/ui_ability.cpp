@@ -800,7 +800,7 @@ void UIAbility::OnDestroy(Rosen::DisplayId displayId)
     TAG_LOGD(AAFwkTag::UIABILITY, "Called.");
 }
 
-void UIAbility::OnDisplayInfoChange(const sptr<IRemoteObject> & token, Rosen::DisplayId displayId, float density,
+void UIAbility::OnDisplayInfoChange(const sptr<IRemoteObject>& token, Rosen::DisplayId displayId, float density,
     Rosen::DisplayOrientation orientation)
 {
     TAG_LOGI(AAFwkTag::UIABILITY, "Begin displayId: %{public}" PRIu64 "", displayId);
