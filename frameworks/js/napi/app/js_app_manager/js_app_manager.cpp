@@ -675,7 +675,7 @@ private:
                     return;
                 }
                 *innerErrorCode = appManager->GetRunningMultiAppInfoByBundleName(bundleName, *info);
-            };     
+            };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, info](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (*innerErrorCode == ERR_OK) {
