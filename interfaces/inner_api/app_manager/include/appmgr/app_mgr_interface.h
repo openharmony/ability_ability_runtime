@@ -334,11 +334,12 @@ public:
      * @param sharedFd, shared memory file descriptior.
      * @param crashFd, crash signal file descriptior.
      * @param renderPid, created render pid.
+     * @param isGPU, is or not gpu process
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int StartRenderProcess(const std::string &renderParam,
                                    int32_t ipcFd, int32_t sharedFd,
-                                   int32_t crashFd, pid_t &renderPid) = 0;
+                                   int32_t crashFd, pid_t &renderPid, bool isGPU = false) = 0;
 
     /**
      * Render process call this to attach app manager service.
@@ -652,6 +653,18 @@ public:
     }
 
     virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
+
+    /**
+     * Start native child process, callde by ChildProcessManager.
+     * @param libName lib file name to be load in child process
+     * @param childProcessCount current started child process count
+     * @param callback callback for notify start result
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback) = 0;
+
+    virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) = 0;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
