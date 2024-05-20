@@ -1199,9 +1199,11 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         TAG_LOGW(AAFwkTag::APPMGR, "env or exportObj null");
         return nullptr;
     }
+
     std::unique_ptr<JsAppManager> jsAppManager = std::make_unique<JsAppManager>(
         GetAppManagerInstance(), GetAbilityManagerInstance());
     napi_wrap(env, exportObj, jsAppManager.release(), JsAppManager::Finalizer, nullptr, nullptr);
+
     napi_set_named_property(env, exportObj, "ApplicationState", ApplicationStateInit(env));
     napi_set_named_property(env, exportObj, "ProcessState", ProcessStateInit(env));
     napi_set_named_property(env, exportObj, "PreloadMode", PreloadModeInit(env));
@@ -1225,22 +1227,15 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::KillProcessesByBundleName);
     BindNativeFunction(env, exportObj, "clearUpApplicationData", moduleName,
         JsAppManager::ClearUpApplicationData);
-    BindNativeFunction(env, exportObj, "getAppMemorySize", moduleName,
-        JsAppManager::GetAppMemorySize);
-    BindNativeFunction(env, exportObj, "isRamConstrainedDevice", moduleName,
-        JsAppManager::IsRamConstrainedDevice);
-    BindNativeFunction(env, exportObj, "isSharedBundleRunning", moduleName,
-        JsAppManager::IsSharedBundleRunning);
-    BindNativeFunction(env, exportObj, "getProcessMemoryByPid", moduleName,
-        JsAppManager::GetProcessMemoryByPid);
+    BindNativeFunction(env, exportObj, "getAppMemorySize", moduleName, JsAppManager::GetAppMemorySize);
+    BindNativeFunction(env, exportObj, "isRamConstrainedDevice", moduleName, JsAppManager::IsRamConstrainedDevice);
+    BindNativeFunction(env, exportObj, "isSharedBundleRunning", moduleName, JsAppManager::IsSharedBundleRunning);
+    BindNativeFunction(env, exportObj, "getProcessMemoryByPid", moduleName, JsAppManager::GetProcessMemoryByPid);
     BindNativeFunction(env, exportObj, "getRunningProcessInfoByBundleName", moduleName,
         JsAppManager::GetRunningProcessInfoByBundleName);
-    BindNativeFunction(env, exportObj, "getRunningMultiAppInfo", moduleName,
-        JsAppManager::GetRunningMultiAppInfo);
-    BindNativeFunction(env, exportObj, "isApplicationRunning", moduleName,
-        JsAppManager::IsApplicationRunning);
-    BindNativeFunction(env, exportObj, "preloadApplication", moduleName,
-        JsAppManager::PreloadApplication);
+    BindNativeFunction(env, exportObj, "getRunningMultiAppInfo", moduleName, JsAppManager::GetRunningMultiAppInfo);
+    BindNativeFunction(env, exportObj, "isApplicationRunning", moduleName, JsAppManager::IsApplicationRunning);
+    BindNativeFunction(env, exportObj, "preloadApplication", moduleName, JsAppManager::PreloadApplication);
     BindNativeFunction(env, exportObj, "getRunningProcessInformationByBundleType", moduleName,
         JsAppManager::GetRunningProcessInformationByBundleType);
     TAG_LOGD(AAFwkTag::APPMGR, "end");
