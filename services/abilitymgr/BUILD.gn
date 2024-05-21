@@ -51,8 +51,6 @@ config("abilityms_config") {
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
     "${ability_runtime_utils_path}/global/constant",
     "${ability_runtime_utils_path}/server/constant",
-    "${bgtaskmgr_frameworks_path}/common/include",
-    "${bgtaskmgr_frameworks_path}/include",
     "${init_path}/interfaces/innerkits/include/syspara/",
     "${bundlefwk_inner_api_path}/appexecfwk_core/include",
   ]
@@ -113,6 +111,7 @@ ohos_shared_library("abilityms") {
   include_dirs = [ "${ability_runtime_services_path}/appdfr/include" ]
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
     "${ability_runtime_innerkits_path}/ability_manager:mission_info",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",

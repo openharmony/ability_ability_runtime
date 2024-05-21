@@ -30,7 +30,6 @@ config("wantagent_innerkits_public_config") {
   ]
 
   include_dirs = [
-    "${ability_base_kits_path}/configuration/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_innerkits_path}/ability_manager/include",
     "${ability_runtime_innerkits_path}/wantagent/include",
@@ -43,7 +42,11 @@ config("wantagent_innerkits_public_config") {
 }
 
 ohos_shared_library("wantagent_innerkits") {
-  include_dirs = [ "${ability_runtime_services_path}/common/include" ]
+  include_dirs = [
+    "${ability_runtime_services_path}/common/include",
+    "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
+    "${ability_runtime_path}/interfaces/inner_api/deps_wrapper/include",
+  ]
 
   sources = [
     "${ability_runtime_services_path}/abilitymgr/src/sender_info.cpp",
@@ -67,11 +70,12 @@ ohos_shared_library("wantagent_innerkits") {
   public_configs = [ ":wantagent_innerkits_public_config" ]
 
   deps = [
-    "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/error_utils:ability_runtime_error_util",
   ]
 
   external_deps = [
+    "ability_base:session_info",
     "ability_base:want",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -83,6 +87,7 @@ ohos_shared_library("wantagent_innerkits") {
   ]
 
   public_external_deps = [
+    "ability_base:configuration",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "eventhandler:libeventhandler",
