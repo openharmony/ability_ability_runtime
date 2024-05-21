@@ -526,7 +526,7 @@ int32_t AppMgrClient::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecF
         TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
         return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
     }
-    return service->GetProcessStateByPid(pid, info);
+    return service->GetRunningProcessInfoByPid(pid, info);
 }
 
 void AppMgrClient::SetAbilityForegroundingFlagToAppRecord(const pid_t pid) const
