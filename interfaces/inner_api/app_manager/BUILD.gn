@@ -17,7 +17,6 @@ import("//foundation/ability/ability_runtime/ability_runtime.gni")
 config("appmgr_sdk_config") {
   include_dirs = [
     "include/appmgr",
-    "${ability_base_kits_path}/configuration/include",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
     "${ability_runtime_innerkits_path}/ability_manager/include",
   ]
@@ -103,6 +102,7 @@ ohos_shared_library("app_manager") {
     "src/appmgr/render_state_data.cpp",
     "src/appmgr/render_state_observer_proxy.cpp",
     "src/appmgr/render_state_observer_stub.cpp",
+    "src/appmgr/running_multi_info.cpp",
     "src/appmgr/running_process_info.cpp",
     "src/appmgr/start_specified_ability_response_proxy.cpp",
     "src/appmgr/start_specified_ability_response_stub.cpp",
@@ -123,7 +123,6 @@ ohos_shared_library("app_manager") {
   deps = [ "${ability_runtime_path}/utils/global/freeze:freeze_util" ]
 
   external_deps = [
-    "ability_base:configuration",
     "c_utils:utils",
     "faultloggerd:libdfx_dumpcatcher",
     "faultloggerd:libfaultloggerd",
@@ -136,8 +135,10 @@ ohos_shared_library("app_manager") {
     "samgr:samgr_proxy",
   ]
   public_external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
+    "image_framework:image_native",
   ]
 
   if (background_task_mgr_continuous_task_enable) {

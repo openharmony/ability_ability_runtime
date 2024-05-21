@@ -39,13 +39,13 @@ ohos_shared_library("napi_common") {
 
   deps = [
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
+    "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:process_options",
     "${ability_runtime_innerkits_path}/runtime:runtime",
   ]
 
   external_deps = [
     "ability_base:base",
-    "ability_base:configuration",
     "ability_base:want",
     "access_token:libtokenid_sdk",
     "c_utils:utils",
@@ -58,6 +58,7 @@ ohos_shared_library("napi_common") {
   ]
 
   public_external_deps = [
+    "ability_base:configuration",
     "bundle_framework:appexecfwk_core",
     "form_fwk:fmskit_native",
     "form_fwk:form_manager",

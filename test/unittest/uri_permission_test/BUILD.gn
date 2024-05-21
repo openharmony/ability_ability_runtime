@@ -44,6 +44,7 @@ ohos_unittest("uri_permission_test") {
     "relational_store:native_rdb",
 
     # "ipc:ipc_core",
+    "ability_base:configuration",
     "storage_service:storage_manager_sa_proxy",
   ]
 }
