@@ -147,6 +147,8 @@ const std::string RENDER_PROCESS_NAME = ":render";
 const std::string RENDER_PROCESS_TYPE = "render";
 const std::string GPU_PROCESS_NAME = ":gpu";
 const std::string GPU_PROCESS_TYPE = "gpu";
+const std::string FONT_WGHT_SCALE = "persist.sys.font_wght_scale_for_user0";
+const std::string FONT_SCALE = "persist.sys.font_scale_for_user0";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -1826,7 +1828,6 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     bool isKeepAlive = bundleInfo.isKeepAlive && bundleInfo.singleton;
     appRecord->SetKeepAliveEnableState(isKeepAlive);
     appRecord->SetEmptyKeepAliveAppState(false);
-    appRecord->SetSingleton(bundleInfo.singleton);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId);
@@ -4046,6 +4047,12 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     auto deviceType = GetDeviceType();
     TAG_LOGI(AAFwkTag::APPMGR, "current deviceType is %{public}s", deviceType);
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
+    auto fontSizeScale = OHOS::system::GetParameter(FONT_SCALE, "1.0");
+    auto fontWeightScale = OHOS::system::GetParameter(FONT_WGHT_SCALE, "1.0");
+    TAG_LOGI(AAFwkTag::APPMGR, "current fontSizeScale is: %{public}s, fontWeightScale is: %{public}s",
+        fontSizeScale.c_str(), fontWeightScale.c_str());
+    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, fontSizeScale);
+    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, fontWeightScale);
 }
 
 std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration()
@@ -6420,7 +6427,7 @@ int32_t AppMgrServiceInner::UnregisterRenderStateObserver(const sptr<IRenderStat
     return DelayedSingleton<RenderStateObserverManager>::GetInstance()->UnregisterRenderStateObserver(observer);
 }
 
-void AppMgrServiceInner::SetAppAssertionPauseState(int32_t pid, bool flag)
+void AppMgrServiceInner::SetAppAssertionPauseState(bool flag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
@@ -6433,14 +6440,10 @@ void AppMgrServiceInner::SetAppAssertionPauseState(int32_t pid, bool flag)
         return;
     }
 
-    auto callerUid = IPCSkeleton::GetCallingUid();
-    if (callerUid != FOUNDATION_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Caller is not foundation.");
-        return;
-    }
-    auto appRecord = GetAppRunningRecordByPid(pid);
+    auto callerPid = IPCSkeleton::GetCallingRealPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "No such appRecord pid is %{public}d.", pid);
+        TAG_LOGE(AAFwkTag::APPMGR, "No such appRecord pid is %{public}d.", callerPid);
         return;
     }
     appRecord->SetAssertionPauseFlag(flag);

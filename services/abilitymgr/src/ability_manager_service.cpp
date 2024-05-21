@@ -454,8 +454,6 @@ void AbilityManagerService::InitPushTask()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "taskHandler_ is nullptr.");
         return;
     }
-    auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
-    taskHandler_->SubmitTask(startResidentAppsTask, "StartResidentApps");
 
     auto initStartupFlagTask = [aams = shared_from_this()]() { aams->InitStartupFlag(); };
     taskHandler_->SubmitTask(initStartupFlagTask, "InitStartupFlag");
@@ -2263,7 +2261,13 @@ void AbilityManagerService::UnSubscribeBackgroundTask()
 
 void AbilityManagerService::SubscribeBundleEventCallback()
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "SubscribeBundleEventCallback to receive hap updates.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "SubscribeBundleEventCallback begin.");
+    if (taskHandler_) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "submit StartResidentApps task.");
+        auto startResidentAppsTask = [aams = shared_from_this()]() { aams->StartResidentApps(); };
+        taskHandler_->SubmitTask(startResidentAppsTask, "StartResidentApps");
+    }
+
     if (abilityBundleEventCallback_) {
         return;
     }
@@ -8648,6 +8652,7 @@ int AbilityManagerService::CheckCallOtherExtensionPermission(const AbilityReques
         return ERR_OK;
     }
     if (extensionType == AppExecFwk::ExtensionAbilityType::WINDOW) {
+        CHECK_CALLER_IS_SYSTEM_APP;
         return ERR_OK;
     }
     if (extensionType == AppExecFwk::ExtensionAbilityType::ADS_SERVICE) {
@@ -10103,10 +10108,10 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
     uint64_t assertFaultSessionId = reinterpret_cast<uint64_t>(remoteCallback.GetRefPtr());
     want.SetParam(Want::PARAM_ASSERT_FAULT_SESSION_ID, std::to_string(assertFaultSessionId));
     want.SetParam(ASSERT_FAULT_DETAIL, wantParams.GetStringParam(ASSERT_FAULT_DETAIL));
-    auto connection = std::make_shared<ModalSystemAssertUIExtension>();
+    auto &connection = AbilityRuntime::ModalSystemAssertUIExtension::GetInstance();
     want.SetParam(UIEXTENSION_MODAL_TYPE, 1);
-    if (connection == nullptr || !IN_PROCESS_CALL(connection->CreateModalUIExtension(want))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Connection is nullptr or create modal ui extension failed.");
+    if (!IN_PROCESS_CALL(connection.CreateModalUIExtension(want))) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Create modal ui extension failed.");
         return ERR_INVALID_VALUE;
     }
     auto callbackDeathMgr = DelayedSingleton<AbilityRuntime::AssertFaultCallbackDeathMgr>::GetInstance();
