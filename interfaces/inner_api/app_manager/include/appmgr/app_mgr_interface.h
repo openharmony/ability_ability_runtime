@@ -472,7 +472,10 @@ public:
      * @param info Output parameters, return runningProcessInfo.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) = 0;
+    virtual int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info)
+    {
+        return 0;
+    }
 
     /**
      * get memorySize by pid.
