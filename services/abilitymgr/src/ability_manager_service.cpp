@@ -10115,15 +10115,13 @@ int32_t AbilityManagerService::RequestAssertFaultDialog(
         return ERR_INVALID_VALUE;
     }
     auto debugDeal = ConnectInitAbilityDebugDeal();
+    Want want;
 #ifdef SUPPORT_GRAPHICS
     auto sysDialog = DelayedSingleton<SystemDialogScheduler>::GetInstance();
     if (sysDialog == nullptr || debugDeal == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "sysDialog or debugDeal is nullptr.");
         return ERR_INVALID_VALUE;
     }
-#endif // SUPPORT_GRAPHICS
-    Want want;
-#ifdef SUPPORT_GRAPHICS
     if (!sysDialog->GetAssertFaultDialogWant(want)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get assert fault dialog want failed.");
         return ERR_INVALID_VALUE;

@@ -168,7 +168,6 @@ public:
 #ifdef SUPPORT_GRAPHICS
     void UpdateMissionSnapshot(int32_t missionId, const std::shared_ptr<Media::PixelMap> &pixelMap, bool isPrivate);
 
-
     /**
      * @brief Get the Snapshot object
      * @param missionId Indicates this mission id.
