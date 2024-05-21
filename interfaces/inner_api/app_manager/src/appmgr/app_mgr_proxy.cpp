@@ -1348,7 +1348,7 @@ int32_t AppMgrProxy::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFw
         return ERR_INVALID_DATA;
     }
 
-    auto ret = SendRequest(AppMgrInterfaceCode::GET_PROCESS_STATE_BY_PID, data, reply, option);
+    auto ret = SendRequest(AppMgrInterfaceCode::GET_RUNNING_PROCESS_INFO_BY_PID, data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
         return ret;
