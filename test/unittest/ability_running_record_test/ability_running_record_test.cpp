@@ -15,10 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#define private public
 #include "ability_running_record.h"
-#undef private
-
 #include "app_state_callback_host.h"
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
@@ -79,7 +76,7 @@ HWTEST_F(AbilityRunningRecordTest, GetName_001, TestSize.Level1)
     abilityInfo->name = GetTestAbilityInfoName();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto name = record->GetName();
     ASSERT_EQ(name, "test_ability_info_name");
@@ -101,7 +98,7 @@ HWTEST_F(AbilityRunningRecordTest, GetBundleName_001, TestSize.Level1)
     abilityInfo->bundleName = GetTestBundleName();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto name = record->GetBundleName();
     ASSERT_EQ(name, "test_bundle_name");
@@ -123,7 +120,7 @@ HWTEST_F(AbilityRunningRecordTest, GetModuleName_001, TestSize.Level1)
     abilityInfo->moduleName = GetTestModuleName();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto name = record->GetModuleName();
     ASSERT_EQ(name, "test_module_name");
@@ -144,7 +141,7 @@ HWTEST_F(AbilityRunningRecordTest, GetAbilityInfo_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetAbilityInfo();
     ASSERT_NE(iret, nullptr);
@@ -165,7 +162,7 @@ HWTEST_F(AbilityRunningRecordTest, GetWant_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetWant();
     ASSERT_EQ(iret, nullptr);
@@ -186,7 +183,7 @@ HWTEST_F(AbilityRunningRecordTest, SetWant_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     const std::shared_ptr<AAFwk::Want> want = std::make_shared<AAFwk::Want>();
     record->SetWant(want);
@@ -207,7 +204,7 @@ HWTEST_F(AbilityRunningRecordTest, GetToken_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetToken();
     ASSERT_NE(iret, nullptr);
@@ -228,7 +225,7 @@ HWTEST_F(AbilityRunningRecordTest, SetState_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     record->SetState(AbilityState::ABILITY_STATE_CREATE);
     TAG_LOGD(AAFwkTag::TEST, "SetState_001 end.");
@@ -248,7 +245,7 @@ HWTEST_F(AbilityRunningRecordTest, GetState_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetState();
     ASSERT_EQ(iret, AbilityState::ABILITY_STATE_CREATE);
@@ -269,7 +266,7 @@ HWTEST_F(AbilityRunningRecordTest, IsSameState_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->IsSameState(AbilityState::ABILITY_STATE_CREATE);
     ASSERT_EQ(iret, true);
@@ -290,7 +287,7 @@ HWTEST_F(AbilityRunningRecordTest, GetLastLaunchTime_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetLastLaunchTime();
     ASSERT_EQ(iret, 0);
@@ -311,7 +308,7 @@ HWTEST_F(AbilityRunningRecordTest, GetPreToken_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetPreToken();
     ASSERT_EQ(iret, nullptr);
@@ -332,7 +329,7 @@ HWTEST_F(AbilityRunningRecordTest, SetPreToken_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     sptr<IRemoteObject> pretoken = new MockAbilityToken();
     record->SetPreToken(pretoken);
@@ -353,7 +350,7 @@ HWTEST_F(AbilityRunningRecordTest, SetVisibility_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     const int32_t visibility = 1;
     record->SetVisibility(visibility);
@@ -374,7 +371,7 @@ HWTEST_F(AbilityRunningRecordTest, GetVisibility_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetVisibility();
     ASSERT_EQ(iret, 0);
@@ -395,7 +392,7 @@ HWTEST_F(AbilityRunningRecordTest, SetPerceptibility_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     const int32_t perceptibility = 1;
     record->SetPerceptibility(perceptibility);
@@ -416,7 +413,7 @@ HWTEST_F(AbilityRunningRecordTest, GetPerceptibility_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetPerceptibility();
     ASSERT_EQ(iret, 0);
@@ -437,7 +434,7 @@ HWTEST_F(AbilityRunningRecordTest, SetConnectionState_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     const int32_t connectionState = 1;
     record->SetConnectionState(connectionState);
@@ -458,7 +455,7 @@ HWTEST_F(AbilityRunningRecordTest, GetConnectionState_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetConnectionState();
     ASSERT_EQ(iret, 0);
@@ -479,7 +476,7 @@ HWTEST_F(AbilityRunningRecordTest, SetEventId_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     const int64_t eventId = 1;
     record->SetEventId(eventId);
@@ -500,7 +497,7 @@ HWTEST_F(AbilityRunningRecordTest, GetEventId_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetEventId();
     ASSERT_EQ(iret, 0);
@@ -521,7 +518,7 @@ HWTEST_F(AbilityRunningRecordTest, SetTerminating_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     record->SetTerminating();
     TAG_LOGD(AAFwkTag::TEST, "SetTerminating_001 end.");
@@ -541,7 +538,7 @@ HWTEST_F(AbilityRunningRecordTest, IsTerminating_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->IsTerminating();
     ASSERT_EQ(iret, false);
@@ -562,7 +559,7 @@ HWTEST_F(AbilityRunningRecordTest, SetOwnerUserId_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     int32_t ownerUserId = 1;
     record->SetOwnerUserId(ownerUserId);
@@ -583,7 +580,7 @@ HWTEST_F(AbilityRunningRecordTest, GetOwnerUserId_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetOwnerUserId();
     ASSERT_EQ(iret, -1);
@@ -604,7 +601,7 @@ HWTEST_F(AbilityRunningRecordTest, SetIsSingleUser_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     bool flag = true;
     record->SetIsSingleUser(flag);
@@ -625,7 +622,7 @@ HWTEST_F(AbilityRunningRecordTest, IsSingleUser_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->IsSingleUser();
     ASSERT_EQ(iret, false);
@@ -646,7 +643,7 @@ HWTEST_F(AbilityRunningRecordTest, UpdateFocusState_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     bool isFocus = true;
     record->UpdateFocusState(isFocus);
@@ -667,7 +664,7 @@ HWTEST_F(AbilityRunningRecordTest, GetFocusFlag_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetFocusFlag();
     ASSERT_EQ(iret, false);
@@ -688,7 +685,7 @@ HWTEST_F(AbilityRunningRecordTest, SetUIExtensionAbilityId_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     const int32_t uiExtensionAbilityId = 1;
     record->SetUIExtensionAbilityId(uiExtensionAbilityId);
@@ -709,7 +706,7 @@ HWTEST_F(AbilityRunningRecordTest, GetUIExtensionAbilityId_001, TestSize.Level1)
     std::shared_ptr<AbilityInfo> abilityInfo = std::make_shared<AbilityInfo>();
     sptr<IRemoteObject> token = new MockAbilityToken();
     int32_t abilityRecordId = 1;
-    std::shared_ptr<AbilityRunningRecord> record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
+    auto record = std::make_shared<AbilityRunningRecord>(abilityInfo, token, abilityRecordId);
     ASSERT_NE(record, nullptr);
     auto iret = record->GetUIExtensionAbilityId();
     ASSERT_EQ(iret, 0);
