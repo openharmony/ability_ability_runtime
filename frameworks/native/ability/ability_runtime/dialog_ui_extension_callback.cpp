@@ -48,9 +48,8 @@ void DialogUIExtensionCallback::OnError()
         TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
         return;
     }
-#ifdef SUPPORT_GRAPHICS   
+#ifdef SUPPORT_GRAPHICS
     abilityCallback->EraseUIExtension(sessionId_);
-
     if (uiContent_ == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ is nullptr.");
         return;
@@ -67,7 +66,7 @@ void DialogUIExtensionCallback::OnDestroy()
         TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
         return;
     }
-#ifdef SUPPORT_GRAPHICS  
+#ifdef SUPPORT_GRAPHICS
     abilityCallback->EraseUIExtension(sessionId_);
 #endif // SUPPORT_GRAPHICS
 }

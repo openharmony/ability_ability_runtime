@@ -1530,7 +1530,7 @@ void FAAbilityThread::UpdateSessionToken(sptr<IRemoteObject> sessionToken)
         TAG_LOGE(AAFwkTag::FA, "current ability is nullptr");
         return;
     }
-#ifdef SUPPORT_GRAPHICS   
+#ifdef SUPPORT_GRAPHICS
     currentAbility_->UpdateSessionToken(sessionToken);
 #endif //SUPPORT_GRAPHICS
 }

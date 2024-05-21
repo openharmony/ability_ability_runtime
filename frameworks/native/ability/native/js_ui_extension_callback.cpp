@@ -27,7 +27,7 @@
 
 namespace OHOS {
 namespace AbilityRuntime {
-#ifdef SUPPORT_GRAPHICS    
+#ifdef SUPPORT_GRAPHICS
 constexpr const char* ERROR_MSG_INNER = "Inner error.";
 #endif // SUPPORT_GRAPHICS
 JsUIExtensionCallback::~JsUIExtensionCallback()
