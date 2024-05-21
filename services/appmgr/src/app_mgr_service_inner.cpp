@@ -3236,7 +3236,8 @@ void AppMgrServiceInner::GetRunningProcessInfoByToken(
     appRunningManager_->GetRunningProcessInfoByToken(token, info);
 }
 
-int32_t AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const
+int32_t AppMgrServiceInner::GetRunningProcessInfoByPid(const pid_t pid,
+    OHOS::AppExecFwk::RunningProcessInfo &info) const
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!CheckGetRunningInfoPermission()) {
