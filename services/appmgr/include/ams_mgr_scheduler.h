@@ -276,14 +276,6 @@ public:
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable) override;
 
     /**
-     * Set application assertion pause state.
-     *
-     * @param pid App process pid.
-     * @param flag assertion pause state.
-     */
-    void SetAppAssertionPauseState(int32_t pid, bool flag) override;
-
-    /**
      * To clear the process by ability token.
      *
      * @param token the unique identification to the ability.

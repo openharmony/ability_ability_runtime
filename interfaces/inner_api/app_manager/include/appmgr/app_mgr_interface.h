@@ -679,6 +679,13 @@ public:
     virtual int32_t SetSupportedProcessCacheSelf(bool isSupport) = 0;
 
     /**
+     * Set application assertion pause state.
+     *
+     * @param flag assertion pause state.
+     */
+    virtual void SetAppAssertionPauseState(bool flag) {}
+
+    /**
      * Start native child process, callde by ChildProcessManager.
      * @param libName lib file name to be load in child process
      * @param childProcessCount current started child process count
