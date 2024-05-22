@@ -31,7 +31,7 @@
 #include "start_options.h"
 #include "want.h"
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 #include "pixel_map.h"
 #endif
 
@@ -327,7 +327,7 @@ public:
     virtual void UnregisterAbilityLifecycleObserver(
         const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer) = 0;
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     /**
      * @brief Set mission label of this ability.
      *

@@ -1836,7 +1836,7 @@ bool AppRunningRecord::IsAbilitytiesBackground()
     }
     return true;
 }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 void AppRunningRecord::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
@@ -1886,7 +1886,7 @@ void AppRunningRecord::OnWindowVisibilityChanged(
         ScheduleBackgroundRunning();
     }
 }
-#endif //SUPPORT_GRAPHICS
+#endif //SUPPORT_SCREEN
 
 bool AppRunningRecord::IsContinuousTask()
 {

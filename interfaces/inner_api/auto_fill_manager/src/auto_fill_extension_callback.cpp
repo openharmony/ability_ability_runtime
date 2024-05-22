@@ -38,9 +38,10 @@ constexpr static char WANT_PARAMS_FILL_CONTENT[] = "ohos.ability.params.fillCont
 void AutoFillExtensionCallback::OnResult(int32_t errCode, const AAFwk::Want &want)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called, result code is %{public}d.", errCode);
+#ifdef SUPPORT_GRAPHICS
     AutoFillManager::GetInstance().RemoveEvent(eventId_);
     CloseModalUIExtension();
-
+#endif // SUPPORT_GRAPHICS
     if (autoFillWindowType_ == AutoFill::AutoFillWindowType::POPUP_WINDOW) {
         isOnResult_ = true;
         want_ = want;
@@ -60,9 +61,10 @@ void AutoFillExtensionCallback::OnResult(int32_t errCode, const AAFwk::Want &wan
 void AutoFillExtensionCallback::OnRelease(int32_t errCode)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called, result code is %{public}d.", errCode);
+#ifdef SUPPORT_GRAPHICS
     AutoFillManager::GetInstance().RemoveEvent(eventId_);
     CloseModalUIExtension();
-
+#endif // SUPPORT_GRAPHICS
     if (errCode != 0) {
         SendAutoFillFailed(AutoFill::AUTO_FILL_RELEASE_FAILED);
     }
@@ -72,9 +74,10 @@ void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called, errcode is %{public}d, name is %{public}s, message is %{public}s",
         errCode, name.c_str(), message.c_str());
+#ifdef SUPPORT_GRAPHICS
     AutoFillManager::GetInstance().RemoveEvent(eventId_);
     CloseModalUIExtension();
-
+#endif // SUPPORT_GRAPHICS
     if (errCode != 0) {
         SendAutoFillFailed(AutoFill::AUTO_FILL_ON_ERROR);
     }
@@ -177,7 +180,9 @@ void AutoFillExtensionCallback::onDestroy()
         return;
     }
     SendAutoFillFailed(AutoFill::AUTO_FILL_CANCEL);
+#ifdef SUPPORT_GRAPHICS
     CloseModalUIExtension();
+#endif
 }
 
 void AutoFillExtensionCallback::SetFillRequestCallback(const std::shared_ptr<IFillRequestCallback> &callback)
@@ -237,7 +242,9 @@ AbilityBase::ViewData AutoFillExtensionCallback::GetViewData()
 
 void AutoFillExtensionCallback::HandleTimeOut()
 {
+#ifdef SUPPORT_GRAPHICS
     CloseModalUIExtension();
+#endif
     SendAutoFillFailed(AutoFill::AUTO_FILL_REQUEST_TIME_OUT);
 }
 

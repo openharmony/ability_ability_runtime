@@ -52,7 +52,7 @@
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "itest_observer.h"
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
 #include "mem_mgr_client.h"
@@ -84,9 +84,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 using namespace OHOS::Rosen;
-#endif //SUPPORT_GRAPHICS
+#endif //SUPPORT_SCREEN
 using namespace OHOS::Security;
 
 namespace {
@@ -149,6 +149,8 @@ const std::string RENDER_PROCESS_NAME = ":render";
 const std::string RENDER_PROCESS_TYPE = "render";
 const std::string GPU_PROCESS_NAME = ":gpu";
 const std::string GPU_PROCESS_TYPE = "gpu";
+const std::string FONT_WGHT_SCALE = "persist.sys.font_wght_scale_for_user0";
+const std::string FONT_SCALE = "persist.sys.font_scale_for_user0";
 const int32_t SIGNAL_KILL = 9;
 constexpr int32_t USER_SCALE = 200000;
 #define ENUM_TO_STRING(s) #s
@@ -1828,7 +1830,6 @@ std::shared_ptr<AppRunningRecord> AppMgrServiceInner::CreateAppRunningRecord(spt
     bool isKeepAlive = bundleInfo.isKeepAlive && bundleInfo.singleton;
     appRecord->SetKeepAliveEnableState(isKeepAlive);
     appRecord->SetEmptyKeepAliveAppState(false);
-    appRecord->SetSingleton(bundleInfo.singleton);
     appRecord->SetTaskHandler(taskHandler_);
     appRecord->SetEventHandler(eventHandler_);
     appRecord->AddModule(appInfo, abilityInfo, token, hapModuleInfo, want, abilityRecordId);
@@ -4027,7 +4028,7 @@ void AppMgrServiceInner::InitGlobalConfiguration()
         return;
     }
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     // Currently only this interface is known
     auto language = OHOS::Global::I18n::LocaleConfig::GetSystemLanguage();
     TAG_LOGI(AAFwkTag::APPMGR, "current global language is : %{public}s", language.c_str());
@@ -4047,6 +4048,12 @@ void AppMgrServiceInner::InitGlobalConfiguration()
     auto deviceType = GetDeviceType();
     TAG_LOGI(AAFwkTag::APPMGR, "current deviceType is %{public}s", deviceType);
     configuration_->AddItem(AAFwk::GlobalConfigurationKey::DEVICE_TYPE, deviceType);
+    auto fontSizeScale = OHOS::system::GetParameter(FONT_SCALE, "1.0");
+    auto fontWeightScale = OHOS::system::GetParameter(FONT_WGHT_SCALE, "1.0");
+    TAG_LOGI(AAFwkTag::APPMGR, "current fontSizeScale is: %{public}s, fontWeightScale is: %{public}s",
+        fontSizeScale.c_str(), fontWeightScale.c_str());
+    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE, fontSizeScale);
+    configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE, fontWeightScale);
 }
 
 std::shared_ptr<AppExecFwk::Configuration> AppMgrServiceInner::GetConfiguration()
@@ -4680,13 +4687,13 @@ void AppMgrServiceInner::AddWatchParameter()
 void AppMgrServiceInner::InitFocusListener()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "begin initFocus listener.");
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     if (focusListener_) {
         return;
     }
 
     focusListener_ = new WindowFocusChangedListener(shared_from_this(), taskHandler_);
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
     auto registerTask = [innerService = shared_from_this()]() {
         if (innerService) {
             TAG_LOGI(AAFwkTag::APPMGR, "RegisterFocusListener task");
@@ -4702,30 +4709,30 @@ void AppMgrServiceInner::InitFocusListener()
 void AppMgrServiceInner::RegisterFocusListener()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "RegisterFocusListener begin");
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     if (!focusListener_) {
         TAG_LOGE(AAFwkTag::APPMGR, "no focusListener_");
         return;
     }
     WindowManager::GetInstance().RegisterFocusChangedListener(focusListener_);
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
     TAG_LOGI(AAFwkTag::APPMGR, "RegisterFocusListener end");
 }
 
 void AppMgrServiceInner::FreeFocusListener()
 {
     TAG_LOGI(AAFwkTag::APPMGR, "FreeFocusListener begin");
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     if (!focusListener_) {
         TAG_LOGE(AAFwkTag::APPMGR, "no focusListener_");
         return;
     }
     WindowManager::GetInstance().UnregisterFocusChangedListener(focusListener_);
     focusListener_ = nullptr;
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
     TAG_LOGI(AAFwkTag::APPMGR, "FreeFocusListener end");
 }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 void AppMgrServiceInner::HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo)
 {
     if (!focusChangeInfo) {
@@ -4844,7 +4851,7 @@ void AppMgrServiceInner::HandleWindowVisibilityChanged(
     }
     appRunningManager_->OnWindowVisibilityChanged(windowVisibilityInfos);
 }
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 void AppMgrServiceInner::PointerDeviceEventCallback(const char *key, const char *value, void *context)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "%{public}s called.", __func__);
@@ -6428,7 +6435,7 @@ int32_t AppMgrServiceInner::UnregisterRenderStateObserver(const sptr<IRenderStat
     return DelayedSingleton<RenderStateObserverManager>::GetInstance()->UnregisterRenderStateObserver(observer);
 }
 
-void AppMgrServiceInner::SetAppAssertionPauseState(int32_t pid, bool flag)
+void AppMgrServiceInner::SetAppAssertionPauseState(bool flag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
@@ -6441,14 +6448,10 @@ void AppMgrServiceInner::SetAppAssertionPauseState(int32_t pid, bool flag)
         return;
     }
 
-    auto callerUid = IPCSkeleton::GetCallingUid();
-    if (callerUid != FOUNDATION_UID) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Caller is not foundation.");
-        return;
-    }
-    auto appRecord = GetAppRunningRecordByPid(pid);
+    auto callerPid = IPCSkeleton::GetCallingRealPid();
+    auto appRecord = GetAppRunningRecordByPid(callerPid);
     if (appRecord == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "No such appRecord pid is %{public}d.", pid);
+        TAG_LOGE(AAFwkTag::APPMGR, "No such appRecord pid is %{public}d.", callerPid);
         return;
     }
     appRecord->SetAssertionPauseFlag(flag);

@@ -751,7 +751,7 @@ public:
     int32_t NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
 
     int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
@@ -760,7 +760,7 @@ public:
      */
     void HandleWindowVisibilityChanged(
             const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
-#endif //SUPPORT_GRAPHICS
+#endif //SUPPORT_SCREEN
     /**
      * Set the current userId, only used by abilityMgr.
      *
@@ -1053,7 +1053,7 @@ public:
 
     int32_t SignRestartAppFlag(const std::string &bundleName);
 
-    void SetAppAssertionPauseState(int32_t pid, bool flag);
+    void SetAppAssertionPauseState(bool flag);
 
     void SetKeepAliveEnableState(const std::string &bundleName, bool enable);
 
@@ -1478,10 +1478,10 @@ private:
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
-#endif //SUPPORT_GRAPHICS
+#endif //SUPPORT_SCREEN
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
     std::map<std::string, bool> waitingDebugBundleList_;
