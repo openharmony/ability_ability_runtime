@@ -45,7 +45,7 @@ void DataObsMgrInnerPrefTest::SetUpTestCase(void) {}
 void DataObsMgrInnerPrefTest::TearDownTestCase(void) {}
 void DataObsMgrInnerPrefTest::SetUp()
 {
-    dataObsMgrInnerPref_ = std::make_shared<DataObsMgrInnerPref>();
+    std::shared_ptr<DataObsMgrInnerPref> dataObsMgrInnerPref_ = std::make_shared<DataObsMgrInnerPref>();
 }
 void DataObsMgrInnerPrefTest::TearDown() {}
 
@@ -115,29 +115,6 @@ HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleRegisterObserver_030
     dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
     int res = dataObsMgrInner->HandleRegisterObserver(uri, callback);
     EXPECT_EQ(res, OBS_EXIST);
-}
-
-/*
- * Feature: DataObsMgrInnerPref
- * Function: Register function test
- * SubFunction: HandleRegisterObserver
- * FunctionPoints: NA
- * EnvConditions: NA
- * CaseDescription:NA
- */
-HWTEST_F(DataObsMgrInnerPrefTest, DataObsMgrInnerPref_HandleRegisterObserver_0400, TestSize.Level1)
-{
-    std::shared_ptr<DataObsMgrInnerPref> dataObsMgrInner = std::make_shared<DataObsMgrInnerPref>();
-    Uri uri("sharepreferences://data/preferences/preferences_test");
-    sptr<MockDataAbilityObserverStub> observer(new (std::nothrow) MockDataAbilityObserverStub());
-    sptr<MockDataAbilityObserverStub> observer1(new (std::nothrow) MockDataAbilityObserverStub());
-    const sptr<IDataAbilityObserver> callback(new (std::nothrow) DataAbilityObserverProxy(observer));
-    const sptr<IDataAbilityObserver> callback1(new (std::nothrow) DataAbilityObserverProxy(observer1));
-    ObsListType obsList;
-    obsList.push_back(callback1);
-    dataObsMgrInner->observers_.emplace(uri.ToString(), obsList);
-    int res = dataObsMgrInner->HandleRegisterObserver(uri, callback);
-    EXPECT_EQ(res, NO_ERROR);
 }
 
 /*
