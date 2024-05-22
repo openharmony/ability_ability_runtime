@@ -546,7 +546,7 @@ std::shared_ptr<AbilityRecord> UIAbilityLifecycleManager::GetAbilityRecordByToke
     return nullptr;
 }
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(const sptr<IRemoteObject> &token)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1940,9 +1940,9 @@ void UIAbilityLifecycleManager::OnAppStateChanged(const AppInfo &info)
             }
             if (info.processName == abilityRecord->GetAbilityInfo().process ||
                 info.processName == abilityRecord->GetApplicationInfo().bundleName) {
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
                 abilityRecord->SetColdStartFlag(true);
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
                 break;
             }
         }
@@ -2284,7 +2284,9 @@ int UIAbilityLifecycleManager::ChangeUIAbilityVisibilityBySCB(sptr<SessionInfo> 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Change ability visibility state to: %{public}d", isShow);
     if (isShow) {
         uiAbilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_SHOW);
+#ifdef SUPPORT_SCREEN
         uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
+#endif // SUPPORT_SCREEN
     } else {
         uiAbilityRecord->SetAbilityVisibilityState(AbilityVisibilityState::FOREGROUND_HIDE);
     }
@@ -2343,11 +2345,11 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) con
         TAG_LOGW(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawing, get AbilityRecord by sessionId failed.");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     abilityRecord->SetCompleteFirstFrameDrawing(true);
     DelayedSingleton<AppExecFwk::AbilityFirstFrameStateObserverManager>::GetInstance()->
         HandleOnFirstFrameState(abilityRecord);
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 }
 
 int UIAbilityLifecycleManager::StartWithPersistentIdByDistributed(const AbilityRequest &abilityRequest,

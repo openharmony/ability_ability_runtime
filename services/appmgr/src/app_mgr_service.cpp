@@ -1194,7 +1194,9 @@ void AppMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::strin
     }
 
     appMgrServiceInner_->InitFocusListener();
+#ifdef SUPPORT_SCREEN
     appMgrServiceInner_->InitWindowVisibilityChangedListener();
+#endif
 }
 
 void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -1210,7 +1212,9 @@ void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::st
     }
 
     appMgrServiceInner_->FreeFocusListener();
+#ifdef SUPPORT_SCREEN
     appMgrServiceInner_->FreeWindowVisibilityChangedListener();
+#endif
 }
 
 int32_t AppMgrService::ChangeAppGcState(pid_t pid, int32_t state)
@@ -1470,6 +1474,16 @@ int32_t AppMgrService::SetSupportedProcessCacheSelf(bool isSupport)
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->SetSupportedProcessCacheSelf(isSupport);
+}
+
+void AppMgrService::SetAppAssertionPauseState(bool flag)
+{
+    TAG_LOGI(AAFwkTag::APPMGR, "Called");
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not ready.");
+        return;
+    }
+    return appMgrServiceInner_->SetAppAssertionPauseState(flag);
 }
 
 int32_t AppMgrService::StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,

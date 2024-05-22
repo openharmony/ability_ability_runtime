@@ -28,11 +28,11 @@
 #include "request_constants.h"
 #include "session_info.h"
 #include "string_wrapper.h"
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 #include "session/host/include/zidl/session_interface.h"
 #include "scene_board_judgement.h"
 #include "ui_content.h"
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 #include "want_params_wrapper.h"
 
 namespace OHOS {
@@ -297,12 +297,12 @@ ErrCode AbilityContextImpl::StopServiceExtensionAbility(const AAFwk::Want& want,
     }
     return err;
 }
-#ifdef SUPPORT_GRAPHICS
+
 ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, int resultCode)
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "TerminateAbilityWithResult");
     isTerminating_ = true;
-
+#ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto sessionToken = GetSessionToken();
         if (sessionToken == nullptr) {
@@ -320,8 +320,13 @@ ErrCode AbilityContextImpl::TerminateAbilityWithResult(const AAFwk::Want& want, 
         TAG_LOGI(AAFwkTag::CONTEXT, "TerminateAbilityWithResult. ret=%{public}d", err);
         return err;
     }
+#else 
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, resultCode, &want);
+    TAG_LOGI(AAFwkTag::CONTEXT, "TerminateAbilityWithResult. ret=%{public}d", err);
+    return err;
+#endif
 }
-#endif // SUPPORT_GRAPHICS
+
 void AbilityContextImpl::SetWeakSessionToken(const wptr<IRemoteObject>& sessionToken)
 {
     std::lock_guard lock(sessionTokenMutex_);
@@ -505,9 +510,9 @@ ErrCode AbilityContextImpl::OnBackPressedCallBack(bool &needMoveToBackground)
         TAG_LOGE(AAFwkTag::CONTEXT, "abilityCallback is nullptr.");
         return ERR_INVALID_VALUE;
     }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     needMoveToBackground = abilityCallback->OnBackPress();
-#endif // SUPPORT_GRAPHICS
+#endif
     return ERR_OK;
 }
 
@@ -530,7 +535,7 @@ ErrCode AbilityContextImpl::MoveUIAbilityToBackground()
     }
     return err;
 }
-#ifdef SUPPORT_GRAPHICS
+
 ErrCode AbilityContextImpl::TerminateSelf()
 {
     TAG_LOGI(AAFwkTag::CONTEXT, "TerminateSelf");
@@ -539,6 +544,7 @@ ErrCode AbilityContextImpl::TerminateSelf()
     if (sessionToken == nullptr) {
         TAG_LOGW(AAFwkTag::CONTEXT, "sessionToken is null");
     }
+#ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() && sessionToken) {
         TAG_LOGI(AAFwkTag::CONTEXT, "TerminateSelf. SCB");
         AAFwk::Want resultWant;
@@ -556,8 +562,16 @@ ErrCode AbilityContextImpl::TerminateSelf()
         }
         return err;
     }
+#else 
+    AAFwk::Want resultWant;
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, &resultWant);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "AbilityContextImpl::TerminateSelf is failed %{public}d", err);
+    }
+    return err;
+#endif
 }
-#endif // SUPPORT_GRAPHICS
+
 ErrCode AbilityContextImpl::CloseAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -625,20 +639,21 @@ void AbilityContextImpl::RegisterAbilityCallback(std::weak_ptr<AppExecFwk::IAbil
     TAG_LOGD(AAFwkTag::CONTEXT, "call");
     abilityCallback_ = abilityCallback;
 }
-#ifdef SUPPORT_GRAPHICS
+
 ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want, RequestDialogResultTask &&task)
 {
     want.SetParam(RequestConstants::REQUEST_TOKEN_KEY, token_);
+#ifdef SUPPORT_SCREEN
     int32_t left;
     int32_t top;
     int32_t width;
     int32_t height;
-
     GetWindowRect(left, top, width, height);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_LEFT_KEY, left);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_TOP_KEY, top);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_WIDTH_KEY, width);
     want.SetParam(RequestConstants::WINDOW_RECTANGLE_HEIGHT_KEY, height);
+#endif // SUPPORT_SCREEN
     auto resultTask =
         [env, outTask = std::move(task)](int32_t resultCode, const AAFwk::Want &resultWant) {
         auto retData = new RequestResult();
@@ -677,7 +692,7 @@ ErrCode AbilityContextImpl::RequestDialogService(napi_env env, AAFwk::Want &want
     TAG_LOGD(AAFwkTag::CONTEXT, "RequestDialogService ret=%{public}d", static_cast<int32_t>(err));
     return err;
 }
-#endif // SUPPORT_GRAPHICS
+
 ErrCode AbilityContextImpl::ReportDrawnCompleted()
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "called.");
@@ -742,7 +757,7 @@ void AbilityContextImpl::InsertResultCallbackTask(int requestCode, RuntimeTask &
     TAG_LOGD(AAFwkTag::CONTEXT, "InsertResultCallbackTask");
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
 }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "call");
@@ -751,7 +766,7 @@ void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &wid
         abilityCallback->GetWindowRect(left, top, width, height);
     }
 }
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 void AbilityContextImpl::RegisterAbilityLifecycleObserver(
     const std::shared_ptr<AppExecFwk::ILifecycleObserver> &observer)
 {
@@ -776,7 +791,7 @@ void AbilityContextImpl::UnregisterAbilityLifecycleObserver(
     abilityCallback->UnregisterAbilityLifecycleObserver(observer);
 }
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 ErrCode AbilityContextImpl::SetMissionLabel(const std::string& label)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "call label:%{public}s", label.c_str());

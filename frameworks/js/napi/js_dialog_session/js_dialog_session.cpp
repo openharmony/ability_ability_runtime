@@ -71,13 +71,13 @@ private:
 
         sptr<AAFwk::DialogSessionInfo> dialogSessionInfo;
         TAG_LOGD(AAFwkTag::DIALOG, "GetDialogSessionInfo begin");
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
         auto errcode = AbilityManagerClient::GetInstance()->GetDialogSessionInfo(dialogSessionId, dialogSessionInfo);
         if (errcode || dialogSessionInfo == nullptr) {
             TAG_LOGE(AAFwkTag::DIALOG, "GetDialogSessionInfo error");
             return CreateJsUndefined(env);
         }
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
         return OHOS::AppExecFwk::WrapDialogSessionInfo(env, *dialogSessionInfo);
     }
 
@@ -109,14 +109,14 @@ private:
         }
         NapiAsyncTask::CompleteCallback complete =
             [dialogSessionId, want, isAllow](napi_env env, NapiAsyncTask &task, int32_t status) {
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
             auto errorcode = AbilityManagerClient::GetInstance()->SendDialogResult(want, dialogSessionId, isAllow);
             if (errorcode) {
                 task.Reject(env, CreateJsError(env, errorcode, "Send dialog result failed"));
             } else {
                 task.ResolveWithNoError(env, CreateJsUndefined(env));
             }
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
         };
         napi_value lastParam = (info.argc > ARGC_THREE) ? info.argv[ARGC_THREE] : nullptr;
         napi_value result = nullptr;

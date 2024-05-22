@@ -18,7 +18,7 @@
 
 #include "ability_lifecycle_observer_interface.h"
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 #include "pixel_map.h"
 #endif
 
@@ -32,7 +32,7 @@ class IAbilityCallback {
 public:
     IAbilityCallback() = default;
     virtual ~IAbilityCallback() = default;
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     /**
      * @brief Called back at ability context.
      *

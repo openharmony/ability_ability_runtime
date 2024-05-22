@@ -17,13 +17,13 @@
 #define OHOS_APP_MANAGER_WINDOW_VISIBILITY_CHANGE_LISTENER_H
 
 #include "task_handler_wrap.h"
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 #include "window_manager.h"
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 namespace OHOS {
 namespace AppExecFwk {
 class AppMgrServiceInner;
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 class WindowVisibilityChangedListener : public OHOS::Rosen::IVisibilityChangedListener {
 public:
     WindowVisibilityChangedListener(
@@ -37,7 +37,7 @@ private:
     std::weak_ptr<AppMgrServiceInner> appServiceInner_;
     std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler_;
 };
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 } // namespace AppExecFwk
 } // namespace OHOS
 #endif // OHOS_APP_MANAGER_WINDOW_VISIBILITY_CHANGE_LISTENER_H

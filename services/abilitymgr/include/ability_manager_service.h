@@ -1100,7 +1100,7 @@ public:
     virtual int SetMissionContinueState(const sptr<IRemoteObject> &abilityToken,
         const AAFwk::ContinueState &state) override;
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) override;
 
     virtual int SetMissionIcon(const sptr<IRemoteObject> &token,
@@ -1310,10 +1310,10 @@ public:
      * @param token The target ability.
      * @param pixelMap The snapshot.
      */
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
@@ -2244,7 +2244,7 @@ private:
 
     sptr<AbilityBundleEventCallback> abilityBundleEventCallback_;
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     int32_t ShowPickerDialog(const Want& want, int32_t userId, const sptr<IRemoteObject> &token);
     bool CheckWindowMode(int32_t windowMode, const std::vector<AppExecFwk::SupportWindowMode>& windowModes) const;
     void InitFocusListener();

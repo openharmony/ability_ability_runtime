@@ -20,7 +20,7 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 using namespace OHOS::Rosen;
 
 WindowFocusChangedListener::WindowFocusChangedListener(const std::shared_ptr<AppMgrServiceInner> &owner,
@@ -67,6 +67,6 @@ void WindowFocusChangedListener::OnUnfocused(const sptr<FocusChangeInfo> &focusC
         taskHandler_->SubmitTask(task);
     }
 }
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 }  // namespace AppExecFwk
 }  // namespace OHOS

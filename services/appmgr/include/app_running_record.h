@@ -667,9 +667,9 @@ public:
     ProcessType GetProcessType() const;
 
     int32_t NotifyAppFault(const FaultData &faultData);
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
-#endif //SUPPORT_GRAPHICS
+#endif //SUPPORT_SCREEN
     bool IsAbilitytiesBackground();
 
     inline void SetAbilityForegroundingFlag()

@@ -29,7 +29,7 @@ void DialogUIExtensionCallback::OnRelease()
         HILOG_ERROR("abilityCallback is nullptr");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     abilityCallback->EraseUIExtension(sessionId_);
 
     if (uiContent_ == nullptr) {
@@ -37,7 +37,7 @@ void DialogUIExtensionCallback::OnRelease()
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 }
 
 void DialogUIExtensionCallback::OnError()
@@ -48,14 +48,14 @@ void DialogUIExtensionCallback::OnError()
         TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     abilityCallback->EraseUIExtension(sessionId_);
     if (uiContent_ == nullptr) {
         TAG_LOGE(AAFwkTag::DIALOG, "uiContent_ is nullptr.");
         return;
     }
     uiContent_->CloseModalUIExtension(sessionId_);
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 }
 
 void DialogUIExtensionCallback::OnDestroy()
@@ -66,20 +66,20 @@ void DialogUIExtensionCallback::OnDestroy()
         TAG_LOGE(AAFwkTag::DIALOG, "abilityCallback is nullptr");
         return;
     }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     abilityCallback->EraseUIExtension(sessionId_);
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 }
 
 void DialogUIExtensionCallback::SetSessionId(int32_t sessionId)
 {
     sessionId_= sessionId;
 }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 void DialogUIExtensionCallback::SetUIContent(Ace::UIContent *uiContent)
 {
     uiContent_ = uiContent;
 }
-#endif // SUPPORT_GRAPHICS
+#endif // SUPPORT_SCREEN
 } // namespace AbilityRuntime
 } // namespace OHOS
