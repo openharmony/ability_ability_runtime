@@ -363,3 +363,4 @@ PREVENT_START_ABILITY:
   CALLEE_PROCESS_NAME: {type: STRING, desc: callee process name}
   EXTENSION_ABILITY_TYPE: {type: INT32, desc: extension ability type}
   ABILITY_NAME: {type: STRING, desc: caller ability name}
+  
