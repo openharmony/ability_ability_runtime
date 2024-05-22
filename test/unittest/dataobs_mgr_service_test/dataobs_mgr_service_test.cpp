@@ -99,7 +99,6 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RegisterObserver_010
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    EXPECT_CALL(*dataobsAbility, OnChange()).Times(1).WillOnce(testing::Return());
     EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility));
 
     testing::Mock::AllowLeak(dataobsAbility);
@@ -144,8 +143,9 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_RegisterObserver_030
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->dataObsMgrInner_ = nullptr;
+    dataObsMgrServer->dataObsMgrInner_.reset();
     EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility));
+    dataObsMgrServer->dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
 
     testing::Mock::AllowLeak(dataobsAbility);
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_RegisterObserver_0300 end";
@@ -186,12 +186,10 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_UnregisterObserver_0
 {
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_UnregisterObserver_0200 start";
     const int testVal = static_cast<int>(DATA_OBSERVER_IS_NULL);
-    //const sptr<MockDataAbilityObserverStub> dataobsAbility(new (std::nothrow) MockDataAbilityObserverStub());
     std::shared_ptr<Uri> uri =
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    //EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserver(*uri, dataobsAbility));
     EXPECT_EQ(testVal, dataObsMgrServer->UnregisterObserver(*uri, nullptr));
 
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_UnregisterObserver_0200 end";
@@ -214,8 +212,9 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_UnregisterObserver_0
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->dataObsMgrInner_ = nullptr;
+    dataObsMgrServer->dataObsMgrInner_.reset();
     EXPECT_EQ(testVal, dataObsMgrServer->UnregisterObserver(*uri, dataobsAbility));
+    dataObsMgrServer->dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
 
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_UnregisterObserver_0300 end";
 }
@@ -257,8 +256,9 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_NotifyChange_0200, T
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->handler_ = nullptr;
+    dataObsMgrServer->OnStop();
     EXPECT_EQ(testVal, dataObsMgrServer->NotifyChange(*uri));
+    dataObsMgrServer->OnStart();
 
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_NotifyChange_0200 end";
 }
@@ -279,8 +279,9 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_NotifyChange_0300, T
         std::make_shared<Uri>("dataability://device_id/com.domainname.dataability.persondata/person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->dataObsMgrInner_ = nullptr;
+    dataObsMgrServer->dataObsMgrInner_.reset();
     EXPECT_EQ(testVal, dataObsMgrServer->NotifyChange(*uri));
+    dataObsMgrServer->dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
 
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_NotifyChange_0300 end";
 }
@@ -303,6 +304,7 @@ HWTEST_F(DataObsMgrServiceTest, AaFwk_DataObsMgrServiceTest_NotifyChange_0400, T
 
     dataObsMgrServer->taskCount_ = 50;
     EXPECT_EQ(testVal, dataObsMgrServer->NotifyChange(*uri));
+    dataObsMgrServer->taskCount_ = 0;
 
     GTEST_LOG_(INFO) << "AaFwk_DataObsMgrServiceTest_NotifyChange_0400 end";
 }
@@ -365,8 +367,9 @@ HWTEST_F(DataObsMgrServiceTest, DataObsMgrServiceTest_RegisterObserverExt_0300, 
     Uri uri("dataobs://authority/com.domainname.dataability.persondata/ person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->dataObsMgrInnerExt_ = nullptr;
+    dataObsMgrServer->dataObsMgrInnerExt_.reset();
     EXPECT_EQ(testVal, dataObsMgrServer->RegisterObserverExt(uri, dataobsAbility, true));
+    dataObsMgrServer->dataObsMgrInnerExt_ = std::make_shared<DataObsMgrInnerExt>();
 
     GTEST_LOG_(INFO) << "DataObsMgrServiceTest_RegisterObserverExt_0300 end";
 }
@@ -451,8 +454,9 @@ HWTEST_F(DataObsMgrServiceTest, DataObsMgrServiceTest_UnregisterObserverExt_0400
     Uri uri("dataobs://authority/com.domainname.dataability.persondata/ person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->dataObsMgrInnerExt_ = nullptr;
+    dataObsMgrServer->dataObsMgrInnerExt_.reset();
     EXPECT_EQ(testVal, dataObsMgrServer->UnregisterObserverExt(uri, dataobsAbility));
+    dataObsMgrServer->dataObsMgrInnerExt_ = std::make_shared<DataObsMgrInnerExt>();
 
     GTEST_LOG_(INFO) << "DataObsMgrServiceTest_UnregisterObserverExt_0400 end";
 }
@@ -493,8 +497,9 @@ HWTEST_F(DataObsMgrServiceTest, DataObsMgrServiceTest_UnregisterObserverExt_0600
     Uri uri("dataobs://authority/com.domainname.dataability.persondata/ person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->dataObsMgrInnerExt_ = nullptr;
+    dataObsMgrServer->dataObsMgrInnerExt_.reset();
     EXPECT_EQ(testVal, dataObsMgrServer->UnregisterObserverExt(dataobsAbility));
+    dataObsMgrServer->dataObsMgrInnerExt_ = std::make_shared<DataObsMgrInnerExt>();
 
     GTEST_LOG_(INFO) << "DataObsMgrServiceTest_UnregisterObserverExt_0600 end";
 }
@@ -533,8 +538,9 @@ HWTEST_F(DataObsMgrServiceTest, DataObsMgrServiceTest_NotifyChangeExt_0200, Test
     Uri uri("dataobs://authority/com.domainname.dataability.persondata/ person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->handler_ = nullptr;
+    dataObsMgrServer->OnStop();
     EXPECT_EQ(testVal, dataObsMgrServer->NotifyChangeExt({ ChangeInfo::ChangeType::UPDATE, { uri } }));
+    dataObsMgrServer->OnStart();
     GTEST_LOG_(INFO) << "DataObsMgrServiceTest_NotifyChangeExt_0200 end";
 }
 
@@ -553,8 +559,9 @@ HWTEST_F(DataObsMgrServiceTest, DataObsMgrServiceTest_NotifyChangeExt_0300, Test
     Uri uri("dataobs://authority/com.domainname.dataability.persondata/ person/10");
     auto dataObsMgrServer = DelayedSingleton<DataObsMgrService>::GetInstance();
 
-    dataObsMgrServer->dataObsMgrInner_ = nullptr;
+    dataObsMgrServer->dataObsMgrInner_.reset();
     EXPECT_EQ(testVal, dataObsMgrServer->NotifyChangeExt({ ChangeInfo::ChangeType::UPDATE, { uri } }));
+    dataObsMgrServer->dataObsMgrInner_ = std::make_shared<DataObsMgrInner>();
     GTEST_LOG_(INFO) << "DataObsMgrServiceTest_NotifyChangeExt_0300 end";
 }
 
