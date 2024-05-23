@@ -3238,7 +3238,8 @@ int AbilityManagerService::CloseUIAbilityBySCB(const sptr<SessionInfo> &sessionI
     if (sessionInfo->isClearSession) {
         const auto &abilityInfo = abilityRecord->GetAbilityInfo();
         (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-            DeleteAbilityRecoverInfo(abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name);
+            DeleteAbilityRecoverInfo(abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName,
+            abilityInfo.name);
     }
 
     EventInfo eventInfo;
@@ -7041,7 +7042,7 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
         CHECK_POINTER(uiAbilityManager);
         const auto& abilityInfo = record->GetAbilityInfo();
         (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->AddAbilityRecoverInfo(
-            abilityInfo.bundleName, abilityInfo.moduleName, abilityInfo.name,
+            abilityInfo.applicationInfo.accessTokenId, abilityInfo.moduleName, abilityInfo.name,
             uiAbilityManager->GetSessionIdByAbilityToken(token));
     } else {
         auto missionListMgr = GetMissionListManagerByUserId(userId);
