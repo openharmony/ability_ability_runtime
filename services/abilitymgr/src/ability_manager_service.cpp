@@ -2120,7 +2120,7 @@ int32_t AbilityManagerService::ForceExitApp(const int32_t pid, const ExitReason 
     }
 
     CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
-    appExitReasonHelper_->RecordProcessExitReason(NO_PID, exitReason, bundleName, uid);
+    appExitReasonHelper_->RecordProcessExitReason(bundleName, uid, exitReason);
 
     return DelayedSingleton<AppScheduler>::GetInstance()->KillApplication(bundleName);
 }
@@ -5931,7 +5931,7 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
     if (isUpgrade) {
         CHECK_POINTER_AND_RETURN(appExitReasonHelper_, ERR_NULL_OBJECT);
         AAFwk::ExitReason exitReason = { REASON_UPGRADE, exitMsg };
-        appExitReasonHelper_->RecordProcessExitReason(NO_PID, exitReason, bundleName, uid);
+        appExitReasonHelper_->RecordProcessExitReason(bundleName, uid, exitReason);
     }
 
     CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
@@ -5941,7 +5941,7 @@ int32_t AbilityManagerService::UninstallAppInner(const std::string &bundleName, 
         return UNINSTALL_APP_FAILED;
     }
     if (!isUpgrade) {
-        DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName);
+        DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName, uid);
     }
     return ERR_OK;
 }
