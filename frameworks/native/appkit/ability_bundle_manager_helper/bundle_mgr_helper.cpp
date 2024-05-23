@@ -645,7 +645,7 @@ bool BundleMgrHelper::ImplicitQueryInfos(const Want &want, int32_t flags, int32_
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     bool findDefaultApp;
     return bundleMgr->ImplicitQueryInfos(newWant, flags, userId, withDefault, abilityInfos, extensionInfos,
-    findDefaultApp);
+        findDefaultApp);
 }
 
 bool BundleMgrHelper::CleanBundleDataFiles(const std::string &bundleName, const int32_t userId)
