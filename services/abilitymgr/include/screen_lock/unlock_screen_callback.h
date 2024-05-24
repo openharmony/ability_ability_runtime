@@ -18,6 +18,8 @@
 
 #ifdef SUPPORT_GRAPHICS
 #include "screenlock_callback_stub.h"
+#include "screenlock_manager.h"
+#include "screenlock_common.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
