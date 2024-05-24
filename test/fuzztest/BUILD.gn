@@ -147,5 +147,13 @@ group("fuzztest") {
     "abilitystubverifypermission_fuzzer:fuzztest",
     "amsmanager_fuzzer:fuzztest",
     "appmanager_fuzzer:fuzztest",
+    "registerabilitylifecyclecallback_fuzzer:fuzztest",
+    "registerapplicationstateobserver_fuzzer:fuzztest",
+    "startuser_fuzzer:fuzztest",
+    "startusertest_fuzzer:fuzztest",
+    "startusertestprocess_fuzzer:fuzztest",
+    "stopserviceability_fuzzer:fuzztest",
+    "stopserviceextensionability_fuzzer:fuzztest",
+    "stopsyncremotemissions_fuzzer:fuzztest",
   ]
 }
