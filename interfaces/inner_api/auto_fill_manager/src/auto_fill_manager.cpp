@@ -42,12 +42,13 @@ constexpr static uint32_t AUTO_FILL_REQUEST_TIME_OUT_VALUE = 1000;
 constexpr static uint32_t AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID = 0;
 #endif //SUPPORT_GRAPHICS
 } // namespace
+#ifdef SUPPORT_GRAPHICS
 AutoFillManager &AutoFillManager::GetInstance()
 {
     static AutoFillManager instance;
     return instance;
 }
-#ifdef SUPPORT_GRAPHICS
+
 AutoFillManager::~AutoFillManager()
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
@@ -96,6 +97,10 @@ int32_t AutoFillManager::HandleRequestExecuteInner(
     if (uiContent == nullptr || (fillCallback == nullptr && saveCallback == nullptr)) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "UIContent or fillCallback&saveCallback is nullptr.");
         return AutoFill::AUTO_FILL_OBJECT_IS_NULL;
+    }
+    if (!IsPreviousRequestFinished(uiContent)) {
+        TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Previous request is not finished.");
+        return AutoFill::AUTO_FILL_PREVIOUS_REQUEST_NOT_FINISHED;
     }
     {
         std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
@@ -303,7 +308,7 @@ int32_t AutoFillManager::CreateAutoFillExtension(Ace::UIContent *uiContent,
     }
     return sessionId;
 }
-#endif // SUPPORT_GRAPHICS
+
 AutoFill::AutoFillWindowType AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest &request,
     bool &isSmartAutoFill)
 {
@@ -328,7 +333,7 @@ AutoFill::AutoFillWindowType AutoFillManager::ConvertAutoFillWindowType(const Au
         AutoFill::AutoFillWindowType::MODAL_WINDOW : autoFillWindowType;
     return autoFillWindowType;
 }
-#ifdef SUPPORT_GRAPHICS
+
 void AutoFillManager::SetTimeOutEvent(uint32_t eventId)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
@@ -355,7 +360,7 @@ void AutoFillManager::RemoveEvent(uint32_t eventId)
         extensionCallbacks_.erase(ret);
     }
 }
-#endif //SUPPORT_GRAPHICS
+
 void AutoFillManager::HandleTimeOut(uint32_t eventId)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
@@ -373,5 +378,21 @@ void AutoFillManager::HandleTimeOut(uint32_t eventId)
     extensionCallback->HandleTimeOut();
     extensionCallbacks_.erase(ret);
 }
+
+bool AutoFillManager::IsPreviousRequestFinished(Ace::UIContent *uiContent)
+{
+    std::lock_guard<std::mutex> lock(extensionCallbacksMutex_);
+    for (auto& item: extensionCallbacks_) {
+        auto extensionCallback = item.second.lock();
+        if (extensionCallback == nullptr) {
+            continue;
+        }
+        if (extensionCallback->GetUIContent() == uiContent) {
+            return false;
+        }
+    }
+    return true;
+}
+#endif // SUPPORT_GRAPHICS
 } // namespace AbilityRuntime
 } // namespace OHOS
