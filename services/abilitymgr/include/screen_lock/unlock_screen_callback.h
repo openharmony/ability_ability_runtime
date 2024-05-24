@@ -16,7 +16,6 @@
 #ifndef OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
 #define OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
 
-#ifdef SUPPORT_GRAPHICS
 #include "screenlock_callback_stub.h"
 #include "screenlock_manager.h"
 #include "screenlock_common.h"
@@ -31,5 +30,4 @@ public:
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // SUPPORT_GRAPHICS
-#endif // OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_MANAGER_H
+#endif // OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
