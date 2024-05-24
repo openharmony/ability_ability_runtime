@@ -147,5 +147,13 @@ group("fuzztest") {
     "abilitystubverifypermission_fuzzer:fuzztest",
     "amsmanager_fuzzer:fuzztest",
     "appmanager_fuzzer:fuzztest",
+    "updateabilitystate_fuzzer:fuzztest",
+    "updateconfiguration_fuzzer:fuzztest",
+    "updateextensionstate_fuzzer:fuzztest",
+    "uripermissionmanager_fuzzer:fuzztest",
+    "wantagenthelperstring_fuzzer:fuzztest",
+    "wantagenthelpertrigger_fuzzer:fuzztest",
+    "wantreceiverstub_fuzzer:fuzztest",
+    "wantsenderstub_fuzzer:fuzztest",
   ]
 }
