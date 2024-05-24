@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifdef SUPPORT_GRAPHICS
 #include "screen_lock/unlock_screen_callback.h"
 
 namespace OHOS {
@@ -27,5 +26,4 @@ void UnlockScreenCallback::OnCallBack(const int32_t screenLockResult)
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
-#endif // SUPPORT_GRAPHICS
 
