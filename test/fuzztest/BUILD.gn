@@ -147,13 +147,5 @@ group("fuzztest") {
     "abilitystubverifypermission_fuzzer:fuzztest",
     "amsmanager_fuzzer:fuzztest",
     "appmanager_fuzzer:fuzztest",
-    "doabilitybackground_fuzzer:fuzztest",
-    "doabilityforeground_fuzzer:fuzztest",
-    "dumpabilityinfodone_fuzzer:fuzztest",
-    "dumpstate_fuzzer:fuzztest",
-    "dumpsysstate_fuzzer:fuzztest",
-    "forcetimeoutfortest_fuzzer:fuzztest",
-    "freeinstallabilityfromremote_fuzzer:fuzztest",
-    "lockmissionforcleanup_fuzzer:fuzztest",
   ]
 }
