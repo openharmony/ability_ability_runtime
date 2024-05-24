@@ -67,7 +67,7 @@ struct ReloadInModalRequest {
     AbilityBase::AutoFillType autoFillType = AbilityBase::AutoFillType::UNSPECIFIED;
     std::shared_ptr<AutoFillExtensionCallback> extensionCallback;
 };
-#endif // SUPPORT_GRAPHICS
+
 }
 class AutoFillManager {
 public:
@@ -75,7 +75,7 @@ public:
     ~AutoFillManager();
 
     static AutoFillManager &GetInstance();
-#ifdef SUPPORT_GRAPHICS
+
     int32_t RequestAutoFill(
         Ace::UIContent *uiContent,
         const AutoFill::AutoFillRequest &request,
@@ -91,11 +91,11 @@ public:
         const std::shared_ptr<Ace::ModalUIExtensionProxy> &modalUIExtensionProxy);
     void RemoveAutoFillExtensionProxy(Ace::UIContent *uiContent);
     int32_t ReloadInModal(const AutoFill::ReloadInModalRequest &request);
-#endif // SUPPORT_GRAPHICS
+
     void HandleTimeOut(uint32_t eventId);
     void RemoveEvent(uint32_t eventId);
 private:
-#ifdef SUPPORT_GRAPHICS
+
     int32_t HandleRequestExecuteInner(
         Ace::UIContent *uiContent,
         const AutoFill::AutoFillRequest &request,
@@ -108,15 +108,16 @@ private:
         bool isSmartAutoFill);
     void BindModalUIExtensionCallback(
         const std::shared_ptr<AutoFillExtensionCallback> &extensionCallback, Ace::ModalUIExtensionCallbacks &callback);
-#endif // SUPPORT_GRAPHICS
+
     void SetTimeOutEvent(uint32_t eventId);
     AutoFill::AutoFillWindowType ConvertAutoFillWindowType(const AutoFill::AutoFillRequest &request,
         bool &isSmartAutoFill);
+    bool IsPreviousRequestFinished(Ace::UIContent *uiContent);
 
     std::mutex extensionCallbacksMutex_;
     std::mutex modalProxyMapMutex_;
     std::map<uint32_t, std::weak_ptr<AutoFillExtensionCallback>> extensionCallbacks_;
-#ifdef SUPPORT_GRAPHICS
+
     std::map<Ace::UIContent *, std::shared_ptr<Ace::ModalUIExtensionProxy>> modalUIExtensionProxyMap_;
     uint32_t eventId_ = 0;
     std::shared_ptr<AutoFillEventHandler> eventHandler_;

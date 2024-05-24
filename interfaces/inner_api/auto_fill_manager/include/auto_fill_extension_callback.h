@@ -53,6 +53,7 @@ public:
 #ifdef SUPPORT_GRAPHICS
     void SetUIContent(Ace::UIContent *uiContent);
 #endif // SUPPORT_GRAPHICS
+    Ace::UIContent *GetUIContent();
     void SetEventId(uint32_t eventId);
     void SetWindowType(const AutoFill::AutoFillWindowType &autoFillWindowType);
     void SetExtensionType(bool isSmartAutoFill);
