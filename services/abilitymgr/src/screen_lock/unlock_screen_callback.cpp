@@ -14,6 +14,8 @@
  */
 #include "screen_lock/unlock_screen_callback.h"
 
+#include "hilog_tag_wrapper.h"
+
 namespace OHOS {
 namespace AbilityRuntime {
 UnlockScreenCallback::~UnlockScreenCallback() {}
