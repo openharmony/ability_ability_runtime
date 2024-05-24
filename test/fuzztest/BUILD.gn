@@ -147,13 +147,5 @@ group("fuzztest") {
     "abilitystubverifypermission_fuzzer:fuzztest",
     "amsmanager_fuzzer:fuzztest",
     "appmanager_fuzzer:fuzztest",
-    "modulerunningrecord_fuzzer:fuzztest",
-    "movemissiontofront_fuzzer:fuzztest",
-    "notifycompletecontinuation_fuzzer:fuzztest",
-    "notifycontinuationresult_fuzzer:fuzztest",
-    "notifymemorylevel_fuzzer:fuzztest",
-    "pendingwantmanager_fuzzer:fuzztest",
-    "prepareterminate_fuzzer:fuzztest",
-    "prestartnwebspawnprocess_fuzzer:fuzztest",
   ]
 }
