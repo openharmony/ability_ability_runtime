@@ -506,12 +506,17 @@ enum {
     ERR_NO_RESIDENT_PERMISSION,
 
     /**
-     * Result(2097250) for app twin index does not exist.
+     * Result(2097250) for app clone index does not exist.
      */
-    ERR_APP_TWIN_INDEX_INVALID,
+    ERR_APP_CLONE_INDEX_INVALID,
 
     /**
-     * Result(2097251) for unlock screen failed in developer mode.
+     * Result(2097251) not support twin.
+     */
+    ERR_MULTI_APP_NOT_SUPPORTED,
+
+    /**
+     * Result(2097252) for unlock screen failed in developer mode.
      */
     ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE,
 };

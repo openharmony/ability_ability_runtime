@@ -36,6 +36,7 @@
 #include "suspend_manager_client.h"
 #endif
 #include "app_mgr_service_dump_error_code.h"
+#include "window_visibility_info.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -79,6 +80,7 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CreateAppRunningRecord(
         processName.c_str(), isStageBasedModel, recordId);
 
     appRecord->SetStageModelState(isStageBasedModel);
+    appRecord->SetSingleton(bundleInfo.singleton);
     appRecord->SetSignCode(signCode);
     appRecord->SetJointUserId(bundleInfo.jointUserId);
     std::lock_guard guard(runningRecordMapMutex_);

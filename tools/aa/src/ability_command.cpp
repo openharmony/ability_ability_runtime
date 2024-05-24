@@ -1809,6 +1809,8 @@ ErrCode AbilityManagerShellCommand::MakeWantFromCmd(Want& want, std::string& win
                 TAG_LOGD(AAFwkTag::AA_TOOL, "isMultiThread");
             }
             case 0: {
+                // 'aa start' with an unknown option: aa start -x
+                // 'aa start' with an unknown option: aa start -xxx
                 break;
             }
             default: {
