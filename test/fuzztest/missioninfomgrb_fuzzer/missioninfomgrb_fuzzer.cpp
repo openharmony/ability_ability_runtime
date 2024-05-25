@@ -34,7 +34,8 @@ constexpr size_t U32_AT_SIZE = 4;
 constexpr uint8_t ENABLE = 2;
 } // namespace
 
-uint32_t GetU32Data(const char *ptr) {
+uint32_t GetU32Data(const char *ptr)
+{
     // convert fuzz input data to an integer
     return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
 }
@@ -44,7 +45,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
     std::string stringParam(data, size);
     bool boolParam = *data % ENABLE;
-    InnerMissionInfo innerMissionInfo;    
+    InnerMissionInfo innerMissionInfo;
     // fuzz for MissionInfoMgr
     auto missionInfoMgr = std::make_shared<MissionInfoMgr>();
     std::vector<MissionInfo> missionInfos;
@@ -52,13 +53,14 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     MissionInfo missionInfo;
     missionInfoMgr->GetMissionInfoById(int32Param, missionInfo);
     missionInfoMgr->GetInnerMissionInfoById(int32Param, innerMissionInfo);
-    missionInfoMgr->FindReusedMissionInfo(stringParam, stringParam, boolParam, innerMissionInfo);    
+    missionInfoMgr->FindReusedMissionInfo(stringParam, stringParam, boolParam, innerMissionInfo);
     return true;
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+{
     /* Run your code on data */
     if (data == nullptr) {
         return 0;
