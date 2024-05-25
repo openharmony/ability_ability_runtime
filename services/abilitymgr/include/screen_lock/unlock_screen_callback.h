@@ -17,6 +17,7 @@
 #define OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
 
 #ifdef SUPPORT_GRAPHICS
+#include "screenlock_manager.h"
 #include "screenlock_callback_stub.h"
 
 namespace OHOS {
