@@ -47,106 +47,102 @@ public:
 } // namespace
 
 uint32_t GetU32Data(const char *ptr) {
-  // convert fuzz input data to an integer
-  return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
+    // convert fuzz input data to an integer
+    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
 }
 
 std::shared_ptr<AbilityRecord> GetFuzzAbilityRecord() {
-  sptr<Token> token = nullptr;
-  AbilityRequest abilityRequest;
-  abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
-  abilityRequest.abilityInfo.name = "MainAbility";
-  abilityRequest.abilityInfo.type = AbilityType::DATA;
-  std::shared_ptr<AbilityRecord> abilityRecord =
-      AbilityRecord::CreateAbilityRecord(abilityRequest);
-  if (!abilityRecord) {
-    return nullptr;
-  }
-  return abilityRecord;
+    sptr<Token> token = nullptr;
+    AbilityRequest abilityRequest;
+    abilityRequest.appInfo.bundleName = "com.example.fuzzTest";
+    abilityRequest.abilityInfo.name = "MainAbility";
+    abilityRequest.abilityInfo.type = AbilityType::DATA;
+    std::shared_ptr<AbilityRecord> abilityRecord =
+        AbilityRecord::CreateAbilityRecord(abilityRequest);
+    if (!abilityRecord) {
+      return nullptr;
+    }
+    return abilityRecord;
 }
 
 sptr<Token> GetFuzzAbilityToken() {
-  sptr<Token> token = nullptr;
-  std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
-  if (abilityRecord) {
-    token = abilityRecord->GetToken();
-  }
-  return token;
+    sptr<Token> token = nullptr;
+    std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
+    if (abilityRecord) {
+      token = abilityRecord->GetToken();
+    }
+    return token;
 }
 
 bool DoSomethingInterestingWithMyAPI(const char *data, size_t size) {
-  bool boolParam = *data % ENABLE;
-  int intParam = static_cast<int>(GetU32Data(data));
-  Parcel wantParcel;
-  Want *want = nullptr;
-  if (wantParcel.WriteBuffer(data, size)) {
-    want = Want::Unmarshalling(wantParcel);
-    if (!want) {
-      return false;
+    bool boolParam = *data % ENABLE;
+    int intParam = static_cast<int>(GetU32Data(data));
+    Parcel wantParcel;
+    Want *want = nullptr;
+    if (wantParcel.WriteBuffer(data, size)) {
+      want = Want::Unmarshalling(wantParcel);
+      if (!want) {
+        return false;
+      }
     }
-  }
-  std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
-  sptr<IRemoteObject> token = GetFuzzAbilityToken();
-  auto missionListManager = std::make_shared<MissionListManager>(intParam);
-  auto launcherList = std::make_shared<MissionList>(MissionListType::LAUNCHER);
-  missionListManager->launcherList_ = launcherList;
-  missionListManager->defaultStandardList_ =
-      std::make_shared<MissionList>(MissionListType::DEFAULT_STANDARD);
-  missionListManager->defaultSingleList_ =
-      std::make_shared<MissionList>(MissionListType::DEFAULT_SINGLE);
-  missionListManager->currentMissionLists_.push_front(launcherList);
-  if (!missionListManager->listenerController_) {
-    missionListManager->listenerController_ =
-        std::make_shared<MissionListenerController>();
-  }
-  DelayedSingleton<MissionInfoMgr>::GetInstance()->taskDataPersistenceMgr_ =
-      DelayedSingleton<TaskDataPersistenceMgr>::GetInstance();
-  std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
-  missionListManager->TerminateAbilityLocked(abilityRecord, boolParam);
-  missionListManager->RemoveTerminatingAbility(abilityRecord, boolParam);
-  missionListManager->RemoveMissionList(missionList);
-  missionListManager->DispatchTerminate(abilityRecord);
-  missionListManager->DelayCompleteTerminate(abilityRecord);
-  missionListManager->CompleteTerminate(abilityRecord);
-  missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
-  missionListManager->GetAbilityFromTerminateList(token);
-  missionListManager->SetMissionLockedState(intParam, boolParam);
-  if (want) {
-    delete want;
-    want = nullptr;
-  }
-  return true;
+    std::shared_ptr<AbilityRecord> abilityRecord = GetFuzzAbilityRecord();
+    sptr<IRemoteObject> token = GetFuzzAbilityToken();
+    auto missionListManager = std::make_shared<MissionListManager>(intParam);
+    auto launcherList = std::make_shared<MissionList>(MissionListType::LAUNCHER);
+    missionListManager->launcherList_ = launcherList;
+    missionListManager->defaultStandardList_ =
+        std::make_shared<MissionList>(MissionListType::DEFAULT_STANDARD);
+    missionListManager->defaultSingleList_ =
+        std::make_shared<MissionList>(MissionListType::DEFAULT_SINGLE);
+    missionListManager->currentMissionLists_.push_front(launcherList);
+    if (!missionListManager->listenerController_) {
+      missionListManager->listenerController_ =
+          std::make_shared<MissionListenerController>();
+    }
+    DelayedSingleton<MissionInfoMgr>::GetInstance()->taskDataPersistenceMgr_ =
+        DelayedSingleton<TaskDataPersistenceMgr>::GetInstance();
+    std::shared_ptr<MissionList> missionList = std::make_shared<MissionList>();
+    missionListManager->TerminateAbilityLocked(abilityRecord, boolParam);
+    missionListManager->RemoveTerminatingAbility(abilityRecord, boolParam);
+    missionListManager->RemoveMissionList(missionList);
+    missionListManager->DispatchTerminate(abilityRecord);
+    missionListManager->DelayCompleteTerminate(abilityRecord);
+    missionListManager->CompleteTerminate(abilityRecord);
+    missionListManager->CompleteTerminateAndUpdateMission(abilityRecord);
+    missionListManager->GetAbilityFromTerminateList(token);
+    missionListManager->SetMissionLockedState(intParam, boolParam);
+    if (want) {
+      delete want;
+      want = nullptr;
+    }
+    return true;
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
-  /* Run your code on data */
-  if (data == nullptr) {
-    return 0;
-  }
-
-  /* Validate the length of size */
-  if (size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-    return 0;
-  }
-
-  char *ch = (char *)malloc(size + 1);
-  if (ch == nullptr) {
-    std::cout << "malloc failed." << std::endl;
-    return 0;
-  }
-
-  (void)memset_s(ch, size + 1, 0x00, size + 1);
-  if (memcpy_s(ch, size, data, size) != EOK) {
-    std::cout << "copy failed." << std::endl;
+    /* Run your code on data */
+    if (data == nullptr) {
+      return 0;
+    }    
+    /* Validate the length of size */
+    if (size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
+      return 0;
+    }    
+    char *ch = (char *)malloc(size + 1);
+    if (ch == nullptr) {
+      std::cout << "malloc failed." << std::endl;
+      return 0;
+    }    
+    (void)memset_s(ch, size + 1, 0x00, size + 1);
+    if (memcpy_s(ch, size, data, size) != EOK) {
+      std::cout << "copy failed." << std::endl;
+      free(ch);
+      ch = nullptr;
+      return 0;
+    }    
+    OHOS::DoSomethingInterestingWithMyAPI(ch, size);
     free(ch);
     ch = nullptr;
     return 0;
-  }
-
-  OHOS::DoSomethingInterestingWithMyAPI(ch, size);
-  free(ch);
-  ch = nullptr;
-  return 0;
 }
