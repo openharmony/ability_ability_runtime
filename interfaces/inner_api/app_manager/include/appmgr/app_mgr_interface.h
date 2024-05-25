@@ -563,7 +563,8 @@ public:
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return Return ERR_OK if success, others fail.
      */
-    virtual int32_t IsCloneApplicationRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning) = 0;
+    virtual int32_t IsCloneApplicationRunning(const std::string &bundleName, int32_t appCloneIndex,
+        bool &isRunning) = 0;
 
     /**
      * Start child process, called by ChildProcessManager.
