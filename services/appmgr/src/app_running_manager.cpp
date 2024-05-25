@@ -164,7 +164,8 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
     return false;
 }
 
-bool AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName, int32_t appCloneIndex)
+bool AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
+    int32_t appCloneIndex)
 {
     std::lock_guard guard(runningRecordMapMutex_);
     if (appRunningRecordMap_.empty()) {

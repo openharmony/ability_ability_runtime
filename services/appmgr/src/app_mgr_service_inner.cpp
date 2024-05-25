@@ -5256,7 +5256,8 @@ int32_t AppMgrServiceInner::IsApplicationRunning(const std::string &bundleName, 
     return ERR_OK;
 }
 
-int32_t AppMgrServiceInner::IsCloneApplicationRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning)
+int32_t AppMgrServiceInner::IsCloneApplicationRunning(const std::string &bundleName, int32_t appCloneIndex,
+    bool &isRunning)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "Called, bundleName: %{public}s", bundleName.c_str());
     CHECK_CALLER_IS_SYSTEM_APP;
