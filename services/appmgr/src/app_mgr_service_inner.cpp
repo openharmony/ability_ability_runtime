@@ -215,6 +215,15 @@ int32_t GetUserIdByUid(int32_t uid)
 {
     return uid / BASE_USER_RANGE;
 }
+
+bool isCjAbility(const std::string& info)
+{
+    std::string cjCheckFlag = ".cj";
+    if (info.length() < cjCheckFlag.length()) {
+        return false;
+    }
+    return info.substr(info.length() - cjCheckFlag.length()) == cjCheckFlag;
+}
 }  // namespace
 
 using OHOS::AppExecFwk::Constants::PERMISSION_GRANTED;
@@ -2721,12 +2730,6 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
         return;
     }
 
-    if (!remoteClientManager_->GetCJSpawnClient()) {
-        TAG_LOGE(AAFwkTag::APPMGR, "cj appSpawnClient is null");
-        appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
-        return;
-    }
-
     AppSpawnStartMsg startMsg;
     auto appInfo = appRecord->GetApplicationInfo();
     auto bundleType = appInfo ? appInfo->bundleType : BundleType::APP;
@@ -2762,6 +2765,11 @@ void AppMgrServiceInner::StartProcess(const std::string &appName, const std::str
     pid_t pid = 0;
     ErrCode errCode = ERR_OK;
     if (isCJApp) {
+        if (!remoteClientManager_->GetCJSpawnClient()) {
+            TAG_LOGE(AAFwkTag::APPMGR, "cj appSpawnClient is null");
+            appRunningManager_->RemoveAppRunningRecordById(appRecord->GetRecordId());
+            return;
+        }
         errCode = remoteClientManager_->GetCJSpawnClient()->StartProcess(startMsg, pid);
     } else {
         errCode = remoteClientManager_->GetSpawnClient()->StartProcess(startMsg, pid);
@@ -6766,15 +6774,6 @@ int32_t AppMgrServiceInner::StartNativeChildProcess(const pid_t hostPid, const s
     auto nativeChildRecord = ChildProcessRecord::CreateNativeChildProcessRecord(
         hostPid, libName, appRecord, callback, childProcessCount, false);
     return StartChildProcessImpl(nativeChildRecord, appRecord, dummyChildPid);
-}
-
-bool isCjAbility(const std::string& info)
-{
-    std::string cjCheckFlag = ".cj";
-    if (info.length() < cjCheckFlag.length()) {
-        return false;
-    }
-    return info.substr(info.length() - cjCheckFlag.length()) == cjCheckFlag;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
