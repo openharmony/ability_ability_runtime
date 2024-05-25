@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "screen_lock/unlock_screen_manager.h"
+#include "unlock_screen_manager.h"
 
 #include "hilog_tag_wrapper.h"
 #include "in_process_call_wrapper.h"
