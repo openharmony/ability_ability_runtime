@@ -39,7 +39,8 @@ uint32_t GetU32Data(const char *ptr) {
     return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
 }
 
-bool DoSomethingInterestingWithMyAPI(const char *data, size_t size) {
+bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
+{
     int32_t int32Param = static_cast<int32_t>(GetU32Data(data));
     std::string stringParam(data, size);
     bool boolParam = *data % ENABLE;
@@ -60,26 +61,26 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size) {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     /* Run your code on data */
     if (data == nullptr) {
-      return 0;
+        return 0;
     }
 
     /* Validate the length of size */
     if (size < OHOS::U32_AT_SIZE || size > OHOS::FOO_MAX_LEN) {
-      return 0;
+        return 0;
     }
 
     char *ch = (char *)malloc(size + 1);
     if (ch == nullptr) {
-      std::cout << "malloc failed." << std::endl;
-      return 0;
+        std::cout << "malloc failed." << std::endl;
+        return 0;
     }
 
     (void)memset_s(ch, size + 1, 0x00, size + 1);
     if (memcpy_s(ch, size, data, size) != EOK) {
-      std::cout << "copy failed." << std::endl;
-      free(ch);
-      ch = nullptr;
-      return 0;
+        std::cout << "copy failed." << std::endl;
+        free(ch);
+        ch = nullptr;
+        return 0;
     }
 
     OHOS::DoSomethingInterestingWithMyAPI(ch, size);
