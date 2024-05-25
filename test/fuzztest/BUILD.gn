@@ -147,6 +147,5 @@ group("fuzztest") {
     "abilitystubverifypermission_fuzzer:fuzztest",
     "amsmanager_fuzzer:fuzztest",
     "appmanager_fuzzer:fuzztest",
-
   ]
 }
