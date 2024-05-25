@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "screen_lock/unlock_screen_callback.h"
+#ifdef SUPPORT_GRAPHICS
+#include "unlock_screen_callback.h"
 
 #include "hilog_tag_wrapper.h"
 
@@ -28,4 +29,5 @@ void UnlockScreenCallback::OnCallBack(const int32_t screenLockResult)
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
+#endif // SUPPORT_GRAPHICS
 
