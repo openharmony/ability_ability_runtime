@@ -56,7 +56,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     }
     sptr<IRemoteObject> observer = nullptr;
     BundleInfo bundleInfo;
-    // int32_t userId = 100;
     int32_t userId = static_cast<int32_t>(GetU32Data(data));
     if (appMgrClient->StartUserTestProcess(*want, observer, bundleInfo, userId) != 0) {
         return false;
