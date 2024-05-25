@@ -37,13 +37,20 @@
 #endif
 #include "app_mgr_service_dump_error_code.h"
 #include "window_visibility_info.h"
+#include "ability_manager_errors.h"
+#include "in_process_call_wrapper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
 namespace {
-    constexpr int32_t QUICKFIX_UID = 5524;
-    const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
-    constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
+constexpr int32_t QUICKFIX_UID = 5524;
+const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
+constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
+constexpr int32_t BASE_USER_RANGE = 200000;
+int32_t GetUserIdByUid(int32_t uid)
+{
+    return uid / BASE_USER_RANGE;
+}
 }
 using EventFwk::CommonEventSupport;
 
@@ -151,6 +158,46 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName, int32_t appCloneIndex)
+{
+    std::lock_guard guard(runningRecordMapMutex_);
+    if (appRunningRecordMap_.empty()) {
+        return false;
+    }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "The bundleMgrHelper is nullptr.");
+        return false;
+    }
+    std::shared_ptr<ApplicationInfo> appInfo;
+    auto userId = GetUserIdByUid(appInfo->uid);
+    BundleInfo bundleInfo;
+    TAG_LOGD(AAFwkTag::APPMGR, "UserId:%{public}d.", userId);
+    int32_t bundleMgrResult;
+    if (appCloneIndex == 0) {
+        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo, userId));
+    } else {
+        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(bundleName,
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+            appCloneIndex, bundleInfo, userId));
+    }
+
+    if (bundleMgrResult != ERR_OK) {
+        return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
+    }
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag()) &&
+            appRecord->GetAppIndex() == appCloneIndex) {
             return true;
         }
     }

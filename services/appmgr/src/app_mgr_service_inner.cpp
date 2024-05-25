@@ -5256,6 +5256,19 @@ int32_t AppMgrServiceInner::IsApplicationRunning(const std::string &bundleName, 
     return ERR_OK;
 }
 
+int32_t AppMgrServiceInner::IsCloneApplicationRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called, bundleName: %{public}s", bundleName.c_str());
+    CHECK_CALLER_IS_SYSTEM_APP;
+    if (!CheckGetRunningInfoPermission()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    isRunning = appRunningManager_->CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex);
+    return ERR_OK;
+}
+
 int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &want)
 {
     if (!remoteClientManager_ || !appRunningManager_) {

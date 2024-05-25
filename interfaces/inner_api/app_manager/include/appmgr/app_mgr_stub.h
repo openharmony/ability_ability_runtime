@@ -95,6 +95,7 @@ private:
     int32_t HandleDumpHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsCloneApplicationRunning(MessageParcel &data, MessageParcel &reply);
 #ifdef ABILITY_COMMAND_FOR_TEST
     int32_t HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply);
 #endif
@@ -102,6 +103,7 @@ private:
     int32_t HandleNotifyLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyHotReloadPage(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyUnLoadRepairPatch(MessageParcel &data, MessageParcel &reply);
+
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
     int32_t HandleSetContinuousTaskProcess(MessageParcel &data, MessageParcel &reply);
 #endif

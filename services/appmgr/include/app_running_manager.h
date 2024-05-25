@@ -33,6 +33,7 @@
 #include "refbase.h"
 #include "running_process_info.h"
 #include "app_jsheap_mem_info.h"
+#include "remote_client_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -79,6 +80,15 @@ public:
      * @return, Return true if exist.
      */
     bool CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName);
+
+    /**
+     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     *
+     * @param bundleName, the bundle name.
+     *
+     * @return, Return true if exist.
+     */
+    bool CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName, int32_t appCloneIndex);
 
     /**
      * GetAppRunningRecordByPid, Get process record by application pid.
@@ -312,6 +322,7 @@ private:
 
     std::mutex uiExtensionMapLock_;
     std::map<int32_t, std::pair<pid_t, pid_t>> uiExtensionLauncherMap_;
+    std::shared_ptr<RemoteClientManager> remoteClientManager_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
