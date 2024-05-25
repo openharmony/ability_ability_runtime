@@ -88,7 +88,8 @@ public:
      *
      * @return, Return true if exist.
      */
-    bool CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName, int32_t appCloneIndex);
+    int32_t CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
+        int32_t appCloneIndex, bool &isRunning);
 
     /**
      * GetAppRunningRecordByPid, Get process record by application pid.
