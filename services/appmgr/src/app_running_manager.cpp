@@ -162,16 +162,12 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
 int32_t AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
     int32_t appCloneIndex, bool &isRunning)
 {
-    if (appRunningRecordMap_.empty()) {
-        return ERR_INVALID_OPERATION;
-    }
     auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
     if (bundleMgrHelper == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "The bundleMgrHelper is nullptr.");
         return ERR_INVALID_OPERATION;
     }
     BundleInfo bundleInfo;
-    TAG_LOGD(AAFwkTag::APPMGR, "UserId:%{public}d.", userId);
     int32_t bundleMgrResult;
     if (appCloneIndex == 0) {
         bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,

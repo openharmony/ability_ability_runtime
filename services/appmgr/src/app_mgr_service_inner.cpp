@@ -5266,8 +5266,8 @@ int32_t AppMgrServiceInner::IsCloneApplicationRunning(const std::string &bundleN
         return ERR_PERMISSION_DENIED;
     }
 
-    isRunning = appRunningManager_->CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex, isRunning);
-    return ERR_OK;
+    return appRunningManager_->CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex, isRunning);
+     
 }
 
 int32_t AppMgrServiceInner::StartNativeProcessForDebugger(const AAFwk::Want &want)
