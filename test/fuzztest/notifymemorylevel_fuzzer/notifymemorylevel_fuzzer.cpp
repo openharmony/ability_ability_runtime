@@ -31,7 +31,7 @@ namespace {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 } // namespace
-bool DoSomethingInterestingWithMyAPI(const char *data, size_t size) 
+bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
 {
     std::shared_ptr<AppMgrClient> appMgrClient = std::make_shared<AppMgrClient>();
     if (!appMgrClient) {
@@ -45,7 +45,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
 }
 } // namespace OHOS
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) 
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     if (data == nullptr) {
