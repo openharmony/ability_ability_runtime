@@ -39,7 +39,7 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
     }
 #ifdef ABILITY_COMMAND_FOR_TEST
     if (abilitymgr->ForceTimeoutForTest(abilityName, state) != 0) {
-      return false;
+        return false;
     }
 #endif
     return true;
@@ -51,8 +51,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     if (data == nullptr) {
-      std::cout << "invalid data" << std::endl;
-      return 0;
+        std::cout << "invalid data" << std::endl;
+        return 0;
     }
 
     /* Validate the length of size */
@@ -62,16 +62,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     char *ch = (char *)malloc(size + 1);
     if (ch == nullptr) {
-      std::cout << "malloc failed." << std::endl;
-      return 0;
+        std::cout << "malloc failed." << std::endl;
+        return 0;
     }
 
     (void)memset_s(ch, size + 1, 0x00, size + 1);
     if (memcpy_s(ch, size, data, size) != EOK) {
-      std::cout << "copy failed." << std::endl;
-      free(ch);
-      ch = nullptr;
-      return 0;
+        std::cout << "copy failed." << std::endl;
+        free(ch);
+        ch = nullptr;
+        return 0;
     }
 
     OHOS::DoSomethingInterestingWithMyAPI(ch, size);
