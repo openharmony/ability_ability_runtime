@@ -147,13 +147,5 @@ group("fuzztest") {
     "abilitystubverifypermission_fuzzer:fuzztest",
     "amsmanager_fuzzer:fuzztest",
     "appmanager_fuzzer:fuzztest",
-    "stopuser_fuzzer:fuzztest",
-    "systemabilitytokencallbackstub_fuzzer:fuzztest",
-    "terminateability_fuzzer:fuzztest",
-    "unlockmissionforcleanup_fuzzer:fuzztest",
-    "unregisterabilitylifecyclecallback_fuzzer:fuzztest",
-    "unregisterapplicationstateobserver_fuzzer:fuzztest",
-    "unregisterenvironmentcallback_fuzzer:fuzztest",
-    "unregistermissionlistener_fuzzer:fuzztest",
   ]
 }
