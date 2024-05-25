@@ -23,7 +23,7 @@
 #endif
 
 #ifdef SUPPORT_GRAPHICS
-#include "screen_lock/unlock_screen_callback.h"
+#include "unlock_screen_callback.h"
 #include "screenlock_manager.h"
 #include "screenlock_common.h"
 #endif
