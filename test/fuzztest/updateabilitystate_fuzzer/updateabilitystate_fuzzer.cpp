@@ -63,7 +63,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     if (appMgrClient->UpdateAbilityState(token, state) != AppMgrResultCode::RESULT_OK) {
         return false;
     }
-    if(appMgrClient) {
+    if (appMgrClient) {
         delete appMgrClient;
         appMgrClient = nullptr;
     }
