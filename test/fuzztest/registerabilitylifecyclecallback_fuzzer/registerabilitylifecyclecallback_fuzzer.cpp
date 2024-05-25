@@ -58,7 +58,8 @@ public:
   void
   OnAbilityContinue(const std::shared_ptr<NativeReference> &ability) override{};
 };
-bool DoSomethingInterestingWithMyAPI(const char *data, size_t size) {
+bool DoSomethingInterestingWithMyAPI(const char *data, size_t size)
+{
   auto context = ApplicationContext::GetInstance();
   if (!context) {
     return false;
