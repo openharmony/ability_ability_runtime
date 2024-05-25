@@ -1681,7 +1681,6 @@ int32_t AppMgrProxy::IsCloneApplicationRunning(const std::string &bundleName, in
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
-    isRunning = false;
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
