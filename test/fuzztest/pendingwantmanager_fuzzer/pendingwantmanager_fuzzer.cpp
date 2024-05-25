@@ -113,7 +113,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     pendingWantManager->CancelWantSender(boolParam, wantSenderPtr);
     pendingWantManager->CancelWantSenderLocked(pendingWantRecord, boolParam);
     sptr<StartOptions> startoptions;
-    pendingWantManager->PendingWantStartAbilitys(allWantsInfos, startoptions, token, int32Param, int32Param, int32Param);
+    pendingWantManager->PendingWantStartAbilitys(allWantsInfos, startoptions,
+                                                 token, int32Param, int32Param, int32Param);
     pendingWantManager->PendingWantPublishCommonEvent(*want, senderInfo, int32Param, int32Param);
     pendingWantManager->PendingRecordIdCreate();
     pendingWantManager->GetPendingWantRecordByCode(int32Param);
