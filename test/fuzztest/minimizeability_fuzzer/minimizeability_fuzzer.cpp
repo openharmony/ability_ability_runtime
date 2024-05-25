@@ -40,7 +40,7 @@ sptr<Token> GetFuzzAbilityToken()
     std::shared_ptr<AbilityRecord> abilityRecord =
         AbilityRecord::CreateAbilityRecord(abilityRequest);
     if (abilityRecord) {
-      token = abilityRecord->GetToken();
+        token = abilityRecord->GetToken();
     }
 
     return token;
