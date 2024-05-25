@@ -29,7 +29,8 @@ namespace {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 } // namespace
-sptr<Token> GetFuzzAbilityToken() {
+sptr<Token> GetFuzzAbilityToken()
+{
     sptr<Token> token = nullptr;
 
     AbilityRequest abilityRequest;
@@ -48,16 +49,16 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size) {
     auto abilitymgr = AbilityManagerClient::GetInstance();
     bool fromUser = true;
     if (!abilitymgr) {
-      return false;
+        return false;
     }    
     // get token
     sptr<IRemoteObject> token = GetFuzzAbilityToken();
     if (!token) {
-      std::cout << "Get ability token failed." << std::endl;
-      return false;
+        std::cout << "Get ability token failed." << std::endl;
+        return false;
     }    
     if (abilitymgr->MinimizeAbility(token, fromUser) != 0) {
-      return false;
+        return false;
     }
     
     return true;
@@ -65,27 +66,28 @@ bool DoSomethingInterestingWithMyAPI(const char *data, size_t size) {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+{
     /* Run your code on data */
     if (data == nullptr) {
-      std::cout << "invalid data" << std::endl;
-      return 0;
+        std::cout << "invalid data" << std::endl;
+        return 0;
     }    
     /* Validate the length of size */
     if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
-      return 0;
+        return 0;
     }    
     char *ch = (char *)malloc(size + 1);
     if (ch == nullptr) {
-      std::cout << "malloc failed." << std::endl;
-      return 0;
+        std::cout << "malloc failed." << std::endl;
+        return 0;
     }    
     (void)memset_s(ch, size + 1, 0x00, size + 1);
     if (memcpy_s(ch, size, data, size) != EOK) {
-      std::cout << "copy failed." << std::endl;
-      free(ch);
-      ch = nullptr;
-      return 0;
+        std::cout << "copy failed." << std::endl;
+        free(ch);
+        ch = nullptr;
+        return 0;
     }    
     OHOS::DoSomethingInterestingWithMyAPI(ch, size);
     free(ch);
