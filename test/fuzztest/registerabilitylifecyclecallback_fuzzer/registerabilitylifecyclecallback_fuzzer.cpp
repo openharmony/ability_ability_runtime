@@ -77,7 +77,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (data == nullptr) {
         std::cout << "invalid data" << std::endl;
         return 0;
-    }    
+    }  
     /* Validate the length of size */
     if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return 0;
@@ -93,7 +93,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         free(ch);
         ch = nullptr;
         return 0;
-    }    
+    }
     OHOS::DoSomethingInterestingWithMyAPI(ch, size);
     free(ch);
     ch = nullptr;
