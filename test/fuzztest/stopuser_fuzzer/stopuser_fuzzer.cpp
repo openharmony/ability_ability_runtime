@@ -19,7 +19,6 @@
 #include <cstdint>
 
 #include "ability_manager_client.h"
-// #include "stop_user_callback.h"
 #include "securec.h"
 
 using namespace OHOS::AAFwk;
