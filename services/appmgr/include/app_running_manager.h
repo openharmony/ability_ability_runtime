@@ -33,7 +33,6 @@
 #include "refbase.h"
 #include "running_process_info.h"
 #include "app_jsheap_mem_info.h"
-#include "remote_client_manager.h"
 
 namespace OHOS {
 namespace Rosen {
@@ -323,7 +322,6 @@ private:
 
     std::mutex uiExtensionMapLock_;
     std::map<int32_t, std::pair<pid_t, pid_t>> uiExtensionLauncherMap_;
-    std::shared_ptr<RemoteClientManager> remoteClientManager_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

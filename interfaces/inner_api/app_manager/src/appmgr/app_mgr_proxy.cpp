@@ -1677,7 +1677,7 @@ int32_t AppMgrProxy::IsApplicationRunning(const std::string &bundleName, bool &i
     return reply.ReadInt32();
 }
 
-int32_t AppMgrProxy::IsCloneApplicationRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning)
+int32_t AppMgrProxy::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPMGR, "Called.");
@@ -1697,7 +1697,7 @@ int32_t AppMgrProxy::IsCloneApplicationRunning(const std::string &bundleName, in
 
     MessageParcel reply;
     MessageOption option;
-    auto ret = SendRequest(AppMgrInterfaceCode::IS_APPCLONE_RUNNING,
+    auto ret = SendRequest(AppMgrInterfaceCode::IS_APP_RUNNING,
         data, reply, option);
     if (ret != NO_ERROR) {
         TAG_LOGE(AAFwkTag::APPMGR, "Send request is failed, error code: %{public}d", ret);

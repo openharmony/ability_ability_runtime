@@ -160,9 +160,9 @@ public:
         GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnIsApplicationRunning);
     }
 
-    static napi_value IsCloneApplicationRunning(napi_env env, napi_callback_info info)
+    static napi_value IsAppRunning(napi_env env, napi_callback_info info)
     {
-        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnIsCloneApplicationRunning);
+        GET_CB_INFO_AND_CALL(env, info, JsAppManager, OnIsAppRunning);
     }
 
     static bool CheckCallerIsSystemApp()
@@ -1103,7 +1103,7 @@ private:
         return result;
     }
 
-    napi_value OnIsCloneApplicationRunning(napi_env env, size_t argc, napi_value *argv)
+    napi_value OnIsAppRunning(napi_env env, size_t argc, napi_value *argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "Called.");
         if (argc < ARGC_ONE) {
@@ -1136,7 +1136,7 @@ private:
                 *innerErrorCode = static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
                 return;
             }
-            *innerErrorCode = appMgr->IsCloneApplicationRunning(bundleName, appCloneIndex, *isRunning);
+            *innerErrorCode = appMgr->IsAppRunning(bundleName, appCloneIndex, *isRunning);
         };
         NapiAsyncTask::CompleteCallback complete =
             [innerErrorCode, isRunning](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -1149,7 +1149,7 @@ private:
 
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
-        NapiAsyncTask::ScheduleHighQos("JSAppManager::IsCloneApplicationRunning",
+        NapiAsyncTask::ScheduleHighQos("JSAppManager::IsAppRunning",
             env, CreateAsyncTaskWithLastParam(env, lastParam, std::move(execute), std::move(complete), &result));
         return result;
     }
@@ -1289,8 +1289,8 @@ napi_value JsAppManagerInit(napi_env env, napi_value exportObj)
         JsAppManager::GetRunningProcessInfoByBundleName);
     BindNativeFunction(env, exportObj, "getRunningMultiAppInfo", moduleName, JsAppManager::GetRunningMultiAppInfo);
     BindNativeFunction(env, exportObj, "isApplicationRunning", moduleName, JsAppManager::IsApplicationRunning);
-    BindNativeFunction(env, exportObj, "isCloneApplicationRunning", moduleName,
-        JsAppManager::IsCloneApplicationRunning);
+    BindNativeFunction(env, exportObj, "isAppRunning", moduleName,
+        JsAppManager::IsAppRunning);
     BindNativeFunction(env, exportObj, "preloadApplication", moduleName, JsAppManager::PreloadApplication);
     BindNativeFunction(env, exportObj, "getRunningProcessInformationByBundleType", moduleName,
         JsAppManager::GetRunningProcessInformationByBundleType);
