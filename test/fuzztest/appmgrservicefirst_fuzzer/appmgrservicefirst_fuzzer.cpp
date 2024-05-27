@@ -63,7 +63,7 @@ sptr<Token> GetFuzzAbilityToken()
 }
 bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
 {
-    std::shared_ptr<AppMgrService> appMgrService = std::make_shared<AppMgrService>();
+    AppMgrService* appMgrService = new AppMgrService();
     std::shared_ptr<AppMgrServiceInner> innerService = std::make_shared<AppMgrServiceInner>();
     appMgrService->appMgrServiceState_.serviceRunningState = ServiceRunningState::STATE_NOT_START;
     appMgrService->SetInnerService(innerService);
@@ -75,6 +75,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     appMgrService->RegisterApplicationStateObserver(applicationStateObserver);
     appMgrService->UnregisterApplicationStateObserver(applicationStateObserver);
     pid_t pid = static_cast<pid_t>(GetU32Data(data));
+    appMgrService->AddAppDeathRecipient(pid);
     appMgrService->QueryServiceState();
     sptr<IRemoteObject> app = nullptr;
     appMgrService->AttachApplication(app);
@@ -104,7 +105,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     appMgrService->Dump(fd, args);
     std::string result(data, size);
     appMgrService->Dump(args, result);
-    appMgrService->ShowHelp(args, result);
+    appMgrService->ShowHelp(result);
     std::string flag(data, size);
     appMgrService->ScheduleAcceptWantDone(recordId, *want, flag);
     Configuration config;
@@ -141,10 +142,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     int64_t resultCode = static_cast<int64_t>(GetU32Data(data));
     appMgrService->FinishUserTest(msg, resultCode, bundleName);
     appMgrService->OnStop();
-    if (want) {
-        delete want;
-        want = nullptr;
-    }
     return appMgrService->IsReady();
 }
 }
