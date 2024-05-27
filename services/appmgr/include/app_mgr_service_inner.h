@@ -421,6 +421,7 @@ public:
      *
      * @param bundleName Indicates the bundle name of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @param appCloneIndex the appindex of the bundle.
      * @return Return ERR_OK if success, others fail.
      */
     int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning);
