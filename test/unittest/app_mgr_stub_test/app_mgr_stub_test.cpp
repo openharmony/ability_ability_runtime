@@ -355,11 +355,11 @@ HWTEST_F(AppMgrStubTest, HandleChangeAppGcState_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsCloneApplicationRunning_001
+ * @tc.name: IsAppRunning_001
  * @tc.desc: On remote request to query the running status of the application.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrStubTest, IsCloneApplicationRunning_0100, TestSize.Level1)
+HWTEST_F(AppMgrStubTest, IsAppRunning_0100, TestSize.Level1)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -373,10 +373,10 @@ HWTEST_F(AppMgrStubTest, IsCloneApplicationRunning_0100, TestSize.Level1)
     data.WriteInt32(appCloneIndex);
     data.WriteBool(isRunning);
 
-    EXPECT_CALL(*mockAppMgrService_, IsCloneApplicationRunning(_, _, _)).Times(1);
+    EXPECT_CALL(*mockAppMgrService_, IsAppRunning(_, _, _)).Times(1);
 
     auto result = mockAppMgrService_->OnRemoteRequest(
-        static_cast<uint32_t>(AppMgrInterfaceCode::IS_APPCLONE_RUNNING), data, reply, option);
+        static_cast<uint32_t>(AppMgrInterfaceCode::IS_APP_RUNNING), data, reply, option);
     EXPECT_EQ(result, NO_ERROR);
 }
 

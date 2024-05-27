@@ -1402,11 +1402,11 @@ HWTEST_F(AppMgrServiceTest, IsApplicationRunning_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsCloneApplicationRunning_001
+ * @tc.name: IsAppRunning_001
  * @tc.desc: Determine that the application is running by returning a value.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrServiceTest, IsCloneApplicationRunning_001, TestSize.Level1)
+HWTEST_F(AppMgrServiceTest, IsAppRunning_001, TestSize.Level1)
 {
     AAFwk::IsMockSaCall::IsMockSaCallWithPermission();
     sptr<AppMgrService> appMgrService = new (std::nothrow) AppMgrService();
@@ -1420,7 +1420,7 @@ HWTEST_F(AppMgrServiceTest, IsCloneApplicationRunning_001, TestSize.Level1)
     std::string bundleName = "test_bundleName";
     int32_t appCloneIndex = 0;
     bool isRunning = false;
-    int32_t res = appMgrService->IsCloneApplicationRunning(bundleName, appCloneIndex, isRunning);
+    int32_t res = appMgrService->IsAppRunning(bundleName, appCloneIndex, isRunning);
     EXPECT_EQ(res, ERR_OK);
 }
 

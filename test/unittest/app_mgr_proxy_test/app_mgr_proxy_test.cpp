@@ -368,11 +368,11 @@ HWTEST_F(AppMgrProxyTest, IsApplicationRunning_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsCloneApplicationRunning_001
+ * @tc.name: IsAppRunning_001
  * @tc.desc: Send request to query the running status of the application.
  * @tc.type: FUNC
  */
-HWTEST_F(AppMgrProxyTest, IsCloneApplicationRunning_001, TestSize.Level1)
+HWTEST_F(AppMgrProxyTest, IsAppRunning_001, TestSize.Level1)
 {
     EXPECT_CALL(*mockAppMgrService_, SendRequest(_, _, _, _))
         .Times(1)
@@ -382,8 +382,8 @@ HWTEST_F(AppMgrProxyTest, IsCloneApplicationRunning_001, TestSize.Level1)
     int32_t appCloneIndex = 0;
     bool isRunning = false;
 
-    appMgrProxy_->IsCloneApplicationRunning(bundleName, appCloneIndex, isRunning);
-    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::IS_APPCLONE_RUNNING));
+    appMgrProxy_->IsAppRunning(bundleName, appCloneIndex, isRunning);
+    EXPECT_EQ(mockAppMgrService_->code_, static_cast<uint32_t>(AppMgrInterfaceCode::IS_APP_RUNNING));
 }
 
 /**
