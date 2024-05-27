@@ -260,7 +260,9 @@ napi_value JSAbilityDelegator::OnAddAbilityMonitor(napi_env env, NapiCallbackInf
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityMonitor parameters failed");
-        return ThrowJsError(env, INCORRECT_PARAMETERS);
+        ThrowInvalidParamError(env,
+            "Parse param monitor failed, monitor must be Monitor.");
+        return CreateJsUndefined(env);
     }
 
     NapiAsyncTask::CompleteCallback complete = [monitor](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -288,7 +290,9 @@ napi_value JSAbilityDelegator::OnAddAbilityMonitorSync(napi_env env, NapiCallbac
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityMonitorSync parameters failed");
-        return ThrowJsError(env, INCORRECT_PARAMETERS);
+        ThrowInvalidParamError(env,
+            "Parse param monitor failed, monitor must be Monitor.");
+        return CreateJsUndefined(env);
     }
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
@@ -307,7 +311,9 @@ napi_value JSAbilityDelegator::OnAddAbilityStageMonitor(napi_env env, NapiCallba
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityStageMonitor parameters failed");
-        return ThrowJsError(env, INCORRECT_PARAMETERS);
+        ThrowInvalidParamError(env,
+            "Parse param parameters, failed, monitor must be Monitor and isExited must be boolean.");
+        return CreateJsUndefined(env);
     }
 
     NapiAsyncTask::CompleteCallback complete = [monitor](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -340,7 +346,9 @@ napi_value JSAbilityDelegator::OnAddAbilityStageMonitorSync(napi_env env, NapiCa
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityStageMonitorSync parameters failed");
-        return ThrowJsError(env, INCORRECT_PARAMETERS);
+        ThrowInvalidParamError(env,
+            "Parse param monitor, failed, monitor must be Monitor.");
+        return CreateJsUndefined(env);
     }
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (!delegator) {
@@ -1121,7 +1129,7 @@ napi_value JSAbilityDelegator::ParseAbilityMonitorPara(
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse monitor parameters failed");
         return nullptr;
     }
-    
+
     if (isSync) {
         return CreateJsNull(env);
     }
@@ -1148,7 +1156,7 @@ napi_value JSAbilityDelegator::ParseAbilityStageMonitorPara(napi_env env, NapiCa
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse stage monitor parameters failed");
         return nullptr;
     }
-    
+
     if (isSync) {
         return CreateJsNull(env);
     }
