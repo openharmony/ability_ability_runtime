@@ -62,7 +62,7 @@ sptr<Token> GetFuzzAbilityToken()
     return token;
 }
 std::shared_ptr<AmsMgrScheduler> DoSomethingInterestingWithMyAPI1(sptr<IRemoteObject> token,
-sptr<IRemoteObject> preToken, const char* data) {
+    sptr<IRemoteObject> preToken, const char* data) {
     std::shared_ptr<AppMgrServiceInner> mgrServiceInner;
     std::shared_ptr<AAFwk::TaskHandlerWrap> handler;
     std::shared_ptr<AmsMgrScheduler> amsMgrScheduler = std::make_shared<AmsMgrScheduler>(mgrServiceInner, handler);
