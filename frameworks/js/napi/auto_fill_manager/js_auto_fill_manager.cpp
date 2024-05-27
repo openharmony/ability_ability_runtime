@@ -53,15 +53,15 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
     napi_value instanceIdValue = nullptr;
     if (napi_get_named_property(env, info.argv[INDEX_ZERO], "instanceId_", &instanceIdValue) != napi_ok) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Get function by name failed.");
-        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parameter error. Get instance id failed.");
+        ThrowInvalidParamError(env,
+            "Parse param instanceId failed, instanceId must be number.");
         return CreateJsUndefined(env);
     }
     int32_t instanceId = -1;
     if (!ConvertFromJsValue(env, instanceIdValue, instanceId)) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Failed to parse type.");
-        ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-            "Parameter error. Parse instance id failed.");
+        ThrowInvalidParamError(env,
+            "Parse param instanceId failed, instanceId must be number.");
         return CreateJsUndefined(env);
     }
 
@@ -83,8 +83,8 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
     if (info.argc != ARGC_ONE) {
         if (!CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
             TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Second input parameter error.");
-            ThrowError(env, static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM),
-                "Parameter error. The second parameter is not of type callback.");
+            ThrowInvalidParamError(env,
+            "Parse param callback failed, callback must be funcation.");
             return CreateJsUndefined(env);
         }
         saveCallback->Register(info.argv[INDEX_ONE]);
