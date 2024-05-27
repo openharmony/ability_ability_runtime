@@ -336,7 +336,8 @@ void AmsMgrProxy::AttachPidToParent(const sptr<IRemoteObject> &token, const sptr
     TAG_LOGD(AAFwkTag::APPMGR, "end");
 }
 
-int32_t AmsMgrProxy::KillProcessWithAccount(const std::string &bundleName, const int accountId, const bool clearPageStack)
+int32_t AmsMgrProxy::KillProcessWithAccount(
+    const std::string &bundleName, const int accountId, const bool clearPageStack)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "start");
 

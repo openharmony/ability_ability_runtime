@@ -134,7 +134,8 @@ public:
      *
      * @return Return true if found, otherwise return false.
      */
-    bool ProcessExitByBundleName(const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack = true);
+    bool ProcessExitByBundleName(
+        const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack = true);
     /**
      * Get Foreground Applications.
      *

@@ -209,12 +209,12 @@ bool AppRunningManager::ProcessExitByBundleName(
             auto isExist = [&bundleName](const std::shared_ptr<ApplicationInfo> &appInfo) {
                 return appInfo->bundleName == bundleName;
             };
+            if (clearPageStack) {
+                appRecord->ScheduleClearPageStack();
+            }
             auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
             if (iter != appInfoList.end() && pid > 0) {
                 pids.push_back(pid);
-                if (clearPageStack) {
-                    appRecord->ScheduleClearPageStack();
-                }
                 appRecord->ScheduleProcessSecurityExit();
             }
         }
@@ -277,11 +277,11 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
             };
             auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
             pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            if (clearPageStack) {
+                appRecord->ScheduleClearPageStack();
+            }
             if (iter != appInfoList.end() && pid > 0) {
                 pids.push_back(pid);
-                if (clearPageStack) {
-                    appRecord->ScheduleClearPageStack();
-                }
                 appRecord->SetKilling();
                 appRecord->ScheduleProcessSecurityExit();
             }
