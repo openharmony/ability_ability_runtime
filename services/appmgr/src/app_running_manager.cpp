@@ -39,6 +39,7 @@
 #include "window_visibility_info.h"
 #include "ability_manager_errors.h"
 #include "in_process_call_wrapper.h"
+#include "bundle_mgr_helper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
