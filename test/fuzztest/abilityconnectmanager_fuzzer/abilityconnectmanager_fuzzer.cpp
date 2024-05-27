@@ -124,7 +124,7 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     abilityConnectManager->LoadAbility(abilityRecord);
     uint32_t uint32Param = GetU32Data(data);
     abilityConnectManager->PostTimeOutTask(abilityRecord, uint32Param);
-    abilityConnectManager->HandleStartTimeoutTask(abilityRecord);
+    abilityConnectManager->HandleStartTimeoutTask(abilityRecord, intParam);
     abilityConnectManager->HandleCommandTimeoutTask(abilityRecord);
     abilityConnectManager->StartRootLauncher(abilityRecord);
     abilityConnectManager->HandleStopTimeoutTask(abilityRecord);
@@ -139,6 +139,8 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::shared_ptr<ConnectionRecord> connection;
     abilityConnectManager->RemoveConnectionRecordFromMap(connection);
     abilityConnectManager->RemoveServiceAbility(abilityRecord);
+    abilityConnectManager->AddConnectDeathRecipient(connect);
+    abilityConnectManager->RemoveConnectDeathRecipient(connect);
     sptr<IRemoteObject> connectRemoteObject = GetFuzzAbilityToken();
     wptr<IRemoteObject> remote = connectRemoteObject;
     abilityConnectManager->OnCallBackDied(remote);
