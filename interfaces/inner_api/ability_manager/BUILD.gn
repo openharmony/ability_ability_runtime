@@ -44,8 +44,6 @@ config("ability_manager_public_config") {
   }
 
   if (ability_runtime_graphics) {
-    include_dirs += []
-
     defines += [ "SUPPORT_GRAPHICS" ]
   }
 
