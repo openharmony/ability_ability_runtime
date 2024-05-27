@@ -37,9 +37,6 @@
 #endif
 #include "app_mgr_service_dump_error_code.h"
 #include "window_visibility_info.h"
-#include "ability_manager_errors.h"
-#include "in_process_call_wrapper.h"
-#include "bundle_mgr_helper.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -163,27 +160,6 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
 int32_t AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
     int32_t appCloneIndex, bool &isRunning)
 {
-    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
-    if (bundleMgrHelper == nullptr) {
-        TAG_LOGE(AAFwkTag::APPMGR, "The bundleMgrHelper is nullptr.");
-        return ERR_INVALID_OPERATION;
-    }
-    BundleInfo bundleInfo;
-    int32_t bundleMgrResult;
-    if (appCloneIndex == 0) {
-        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo));
-    } else {
-        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(bundleName,
-            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
-            appCloneIndex, bundleInfo));
-    }
-
-    if (bundleMgrResult != ERR_OK) {
-        return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
-    }
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
