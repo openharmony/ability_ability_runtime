@@ -139,8 +139,6 @@ bool DoSomethingInterestingWithMyAPI(const char* data, size_t size)
     std::shared_ptr<ConnectionRecord> connection;
     abilityConnectManager->RemoveConnectionRecordFromMap(connection);
     abilityConnectManager->RemoveServiceAbility(abilityRecord);
-    abilityConnectManager->AddConnectDeathRecipient(connect);
-    abilityConnectManager->RemoveConnectDeathRecipient(connect);
     sptr<IRemoteObject> connectRemoteObject = GetFuzzAbilityToken();
     wptr<IRemoteObject> remote = connectRemoteObject;
     abilityConnectManager->OnCallBackDied(remote);
@@ -186,7 +184,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size, data, size) != EOK) {
+    if (memcpy_s(ch, sizeof(ch), data, size) != EOK) {
         std::cout << "copy failed." << std::endl;
         free(ch);
         ch = nullptr;
