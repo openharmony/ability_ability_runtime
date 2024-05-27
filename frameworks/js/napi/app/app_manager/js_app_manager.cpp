@@ -422,23 +422,23 @@ private:
             TAG_LOGE(AAFwkTag::APPMGR, "Not enough params");
             errCode = ERR_NOT_OK;
         } else {
-            if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+            if (!ConvertFromJsValue(env, argv[ARGC_ZERO], bundleName)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
                 errCode = ERR_NOT_OK;
             }
-            if (!ConvertFromJsValue(env, argv[1], accountId)) {
+            if (!ConvertFromJsValue(env, argv[ARGC_ONE], accountId)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "Parse userId failed");
                 errCode = ERR_NOT_OK;
             }
-            if (!ConvertFromJsValue(env, argv[2], clearPageStack)) {
+            if (!ConvertFromJsValue(env, argv[ARGC_TWO], clearPageStack)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "Parse clearPageStack failed");
                 errCode = ERR_NOT_OK;
             }
         }
 
         NapiAsyncTask::CompleteCallback complete =
-            [appManager = appManager_, bundleName, accountId, clearPageStack, errCode](napi_env env, NapiAsyncTask &task,
-                int32_t status) {
+            [appManager = appManager_, bundleName, accountId, clearPageStack, errCode](
+                napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (errCode != 0) {
                     task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
                     return;

@@ -784,7 +784,8 @@ private:
         TAG_LOGI(AAFwkTag::APPMGR, "kill process [%{public}s], clearPageStack [%{public}d]",
             bundleName.c_str(), clearPageStack);
         NapiAsyncTask::CompleteCallback complete =
-            [bundleName, clearPageStack, abilityManager = abilityManager_](napi_env env, NapiAsyncTask& task, int32_t status) {
+            [bundleName, clearPageStack, abilityManager = abilityManager_](
+                napi_env env, NapiAsyncTask& task, int32_t status) {
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                 task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -914,7 +915,8 @@ private:
         }
 
         NapiAsyncTask::CompleteCallback complete =
-            [appManager = appManager_, bundleName, accountId, clearPageStack](napi_env env, NapiAsyncTask &task, int32_t status) {
+            [appManager = appManager_, bundleName, accountId, clearPageStack](
+                napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
                     TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr or amsMgr is nullptr.");
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));

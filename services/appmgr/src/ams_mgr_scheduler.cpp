@@ -242,7 +242,7 @@ void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const 
 }
 
 int32_t AmsMgrScheduler::KillProcessWithAccount(
-    const std::string &bundleName, const int accountId,const bool clearPageStack)
+    const std::string &bundleName, const int accountId, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d, clearPageStack = %{public}d",
         bundleName.c_str(), accountId, clearPageStack);
