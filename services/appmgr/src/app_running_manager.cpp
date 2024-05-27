@@ -166,6 +166,7 @@ int32_t AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const s
         if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag()) &&
             appRecord->GetAppIndex() == appCloneIndex) {
             isRunning = true;
+            break;
         }
     }
     return ERR_OK;
