@@ -101,6 +101,7 @@
 #include "system_ability_token_callback.h"
 #include "extension_record_manager.h"
 #include "ui_extension_utils.h"
+#include "unlock_screen_manager.h"
 #include "uri_permission_manager_client.h"
 #include "uri_utils.h"
 #include "view_data.h"
@@ -537,6 +538,10 @@ int AbilityManagerService::StartAbility(const Want &want, int32_t userId, int re
     if (want.GetBoolParam(DEBUG_APP, false) && !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Developer Mode is false.");
         return ERR_NOT_DEVELOPER_MODE;
+    }
+    if (!UnlockScreenManager::GetInstance().UnlockScreen()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Screen need passord to unlock");
+        return ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE;
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "coldStart:%{public}d", want.GetBoolParam("coldStart", false));
     bool startWithAccount = want.GetBoolParam(START_ABILITY_TYPE, false);
@@ -1200,6 +1205,10 @@ int AbilityManagerService::StartAbilityDetails(const Want &want, const AbilitySt
     if (want.GetBoolParam(DEBUG_APP, false) && !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Developer Mode is false.");
         return ERR_NOT_DEVELOPER_MODE;
+    }
+    if (!UnlockScreenManager::GetInstance().UnlockScreen()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Screen need passord to unlock");
+        return ERR_UNLOCK_SCREEN_FAILED_IN_DEVELOPER_MODE;
     }
     AbilityUtil::RemoveWantKey(const_cast<Want &>(want));
     StartAbilityParams startParams(const_cast<Want &>(want));
@@ -9889,6 +9898,20 @@ void AbilityManagerService::NotifyStartResidentProcess(std::vector<AppExecFwk::B
     DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcessWithMainElement(bundleInfos);
     if (!bundleInfos.empty()) {
         DelayedSingleton<ResidentProcessManager>::GetInstance()->StartResidentProcess(bundleInfos);
+    }
+}
+
+void AbilityManagerService::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
+{
+    std::shared_ptr<AbilityRecord> abilityRecord;
+    for (auto &token : abilityTokens) {
+        abilityRecord = Token::GetAbilityRecordByToken(token);
+        if (abilityRecord == nullptr) {
+            continue;
+        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "App OnRemoteDied, ability is %{public}s, app is %{public}s",
+            abilityRecord->GetAbilityInfo().name.c_str(), abilityRecord->GetAbilityInfo().bundleName.c_str());
+        abilityRecord->OnProcessDied();
     }
 }
 
