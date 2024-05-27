@@ -91,7 +91,6 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartAbilityAsCa
     ServiceExtensionContext serviceExtensionContextTest;
     Want want;
     ErrCode result = serviceExtensionContextTest.StartAbilityAsCaller(want);
-    //todo
     GTEST_LOG_(INFO) <<result;
     EXPECT_EQ(ERR_IMPLICIT_START_ABILITY_FAIL, result);
 }
@@ -109,8 +108,7 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_StartAbilityAsCa
     ServiceExtensionContext serviceExtensionContextTest;
     Want want;
     StartOptions startOptions;
-    ErrCode result = serviceExtensionContextTest.StartAbilityAsCaller(want,startOptions);
-    //todo
+    ErrCode result = serviceExtensionContextTest.StartAbilityAsCaller(want, startOptions);
     GTEST_LOG_(INFO) <<result;
     EXPECT_EQ(ERR_IMPLICIT_START_ABILITY_FAIL, result);
 }
@@ -269,7 +267,6 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_DisconnectAbilit
     int32_t accountId = 1;
     sptr<AbilityConnectCallback> connectCallback;
     ErrCode result = serviceExtensionContextTest.DisconnectAbility(want, connectCallback, accountId);
-    //todo
     GTEST_LOG_(INFO) <<result;
     EXPECT_EQ(AAFwk::ERR_INVALID_CALLER, result);
 }
@@ -302,7 +299,6 @@ HWTEST_F(ServiceExtensionContextTest, service_extension_context_RequestModalUIEx
     ServiceExtensionContext serviceExtensionContextTest;
     Want want;
     ErrCode result = serviceExtensionContextTest.RequestModalUIExtension(want);
-    //todo
     GTEST_LOG_(INFO) <<result;
     EXPECT_EQ(AAFwk::INNER_ERR, result);
 }
