@@ -5265,6 +5265,28 @@ int32_t AppMgrServiceInner::IsCloneApplicationRunning(const std::string &bundleN
         TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
         return ERR_PERMISSION_DENIED;
     }
+    auto bundleMgrHelper = remoteClientManager_->GetBundleManagerHelper();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "The bundleMgrHelper is nullptr.");
+        return ERR_INVALID_OPERATION;
+    }
+    BundleInfo bundleInfo;
+    auto userId = GetCurrentAccountId();
+    int32_t bundleMgrResult;
+    if (appCloneIndex == 0) {
+        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfoV9(bundleName,
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) |
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), userId, bundleInfo));
+    } else {
+        bundleMgrResult = IN_PROCESS_CALL(bundleMgrHelper->GetCloneBundleInfo(bundleName,
+            static_cast<int32_t>(GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+            appCloneIndex, userId, bundleInfo));
+    }
+
+    if (bundleMgrResult != ERR_OK) {
+        return AAFwk::ERR_APP_CLONE_INDEX_INVALID;
+    }
 
     return appRunningManager_->CheckAppCloneRunningRecordIsExistByBundleName(bundleName, appCloneIndex, isRunning);
 }
