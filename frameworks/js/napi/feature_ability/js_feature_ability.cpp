@@ -104,6 +104,7 @@ napi_value JsFeatureAbility::OnStartAbility(napi_env env, NapiCallbackInfo& info
     DistributeReqParam requestParam;
     if (!UnWrapRequestParams(env, info.argv[0], requestParam)) {
         TAG_LOGE(AAFwkTag::FA, "unwrap request arguments failed");
+        ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
 
