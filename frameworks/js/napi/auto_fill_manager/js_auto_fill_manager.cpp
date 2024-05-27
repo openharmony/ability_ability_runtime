@@ -84,7 +84,7 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
         if (!CheckTypeForNapiValue(env, info.argv[INDEX_ONE], napi_object)) {
             TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Second input parameter error.");
             ThrowInvalidParamError(env,
-            "Parse param callback failed, callback must be funcation.");
+                "Parse param callback failed, callback must be funcation.");
             return CreateJsUndefined(env);
         }
         saveCallback->Register(info.argv[INDEX_ONE]);
