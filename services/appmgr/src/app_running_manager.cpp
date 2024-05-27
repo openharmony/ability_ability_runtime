@@ -194,7 +194,8 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByAbilit
     return nullptr;
 }
 
-bool AppRunningManager::ProcessExitByBundleName(const std::string &bundleName, std::list<pid_t> &pids)
+bool AppRunningManager::ProcessExitByBundleName(
+    const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -211,6 +212,9 @@ bool AppRunningManager::ProcessExitByBundleName(const std::string &bundleName, s
             auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
             if (iter != appInfoList.end() && pid > 0) {
                 pids.push_back(pid);
+                if (clearPageStack) {
+                    appRecord->ScheduleClearPageStack();
+                }
                 appRecord->ScheduleProcessSecurityExit();
             }
         }
@@ -261,7 +265,7 @@ int32_t AppRunningManager::ProcessUpdateApplicationInfoInstalled(const Applicati
 }
 
 bool AppRunningManager::ProcessExitByBundleNameAndUid(
-    const std::string &bundleName, const int uid, std::list<pid_t> &pids)
+    const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack)
 {
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
@@ -275,7 +279,9 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
             pid_t pid = appRecord->GetPriorityObject()->GetPid();
             if (iter != appInfoList.end() && pid > 0) {
                 pids.push_back(pid);
-
+                if (clearPageStack) {
+                    appRecord->ScheduleClearPageStack();
+                }
                 appRecord->SetKilling();
                 appRecord->ScheduleProcessSecurityExit();
             }
