@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <unistd.h>
 
 #include "errors.h"
@@ -354,6 +355,20 @@ int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(const std::string &bundl
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "AddAbilityRecoverInfo finish");
+    return ERR_OK;
+}
+
+int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByBundleName(const std::string &bundleName)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "DeleteAllRecoverInfoByBundleName bundle %{public}s", bundleName.c_str());
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (!CheckKvStore()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "kvStore is nullptr!");
+            return ERR_NO_INIT;
+        }
+    }
+    InnerDeleteAbilityRecoverInfo(bundleName);
     return ERR_OK;
 }
 

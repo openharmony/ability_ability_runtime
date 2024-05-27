@@ -47,6 +47,8 @@ public:
     int32_t DeleteAbilityRecoverInfo(
         const std::string &bundleName, const std::string &moduleName, const std::string &abilityName);
 
+    int32_t DeleteAllRecoverInfoByBundleName(const std::string &moduleName);
+
     int32_t GetAbilityRecoverInfo(const std::string &bundleName,
         const std::string &moduleName, const std::string &abilityName, bool &hasRecoverInfo);
 
