@@ -598,7 +598,7 @@ public:
 
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
 
-    void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
+    int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) const;
 
     /**
      * Set AbilityForegroundingFlag of an app-record to true.
@@ -1093,9 +1093,12 @@ public:
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
 
-    void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord);
+    void OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, ApplicationState state);
 
     virtual void SaveBrowserChannel(const pid_t hostPid, sptr<IRemoteObject> browser);
+
+    bool IsAppProcessesAllCached(const std::string &bundleName, int32_t uid,
+        const std::set<std::shared_ptr<AppRunningRecord>> &cachedSet);
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1118,8 +1121,8 @@ private:
         const std::shared_ptr<ApplicationInfo> &appInfo, std::string &processName) const;
 
     void MakeProcessName(const std::shared_ptr<AbilityInfo> &abilityInfo,
-        const std::shared_ptr<ApplicationInfo> &appInfo,
-        const HapModuleInfo &hapModuleInfo, int32_t appIndex, std::string &processName) const;
+        const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo, int32_t appIndex,
+        const std::string &specifiedProcessFlag, std::string &processName) const;
 
     void MakeProcessName(const std::shared_ptr<ApplicationInfo> &appInfo, const HapModuleInfo &hapModuleInfo,
         std::string &processName) const;
@@ -1165,7 +1168,7 @@ private:
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false, const std::string &moduleName = "", const std::string &abilityName = "",
-                      bool strictMode = false);
+                      bool strictMode = false, int32_t maxChildProcess = 0);
 
     /**
      * PushAppFront, Adjust the latest application record to the top level.
@@ -1327,6 +1330,8 @@ private:
     void KillChildProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void KillAttachedChildProcess(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    void PresetMaxChildProcess(const std::shared_ptr<AbilityInfo> &abilityInfo, int32_t &maxChildProcess);
 
 private:
     /**
