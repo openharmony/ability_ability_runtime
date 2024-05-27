@@ -50,16 +50,15 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
     }
 
     auto pid = IPCSkeleton::GetCallingRealPid();
-    std::string bundleName;
-    uint32_t accessTokenId;
-    int32_t uid;
-    auto ret = DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameUidAndAccessTokenIdByPid(pid, bundleName,
-        accessTokenId, uid);
+    AppExecFwk::ApplicationInfo application;
+    bool debug = false;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetApplicationInfoByProcessID(pid,
+        application, debug));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleNameUidAndAccessTokenIdByPid failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetApplicationInfoByProcessID failed.");
         return ret;
     }
-
+    auto bundleName = application.bundleName;
     int32_t resultCode = RecordProcessExtensionExitReason(NO_PID, bundleName, exitReason);
     if (resultCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Record Process Extension Exit Reason failed.code: %{public}d", resultCode);
@@ -88,27 +87,26 @@ int32_t AppExitReasonHelper::RecordAppExitReason(const ExitReason &exitReason)
         return ERR_GET_ACTIVE_ABILITY_LIST_EMPTY;
     }
     return DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->SetAppExitReason(bundleName,
-        accessTokenId, abilityList, exitReason);
+        application.accessTokenId, abilityList, exitReason);
 }
 
 int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const ExitReason &exitReason)
 {
-    std::string bundleName;
-    uint32_t accessTokenId;
-    int32_t uid;
-    auto ret = DelayedSingleton<AppScheduler>::GetInstance()->GetBundleNameUidAndAccessTokenIdByPid(pid, bundleName,
-        accessTokenId, uid);
+    AppExecFwk::ApplicationInfo application;
+    bool debug = false;
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AppScheduler>::GetInstance()->GetApplicationInfoByProcessID(pid,
+        application, debug));
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetBundleNameUidAndAccessTokenIdByPid failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetApplicationInfoByProcessID failed.");
         return ret;
     }
-
+    auto bundleName = application.bundleName;
     int32_t resultCode = RecordProcessExtensionExitReason(pid, bundleName, exitReason);
     if (resultCode != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Record Process Extension Exit Reason failed.code: %{public}d", resultCode);
     }
 
-    return RecordProcessExitReason(pid, bundleName, uid, accessTokenId, exitReason);
+    return RecordProcessExitReason(pid, bundleName, application.uid, application.accessTokenId, exitReason);
 }
 
 int32_t AppExitReasonHelper::RecordProcessExitReason(const std::string &bundleName, int32_t uid,

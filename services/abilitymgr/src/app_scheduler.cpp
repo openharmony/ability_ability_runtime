@@ -459,23 +459,6 @@ int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Appli
     return ERR_OK;
 }
 
-int32_t AppScheduler::GetBundleNameUidAndAccessTokenIdByPid(int32_t pid, std::string &bundleName,
-    uint32_t &accessTokenId, int32_t &uid)
-{
-    CHECK_POINTER_AND_RETURN(appMgrClient_, INNER_ERR);
-    AppExecFwk::ApplicationInfo application;
-    bool debug = false;
-    auto ret = IN_PROCESS_CALL(appMgrClient_->GetApplicationInfoByProcessID(pid, application, debug));
-    if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "GetApplicationInfoByProcessID failed.");
-        return ret;
-    }
-    bundleName = application.bundleName;
-    accessTokenId = application.accessTokenId;
-    uid = application.uid;
-    return ERR_OK;
-}
-
 int32_t AppScheduler::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg)
 {
     if (pid < 0) {
