@@ -795,9 +795,8 @@ void AppRunningRecord::StateChangedNotifyObserver(
     abilityStateData.isFocused = ability->GetFocusFlag();
     abilityStateData.abilityRecordId = ability->GetAbilityRecordId();
     auto applicationInfo = GetApplicationInfo();
-    if (applicationInfo) {
-        if (static_cast<int32_t>(applicationInfo->multiAppMode.multiAppModeType) ==
-            static_cast<int32_t>(MultiAppModeType::APP_CLONE)) {
+    if (applicationInfo && (static_cast<int32_t>(applicationInfo->multiAppMode.multiAppModeType) ==
+            static_cast<int32_t>(MultiAppModeType::APP_CLONE))) {
             info.appCloneIndex = appIndex_;
     }
     if (ability->GetWant() != nullptr) {
