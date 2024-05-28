@@ -797,7 +797,7 @@ void AppRunningRecord::StateChangedNotifyObserver(
     auto applicationInfo = GetApplicationInfo();
     if (applicationInfo && (static_cast<int32_t>(applicationInfo->multiAppMode.multiAppModeType) ==
             static_cast<int32_t>(MultiAppModeType::APP_CLONE))) {
-            info.appCloneIndex = appIndex_;
+            abilityStateData.appCloneIndex = appIndex_;
     }
     if (ability->GetWant() != nullptr) {
         abilityStateData.callerAbilityName = ability->GetWant()->GetStringParam(Want::PARAM_RESV_CALLER_ABILITY_NAME);
