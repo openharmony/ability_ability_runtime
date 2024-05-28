@@ -36,7 +36,7 @@ bool UnwrapAutoStartupInfo(napi_env env, napi_value param, AutoStartupInfo &info
         return false;
     }
 
-    if (IsExistsByPropertyName(env, param, "appCloneIndex")) {
+    if (AppExecFwk::IsExistsByPropertyName(env, param, "appCloneIndex")) {
         if (!AppExecFwk::UnwrapInt32ByPropertyName(env, param, "appCloneIndex", info.appCloneIndex)) {
             TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Convert appCloneIndex failed.");
             return false;

@@ -83,7 +83,7 @@ public:
 
     /**
      * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
-     * 
+     *
      * @param bundleName Indicates the bundle name of the bundle.
      * @param appCloneIndex the appindex of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
