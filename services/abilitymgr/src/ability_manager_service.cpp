@@ -9855,9 +9855,7 @@ int32_t AbilityManagerService::GetForegroundUIAbilities(std::vector<AppExecFwk::
         abilityData.pid = info.pid;
         abilityData.uid = info.uid;
         abilityData.abilityType = static_cast<int32_t>(AppExecFwk::AbilityType::PAGE);
-        if (info.appCloneIndex != -1) {
-            abilityData.appCloneIndex = info.appCloneIndex;
-        }
+        abilityData.appCloneIndex = info.appCloneIndex;
         AppExecFwk::ApplicationInfo appInfo;
         if (!StartAbilityUtils::GetApplicationInfo(abilityData.bundleName, GetUserId(), appInfo)) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "can not get applicationInfo through bundleName");
