@@ -591,7 +591,7 @@ napi_value JsApplicationContextUtils::OnKillProcessBySelf(napi_env env, NapiCall
     }
 
     bool clearPageStack = false;
-    if (!ConvertFromJsValue(env, argv[0], clearPageStack)) {
+    if (!ConvertFromJsValue(env, info.argv[0], clearPageStack)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse clearPageStack failed");
         ThrowInvalidParamError(env, "Parse param clearPageStack failed, clearPageStack must be boolean.");
     }
