@@ -204,13 +204,12 @@ void AutoFillExtensionCallback::SetUIContent(Ace::UIContent *uiContent)
 {
     uiContent_ = uiContent;
 }
-#endif // SUPPORT_GRAPHICS
 
 Ace::UIContent *AutoFillExtensionCallback::GetUIContent()
 {
     return uiContent_;
 }
-
+#endif // SUPPORT_GRAPHICS
 void AutoFillExtensionCallback::SetEventId(uint32_t eventId)
 {
     eventId_ = eventId;

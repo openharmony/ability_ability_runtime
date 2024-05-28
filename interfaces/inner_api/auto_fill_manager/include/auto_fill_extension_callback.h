@@ -52,8 +52,8 @@ public:
     void SetSessionId(int32_t sessionId);
 #ifdef SUPPORT_GRAPHICS
     void SetUIContent(Ace::UIContent *uiContent);
-#endif // SUPPORT_GRAPHICS
     Ace::UIContent *GetUIContent();
+#endif // SUPPORT_GRAPHICS
     void SetEventId(uint32_t eventId);
     void SetWindowType(const AutoFill::AutoFillWindowType &autoFillWindowType);
     void SetExtensionType(bool isSmartAutoFill);
