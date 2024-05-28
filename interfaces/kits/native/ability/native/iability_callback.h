@@ -18,8 +18,10 @@
 
 #include "ability_lifecycle_observer_interface.h"
 
+#ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
 #include "pixel_map.h"
+#endif
 #endif
 
 namespace OHOS {
@@ -32,6 +34,7 @@ class IAbilityCallback {
 public:
     IAbilityCallback() = default;
     virtual ~IAbilityCallback() = default;
+#ifdef SUPPORT_GRAPHICS
 #ifdef SUPPORT_SCREEN
     /**
      * @brief Called back at ability context.
@@ -83,6 +86,7 @@ public:
      */
     virtual Ace::UIContent* GetUIContent() = 0;
     virtual void EraseUIExtension(int32_t sessionId) = 0;
+#endif
 #endif
 
     /**

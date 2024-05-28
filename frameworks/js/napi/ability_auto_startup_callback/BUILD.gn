@@ -45,7 +45,10 @@ ohos_shared_library("autostartupcallback") {
   ]
 
   if (ability_runtime_graphics) {
-    defines = [ "SUPPORT_GRAPHICS" ]
+    defines = [
+      "SUPPORT_GRAPHICS",
+      "SUPPORT_SCREEN",
+    ]
   }
 
   innerapi_tags = [ "platformsdk" ]

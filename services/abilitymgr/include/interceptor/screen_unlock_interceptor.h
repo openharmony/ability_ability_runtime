@@ -13,24 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
-#define OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
+#ifndef OHOS_ABILITY_RUNTIME_SCREEN_UNLOCK_INTERCEPTOR
+#define OHOS_ABILITY_RUNTIME_SCREEN_UNLOCK_INTERCEPTOR
 
-#ifdef SUPPORT_GRAPHICS
-#ifdef SUPPORT_SCREEN
-#include "screenlock_manager.h"
-#include "screenlock_callback_stub.h"
+#include "ability_interceptor_interface.h"
 
 namespace OHOS {
-namespace AbilityRuntime {
-class UnlockScreenCallback : public ScreenLock::ScreenLockCallbackStub {
+namespace AAFwk {
+class ScreenUnlockInterceptor : public IAbilityInterceptor {
 public:
-    explicit UnlockScreenCallback();
-    ~UnlockScreenCallback() override;
-    void OnCallBack(const int32_t screenLockResult) override;
+    ScreenUnlockInterceptor() = default;
+    ~ScreenUnlockInterceptor() = default;
+    ErrCode DoProcess(AbilityInterceptorParam param) override;
+    virtual void SetTaskHandler(std::shared_ptr<AAFwk::TaskHandlerWrap> taskHandler) override
+    {
+        return;
+    };
 };
-} // namespace AbilityRuntime
+} // namespace AAFwk
 } // namespace OHOS
-#endif // SUPPORT_SCREEN
-#endif // SUPPORT_GRAPHICS
-#endif // OHOS_ABILITY_RUNTIME_UNLOCK_SCREEN_CALLBACK_H
+
+#endif // OHOS_ABILITY_RUNTIME_SCREEN_UNLOCK_INTERCEPTOR
