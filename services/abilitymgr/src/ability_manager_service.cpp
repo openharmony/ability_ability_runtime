@@ -7084,10 +7084,13 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
 
 void AbilityManagerService::ScheduleClearRecoveryPageStack(const std::string& bundleName)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack bundleName is %{public}s", bundleName.c_str());
-    (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->DeleteAppExitReason(bundleName);
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack bundleName = %{public}s, callerUid = %{public}d",
+        bundleName.c_str());
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-        DeleteAllRecoverInfoByBundleName(bundleName);
+        DeleteAppExitReason(bundleName, callerUid);
+    (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+        DeleteAllRecoverInfoByBundleName(bundleName, callerUid);
 }
 
 
