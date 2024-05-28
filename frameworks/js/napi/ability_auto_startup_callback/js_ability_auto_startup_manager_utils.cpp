@@ -36,12 +36,13 @@ bool UnwrapAutoStartupInfo(napi_env env, napi_value param, AutoStartupInfo &info
         return false;
     }
 
-    if (info.appCloneIndex != -1) {
+    if (IsExistsByPropertyName(env, param, "appCloneIndex")) {
         if (!AppExecFwk::UnwrapInt32ByPropertyName(env, param, "appCloneIndex", info.appCloneIndex)) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Convert appCloneIndex failed.");
-        return false;
+            TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Convert appCloneIndex failed.");
+            return false;
         }
     }
+    
     AppExecFwk::UnwrapStringByPropertyName(env, param, "moduleName", info.moduleName);
     return true;
 }
