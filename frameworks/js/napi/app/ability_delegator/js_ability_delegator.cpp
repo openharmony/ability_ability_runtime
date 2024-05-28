@@ -67,10 +67,10 @@ constexpr int COMMON_FAILED = 16000100;
 constexpr int COMMON_FAILED = -1;
 #endif
 
-napi_value ThrowJsError(napi_env env, int32_t errCode)
+napi_value ThrowJsError(napi_env env, int32_t errCode, std::string errMsg)
 {
 #ifdef ENABLE_ERRCODE
-    napi_value error = CreateJsError(env, errCode, errorMap[errCode]);
+    napi_value error = CreateJsError(env, errCode, errMsg);
     napi_throw(env, error);
 #endif
     return CreateJsUndefined(env);
@@ -260,9 +260,8 @@ napi_value JSAbilityDelegator::OnAddAbilityMonitor(napi_env env, NapiCallbackInf
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityMonitor parameters failed");
-        ThrowInvalidParamError(env,
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
             "Parse param monitor failed, monitor must be Monitor.");
-        return CreateJsUndefined(env);
     }
 
     NapiAsyncTask::CompleteCallback complete = [monitor](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -290,9 +289,8 @@ napi_value JSAbilityDelegator::OnAddAbilityMonitorSync(napi_env env, NapiCallbac
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityMonitorSync parameters failed");
-        ThrowInvalidParamError(env,
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
             "Parse param monitor failed, monitor must be Monitor.");
-        return CreateJsUndefined(env);
     }
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
@@ -311,9 +309,8 @@ napi_value JSAbilityDelegator::OnAddAbilityStageMonitor(napi_env env, NapiCallba
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityStageMonitor parameters failed");
-        ThrowInvalidParamError(env,
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
             "Parse param parameters, failed, monitor must be Monitor and isExited must be boolean.");
-        return CreateJsUndefined(env);
     }
 
     NapiAsyncTask::CompleteCallback complete = [monitor](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -346,9 +343,8 @@ napi_value JSAbilityDelegator::OnAddAbilityStageMonitorSync(napi_env env, NapiCa
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse addAbilityStageMonitorSync parameters failed");
-        ThrowInvalidParamError(env,
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
             "Parse param monitor, failed, monitor must be Monitor.");
-        return CreateJsUndefined(env);
     }
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (!delegator) {
@@ -369,8 +365,8 @@ napi_value JSAbilityDelegator::OnRemoveAbilityMonitor(napi_env env, NapiCallback
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse removeAbilityMonitor parameters failed");
-        ThrowInvalidParamError(env, "Parse monitor failed, removeAbilityMonitor must be Monitor.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
     }
 
     NapiAsyncTask::CompleteCallback complete =
@@ -413,8 +409,8 @@ napi_value JSAbilityDelegator::OnRemoveAbilityMonitorSync(napi_env env, NapiCall
     std::shared_ptr<AbilityMonitor> monitor = nullptr;
     if (!ParseAbilityMonitorPara(env, info, monitor, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse removeAbilityMonitorSync parameters failed");
-        ThrowInvalidParamError(env, "Parse monitor failed, removeAbilityMonitor must be Monitor.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
     }
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
     if (!delegator) {
@@ -442,8 +438,8 @@ napi_value JSAbilityDelegator::OnRemoveAbilityStageMonitor(napi_env env, NapiCal
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, false)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse removeAbilityStageMonitor parameters failed");
-        ThrowInvalidParamError(env, "Parse monitor failed, removeAbilityMonitor must be Monitor.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
     }
 
     NapiAsyncTask::CompleteCallback complete =
@@ -478,8 +474,8 @@ napi_value JSAbilityDelegator::OnRemoveAbilityStageMonitorSync(napi_env env, Nap
     std::shared_ptr<AbilityStageMonitor> monitor = nullptr;
     if (!ParseAbilityStageMonitorPara(env, info, monitor, isExisted, true)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse removeAbilityStageMonitorSync parameters failed");
-        ThrowInvalidParamError(env, "Parse monitor failed, removeAbilityMonitor must be Monitor.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
     }
 
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
@@ -503,8 +499,8 @@ napi_value JSAbilityDelegator::OnWaitAbilityMonitor(napi_env env, NapiCallbackIn
     int64_t timeout = 0;
     if (!ParseWaitAbilityMonitorPara(env, info, monitor, opt, timeout)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse waitAbilityMonitor parameters failed");
-        ThrowInvalidParamError(env, "Parse monitor want failed, removeAbilityMonitor must be Monitor.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse monitor want failed, removeAbilityMonitor must be Monitor.");
     }
 
     auto abilityObjectBox = std::make_shared<AbilityObjectBox>();
@@ -563,8 +559,8 @@ napi_value JSAbilityDelegator::OnWaitAbilityStageMonitor(napi_env env, NapiCallb
     int64_t timeout = 0;
     if (!ParseWaitAbilityStageMonitorPara(env, info, monitor, opt, timeout)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse waitAbilityStageMonitor parameters failed");
-        ThrowInvalidParamError(env, "Parse monitor failed, removeAbilityMonitor must be Monitor.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse monitor failed, removeAbilityMonitor must be Monitor.");
     }
 
     auto abilityStageObjBox = std::make_shared<AbilityStageObjBox>();
@@ -615,8 +611,8 @@ napi_value JSAbilityDelegator::OnPrint(napi_env env, NapiCallbackInfo& info)
     std::string msg;
     if (!ParsePrintPara(env, info, msg)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse print parameters failed");
-        ThrowInvalidParamError(env, "Parse msg failed, msg must be string.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse msg failed, msg must be string.");
     }
 
     NapiAsyncTask::CompleteCallback complete = [msg](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -644,8 +640,8 @@ napi_value JSAbilityDelegator::OnPrintSync(napi_env env, NapiCallbackInfo& info)
     std::string msg;
     if (!ParsePrintPara(env, info, msg)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse print parameters failed");
-        ThrowInvalidParamError(env, "Parse msg failed, msg must be string.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse msg failed, msg must be string.");
     }
 
     auto delegator = AbilityDelegatorRegistry::GetAbilityDelegator();
@@ -667,8 +663,8 @@ napi_value JSAbilityDelegator::OnExecuteShellCommand(napi_env env, NapiCallbackI
     int64_t timeoutSecs = 0;
     if (!ParseExecuteShellCommandPara(env, info, cmd, opt, timeoutSecs)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse executeShellCommand parameters failed");
-        ThrowInvalidParamError(env, "Parse parameters failed, cmd must be string and timeout must be number.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse parameters failed, cmd must be string and timeout must be number.");
     }
 
     auto shellCmdResultBox = std::make_shared<ShellCmdResultBox>();
@@ -778,7 +774,7 @@ napi_value JSAbilityDelegator::OnGetCurrentTopAbility(napi_env env, NapiCallback
 
     if (info.argc >= ARGC_ONE && !AppExecFwk::IsTypeForNapiValue(env, info.argv[INDEX_ZERO], napi_function)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse getCurrentTopAbility parameter failed");
-        return ThrowJsError(env, INCORRECT_PARAMETERS);
+        return ThrowJsError(env, INCORRECT_PARAMETERS, "Parse callback failed, callback must be funcation");
     }
 
     NapiAsyncTask::CompleteCallback complete = [this](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -817,8 +813,8 @@ napi_value JSAbilityDelegator::OnStartAbility(napi_env env, NapiCallbackInfo& in
     AAFwk::Want want;
     if (!ParseStartAbilityPara(env, info, want)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse startAbility parameters failed");
-        ThrowInvalidParamError(env, "Parse want failed, want must be Want.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse want failed, want must be Want.");
     }
 
     NapiAsyncTask::CompleteCallback complete = [want](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -850,8 +846,8 @@ napi_value JSAbilityDelegator::OnDoAbilityForeground(napi_env env, NapiCallbackI
     sptr<OHOS::IRemoteObject> remoteObject = nullptr;
     if (!ParseAbilityCommonPara(env, info, remoteObject)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse doAbilityForeground parameters failed");
-        ThrowInvalidParamError(env, "Parse remoteObject failed, remoteObject must be RemoteObject.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse remoteObject failed, remoteObject must be RemoteObject.");
     }
 
     NapiAsyncTask::CompleteCallback complete = [remoteObject](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -882,8 +878,8 @@ napi_value JSAbilityDelegator::OnDoAbilityBackground(napi_env env, NapiCallbackI
     sptr<OHOS::IRemoteObject> remoteObject = nullptr;
     if (!ParseAbilityCommonPara(env, info, remoteObject)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse doAbilityBackground parameters failed");
-        ThrowInvalidParamError(env, "Parse remoteObject failed, remoteObject must be RemoteObject.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse remoteObject failed, remoteObject must be RemoteObject.");
     }
 
     NapiAsyncTask::CompleteCallback complete = [remoteObject](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -915,8 +911,8 @@ napi_value JSAbilityDelegator::OnFinishTest(napi_env env, NapiCallbackInfo& info
     int64_t code = 0;
     if (!ParseFinishTestPara(env, info, msg, code)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse finishTest parameters failed");
-        ThrowInvalidParamError(env, "Parse parameters failed, msg must be string and code must be number.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse parameters failed, msg must be string and code must be number.");
     }
 
     NapiAsyncTask::CompleteCallback complete = [msg, code](napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -943,8 +939,8 @@ napi_value JSAbilityDelegator::OnSetMockList(napi_env env, NapiCallbackInfo& inf
     std::map<std::string, std::string> mockList;
     if (!ParseMockListPara(env, info, mockList)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse setMockList parameters failed");
-        ThrowInvalidParamError(env, "Parse mockList failed, mockList must be MockList.");
-        return CreateJsUndefined(env);
+        return ThrowJsError(env, INCORRECT_PARAMETERS,
+            "Parse mockList failed, mockList must be MockList.");
     }
     auto engine = reinterpret_cast<NativeEngine*>(env);
     engine->SetMockModuleList(mockList);
