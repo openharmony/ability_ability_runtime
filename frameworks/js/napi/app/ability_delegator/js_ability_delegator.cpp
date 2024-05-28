@@ -612,7 +612,7 @@ napi_value JSAbilityDelegator::OnPrint(napi_env env, NapiCallbackInfo& info)
     if (!ParsePrintPara(env, info, msg)) {
         TAG_LOGE(AAFwkTag::DELEGATOR, "Parse print parameters failed");
         return ThrowJsError(env, INCORRECT_PARAMETERS,
-            "Parse msg failed, msg must be string.");
+            "Parse parameters msg failed, msg must be string.");
     }
 
     NapiAsyncTask::CompleteCallback complete = [msg](napi_env env, NapiAsyncTask &task, int32_t status) {
