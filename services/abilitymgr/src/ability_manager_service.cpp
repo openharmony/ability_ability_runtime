@@ -7086,7 +7086,7 @@ void AbilityManagerService::ScheduleClearRecoveryPageStack(const std::string& bu
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack bundleName = %{public}s, callerUid = %{public}d",
-        bundleName.c_str());
+        bundleName.c_str(), callerUid);
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
         DeleteAppExitReason(bundleName, callerUid);
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
