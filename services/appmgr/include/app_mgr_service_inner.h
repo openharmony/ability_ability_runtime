@@ -1210,7 +1210,8 @@ private:
      *
      * @return ERR_OK, return back success, others fail.
      */
-    int32_t KillApplicationByUserIdLocked(const std::string &bundleName, const int userId);
+    int32_t KillApplicationByUserIdLocked(
+        const std::string &bundleName, const int userId, const bool clearPageStack = true);
 
     /**
      * WaitForRemoteProcessExit, Wait for the process to exit normally.
@@ -1342,7 +1343,8 @@ private:
 
     bool CheckGetRunningInfoPermission() const;
 
-    int32_t KillApplicationByBundleName(const std::string &bundleName);
+    int32_t KillApplicationByBundleName(
+        const std::string &bundleName, const bool clearPageStack = true);
 
     bool SendProcessStartEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
