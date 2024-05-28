@@ -149,7 +149,7 @@ private:
         // only support one or two params
         if (info.argc != ARGC_ONE && info.argc != ARGC_TWO) {
             TAG_LOGE(AAFwkTag::FORM_EXT, "Not enough params");
-            ThrowInvalidParamError(env, "Parse param want failed, want must be Want.");
+            NapiFormUtil::ThrowParamNumError(env, std::to_string(info.argc), "1 or 2");
             return CreateJsUndefined(env);
         }
 
@@ -158,7 +158,7 @@ private:
         bool unwrapResult = OHOS::AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want);
         if (!unwrapResult) {
             TAG_LOGE(AAFwkTag::FORM_EXT, "Failed to unwrap want.");
-            ThrowInvalidParamError(env, "Parameter error: Failed to parse want! Want must be a Want.");
+            NapiFormUtil::ThrowParamTypeError(env, "want", "Want");
             return CreateJsUndefined(env);
         }
         TAG_LOGI(AAFwkTag::FORM_EXT, "Start ability, bundleName: %{public}s abilityName: %{public}s.",
