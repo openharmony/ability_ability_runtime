@@ -278,7 +278,7 @@ public:
      * @return ERR_OK, return back success, others fail.
      */
     virtual int32_t KillApplicationByUserId(
-        const std::string &bundleName, const int userId,, const bool clearPageStack = true);
+        const std::string &bundleName, const int userId, const bool clearPageStack = true);
 
     /**
      * ClearUpApplicationData, clear the application data.

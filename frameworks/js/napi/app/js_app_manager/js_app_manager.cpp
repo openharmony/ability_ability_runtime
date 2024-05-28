@@ -896,19 +896,19 @@ private:
         }
 
         std::string bundleName;
-        if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+        if (!ConvertFromJsValue(env, argv[ARGC_ZERO], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
             ThrowInvalidParamError(env, "Parse param bundleName failed, must be a string");
             return CreateJsUndefined(env);
         }
         int32_t accountId = -1;
-        if (!ConvertFromJsValue(env, argv[1], accountId)) {
+        if (!ConvertFromJsValue(env, argv[ARGC_ONE], accountId)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Parse userId failed");
             ThrowInvalidParamError(env, "Parse param accountId failed, must be a number");
             return CreateJsUndefined(env);
         }
         bool clearPageStack = false;
-        if (!ConvertFromJsValue(env, argv[2], clearPageStack)) {
+        if (!ConvertFromJsValue(env, argv[ARGC_TWO], clearPageStack)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Parse clearPageStack failed");
             ThrowInvalidParamError(env, "Parse param clearPageStack failed, must be a boolean");
             return CreateJsUndefined(env);
