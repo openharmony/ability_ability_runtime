@@ -88,12 +88,10 @@ void JsPhotoEditorExtensionImpl::BindContext()
         TAG_LOGE(AAFwkTag::UI_EXT, "obj is not object.");
         return;
     }
-
     if (context_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Context is nullptr.");
         return;
     }
-
     TAG_LOGD(AAFwkTag::UI_EXT, "BindContext CreateJsPhotoEditorExtensionContext.");
     napi_value contextObj = JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(env, context_);
     if (contextObj == nullptr) {
