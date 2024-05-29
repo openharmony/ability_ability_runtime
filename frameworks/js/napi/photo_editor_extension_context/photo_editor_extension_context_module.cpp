@@ -30,7 +30,8 @@ extern "C" __attribute__((constructor)) void NAPI_application_PhotoEditorExtensi
     napi_module_register(&_module);
 }
 
-extern "C" __attribute__((visibility("default"))) void NAPI_application_PhotoEditorExtensionContext_GetJSCode(const char **buf, int *bufLen)
+extern "C" __attribute__((visibility("default"))) void NAPI_application_PhotoEditorExtensionContext_GetJSCode(
+    const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_photo_editor_extension_context_js_start;
@@ -42,7 +43,8 @@ extern "C" __attribute__((visibility("default"))) void NAPI_application_PhotoEdi
 }
 
 // ability_context JS register
-extern "C" __attribute__((visibility("default"))) void NAPI_application_PhotoEditorExtensionContext_GetABCCode(const char **buf, int *buflen)
+extern "C" __attribute__((visibility("default"))) void NAPI_application_PhotoEditorExtensionContext_GetABCCode(
+    const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_photo_editor_extension_context_abc_start;
