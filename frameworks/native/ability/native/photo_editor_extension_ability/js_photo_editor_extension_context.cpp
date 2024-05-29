@@ -127,8 +127,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
 
 napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage is called: param size: %{public}d.",
-             static_cast<int32_t>(info.argc));
+    TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage is called: param size: %{public}d.", static_cast<int32_t>(info.argc));
 
     if (info.argc != ARGC_THREE) {
         ThrowError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR), ERR_MSG_PARAMS_ERROR);
