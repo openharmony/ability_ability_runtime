@@ -99,7 +99,8 @@ void JsPhotoEditorExtensionImpl::BindContext()
         return;
     }
 
-    shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &contextObj, ARGC_ONE);
+    shellContextRef_ =
+        JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &contextObj, ARGC_ONE);
     if (shellContextRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get loadSystemModuleByEngine.");
         return;
@@ -115,8 +116,7 @@ void JsPhotoEditorExtensionImpl::BindContext()
                                          nullptr);
     context_->Bind(jsRuntime_, shellContextRef_.get());
     napi_set_named_property(env, obj, "context", contextObj);
-    napi_wrap(
-        env, contextObj, workContext,
+    napi_wrap(env, contextObj, workContext,
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::UI_EXT, "Finalizer for weak_ptr ui extension context is called.");
             if (data == nullptr) {
