@@ -15,10 +15,10 @@
 
 #include "native_engine/native_engine.h"
 
-extern const char _binary_photo_editor_extension_ability_js_start[];
-extern const char _binary_photo_editor_extension_ability_js_end[];
-extern const char _binary_photo_editor_extension_ability_abc_start[];
-extern const char _binary_photo_editor_extension_ability_abc_end[];
+extern const char _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_JS_START[];
+extern const char _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_JS_END[];
+extern const char _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_ABC_START[];
+extern const char _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_ABC_END[];
 
 static napi_module _module = {
     .nm_version = 0,
@@ -34,11 +34,11 @@ extern "C" __attribute__((visibility("default"))) void
 NAPI_app_ability_PhotoEditorExtensionAbility_GetJSCode(const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
-        *buf = _binary_photo_editor_extension_ability_js_start;
+        *buf = _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_JS_START;
     }
 
     if (bufLen != nullptr) {
-        *bufLen = _binary_photo_editor_extension_ability_js_end - _binary_photo_editor_extension_ability_js_start;
+        *bufLen = _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_JS_END - _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_JS_START;
     }
 }
 
@@ -46,9 +46,9 @@ extern "C" __attribute__((visibility("default"))) void
 NAPI_app_ability_PhotoEditorExtensionAbility_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
-        *buf = _binary_photo_editor_extension_ability_abc_start;
+        *buf = _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_ABC_START;
     }
     if (buflen != nullptr) {
-        *buflen = _binary_photo_editor_extension_ability_abc_end - _binary_photo_editor_extension_ability_abc_start;
+        *buflen = _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_ABC_END - _BINARY_PHOTO_EDITOR_EXTENSION_ABILITY_ABC_START;
     }
 }
