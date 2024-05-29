@@ -98,8 +98,7 @@ void JsPhotoEditorExtensionImpl::BindContext()
         return;
     }
 
-    shellContextRef_ =
-        JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &contextObj, ARGC_ONE);
+    shellContextRef_ = JsRuntime::LoadSystemModuleByEngine(env, "application.PhotoEditorExtensionContext", &contextObj, ARGC_ONE);
     if (shellContextRef_ == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Fail to get loadSystemModuleByEngine.");
         return;
