@@ -60,7 +60,9 @@ inline std::unordered_set<AppExecFwk::ExtensionAbilityType> GetUiExtensionSet()
         AppExecFwk::ExtensionAbilityType::SYSPICKER_CAMERA,
         AppExecFwk::ExtensionAbilityType::SYSPICKER_FILEPICKER,
         AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART,
-        AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN
+        AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN,
+        AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR,
+        AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR
     };
 }
 
@@ -88,6 +90,7 @@ inline bool IsSystemUIExtension(const AppExecFwk::ExtensionAbilityType type)
         AppExecFwk::ExtensionAbilityType::SYSPICKER_APPSELECTOR,
         AppExecFwk::ExtensionAbilityType::UI,
         AppExecFwk::ExtensionAbilityType::SYS_COMMON_UI,
+        AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR
     };
     return systemUiExtensionSet.find(type) != systemUiExtensionSet.end();
 }
