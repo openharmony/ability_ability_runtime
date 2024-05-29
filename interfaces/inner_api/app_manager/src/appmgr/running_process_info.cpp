@@ -61,8 +61,7 @@ bool RunningProcessInfo::ReadFromParcel(Parcel &parcel)
     int32_t extensionType;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, extensionType);
     extensionType_ = static_cast<ExtensionAbilityType>(extensionType);
-    int32_t appCloneIndex;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, appCloneIndex);
+    appCloneIndex = parcel.ReadInt32();
     return true;
 }
 
