@@ -209,7 +209,8 @@ public:
         return 0;
     }
 
-    
+    void ScheduleClearPageStack() override
+    {}
 
 private:
     int abilityLaunchTime = 0;
