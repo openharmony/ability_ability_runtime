@@ -28,7 +28,6 @@ namespace OHOS {
 namespace AbilityRuntime {
 namespace {
 constexpr size_t ARGC_TWO = 2;
-constexpr size_t ARGC_THREE = 3;
 constexpr const char *ERR_MSG_PARAMS_ERROR = "Params error";
 constexpr const char *ERR_MSG_INTERNAL_ERROR = "Internal error";
 constexpr int32_t INDEX_ZERO = 0;
@@ -129,12 +128,7 @@ napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithUri(napi_env en
 napi_value JsPhotoEditorExtensionContext::OnSaveEditedContentWithImage(napi_env env, NapiCallbackInfo &info)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "OnSaveEditedContentWithImage is called: param size: %{public}d.",
-            static_cast<int32_t>(info.argc));
-
-    if (info.argc != ARGC_THREE) {
-        ThrowError(env, static_cast<int32_t>(PhotoEditorErrorCode::ERROR_CODE_PARAM_ERROR), ERR_MSG_PARAMS_ERROR);
-        return CreateJsUndefined(env);
-    }
+        static_cast<int32_t>(info.argc));
 
     auto image = Media::PixelMapNapi::GetPixelMap(env, info.argv[INDEX_ZERO]);
     if (!image) {
