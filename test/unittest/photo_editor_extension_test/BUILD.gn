@@ -72,6 +72,12 @@ config("module_ability_context_config") {
 }
 
 ohos_unittest("photo_editor_extension_module_loader_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   module_out_path = "ability_runtime/photo_editor_extension"
 
   sources = [
@@ -106,6 +112,12 @@ ohos_unittest("photo_editor_extension_module_loader_test") {
 }
 
 ohos_unittest("photo_editor_extension_test") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+      
   module_out_path = "ability_runtime/photo_editor_extension"
 
   include_dirs = [
