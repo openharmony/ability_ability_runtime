@@ -26,8 +26,7 @@ struct NapiCallbackInfo;
 
 class JsPhotoEditorExtensionContext {
 public:
-    explicit JsPhotoEditorExtensionContext(const std::shared_ptr<PhotoEditorExtensionContext> &context) :
-        context_(context)
+    explicit JsPhotoEditorExtensionContext(const std::shared_ptr<PhotoEditorExtensionContext> &context) : context_(context)
     {}
 
     virtual ~JsPhotoEditorExtensionContext() = default;
