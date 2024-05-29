@@ -10580,6 +10580,9 @@ bool AbilityManagerService::ParseJsonFromBoot(nlohmann::json jsonObj, const std:
             }
         }
     }
+    if (!jsonObj.contains("exposed_white_list")) {
+        return false;
+    }
     nlohmann::json exportWhiteJsonList = jsonObj["exposed_white_list"];
     for (const auto& it : exportWhiteJsonList) {
         if (it.is_string()) {
