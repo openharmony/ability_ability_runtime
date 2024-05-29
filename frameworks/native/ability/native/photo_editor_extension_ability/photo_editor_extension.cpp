@@ -28,9 +28,9 @@ PhotoEditorExtension *PhotoEditorExtension::Create(const std::unique_ptr<Runtime
         return new PhotoEditorExtension();
     }
     switch (runtime->GetLanguage()) {
-        case Runtime::Language::JS: 
+        case Runtime::Language::JS:
             return JsPhotoEditorExtension::Create(runtime);
-        default: 
+        default:
             return new PhotoEditorExtension();
     }
 }
