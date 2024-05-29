@@ -1751,6 +1751,8 @@ protected:
 
     void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
 
+    void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
+
 private:
     int TerminateAbilityWithFlag(const sptr<IRemoteObject> &token, int resultCode = DEFAULT_INVAL_VALUE,
         const Want *resultWant = nullptr, bool flag = true);
@@ -1916,6 +1918,7 @@ private:
     void SubscribeScreenUnlockedEvent();
     void UnSubscribeScreenUnlockedEvent();
     void RetrySubscribeScreenUnlockedEvent(int32_t retryCount);
+    void RemoveScreenUnlockInterceptor();
 
     int VerifyAccountPermission(int32_t userId);
 
@@ -2157,6 +2160,8 @@ private:
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
+
+    void GetRunningMultiAppIndex(const std::string &bundleName, int32_t uid, int32_t &appIndex);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;

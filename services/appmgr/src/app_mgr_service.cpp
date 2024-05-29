@@ -257,6 +257,7 @@ void AppMgrService::ApplicationBackgrounded(const int32_t recordId)
     if (!JudgeAppSelfCalled(recordId)) {
         return;
     }
+    taskHandler_->CancelTask("appbackground_" + std::to_string(recordId));
     std::function<void()> applicationBackgroundedFunc =
         std::bind(&AppMgrServiceInner::ApplicationBackgrounded, appMgrServiceInner_, recordId);
     taskHandler_->SubmitTask(applicationBackgroundedFunc, AAFwk::TaskAttribute{
@@ -1132,6 +1133,15 @@ int32_t AppMgrService::GetBundleNameByPid(const int32_t pid, std::string &bundle
     return appMgrServiceInner_->GetBundleNameByPid(pid, bundleName, uid);
 }
 
+int32_t AppMgrService::GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService is not ready.");
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->GetRunningProcessInfoByPid(pid, info);
+}
+
 int32_t AppMgrService::NotifyAppFault(const FaultData &faultData)
 {
     if (!IsReady()) {
@@ -1294,6 +1304,14 @@ int32_t AppMgrService::IsApplicationRunning(const std::string &bundleName, bool 
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->IsApplicationRunning(bundleName, isRunning);
+}
+
+int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->IsAppRunning(bundleName, appCloneIndex, isRunning);
 }
 
 int32_t AppMgrService::StartChildProcess(const std::string &srcEntry, pid_t &childPid, int32_t childProcessCount,
