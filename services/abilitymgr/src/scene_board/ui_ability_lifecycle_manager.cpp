@@ -575,6 +575,7 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(const sptr<IRemoteObje
         TAG_LOGD(AAFwkTag::ABILITYMGR, "First frame drawing has completed.");
         return;
     }
+    abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
     abilityRecord->SetCompleteFirstFrameDrawing(true);
     DelayedSingleton<AppExecFwk::AbilityFirstFrameStateObserverManager>::GetInstance()->
         HandleOnFirstFrameState(abilityRecord);
@@ -2355,6 +2356,7 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) con
         TAG_LOGW(AAFwkTag::ABILITYMGR, "CompleteFirstFrameDrawing, get AbilityRecord by sessionId failed.");
         return;
     }
+    abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
 #ifdef SUPPORT_SCREEN
     abilityRecord->SetCompleteFirstFrameDrawing(true);
     DelayedSingleton<AppExecFwk::AbilityFirstFrameStateObserverManager>::GetInstance()->

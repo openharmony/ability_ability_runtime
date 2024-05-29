@@ -56,6 +56,7 @@ AutoFillManager::~AutoFillManager()
         eventHandler_.reset();
     }
 }
+
 int32_t AutoFillManager::RequestAutoFill(
     Ace::UIContent *uiContent,
     const AutoFill::AutoFillRequest &request,
@@ -208,6 +209,7 @@ void AutoFillManager::RemoveAutoFillExtensionProxy(Ace::UIContent *uiContent)
         modalUIExtensionProxyMap_.erase(it);
     }
 }
+
 void AutoFillManager::BindModalUIExtensionCallback(
     const std::shared_ptr<AutoFillExtensionCallback> &extensionCallback, Ace::ModalUIExtensionCallbacks &callback)
 {
@@ -223,6 +225,7 @@ void AutoFillManager::BindModalUIExtensionCallback(
         extensionCallback, std::placeholders::_1);
     callback.onDestroy = std::bind(&AutoFillExtensionCallback::onDestroy, extensionCallback);
 }
+
 int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &request)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
@@ -254,13 +257,9 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
     want.SetParam(WANT_PARAMS_AUTO_FILL_TYPE_KEY, static_cast<int32_t>(request.autoFillType));
     want.SetParam(WANT_PARAMS_VIEW_DATA_KEY, request.extensionCallback->GetViewData().ToJsonString());
     want.SetParam(WANT_PARAMS_AUTO_FILL_POPUP_WINDOW_KEY, false);
-
     Ace::ModalUIExtensionCallbacks callback;
-
     BindModalUIExtensionCallback(request.extensionCallback, callback);
-
     Ace::ModalUIExtensionConfig config;
-
     config.isAsyncModalBinding = true;
     int32_t sessionId = AUTO_FILL_UI_EXTENSION_SESSION_ID_INVALID;
     sessionId = request.uiContent->CreateModalUIExtension(want, callback, config);
@@ -276,6 +275,7 @@ int32_t AutoFillManager::ReloadInModal(const AutoFill::ReloadInModalRequest &req
     extensionCallbacks_.emplace(eventId_, request.extensionCallback);
     return AutoFill::AUTO_FILL_SUCCESS;
 }
+
 int32_t AutoFillManager::CreateAutoFillExtension(Ace::UIContent *uiContent,
     const AutoFill::AutoFillRequest &request,
     const Ace::ModalUIExtensionCallbacks &callback,
