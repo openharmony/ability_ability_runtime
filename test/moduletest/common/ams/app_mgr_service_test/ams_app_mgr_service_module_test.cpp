@@ -128,6 +128,8 @@ public:
     {
         return 0;
     }
+    void ScheduleClearPageStack() override
+    {}
 };
 class AppMgrServiceModuleTest : public testing::Test {
 public:
