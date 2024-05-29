@@ -70,7 +70,8 @@ napi_value AttachUIExtensionContext(napi_env env, void *value, void *)
     return contextObj;
 }
 
-JsPhotoEditorExtensionImpl::JsPhotoEditorExtensionImpl(const std::unique_ptr<Runtime> &runtime) : JsUIExtensionBase(runtime)
+JsPhotoEditorExtensionImpl::JsPhotoEditorExtensionImpl(const std::unique_ptr<Runtime> &runtime)
+    : JsUIExtensionBase(runtime)
 {}
 
 void JsPhotoEditorExtensionImpl::BindContext()
