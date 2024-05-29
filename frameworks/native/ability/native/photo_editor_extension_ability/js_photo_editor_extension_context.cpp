@@ -42,8 +42,7 @@ void JsPhotoEditorExtensionContext::Finalizer(napi_env env, void *data, void *hi
     std::unique_ptr<JsPhotoEditorExtensionContext>(static_cast<JsPhotoEditorExtensionContext *>(data));
 }
 
-napi_value
-JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(napi_env env,
+napi_value JsPhotoEditorExtensionContext::CreateJsPhotoEditorExtensionContext(napi_env env,
                                                                    std::shared_ptr<PhotoEditorExtensionContext> context)
 {
     TAG_LOGD(AAFwkTag::UI_EXT, "CreateJsPhotoEditorExtensionContext begin.");
