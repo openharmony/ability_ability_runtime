@@ -35,6 +35,16 @@ gen_js_obj("photo_editor_extension_context_abc") {
 }
 
 ohos_shared_library("photoeditorextensioncontext_napi") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  
   sources = [ "photo_editor_extension_context_module.cpp" ]
 
   deps = [
