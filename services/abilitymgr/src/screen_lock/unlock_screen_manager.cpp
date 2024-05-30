@@ -57,11 +57,6 @@ bool UnlockScreenManager::UnlockScreen()
     if (isScreenLocked && isScreenSecured) {
         return false;
     }
-    if (isScreenLocked) {
-        sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>(new (std::nothrow) UnlockScreenCallback());
-        IN_PROCESS_CALL(OHOS::ScreenLock::ScreenLockManager::GetInstance()->Unlock(
-            OHOS::ScreenLock::Action::UNLOCKSCREEN, listener));
-    }
 #endif
 
 #ifdef SUPPORT_POWER
@@ -69,6 +64,14 @@ bool UnlockScreenManager::UnlockScreen()
     TAG_LOGD(AAFwkTag::ABILITYMGR, "isScreenOn: %{public}d", isScreenOn);
     if (!isScreenOn) {
         PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
+    }
+#endif
+
+#ifdef SUPPORT_GRAPHICS
+    if (isScreenLocked) {
+        sptr<UnlockScreenCallback> listener = sptr<UnlockScreenCallback>(new (std::nothrow) UnlockScreenCallback());
+        IN_PROCESS_CALL(OHOS::ScreenLock::ScreenLockManager::GetInstance()->Unlock(
+            OHOS::ScreenLock::Action::UNLOCKSCREEN, listener));
     }
 #endif
     return true;
