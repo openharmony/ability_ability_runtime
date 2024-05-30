@@ -1204,7 +1204,9 @@ void AppMgrService::OnAddSystemAbility(int32_t systemAbilityId, const std::strin
     }
 
     appMgrServiceInner_->InitFocusListener();
+#ifdef SUPPORT_SCREEN
     appMgrServiceInner_->InitWindowVisibilityChangedListener();
+#endif
 }
 
 void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -1220,7 +1222,9 @@ void AppMgrService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::st
     }
 
     appMgrServiceInner_->FreeFocusListener();
+#ifdef SUPPORT_SCREEN
     appMgrServiceInner_->FreeWindowVisibilityChangedListener();
+#endif
 }
 
 int32_t AppMgrService::ChangeAppGcState(pid_t pid, int32_t state)
@@ -1304,6 +1308,14 @@ int32_t AppMgrService::IsApplicationRunning(const std::string &bundleName, bool 
         return ERR_INVALID_OPERATION;
     }
     return appMgrServiceInner_->IsApplicationRunning(bundleName, isRunning);
+}
+
+int32_t AppMgrService::IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning)
+{
+    if (!IsReady()) {
+        return ERR_INVALID_OPERATION;
+    }
+    return appMgrServiceInner_->IsAppRunning(bundleName, appCloneIndex, isRunning);
 }
 
 int32_t AppMgrService::StartChildProcess(const std::string &srcEntry, pid_t &childPid, int32_t childProcessCount,
