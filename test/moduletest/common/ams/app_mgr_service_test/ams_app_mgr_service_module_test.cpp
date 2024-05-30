@@ -413,7 +413,8 @@ HWTEST_F(AppMgrServiceModuleTest, KillApplication_001, TestSize.Level1)
     bool testResult = false;
     Semaphore sem(0);
 
-    auto mockHandler = [&testResult, testBundleName, &sem](const std::string& bundleName) {
+    auto mockHandler = [&testResult, testBundleName, &sem](
+        const std::string& bundleName, const bool clearPageStack = true) {
         testResult = (bundleName == testBundleName);
         sem.Post();
         return 0;
