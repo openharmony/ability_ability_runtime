@@ -55,7 +55,7 @@ bool AbilityStateData::Marshalling(Parcel &parcel) const
     if (!parcel.WriteInt32(abilityType)) {
         return false;
     }
-    if (!parcel.WriteBool(isFocused) || !parcel.WriteInt32(appCloneIndex)) {
+    if (!parcel.WriteBool(isFocused)) {
         return false;
     }
     if (!parcel.WriteString(callerBundleName)) {
@@ -65,6 +65,9 @@ bool AbilityStateData::Marshalling(Parcel &parcel) const
         return false;
     }
     if (!parcel.WriteBool(isAtomicService) || !parcel.WriteInt32(abilityRecordId)) {
+        return false;
+    }
+    if (!parcel.WriteInt32(appCloneIndex)) {
         return false;
     }
     return true;
