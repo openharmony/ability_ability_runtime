@@ -1593,7 +1593,6 @@ ohos_shared_library("photo_editor_extension_module") {
   sources = [ "${ability_runtime_native_path}/ability/native/photo_editor_extension_ability/photo_editor_extension_module_loader.cpp" ]
 
   configs = [
-    ":ability_config",
     ":photo_editor_extension_config",
   ]
 
