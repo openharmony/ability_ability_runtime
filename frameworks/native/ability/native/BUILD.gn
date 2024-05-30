@@ -1610,6 +1610,10 @@ ohos_shared_library("photo_editor_extension_module") {
     "napi:ace_napi",
   ]
 
+  if (ability_runtime_graphics) {
+    external_deps += [ "window_manager:libwm" ]
+  }
+
   relative_install_dir = "extensionability/"
   subsystem_name = "ability"
   part_name = "ability_runtime"
