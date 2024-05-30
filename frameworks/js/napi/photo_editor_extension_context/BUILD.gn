@@ -28,8 +28,9 @@ gen_js_obj("photo_editor_extension_context_js") {
 }
 
 gen_js_obj("photo_editor_extension_context_abc") {
-  input = get_label_info(":gen_photo_editor_extension_context_abc", "target_out_dir") +
-          "/photo_editor_extension_context.abc"
+  input =
+      get_label_info(":gen_photo_editor_extension_context_abc",
+                     "target_out_dir") + "/photo_editor_extension_context.abc"
   output = target_out_dir + "/photo_editor_extension_context_abc.o"
   dep = ":gen_photo_editor_extension_context_abc"
 }
@@ -44,7 +45,7 @@ ohos_shared_library("photoeditorextensioncontext_napi") {
     cfi_vcall_icall_only = true
     debug = false
   }
-  
+
   sources = [ "photo_editor_extension_context_module.cpp" ]
 
   deps = [
