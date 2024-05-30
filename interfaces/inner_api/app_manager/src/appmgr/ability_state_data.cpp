@@ -52,7 +52,7 @@ bool AbilityStateData::Marshalling(Parcel &parcel) const
             return false;
         }
     }
-    if (!MarshallingOne(Parcel &parcel)) {
+    if (!MarshallingOne(parcel)) {
         return false;
     }
     return true;
