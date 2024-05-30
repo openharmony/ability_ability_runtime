@@ -52,13 +52,13 @@ bool AbilityStateData::Marshalling(Parcel &parcel) const
             return false;
         }
     }
-    if (!MarshallingAdd) {
+    if (!MarshallingOne) {
         return false;
     }
     return true;
 }
 
-bool AbilityStateData::MarshallingAdd(Parcel &parcel) const
+bool AbilityStateData::MarshallingOne(Parcel &parcel) const
 {
     if (!parcel.WriteInt32(abilityType)) {
         return false;
