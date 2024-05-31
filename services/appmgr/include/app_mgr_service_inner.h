@@ -420,6 +420,7 @@ public:
      * Check whether the bundle is running.
      *
      * @param bundleName Indicates the bundle name of the bundle.
+     * @param appCloneIndex the appindex of the bundle.
      * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
      * @return Return ERR_OK if success, others fail.
      */
@@ -765,7 +766,7 @@ public:
     int32_t NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
 
     int32_t NotifyUnLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback);
-
+#ifdef SUPPORT_SCREEN
     void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
@@ -774,7 +775,7 @@ public:
      */
     void HandleWindowVisibilityChanged(
             const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
-
+#endif //SUPPORT_SCREEN
     /**
      * Set the current userId, only used by abilityMgr.
      *
@@ -1357,11 +1358,12 @@ private:
     void SendAppStartupTypeEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
         const std::shared_ptr<AbilityInfo> &abilityInfo, const AppStartType startType);
 
+    bool SendCreateAtomicServiceProcessEvent(const std::shared_ptr<AppRunningRecord> &appRecord,
+        const BundleType &bundleType, const std::string &moduleName = "", const std::string &abilityName = "");
+
     void SendProcessExitEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
 
     void SendProcessExitEventTask(const std::shared_ptr<AppRunningRecord> &appRecord, time_t exitTime, int32_t count);
-
-    void UpDateStartupType(const std::shared_ptr<AbilityInfo> &info, int32_t &abilityType, int32_t &extensionType);
 
     void SetRunningSharedBundleList(const std::string &bundleName,
         const std::vector<BaseSharedBundleInfo> baseSharedBundleInfoList);
@@ -1470,8 +1472,7 @@ private:
     int FinishUserTestLocked(
         const std::string &msg, const int64_t &resultCode, const std::shared_ptr<AppRunningRecord> &appRecord);
     int32_t GetCurrentAccountId() const;
-    void SendReStartProcessEvent(const AAFwk::EventInfo &eventInfo,
-        const std::shared_ptr<AppRunningRecord> &appRecord);
+    void SendReStartProcessEvent(AAFwk::EventInfo &eventInfo, int32_t appUid);
     void SendAppLaunchEvent(const std::shared_ptr<AppRunningRecord> &appRecord);
     void InitAppWaitingDebugList();
     void HandleConfigurationChange(const Configuration &config);
@@ -1497,8 +1498,10 @@ private:
     sptr<IStartSpecifiedAbilityResponse> startSpecifiedAbilityResponse_;
     ffrt::mutex configurationObserverLock_;
     std::vector<sptr<IConfigurationObserver>> configurationObservers_;
+#ifdef SUPPORT_SCREEN
     sptr<WindowFocusChangedListener> focusListener_;
     sptr<WindowVisibilityChangedListener> windowVisibilityChangedListener_;
+#endif //SUPPORT_SCREEN
     std::vector<std::shared_ptr<AppRunningRecord>> restartResedentTaskList_;
     std::map<std::string, std::vector<BaseSharedBundleInfo>> runningSharedBundleList_;
     std::map<std::string, bool> waitingDebugBundleList_;
