@@ -29,7 +29,7 @@
 #include "iability_callback.h"
 #include "want.h"
 #include "resource_config_helper.h"
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 #include "display_manager.h"
 #include "session_info.h"
 #include "window_scene.h"
@@ -356,7 +356,7 @@ private:
     bool startUpNewRule_ = false;
     bool isSilentForeground_ = false;
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 public:
     uint32_t sceneFlag_ = 0;
 
