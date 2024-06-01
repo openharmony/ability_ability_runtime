@@ -3197,6 +3197,9 @@ int32_t MainThread::ChangeAppGcState(int32_t state)
         TAG_LOGE(AAFwkTag::APPKIT, "runtime is nullptr.");
         return ERR_INVALID_VALUE;
     }
+    if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::CJ) {
+        return NO_ERROR;
+    }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime)).GetNativeEngine();
     nativeEngine.NotifyForceExpandState(state);
     return NO_ERROR;
