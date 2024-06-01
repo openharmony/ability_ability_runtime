@@ -207,9 +207,13 @@ class AbilityContext extends Context {
   openAtomicService(appId, options, callback) {
     return this.__context_impl__.openAtomicService(appId, options, callback);
   }
-  
+
   moveAbilityToBackground(callback) {
     return this.__context_impl__.moveAbilityToBackground(callback);
+  }
+
+  setRestoreEnabled(enabled) {
+    this.__context_impl__.setRestoreEnabled(enabled);
   }
 }
 
