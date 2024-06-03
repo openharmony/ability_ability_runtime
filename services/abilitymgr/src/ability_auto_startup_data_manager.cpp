@@ -413,6 +413,10 @@ AutoStartupInfo AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKeyAndV
         info.appCloneIndex = jsonObject.at(JSON_KEY_APP_CLONE_INDEX).get<std::int32_t>();
     }
 
+    if (jsonObject.contains(JSON_KEY_ACCESS_TOKENID) && jsonObject[JSON_KEY_ACCESS_TOKENID].is_string()) {
+        info.accessTokenId = jsonObject.at(JSON_KEY_ACCESS_TOKENID).get<std::string>();
+    }
+
     nlohmann::json jsonValueObject = nlohmann::json::parse(value.ToString(), nullptr, false);
     if (jsonValueObject.is_discarded()) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to parse jsonValueObject.");
