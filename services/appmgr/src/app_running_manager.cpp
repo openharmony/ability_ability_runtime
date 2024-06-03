@@ -569,7 +569,9 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
-            appRecord->PostTask("DELAY_KILL_PROCESS", AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT, killProcess);
+            auto delayTime = appRecord->ExtensionAbilityRecordExists(token) ?
+                AMSEventHandler::DELAY_KILL_EXTENSION_PROCESS_TIMEOUT : AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT;
+            appRecord->PostTask("DELAY_KILL_PROCESS", delayTime, killProcess);
         }
     }
 }
@@ -618,6 +620,10 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo) {
         info.bundleType = static_cast<int32_t>(appInfo->bundleType);
+    }
+    if (appInfo && (static_cast<int32_t>(appInfo->multiAppMode.multiAppModeType) ==
+            static_cast<int32_t>(MultiAppModeType::APP_CLONE))) {
+            info.appCloneIndex = appRecord->GetAppIndex();
     }
     return ERR_OK;
 }
@@ -1499,10 +1505,13 @@ bool AppRunningManager::IsAppProcessesAllCached(const std::string &bundleName, i
         if (itemRecord == nullptr) {
             continue;
         }
-        if (itemRecord->GetBundleName() == bundleName && itemRecord->GetUid() == uid &&
-            cachedSet.find(itemRecord) == cachedSet.end() &&
-            DelayedSingleton<CacheProcessManager>::GetInstance()->IsAppSupportProcessCache(itemRecord)) {
-            return false;
+        if (itemRecord->GetBundleName() == bundleName && itemRecord->GetUid() == uid) {
+            auto supportCache =
+                DelayedSingleton<CacheProcessManager>::GetInstance()->IsAppSupportProcessCache(itemRecord);
+            // need wait for unsupported processes
+            if ((cachedSet.find(itemRecord) == cachedSet.end() && supportCache) || !supportCache) {
+                return false;
+            }
         }
     }
     return true;
