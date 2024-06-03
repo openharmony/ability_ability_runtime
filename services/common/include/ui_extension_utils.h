@@ -62,7 +62,8 @@ inline std::unordered_set<AppExecFwk::ExtensionAbilityType> GetUiExtensionSet()
         AppExecFwk::ExtensionAbilityType::AUTO_FILL_SMART,
         AppExecFwk::ExtensionAbilityType::LIVEVIEW_LOCKSCREEN,
         AppExecFwk::ExtensionAbilityType::SYSPICKER_PHOTOEDITOR,
-        AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR
+        AppExecFwk::ExtensionAbilityType::PHOTO_EDITOR,
+        AppExecFwk::ExtensionAbilityType::SYSPICKER_AUDIOPICKER
     };
 }
 
