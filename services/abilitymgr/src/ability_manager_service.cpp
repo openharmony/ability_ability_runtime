@@ -10741,7 +10741,7 @@ void AbilityManagerService::GetRunningMultiAppIndex(const std::string &bundleNam
         TAG_LOGW(AAFwkTag::ABILITYMGR, "GetAppMgr failed");
         return;
     }
-    auto ret = IN_PROCESS_CALL(appMgr->GetRunningMultiAppInfoByBundleName(bundleName, runningMultiAppInfo));
+    auto ret = appMgr->GetRunningMultiAppInfoByBundleName(bundleName, runningMultiAppInfo);
     if (ret != ERR_OK) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "GetRunningMultiAppInfo failed bundleName = %{public}s",
             bundleName.c_str());
