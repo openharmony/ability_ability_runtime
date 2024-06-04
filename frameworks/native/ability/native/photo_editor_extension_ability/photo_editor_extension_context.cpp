@@ -17,8 +17,6 @@
 #include <fstream>
 #include "media_errors.h"
 #include "hilog_tag_wrapper.h"
-#include "file_uri.h"
-#include "sandbox_helper.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -50,8 +48,13 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::SaveEditedContent(const std::s
 {
     const std::string panelUri = want_->GetStringParam(PANEL_TRANSFER_FILE_PATH);
     TAG_LOGD(AAFwkTag::UI_EXT, "PanelUri: %{public}s.", panelUri.c_str());
-    AppFileService::ModuleFileUri::FileUri fileUri(panelUri);
-    std::string panelPhysicalPath = fileUri.GetRealPath();
+
+    std::string panelPhysicalPath = panelUri;
+    std::string bundleName = GetRealPath(panelPhysicalPath);
+    const std::string pathShare = "/data/storage/el2/share";
+    const std::string modeRw = "/rw/";
+    panelPhysicalPath = pathShare + modeRw + bundleName + panelPhysicalPath;
+
     std::ofstream panelFile;
     panelFile.open(panelPhysicalPath, std::ios::binary);
     if (!panelFile.is_open()) {
@@ -104,8 +107,11 @@ void PhotoEditorExtensionContext::SetWant(const std::shared_ptr<AAFwk::Want> &wa
 PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::string &imageUri,
                                                                    const std::string &panelUri)
 {
-    AppFileService::ModuleFileUri::FileUri fileUri(panelUri);
-    std::string panelPhysicalPath = fileUri.GetRealPath();
+    std::string panelPhysicalPath = panelUri;
+    std::string bundleName = GetRealPath(panelPhysicalPath);
+    const std::string pathShare = "/data/storage/el2/share";
+    const std::string modeRw = "/rw/";
+    panelPhysicalPath = pathShare + modeRw + bundleName + panelPhysicalPath;
 
     TAG_LOGD(AAFwkTag::UI_EXT, "ImageUri: %{public}s, panelPhysicalPath: %{public}s.", imageUri.c_str(),
              panelPhysicalPath.c_str());
@@ -146,6 +152,16 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
 
     TAG_LOGD(AAFwkTag::UI_EXT, "Copy succeed.");
     return PhotoEditorErrorCode::ERROR_OK;
+}
+
+std::string PhotoEditorExtensionContext::GetRealPath(std::string &uri)
+{
+    const std::string filePrefix = "file://";
+    uri.replace(0, filePrefix.size(), "");
+    auto pos = uri.find_first_of("//");
+    std::string bundleName = uri.substr(0, pos);
+    uri = uri.substr(pos);
+    return bundleName;
 }
 
 } // namespace AbilityRuntime
