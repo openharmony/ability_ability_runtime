@@ -24,6 +24,8 @@ namespace AbilityRuntime {
 const size_t PhotoEditorExtensionContext::CONTEXT_TYPE_ID(std::hash<const char *>{}("PhotoEditorExtensionContext"));
 constexpr const char *PANEL_TRANSFER_FILE_PATH = "transferFile";
 const uint64_t MAX_IMAGE_SIZE = 50 * 1024 * 1024;
+const std::string PATH_SHARE = "/data/storage/el2/share";
+const std::string MODE_RW = "/rw/";
 
 PhotoEditorErrorCode PhotoEditorExtensionContext::SaveEditedContent(const std::string &uri, AAFwk::Want &newWant)
 {
@@ -51,9 +53,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::SaveEditedContent(const std::s
 
     std::string panelPhysicalPath = panelUri;
     std::string bundleName = GetRealPath(panelPhysicalPath);
-    const std::string pathShare = "/data/storage/el2/share";
-    const std::string modeRw = "/rw/";
-    panelPhysicalPath = pathShare + modeRw + bundleName + panelPhysicalPath;
+    panelPhysicalPath = PATH_SHARE + MODE_RW + bundleName + panelPhysicalPath;
 
     std::ofstream panelFile;
     panelFile.open(panelPhysicalPath, std::ios::binary);
@@ -109,9 +109,7 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
 {
     std::string panelPhysicalPath = panelUri;
     std::string bundleName = GetRealPath(panelPhysicalPath);
-    const std::string pathShare = "/data/storage/el2/share";
-    const std::string modeRw = "/rw/";
-    panelPhysicalPath = pathShare + modeRw + bundleName + panelPhysicalPath;
+    panelPhysicalPath = PATH_SHARE + MODE_RW + bundleName + panelPhysicalPath;
 
     TAG_LOGD(AAFwkTag::UI_EXT, "ImageUri: %{public}s, panelPhysicalPath: %{public}s.", imageUri.c_str(),
              panelPhysicalPath.c_str());
