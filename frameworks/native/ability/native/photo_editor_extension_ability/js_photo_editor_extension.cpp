@@ -42,7 +42,7 @@ void JsPhotoEditorExtension::Init(const std::shared_ptr<AppExecFwk::AbilityLocal
     context->SetToken(token);
     auto appContext = Context::GetApplicationContext();
     if (appContext == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "ServiceExtension::CreateAndInitContext appContext is nullptr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "JsPhotoEditorExtension::CreateAndInitContext appContext is nullptr.");
         return;
     }
     context->SetApplicationInfo(appContext->GetApplicationInfo());
