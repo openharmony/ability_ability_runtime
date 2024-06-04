@@ -71,6 +71,7 @@ public:
 
 private:
     PhotoEditorErrorCode CopyImageToPanel(const std::string &imageUri, const std::string &panelUri);
+    std::string GetRealPath(std::string &uri);
 
 private:
     std::shared_ptr<AAFwk::Want> want_;
