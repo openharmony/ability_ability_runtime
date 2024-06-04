@@ -137,6 +137,9 @@ abilityms_files = [
   "src/insight_intent_execute_result.cpp",
 
   "src/ability_manager_event_subscriber.cpp",
+
+  #utils
+  "src/utils/window_options_utils.cpp",
 ]
 
 if (ability_runtime_graphics) {
