@@ -50,7 +50,7 @@ void JsPhotoEditorExtension::Init(const std::shared_ptr<AppExecFwk::AbilityLocal
     context->SetParentContext(appContext);
 
     if (record == nullptr) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "ServiceExtension::CreateAndInitContext record is nullptr.");
+        TAG_LOGE(AAFwkTag::UI_EXT, "JsPhotoEditorExtension::CreateAndInitContext record is nullptr.");
         return;
     }
     TAG_LOGD(AAFwkTag::UI_EXT, "Begin init abilityInfo.");
