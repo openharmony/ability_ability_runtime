@@ -462,7 +462,7 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const
         }
     }
 
-    if (jsonObject.contains(JSON_KEY_APP_CLONE_INDEX) && jsonObject[JSON_KEY_APP_CLONE_INDEX].is_string()) {
+    if (jsonObject.contains(JSON_KEY_APP_CLONE_INDEX) && jsonObject[JSON_KEY_APP_CLONE_INDEX].is_number()) {
         if (info.appCloneIndex != jsonObject.at(JSON_KEY_APP_CLONE_INDEX).get<std::int32_t>()) {
             return false;
         }
