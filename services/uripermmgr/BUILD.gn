@@ -113,7 +113,6 @@ ohos_static_library("libupms_static") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_deps_wrapper",
