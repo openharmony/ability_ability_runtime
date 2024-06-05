@@ -10533,7 +10533,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");
         return false;
     }
-    if (callerAbilityInfo.bundleName == abilityInfo.bundleName) {
+    if (abilityInfo.uid == IPCSkeleton::GetCallingUid()) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in same bundle Pass");
         return false;
     }
