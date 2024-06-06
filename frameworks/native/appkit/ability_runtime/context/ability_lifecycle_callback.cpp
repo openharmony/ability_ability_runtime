@@ -202,34 +202,34 @@ void JsAbilityLifecycleCallback::OnWillNewWant(const std::shared_ptr<NativeRefer
 
 void JsAbilityLifecycleCallback::OnAbilityWillCreate(const std::shared_ptr<NativeReference> &ability)
 {
-    CallWindowStageJsMethod("onAbilityWillCreate", ability);
+    CallJsMethod("onAbilityWillCreate", ability);
 }
 
 void JsAbilityLifecycleCallback::OnWindowStageWillCreate(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    CallWindowStageJsMethod("onWindowStageWillCreate", ability, windowStage);
+    CallJsMethod("onWindowStageWillCreate", ability, windowStage);
 }
 
 void JsAbilityLifecycleCallback::OnWindowStageWillDestroy(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    CallWindowStageJsMethod("onWindowStageWillDestroy", ability, windowStage);
+    CallJsMethod("onWindowStageWillDestroy", ability, windowStage);
 }
 
 void JsAbilityLifecycleCallback::OnAbilityWillDestroy(const std::shared_ptr<NativeReference> &ability)
 {
-    CallWindowStageJsMethod("onAbilityWillDestroy", ability);
+    CallJsMethod("onAbilityWillDestroy", ability);
 }
 
 void JsAbilityLifecycleCallback::OnAbilityWillForeground(const std::shared_ptr<NativeReference> &ability)
 {
-    CallWindowStageJsMethod("onAbilityWillForeground", ability);
+    CallJsMethod("onAbilityWillForeground", ability);
 }
 
 void JsAbilityLifecycleCallback::OnAbilityWillBackground(const std::shared_ptr<NativeReference> &ability)
 {
-    CallWindowStageJsMethod("onAbilityWillBackground", ability);
+    CallJsMethod("onAbilityWillBackground", ability);
 }
 
 bool JsAbilityLifecycleCallback::IsEmpty() const
