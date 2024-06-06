@@ -294,11 +294,6 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
         return;
     }
 
-    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
-    if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityWillCreate(jsAbilityObj_);
-    }
-
     napi_value jsWant = OHOS::AppExecFwk::WrapWant(env, want);
     if (jsWant == nullptr) {
         TAG_LOGE(AAFwkTag::UIABILITY, "JsWant is nullptr.");
@@ -316,6 +311,12 @@ void JsUIAbility::OnStart(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
         CreateJsLaunchParam(env, launchParam),
     };
     std::string methodName = "OnStart";
+
+    auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
+    if (applicationContext != nullptr) {
+        applicationContext->DispatchOnAbilityWillCreate(jsAbilityObj_);
+    }
+
     AddLifecycleEventBeforeJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     CallObjectMethod("onCreate", argv, ArraySize(argv));
     AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
@@ -480,6 +481,7 @@ void JsUIAbility::OnSceneCreated()
         AddLifecycleEventAfterJSCall(FreezeUtil::TimeoutState::FOREGROUND, methodName);
     }
 
+    jsWindowStageObj_ = std::shared_ptr<NativeReference>(jsAppWindowStage.release());
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnWindowStageWillCreate(jsAbilityObj_, jsWindowStageObj_);
@@ -491,7 +493,6 @@ void JsUIAbility::OnSceneCreated()
         delegator->PostPerformScenceCreated(CreateADelegatorAbilityProperty());
     }
 
-    jsWindowStageObj_ = std::shared_ptr<NativeReference>(jsAppWindowStage.release());
     applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
         applicationContext->DispatchOnWindowStageCreate(jsAbilityObj_, jsWindowStageObj_);
@@ -647,7 +648,7 @@ void JsUIAbility::OnBackground()
 
     auto applicationContext = AbilityRuntime::Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        applicationContext->DispatchOnAbilityBackground(jsAbilityObj_);
+        applicationContext->DispatchOnAbilityWillBackground(jsAbilityObj_);
     }
 
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
