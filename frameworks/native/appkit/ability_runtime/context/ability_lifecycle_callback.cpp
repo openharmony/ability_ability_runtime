@@ -208,13 +208,13 @@ void JsAbilityLifecycleCallback::OnAbilityWillCreate(const std::shared_ptr<Nativ
 void JsAbilityLifecycleCallback::OnWindowStageWillCreate(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    CallJsMethod("onWindowStageWillCreate", ability, windowStage);
+    CallWindowStageJsMethod("onWindowStageWillCreate", ability, windowStage);
 }
 
 void JsAbilityLifecycleCallback::OnWindowStageWillDestroy(const std::shared_ptr<NativeReference> &ability,
     const std::shared_ptr<NativeReference> &windowStage)
 {
-    CallJsMethod("onWindowStageWillDestroy", ability, windowStage);
+    CallWindowStageJsMethod("onWindowStageWillDestroy", ability, windowStage);
 }
 
 void JsAbilityLifecycleCallback::OnAbilityWillDestroy(const std::shared_ptr<NativeReference> &ability)
