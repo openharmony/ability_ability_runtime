@@ -652,7 +652,6 @@ void JsUIAbility::OnBackground()
 
     UIAbility::OnBackground();
 
-
     auto delegator = AppExecFwk::AbilityDelegatorRegistry::GetAbilityDelegator();
     if (delegator) {
         TAG_LOGD(AAFwkTag::UIABILITY, "Call PostPerformBackground.");
