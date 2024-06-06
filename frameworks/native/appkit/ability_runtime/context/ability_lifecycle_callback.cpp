@@ -227,10 +227,9 @@ void JsAbilityLifecycleCallback::OnAbilityWillForeground(const std::shared_ptr<N
     CallWindowStageJsMethod("onAbilityWillForeground", ability);
 }
 
-void JsAbilityLifecycleCallback::OnAbilityWillBackground(const std::shared_ptr<NativeReference> &ability,
-    const std::shared_ptr<NativeReference> &windowStage)
+void JsAbilityLifecycleCallback::OnAbilityWillBackground(const std::shared_ptr<NativeReference> &ability)
 {
-    CallWindowStageJsMethod("onAbilityWillBackground", ability, windowStage);
+    CallWindowStageJsMethod("onAbilityWillBackground", ability);
 }
 
 bool JsAbilityLifecycleCallback::IsEmpty() const
