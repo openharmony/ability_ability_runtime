@@ -117,6 +117,7 @@
 #include "config_policy_utils.h"
 #include "running_multi_info.h"
 #include "utils/ability_permission_util.h"
+#include "utils/extension_permissions_util.h"
 #include "utils/dump_utils.h"
 #include "utils/window_options_utils.h"
 #ifdef SUPPORT_GRAPHICS
@@ -4081,6 +4082,12 @@ int AbilityManagerService::ConnectLocalAbility(const Want &want, const int32_t u
         TAG_LOGE(AAFwkTag::ABILITYMGR, "%{public}s CheckCallServicePermission error.", __func__);
         return result;
     }
+
+    if (!ExtensionPermissionsUtil::CheckSAPermission(targetExtensionType)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "The SA doesn't have permission for target extension.");
+        return CHECK_PERMISSION_FAILED;
+    }
+
     result = PreLoadAppDataAbilities(abilityInfo.bundleName, validUserId);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ConnectAbility: App data ability preloading failed, '%{public}s', %{public}d",
