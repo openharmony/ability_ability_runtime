@@ -337,7 +337,6 @@ private:
                 errCode = ERR_NOT_OK;
             }
         }
-
         TAG_LOGI(AAFwkTag::APPMGR,
             "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
