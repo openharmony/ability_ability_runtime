@@ -82,6 +82,17 @@ public:
     bool CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName);
 
     /**
+     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param appCloneIndex the appindex of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return, Return ERR_OK if success, others fail.
+     */
+    int32_t CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
+        int32_t appCloneIndex, bool &isRunning);
+
+    /**
      * GetAppRunningRecordByPid, Get process record by application pid.
      *
      * @param pid, the application pid.
@@ -243,8 +254,9 @@ public:
     bool IsApplicationBackground(const std::string &bundleName);
     bool IsApplicationFirstFocused(const AppRunningRecord &foregroundingRecord);
     bool IsApplicationUnfocused(const std::string &bundleName);
+#ifdef SUPPORT_SCREEN
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
-
+#endif //SUPPORT_SCREEN
     /**
      * @brief Set attach app debug mode.
      * @param bundleName The application bundle name.

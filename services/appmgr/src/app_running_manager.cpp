@@ -28,7 +28,10 @@
 #include "perf_profile.h"
 #include "parameters.h"
 #include "quick_fix_callback_with_record.h"
+#ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
+#include "window_visibility_info.h"
+#endif //SUPPORT_SCREEN
 #include "ui_extension_utils.h"
 #include "app_mgr_service_const.h"
 #include "cache_process_manager.h"
@@ -36,7 +39,7 @@
 #include "suspend_manager_client.h"
 #endif
 #include "app_mgr_service_dump_error_code.h"
-#include "window_visibility_info.h"
+
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -155,6 +158,21 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
         }
     }
     return false;
+}
+
+int32_t AppRunningManager::CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
+    int32_t appCloneIndex, bool &isRunning)
+{
+    std::lock_guard guard(runningRecordMapMutex_);
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag()) &&
+            appRecord->GetAppIndex() == appCloneIndex) {
+            isRunning = true;
+            break;
+        }
+    }
+    return ERR_OK;
 }
 
 int32_t AppRunningManager::GetAllAppRunningRecordCountByBundleName(const std::string &bundleName)
@@ -537,11 +555,13 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
 
     auto isLastAbility =
         clearMissionFlag ? appRecord->IsLastPageAbilityRecord(token) : appRecord->IsLastAbilityRecord(token);
+#ifdef SUPPORT_SCREEN
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         appRecord->TerminateAbility(token, true);
     } else {
         appRecord->TerminateAbility(token, false);
     }
+#endif //SUPPORT_SCREEN
     auto isLauncherApp = appRecord->GetApplicationInfo()->isLauncherApp;
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
@@ -555,7 +575,9 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
         TAG_LOGD(AAFwkTag::APPMGR, "The ability is the last in the app:%{public}s.", appRecord->GetName().c_str());
         appRecord->SetTerminating();
         if (clearMissionFlag && appMgrServiceInner != nullptr) {
-            appRecord->PostTask("DELAY_KILL_PROCESS", AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT, killProcess);
+            auto delayTime = appRecord->ExtensionAbilityRecordExists(token) ?
+                AMSEventHandler::DELAY_KILL_EXTENSION_PROCESS_TIMEOUT : AMSEventHandler::DELAY_KILL_PROCESS_TIMEOUT;
+            appRecord->PostTask("DELAY_KILL_PROCESS", delayTime, killProcess);
         }
     }
 }
@@ -604,6 +626,10 @@ int32_t AppRunningManager::AssignRunningProcessInfoByAppRecord(
     auto appInfo = appRecord->GetApplicationInfo();
     if (appInfo) {
         info.bundleType = static_cast<int32_t>(appInfo->bundleType);
+    }
+    if (appInfo && (static_cast<int32_t>(appInfo->multiAppMode.multiAppModeType) ==
+            static_cast<int32_t>(MultiAppModeType::APP_CLONE))) {
+            info.appCloneIndex = appRecord->GetAppIndex();
     }
     return ERR_OK;
 }
@@ -1083,7 +1109,7 @@ bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
     }
     return true;
 }
-
+#ifdef SUPPORT_SCREEN
 void AppRunningManager::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
@@ -1107,7 +1133,7 @@ void AppRunningManager::OnWindowVisibilityChanged(
         pids.emplace(info->pid_);
     }
 }
-
+#endif //SUPPORT_SCREEN
 bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focusedRecord)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "check focus function called.");
@@ -1485,10 +1511,13 @@ bool AppRunningManager::IsAppProcessesAllCached(const std::string &bundleName, i
         if (itemRecord == nullptr) {
             continue;
         }
-        if (itemRecord->GetBundleName() == bundleName && itemRecord->GetUid() == uid &&
-            cachedSet.find(itemRecord) == cachedSet.end() &&
-            DelayedSingleton<CacheProcessManager>::GetInstance()->IsAppSupportProcessCache(itemRecord)) {
-            return false;
+        if (itemRecord->GetBundleName() == bundleName && itemRecord->GetUid() == uid) {
+            auto supportCache =
+                DelayedSingleton<CacheProcessManager>::GetInstance()->IsAppSupportProcessCache(itemRecord);
+            // need wait for unsupported processes
+            if ((cachedSet.find(itemRecord) == cachedSet.end() && supportCache) || !supportCache) {
+                return false;
+            }
         }
     }
     return true;
