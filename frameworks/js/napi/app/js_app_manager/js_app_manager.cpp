@@ -795,7 +795,6 @@ private:
             ThrowInvalidParamError(env, "Parse param appIndex failed, must be a number.");
             return CreateJsUndefined(env);
         }
-        int32_t appIndex = 0;
         TAG_LOGI(AAFwkTag::APPMGR,
             "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
@@ -928,10 +927,9 @@ private:
         }
         int32_t appIndex = 0;
         if (hasClearPageStack && argc == ARGC_FOUR && !ConvertFromJsValue(env, argv[INDEX_THREE], appIndex)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "get appIndex failed!");
-            errCode = ERR_NOT_OK;
+            ThrowInvalidParamError(env, "Parse param appIndex failed, must be a number.");
+            return CreateJsUndefined(env);
         }
-
         TAG_LOGI(AAFwkTag::APPMGR,
             "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
@@ -950,7 +948,6 @@ private:
                     task.Reject(env, CreateJsErrorByNativeErr(env, ret, "Kill processes failed."));
                 }
             };
-
         napi_value lastParam = (argc == ARGC_THREE && !hasClearPageStack) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
