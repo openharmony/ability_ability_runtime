@@ -318,24 +318,30 @@ private:
         int32_t errCode = 0;
         std::string bundleName;
         bool clearPageStack = false;
+        bool hasClearPageStack = false;
+        int32_t appIndex = 0;
 
-        // only support 2 or 3 params
-        if (argc != ARGC_TWO && argc != ARGC_THREE) {
+        // only support 1 or 2 or 3 params
+        if (argc != ARGC_ONE && argc != ARGC_TWO && argc != ARGC_THREE) {
             TAG_LOGE(AAFwkTag::APPMGR, "Not enough arguments");
             errCode = ERR_NOT_OK;
         } else {
-            if (!ConvertFromJsValue(env, argv[0], bundleName)) {
+            if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "get bundleName failed!");
                 errCode = ERR_NOT_OK;
             }
-            if (!ConvertFromJsValue(env, argv[1], clearPageStack)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "get clearPageStack failed!");
+            if (argc > ARGC_ONE && ConvertFromJsValue(env, argv[INDEX_ONE], clearPageStack)) {
+                hasClearPageStack = true;
+            }
+            if (hasClearPageStack && argc == ARGC_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], appIndex)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "get appIndex failed!");
                 errCode = ERR_NOT_OK;
             }
         }
 
-        TAG_LOGI(AAFwkTag::APPMGR, "kill process [%{public}s], clearPageStack [%{public}d]",
-            bundleName.c_str(), clearPageStack);
+        TAG_LOGI(AAFwkTag::APPMGR,
+            "kill process [%{public}s], hasClearPageStack [%{public}s], clearPageStack [%{public}d],appIndex [%{public}d]",
+            bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, clearPageStack, abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task,
                 int32_t status) {
@@ -356,7 +362,7 @@ private:
             }
         };
 
-        napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
+        napi_value lastParam = (argc == ARGC_TWO && !hasClearPageStack) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessByBundleName",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
@@ -416,25 +422,34 @@ private:
         int32_t accountId = -1;
         std::string bundleName;
         bool clearPageStack = false;
+        bool hasClearPageStack = false;
+        int32_t appIndex = 0;
 
         // only support 2 or 3 params
-        if (argc != ARGC_THREE && argc != ARGC_FOUR) {
+        if (argc != ARGC_TWO && argc != ARGC_THREE && argc != ARGC_FOUR) {
             TAG_LOGE(AAFwkTag::APPMGR, "Not enough params");
             errCode = ERR_NOT_OK;
         } else {
-            if (!ConvertFromJsValue(env, argv[ARGC_ZERO], bundleName)) {
+            if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
                 errCode = ERR_NOT_OK;
             }
-            if (!ConvertFromJsValue(env, argv[ARGC_ONE], accountId)) {
+            if (!ConvertFromJsValue(env, argv[INDEX_ONE], accountId)) {
                 TAG_LOGE(AAFwkTag::APPMGR, "Parse userId failed");
                 errCode = ERR_NOT_OK;
             }
-            if (!ConvertFromJsValue(env, argv[ARGC_TWO], clearPageStack)) {
-                TAG_LOGE(AAFwkTag::APPMGR, "Parse clearPageStack failed");
+            if (argc > ARGC_TWO && ConvertFromJsValue(env, argv[INDEX_TWO], clearPageStack)) {
+                hasClearPageStack = true;
+            }
+            if (hasClearPageStack && argc == ARGC_FOUR && !ConvertFromJsValue(env, argv[INDEX_THREE], appIndex)) {
+                TAG_LOGE(AAFwkTag::APPMGR, "get appIndex failed!");
                 errCode = ERR_NOT_OK;
             }
         }
+
+        TAG_LOGI(AAFwkTag::APPMGR,
+            "kill process [%{public}s], hasClearPageStack [%{public}s], clearPageStack [%{public}d],appIndex [%{public}d]",
+            bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
 
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, bundleName, accountId, clearPageStack, errCode](
