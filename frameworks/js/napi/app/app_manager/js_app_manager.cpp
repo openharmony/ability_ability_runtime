@@ -320,7 +320,6 @@ private:
         bool clearPageStack = false;
         bool hasClearPageStack = false;
         int32_t appIndex = 0;
-
         // only support 1 or 2 or 3 params
         if (argc != ARGC_ONE && argc != ARGC_TWO && argc != ARGC_THREE) {
             TAG_LOGE(AAFwkTag::APPMGR, "Not enough arguments");
@@ -340,7 +339,7 @@ private:
         }
 
         TAG_LOGI(AAFwkTag::APPMGR,
-            "kill process [%{public}s], hasClearPageStack [%{public}s], clearPageStack [%{public}d],appIndex [%{public}d]",
+            "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, clearPageStack, abilityManager = abilityManager_, errCode](napi_env env, NapiAsyncTask& task,
@@ -361,7 +360,6 @@ private:
                 task.Reject(env, CreateJsError(env, ret, "kill process failed."));
             }
         };
-
         napi_value lastParam = (argc == ARGC_TWO && !hasClearPageStack) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessByBundleName",
@@ -424,8 +422,7 @@ private:
         bool clearPageStack = false;
         bool hasClearPageStack = false;
         int32_t appIndex = 0;
-
-        // only support 2 or 3 params
+        // only support 2 or 3 or 4 params
         if (argc != ARGC_TWO && argc != ARGC_THREE && argc != ARGC_FOUR) {
             TAG_LOGE(AAFwkTag::APPMGR, "Not enough params");
             errCode = ERR_NOT_OK;
@@ -446,11 +443,9 @@ private:
                 errCode = ERR_NOT_OK;
             }
         }
-
         TAG_LOGI(AAFwkTag::APPMGR,
-            "kill process [%{public}s], hasClearPageStack [%{public}s], clearPageStack [%{public}d],appIndex [%{public}d]",
+            "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
-
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, bundleName, accountId, clearPageStack, errCode](
                 napi_env env, NapiAsyncTask &task, int32_t status) {
@@ -466,8 +461,7 @@ private:
                     task.Reject(env, CreateJsError(env, ret, "Kill processes failed."));
                 }
             };
-
-        napi_value lastParam = (argc == ARGC_FOUR) ? argv[INDEX_THREE] : nullptr;
+        napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessWithAccount",
             env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));

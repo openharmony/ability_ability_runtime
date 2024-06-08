@@ -778,7 +778,6 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
-
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get bundleName error!");
@@ -790,17 +789,16 @@ private:
         if (argc > ARGC_ONE && ConvertFromJsValue(env, argv[INDEX_ONE], clearPageStack)) {
             hasClearPageStack = true;
         }
-
+        int32_t appIndex = 0;
         if (hasClearPageStack && argc == ARGC_THREE && !ConvertFromJsValue(env, argv[INDEX_TWO], appIndex)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get appIndex failed!");
-            errCode = ERR_NOT_OK;
+            ThrowInvalidParamError(env, "Parse param appIndex failed, must be a number.");
+            return CreateJsUndefined(env);
         }
-
         int32_t appIndex = 0;
         TAG_LOGI(AAFwkTag::APPMGR,
-            "kill process [%{public}s], hasClearPageStack [%{public}s], clearPageStack [%{public}d],appIndex [%{public}d]",
+            "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
-
         NapiAsyncTask::CompleteCallback complete =
             [bundleName, clearPageStack, abilityManager = abilityManager_](
                 napi_env env, NapiAsyncTask& task, int32_t status) {
@@ -816,7 +814,6 @@ private:
                 task.Reject(env, CreateJsErrorByNativeErr(env, ret, "kill process failed."));
             }
         };
-
         napi_value lastParam = (argc == ARGC_TWO && !hasClearPageStack) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::ScheduleHighQos("JSAppManager::OnKillProcessesByBundleName",
@@ -912,7 +909,6 @@ private:
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
-
         std::string bundleName;
         if (!ConvertFromJsValue(env, argv[INDEX_ZERO], bundleName)) {
             TAG_LOGE(AAFwkTag::APPMGR, "Parse bundleName failed");
@@ -930,7 +926,6 @@ private:
         if (argc > ARGC_TWO && ConvertFromJsValue(env, argv[INDEX_TWO], clearPageStack)) {
             hasClearPageStack = true;
         }
-
         int32_t appIndex = 0;
         if (hasClearPageStack && argc == ARGC_FOUR && !ConvertFromJsValue(env, argv[INDEX_THREE], appIndex)) {
             TAG_LOGE(AAFwkTag::APPMGR, "get appIndex failed!");
@@ -938,9 +933,8 @@ private:
         }
 
         TAG_LOGI(AAFwkTag::APPMGR,
-            "kill process [%{public}s], hasClearPageStack [%{public}s], clearPageStack [%{public}d],appIndex [%{public}d]",
+            "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
-
         NapiAsyncTask::CompleteCallback complete =
             [appManager = appManager_, bundleName, accountId, clearPageStack](
                 napi_env env, NapiAsyncTask &task, int32_t status) {
