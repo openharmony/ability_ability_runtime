@@ -313,7 +313,16 @@ public:
      * @param token The target ability.
      * @param pixelMap The snapshot.
      */
+#ifdef SUPPORT_SCREEN
     void UpdateSnapShot(const sptr<IRemoteObject> &token, const std::shared_ptr<Media::PixelMap> &pixelMap);
+#endif // SUPPORT_SCREEN
+
+    /**
+     * Get ability number.
+     * @param element type of ElementName.
+     * @return ability number.
+     */
+    int32_t GetAbilityNumber(const AppExecFwk::ElementName &element) const;
 
     void EnableRecoverAbility(int32_t missionId);
 
@@ -350,7 +359,7 @@ public:
     bool IsAbilityStarted(AbilityRequest &abilityRequest, std::shared_ptr<AbilityRecord> &targetRecord);
 
     void SignRestartAppFlag(const std::string &bundleName);
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 public:
     /**
      * Set mission label of this ability.

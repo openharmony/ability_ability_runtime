@@ -673,6 +673,34 @@ napi_value JsApplicationContextUtils::OnSetLanguage(napi_env env, NapiCallbackIn
     return CreateJsUndefined(env);
 }
 
+napi_value JsApplicationContextUtils::SetFont(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_WITH_NAME_AND_CALL(env, info, JsApplicationContextUtils, OnSetFont, APPLICATION_CONTEXT_NAME);
+}
+
+napi_value JsApplicationContextUtils::OnSetFont(napi_env env, NapiCallbackInfo& info)
+{
+    // only support one params
+    if (info.argc == ARGC_ZERO) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
+        return CreateJsUndefined(env);
+    }
+    auto applicationContext = applicationContext_.lock();
+    if (!applicationContext) {
+        TAG_LOGW(AAFwkTag::APPKIT, "applicationContext is already released");
+        return CreateJsUndefined(env);
+    }
+    std::string font;
+    if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], font)) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Parse font failed");
+        ThrowInvalidParamError(env, "Parse param font failed, font must be string.");
+        return CreateJsUndefined(env);
+    }
+    applicationContext->SetFont(font);
+    return CreateJsUndefined(env);
+}
+
 napi_value JsApplicationContextUtils::PreloadUIExtensionAbility(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_WITH_NAME_AND_CALL(
@@ -691,7 +719,8 @@ napi_value JsApplicationContextUtils::OnPreloadUIExtensionAbility(napi_env env, 
     AAFwk::Want want;
     if (!AppExecFwk::UnwrapWant(env, info.argv[INDEX_ZERO], want)) {
         TAG_LOGW(AAFwkTag::APPKIT, "Parse want failed");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        ThrowInvalidParamError(env,
+            "Parse param want failed, want must be Want.");
         return CreateJsUndefined(env);
     }
 
@@ -786,6 +815,9 @@ napi_value JsApplicationContextUtils::OnGetRunningProcessInformation(napi_env en
             napi_set_named_property(env, object, "bundleNames", CreateNativeArray(env, processInfo.bundleNames));
             napi_set_named_property(env, object,
                 "state", CreateJsValue(env, ConvertToJsAppProcessState(processInfo.state_, processInfo.isFocused)));
+            if (processInfo.appCloneIndex != -1) {
+                napi_set_named_property(env, object, "appCloneIndex", CreateJsValue(env, processInfo.appCloneIndex));
+            }
             napi_value array = nullptr;
             napi_create_array_with_length(env, 1, &array);
             if (array == nullptr) {
@@ -1040,7 +1072,8 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
     std::string type;
     if (!ConvertFromJsValue(env, info.argv[0], type)) {
         TAG_LOGE(AAFwkTag::APPKIT, "convert type failed!");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        ThrowInvalidParamError(env,
+            "Parse param type failed, type must be string.");
         return CreateJsUndefined(env);
     }
 
@@ -1060,7 +1093,7 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
         return OnOnApplicationStateChange(env, info);
     }
     TAG_LOGE(AAFwkTag::APPKIT, "on function type not match.");
-    AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    ThrowInvalidParamError(env, "Parse param callback failed, callback must be function.");
     return CreateJsUndefined(env);
 }
 
@@ -1081,7 +1114,8 @@ napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info
     std::string type;
     if (!ConvertFromJsValue(env, info.argv[0], type)) {
         TAG_LOGE(AAFwkTag::APPKIT, "convert type failed!");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        ThrowInvalidParamError(env,
+            "Parse param type failed, type must be string.");
         return CreateJsUndefined(env);
     }
 
@@ -1114,7 +1148,7 @@ napi_value JsApplicationContextUtils::OnOff(napi_env env, NapiCallbackInfo& info
         return OnOffEnvironmentEventSync(env, info, callbackId);
     }
     TAG_LOGE(AAFwkTag::APPKIT, "off function type not match.");
-    AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+    ThrowInvalidParamError(env, "Parse param callback failed, callback must be function.");
     return CreateJsUndefined(env);
 }
 
@@ -1330,7 +1364,8 @@ napi_value JsApplicationContextUtils::OnOffApplicationStateChange(
     std::lock_guard<std::mutex> lock(applicationStateCallbackLock_);
     if (applicationStateCallback_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "ApplicationStateCallback_ is nullptr.");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        ThrowInvalidParamError(env,
+            "Parse applicationStateCallback failed, applicationStateCallback must be function.");
         return CreateJsUndefined(env);
     }
 
@@ -1338,7 +1373,7 @@ napi_value JsApplicationContextUtils::OnOffApplicationStateChange(
         applicationStateCallback_->UnRegister();
     } else if (!applicationStateCallback_->UnRegister(info.argv[INDEX_ONE])) {
         TAG_LOGE(AAFwkTag::APPKIT, "call UnRegister failed!");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        ThrowInvalidParamError(env, "Parse param call UnRegister failed, call UnRegister must be function.");
         return CreateJsUndefined(env);
     }
 
@@ -1463,7 +1498,8 @@ napi_value JsApplicationContextUtils::OnSetSupportedProcessCacheSelf(napi_env en
     bool isSupport = false;
     if (!ConvertFromJsValue(env, info.argv[INDEX_ZERO], isSupport)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Parse isSupport failed");
-        AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
+        ThrowInvalidParamError(env,
+            "Parse param isSupport failed, isSupport must be boolean.");
         return CreateJsUndefined(env);
     }
 
@@ -1515,6 +1551,7 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
     BindNativeFunction(env, object, "killAllProcesses", MD_NAME, JsApplicationContextUtils::KillProcessBySelf);
     BindNativeFunction(env, object, "setColorMode", MD_NAME, JsApplicationContextUtils::SetColorMode);
     BindNativeFunction(env, object, "setLanguage", MD_NAME, JsApplicationContextUtils::SetLanguage);
+    BindNativeFunction(env, object, "setFont", MD_NAME, JsApplicationContextUtils::SetFont);
     BindNativeFunction(env, object, "clearUpApplicationData", MD_NAME,
         JsApplicationContextUtils::ClearUpApplicationData);
     BindNativeFunction(env, object, "preloadUIExtensionAbility", MD_NAME,
@@ -1525,10 +1562,8 @@ void JsApplicationContextUtils::BindNativeApplicationContext(napi_env env, napi_
         JsApplicationContextUtils::GetRunningProcessInformation);
     BindNativeFunction(env, object, "getCurrentAppCloneIndex", MD_NAME,
         JsApplicationContextUtils::GetCurrentAppCloneIndex);
-    BindNativeFunction(env, object, "getGroupDir", MD_NAME,
-        JsApplicationContextUtils::GetGroupDir);
-    BindNativeFunction(env, object, "restartApp", MD_NAME,
-        JsApplicationContextUtils::RestartApp);
+    BindNativeFunction(env, object, "getGroupDir", MD_NAME, JsApplicationContextUtils::GetGroupDir);
+    BindNativeFunction(env, object, "restartApp", MD_NAME, JsApplicationContextUtils::RestartApp);
     BindNativeFunction(env, object, "setSupportedProcessCache", MD_NAME,
         JsApplicationContextUtils::SetSupportedProcessCacheSelf);
 }

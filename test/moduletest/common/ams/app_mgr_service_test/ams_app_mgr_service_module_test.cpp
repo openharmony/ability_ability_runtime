@@ -130,6 +130,9 @@ public:
     }
     void ScheduleClearPageStack() override
     {}
+
+    void ScheduleCacheProcess() override
+    {}
 };
 class AppMgrServiceModuleTest : public testing::Test {
 public:

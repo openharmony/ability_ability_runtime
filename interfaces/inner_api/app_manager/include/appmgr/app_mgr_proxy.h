@@ -502,6 +502,16 @@ public:
     int32_t IsApplicationRunning(const std::string &bundleName, bool &isRunning) override;
 
     /**
+     * Check whether the bundle is running.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param appCloneIndex the appindex of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning) override;
+
+    /**
      * Start child process, called by ChildProcessManager.
      *
      * @param srcEntry Child process source file entrance path to be started.
@@ -608,6 +618,14 @@ public:
         const sptr<IRemoteObject> &callback) override;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
+
+    /**
+     * Check caller is test ability
+     *
+     * @param pid, the pid of ability.
+     * @return Returns ERR_OK is test ability, others is not test ability.
+     */
+    int32_t CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest) override;
 
 private:
     bool SendTransactCmd(AppMgrInterfaceCode code, MessageParcel &data, MessageParcel &reply);

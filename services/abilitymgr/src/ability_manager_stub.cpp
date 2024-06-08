@@ -367,6 +367,8 @@ void AbilityManagerStub::ThirdStepInit()
         = &AbilityManagerStub::UnregisterAbilityFirstFrameStateObserverInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::COMPLETE_FIRST_FRAME_DRAWING_BY_SCB)] =
         &AbilityManagerStub::CompleteFirstFrameDrawingBySCBInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::START_UI_EXTENSION_ABILITY_NON_MODAL)] =
+        &AbilityManagerStub::StartUIExtensionAbilityNonModalInner;
 #endif
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::REQUEST_DIALOG_SERVICE)] =
         &AbilityManagerStub::HandleRequestDialogService;
@@ -946,6 +948,30 @@ int AbilityManagerStub::StartUIExtensionAbilityInner(MessageParcel &data, Messag
     sptr<SessionInfo> extensionSessionInfo = nullptr;
     if (data.ReadBool()) {
         extensionSessionInfo = data.ReadParcelable<SessionInfo>();
+        if (extensionSessionInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "read extensionSessionInfo failed.");
+            return ERR_NULL_OBJECT;
+        }
+        extensionSessionInfo->isModal = true; // To ensure security, this attribute must be rewritten.
+    }
+
+    int32_t userId = data.ReadInt32();
+
+    int32_t result = StartUIExtensionAbility(extensionSessionInfo, userId);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int AbilityManagerStub::StartUIExtensionAbilityNonModalInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<SessionInfo> extensionSessionInfo = nullptr;
+    if (data.ReadBool()) {
+        extensionSessionInfo = data.ReadParcelable<SessionInfo>();
+        if (extensionSessionInfo == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "read extensionSessionInfo failed.");
+            return ERR_NULL_OBJECT;
+        }
+        extensionSessionInfo->isModal = false; // To ensure security, this attribute must be rewritten.
     }
 
     int32_t userId = data.ReadInt32();
@@ -2300,13 +2326,14 @@ int AbilityManagerStub::UpdateMissionSnapShotFromWMSInner(MessageParcel &data, M
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read ability token failed.");
         return ERR_NULL_OBJECT;
     }
-
+#ifdef SUPPORT_SCREEN
     std::shared_ptr<Media::PixelMap> pixelMap(data.ReadParcelable<Media::PixelMap>());
     if (pixelMap == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "read pixelMap failed.");
         return ERR_NULL_OBJECT;
     }
     UpdateMissionSnapShot(token, pixelMap);
+#endif // SUPPORT_SCREEN
     return NO_ERROR;
 }
 
@@ -2528,7 +2555,7 @@ int AbilityManagerStub::SetMissionContinueStateInner(MessageParcel &data, Messag
     return NO_ERROR;
 }
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 int AbilityManagerStub::SetMissionLabelInner(MessageParcel &data, MessageParcel &reply)
 {
     sptr<IRemoteObject> token = data.ReadRemoteObject();
@@ -2795,7 +2822,9 @@ int AbilityManagerStub::CallUIAbilityBySCBInner(MessageParcel &data, MessageParc
     if (data.ReadBool()) {
         sessionInfo = data.ReadParcelable<SessionInfo>();
     }
-    CallUIAbilityBySCB(sessionInfo);
+    bool isColdStart = false;
+    CallUIAbilityBySCB(sessionInfo, isColdStart);
+    reply.WriteBool(isColdStart);
     return NO_ERROR;
 }
 

@@ -211,6 +211,8 @@ public:
 
     void ScheduleClearPageStack() override
     {}
+    void ScheduleCacheProcess() override
+    {}
 
 private:
     int abilityLaunchTime = 0;
