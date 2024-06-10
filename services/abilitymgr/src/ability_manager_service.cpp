@@ -4660,10 +4660,13 @@ sptr<IAbilityScheduler> AbilityManagerService::AcquireDataAbility(
 
     if (CheckStaticCfgPermission(abilityRequest, false, -1, true, isSaCall) !=
         AppExecFwk::Constants::PERMISSION_GRANTED) {
-        if (!VerificationAllToken(callerToken)) {
-            TAG_LOGI(AAFwkTag::ABILITYMGR, "VerificationAllToken fail");
-            return nullptr;
-        }
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "CheckStaticCfgPermission fail");
+        return nullptr;
+    }
+
+    if (!VerificationAllToken(callerToken)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "VerificationAllToken fail");
+        return nullptr;
     }
 
     if (abilityRequest.abilityInfo.applicationInfo.singleton) {
