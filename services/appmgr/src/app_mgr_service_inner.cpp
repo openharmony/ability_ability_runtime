@@ -86,6 +86,7 @@
 #include "window_visibility_changed_listener.h"
 #ifdef APP_NO_RESPONSE_DIALOG
 #include "modal_system_app_freeze_uiextension.h"
+#include "fault_data.h"
 #endif
 
 namespace OHOS {
@@ -5196,7 +5197,8 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
 
 #ifdef APP_NO_RESPONSE_DIALOG
     // A dialog box is displayed when the PC appfreeze
-    if (appRecord->GetFocusFlag()) {
+    if (appRecord->GetFocusFlag() && (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S ||
+        faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK)) {
         std::string startAbilityName = "AppAbnormalAbility";
         std::string startBundleName = "com.ohos.sceneboard";
         AAFwk::Want want;
