@@ -85,8 +85,9 @@
 #include "window_focus_changed_listener.h"
 #include "window_visibility_changed_listener.h"
 #ifdef APP_NO_RESPONSE_DIALOG
-#include "modal_system_app_freeze_uiextension.h"
 #include "fault_data.h"
+#include "modal_system_app_freeze_uiextension.h"
+#include "scene_board_judgement.h"
 #endif
 
 namespace OHOS {
@@ -5200,7 +5201,8 @@ int32_t AppMgrServiceInner::NotifyAppFault(const FaultData &faultData)
     if (appRecord->GetFocusFlag() && (faultData.errorObject.name == AppFreezeType::THREAD_BLOCK_6S ||
         faultData.errorObject.name == AppFreezeType::APP_INPUT_BLOCK)) {
         std::string startAbilityName = "AppAbnormalAbility";
-        std::string startBundleName = "com.ohos.sceneboard";
+        std::string startBundleName =
+            Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ? "com.ohos.sceneboard" : "com.ohos.systemui";
         AAFwk::Want want;
         want.SetElementName(startBundleName, startAbilityName);
         want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
