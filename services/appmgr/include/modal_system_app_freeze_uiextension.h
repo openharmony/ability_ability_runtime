@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,13 +30,6 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
-const std::string UIEXTENSION_SYS_COMMON_UI = "sysDialog/common";
-const std::string APP_FREEZE_PID = "APP_FREEZE_PID";
-const std::string START_BUNDLE_NAME = "startBundleName";
-constexpr int32_t INVALID_USERID = -1;
-constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
-constexpr uint32_t COMMAND_START_DIALOG = 1;
 
 class ModalSystemAppFreezeUIExtension {
 public:
@@ -44,7 +37,10 @@ public:
     ModalSystemAppFreezeUIExtension() = default;
     virtual ~ModalSystemAppFreezeUIExtension();
 
-    bool CreateModalUIExtension(const AAFwk::Want &want);
+    bool CreateModalUIExtension(std::string pid, std::string bundleName);
+
+private:
+    AAFwk::Want CreateSystemDialogWant(std::string pid, std::string bundleName);
 
 private:
     class AppFreezeDialogConnection : public AAFwk::AbilityConnectionStub {

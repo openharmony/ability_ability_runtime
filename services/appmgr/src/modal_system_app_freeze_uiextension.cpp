@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,14 @@
 
 namespace OHOS {
 namespace AppExecFwk {
+const std::string UIEXTENSION_TYPE_KEY = "ability.want.params.uiExtensionType";
+const std::string UIEXTENSION_SYS_COMMON_UI = "sysDialog/common";
+const std::string APP_FREEZE_PID = "APP_FREEZE_PID";
+const std::string START_BUNDLE_NAME = "startBundleName";
+constexpr int32_t INVALID_USERID = -1;
+constexpr int32_t MESSAGE_PARCEL_KEY_SIZE = 3;
+constexpr uint32_t COMMAND_START_DIALOG = 1;
+
 ModalSystemAppFreezeUIExtension &ModalSystemAppFreezeUIExtension::GetInstance()
 {
     static ModalSystemAppFreezeUIExtension instance;
@@ -48,9 +56,10 @@ sptr<ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection> ModalSystemAppF
     return dialogConnectionCallback_;
 }
 
-bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(const AAFwk::Want &want)
+bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, std::string bundleName)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "CreateModalUIExtension Called.");
+    AAFwk::Want want = CreateSystemDialogWant(pid, bundleName);
     std::unique_lock<std::mutex> lockAssertResult(appFreezeResultMutex_);
     auto callback = GetConnection();
     if (callback == nullptr) {
@@ -78,6 +87,19 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(const AAFwk::Want &
     TAG_LOGE(AAFwkTag::ABILITYMGR,
         "CreateModalUIExtension ConnectSystemUi ConnectAbility dialog success, result = %{public}d", result);
     return true;
+}
+
+AAFwk::Want ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(std::string pid, std::string bundleName)
+{
+    std::string startAbilityName = "AppAbnormalAbility";
+    std::string startBundleName =
+        Rosen::SceneBoardJudgement::IsSceneBoardEnabled() ? "com.ohos.sceneboard" : "com.ohos.systemui";
+    AAFwk::Want want;
+    want.SetElementName(startBundleName, startAbilityName);
+    want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
+    want.SetParam(APP_FREEZE_PID, pid);
+    want.SetParam(START_BUNDLE_NAME, bundleName);
+    return want;
 }
 
 void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::SetReqeustAppFreezeDialogWant(const AAFwk::Want &want)
