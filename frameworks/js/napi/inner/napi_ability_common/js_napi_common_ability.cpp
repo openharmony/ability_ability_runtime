@@ -70,22 +70,22 @@ napi_value JsNapiCommon::HandleJsConnectAbilityError(napi_env env,
 napi_value JsNapiCommon::OnFindAbilityConnection(napi_env env, sptr<NAPIAbilityConnection> &abilityConnection,
     std::shared_ptr<ConnectionCallback> &connectionCallback, const Want &want, int64_t id)
 {
-        TAG_LOGI(AAFwkTag::JSNAPI, "find abilityConnection exist, current callbackSize: %{public}zu.",
-                    abilityConnection->GetCallbackSize());
-        // Add callback to connection
-        abilityConnection->AddConnectionCallback(connectionCallback);
-        // Judge connection-state
-        auto connectionState = abilityConnection->GetConnectionState();
-        TAG_LOGI(AAFwkTag::JSNAPI, "connectionState = %{public}d", connectionState);
-        if (connectionState == CONNECTION_STATE_CONNECTED) {
-            abilityConnection->HandleOnAbilityConnectDone(*connectionCallback, ERR_OK);
-            return CreateJsValue(env, id);
-        } else if (connectionState == CONNECTION_STATE_CONNECTING) {
-            return CreateJsValue(env, id);
-        } else {
-            RemoveConnectionLocked(want);
-            return CreateJsUndefined(env);
-        }
+    TAG_LOGI(AAFwkTag::JSNAPI, "find abilityConnection exist, current callbackSize: %{public}zu.",
+        abilityConnection->GetCallbackSize());
+    // Add callback to connection
+    abilityConnection->AddConnectionCallback(connectionCallback);
+    // Judge connection-state
+    auto connectionState = abilityConnection->GetConnectionState();
+    TAG_LOGI(AAFwkTag::JSNAPI, "connectionState = %{public}d", connectionState);
+    if (connectionState == CONNECTION_STATE_CONNECTED) {
+        abilityConnection->HandleOnAbilityConnectDone(*connectionCallback, ERR_OK);
+        return CreateJsValue(env, id);
+    } else if (connectionState == CONNECTION_STATE_CONNECTING) {
+        return CreateJsValue(env, id);
+    } else {
+        RemoveConnectionLocked(want);
+        return CreateJsUndefined(env);
+    }
 }
 
 napi_value JsNapiCommon::JsConnectAbility(napi_env env, napi_callback_info info, const AbilityType abilityType)
