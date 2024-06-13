@@ -642,7 +642,6 @@ napi_value BuildJsAbilityInfoNamedPropertyFirst(napi_env env, const AbilityInfo 
 napi_value BuildJsAbilityInfoNamedPropertySecond(napi_env env, const AbilityInfo &abilityInfo, napi_value &result,
     napi_value &proValue)
 {
-
     NAPI_CALL(env, napi_create_int32(env, static_cast<int32_t>(abilityInfo.subType), &proValue));
     NAPI_CALL(env, napi_set_named_property(env, result, "subType", proValue));
 

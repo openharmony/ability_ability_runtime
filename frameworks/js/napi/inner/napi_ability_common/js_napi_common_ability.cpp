@@ -67,6 +67,27 @@ napi_value JsNapiCommon::HandleJsConnectAbilityError(napi_env env,
     return resultVal;
 }
 
+napi_value JsNapiCommon::OnFindAbilityConnection(napi_env env, sptr<NAPIAbilityConnection> &abilityConnection,
+    std::shared_ptr<ConnectionCallback> &connectionCallback, const Want &want, int64_t id)
+{
+        TAG_LOGI(AAFwkTag::JSNAPI, "find abilityConnection exist, current callbackSize: %{public}zu.",
+                    abilityConnection->GetCallbackSize());
+        // Add callback to connection
+        abilityConnection->AddConnectionCallback(connectionCallback);
+        // Judge connection-state
+        auto connectionState = abilityConnection->GetConnectionState();
+        TAG_LOGI(AAFwkTag::JSNAPI, "connectionState = %{public}d", connectionState);
+        if (connectionState == CONNECTION_STATE_CONNECTED) {
+            abilityConnection->HandleOnAbilityConnectDone(*connectionCallback, ERR_OK);
+            return CreateJsValue(env, id);
+        } else if (connectionState == CONNECTION_STATE_CONNECTING) {
+            return CreateJsValue(env, id);
+        } else {
+            RemoveConnectionLocked(want);
+            return CreateJsUndefined(env);
+        }
+}
+
 napi_value JsNapiCommon::JsConnectAbility(napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s is called", __func__);
@@ -93,21 +114,7 @@ napi_value JsNapiCommon::JsConnectAbility(napi_env env, napi_callback_info info,
     if (CheckAbilityType(abilityType)) {
         abilityConnection = FindConnectionLocked(want, id);
         if (abilityConnection) {
-            // Add callback to connection
-            abilityConnection->AddConnectionCallback(connectionCallback);
-            // Judge connection-state
-            auto connectionState = abilityConnection->GetConnectionState();
-            TAG_LOGI(AAFwkTag::JSNAPI, "abilityConnection exist, current callbackSize: %{public}zu \
-                connectionState = %{public}d.", abilityConnection->GetCallbackSize(), connectionState);
-            if (connectionState == CONNECTION_STATE_CONNECTED) {
-                abilityConnection->HandleOnAbilityConnectDone(*connectionCallback, ERR_OK);
-                return CreateJsValue(env, id);
-            } else if (connectionState == CONNECTION_STATE_CONNECTING) {
-                return CreateJsValue(env, id);
-            } else {
-                RemoveConnectionLocked(want);
-                return CreateJsUndefined(env);
-            }
+            return OnFindAbilityConnection(env, abilityConnection, connectionCallback, want, id);
         } else {
             result = CreateConnectionAndConnectAbilityLocked(connectionCallback, want, id);
         }
@@ -124,6 +131,32 @@ napi_value JsNapiCommon::JsConnectAbility(napi_env env, napi_callback_info info,
     napi_delete_reference(env, connectionCallback->failedCallbackRef);
     connectionCallback->failedCallbackRef = nullptr;
     return CreateJsValue(env, id);
+}
+
+void JsNapiCommon::SetJsDisConnectAbilityCallback(std::shared_ptr<int32_t> &errorVal, const AbilityType &abilityType,
+    sptr<NAPIAbilityConnection> &abilityConnection, NapiAsyncTask::ExecuteCallback &execute,
+    NapiAsyncTask::CompleteCallback &complete)
+{
+    execute = [obj = this, value = errorVal, abilityType, abilityConnection] () {
+        if (obj->ability_ == nullptr) {
+            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr.");
+            return;
+        }
+        if (!obj->CheckAbilityType(abilityType)) {
+            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
+            return;
+        }
+        *value = obj->ability_->DisconnectAbility(abilityConnection);
+    };
+    complete = [obj = this, value = errorVal]
+        (napi_env env, NapiAsyncTask &task, const int32_t status) {
+        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR)) {
+            task.Reject(env, CreateJsError(env, *value, "DisconnectAbility failed."));
+            return;
+        }
+        task.Resolve(env, CreateJsValue(env, *value));
+    };
 }
 
 napi_value JsNapiCommon::JsDisConnectAbility(napi_env env, napi_callback_info info, const AbilityType abilityType)
@@ -154,26 +187,10 @@ napi_value JsNapiCommon::JsDisConnectAbility(napi_env env, napi_callback_info in
         TAG_LOGE(AAFwkTag::JSNAPI, "there is no ability to disconnect.");
         return CreateJsUndefined(env);
     }
-    auto execute = [obj = this, value = errorVal, abilityType, abilityConnection] () {
-        if (obj->ability_ == nullptr) {
-            *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr.");
-            return;
-        }
-        if (!obj->CheckAbilityType(abilityType)) {
-            *value = static_cast<int32_t>(NAPI_ERR_ABILITY_TYPE_INVALID);
-            return;
-        }
-        *value = obj->ability_->DisconnectAbility(abilityConnection);
-    };
-    auto complete = [obj = this, value = errorVal]
-        (napi_env env, NapiAsyncTask &task, const int32_t status) {
-        if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR)) {
-            task.Reject(env, CreateJsError(env, *value, "DisconnectAbility failed."));
-            return;
-        }
-        task.Resolve(env, CreateJsValue(env, *value));
-    };
+
+    NapiAsyncTask::ExecuteCallback execute;
+    NapiAsyncTask::CompleteCallback complete;
+    SetJsDisConnectAbilityCallback(errorVal, abilityType, abilityConnection, execute, complete);
     napi_value lastParam = (argc == ARGS_ONE) ? nullptr : argv[PARAM1];
     napi_value result = nullptr;
     NapiAsyncTask::Schedule("JsNapiCommon::JsDisConnectAbility",

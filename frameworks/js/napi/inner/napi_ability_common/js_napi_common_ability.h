@@ -92,7 +92,13 @@ public:
     napi_value HandleJsConnectAbilityError(napi_env env, std::shared_ptr<ConnectionCallback> &connectionCallback,
         const Want &want, int32_t errorVal);
 
+    napi_value OnFindAbilityConnection(napi_env env, sptr<NAPIAbilityConnection> &abilityConnection,
+        std::shared_ptr<ConnectionCallback> &connectionCallback, const Want &want, int64_t id);
     napi_value JsConnectAbility(napi_env env, napi_callback_info info, const AbilityType abilityType);
+
+    void SetJsDisConnectAbilityCallback(std::shared_ptr<int32_t> &errorVal, const AbilityType &abilityType,
+        sptr<NAPIAbilityConnection> &abilityConnection, AbilityRuntime::NapiAsyncTask::ExecuteCallback &execute,
+        AbilityRuntime::NapiAsyncTask::CompleteCallback &complete);
     napi_value JsDisConnectAbility(napi_env env, napi_callback_info info, const AbilityType abilityType);
     napi_value JsGetContext(napi_env env, const napi_callback_info info, const AbilityType abilityType);
     napi_value JsGetFilesDir(napi_env env, napi_callback_info info, const AbilityType abilityType);
