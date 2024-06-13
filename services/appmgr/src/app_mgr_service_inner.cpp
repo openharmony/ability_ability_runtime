@@ -87,7 +87,6 @@
 #ifdef APP_NO_RESPONSE_DIALOG
 #include "fault_data.h"
 #include "modal_system_app_freeze_uiextension.h"
-#include "scene_board_judgement.h"
 #endif
 
 namespace OHOS {
