@@ -1177,18 +1177,21 @@ ErrCode AccessibilityAbilityShellCommand::MakeSetShortKeyTargetCommandArgumentFr
 void AccessibilityAbilityShellCommand::SetArgument(int option, AccessibilityCommandArgument& argument)
 {
     switch (option) {
-        case 'a':
+        case 'a': {
             argument.abilityName = optarg;
             argument.abilityArgumentNum++;
             break;
-        case 'b':
+        }
+        case 'b': {
             argument.bundleName = optarg;
             argument.bundleArgumentNum++;
             break;
-        default:
+        }
+        default: {
             argument.unknownArgumentNum++;
             argument.unknownArguments.push_back(argv_[optind - 1]);
             break;
+        }
     }
 }
 
