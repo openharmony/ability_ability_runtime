@@ -367,8 +367,6 @@ private:
      */
     void HandleProcessSecurityExit();
 
-    void HandleClearPageStack();
-
     /**
      *
      * @brief Clean the ability but don't notify ams.

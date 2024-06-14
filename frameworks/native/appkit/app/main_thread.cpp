@@ -684,13 +684,13 @@ void MainThread::ScheduleProcessSecurityExit()
 void MainThread::ScheduleClearPageStack()
 {
     TAG_LOGI(AAFwkTag::APPKIT, "ScheduleClearPageStack called");
-    wptr<MainThread> weak = this;
-    auto appThread = weak.promote();
-    if (appThread == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "appThread is nullptr");
+    if (applicationInfo_ == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo_ is nullptr");
         return;
     }
-    appThread->HandleClearPageStack();
+
+    auto bundleName = applicationInfo_->bundleName;
+    AppRecovery::GetInstance().ClearPageStack(bundleName);
 }
 
 /**
@@ -975,20 +975,6 @@ void MainThread::HandleProcessSecurityExit()
     }
 
     HandleTerminateApplicationLocal();
-}
-
-void MainThread::HandleClearPageStack()
-{
-    TAG_LOGI(AAFwkTag::APPKIT, "HandleClearPageStack");
-    AppRecovery::GetInstance().DeleteInValidMissionFiles();
-
-    if (applicationInfo_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "applicationInfo_ is nullptr");
-        return;
-    }
-
-    auto bundleName = applicationInfo_->bundleName;
-    AbilityManagerClient::GetInstance()->ScheduleClearRecoveryPageStack(bundleName);
 }
 
 bool MainThread::InitCreate(
