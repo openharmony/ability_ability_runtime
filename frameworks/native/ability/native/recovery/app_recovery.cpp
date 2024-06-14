@@ -463,6 +463,18 @@ void AppRecovery::DeleteInValidMissionFileById(std::string fileDir, int32_t miss
     TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery delete the file: %{public}s done", file.c_str());
 }
 
+void AppRecovery::ClearPageStack(std::string bundleName)
+{
+    TAG_LOGI(AAFwkTag::RECOVERY, "AppRecovery ClearPageStack");
+    DeleteInValidMissionFiles();
+    std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery ClearPageStack. abilityMgr client is not exist.");
+        return;
+    }
+    abilityMgr->ScheduleClearRecoveryPageStack(bundleName);
+}
+
 bool AppRecovery::GetMissionIds(std::string path, std::vector<int32_t> &missionIds)
 {
     DIR *dir = opendir(path.c_str());
