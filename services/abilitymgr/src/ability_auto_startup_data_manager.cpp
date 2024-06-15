@@ -447,15 +447,15 @@ AutoStartupInfo AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKeyAndV
     return info;
 }
 
-bool AbilityAutoStartupDataManager::IsEqual(nlohmann::json &jsonObject, const std::string &key,
-         const std::string &value, bool checkEmpty)
+bool AbilityAutoStartupDataManager::IsEqual(
+    nlohmann::json &jsonObject, const std::string &key,const std::string &value, bool checkEmpty)
 {
     if (jsonObject.contains(key) && jsonObject[key].is_string()) {
         std::string  jsonValue = jsonObject.at(key).get<std::string>();
         if (checkEmpty && !jsonValue.empty() && jsonValue != value) {
-             return false;
+            return false;
         } else if (value != jsonValue) {
-             return false;
+            return false;
         }
     }
     return true;
