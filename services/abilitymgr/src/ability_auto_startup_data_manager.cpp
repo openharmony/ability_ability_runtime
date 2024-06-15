@@ -448,7 +448,7 @@ AutoStartupInfo AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKeyAndV
 }
 
 bool AbilityAutoStartupDataManager::IsEqual(
-    nlohmann::json &jsonObject, const std::string &key,const std::string &value, bool checkEmpty)
+    nlohmann::json &jsonObject, const std::string &key, const std::string &value, bool checkEmpty)
 {
     if (jsonObject.contains(key) && jsonObject[key].is_string()) {
         std::string  jsonValue = jsonObject.at(key).get<std::string>();
