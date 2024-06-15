@@ -460,7 +460,6 @@ bool AbilityAutoStartupService::GetBundleInfo(
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get bundle info.");
         return false;
     }
-
     return true;
 }
 
