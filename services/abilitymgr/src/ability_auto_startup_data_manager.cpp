@@ -447,6 +447,30 @@ AutoStartupInfo AbilityAutoStartupDataManager::ConvertAutoStartupInfoFromKeyAndV
     return info;
 }
 
+bool AbilityAutoStartupDataManager::IsEqual(nlohmann::json &jsonObject, const std::string &key,
+    const std::string &value, bool checkEmpty) 
+{
+    if (jsonObject.contains(key) && jsonObject[key].is_string()) {
+        std::string  jsonValue = jsonObject.at(key).get<std::string>();
+        if (checkEmpty && !jsonValue.empty() && jsonValue != value) {
+             return false;
+        } else if (value != jsonValue) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool AbilityAutoStartupDataManager::IsEqual(nlohmann::json &jsonObject, const std::string &key, int32_t value)
+{
+    if (jsonObject.contains(key) && jsonObject[key].is_number()) {
+        if (value != jsonObject.at(key).get<int32_t>()) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const AutoStartupInfo &info)
 {
     nlohmann::json jsonObject = nlohmann::json::parse(key.ToString(), nullptr, false);
@@ -455,43 +479,14 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, const
         return false;
     }
 
-    if (jsonObject.contains(JSON_KEY_BUNDLE_NAME) && jsonObject[JSON_KEY_BUNDLE_NAME].is_string()) {
-        if (info.bundleName != jsonObject.at(JSON_KEY_BUNDLE_NAME).get<std::string>()) {
-            return false;
-        }
+    if (!IsEqual(jsonObject, JSON_KEY_BUNDLE_NAME, info.bundleName) 
+        || !IsEqual(jsonObject, JSON_KEY_ABILITY_NAME, info.abilityName)
+        || !IsEqual(jsonObject, JSON_KEY_MODULE_NAME, info.moduleName, true)
+        || !IsEqual(jsonObject, JSON_KEY_ACCESS_TOKENID, info.accessTokenId)
+        || !IsEqual(jsonObject, JSON_KEY_USERID, info.userId)
+        || !IsEqual(jsonObject, JSON_KEY_APP_CLONE_INDEX, info.appCloneIndex)) {
+        return false;
     }
-
-    if (jsonObject.contains(JSON_KEY_ABILITY_NAME) && jsonObject[JSON_KEY_ABILITY_NAME].is_string()) {
-        if (info.abilityName != jsonObject.at(JSON_KEY_ABILITY_NAME).get<std::string>()) {
-            return false;
-        }
-    }
-
-    if (jsonObject.contains(JSON_KEY_MODULE_NAME) && jsonObject[JSON_KEY_MODULE_NAME].is_string()) {
-        std::string moduleName = jsonObject.at(JSON_KEY_MODULE_NAME).get<std::string>();
-        if (!moduleName.empty() && info.moduleName != moduleName) {
-            return false;
-        }
-    }
-
-    if (jsonObject.contains(JSON_KEY_ACCESS_TOKENID) && jsonObject[JSON_KEY_ACCESS_TOKENID].is_string()) {
-        if (info.accessTokenId != jsonObject.at(JSON_KEY_ACCESS_TOKENID).get<std::string>()) {
-            return false;
-        }
-    }
-
-    if (jsonObject.contains(JSON_KEY_USERID) && jsonObject[JSON_KEY_USERID].is_number()) {
-        if (info.userId != jsonObject.at(JSON_KEY_USERID).get<int32_t>()) {
-            return false;
-        }
-    }
-
-    if (jsonObject.contains(JSON_KEY_APP_CLONE_INDEX) && jsonObject[JSON_KEY_APP_CLONE_INDEX].is_number()) {
-        if (info.appCloneIndex != jsonObject.at(JSON_KEY_APP_CLONE_INDEX).get<int32_t>()) {
-            return false;
-        }
-    }
-
     return true;
 }
 
