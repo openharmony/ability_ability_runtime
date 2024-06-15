@@ -296,7 +296,8 @@ AutoStartupStatus AbilityAutoStartupDataManager::QueryAutoStartupData(const Auto
     return asustatus;
 }
 
-int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList, int32_t userId)
+int32_t AbilityAutoStartupDataManager::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList,
+    int32_t userId)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
     {
@@ -524,7 +525,6 @@ bool AbilityAutoStartupDataManager::IsEqual(const DistributedKv::Key &key, int32
         }
     }
     return false;
-
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
