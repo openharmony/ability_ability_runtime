@@ -104,8 +104,10 @@ int32_t AbilityAutoStartupService::UnregisterAutoStartupSystemCallback(const spt
 int32_t AbilityAutoStartupService::SetApplicationAutoStartup(const AutoStartupInfo &info)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
-        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, accessTokenId: %{public}s, userId: %{public}d.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
+        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     int32_t code = CheckPermissionForSystem();
     if (code != ERR_OK) {
         return code;
@@ -170,8 +172,10 @@ int32_t AbilityAutoStartupService::InnerSetApplicationAutoStartup(const AutoStar
 int32_t AbilityAutoStartupService::CancelApplicationAutoStartup(const AutoStartupInfo &info)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
-        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, accessTokenId: %{public}s, userId: %{public}d.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
+        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     int32_t code = CheckPermissionForSystem();
     if (code != ERR_OK) {
         return code;
@@ -223,7 +227,8 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartup(const AutoS
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList, int32_t userId)
+int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList,
+    int32_t userId)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
     int32_t code = CheckPermissionForEDM();
@@ -233,7 +238,8 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<A
         return code;
     }
 
-    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList, userId);
+    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList,
+        userId);
 }
 
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermission(
@@ -245,7 +251,8 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermiss
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
-    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList, userId);
+    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList,
+        userId);
 }
 
 int32_t AbilityAutoStartupService::DeleteAutoStartupData(const std::string &bundleName, const int32_t uid)
@@ -295,8 +302,10 @@ int32_t AbilityAutoStartupService::CheckAutoStartupData(const std::string &bundl
 void AbilityAutoStartupService::ExecuteCallbacks(bool isCallOn, const AutoStartupInfo &info)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
-        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, accessTokenId: %{public}s, userId: %{public}d.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
+        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     for (auto item : callbackVector_) {
         auto remoteSystemCallback = iface_cast<IAutoStartupCallBack>(item);
         if (remoteSystemCallback != nullptr) {
@@ -455,12 +464,14 @@ bool AbilityAutoStartupService::GetBundleInfo(
     return true;
 }
 
-bool AbilityAutoStartupService::GetAbilityData(
-    const AutoStartupInfo &info, bool &isVisible, std::string &abilityTypeName, std::string &accessTokenId, int32_t &userId)
+bool AbilityAutoStartupService::GetAbilityData(const AutoStartupInfo &info, bool &isVisible,
+    std::string &abilityTypeName, std::string &accessTokenId, int32_t &userId)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
-        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, accessTokenId: %{public}s, userId: %{public}d.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
+        "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     AppExecFwk::BundleInfo bundleInfo;
     int32_t currentUserId;
     int32_t uid = bundleInfo.applicationInfo.uid;
