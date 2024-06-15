@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "napi_common_ability_impl.h"
+#include "napi_common_ability_execute_utils.h"
 
 #include "hilog_tag_wrapper.h"
-#include "napi_common_ability_common.h"
+#include "napi_common_ability_wrap_utils.h"
 
 namespace OHOS {
 namespace AppExecFwk {

@@ -21,7 +21,7 @@
 #include "hilog_tag_wrapper.h"
 #include "js_runtime_utils.h"
 #include "napi_common_ability.h"
-#include "napi_common_ability_common.h"
+#include "napi_common_ability_wrap_utils.h"
 #include "napi_common_util.h"
 #include "napi_context.h"
 
