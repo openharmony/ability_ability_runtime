@@ -47,7 +47,7 @@ public:
     int32_t DeleteAbilityRecoverInfo(
         uint32_t accessTokenId, const std::string &moduleName, const std::string &abilityName);
 
-    int32_t DeleteAllRecoverInfoByBundleName(const std::string &moduleName, int32_t uid);
+    int32_t DeleteAllRecoverInfoByTokenId(uint32_t tokenId);
 
     int32_t GetAbilityRecoverInfo(uint32_t accessTokenId,
         const std::string &moduleName, const std::string &abilityName, bool &hasRecoverInfo);

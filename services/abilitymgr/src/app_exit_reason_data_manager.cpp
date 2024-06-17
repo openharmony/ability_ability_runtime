@@ -370,23 +370,9 @@ int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(uint32_t accessTokenId,
     return ERR_OK;
 }
 
-int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByBundleName(const std::string &bundleName, int32_t uid)
+int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByTokenId(uint32_t tokenId)
 {
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "DeleteAllRecoverInfoByBundleName bundle %{public}s", bundleName.c_str());
-    int32_t userId;
-    if (DelayedSingleton<AppExecFwk::OsAccountManagerWrapper>::GetInstance()->
-        GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Get GetOsAccountLocalIdFromUid failed.");
-        return ERR_INVALID_VALUE;
-    }
-    uint32_t accessTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(userId, bundleName, 0);
-    auto accessTokenIdStr = std::to_string(accessTokenId);
-    if (bundleName.empty() || accessTokenIdStr.empty()) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid value.");
-        return ERR_INVALID_VALUE;
-    }
-
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, tokenId: %{private}u", bundleName.c_str(), accessTokenId);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "tokenId: %{private}u", accessTokenId);
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
@@ -394,7 +380,7 @@ int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByBundleName(const std::st
             return ERR_NO_INIT;
         }
     }
-    InnerDeleteAbilityRecoverInfo(accessTokenId);
+    InnerDeleteAbilityRecoverInfo(tokenId);
     return ERR_OK;
 }
 
