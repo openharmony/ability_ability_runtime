@@ -1739,7 +1739,7 @@ int AbilityManagerProxy::KillProcess(const std::string &bundleName, const bool c
     return reply.ReadInt32();
 }
 
-void AbilityManagerProxy::ScheduleClearRecoveryPageStack(const std::string &bundleName)
+void AbilityManagerProxy::ScheduleClearRecoveryPageStack()
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1747,10 +1747,6 @@ void AbilityManagerProxy::ScheduleClearRecoveryPageStack(const std::string &bund
 
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack WriteInterfaceToken failed.");
-        return;
-    }
-    if (!data.WriteString16(Str8ToStr16(bundleName))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName write failed.");
         return;
     }
     int error = SendRequest(AbilityManagerInterfaceCode::CLEAR_RECOVERY_PAGE_STACK, data, reply, option);

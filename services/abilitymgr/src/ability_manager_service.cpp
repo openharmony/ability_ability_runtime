@@ -7167,9 +7167,14 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
     }
 }
 
-void AbilityManagerService::ScheduleClearRecoveryPageStack(const std::string& bundleName)
+void AbilityManagerService::ScheduleClearRecoveryPageStack()
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
+    std::string bundleName;
+    if (IN_PROCESS_CALL(bms->GetNameForUid(uid, bundleName)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "VerifyPermission failed to get bundle name by uid");
+        return CHECK_PERMISSION_FAILED;
+    }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack bundleName = %{public}s, callerUid = %{public}d",
         bundleName.c_str(), callerUid);
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->

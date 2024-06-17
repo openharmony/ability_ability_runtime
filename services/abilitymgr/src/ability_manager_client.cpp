@@ -1397,11 +1397,11 @@ void AbilityManagerClient::ScheduleRecoverAbility(sptr<IRemoteObject> token, int
     return abms->ScheduleRecoverAbility(token, reason, want);
 }
 
-void AbilityManagerClient::ScheduleClearRecoveryPageStack(const std::string& bundleName)
+void AbilityManagerClient::ScheduleClearRecoveryPageStack()
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
-    return abms->ScheduleClearRecoveryPageStack(bundleName);
+    return abms->ScheduleClearRecoveryPageStack();
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
