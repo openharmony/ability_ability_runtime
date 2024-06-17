@@ -7181,14 +7181,16 @@ void AbilityManagerService::ScheduleClearRecoveryPageStack()
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack failed to get bundle name by uid");
         return;
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack bundleName = %{public}s, callerUid = %{public}d",
-        bundleName.c_str(), callerUid);
+    auto tokenId = IPCSkeleton::GetCallingTokenID();
+
+    TAG_LOGI(AAFwkTag::ABILITYMGR,
+        "ScheduleClearRecoveryPageStack bundleName = %{public}s, callerUid = %{public}d, tokenId = %{public}d",
+        bundleName.c_str(), callerUid, tokenId);
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
         DeleteAppExitReason(bundleName, callerUid);
     (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
-        DeleteAllRecoverInfoByBundleName(bundleName, callerUid);
+        DeleteAllRecoverInfoByTokenId(tokenId);
 }
-
 
 void AbilityManagerService::ReportAppRecoverResult(const int32_t appId, const AppExecFwk::ApplicationInfo &appInfo,
     const std::string& abilityName, const std::string& result)
