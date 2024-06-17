@@ -2350,12 +2350,7 @@ int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessagePa
 
 int AbilityManagerStub::ScheduleClearRecoveryPageStackInner(MessageParcel &data, MessageParcel &reply)
 {
-    std::string bundleName = Str16ToStr8(data.ReadString16());
-    if (bundleName.empty()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStackInner read bundleName failed.");
-        return ERR_NULL_OBJECT;
-    }
-    ScheduleClearRecoveryPageStack(bundleName);
+    ScheduleClearRecoveryPageStack();
     return NO_ERROR;
 }
 
