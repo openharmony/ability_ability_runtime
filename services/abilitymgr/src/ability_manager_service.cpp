@@ -7171,9 +7171,9 @@ void AbilityManagerService::ScheduleClearRecoveryPageStack()
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     std::string bundleName;
-    if (IN_PROCESS_CALL(bms->GetNameForUid(uid, bundleName)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "VerifyPermission failed to get bundle name by uid");
-        return CHECK_PERMISSION_FAILED;
+    if (IN_PROCESS_CALL(bms->GetNameForUid(callerUid, bundleName)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack failed to get bundle name by uid");
+        return;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack bundleName = %{public}s, callerUid = %{public}d",
         bundleName.c_str(), callerUid);
