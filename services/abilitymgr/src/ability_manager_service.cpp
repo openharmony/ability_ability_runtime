@@ -7167,20 +7167,26 @@ void AbilityManagerService::EnableRecoverAbility(const sptr<IRemoteObject>& toke
     }
 }
 
-void AbilityManagerService::ScheduleClearRecoveryPageStack()
+void AbilityManagerService::ScheduleClearRecoveryPageStack(std::string bundleName)
 {
     int32_t callerUid = IPCSkeleton::GetCallingUid();
-    std::string bundleName;
+    std::string currentBundleName;
     auto bms = GetBundleManager();
     if (bms == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack failed to get bms");
         return;
     }
 
-    if (IN_PROCESS_CALL(bms->GetNameForUid(callerUid, bundleName)) != ERR_OK) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack failed to get bundle name by uid");
+    if (IN_PROCESS_CALL(bms->GetNameForUid(callerUid, currentBundleName)) != ERR_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack failed to get currentBundleName by uid");
         return;
     }
+
+    if (bundleName != currentBundleName) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack currentBundleName not target");
+        return;
+    }
+
     auto tokenId = IPCSkeleton::GetCallingTokenID();
 
     TAG_LOGI(AAFwkTag::ABILITYMGR,

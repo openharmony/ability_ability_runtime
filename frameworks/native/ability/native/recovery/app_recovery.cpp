@@ -472,7 +472,7 @@ void AppRecovery::ClearPageStack(std::string bundleName)
         TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery ClearPageStack. abilityMgr client is not exist.");
         return;
     }
-    abilityMgr->ScheduleClearRecoveryPageStack();
+    abilityMgr->ScheduleClearRecoveryPageStack(bundleName);
 }
 
 bool AppRecovery::GetMissionIds(std::string path, std::vector<int32_t> &missionIds)

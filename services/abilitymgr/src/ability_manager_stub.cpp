@@ -2350,7 +2350,8 @@ int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessagePa
 
 int AbilityManagerStub::ScheduleClearRecoveryPageStackInner(MessageParcel &data, MessageParcel &reply)
 {
-    ScheduleClearRecoveryPageStack();
+    std::string bundleName = Str16ToStr8(data.ReadString16());
+    ScheduleClearRecoveryPageStack(bundleName);
     return NO_ERROR;
 }
 
