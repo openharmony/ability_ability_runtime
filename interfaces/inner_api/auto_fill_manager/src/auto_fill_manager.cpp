@@ -327,10 +327,8 @@ bool AutoFillManager::IsNeed2SaveRequest(const AbilityBase::ViewData& viewData, 
         if (AbilityBase::AutoFillType::FULL_STREET_ADDRESS <= it->autoFillType &&
             it->autoFillType <= AbilityBase::AutoFillType::FORMAT_ADDRESS &&
             it->enableAutoFill && !it->value.empty()) {
-            {
-                isSmartAutoFill = false;
-                ret = true;
-            }
+            isSmartAutoFill = true;
+            ret = true;
         }
     }
     return ret;
