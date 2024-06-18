@@ -1752,7 +1752,7 @@ void AbilityManagerProxy::ScheduleClearRecoveryPageStack(std::string bundleName)
 
     if (!data.WriteString16(Str8ToStr16(bundleName))) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName write failed.");
-        return ERR_INVALID_VALUE;
+        return;
     }
 
     int error = SendRequest(AbilityManagerInterfaceCode::CLEAR_RECOVERY_PAGE_STACK, data, reply, option);
