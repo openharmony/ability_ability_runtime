@@ -335,7 +335,7 @@ bool AutoFillManager::IsNeed2SaveRequest(const AbilityBase::ViewData& viewData, 
 }
 
 bool AutoFillManager::ConvertAutoFillWindowType(const AutoFill::AutoFillRequest &request,
-        bool &isSmartAutoFill, AutoFill::AutoFillWindowType &autoFillWindowType)
+    bool &isSmartAutoFill, AutoFill::AutoFillWindowType &autoFillWindowType)
 {
     bool ret = true;
     autoFillWindowType = AutoFill::AutoFillWindowType::MODAL_WINDOW;
