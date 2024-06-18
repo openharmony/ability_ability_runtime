@@ -1148,7 +1148,7 @@ public:
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
 
-    virtual void ScheduleClearRecoveryPageStack() {};
+    virtual void ScheduleClearRecoveryPageStack(std::string bundleName) {};
 
     /**
      * Called to verify that the MissionId is valid.
