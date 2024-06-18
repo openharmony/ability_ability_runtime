@@ -245,7 +245,7 @@ ohos_shared_library("ability_manager") {
     "relational_store:native_dataability",
     "samgr:samgr_proxy",
   ]
-  if (!(is_linux && host_cpu == "arm64")) {
+  if (host_cpu != "arm64") {
     external_deps += [ "relational_store:native_rdb" ]
   }
 
