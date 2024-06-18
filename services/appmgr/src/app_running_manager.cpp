@@ -228,13 +228,14 @@ bool AppRunningManager::ProcessExitByBundleName(
                 return appInfo->bundleName == bundleName;
             };
             auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-            if (iter != appInfoList.end() && pid > 0) {
-                pids.push_back(pid);
-                if (clearPageStack) {
-                    appRecord->ScheduleClearPageStack();
-                }
-                appRecord->ScheduleProcessSecurityExit();
+            if (iter == appInfoList.end() || pid <= 0) {
+                continue;
             }
+            pids.push_back(pid);
+            if (clearPageStack) {
+                appRecord->ScheduleClearPageStack();
+            }
+            appRecord->ScheduleProcessSecurityExit();
         }
     }
 
@@ -288,22 +289,24 @@ bool AppRunningManager::ProcessExitByBundleNameAndUid(
     auto appRunningMap = GetAppRunningRecordMap();
     for (const auto &item : appRunningMap) {
         const auto &appRecord = item.second;
-        if (appRecord) {
-            auto appInfoList = appRecord->GetAppInfoList();
-            auto isExist = [&bundleName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
-                return appInfo->bundleName == bundleName && appInfo->uid == uid;
-            };
-            auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
-            pid_t pid = appRecord->GetPriorityObject()->GetPid();
-            if (iter != appInfoList.end() && pid > 0) {
-                pids.push_back(pid);
-                if (clearPageStack) {
-                    appRecord->ScheduleClearPageStack();
-                }
-                appRecord->SetKilling();
-                appRecord->ScheduleProcessSecurityExit();
-            }
+        if (appRecord == nullptr) {
+            continue;
         }
+        auto appInfoList = appRecord->GetAppInfoList();
+        auto isExist = [&bundleName, &uid](const std::shared_ptr<ApplicationInfo> &appInfo) {
+            return appInfo->bundleName == bundleName && appInfo->uid == uid;
+        };
+        auto iter = std::find_if(appInfoList.begin(), appInfoList.end(), isExist);
+        pid_t pid = appRecord->GetPriorityObject()->GetPid();
+        if (iter == appInfoList.end() || pid <= 0) {
+            continue;
+        }
+        pids.push_back(pid);
+        if (clearPageStack) {
+            appRecord->ScheduleClearPageStack();
+        }
+        appRecord->SetKilling();
+        appRecord->ScheduleProcessSecurityExit();
     }
 
     return (pids.empty() ? false : true);
