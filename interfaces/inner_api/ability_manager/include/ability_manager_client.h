@@ -1184,7 +1184,7 @@ public:
      *
      * @param bundleName application bundleName.
      */
-    void ScheduleClearRecoveryPageStack(std::string bundleName);
+    void ScheduleClearRecoveryPageStack();
 
     /**
      * @brief Add free install observer.
