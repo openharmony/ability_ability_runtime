@@ -32,6 +32,7 @@ public:
 class AppUtils {
 public:
     static AppUtils &GetInstance();
+    ~AppUtils();
     bool IsLauncher(const std::string &bundleName) const;
     bool IsLauncherAbility(const std::string &abilityName) const;
     bool IsInheritWindowSplitScreenMode();
@@ -48,10 +49,11 @@ public:
     bool EnableMoveUIAbilityToBackgroundApi();
     bool IsLaunchEmbededUIAbility();
     bool IsSupportNativeChildProcess();
+    bool IsAllowResidentInExtremeMemory(const std::string& bundleName, const std::string& abilityName = "");
 
 private:
+    void LoadResidentProcessInExtremeMemory();
     AppUtils();
-    ~AppUtils();
     volatile bool isSceneBoard_ = false;
     volatile DeviceConfiguration<bool> isInheritWindowSplitScreenMode_ = {false, true};
     volatile DeviceConfiguration<bool> isSupportAncoApp_ = {false, false};
@@ -67,6 +69,8 @@ private:
     volatile DeviceConfiguration<bool> enableMoveUIAbilityToBackgroundApi_ = {false, true};
     volatile DeviceConfiguration<bool> isLaunchEmbededUIAbility_ = {false, false};
     volatile DeviceConfiguration<bool> isSupportNativeChildProcess_ = {false, false};
+    DeviceConfiguration<std::vector<std::pair<std::string, std::string>>>
+        residentProcessInExtremeMemory_ = {false, {}};
     DISALLOW_COPY_AND_MOVE(AppUtils);
 };
 }  // namespace AAFwk
