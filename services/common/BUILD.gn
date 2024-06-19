@@ -113,14 +113,19 @@ ohos_shared_library("task_handler_wrap") {
 
 ohos_shared_library("app_util") {
   public_configs = [ ":common_config" ]
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "//third_party/json/include",
+  ]
 
   sources = [
     "src/ability_manager_radar.cpp",
     "src/app_utils.cpp",
+    "src/configuation_utils.cpp",
   ]
 
   external_deps = [
+    "config_policy:configpolicy_util",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "init:libbegetutil",
