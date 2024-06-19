@@ -900,10 +900,9 @@ private:
             }
         };
 
-        napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         NapiAsyncTask::Schedule("JSAppManager::OnClearUpAppData",
-            env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
+            env, CreateAsyncTaskWithLastParam(env, nullptr, nullptr, std::move(complete), &result));
         return result;
     }
 
