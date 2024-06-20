@@ -5632,7 +5632,7 @@ int32_t AbilityManagerService::GetUserId() const
     return U0_USER_ID;
 }
 
-void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot, sptr<IUserCallback> callback)
+void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     auto bms = GetBundleManager();
@@ -5651,7 +5651,6 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
         ++attemptNums;
         if (!isBoot && attemptNums > SWITCH_ACCOUNT_TRY) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Query highest priority ability failed.");
-            callback->OnStartUserDone(userId, ERR_QUERY_HIGHEST_PRIORITY_ABILITY);
             return;
         }
         AbilityRequest abilityRequest;
@@ -5660,10 +5659,8 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
 
     if (abilityInfo.name.empty() && extensionAbilityInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Query highest priority ability failed");
-        callback->OnStartUserDone(userId, ERR_QUERY_HIGHEST_PRIORITY_ABILITY);
         return;
     }
-    callback->OnStartUserDone(userId, ERR_OK);
 
     Want abilityWant; // donot use 'want' here, because the entity of 'want' is not empty
     if (!abilityInfo.name.empty()) {
@@ -7393,8 +7390,9 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
         ConnectBmsService();
         StartUserApps();
     }
+    callback->OnStartUserDone(userId, ERR_OK);
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
-    StartHighestPriorityAbility(userId, isBoot, callback);
+    StartHighestPriorityAbility(userId, isBoot);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
         AmsConfigurationParameter::GetInstance().MultiUserType() != 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "no need to terminate old scb.");
