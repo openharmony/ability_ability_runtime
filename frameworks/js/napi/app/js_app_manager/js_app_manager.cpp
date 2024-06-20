@@ -524,14 +524,12 @@ private:
             int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
             if (ret == 0 && observer->RemoveJsObserverObject(observerId)) {
                 task->ResolveWithNoError(env, CreateJsUndefined(env));
-                TAG_LOGD(AAFwkTag::APPMGR, "success size:%{public}zu",
-                    observer->GetJsObserverMapSize());
+                TAG_LOGD(AAFwkTag::APPMGR, "success size:%{public}zu", observer->GetJsObserverMapSize());
             } else {
                 TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -633,7 +631,6 @@ private:
                 task->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -662,7 +659,6 @@ private:
                 task->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -756,7 +752,6 @@ private:
                 task->Reject(env, CreateJsError(env, GetJsErrorCodeByNativeError(ret)));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -780,7 +775,6 @@ private:
             TAG_LOGD(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->ResolveWithNoError(env, CreateJsValue(env, ret));
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -833,7 +827,6 @@ private:
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret, "kill process failed."));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -873,7 +866,6 @@ private:
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret, "clear up application failed."));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -918,7 +910,6 @@ private:
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret, "clear up application failed."));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -962,7 +953,6 @@ private:
             TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->ResolveWithNoError(env, CreateJsValue(env, ret));
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -1020,7 +1010,6 @@ private:
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret, "Kill processes failed."));
             }
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -1043,7 +1032,6 @@ private:
             TAG_LOGI(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
             task->ResolveWithNoError(env, CreateJsValue(env, memorySize));
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -1066,7 +1054,6 @@ private:
             TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->ResolveWithNoError(env, CreateJsValue(env, ret));
         };
-
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
             TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         }
@@ -1162,10 +1149,7 @@ private:
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret));
             }
         };
-
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
-        }
+        napi_send_event(env, asyncTask, napi_eprio_immediate);
         napiAsyncTask.release();
         return result;
     }
