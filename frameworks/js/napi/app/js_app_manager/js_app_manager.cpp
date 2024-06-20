@@ -1149,7 +1149,8 @@ private:
                 task->Reject(env, CreateJsErrorByNativeErr(env, ret));
             }
         };
-        napi_send_event(env, asyncTask, napi_eprio_immediate);
+        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate))
+            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
         napiAsyncTask.release();
         return result;
     }
