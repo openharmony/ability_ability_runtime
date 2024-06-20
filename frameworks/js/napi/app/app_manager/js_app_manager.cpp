@@ -460,8 +460,8 @@ private:
         TAG_LOGI(AAFwkTag::APPMGR,
             "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
-         napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
-         napi_value result = nullptr;
+        napi_value lastParam = (argc == ARGC_THREE) ? argv[INDEX_TWO] : nullptr;
+        napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [appManager = appManager_, bundleName, accountId, clearPageStack, errCode,
             env, task = napiAsyncTask.get()]() {
