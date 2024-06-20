@@ -514,7 +514,8 @@ private:
         napi_value lastParam = (argc > ARGC_TWO) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [appManager = appManager_, observer = observer_, observerId, env, task = napiAsyncTask.get()]() {
+        auto asyncTask = [appManager = appManager_, observer = observer_, observerId,
+            env, task = napiAsyncTask.get()]() {
             if (observer == nullptr || appManager == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "observer or appManager nullptr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
@@ -818,13 +819,14 @@ private:
         napi_value lastParam = (argc == ARGC_TWO && !hasClearPageStack) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [bundleName, abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
+        auto asyncTask = [bundleName, clearPageStack, abilityManager = abilityManager_,
+            env, task = napiAsyncTask.get()]() {
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
-            auto ret = abilityManager->KillProcess(bundleName);
+            auto ret = abilityManager->KillProcess(bundleName, clearPageStack);
             if (ret == 0) {
                 task->ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
@@ -858,13 +860,13 @@ private:
         napi_value lastParam = (argc == ARGC_TWO) ? argv[INDEX_ONE] : nullptr;
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
-        auto asyncTask = [bundleName, abilityManager = abilityManager_, env, task = napiAsyncTask.get()]() {
-            if (abilityManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
+        auto asyncTask = [bundleName, appManager = appManager_, env, task = napiAsyncTask.get()]() {
+            if (appManager == nullptr) {
+                TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
                 task->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
                 return;
             }
-            auto ret = abilityManager->ClearUpApplicationData(bundleName);
+            auto ret = appManager->ClearUpApplicationData(bundleName, 0);
             if (ret == 0) {
                 task->ResolveWithNoError(env, CreateJsUndefined(env));
             } else {
@@ -1001,21 +1003,6 @@ private:
         TAG_LOGI(AAFwkTag::APPMGR,
             "kill [%{public}s], hasClearPageStack [%{public}d], clearPageStack [%{public}d],appIndex [%{public}d]",
             bundleName.c_str(), hasClearPageStack, clearPageStack, appIndex);
-        NapiAsyncTask::CompleteCallback complete =
-            [appManager = appManager_, bundleName, accountId, clearPageStack](
-                napi_env env, NapiAsyncTask &task, int32_t status) {
-                if (appManager == nullptr || appManager->GetAmsMgr() == nullptr) {
-                    TAG_LOGW(AAFwkTag::APPMGR, "appManager is nullptr or amsMgr is nullptr.");
-                    task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
-                    return;
-                }
-                auto ret = appManager->GetAmsMgr()->KillProcessWithAccount(bundleName, accountId, clearPageStack);
-                if (ret == 0) {
-                    task.ResolveWithNoError(env, CreateJsUndefined(env));
-                } else {
-                    task.Reject(env, CreateJsErrorByNativeErr(env, ret, "Kill processes failed."));
-                }
-            };
         napi_value lastParam = (argc == ARGC_THREE && !hasClearPageStack) ? argv[INDEX_TWO] : nullptr;
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
