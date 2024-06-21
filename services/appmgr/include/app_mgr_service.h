@@ -124,10 +124,12 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param appCloneIndex the app clone id.
+     * @param userId the user id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t ClearUpApplicationData(const std::string &bundleName,
-        const int32_t userId = -1) override;
+    virtual int32_t ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId = -1) override;
 
     /**
      * ClearUpApplicationDataBySelf, call ClearUpApplicationDataBySelf() through proxy project,
@@ -536,6 +538,14 @@ public:
         const sptr<IRemoteObject> &callback) override;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
+
+    /**
+     * Check caller is test ability
+     *
+     * @param pid, the pid of ability.
+     * @return Returns ERR_OK is test ability, others is not test ability.
+     */
+    int32_t CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest) override;
 private:
     /**
      * Init, Initialize application services.

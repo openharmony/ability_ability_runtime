@@ -20,12 +20,12 @@
 #include <vector>
 #include <unordered_map>
 
-#include "constants.h"
 #include "ability_event_handler.h"
 #include "ability_manager_service.h"
 #include "ability_resident_process_rdb.h"
 #include "ability_scheduler_stub.h"
 #include "ability_util.h"
+#include "app_exit_reason_data_manager.h"
 #include "app_utils.h"
 #include "appfreeze_manager.h"
 #include "array_wrapper.h"
@@ -45,9 +45,9 @@
 #include "errors.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
 #include "parameters.h"
+#include "res_sched_util.h"
 #include "ui_extension_host_info.h"
 #include "scene_board_judgement.h"
 #include "start_ability_utils.h"
@@ -64,10 +64,6 @@
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
-#ifdef EFFICIENCY_MANAGER_ENABLE
-#include "suspend_manager_client.h"
-#endif // EFFICIENCY_MANAGER_ENABLE
-
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -98,6 +94,8 @@ const std::string PARAM_MISSION_AFFINITY_KEY = "ohos.anco.param.missionAffinity"
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbilityId";
 const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
+constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sendResultCallderBundleName";
+constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -220,6 +218,20 @@ std::shared_ptr<AbilityRecord> Token::GetAbilityRecordByToken(const sptr<IRemote
 std::shared_ptr<AbilityRecord> Token::GetAbilityRecord() const
 {
     return abilityRecord_.lock();
+}
+
+CallerRecord::CallerRecord(int requestCode, std::weak_ptr<AbilityRecord> caller)
+    : requestCode_(requestCode), caller_(caller)
+{
+    auto callerAbilityRecord = caller.lock();
+    if  (callerAbilityRecord != nullptr) {
+        callerInfo_ = std::make_shared<CallerAbilityInfo>();
+        callerInfo_->callerBundleName = callerAbilityRecord->GetAbilityInfo().bundleName;
+        callerInfo_->callerAbilityName = callerAbilityRecord->GetAbilityInfo().name;
+        callerInfo_->callerTokenId = callerAbilityRecord->GetApplicationInfo().accessTokenId;
+        callerInfo_->callerUid =  callerAbilityRecord->GetUid();
+        callerInfo_->callerPid =  callerAbilityRecord->GetPid();
+    }
 }
 
 AbilityRecord::AbilityRecord(const Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
@@ -502,9 +514,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
     }
 
     if (isReady_) {
-        if (!IsDebug()) {
-            PostForegroundTimeoutTask();
-        }
+        PostForegroundTimeoutTask();
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
             ForegroundAbility(sceneFlag);
@@ -512,12 +522,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
             // background to active state
             TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
             lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-#ifdef EFFICIENCY_MANAGER_ENABLE
             std::string bundleName = GetAbilityInfo().bundleName;
             int32_t uid = GetUid();
-            SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-                uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
-#endif // EFFICIENCY_MANAGER_ENABLE
+            ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
         }
     } else {
@@ -529,6 +536,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
 
 void AbilityRecord::PostForegroundTimeoutTask()
 {
+    if (IsDebug()) {
+        return;
+    }
     int foregroundTimeout =
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, foregroundTimeout / HALF_TIMEOUT);
@@ -576,9 +586,7 @@ void AbilityRecord::ProcessForegroundAbility(const std::shared_ptr<AbilityRecord
     NotifyAnimationFromTerminatingAbility(callerAbility, needExit, flag);
     PostCancelStartingWindowHotTask();
 
-    if (!IsDebug()) {
-        PostForegroundTimeoutTask();
-    }
+    PostForegroundTimeoutTask();
     if (IsAbilityState(AbilityState::FOREGROUND)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
         ForegroundAbility(sceneFlag);
@@ -723,9 +731,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
             AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
             PostCancelStartingWindowColdTask();
         }
-        if (!IsDebug()) {
-            PostForegroundTimeoutTask();
-        }
+        PostForegroundTimeoutTask();
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
             ForegroundAbility(sceneFlag);
@@ -1270,6 +1276,12 @@ int AbilityRecord::TerminateAbility()
     AAFwk::EventInfo eventInfo;
     eventInfo.bundleName = GetAbilityInfo().bundleName;
     eventInfo.abilityName = GetAbilityInfo().name;
+    if (clearMissionFlag_) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "deleteAbilityRecoverInfo before clearMission.");
+        (void)DelayedSingleton<AbilityRuntime::AppExitReasonDataManager>::GetInstance()->
+            DeleteAbilityRecoverInfo(GetAbilityInfo().applicationInfo.accessTokenId, GetAbilityInfo().moduleName,
+            GetAbilityInfo().name);
+    }
     AAFwk::EventReport::SendAbilityEvent(AAFwk::EventName::TERMINATE_ABILITY, HiSysEventType::BEHAVIOR, eventInfo);
     eventInfo.errCode = DelayedSingleton<AppScheduler>::GetInstance()->TerminateAbility(token_, clearMissionFlag_);
     if (eventInfo.errCode != ERR_OK) {
@@ -1439,7 +1451,7 @@ void AbilityRecord::SetScheduler(const sptr<IAbilityScheduler> &scheduler)
         if (IsSceneBoard()) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "Sceneboard DeathRecipient Added");
         }
-        pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingRealPid()); // set pid when ability attach to service.
+        pid_ = static_cast<int32_t>(IPCSkeleton::GetCallingPid()); // set pid when ability attach to service.
         // add collaborator mission bind pid
         NotifyMissionBindPid();
         HandleDlpAttached();
@@ -1818,8 +1830,14 @@ void AbilityRecord::SaveResult(int resultCode, const Want *resultWant, std::shar
     std::lock_guard<ffrt::mutex> guard(lock_);
     std::shared_ptr<AbilityRecord> callerAbilityRecord = caller->GetCaller();
     if (callerAbilityRecord != nullptr) {
+        Want* newWant = const_cast<Want*>(resultWant);
+        if (callerAbilityRecord->GetApplicationInfo().name == SHELL_ASSISTANT_BUNDLENAME) {
+            newWant->SetParam(std::string(PARAM_SEND_RESULT_CALLER_BUNDLENAME), applicationInfo_.name);
+            newWant->SetParam(std::string(PARAM_SEND_RESULT_CALLER_TOKENID), static_cast<int32_t>(
+                applicationInfo_.accessTokenId));
+        }
         callerAbilityRecord->SetResult(
-            std::make_shared<AbilityResult>(caller->GetRequestCode(), resultCode, *resultWant));
+            std::make_shared<AbilityResult>(caller->GetRequestCode(), resultCode, *newWant));
     } else {
         std::shared_ptr<SystemAbilityCallerRecord> callerSystemAbilityRecord = caller->GetSaCaller();
         if (callerSystemAbilityRecord != nullptr) {
@@ -2026,7 +2044,21 @@ std::shared_ptr<AbilityRecord> AbilityRecord::GetCallerRecord() const
     if (callerList_.empty()) {
         return nullptr;
     }
+    if (callerList_.back() == nullptr) {
+        return nullptr;
+    }
     return callerList_.back()->GetCaller();
+}
+
+std::shared_ptr<CallerAbilityInfo> AbilityRecord::GetCallerInfo() const
+{
+    if (callerList_.empty()) {
+        return nullptr;
+    }
+    if (callerList_.back() == nullptr) {
+        return nullptr;
+    }
+    return callerList_.back()->GetCallerInfo();
 }
 
 bool AbilityRecord::IsConnectListEmpty()
@@ -2192,7 +2224,8 @@ void AbilityRecord::DumpUIExtensionRootHostInfo(std::vector<std::string> &info) 
     }
 
     UIExtensionHostInfo hostInfo;
-    auto ret = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetUIExtensionRootHostInfo(token, hostInfo));
+    auto ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->GetUIExtensionRootHostInfo(
+        token, hostInfo));
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Get ui extension host info failed with %{public}d.", ret);
         return;
@@ -2244,9 +2277,8 @@ void AbilityRecord::DumpAbilityState(
         info.push_back(dumpInfo);
     }
 
-    auto mission = GetMission();
-    if (mission) {
-        std::string missionAffinity = mission->GetMissionAffinity();
+    auto missionAffinity = GetMissionAffinity();
+    if (!missionAffinity.empty()) {
         dumpInfo = "        missionAffinity: " + missionAffinity;
         info.push_back(dumpInfo);
     }
@@ -2350,13 +2382,6 @@ void AbilityRecord::RemoveAbilityDeathRecipient() const
 void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called.");
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto mission = GetMission();
-        if (mission) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "On scheduler died. Is app not response Reason:%{public}d",
-                mission->IsANRState());
-        }
-    }
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
 
@@ -2511,7 +2536,9 @@ void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param)
     param = (param == -1) ? recordId_ : param;
     auto eventWrap = EventWrap(msg, param);
     eventWrap.SetTimeout(timeOut);
-    handler->SendEvent(eventWrap, timeOut);
+    if (!handler->SendEvent(eventWrap, timeOut, false)) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "SendTimeOut event failed: %{public}u, %{public}d.", msg, param);
+    }
 }
 
 void AbilityRecord::SetWant(const Want &want)
@@ -2735,26 +2762,12 @@ void AbilityRecord::NotifyContinuationResult(int32_t result)
     lifecycleDeal_->NotifyContinuationResult(result);
 }
 
-std::shared_ptr<MissionList> AbilityRecord::GetOwnedMissionList() const
+void AbilityRecord::SetMissionId(int32_t missionId)
 {
-    return missionList_.lock();
-}
-
-void AbilityRecord::SetMissionList(const std::shared_ptr<MissionList> &missionList)
-{
-    missionList_ = missionList;
-}
-
-void AbilityRecord::SetMission(const std::shared_ptr<Mission> &mission)
-{
-    if (mission) {
-        missionId_ = mission->GetMissionId();
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetMission come, missionId is %{public}d.", missionId_);
-    }
     std::lock_guard guard(wantLock_);
+    missionId_ = missionId;
     want_.RemoveParam(KEY_MISSION_ID);
     want_.SetParam(KEY_MISSION_ID, missionId_);
-    mission_ = mission;
 }
 
 void AbilityRecord::SetSessionInfo(sptr<SessionInfo> sessionInfo)
@@ -2811,11 +2824,6 @@ void AbilityRecord::SetClearMissionFlag(bool clearMissionFlag)
 bool AbilityRecord::IsClearMissionFlag()
 {
     return clearMissionFlag_;
-}
-
-std::shared_ptr<Mission> AbilityRecord::GetMission() const
-{
-    return mission_.lock();
 }
 
 int32_t AbilityRecord::GetMissionId() const
@@ -3113,6 +3121,7 @@ void AbilityRecord::GrantUriPermission(Want &want, std::string targetBundleName,
         TAG_LOGI(AAFwkTag::ABILITYMGR, "permission to shell");
         return;
     }
+    TAG_LOGW(AAFwkTag::ABILITYMGR, "Sharing the file uri to specific bundlename will be denied in sdk 13.");
     GrantUriPermissionInner(want, uriVec, targetBundleName, tokenId);
     PublishFileOpenEvent(want);
 }

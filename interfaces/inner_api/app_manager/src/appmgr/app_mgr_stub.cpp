@@ -203,6 +203,8 @@ AppMgrStub::AppMgrStub()
         &AppMgrStub::HandleSaveBrowserChannel;
     memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::IS_APP_RUNNING)] =
         &AppMgrStub::HandleIsAppRunning;
+    memberFuncMap_[static_cast<uint32_t>(AppMgrInterfaceCode::CHECK_CALLING_IS_USER_TEST_MODE)] =
+        &AppMgrStub::HandleCheckCallingIsUserTestMode;
 }
 
 AppMgrStub::~AppMgrStub()
@@ -307,8 +309,9 @@ int32_t AppMgrStub::HandleClearUpApplicationData(MessageParcel &data, MessagePar
 {
     HITRACE_METER(HITRACE_TAG_APP);
     std::string bundleName = data.ReadString();
+    int32_t appCloneIndex = data.ReadInt32();
     int32_t userId = data.ReadInt32();
-    int32_t result = ClearUpApplicationData(bundleName, userId);
+    int32_t result = ClearUpApplicationData(bundleName, appCloneIndex, userId);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -1402,6 +1405,23 @@ int32_t AppMgrStub::HandleStartNativeChildProcess(MessageParcel &data, MessagePa
         return IPC_STUB_ERR;
     }
 
+    return NO_ERROR;
+}
+
+int32_t AppMgrStub::HandleCheckCallingIsUserTestMode(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    pid_t pid = data.ReadInt32();
+    bool isUserTest = false;
+    int32_t ret = CheckCallingIsUserTestMode(pid, isUserTest);
+    if (!reply.WriteBool(isUserTest)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write isUserTest error.");
+        return IPC_STUB_ERR;
+    }
+    if (!reply.WriteInt32(ret)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write ret error.");
+        return IPC_STUB_ERR;
+    }
     return NO_ERROR;
 }
 

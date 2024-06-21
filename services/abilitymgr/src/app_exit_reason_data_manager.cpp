@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <unistd.h>
 
 #include "accesstoken_kit.h"
@@ -181,7 +182,8 @@ int32_t AppExitReasonDataManager::GetAppExitReason(const std::string &bundleName
         TAG_LOGW(AAFwkTag::ABILITYMGR, "invalid value!");
         return ERR_INVALID_VALUE;
     }
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, tokenId: %{private}u", bundleName.c_str(), accessTokenId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "bundleName: %{public}s, tokenId: %{private}u, abilityName: %{public}s.",
+        bundleName.c_str(), accessTokenId, abilityName.c_str());
     {
         std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
         if (!CheckKvStore()) {
@@ -365,6 +367,20 @@ int32_t AppExitReasonDataManager::AddAbilityRecoverInfo(uint32_t accessTokenId,
     }
 
     TAG_LOGI(AAFwkTag::ABILITYMGR, "AddAbilityRecoverInfo finish");
+    return ERR_OK;
+}
+
+int32_t AppExitReasonDataManager::DeleteAllRecoverInfoByTokenId(uint32_t tokenId)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "tokenId: %{private}u", tokenId);
+    {
+        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
+        if (!CheckKvStore()) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "kvStore is nullptr!");
+            return ERR_NO_INIT;
+        }
+    }
+    InnerDeleteAbilityRecoverInfo(tokenId);
     return ERR_OK;
 }
 

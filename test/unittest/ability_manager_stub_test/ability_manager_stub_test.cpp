@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "ability_manager_errors.h"
 #include "ability_manager_stub_impl_mock.h"
 #include "ability_scheduler.h"
 #include "app_debug_listener_stub_mock.h"
@@ -813,22 +814,6 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_KillProcessInner_001, TestSi
     MessageParcel data;
     MessageParcel reply;
     auto res = stub_->KillProcessInner(data, reply);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/*
- * Feature: AbilityManagerService
- * Function: ClearUpApplicationDataInner
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService ClearUpApplicationDataInner
- * EnvConditions: NA
- * CaseDescription: Verify the function ClearUpApplicationDataInner is normal flow.
- */
-HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_ClearUpApplicationDataInner_001, TestSize.Level1)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    auto res = stub_->ClearUpApplicationDataInner(data, reply);
     EXPECT_EQ(res, NO_ERROR);
 }
 

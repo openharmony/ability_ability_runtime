@@ -44,6 +44,10 @@ constexpr const char* TASK_ATTACH_PID_TO_PARENT = "AttachPidToParent";
 constexpr const char* TASK_KILL_APPLICATION = "KillApplicationTask";
 constexpr const char* TASK_CLEAR_PROCESS_BY_ABILITY_TOKEN = "ClearProcessByAbilityTokenTask";
 constexpr const char* FOUNDATION_NAME = "foundation";
+constexpr const char* SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
+constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
+constexpr const char* TASK_SCENE_BOARD_ATTACH_TIMEOUT = "sceneBoardAttachTimeoutTask";
+constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
 };  // namespace
 
 AmsMgrScheduler::AmsMgrScheduler(
@@ -80,6 +84,24 @@ void AmsMgrScheduler::LoadAbility(const sptr<IRemoteObject> &token, const sptr<I
     std::function<void()> loadAbilityFunc =
         std::bind(&AppMgrServiceInner::LoadAbility, amsMgrServiceInner_, token, preToken, abilityInfo,
             appInfo, want, abilityRecordId);
+
+    // cache other application load ability task before scene board attach
+    if (!amsMgrServiceInner_->GetSceneBoardAttachFlag() && abilityInfo->bundleName != SCENE_BOARD_BUNDLE_NAME) {
+        amsMgrServiceInner_->CacheLoabAbilityTask(loadAbilityFunc);
+        return;
+    }
+    if (abilityInfo->bundleName == SCENE_BOARD_BUNDLE_NAME && abilityInfo->name == SCENEBOARD_ABILITY_NAME) {
+        amsMgrServiceInner_->SetSceneBoardAttachFlag(false);
+        // set scene board attach timeout task
+        std::weak_ptr<AppMgrServiceInner> amsMgrServiceInner = amsMgrServiceInner_;
+        auto timeoutTask = [amsMgrServiceInner]() {
+            auto inner = amsMgrServiceInner.lock();
+            if (inner != nullptr) {
+                inner->SetSceneBoardAttachFlag(true);
+            }
+        };
+        amsHandler_->SubmitTask(timeoutTask, TASK_SCENE_BOARD_ATTACH_TIMEOUT, SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME);
+    }
 
     amsHandler_->SubmitTask(loadAbilityFunc);
 }
@@ -211,7 +233,7 @@ void AmsMgrScheduler::KillProcessesByPids(std::vector<int32_t> &pids)
         return;
     }
 
-    pid_t callingPid = IPCSkeleton::GetCallingRealPid();
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
     pid_t pid = getprocpid();
     if (callingPid != pid) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
@@ -229,7 +251,7 @@ void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const 
         return;
     }
 
-    pid_t callingPid = IPCSkeleton::GetCallingRealPid();
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
     pid_t pid = getprocpid();
     if (callingPid != pid) {
         TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
@@ -241,13 +263,15 @@ void AmsMgrScheduler::AttachPidToParent(const sptr<IRemoteObject> &token, const 
     amsHandler_->SubmitTask(attachPidToParentFunc, TASK_ATTACH_PID_TO_PARENT);
 }
 
-int32_t AmsMgrScheduler::KillProcessWithAccount(const std::string &bundleName, const int accountId)
+int32_t AmsMgrScheduler::KillProcessWithAccount(
+    const std::string &bundleName, const int accountId, const bool clearPageStack)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d", bundleName.c_str(), accountId);
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, accountId = %{public}d, clearPageStack = %{public}d",
+        bundleName.c_str(), accountId, clearPageStack);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, accountId);
+    return amsMgrServiceInner_->KillApplicationByUserId(bundleName, 0, accountId, clearPageStack);
 }
 
 void AmsMgrScheduler::AbilityAttachTimeOut(const sptr<IRemoteObject> &token)
@@ -289,14 +313,15 @@ int32_t AmsMgrScheduler::UpdateApplicationInfoInstalled(const std::string &bundl
     return amsMgrServiceInner_->UpdateApplicationInfoInstalled(bundleName, uid);
 }
 
-int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName)
+int32_t AmsMgrScheduler::KillApplication(const std::string &bundleName, const bool clearPageStack)
 {
-    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s", bundleName.c_str());
+    TAG_LOGI(AAFwkTag::APPMGR, "bundleName = %{public}s, clearPageStack = %{public}d",
+        bundleName.c_str(), clearPageStack);
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
 
-    return amsMgrServiceInner_->KillApplication(bundleName);
+    return amsMgrServiceInner_->KillApplication(bundleName, clearPageStack);
 }
 
 int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, const int uid)
@@ -308,12 +333,12 @@ int32_t AmsMgrScheduler::KillApplicationByUid(const std::string &bundleName, con
     return amsMgrServiceInner_->KillApplicationByUid(bundleName, uid);
 }
 
-int32_t AmsMgrScheduler::KillApplicationSelf()
+int32_t AmsMgrScheduler::KillApplicationSelf(const bool clearPageStack)
 {
     if (!IsReady()) {
         return ERR_INVALID_OPERATION;
     }
-    return amsMgrServiceInner_->KillApplicationSelf();
+    return amsMgrServiceInner_->KillApplicationSelf(clearPageStack);
 }
 
 bool AmsMgrScheduler::IsReady() const
