@@ -2152,6 +2152,7 @@ void AbilityConnectManager::RestartAbility(const std::shared_ptr<AbilityRecord> 
     requestInfo.appInfo = abilityRecord->GetApplicationInfo();
     requestInfo.restartTime = abilityRecord->GetRestartTime();
     requestInfo.restart = true;
+    requestInfo.uid = abilityRecord->GetUid();
     abilityRecord->SetRestarting(true);
 
     if (AppUtils::GetInstance().IsLauncherAbility(abilityRecord->GetAbilityInfo().name)) {
