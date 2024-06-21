@@ -432,28 +432,6 @@ void AppStateObserverManager::HandleOnAppStopped(const std::shared_ptr<AppRunnin
     }
 }
 
-void AppStateObserverManager::NotifyObserversOfAppStateChange(const std::shared_ptr<AppRunningRecord> &appRecord,
-    const ApplicationState state, bool needNotifyApp)
-{
-    AppStateData data = WrapAppStateData(appRecord, state);
-    TAG_LOGD(AAFwkTag::APPMGR,
-        "NotifyObserversOfAppStateChange, name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
-        data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
-    dummyCode_ = __LINE__;
-    auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
-    for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
-        std::vector<std::string>::iterator iter =
-            std::find(it->second.begin(), it->second.end(), data.bundleName);
-        bool valid = (it->second.empty() || iter != it->second.end()) && it->first != nullptr;
-        if (valid) {
-            it->first->OnForegroundApplicationChanged(data);
-        }
-        if (valid && needNotifyApp) {
-            it->first->OnAppStateChanged(data);
-        }
-    }
-}
-
 void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
     const ApplicationState state, bool needNotifyApp, bool isFromWindowFocusChanged)
 {
@@ -476,7 +454,23 @@ void AppStateObserverManager::HandleAppStateChanged(const std::shared_ptr<AppRun
         dummyCode_ = __LINE__;
         if (!AAFwk::UIExtensionUtils::IsUIExtension(appRecord->GetExtensionType()) &&
             !AAFwk::UIExtensionUtils::IsWindowExtension(appRecord->GetExtensionType())) {
-            NotifyObserversOfAppStateChange(appRecord, state, needNotifyApp);
+            AppStateData data = WrapAppStateData(appRecord, state);
+            TAG_LOGD(AAFwkTag::APPMGR,
+                "HandleAppStateChanged, name:%{public}s, uid:%{public}d, state:%{public}d, notify:%{public}d",
+                data.bundleName.c_str(), data.uid, data.state, needNotifyApp);
+            dummyCode_ = __LINE__;
+            auto appStateObserverMapCopy = GetAppStateObserverMapCopy();
+            for (auto it = appStateObserverMapCopy.begin(); it != appStateObserverMapCopy.end(); ++it) {
+                std::vector<std::string>::iterator iter =
+                    std::find(it->second.begin(), it->second.end(), data.bundleName);
+                bool valid = (it->second.empty() || iter != it->second.end()) && it->first != nullptr;
+                if (valid) {
+                    it->first->OnForegroundApplicationChanged(data);
+                }
+                if (valid && needNotifyApp) {
+                    it->first->OnAppStateChanged(data);
+                }
+            }
         }
     }
     dummyCode_ = __LINE__;

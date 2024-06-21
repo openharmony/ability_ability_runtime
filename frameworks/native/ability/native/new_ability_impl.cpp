@@ -89,7 +89,7 @@ void NewAbilityImpl::AbilityTransactionCallback(const AbilityLifeCycleState &sta
         FreezeUtil::GetInstance().DeleteLifecycleEvent(flow);
     }
 }
-// zhouxu
+
 /**
  * @brief Handling the life cycle switching of NewAbility in switch.
  *

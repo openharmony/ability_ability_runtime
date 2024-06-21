@@ -313,15 +313,6 @@ public:
 
 private:
     /**
-     * CheckAndHandleUIExtensionAbility with request.
-     * @param abilityRequest, the request of the service ability to start.
-     * @param isLoadedAbility is bool.
-     * @param targetService is shared_ptr.
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int CheckAndHandleUIExtensionAbility(const AbilityRequest &abilityRequest,
-        std::shared_ptr<AbilityRecord> &targetService, bool &isLoadedAbility);
-    /**
      * StartAbilityLocked with request.
      *
      * @param abilityRequest, the request of the service ability to start.

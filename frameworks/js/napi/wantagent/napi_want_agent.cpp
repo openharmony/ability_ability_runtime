@@ -823,7 +823,7 @@ int32_t JsWantAgent::GetTriggerExtraInfo(napi_env env, napi_value param, std::sh
 
     return BUSINESS_ERROR_CODE_OK;
 }
-// zhouxu
+
 int32_t JsWantAgent::GetTriggerInfo(napi_env env, napi_value param, TriggerInfo &triggerInfo)
 {
     TAG_LOGD(AAFwkTag::WANTAGENT, "GetTriggerInfo called.");
