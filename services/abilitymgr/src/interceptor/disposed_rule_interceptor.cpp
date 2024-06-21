@@ -165,7 +165,7 @@ ErrCode DisposedRuleInterceptor::StartNonBlockRule(const Want &want, AppExecFwk:
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Can not start disposed app with same bundleName");
         return ERR_OK;
     }
-    SetInterceptInfo(param.want, disposedRule);
+    SetInterceptInfo(want, disposedRule);
     std::string bundleName = want.GetBundle();
     {
         std::lock_guard<ffrt::mutex> guard(observerLock_);
