@@ -113,10 +113,7 @@ ohos_shared_library("task_handler_wrap") {
 
 ohos_shared_library("app_util") {
   public_configs = [ ":common_config" ]
-  include_dirs = [
-    "include",
-    "//third_party/json/include",
-  ]
+  include_dirs = [ "include" ]
 
   sources = [
     "src/ability_manager_radar.cpp",
@@ -129,6 +126,7 @@ ohos_shared_library("app_util") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "init:libbegetutil",
+    "json:nlohmann_json_static",
   ]
 
   if (ability_runtime_graphics) {
