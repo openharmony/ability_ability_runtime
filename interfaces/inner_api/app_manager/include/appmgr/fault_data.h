@@ -75,7 +75,6 @@ struct AppFaultDataBySA : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;
     static AppFaultDataBySA *Unmarshalling(Parcel &parcel);
-    bool WriteStringsMarshalling(Parcel &parcel) const;
     // error object
     ErrorObject errorObject;
     FaultDataType faultType = FaultDataType::UNKNOWN;

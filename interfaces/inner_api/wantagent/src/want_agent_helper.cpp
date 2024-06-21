@@ -86,10 +86,15 @@ unsigned int WantAgentHelper::FlagsTransformer(const std::vector<WantAgentConsta
     return wantFlags;
 }
 
-ErrCode WantAgentHelper::GetWantAgentOperationType(
+ErrCode WantAgentHelper::GetWantAgent(
     const std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext> &context,
-    const WantAgentInfo &paramsInfo, std::shared_ptr<WantAgent> &wantAgent, std::shared_ptr<PendingWant> &pendingWant)
+    const WantAgentInfo &paramsInfo, std::shared_ptr<WantAgent> &wantAgent)
 {
+    if (context == nullptr) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgentHelper::GetWantAgent invalid input param.");
+        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
+    }
+
     std::vector<std::shared_ptr<Want>> wants = paramsInfo.GetWants();
     if (wants.empty()) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgentHelper::GetWantAgent invalid input param.");
@@ -107,7 +112,7 @@ ErrCode WantAgentHelper::GetWantAgentOperationType(
     }
 
     std::shared_ptr<WantParams> extraInfo = paramsInfo.GetExtraInfo();
-    pendingWant = nullptr;
+    std::shared_ptr<PendingWant> pendingWant = nullptr;
     int requestCode = paramsInfo.GetRequestCode();
     WantAgentConstant::OperationType operationType = paramsInfo.GetOperationType();
     ErrCode result;
@@ -132,24 +137,9 @@ ErrCode WantAgentHelper::GetWantAgentOperationType(
             result = ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
             break;
     }
+
     if (pendingWant == nullptr) {
         TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgentHelper::GetWantAgent the wants does not meet the requirements.");
-        return result;
-    }
-    return result;
-    }
-ErrCode WantAgentHelper::GetWantAgent(
-    const std::shared_ptr<OHOS::AbilityRuntime::ApplicationContext> &context,
-    const WantAgentInfo &paramsInfo, std::shared_ptr<WantAgent> &wantAgent)
-{
-    if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "WantAgentHelper::GetWantAgent invalid input param.");
-        return ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER;
-    }
-    std::shared_ptr<PendingWant> pendingWant = nullptr;
-    ErrCode result = GetWantAgentOperationType(context, paramsInfo, wantAgent, pendingWant);
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::WANTAGENT, "Call WantAgentHelper::GetWantAgentOperationType failed");
         return result;
     }
     wantAgent = std::make_shared<WantAgent>(pendingWant);

@@ -259,8 +259,8 @@ bool IsCjApplication(const BundleInfo &bundleInfo)
             TAG_LOGW(AAFwkTag::APPMGR, "HandleLaunchApplication find entry hap module info failed!");
             entryHapModuleInfo = bundleInfo.hapModuleInfos.back();
         }
-        if (!entryHapModuleInfo.abilityInfos.empty()) {
-            return IsCjAbility(entryHapModuleInfo.abilityInfos.front().srcEntrance);
+        if (entryHapModuleInfo.srcEntrance.length() > 0) {
+            return IsCjAbility(entryHapModuleInfo.srcEntrance);
         }
     }
     return false;
@@ -6984,6 +6984,17 @@ bool AppMgrServiceInner::IsSceneBoardCall() {
         return callerBundleName == SCENE_BOARD_BUNDLE_NAME;
     }
     return false;
+}
+
+void AppMgrServiceInner::AttachedToStatusBar(const sptr<IRemoteObject> &token)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
+    auto appRecord = GetAppRunningRecordByAbilityToken(token);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "abilityRecord is nullptr");
+        return;
+    }
+    appRecord->SetAttachedToStatusBar(true);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

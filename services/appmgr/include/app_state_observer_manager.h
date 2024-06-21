@@ -75,8 +75,6 @@ public:
 private:
     void HandleAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state,
         bool needNotifyApp, bool isFromWindowFocusChanged);
-    void NotifyObserversOfAppStateChange(const std::shared_ptr<AppRunningRecord> &appRecord,
-        const ApplicationState state, bool needNotifyApp);
     void HandleOnAppStarted(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleOnAppStopped(const std::shared_ptr<AppRunningRecord> &appRecord);
     void HandleStateChangedNotifyObserver(

@@ -506,9 +506,8 @@ void MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const std::shared_
     }
 }
 #endif
-
-bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot, bool isLowResolution, Snapshot &snapshot)
+bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
+    MissionSnapshot& missionSnapshot, bool isLowResolution)
 {
     TAG_LOGI(AAFwkTag::ABILITYMGR, "missionId:%{public}d.", missionId);
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -532,6 +531,7 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
         TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: snapshotHandler_ is nullptr");
         return false;
     }
+    Snapshot snapshot;
     int32_t result = snapshotHandler_->GetSnapshot(abilityToken, snapshot);
     if (result != 0) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "snapshot: get WMS snapshot failed, result = %{public}d", result);
@@ -545,18 +545,6 @@ bool MissionInfoMgr::GetMissionSnapshot(int32_t missionId, const sptr<IRemoteObj
     missionSnapshot.snapshot = isLowResolution ?
         MissionDataStorage::GetReducedPixelMap(snapshot.GetPixelMap()) : snapshot.GetPixelMap();
 #endif
-
-    return true;
-}
-
-bool MissionInfoMgr::UpdateMissionSnapshot(int32_t missionId, const sptr<IRemoteObject>& abilityToken,
-    MissionSnapshot& missionSnapshot, bool isLowResolution)
-{
-    Snapshot snapshot;
-    bool ret = GetMissionSnapshot(missionId, abilityToken, missionSnapshot, isLowResolution, snapshot);
-    if (!ret) {
-        return false;
-    }
 
     MissionSnapshot savedSnapshot = missionSnapshot;
 #ifdef SUPPORT_SCREEN

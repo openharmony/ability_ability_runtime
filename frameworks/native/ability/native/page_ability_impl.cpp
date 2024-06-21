@@ -80,7 +80,7 @@ void PageAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Li
         AbilityManagerClient::GetInstance()->AbilityTransitionDone(token_, targetState.state, GetRestoreData());
     }
 }
-// zhouxu
+
 /**
  * @brief Handling the life cycle switching of PageAbility in switch.
  *
