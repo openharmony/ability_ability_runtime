@@ -1714,7 +1714,7 @@ void AbilityManagerProxy::ScheduleRecoverAbility(const sptr<IRemoteObject>& toke
     return;
 }
 
-int AbilityManagerProxy::KillProcess(const std::string &bundleName)
+int AbilityManagerProxy::KillProcess(const std::string &bundleName, const bool clearPageStack)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1727,12 +1727,35 @@ int AbilityManagerProxy::KillProcess(const std::string &bundleName)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName write failed.");
         return ERR_INVALID_VALUE;
     }
+    if (!data.WriteBool(clearPageStack)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "clearPageStack write failed.");
+        return ERR_INVALID_VALUE;
+    }
     int error = SendRequest(AbilityManagerInterfaceCode::KILL_PROCESS, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
         return error;
     }
     return reply.ReadInt32();
+}
+
+void AbilityManagerProxy::ScheduleClearRecoveryPageStack()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ScheduleClearRecoveryPageStack WriteInterfaceToken failed.");
+        return;
+    }
+
+    int error = SendRequest(AbilityManagerInterfaceCode::CLEAR_RECOVERY_PAGE_STACK, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return;
+    }
+    return;
 }
 
 #ifdef ABILITY_COMMAND_FOR_TEST
@@ -1761,31 +1784,6 @@ int AbilityManagerProxy::ForceTimeoutForTest(const std::string &abilityName, con
     return reply.ReadInt32();
 }
 #endif
-
-int AbilityManagerProxy::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
-{
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    if (!WriteInterfaceToken(data)) {
-        return INNER_ERR;
-    }
-    if (!data.WriteString16(Str8ToStr16(bundleName))) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "bundleName write failed.");
-        return ERR_INVALID_VALUE;
-    }
-    if (!data.WriteInt32(userId)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId write failed.");
-        return ERR_INVALID_VALUE;
-    }
-    int error = SendRequest(AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA, data, reply, option);
-    if (error != NO_ERROR) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
-        return error;
-    }
-    return reply.ReadInt32();
-}
 
 int AbilityManagerProxy::UninstallApp(const std::string &bundleName, int32_t uid)
 {
@@ -4226,7 +4224,7 @@ void AbilityManagerProxy::SetRootSceneSession(const sptr<IRemoteObject> &rootSce
     }
 }
 
-void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo)
+void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -4246,11 +4244,13 @@ void AbilityManagerProxy::CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInf
     }
 
     MessageParcel reply;
-    MessageOption option(MessageOption::TF_ASYNC);
+    MessageOption option;
     auto error = SendRequest(AbilityManagerInterfaceCode::CALL_ABILITY_BY_SCB, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return;
     }
+    isColdStart = reply.ReadBool();
 }
 
 void AbilityManagerProxy::StartSpecifiedAbilityBySCB(const Want &want)
@@ -5259,6 +5259,31 @@ int32_t AbilityManagerProxy::TransferAbilityResultForExtension(const sptr<IRemot
         return error;
     }
     return NO_ERROR;
+}
+
+void AbilityManagerProxy::NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
+        return;
+    }
+    if (!data.WriteInt32Vector(pidList)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "pid list write failed.");
+        return;
+    }
+    if (!data.WriteInt32(uid)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "uid write failed.");
+        return;
+    }
+
+    int error = SendRequest(AbilityManagerInterfaceCode::NOTIFY_FROZEN_PROCESS_BY_RSS, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "AbilityManagerProxy: SendRequest err %{public}d", error);
+    }
 }
 } // namespace AAFwk
 } // namespace OHOS

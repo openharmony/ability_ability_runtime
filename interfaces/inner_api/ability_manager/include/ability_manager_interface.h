@@ -703,7 +703,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName) = 0;
+    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) = 0;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -715,15 +715,6 @@ public:
      */
     virtual int ForceTimeoutForTest(const std::string &abilityName, const std::string &state) = 0;
     #endif
-
-    /**
-     * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
-     * clear the application data.
-     *
-     * @param bundleName, bundle name in Application record.
-     * @return
-     */
-    virtual int ClearUpApplicationData(const std::string &bundleName, const int32_t userId = DEFAULT_INVAL_VALUE) = 0;
 
     /**
      * Uninstall app
@@ -1148,6 +1139,8 @@ public:
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) {};
 
+    virtual void ScheduleClearRecoveryPageStack() {};
+
     /**
      * Called to verify that the MissionId is valid.
      * @param missionIds Query mission list.
@@ -1256,8 +1249,9 @@ public:
      * Call UIAbility by SCB.
      *
      * @param sessionInfo the session info of the ability to be called.
+     * @param isColdStart the session of the ability is or not cold start.
      */
-    virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo) {}
+    virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart) {}
 
     /**
      * Start specified ability by SCB.
@@ -1604,6 +1598,17 @@ public:
         const Want &want)
     {
         return 0;
+    }
+
+    /**
+     * Notify ability manager service frozen process.
+     *
+     * @param pidList, the pid list of the frozen process.
+     * @param uid, the uid of the frozen process.
+     */
+    virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid)
+    {
+        return;
     }
 };
 }  // namespace AAFwk

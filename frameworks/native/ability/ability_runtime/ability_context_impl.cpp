@@ -766,7 +766,8 @@ ErrCode AbilityContextImpl::GetMissionId(int32_t &missionId)
 ErrCode AbilityContextImpl::SetMissionContinueState(const AAFwk::ContinueState &state)
 {
     TAG_LOGD(AAFwkTag::CONTEXT, "SetMissionContinueState: %{public}d", state);
-    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionContinueState(token_, state);
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->SetMissionContinueState(token_, state,
+        sessionToken_.promote());
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::CONTEXT, "SetMissionContinueState failed: %{public}d", err);
     }
@@ -987,6 +988,16 @@ ErrCode AbilityContextImpl::OpenAtomicService(AAFwk::Want& want, const AAFwk::St
         OnAbilityResultInner(requestCode, err, want);
     }
     return err;
+}
+
+void AbilityContextImpl::SetRestoreEnabled(bool enabled)
+{
+    restoreEnabled_.store(enabled);
+}
+
+bool AbilityContextImpl::GetRestoreEnabled()
+{
+    return restoreEnabled_.load();
 }
 } // namespace AbilityRuntime
 } // namespace OHOS
