@@ -14,7 +14,7 @@
  */
 
 #include "app_utils.h"
-#include "configuation_utils.h"
+#include "json_utils.h"
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "nlohmann/json.hpp"
