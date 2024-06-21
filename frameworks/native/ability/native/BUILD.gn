@@ -106,6 +106,10 @@ config("ability_public_config") {
   }
 }
 
+config("abilitykit_utils_exceptions") {
+  cflags_cc = [ "-fexceptions" ]
+}
+
 config("abilitykit_utils_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
@@ -140,6 +144,8 @@ ohos_shared_library("abilitykit_utils") {
   ]
 
   deps = []
+
+  configs = [ ":abilitykit_utils_exceptions" ]
 
   public_configs = [ ":abilitykit_utils_public_config" ]
 
@@ -307,11 +313,6 @@ ohos_shared_library("abilitykit_native") {
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
-  }
-
-  if (efficiency_manager) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
-    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
   }
 
   public_deps = [

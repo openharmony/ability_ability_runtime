@@ -44,12 +44,17 @@ constexpr const char* MULTI_PROCESS_MODEL = "persist.sys.abilityms.multi_process
 constexpr const char* START_OPTIONS_WITH_PROCESS_OPTION = "persist.sys.abilityms.start_options_with_process_option";
 constexpr const char* MOVE_UI_ABILITY_TO_BACKGROUND_API_ENABLE =
     "persist.sys.abilityms.move_ui_ability_to_background_api_enable";
-constexpr const char* LAUNCH_EMBEDED_UI_ABILITY = "const.abilityms.launch_embeded_ui_ability";
-constexpr const char* SUPPROT_NATIVE_CHILD_PROCESS = "persist.sys.abilityms.start_native_child_process";
 constexpr const char* CONFIG_PATH = "/etc/ability_runtime/resident_process_in_extreme_memory.json";
 constexpr const char* RESIDENT_PROCESS_IN_EXTREME_MEMORY = "residentProcessInExtremeMemory";
 constexpr const char* BUNDLE_NAME = "bundleName";
 constexpr const char* ABILITY_NAME = "abilityName";
+constexpr const char* LAUNCH_EMBEDED_UI_ABILITY = "const.abilityms.launch_embeded_ui_ability";
+constexpr const char* SUPPROT_NATIVE_CHILD_PROCESS = "persist.sys.abilityms.start_native_child_process";
+constexpr const char* LIMIT_MAXIMUM_EXTENSIONS_OF_PER_PROCESS =
+    "persist.sys.abilityms.limit_maximum_extensions_of_per_process";
+constexpr const char* LIMIT_MAXIMUM_EXTENSIONS_OF_PER_DEVICE =
+    "persist.sys.abilityms.limit_maximum_extensions_of_per_device";
+constexpr const char* CACHE_EXTENSION_TYPES = "persist.sys.abilityms.cache_extension";
 }
 
 AppUtils::~AppUtils() {}
@@ -237,7 +242,7 @@ bool AppUtils::IsAllowResidentInExtremeMemory(const std::string& bundleName, con
         residentProcessInExtremeMemory_.isLoaded = true;
     }
     TAG_LOGD(AAFwkTag::DEFAULT, "isSupportNativeChildProcess_ is %{public}d", isSupportNativeChildProcess_.value);
-    for(auto &element : residentProcessInExtremeMemory_.value) {
+    for (auto &element : residentProcessInExtremeMemory_.value) {
         if (bundleName == element.first &&
             (abilityName == "" || abilityName == element.second)) {
             return true;
@@ -272,6 +277,36 @@ void AppUtils::LoadResidentProcessInExtremeMemory()
         std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
         residentProcessInExtremeMemory_.value.emplace_back(std::make_pair(bundleName, abilityName));
     }
+}
+
+int32_t AppUtils::GetLimitMaximumExtensionsPerProc()
+{
+    if (!limitMaximumExtensionsPerProc_.isLoaded) {
+        limitMaximumExtensionsPerProc_.value =
+            system::GetIntParameter<int32_t>(LIMIT_MAXIMUM_EXTENSIONS_OF_PER_PROCESS, DEFAULT_MAX_EXT_PER_PROC);
+        limitMaximumExtensionsPerProc_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "limitMaximumExtensionsPerProc is %{public}d", limitMaximumExtensionsPerProc_.value);
+    return limitMaximumExtensionsPerProc_.value;
+}
+
+int32_t AppUtils::GetLimitMaximumExtensionsPerDevice()
+{
+    if (!limitMaximumExtensionsPerDevice_.isLoaded) {
+        limitMaximumExtensionsPerDevice_.value =
+            system::GetIntParameter<int32_t>(LIMIT_MAXIMUM_EXTENSIONS_OF_PER_DEVICE, DEFAULT_MAX_EXT_PER_DEV);
+        limitMaximumExtensionsPerDevice_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "limitMaximumExtensionsPerDevice is %{public}d",
+        limitMaximumExtensionsPerDevice_.value);
+    return limitMaximumExtensionsPerDevice_.value;
+}
+
+std::string AppUtils::GetCacheExtensionTypeList()
+{
+    std::string cacheExtAbilityTypeList = system::GetParameter(CACHE_EXTENSION_TYPES, "3;5;17");
+    TAG_LOGD(AAFwkTag::DEFAULT, "cacheExtAbilityTypeList is %{public}s", cacheExtAbilityTypeList.c_str());
+    return cacheExtAbilityTypeList;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

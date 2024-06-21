@@ -256,6 +256,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
     if (abilityRecord->IsStartedByCall()) {
         if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             abilityRecord->SetStartToForeground(true);
+            abilityRecord->PostForegroundTimeoutTask();
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
         } else {
             abilityRecord->SetStartToBackground(true);
@@ -263,11 +264,10 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
         }
         return ERR_OK;
     }
-
     if (abilityRecord->IsNeedToCallRequest()) {
         abilityRecord->CallRequest();
     }
-
+    abilityRecord->PostForegroundTimeoutTask();
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
     return ERR_OK;
 }
@@ -570,7 +570,7 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(const sptr<IRemoteObje
     }
     abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
     abilityRecord->SetCompleteFirstFrameDrawing(true);
-    DelayedSingleton<AppExecFwk::AbilityFirstFrameStateObserverManager>::GetInstance()->
+    AppExecFwk::AbilityFirstFrameStateObserverManager::GetInstance().
         HandleOnFirstFrameState(abilityRecord);
 }
 #endif
@@ -737,7 +737,8 @@ int UIAbilityLifecycleManager::MinimizeUIAbility(const std::shared_ptr<AbilityRe
     abilityRecord->SetMinimizeReason(fromUser);
     abilityRecord->SetPendingState(AbilityState::BACKGROUND);
     if (!abilityRecord->IsAbilityState(AbilityState::FOREGROUND)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability state is not foreground");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "ability state is not foreground: %{public}d",
+            abilityRecord->GetAbilityState());
         return ERR_OK;
     }
     MoveToBackground(abilityRecord);
@@ -829,6 +830,7 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
             sessionInfo->state = CallToState::FOREGROUND;
             sessionInfo->reuse = reuse;
             sessionInfo->uiAbilityId = uiAbilityRecord->GetAbilityRecordId();
+            uiAbilityRecord->PostForegroundTimeoutTask();
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(uiAbilityRecord->GetToken());
             return NotifySCBPendingActivation(sessionInfo, abilityRequest);
         }
@@ -909,6 +911,13 @@ sptr<SessionInfo> UIAbilityLifecycleManager::CreateSessionInfo(const AbilityRequ
 int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &sessionInfo,
     const AbilityRequest &abilityRequest) const
 {
+    CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,"
+        "windowHeight=%{public}d,windowWidth=%{public}d",
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord != nullptr && !abilityRecord->GetRestartAppFlag()) {
         auto callerSessionInfo = abilityRecord->GetSessionInfo();
@@ -1611,7 +1620,14 @@ int UIAbilityLifecycleManager::MoveAbilityToFront(const AbilityRequest &abilityR
 int UIAbilityLifecycleManager::SendSessionInfoToSCB(std::shared_ptr<AbilityRecord> &callerAbility,
     sptr<SessionInfo> &sessionInfo)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
+    CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "call"
+        "windowLeft=%{public}d,windowTop=%{public}d,"
+        "windowHeight=%{public}d,windowWidth=%{public}d",
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
     auto tmpSceneSession = iface_cast<Rosen::ISession>(rootSceneSession_);
     if (callerAbility != nullptr) {
         auto callerSessionInfo = callerAbility->GetSessionInfo();
@@ -2205,7 +2221,13 @@ int UIAbilityLifecycleManager::MoveMissionToFront(int32_t sessionId, std::shared
     }
     sptr<SessionInfo> sessionInfo = abilityRecord->GetSessionInfo();
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by rootSceneSession.");
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Call PendingSessionActivation by rootSceneSession."
+        "windowLeft=%{public}d,windowTop=%{public}d,"
+        "windowHeight=%{public}d,windowWidth=%{public}d",
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
     return static_cast<int>(tmpSceneSession->PendingSessionActivation(sessionInfo));
 }
 
@@ -2416,7 +2438,7 @@ void UIAbilityLifecycleManager::CompleteFirstFrameDrawing(int32_t sessionId) con
     abilityRecord->ReportAtomicServiceDrawnCompleteEvent();
 #ifdef SUPPORT_SCREEN
     abilityRecord->SetCompleteFirstFrameDrawing(true);
-    DelayedSingleton<AppExecFwk::AbilityFirstFrameStateObserverManager>::GetInstance()->
+    AppExecFwk::AbilityFirstFrameStateObserverManager::GetInstance().
         HandleOnFirstFrameState(abilityRecord);
 #endif // SUPPORT_SCREEN
 }
