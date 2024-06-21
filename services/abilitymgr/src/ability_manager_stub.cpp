@@ -30,6 +30,7 @@
 #include "hitrace_meter.h"
 #include "session_info.h"
 #include "status_bar_delegate_interface.h"
+#include <iterator>
 
 namespace OHOS {
 namespace AAFwk {
@@ -151,6 +152,8 @@ void AbilityManagerStub::FirstStepInit()
         &AbilityManagerStub::ScheduleRecoverAbilityInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::ABILITY_RECOVERY_ENABLE)] =
         &AbilityManagerStub::EnableRecoverAbilityInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_RECOVERY_PAGE_STACK)] =
+        &AbilityManagerStub::ScheduleClearRecoveryPageStackInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::MINIMIZE_UI_ABILITY_BY_SCB)] =
         &AbilityManagerStub::MinimizeUIAbilityBySCBInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CLOSE_UI_ABILITY_BY_SCB)] =
@@ -207,8 +210,6 @@ void AbilityManagerStub::SecondStepInit()
         &AbilityManagerStub::GetAppMemorySizeInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::IS_RAM_CONSTRAINED_DEVICE)] =
         &AbilityManagerStub::IsRamConstrainedDeviceInner;
-    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA)] =
-        &AbilityManagerStub::ClearUpApplicationDataInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::LOCK_MISSION_FOR_CLEANUP)] =
         &AbilityManagerStub::LockMissionForCleanupInner;
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::UNLOCK_MISSION_FOR_CLEANUP)] =
@@ -446,6 +447,8 @@ void AbilityManagerStub::FifthStepInit()
 {
     requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::TRANSFER_ABILITY_RESULT)] =
         &AbilityManagerStub::TransferAbilityResultForExtensionInner;
+    requestFuncMap_[static_cast<uint32_t>(AbilityManagerInterfaceCode::NOTIFY_FROZEN_PROCESS_BY_RSS)] =
+        &AbilityManagerStub::NotifyFrozenProcessByRSSInner;
 }
 
 int AbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -711,21 +714,10 @@ int AbilityManagerStub::ReleaseDataAbilityInner(MessageParcel &data, MessageParc
 int AbilityManagerStub::KillProcessInner(MessageParcel &data, MessageParcel &reply)
 {
     std::string bundleName = Str16ToStr8(data.ReadString16());
-    int result = KillProcess(bundleName);
+    bool clearPageStack = data.ReadBool();
+    int result = KillProcess(bundleName, clearPageStack);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "remove stack error");
-        return ERR_INVALID_VALUE;
-    }
-    return NO_ERROR;
-}
-
-int AbilityManagerStub::ClearUpApplicationDataInner(MessageParcel &data, MessageParcel &reply)
-{
-    std::string bundleName = Str16ToStr8(data.ReadString16());
-    int32_t userId = data.ReadInt32();
-    int result = ClearUpApplicationData(bundleName, userId);
-    if (!reply.WriteInt32(result)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "ClearUpApplicationData error");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -2344,6 +2336,12 @@ int AbilityManagerStub::EnableRecoverAbilityInner(MessageParcel &data, MessagePa
     return NO_ERROR;
 }
 
+int AbilityManagerStub::ScheduleClearRecoveryPageStackInner(MessageParcel &data, MessageParcel &reply)
+{
+    ScheduleClearRecoveryPageStack();
+    return NO_ERROR;
+}
+
 int AbilityManagerStub::HandleRequestDialogService(MessageParcel &data, MessageParcel &reply)
 {
     std::unique_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
@@ -3461,6 +3459,15 @@ int32_t AbilityManagerStub::TransferAbilityResultForExtensionInner(MessageParcel
     sptr<Want> want = data.ReadParcelable<Want>();
     int32_t result = TransferAbilityResultForExtension(callerToken, resultCode, *want);
     reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::NotifyFrozenProcessByRSSInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<int32_t> pidList;
+    data.ReadInt32Vector(&pidList);
+    int32_t uid = data.ReadInt32();
+    NotifyFrozenProcessByRSS(pidList, uid);
     return NO_ERROR;
 }
 } // namespace AAFwk

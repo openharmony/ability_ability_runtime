@@ -47,6 +47,7 @@
 #include "hilog_tag_wrapper.h"
 #include "os_account_manager_wrapper.h"
 #include "parameters.h"
+#include "res_sched_util.h"
 #include "ui_extension_host_info.h"
 #include "scene_board_judgement.h"
 #include "start_ability_utils.h"
@@ -63,10 +64,6 @@
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
 #endif
-#ifdef EFFICIENCY_MANAGER_ENABLE
-#include "suspend_manager_client.h"
-#endif // EFFICIENCY_MANAGER_ENABLE
-
 
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
@@ -99,6 +96,8 @@ const std::string UIEXTENSION_ABILITY_ID = "ability.want.params.uiExtensionAbili
 const std::string UIEXTENSION_ROOT_HOST_PID = "ability.want.params.uiExtensionRootHostPid";
 constexpr const char* PARAM_SEND_RESULT_CALLER_BUNDLENAME = "ohos.anco.param.sendResultCallderBundleName";
 constexpr const char* PARAM_SEND_RESULT_CALLER_TOKENID = "ohos.anco.param.sendResultCallerTokenId";
+// Developer mode param
+constexpr const char* DEVELOPER_MODE_STATE = "const.security.developermode.state";
 const int32_t SHELL_ASSISTANT_DIETYPE = 0;
 int64_t AbilityRecord::abilityRecordId = 0;
 const int32_t DEFAULT_USER_ID = 0;
@@ -272,6 +271,11 @@ std::shared_ptr<AbilityRecord> AbilityRecord::CreateAbilityRecord(const AbilityR
     std::shared_ptr<AbilityRecord> abilityRecord = std::make_shared<AbilityRecord>(
         abilityRequest.want, abilityRequest.abilityInfo, abilityRequest.appInfo, abilityRequest.requestCode);
     CHECK_POINTER_AND_RETURN(abilityRecord, nullptr);
+
+    Want newWant = abilityRecord->GetWant();
+    SetDebugAppByWaitingDebugFlag(newWant, abilityRequest.appInfo.bundleName, abilityRequest.appInfo.debug);
+    abilityRecord->SetWant(newWant);
+
     abilityRecord->SetUid(abilityRequest.uid);
     int32_t appIndex = 0;
     (void)AbilityRuntime::StartupUtil::GetAppIndex(abilityRequest.want, appIndex);
@@ -517,9 +521,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
     }
 
     if (isReady_) {
-        if (!IsDebug()) {
-            PostForegroundTimeoutTask();
-        }
+        PostForegroundTimeoutTask();
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
             ForegroundAbility(sceneFlag);
@@ -527,12 +529,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
             // background to active state
             TAG_LOGD(AAFwkTag::ABILITYMGR, "MoveToForeground, %{public}s", element.c_str());
             lifeCycleStateInfo_.sceneFlagBak = sceneFlag;
-#ifdef EFFICIENCY_MANAGER_ENABLE
             std::string bundleName = GetAbilityInfo().bundleName;
             int32_t uid = GetUid();
-            SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
-                uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
-#endif // EFFICIENCY_MANAGER_ENABLE
+            ResSchedUtil::GetInstance().ReportEventToRSS(uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
         }
     } else {
@@ -544,6 +543,9 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
 
 void AbilityRecord::PostForegroundTimeoutTask()
 {
+    if (IsDebug()) {
+        return;
+    }
     int foregroundTimeout =
         AmsConfigurationParameter::GetInstance().GetAppStartTimeoutTime() * FOREGROUND_TIMEOUT_MULTIPLE;
     SendEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, foregroundTimeout / HALF_TIMEOUT);
@@ -591,9 +593,7 @@ void AbilityRecord::ProcessForegroundAbility(const std::shared_ptr<AbilityRecord
     NotifyAnimationFromTerminatingAbility(callerAbility, needExit, flag);
     PostCancelStartingWindowHotTask();
 
-    if (!IsDebug()) {
-        PostForegroundTimeoutTask();
-    }
+    PostForegroundTimeoutTask();
     if (IsAbilityState(AbilityState::FOREGROUND)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
         ForegroundAbility(sceneFlag);
@@ -738,9 +738,7 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
             AnimationTask(isRecent, abilityRequest, startOptions, callerAbility);
             PostCancelStartingWindowColdTask();
         }
-        if (!IsDebug()) {
-            PostForegroundTimeoutTask();
-        }
+        PostForegroundTimeoutTask();
         if (IsAbilityState(AbilityState::FOREGROUND)) {
             TAG_LOGD(AAFwkTag::ABILITYMGR, "Activate %{public}s", element.c_str());
             ForegroundAbility(sceneFlag);
@@ -2286,9 +2284,8 @@ void AbilityRecord::DumpAbilityState(
         info.push_back(dumpInfo);
     }
 
-    auto mission = GetMission();
-    if (mission) {
-        std::string missionAffinity = mission->GetMissionAffinity();
+    auto missionAffinity = GetMissionAffinity();
+    if (!missionAffinity.empty()) {
         dumpInfo = "        missionAffinity: " + missionAffinity;
         info.push_back(dumpInfo);
     }
@@ -2392,13 +2389,6 @@ void AbilityRecord::RemoveAbilityDeathRecipient() const
 void AbilityRecord::OnSchedulerDied(const wptr<IRemoteObject> &remote)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "called.");
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        auto mission = GetMission();
-        if (mission) {
-            TAG_LOGW(AAFwkTag::ABILITYMGR, "On scheduler died. Is app not response Reason:%{public}d",
-                mission->IsANRState());
-        }
-    }
     std::lock_guard<ffrt::mutex> guard(lock_);
     CHECK_POINTER(scheduler_);
 
@@ -2553,7 +2543,9 @@ void AbilityRecord::SendEvent(uint32_t msg, uint32_t timeOut, int32_t param)
     param = (param == -1) ? recordId_ : param;
     auto eventWrap = EventWrap(msg, param);
     eventWrap.SetTimeout(timeOut);
-    handler->SendEvent(eventWrap, timeOut);
+    if (!handler->SendEvent(eventWrap, timeOut, false)) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "SendTimeOut event failed: %{public}u, %{public}d.", msg, param);
+    }
 }
 
 void AbilityRecord::SetWant(const Want &want)
@@ -2777,26 +2769,12 @@ void AbilityRecord::NotifyContinuationResult(int32_t result)
     lifecycleDeal_->NotifyContinuationResult(result);
 }
 
-std::shared_ptr<MissionList> AbilityRecord::GetOwnedMissionList() const
+void AbilityRecord::SetMissionId(int32_t missionId)
 {
-    return missionList_.lock();
-}
-
-void AbilityRecord::SetMissionList(const std::shared_ptr<MissionList> &missionList)
-{
-    missionList_ = missionList;
-}
-
-void AbilityRecord::SetMission(const std::shared_ptr<Mission> &mission)
-{
-    if (mission) {
-        missionId_ = mission->GetMissionId();
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "SetMission come, missionId is %{public}d.", missionId_);
-    }
     std::lock_guard guard(wantLock_);
+    missionId_ = missionId;
     want_.RemoveParam(KEY_MISSION_ID);
     want_.SetParam(KEY_MISSION_ID, missionId_);
-    mission_ = mission;
 }
 
 void AbilityRecord::SetSessionInfo(sptr<SessionInfo> sessionInfo)
@@ -2853,11 +2831,6 @@ void AbilityRecord::SetClearMissionFlag(bool clearMissionFlag)
 bool AbilityRecord::IsClearMissionFlag()
 {
     return clearMissionFlag_;
-}
-
-std::shared_ptr<Mission> AbilityRecord::GetMission() const
-{
-    return mission_.lock();
 }
 
 int32_t AbilityRecord::GetMissionId() const
@@ -3557,6 +3530,20 @@ void AbilityRecord::UpdateUIExtensionInfo(const WantParams &wantParams)
 void AbilityRecord::SetSpecifyTokenId(uint32_t specifyTokenId)
 {
     specifyTokenId_ = specifyTokenId;
+}
+
+void AbilityRecord::SetDebugAppByWaitingDebugFlag(Want &requestWant, const std::string &bundleName, bool isDebugApp)
+{
+    if (!isDebugApp || !system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Not meeting the set debugging conditions.");
+        return;
+    }
+
+    if (IN_PROCESS_CALL(DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->IsWaitingDebugApp(bundleName))) {
+        requestWant.SetParam(DEBUG_APP, true);
+        IN_PROCESS_CALL_WITHOUT_RET(
+            DelayedSingleton<AppExecFwk::AppMgrClient>::GetInstance()->ClearNonPersistWaitingDebugFlag());
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS
