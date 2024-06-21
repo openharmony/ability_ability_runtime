@@ -264,12 +264,6 @@ void DisposedRuleInterceptor::SetInterceptInfo(const Want &want, AppExecFwk::Dis
         return;
     }
     if (disposedRule.want->GetBoolParam(IS_FROM_PARENTCONTROL, false)) {
-        auto disposedParam = disposedRule.want->GetParams();
-        sptr<AAFwk::IWantParams> interceptParam = WantParamWrapper::Box(want.GetParams());
-        if (interceptParam != nullptr) {
-            disposedParam.SetParam(INTERCEPT_PARAMETERS, interceptParam);
-        }
-        disposedRule.want->SetParams(disposedParam);
         disposedRule.want->SetParam(INTERCEPT_BUNDLE_NAME, want.GetElement().GetBundleName());
         disposedRule.want->SetParam(INTERCEPT_ABILITY_NAME, want.GetElement().GetAbilityName());
         disposedRule.want->SetParam(INTERCEPT_MODULE_NAME, want.GetElement().GetModuleName());
