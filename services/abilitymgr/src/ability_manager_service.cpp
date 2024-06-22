@@ -340,10 +340,7 @@ AbilityManagerService::AbilityManagerService()
     : SystemAbility(ABILITY_MGR_SERVICE_ID, true),
       state_(ServiceRunningState::STATE_NOT_START),
       bundleMgrHelper_(nullptr)
-{
-    DumpFuncInit();
-    DumpSysFuncInit();
-}
+{}
 
 AbilityManagerService::~AbilityManagerService()
 {}
@@ -4776,29 +4773,6 @@ int AbilityManagerService::AttachAbilityThread(
     }
 }
 
-void AbilityManagerService::DumpFuncInit()
-{
-    dumpFuncMap_[KEY_DUMP_SERVICE] = &AbilityManagerService::DumpStateInner;
-    dumpFuncMap_[KEY_DUMP_DATA] = &AbilityManagerService::DataDumpStateInner;
-
-    dumpFuncMap_[KEY_DUMP_ALL] = &AbilityManagerService::DumpInner;
-    dumpFuncMap_[KEY_DUMP_MISSION] = &AbilityManagerService::DumpMissionInner;
-    dumpFuncMap_[KEY_DUMP_MISSION_LIST] = &AbilityManagerService::DumpMissionListInner;
-    dumpFuncMap_[KEY_DUMP_MISSION_INFOS] = &AbilityManagerService::DumpMissionInfosInner;
-}
-
-void AbilityManagerService::DumpSysFuncInit()
-{
-    dumpsysFuncMap_[KEY_DUMPSYS_ALL] = &AbilityManagerService::DumpSysInner;
-    dumpsysFuncMap_[KEY_DUMPSYS_SERVICE] = &AbilityManagerService::DumpSysStateInner;
-    dumpsysFuncMap_[KEY_DUMPSYS_PENDING] = &AbilityManagerService::DumpSysPendingInner;
-    dumpsysFuncMap_[KEY_DUMPSYS_PROCESS] = &AbilityManagerService::DumpSysProcess;
-    dumpsysFuncMap_[KEY_DUMPSYS_DATA] = &AbilityManagerService::DataDumpSysStateInner;
-
-    dumpsysFuncMap_[KEY_DUMPSYS_MISSION_LIST] = &AbilityManagerService::DumpSysMissionListInner;
-    dumpsysFuncMap_[KEY_DUMPSYS_ABILITY] = &AbilityManagerService::DumpSysAbilityInner;
-}
-
 void AbilityManagerService::DumpSysInner(
     const std::string& args, std::vector<std::string>& info, bool isClient, bool isUserID, int userId)
 {
@@ -5271,15 +5245,29 @@ void AbilityManagerService::DumpState(const std::string &args, std::vector<std::
         return;
     }
     DumpKey key = it->second;
-    auto itFunc = dumpFuncMap_.find(key);
-    if (itFunc != dumpFuncMap_.end()) {
-        auto dumpFunc = itFunc->second;
-        if (dumpFunc != nullptr) {
-            (this->*dumpFunc)(args, info);
-            return;
-        }
+    switch (key) {
+        case KEY_DUMP_SERVICE:
+            DumpStateInner(args, info);
+            break;
+        case KEY_DUMP_DATA:
+            DataDumpStateInner(args, info);
+            break;
+        case KEY_DUMP_ALL:
+            DumpInner(args, info);
+            break;
+        case KEY_DUMP_MISSION:
+            DumpMissionInner(args, info);
+            break;
+        case KEY_DUMP_MISSION_LIST:
+            DumpMissionListInner(args, info);
+            break;
+        case KEY_DUMP_MISSION_INFOS:
+            DumpMissionInfosInner(args, info);
+            break;
+        default:
+            info.push_back("error: invalid argument, please see 'ability dump -h'.");
+            break;
     }
-    info.push_back("error: invalid argument, please see 'ability dump -h'.");
 }
 
 void AbilityManagerService::DumpSysState(
@@ -5302,15 +5290,32 @@ void AbilityManagerService::DumpSysState(
         return;
     }
     DumpsysKey key = it->second;
-    auto itFunc = dumpsysFuncMap_.find(key);
-    if (itFunc != dumpsysFuncMap_.end()) {
-        auto dumpsysFunc = itFunc->second;
-        if (dumpsysFunc != nullptr) {
-            (this->*dumpsysFunc)(args, info, isClient, isUserID, userId);
-            return;
-        }
+    switch (key) {
+        case KEY_DUMPSYS_ALL:
+            DumpSysInner(args, info, isClient, isUserID, userId);
+            break;
+        case KEY_DUMPSYS_SERVICE:
+            DumpSysStateInner(args, info, isClient, isUserID, userId);
+            break;
+        case KEY_DUMPSYS_PENDING:
+            DumpSysPendingInner(args, info, isClient, isUserID, userId);
+            break;
+        case KEY_DUMPSYS_PROCESS:
+            DumpSysProcess(args, info, isClient, isUserID, userId);
+            break;
+        case KEY_DUMPSYS_DATA:
+            DataDumpSysStateInner(args, info, isClient, isUserID, userId);
+            break;
+        case KEY_DUMPSYS_MISSION_LIST:
+            DumpSysMissionListInner(args, info, isClient, isUserID, userId);
+            break;
+        case KEY_DUMPSYS_ABILITY:
+            DumpSysAbilityInner(args, info, isClient, isUserID, userId);
+            break;
+        default:
+            info.push_back("error: invalid argument, please see 'ability dump -h'.");
+            break;
     }
-    info.push_back("error: invalid argument, please see 'ability dump -h'.");
 }
 
 int AbilityManagerService::AbilityTransitionDone(const sptr<IRemoteObject> &token, int state, const PacMap &saveData)
@@ -5596,7 +5601,7 @@ int32_t AbilityManagerService::GetUserId() const
     return U0_USER_ID;
 }
 
-void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot, sptr<IUserCallback> callback)
+void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isBoot)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "%{public}s", __func__);
     auto bms = GetBundleManager();
@@ -5615,7 +5620,6 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
         ++attemptNums;
         if (!isBoot && attemptNums > SWITCH_ACCOUNT_TRY) {
             TAG_LOGE(AAFwkTag::ABILITYMGR, "Query highest priority ability failed.");
-            callback->OnStartUserDone(userId, ERR_QUERY_HIGHEST_PRIORITY_ABILITY);
             return;
         }
         AbilityRequest abilityRequest;
@@ -5624,10 +5628,8 @@ void AbilityManagerService::StartHighestPriorityAbility(int32_t userId, bool isB
 
     if (abilityInfo.name.empty() && extensionAbilityInfo.name.empty()) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Query highest priority ability failed");
-        callback->OnStartUserDone(userId, ERR_QUERY_HIGHEST_PRIORITY_ABILITY);
         return;
     }
-    callback->OnStartUserDone(userId, ERR_OK);
 
     Want abilityWant; // donot use 'want' here, because the entity of 'want' is not empty
     if (!abilityInfo.name.empty()) {
@@ -7401,8 +7403,9 @@ void AbilityManagerService::SwitchToUser(int32_t oldUserId, int32_t userId, sptr
         ConnectBmsService();
         StartUserApps();
     }
+    callback->OnStartUserDone(userId, ERR_OK);
     bool isBoot = oldUserId == U0_USER_ID ? true : false;
-    StartHighestPriorityAbility(userId, isBoot, callback);
+    StartHighestPriorityAbility(userId, isBoot);
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
         AmsConfigurationParameter::GetInstance().MultiUserType() != 0) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "no need to terminate old scb.");
@@ -7930,12 +7933,17 @@ int AbilityManagerService::CheckStaticCfgPermissionForSkill(const AppExecFwk::Ab
     if (abilityInfo.skills.empty()) {
         return AppExecFwk::Constants::PERMISSION_GRANTED;
     }
+    int32_t result = AppExecFwk::Constants::PERMISSION_GRANTED;
     for (auto skill : abilityInfo.skills) {
-        if (skill.Match(abilityRequest.want) && CheckOneSkillPermission(skill, tokenId)) {
-            return AppExecFwk::Constants::PERMISSION_GRANTED;
+        if (skill.Match(abilityRequest.want)) {
+            if (CheckOneSkillPermission(skill, tokenId)) {
+                return AppExecFwk::Constants::PERMISSION_GRANTED;
+            } else {
+                result = AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
+            }
         }
     }
-    return AppExecFwk::Constants::PERMISSION_NOT_GRANTED;
+    return result;
 }
 
 int AbilityManagerService::CheckStaticCfgPermission(const AppExecFwk::AbilityRequest &abilityRequest,
