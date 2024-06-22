@@ -180,17 +180,6 @@ bool AbilityRecovery::SerializeDataToFile(int32_t savedStateId, WantParams& para
     }
     TAG_LOGD(AAFwkTag::RECOVERY, "file size: %{public}zu.", sz);
     close(fd);
-    auto token = token_.promote();
-    if (token == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery token is nullptr");
-        return false;
-    }
-    std::shared_ptr<AAFwk::AbilityManagerClient> abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
-    if (abilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery submitSaveRecoveryInfo. abilityMgr client is not exist.");
-        return false;
-    }
-    abilityMgr->submitSaveRecoveryInfo(token);
     return true;
 }
 
@@ -259,6 +248,7 @@ bool AbilityRecovery::ReadSerializeDataFromFile(int32_t savedStateId, WantParams
 bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery ScheduleSaveAbilityState.");
     if (!isEnable_) {
         TAG_LOGE(AAFwkTag::RECOVERY, "AppRecovery not enable");
         return false;
@@ -288,6 +278,10 @@ bool AbilityRecovery::ScheduleSaveAbilityState(StateReason reason)
             return false;
         }
         abilityMgr->EnableRecoverAbility(token);
+        if (reason == StateReason::LIFECYCLE && DefaultRecovery()) {
+            TAG_LOGD(AAFwkTag::RECOVERY, "AppRecovery ScheduleSaveAbilityState SubmitSaveRecoveryInfo");
+            abilityMgr->SubmitSaveRecoveryInfo(token);
+        }
     }
     return ret;
 }

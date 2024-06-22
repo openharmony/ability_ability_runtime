@@ -16,8 +16,6 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
-#include <atomic>
-#include <functional>
 #include <future>
 #include <map>
 #include <memory>
@@ -89,14 +87,6 @@ using OHOS::AppExecFwk::IAbilityController;
 class PendingWantManager;
 struct StartAbilityInfo;
 class WindowFocusChangedListener;
-
-class RecoveryTimer {
-public:
-    RecoveryTimer(): run_(false) {};
-    ~RecoveryTimer(){};
-    void Start(std::function<void()> task, int interval_ms);
-    std::atomic<bool> run_;
-};
 
 /**
  * @class AbilityManagerService
@@ -1064,8 +1054,7 @@ public:
         int requestCode,
         AbilityRequest &request,
         const sptr<IRemoteObject> &callerToken,
-        int32_t userId,
-        bool isNeedSetDebugApp = true);
+        int32_t userId);
 
     /**
      * Get mission id by target ability token.
@@ -1316,8 +1305,7 @@ public:
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
 #endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
-    virtual void submitSaveRecoveryInfo(const sptr<IRemoteObject>& token) override;
-    virtual void clearRecoveryInfoByTimer();
+    virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
 
@@ -1780,7 +1768,7 @@ private:
      * start highest priority ability.
      *
      */
-    void StartHighestPriorityAbility(int32_t userId, bool isBoot, sptr<IUserCallback> callback);
+    void StartHighestPriorityAbility(int32_t userId, bool isBoot);
     /**
      * connet bms.
      *
@@ -1849,14 +1837,12 @@ private:
     void DataDumpStateInner(const std::string &args, std::vector<std::string> &info);
     void DumpMissionListInner(const std::string &args, std::vector<std::string> &info);
     void DumpMissionInfosInner(const std::string &args, std::vector<std::string> &info);
-    void DumpFuncInit();
 
     bool JudgeMultiUserConcurrency(const int32_t userId);
     /**
      * dumpsys info
      *
      */
-    void DumpSysFuncInit();
     void DumpSysInner(
         const std::string &args, std::vector<std::string> &info, bool isClient, bool isUserID, int userId);
     void DumpSysMissionListInner(
@@ -1931,13 +1917,6 @@ private:
     void RemoveScreenUnlockInterceptor();
 
     int VerifyAccountPermission(int32_t userId);
-
-    using DumpFuncType = void (AbilityManagerService::*)(const std::string &args, std::vector<std::string> &info);
-    std::map<uint32_t, DumpFuncType> dumpFuncMap_;
-
-    using DumpSysFuncType = void (AbilityManagerService::*)(
-        const std::string& args, std::vector<std::string>& state, bool isClient, bool isUserID, int UserID);
-    std::map<uint32_t, DumpSysFuncType> dumpsysFuncMap_;
 
     int CheckStaticCfgPermissionForAbility(const AppExecFwk::AbilityInfo &abilityInfo, uint32_t tokenId);
 
@@ -2087,7 +2066,7 @@ private:
     int32_t RequestDialogServiceInner(const Want &want, const sptr<IRemoteObject> &callerToken,
         int requestCode, int32_t userId);
 
-    bool CheckCallingTokenId(const std::string &bundleName, int32_t userId = INVALID_USER_ID);
+    bool CheckCallingTokenId(const std::string &bundleName, int32_t userId = INVALID_USER_ID, int32_t appIndex = 0);
     bool IsCallerSceneBoard();
 
     void ReleaseAbilityTokenMap(const sptr<IRemoteObject> &token);
@@ -2159,9 +2138,6 @@ private:
     bool CheckCallerIsDmsProcess();
 
     void WaitBootAnimationStart();
-
-    void SetDebugAppByWaitingDebugFlag(
-        const Want &want, Want &requestWant, const std::string &bundleName, bool isDebugApp);
 
     int32_t SignRestartAppFlag(int32_t userId, const std::string &bundleName);
     int32_t CheckRestartAppWant(const AAFwk::Want &want);
@@ -2290,7 +2266,6 @@ private:
     ffrt::mutex abilityDebugDealLock_;
     std::shared_ptr<AbilityDebugDeal> abilityDebugDeal_;
     std::shared_ptr<AppExitReasonHelper> appExitReasonHelper_;
-    RecoveryTimer recoveryTimer_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
