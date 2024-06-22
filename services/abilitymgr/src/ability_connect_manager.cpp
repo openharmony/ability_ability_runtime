@@ -2050,7 +2050,8 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
 {
     CHECK_POINTER(abilityRecord);
     auto abilityInfo = abilityRecord->GetAbilityInfo();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "restart ability: %{public}s", abilityInfo.name.c_str());
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "restart ability, bundleName: %{public}s, abilityName: %{public}s",
+        abilityInfo.bundleName.c_str(), abilityInfo.name.c_str());
     auto token = abilityRecord->GetToken();
     if ((IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard()) && token != nullptr) {
         IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->ClearProcessByToken(
@@ -2107,7 +2108,6 @@ void AbilityConnectManager::HandleAbilityDiedTask(
         }
         isRemove = true;
     }
-    auto abilityInfo = abilityRecord->GetAbilityInfo();
 
     if (IsAbilityNeedKeepAlive(abilityRecord)) {
         KeepAbilityAlive(abilityRecord, currentUserId);
