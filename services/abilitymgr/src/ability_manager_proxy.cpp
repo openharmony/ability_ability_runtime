@@ -1787,6 +1787,11 @@ int AbilityManagerProxy::ForceTimeoutForTest(const std::string &abilityName, con
 
 int AbilityManagerProxy::UninstallApp(const std::string &bundleName, int32_t uid)
 {
+    return UninstallApp(bundleName, uid, 0);
+}
+
+int32_t AbilityManagerProxy::UninstallApp(const std::string &bundleName, int32_t uid, int32_t appIndex)
+{
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1802,6 +1807,10 @@ int AbilityManagerProxy::UninstallApp(const std::string &bundleName, int32_t uid
         TAG_LOGE(AAFwkTag::ABILITYMGR, "uid write failed.");
         return ERR_INVALID_VALUE;
     }
+    if (!data.WriteInt32(appIndex)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appIndex write failed.");
+        return ERR_INVALID_VALUE;
+    }
     int error = SendRequest(AbilityManagerInterfaceCode::UNINSTALL_APP, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
@@ -1810,7 +1819,8 @@ int AbilityManagerProxy::UninstallApp(const std::string &bundleName, int32_t uid
     return reply.ReadInt32();
 }
 
-int32_t AbilityManagerProxy::UpgradeApp(const std::string &bundleName, const int32_t uid, const std::string &exitMsg)
+int32_t AbilityManagerProxy::UpgradeApp(const std::string &bundleName, const int32_t uid, const std::string &exitMsg,
+    int32_t appIndex)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -1822,6 +1832,7 @@ int32_t AbilityManagerProxy::UpgradeApp(const std::string &bundleName, const int
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, String16, Str8ToStr16(bundleName));
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, uid);
     PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, String16, Str8ToStr16(exitMsg));
+    PROXY_WRITE_PARCEL_AND_RETURN_IF_FAIL(data, Int32, appIndex);
     int error = SendRequest(AbilityManagerInterfaceCode::UPGRADE_APP, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
