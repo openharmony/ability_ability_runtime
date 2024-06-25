@@ -199,6 +199,7 @@ struct SelectorPhoneDialog {
                   })
                 }
                 .margin({ top: 85 })
+                .align(Alignment.Center)
               }, item => item)
             }
             .columnsTemplate(this.selector.swiper.gridColumns)
