@@ -186,11 +186,13 @@ private:
                           env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             if (observer == nullptr || appManager == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "observer or appManager nullptr");
                 task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "observer or appManager nullptr"));
+                delete task;
                 return;
             }
             int32_t ret = appManager->UnregisterApplicationStateObserver(observer);
@@ -201,11 +203,13 @@ private:
                 TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
                 task->Reject(env, CreateJsError(env, ret, "UnregisterApplicationStateObserver failed"));
             }
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         return result;
     }
 
@@ -226,11 +230,13 @@ private:
         auto asyncTask = [appManager = appManager_, errCode, env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             if (appManager == nullptr) {
                 TAG_LOGE(AAFwkTag::APPMGR, "appManager nullptr");
                 task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "appManager nullptr"));
+                delete task;
                 return;
             }
             std::vector<AppExecFwk::AppStateData> list;
@@ -242,11 +248,13 @@ private:
                 TAG_LOGE(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
                 task->Reject(env, CreateJsError(env, ret, "OnGetForegroundApplications failed"));
             }
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         return result;
     }
 
@@ -267,6 +275,7 @@ private:
         auto asyncTask = [appManager = appManager_, errCode, env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             std::vector<AppExecFwk::RunningProcessInfo> infos;
@@ -276,11 +285,13 @@ private:
             } else {
                 task->Reject(env, CreateJsError(env, ret, "Get mission infos failed."));
             }
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         return result;
     }
 
@@ -301,21 +312,25 @@ private:
         auto asyncTask = [abilityManager = abilityManager_, errCode, env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                 task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
+                delete task;
                 return;
             }
             bool ret = abilityManager->IsRunningInStabilityTest();
             TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->Resolve(env, CreateJsValue(env, ret));
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         return result;
     }
 
@@ -354,11 +369,13 @@ private:
             env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "abilityManager null");
                 task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
+                delete task;
                 return;
             }
             auto ret = abilityManager->KillProcess(bundleName, clearPageStack);
@@ -367,10 +384,13 @@ private:
             } else {
                 task->Reject(env, CreateJsError(env, ret, "kill process failed."));
             }
+            delete task;
         };
-        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate))
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
-        napiAsyncTask.release();
+        if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
+        }
         return result;
     }
 
@@ -399,11 +419,13 @@ private:
         auto asyncTask = [bundleName, appManager = appManager_, errCode, env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             if (appManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "appManager nullptr");
                 task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "appManager nullptr"));
+                delete task;
                 return;
             }
             auto ret = appManager->ClearUpApplicationData(bundleName, 0);
@@ -412,11 +434,13 @@ private:
             } else {
                 task->Reject(env, CreateJsError(env, ret, "clear up application failed."));
             }
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_high)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         return result;
     }
 
@@ -460,6 +484,7 @@ private:
             env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             auto ret = appManager->GetAmsMgr()->KillProcessWithAccount(bundleName, accountId, clearPageStack);
@@ -469,11 +494,13 @@ private:
                 TAG_LOGD(AAFwkTag::APPMGR, "failed error:%{public}d", ret);
                 task->Reject(env, CreateJsError(env, ret, "Kill processes failed."));
             }
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         TAG_LOGD(AAFwkTag::APPMGR, "end");
         return result;
     }
@@ -494,21 +521,25 @@ private:
         auto asyncTask = [abilityManager = abilityManager_, errCode, env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                 task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
+                delete task;
                 return;
             }
             int32_t memorySize = abilityManager->GetAppMemorySize();
             TAG_LOGI(AAFwkTag::APPMGR, "memorySize:%{public}d", memorySize);
             task->Resolve(env, CreateJsValue(env, memorySize));
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         return result;
     }
 
@@ -528,21 +559,25 @@ private:
         auto asyncTask = [abilityManager = abilityManager_, errCode, env, task = napiAsyncTask.get()]() {
             if (errCode != 0) {
                 task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+                delete task;
                 return;
             }
             if (abilityManager == nullptr) {
                 TAG_LOGW(AAFwkTag::APPMGR, "abilityManager nullptr");
                 task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
+                delete task;
                 return;
             }
             bool ret = abilityManager->IsRamConstrainedDevice();
             TAG_LOGI(AAFwkTag::APPMGR, "result:%{public}d", ret);
             task->Resolve(env, CreateJsValue(env, ret));
+            delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
-            TAG_LOGE(AAFwkTag::APPMGR, "%{public}s send event failed!", __func__);
+            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+        } else {
+            napiAsyncTask.release();
         }
-        napiAsyncTask.release();
         return result;
     }
 };
