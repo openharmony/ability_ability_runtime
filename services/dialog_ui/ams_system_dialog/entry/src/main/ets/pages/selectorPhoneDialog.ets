@@ -198,7 +198,7 @@ struct SelectorPhoneDialog {
                     this.onSelectApp(item)
                   })
                 }
-                .margin({ top: 85 })
+                .margin({ top: 10 })
                 .align(Alignment.Center)
               }, item => item)
             }

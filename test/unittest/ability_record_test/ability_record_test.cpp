@@ -46,7 +46,6 @@
 
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
-using namespace OHOS::AbilityBase::Constants;
 
 namespace OHOS {
 namespace AAFwk {
@@ -56,6 +55,7 @@ const std::string DLP_BUNDLE_NAME = "com.ohos.dlpmanager";
 const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const std::string SHOW_ON_LOCK_SCREEN = "ShowOnLockScreen";
 const std::string URI_PERMISSION_TABLE_NAME = "uri_permission";
+constexpr const char* COMPRESS_PROPERTY = "compress";
 }
 class AbilityRecordTest : public testing::TestWithParam<OHOS::AAFwk::AbilityState> {
 public:
@@ -2368,7 +2368,6 @@ HWTEST_F(AbilityRecordTest, AbilityRecord_GetCurrentAccountId_001, TestSize.Leve
  */
 HWTEST_F(AbilityRecordTest, AbilityRecord_CanRestartResident_001, TestSize.Level1)
 {
-
     abilityRecord_->SetRestarting(true, -1);
     EXPECT_TRUE(abilityRecord_->isRestarting_);
     EXPECT_NE(abilityRecord_->restartCount_, -1);

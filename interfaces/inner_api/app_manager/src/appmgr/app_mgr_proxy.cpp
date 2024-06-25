@@ -172,7 +172,7 @@ sptr<IAmsMgr> AppMgrProxy::GetAmsMgr()
     return amsMgr;
 }
 
-int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, const int32_t userId)
+int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex, const int32_t userId)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -183,6 +183,10 @@ int32_t AppMgrProxy::ClearUpApplicationData(const std::string &bundleName, const
     if (!data.WriteString(bundleName)) {
         TAG_LOGE(AAFwkTag::APPMGR, "parcel WriteString failed");
         return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(appCloneIndex)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "appCloneIndex write failed.");
+        return ERR_INVALID_VALUE;
     }
     if (!data.WriteInt32(userId)) {
         TAG_LOGE(AAFwkTag::APPMGR, "userId write failed.");
@@ -256,6 +260,10 @@ int32_t AppMgrProxy::GetRunningMultiAppInfoByBundleName(const std::string &bundl
         return ret;
     }
     std::unique_ptr<RunningMultiAppInfo> infoReply(reply.ReadParcelable<RunningMultiAppInfo>());
+    if (infoReply == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "reply ReadParcelable is nullptr");
+        return ERR_NULL_OBJECT;
+    }
     info = *infoReply;
     int result = reply.ReadInt32();
     return result;
@@ -362,6 +370,10 @@ int32_t AppMgrProxy::GetProcessRunningInformation(RunningProcessInfo &info)
         return ERR_NULL_OBJECT;
     }
     std::unique_ptr<RunningProcessInfo> infoReply(reply.ReadParcelable<RunningProcessInfo>());
+    if (infoReply == nullptr) {
+        TAG_LOGW(AAFwkTag::APPMGR, "reply ReadParcelable is nullptr");
+        return ERR_NULL_OBJECT;
+    }
     info = *infoReply;
     return reply.ReadInt32();
 }
@@ -908,6 +920,10 @@ void AppMgrProxy::AttachRenderProcess(const sptr<IRemoteObject> &renderScheduler
 
 void AppMgrProxy::SaveBrowserChannel(sptr<IRemoteObject> browser)
 {
+    if (!browser) {
+        TAG_LOGE(AAFwkTag::APPMGR, "browser is null");
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1415,6 +1431,29 @@ int32_t AppMgrProxy::NotifyAppFaultBySA(const AppFaultDataBySA &faultData)
     }
 
     return reply.ReadInt32();
+}
+
+bool AppMgrProxy::SetAppFreezeFilter(int32_t pid)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called.");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Write interface token failed.");
+        return false;
+    }
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "write pid failed.");
+        return false;
+    }
+    auto ret = SendRequest(AppMgrInterfaceCode::SET_APPFREEZE_FILTER,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Send request failed with error code %{public}d.", ret);
+        return false;
+    }
+    return reply.ReadBool();
 }
 
 int32_t AppMgrProxy::GetProcessMemoryByPid(const int32_t pid, int32_t &memorySize)
@@ -2163,5 +2202,26 @@ int32_t AppMgrProxy::StartNativeChildProcess(const std::string &libName, int32_t
     return reply.ReadInt32();
 }
 
+int32_t AppMgrProxy::CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    if (!WriteInterfaceToken(data)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(pid)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "pid write failed.");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t ret = SendRequest(AppMgrInterfaceCode::CHECK_CALLING_IS_USER_TEST_MODE, data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::APPMGR, "SendRequest is failed, error code: %{public}d", ret);
+        isUserTest = false;
+        return ret;
+    }
+    isUserTest = reply.ReadBool();
+    return reply.ReadInt32();
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
