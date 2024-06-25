@@ -207,6 +207,7 @@ struct SelectorPhoneDialog {
             .rowsGap(12)
             .margin({ top: 30 })
             .height(210)
+            .align(Alignment.Center)
           }, item => item)
         }
         .indicatorStyle({ color: '#bebdc0', selectedColor: '#ff326Ce9', size: 4 })
