@@ -557,7 +557,7 @@ public:
      * @param bundleName.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillProcess(const std::string &bundleName) override;
+    virtual int KillProcess(const std::string &bundleName, const bool clearPageStack = true) override;
 
     #ifdef ABILITY_COMMAND_FOR_TEST
     /**
@@ -569,16 +569,6 @@ public:
      */
     virtual int ForceTimeoutForTest(const std::string &abilityName, const std::string &state) override;
     #endif
-
-    /**
-     * ClearUpApplicationData, call ClearUpApplicationData() through proxy project,
-     * clear the application data.
-     *
-     * @param bundleName, bundle name in Application record.
-     * @return
-     */
-    virtual int ClearUpApplicationData(const std::string &bundleName,
-        const int32_t userId = -1) override;
 
     /**
      * Uninstall app
@@ -712,7 +702,7 @@ public:
 
     virtual int SetMissionContinueState(const sptr<IRemoteObject> &token, const AAFwk::ContinueState &state) override;
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     virtual int SetMissionLabel(const sptr<IRemoteObject> &abilityToken, const std::string &label) override;
 
     virtual int SetMissionIcon(const sptr<IRemoteObject> &token,
@@ -899,12 +889,15 @@ public:
      * @param token The target ability.
      * @param pixelMap The snapshot.
      */
+#ifdef SUPPORT_SCREEN
     virtual void UpdateMissionSnapShot(const sptr<IRemoteObject> &token,
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
-
+#endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
+
+    virtual void ScheduleClearRecoveryPageStack() override;
 
     /**
      * Called to verify that the MissionId is valid.
@@ -974,8 +967,9 @@ public:
      * Call UIAbility by SCB.
      *
      * @param sessionInfo the session info of the ability to be called.
+     * @param isColdStart the session of the ability is or not cold start.
      */
-    virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo) override;
+    virtual void CallUIAbilityBySCB(const sptr<SessionInfo> &sessionInfo, bool &isColdStart) override;
 
     /**
      * Start specified ability by SCB.
@@ -1252,6 +1246,14 @@ public:
      */
     virtual int32_t TransferAbilityResultForExtension(const sptr<IRemoteObject> &callerToken, int32_t resultCode,
         const Want &want) override;
+
+    /**
+     * Notify ability manager service frozen process.
+     *
+     * @param pidList, the pid list of the frozen process.
+     * @param uid, the uid of the frozen process.
+     */
+    virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
 private:
     template <typename T>
