@@ -206,14 +206,13 @@ struct SelectorPhoneDialog {
             .rowsTemplate(this.selector.swiper.gridRows)
             .columnsGap(12)
             .rowsGap(12)
-            .margin({ top: 30 })
+            .margin({ top: 10 })
             .height(210)
             .align(Alignment.Center)
           }, item => item)
         }
         .indicatorStyle({ color: '#bebdc0', selectedColor: '#ff326Ce9', size: 4 })
         .align(Alignment.Center)
-        .margin({ top: 20 })
         .width('90%')
         .indicator(this.phoneShowData.totalCount() > 1)
       }
