@@ -335,12 +335,8 @@ private:
     }
 
     static void OnKillProcessByBundleNameInner(std::string bundleName, bool clearPageStack,
-        sptr<OHOS::AAFwk::IAbilityManager> abilityManager, int32_t errCode, napi_env env, NapiAsyncTask *task)
+        sptr<OHOS::AAFwk::IAbilityManager> abilityManager, napi_env env, NapiAsyncTask *task)
     {
-        if (errCode != 0) {
-            task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
-            return;
-        }
         if (abilityManager == nullptr) {
             TAG_LOGW(AAFwkTag::APPMGR, "abilityManager null");
             task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
@@ -387,7 +383,11 @@ private:
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [bundleName, clearPageStack, abilityManager = abilityManager_, errCode,
             env, task = napiAsyncTask.get()]() {
-            OnKillProcessByBundleNameInner(bundleName, clearPageStack, abilityManager, errCode, env, task);
+            if (errCode != 0) {
+                task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+            } else {
+                OnKillProcessByBundleNameInner(bundleName, clearPageStack, abilityManager, env, task);
+            }
             delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
