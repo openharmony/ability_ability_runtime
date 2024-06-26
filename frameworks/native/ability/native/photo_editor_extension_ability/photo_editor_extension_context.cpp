@@ -116,10 +116,10 @@ PhotoEditorErrorCode PhotoEditorExtensionContext::CopyImageToPanel(const std::st
              panelPhysicalPath.c_str());
 
     char imagePath[PATH_MAX] = {0};
-    if(realpath(imageUri.c_str(), imagePath) == nullptr) {
+    if (realpath(imageUri.c_str(), imagePath) == nullptr) {
         TAG_LOGE(AAFwkTag::UI_EXT, "Realpath error, errno is %{public}d.", errno);
         return PhotoEditorErrorCode::ERROR_CODE_IMAGE_INPUT_ERROR;
-    }        
+    }
 
     std::ifstream sourceFile;
     sourceFile.open(imagePath, std::ios::binary);
