@@ -213,6 +213,7 @@ struct SelectorPhoneDialog {
         }
         .indicatorStyle({ color: '#bebdc0', selectedColor: '#ff326Ce9', size: 4 })
         .align(Alignment.Center)
+        .margin({ top: 20 })
         .width('90%')
         .indicator(this.phoneShowData.totalCount() > 1)
       }
@@ -232,8 +233,7 @@ struct SelectorPhoneDialog {
         globalThis.selectExtensionContext.terminateSelf();
       })
     }
-    .borderRadius(24)
-    .borderWidth(1)
+    .borderRadius(24) 
     .borderColor('#e9e9e9')
     .backgroundColor('#ffffff')
     .width('100%')
