@@ -233,7 +233,9 @@ struct SelectorPhoneDialog {
         globalThis.selectExtensionContext.terminateSelf();
       })
     }
-    .borderRadius(24) 
+    .borderRadius(24)
+    .borderWidth(1)
+    .align(Alignment.Center)
     .borderColor('#e9e9e9')
     .backgroundColor('#ffffff')
     .width('100%')
