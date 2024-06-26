@@ -334,6 +334,26 @@ private:
         return result;
     }
 
+    static void OnKillProcessByBundleNameInner(std::string bundleName, bool clearPageStack,
+        sptr<OHOS::AAFwk::IAbilityManager> abilityManager, int32_t errCode, napi_env env, NapiAsyncTask *task)
+    {
+        if (errCode != 0) {
+            task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
+            return;
+        }
+        if (abilityManager == nullptr) {
+            TAG_LOGW(AAFwkTag::APPMGR, "abilityManager null");
+            task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
+            return;
+        }
+        auto ret = abilityManager->KillProcess(bundleName, clearPageStack);
+        if (ret == 0) {
+            task->Resolve(env, CreateJsValue(env, ret));
+        } else {
+            task->Reject(env, CreateJsError(env, ret, "kill process failed."));
+        }
+    }
+
     napi_value OnKillProcessByBundleName(napi_env env, size_t argc, napi_value* argv)
     {
         TAG_LOGD(AAFwkTag::APPMGR, "called");
@@ -367,23 +387,7 @@ private:
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [bundleName, clearPageStack, abilityManager = abilityManager_, errCode,
             env, task = napiAsyncTask.get()]() {
-            if (errCode != 0) {
-                task->Reject(env, CreateJsError(env, errCode, "Invalidate params."));
-                delete task;
-                return;
-            }
-            if (abilityManager == nullptr) {
-                TAG_LOGW(AAFwkTag::APPMGR, "abilityManager null");
-                task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "abilityManager nullptr"));
-                delete task;
-                return;
-            }
-            auto ret = abilityManager->KillProcess(bundleName, clearPageStack);
-            if (ret == 0) {
-                task->Resolve(env, CreateJsValue(env, ret));
-            } else {
-                task->Reject(env, CreateJsError(env, ret, "kill process failed."));
-            }
+            OnKillProcessByBundleNameInner(bundleName, clearPageStack, abilityManager, errCode, env, task);
             delete task;
         };
         if (napi_status::napi_ok != napi_send_event(env, asyncTask, napi_eprio_immediate)) {
