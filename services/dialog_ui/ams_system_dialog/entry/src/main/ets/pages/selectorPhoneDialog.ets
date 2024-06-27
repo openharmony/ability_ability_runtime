@@ -141,13 +141,14 @@ struct SelectorPhoneDialog {
   build() {
     Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Center }) {
       Flex({ direction: FlexDirection.Column }) {
-      Text($r('app.string.message_title_selector'))
-        .fontSize(22)
-        .fontWeight(FontWeight.Medium)
-        .textAlign(TextAlign.Start)
-        .margin({ top: 25, left: 20 })
-      }
-      .height(100)
+        Text($r('app.string.message_title_selector'))
+          .fontSize(22)
+          .fontWeight(FontWeight.Medium)
+          .textAlign(TextAlign.Start)
+          .margin({ top: 25, left: 20 })
+        }
+        .height(100)
+
       Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Center }) {
         Swiper() {
           LazyForEach(this.phoneShowData, (item: any) => {
