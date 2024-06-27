@@ -206,7 +206,7 @@ struct SelectorPhoneDialog {
             .rowsTemplate(this.selector.swiper.gridRows)
             .columnsGap(12)
             .rowsGap(12)
-            .margin({ top: 10})
+            .margin({ top: 30})
             .height(210)
             .align(Alignment.Center)
           }, item => item)
