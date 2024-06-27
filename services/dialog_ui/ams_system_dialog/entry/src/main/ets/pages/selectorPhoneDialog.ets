@@ -139,7 +139,7 @@ struct SelectorPhoneDialog {
   }
 
   build() {
-    Flex({ direction: FlexDirection.Column }) {
+    Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Center }) {
       Flex({ direction: FlexDirection.Column }) {
         Text($r('app.string.message_title_selector'))
           .fontSize(22)
