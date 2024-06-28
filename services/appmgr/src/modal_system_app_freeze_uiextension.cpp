@@ -93,7 +93,6 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
         TAG_LOGI(AAFwkTag::ABILITYMGR, "CreateModalUIExtension reqeustCount is greater than 0.");
         return false;
     }
-    reqeustCount_++;
     auto callback = GetConnection();
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CreateModalUIExtension Callback is nullptr.");
@@ -115,11 +114,11 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR,
             "CreateModalUIExtension ConnectSystemUi ConnectAbility dialog failed, result = %{public}d", result);
-        reqeustCount_--;
         return false;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR,
         "CreateModalUIExtension ConnectSystemUi ConnectAbility dialog success, result = %{public}d", result);
+    reqeustCount_++;
     return true;
 }
 
@@ -146,6 +145,7 @@ void ModalSystemAppFreezeUIExtension::AppFreezeDialogConnection::OnAbilityConnec
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
     if (remote == nullptr) {
+        ModalSystemAppFreezeUIExtension::GetInstance().TryReduceReqeustCount();
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Input remote object is nullptr.");
         return;
     }
