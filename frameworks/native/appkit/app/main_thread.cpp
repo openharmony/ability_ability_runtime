@@ -2516,7 +2516,7 @@ void MainThread::HandleDumpHeap(bool isPrivate)
     };
 
     ffrt::submit(taskFork, {}, {}, ffrt::task_attr().qos(ffrt::qos_user_initiated));
-    runtime->DumpCpuProfile(isPrivate);
+    runtime->DumpCpuProfile();
 }
 
 void MainThread::DestroyHeapProfiler()
