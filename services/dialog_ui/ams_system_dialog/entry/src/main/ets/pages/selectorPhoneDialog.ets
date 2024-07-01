@@ -210,7 +210,7 @@ struct SelectorPhoneDialog {
             .height(240)
           }, item => item)
         }
-        .indicatorStyle({ color: '#bebdc0', selectedColor: '#ff326Ce9', size: 4 ,top: 10})
+        .indicatorStyle({ color: '#bebdc0', selectedColor: '#ff326Ce9', size: 4})
         .align(Alignment.Center)
         .width('90%')
         .indicator(this.phoneShowData.totalCount() > 1)
