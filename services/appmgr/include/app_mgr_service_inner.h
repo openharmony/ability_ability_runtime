@@ -592,7 +592,7 @@ public:
 
     void HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &token);
 
-    void PrepareTerminate(const sptr<IRemoteObject> &token);
+    void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
     void OnAppStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord, const ApplicationState state,
         bool needNotifyApp, bool isFromWindowFocusChanged);
@@ -1136,6 +1136,12 @@ public:
      */
     void AttachedToStatusBar(const sptr<IRemoteObject> &token);
     void KillApplicationByRecord(const std::shared_ptr<AppRunningRecord> &appRecord);
+
+    int32_t NotifyProcessDependedOnWeb();
+
+    void KillProcessDependedOnWeb();
+
+    void RestartResidentProcessDependedOnWeb();
 private:
 
     std::string FaultTypeToString(FaultDataType type);

@@ -580,14 +580,26 @@ public:
     virtual int UninstallApp(const std::string &bundleName, int32_t uid) override;
 
     /**
+     * Uninstall app
+     *
+     * @param bundleName bundle name of uninstalling app.
+     * @param uid uid of bundle.
+     * @param appIndex the app index of app clone.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UninstallApp(const std::string &bundleName, int32_t uid, int32_t appIndex) override;
+
+    /**
      * Upgrade app, record exit reason and kill application
      *
      * @param bundleName bundle name of upgrading app.
      * @param uid uid of bundle.
      * @param exitMsg the exit reason message.
+     * @param appIndex the app index of app clone.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UpgradeApp(const std::string &bundleName, const int32_t uid, const std::string &exitMsg) override;
+    virtual int32_t UpgradeApp(const std::string &bundleName, const int32_t uid, const std::string &exitMsg,
+        int32_t appIndex = 0) override;
 
     virtual sptr<IWantSender> GetWantSender(
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) override;
@@ -708,7 +720,8 @@ public:
     virtual int SetMissionIcon(const sptr<IRemoteObject> &token,
         const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
 
-    virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler) override;
+    virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
+        bool animationEnabled) override;
 
     virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) override;
 

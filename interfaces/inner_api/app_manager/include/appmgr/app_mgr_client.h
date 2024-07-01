@@ -292,8 +292,9 @@ public:
      * Prepare terminate.
      *
      * @param token Ability identify.
+     * @param clearMissionFlag Clear mission flag.
      */
-    virtual void PrepareTerminate(const sptr<IRemoteObject> &token);
+    virtual void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
     /**
      * Get running process information by ability token.
@@ -763,6 +764,10 @@ public:
      * @return Returns RESULT_OK on success, others on failure.
      */
     virtual AppMgrResultCode AttachedToStatusBar(const sptr<IRemoteObject> &token);
+
+    int32_t NotifyProcessDependedOnWeb();
+
+    void KillProcessDependedOnWeb();
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

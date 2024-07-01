@@ -792,14 +792,26 @@ public:
     virtual int UninstallApp(const std::string &bundleName, int32_t uid) override;
 
     /**
+     * Uninstall app
+     *
+     * @param bundleName bundle name of uninstalling app.
+     * @param uid uid of bundle.
+     * @param appIndex the app index of app clone.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t UninstallApp(const std::string &bundleName, int32_t uid, int32_t appIndex) override;
+
+    /**
      * Upgrade app, record exit reason and kill application
      *
      * @param bundleName bundle name of upgrading app.
      * @param uid uid of bundle.
      * @param exitMsg the exit reason message.
+     * @param appIndex the app index of app clone.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t UpgradeApp(const std::string &bundleName, const int32_t uid, const std::string &exitMsg) override;
+    virtual int32_t UpgradeApp(const std::string &bundleName, const int32_t uid, const std::string &exitMsg,
+        int32_t appIndex = 0) override;
 
     virtual sptr<IWantSender> GetWantSender(
         const WantSenderInfo &wantSenderInfo, const sptr<IRemoteObject> &callerToken) override;
@@ -1096,7 +1108,8 @@ public:
     virtual int SetMissionIcon(const sptr<IRemoteObject> &token,
         const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
 
-    virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler) override;
+    virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
+        bool animationEnabled) override;
 
     virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) override;
 
@@ -1126,6 +1139,8 @@ public:
 
     virtual int UnregisterAbilityFirstFrameStateObserver(
         const sptr<IAbilityFirstFrameStateObserver> &observer) override;
+    
+    bool GetAnimationFlag();
 
 #endif
 
@@ -1681,6 +1696,8 @@ public:
      */
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
+    void HandleRestartResidentProcessDependedOnWeb();
+
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
     static constexpr uint32_t ACTIVE_TIMEOUT_MSG = 1;
@@ -2130,7 +2147,7 @@ private:
 
     bool CheckSenderWantInfo(int32_t callerUid, const WantSenderInfo &wantSenderInfo);
 
-    int32_t UninstallAppInner(const std::string &bundleName, const int32_t uid, const bool isUpgrade,
+    int32_t UninstallAppInner(const std::string &bundleName, const int32_t uid, int32_t appIndex, const bool isUpgrade,
         const std::string &exitMsg);
 
     int32_t GetMissionIdByAbilityTokenInner(const sptr<IRemoteObject> &token);
@@ -2166,7 +2183,6 @@ private:
     sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
     const static std::map<std::string, AbilityManagerService::DumpKey> dumpMap;
     const static std::map<std::string, AbilityManagerService::DumpsysKey> dumpsysMap;
-    const static std::map<int32_t, AppExecFwk::SupportWindowMode> windowModeMap;
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
 
@@ -2254,6 +2270,7 @@ private:
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
     std::shared_ptr<DialogSessionRecord> dialogSessionRecord_;
+    bool isAnimationEnabled_ = true; //only use on mission list
 #endif
     std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;
     std::shared_ptr<AbilityInterceptorExecuter> afterCheckExecuter_;
