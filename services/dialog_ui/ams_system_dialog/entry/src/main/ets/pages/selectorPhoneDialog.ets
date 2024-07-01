@@ -207,7 +207,7 @@ struct SelectorPhoneDialog {
             .columnsGap(12)
             .rowsGap(12)
             .margin({ top: 30 })
-            .height(210)
+            .height(240)
             .align(Alignment.Center)
           }, item => item)
         }
