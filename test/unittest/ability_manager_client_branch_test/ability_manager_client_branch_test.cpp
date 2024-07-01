@@ -279,19 +279,6 @@ HWTEST_F(AbilityManagerClientBranchTest, ForceTimeoutForTest_0100, TestSize.Leve
 #endif
 
 /**
- * @tc.name: AbilityManagerClient_ClearUpApplicationData_0100
- * @tc.desc: ClearUpApplicationData
- * @tc.type: FUNC
- * @tc.require: issueI5NRWT
- */
-HWTEST_F(AbilityManagerClientBranchTest, ClearUpApplicationData_0100, TestSize.Level1)
-{
-    std::string bundleName = "bundleName_test";
-    auto result = client_->ClearUpApplicationData(bundleName);
-    EXPECT_EQ(ERR_OK, result);
-}
-
-/**
  * @tc.name: AbilityManagerClient_StartContinuation_0100
  * @tc.desc: StartContinuation
  * @tc.type: FUNC
@@ -1653,6 +1640,20 @@ HWTEST_F(AbilityManagerClientBranchTest, RegisterOffListener_0100, TestSize.Leve
 }
 
 /**
+ * @tc.name: AbilityManagerClient_RegisterOffListener_0200
+ * @tc.desc: RegisterOffListener
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AbilityManagerClientBranchTest, RegisterOffListener_0200, TestSize.Level1)
+{
+    std::string type = "continueStateChange";
+    sptr<IRemoteOnListener> listener = nullptr;
+    auto result = client_->RegisterOffListener(type, listener);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
  * @tc.name: AbilityManagerClient_RequestDialogService_0100
  * @tc.desc: RequestDialogService
  * @tc.type: FUNC
@@ -2450,8 +2451,9 @@ HWTEST_F(AbilityManagerClientBranchTest, SetMissionContinueState_0100, TestSize.
     EXPECT_NE(client_, nullptr);
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         sptr<IRemoteObject> token = nullptr;
+        sptr<IRemoteObject> sessionToken = nullptr;
         AAFwk::ContinueState state = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
-        auto result = client_->SetMissionContinueState(token, state);
+        auto result = client_->SetMissionContinueState(token, state, sessionToken);
         EXPECT_EQ(ERR_OK, result);
     }
     GTEST_LOG_(INFO) << "SetMissionContinueState_0100 end";

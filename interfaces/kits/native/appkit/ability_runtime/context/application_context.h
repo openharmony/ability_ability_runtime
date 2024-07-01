@@ -54,6 +54,13 @@ public:
     void DispatchOnAbilityForeground(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnAbilityBackground(const std::shared_ptr<NativeReference> &ability);
     void DispatchOnAbilityContinue(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnAbilityWillContinue(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnWindowStageWillRestore(const std::shared_ptr<NativeReference> &ability,
+        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchOnWindowStageRestore(const std::shared_ptr<NativeReference> &ability,
+        const std::shared_ptr<NativeReference> &windowStage);
+    void DispatchOnAbilityWillSaveState(const std::shared_ptr<NativeReference> &ability);
+    void DispatchOnAbilitySaveState(const std::shared_ptr<NativeReference> &ability);
     void DispatchConfigurationUpdated(const AppExecFwk::Configuration &config);
     void DispatchMemoryLevel(const int level);
     void NotifyApplicationForeground();
@@ -107,7 +114,7 @@ public:
     std::shared_ptr<AppExecFwk::Configuration> GetConfiguration() const override;
     std::string GetBaseDir() const override;
     Global::Resource::DeviceType GetDeviceType() const override;
-    void KillProcessBySelf();
+    void KillProcessBySelf(const bool clearPageStack = true);
     int32_t GetProcessRunningInformation(AppExecFwk::RunningProcessInfo &info);
     int32_t RestartApp(const AAFwk::Want& want);
 

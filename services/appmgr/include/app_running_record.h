@@ -411,6 +411,13 @@ public:
     void ScheduleProcessSecurityExit();
 
     /**
+     * ScheduleTerminate, Notify application clear page stack.
+     *
+     * @return
+     */
+    void ScheduleClearPageStack();
+
+    /**
      * ScheduleTrimMemory, Notifies the application of the memory seen.
      *
      * @return
@@ -534,7 +541,7 @@ public:
 
     bool IsLastPageAbilityRecord(const sptr<IRemoteObject> &token);
 
-    bool ExtensionAbilityRecordExists(const sptr<IRemoteObject> &token);
+    bool ExtensionAbilityRecordExists();
 
     void SetTerminating();
 
@@ -786,6 +793,8 @@ public:
 
     bool SetSupportedProcessCache(bool isSupport);
     SupportProcessCacheState GetSupportProcessCacheState();
+    void SetAttachedToStatusBar(bool isAttached);
+    bool IsAttachedToStatusBar();
 
     void SetBrowserHost(sptr<IRemoteObject> browser);
     sptr<IRemoteObject> GetBrowserHost();
@@ -804,6 +813,16 @@ public:
     inline bool IsStrictMode()
     {
         return isStrictMode_;
+    }
+
+    inline void SetIsDependedOnArkWeb(bool isDepend)
+    {
+        isDependedOnArkWeb_ = isDepend;
+    }
+
+    inline bool IsDependedOnArkWeb()
+    {
+        return isDependedOnArkWeb_;
     }
 private:
     /**
@@ -965,6 +984,8 @@ private:
     bool isGPU_ = false;
     pid_t gpuPid_ = 0;
     bool isStrictMode_ = false;
+    bool isAttachedToStatusBar = false;
+    bool isDependedOnArkWeb_ = false;
 };
 
 }  // namespace AppExecFwk

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,4 +13,21 @@
  * limitations under the License.
  */
 
-FUZZ
+#ifndef NAPI_CUSTOM_SCOPE_H
+#define NAPI_CUSTOM_SCOPE_H
+
+#include <cstdint>
+
+class CustomScope {
+public:
+    explicit CustomScope(int32_t id): id_(id), last_(0) {}
+
+    void Enter();
+    void Exit() const;
+
+private:
+    int32_t id_ = 0;
+    int32_t last_ = 0;
+};
+
+#endif // NAPI_CUSTOM_SCOPE_H
