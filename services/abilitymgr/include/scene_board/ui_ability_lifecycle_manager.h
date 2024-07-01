@@ -28,9 +28,6 @@
 #include "isession_handler_interface.h"
 
 namespace OHOS {
-namespace AbilityRuntime {
-class IStatusBarDelegate;
-}
 namespace AAFwk {
 class SessionInfo;
 class StatusBarDelegateManager;
@@ -253,8 +250,7 @@ public:
      */
     int32_t GetSessionIdByAbilityToken(const sptr<IRemoteObject> &token);
 
-    void GetActiveAbilityList(const std::string &bundleName, std::vector<std::string> &abilityList,
-        int32_t pid = NO_PID);
+    void GetActiveAbilityList(int32_t uid, std::vector<std::string> &abilityList, int32_t pid = NO_PID);
 
     bool PrepareTerminateAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void SetSessionHandler(const sptr<ISessionHandler> &handler);

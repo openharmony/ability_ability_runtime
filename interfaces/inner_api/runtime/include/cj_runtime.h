@@ -33,6 +33,9 @@ class CJRuntime : public Runtime {
 public:
     static std::unique_ptr<CJRuntime> Create(const Options& options);
     static void SetAppLibPath(const AppLibPathMap& appLibPaths);
+    static void SetAsanVersion();
+    static void SetTsanVersion();
+    static void SetHWAsanVersion();
     ~CJRuntime() override = default;
 
     Language GetLanguage() const override
@@ -53,7 +56,7 @@ public:
     void RegisterQuickFixQueryFunc(const std::map<std::string, std::string>& moduleAndPath) override {};
     void StartProfiler(const DebugOption debugOption) override {};
     void DoCleanWorkAfterStageCleaned() override {};
-    void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate) const override {}
+    void SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const override {}
     void SetDeviceDisconnectCallback(const std::function<bool()> &cb) override {};
     bool IsAppLibLoaded() const { return appLibLoaded_; }
     void UnLoadCJAppLibrary();

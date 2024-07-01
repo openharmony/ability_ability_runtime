@@ -15,7 +15,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/ability_runtime/ability_runtime.gni")
 
-module_output_path = "ability_runtime/appkit"
+module_output_path = "ability_runtime/uripermmgr"
 config("coverage_flags") {
   if (ability_runtime_feature_coverage) {
     cflags = [ "--coverage" ]
@@ -23,39 +23,39 @@ config("coverage_flags") {
   }
 }
 
-ohos_unittest("ability_manager_test") {
+ohos_unittest("uri_perm_mgr_test") {
   module_out_path = module_output_path
 
-  include_dirs = []
+  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper" ]
 
   sources = [
-    "${ability_runtime_native_path}/appkit/app/ability_manager.cpp",
-    "ability_manager_test.cpp",
+    "tokenid_permission_test.cpp",
+    "uri_permission_manager_service_test.cpp",
   ]
 
   configs = [
     ":coverage_flags",
-    "${ability_runtime_services_path}/abilitymgr:abilityms_config",
-    "${ability_runtime_test_path}/mock/services_abilitymgr_test:aafwk_mock_config",
+    "${ability_runtime_innerkits_path}/app_manager:appmgr_sdk_config",
   ]
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  deps = [ "//third_party/googletest:gmock_main" ]
-
-  external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_deps_wrapper",
-    "ability_runtime:ability_manager",
-    "ability_runtime:abilitykit_native",
-    "c_utils:utils",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-    "ipc:ipc_core",
-    "napi:ace_napi",
+  deps = [
+    "${ability_runtime_innerkits_path}/uri_permission:uri_permission_mgr",
+    "${ability_runtime_native_path}/appkit:appkit_manager_helper",
+    "${ability_runtime_services_path}/common:event_report",
+    "${ability_runtime_services_path}/uripermmgr:libupms_static",
+    "//third_party/googletest:gtest_main",
   ]
 
+  external_deps = [
+    "ability_base:configuration",
+    "access_token:libtokenid_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "storage_service:storage_manager_sa_proxy",
+  ]
   if (background_task_mgr_continuous_task_enable) {
     external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
   }
@@ -64,5 +64,5 @@ ohos_unittest("ability_manager_test") {
 group("unittest") {
   testonly = true
 
-  deps = [ ":ability_manager_test" ]
+  deps = [ ":uri_perm_mgr_test" ]
 }
