@@ -87,7 +87,7 @@ bool CJRuntime::Initialize(const Options& options)
 
 void CJRuntime::RegisterUncaughtExceptionHandler(const CJUncaughtExceptionInfo& uncaughtExceptionInfo)
 {
-    HILOG_INFO("RegisterUncaughtExceptionHandler not support yet");
+    OHOS::CJEnvironment::GetInstance()->RegisterCJUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 
 bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
@@ -110,6 +110,21 @@ bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
     }
     appLibLoaded_ = true;
     return true;
+}
+
+void CJRuntime::SetAsanVersion()
+{
+    CJEnvironment::GetInstance()->SetSanitizerKindRuntimeVersion(CJEnvironment::SanitizerKind::ASAN);
+}
+
+void CJRuntime::SetTsanVersion()
+{
+    CJEnvironment::GetInstance()->SetSanitizerKindRuntimeVersion(CJEnvironment::SanitizerKind::TSAN);
+}
+
+void CJRuntime::SetHWAsanVersion()
+{
+    CJEnvironment::GetInstance()->SetSanitizerKindRuntimeVersion(CJEnvironment::SanitizerKind::HWASAN);
 }
 
 void CJRuntime::StartDebugMode(const DebugOption dOption)

@@ -640,7 +640,7 @@ void AppMgrServiceInner::MakeProcessName(const std::shared_ptr<AbilityInfo> &abi
     if (appIndex != 0) {
         processName += std::to_string(appIndex);
     }
-
+        
     if (!specifiedProcessFlag.empty()) {
         processName = (processName + ":" + specifiedProcessFlag).substr(0, MAX_SPECIFIED_PROCESS_NAME_LENGTH);
         TAG_LOGI(AAFwkTag::APPMGR, "specifiedProcessFlag = %{public}s, processName = %{public}s",
@@ -943,8 +943,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto appRecord = GetAppRunningRecordByAppRecordId(recordId);
-    if (!appRecord || (!appRecord->IsUpdateStateFromService()
-        && appRecord->GetApplicationPendingState() != ApplicationPendingState::FOREGROUNDING)) {
+    if (!appRecord || appRecord->GetApplicationPendingState() != ApplicationPendingState::FOREGROUNDING) {
         TAG_LOGE(AAFwkTag::APPMGR, "get app record failed");
         return;
     }
@@ -3224,14 +3223,14 @@ void AppMgrServiceInner::HandleAbilityAttachTimeOut(const sptr<IRemoteObject> &t
     appRunningManager_->HandleAbilityAttachTimeOut(token);
 }
 
-void AppMgrServiceInner::PrepareTerminate(const sptr<IRemoteObject> &token)
+void AppMgrServiceInner::PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
         return;
     }
-    appRunningManager_->PrepareTerminate(token);
+    appRunningManager_->PrepareTerminate(token, clearMissionFlag);
 }
 
 void AppMgrServiceInner::HandleTerminateApplicationTimeOut(const int64_t eventId)
@@ -4814,7 +4813,7 @@ void AppMgrServiceInner::RegisterFocusListener()
         TAG_LOGE(AAFwkTag::APPMGR, "no focusListener_");
         return;
     }
-    WindowManagerLite::GetInstance().RegisterFocusChangedListener(focusListener_);
+    WindowManager::GetInstance().RegisterFocusChangedListener(focusListener_);
 #endif // SUPPORT_SCREEN
     TAG_LOGI(AAFwkTag::APPMGR, "RegisterFocusListener end");
 }
@@ -4827,7 +4826,7 @@ void AppMgrServiceInner::FreeFocusListener()
         TAG_LOGE(AAFwkTag::APPMGR, "no focusListener_");
         return;
     }
-    WindowManagerLite::GetInstance().UnregisterFocusChangedListener(focusListener_);
+    WindowManager::GetInstance().UnregisterFocusChangedListener(focusListener_);
     focusListener_ = nullptr;
 #endif // SUPPORT_SCREEN
     TAG_LOGI(AAFwkTag::APPMGR, "FreeFocusListener end");
@@ -4916,7 +4915,7 @@ void AppMgrServiceInner::InitWindowVisibilityChangedListener()
             TAG_LOGE(AAFwkTag::APPMGR, "Window visibility changed listener is nullptr.");
             return;
         }
-        WindowManagerLite::GetInstance().RegisterVisibilityChangedListener(inner->windowVisibilityChangedListener_);
+        WindowManager::GetInstance().RegisterVisibilityChangedListener(inner->windowVisibilityChangedListener_);
     };
 
     if (taskHandler_ == nullptr) {
@@ -4934,7 +4933,7 @@ void AppMgrServiceInner::FreeWindowVisibilityChangedListener()
         TAG_LOGW(AAFwkTag::APPMGR, "Visibility listener has been freed.");
         return;
     }
-    WindowManagerLite::GetInstance().UnregisterVisibilityChangedListener(windowVisibilityChangedListener_);
+    WindowManager::GetInstance().UnregisterVisibilityChangedListener(windowVisibilityChangedListener_);
 }
 
 void AppMgrServiceInner::HandleWindowVisibilityChanged(
@@ -7008,6 +7007,60 @@ void AppMgrServiceInner::AttachedToStatusBar(const sptr<IRemoteObject> &token)
         return;
     }
     appRecord->SetAttachedToStatusBar(true);
+}
+
+int32_t AppMgrServiceInner::NotifyProcessDependedOnWeb()
+{
+    int32_t pid = IPCSkeleton::GetCallingPid();
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    if (appRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord");
+        return ERR_INVALID_VALUE;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    appRecord->SetIsDependedOnArkWeb(true);
+    return ERR_OK;
+}
+
+void AppMgrServiceInner::KillProcessDependedOnWeb()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    CHECK_POINTER_AND_RETURN_LOG(appRunningManager_, "appRunningManager_ is nullptr");
+    for (const auto &item : appRunningManager_->GetAppRunningRecordMap()) {
+        const auto &appRecord = item.second;
+        if (!appRecord || !appRecord->GetSpawned() || !appRecord->GetPriorityObject()) {
+            continue;
+        }
+
+        if (appRecord->IsDependedOnArkWeb()) {
+            std::string bundleName = appRecord->GetBundleName();
+            pid_t pid = appRecord->GetPriorityObject()->GetPid();
+            appRecord->IsKeepAliveApp() &&
+                ExitResidentProcessManager::GetInstance().RecordExitResidentBundleDependedOnWeb(bundleName);
+            KillProcessByPid(pid, "KillProcessDependedOnWeb");
+        }
+    }
+}
+
+void AppMgrServiceInner::RestartResidentProcessDependedOnWeb()
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    std::vector<std::string> bundleNames;
+    ExitResidentProcessManager::GetInstance().HandleExitResidentBundleDependedOnWeb(bundleNames);
+    if (bundleNames.empty()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "exit resident bundle names is empty");
+        return;
+    }
+
+    auto RestartResidentProcessDependedOnWebTask = [bundleNames, innerServicerWeak = weak_from_this()]() {
+        auto innerServicer = innerServicerWeak.lock();
+        CHECK_POINTER_AND_RETURN_LOG(innerServicer, "get AppMgrServiceInner failed");
+        std::vector<AppExecFwk::BundleInfo> exitBundleInfos;
+        ExitResidentProcessManager::GetInstance().QueryExitBundleInfos(bundleNames, exitBundleInfos);
+
+        innerServicer->NotifyStartResidentProcess(exitBundleInfos);
+    };
+    taskHandler_->SubmitTask(RestartResidentProcessDependedOnWebTask, "RestartResidentProcessDependedOnWeb");
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

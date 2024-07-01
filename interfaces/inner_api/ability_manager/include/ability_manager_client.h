@@ -1009,7 +1009,8 @@ public:
      * @param handler Indidate handler of WindowManagerService.
      * @return ErrCode Returns ERR_OK on success, others on failure.
      */
-    ErrCode RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler);
+    ErrCode RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler,
+        bool animationEnabled = true);
 
     /**
      * WindowManager notification AbilityManager after the first frame is drawn.
@@ -1517,6 +1518,7 @@ private:
 
     static std::once_flag singletonFlag_;
     std::recursive_mutex mutex_;
+    std::mutex topAbilityMutex_;
     static std::shared_ptr<AbilityManagerClient> instance_;
     sptr<IAbilityManager> proxy_;
     sptr<IRemoteObject::DeathRecipient> deathRecipient_;
