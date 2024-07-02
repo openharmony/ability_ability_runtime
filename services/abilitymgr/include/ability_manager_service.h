@@ -856,6 +856,8 @@ public:
     void HandleFocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
 
     void HandleUnfocused(const sptr<OHOS::Rosen::FocusChangeInfo> &focusChangeInfo);
+
+    bool GetAnimationFlag();
 #endif
 
     void ClearUserData(int32_t userId);

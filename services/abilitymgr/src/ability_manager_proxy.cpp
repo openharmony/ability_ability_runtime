@@ -2629,7 +2629,7 @@ int AbilityManagerProxy::RegisterWindowManagerServiceHandler(const sptr<IWindowM
         return INNER_ERR;
     }
     if (!data.WriteBool(animationEnabled)) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "write animationEnabled fail.");
+        HILOG_ERROR("write animationEnabled fail.");
         return ERR_INVALID_VALUE;
     }
     MessageOption option;
