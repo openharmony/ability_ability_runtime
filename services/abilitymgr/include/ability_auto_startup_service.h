@@ -147,7 +147,6 @@ private:
     std::string GetAbilityTypeName(AppExecFwk::AbilityInfo abilityInfo);
     std::string GetExtensionTypeName(AppExecFwk::ExtensionAbilityInfo extensionInfo);
     std::shared_ptr<AppExecFwk::BundleMgrClient> GetBundleMgrClient();
-    std::shared_ptr<AppExecFwk::BundleMgrHelper> ConnectManagerHelper();
     int32_t CheckPermissionForSystem();
     int32_t CheckPermissionForSelf(const std::string &bundleName);
     int32_t CheckPermissionForEDM();
@@ -161,7 +160,6 @@ private:
     std::map<std::string, sptr<IRemoteObject>> callbackMaps_;
     std::map<sptr<IRemoteObject>, sptr<IRemoteObject::DeathRecipient>> deathRecipients_;
     std::shared_ptr<AppExecFwk::BundleMgrClient> bundleMgrClient_;
-    std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper_;
 };
 } // namespace AbilityRuntime
 } // namespace OHOS
