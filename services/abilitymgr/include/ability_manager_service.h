@@ -932,6 +932,8 @@ public:
     int CreateModalDialog(const Want &replaceWant, sptr<IRemoteObject> callerToken, std::string dialogSessionId);
 
     virtual int SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllowed) override;
+
+    bool GetAnimationFlag();
 #endif
 
     void ClearUserData(int32_t userId);

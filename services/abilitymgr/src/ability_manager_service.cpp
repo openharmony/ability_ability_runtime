@@ -8018,6 +8018,11 @@ void AbilityManagerService::InitPrepareTerminateConfig()
         isPrepareTerminateEnable_ = true;
     }
 }
+
+bool AbilityManagerService::GetAnimationFlag()
+{
+    return isAnimationEnabled_;
+}
 #endif
 
 int AbilityManagerService::CheckCallServicePermission(const AbilityRequest &abilityRequest)
