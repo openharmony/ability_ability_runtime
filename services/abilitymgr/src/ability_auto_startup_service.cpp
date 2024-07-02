@@ -25,6 +25,8 @@
 #include "auto_startup_callback_proxy.h"
 #include "auto_startup_info.h"
 #include "auto_startup_interface.h"
+#include "ability_util.h"
+#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
@@ -264,8 +266,9 @@ int32_t AbilityAutoStartupService::DeleteAutoStartupData(const std::string &bund
 int32_t AbilityAutoStartupService::CheckAutoStartupData(const std::string &bundleName, int32_t uid)
 {
     int32_t userId;
+    int32_t appIndex = 0;
     AppExecFwk::BundleInfo bundleInfo;
-    if (!GetBundleInfo(bundleName, bundleInfo, uid, userId)) {
+    if (!GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex)) {
         return INNER_ERR;
     }
     auto tokenId = bundleInfo.applicationInfo.accessTokenId;
@@ -423,21 +426,24 @@ std::string AbilityAutoStartupService::GetSelfApplicationBundleName()
     return bundleName;
 }
 
+std::shared_ptr<AppExecFwk::BundleMgrHelper> AbilityAutoStartupService::ConnectManagerHelper()
+{
+    if (bundleMgrHelper_ == nullptr) {
+        bundleMgrHelper_ = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    }
+    return bundleMgrHelper_;
+}
+
 bool AbilityAutoStartupService::CheckSelfApplication(const std::string &bundleName)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called, bundleName: %{public}s.", bundleName.c_str());
     return GetSelfApplicationBundleName() == bundleName ? true : false;
 }
 
-bool AbilityAutoStartupService::GetBundleInfo(
-    const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, int32_t uid, int32_t &userId)
+bool AbilityAutoStartupService::GetBundleInfo(const std::string &bundleName,
+    AppExecFwk::BundleInfo &bundleInfo, int32_t uid, int32_t &userId, int32_t appIndex)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
-    auto bundleMgrClient = GetBundleMgrClient();
-    if (bundleMgrClient == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get BundleMgrClient.");
-        return false;
-    }
 
     if (uid == -1) {
         userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
@@ -453,12 +459,33 @@ bool AbilityAutoStartupService::GetBundleInfo(
         userId = abilityMgr->GetUserId();
     }
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Current userId: %{public}d.", userId);
-    auto flags =
-        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES | AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    if (!IN_PROCESS_CALL(bundleMgrClient->GetBundleInfo(
-        bundleName, static_cast<AppExecFwk::BundleFlag>(flags), bundleInfo, userId))) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get bundle info.");
+    
+    auto bms = ConnectManagerHelper();
+    if (bms == nullptr) {
         return false;
+    }
+    if (appIndex == 0) {
+        auto flags =
+            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES | AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+            if (!IN_PROCESS_CALL(bms->GetBundleInfo(
+                bundleName, static_cast<AppExecFwk::BundleFlag>(flags), bundleInfo, userId))) {
+                TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get bundle info.");
+                return false;
+            }
+    } else if (appIndex <= GlobalConstant::MAX_APP_CLONE_INDEX) {
+        auto bundleFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE);
+        auto bundleMgrResult = IN_PROCESS_CALL(
+            bms->GetCloneBundleInfo(bundleName, bundleFlag, appIndex, bundleInfo, userId));
+            if (bundleMgrResult != ERR_OK) {
+                return false;
+            }
+    } else {
+            if (!IN_PROCESS_CALL(bms->GetSandboxBundleInfo(bundleName, appIndex, userId, bundleInfo))) {
+                return false;
+            }
     }
     return true;
 }
@@ -474,15 +501,16 @@ bool AbilityAutoStartupService::GetAbilityData(const AutoStartupInfo &info, bool
     AppExecFwk::BundleInfo bundleInfo;
     int32_t currentUserId;
     int32_t uid = bundleInfo.applicationInfo.uid;
-    if (!GetBundleInfo(info.bundleName, bundleInfo, uid, currentUserId)) {
+    if (!GetBundleInfo(info.bundleName, bundleInfo, uid, currentUserId, info.appCloneIndex)) {
         return false;
     }
     userId = currentUserId;
     auto accessTokenIdStr = bundleInfo.applicationInfo.accessTokenId;
     accessTokenId = std::to_string(accessTokenIdStr);
-    for (auto abilityInfo : bundleInfo.abilityInfos) {
-        if ((abilityInfo.bundleName == info.bundleName) && (abilityInfo.name == info.abilityName)) {
-            if (info.moduleName.empty() || (abilityInfo.moduleName == info.moduleName)) {
+    for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
+        for (const auto& abilityInfo : hapModuleInfo.abilityInfos) {
+            if ((abilityInfo.bundleName == info.bundleName) && (abilityInfo.name == info.abilityName) &&
+                (info.moduleName.empty() || (abilityInfo.moduleName == info.moduleName))) {
                 isVisible = abilityInfo.visible;
                 abilityTypeName = GetAbilityTypeName(abilityInfo);
                 TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Get ability info success.");
