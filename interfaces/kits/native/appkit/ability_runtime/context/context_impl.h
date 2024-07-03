@@ -325,7 +325,7 @@ public:
      *
      * @return error code
      */
-    void KillProcessBySelf();
+    void KillProcessBySelf(const bool clearPageStack = true);
 
     /**
      * @brief Get running informationfor cuirrent process
@@ -363,6 +363,8 @@ public:
     Global::Resource::DeviceType GetDeviceType() const override;
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
+
+    void PrintTokenInfo() const;
 
     static const int EL_DEFAULT = 1;
 

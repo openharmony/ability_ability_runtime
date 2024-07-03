@@ -75,7 +75,7 @@ void TriggerCompleteCallBack::SetCallbackInfo(napi_env env, NativeReference* ref
     triggerCompleteInfo_.nativeRef.reset(ref);
 }
 
-void TriggerCompleteCallBack::SetWantAgentInstance(WantAgent* wantAgent)
+void TriggerCompleteCallBack::SetWantAgentInstance(std::shared_ptr<WantAgent> wantAgent)
 {
     triggerCompleteInfo_.wantAgent = wantAgent;
 }
@@ -222,7 +222,9 @@ void TriggerCompleteCallBack::OnSendFinished(
     dataWorker->resultExtras = resultExtras;
     dataWorker->env = triggerCompleteInfo_.env;
     dataWorker->nativeRef = std::move(triggerCompleteInfo_.nativeRef);
-    dataWorker->wantAgent = triggerCompleteInfo_.wantAgent;
+    if (triggerCompleteInfo_.wantAgent != nullptr) {
+        dataWorker->wantAgent = new WantAgent(triggerCompleteInfo_.wantAgent->GetPendingWant());
+    }
     work->data = static_cast<void *>(dataWorker);
     int ret = uv_queue_work(loop, work, [](uv_work_t *work) {}, OnSendFinishedUvAfterWorkCallback);
     if (ret != 0) {
@@ -696,7 +698,14 @@ napi_value JsWantAgent::OnTrigger(napi_env env, napi_callback_info info)
         return RetErrMsg(env, argv[ARGC_TWO], errCode);
     }
 
-    WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
+    auto execute = [wantAgent, triggerObj, triggerInfo] () {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "OnTrigger NapiAsyncTask is called");
+        WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnTrigger",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, &result));
+
     return CreateJsNull(env);
 }
 
@@ -738,7 +747,7 @@ int32_t JsWantAgent::UnWrapTriggerInfoParam(napi_env env, napi_callback_info inf
     napi_ref ref = nullptr;
     napi_create_reference(env, argv[ARGC_TWO], 1, &ref);
     triggerObj->SetCallbackInfo(env, reinterpret_cast<NativeReference*>(ref));
-    triggerObj->SetWantAgentInstance(pWantAgent);
+    triggerObj->SetWantAgentInstance(std::make_shared<WantAgent>(pWantAgent->GetPendingWant()));
 
     return BUSINESS_ERROR_CODE_OK;
 }
@@ -1155,10 +1164,14 @@ napi_value JsWantAgent::OnNapiTrigger(napi_env env, napi_callback_info info)
         ThrowInvalidParamError(env, "Parameter error!");
         return CreateJsUndefined(env);
     }
-    ErrCode result = WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
-    if (result != ERR_OK) {
-        return CreateJsError(env, result, AbilityRuntimeErrorUtil::GetErrMessage(result));
-    }
+    auto execute = [wantAgent, triggerObj, triggerInfo] () {
+        TAG_LOGD(AAFwkTag::WANTAGENT, "OnNapiTrigger NapiAsyncTask is called");
+        WantAgentHelper::TriggerWantAgent(wantAgent, triggerObj, triggerInfo);
+    };
+    napi_value result = nullptr;
+    NapiAsyncTask::ScheduleHighQos("JsWantAgent::OnNapiTrigger",
+        env, CreateAsyncTaskWithLastParam(env, nullptr, std::move(execute), nullptr, &result));
+
     return CreateJsNull(env);
 }
 
