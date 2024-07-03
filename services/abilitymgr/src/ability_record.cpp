@@ -523,6 +523,7 @@ void AbilityRecord::ProcessForegroundAbility(uint32_t tokenId, uint32_t sceneFla
             SuspendManager::SuspendManagerClient::GetInstance().ThawOneApplication(
                 uid, bundleName, "THAW_BY_FOREGROUND_ABILITY");
 #endif // EFFICIENCY_MANAGER_ENABLE
+            SetAbilityStateInner(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token_);
         }
     } else {
