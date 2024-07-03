@@ -96,6 +96,7 @@ napi_value JsAutoFillManager::OnRequestAutoSave(napi_env env, NapiCallbackInfo &
 void JsAutoFillManager::OnRequestAutoSaveInner(napi_env env, int32_t instanceId,
     const std::shared_ptr<JsAutoSaveRequestCallback> &saveRequestCallback)
 {
+#ifdef SUPPORT_GRAPHICS
     auto uiContent = Ace::UIContent::GetUIContent(instanceId);
     if (uiContent == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "UIContent is nullptr.");
@@ -106,7 +107,8 @@ void JsAutoFillManager::OnRequestAutoSaveInner(napi_env env, int32_t instanceId,
         AutoFill::AutoFillRequest request;
         uiContent->DumpViewData(request.viewData, request.autoFillType);
         request.autoFillCommand = AutoFill::AutoFillCommand::SAVE;
-        auto ret = AutoFillManager::GetInstance().RequestAutoSave(uiContent, request, saveRequestCallback);
+        AbilityRuntime::AutoFill::AutoFillResult result;
+        auto ret = AutoFillManager::GetInstance().RequestAutoSave(uiContent, request, saveRequestCallback, result);
         if (ret != ERR_OK) {
             TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Request auto save error[%{public}d].", ret);
             ThrowError(env, GetJsErrorCodeByNativeError(ret));
@@ -115,6 +117,7 @@ void JsAutoFillManager::OnRequestAutoSaveInner(napi_env env, int32_t instanceId,
         std::lock_guard<std::mutex> lock(mutexLock_);
         saveRequestObject_.emplace(instanceId, saveRequestCallback);
     }
+#endif // SUPPORT_GRAPHICS
 }
 
 std::shared_ptr<JsAutoSaveRequestCallback> JsAutoFillManager::GetCallbackByInstanceId(int32_t instanceId)
