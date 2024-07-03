@@ -943,8 +943,7 @@ void AppMgrServiceInner::ApplicationForegrounded(const int32_t recordId)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     auto appRecord = GetAppRunningRecordByAppRecordId(recordId);
-    if (!appRecord || (!appRecord->IsUpdateStateFromService()
-        && appRecord->GetApplicationPendingState() != ApplicationPendingState::FOREGROUNDING)) {
+    if (!appRecord || appRecord->GetApplicationPendingState() != ApplicationPendingState::FOREGROUNDING) {
         TAG_LOGE(AAFwkTag::APPMGR, "get app record failed");
         return;
     }
@@ -2755,15 +2754,15 @@ void AppMgrServiceInner::QueryExtensionSandBox(const std::string &moduleName, co
         extensionInfos.insert(extensionInfos.end(), hapModuleInfo.extensionInfos.begin(),
             hapModuleInfo.extensionInfos.end());
     }
-    auto infoExisted = [&moduleName, &abilityName](const ExtensionAbilityInfo& info) {
-        return info.moduleName == moduleName && info.name == abilityName && info.needCreateSandbox;
+    startMsg.strictMode = strictMode;
+    auto infoExisted = [&moduleName, &abilityName, &strictMode](const ExtensionAbilityInfo& info) {
+        return info.moduleName == moduleName && info.name == abilityName && info.needCreateSandbox && strictMode;
     };
     auto infoIter = std::find_if(extensionInfos.begin(), extensionInfos.end(), infoExisted);
     DataGroupInfoList extensionDataGroupInfoList;
     if (infoIter != extensionInfos.end()) {
-        startMsg.isolatedExtension = infoIter->needCreateSandbox;
+        startMsg.isolatedExtension = true;
         startMsg.extensionSandboxPath = infoIter->moduleName + "-" + infoIter->name;
-        startMsg.strictMode = strictMode;
         for (auto dataGroupInfo : dataGroupInfoList) {
             auto groupIdExisted = [&dataGroupInfo](const std::string &dataGroupId) {
                 return dataGroupInfo.dataGroupId == dataGroupId;
@@ -5307,10 +5306,16 @@ int32_t AppMgrServiceInner::NotifyAppFaultBySA(const AppFaultDataBySA &faultData
 bool AppMgrServiceInner::SetAppFreezeFilter(int32_t pid)
 {
     int32_t callingPid = IPCSkeleton::GetCallingPid();
-    if (callingPid == pid && AppExecFwk::AppfreezeManager::GetInstance()->IsValidFreezeFilter(pid)) {
-        bool cancelResult = AppExecFwk::AppfreezeManager::GetInstance()->CancelAppFreezeDetect(pid);
-        auto resetAppfreezeTask = [pid, innerService = shared_from_this()]() {
-            AppExecFwk::AppfreezeManager::GetInstance()->ResetAppfreezeState(pid);
+    auto callerRecord = GetAppRunningRecordByPid(pid);
+    if (callerRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "SetAppFreezeFilter callerRecord is nullptr, can not get callerBundleName.");
+        return false;
+    }
+    std::string bundleName = callerRecord->GetBundleName();
+    if (callingPid == pid && AppExecFwk::AppfreezeManager::GetInstance()->IsValidFreezeFilter(pid, bundleName)) {
+        bool cancelResult = AppExecFwk::AppfreezeManager::GetInstance()->CancelAppFreezeDetect(pid, bundleName);
+        auto resetAppfreezeTask = [pid, bundleName, innerService = shared_from_this()]() {
+            AppExecFwk::AppfreezeManager::GetInstance()->ResetAppfreezeState(pid, bundleName);
         };
         constexpr int32_t waitTime = 120000; // wait 2min
         taskHandler_->SubmitTask(resetAppfreezeTask, "resetAppfreezeTask", waitTime);
