@@ -23,6 +23,14 @@
         {
             "type": "filePicker",
             "typePicker": "sysPicker/filePicker"
+        },
+        {
+            "type": "audioPicker",
+            "typePicker": "sysPicker/audioPicker"
+        },
+        {
+            "type": "mediaControl",
+            "typePicker": "sysPicker/mediaControl"
         }
     ]
 }

@@ -157,11 +157,18 @@ public:
     void SetColorMode(int colorMode);
 
     /**
-     * @brief Set color mode
+     * @brief Set language
      *
-     * @param colorMode color mode.
+     * @param language language.
      */
     void SetLanguage(std::string language);
+
+    /**
+     * @brief Set font
+     *
+     * @param Font font.
+     */
+    void SetFont(std::string font);
 
     /**
      * @brief clear the application data by app self
@@ -318,7 +325,7 @@ public:
      *
      * @return error code
      */
-    void KillProcessBySelf();
+    void KillProcessBySelf(const bool clearPageStack = true);
 
     /**
      * @brief Get running informationfor cuirrent process
@@ -356,6 +363,8 @@ public:
     Global::Resource::DeviceType GetDeviceType() const override;
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport);
+
+    void PrintTokenInfo() const;
 
     static const int EL_DEFAULT = 1;
 

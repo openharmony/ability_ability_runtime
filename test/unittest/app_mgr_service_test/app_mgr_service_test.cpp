@@ -289,7 +289,7 @@ HWTEST_F(AppMgrServiceTest, ClearUpApplicationData_001, TestSize.Level0)
     std::string bundleName = "bundleName";
     appMgrService->SetInnerService(std::make_shared<AppMgrServiceInner>());
     appMgrService->eventHandler_ = std::make_shared<AMSEventHandler>(taskHandler_, appMgrService->appMgrServiceInner_);
-    int32_t res = appMgrService->ClearUpApplicationData(bundleName);
+    int32_t res = appMgrService->ClearUpApplicationData(bundleName, 0);
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
 }
 
@@ -1421,7 +1421,7 @@ HWTEST_F(AppMgrServiceTest, IsAppRunning_001, TestSize.Level1)
     int32_t appCloneIndex = 0;
     bool isRunning = false;
     int32_t res = appMgrService->IsAppRunning(bundleName, appCloneIndex, isRunning);
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, AAFwk::ERR_APP_CLONE_INDEX_INVALID);
 }
 
 /**

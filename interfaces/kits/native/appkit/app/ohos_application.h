@@ -22,9 +22,9 @@
 #include <memory>
 
 #include "ability_lifecycle_callbacks.h"
-#include "foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/context/context.h"
 #include "ability_stage.h"
 #include "app_context.h"
+#include "context.h"
 #include "element_callback.h"
 
 namespace OHOS {
@@ -176,6 +176,14 @@ public:
      * @param config Indicates the new Configuration object.
      */
     virtual void OnConfigurationUpdated(Configuration config);
+    
+    /**
+     *
+     * @brief Will be Called when the application font of the device changes.
+     *
+     * @param config Indicates the new Configuration object.
+     */
+    virtual void OnFontUpdated(Configuration config);
 
     /**
      *
@@ -306,6 +314,8 @@ public:
 
     void AutoStartupDone(const std::shared_ptr<AbilityLocalRecord> &abilityRecord,
         const std::shared_ptr<AbilityRuntime::AbilityStage> &abilityStage, const std::string &moduleName);
+
+    void CleanEmptyAbilityStage();
 
 private:
     void DoCleanWorkAfterStageCleaned(const AbilityInfo &abilityInfo);

@@ -106,12 +106,13 @@ public:
     Status NotifyChangeExt(const ChangeInfo &changeInfo);
 
 private:
+    class SystemAbilityStatusChangeListener;
     /**
      * Connect dataobs manager service.
      *
      * @return Returns SUCCESS on success, others on failure.
      */
-    Status Connect();
+    std::pair<Status, sptr<IDataObsMgr>> GetObsMgr();
 
     void ResetService();
     void OnRemoteDied();
@@ -144,6 +145,7 @@ private:
         bool isDescendants;
     };
     ConcurrentMap<sptr<IDataAbilityObserver>, std::list<Param>> observerExts_;
+    sptr<SystemAbilityStatusChangeListener> callback_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS
