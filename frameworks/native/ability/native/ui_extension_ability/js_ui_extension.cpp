@@ -334,8 +334,7 @@ void JsUIExtension::OnStopCallBack()
 
     auto applicationContext = Context::GetApplicationContext();
     if (applicationContext != nullptr) {
-        std::shared_ptr<NativeReference> sharedJsObj = std::move(jsObj_);
-        applicationContext->DispatchOnAbilityDestroy(sharedJsObj);
+        applicationContext->DispatchOnAbilityDestroy(jsObj_);
     }
 }
 
@@ -709,6 +708,7 @@ sptr<Rosen::Window> JsUIExtension::CreateUIWindow(const std::shared_ptr<UIExtens
     option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
     option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
     option->SetParentId(sessionInfo->hostWindowId);
+    option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
     return Rosen::Window::Create(option, GetContext(), sessionInfo->sessionToken);
 }
 

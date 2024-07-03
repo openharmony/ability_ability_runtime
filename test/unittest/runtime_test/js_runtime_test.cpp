@@ -1331,8 +1331,8 @@ HWTEST_F(JsRuntimeTest, InitSourceMap_0100, TestSize.Level0)
     AbilityRuntime::Runtime::Options options;
     options.preload = true;
     auto jsRuntime = AbilityRuntime::JsRuntime::Create(options);
-
-    jsRuntime->InitSourceMap(nullptr);
+    auto operatorObj = std::make_shared<JsEnv::SourceMapOperator>("", true, true);
+    jsRuntime->InitSourceMap(operatorObj);
     ASSERT_NE(jsRuntime, nullptr);
     jsRuntime.reset();
     TAG_LOGI(AAFwkTag::TEST, "InitSourceMap_0100 end");
@@ -1465,7 +1465,7 @@ HWTEST_F(JsRuntimeTest, DumpCpuProfile_0100, TestSize.Level1)
 {
     auto jsRuntime = std::make_unique<JsRuntime>();
     bool isPrivate = true;
-    jsRuntime->DumpCpuProfile(isPrivate);
+    jsRuntime->DumpCpuProfile();
     EXPECT_TRUE(jsRuntime != nullptr);
 }
 
