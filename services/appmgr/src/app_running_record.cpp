@@ -658,6 +658,8 @@ void AppRunningRecord::ScheduleBackgroundRunning()
 void AppRunningRecord::ScheduleProcessSecurityExit()
 {
     if (appLifeCycleDeal_) {
+        auto appRecord = shared_from_this();
+        DelayedSingleton<CacheProcessManager>::GetInstance()->PrepareActivateCache(appRecord);
         appLifeCycleDeal_->ScheduleProcessSecurityExit();
     }
 }
@@ -1354,19 +1356,15 @@ bool AppRunningRecord::IsLastAbilityRecord(const sptr<IRemoteObject> &token)
     return false;
 }
 
-bool AppRunningRecord::ExtensionAbilityRecordExists(const sptr<IRemoteObject> &token)
+bool AppRunningRecord::ExtensionAbilityRecordExists()
 {
-    auto moduleRecord = GetModuleRunningRecordByToken(token);
-    if (!moduleRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "can not find module record");
-        return false;
-    }
     auto moduleRecordList = GetAllModuleRecord();
     for (auto moduleRecord : moduleRecordList) {
         if (moduleRecord && moduleRecord->ExtensionAbilityRecordExists()) {
             return true;
+        }
     }
-    }
+    TAG_LOGD(AAFwkTag::APPMGR, "can not find extension record");
     return false;
 }
 

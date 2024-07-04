@@ -283,9 +283,7 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             if (isDebugApp) {
                 weak->StopDebugger(option);
             }
-            int32_t tid = weak->ParseHdcRegisterOption(option);
-            const auto &debuggerPostTask = ConnectServerManager::Get().GetDebuggerPostTask(tid);
-            weak->StartDebugger(option, socketFd, isDebugApp, debuggerPostTask);
+            weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
     if (isDebugApp) {
@@ -416,9 +414,7 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             if (isDebugApp) {
                 weak->StopDebugger(option);
             }
-            int32_t tid = weak->ParseHdcRegisterOption(option);
-            const auto &debuggerPostTask = ConnectServerManager::Get().GetDebuggerPostTask(tid);
-            weak->StartDebugger(option, socketFd, isDebugApp, debuggerPostTask);
+            weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
 
@@ -1202,11 +1198,11 @@ void JsRuntime::RemoveTask(const std::string& name)
     jsEnv_->RemoveTask(name);
 }
 
-void JsRuntime::DumpCpuProfile(bool isPrivate)
+void JsRuntime::DumpCpuProfile()
 {
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
-    nativeEngine->DumpCpuProfile(true, DumpFormat::JSON, isPrivate, false);
+    nativeEngine->DumpCpuProfile();
 }
 
 void JsRuntime::DumpHeapSnapshot(bool isPrivate)
@@ -1220,7 +1216,13 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
-    DFXJSNApi::DumpHeapSnapshot(vm, 0, true, false, false, isFullGC, tid);
+    panda::ecmascript::DumpSnapShotOption dumpOption;
+    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    dumpOption.isVmMode = true;
+    dumpOption.isPrivate = false;
+    dumpOption.captureNumericValue = false;
+    dumpOption.isFullGC = isFullGC;
+    DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
 }
 
 void JsRuntime::ForceFullGC(uint32_t tid)
