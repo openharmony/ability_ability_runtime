@@ -182,8 +182,9 @@ void EventReport::LogAbilityOnActiveEvent(const std::string &name, HiSysEventTyp
 
 void EventReport::LogStartStandardEvent(const std::string &name, HiSysEventType type, const EventInfo &eventInfo)
 {
-    HILOG_DEBUG("EventInfo is [%{public}d, %{public}s, %{public}s, %{public}s]", eventInfo.userId,
-                eventInfo.bundleName.c_str(), eventInfo.moduleName.c_str(), eventInfo.abilityName.c_str());
+    TAG_LOGD(AAFwkTag::DEFAULT, "EventInfo is [%{public}d, %{public}s, %{public}s, %{public}s]",
+        eventInfo.userId, eventInfo.bundleName.c_str(), eventInfo.moduleName.c_str(),
+        eventInfo.abilityName.c_str());
     HiSysEventWrite(
         HiSysEvent::Domain::AAFWK,
         name,
@@ -227,18 +228,7 @@ void EventReport::SendAbilityEvent(const EventName &eventName, HiSysEventType ty
             LogAbilityOnActiveEvent(name, type, eventInfo);
             break;
         case EventName::START_STANDARD_ABILITIES:
-            TAG_LOGD(AAFwkTag::DEFAULT, "EventInfo is [%{public}d, %{public}s, %{public}s, %{public}s]",
-                eventInfo.userId, eventInfo.bundleName.c_str(), eventInfo.moduleName.c_str(),
-                eventInfo.abilityName.c_str());
-            HiSysEventWrite(
-                HiSysEvent::Domain::AAFWK,
-                name,
-                type,
-                EVENT_KEY_USERID, eventInfo.userId,
-                EVENT_KEY_BUNDLE_NAME, eventInfo.bundleName,
-                EVENT_KEY_MODULE_NAME, eventInfo.moduleName,
-                EVENT_KEY_ABILITY_NAME, eventInfo.abilityName,
-                EVENT_KEY_ABILITY_NUMBER, eventInfo.abilityNumber);
+            LogStartStandardEvent(name, type, eventInfo);
             break;
         default:
             break;

@@ -114,13 +114,13 @@ private:
     int32_t GetTriggerInfo(napi_env env, napi_value param, TriggerInfo &triggerInfo);
     int32_t GetWantAgentParam(napi_env env, napi_callback_info info, WantAgentWantsParas &paras);
     void SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgent,
-        AbilityRuntime::NapiAsyncTask::CompleteCallback& complete);
+        AbilityRuntime::NapiAsyncTask::CompleteCallback &complete);
     void SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
-        AbilityRuntime::NapiAsyncTask::CompleteCallback& complete);
+        AbilityRuntime::NapiAsyncTask::CompleteCallback &complete);
     void SetOnCancelCallback(std::shared_ptr<WantAgent> wantAgent,
-        AbilityRuntime::NapiAsyncTask::CompleteCallback& complete);
+        AbilityRuntime::NapiAsyncTask::CompleteCallback &complete);
     void SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsParas> spParas,
-        AbilityRuntime::NapiAsyncTask::CompleteCallback& complete);
+        AbilityRuntime::NapiAsyncTask::CompleteCallback &complete);
     int32_t GetTriggerWant(napi_env env, napi_value param, std::shared_ptr<AAFwk::Want> &want);
     int32_t GetTriggerPermission(napi_env env, napi_value param, std::string &permission);
     int32_t GetTriggerExtraInfo(napi_env env, napi_value param, std::shared_ptr<AAFwk::WantParams> &extraInfo);
