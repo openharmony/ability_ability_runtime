@@ -938,7 +938,10 @@ ohos_shared_library("service_extension_module") {
   ]
 
   if (ability_runtime_graphics) {
-    external_deps += [ "image_framework:image" ]
+    external_deps += [
+      "image_framework:image",
+      "window_manager:libwm",
+    ]
     public_external_deps = [
       "form_fwk:fmskit_provider_client",
       "form_fwk:form_manager",
