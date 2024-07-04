@@ -324,7 +324,7 @@ napi_value JsWantAgent::HandleInvalidParam(napi_env env, napi_value lastParam, c
     #endif
 }
 
-void HandleAsyncTaskResult(napi_env env, NapiAsyncTask & task, ErrCode &retCode)
+void HandleAsyncTaskResult(napi_env env, NapiAsyncTask &task, ErrCode retCode)
 {
     bool ret = false;
     #ifdef ENABLE_ERRCODE
@@ -542,7 +542,7 @@ napi_value JsWantAgent::OnGetBundleName(napi_env env, napi_callback_info info)
 }
 
 void JsWantAgent::SetOnGetBundleNameCallback(std::shared_ptr<WantAgent> wantAgent,
-    NapiAsyncTask::CompleteCallback& complete)
+    NapiAsyncTask::CompleteCallback &complete)
 {
     complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "OnGetBundleName NapiAsyncTask is called");
@@ -609,7 +609,7 @@ napi_value JsWantAgent::OnGetUid(napi_env env, napi_callback_info info)
 }
 
 void JsWantAgent::SetOnGetUidCallback(std::shared_ptr<WantAgent> wantAgent,
-    NapiAsyncTask::CompleteCallback& complete)
+    NapiAsyncTask::CompleteCallback &complete)
 {
     complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
         TAG_LOGD(AAFwkTag::WANTAGENT, "OnGetUid NapiAsyncTask is called");
@@ -676,7 +676,7 @@ napi_value JsWantAgent::OnCancel(napi_env env, napi_callback_info info)
 }
 
 void JsWantAgent::SetOnCancelCallback(std::shared_ptr<WantAgent> wantAgent,
-    NapiAsyncTask::CompleteCallback& complete)
+    NapiAsyncTask::CompleteCallback &complete)
 {
     complete = [wantAgent](napi_env env, NapiAsyncTask &task, int32_t status) {
             TAG_LOGD(AAFwkTag::WANTAGENT, "OnCancel NapiAsyncTask is called");
@@ -1249,7 +1249,7 @@ napi_value JsWantAgent::OnNapiGetWantAgent(napi_env env, napi_callback_info info
 }
 
 void JsWantAgent::SetOnNapiGetWantAgentCallback(std::shared_ptr<WantAgentWantsParas> spParas,
-    AbilityRuntime::NapiAsyncTask::CompleteCallback& complete)
+    AbilityRuntime::NapiAsyncTask::CompleteCallback &complete)
 {
     complete = [weak = weak_from_this(), parasobj = spParas](napi_env env,
         NapiAsyncTask &task, int32_t status) {
