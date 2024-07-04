@@ -406,6 +406,14 @@ public:
     int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override;
 
     /**
+     * Set Appfreeze Detect Filter
+     *
+     * @param pid the process pid.
+     * @return Returns true on success, others on failure.
+     */
+    bool SetAppFreezeFilter(int32_t pid) override;
+
+    /**
      * get memorySize by pid.
      *
      * @param pid process id.
@@ -546,6 +554,12 @@ public:
      * @return Returns ERR_OK is test ability, others is not test ability.
      */
     int32_t CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest) override;
+
+    virtual int32_t NotifyProcessDependedOnWeb() override;
+
+    virtual void KillProcessDependedOnWeb() override;
+
+    virtual void RestartResidentProcessDependedOnWeb() override;
 private:
     /**
      * Init, Initialize application services.
@@ -697,15 +711,6 @@ private:
     sptr<IAmsMgr> amsMgrScheduler_;
 
     bool GetDumpIpcKeyByOption(const std::string &option, DumpIpcKey &key);
-
-    using DumpFuncType = int (AppMgrService::*)(const std::vector<std::u16string>& args, std::string& result);
-    bool GetDumpFunc(const std::string &optionKey, DumpFuncType &func);
-
-    using DumpIpcAllFuncType = int (AppMgrService::*)(std::string& result);
-    DumpIpcAllFuncType GetDumpIpcAllFuncByKey(uint32_t key);
-
-    using DumpIpcFuncType = int (AppMgrService::*)(const int32_t pid, std::string& result);
-    DumpIpcFuncType GetDumpIpcFuncByKey(uint32_t key);
 
     DISALLOW_COPY_AND_MOVE(AppMgrService);
 };

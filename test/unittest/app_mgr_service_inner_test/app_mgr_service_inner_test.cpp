@@ -2940,23 +2940,23 @@ HWTEST_F(AppMgrServiceInnerTest, NotifyAppMgrRecordExitReason_001, TestSize.Leve
 }
 
 /**
- * @tc.name: VerifyProcessPermission_001
+ * @tc.name: VerifyKillProcessPermission_001
  * @tc.desc: verify process permission.
  * @tc.type: FUNC
  * @tc.require: issueI5W4S7
  */
-HWTEST_F(AppMgrServiceInnerTest, VerifyProcessPermission_001, TestSize.Level0)
+HWTEST_F(AppMgrServiceInnerTest, VerifyKillProcessPermission_001, TestSize.Level0)
 {
-    TAG_LOGI(AAFwkTag::TEST, "VerifyProcessPermission_001 start");
+    TAG_LOGI(AAFwkTag::TEST, "VerifyKillProcessPermission_001 start");
     auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
     EXPECT_NE(appMgrServiceInner, nullptr);
 
-    appMgrServiceInner->VerifyProcessPermission("");
+    appMgrServiceInner->VerifyKillProcessPermission("");
 
     appMgrServiceInner->appRunningManager_ = nullptr;
-    appMgrServiceInner->VerifyProcessPermission("");
+    appMgrServiceInner->VerifyKillProcessPermission("");
 
-    TAG_LOGI(AAFwkTag::TEST, "VerifyProcessPermission_001 end");
+    TAG_LOGI(AAFwkTag::TEST, "VerifyKillProcessPermission_001 end");
 }
 
 /**
@@ -4303,7 +4303,7 @@ HWTEST_F(AppMgrServiceInnerTest, SetSupportedProcessCacheSelf_001, TestSize.Leve
     EXPECT_NE(appMgrServiceInner, nullptr);
 
     bool isSupported = false;
-    EXPECT_EQ(appMgrServiceInner->SetSupportedProcessCacheSelf(isSupported), AAFwk::CHECK_PERMISSION_FAILED);
+    EXPECT_EQ(appMgrServiceInner->SetSupportedProcessCacheSelf(isSupported), CHECK_PERMISSION_FAILED);
 
     appMgrServiceInner->appRunningManager_ = nullptr;
     EXPECT_EQ(appMgrServiceInner->SetSupportedProcessCacheSelf(isSupported), ERR_NO_INIT);
@@ -4359,11 +4359,31 @@ HWTEST_F(AppMgrServiceInnerTest, GetRunningMultiAppInfoByBundleName_001, TestSiz
     int32_t ret = appMgrServiceInner->GetRunningMultiAppInfoByBundleName(bundleName, info);
     EXPECT_NE(ret, ERR_OK);
 
-    appMgrServiceInner->appRunningManager_ = nullptr;
+    appMgrServiceInner->remoteClientManager_ = nullptr;
     ret = appMgrServiceInner->GetRunningMultiAppInfoByBundleName(bundleName, info);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 
     TAG_LOGI(AAFwkTag::TEST, "GetRunningMultiAppInfoByBundleName_001 end");
+}
+
+/**
+ * @tc.name: GetRunningMultiAppInfoByBundleName_002
+ * @tc.desc: Get multiApp information list by bundleName.
+ * @tc.type: FUNC
+ * @tc.require: issueI9HMAO
+ */
+HWTEST_F(AppMgrServiceInnerTest, GetRunningMultiAppInfoByBundleName_002, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "GetRunningMultiAppInfoByBundleName_002 start");
+    auto appMgrServiceInner = std::make_shared<AppMgrServiceInner>();
+    EXPECT_NE(appMgrServiceInner, nullptr);
+
+    std::string bundleName = "";
+    RunningMultiAppInfo info;
+    int32_t ret = appMgrServiceInner->GetRunningMultiAppInfoByBundleName(bundleName, info);
+    EXPECT_EQ(ret, AAFwk::INVALID_PARAMETERS_ERR);
+
+    TAG_LOGI(AAFwkTag::TEST, "GetRunningMultiAppInfoByBundleName_002 end");
 }
 
 /**

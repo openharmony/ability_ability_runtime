@@ -1294,11 +1294,12 @@ ErrCode AbilityManagerClient::SetMissionIcon(
     return abms->SetMissionIcon(abilityToken, icon);
 }
 
-ErrCode AbilityManagerClient::RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler)
+ErrCode AbilityManagerClient::RegisterWindowManagerServiceHandler(sptr<IWindowManagerServiceHandler> handler,
+    bool animationEnabled)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
-    return abms->RegisterWindowManagerServiceHandler(handler);
+    return abms->RegisterWindowManagerServiceHandler(handler, animationEnabled);
 }
 
 void AbilityManagerClient::CompleteFirstFrameDrawing(sptr<IRemoteObject> abilityToken)
@@ -1467,7 +1468,7 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDevi
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     {
-        std::lock_guard<std::recursive_mutex> lock_l(mutex_);
+        std::lock_guard<std::mutex> lock_l(topAbilityMutex_);
 #ifdef SUPPORT_SCREEN
         if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
             AppExecFwk::ElementName elementName = {};
@@ -1843,6 +1844,15 @@ ErrCode AbilityManagerClient::GetUIExtensionRootHostInfo(const sptr<IRemoteObjec
     return abms->GetUIExtensionRootHostInfo(token, hostInfo, userId);
 }
 
+ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
+    UIExtensionSessionInfo &uiExtensionSessionInfo, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get ui extension session info.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo, userId);
+}
+
 int32_t AbilityManagerClient::RestartApp(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1909,6 +1919,15 @@ void AbilityManagerClient::NotifyFrozenProcessByRSS(const std::vector<int32_t> &
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->NotifyFrozenProcessByRSS(pidList, uid);
+}
+
+ErrCode AbilityManagerClient::PreStartMission(const std::string& bundleName, const std::string& moduleName,
+    const std::string& abilityName, const std::string& startTime)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->PreStartMission(bundleName, moduleName, abilityName, startTime);
 }
 } // namespace AAFwk
 } // namespace OHOS

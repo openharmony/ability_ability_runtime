@@ -31,7 +31,6 @@
 #include "ability_thread.h"
 #include "ability_util.h"
 #include "app_loader.h"
-#include "ability_manager_client.h"
 #include "app_recovery.h"
 #include "app_utils.h"
 #include "appfreeze_inner.h"
@@ -49,6 +48,7 @@
 #include "context_impl.h"
 #include "dump_ffrt_helper.h"
 #include "dump_ipc_helper.h"
+#include "dump_runtime_helper.h"
 #include "exit_reason.h"
 #include "extension_ability_info.h"
 #include "extension_module_loader.h"
@@ -58,6 +58,7 @@
 #include "file_path_utils.h"
 #include "freeze_util.h"
 #include "hilog_tag_wrapper.h"
+#include "hilog_wrapper.h"
 #include "resource_config_helper.h"
 #ifdef SUPPORT_SCREEN
 #include "locale_config.h"
@@ -1485,6 +1486,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 #ifdef CJ_FRONTEND
     if (isCJApp) {
         AbilityRuntime::CJRuntime::SetAppLibPath(appLibPaths);
+        if (appInfo.asanEnabled) {
+            AbilityRuntime::CJRuntime::SetAsanVersion();
+        } else if (appInfo.tsanEnabled) {
+            AbilityRuntime::CJRuntime::SetTsanVersion();
+        }
     } else {
 #endif
         AbilityRuntime::JsRuntime::SetAppLibPath(appLibPaths, isSystemApp);
@@ -1623,7 +1629,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
                 TAG_LOGI(AAFwkTag::APPKIT, "hisysevent write result=%{public}d, send event [FRAMEWORK,PROCESS_KILL],"
                     " pid=%{public}d, processName=%{public}s, msg=%{public}s", result, pid, processName.c_str(),
                     KILL_REASON);
-
+    
                 if (ApplicationDataManager::GetInstance().NotifyUnhandledException(summary) &&
                     ApplicationDataManager::GetInstance().NotifyExceptionObject(appExecErrorObj)) {
                     return;
@@ -1683,6 +1689,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
 
             IdleNotifyStatusCallback cb = idleTime_->GetIdleNotifyFunc();
             jsEngine.NotifyIdleStatusControl(cb);
+
+            auto helper = std::make_shared<DumpRuntimeHelper>(application_);
+            helper->SetAppFreezeFilterCallback();
         }
 #ifdef CJ_FRONTEND
     }
@@ -2534,7 +2543,7 @@ void MainThread::HandleDumpHeap(bool isPrivate)
     };
 
     ffrt::submit(taskFork, {}, {}, ffrt::task_attr().qos(ffrt::qos_user_initiated));
-    runtime->DumpCpuProfile(isPrivate);
+    runtime->DumpCpuProfile();
 }
 
 void MainThread::DestroyHeapProfiler()
