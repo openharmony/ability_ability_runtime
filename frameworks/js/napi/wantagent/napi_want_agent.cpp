@@ -844,16 +844,19 @@ int32_t JsWantAgent::GetTriggerInfo(napi_env env, napi_value param, TriggerInfo 
 
     std::shared_ptr<AAFwk::Want> want = nullptr;
     if (GetTriggerWant(env, param, want) == ERR_NOT_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Call GetTriggerWant GetTriggerInfo convert code error!");
         return ERR_NOT_OK;
     }
 
     std::string permission = "";
     if (GetTriggerPermission(env, param, permission) == ERR_NOT_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Call GetTriggerPermission GetTriggerInfo convert code error!");
         return ERR_NOT_OK;
     }
 
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (GetTriggerExtraInfo(env, param, extraInfo) == ERR_NOT_OK) {
+        TAG_LOGE(AAFwkTag::WANTAGENT, "Call GetTriggerExtraInfo GetTriggerInfo convert code error!");
         return ERR_NOT_OK;
     }
 
