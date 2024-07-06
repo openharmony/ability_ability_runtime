@@ -299,7 +299,6 @@ ohos_shared_library("app_context") {
 
   external_deps = [
     "ability_base:extractortool",
-    "ability_base:session_info",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -315,6 +314,7 @@ ohos_shared_library("app_context") {
   ]
   public_external_deps = [
     "ability_base:configuration",
+    "ability_base:session_info",
     "ability_base:want",
   ]
 

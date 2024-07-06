@@ -56,6 +56,8 @@ ohos_shared_library("extension_manager") {
     "samgr:samgr_proxy",
   ]
 
+  public_external_deps = [ "ability_base:session_info" ]
+
   innerapi_tags = [ "platformsdk" ]
   subsystem_name = "ability"
   part_name = "ability_runtime"
