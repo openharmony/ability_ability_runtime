@@ -118,6 +118,8 @@ ohos_shared_library("runtime") {
     "zlib:shared_libz",
   ]
 
+  public_external_deps = [ "ability_base:session_info" ]
+
   defines = []
 
   if (cj_frontend) {
