@@ -2793,7 +2793,7 @@ int AbilityManagerService::StartUIExtensionAbility(const sptr<SessionInfo> &exte
     AppExecFwk::ExtensionAbilityType extensionType = extensionTypeStr.empty() ?
         AppExecFwk::ExtensionAbilityType::UI : AppExecFwk::ConvertToExtensionAbilityType(extensionTypeStr);
     
-    if(extensionType == AppExecFwk::extensionAbilityType::UNSPECIFIED) {
+    if(extensionType == AppExecFwk::ExtensionAbilityType::UNSPECIFIED) {
       TAG_LOGE(AAFwkTag::ABILITYMGR, "Invalid input extension type.");
       return ERR_INVALID_VALUE;
     }
