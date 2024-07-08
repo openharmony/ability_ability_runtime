@@ -67,8 +67,8 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
         newFlag = FLAG_WRITE_URI;
     }
     std::lock_guard<std::mutex> guard(mutex_);
-    for(auto search = uriMap_.begin(); search != uriMap_.end(); ++search) {
-        if((search->first != uriStr) && !IsSubDirectoryFileUri(uriStr, search->first)) {
+    for (auto search = uriMap_.begin(); search != uriMap_.end(); ++search) {
+        if ((search->first != uriStr) && !IsSubDirectoryFileUri(uriStr, search->first)) {
             continue;
         }
         auto& list = search->second;
