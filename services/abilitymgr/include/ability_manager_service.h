@@ -16,6 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_MANAGER_SERVICE_H
 
+#include <cstdint>
 #include <future>
 #include <map>
 #include <memory>
@@ -30,6 +31,7 @@
 #include "ability_connect_manager.h"
 #include "ability_debug_deal.h"
 #include "ability_event_handler.h"
+#include "ability_info.h"
 #include "ability_manager_event_subscriber.h"
 #include "ability_manager_stub.h"
 #include "ams_configuration_parameter.h"
@@ -64,7 +66,6 @@
 #include "uri.h"
 #include "user_controller.h"
 #ifdef SUPPORT_GRAPHICS
-#include "dialog_session_record.h"
 #include "implicit_start_processor.h"
 #include "system_dialog_scheduler.h"
 #endif
@@ -83,6 +84,7 @@ enum class ServiceRunningState { STATE_NOT_START, STATE_RUNNING };
 constexpr int32_t BASE_USER_RANGE = 200000;
 constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t INVALID_USER_ID = -1;
+constexpr const char* KEY_SESSION_ID = "com.ohohs.param.sessionId";
 using OHOS::AppExecFwk::IAbilityController;
 class PendingWantManager;
 struct StartAbilityInfo;
@@ -251,8 +253,7 @@ public:
             const sptr<IRemoteObject> &callerToken,
             sptr<IRemoteObject> asCallerSourceToken,
             int32_t userId = DEFAULT_INVAL_VALUE,
-            int requestCode = DEFAULT_INVAL_VALUE,
-            bool isSendDialogResult = false) override;
+            int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
      * Starts a new ability using the original caller information.
@@ -340,6 +341,18 @@ public:
         const sptr<SessionInfo> &sessionInfo,
         int32_t userId,
         int requestCode) override;
+
+    /**
+     * Open link of ability and atomic service.
+     *
+     * @param want Ability want.
+     * @param callerToken Caller ability token.
+     * @param userId User ID.
+     * @param requestCode Ability request code.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
      * Pop-up launch of full-screen atomic service.
@@ -945,7 +958,6 @@ public:
         int requestCode,
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
-        bool isSendDialogResult = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false);
@@ -956,7 +968,6 @@ public:
         int requestCode,
         int32_t userId = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
-        bool isSendDialogResult = false,
         uint32_t specifyTokenId = 0,
         bool isForegroundToRestartApp = false,
         bool isImplicit = false);
@@ -1029,7 +1040,6 @@ public:
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
         int requestCode = DEFAULT_INVAL_VALUE,
-        bool isSendDialogResult = false,
         bool isImplicit = false);
 
     int ImplicitStartAbilityAsCaller(
@@ -1037,8 +1047,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE,
-        bool isSendDialogResult = false);
+        int requestCode = DEFAULT_INVAL_VALUE);
 
     void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag, int32_t requestId = 0);
     void OnStartSpecifiedAbilityTimeoutResponse(const AAFwk::Want &want, int32_t requestId = 0);
@@ -1127,12 +1136,7 @@ public:
     virtual int GetDialogSessionInfo(const std::string dialogSessionId,
         sptr<DialogSessionInfo> &dialogSessionInfo) override;
 
-    bool GenerateDialogSessionRecord(AbilityRequest &abilityRequest, int32_t userId,
-        std::string &dialogSessionId, std::vector<DialogAppInfo> &dialogAppInfos, bool isSelector);
-
-    int CreateModalDialog(const Want &replaceWant, sptr<IRemoteObject> callerToken, std::string dialogSessionId);
-
-    virtual int SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllowed) override;
+    virtual int SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllowed) override;
 
     virtual int RegisterAbilityFirstFrameStateObserver(const sptr<IAbilityFirstFrameStateObserver> &observer,
         const std::string &bundleName) override;
@@ -1626,6 +1630,17 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * @brief Get ui extension session info
+     *
+     * @param token The ability token.
+     * @param uiExtensionSessionInfo The ui extension session info.
+     * @param userId The user id.
+     * @return int32_t Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    /**
      * Set the enable status for starting and stopping resident processes.
      * The caller application can only set the resident status of the configured process.
      * @param bundleName The bundle name of the resident process.
@@ -1697,6 +1712,23 @@ public:
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
 
     void HandleRestartResidentProcessDependedOnWeb();
+
+    /**
+     * Open atomic service window prior to finishing free install.
+     *
+     * @param bundleName, the bundle name of the atomic service.
+     * @param moduleName, the module name of the atomic service.
+     * @param abilityName, the ability name of the atomic service.
+     * @param startTime, the starting time of the free install task.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t PreStartMission(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, const std::string& startTime) override;
+
+    int32_t StartUIAbilityByPreInstall(const FreeInstallInfo &taskInfo);
+
+    void NotifySCBToHandleException(const std::string& sessionId, int errCode,
+        const std::string& reason);
 
     // MSG 0 - 20 represents timeout message
     static constexpr uint32_t LOAD_TIMEOUT_MSG = 0;
@@ -1808,6 +1840,12 @@ private:
 
     int StartRemoteAbility(const Want &want, int requestCode, int32_t validUserId,
         const sptr<IRemoteObject> &callerToken);
+    int StartUIAbilityBySCBDefault(sptr<SessionInfo> sessionInfo, bool &isColdStart);
+    int StartUIAbilityByPreInstallInner(sptr<SessionInfo> sessionInfo,
+        uint32_t specifyTokenId, bool &isColdStart);
+    int32_t PreStartInner(const FreeInstallInfo& taskInfo);
+    void RemovePreStartSession(const std::string& sessionId);
+
     int ConnectLocalAbility(
         const Want &want,
         const int32_t userId,
@@ -2168,9 +2206,32 @@ private:
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
 
     void GetRunningMultiAppIndex(const std::string &bundleName, int32_t uid, int32_t &appIndex);
+    ErrCode ConvertToExplicitWant(Want& want);
 
     int CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage uiExtensionUsage,
         AppExecFwk::ExtensionAbilityType extensionType);
+
+    int CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest);
+
+    int CheckServiceCallPermission(const AbilityRequest& abilityRequest,
+        const AppExecFwk::AbilityInfo& abilityInfo);
+
+    int CheckBrokerCallPermission(const AbilityRequest& abilityRequest,
+        const AppExecFwk::AbilityInfo& abilityInfo);
+
+    int CheckAbilityCallPermission(const AbilityRequest& abilityRequest,
+        const AppExecFwk::AbilityInfo& abilityInfo, uint32_t specifyTokenId);
+
+    int CheckCallPermission(const Want& want, const AppExecFwk::AbilityInfo& abilityInfo,
+        const AbilityRequest& abilityRequest, bool isForegroundToRestartApp,
+        bool isSendDialogResult, uint32_t specifyTokenId,
+        const std::string& callerBundleName);
+
+    int StartAbilityByConnectManager(const Want& want, const AbilityRequest& abilityRequest,
+        const AppExecFwk::AbilityInfo& abilityInfo, int validUserId, sptr<IRemoteObject> callerToken);
+
+    int PreStartFreeInstall(const Want &want, sptr<IRemoteObject> callerToken,
+        uint32_t specifyTokenId, bool isStartAsCaller, Want &localWant);
 
     constexpr static int REPOLL_TIME_MICRO_SECONDS = 1000000;
     constexpr static int WAITING_BOOT_ANIMATION_TIMER = 5;
@@ -2194,8 +2255,10 @@ private:
     ffrt::mutex globalLock_;
     ffrt::mutex bgtaskObserverMutex_;
     ffrt::mutex abilityTokenLock_;
+    ffrt::mutex preStartSessionMapLock_;
 
     std::multimap<std::string, std::string> timeoutMap_;
+    std::map<std::string, sptr<SessionInfo>> preStartSessionMap_;
 
     static sptr<AbilityManagerService> instance_;
     int32_t uniqueId_ = 0;
@@ -2269,7 +2332,6 @@ private:
     void InitPrepareTerminateConfig();
     std::shared_ptr<ImplicitStartProcessor> implicitStartProcessor_;
     sptr<IWindowManagerServiceHandler> wmsHandler_;
-    std::shared_ptr<DialogSessionRecord> dialogSessionRecord_;
     bool isAnimationEnabled_ = true; //only use on mission list
 #endif
     std::shared_ptr<AbilityInterceptorExecuter> interceptorExecuter_;

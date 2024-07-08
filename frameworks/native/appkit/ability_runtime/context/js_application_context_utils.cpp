@@ -208,7 +208,11 @@ napi_value JsApplicationContextUtils::OnCreateModuleContext(napi_env env, NapiCa
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
+    return CreateJsModuleContext(env, moduleContext);
+}
 
+napi_value JsApplicationContextUtils::CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext)
+{
     napi_value value = CreateJsBaseContext(env, moduleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -431,7 +435,7 @@ napi_value JsApplicationContextUtils::OnGetCloudFileDir(napi_env env, NapiCallba
 {
     auto applicationContext = applicationContext_.lock();
     if (!applicationContext) {
-        HILOG_WARN("applicationContext is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "applicationContext is already released");
         return CreateJsUndefined(env);
     }
     std::string path = applicationContext->GetCloudFileDir();
@@ -711,7 +715,7 @@ napi_value JsApplicationContextUtils::PreloadUIExtensionAbility(napi_env env, na
 
 napi_value JsApplicationContextUtils::OnPreloadUIExtensionAbility(napi_env env, NapiCallbackInfo& info)
 {
-    HILOG_DEBUG("called");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGW(AAFwkTag::APPKIT, "Params error!");
         ThrowTooFewParametersError(env);

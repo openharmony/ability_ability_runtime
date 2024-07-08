@@ -791,6 +791,13 @@ void AbilityContextImpl::InsertResultCallbackTask(int requestCode, RuntimeTask &
     TAG_LOGD(AAFwkTag::CONTEXT, "InsertResultCallbackTask");
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
 }
+
+void AbilityContextImpl::RemoveResultCallbackTask(int requestCode)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "Called.");
+    resultCallbacks_.erase(requestCode);
+}
+
 #ifdef SUPPORT_SCREEN
 void AbilityContextImpl::GetWindowRect(int32_t &left, int32_t &top, int32_t &width, int32_t &height)
 {
@@ -894,10 +901,16 @@ ErrCode AbilityContextImpl::StartAbilityByType(const std::string &type,
         wantParams.Remove(FLAG_AUTH_READ_URI_PERMISSION);
     }
     Ace::ModalUIExtensionCallbacks callback;
-    callback.onError = std::bind(&JsUIExtensionCallback::OnError, uiExtensionCallbacks, std::placeholders::_1);
-    callback.onRelease = std::bind(&JsUIExtensionCallback::OnRelease, uiExtensionCallbacks, std::placeholders::_1);
-    callback.onResult = std::bind(
-        &JsUIExtensionCallback::OnResult, uiExtensionCallbacks, std::placeholders::_1, std::placeholders::_2);
+    callback.onError = [uiExtensionCallbacks](int32_t arg, const std::string &str1, const std::string &str2) {
+        uiExtensionCallbacks->OnError(arg);
+    };
+    callback.onRelease = [uiExtensionCallbacks](int32_t arg) {
+        uiExtensionCallbacks->OnRelease(arg);
+    };
+    callback.onResult = [uiExtensionCallbacks](int32_t arg1, const OHOS::AAFwk::Want arg2) {
+        uiExtensionCallbacks->OnResult(arg1, arg2);
+    };
+
     Ace::ModalUIExtensionConfig config;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
@@ -952,9 +965,15 @@ ErrCode AbilityContextImpl::CreateModalUIExtensionWithApp(const AAFwk::Want &wan
     }
     auto disposedCallback = std::make_shared<DialogUIExtensionCallback>(abilityCallback);
     Ace::ModalUIExtensionCallbacks callback;
-    callback.onError = std::bind(&DialogUIExtensionCallback::OnError, disposedCallback);
-    callback.onRelease = std::bind(&DialogUIExtensionCallback::OnRelease, disposedCallback);
-    callback.onDestroy = std::bind(&DialogUIExtensionCallback::OnDestroy, disposedCallback);
+    callback.onError = [disposedCallback](int32_t arg1, const std::string &str1, const std::string &str2) {
+        disposedCallback->OnError();
+    };
+    callback.onRelease = [disposedCallback](int32_t arg1) {
+        disposedCallback->OnRelease();
+    };
+    callback.onDestroy = [disposedCallback]() {
+        disposedCallback->OnDestroy();
+    };
     Ace::ModalUIExtensionConfig config;
     int32_t sessionId = uiContent->CreateModalUIExtension(want, callback, config);
     if (sessionId == 0) {
@@ -1010,6 +1029,12 @@ void AbilityContextImpl::SetRestoreEnabled(bool enabled)
 bool AbilityContextImpl::GetRestoreEnabled()
 {
     return restoreEnabled_.load();
+}
+
+ErrCode AbilityContextImpl::OpenLink(const AAFwk::Want& want, int requestCode)
+{
+    TAG_LOGD(AAFwkTag::CONTEXT, "Called.");
+    return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

@@ -16,13 +16,12 @@
 #ifndef OHOS_ABILITY_RUNTIME_ABILITY_CONTEXT_H
 #define OHOS_ABILITY_RUNTIME_ABILITY_CONTEXT_H
 
-#include "foundation/ability/ability_runtime/interfaces/kits/native/appkit/ability_runtime/context/context.h"
-
 #include "ability_connect_callback.h"
 #include "ability_info.h"
 #include "ability_lifecycle_observer_interface.h"
 #include "caller_callback.h"
 #include "configuration.h"
+#include "context.h"
 #include "iability_callback.h"
 #include "js_ui_extension_callback.h"
 #include "mission_info.h"
@@ -170,6 +169,8 @@ public:
     virtual void OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData) = 0;
 
     virtual ErrCode RequestModalUIExtension(const AAFwk::Want& want) = 0;
+
+    virtual ErrCode OpenLink(const AAFwk::Want& want, int requestCode) = 0;
 
     virtual ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
         RuntimeTask &&task) = 0;
@@ -390,6 +391,7 @@ public:
     virtual bool IsTerminating() = 0;
     virtual void SetTerminating(bool state) = 0;
     virtual void InsertResultCallbackTask(int requestCode, RuntimeTask&& task) = 0;
+    virtual void RemoveResultCallbackTask(int requestCode) = 0;
     using SelfType = AbilityContext;
     static const size_t CONTEXT_TYPE_ID;
 

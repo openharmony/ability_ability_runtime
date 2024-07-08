@@ -290,6 +290,11 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
         ConnectServerManager::Get().StartConnectServer(bundleName_, -1, true);
     }
 
+    DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+}
+
+void JsRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug)
+{
     ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId_);
     EcmaVM* vm = GetEcmaVm();
     auto dTask = jsEnv_->GetDebuggerPostTask();
@@ -412,6 +417,12 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
+
+    DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
+}
+
+void JsRuntime::DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug, const DebugOption dOption)
+{
     if (isDebugApp) {
         ConnectServerManager::Get().StartConnectServer(bundleName_, 0, true);
     }
@@ -1187,11 +1198,11 @@ void JsRuntime::RemoveTask(const std::string& name)
     jsEnv_->RemoveTask(name);
 }
 
-void JsRuntime::DumpCpuProfile(bool isPrivate)
+void JsRuntime::DumpCpuProfile()
 {
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
-    nativeEngine->DumpCpuProfile(true, DumpFormat::JSON, isPrivate, false);
+    nativeEngine->DumpCpuProfile();
 }
 
 void JsRuntime::DumpHeapSnapshot(bool isPrivate)
@@ -1205,7 +1216,13 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
-    DFXJSNApi::DumpHeapSnapshot(vm, 0, true, false, false, isFullGC, tid);
+    panda::ecmascript::DumpSnapShotOption dumpOption;
+    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    dumpOption.isVmMode = true;
+    dumpOption.isPrivate = false;
+    dumpOption.captureNumericValue = false;
+    dumpOption.isFullGC = isFullGC;
+    DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
 }
 
 void JsRuntime::ForceFullGC(uint32_t tid)

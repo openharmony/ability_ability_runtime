@@ -288,6 +288,7 @@ private:
     int32_t GetForegroundUIAbilitiesInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t GetUIExtensionRootHostInfoInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetUIExtensionSessionInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t RestartAppInner(MessageParcel &data, MessageParcel &reply);
     int32_t RequestAssertFaultDialogInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyDebugAssertResultInner(MessageParcel &data, MessageParcel &reply);
@@ -295,6 +296,7 @@ private:
     int32_t GetAbilityStateByPersistentIdInner(MessageParcel &data, MessageParcel &reply);
     int32_t TransferAbilityResultForExtensionInner(MessageParcel &data, MessageParcel &reply);
     int32_t NotifyFrozenProcessByRSSInner(MessageParcel &data, MessageParcel &reply);
+    int32_t PreStartMissionInner(MessageParcel &data, MessageParcel &reply);
     int OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
     int OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
@@ -339,6 +341,7 @@ private:
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
+    int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -544,6 +544,9 @@ int AbilityManagerStub::OnRemoteRequestInnerFourteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::GET_UI_EXTENSION_ROOT_HOST_INFO) {
         return GetUIExtensionRootHostInfoInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::GET_UI_EXTENSION_SESSION_INFO) {
+        return GetUIExtensionSessionInfoInner(data, reply);
+    }
     if (interfaceCode == AbilityManagerInterfaceCode::PRELOAD_UIEXTENSION_ABILITY) {
         return PreloadUIExtensionAbilityInner(data, reply);
     }
@@ -742,6 +745,12 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     }
     if (interfaceCode == AbilityManagerInterfaceCode::NOTIFY_FROZEN_PROCESS_BY_RSS) {
         return NotifyFrozenProcessByRSSInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::PRE_START_MISSION) {
+        return PreStartMissionInner(data, reply);
+    }
+    if (interfaceCode == AbilityManagerInterfaceCode::OPEN_LINK) {
+        return OpenLinkInner(data, reply);
     }
     return ERR_CODE_NOT_EXIST;
 }
@@ -1443,9 +1452,7 @@ int AbilityManagerStub::StartAbilityAsCallerByTokenInner(MessageParcel &data, Me
     }
     int32_t userId = data.ReadInt32();
     int requestCode = data.ReadInt32();
-    bool isSendDialogResult = data.ReadBool();
-    int32_t result = StartAbilityAsCaller(*want, callerToken, asCallerSourceToken, userId, requestCode,
-        isSendDialogResult);
+    int32_t result = StartAbilityAsCaller(*want, callerToken, asCallerSourceToken, userId, requestCode);
     reply.WriteInt32(result);
     return NO_ERROR;
 }
@@ -3756,6 +3763,33 @@ int32_t AbilityManagerStub::GetUIExtensionRootHostInfoInner(MessageParcel &data,
     return NO_ERROR;
 }
 
+int32_t AbilityManagerStub::GetUIExtensionSessionInfoInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> callerToken = nullptr;
+    if (data.ReadBool()) {
+        callerToken = data.ReadRemoteObject();
+        if (callerToken == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller token is nullptr.");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
+    int32_t userId = data.ReadInt32();
+    UIExtensionSessionInfo uiExtensionSessionInfo;
+    auto result = GetUIExtensionSessionInfo(callerToken, uiExtensionSessionInfo, userId);
+    if (!reply.WriteParcelable(&uiExtensionSessionInfo)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write ui extension session info failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!reply.WriteInt32(result)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write result failed.");
+        return ERR_INVALID_VALUE;
+    }
+
+    return NO_ERROR;
+}
+
 int32_t AbilityManagerStub::RestartAppInner(MessageParcel &data, MessageParcel &reply)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call.");
@@ -3808,7 +3842,7 @@ int32_t AbilityManagerStub::SetResidentProcessEnableInner(MessageParcel &data, M
     bool enable = data.ReadBool();
     auto result = SetResidentProcessEnabled(bundleName, enable);
     if (!reply.WriteInt32(result)) {
-        HILOG_ERROR("Write result failed.");
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Write result failed.");
         return ERR_INVALID_VALUE;
     }
     return NO_ERROR;
@@ -3891,6 +3925,32 @@ int32_t AbilityManagerStub::NotifyFrozenProcessByRSSInner(MessageParcel &data, M
     int32_t uid = data.ReadInt32();
     NotifyFrozenProcessByRSS(pidList, uid);
     return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::PreStartMissionInner(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    std::string moduleName = data.ReadString();
+    std::string abilityName = data.ReadString();
+    std::string startTime = data.ReadString();
+    int32_t result = PreStartMission(bundleName, moduleName, abilityName, startTime);
+    reply.WriteInt32(result);
+    return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::OpenLinkInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<Want> want = data.ReadParcelable<Want>();
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    int32_t userId = data.ReadInt32();
+    int requestCode = data.ReadInt32();
+
+    int32_t result = OpenLink(*want, callerToken, userId, requestCode);
+    if (result != NO_ERROR && result != ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "OpenLink failed.");
+    }
+    reply.WriteInt32(result);
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS
