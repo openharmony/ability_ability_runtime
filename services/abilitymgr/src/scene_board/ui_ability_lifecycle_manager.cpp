@@ -847,8 +847,12 @@ int UIAbilityLifecycleManager::CallAbilityLocked(const AbilityRequest &abilityRe
             sessionInfo->uiAbilityId = uiAbilityRecord->GetAbilityRecordId();
             sessionInfo->isAtomicService =
                 (abilityInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE);
-            uiAbilityRecord->PostForegroundTimeoutTask();
-            DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(uiAbilityRecord->GetToken());
+            if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
+                TAG_LOGI(AAFwkTag::ABILITYMGR, "pending state is FOREGROUND or BACKGROUND, dropped.");
+                uiAbilityRecord->SetPendingState(AbilityState::FOREGROUND);
+                return NotifySCBPendingActivation(sessionInfo, abilityRequest);
+            }
+            uiAbilityRecord->ProcessForegroundAbility(sessionInfo->callingTokenId);
             return NotifySCBPendingActivation(sessionInfo, abilityRequest);
         }
         return ERR_OK;
