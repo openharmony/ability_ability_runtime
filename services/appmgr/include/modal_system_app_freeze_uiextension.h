@@ -33,6 +33,9 @@
 namespace OHOS {
 namespace AppExecFwk {
 
+const std::string TASKMANAGER_NAME = "com.ohos.taskmanager";
+const std::string APP_NO_DIALOG_ABILITY = "AppAbnormalAbility";
+
 class ModalSystemAppFreezeUIExtension {
 public:
     static ModalSystemAppFreezeUIExtension &GetInstance();

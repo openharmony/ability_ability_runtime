@@ -115,10 +115,8 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
 
 AAFwk::Want ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(std::string pid, std::string bundleName)
 {
-    std::string startAbilityName = "AppAbnormalAbility";
-    std::string startBundleName = "com.huawei.hmos.taskmanager";
     AAFwk::Want want;
-    want.SetElementName(startBundleName, startAbilityName);
+    want.SetElementName(TASKMANAGER_NAME, APP_NO_DIALOG_ABILITY);
     want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
     want.SetParam(APP_FREEZE_PID, pid);
     want.SetParam(START_BUNDLE_NAME, bundleName);
