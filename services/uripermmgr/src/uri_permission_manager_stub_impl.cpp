@@ -67,8 +67,10 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
         newFlag = FLAG_WRITE_URI;
     }
     std::lock_guard<std::mutex> guard(mutex_);
-    auto search = uriMap_.find(uriStr);
-    if (search != uriMap_.end()) {
+    for(auto search = uriMap_.begin(); search != uriMap_.end(); ++search) {
+        if((search->first != uriStr) && !IsSubDirectoryFileUri(uriStr, search->first)) {
+            continue;
+        }
         auto& list = search->second;
         for (auto it = list.begin(); it != list.end(); it++) {
             if ((it->targetTokenId == tokenId) && ((it->flag | FLAG_READ_URI) & newFlag) != 0) {
@@ -78,6 +80,21 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
         }
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri permission not exists.");
+    return false;
+}
+
+bool IsSubDirectoryFileUri(const std::string &inputUri, const std::string &cachedUri)
+{
+    auto iPos = inputUri.find(CLOUND_DOCS_URI_MARK);
+    auto cPos = cachedUri.find(CLOUND_DOCS_URI_MARK);
+    if ((iPos == std::string::npos) && (cPos == std::string::npos)) {
+        return inputUri.find(cachedUri + "/") == 0;
+    }
+    if ((iPos == std::string::npos) && (cPos != std::string::npos)) {
+        std::string iTempUri = inputUri.substr(0, iPos);
+        std::string cTempUri = cachedUri.substr(0, cPos);
+        return iTempUri.find(cTempUri + "/") == 0;
+    }
     return false;
 }
 
