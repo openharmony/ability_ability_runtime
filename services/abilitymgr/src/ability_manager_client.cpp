@@ -1338,7 +1338,7 @@ ErrCode AbilityManagerClient::GetDialogSessionInfo(const std::string dialogSessi
     return abms->GetDialogSessionInfo(dialogSessionId, info);
 }
 
-ErrCode AbilityManagerClient::SendDialogResult(const Want &want, const std::string dialogSessionId, const bool isAllow)
+ErrCode AbilityManagerClient::SendDialogResult(const Want &want, const std::string &dialogSessionId, const bool isAllow)
 {
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
@@ -1844,6 +1844,15 @@ ErrCode AbilityManagerClient::GetUIExtensionRootHostInfo(const sptr<IRemoteObjec
     return abms->GetUIExtensionRootHostInfo(token, hostInfo, userId);
 }
 
+ErrCode AbilityManagerClient::GetUIExtensionSessionInfo(const sptr<IRemoteObject> token,
+    UIExtensionSessionInfo &uiExtensionSessionInfo, int32_t userId)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Get ui extension session info.");
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->GetUIExtensionSessionInfo(token, uiExtensionSessionInfo, userId);
+}
+
 int32_t AbilityManagerClient::RestartApp(const AAFwk::Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
@@ -1910,6 +1919,23 @@ void AbilityManagerClient::NotifyFrozenProcessByRSS(const std::vector<int32_t> &
     auto abms = GetAbilityManager();
     CHECK_POINTER_RETURN(abms);
     return abms->NotifyFrozenProcessByRSS(pidList, uid);
+}
+
+ErrCode AbilityManagerClient::PreStartMission(const std::string& bundleName, const std::string& moduleName,
+    const std::string& abilityName, const std::string& startTime)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_NOT_CONNECTED(abms);
+    return abms->PreStartMission(bundleName, moduleName, abilityName, startTime);
+}
+
+ErrCode AbilityManagerClient::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int requestCode)
+{
+    auto abms = GetAbilityManager();
+    CHECK_POINTER_RETURN_INVALID_VALUE(abms);
+    return abms->OpenLink(want, callerToken, userId, requestCode);
 }
 } // namespace AAFwk
 } // namespace OHOS

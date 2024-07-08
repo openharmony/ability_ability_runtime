@@ -18,6 +18,7 @@
 
 #include <list>
 #include <map>
+#include <mutex>
 #include <regex>
 #include <unordered_map>
 #include <unordered_set>
@@ -47,6 +48,7 @@
 #include "bundle_info.h"
 #include "bundle_mgr_helper.h"
 #include "child_process_info.h"
+#include "child_process_request.h"
 #include "cpp/mutex.h"
 #include "event_report.h"
 #include "fault_data.h"
@@ -729,7 +731,7 @@ public:
 
     virtual int GetRenderProcessTerminationStatus(pid_t renderPid, int &status);
 
-    int VerifyProcessPermission(const sptr<IRemoteObject> &token) const;
+    int VerifyKillProcessPermission(const sptr<IRemoteObject> &token) const;
 
     int VerifyAccountPermission(const std::string &permissionName, const int userId) const;
 
@@ -1005,12 +1007,11 @@ public:
      * Start child process, called by ChildProcessManager.
      *
      * @param hostPid Host process pid.
-     * @param srcEntry Child process source file entrance path to be started.
      * @param childPid Created child process pid.
+     * @param request Child process start request params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t StartChildProcess(const pid_t hostPid, const std::string &srcEntry, pid_t &childPid,
-        int32_t childProcessCount, bool isStartWithDebug);
+    virtual int32_t StartChildProcess(const pid_t hostPid, pid_t &childPid, const ChildProcessRequest &request);
 
     /**
      * Get child process record for self.
@@ -1353,9 +1354,9 @@ private:
 
     static void PointerDeviceEventCallback(const char *key, const char *value, void *context);
 
-    int VerifyProcessPermission() const;
+    int VerifyKillProcessPermission(const std::string &bundleName) const;
 
-    int VerifyProcessPermission(const std::string &bundleName) const;
+    int32_t VerifyKillProcessPermissionCommon() const;
 
     bool CheckCallerIsAppGallery();
 
@@ -1365,7 +1366,7 @@ private:
     int32_t StartChildProcessPreCheck(const pid_t callingPid);
 
     int32_t StartChildProcessImpl(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
-        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid);
+        const std::shared_ptr<AppRunningRecord> appRecord, pid_t &childPid, const ChildProcessArgs &args);
 
     int32_t GetChildProcessInfo(const std::shared_ptr<ChildProcessRecord> childProcessRecord,
         const std::shared_ptr<AppRunningRecord> appRecord, ChildProcessInfo &info);
@@ -1572,6 +1573,8 @@ private:
     std::shared_ptr<AAFwk::TaskHandlerWrap> otherTaskHandler_;
     std::shared_ptr<AppPreloader> appPreloader_;
     std::atomic<bool> sceneBoardAttachFlag_ = true;
+
+    std::mutex loadTaskListMutex_;
     std::vector<LoabAbilityTaskFunc> loadAbilityTaskFuncList_;
 };
 }  // namespace AppExecFwk
