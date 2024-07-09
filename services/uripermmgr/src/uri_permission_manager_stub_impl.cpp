@@ -84,7 +84,7 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
 
 bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &uriStr, uint32_t newFlag, uint32_t tokenId)
 {
-    auto iPos = inputUri.find(CLOUND_DOCS_URI_MARK);
+    auto iPos = uriStr.find(CLOUND_DOCS_URI_MARK);
     if (iPos == std::string::npos) {
         TAG_LOGI(AAFwkTag::URIPERMMGR, "Local uri not support to verify sub directory uri permission.");
         return false;
@@ -101,7 +101,7 @@ bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &
                 return true;
             }
         }
-        break!
+        break;
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri permission not exists.");
     return false;
