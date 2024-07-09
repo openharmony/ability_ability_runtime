@@ -145,7 +145,7 @@ private:
 
     bool VerifySubDirUriPermission(const std::string &uriStr, uint32_t newFlag, uint32_t tokenId);
 
-    bool IsSubDirectoryFileUri(const std::string &inputUri, const std::string &cachedUri);
+    bool IsDistributedSubDirUri(const std::string &inputUri, const std::string &cachedUri);
 
     class ProxyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
