@@ -94,7 +94,6 @@ public:
         int32_t appIndex = 0) override;
 
     bool VerifyUriPermission(const Uri &uri, uint32_t flag, uint32_t tokenId) override;
-    bool IsSubDirectoryFileUri(const std::string &inputUri, const std::string &cachedUri);
 
 private:
     template<typename T>
@@ -143,6 +142,10 @@ private:
     int32_t DeleteShareFile(uint32_t targetTokenId, const std::vector<std::string> &uriVec);
 
     void RemoveUriRecord(std::vector<std::string> &uriList, const TokenId tokenId, int32_t abilityId);
+
+    bool VerifySubDirUriPermission(const std::string &uriStr, uint32_t newFlag, uint32_t tokenId);
+
+    bool IsSubDirectoryFileUri(const std::string &inputUri, const std::string &cachedUri);
 
     class ProxyDeathRecipient : public IRemoteObject::DeathRecipient {
     public:
