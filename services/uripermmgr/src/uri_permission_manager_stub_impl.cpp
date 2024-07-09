@@ -82,7 +82,8 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
     return VerifySubDirUriPermission(uriStr, newFlag, tokenId);
 }
 
-bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &uriStr, uint32_t newFlag, uint32_t tokenId)
+bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &uriStr,
+                                                             uint32_t newFlag, uint32_t tokenId)
 {
     auto iPos = uriStr.find(CLOUND_DOCS_URI_MARK);
     if (iPos == std::string::npos) {
