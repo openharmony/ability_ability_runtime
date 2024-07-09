@@ -1397,7 +1397,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         }
 #ifdef CJ_FRONTEND
         if (!entryHapModuleInfo.abilityInfos.empty()) {
-            isCJApp = IsCJAbility(entryHapModuleInfo.abilityInfos.front().srcEntrance);
+            isCJApp = AbilityRuntime::CJRuntime::IsCJAbility(entryHapModuleInfo.abilityInfos.front().srcEntrance);
         }
 #endif
         moduelJson = entryHapModuleInfo.isModuleJson;
@@ -2430,38 +2430,37 @@ void MainThread::HandleSignal(int signal, [[maybe_unused]] siginfo_t *siginfo, v
     }
     switch (static_cast<SignalType>(siginfo->si_value.sival_int)) {
         case SignalType::SIGNAL_JSHEAP_OLD: {
-            auto heapFunc = std::bind(&MainThread::HandleDumpHeap, false);
+            auto heapFunc = []() { return MainThread::HandleDumpHeap(false); };
             mainHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP_OLD");
-            break;
         }
         case SignalType::SIGNAL_JSHEAP: {
-            auto heapFunc = std::bind(&MainThread::HandleDumpHeap, false);
+            auto heapFunc = []() { return MainThread::HandleDumpHeap(false); };
             mainHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP");
             break;
         }
         case SignalType::SIGNAL_JSHEAP_PRIV: {
-            auto privateHeapFunc = std::bind(&MainThread::HandleDumpHeap, true);
+            auto privateHeapFunc = []() { return MainThread::HandleDumpHeap(true); };
             mainHandler_->PostTask(privateHeapFunc, "MainThread:SIGNAL_JSHEAP_PRIV");
             break;
         }
         case SignalType::SIGNAL_NO_TRIGGERID: {
-            auto heapFunc = std::bind(&MainThread::HandleDumpHeap, false);
+            auto heapFunc = []() { return MainThread::HandleDumpHeap(false); };
             mainHandler_->PostTask(heapFunc, "MainThread::SIGNAL_JSHEAP");
 
-            auto noTriggerIdFunc = std::bind(&MainThread::DestroyHeapProfiler);
+            auto noTriggerIdFunc = []() { MainThread::DestroyHeapProfiler(); };
             mainHandler_->PostTask(noTriggerIdFunc, "MainThread::SIGNAL_NO_TRIGGERID");
             break;
         }
         case SignalType::SIGNAL_NO_TRIGGERID_PRIV: {
-            auto privateHeapFunc = std::bind(&MainThread::HandleDumpHeap, true);
+            auto privateHeapFunc = []() { return MainThread::HandleDumpHeap(true); };
             mainHandler_->PostTask(privateHeapFunc, "MainThread:SIGNAL_JSHEAP_PRIV");
 
-            auto noTriggerIdFunc = std::bind(&MainThread::DestroyHeapProfiler);
+            auto noTriggerIdFunc = []() { MainThread::DestroyHeapProfiler(); };
             mainHandler_->PostTask(noTriggerIdFunc, "MainThread::SIGNAL_NO_TRIGGERID_PRIV");
             break;
         }
         case SignalType::SIGNAL_FORCE_FULLGC: {
-            auto forceFullGCFunc = std::bind(&MainThread::ForceFullGC);
+            auto forceFullGCFunc = []() { MainThread::ForceFullGC(); };
             ffrt::submit(forceFullGCFunc);
             break;
         }
