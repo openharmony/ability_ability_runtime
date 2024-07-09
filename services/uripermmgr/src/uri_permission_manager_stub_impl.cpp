@@ -67,10 +67,8 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
         newFlag = FLAG_WRITE_URI;
     }
     std::lock_guard<std::mutex> guard(mutex_);
-    for (auto search = uriMap_.begin(); search != uriMap_.end(); ++search) {
-        if ((search->first != uriStr) && !IsSubDirectoryFileUri(uriStr, search->first)) {
-            continue;
-        }
+    auto search = uriMap_.begin();
+    if (search != uriMap_.end()) {
         auto& list = search->second;
         for (auto it = list.begin(); it != list.end(); it++) {
             if ((it->targetTokenId == tokenId) && ((it->flag | FLAG_READ_URI) & newFlag) != 0) {
@@ -84,7 +82,7 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
     return VerifySubDirUriPermission(uriStr, newFlag, tokenId);
 }
 
-bool UriPermissionManagerStubImpl::VerifySubDirUriPermission()
+bool UriPermissionManagerStubImpl::VerifySubDirUriPermission(const std::string &uriStr, uint32_t newFlag, uint32_t tokenId)
 {
     auto iPos = inputUri.find(CLOUND_DOCS_URI_MARK);
     if (iPos == std::string::npos) {
