@@ -78,24 +78,48 @@ bool UriPermissionManagerStubImpl::VerifyUriPermission(const Uri &uri, uint32_t 
                 return true;
             }
         }
+        TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri permission not exists.");
+        return false;
+    }
+    return VerifySubDirUriPermission(uriStr, newFlag, tokenId);
+}
+
+bool UriPermissionManagerStubImpl::VerifySubDirUriPermission()
+{
+    auto iPos = inputUri.find(CLOUND_DOCS_URI_MARK);
+    if (iPos == std::string::npos) {
+        TAG_LOGI(AAFwkTag::URIPERMMGR, "Local uri not support to verify sub directory uri permission.");
+        return false;
+    }
+
+    for (auto search = uriMap_.rbegin(); search != uriMap_.rend(); ++search) {
+        if (!IsDistributedSubDirUri(uriStr, search->first)) {
+            continue;
+        }
+        auto& list = search->second;
+        for (auto it = list.begin(); it != list.end(); it++) {
+            if ((it->targetTokenId == tokenId) && ((it->flag | FLAG_READ_URI) & newFlag) != 0) {
+                TAG_LOGD(AAFwkTag::URIPERMMGR, "have uri permission.");
+                return true;
+            }
+        }
+        break!
     }
     TAG_LOGI(AAFwkTag::URIPERMMGR, "Uri permission not exists.");
     return false;
 }
 
-bool IsSubDirectoryFileUri(const std::string &inputUri, const std::string &cachedUri)
+bool UriPermissionManagerStubImpl::IsDistributedSubDirUri(const std::string &inputUri, const std::string &cachedUri)
 {
     auto iPos = inputUri.find(CLOUND_DOCS_URI_MARK);
     auto cPos = cachedUri.find(CLOUND_DOCS_URI_MARK);
-    if ((iPos == std::string::npos) && (cPos == std::string::npos)) {
-        return inputUri.find(cachedUri + "/") == 0;
+    if ((iPos == std::string::npos) || (cPos == std::string::npos)) {
+        TAG_LOGI(AAFwkTag::URIPERMMGR, "The uri is not distributed file uri.");
+        return false;
     }
-    if ((iPos == std::string::npos) && (cPos != std::string::npos)) {
-        std::string iTempUri = inputUri.substr(0, iPos);
-        std::string cTempUri = cachedUri.substr(0, cPos);
-        return iTempUri.find(cTempUri + "/") == 0;
-    }
-    return false;
+    std::string iTempUri = inputUri.substr(0, iPos);
+    std::string cTempUri = cachedUri.substr(0, cPos);
+    return iTempUri.find(cTempUri + "/") == 0;
 }
 
 int UriPermissionManagerStubImpl::GrantUriPermission(const Uri &uri, unsigned int flag,
