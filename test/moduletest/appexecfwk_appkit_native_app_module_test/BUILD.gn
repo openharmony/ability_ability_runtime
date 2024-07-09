@@ -54,7 +54,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_first") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -92,7 +91,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_second") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -130,7 +128,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_third") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -168,7 +165,6 @@ ohos_moduletest("appexecfwk_appkit_native_app_module_test_fourth") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "ability_base:want",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",

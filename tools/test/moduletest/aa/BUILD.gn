@@ -48,7 +48,6 @@ ohos_moduletest("aa_command_dumpsys_module_test") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
@@ -78,7 +77,6 @@ ohos_moduletest("aa_command_start_module_test") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -107,7 +105,6 @@ ohos_moduletest("aa_command_stop_service_module_test") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -136,7 +133,6 @@ ohos_moduletest("aa_command_dump_module_test") {
 
   external_deps = [
     "ability_base:configuration",
-    "ability_base:session_info",
     "bundle_framework:appexecfwk_base",
     "hilog:libhilog",
     "ipc:ipc_core",
