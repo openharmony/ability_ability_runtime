@@ -587,7 +587,8 @@ int FreeInstallManager::AddFreeInstallObserver(const sptr<IRemoteObject> &caller
     if (abilityRecord != nullptr) {
         return DelayedSingleton<FreeInstallObserverManager>::GetInstance()->AddObserver(abilityRecord->GetRecordId(),
             observer);
-    } else if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+    }
+    if (AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
         return DelayedSingleton<FreeInstallObserverManager>::GetInstance()->AddObserver(-1, observer);
     }
     return CHECK_PERMISSION_FAILED;
@@ -702,12 +703,9 @@ bool FreeInstallManager::VerifyStartFreeInstallPermission(const sptr<IRemoteObje
     if (isSaCall || IsTopAbility(callerToken)) {
         return true;
     }
-    AppExecFwk::AbilityInfo callerInfo;
-    if (StartAbilityUtils::GetCallerAbilityInfo(callerToken, callerInfo)) {
-        if (callerInfo.applicationInfo.isSystemApp && AAFwk::PermissionVerification::GetInstance()->
-            VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND)) {
-            return true;
-        }
+    if (AAFwk::PermissionVerification::GetInstance()->
+        VerifyCallingPermission(PermissionConstants::PERMISSION_START_ABILITIES_FROM_BACKGROUND)) {
+        return true;
     }
     return false;
 }
