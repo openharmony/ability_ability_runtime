@@ -8932,13 +8932,6 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
     verificationInfo.visible = abilityRequest.abilityInfo.visible;
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     verificationInfo.isBackgroundCall = false;
-    if (isParamStartAbilityEnable_) {
-        bool stopContinuousTaskFlag = ShouldPreventStartAbility(abilityRequest);
-        if (stopContinuousTaskFlag) {
-            TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension");
-            return CHECK_PERMISSION_FAILED;
-        }
-    }
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension or DataShareExtension");
@@ -10712,6 +10705,10 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
         return false;
     }
+    if (abilityRecord->GetAbilityState() != AAFwk::AbilityState::BACKGROUND) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
+        return false;
+    }
     if (continuousFlag) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has continuous task Pass");
         return false;
@@ -10719,10 +10716,6 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     if (IsInWhiteList(callerAbilityInfo.bundleName, abilityInfo.bundleName, abilityInfo.name)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in white list Pass");
         return false;
-    }
-    if (abilityRecord->GetAbilityState() == AAFwk::AbilityState::BACKGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is on background access service intercepted");
-        return true;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",
         abilityRecord->GetURI().c_str());
