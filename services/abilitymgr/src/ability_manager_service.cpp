@@ -10721,7 +10721,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         return false;
     }
     if (abilityRecord->GetAbilityState() == AAFwk::AbilityState::BACKGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is on background access service intercepted");
         return true;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",
