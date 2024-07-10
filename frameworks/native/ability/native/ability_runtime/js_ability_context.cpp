@@ -482,10 +482,9 @@ bool JsAbilityContext::CreateOpenLinkTask(const napi_env &env, const napi_value 
             TAG_LOGW(AAFwkTag::CONTEXT, "wrap abilityResult error");
             asyncTask->Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INNER));
             return;
-        } else {
-            isInner ? asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode)) :
-                asyncTask->ResolveWithNoError(env, abilityResult);
         }
+        isInner ? asyncTask->Reject(env, CreateJsErrorByNativeErr(env, resultCode)) :
+            asyncTask->ResolveWithNoError(env, abilityResult);
     };
     curRequestCode_ = (curRequestCode_ == INT_MAX) ? 0 : (curRequestCode_ + 1);
     requestCode = curRequestCode_;
