@@ -103,6 +103,7 @@ const std::string MODULE_NAME = "moduleName";
 const std::string VERSION = "version";
 const std::string ENTRY_PATH = "entryPath";
 const std::string IS_SO = "isSO";
+constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 const std::string DEPENDENCY_ALIAS = "dependencyAlias";
 
 static auto PermissionCheckFunc = []() {
@@ -247,6 +248,10 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
 
 void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
+    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
+        return;
+    }
     CHECK_POINTER(jsEnv_);
     if (jsEnv_->GetDebugMode()) {
         TAG_LOGI(AAFwkTag::JSRUNTIME, "Already in debug mode");
@@ -385,6 +390,10 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
 
 void JsRuntime::StartProfiler(const DebugOption dOption)
 {
+    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
+        return;
+    }
     CHECK_POINTER(jsEnv_);
     if (JsRuntime::hasInstance.exchange(true, std::memory_order_relaxed)) {
         instanceId_ = static_cast<uint32_t>(getproctid());
