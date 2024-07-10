@@ -10712,10 +10712,6 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
         return false;
     }
-    if (abilityRecord->GetAbilityState() != AAFwk::AbilityState::BACKGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
-        return false;
-    }
     if (continuousFlag) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has continuous task Pass");
         return false;
@@ -10723,6 +10719,10 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
     if (IsInWhiteList(callerAbilityInfo.bundleName, abilityInfo.bundleName, abilityInfo.name)) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in white list Pass");
         return false;
+    }
+    if (abilityRecord->GetAbilityState() == AAFwk::AbilityState::BACKGROUND) {
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
+        return true;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",
         abilityRecord->GetURI().c_str());
