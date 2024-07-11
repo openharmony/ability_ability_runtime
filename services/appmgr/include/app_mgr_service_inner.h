@@ -1480,8 +1480,6 @@ private:
         bool appExistFlag,
         bool isPreload);
 
-    int32_t CheckSetProcessCachePermission() const;
-
     int32_t CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName,
         AppSpawnStartMsg &startMsg);
