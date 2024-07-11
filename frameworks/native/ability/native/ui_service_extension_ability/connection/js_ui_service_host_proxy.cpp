@@ -123,6 +123,5 @@ napi_value JsUIServiceHostProxy::OnSendData(napi_env env, NapiCallbackInfo& info
     }
     return CreateJsUndefined(env);
 }
-
 }
 }

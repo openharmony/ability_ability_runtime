@@ -15,7 +15,6 @@
 
 #include "ui_service_host_stub.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -52,7 +51,7 @@ int UIServiceHostStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
 
 int32_t UIServiceHostStub::OnSendData(MessageParcel& data, MessageParcel& reply)
 {
-    AAFwk::WantParams* wantParams = data.ReadParcelable<AAFwk::WantParams>();
+    std::unique_ptr<AAFwk::WantParams> wantParams(data.ReadParcelable<AAFwk::WantParams>());
     if (wantParams == nullptr) {
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "UIServiceHostStub::OnSendData, read WantParams failed");
         return ERR_INVALID_VALUE;
@@ -64,6 +63,5 @@ int32_t UIServiceHostStub::OnSendData(MessageParcel& data, MessageParcel& reply)
     }
     return NO_ERROR;
 }
-
 }
 }

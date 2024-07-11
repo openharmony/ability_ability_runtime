@@ -19,7 +19,6 @@
 #include "ability_manager_ipc_interface_code.h"
 #include "ipc_types.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -51,7 +50,7 @@ int32_t UIServiceProxy::SendData(sptr<IRemoteObject> hostProxy, OHOS::AAFwk::Wan
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
     if (!parcelData.WriteRemoteObject(hostProxy)) {
-         TAG_LOGE(AAFwkTag::UISERVC_EXT, "Write hostProxy failed.");
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "Write hostProxy failed.");
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
     if (!parcelData.WriteParcelable(&data)) {
@@ -68,9 +67,7 @@ int32_t UIServiceProxy::SendData(sptr<IRemoteObject> hostProxy, OHOS::AAFwk::Wan
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "SendRequest failed, error %{public}d", error);
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
-    int32_t ret = reply.ReadInt32();
-    return ret;
+    return ERR_OK;
 }
-
 }
 }

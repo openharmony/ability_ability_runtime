@@ -77,6 +77,7 @@ napi_value JsUIServiceProxy::SendData(napi_env env, napi_callback_info info)
 napi_value JsUIServiceProxy::OnSendData(napi_env env, NapiCallbackInfo& info)
 {
     if (proxy_ == nullptr || hostProxy_ == nullptr) {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "proxy_ or hostProxy_ is null");
         ThrowError(env, AbilityErrorCode::ERROR_CODE_INNER);
         return CreateJsUndefined(env);
     }
@@ -100,6 +101,5 @@ napi_value JsUIServiceProxy::OnSendData(napi_env env, NapiCallbackInfo& info)
     }
     return CreateJsUndefined(env);
 }
-
 }
 }

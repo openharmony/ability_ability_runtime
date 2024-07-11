@@ -19,14 +19,13 @@
 #include "ability_manager_ipc_interface_code.h"
 #include "ipc_types.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
 using namespace AbilityRuntime;
 
 UIServiceHostProxy::UIServiceHostProxy(const sptr<IRemoteObject>& impl)
-        :IRemoteProxy<IUIServiceHost>(impl)
+    :IRemoteProxy<IUIServiceHost>(impl)
 {
     TAG_LOGI(AAFwkTag::UISERVC_EXT, "called");
 }
@@ -59,9 +58,7 @@ int32_t UIServiceHostProxy::SendData(OHOS::AAFwk::WantParams &data)
         TAG_LOGE(AAFwkTag::UISERVC_EXT, "SendRequest failed, error %{public}d", error);
         return static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INNER);
     }
-    int32_t ret = reply.ReadInt32();
-    return ret;
+    return ERR_OK;
 }
-
 }
 }

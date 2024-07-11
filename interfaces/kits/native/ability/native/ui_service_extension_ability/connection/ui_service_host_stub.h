@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_STUB_H
+#define OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_STUB_H
 
 #include <map>
 
@@ -20,9 +22,6 @@
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "ui_service_host_interface.h"
-
-#ifndef OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_STUB_H
-#define OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_STUB_H
 
 namespace OHOS {
 namespace AAFwk {
