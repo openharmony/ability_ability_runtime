@@ -19,23 +19,27 @@
 #include <map>
 #include <mutex>
 #include <regex>
+#include <set>
 
 #include "ability_info.h"
 #include "app_debug_listener_interface.h"
+#include "app_jsheap_mem_info.h"
 #include "app_malloc_info.h"
 #include "app_mem_info.h"
 #include "app_running_record.h"
 #include "app_state_data.h"
 #include "application_info.h"
 #include "bundle_info.h"
-#include "cpp/mutex.h"
+#include "configuration.h"
 #include "iremote_object.h"
 #include "record_query_result.h"
 #include "refbase.h"
 #include "running_process_info.h"
-#include "app_jsheap_mem_info.h"
 
 namespace OHOS {
+namespace Rosen {
+class WindowVisibilityInfo;
+}
 namespace AppExecFwk {
 class AppRunningManager {
 public:
@@ -79,6 +83,17 @@ public:
     bool CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName);
 
     /**
+     * CheckAppRunningRecordIsExistByBundleName, Check whether the process of the application exists.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param appCloneIndex the appindex of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return, Return ERR_OK if success, others fail.
+     */
+    int32_t CheckAppCloneRunningRecordIsExistByBundleName(const std::string &bundleName,
+        int32_t appCloneIndex, bool &isRunning);
+
+    /**
      * GetAppRunningRecordByPid, Get process record by application pid.
      *
      * @param pid, the application pid.
@@ -100,9 +115,11 @@ public:
      * OnRemoteDied, Equipment death notification.
      *
      * @param remote, Death client.
+     * @param appMgrServiceInner, Application manager service inner instance.
      * @return
      */
-    std::shared_ptr<AppRunningRecord> OnRemoteDied(const wptr<IRemoteObject> &remote);
+    std::shared_ptr<AppRunningRecord> OnRemoteDied(const wptr<IRemoteObject> &remote,
+        std::shared_ptr<AppMgrServiceInner> appMgrServiceInner);
 
     /**
      * GetAppRunningRecordMap, Get application record list.
@@ -131,7 +148,8 @@ public:
      *
      * @return Return true if found, otherwise return false.
      */
-    bool ProcessExitByBundleName(const std::string &bundleName, std::list<pid_t> &pids);
+    bool ProcessExitByBundleName(
+        const std::string &bundleName, std::list<pid_t> &pids, const bool clearPageStack = true);
     /**
      * Get Foreground Applications.
      *
@@ -214,20 +232,22 @@ public:
      */
     int32_t ProcessUpdateApplicationInfoInstalled(const ApplicationInfo &appInfo);
 
-    bool ProcessExitByBundleNameAndUid(const std::string &bundleName, const int uid, std::list<pid_t> &pids);
+    bool ProcessExitByBundleNameAndUid(
+        const std::string &bundleName, const int uid, std::list<pid_t> &pids, const bool clearPageStack = true);
     bool GetPidsByUserId(int32_t userId, std::list<pid_t> &pids);
 
-    void PrepareTerminate(const sptr<IRemoteObject> &token);
+    void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
     std::shared_ptr<AppRunningRecord> GetTerminatingAppRunningRecord(const sptr<IRemoteObject> &abilityToken);
 
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
-    void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info);
+    int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info);
 
     void ClipStringContent(const std::regex &re, const std::string &source, std::string &afterCutStr);
     void HandleAddAbilityStageTimeOut(const int64_t eventId);
     void HandleStartSpecifiedAbilityTimeOut(const int64_t eventId);
     std::shared_ptr<AppRunningRecord> GetAppRunningRecordByRenderPid(const pid_t pid);
+    bool CheckCallerIsRenderHost(pid_t callingPid, pid_t renderPid);
     std::shared_ptr<RenderRecord> OnRemoteRenderDied(const wptr<IRemoteObject> &remote);
     bool ProcessExitByPid(pid_t pid);
     bool GetAppRunningStateByBundleName(const std::string &bundleName);
@@ -238,8 +258,9 @@ public:
     bool IsApplicationBackground(const std::string &bundleName);
     bool IsApplicationFirstFocused(const AppRunningRecord &foregroundingRecord);
     bool IsApplicationUnfocused(const std::string &bundleName);
+#ifdef SUPPORT_SCREEN
     void OnWindowVisibilityChanged(const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos);
-
+#endif //SUPPORT_SCREEN
     /**
      * @brief Set attach app debug mode.
      * @param bundleName The application bundle name.
@@ -296,20 +317,29 @@ public:
 
     int DumpIpcStat(const int32_t pid, std::string& result);
 
+    int DumpFfrt(const std::vector<int32_t>& pids, std::string& result);
+
+    bool IsAppProcessesAllCached(const std::string &bundleName, int32_t uid,
+        const std::set<std::shared_ptr<AppRunningRecord>> &cachedSet);
+
+    int32_t UpdateConfigurationDelayed(const std::shared_ptr<AppRunningRecord> &appRecord);
+
 private:
     std::shared_ptr<AbilityRunningRecord> GetAbilityRunningRecord(const int64_t eventId);
-    void AssignRunningProcessInfoByAppRecord(
+    int32_t AssignRunningProcessInfoByAppRecord(
         std::shared_ptr<AppRunningRecord> appRecord, AppExecFwk::RunningProcessInfo &info) const;
-    std::shared_ptr<AppRunningRecord> GetAppRunningRecordByPidInner(const pid_t pid);
-    std::shared_ptr<AppRunningRecord> GetAppRunningRecordByTokenInner(const sptr<IRemoteObject> &abilityToken);
     bool isCollaboratorReserveType(const std::shared_ptr<AppRunningRecord> &appRecord);
 
 private:
+    std::mutex runningRecordMapMutex_;
     std::map<const int32_t, const std::shared_ptr<AppRunningRecord>> appRunningRecordMap_;
-    std::map<const std::string, int> processRestartRecord_;
-    ffrt::mutex lock_;
-    ffrt::mutex uiExtensionMapLock_;
+
+    std::mutex uiExtensionMapLock_;
     std::map<int32_t, std::pair<pid_t, pid_t>> uiExtensionLauncherMap_;
+
+    std::shared_ptr<Configuration> configuration_;
+    std::mutex updateConfigurationDelayedLock_;
+    std::map<const int32_t, bool> updateConfigurationDelayedMap_;
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

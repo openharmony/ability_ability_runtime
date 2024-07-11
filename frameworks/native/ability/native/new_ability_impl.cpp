@@ -19,8 +19,9 @@
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
+#ifdef SUPPORT_SCREEN
 #include "scene_board_judgement.h"
-
+#endif // SUPPORT_SCREEN
 namespace OHOS {
 using AbilityRuntime::FreezeUtil;
 namespace AppExecFwk {
@@ -40,7 +41,7 @@ void NewAbilityImpl::HandleAbilityTransaction(const Want &want, const AAFwk::Lif
     TAG_LOGI(AAFwkTag::ABILITY,
         "Lifecycle: srcState:%{public}d; targetState: %{public}d; isNewWant: %{public}d, sceneFlag: %{public}d",
         lifecycleState_, targetState.state, targetState.isNewWant, targetState.sceneFlag);
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     if (ability_ != nullptr) {
         ability_->sceneFlag_ = targetState.sceneFlag;
     }
@@ -105,7 +106,7 @@ bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycle
     bool ret = true;
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
             if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled() &&
                 lifecycleState_ == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
                 Background();
@@ -121,35 +122,14 @@ bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycle
             break;
         }
         case AAFwk::ABILITY_STATE_FOREGROUND_NEW: {
-            if (targetState.isNewWant) {
-                NewWant(want);
-            }
-#ifdef SUPPORT_GRAPHICS
-            if (lifecycleState_ == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
-                if (ability_) {
-                    ability_->RequestFocus(want);
-                }
-            } else {
-                {
-                    std::lock_guard<std::mutex> lock(notifyForegroundLock_);
-                    notifyForegroundByWindow_ = false;
-                }
-                Foreground(want);
-                std::lock_guard<std::mutex> lock(notifyForegroundLock_);
-                ret = notifyForegroundByWindow_;
-                if (ret) {
-                    notifyForegroundByWindow_ = false;
-                    notifyForegroundByAbility_ = false;
-                }
-            }
-#endif
+            ret = AbilityTransactionForeground(want, targetState);
             break;
         }
         case AAFwk::ABILITY_STATE_BACKGROUND_NEW: {
             if (lifecycleState_ != ABILITY_STATE_STARTED_NEW) {
                 ret = false;
             }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
             Background();
 #endif
             break;
@@ -161,6 +141,35 @@ bool NewAbilityImpl::AbilityTransaction(const Want &want, const AAFwk::LifeCycle
         }
     }
     TAG_LOGD(AAFwkTag::ABILITY, "NewAbilityImpl::AbilityTransaction end: retVal = %{public}d", static_cast<int>(ret));
+    return ret;
+}
+
+bool NewAbilityImpl::AbilityTransactionForeground(const Want &want, const AAFwk::LifeCycleStateInfo &targetState)
+{
+    bool ret = true;
+    if (targetState.isNewWant) {
+        NewWant(want);
+    }
+#ifdef SUPPORT_SCREEN
+    if (lifecycleState_ == AAFwk::ABILITY_STATE_FOREGROUND_NEW) {
+        if (ability_) {
+            ability_->RequestFocus(want);
+        }
+    } else {
+        {
+            std::lock_guard<std::mutex> lock(notifyForegroundLock_);
+            notifyForegroundByWindow_ = false;
+        }
+        Foreground(want);
+        std::lock_guard<std::mutex> lock(notifyForegroundLock_);
+        ret = notifyForegroundByWindow_;
+        if (ret) {
+            notifyForegroundByWindow_ = false;
+            notifyForegroundByAbility_ = false;
+        }
+    }
+#endif
+
     return ret;
 }
 }  // namespace AppExecFwk

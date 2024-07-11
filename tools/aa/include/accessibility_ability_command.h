@@ -55,6 +55,7 @@ private:
     ErrCode RunAsGetInstalledAbilities();
 
     ErrCode MakeEnableCommandArgumentFromCmd(AccessibilityCommandArgument& argument);
+    void CheckEnableCommandOption(const int option, AccessibilityCommandArgument& argument);
     ErrCode MakeDisableCommandArgumentFromCmd(AccessibilityCommandArgument& argument);
     const std::vector<std::string> GetEnabledAbilities();
     const std::vector<Accessibility::AccessibilityAbilityInfo> GetInstalledAbilities();
@@ -94,6 +95,7 @@ private:
     ErrCode MakeSetShortKeyTargetCommandArgumentFromCmd(AccessibilityCommandArgument& argument);
     ErrCode MakeSetCommandArgumentFromCmd(AccessibilityCommandArgument& argument);
     ErrCode MakeCommandArgumentFromCmd(AccessibilityCommandArgument& argument);
+    void SetArgument(int option, AccessibilityCommandArgument& argument);
 
     std::shared_ptr<Accessibility::AccessibilitySystemAbilityClient> abilityClientPtr_ = nullptr;
 };

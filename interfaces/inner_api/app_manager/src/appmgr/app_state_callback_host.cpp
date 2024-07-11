@@ -28,22 +28,9 @@
 namespace OHOS {
 namespace AppExecFwk {
 constexpr int32_t CYCLE_LIMIT = 1000;
-AppStateCallbackHost::AppStateCallbackHost()
-{
-    memberFuncMap_[static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_STATE_CHANGED)] =
-        &AppStateCallbackHost::HandleOnAppStateChanged;
-    memberFuncMap_[static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_ABILITY_REQUEST_DONE)] =
-        &AppStateCallbackHost::HandleOnAbilityRequestDone;
-    memberFuncMap_[static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIG_CHANGE)] =
-        &AppStateCallbackHost::HandleNotifyConfigurationChange;
-    memberFuncMap_[static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_START_RESIDENT_PROCESS)] =
-        &AppStateCallbackHost::HandleNotifyStartResidentProcess;
-}
+AppStateCallbackHost::AppStateCallbackHost() {}
 
-AppStateCallbackHost::~AppStateCallbackHost()
-{
-    memberFuncMap_.clear();
-}
+AppStateCallbackHost::~AppStateCallbackHost() {}
 
 int AppStateCallbackHost::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
@@ -57,13 +44,19 @@ int AppStateCallbackHost::OnRemoteRequest(
         return ERR_INVALID_STATE;
     }
 
-    auto itFunc = memberFuncMap_.find(code);
-    if (itFunc != memberFuncMap_.end()) {
-        auto memberFunc = itFunc->second;
-        if (memberFunc != nullptr) {
-            return (this->*memberFunc)(data, reply);
-        }
+    switch (code) {
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_STATE_CHANGED):
+            return HandleOnAppStateChanged(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_ABILITY_REQUEST_DONE):
+            return HandleOnAbilityRequestDone(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_CONFIG_CHANGE):
+            return HandleNotifyConfigurationChange(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_NOTIFY_START_RESIDENT_PROCESS):
+            return HandleNotifyStartResidentProcess(data, reply);
+        case static_cast<uint32_t>(IAppStateCallback::Message::TRANSACT_ON_APP_REMOTE_DIED):
+            return HandleOnAppRemoteDied(data, reply);
     }
+
     TAG_LOGD(AAFwkTag::APPMGR, "AppStateCallbackHost::OnRemoteRequest end");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
@@ -83,6 +76,11 @@ void AppStateCallbackHost::NotifyConfigurationChange(const AppExecFwk::Configura
 }
 
 void AppStateCallbackHost::NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+}
+
+void AppStateCallbackHost::OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
 }
@@ -141,6 +139,26 @@ int32_t AppStateCallbackHost::HandleNotifyStartResidentProcess(MessageParcel &da
         bundleInfos.emplace_back(*bundleInfo);
     }
     NotifyStartResidentProcess(bundleInfos);
+    return NO_ERROR;
+}
+
+int32_t AppStateCallbackHost::HandleOnAppRemoteDied(MessageParcel &data, MessageParcel &reply)
+{
+    std::vector<sptr<IRemoteObject>> abilityTokens;
+    int32_t infoSize = data.ReadInt32();
+    if (infoSize > CYCLE_LIMIT) {
+        TAG_LOGE(AAFwkTag::APPMGR, "infoSize is too large");
+        return ERR_INVALID_VALUE;
+    }
+    for (int32_t i = 0; i < infoSize; i++) {
+        sptr<IRemoteObject> obj = data.ReadRemoteObject();
+        if (!obj) {
+            TAG_LOGE(AAFwkTag::APPMGR, "Read token failed.");
+            return ERR_INVALID_VALUE;
+        }
+        abilityTokens.emplace_back(obj);
+    }
+    OnAppRemoteDied(abilityTokens);
     return NO_ERROR;
 }
 }  // namespace AppExecFwk

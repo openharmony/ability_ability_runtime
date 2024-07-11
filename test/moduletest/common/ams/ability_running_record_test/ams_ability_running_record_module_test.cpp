@@ -204,6 +204,16 @@ public:
         return 0;
     }
 
+    int32_t ScheduleDumpFfrt(std::string& result) override
+    {
+        return 0;
+    }
+
+    void ScheduleClearPageStack() override
+    {}
+    void ScheduleCacheProcess() override
+    {}
+
 private:
     int abilityLaunchTime = 0;
     int appLaunchTime = 0;

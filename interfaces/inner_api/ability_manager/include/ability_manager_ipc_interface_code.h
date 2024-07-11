@@ -241,6 +241,9 @@ enum class AbilityManagerInterfaceCode {
     // Starts a new ability by shortcut.
     START_SHORTCUT = 79,
 
+    // Set resident process enable status.
+    SET_RESIDENT_PROCESS_ENABLE = 80,
+
     // ipc id 1001-2000 for DMS
     // ipc id for starting ability (1001)
     START_ABILITY = 1001,
@@ -298,8 +301,6 @@ enum class AbilityManagerInterfaceCode {
     GET_EXTENSION_RUNNING_INFO = 1025,
 
     GET_PROCESS_RUNNING_INFO = 1026,
-
-    CLEAR_UP_APPLICATION_DATA = 1027,
 
     START_ABILITY_FOR_OPTIONS = 1028,
 
@@ -394,6 +395,15 @@ enum class AbilityManagerInterfaceCode {
     // ipc id for preload UIExtension ability by want
     PRELOAD_UIEXTENSION_ABILITY = 1062,
 
+    // ipc id for start UIExtension ability embedded
+    START_UI_EXTENSION_ABILITY_EMBEDDED = 1063,
+
+    // ipc id for start UIExtension ability constrained embedded
+    START_UI_EXTENSION_CONSTRAINED_EMBEDDED = 1064,
+
+    // get ui extension session info
+    GET_UI_EXTENSION_SESSION_INFO = 1065,
+
     // ipc id for continue ability(1101)
     START_CONTINUATION = 1101,
 
@@ -436,6 +446,15 @@ enum class AbilityManagerInterfaceCode {
     UNREGISTER_ABILITY_FIRST_FRAME_STATE_OBSERVER = 1127,
     // ipc for get ability state by persistent id
     GET_ABILITY_STATE_BY_PERSISTENT_ID = 1128,
+    TRANSFER_ABILITY_RESULT = 1129,
+    // ipc for notify frozen process by RSS
+    NOTIFY_FROZEN_PROCESS_BY_RSS = 1130,
+
+    // ipc id for pre-start mission
+    PRE_START_MISSION = 1135,
+
+    // ipc for open link
+    OPEN_LINK = 1140,
 
     // ipc id 2001-3000 for tools
     // ipc id for dumping state (2001)
@@ -463,6 +482,8 @@ enum class AbilityManagerInterfaceCode {
     QUERY_MISSION_VAILD = 3012,
 
     VERIFY_PERMISSION = 3013,
+
+    CLEAR_RECOVERY_PAGE_STACK = 3014,
 
     ACQUIRE_SHARE_DATA = 4001,
     SHARE_DATA_DONE = 4002,

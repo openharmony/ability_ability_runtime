@@ -217,7 +217,9 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_GetAppRunningRecordByChildProc
 
     auto appInfo = std::make_shared<ApplicationInfo>();
     auto appRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.example.child");
-    auto childRecord = ChildProcessRecord::CreateChildProcessRecord(PID, "./ets/AProcess.ts", appRecord, 1, false);
+    ChildProcessRequest request;
+    request.srcEntry = "./ets/AProcess.ts";
+    auto childRecord = ChildProcessRecord::CreateChildProcessRecord(PID, request, appRecord);
     pid_t childPid = 201;
     childRecord->pid_ = childPid;
     appRecord->AddChildProcessRecord(childPid, childRecord);
@@ -254,6 +256,48 @@ HWTEST_F(AppRunningManagerTest, AppRunningManager_UpdateConfiguration_0100, Test
     EXPECT_EQ(appRunningManager->appRunningRecordMap_.size(), recordId);
     auto ret = appRunningManager->UpdateConfiguration(config);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: AppRunningManager_UpdateConfiguration_0200
+ * @tc.desc: Test UpdateConfiguration config storage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_UpdateConfiguration_0200, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    Configuration config;
+    config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_LIGHT);
+    auto ret = appRunningManager->UpdateConfiguration(config);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(appRunningManager->configuration_, nullptr);
+    EXPECT_EQ(appRunningManager->configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE),
+        ConfigurationInner::COLOR_MODE_LIGHT);
+}
+
+/**
+ * @tc.name: AppRunningManager_UpdateConfiguration_0300
+ * @tc.desc: Test UpdateConfiguration delayed
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, AppRunningManager_UpdateConfiguration_0300, TestSize.Level1)
+{
+    auto appRunningManager = std::make_shared<AppRunningManager>();
+    EXPECT_NE(appRunningManager, nullptr);
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    int32_t recordId = 1;
+    std::string processName;
+    Configuration config;
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRunningManager->appRunningRecordMap_.emplace(recordId, appRunningRecord);
+    appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, recordId, processName);
+    appRunningRecord->SetState(ApplicationState::APP_STATE_BACKGROUND);
+    appRunningManager->appRunningRecordMap_.emplace(++recordId, appRunningRecord);
+    auto ret = appRunningManager->UpdateConfiguration(config);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(appRunningManager->updateConfigurationDelayedMap_[0], false);
+    EXPECT_EQ(appRunningManager->updateConfigurationDelayedMap_[1], true);
 }
 
 /**
@@ -610,6 +654,87 @@ HWTEST_F(AppRunningManagerTest, UIExtensionReleationship_0700, TestSize.Level1)
 
     SET_THREAD_NUM(100);
     GTEST_RUN_TASK(task);
+}
+
+/**
+ * @tc.name: IsAppProcessesAllCached_0100
+ * @tc.desc: MultiProcess application cache check test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, IsAppProcessesAllCached_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+    std::string bundleName;
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    appInfo->bundleName = "com.tdd.cacheprocesstest";
+    appInfo->apiTargetVersion = 12;
+    appInfo->uid = 1010101;
+    int32_t recordId1 = RECORD_ID;
+    int32_t recordId2 = RECORD_ID + 1;
+    std::string processName = "com.tdd.cacheprocesstest";
+    auto appRunningRecord1 = std::make_shared<AppRunningRecord>(appInfo, recordId1, processName);
+    appRunningRecord1->SetUid(appInfo->uid);
+    auto appRunningRecord2 = std::make_shared<AppRunningRecord>(appInfo, recordId2, processName);
+    appRunningRecord2->SetUid(appInfo->uid);
+
+    appRunningManager->appRunningRecordMap_.insert(make_pair(recordId1, appRunningRecord1));
+    std::set<std::shared_ptr<AppRunningRecord>> cachedSet;
+    cachedSet.insert(appRunningRecord1);
+    EXPECT_EQ(appRunningManager->IsAppProcessesAllCached(appInfo->bundleName, appInfo->uid, cachedSet), true);
+
+    appRunningManager->appRunningRecordMap_.insert(make_pair(recordId2, appRunningRecord2));
+    EXPECT_EQ(appRunningManager->IsAppProcessesAllCached(appInfo->bundleName, appInfo->uid, cachedSet), false);
+}
+
+/**
+ * @tc.name: CheckCallerIsRenderHost_0100
+ * @tc.desc: Check caller is render pid host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, CheckCallerIsRenderHost_0100, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.tdd.test");
+    auto priorityObject = appRunningRecord->GetPriorityObject();
+    ASSERT_NE(priorityObject, nullptr);
+    priorityObject->SetPid(PID);
+
+    pid_t renderPid = 100;
+    auto renderRecord = std::make_shared<RenderRecord>(PID, "param", 1, 1, 1, appRunningRecord);
+    renderRecord->SetPid(renderPid);
+    appRunningRecord->AddRenderRecord(renderRecord);
+    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));
+
+    EXPECT_TRUE(appRunningManager->CheckCallerIsRenderHost(PID, renderPid));
+}
+
+/**
+ * @tc.name: CheckCallerIsRenderHost_0200
+ * @tc.desc: Check caller is render pid host.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppRunningManagerTest, CheckCallerIsRenderHost_0200, TestSize.Level1)
+{
+    static std::shared_ptr<AppRunningManager> appRunningManager = std::make_shared<AppRunningManager>();
+    ASSERT_NE(appRunningManager, nullptr);
+
+    std::shared_ptr<ApplicationInfo> appInfo = std::make_shared<ApplicationInfo>();
+    auto appRunningRecord = std::make_shared<AppRunningRecord>(appInfo, RECORD_ID, "com.tdd.test");
+    auto priorityObject = appRunningRecord->GetPriorityObject();
+    ASSERT_NE(priorityObject, nullptr);
+    priorityObject->SetPid(PID);
+
+    pid_t renderPid = 100;
+    auto renderRecord = std::make_shared<RenderRecord>(PID, "param", 1, 1, 1, appRunningRecord);
+    renderRecord->SetPid(renderPid);
+    appRunningRecord->AddRenderRecord(renderRecord);
+    appRunningManager->appRunningRecordMap_.insert(make_pair(RECORD_ID, appRunningRecord));
+
+    EXPECT_FALSE(appRunningManager->CheckCallerIsRenderHost(1000, renderPid));
 }
 } // namespace AppExecFwk
 } // namespace OHOS

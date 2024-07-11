@@ -18,7 +18,13 @@ module_output_path = "ability_runtime/abilitymgr"
 
 ohos_unittest("ability_record_test") {
   module_out_path = module_output_path
-
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+  branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_services_path}/appdfr/include",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/system_ability_mock",
@@ -53,6 +59,7 @@ ohos_unittest("ability_record_test") {
     "${ability_runtime_native_path}/ability/native:abilitykit_native",
     "${ability_runtime_native_path}/ability/native:auto_startup_callback",
     "${ability_runtime_services_path}/abilitymgr:abilityms",
+    "${ability_runtime_services_path}/abilitymgr:mission_list",
     "${ability_runtime_services_path}/common:perm_verification",
     "${ability_runtime_services_path}/uripermmgr:libupms_static",
     "${ability_runtime_test_path}/mock/services_abilitymgr_test/libs/aakit:aakit_mock",
@@ -64,6 +71,7 @@ ohos_unittest("ability_record_test") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_base:extractortool",
     "ability_base:session_info",
     "ability_base:want",
     "ability_base:zuri",
@@ -93,7 +101,13 @@ ohos_unittest("ability_record_test") {
 
 ohos_unittest("ability_record_test_call") {
   module_out_path = "ability_runtime/ability_call_test"
-
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "../../cfi_blocklist.txt"
+  }
+  branch_protector_ret = "pac_ret"
   include_dirs = [
     "${ability_runtime_path}/interfaces/inner_api/ability_manager/include/",
     "${ability_runtime_path}/interfaces/kits/native/appkit/ability_bundle_manager_helper",
@@ -146,8 +160,10 @@ ohos_unittest("ability_record_test_call") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
+    "config_policy:configpolicy_util",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "napi:ace_napi",

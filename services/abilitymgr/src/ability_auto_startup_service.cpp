@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <mutex>
+#include <string>
 
 #include "ability_auto_startup_data_manager.h"
 #include "ability_manager_errors.h"
@@ -24,6 +25,8 @@
 #include "auto_startup_callback_proxy.h"
 #include "auto_startup_info.h"
 #include "auto_startup_interface.h"
+#include "ability_util.h"
+#include "global_constant.h"
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
@@ -102,16 +105,21 @@ int32_t AbilityAutoStartupService::UnregisterAutoStartupSystemCallback(const spt
 
 int32_t AbilityAutoStartupService::SetApplicationAutoStartup(const AutoStartupInfo &info)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP,
+        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     int32_t code = CheckPermissionForSystem();
     if (code != ERR_OK) {
         return code;
     }
 
     bool isVisible;
+    int32_t userId;
     std::string abilityTypeName;
-    if (!GetAbilityData(info, isVisible, abilityTypeName)) {
+    std::string accessTokenId;
+    if (!GetAbilityData(info, isVisible, abilityTypeName, accessTokenId, userId)) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get ability data.");
         return INNER_ERR;
     }
@@ -123,6 +131,8 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartup(const AutoStartupIn
 
     AutoStartupInfo fullInfo(info);
     fullInfo.abilityTypeName = abilityTypeName;
+    fullInfo.accessTokenId = accessTokenId;
+    fullInfo.userId = userId;
 
     return InnerSetApplicationAutoStartup(fullInfo);
 }
@@ -163,8 +173,11 @@ int32_t AbilityAutoStartupService::InnerSetApplicationAutoStartup(const AutoStar
 
 int32_t AbilityAutoStartupService::CancelApplicationAutoStartup(const AutoStartupInfo &info)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP,
+        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     int32_t code = CheckPermissionForSystem();
     if (code != ERR_OK) {
         return code;
@@ -172,7 +185,9 @@ int32_t AbilityAutoStartupService::CancelApplicationAutoStartup(const AutoStartu
 
     bool isVisible;
     std::string abilityTypeName;
-    if (!GetAbilityData(info, isVisible, abilityTypeName)) {
+    std::string accessTokenId;
+    int32_t userId;
+    if (!GetAbilityData(info, isVisible, abilityTypeName, accessTokenId, userId)) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get ability data.");
         return INNER_ERR;
     }
@@ -184,6 +199,8 @@ int32_t AbilityAutoStartupService::CancelApplicationAutoStartup(const AutoStartu
 
     AutoStartupInfo fullInfo(info);
     fullInfo.abilityTypeName = abilityTypeName;
+    fullInfo.accessTokenId = accessTokenId;
+    fullInfo.userId = userId;
 
     return InnerCancelApplicationAutoStartup(fullInfo);
 }
@@ -212,7 +229,8 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartup(const AutoS
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList)
+int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList,
+    int32_t userId)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
     int32_t code = CheckPermissionForEDM();
@@ -222,11 +240,12 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<A
         return code;
     }
 
-    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList);
+    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList,
+        userId);
 }
 
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermission(
-    std::vector<AutoStartupInfo> &infoList)
+    std::vector<AutoStartupInfo> &infoList, int32_t userId)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
@@ -234,31 +253,35 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermiss
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
     }
 
-    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList);
+    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAllAutoStartupApplications(infoList,
+        userId);
 }
 
-int32_t AbilityAutoStartupService::DeleteAutoStartupData(const std::string &bundleName)
+int32_t AbilityAutoStartupService::DeleteAutoStartupData(const std::string &bundleName, const int32_t uid)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
-    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->DeleteAutoStartupData(bundleName);
+    return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->DeleteAutoStartupData(bundleName, uid);
 }
 
 int32_t AbilityAutoStartupService::CheckAutoStartupData(const std::string &bundleName, int32_t uid)
 {
+    int32_t userId;
+    int32_t appIndex = 0;
+    AppExecFwk::BundleInfo bundleInfo;
+    if (!GetBundleInfo(bundleName, bundleInfo, uid, userId, appIndex)) {
+        return INNER_ERR;
+    }
+    auto tokenId = bundleInfo.applicationInfo.accessTokenId;
+    std::string accessTokenIdStr = std::to_string(tokenId);
     std::vector<AutoStartupInfo> infoList;
     int32_t result = DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->GetCurrentAppAutoStartupData(
-        bundleName, infoList);
+        bundleName, infoList, accessTokenIdStr);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get auto startup data.");
         return result;
     }
     if (infoList.size() == 0) {
         return ERR_OK;
-    }
-
-    AppExecFwk::BundleInfo bundleInfo;
-    if (!GetBundleInfo(bundleName, bundleInfo, uid)) {
-        return INNER_ERR;
     }
 
     bool isFound = false;
@@ -274,15 +297,18 @@ int32_t AbilityAutoStartupService::CheckAutoStartupData(const std::string &bundl
 
     if (!isFound) {
         TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Current bundleName not found in Datebase.");
-        return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->DeleteAutoStartupData(bundleName);
+        return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->DeleteAutoStartupData(bundleName, uid);
     }
     return ERR_OK;
 }
 
 void AbilityAutoStartupService::ExecuteCallbacks(bool isCallOn, const AutoStartupInfo &info)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP,
+        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     for (auto item : callbackVector_) {
         auto remoteSystemCallback = iface_cast<IAutoStartupCallBack>(item);
         if (remoteSystemCallback != nullptr) {
@@ -406,17 +432,11 @@ bool AbilityAutoStartupService::CheckSelfApplication(const std::string &bundleNa
     return GetSelfApplicationBundleName() == bundleName ? true : false;
 }
 
-bool AbilityAutoStartupService::GetBundleInfo(
-    const std::string &bundleName, AppExecFwk::BundleInfo &bundleInfo, int32_t uid)
+bool AbilityAutoStartupService::GetBundleInfo(const std::string &bundleName,
+    AppExecFwk::BundleInfo &bundleInfo, int32_t uid, int32_t &userId, int32_t appIndex)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
-    auto bundleMgrClient = GetBundleMgrClient();
-    if (bundleMgrClient == nullptr) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get BundleMgrClient.");
-        return false;
-    }
 
-    int32_t userId;
     if (uid == -1) {
         userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
     } else {
@@ -431,30 +451,61 @@ bool AbilityAutoStartupService::GetBundleInfo(
         userId = abilityMgr->GetUserId();
     }
     TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Current userId: %{public}d.", userId);
-    auto flags =
-        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES | AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
-    if (!IN_PROCESS_CALL(bundleMgrClient->GetBundleInfo(
-        bundleName, static_cast<AppExecFwk::BundleFlag>(flags), bundleInfo, userId))) {
-        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get bundle info.");
+    auto bundleMgrHelper = DelayedSingleton<AppExecFwk::BundleMgrHelper>::GetInstance();
+    if (bundleMgrHelper == nullptr) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "bundleMgrHelper is nullptr.");
         return false;
     }
-
+    if (appIndex == 0) {
+        auto flags =
+            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES | AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO;
+            if (!IN_PROCESS_CALL(bundleMgrHelper->GetBundleInfo(
+                bundleName, static_cast<AppExecFwk::BundleFlag>(flags), bundleInfo, userId))) {
+                TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get bundle info.");
+                return false;
+            }
+    } else if (appIndex <= GlobalConstant::MAX_APP_CLONE_INDEX) {
+        auto bundleFlag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) +
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE);
+        auto bundleMgrResult = IN_PROCESS_CALL(
+            bundleMgrHelper->GetCloneBundleInfo(bundleName, bundleFlag, appIndex, bundleInfo, userId));
+            if (bundleMgrResult != ERR_OK) {
+                TAG_LOGE(AAFwkTag::AUTO_STARTUP, "bundleMgrResult is not ERR_OK.");
+                return false;
+            }
+    } else {
+            if (!IN_PROCESS_CALL(bundleMgrHelper->GetSandboxBundleInfo(bundleName, appIndex, userId, bundleInfo))) {
+                TAG_LOGE(AAFwkTag::AUTO_STARTUP, "fail to GetSandboxBundleInfo.");
+                return false;
+            }
+    }
     return true;
 }
 
-bool AbilityAutoStartupService::GetAbilityData(
-    const AutoStartupInfo &info, bool &isVisible, std::string &abilityTypeName)
+bool AbilityAutoStartupService::GetAbilityData(const AutoStartupInfo &info, bool &isVisible,
+    std::string &abilityTypeName, std::string &accessTokenId, int32_t &userId)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s.",
-        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str());
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP,
+        "bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s,"
+        " accessTokenId: %{public}s, userId: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(),
+        info.abilityName.c_str(), info.accessTokenId.c_str(), info.userId);
     AppExecFwk::BundleInfo bundleInfo;
-    if (!GetBundleInfo(info.bundleName, bundleInfo)) {
+    int32_t currentUserId;
+    int32_t uid = bundleInfo.applicationInfo.uid;
+    if (!GetBundleInfo(info.bundleName, bundleInfo, uid, currentUserId, info.appCloneIndex)) {
+        TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to GetBundleInfo.");
         return false;
     }
-
-    for (auto abilityInfo : bundleInfo.abilityInfos) {
-        if ((abilityInfo.bundleName == info.bundleName) && (abilityInfo.name == info.abilityName)) {
-            if (info.moduleName.empty() || (abilityInfo.moduleName == info.moduleName)) {
+    userId = currentUserId;
+    auto accessTokenIdStr = bundleInfo.applicationInfo.accessTokenId;
+    accessTokenId = std::to_string(accessTokenIdStr);
+    for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
+        for (const auto& abilityInfo : hapModuleInfo.abilityInfos) {
+            if ((abilityInfo.bundleName == info.bundleName) && (abilityInfo.name == info.abilityName) &&
+                (info.moduleName.empty() || (abilityInfo.moduleName == info.moduleName))) {
                 isVisible = abilityInfo.visible;
                 abilityTypeName = GetAbilityTypeName(abilityInfo);
                 TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Get ability info success.");
@@ -538,10 +589,11 @@ int32_t AbilityAutoStartupService::CheckPermissionForSelf(const std::string &bun
     return ERR_OK;
 }
 
-int32_t AbilityAutoStartupService::GetAbilityInfo(const AutoStartupInfo &info, std::string &abilityTypeName)
+int32_t AbilityAutoStartupService::GetAbilityInfo(
+    const AutoStartupInfo &info, std::string &abilityTypeName, std::string &accessTokenId, int32_t &userId)
 {
     bool isVisible = false;
-    if (!GetAbilityData(info, isVisible, abilityTypeName)) {
+    if (!GetAbilityData(info, isVisible, abilityTypeName, accessTokenId, userId)) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Failed to get ability data.");
         return INNER_ERR;
     }
@@ -560,13 +612,18 @@ int32_t AbilityAutoStartupService::SetApplicationAutoStartupByEDM(const AutoStar
     if (errorCode != ERR_OK) {
         return errorCode;
     }
+    int32_t userId;
     std::string typeName;
-    errorCode = GetAbilityInfo(info, typeName);
+    std::string accessTokenId;
+    
+    errorCode = GetAbilityInfo(info, typeName, accessTokenId, userId);
     if (errorCode != ERR_OK) {
         return errorCode;
     }
     AutoStartupInfo fullInfo(info);
     fullInfo.abilityTypeName = typeName;
+    fullInfo.accessTokenId = accessTokenId;
+    fullInfo.userId = userId;
     return InnerApplicationAutoStartupByEDM(fullInfo, true, flag);
 }
 
@@ -576,21 +633,27 @@ int32_t AbilityAutoStartupService::CancelApplicationAutoStartupByEDM(const AutoS
     if (errorCode != ERR_OK) {
         return errorCode;
     }
+    int32_t userId;
     std::string typeName;
-    errorCode = GetAbilityInfo(info, typeName);
+    std::string accessTokenId;
+    errorCode = GetAbilityInfo(info, typeName, accessTokenId, userId);
     if (errorCode != ERR_OK) {
         return errorCode;
     }
     AutoStartupInfo fullInfo(info);
     fullInfo.abilityTypeName = typeName;
+    fullInfo.accessTokenId = accessTokenId;
+    fullInfo.userId = userId;
     return InnerApplicationAutoStartupByEDM(fullInfo, false, flag);
 }
 
 int32_t AbilityAutoStartupService::InnerApplicationAutoStartupByEDM(const AutoStartupInfo &info, bool isSet, bool flag)
 {
     TAG_LOGD(AAFwkTag::AUTO_STARTUP,
-        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, isSet: %{public}d.,"
-        "flag: %{public}d.", info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(), isSet, flag);
+        "Called, bundleName: %{public}s, moduleName: %{public}s, abilityName: %{public}s, accessTokenId: %{public}s,"
+        " userId: %{public}d, isSet: %{public}d, flag: %{public}d.",
+        info.bundleName.c_str(), info.moduleName.c_str(), info.abilityName.c_str(),
+        info.accessTokenId.c_str(), info.userId, isSet, flag);
     AutoStartupStatus status =
         DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->QueryAutoStartupData(info);
     if (status.code != ERR_OK && status.code != ERR_NAME_NOT_FOUND) {

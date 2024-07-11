@@ -22,6 +22,7 @@ import type UIExtensionContentSession from '@ohos.app.ability.UIExtensionContent
 
 const TAG = 'AssertFaultDialog_UIExtension';
 const TEXT_DETAIL = 'assertFaultDialogDetail';
+const DEBUG_ASSERT_RESULT = 'assertResult';
 
 export default class UiExtAbility extends UIExtensionAbility {
   storage: LocalStorage;
@@ -40,13 +41,16 @@ export default class UiExtAbility extends UIExtensionAbility {
   }
 
   onSessionCreate(want: Want, session: UIExtensionContentSession): void {
-    this.sessionId = want.parameters[wantConstant.Params.ASSERT_FAULT_SESSION_ID] as string,
-    this.storage = new LocalStorage(
-      {
-        'session': session,
-        'sessionId' : this.sessionId,
-        'textDetail' : want.parameters[TEXT_DETAIL]
-      });
+    try {
+      this.sessionId = want.parameters[wantConstant.Params.ASSERT_FAULT_SESSION_ID] as string,
+      this.storage = new LocalStorage(
+        {
+          'session': session,
+          'textDetail' : want.parameters[TEXT_DETAIL]
+        });
+    } catch (exception) {
+      console.error('Failed to register callback. Code: ' + JSON.stringify(exception));
+    }
     session.loadContent('pages/assertFaultDialog', this.storage);
     session.setWindowBackgroundColor('#00000000');
   }
@@ -57,19 +61,18 @@ export default class UiExtAbility extends UIExtensionAbility {
 
   onSessionDestroy(session: UIExtensionContentSession): void {
     console.info(TAG, 'onSessionDestroy');
-    console.info(TAG, `isUserAction: ${AppStorage.get('isUserAction')}`);
-    let isUserAction = AppStorage.get<boolean>('isUserAction');
-    if (isUserAction === undefined) {
-      let status = abilityManager.UserStatus.ASSERT_TERMINATE;
-      try {
-        abilityManager.notifyDebugAssertResult(this.sessionId, status).then(() => {
-          console.log(TAG, 'notifyDebugAssertResult success.');
-        }).catch((err: BusinessError) => {
-          console.error(TAG, `notifyDebugAssertResult failed, error: ${JSON.stringify(err)}`);
-        });
-      } catch (error) {
-        console.error(TAG, `try notifyDebugAssertResult failed, error: ${JSON.stringify(error)}`);
-      }
+    let assertResult = AppStorage.get<abilityManager.UserStatus>(DEBUG_ASSERT_RESULT);
+    if (assertResult === undefined) {
+      assertResult = abilityManager.UserStatus.ASSERT_TERMINATE;
+    }
+    try {
+      abilityManager.notifyDebugAssertResult(this.sessionId, assertResult).then(() => {
+        console.log(TAG, 'notifyDebugAssertResult success.');
+      }).catch((err: BusinessError) => {
+        console.error(TAG, `notifyDebugAssertResult failed, error: ${JSON.stringify(err)}`);
+      });
+    } catch (error) {
+      console.error(TAG, `try notifyDebugAssertResult failed, error: ${JSON.stringify(error)}`);
     }
   }
 };

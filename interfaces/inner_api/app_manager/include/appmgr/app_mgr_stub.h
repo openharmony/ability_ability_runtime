@@ -65,6 +65,7 @@ private:
     int32_t HandleGetAmsMgr(MessageParcel &data, MessageParcel &reply);
     int32_t HandleClearUpApplicationData(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRunningProcesses(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetRunningProcessesByBundleType(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInfosByUserId(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessRunningInformation(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetAllRenderProcesses(MessageParcel &data, MessageParcel &reply);
@@ -93,6 +94,8 @@ private:
     int32_t HandleUnregisterConfigurationObserver(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDumpHeapMemory(MessageParcel &data, MessageParcel &reply);
     int32_t HandleDumpJsHeapMemory(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetRunningMultiAppInfoByBundleName(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleIsAppRunning(MessageParcel &data, MessageParcel &reply);
 #ifdef ABILITY_COMMAND_FOR_TEST
     int32_t HandleBlockAppServiceDone(MessageParcel &data, MessageParcel &reply);
 #endif
@@ -107,8 +110,10 @@ private:
     int32_t HandleStartNativeProcessForDebugger(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyFault(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyFaultBySA(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetAppFreezeFilter(MessageParcel &data, MessageParcel &reply);
     int32_t HandleJudgeSandboxByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetBundleNameByPid(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleGetRunningProcessInfoByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetProcessMemoryByPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleGetRunningProcessInformation(MessageParcel &data, MessageParcel &reply);
     int32_t HandleChangeAppGcState(MessageParcel &data, MessageParcel &reply);
@@ -134,10 +139,28 @@ private:
     int32_t HandleGetAllUIExtensionProviderPid(MessageParcel &data, MessageParcel &reply);
     int32_t HandleNotifyMemorySizeStateChanged(MessageParcel &data, MessageParcel &reply);
     int32_t HandleSetSupportedProcessCacheSelf(MessageParcel &data, MessageParcel &reply);
-
-    using AppMgrFunc = int32_t (AppMgrStub::*)(MessageParcel &data, MessageParcel &reply);
-    std::map<uint32_t, AppMgrFunc> memberFuncMap_;
-
+    int32_t HandleSetAppAssertionPauseState(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleStartNativeChildProcess(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSaveBrowserChannel(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleCheckCallingIsUserTestMode(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleNotifyProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleKillProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleRestartResidentProcessDependedOnWeb(MessageParcel &data, MessageParcel &reply);
+    int32_t OnRemoteRequestInner(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerFirst(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerFourth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerFifth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerSixth(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
+    int32_t OnRemoteRequestInnerSeventh(uint32_t code, MessageParcel &data,
+        MessageParcel &reply, MessageOption &option);
     DISALLOW_COPY_AND_MOVE(AppMgrStub);
 };
 }  // namespace AppExecFwk

@@ -51,6 +51,58 @@ class AbilityLifecycleCallback {
   onAbilityContinue(ability) {
     console.log('onAbilityContinue');
   }
+
+  onNewWant(ability) {
+    console.log('onNewWant');
+  }
+
+  onWillNewWant(ability) {
+    console.log('onWillNewWant');
+  }
+
+  onAbilityWillCreate(ability) {
+    console.log('onAbilityWillCreate');
+  }
+
+  onWindowStageWillCreate(ability, windowStage) {
+    console.log('onWindowStageWillCreate');
+  }
+
+  onWindowStageWillDestroy(ability, windowStage) {
+    console.log('onWindowStageWillDestroy');
+  }
+
+  onAbilityWillDestroy(ability) {
+    console.log('onAbilityWillDestroy');
+  }
+
+  onAbilityWillForeground(ability) {
+    console.log('onAbilityWillForeground');
+  }
+
+  onAbilityWillBackground(ability) {
+    console.log('onAbilityWillBackground');
+  }
+
+  onAbilityWillContinue(ability) {
+    console.log('onAbilityWillContinue');
+  }
+
+  onWindowStageWillRestore(ability, windowStage) {
+    console.log('onWindowStageWillRestore');
+  }
+
+  onWindowStageRestore(ability, windowStage) {
+    console.log('onWindowStageRestore');
+  }
+
+  onAbilityWillSaveState(ability) {
+    console.log('onAbilityWillSaveState');
+  }
+
+  onAbilitySaveState(ability) {
+    console.log('onAbilitySaveState');
+  }
 }
 
 export default AbilityLifecycleCallback;

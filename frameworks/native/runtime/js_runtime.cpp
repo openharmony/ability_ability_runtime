@@ -38,7 +38,6 @@
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
 #include "hitrace_meter.h"
-#include "hot_reloader.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "js_environment.h"
@@ -63,10 +62,12 @@
 #include "source_map.h"
 #include "source_map_operator.h"
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
+#include "hot_reloader.h"
 #include "ace_forward_compatibility.h"
 #include "declarative_module_preloader.h"
-#endif
+#endif //SUPPORT_SCREEN
+
 
 using namespace OHOS::AbilityBase;
 using Extractor = OHOS::AbilityBase::Extractor;
@@ -223,7 +224,7 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
     SetChildOptions(options);
     if (!options.preload && options.isStageModel) {
         auto preloadedInstance = Runtime::GetPreloaded();
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
         // reload ace if compatible mode changes
         if (Ace::AceForwardCompatibility::PipelineChanged() && preloadedInstance) {
             preloadedInstance.reset();
@@ -282,18 +283,23 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
             if (isDebugApp) {
                 weak->StopDebugger(option);
             }
-            weak->StartDebugger(option, ARK_DEBUGGER_LIB_PATH, socketFd, isStartWithDebug, instanceId);
+            weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
     if (isDebugApp) {
         ConnectServerManager::Get().StartConnectServer(bundleName_, -1, true);
     }
 
+    DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+}
+
+void JsRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug)
+{
     ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId_);
     EcmaVM* vm = GetEcmaVm();
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
-    ConnectServerManager::Get().StoreDebuggerInfo(instanceId_, reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
+    ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
     jsEnv_->NotifyDebugMode(getproctid(), ARK_DEBUGGER_LIB_PATH, instanceId_, isDebugApp, isStartWithDebug);
 }
 
@@ -408,9 +414,15 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             if (isDebugApp) {
                 weak->StopDebugger(option);
             }
-            weak->StartDebugger(option, ARK_DEBUGGER_LIB_PATH, socketFd, isStartWithDebug, instanceId);
+            weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
+
+    DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
+}
+
+void JsRuntime::DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug, const DebugOption dOption)
+{
     if (isDebugApp) {
         ConnectServerManager::Get().StartConnectServer(bundleName_, 0, true);
     }
@@ -425,12 +437,13 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
     EcmaVM* vm = GetEcmaVm();
     auto dTask = jsEnv_->GetDebuggerPostTask();
     panda::JSNApi::DebugOption option = {ARK_DEBUGGER_LIB_PATH, isDebugApp ? isStartWithDebug : false};
-    ConnectServerManager::Get().StoreDebuggerInfo(instanceId_, reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
+    ConnectServerManager::Get().StoreDebuggerInfo(getproctid(), reinterpret_cast<void*>(vm), option, dTask, isDebugApp);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "profiler:%{public}d interval:%{public}d.", profiler, interval);
     jsEnv_->StartProfiler(ARK_DEBUGGER_LIB_PATH, instanceId_, profiler, interval, getproctid(), isDebugApp);
 }
 
-bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer)
+bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFullName, std::vector<uint8_t>& buffer,
+                              bool isABC)
 {
     Extractor extractor(filePath);
     if (!extractor.Init()) {
@@ -439,7 +452,11 @@ bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFull
     }
 
     std::vector<std::string> fileNames;
-    extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
+    if (isABC) {
+        extractor.GetSpecifiedTypeFiles(fileNames, ".abc");
+    } else {
+        extractor.GetSpecifiedTypeFiles(fileNames, ".map");
+    }
     if (fileNames.empty()) {
         TAG_LOGW(
             AAFwkTag::JSRUNTIME, "GetFileBuffer, There's no abc file in hap or hqf %{private}s.", filePath.c_str());
@@ -464,6 +481,8 @@ bool JsRuntime::LoadRepairPatch(const std::string& hqfFile, const std::string& h
     TAG_LOGD(AAFwkTag::JSRUNTIME, "LoadRepairPatch function called.");
     auto vm = GetEcmaVm();
     CHECK_POINTER_AND_RETURN(vm, false);
+
+    InitSourceMap(hqfFile);
 
     std::string patchFile;
     std::vector<uint8_t> patchBuffer;
@@ -538,7 +557,9 @@ bool JsRuntime::UnLoadRepairPatch(const std::string& hqfFile)
 bool JsRuntime::NotifyHotReloadPage()
 {
     TAG_LOGD(AAFwkTag::JSRUNTIME, "function called.");
+#ifdef SUPPORT_SCREEN
     Ace::HotReloader::HotReload();
+#endif // SUPPORT_SCREEN
     return true;
 }
 
@@ -602,7 +623,6 @@ void JsRuntime::FinishPreload()
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
     panda::JSNApi::PreFork(vm);
-    jsEnv_->StopMonitorJSHeapUsage();
 }
 
 void JsRuntime::PostPreload(const Options& options)
@@ -616,6 +636,10 @@ void JsRuntime::PostPreload(const Options& options)
     if (!options.arkNativeFilePath.empty()) {
         std::string sandBoxAnFilePath = SANDBOX_ARK_CACHE_PATH + options.arkNativeFilePath;
         postOption.SetAnDir(sandBoxAnFilePath);
+    }
+    if (options.isMultiThread) {
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Multi-Thread Mode: %{public}d.", options.isMultiThread);
+        panda::JSNApi::SetMultiThreadCheck();
     }
     bool profileEnabled = OHOS::system::GetBoolParameter("ark.profile", false);
     postOption.SetEnableProfile(profileEnabled);
@@ -647,7 +671,7 @@ void JsRuntime::LoadAotFile(const Options& options)
 bool JsRuntime::Initialize(const Options& options)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     if (Ace::AceForwardCompatibility::PipelineChanged()) {
         preloaded_ = false;
     }
@@ -659,8 +683,6 @@ bool JsRuntime::Initialize(const Options& options)
         }
         NativeCreateEnv::RegCreateNapiEnvCallback(CreateNapiEnv);
         NativeCreateEnv::RegDestroyNapiEnvCallback(DestroyNapiEnv);
-    } else {
-        jsEnv_->StartMonitorJSHeapUsage();
     }
     apiTargetVersion_ = options.apiTargetVersion;
     TAG_LOGD(AAFwkTag::JSRUNTIME, "Initialize: %{public}d.", apiTargetVersion_);
@@ -729,6 +751,8 @@ bool JsRuntime::Initialize(const Options& options)
             panda::JSNApi::SetHmsModuleList(vm, systemKitsMap);
             std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
             std::map<std::string, std::string> pkgAliasMap;
+            pkgContextInfoJsonStringMap_ = options.pkgContextInfoJsonStringMap;
+            packageNameList_ = options.packageNameList;
             GetPkgContextInfoListMap(options.pkgContextInfoJsonStringMap, pkgContextInfoMap, pkgAliasMap);
             panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
             panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
@@ -792,6 +816,11 @@ bool JsRuntime::CreateJsEnv(const Options& options)
     TAG_LOGD(AAFwkTag::JSRUNTIME, "ASMM JIT Verify CreateJsEnv, jitEnabled: %{public}d", options.jitEnabled);
     pandaOption.SetEnableJIT(options.jitEnabled);
 
+    if (options.isMultiThread) {
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Multi Thread Mode: %{public}d.", options.isMultiThread);
+        panda::JSNApi::SetMultiThreadCheck();
+    }
+
     if (IsUseAbilityRuntime(options)) {
         // aot related
         bool aotEnabled = OHOS::system::GetBoolParameter("persist.ark.aot", true);
@@ -813,11 +842,12 @@ void JsRuntime::PreloadAce(const Options& options)
 {
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
     if (options.loadAce) {
         // ArkTsCard start
         if (options.isUnique) {
-            OHOS::Ace::DeclarativeModulePreloader::PreloadCard(*nativeEngine, options.bundleName);
+            OHOS::Ace::DeclarativeModulePreloader::PreloadCard(
+                *nativeEngine, options.bundleName, options.pkgContextInfoJsonStringMap);
         } else {
             OHOS::Ace::DeclarativeModulePreloader::Preload(*nativeEngine);
         }
@@ -832,7 +862,9 @@ void JsRuntime::ReloadFormComponent()
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
     // ArkTsCard update condition, need to reload new component
-    OHOS::Ace::DeclarativeModulePreloader::ReloadCard(*nativeEngine, bundleName_);
+#ifdef SUPPORT_SCREEN
+    OHOS::Ace::DeclarativeModulePreloader::ReloadCard(*nativeEngine, bundleName_, pkgContextInfoJsonStringMap_);
+#endif
 }
 
 void JsRuntime::DoCleanWorkAfterStageCleaned()
@@ -878,6 +910,24 @@ void JsRuntime::InitSourceMap(const std::shared_ptr<JsEnv::SourceMapOperator> op
     jsEnv_->InitSourceMap(operatorObj);
     JsEnv::SourceMap::RegisterReadSourceMapCallback(JsRuntime::ReadSourceMapData);
     JsEnv::SourceMap::RegisterGetHapPathCallback(JsModuleReader::GetHapPathList);
+}
+
+void JsRuntime::InitSourceMap(const std::string hqfFilePath)
+{
+    std::string patchSoureMapFile;
+    std::vector<uint8_t> soureMapBuffer;
+    if (!GetFileBuffer(hqfFilePath, patchSoureMapFile, soureMapBuffer, false)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "InitSourceMap, get patchSoureMap file buffer failed.");
+        return;
+    }
+    std::string str(soureMapBuffer.begin(), soureMapBuffer.end());
+    auto sourceMapOperator = jsEnv_->GetSourceMapOperator();
+    if (sourceMapOperator != nullptr) {
+        auto sourceMapObj = sourceMapOperator->GetSourceMapObj();
+        if (sourceMapObj != nullptr) {
+            sourceMapObj->SplitSourceMap(str);
+        }
+    }
 }
 
 void JsRuntime::Deinitialize()
@@ -1148,11 +1198,11 @@ void JsRuntime::RemoveTask(const std::string& name)
     jsEnv_->RemoveTask(name);
 }
 
-void JsRuntime::DumpCpuProfile(bool isPrivate)
+void JsRuntime::DumpCpuProfile()
 {
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
-    nativeEngine->DumpCpuProfile(true, DumpFormat::JSON, isPrivate, false);
+    nativeEngine->DumpCpuProfile();
 }
 
 void JsRuntime::DumpHeapSnapshot(bool isPrivate)
@@ -1166,7 +1216,14 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
-    DFXJSNApi::DumpHeapSnapshot(vm, 0, true, false, false, isFullGC, tid);
+    panda::ecmascript::DumpSnapShotOption dumpOption;
+    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    dumpOption.isVmMode = true;
+    dumpOption.isPrivate = false;
+    dumpOption.captureNumericValue = false;
+    dumpOption.isFullGC = isFullGC;
+    dumpOption.isSync = false;
+    DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
 }
 
 void JsRuntime::ForceFullGC(uint32_t tid)
@@ -1200,26 +1257,6 @@ void JsRuntime::GetHeapPrepare()
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->GetHeapPrepare();
-}
-
-bool JsRuntime::BuildJsStackInfoList(uint32_t tid, std::vector<JsFrames>& jsFrames)
-{
-    auto nativeEngine = GetNativeEnginePointer();
-    CHECK_POINTER_AND_RETURN(nativeEngine, false);
-    std::vector<JsFrameInfo> jsFrameInfo;
-    bool ret = nativeEngine->BuildJsStackInfoList(tid, jsFrameInfo);
-    if (!ret) {
-        return ret;
-    }
-    for (auto jf : jsFrameInfo) {
-        struct JsFrames jsFrame;
-        jsFrame.functionName = jf.functionName;
-        jsFrame.fileName = jf.fileName;
-        jsFrame.pos = jf.pos;
-        jsFrame.nativePointer = jf.nativePointer;
-        jsFrames.emplace_back(jsFrame);
-    }
-    return ret;
 }
 
 void JsRuntime::NotifyApplicationState(bool isBackground)
@@ -1313,6 +1350,10 @@ void JsRuntime::RegisterQuickFixQueryFunc(const std::map<std::string, std::strin
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
+    for (auto it = moduleAndPath.begin(); it != moduleAndPath.end(); it++) {
+        std::string hqfFile(AbilityBase::GetLoadPath(it->second));
+        InitSourceMap(hqfFile);
+    }
     panda::JSNApi::RegisterQuickFixQueryFunc(vm, JsQuickfixCallback(moduleAndPath));
 }
 
@@ -1444,7 +1485,7 @@ void JsRuntime::ReInitJsEnvImpl(const Options& options)
     jsEnv_->ReInitJsEnvImpl(std::make_unique<OHOSJsEnvironmentImpl>(options.eventRunner));
 }
 
-void JsRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate>& moduleCheckerDelegate) const
+void JsRuntime::SetModuleLoadChecker(const std::shared_ptr<ModuleCheckerDelegate> moduleCheckerDelegate) const
 {
     CHECK_POINTER(jsEnv_);
     jsEnv_->SetModuleLoadChecker(moduleCheckerDelegate);
@@ -1560,15 +1601,28 @@ void JsRuntime::GetPkgContextInfoListMap(const std::map<std::string, std::string
 {
     for (auto it = contextInfoMap.begin(); it != contextInfoMap.end(); it++) {
         std::vector<std::vector<std::string>> pkgContextInfoList;
-        auto jsonObject = nlohmann::json::parse(it->second);
+        std::string filePath = it->second;
+        bool newCreate = false;
+        std::shared_ptr<Extractor> extractor = ExtractorUtil::GetExtractor(
+            ExtractorUtil::GetLoadFilePath(filePath), newCreate, false);
+        if (!extractor) {
+            TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s load hapPath failed", it->first.c_str());
+            continue;
+        }
+        std::ostringstream outStream;
+        if (!extractor->ExtractByName("pkgContextInfo.json", outStream)) {
+            TAG_LOGW(AAFwkTag::JSRUNTIME, "moduleName: %{public}s get pkgContextInfo failed", it->first.c_str());
+            continue;
+        }
+        auto jsonObject = nlohmann::json::parse(outStream.str(), nullptr, false);
         if (jsonObject.is_discarded()) {
             TAG_LOGE(AAFwkTag::JSRUNTIME, "moduleName: %{public}s parse json error", it->first.c_str());
             continue;
         }
-        for (nlohmann::json::iterator it = jsonObject.begin(); it != jsonObject.end(); it++) {
+        for (nlohmann::json::iterator jsonIt = jsonObject.begin(); jsonIt != jsonObject.end(); jsonIt++) {
             std::vector<std::string> items;
-            items.emplace_back(it.key());
-            nlohmann::json itemObject = it.value();
+            items.emplace_back(jsonIt.key());
+            nlohmann::json itemObject = jsonIt.value();
             std::string pkgName = "";
             items.emplace_back(PACKAGE_NAME);
             if (itemObject[PACKAGE_NAME].is_null() || !itemObject[PACKAGE_NAME].is_string()) {
@@ -1665,6 +1719,22 @@ std::shared_ptr<Runtime::Options> JsRuntime::GetChildOptions()
     std::lock_guard<std::mutex> lock(childOptionsMutex_);
     TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     return childOptions_;
+}
+
+void JsRuntime::UpdatePkgContextInfoJson(std::string moduleName, std::string hapPath, std::string packageName)
+{
+    auto iterator = pkgContextInfoJsonStringMap_.find(moduleName);
+    if (iterator == pkgContextInfoJsonStringMap_.end()) {
+        pkgContextInfoJsonStringMap_[moduleName] = hapPath;
+        packageNameList_[moduleName] = packageName;
+        auto vm = GetEcmaVm();
+        std::map<std::string, std::vector<std::vector<std::string>>> pkgContextInfoMap;
+        std::map<std::string, std::string> pkgAliasMap;
+        GetPkgContextInfoListMap(pkgContextInfoJsonStringMap_, pkgContextInfoMap, pkgAliasMap);
+        panda::JSNApi::SetpkgContextInfoList(vm, pkgContextInfoMap);
+        panda::JSNApi::SetPkgAliasList(vm, pkgAliasMap);
+        panda::JSNApi::SetPkgNameList(vm, packageNameList_);
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

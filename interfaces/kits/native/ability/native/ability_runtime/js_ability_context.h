@@ -21,9 +21,10 @@
 #include <native_engine/native_value.h>
 
 #include "ability_connect_callback.h"
-#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
+#include "ability_context.h"
 #include "js_free_install_observer.h"
 #include "js_runtime.h"
+
 #include "event_handler.h"
 
 class NativeReference;
@@ -67,7 +68,8 @@ public:
     static napi_value HideAbility(napi_env env, napi_callback_info info);
     static napi_value OpenAtomicService(napi_env env, napi_callback_info info);
     static napi_value MoveAbilityToBackground(napi_env env, napi_callback_info info);
-
+    static napi_value SetRestoreEnabled(napi_env env, napi_callback_info info);
+    static napi_value StartUIServiceExtension(napi_env env, napi_callback_info info);
     static void ConfigurationUpdated(napi_env env, std::shared_ptr<NativeReference> &jsContext,
         const std::shared_ptr<AppExecFwk::Configuration> &config);
 
@@ -91,6 +93,8 @@ private:
         const std::weak_ptr<AbilityContext>& abilityContext, const std::shared_ptr<CallerCallBack> &callback);
     napi_value OnStartAbility(napi_env env, NapiCallbackInfo& info, bool isStartRecent = false);
     napi_value OnOpenLink(napi_env env, NapiCallbackInfo& info);
+    napi_value OnOpenLinkInner(napi_env env, const AAFwk::Want& want,
+        int requestCode, const std::string& startTime, const std::string& url);
     napi_value OnStartAbilityAsCaller(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartRecentAbility(napi_env env, NapiCallbackInfo& info);
     napi_value OnStartAbilityWithAccount(napi_env env, NapiCallbackInfo& info);
@@ -120,8 +124,11 @@ private:
     napi_value OpenAtomicServiceInner(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         AAFwk::StartOptions &options);
     napi_value OnMoveAbilityToBackground(napi_env env, NapiCallbackInfo& info);
+    napi_value OnSetRestoreEnabled(napi_env env, NapiCallbackInfo& info);
     bool CreateOpenLinkTask(const napi_env &env, const napi_value &lastParam, AAFwk::Want &want,
         int &requestCode);
+    napi_value OnStartUIServiceExtension(napi_env env, NapiCallbackInfo& info);
+    void RemoveOpenLinkTask(int requestCode);
 
     static bool UnWrapWant(napi_env env, napi_value argv, AAFwk::Want& want);
     static napi_value WrapWant(napi_env env, const AAFwk::Want& want);
@@ -130,7 +137,7 @@ private:
     void InheritWindowMode(AAFwk::Want &want);
     static napi_value WrapRequestDialogResult(napi_env env, int32_t resultCode, const AAFwk::Want& want);
     void AddFreeInstallObserver(napi_env env, const AAFwk::Want &want, napi_value callback, napi_value* result,
-        bool isAbilityResult = false);
+        bool isAbilityResult = false, bool isOpenLink = false);
     bool CheckStartAbilityByCallParams(napi_env env, NapiCallbackInfo& info, AAFwk::Want &want,
         int32_t &userId, napi_value &lastParam);
 
@@ -170,6 +177,7 @@ private:
 struct ConnectionKey {
     AAFwk::Want want;
     int64_t id;
+    int32_t accountId;
 };
 
 struct KeyCompare {

@@ -125,9 +125,16 @@ ErrCode ServiceExtensionContext::ConnectAbility(
 
 ErrCode ServiceExtensionContext::StartAbilityWithAccount(const AAFwk::Want &want, int32_t accountId) const
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "%{public}s begin.", __func__);
-    TAG_LOGI(AAFwkTag::APPKIT, "%{public}d accountId:", accountId);
+    std::string callerName = "";
+    if (GetAbilityInfo() != nullptr) {
+        callerName = GetAbilityInfo()->name;
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "accountId: %{public}d, ability: %{public}s, caller: %{public}s",
+        accountId, want.GetElement().GetURI().c_str(), callerName.c_str());
     (const_cast<Want &>(want)).SetParam(START_ABILITY_TYPE, true);
+    if (callerName == "com.ohos.callui.ServiceAbility") {
+        PrintTokenInfo();
+    }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(
         want, token_, ILLEGAL_REQUEST_CODE, accountId);
     TAG_LOGD(AAFwkTag::APPKIT, "%{public}s. End calling StartAbilityWithAccount. ret=%{public}d", __func__, err);
@@ -162,6 +169,17 @@ ErrCode ServiceExtensionContext::StartServiceExtensionAbility(const AAFwk::Want 
     return err;
 }
 
+ErrCode ServiceExtensionContext::StartUIServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId) const
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "begin.");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
+        want, token_, accountId, AppExecFwk::ExtensionAbilityType::UI_SERVICE);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ServiceContext::StartServiceExtensionAbility is failed %{public}d", err);
+    }
+    return err;
+}
+
 ErrCode ServiceExtensionContext::StopServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "%{public}s begin.", __func__);
@@ -183,12 +201,12 @@ ErrCode ServiceExtensionContext::ConnectAbilityWithAccount(
     return ret;
 }
 
-ErrCode ServiceExtensionContext::DisconnectAbility(
-    const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
+ErrCode ServiceExtensionContext::DisconnectAbility(const AAFwk::Want &want,
+    const sptr<AbilityConnectCallback> &connectCallback, int32_t accountId) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin.");
     ErrCode ret =
-        ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback);
+        ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback, accountId);
     if (ret != ERR_OK) {
         TAG_LOGE(AAFwkTag::APPKIT, "%{public}s end DisconnectAbility error, ret=%{public}d", __func__, ret);
     }
@@ -227,6 +245,28 @@ AppExecFwk::AbilityType ServiceExtensionContext::GetAbilityInfoType() const
     }
 
     return info->type;
+}
+
+ErrCode ServiceExtensionContext::PreStartMission(const std::string& bundleName, const std::string& moduleName,
+    const std::string& abilityName, const std::string& startTime)
+{
+    TAG_LOGI(AAFwkTag::APPKIT, "Called.");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->PreStartMission(
+        bundleName, moduleName, abilityName, startTime);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ServiceExtensionContext::PreStartMission is failed %{public}d", err);
+    }
+    TAG_LOGI(AAFwkTag::APPKIT, "End.");
+    return err;
+}
+
+ErrCode ServiceExtensionContext::AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
+{
+    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(token_, observer);
+    if (ret != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "AddFreeInstallObserver error, ret: %{public}d", ret);
+    }
+    return ret;
 }
 }  // namespace AbilityRuntime
 }  // namespace OHOS

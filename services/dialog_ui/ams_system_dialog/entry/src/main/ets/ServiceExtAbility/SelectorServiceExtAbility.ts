@@ -22,6 +22,8 @@ import type image from '@ohos.multimedia.image';
 import window from '@ohos.window';
 import PositionUtils from '../utils/PositionUtils';
 import deviceInfo from '@ohos.deviceInfo';
+import systemparameter from '@ohos.systemParameterEnhance';
+import dataPreferences from '@ohos.data.preferences';
 
 const TAG = 'SelectorDialog_Service';
 
@@ -32,8 +34,12 @@ export default class SelectorServiceExtensionAbility extends extension {
   onCreate(want) {
     console.debug(TAG, 'onCreate, want: ' + JSON.stringify(want));
     globalThis.selectExtensionContext = this.context;
+    globalThis.currentExtensionContext = this.context;
+    globalThis.ExtensionType = 'ServiceExtension';
     globalThis.defaultAppManager = defaultAppManager;
     globalThis.bundleManager = bundleManager;
+    let options = {name:'dialogStore'};
+    globalThis.preferences = dataPreferences.getPreferencesSync(this.context, options);
   }
 
   async getPhoneShowHapList() {
@@ -136,14 +142,14 @@ export default class SelectorServiceExtensionAbility extends extension {
   async onRequest(want, startId) {
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     globalThis.abilityWant = want;
-    globalThis.params = JSON.parse(want.parameters.params);
-    let displayClass = display.getDefaultDisplaySync();
-    let lineNums = 0;
-    if (globalThis.params && globalThis.params.hapList && globalThis.params.hapList.length) {
-      lineNums = globalThis.params.hapList.length;
-    }
-    globalThis.position = PositionUtils.getSelectorDialogPosition(lineNums);
     try {
+      globalThis.params = JSON.parse(want.parameters.params);
+      globalThis.callerToken = want.parameters.callerToken;
+      let lineNums = 0;
+      if (globalThis.params && globalThis.params.hapList && globalThis.params.hapList.length) {
+        lineNums = globalThis.params.hapList.length;
+      }
+      globalThis.position = PositionUtils.getSelectorDialogPosition(lineNums);
       display.on('change', (data: number) => {
         let position = PositionUtils.getSelectorDialogPosition(lineNums);
         if (position.offsetX !== globalThis.position.offsetX || position.offsetY !== globalThis.position.offsetY) {
@@ -157,11 +163,10 @@ export default class SelectorServiceExtensionAbility extends extension {
     } catch (exception) {
       console.error('Failed to register callback. Code: ' + JSON.stringify(exception));
     }
-
+    let displayClass = display.getDefaultDisplaySync();
     console.debug(TAG, 'onRequest display is' + JSON.stringify(displayClass));
     console.debug(TAG, 'onRequest, want: ' + JSON.stringify(want));
     console.debug(TAG, 'onRequest, params: ' + JSON.stringify(globalThis.params));
-    globalThis.callerToken = want.parameters.callerToken;
     console.debug(TAG, 'onRequest, position: ' + JSON.stringify(globalThis.position));
     if (!globalThis.params.isDefaultSelector) {
       globalThis.modelFlag = Boolean(globalThis.params.modelFlag);
@@ -218,10 +223,20 @@ export default class SelectorServiceExtensionAbility extends extension {
       }
       await win.moveTo(rect.left, rect.top);
       await win.resetSize(rect.width, rect.height);
-      if (globalThis.params.isDefaultSelector) {
-        await win.loadContent('pages/selectorPhoneDialog');
+      if (systemparameter.getSync('persist.sys.abilityms.isdialogconfirmpermission', 'false') === 'false' &&
+        globalThis.preferences.getSync('isdialogconfirmpermission', 'false') === 'false') {
+        if (globalThis.params.isDefaultSelector) {
+          globalThis.currentURL = 'pages/selectorPhoneDialog';
+        } else {
+          globalThis.currentURL = 'pages/selectorPcDialog';
+        }
+        await win.loadContent('pages/permissionConfirmDialog');
       } else {
-        await win.loadContent('pages/selectorPcDialog');
+        if (globalThis.params.isDefaultSelector) {
+          await win.loadContent('pages/selectorPhoneDialog');
+        } else {
+          await win.loadContent('pages/selectorPcDialog');
+        }
       }
       await win.setBackgroundColor('#00000000');
       await win.show();

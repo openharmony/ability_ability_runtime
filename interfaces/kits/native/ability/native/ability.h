@@ -26,20 +26,22 @@
 #include "ability_lifecycle_executor.h"
 #include "ability_lifecycle_interface.h"
 #include "ability_transaction_callback_info.h"
-#include "appexecfwk_errors.h"
 #include "configuration.h"
 #include "context.h"
 #include "continuation_handler.h"
 #include "continuation_state.h"
 #include "dummy_notification_request.h"
+#include "fa_ability_context.h"
+#include "free_install_observer_interface.h"
 #include "iability_callback.h"
+#include "want_agent.h"
+
+#include "appexecfwk_errors.h"
 #include "iremote_object.h"
 #include "pac_map.h"
 #include "want.h"
-#include "want_agent.h"
-#include "foundation/ability/ability_runtime/interfaces/kits/native/ability/ability_runtime/ability_context.h"
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 #include "ability_window.h"
 #include "display_manager.h"
 #include "form_constants.h"
@@ -63,7 +65,7 @@ class ValuesBucket;
 namespace AbilityRuntime {
 class Runtime;
 }
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 class KeyEvent;
 namespace Ace {
 class UIContent;
@@ -76,7 +78,7 @@ class DataAbilityOperation;
 class AbilityPostEventTimeout;
 class OHOSApplication;
 class AbilityHandler;
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 class AbilityWindow;
 #endif
 class ILifeCycle;
@@ -177,6 +179,7 @@ public:
     using AbilityContext::StartAbility;
     ErrCode StartAbility(const Want &want, AbilityStartSetting abilityStartSetting);
 
+    ErrCode AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> observer);
     /**
      * @brief A Page or Service ability uses this method to start a specific ability. The system locates the target
      * ability from installed abilities based on the value of the want parameter and then starts it. You can specify
@@ -825,7 +828,7 @@ public:
      */
     virtual int32_t OnShare(WantParams &wantParams);
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 public:
     friend class PageAbilityImpl;
     uint32_t sceneFlag_ = 0;
@@ -1295,7 +1298,6 @@ protected:
     std::shared_ptr<AbilityStartSetting> setting_ = nullptr;
     std::shared_ptr<AbilityInfo> abilityInfo_ = nullptr;
     LaunchParam launchParam_;
-    int32_t appIndex_ = 0;
     bool securityFlag_ = false;
 
 private:
@@ -1375,7 +1377,7 @@ private:
     bool isNewRuleFlagSetted_ = false;
     bool startUpNewRule_ = false;
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 private:
     void InitFAWindow(const Want &want, int32_t displayId);
     bool UpdateResMgrAndConfiguration(int32_t displayId);

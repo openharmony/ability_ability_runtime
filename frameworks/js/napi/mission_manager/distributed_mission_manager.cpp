@@ -840,7 +840,6 @@ void OffExecuteCB(napi_env env, OnCB *onCB)
     onCB->onRegistration->DelOnCallbackCBRef(env, onCB->onCallbackCB.napiCallback);
     if (!onCB->onRegistration->GetOnCallbackCBRef().empty()) {
         TAG_LOGI(AAFwkTag::MISSION, "There are still other remaining callback");
-        return;
     }
     DmsSaClient::GetInstance().DelListener(onCB->type, onCB->onRegistration);
     if (onCB->result == NO_ERROR) {
@@ -2066,6 +2065,7 @@ void UvWorkOnContinueDone(uv_work_t *work, int status)
         result = WrapInt32(continueAbilityCB->cbBase.cbInfo.env, continueAbilityCB->resultCode, "code");
     }
     if (continueAbilityCB->cbBase.deferred == nullptr) {
+        std::lock_guard<std::mutex> autoLock(registrationLock_);
         napi_value callback = nullptr;
         napi_value undefined = nullptr;
         napi_get_undefined(continueAbilityCB->cbBase.cbInfo.env, &undefined);
@@ -2075,6 +2075,7 @@ void UvWorkOnContinueDone(uv_work_t *work, int status)
         napi_call_function(continueAbilityCB->cbBase.cbInfo.env, undefined, callback, 1, &result, &callResult);
         if (continueAbilityCB->cbBase.cbInfo.callback != nullptr) {
             napi_delete_reference(continueAbilityCB->cbBase.cbInfo.env, continueAbilityCB->cbBase.cbInfo.callback);
+            continueAbilityCB->cbBase.cbInfo.callback = nullptr;
         }
     } else {
         napi_value result[2] = { nullptr };

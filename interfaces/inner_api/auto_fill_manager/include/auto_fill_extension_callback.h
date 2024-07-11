@@ -16,10 +16,14 @@
 #ifndef OHOS_ABILITY_RUNTIME_AUTO_FILL_EXTENSION_CALLBACK_H
 #define OHOS_ABILITY_RUNTIME_AUTO_FILL_EXTENSION_CALLBACK_H
 
+#include <atomic>
+
 #include "auto_fill_custom_config.h"
 #include "fill_request_callback_interface.h"
 #include "save_request_callback_interface.h"
+#ifdef SUPPORT_GRAPHICS
 #include "ui_content.h"
+#endif // SUPPORT_GRAPHICS
 #include "want.h"
 
 namespace OHOS {
@@ -30,9 +34,10 @@ enum AutoFillWindowType {
     POPUP_WINDOW
 };
 }
+#ifdef SUPPORT_GRAPHICS
 class AutoFillExtensionCallback : public std::enable_shared_from_this<AutoFillExtensionCallback> {
 public:
-    AutoFillExtensionCallback() = default;
+    AutoFillExtensionCallback();
     ~AutoFillExtensionCallback() = default;
 
     void OnResult(int32_t errCode, const AAFwk::Want &want);
@@ -46,27 +51,36 @@ public:
     void SetSaveRequestCallback(const std::shared_ptr<ISaveRequestCallback> &callback);
 
     void SetSessionId(int32_t sessionId);
-    void SetUIContent(Ace::UIContent *uiContent);
-    void SetEventId(uint32_t eventId);
+    void SetInstanceId(int32_t instanceId);
+    int32_t GetInstanceId();
     void SetWindowType(const AutoFill::AutoFillWindowType &autoFillWindowType);
+    AutoFill::AutoFillWindowType GetWindowType() const;
     void SetExtensionType(bool isSmartAutoFill);
     void SetAutoFillType(const AbilityBase::AutoFillType &autoFillType);
     void SetViewData(const AbilityBase::ViewData &viewData);
     void SetAutoFillRequestConfig(const AutoFill::AutoFillCustomConfig &config);
-    AbilityBase::ViewData GetViewData();
+    uint32_t GetCallbackId() const;
     void HandleTimeOut();
+    void UpdateCustomPopupUIExtension(const AbilityBase::ViewData &viewData);
+    void CloseUIExtension();
 
 private:
-    void SendAutoFillSucess(const AAFwk::Want &want);
-    void SendAutoFillFailed(int32_t errCode);
-    void CloseModalUIExtension();
+    void SendAutoFillSuccess(const AAFwk::Want &want);
+    void SendAutoFillFailed(int32_t errCode, const AAFwk::Want &want = AAFwk::Want());
     void HandleReloadInModal(const AAFwk::WantParams &wantParams);
+    int32_t ReloadInModal(const AAFwk::WantParams &wantParams);
+    void UpdateCustomPopupConfig(const AAFwk::WantParams &wantParams);
+    void SetModalUIExtensionProxy(const std::shared_ptr<Ace::ModalUIExtensionProxy>& proxy);
+    std::shared_ptr<Ace::ModalUIExtensionProxy> GetModalUIExtensionProxy();
+    uint32_t GenerateCallbackId();
+    Ace::UIContent* GetUIContent();
 
+    std::mutex requestCallbackMutex_;
     std::shared_ptr<IFillRequestCallback> fillCallback_;
     std::shared_ptr<ISaveRequestCallback> saveCallback_;
-    int32_t sessionId_;
-    Ace::UIContent *uiContent_ = nullptr;
-    uint32_t eventId_ = 0;
+    int32_t sessionId_ = -1;
+    std::atomic<int32_t> instanceId_ {-1};
+    uint32_t callbackId_ = 0;
     AutoFill::AutoFillWindowType autoFillWindowType_ = AutoFill::AutoFillWindowType::MODAL_WINDOW;
     AbilityBase::ViewData viewData_;
     AutoFill::AutoFillCustomConfig autoFillCustomConfig_;
@@ -76,7 +90,11 @@ private:
     AAFwk::Want want_;
     int32_t errCode_ = 0;
     AbilityBase::AutoFillType autoFillType_ = AbilityBase::AutoFillType::UNSPECIFIED;
+    std::mutex proxyMutex_;
+    std::shared_ptr<Ace::ModalUIExtensionProxy> modalUIExtensionProxy_;
+    std::mutex closeMutex_;
 };
+#endif // SUPPORT_GRAPHICS
 } // AbilityRuntime
 } // OHOS
 #endif // OHOS_ABILITY_RUNTIME_AUTO_FILL_EXTENSION_CALLBACK_H

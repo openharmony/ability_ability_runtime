@@ -62,12 +62,13 @@ public:
 
     void ResetCallingIdentityAsCaller(int32_t tokenId);
 
-    int NotifyCreateModalDialog(AbilityRequest &abilityRequest, const Want &want, int32_t userId,
-        std::vector<DialogAppInfo> &dialogAppInfos);
+    void SetUriReservedFlag(const bool flag);
+
+    void SetUriReservedBundle(const std::string bundleName);
 
 private:
     int GenerateAbilityRequestByAction(int32_t userId, AbilityRequest &request,
-        std::vector<DialogAppInfo> &dialogAppInfos, bool isMoreHapList);
+        std::vector<DialogAppInfo> &dialogAppInfos, bool isMoreHapList, bool &findDefaultApp);
     std::string MatchTypeAndUri(const AAFwk::Want &want);
     std::shared_ptr<AppExecFwk::BundleMgrHelper> GetBundleManagerHelper();
     std::vector<std::string> SplitStr(const std::string& str, char delimiter);
@@ -98,12 +99,19 @@ private:
 
     void SetTargetLinkInfo(const std::vector<AppExecFwk::SkillUriForAbilityAndExtension> &skillUri, Want &want);
 
+    void OnlyKeepReserveApp(std::vector<AppExecFwk::AbilityInfo> &abilityInfos,
+        std::vector<AppExecFwk::ExtensionAbilityInfo> &extensionInfos);
+
+    bool IsActionImplicitStart(const Want &want, bool findDeafultApp);
+
 private:
     const static std::vector<std::string> blackList;
     const static std::unordered_set<AppExecFwk::ExtensionAbilityType> extensionWhiteList;
     std::shared_ptr<AppExecFwk::BundleMgrHelper> iBundleManagerHelper_;
     ffrt::mutex identityListLock_;
     std::list<IdentityNode> identityList_;
+    bool uriReservedFlag_ = false;
+    std::string reservedBundleName_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

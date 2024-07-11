@@ -21,18 +21,9 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-ChildSchedulerStub::ChildSchedulerStub()
-{
-    memberFuncMap_[static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_LOAD_JS)] =
-        &ChildSchedulerStub::HandleScheduleLoadJs;
-    memberFuncMap_[static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_EXIT_PROCESS_SAFELY)] =
-        &ChildSchedulerStub::HandleScheduleExitProcessSafely;
-}
+ChildSchedulerStub::ChildSchedulerStub() {}
 
-ChildSchedulerStub::~ChildSchedulerStub()
-{
-    memberFuncMap_.clear();
-}
+ChildSchedulerStub::~ChildSchedulerStub() {}
 
 int32_t ChildSchedulerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
@@ -46,12 +37,13 @@ int32_t ChildSchedulerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return ERR_INVALID_STATE;
     }
 
-    auto itFunc = memberFuncMap_.find(code);
-    if (itFunc != memberFuncMap_.end()) {
-        auto memberFunc = itFunc->second;
-        if (memberFunc != nullptr) {
-            return (this->*memberFunc)(data, reply);
-        }
+    switch (code) {
+        case static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_LOAD_JS):
+            return HandleScheduleLoadJs(data, reply);
+        case static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_EXIT_PROCESS_SAFELY):
+            return HandleScheduleExitProcessSafely(data, reply);
+        case static_cast<uint32_t>(IChildScheduler::Message::SCHEDULE_RUN_NATIVE_PROC):
+            return HandleScheduleRunNativeProc(data, reply);
     }
     TAG_LOGI(AAFwkTag::APPMGR, "ChildSchedulerStub::OnRemoteRequest end");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -68,5 +60,13 @@ int32_t ChildSchedulerStub::HandleScheduleExitProcessSafely(MessageParcel &data,
     ScheduleExitProcessSafely();
     return ERR_NONE;
 }
+
+int32_t ChildSchedulerStub::HandleScheduleRunNativeProc(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<IRemoteObject> cb = data.ReadRemoteObject();
+    ScheduleRunNativeProc(cb);
+    return ERR_NONE;
+}
+
 }  // namespace AppExecFwk
 }  // namespace OHOS

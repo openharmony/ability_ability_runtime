@@ -124,10 +124,12 @@ public:
      * clear the application data.
      *
      * @param bundleName, bundle name in Application record.
+     * @param appCloneIndex the app clone id.
+     * @param userId the user id.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t ClearUpApplicationData(const std::string &bundleName,
-        const int32_t userId = -1) override;
+    virtual int32_t ClearUpApplicationData(const std::string &bundleName, int32_t appCloneIndex,
+        int32_t userId = -1) override;
 
     /**
      * ClearUpApplicationDataBySelf, call ClearUpApplicationDataBySelf() through proxy project,
@@ -146,6 +148,28 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual int32_t GetAllRunningProcesses(std::vector<RunningProcessInfo> &info) override;
+
+    /**
+     * GetRunningMultiAppInfoByBundleName, call GetRunningMultiAppInfoByBundleName() through proxy project.
+     * Obtains information about multiapp that are running on the device.
+     *
+     * @param bundlename, input.
+     * @param info, output multiapp information.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int32_t GetRunningMultiAppInfoByBundleName(const std::string &bundleName,
+        RunningMultiAppInfo &info) override;
+
+    /**
+     * GetRunningProcessesByBundleType, call GetRunningProcessesByBundleType() through proxy project.
+     * Obtains information about application processes by bundle type that are running on the device.
+     *
+     * @param bundleType, bundle type of the processes
+     * @param info, app name in Application record.
+     * @return ERR_OK ,return back success，others fail.
+     */
+    virtual int GetRunningProcessesByBundleType(const BundleType bundleType,
+        std::vector<RunningProcessInfo> &info) override;
 
     /**
      * GetAllRenderProcesses, call GetAllRenderProcesses() through proxy project.
@@ -298,7 +322,7 @@ public:
 
     virtual int StartRenderProcess(const std::string &renderParam,
                                    int32_t ipcFd, int32_t sharedFd,
-                                   int32_t crashFd, pid_t &renderPid) override;
+                                   int32_t crashFd, pid_t &renderPid, bool isGPU = false) override;
 
     virtual void AttachRenderProcess(const sptr<IRemoteObject> &shceduler) override;
 
@@ -357,6 +381,15 @@ public:
     virtual int32_t GetBundleNameByPid(const int32_t pid, std::string &bundleName, int32_t &uid) override;
 
     /**
+     * Get running process information by pid.
+     *
+     * @param pid process id.
+     * @param info Output parameters, return runningProcessInfo.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) override;
+
+    /**
      * Notify Fault Data
      *
      * @param faultData the fault data.
@@ -371,6 +404,14 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int32_t NotifyAppFaultBySA(const AppFaultDataBySA &faultData) override;
+
+    /**
+     * Set Appfreeze Detect Filter
+     *
+     * @param pid the process pid.
+     * @return Returns true on success, others on failure.
+     */
+    bool SetAppFreezeFilter(int32_t pid) override;
 
     /**
      * get memorySize by pid.
@@ -449,12 +490,11 @@ public:
     /**
      * Start child process, called by ChildProcessManager.
      *
-     * @param srcEntry Child process source file entrance path to be started.
      * @param childPid Created child process pid.
+     * @param request Child process start request params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t StartChildProcess(const std::string &srcEntry, pid_t &childPid, int32_t childProcessCoun,
-        bool isStartWithDebug) override;
+    int32_t StartChildProcess(pid_t &childPid, const ChildProcessRequest &request) override;
 
     /**
      * Get child process record for self.
@@ -492,6 +532,33 @@ public:
     int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent) override;
 
     int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
+
+    void SetAppAssertionPauseState(bool flag) override;
+    /**
+     * Start native child process, callde by ChildProcessManager.
+     * @param libName lib file name to be load in child process
+     * @param childProcessCount current started child process count
+     * @param callback callback for notify start result
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback) override;
+
+    virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
+
+    /**
+     * Check caller is test ability
+     *
+     * @param pid, the pid of ability.
+     * @return Returns ERR_OK is test ability, others is not test ability.
+     */
+    int32_t CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest) override;
+
+    virtual int32_t NotifyProcessDependedOnWeb() override;
+
+    virtual void KillProcessDependedOnWeb() override;
+
+    virtual void RestartResidentProcessDependedOnWeb() override;
 private:
     /**
      * Init, Initialize application services.
@@ -566,7 +633,7 @@ private:
     virtual int32_t GetForegroundApplications(std::vector<AppStateData> &list) override;
 
     int Dump(const std::vector<std::u16string>& args, std::string& result);
-    void ShowHelp(std::string& result) const;
+    int ShowHelp(const std::vector<std::u16string>& args, std::string& result);
     int DumpIpc(const std::vector<std::u16string>& args, std::string& result);
     int DumpIpcAllStart(std::string& result);
     int DumpIpcAllStop(std::string& result);
@@ -574,6 +641,8 @@ private:
     int DumpIpcStart(const int32_t pid, std::string& result);
     int DumpIpcStop(const int32_t pid, std::string& result);
     int DumpIpcStat(const int32_t pid, std::string& result);
+
+    int DumpFfrt(const std::vector<std::u16string>& args, std::string& result);
 
     bool JudgeAppSelfCalled(int32_t recordId);
 
@@ -603,6 +672,16 @@ private:
     int32_t IsApplicationRunning(const std::string &bundleName, bool &isRunning) override;
 
     /**
+     * Check whether the bundle is running.
+     *
+     * @param bundleName Indicates the bundle name of the bundle.
+     * @param appCloneIndex the appindex of the bundle.
+     * @param isRunning Obtain the running status of the application, the result is true if running, false otherwise.
+     * @return Return ERR_OK if success, others fail.
+     */
+    int32_t IsAppRunning(const std::string &bundleName, int32_t appCloneIndex, bool &isRunning) override;
+
+    /**
      * Whether the current application process is the last surviving process.
      *
      * @return Returns true is final application process, others return false.
@@ -616,11 +695,11 @@ private:
     };
 
 private:
-    void DumpIpcAllFuncInit();
-    void DumpIpcFuncInit();
     int DumpIpcAllInner(const AppMgrService::DumpIpcKey key, std::string& result);
     int DumpIpcWithPidInner(const AppMgrService::DumpIpcKey key,
         const std::string& optionPid, std::string& result);
+
+    int DumpFfrtInner(const std::string& pidsRaw, std::string& result);
 
 private:
     std::shared_ptr<AppMgrServiceInner> appMgrServiceInner_;
@@ -630,13 +709,7 @@ private:
     sptr<ISystemAbilityManager> systemAbilityMgr_;
     sptr<IAmsMgr> amsMgrScheduler_;
 
-    const static std::map<std::string, AppMgrService::DumpIpcKey> dumpIpcMap;
-
-    using DumpIpcAllFuncType = int (AppMgrService::*)(std::string& result);
-    std::map<uint32_t, DumpIpcAllFuncType> dumpIpcAllFuncMap_;
-
-    using DumpIpcFuncType = int (AppMgrService::*)(const int32_t pid, std::string& result);
-    std::map<uint32_t, DumpIpcFuncType> dumpIpcFuncMap_;
+    bool GetDumpIpcKeyByOption(const std::string &option, DumpIpcKey &key);
 
     DISALLOW_COPY_AND_MOVE(AppMgrService);
 };

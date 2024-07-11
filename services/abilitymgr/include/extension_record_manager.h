@@ -25,6 +25,7 @@
 #include "ability_record.h"
 #include "extension_record.h"
 #include "ui_extension_host_info.h"
+#include "ui_extension_session_info.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -87,19 +88,22 @@ public:
 
     int32_t StartAbility(const AAFwk::AbilityRequest &abilityRequest);
 
-    int32_t CreateExtensionRecord(
-        const std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, const std::string &hostBundleName,
+    int32_t CreateExtensionRecord(const AAFwk::AbilityRequest &abilityRequest, const std::string &hostBundleName,
         std::shared_ptr<ExtensionRecord> &extensionRecord, int32_t &extensionRecordId);
-    
+
     bool IsPreloadExtensionRecord(const AAFwk::AbilityRequest &abilityRequest,
         const std::string &hostBundleName, std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);
 
     int32_t AddPreloadUIExtensionRecord(const std::shared_ptr<AAFwk::AbilityRecord> abilityRecord);
 
     void RemoveAllPreloadUIExtensionRecord(PreLoadUIExtensionMapKey &preLoadUIExtensionInfo);
-    
-    bool RemovePreloadUIExtensionRecord(const AAFwk::AbilityRequest &abilityRequest,
-    const std::string &hostBundleName, std::shared_ptr<ExtensionRecord> &extensionRecord, bool &isLoaded);
+
+    bool RemovePreloadUIExtensionRecord(
+        const std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey);
+
+    bool RemovePreloadUIExtensionRecordById(
+        const std::tuple<std::string, std::string, std::string, std::string> extensionRecordMapKey,
+        int32_t extensionRecordId);
 
     int32_t GetOrCreateExtensionRecord(const AAFwk::AbilityRequest &abilityRequest, const std::string &hostBundleName,
         std::shared_ptr<AAFwk::AbilityRecord> &abilityRecord, bool &isLoaded);
@@ -108,10 +112,14 @@ public:
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
+    int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo);
+
     void LoadTimeout(int32_t extensionRecordId);
     void ForegroundTimeout(int32_t extensionRecordId);
     void BackgroundTimeout(int32_t extensionRecordId);
     void TerminateTimeout(int32_t extensionRecordId);
+
+    int32_t GetHostBundleNameForExtensionId(int32_t extensionRecordId, std::string& hostBundleName);
 private:
     inline std::shared_ptr<ExtensionRecord> GetExtensionRecordById(int32_t extensionRecordId);
 

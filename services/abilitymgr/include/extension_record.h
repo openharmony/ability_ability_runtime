@@ -45,7 +45,7 @@ public:
 
     virtual void Update(const AAFwk::AbilityRequest &abilityRequest);
 
-    void UnLoadUIExtension();
+    void UnloadUIExtensionAbility();
 
     int32_t RegisterStateObserver(const std::string &hostBundleName);
 
@@ -54,6 +54,7 @@ public:
     int32_t extensionRecordId_ = INVALID_EXTENSION_RECORD_ID;
     uint32_t processMode_ = 0;
     bool isHostSpecified_ = false;
+    pid_t hostPid_ = 0;
 private:
     sptr<IRemoteObject> rootCallerToken_ = nullptr;
     sptr<AAFwk::PreLoadUIExtStateObserver> preLoadUIExtStateObserver_;

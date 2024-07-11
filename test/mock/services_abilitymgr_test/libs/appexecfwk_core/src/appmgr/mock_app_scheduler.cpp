@@ -110,7 +110,7 @@ void AppScheduler::OnAbilityRequestDone(const sptr<IRemoteObject>& token, const 
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAbilityRequestDone()");
 }
 
-int AppScheduler::KillApplication(const std::string& bundleName)
+int AppScheduler::KillApplication(const std::string& bundleName, const bool clearPageStack)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::KillApplication()");
     return ERR_OK;
@@ -121,7 +121,7 @@ void AppScheduler::AttachTimeOut(const sptr<IRemoteObject>& token)
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::AttachTimeOut()");
 }
 
-void AppScheduler::PrepareTerminate(const sptr<IRemoteObject>& token)
+void AppScheduler::PrepareTerminate(const sptr<IRemoteObject>& token, bool clearMissionFlag)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::PrepareTerminate()");
 }
@@ -129,12 +129,6 @@ void AppScheduler::PrepareTerminate(const sptr<IRemoteObject>& token)
 void AppScheduler::OnAppStateChanged(const AppExecFwk::AppProcessData& appData)
 {
     TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::OnAppStateChanged()");
-}
-
-int AppScheduler::ClearUpApplicationData(const std::string& bundleName, const int32_t userId)
-{
-    TAG_LOGI(AAFwkTag::TEST, "Test AppScheduler::ClearUpApplicationData()");
-    return ERR_OK;
 }
 
 void AppScheduler::UpdateAbilityState(const sptr<IRemoteObject>& token, const AppExecFwk::AbilityState state)
@@ -173,7 +167,7 @@ bool AppScheduler::IsMemorySizeSufficent() const
     return true;
 }
 
-void AppScheduler::StartSpecifiedAbility(const AAFwk::Want& want, const AppExecFwk::AbilityInfo& abilityInfo)
+void AppScheduler::StartSpecifiedAbility(const AAFwk::Want&, const AppExecFwk::AbilityInfo&, int32_t)
 {}
 
 int AppScheduler::StartUserTest(
@@ -188,6 +182,11 @@ int AppScheduler::GetApplicationInfoByProcessID(const int pid, AppExecFwk::Appli
         return -1;
     }
 
+    return 0;
+}
+
+int32_t AppScheduler::NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg)
+{
     return 0;
 }
 

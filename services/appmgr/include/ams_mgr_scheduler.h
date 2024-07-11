@@ -132,7 +132,8 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillProcessWithAccount(const std::string &bundleName, const int accountId) override;
+    virtual int32_t KillProcessWithAccount(
+        const std::string &bundleName, const int accountId, const bool clearPageStack = true) override;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -150,7 +151,7 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int32_t KillApplication(const std::string &bundleName) override;
+    virtual int32_t KillApplication(const std::string &bundleName,  const bool clearPageStack = true) override;
 
     /**
      * KillApplicationByUid, call KillApplicationByUid() through proxy object, kill the application.
@@ -161,18 +162,18 @@ public:
      */
     virtual int KillApplicationByUid(const std::string &bundleName, const int uid) override;
 
-    virtual int KillApplicationSelf() override;
+    virtual int KillApplicationSelf(const bool clearPageStack = true) override;
 
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) override;
 
+    virtual int32_t NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg) override;
+
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) override;
 
-    virtual void PrepareTerminate(const sptr<IRemoteObject> &token) override;
+    virtual void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false) override;
 
     virtual void GetRunningProcessInfoByToken(
         const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info) override;
-
-    void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) override;
 
     /**
      * Set AbilityForegroundingFlag of an app-record to true.
@@ -183,11 +184,12 @@ public:
     void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) override;
 
     virtual void StartSpecifiedAbility(
-        const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) override;
+        const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo, int32_t requestId = 0) override;
 
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) override;
 
-    virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) override;
+    virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
+        int32_t requestId = 0) override;
 
     virtual void SetCurrentUserId(const int32_t userId) override;
 
@@ -268,12 +270,11 @@ public:
     bool IsAttachDebug(const std::string &bundleName) override;
 
     /**
-     * Set application assertion pause state.
-     *
-     * @param pid App process pid.
-     * @param flag assertion pause state.
+     * @brief Set resident process enable status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
      */
-    void SetAppAssertionPauseState(int32_t pid, bool flag) override;
+    void SetKeepAliveEnableState(const std::string &bundleName, bool enable) override;
 
     /**
      * To clear the process by ability token.
@@ -287,6 +288,13 @@ public:
      * @return Returns true is sufficent memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() override;
+
+    /**
+     * Notifies that one ability is attached to status bar.
+     *
+     * @param token the token of the abilityRecord that is attached to status bar.
+     */
+    void AttachedToStatusBar(const sptr<IRemoteObject> &token) override;
 
 private:
     /**
