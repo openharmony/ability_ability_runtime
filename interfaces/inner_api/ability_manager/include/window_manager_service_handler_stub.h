@@ -16,7 +16,7 @@
 #ifndef OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_STUB_H
 #define OHOS_ABILITY_RUNTIME_WINDOW_MANAGER_SERVICE_HANDLER_STUB_H
 
-#ifdef SUPPORT_GRAPHICS
+#ifdef SUPPORT_SCREEN
 
 #include <map>
 
@@ -44,9 +44,6 @@ private:
     int NotifyAnimationAbilityDiedInner(MessageParcel &data, MessageParcel &reply);
     int MoveMissionsToForegroundInner(MessageParcel &data, MessageParcel &reply);
     int MoveMissionsToBackgroundInner(MessageParcel &data, MessageParcel &reply);
-
-    using RequestFuncType = int (WindowManagerServiceHandlerStub::*)(MessageParcel &data, MessageParcel &reply);
-    std::map<uint32_t, RequestFuncType> requestFuncMap_;
 };
 }  // namespace AAFwk
 }  // namespace OHOS

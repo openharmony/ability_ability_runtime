@@ -78,10 +78,13 @@ protected:
 
 private:
     napi_value OnCreateBundleContext(napi_env env, NapiCallbackInfo& info);
+    napi_value CreateJsBundleContext(napi_env env, const std::shared_ptr<Context>& bundleContext);
     napi_value OnGetApplicationContext(napi_env env, NapiCallbackInfo& info);
+    napi_value CreateJSApplicationContext(napi_env env, const std::shared_ptr<ApplicationContext> applicationContext);
     napi_value OnSwitchArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnGetArea(napi_env env, NapiCallbackInfo& info);
     napi_value OnCreateModuleContext(napi_env env, NapiCallbackInfo& info);
+    napi_value CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext);
     napi_value OnCreateSystemHspModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     napi_value OnCreateModuleResourceManager(napi_env env, NapiCallbackInfo& info);
     bool CheckCallerIsSystemApp();
@@ -194,7 +197,11 @@ napi_value JsBaseContext::OnCreateModuleContext(napi_env env, NapiCallbackInfo& 
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
+    return CreateJsModuleContext(env, moduleContext);
+}
 
+napi_value JsBaseContext::CreateJsModuleContext(napi_env env, const std::shared_ptr<Context>& moduleContext)
+{
     napi_value value = CreateJsBaseContext(env, moduleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -509,7 +516,7 @@ napi_value JsBaseContext::OnGetCloudFileDir(napi_env env, NapiCallbackInfo& info
 {
     auto context = context_.lock();
     if (!context) {
-        HILOG_WARN("context is already released");
+        TAG_LOGW(AAFwkTag::APPKIT, "context is already released");
         return CreateJsUndefined(env);
     }
     std::string path = context->GetCloudFileDir();
@@ -550,7 +557,11 @@ napi_value JsBaseContext::OnCreateBundleContext(napi_env env, NapiCallbackInfo& 
         AbilityRuntimeErrorUtil::Throw(env, ERR_ABILITY_RUNTIME_EXTERNAL_INVALID_PARAMETER);
         return CreateJsUndefined(env);
     }
+    return CreateJsBundleContext(env, bundleContext);
+}
 
+napi_value JsBaseContext::CreateJsBundleContext(napi_env env, const std::shared_ptr<Context>& bundleContext)
+{
     napi_value value = CreateJsBaseContext(env, bundleContext, true);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.Context", &value, 1);
     if (systemModule == nullptr) {
@@ -600,7 +611,12 @@ napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo
             return objValue;
         }
     }
+    return CreateJSApplicationContext(env, applicationContext);
+}
 
+napi_value JsBaseContext::CreateJSApplicationContext(napi_env env,
+    const std::shared_ptr<ApplicationContext> applicationContext)
+{
     napi_value value = JsApplicationContextUtils::CreateJsApplicationContext(env);
     auto systemModule = JsRuntime::LoadSystemModuleByEngine(env, "application.ApplicationContext", &value, 1);
     if (systemModule == nullptr) {
@@ -621,6 +637,7 @@ napi_value JsBaseContext::OnGetApplicationContext(napi_env env, NapiCallbackInfo
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
             delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
+            data = nullptr;
         },
         nullptr, nullptr);
     napi_ref ref = nullptr;
@@ -706,6 +723,7 @@ napi_value AttachApplicationContext(napi_env env, void* value, void* hint)
         [](napi_env, void *data, void *) {
             TAG_LOGD(AAFwkTag::APPKIT, "Finalizer for weak_ptr application context is called");
             delete static_cast<std::weak_ptr<ApplicationContext> *>(data);
+            data = nullptr;
         },
         nullptr, nullptr);
     return contextObj;

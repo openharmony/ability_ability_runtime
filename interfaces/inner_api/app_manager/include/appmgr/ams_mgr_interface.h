@@ -126,7 +126,8 @@ public:
      * @param accountId, account ID.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillProcessWithAccount(const std::string &bundleName, const int accountId) = 0;
+    virtual int KillProcessWithAccount(
+        const std::string &bundleName, const int accountId, const bool clearPageStack = true) = 0;
 
     /**
      * UpdateApplicationInfoInstalled, call UpdateApplicationInfoInstalled() through proxy object,
@@ -144,7 +145,7 @@ public:
      * @param  bundleName, bundle name in Application record.
      * @return ERR_OK, return back success, others fail.
      */
-    virtual int KillApplication(const std::string &bundleName) = 0;
+    virtual int KillApplication(const std::string &bundleName, const bool clearPageStack = true) = 0;
 
     /**
      * KillApplicationByUid, call KillApplicationByUid() through proxy object, kill the application.
@@ -160,29 +161,38 @@ public:
      *
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int KillApplicationSelf()
+    virtual int KillApplicationSelf(const bool clearPageStack = true)
     {
         return ERR_OK;
     }
 
     virtual void AbilityAttachTimeOut(const sptr<IRemoteObject> &token) = 0;
 
-    virtual void PrepareTerminate(const sptr<IRemoteObject> &token) = 0;
+    virtual void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false) = 0;
 
     virtual void GetRunningProcessInfoByToken(
         const sptr<IRemoteObject> &token, OHOS::AppExecFwk::RunningProcessInfo &info) = 0;
 
-    virtual void GetRunningProcessInfoByPid(const pid_t pid, OHOS::AppExecFwk::RunningProcessInfo &info) = 0;
-
     virtual void SetAbilityForegroundingFlagToAppRecord(const pid_t pid) = 0;
 
-    virtual void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) = 0;
+    virtual void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
+        int32_t requestId = 0) = 0;
 
     virtual void RegisterStartSpecifiedAbilityResponse(const sptr<IStartSpecifiedAbilityResponse> &response) = 0;
 
-    virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo) = 0;
+    virtual void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
+        int32_t requestId = 0) = 0;
 
     virtual int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug) = 0;
+
+    /**
+     * Record process exit reason to appRunningRecord
+     * @param pid pid
+     * @param reason reason enum
+     * @param exitMsg exitMsg
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg) = 0;
 
     /**
      * Set the current userId of appMgr.
@@ -278,12 +288,11 @@ public:
     virtual bool IsAttachDebug(const std::string &bundleName) = 0;
 
     /**
-     * Set application assertion pause state.
-     *
-     * @param pid App process pid.
-     * @param flag assertion pause state.
+     * @brief Set resident process enable status.
+     * @param bundleName The application bundle name.
+     * @param enable The current updated enable status.
      */
-    virtual void SetAppAssertionPauseState(int32_t pid, bool flag) {}
+    virtual void SetKeepAliveEnableState(const std::string &bundleName, bool enable) {};
 
     /**
      * To clear the process by ability token.
@@ -297,6 +306,13 @@ public:
      * @return Returns true is sufficent memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() = 0;
+
+    /**
+     * Notifies that one ability is attached to status bar.
+     *
+     * @param token the token of the abilityRecord that is attached to status bar.
+     */
+    virtual void AttachedToStatusBar(const sptr<IRemoteObject> &token) {}
 
     enum class Message {
         LOAD_ABILITY = 0,
@@ -319,7 +335,6 @@ public:
         GET_CONFIGURATION,
         GET_APPLICATION_INFO_BY_PROCESS_ID,
         KILL_APPLICATION_SELF,
-        GET_RUNNING_PROCESS_INFO_BY_PID,
         UPDATE_APPLICATION_INFO_INSTALLED,
         SET_CURRENT_USER_ID,
         Get_BUNDLE_NAME_BY_PID,
@@ -336,12 +351,14 @@ public:
         REGISTER_ABILITY_DEBUG_RESPONSE,
         IS_ATTACH_DEBUG,
         START_SPECIFIED_PROCESS,
-        SET_APP_ASSERT_PAUSE_STATE,
         CLEAR_PROCESS_BY_TOKEN,
         REGISTER_ABILITY_MS_DELEGATE,
         KILL_PROCESSES_BY_PIDS,
         ATTACH_PID_TO_PARENT,
         IS_MEMORY_SIZE_SUFFICIENT,
+        SET_KEEP_ALIVE_ENABLE_STATE,
+        NOTIFY_APP_MGR_RECORD_EXIT_REASON,
+        ATTACHED_TO_STATUS_BAR,
     };
 };
 }  // namespace AppExecFwk

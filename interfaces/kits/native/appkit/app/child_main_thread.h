@@ -34,21 +34,27 @@ namespace OHOS {
 namespace AppExecFwk {
 class ChildMainThread : public ChildSchedulerStub {
     DECLARE_DELAYED_IPCSINGLETON(ChildMainThread);
-    
+
 public:
-    static void Start(const ChildProcessInfo &processInfo);
+    static void Start(const std::map<std::string, int32_t> &fds);
+    void SetFds(const std::map<std::string, int32_t> &fds);
     bool ScheduleLoadJs() override;
     bool ScheduleExitProcessSafely() override;
+    bool ScheduleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb) override;
 
 private:
+    static int32_t GetChildProcessInfo(ChildProcessInfo &info);
     bool Init(const std::shared_ptr<EventRunner> &runner, const ChildProcessInfo &processInfo);
     bool Attach();
     void HandleLoadJs();
+    void HandleLoadArkTs();
     void InitNativeLib(const BundleInfo &bundleInfo);
     void HandleExitProcessSafely();
     void ExitProcessSafely();
     void GetNativeLibPath(const BundleInfo &bundleInfo, AppLibPathMap &appLibPaths);
     void GetHapSoPath(const HapModuleInfo &hapInfo, AppLibPathMap &appLibPaths, bool isPreInstallApp);
+    void HandleRunNativeProc(const sptr<IRemoteObject> &mainProcessCb);
+    void UpdateNativeChildLibModuleName(const AppLibPathMap &appLibPaths, bool isSystemApp);
     std::string GetLibPath(const std::string &hapPath, bool isPreInstallApp);
 
     sptr<IAppMgr> appMgr_ = nullptr;
@@ -56,6 +62,8 @@ private:
     std::shared_ptr<BundleInfo> bundleInfo_ = nullptr;
     std::shared_ptr<ChildProcessInfo> processInfo_ = nullptr;
     std::unique_ptr<AbilityRuntime::Runtime> runtime_ = nullptr;
+    std::string nativeLibModuleName_;
+    std::shared_ptr<ChildProcessArgs> processArgs_ = nullptr;
 
     DISALLOW_COPY_AND_MOVE(ChildMainThread);
 };

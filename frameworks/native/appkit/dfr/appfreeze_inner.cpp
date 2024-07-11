@@ -18,6 +18,7 @@
 
 #include "ability_manager_client.h"
 #include "ability_state.h"
+#include "appfreeze_manager.h"
 #include "app_recovery.h"
 #include "exit_reason.h"
 #include "ffrt.h"
@@ -169,6 +170,7 @@ int AppfreezeInner::AcquireStack(const FaultData& info, bool onlyMainThread)
         faultData.notifyApp = false;
         faultData.waitSaveState = false;
         faultData.forceExit = false;
+        faultData.eventId = it->eventId;
         bool isExit = IsExitApp(it->errorObject.name);
         if (isExit) {
             faultData.forceExit = true;
@@ -197,6 +199,9 @@ void AppfreezeInner::ThreadBlock(std::atomic_bool& isSixSecondEvent)
     if (isSixSecondEvent) {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_6S;
         onlyMainThread = true;
+#ifdef APP_NO_RESPONSE_DIALOG
+        isSixSecondEvent.store(false);
+#endif
     } else {
         faultData.errorObject.name = AppFreezeType::THREAD_BLOCK_3S;
         isSixSecondEvent.store(true);

@@ -125,15 +125,14 @@ AbilityCallerInfo *AbilityCallerInfo::Unmarshalling(Parcel &in)
         return nullptr;
     }
 
-    if (!in.ReadInt32(info->callerAbilityType)) {
-        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "read callerAbilityType failed");
-        delete info;
-        return nullptr;
-    }
+    info->callerAbilityType = static_cast<AppExecFwk::AbilityType>(in.ReadInt32());
 
     info->embedded = in.ReadInt32();
     info->callerAppProvisionType = in.ReadString();
     info->targetAppProvisionType = in.ReadString();
+    info->callerExtensionAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(in.ReadInt32());
+    info->targetAbilityType = static_cast<AppExecFwk::AbilityType>(in.ReadInt32());
+    info->targetExtensionAbilityType = static_cast<AppExecFwk::ExtensionAbilityType>(in.ReadInt32());
     return info;
 }
 
@@ -155,6 +154,21 @@ bool AbilityCallerInfo::Marshalling(Parcel &parcel) const
 
     if (!parcel.WriteString(targetAppProvisionType)) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetAppProvisionType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(callerExtensionAbilityType))) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write callerExtensionAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(targetAbilityType))) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetAbilityType failed");
+        return false;
+    }
+
+    if (!parcel.WriteInt32(static_cast<int32_t>(targetExtensionAbilityType))) {
+        TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write targetExtensionAbilityType failed");
         return false;
     }
     return true;
@@ -207,10 +221,11 @@ bool AbilityCallerInfo::DoMarshallingOne(Parcel &parcel) const
         return false;
     }
 
-    if (!parcel.WriteInt32(callerAbilityType)) {
+    if (!parcel.WriteInt32(static_cast<int32_t>(callerAbilityType))) {
         TAG_LOGE(AAFwkTag::ECOLOGICAL_RULE, "write callerAbilityType failed");
         return false;
     }
+
     return true;
 }
 
@@ -220,9 +235,13 @@ std::string AbilityCallerInfo::ToString() const
         ",pid:" + std::to_string(pid) + ",callerAppType:" + std::to_string(callerAppType) +
         ",targetAppType:" + std::to_string(targetAppType) + ",callerModelType:" + std::to_string(callerModelType) +
         ",targetAppDistType:" + targetAppDistType + ",targetLinkFeature:" + targetLinkFeature + ",targetLinkType:" +
-        std::to_string(targetLinkType) + ",callerAbilityType:" + std::to_string(callerAbilityType) + ",embedded:" +
+        std::to_string(targetLinkType) + ",callerAbilityType:" +
+        std::to_string(static_cast<int32_t>(callerAbilityType)) + ",callerExtensionAbilityType:" +
+        std::to_string(static_cast<int32_t>(callerExtensionAbilityType)) + ",embedded:" +
         std::to_string(embedded) + ",callerAppProvisionType:" + callerAppProvisionType + ",targetAppProvisionType:" +
-        targetAppProvisionType + "}";
+        targetAppProvisionType + ",targetAbilityType:" +
+        std::to_string(static_cast<int32_t>(targetAbilityType)) + ",targetExtensionAbilityType:" +
+        std::to_string(static_cast<int32_t>(targetExtensionAbilityType)) + "}";
     return str;
 }
 } // namespace EcologicalRuleMgrService

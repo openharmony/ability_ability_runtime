@@ -73,6 +73,7 @@ struct AppInfo {
     std::vector<AppData> appData;
     std::string processName;
     AppState state;
+    pid_t pid = 0;
 };
 /**
  * @class AppStateCallback
@@ -92,6 +93,8 @@ public:
     virtual void NotifyConfigurationChange(const AppExecFwk::Configuration &config, int32_t userId) {}
 
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) {}
+
+    virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) {}
 };
 
 class StartSpecifiedAbilityResponse : public AppExecFwk::StartSpecifiedAbilityResponseStub {
@@ -99,11 +102,13 @@ public:
     StartSpecifiedAbilityResponse() = default;
     virtual ~StartSpecifiedAbilityResponse() = default;
 
-    virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag) override;
-    virtual void OnTimeoutResponse(const AAFwk::Want &want) override;
+    virtual void OnAcceptWantResponse(const AAFwk::Want &want, const std::string &flag,
+        int32_t requestId) override;
+    virtual void OnTimeoutResponse(const AAFwk::Want &want, int32_t requestId) override;
 
-    virtual void OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag) override;
-    virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want) override;
+    virtual void OnNewProcessRequestResponse(const AAFwk::Want &want, const std::string &flag,
+        int32_t requestId) override;
+    virtual void OnNewProcessRequestTimeoutResponse(const AAFwk::Want &want, int32_t requestId) override;
 };
 
 /**
@@ -226,7 +231,7 @@ public:
      *
      * @param bundleName.
      */
-    int KillApplication(const std::string &bundleName);
+    int KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
      * kill the application by uid
@@ -246,16 +251,9 @@ public:
      */
     int UpdateApplicationInfoInstalled(const std::string &bundleName, const int32_t uid);
 
-    /**
-     * clear the application data
-     *
-     * @param bundleName.
-     */
-    int ClearUpApplicationData(const std::string &bundleName, const int32_t userId = -1);
-
     void AttachTimeOut(const sptr<IRemoteObject> &token);
 
-    void PrepareTerminate(const sptr<IRemoteObject> &token);
+    void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
 
@@ -274,10 +272,12 @@ public:
      */
     void StartupResidentProcess(const std::vector<AppExecFwk::BundleInfo> &bundleInfos);
 
-    void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo);
+    void StartSpecifiedAbility(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
+        int32_t requestId = 0);
     int GetProcessRunningInfos(std::vector<AppExecFwk::RunningProcessInfo> &info);
 
-    void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo);
+    void StartSpecifiedProcess(const AAFwk::Want &want, const AppExecFwk::AbilityInfo &abilityInfo,
+        int32_t requestId = 0);
 
     /**
      * Start a user test
@@ -326,6 +326,15 @@ public:
      * @return Returns ERR_OK on success, others on failure.
      */
     int GetApplicationInfoByProcessID(const int pid, AppExecFwk::ApplicationInfo &application, bool &debug);
+
+    /**
+     * Record process exit reason to appRunningRecord
+     * @param pid pid
+     * @param reason reason enum
+     * @param exitMsg exitMsg
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t NotifyAppMgrRecordExitReason(int32_t pid, int32_t reason, const std::string &exitMsg);
 
     /**
      * Set the current userId of appMgr, only used by abilityMgr.
@@ -413,18 +422,17 @@ public:
     void ClearProcessByToken(sptr<IRemoteObject> token) const;
 
     /**
-     * Set application assertion pause state.
-     *
-     * @param pid App process pid.
-     * @param flag assertion pause state.
-     */
-    void SetAppAssertionPauseState(int32_t pid, bool flag);
-
-    /**
      * whether memory size is sufficent.
      * @return Returns true is sufficent memory size, others return false.
      */
     virtual bool IsMemorySizeSufficent() const;
+
+    /**
+     * Notifies that one ability is attached to status bar.
+     *
+     * @param token the token of the abilityRecord that is attached to status bar.
+     */
+    void AttachedToStatusBar(const sptr<IRemoteObject> &token);
 
 protected:
     /**
@@ -454,6 +462,8 @@ protected:
      * @param bundleInfos resident process bundle infos.
      */
     virtual void NotifyStartResidentProcess(std::vector<AppExecFwk::BundleInfo> &bundleInfos) override;
+
+    virtual void OnAppRemoteDied(const std::vector<sptr<IRemoteObject>> &abilityTokens) override;
 
 private:
     std::mutex lock_;

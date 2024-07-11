@@ -76,6 +76,7 @@ public:
         const AAFwk::StartOptions &startOptions, int requestCode, RuntimeTask &&task) override;
     ErrCode StartAbilityForResult(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions,
         int requestCode, RuntimeTask &&task) override;
+    ErrCode StartUIServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) override;
     ErrCode StartServiceExtensionAbility(const Want &want, int32_t accountId = -1) override;
     ErrCode StopServiceExtensionAbility(const Want& want, int32_t accountId = -1) override;
     ErrCode TerminateAbilityWithResult(const AAFwk::Want &want, int resultCode) override;
@@ -84,8 +85,8 @@ public:
                         const sptr<AbilityConnectCallback> &connectCallback) override;
     ErrCode ConnectAbilityWithAccount(const AAFwk::Want &want, int accountId,
                         const sptr<AbilityConnectCallback> &connectCallback) override;
-    void DisconnectAbility(const AAFwk::Want &want,
-                           const sptr<AbilityConnectCallback> &connectCallback) override;
+    void DisconnectAbility(const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback,
+        int32_t accountId = -1) override;
     std::shared_ptr<AppExecFwk::HapModuleInfo> GetHapModuleInfo() const override;
     std::shared_ptr<AppExecFwk::AbilityInfo> GetAbilityInfo() const override;
     void MinimizeAbility(bool fromUser = false) override;
@@ -186,7 +187,7 @@ public:
 
     bool IsTerminating() override
     {
-        return isTerminating_;
+        return isTerminating_.load();
     }
 
     void SetWeakSessionToken(const wptr<IRemoteObject>& sessionToken) override;
@@ -195,10 +196,12 @@ public:
 
     void SetTerminating(bool state) override
     {
-        isTerminating_ = state;
+        isTerminating_.store(state);
     }
 
     ErrCode RequestDialogService(napi_env env, AAFwk::Want &want, RequestDialogResultTask &&task) override;
+
+    ErrCode RequestDialogService(AAFwk::Want &want, RequestDialogResultTask &&task) override;
 
     ErrCode ReportDrawnCompleted() override;
 
@@ -211,13 +214,16 @@ public:
      * @return Returns ERR_OK if success.
      */
     ErrCode SetMissionContinueState(const AAFwk::ContinueState &state) override;
-
+#ifdef SUPPORT_SCREEN
     ErrCode StartAbilityByType(const std::string &type,
         AAFwk::WantParams &wantParam, const std::shared_ptr<JsUIExtensionCallback> &uiExtensionCallbacks) override;
-
+#endif
     ErrCode RequestModalUIExtension(const Want &want) override;
 
     ErrCode ChangeAbilityVisibility(bool isShow) override;
+
+    ErrCode OpenLink(const AAFwk::Want& want, int requestCode) override;
+    ErrCode AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
 
     ErrCode OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
         RuntimeTask &&task) override;
@@ -228,7 +234,12 @@ public:
 
     void InsertResultCallbackTask(int requestCode, RuntimeTask&& task) override;
 
-#ifdef SUPPORT_GRAPHICS
+    void RemoveResultCallbackTask(int requestCode) override;
+
+    void SetRestoreEnabled(bool enabled) override;
+    bool GetRestoreEnabled() override;
+
+#ifdef SUPPORT_SCREEN
     /**
      * @brief Set mission label of this ability.
      *
@@ -287,13 +298,14 @@ private:
     std::shared_ptr<AppExecFwk::Configuration> config_ = nullptr;
     std::shared_ptr<LocalCallContainer> localCallContainer_ = nullptr;
     std::weak_ptr<AppExecFwk::IAbilityCallback> abilityCallback_;
-    bool isTerminating_ = false;
+    std::atomic<bool> isTerminating_ = false;
     int32_t missionId_ = -1;
     int32_t abilityRecordId_ = 0;
     std::mutex sessionTokenMutex_;
     wptr<IRemoteObject> sessionToken_;
     std::mutex uiExtensionMutex_;
     std::map<int32_t, Want> uiExtensionMap_;
+    std::atomic<bool> restoreEnabled_ = true;
 
     static void RequestDialogResultJSThreadWorker(uv_work_t* work, int status);
     void OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData);

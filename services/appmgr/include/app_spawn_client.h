@@ -26,6 +26,7 @@
 
 #include "appexecfwk_errors.h"
 #include "appspawn.h"
+#include "child_process_info.h"
 #include "data_group_info.h"
 #include "nocopyable.h"
 #include "shared/base_shared_bundle_info.h"
@@ -65,6 +66,16 @@ struct AppSpawnStartMsg {
     std::set<std::string> permissions;
     std::map<std::string, std::string> appEnv; // environment variable to be set to the process
     std::string ownerId;
+    std::string provisionType;
+    bool atomicServiceFlag = false;
+    std::string atomicAccount = "";
+    bool isolatedExtension = false; // whether is isolatedExtension
+    std::string extensionSandboxPath;
+    bool strictMode = false; // whether is strict mode
+    std::string processType = "";
+    int32_t maxChildProcess = 0;
+    int32_t childProcessType = CHILD_PROCESS_TYPE_NOT_CHILD;
+    std::map<std::string, int32_t> fds;
 };
 
 constexpr auto LEN_PID = sizeof(pid_t);
@@ -82,6 +93,7 @@ struct StartFlags {
     static const int GWP_ENABLED_FORCE = 10;
     static const int GWP_ENABLED_NORMAL = 11;
     static const int TSANENABLED = 12;
+    static const int EXTENSION_CONTROLLED = 13;
 };
 
 union AppSpawnPidMsg {
@@ -95,6 +107,11 @@ public:
      * Constructor.
      */
     explicit AppSpawnClient(bool isNWebSpawn = false);
+
+    /**
+     * Constructor by service name
+     */
+    explicit AppSpawnClient(const char* serviceName);
 
     /**
      * Destructor
@@ -159,6 +176,14 @@ public:
     int32_t AppspawnSetExtMsg(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle);
 
     /**
+     * Set extra info: provision_type, max_child_process.
+     *
+     * @param startMsg, request message.
+     * @param reqHandle, handle for request message
+     */
+    int32_t AppspawnSetExtMsgMore(const AppSpawnStartMsg &startMsg, AppSpawnReqMsgHandle reqHandle);
+
+    /**
      * Create default appspawn msg.
      *
      * @param startMsg, request message.
@@ -198,6 +223,10 @@ private:
     std::string serviceName_ = APPSPAWN_SERVER_NAME;
     AppSpawnClientHandle handle_ = nullptr;
     SpawnConnectionState state_ = SpawnConnectionState::STATE_NOT_CONNECT;
+
+    int32_t SetChildProcessTypeStartFlag(const AppSpawnReqMsgHandle &reqHandle, int32_t childProcessType);
+
+    int32_t SetExtMsgFds(const AppSpawnReqMsgHandle &reqHandle, const std::map<std::string, int32_t> &fds);
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS

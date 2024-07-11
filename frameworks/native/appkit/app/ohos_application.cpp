@@ -23,6 +23,7 @@
 
 #include "ability.h"
 #include "ability_record_mgr.h"
+#include "ability_stage_context.h"
 #include "ability_thread.h"
 #include "app_loader.h"
 #include "application_context.h"
@@ -200,9 +201,18 @@ void OHOSApplication::SetApplicationContext(
     abilityRuntimeContext_->RegisterAppConfigUpdateObserver([applicationWptr](const Configuration &config) {
         std::shared_ptr<OHOSApplication> applicationSptr = applicationWptr.lock();
         if (applicationSptr == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr.");
             return;
         }
         applicationSptr->OnConfigurationUpdated(config);
+    });
+    abilityRuntimeContext_->RegisterAppFontObserver([applicationWptr](const Configuration &config) {
+        std::shared_ptr<OHOSApplication> applicationSptr = applicationWptr.lock();
+        if (applicationSptr == nullptr) {
+            TAG_LOGE(AAFwkTag::APPKIT, "application is nullptr.");
+            return;
+        }
+        applicationSptr->OnFontUpdated(config);
     });
 }
 
@@ -428,6 +438,7 @@ void OHOSApplication::UnregisterElementsCallbacks(const std::shared_ptr<Elements
  */
 void OHOSApplication::OnConfigurationUpdated(Configuration config)
 {
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::APPKIT, "called");
     if (!abilityRecordMgr_ || !configuration_) {
         TAG_LOGD(AAFwkTag::APPKIT, "abilityRecordMgr_ or configuration_ is null");
@@ -452,7 +463,7 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
         configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
     std::string globalColorModeIsSetBySa =
         configuration_->GetItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-    if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0) {
+    if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 && globalColorModeIsSetBySa.empty()) {
         TAG_LOGD(AAFwkTag::APPKIT, "colorMode is auto");
         constexpr int buffSize = 64;
         char valueGet[buffSize] = { 0 };
@@ -464,14 +475,14 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
         config.AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, valueGet);
     }
     if (!colorMode.empty() && colorModeIsSetByApp.empty() && colorModeIsSetBySa.empty()) {
-        if ((!globalColorModeIsSetByApp.empty() || !globalColorModeIsSetBySa.empty()) &&
-            globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) != 0) {
+        if ((!globalColorModeIsSetByApp.empty() && globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) != 0) ||
+            !globalColorModeIsSetBySa.empty()) {
             TAG_LOGD(AAFwkTag::APPKIT, "colormode has been set by app or sa");
             return;
         }
     }
     if (!colorModeIsSetBySa.empty() && colorModeIsSetByApp.empty()) {
-        if (!globalColorModeIsSetByApp.empty()) {
+        if (!globalColorModeIsSetByApp.empty() && globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) != 0) {
             TAG_LOGD(AAFwkTag::APPKIT, "colormode has been set by app");
             return;
         }
@@ -480,15 +491,12 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
         TAG_LOGD(AAFwkTag::APPKIT, "language has been set by app");
         return;
     }
-    // When display move happened, need to remove SA key, so setting can update colormode success after display move.
-    if (!colorModeNeedRemoveIsSetBySa.empty() && !globalColorModeIsSetBySa.empty()) {
-        configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA);
-        config.RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
-    }
     std::vector<std::string> changeKeyV;
-    configuration_->CompareDifferent(changeKeyV, config);
-    configuration_->Merge(changeKeyV, config);
+    {
+        HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "configuration_->CompareDifferent");
+        configuration_->CompareDifferent(changeKeyV, config);
+        configuration_->Merge(changeKeyV, config);
+    }
     TAG_LOGD(AAFwkTag::UIABILITY, "configuration_: %{public}s", configuration_->GetName().c_str());
 
     // Update resConfig of resource manager, which belongs to application context.
@@ -526,11 +534,36 @@ void OHOSApplication::OnConfigurationUpdated(Configuration config)
     }
 
     abilityRuntimeContext_->DispatchConfigurationUpdated(*configuration_);
+    abilityRuntimeContext_->SetMcc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MCC));
+    abilityRuntimeContext_->SetMnc(configuration_->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_MNC));
 
-    if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0
-        || (globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 && colorModeIsSetByApp.empty())) {
+    if (colorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 ||
+        (globalColorMode.compare(ConfigurationInner::COLOR_MODE_AUTO) == 0 && (colorModeIsSetByApp.empty() ||
+        !colorModeIsSetBySa.empty()))) {
         configuration_->AddItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE, ConfigurationInner::COLOR_MODE_AUTO);
     }
+
+    // When display move happened, need to remove SA key, so setting can update colormode success after display move.
+    if (!colorModeNeedRemoveIsSetBySa.empty() && !globalColorModeIsSetBySa.empty()) {
+        configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_SA);
+        configuration_->RemoveItem(AAFwk::GlobalConfigurationKey::COLORMODE_NEED_REMOVE_SET_BY_SA);
+    }
+}
+
+/**
+ *
+ * @brief Will be Called when the application font of the device changes.
+ *
+ * @param config Indicates the new Configuration object.
+ */
+void OHOSApplication::OnFontUpdated(Configuration config)
+{
+    #ifdef SUPPORT_GRAPHICS
+    // Notify Window
+    TAG_LOGD(AAFwkTag::APPKIT, "Update configuration for all window.");
+    auto diffConfiguration = std::make_shared<AppExecFwk::Configuration>(config);
+    Rosen::Window::UpdateConfigurationForAll(diffConfiguration);
+    #endif
 }
 
 /**
@@ -641,7 +674,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
     std::shared_ptr<AbilityRuntime::AbilityStage> abilityStage;
     auto iterator = abilityStages_.find(moduleName);
     if (iterator == abilityStages_.end()) {
-        std::shared_ptr<AbilityRuntime::ContextImpl> stageContext = std::make_shared<AbilityRuntime::ContextImpl>();
+        auto stageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
         stageContext->SetParentContext(abilityRuntimeContext_);
         stageContext->InitHapModuleInfo(abilityInfo);
         stageContext->SetConfiguration(GetConfiguration());
@@ -649,6 +682,10 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
         if (hapModuleInfo == nullptr) {
             TAG_LOGE(AAFwkTag::APPKIT, "hapModuleInfo is nullptr");
             return nullptr;
+        }
+        if (runtime_) {
+            runtime_->UpdatePkgContextInfoJson(
+                hapModuleInfo->moduleName, hapModuleInfo->hapPath, hapModuleInfo->packageName);
         }
         SetAppEnv(hapModuleInfo->appEnvironments);
 
@@ -672,7 +709,7 @@ std::shared_ptr<AbilityRuntime::Context> OHOSApplication::AddAbilityStage(
             ohosApplication->AutoStartupDone(abilityRecord, abilityStage, moduleName);
             callback(abilityStage->GetContext());
         };
-        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback);
+        abilityStage->RunAutoStartupTask(autoStartupCallback, isAsyncCallback, stageContext);
         if (isAsyncCallback) {
             TAG_LOGI(AAFwkTag::APPKIT, "waiting for startup");
             return nullptr;
@@ -756,7 +793,7 @@ bool OHOSApplication::AddAbilityStage(const AppExecFwk::HapModuleInfo &hapModule
         return false;
     }
 
-    auto stageContext = std::make_shared<AbilityRuntime::ContextImpl>();
+    auto stageContext = std::make_shared<AbilityRuntime::AbilityStageContext>();
     stageContext->SetParentContext(abilityRuntimeContext_);
     stageContext->InitHapModuleInfo(hapModuleInfo);
     stageContext->SetConfiguration(GetConfiguration());
@@ -944,6 +981,28 @@ void OHOSApplication::UpdateAppContextResMgr(const Configuration &config)
 
     auto configUtils = std::make_shared<AbilityRuntime::ConfigurationUtils>();
     configUtils->UpdateGlobalConfig(config, context->GetResourceManager());
+}
+
+void OHOSApplication::CleanEmptyAbilityStage()
+{
+    bool containsNonEmpty = false;
+    for (auto it = abilityStages_.begin(); it != abilityStages_.end();) {
+        auto abilityStage = it->second;
+        if (abilityStage == nullptr) {
+            it++;
+            continue;
+        }
+        if (!abilityStage->ContainsAbility()) {
+            abilityStage->OnDestroy();
+            it = abilityStages_.erase(it);
+        } else {
+            containsNonEmpty = true;
+            it++;
+        }
+    }
+    if (containsNonEmpty) {
+        TAG_LOGI(AAFwkTag::APPKIT, "Application contains none empty abilityStage.");
+    }
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

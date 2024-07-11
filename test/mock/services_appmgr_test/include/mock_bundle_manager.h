@@ -100,8 +100,6 @@ public:
         const std::string& bundleName, const BundleFlag flag, BundleInfo& bundleInfo, int32_t userId) override;
     virtual bool GetBundleInfos(
         const BundleFlag flag, std::vector<BundleInfo>& bundleInfos, int32_t userId) override;
-    bool GetBundleGidsByUid(
-        const std::string& bundleName, const int& uid, std::vector<int>& gids) override;
     virtual bool GetBundleGids(const std::string& bundleName, std::vector<int>& gids) override;
     virtual bool GetHapModuleInfo(const AbilityInfo& abilityInfo, HapModuleInfo& hapModuleInfo);
     virtual bool GetHapModuleInfo(
@@ -170,8 +168,8 @@ public:
 
 class QuickFixManagerHostImpl : public QuickFixManagerHost {
 public:
-    MOCK_METHOD3(DeployQuickFix, ErrCode(const std::vector<std::string>& bundleFilePaths,
-        const sptr<IQuickFixStatusCallback>& statusCallback, bool isDebug));
+    MOCK_METHOD4(DeployQuickFix, ErrCode(const std::vector<std::string>& bundleFilePaths,
+        const sptr<IQuickFixStatusCallback>& statusCallback, bool isDebug, const std::string& targetPath));
     MOCK_METHOD3(SwitchQuickFix, ErrCode(const std::string& bundleName, bool enable,
         const sptr<IQuickFixStatusCallback>& statusCallback));
     MOCK_METHOD2(DeleteQuickFix, ErrCode(const std::string& bundleName,

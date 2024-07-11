@@ -21,10 +21,19 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const std::string &srcEntry,
-    const std::shared_ptr<AppRunningRecord> hostRecord, int32_t childProcessCount, bool isStartWithDebug)
-    : hostPid_(hostPid), childProcessCount_(childProcessCount), srcEntry_(srcEntry), hostRecord_(hostRecord),
-    isStartWithDebug_(isStartWithDebug)
+ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const ChildProcessRequest &request,
+    const std::shared_ptr<AppRunningRecord> hostRecord)
+    : hostPid_(hostPid), childProcessCount_(request.childProcessCount), childProcessType_(request.childProcessType),
+    srcEntry_(request.srcEntry), hostRecord_(hostRecord), isStartWithDebug_(request.isStartWithDebug)
+{
+    MakeProcessName(hostRecord);
+}
+
+ChildProcessRecord::ChildProcessRecord(pid_t hostPid, const std::string &libName,
+    const std::shared_ptr<AppRunningRecord> hostRecord, const sptr<IRemoteObject> &mainProcessCb,
+    int32_t childProcessCount, bool isStartWithDebug)
+    : hostPid_(hostPid), childProcessCount_(childProcessCount), childProcessType_(CHILD_PROCESS_TYPE_NATIVE),
+    srcEntry_(libName), hostRecord_(hostRecord), mainProcessCb_(mainProcessCb), isStartWithDebug_(isStartWithDebug)
 {
     MakeProcessName(hostRecord);
 }
@@ -35,15 +44,27 @@ ChildProcessRecord::~ChildProcessRecord()
 }
 
 std::shared_ptr<ChildProcessRecord> ChildProcessRecord::CreateChildProcessRecord(pid_t hostPid,
-    const std::string &srcEntry, const std::shared_ptr<AppRunningRecord> hostRecord, int32_t childProcessCount,
-    bool isStartWithDebug)
+    const ChildProcessRequest &request, const std::shared_ptr<AppRunningRecord> hostRecord)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "hostPid: %{public}d, srcEntry: %{public}s", hostPid, srcEntry.c_str());
-    if (hostPid <= 0 || srcEntry.empty() || !hostRecord) {
+    TAG_LOGD(AAFwkTag::APPMGR, "hostPid: %{public}d, srcEntry: %{priavte}s,", hostPid, request.srcEntry.c_str());
+    if (hostPid <= 0 || request.srcEntry.empty() || !hostRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "Invalid parameter.");
         return nullptr;
     }
-    return std::make_shared<ChildProcessRecord>(hostPid, srcEntry, hostRecord, childProcessCount, isStartWithDebug);
+    return std::make_shared<ChildProcessRecord>(hostPid, request, hostRecord);
+}
+
+std::shared_ptr<ChildProcessRecord> ChildProcessRecord::CreateNativeChildProcessRecord(
+    pid_t hostPid, const std::string &libName, const std::shared_ptr<AppRunningRecord> hostRecord,
+    const sptr<IRemoteObject> &mainProcessCb, int32_t childProcessCount, bool isStartWithDebug)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "hostPid: %{public}d, libName: %{public}s", hostPid, libName.c_str());
+    if (hostPid <= 0 || libName.empty() || !hostRecord || !mainProcessCb) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Invalid parameter.");
+        return nullptr;
+    }
+    return std::make_shared<ChildProcessRecord>(hostPid, libName, hostRecord, mainProcessCb,
+        childProcessCount, isStartWithDebug);
 }
 
 void ChildProcessRecord::SetPid(pid_t pid)
@@ -148,6 +169,10 @@ void ChildProcessRecord::MakeProcessName(const std::shared_ptr<AppRunningRecord>
     std::string filename = std::filesystem::path(srcEntry_).stem();
     if (!filename.empty()) {
         processName_.append(":");
+        if (childProcessType_ == CHILD_PROCESS_TYPE_NATIVE) {
+            processName_.append("Native_");
+        }
+        
         processName_.append(filename);
     }
     processName_.append(std::to_string(childProcessCount_));
@@ -157,6 +182,31 @@ void ChildProcessRecord::MakeProcessName(const std::shared_ptr<AppRunningRecord>
 bool ChildProcessRecord::isStartWithDebug()
 {
     return isStartWithDebug_;
+}
+
+int32_t ChildProcessRecord::GetChildProcessType() const
+{
+    return childProcessType_;
+}
+
+sptr<IRemoteObject> ChildProcessRecord::GetMainProcessCallback() const
+{
+    return mainProcessCb_;
+}
+
+void ChildProcessRecord::ClearMainProcessCallback()
+{
+    mainProcessCb_.clear();
+}
+
+void ChildProcessRecord::SetEntryParams(const std::string &entryParams)
+{
+    entryParams_ = entryParams;
+}
+
+std::string ChildProcessRecord::GetEntryParams() const
+{
+    return entryParams_;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

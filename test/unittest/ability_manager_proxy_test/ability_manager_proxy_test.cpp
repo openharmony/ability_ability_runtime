@@ -1034,25 +1034,6 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_ForceTimeoutForTest_001, T
 
 /*
  * Feature: AbilityManagerService
- * Function: ClearUpApplicationData
- * SubFunction: NA
- * FunctionPoints: AbilityManagerService ClearUpApplicationData
- * EnvConditions: NA
- * CaseDescription: Verify the normal process of ClearUpApplicationData
- */
-HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_ClearUpApplicationData_001, TestSize.Level1)
-{
-    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
-        .Times(1)
-        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
-    std::string bundleName = "";
-    auto res = proxy_->ClearUpApplicationData(bundleName);
-    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::CLEAR_UP_APPLICATION_DATA), mock_->code_);
-    EXPECT_EQ(res, NO_ERROR);
-}
-
-/*
- * Feature: AbilityManagerService
  * Function: UninstallApp
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService UninstallApp
@@ -1073,6 +1054,27 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_UninstallApp_001, TestSize
 
 /*
  * Feature: AbilityManagerService
+ * Function: UninstallApp
+ * SubFunction: NA
+ * FunctionPoints: AbilityManagerService UninstallApp
+ * EnvConditions: NA
+ * CaseDescription: Verify the normal process of UninstallApp
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_UninstallApp_002, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+    std::string bundleName = "";
+    int32_t uid = 1;
+    int32_t appIndex = 0;
+    auto res = proxy_->UninstallApp(bundleName, uid, appIndex);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::UNINSTALL_APP), mock_->code_);
+    EXPECT_EQ(res, NO_ERROR);
+}
+
+/*
+ * Feature: AbilityManagerService
  * Function: UpgradeApp
  * SubFunction: NA
  * FunctionPoints: AbilityManagerService UpgradeApp
@@ -1087,7 +1089,8 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_UpgradeApp_001, TestSize.L
     std::string bundleName = "";
     int32_t uid = 1;
     std::string exitMsg = "App upgrade.";
-    auto res = proxy_->UpgradeApp(bundleName, uid, exitMsg);
+    int32_t appIndex = 0;
+    auto res = proxy_->UpgradeApp(bundleName, uid, exitMsg, appIndex);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::UPGRADE_APP), mock_->code_);
     EXPECT_EQ(res, NO_ERROR);
 }
@@ -1625,7 +1628,7 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_SetMissionLabel_001, TestS
 HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RegisterWindowManagerServiceHandler_001, TestSize.Level1)
 {
     sptr<IWindowManagerServiceHandler> handler = nullptr;
-    auto res = proxy_->RegisterWindowManagerServiceHandler(handler);
+    auto res = proxy_->RegisterWindowManagerServiceHandler(handler, true);
     EXPECT_EQ(res, INNER_ERR);
 }
 
@@ -2710,6 +2713,23 @@ HWTEST_F(AbilityManagerProxyTest, QueryAllAutoStartupApplications_0100, TestSize
 }
 
 /**
+ * @tc.name: AbilityManagerProxy_SetResidentProcessEnable_0100
+ * @tc.desc: RestartApp
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_SetResidentProcessEnable_0100, TestSize.Level1)
+{
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    std::string bundleName = "ability.manager.proxy.test";
+    bool enable = true;
+    proxy_->SetResidentProcessEnabled(bundleName, enable);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::SET_RESIDENT_PROCESS_ENABLE), mock_->code_);
+}
+
+/**
  * @tc.name: AbilityManagerProxy_GetUIExtensionRootHostInfo_0100
  * @tc.desc: GetUIExtensionRootHostInfo
  * @tc.type: FUNC
@@ -2745,6 +2765,46 @@ HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_RestartApp_0100, TestSize.
     AAFwk::Want want;
     proxy_->RestartApp(want);
     EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::RESTART_APP), mock_->code_);
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_ChangeAbilityVisibility_0100
+ * @tc.desc: ChangeAbilityVisibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_ChangeAbilityVisibility_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    auto token = sptr<MockAbilityToken>::MakeSptr();
+    proxy_->ChangeAbilityVisibility(token, true);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::CHANGE_ABILITY_VISIBILITY), mock_->code_);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
+}
+
+/**
+ * @tc.name: AbilityManagerProxy_ChangeUIAbilityVisibilityBySCB_0100
+ * @tc.desc: ChangeUIAbilityVisibilityBySCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(AbilityManagerProxyTest, AbilityManagerProxy_ChangeUIAbilityVisibilityBySCB_0100, TestSize.Level1)
+{
+    TAG_LOGI(AAFwkTag::TEST, "begin");
+
+    EXPECT_CALL(*mock_, SendRequest(_, _, _, _))
+        .Times(1)
+        .WillOnce(Invoke(mock_.GetRefPtr(), &AbilityManagerStubMock::InvokeSendRequest));
+
+    sptr<SessionInfo> session = new (std::nothrow) SessionInfo();
+    proxy_->ChangeUIAbilityVisibilityBySCB(session, true);
+    EXPECT_EQ(static_cast<uint32_t>(AbilityManagerInterfaceCode::CHANGE_UI_ABILITY_VISIBILITY_BY_SCB), mock_->code_);
+
+    TAG_LOGI(AAFwkTag::TEST, "end");
 }
 } // namespace AAFwk
 } // namespace OHOS
