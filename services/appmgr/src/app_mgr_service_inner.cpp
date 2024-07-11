@@ -7093,5 +7093,17 @@ void AppMgrServiceInner::RestartResidentProcessDependedOnWeb()
     };
     taskHandler_->SubmitTask(RestartResidentProcessDependedOnWebTask, "RestartResidentProcessDependedOnWeb");
 }
+
+void AppMgrServiceInner::BlockProcessCacheByPids(const std::vector<int32_t>& pids)
+{
+    for (const auto& pid : pids) {
+        auto appRecord = GetAppRunningRecordByPid(pid);
+        if (appRecord == nullptr) {
+            TAG_LOGE(AAFwkTag::APPMGR, "appRecord is nullptr..");
+            continue;
+        }
+        appRecord->SetProcessCacheBlocked(true);
+    }
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS
