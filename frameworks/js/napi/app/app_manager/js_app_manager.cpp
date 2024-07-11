@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "ability_manager_interface.h"
+#include "ability_manager_errors.h"
 #include "app_mgr_interface.h"
 #include "hilog_tag_wrapper.h"
 #include "hilog_wrapper.h"
@@ -390,7 +391,7 @@ private:
             if (ret == 0) {
                 task.Resolve(env, CreateJsValue(env, ret));
             } else {
-                task.Reject(env, CreateJsError(env, ret, "clear up application failed."));
+                task.Reject(env, CreateJsError(env, CLEAR_APPLICATION_DATA_FAIL, "clear up application failed."));
             }
         };
 
