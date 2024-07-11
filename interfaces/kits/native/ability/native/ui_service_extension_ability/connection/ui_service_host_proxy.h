@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+#ifndef OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_PROXY_H
+#define OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_PROXY_H
+
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "ui_service_host_interface.h"
-
-#ifndef OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_PROXY_H
-#define OHOS_ABILITY_RUNTIME_UI_SERVICE_HOST_PROXY_H
 
 namespace OHOS {
 namespace AAFwk {
