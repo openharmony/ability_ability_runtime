@@ -983,6 +983,7 @@ public:
     void SetSessionInfo(sptr<SessionInfo> sessionInfo);
     void UpdateSessionInfo(sptr<IRemoteObject> sessionToken);
     void SetMinimizeReason(bool fromUser);
+    void SetSceneFlag(uint32_t sceneFlag);
     bool IsMinimizeFromUser() const;
     void SetClearMissionFlag(bool clearMissionFlag);
     bool IsClearMissionFlag();
