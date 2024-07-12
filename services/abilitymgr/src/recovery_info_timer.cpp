@@ -41,7 +41,7 @@ void RecoveryInfoTimer::SubmitSaveRecoveryInfo(RecoveryInfo recoveryInfo)
 
     int64_t now = recoveryInfo.time;
     auto timeoutDeleteTime = AbilityRuntime::DefaultRecoveryConfig::GetInstance().
-        GetTimeoutDeleteTime() * HOURS_TO_SECOND / 60;
+        GetTimeoutDeleteTime() * HOURS_TO_SECOND;
     auto reserveNumber = AbilityRuntime::DefaultRecoveryConfig::GetInstance().GetReserveNumber();
     int timeoutCount = 0;
     for (auto p = recoveryInfoQueue_.begin(); p != recoveryInfoQueue_.end(); p++) {
