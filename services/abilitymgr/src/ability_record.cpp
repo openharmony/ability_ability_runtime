@@ -2850,6 +2850,11 @@ void AbilityRecord::SetMinimizeReason(bool fromUser)
     minimizeReason_ = fromUser;
 }
 
+void AbilityRecord::SetSceneFlag(uint32_t sceneFlag)
+{
+    lifeCycleStateInfo_.sceneFlag = sceneFlag;
+}
+
 void AbilityRecord::SetAppIndex(const int32_t appIndex)
 {
     appIndex_ = appIndex;
