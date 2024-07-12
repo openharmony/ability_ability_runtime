@@ -7162,15 +7162,22 @@ void AbilityManagerService::ReportAppRecoverResult(const int32_t appId, const Ap
 void AbilityManagerService::SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token)
 {
     if (token == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "submitInfo token is nullptr");
         return;
     }
     auto abilityRecord = Token::GetAbilityRecordByToken(token);
     if (abilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "submitInfo abilityRecord is nullptr");
         return;
     }
     auto abilityInfo = abilityRecord->GetAbilityInfo();
     auto userId = abilityRecord->GetOwnerMissionUserId();
     auto tokenId = abilityRecord->GetApplicationInfo().accessTokenId;
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    if (callingTokenId != tokenId) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "SubmitSaveRecoveryInfo not self, not enabled");
+        return;
+    }
     std::string abilityName = abilityInfo.name;
     if (Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         auto uiAbilityManager = GetUIAbilityManagerByUserId(userId);
