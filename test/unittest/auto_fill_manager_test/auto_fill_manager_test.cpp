@@ -239,20 +239,19 @@ HWTEST_F(AutoFillManagerTest, ConvertAutoFillWindowType_0100, TestSize.Level1)
 
 /*
  * Feature: AutoFillManager
- * Function: IsNeedToCreatePopopWindow
+ * Function: IsNeedToCreatePopupWindow
  * SubFunction: NA
  * FunctionPoints: NA
  * EnvConditions: NA
- * CaseDescription: Verify Based on whether the AutoFillType value pull up
- * the windowType and extension types.
+ * CaseDescription: pull up the windowType and extension types.
  */
-HWTEST_F(AutoFillManagerTest, IsNeedToCreatePopopWindow_0100, TestSize.Level1)
+HWTEST_F(AutoFillManagerTest, IsNeedToCreatePopupWindow_0100, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "AutoFillManagerTest, IsNeedToCreatePopopWindow_0100, TestSize.Level1";
+    GTEST_LOG_(INFO) << "AutoFillManagerTest, IsNeedToCreatePopupWindow_0100, TestSize.Level1";
     auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
     bool isPopupAutoFill = false;
 
-    isPopupAutoFill = manager.IsNeedToCreatePopopWindow(AbilityBase::AutoFillType::PERSON_FULL_NAME);
+    isPopupAutoFill = manager.IsNeedToCreatePopupWindow(AbilityBase::AutoFillType::PERSON_FULL_NAME);
     EXPECT_EQ(isPopupAutoFill, true);
 }
 } // namespace AppExecFwk

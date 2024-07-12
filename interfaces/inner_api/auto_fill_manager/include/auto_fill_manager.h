@@ -68,7 +68,7 @@ public:
     int32_t RequestAutoFill(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
         const std::shared_ptr<IFillRequestCallback> &fillCallback, AutoFill::AutoFillResult &result);
 
-    bool IsNeedToCreatePopopWindow(const AbilityBase::AutoFillType &autoFillType);
+    bool IsNeedToCreatePopupWindow(const AbilityBase::AutoFillType &autoFillType);
 
     int32_t RequestAutoSave(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
         const std::shared_ptr<ISaveRequestCallback> &saveCallback, AutoFill::AutoFillResult &result);
