@@ -2097,12 +2097,6 @@ void AppMgrServiceInner::SetBundleManagerHelper(const std::shared_ptr<BundleMgrH
 
 void AppMgrServiceInner::RegisterAppStateCallback(const sptr<IAppStateCallback> &callback)
 {
-    pid_t callingPid = IPCSkeleton::GetCallingPid();
-    pid_t pid = getprocpid();
-    if (callingPid != pid) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Not abilityMgr call.", __func__);
-        return;
-    }
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
     if (callback != nullptr) {
         std::lock_guard lock(appStateCallbacksLock_);
@@ -3915,14 +3909,6 @@ void AppMgrServiceInner::RegisterStartSpecifiedAbilityResponse(const sptr<IStart
         TAG_LOGE(AAFwkTag::APPMGR, "response is nullptr, register failed.");
         return;
     }
-
-    pid_t callingPid = IPCSkeleton::GetCallingPid();
-    pid_t pid = getprocpid();
-    if (callingPid != pid) {
-        TAG_LOGE(AAFwkTag::APPMGR, "%{public}s: Not abilityMgr call.", __func__);
-        return;
-    }
-
     startSpecifiedAbilityResponse_ = response;
 }
 
@@ -4086,6 +4072,10 @@ void AppMgrServiceInner::HandleConfigurationChange(const Configuration &config)
 int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called");
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "caller is not SA");
+        return ERR_INVALID_VALUE;
+    }
 
     if (observer == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrServiceInner::Register error: observer is null");
@@ -4107,6 +4097,10 @@ int32_t AppMgrServiceInner::RegisterConfigurationObserver(const sptr<IConfigurat
 int32_t AppMgrServiceInner::UnregisterConfigurationObserver(const sptr<IConfigurationObserver>& observer)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "called");
+    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "caller is not SA");
+        return ERR_INVALID_VALUE;
+    }
     if (observer == nullptr) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrServiceInner::Register error: observer is null");
         return ERR_INVALID_VALUE;
@@ -5056,12 +5050,6 @@ int32_t AppMgrServiceInner::NotifyHotReloadPage(const std::string &bundleName, c
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 int32_t AppMgrServiceInner::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
 {
-    auto isSaCall = AAFwk::PermissionVerification::GetInstance()->IsSACall();
-    if (!isSaCall) {
-        TAG_LOGE(AAFwkTag::APPMGR, "callerToken not SA %{public}s", __func__);
-        return ERR_INVALID_VALUE;
-    }
-
     if (!appRunningManager_) {
         TAG_LOGE(AAFwkTag::APPMGR, "app running manager is nullptr.");
         return ERR_INVALID_OPERATION;
@@ -5070,7 +5058,7 @@ int32_t AppMgrServiceInner::SetContinuousTaskProcess(int32_t pid, bool isContinu
     auto appRecord = appRunningManager_->GetAppRunningRecordByPid(pid);
     if (!appRecord) {
         TAG_LOGE(AAFwkTag::APPMGR, "Get app running record by pid failed. pid: %{public}d", pid);
-        return false;
+        return ERR_INVALID_VALUE;
     }
     appRecord->SetContinuousTaskAppState(isContinuousTask);
     DelayedSingleton<AppStateObserverManager>::GetInstance()->OnProcessStateChanged(appRecord);
@@ -6871,11 +6859,6 @@ int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
         TAG_LOGE(AAFwkTag::APPMGR, "appRunningManager_ is nullptr");
         return ERR_NO_INIT;
     }
-    auto result = CheckSetProcessCachePermission();
-    if (result != ERR_OK) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Permission verification failed.");
-        return result;
-    }
 
     auto callerPid = IPCSkeleton::GetCallingPid();
     auto appRecord = GetAppRunningRecordByPid(callerPid);
@@ -6883,21 +6866,13 @@ int32_t AppMgrServiceInner::SetSupportedProcessCacheSelf(bool isSupport)
         TAG_LOGE(AAFwkTag::APPMGR, "no such appRecord, callerPid:%{public}d", callerPid);
         return ERR_INVALID_VALUE;
     }
-    if (!appRecord->SetSupportedProcessCache(isSupport)) {
-        TAG_LOGE(AAFwkTag::APPMGR, "SetSupportedProcessCache more than once");
-        return AAFwk::ERR_SET_SUPPORTED_PROCESS_CACHE_AGAIN;
-    }
-    return ERR_OK;
-}
 
-int32_t AppMgrServiceInner::CheckSetProcessCachePermission() const
-{
-    TAG_LOGI(AAFwkTag::APPMGR, "Called.");
-    HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    CHECK_CALLER_IS_SYSTEM_APP;
-    auto isCallingPerm = AAFwk::PermissionVerification::GetInstance()->VerifySetProcessCachePermission();
-    TAG_LOGI(AAFwkTag::APPMGR, "ProcessCache permission: %{public}d", isCallingPerm);
-    return isCallingPerm ? ERR_OK : AAFwk::CHECK_PERMISSION_FAILED;
+    if (!DelayedSingleton<CacheProcessManager>::GetInstance()->QueryEnableProcessCache()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "process cache feature is disabled.");
+        return AAFwk::ERR_CAPABILITY_NOT_SUPPORT;
+    }
+    appRecord->SetSupportedProcessCache(isSupport);
+    return ERR_OK;
 }
 
 void AppMgrServiceInner::OnAppCacheStateChanged(const std::shared_ptr<AppRunningRecord> &appRecord,
