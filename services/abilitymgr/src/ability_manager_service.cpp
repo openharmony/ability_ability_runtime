@@ -2764,8 +2764,7 @@ int AbilityManagerService::StartExtensionAbilityInner(const Want &want, const sp
     }
     UpdateCallerInfo(abilityRequest.want, callerToken);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "Start extension begin, name is %{public}s.", abilityInfo.name.c_str());
-    sptr<SessionInfo> sessionInfo = CreateSessionInfo(abilityRequest);
-    abilityRequest.sessionInfo = sessionInfo;
+    SetAbilityRequestSessionInfo(abilityRequest, extensionType);
     eventInfo.errCode = connectManager->StartAbility(abilityRequest);
     if (eventInfo.errCode != ERR_OK) {
         EventReport::SendExtensionEvent(EventName::START_EXTENSION_ERROR, HiSysEventType::FAULT, eventInfo);
@@ -11345,21 +11344,25 @@ ErrCode AbilityManagerService::ConvertToExplicitWant(Want& want)
     return retCode;
 }
 
-sptr<SessionInfo> AbilityManagerService::CreateSessionInfo(const AbilityRequest &abilityRequest) const
+void AbilityManagerService::SetAbilityRequestSessionInfo(AbilityRequest &abilityRequest, AppExecFwk::ExtensionAbilityType extensionType)
 {
+    if (extensionType != AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        return;
+    }
     sptr<SessionInfo> sessionInfo = new SessionInfo();
     sessionInfo->callerToken = abilityRequest.callerToken;
-    auto record = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
-    sptr<SessionInfo> sessionInfo2 = record->GetSessionInfo();
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "CreateSessionInfo %{public}d.", sessionInfo2->persistentId);
-    sessionInfo->want = abilityRequest.want;
-    sessionInfo->hostWindowId = sessionInfo2->persistentId;
-    if (abilityRequest.startSetting != nullptr) {
-        sessionInfo->startSetting = abilityRequest.startSetting;
+    auto callerAbilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
+    if(callerAbilityRecord == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerAbilityRecord is nullptr");
     }
+    sptr<SessionInfo> callerSessionInfo = callerAbilityRecord->GetSessionInfo();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "CreateSessionInfo %{public}d.", callerSessionInfo->persistentId);
+    sessionInfo->want = abilityRequest.want;
+    sessionInfo->hostWindowId = callerSessionInfo->persistentId;
     sessionInfo->callingTokenId = static_cast<uint32_t>(abilityRequest.want.GetIntParam(Want::PARAM_RESV_CALLER_TOKEN,
         IPCSkeleton::GetCallingTokenID()));
-    return sessionInfo;
+
+    abilityRequest.sessionInfo = sessionInfo;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

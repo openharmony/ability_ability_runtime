@@ -30,6 +30,8 @@
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 #include "js_ui_service_extension_context.h"
+#include "js_window_stage.h"
+#include "js_window.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 #include "napi_common_configuration.h"
@@ -39,10 +41,8 @@
 #include "ability_context.h"
 #include "session_info.h"
 #include "window_scene.h"
-#include "js_window_stage.h"
 #include "wm_common.h"
 #include "window.h"
-#include "js_window.h"
 #ifdef SUPPORT_GRAPHICS
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
@@ -255,24 +255,12 @@ void JsUIServiceExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionI
     napi_value argv[] = {napiWant};
     CallObjectMethod("onCreate", argv, ARGC_ONE);
 #ifdef SUPPORT_GRAPHICS
-    std::shared_ptr<Rosen::ExtensionWindowConfig> extensionWindowConfig = std::make_shared<Rosen::ExtensionWindowConfig>();
+    auto extensionWindowConfig = std::make_shared<Rosen::ExtensionWindowConfig>();
     OnSceneWillCreated(extensionWindowConfig);
-    TAG_LOGI(AAFwkTag::UISERVC_EXT, "extensionWindowConfig.windowStageAttribute: %{public}d",
-        extensionWindowConfig->windowAttribute);
-    TAG_LOGI(AAFwkTag::UISERVC_EXT, "extensionWindowConfig.rect.posX_: %{public}d",
-        extensionWindowConfig->windowRect.posX_);
-    TAG_LOGI(AAFwkTag::UISERVC_EXT, "extensionWindowConfig.rect.posY_: %{public}d",
-        extensionWindowConfig->windowRect.posY_);
-    TAG_LOGI(AAFwkTag::UISERVC_EXT, "extensionWindowConfig.rect.width_: %{public}d",
-        extensionWindowConfig->windowRect.width_);
-    TAG_LOGI(AAFwkTag::UISERVC_EXT, "extensionWindowConfig.rect.height_: %{public}d",
-            extensionWindowConfig->windowRect.height_);
-
     auto option = GetWindowOption(want, extensionWindowConfig, sessionInfo);
-    sptr<Rosen::Window> mainWindow_ = nullptr;
-    mainWindow_ = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);    
-    OnSceneDidCreated(mainWindow_);
-
+    sptr<Rosen::Window> mainWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
+    OnSceneDidCreated(mainWindow);
+    context->SetWindow(mainWindow);
 #endif
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "ok");
 }
@@ -496,25 +484,12 @@ void JsUIServiceExtension::OnSceneWillCreated(std::shared_ptr<Rosen::ExtensionWi
 
 void JsUIServiceExtension::OnSceneDidCreated(sptr<Rosen::Window>& window)
 {
-     TAG_LOGI(AAFwkTag::UISERVC_EXT, "OnSceneDidCreated call");
-     HandleScope handleScope(jsRuntime_);
-     auto jsAppWindowStage = CreateAppWindowStage();
+    TAG_LOGI(AAFwkTag::UISERVC_EXT, "OnSceneDidCreated call");
+    HandleScope handleScope(jsRuntime_);
     auto env = jsRuntime_.GetNapiEnv();
     napi_value jsWindow = Rosen::CreateJsWindowObject(env, window);
-     if (jsAppWindowStage == nullptr) {
-        TAG_LOGE(AAFwkTag::UISERVC_EXT, "jsWindow is nullptr.");
-         return;
-     }
-
     napi_value argv[] = {jsWindow};
-    CallObjectMethod("onWindowDidCreate", argv, ArraySize(argv)); //load page
-    TAG_LOGI(AAFwkTag::UISERVC_EXT, "Call onWindowDidCreate finish.");
-    jsWindowStageObj_ = std::shared_ptr<NativeReference>(jsAppWindowStage.release());
-
-    if (window != nullptr && securityFlag_) {
-        window->SetSystemPrivacyMode(true);
-    }
-
+    CallObjectMethod("onWindowDidCreate", argv, ArraySize(argv));
     TAG_LOGI(AAFwkTag::UISERVC_EXT, "End OnSceneDidCreated.");
 }
 #endif
