@@ -278,7 +278,7 @@ void AutoFillManager::HandleTimeOut(uint32_t eventId)
     extensionCallback->HandleTimeOut();
 }
 
-bool AutoFillManager::IsNeedToCreatePopopWindow(const AbilityBase::AutoFillType &autoFillType)
+bool AutoFillManager::IsNeedToCreatePopupWindow(const AbilityBase::AutoFillType &autoFillType)
 {
     TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
     if (autoFillType == AbilityBase::AutoFillType::PASSWORD ||
