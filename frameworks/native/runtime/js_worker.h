@@ -35,11 +35,9 @@ class AssetHelper final {
 public:
     explicit AssetHelper(std::shared_ptr<JsEnv::WorkerInfo> workerInfo) : workerInfo_(workerInfo)
     {
-        JsEnv::StringPacProtect codePath = JsEnv::StringPacProtect(workerInfo_->codePath);
+        panda::panda_file::StringPacProtect codePath = panda::panda_file::StringPacProtect(workerInfo_->codePath);
         if (!(codePath.GetOriginString()).empty() && (codePath.GetOriginString()).back() != '/') {
-            // (workerInfo_->codePath).append("/");
-            // workerInfo_->codePath = StringPacProtect(codePath.append("/"));
-            (workerInfo_->codePath).Append("/");
+            (workerInfo_->codePath).Append('/');
         }
     }
 
@@ -60,6 +58,8 @@ private:
     void GetAmi(std::string& ami, const std::string& filePath);
 
     bool GetSafeData(const std::string& ami, uint8_t** buff, size_t* buffSize);
+    
+    bool GetIsStageModel();
 
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo_ = nullptr;
     int fd_ = -1;
