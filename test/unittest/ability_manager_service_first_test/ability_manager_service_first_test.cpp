@@ -234,6 +234,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, CheckStartByCallPermission_002, TestSiz
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest CheckStartByCallPermission_002 end");
 }
 
+#ifdef WITH_DLP
 /*
  * Feature: AbilityManagerService
  * Function: GetDlpConnectionInfos
@@ -253,6 +254,7 @@ HWTEST_F(AbilityManagerServiceFirstTest, GetDlpConnectionInfos_001, TestSize.Lev
     MyFlag::flag_ = 0;
     TAG_LOGI(AAFwkTag::TEST, "AbilityManagerServiceFirstTest GetDlpConnectionInfos_001 end");
 }
+#endif // WITH_DLP
 
 /*
  * Feature: AbilityManagerService
