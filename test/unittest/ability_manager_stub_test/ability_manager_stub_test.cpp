@@ -2306,6 +2306,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_UnregisterObserver_001, Test
     EXPECT_EQ(res, NO_ERROR);
 }
 
+#ifdef WITH_DLP
 /*
  * Feature: AbilityManagerService
  * Function: GetDlpConnectionInfos
@@ -2320,6 +2321,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetDlpConnectionInfos_001, T
     auto res = stub_->GetDlpConnectionInfos(infos);
     EXPECT_EQ(res, NO_ERROR);
 }
+#endif // WITH_DLP
 
 /*
  * Feature: AbilityManagerService
@@ -2579,6 +2581,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_UnregisterConnectionObserver
     EXPECT_EQ(res, ERR_NULL_OBJECT);
 }
 
+#ifdef WITH_DLP
 /*
  * Feature: AbilityManagerService
  * Function: GetDlpConnectionInfosInner
@@ -2594,6 +2597,7 @@ HWTEST_F(AbilityManagerStubTest, AbilityManagerStub_GetDlpConnectionInfosInner_0
     auto res = stub_->GetDlpConnectionInfosInner(data, reply);
     EXPECT_EQ(res, ERR_OK);
 }
+#endif // WITH_DLP
 
 /*
  * Feature: AbilityManagerService
