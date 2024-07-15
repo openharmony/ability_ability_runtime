@@ -78,10 +78,15 @@ void CJRuntime::SetAppLibPath(const AppLibPathMap& appLibPaths)
             appPath += appPath.empty() ? libPath : ":" + libPath;
         }
     }
-    OHOS::CJEnv::LoadInstance()->initCJChipSDKNS(CJ_CHIPSDK_PATH);
-    OHOS::CJEnv::LoadInstance()->initCJAppNS(appPath);
-    OHOS::CJEnv::LoadInstance()->initCJSDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
-    OHOS::CJEnv::LoadInstance()->initCJSysNS(CJ_SYSLIB_PATH);
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return;
+    }
+    cjEnv->initCJChipSDKNS(CJ_CHIPSDK_PATH);
+    cjEnv->initCJAppNS(appPath);
+    cjEnv->initCJSDKNS(CJ_RT_PATH + ":" + CJ_LIB_PATH);
+    cjEnv->initCJSysNS(CJ_SYSLIB_PATH);
 }
 
 bool CJRuntime::Initialize(const Options& options)
@@ -90,11 +95,16 @@ bool CJRuntime::Initialize(const Options& options)
         TAG_LOGE(AAFwkTag::CJRUNTIME, "CJRuntime Initialize fail, language mismatch");
         return false;
     }
-    if (!OHOS::CJEnv::LoadInstance()->startRuntime()) {
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return false;
+    }
+    if (!cjEnv->startRuntime()) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "start cj runtime failed");
         return false;
     }
-    if (!OHOS::CJEnv::LoadInstance()->startUIScheduler()) {
+    if (!cjEnv->startUIScheduler()) {
         TAG_LOGE(AAFwkTag::CJRUNTIME, "start cj ui context failed");
         return false;
     }
@@ -109,7 +119,12 @@ bool CJRuntime::Initialize(const Options& options)
 
 void CJRuntime::RegisterUncaughtExceptionHandler(const CJUncaughtExceptionInfo& uncaughtExceptionInfo)
 {
-    OHOS::CJEnv::LoadInstance()->registerCJUncaughtExceptionHandler(uncaughtExceptionInfo);
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return;
+    }
+    cjEnv->registerCJUncaughtExceptionHandler(uncaughtExceptionInfo);
 }
 
 bool CJRuntime::IsCJAbility(const std::string& info)
@@ -121,6 +136,11 @@ bool CJRuntime::IsCJAbility(const std::string& info)
 
 bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
 {
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return false;
+    }
     void* handle = nullptr;
     for (const auto& libPath : appLibPaths) {
         for (auto& itor : std::filesystem::directory_iterator(libPath)) {
@@ -128,7 +148,7 @@ bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
             if (itor.path().string().find("ohos_app_cangjie") == std::string::npos) {
                 continue;
             }
-            handle = OHOS::CJEnv::LoadInstance()->loadCJLibrary(itor.path().c_str());
+            handle = cjEnv->loadCJLibrary(itor.path().c_str());
             if (handle == nullptr) {
                 char* errMsg = dlerror();
                 TAG_LOGE(AAFwkTag::CJRUNTIME,
@@ -143,17 +163,32 @@ bool CJRuntime::LoadCJAppLibrary(const AppLibPathVec& appLibPaths)
 
 void CJRuntime::SetAsanVersion()
 {
-    OHOS::CJEnv::LoadInstance()->setSanitizerKindRuntimeVersion(SanitizerKind::ASAN);
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return;
+    }
+    cjEnv->setSanitizerKindRuntimeVersion(SanitizerKind::ASAN);
 }
 
 void CJRuntime::SetTsanVersion()
 {
-    OHOS::CJEnv::LoadInstance()->setSanitizerKindRuntimeVersion(SanitizerKind::TSAN);
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return;
+    }
+    cjEnv->setSanitizerKindRuntimeVersion(SanitizerKind::TSAN);
 }
 
 void CJRuntime::SetHWAsanVersion()
 {
-    OHOS::CJEnv::LoadInstance()->setSanitizerKindRuntimeVersion(SanitizerKind::HWASAN);
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return;
+    }
+    cjEnv->setSanitizerKindRuntimeVersion(SanitizerKind::HWASAN);
 }
 
 void CJRuntime::StartDebugMode(const DebugOption dOption)
@@ -195,7 +230,12 @@ void CJRuntime::StartDebugMode(const DebugOption dOption)
 
 bool CJRuntime::StartDebugger()
 {
-    return OHOS::CJEnv::LoadInstance()->startDebugger();
+    auto cjEnv = OHOS::CJEnv::LoadInstance();
+    if (cjEnv == nullptr) {
+        TAG_LOGE(AAFwkTag::CJRUNTIME, "CJEnv LoadInstance failed.");
+        return false;
+    }
+    return cjEnv->startDebugger();
 }
 
 void CJRuntime::UnLoadCJAppLibrary()
