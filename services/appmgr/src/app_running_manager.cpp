@@ -1029,7 +1029,7 @@ std::shared_ptr<RenderRecord> AppRunningManager::OnRemoteRenderDied(const wptr<I
 bool AppRunningManager::GetAppRunningStateByBundleName(const std::string &bundleName)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -1048,7 +1048,7 @@ bool AppRunningManager::GetAppRunningStateByBundleName(const std::string &bundle
 int32_t AppRunningManager::NotifyLoadRepairPatch(const std::string &bundleName, const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     int32_t result = ERR_OK;
     bool loadSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
@@ -1079,7 +1079,7 @@ int32_t AppRunningManager::NotifyLoadRepairPatch(const std::string &bundleName, 
 int32_t AppRunningManager::NotifyHotReloadPage(const std::string &bundleName, const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     int32_t result = ERR_OK;
     bool reloadPageSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
@@ -1111,7 +1111,7 @@ int32_t AppRunningManager::NotifyUnLoadRepairPatch(const std::string &bundleName
     const sptr<IQuickFixCallback> &callback)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     int32_t result = ERR_OK;
     bool unLoadSucceed = false;
     auto callbackByRecord = sptr<QuickFixCallbackWithRecord>::MakeSptr(callback);
@@ -1141,7 +1141,7 @@ int32_t AppRunningManager::NotifyUnLoadRepairPatch(const std::string &bundleName
 
 bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &foregroundingRecord)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (AAFwk::UIExtensionUtils::IsUIExtension(foregroundingRecord.GetExtensionType())
         || AAFwk::UIExtensionUtils::IsWindowExtension(foregroundingRecord.GetExtensionType())) {
         return false;
@@ -1166,7 +1166,7 @@ bool AppRunningManager::IsApplicationFirstForeground(const AppRunningRecord &for
 
 bool AppRunningManager::IsApplicationBackground(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
@@ -1213,7 +1213,7 @@ void AppRunningManager::OnWindowVisibilityChanged(
 #endif //SUPPORT_SCREEN
 bool AppRunningManager::IsApplicationFirstFocused(const AppRunningRecord &focusedRecord)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "check focus function called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     std::lock_guard guard(runningRecordMapMutex_);
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
