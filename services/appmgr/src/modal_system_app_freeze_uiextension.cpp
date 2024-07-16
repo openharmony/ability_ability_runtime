@@ -116,7 +116,7 @@ bool ModalSystemAppFreezeUIExtension::CreateModalUIExtension(std::string pid, st
 AAFwk::Want ModalSystemAppFreezeUIExtension::CreateSystemDialogWant(std::string pid, std::string bundleName)
 {
     AAFwk::Want want;
-    want.SetElementName(APP_NO_RESPONSE_DIALOG_BUNDLE_NAME, APP_NO_RESPONSE_DIALOG_ABILITY);
+    want.SetElementName(APP_NO_RESPONSE_BUNDLENAME, APP_NO_RESPONSE_ABILITY);
     want.SetParam(UIEXTENSION_TYPE_KEY, UIEXTENSION_SYS_COMMON_UI);
     want.SetParam(APP_FREEZE_PID, pid);
     want.SetParam(START_BUNDLE_NAME, bundleName);
