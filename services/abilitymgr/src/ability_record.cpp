@@ -46,9 +46,9 @@
 #include "errors.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "os_account_manager_wrapper.h"
 #include "parameters.h"
+#include "ui_service_extension_connection_constants.h"
 #include "res_sched_util.h"
 #include "ui_extension_host_info.h"
 #include "scene_board_judgement.h"
@@ -75,6 +75,7 @@ using namespace OHOS::AAFwk::PermissionConstants;
 const std::string DEBUG_APP = "debugApp";
 const std::string NATIVE_DEBUG = "nativeDebug";
 const std::string PERF_CMD = "perfCmd";
+const std::string ERROR_INFO_ENHANCE = "errorInfoEnhance";
 const std::string MULTI_THREAD = "multiThread";
 const std::string DMS_PROCESS_NAME = "distributedsched";
 const std::string DMS_MISSION_ID = "dmsMissionId";
@@ -432,10 +433,6 @@ bool AbilityRecord::CanRestartResident()
 void AbilityRecord::ForegroundAbility(uint32_t sceneFlag)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    if (GetAbilityVisibilityState() == AbilityVisibilityState::FOREGROUND_HIDE) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability visibility state is FOREGROUND_HIDE, should not do foreground again.");
-        return;
-    }
     isWindowStarted_ = true;
     TAG_LOGI(AAFwkTag::ABILITYMGR, "ForegroundLifecycle: name:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
@@ -701,7 +698,13 @@ void AbilityRecord::StartingWindowHot()
         return;
     }
 
-    auto pixelMap = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetSnapshot(missionId_);
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    if (missionListWrap == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionListWrap null.");
+        return;
+    }
+
+    auto pixelMap = missionListWrap->GetSnapshot(missionId_);
     if (!pixelMap) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "Get snapshot failed.");
     }
@@ -767,9 +770,14 @@ void AbilityRecord::ProcessForegroundAbility(bool isRecent, const AbilityRequest
 
 std::shared_ptr<Want> AbilityRecord::GetWantFromMission() const
 {
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    if (missionListWrap == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionListWrap null.");
+        return nullptr;
+    }
+
     InnerMissionInfo innerMissionInfo;
-    int getMission = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetInnerMissionInfoById(
-        missionId_, innerMissionInfo);
+    int getMission = missionListWrap->GetInnerMissionInfoById(missionId_, innerMissionInfo);
     if (getMission != ERR_OK) {
         TAG_LOGE(
             AAFwkTag::ABILITYMGR, "cannot find mission info from MissionInfoList by missionId: %{public}d", missionId_);
@@ -1109,7 +1117,13 @@ void AbilityRecord::StartingWindowHot(const std::shared_ptr<StartOptions> &start
         return;
     }
 
-    auto pixelMap = DelayedSingleton<MissionInfoMgr>::GetInstance()->GetSnapshot(missionId_);
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    if (missionListWrap == nullptr) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "missionListWrap null.");
+        return;
+    }
+
+    auto pixelMap = missionListWrap->GetSnapshot(missionId_);
     if (!pixelMap) {
         TAG_LOGW(AAFwkTag::ABILITYMGR, "%{public}s, Get snapshot failed.", __func__);
     }
@@ -1407,7 +1421,9 @@ void AbilityRecord::SetAbilityStateInner(AbilityState state)
         }
     }
 
-    DelayedSingleton<MissionInfoMgr>::GetInstance()->SetMissionAbilityState(missionId_, currentState_);
+    auto missionListWrap = DelayedSingleton<AbilityManagerService>::GetInstance()->GetMissionListWrap();
+    CHECK_POINTER(missionListWrap);
+    missionListWrap->SetMissionAbilityState(missionId_, currentState_);
 }
 #endif // SUPPORT_SCREEN
 bool AbilityRecord::GetAbilityForegroundingFlag() const
@@ -1658,14 +1674,46 @@ void AbilityRecord::ConnectAbility()
     isConnected = true;
 }
 
+void AbilityRecord::ConnectUIServiceExtAbility(const Want &want)
+{
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "Connect ability.");
+    CHECK_POINTER(lifecycleDeal_);
+    if (isConnected) {
+        TAG_LOGW(AAFwkTag::ABILITYMGR, "connect state error.");
+    }
+#ifdef SUPPORT_SCREEN
+    GrantUriPermissionForServiceExtension();
+#endif // SUPPORT_SCREEN
+    lifecycleDeal_->ConnectAbility(want);
+    isConnected = true;
+}
+
 void AbilityRecord::DisconnectAbility()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
     CHECK_POINTER(lifecycleDeal_);
     lifecycleDeal_->DisconnectAbility(GetWant());
-    isConnected = false;
+    if (GetAbilityInfo().extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
+        if (GetInProgressRecordCount() == 0) {
+            isConnected = false;
+        }
+    } else {
+        isConnected = false;
+    }
 }
+
+void AbilityRecord::DisconnectUIServiceExtAbility(const Want &want)
+{
+    HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "ability:%{public}s.", abilityInfo_.name.c_str());
+    CHECK_POINTER(lifecycleDeal_);
+    lifecycleDeal_->DisconnectAbility(want);
+    if (GetInProgressRecordCount() == 0) {
+        isConnected = false;
+    }
+}
+
 #ifdef SUPPORT_SCREEN
 bool AbilityRecord::GrantUriPermissionForServiceExtension()
 {
@@ -1895,8 +1943,7 @@ void SystemAbilityCallerRecord::SendResultToSystemAbility(int requestCode,
         callerUid = IPCSkeleton::GetCallingUid();
         accessToken = IPCSkeleton::GetCallingTokenID();
     }
-    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult, callerUid = %{public}d, AccessTokenId = %{public}u",
-        callerUid, accessToken);
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Try to SendResult");
     if (callerToken == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "CallerToken is nullptr");
         return;
@@ -1953,6 +2000,9 @@ void AbilityRecord::RemoveConnectRecordFromList(const std::shared_ptr<Connection
     CHECK_POINTER(connRecord);
     std::lock_guard guard(connRecordListMutex_);
     connRecordList_.remove(connRecord);
+    if (connRecordList_.empty()) {
+        isConnected = false;
+    }
 }
 
 void AbilityRecord::RemoveSpecifiedWantParam(const std::string &key)
@@ -2097,6 +2147,19 @@ std::list<std::shared_ptr<ConnectionRecord>> AbilityRecord::GetConnectingRecordL
         }
     }
     return connectingList;
+}
+
+uint32_t AbilityRecord::GetInProgressRecordCount()
+{
+    std::lock_guard guard(connRecordListMutex_);
+    uint32_t count = 0;
+    for (auto record : connRecordList_) {
+        if (record && (record->GetConnectState() == ConnectionState::CONNECTING ||
+            record->GetConnectState() == ConnectionState::CONNECTED)) {
+            count ++;
+        }
+    }
+    return count;
 }
 
 std::shared_ptr<ConnectionRecord> AbilityRecord::GetDisconnectingRecord() const
@@ -2557,6 +2620,7 @@ void AbilityRecord::SetWant(const Want &want)
     auto nativeDebug = want_.GetBoolParam(NATIVE_DEBUG, false);
     auto perfCmd = want_.GetStringParam(PERF_CMD);
     auto multiThread = want_.GetBoolParam(MULTI_THREAD, false);
+    auto errorInfoEnhance = want_.GetBoolParam(ERROR_INFO_ENHANCE, false);
     want_.CloseAllFd();
 
     want_ = want;
@@ -2571,6 +2635,12 @@ void AbilityRecord::SetWant(const Want &want)
     }
     if (multiThread) {
         want_.SetParam(MULTI_THREAD, true);
+    }
+    if (errorInfoEnhance) {
+        want_.SetParam(ERROR_INFO_ENHANCE, true);
+    }
+    if (want_.HasParameter(UISERVICEHOSTPROXY_KEY)) {
+        want_.RemoveParam(UISERVICEHOSTPROXY_KEY);
     }
 }
 

@@ -453,6 +453,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetAppIndex(appIndex_);
     launchData.SetDebugApp(isDebugApp_);
     launchData.SetPerfCmd(perfCmd_);
+    launchData.SetErrorInfoEnhance(isErrorInfoEnhance_);
     launchData.SetMultiThread(isMultiThread_);
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
@@ -1151,7 +1152,6 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
     auto appRecord = shared_from_this();
     auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
     bool needCache = false;
-    cacheProcMgr->UpdateTypeByAbility(abilityRecord, appRecord);
     if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
         cacheProcMgr->CheckAndCacheProcess(appRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s should cache, not remove module and terminate app.",
@@ -1692,6 +1692,10 @@ void AppRunningRecord::AddRenderRecord(const std::shared_ptr<RenderRecord> &reco
         TAG_LOGD(AAFwkTag::APPMGR, "AddRenderRecord: record is null");
         return;
     }
+    {
+        std::lock_guard renderPidSetLock(renderPidSetLock_);
+        renderPidSet_.insert(record->GetPid());
+    }
     std::lock_guard renderRecordMapLock(renderRecordMapLock_);
     renderRecordMap_.emplace(record->GetUid(), record);
 }
@@ -1704,6 +1708,18 @@ void AppRunningRecord::RemoveRenderRecord(const std::shared_ptr<RenderRecord> &r
     }
     std::lock_guard renderRecordMapLock(renderRecordMapLock_);
     renderRecordMap_.erase(record->GetUid());
+}
+
+void AppRunningRecord::RemoveRenderPid(pid_t renderPid)
+{
+    std::lock_guard renderPidSetLock(renderPidSetLock_);
+    renderPidSet_.erase(renderPid);
+}
+
+bool AppRunningRecord::ConstainsRenderPid(pid_t renderPid)
+{
+    std::lock_guard renderPidSetLock(renderPidSetLock_);
+    return renderPidSet_.find(renderPid) != renderPidSet_.end();
 }
 
 std::shared_ptr<RenderRecord> AppRunningRecord::GetRenderRecordByPid(const pid_t pid)
@@ -1757,6 +1773,11 @@ void AppRunningRecord::SetNativeDebug(bool isNativeDebug)
 void AppRunningRecord::SetPerfCmd(const std::string &perfCmd)
 {
     perfCmd_ = perfCmd;
+}
+
+void AppRunningRecord::SetErrorInfoEnhance(bool errorInfoEnhance)
+{
+    isErrorInfoEnhance_ = errorInfoEnhance;
 }
 
 void AppRunningRecord::SetMultiThread(bool multiThread)
@@ -2261,10 +2282,6 @@ int AppRunningRecord::DumpFfrt(std::string& result)
 bool AppRunningRecord::SetSupportedProcessCache(bool isSupport)
 {
     TAG_LOGI(AAFwkTag::APPMGR, "Called");
-    if (procCacheSupportState_ != SupportProcessCacheState::UNSPECIFIED) {
-        TAG_LOGI(AAFwkTag::APPMGR, "Process cache not support set more than once.");
-        return false;
-    }
     procCacheSupportState_ = isSupport ? SupportProcessCacheState::SUPPORT : SupportProcessCacheState::NOT_SUPPORT;
     return true;
 }
@@ -2332,6 +2349,16 @@ void AppRunningRecord::SetAttachedToStatusBar(bool isAttached)
 bool AppRunningRecord::IsAttachedToStatusBar()
 {
     return isAttachedToStatusBar;
+}
+
+void AppRunningRecord::SetProcessCacheBlocked(bool isBlocked)
+{
+    processCacheBlocked = isBlocked;
+}
+
+bool AppRunningRecord::GetProcessCacheBlocked()
+{
+    return processCacheBlocked;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

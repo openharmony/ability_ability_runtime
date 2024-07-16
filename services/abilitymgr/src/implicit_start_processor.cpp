@@ -26,7 +26,6 @@
 #include "ecological_rule/ability_ecological_rule_mgr_service.h"
 #include "event_report.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "parameters.h"
@@ -37,7 +36,6 @@
 namespace OHOS {
 namespace AAFwk {
 const size_t IDENTITY_LIST_MAX_SIZE = 10;
-const int32_t BROKER_UID = 5557;
 
 const std::string BLACK_ACTION_SELECT_DATA = "ohos.want.action.select";
 const std::string ACTION_VIEW = "ohos.want.action.viewData";
@@ -47,7 +45,6 @@ const std::string TYPE_ONLY_MATCH_WILDCARD = "reserved/wildcard";
 const std::string SHOW_DEFAULT_PICKER_FLAG = "ohos.ability.params.showDefaultPicker";
 const std::string PARAM_ABILITY_APPINFOS = "ohos.ability.params.appInfos";
 const std::string ANCO_PENDING_REQUEST = "ancoPendingRequest";
-const std::string SHELL_ASSISTANT_BUNDLENAME = "com.huawei.shell_assistant";
 const int NFC_CALLER_UID = 1027;
 const int NFC_QUERY_LENGTH = 2;
 const std::string OPEN_LINK_APP_LINKING_ONLY = "appLinkingOnly";
@@ -345,7 +342,7 @@ int ImplicitStartProcessor::GenerateAbilityRequestByAction(int32_t userId,
         QueryBmsAppInfos(request, userId, dialogAppInfos);
     }
 
-    if (!IsCallFromAncoShellOrBroker(request.callerToken)) {
+    if (!StartAbilityUtils::IsCallFromAncoShellOrBroker(request.callerToken)) {
         request.want.RemoveParam(ANCO_PENDING_REQUEST);
     }
 
@@ -746,19 +743,6 @@ bool ImplicitStartProcessor::IsExistDefaultApp(int32_t userId, const std::string
         TAG_LOGI(AAFwkTag::ABILITYMGR, "GetDefaultApplication failed.");
         return false;
     }
-}
-
-bool ImplicitStartProcessor::IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &token)
-{
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid == BROKER_UID) {
-        return true;
-    }
-    AppExecFwk::AbilityInfo callerAbilityInfo;
-    if (StartAbilityUtils::GetCallerAbilityInfo(token, callerAbilityInfo)) {
-        return callerAbilityInfo.bundleName == SHELL_ASSISTANT_BUNDLENAME;
-    }
-    return false;
 }
 
 void ImplicitStartProcessor::SetTargetLinkInfo(const std::vector<AppExecFwk::SkillUriForAbilityAndExtension> &skillUri,

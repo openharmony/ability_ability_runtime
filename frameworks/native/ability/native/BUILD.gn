@@ -77,6 +77,7 @@ config("ability_public_config") {
   include_dirs = [
     "${ability_runtime_napi_path}/inner/napi_ability_common",
     "${ability_runtime_path}/interfaces/kits/native/ability/native",
+    "${ability_runtime_path}/interfaces/kits/native/ability/ability_runtime",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/distributed",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/kits",
     "${ability_runtime_path}/interfaces/kits/native/ability/native/continuation/remote_register_service",
@@ -92,7 +93,11 @@ config("ability_public_config") {
   ]
 
   if (ability_runtime_graphics) {
-    include_dirs += [ "${windowmanager_path}/interfaces/kits/napi/window_runtime/window_stage_napi" ]
+    include_dirs += [
+      "${windowmanager_path}/interfaces/kits/napi/window_runtime/window_stage_napi",
+      "${windowmanager_path}/interfaces/innerkits/wm",
+      "${windowmanager_path}/interfaces/innerkits/dm",
+    ]
     defines = [ "SUPPORT_GRAPHICS" ]
   }
 }
@@ -183,7 +188,10 @@ ohos_shared_library("abilitykit_utils") {
 }
 
 ohos_shared_library("abilitykit_native") {
-  include_dirs = [ "${ability_runtime_path}/utils/global/time/include" ]
+  include_dirs = [
+    "${ability_runtime_path}/utils/global/time/include",
+    "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection",
+  ]
 
   sources = [
     "${ability_runtime_innerkits_path}/app_manager/src/appmgr/process_info.cpp",
@@ -199,6 +207,8 @@ ohos_shared_library("abilitykit_native") {
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_ability_context.cpp",
     "${ability_runtime_native_path}/ability/native/ability_runtime/js_caller_complex.cpp",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/js_uiservice_ability_connection.cpp",
+    "${ability_runtime_native_path}/ability/native/ability_runtime/ui_ability_servicehost_stub_impl.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_handler.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/continuation_manager.cpp",
     "${ability_runtime_native_path}/ability/native/continuation/distributed/reverse_continuation_scheduler_primary.cpp",
@@ -228,6 +238,7 @@ ohos_shared_library("abilitykit_native") {
   deps = [
     ":continuation_ipc",
     ":extension_blocklist_config",
+    ":ui_service_extension_connection",
     "${ability_runtime_innerkits_path}/ability_manager:ability_manager",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_options",
     "${ability_runtime_innerkits_path}/ability_manager:ability_start_setting",
@@ -264,7 +275,6 @@ ohos_shared_library("abilitykit_native") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
-    "image_framework:image",
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:ipc_napi",
@@ -338,7 +348,6 @@ ohos_shared_library("abilitykit_native") {
     public_external_deps += [
       "form_fwk:form_manager",
       "window_manager:libdm",
-      "window_manager:libdm_lite",
     ]
   }
 
@@ -737,7 +746,6 @@ ohos_shared_library("form_extension_module") {
       "form_fwk:fmskit_provider_client",
       "form_fwk:form_manager",
       "window_manager:libdm",
-      "window_manager:libdm_lite",
     ]
   }
 
@@ -803,6 +811,51 @@ ohos_shared_library("service_extension") {
   part_name = "ability_runtime"
 }
 
+ohos_shared_library("ui_service_extension_connection") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+  branch_protector_ret = "pac_ret"
+
+  defines = [ "AMS_LOG_TAG = \"Ability\"" ]
+  defines += [ "AMS_LOG_DOMAIN = 0xD001300" ]
+  include_dirs = [ "${ability_runtime_path}/interfaces/kits/native/ability/native/ui_service_extension_ability/connection" ]
+
+  sources = [
+    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/js_ui_service_host_proxy.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/js_ui_service_proxy.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_host_proxy.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_host_stub.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_proxy.cpp",
+    "${ability_runtime_native_path}/ability/native/ui_service_extension_ability/connection/ui_service_stub.cpp",
+  ]
+
+  deps = [
+    "${ability_runtime_innerkits_path}/runtime:runtime",
+    "${ability_runtime_napi_path}/inner/napi_common:napi_common",
+    "${ability_runtime_native_path}/ability/native:ability_business_error",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "access_token:libtokenid_sdk",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+  ]
+
+  subsystem_name = "ability"
+  part_name = "ability_runtime"
+}
+
 ohos_shared_library("continuation_ipc") {
   include_dirs = []
 
@@ -854,7 +907,6 @@ ohos_shared_library("continuation_ipc") {
     public_external_deps += [
       "form_fwk:form_manager",
       "window_manager:libdm",
-      "window_manager:libdm_lite",
     ]
   }
 
@@ -907,7 +959,6 @@ ohos_shared_library("data_ability_helper") {
       "form_fwk:fmskit_provider_client",
       "form_fwk:form_manager",
       "window_manager:libdm",
-      "window_manager:libdm_lite",
     ]
   }
 
@@ -949,7 +1000,6 @@ ohos_shared_library("service_extension_module") {
       "form_fwk:fmskit_provider_client",
       "form_fwk:form_manager",
       "window_manager:libdm",
-      "window_manager:libdm_lite",
     ]
   }
 

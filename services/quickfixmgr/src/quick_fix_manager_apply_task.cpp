@@ -20,7 +20,6 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "quick_fix_callback_stub.h"
 #include "quick_fix_error_utils.h"
@@ -50,7 +49,7 @@ constexpr const char *PATCH_VERSION = "patchVersion";
 
 // timeout task
 constexpr const char *TIMEOUT_TASK_NAME = "timeoutTask";
-constexpr int64_t TIMEOUT_TASK_DELAY_TIME = 5000;
+constexpr int64_t TIMEOUT_TASK_DELAY_TIME = 3 * 60 * 1000;
 } // namespace
 
 class QuickFixManagerStatusCallback : public AppExecFwk::QuickFixStatusCallbackHost {
