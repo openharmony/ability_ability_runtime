@@ -25,7 +25,6 @@
 #include "distributed_client.h"
 #include "free_install_observer_manager.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "permission_constants.h"
@@ -334,7 +333,7 @@ void FreeInstallManager::HandleOnFreeInstallFail(int32_t recordId, FreeInstallIn
             freeInstallInfo.want.HasParameter(KEY_SESSION_ID) &&
             !freeInstallInfo.want.GetStringParam(KEY_SESSION_ID).empty() &&
             freeInstallInfo.isStartUIAbilityBySCBCalled) {
-            DelayedSingleton<AbilityManagerService>::GetInstance()->NotifySCBToHandleException(
+            DelayedSingleton<AbilityManagerService>::GetInstance()->NotifySCBToHandleAtomicServiceException(
                 freeInstallInfo.want.GetStringParam(KEY_SESSION_ID),
                 resultCode, "free install failed");
         }
@@ -398,6 +397,11 @@ void FreeInstallManager::StartAbilityByPreInstall(int32_t recordId, FreeInstallI
     if (result == ERR_OK) {
         result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartUIAbilityByPreInstall(info);
     }
+    if (result != ERR_OK && info.isStartUIAbilityBySCBCalled) {
+        DelayedSingleton<AbilityManagerService>::GetInstance()->NotifySCBToHandleAtomicServiceException(
+            info.want.GetStringParam(KEY_SESSION_ID),
+            result, "start ability failed");
+    }
     IPCSkeleton::SetCallingIdentity(identity);
     TAG_LOGI(AAFwkTag::FREE_INSTALL, "The result of StartAbility is %{public}d.", result);
     DelayedSingleton<FreeInstallObserverManager>::GetInstance()->OnInstallFinished(
@@ -429,8 +433,14 @@ void FreeInstallManager::StartAbilityByOriginalWant(FreeInstallInfo &info, const
 {
     auto identity = IPCSkeleton::ResetCallingIdentity();
     IPCSkeleton::SetCallingIdentity(info.identity);
-    int32_t result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(*(info.originalWant),
-        info.callerToken, info.userId, info.requestCode);
+    int result = ERR_INVALID_VALUE;
+    if (info.originalWant) {
+        TAG_LOGI(AAFwkTag::FREE_INSTALL, "starting ability by the original want.");
+        result = DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(*(info.originalWant),
+            info.callerToken, info.userId, info.requestCode);
+    } else {
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "The original want is nullptr.");
+    }
     IPCSkeleton::SetCallingIdentity(identity);
     TAG_LOGI(AAFwkTag::FREE_INSTALL, "The result of StartAbility is %{public}d.", result);
     auto url = info.want.GetUriString();

@@ -755,15 +755,7 @@ public:
      */
     void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
 
-    /**
-     * KillProcessByPid, Kill process by PID.
-     *
-     * @param pid_t, the app record pid.
-     * @param reason, the reason why the process is killed, default to "foundation"
-     *
-     * @return ERR_OK, return back success，others fail.
-     */
-    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
+    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation", int32_t uid = -1);
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName);
 
@@ -1143,6 +1135,11 @@ public:
     void KillProcessDependedOnWeb();
 
     void RestartResidentProcessDependedOnWeb();
+
+    void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
+
+    bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
+
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1212,7 +1209,9 @@ private:
                       std::shared_ptr<AppRunningRecord> appRecord, const int uid, const BundleInfo &bundleInfo,
                       const std::string &bundleName, const int32_t bundleIndex, bool appExistFlag = true,
                       bool isPreload = false, const std::string &moduleName = "", const std::string &abilityName = "",
-                      bool strictMode = false, int32_t maxChildProcess = 0);
+                      bool strictMode = false, int32_t maxChildProcess = 0, sptr<IRemoteObject> token = nullptr,
+                      std::shared_ptr<AAFwk::Want> want = nullptr,
+                      ExtensionAbilityType ExtensionAbilityType = ExtensionAbilityType::UNSPECIFIED);
 
     /**
      * PushAppFront, Adjust the latest application record to the top level.
@@ -1292,7 +1291,7 @@ private:
      *
      * @return true, return back existed，others non-existent.
      */
-    bool ProcessExist(pid_t pid);
+    bool ProcessExist(pid_t pid, int32_t uid = -1);
 
     /**
      * CheckAllProcessExist, Determine whether all processes exist .
@@ -1469,18 +1468,11 @@ private:
     std::string GetSpecifiedProcessFlag(std::shared_ptr<AbilityInfo> abilityInfo, std::shared_ptr<AAFwk::Want> want);
 
     void LoadAbilityNoAppRecord(const std::shared_ptr<AppRunningRecord> appRecord,
-        sptr<IRemoteObject> preToken,
-        std::shared_ptr<ApplicationInfo> appInfo,
-        std::shared_ptr<AbilityInfo> abilityInfo,
-        const std::string &processName,
-        const std::string &specifiedProcessFlag,
-        const BundleInfo &bundleInfo,
-        const HapModuleInfo &hapModuleInfo,
-        std::shared_ptr<AAFwk::Want> want,
-        bool appExistFlag,
-        bool isPreload);
-
-    int32_t CheckSetProcessCachePermission() const;
+        sptr<IRemoteObject> preToken, std::shared_ptr<ApplicationInfo> appInfo,
+        std::shared_ptr<AbilityInfo> abilityInfo, const std::string &processName,
+        const std::string &specifiedProcessFlag, const BundleInfo &bundleInfo,
+        const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want,
+        bool appExistFlag, bool isPreload, sptr<IRemoteObject> token = nullptr);
 
     int32_t CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName,

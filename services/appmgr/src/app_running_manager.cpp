@@ -151,6 +151,33 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::CheckAppRunningRecordIsExis
     return nullptr;
 }
 
+#ifdef APP_NO_RESPONSE_DIALOG
+bool AppRunningManager::CheckAppRunningRecordIsExist(const std::string &bundleName, const std::string &ablityName)
+{
+    std::lock_guard guard(runningRecordMapMutex_);
+    if (appRunningRecordMap_.empty()) {
+        return false;
+    }
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (!appRecord) {
+            continue;
+        }
+        if (appRecord->GetBundleName() != bundleName) {
+            continue;
+        }
+        const auto &abilityRunningRecordMap = appRecord->GetAbilities();
+        for (const auto &abilityItem : abilityRunningRecordMap) {
+            const auto &abilityRunning = abilityItem.second;
+            if (abilityRunning && abilityRunning->GetName() == ablityName) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+#endif
+
 bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::string &bundleName)
 {
     std::lock_guard guard(runningRecordMapMutex_);
@@ -160,6 +187,21 @@ bool AppRunningManager::CheckAppRunningRecordIsExistByBundleName(const std::stri
     for (const auto &item : appRunningRecordMap_) {
         const auto &appRecord = item.second;
         if (appRecord && appRecord->GetBundleName() == bundleName && !(appRecord->GetRestartAppFlag())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AppRunningManager::CheckAppRunningRecordIsExistByUid(int32_t uid)
+{
+    std::lock_guard guard(runningRecordMapMutex_);
+    if (appRunningRecordMap_.empty()) {
+        return false;
+    }
+    for (const auto &item : appRunningRecordMap_) {
+        const auto &appRecord = item.second;
+        if (appRecord && appRecord->GetUid() == uid && !(appRecord->GetRestartAppFlag())) {
             return true;
         }
     }
@@ -527,7 +569,6 @@ void AppRunningManager::PrepareTerminate(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent())) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
-        cacheProcMgr->UpdateTypeByAbility(abilityRecord, appRecord);
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             cacheProcMgr->PenddingCacheProcess(appRecord);
             TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s supports process cache, not terminate record.",
@@ -590,7 +631,6 @@ void AppRunningManager::TerminateAbility(const sptr<IRemoteObject> &token, bool 
     if (isLastAbility && (!appRecord->IsKeepAliveApp() ||
         !ExitResidentProcessManager::GetInstance().IsMemorySizeSufficent()) && !isLauncherApp) {
         auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
-        cacheProcMgr->UpdateTypeByToken(token, appRecord);
         if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
             TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s is cached, not terminate app.",
                 appRecord->GetBundleName().c_str());
@@ -913,21 +953,6 @@ std::shared_ptr<AppRunningRecord> AppRunningManager::GetAppRunningRecordByRender
         return false;
     });
     return ((iter == appRunningRecordMap_.end()) ? nullptr : iter->second);
-}
-
-bool AppRunningManager::CheckCallerIsRenderHost(pid_t callingPid, pid_t renderPid)
-{
-    auto hostRecord = GetAppRunningRecordByRenderPid(renderPid);
-    if (!hostRecord) {
-        TAG_LOGE(AAFwkTag::APPMGR, "hostRecord is nullptr.");
-        return false;
-    }
-    auto priorityObject = hostRecord->GetPriorityObject();
-    if (!priorityObject) {
-        TAG_LOGE(AAFwkTag::APPMGR, "priorityObject is nullptr.");
-        return false;
-    }
-    return priorityObject->GetPid() == callingPid;
 }
 
 std::shared_ptr<RenderRecord> AppRunningManager::OnRemoteRenderDied(const wptr<IRemoteObject> &remote)
@@ -1338,6 +1363,7 @@ int32_t AppRunningManager::GetAppRunningUniqueIdByPid(pid_t pid, std::string &ap
 
 int32_t AppRunningManager::GetAllUIExtensionRootHostPid(pid_t pid, std::vector<pid_t> &hostPids)
 {
+    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
     std::lock_guard guard(uiExtensionMapLock_);
     for (auto &item: uiExtensionLauncherMap_) {
         auto temp = item.second.second;
@@ -1345,7 +1371,12 @@ int32_t AppRunningManager::GetAllUIExtensionRootHostPid(pid_t pid, std::vector<p
             hostPids.emplace_back(item.second.first);
         }
     }
-
+    std::string hostPidStr = std::accumulate(hostPids.begin(), hostPids.end(), std::string(),
+        [](const std::string& a, pid_t b) {
+            return a + std::to_string(b) + " ";
+        });
+    TAG_LOGI(AAFwkTag::APPMGR, "pid: %{public}s, hostPid: %{public}s.", std::to_string(pid).c_str(),
+        hostPidStr.c_str());
     return ERR_OK;
 }
 

@@ -20,7 +20,6 @@
 #include "ability_manager_errors.h"
 #include "configuration_convertor.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "running_process_info.h"
 
@@ -716,6 +715,20 @@ void ApplicationContext::SetFont(const std::string &font)
         appFontCallback_(config);
     }
     #endif
+}
+
+void ApplicationContext::SetMcc(const std::string &mcc)
+{
+    if (contextImpl_ != nullptr) {
+        contextImpl_->SetMcc(mcc);
+    }
+}
+
+void ApplicationContext::SetMnc(const std::string &mnc)
+{
+    if (contextImpl_ != nullptr) {
+        contextImpl_->SetMnc(mnc);
+    }
 }
 
 void ApplicationContext::ClearUpApplicationData()

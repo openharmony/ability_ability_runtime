@@ -21,7 +21,6 @@
 #include "ability_manager_errors.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_extension_context.h"
 #include "js_error_utils.h"
 #include "js_data_struct_converter.h"
@@ -350,14 +349,15 @@ napi_value JsUIExtensionContext::OnOpenLinkInner(napi_env env, const AAFwk::Want
             TAG_LOGI(AAFwkTag::UI_EXT, "OpenLink succeeded.");
             return;
         }
+        if (freeInstallObserver_ == nullptr) {
+            TAG_LOGE(AAFwkTag::UI_EXT, "freeInstallObserver_ is nullptr.");
+            RemoveOpenLinkTask(requestCode);
+            return;
+        }
         if (*innerErrorCode == AAFwk::ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
             TAG_LOGI(AAFwkTag::UI_EXT, "start ability by default succeeded.");
-            if (freeInstallObserver_ != nullptr) {
-                freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, ERR_OK);
-                return;
-            }
-            TAG_LOGE(AAFwkTag::UI_EXT, "freeInstallObserver_ is nullptr.");
-            *innerErrorCode = static_cast<int>(AbilityErrorCode::ERROR_CODE_INVALID_CONTEXT);
+            freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, ERR_OK);
+            return;
         }
         TAG_LOGI(AAFwkTag::UI_EXT, "OpenLink failed.");
         freeInstallObserver_->OnInstallFinishedByUrl(startTime, url, *innerErrorCode);

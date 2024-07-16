@@ -1076,6 +1076,10 @@ int32_t AppMgrService::NotifyHotReloadPage(const std::string &bundleName, const 
 #ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
 int32_t AppMgrService::SetContinuousTaskProcess(int32_t pid, bool isContinuousTask)
 {
+    if (!AAFwk::PermissionVerification::GetInstance()->CheckSpecificSystemAbilityAccessPermission(FOUNDATION_PROCESS)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not foundation.");
+        return ERR_INVALID_OPERATION;
+    }
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AppMgrService is not ready.");
         return ERR_INVALID_OPERATION;
@@ -1565,8 +1569,8 @@ int32_t AppMgrService::NotifyProcessDependedOnWeb()
 void AppMgrService::KillProcessDependedOnWeb()
 {
     TAG_LOGD(AAFwkTag::APPMGR, "called.");
-    if (!AAFwk::PermissionVerification::GetInstance()->IsSACall()) {
-        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller is not SA.");
+    if (!AAFwk::PermissionVerification::GetInstance()->VerifyKillProcessDependedOnWebPermission()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "caller have not permission.");
         return;
     }
     if (!appMgrServiceInner_) {
