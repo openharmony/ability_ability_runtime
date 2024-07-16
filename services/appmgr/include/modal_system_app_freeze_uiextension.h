@@ -33,8 +33,8 @@
 namespace OHOS {
 namespace AppExecFwk {
 
-constexpr const char* APP_NO_RESPONSE_DIALOG_BUNDLE_NAME = "com.ohos.taskmanager";
-constexpr const char* APP_NO_RESPONSE_DIALOG_ABILITY = "AppAbnormalAbility";
+constexpr const char* APP_NO_RESPONSE_BUNDLENAME = "com.ohos.taskmanager";
+constexpr const char* APP_NO_RESPONSE_ABILITY = "AppAbnormalAbility";
 
 class ModalSystemAppFreezeUIExtension {
 public:
