@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
+import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//build/templates/abc/ohos_abc.gni")
 import("//commonlibrary/memory_utils/purgeable_mem_config.gni")
@@ -172,6 +172,7 @@ ohos_shared_library("appkit_native") {
     "ability_base:extractresourcemanager",
     "ability_base:string_utils",
     "ability_base:want",
+    "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",

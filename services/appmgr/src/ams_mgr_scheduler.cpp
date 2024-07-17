@@ -48,6 +48,7 @@ constexpr const char* SCENE_BOARD_BUNDLE_NAME = "com.ohos.sceneboard";
 constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.MainAbility";
 constexpr const char* TASK_SCENE_BOARD_ATTACH_TIMEOUT = "sceneBoardAttachTimeoutTask";
 constexpr const char* TASK_ATTACHED_TO_STATUS_BAR = "AttachedToStatusBar";
+constexpr const char* TASK_BLOCK_PROCESS_CACHE_BY_PIDS = "BlockProcessCacheByPids";
 constexpr int32_t SCENE_BOARD_ATTACH_TIMEOUT_TASK_TIME = 1000;
 };  // namespace
 
@@ -624,6 +625,34 @@ void AmsMgrScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
     std::function<void()> attachedToStatusBarFunc =
         std::bind(&AppMgrServiceInner::AttachedToStatusBar, amsMgrServiceInner_, token);
     amsHandler_->SubmitTask(attachedToStatusBarFunc, TASK_ATTACHED_TO_STATUS_BAR);
+}
+
+void AmsMgrScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
+{
+    if (!IsReady()) {
+        return;
+    }
+
+    pid_t callingPid = IPCSkeleton::GetCallingPid();
+    pid_t pid = getprocpid();
+    if (callingPid != pid) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Not allow other process to call.");
+        return;
+    }
+
+    std::function<void()> blockProcCacheFunc = [amsMgrServiceInner = amsMgrServiceInner_, pids]() mutable {
+        amsMgrServiceInner->BlockProcessCacheByPids(pids);
+    };
+    amsHandler_->SubmitTask(blockProcCacheFunc, TASK_BLOCK_PROCESS_CACHE_BY_PIDS);
+}
+
+bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS
