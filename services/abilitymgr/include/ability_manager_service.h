@@ -2203,6 +2203,10 @@ private:
     int CheckUIExtensionUsage(AppExecFwk::UIExtensionUsage uiExtensionUsage,
         AppExecFwk::ExtensionAbilityType extensionType);
 
+    bool CheckUIExtensionCallerIsForeground(const AbilityRequest &abilityRequest);
+    bool CheckUIExtensionCallerIsUIAbility(const AbilityRequest &abilityRequest);
+    std::shared_ptr<AbilityRecord> GetUIExtensionRootCaller(const sptr<IRemoteObject> token, int32_t userId);
+
     int CheckExtensionCallPermission(const Want& want, const AbilityRequest& abilityRequest);
 
     int CheckServiceCallPermission(const AbilityRequest& abilityRequest,
