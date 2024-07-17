@@ -453,6 +453,7 @@ void AppRunningRecord::LaunchApplication(const Configuration &config)
     launchData.SetAppIndex(appIndex_);
     launchData.SetDebugApp(isDebugApp_);
     launchData.SetPerfCmd(perfCmd_);
+    launchData.SetErrorInfoEnhance(isErrorInfoEnhance_);
     launchData.SetMultiThread(isMultiThread_);
     launchData.SetJITEnabled(jitEnabled_);
     launchData.SetNativeStart(isNativeStart_);
@@ -1151,7 +1152,6 @@ void AppRunningRecord::AbilityTerminated(const sptr<IRemoteObject> &token)
     auto appRecord = shared_from_this();
     auto cacheProcMgr = DelayedSingleton<CacheProcessManager>::GetInstance();
     bool needCache = false;
-    cacheProcMgr->UpdateTypeByAbility(abilityRecord, appRecord);
     if (cacheProcMgr != nullptr && cacheProcMgr->IsAppShouldCache(appRecord)) {
         cacheProcMgr->CheckAndCacheProcess(appRecord);
         TAG_LOGI(AAFwkTag::APPMGR, "App %{public}s should cache, not remove module and terminate app.",
@@ -1692,6 +1692,10 @@ void AppRunningRecord::AddRenderRecord(const std::shared_ptr<RenderRecord> &reco
         TAG_LOGD(AAFwkTag::APPMGR, "AddRenderRecord: record is null");
         return;
     }
+    {
+        std::lock_guard renderPidSetLock(renderPidSetLock_);
+        renderPidSet_.insert(record->GetPid());
+    }
     std::lock_guard renderRecordMapLock(renderRecordMapLock_);
     renderRecordMap_.emplace(record->GetUid(), record);
 }
@@ -1704,6 +1708,18 @@ void AppRunningRecord::RemoveRenderRecord(const std::shared_ptr<RenderRecord> &r
     }
     std::lock_guard renderRecordMapLock(renderRecordMapLock_);
     renderRecordMap_.erase(record->GetUid());
+}
+
+void AppRunningRecord::RemoveRenderPid(pid_t renderPid)
+{
+    std::lock_guard renderPidSetLock(renderPidSetLock_);
+    renderPidSet_.erase(renderPid);
+}
+
+bool AppRunningRecord::ConstainsRenderPid(pid_t renderPid)
+{
+    std::lock_guard renderPidSetLock(renderPidSetLock_);
+    return renderPidSet_.find(renderPid) != renderPidSet_.end();
 }
 
 std::shared_ptr<RenderRecord> AppRunningRecord::GetRenderRecordByPid(const pid_t pid)
@@ -1757,6 +1773,11 @@ void AppRunningRecord::SetNativeDebug(bool isNativeDebug)
 void AppRunningRecord::SetPerfCmd(const std::string &perfCmd)
 {
     perfCmd_ = perfCmd;
+}
+
+void AppRunningRecord::SetErrorInfoEnhance(bool errorInfoEnhance)
+{
+    isErrorInfoEnhance_ = errorInfoEnhance;
 }
 
 void AppRunningRecord::SetMultiThread(bool multiThread)
@@ -1896,7 +1917,7 @@ bool AppRunningRecord::IsAbilitytiesBackground()
 void AppRunningRecord::OnWindowVisibilityChanged(
     const std::vector<sptr<OHOS::Rosen::WindowVisibilityInfo>> &windowVisibilityInfos)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (windowVisibilityInfos.empty()) {
         TAG_LOGW(AAFwkTag::APPMGR, "Window visibility info is empty.");
         return;
@@ -2046,7 +2067,7 @@ int32_t AppRunningRecord::ChangeAppGcState(const int32_t state)
 
 void AppRunningRecord::SetAttachDebug(const bool &isAttachDebug)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     isAttachDebug_ = isAttachDebug;
 
     if (appLifeCycleDeal_ == nullptr) {
@@ -2209,7 +2230,7 @@ std::string AppRunningRecord::GetExitMsg() const
 
 int AppRunningRecord::DumpIpcStart(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         result.append(MSG_DUMP_IPC_START_STAT, strlen(MSG_DUMP_IPC_START_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
@@ -2222,7 +2243,7 @@ int AppRunningRecord::DumpIpcStart(std::string& result)
 
 int AppRunningRecord::DumpIpcStop(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         result.append(MSG_DUMP_IPC_STOP_STAT, strlen(MSG_DUMP_IPC_STOP_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
@@ -2235,7 +2256,7 @@ int AppRunningRecord::DumpIpcStop(std::string& result)
 
 int AppRunningRecord::DumpIpcStat(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         result.append(MSG_DUMP_IPC_STAT, strlen(MSG_DUMP_IPC_STAT))
             .append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
@@ -2248,7 +2269,7 @@ int AppRunningRecord::DumpIpcStat(std::string& result)
 
 int AppRunningRecord::DumpFfrt(std::string& result)
 {
-    TAG_LOGD(AAFwkTag::APPMGR, "Called.");
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
     if (appLifeCycleDeal_ == nullptr) {
         result.append(MSG_DUMP_FAIL, strlen(MSG_DUMP_FAIL))
             .append(MSG_DUMP_FAIL_REASON_INTERNAL, strlen(MSG_DUMP_FAIL_REASON_INTERNAL));
@@ -2328,6 +2349,16 @@ void AppRunningRecord::SetAttachedToStatusBar(bool isAttached)
 bool AppRunningRecord::IsAttachedToStatusBar()
 {
     return isAttachedToStatusBar;
+}
+
+void AppRunningRecord::SetProcessCacheBlocked(bool isBlocked)
+{
+    processCacheBlocked = isBlocked;
+}
+
+bool AppRunningRecord::GetProcessCacheBlocked()
+{
+    return processCacheBlocked;
 }
 }  // namespace AppExecFwk
 }  // namespace OHOS

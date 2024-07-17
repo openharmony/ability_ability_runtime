@@ -434,6 +434,10 @@ public:
      */
     void AttachedToStatusBar(const sptr<IRemoteObject> &token);
 
+    void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
+
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
 protected:
     /**
      * OnAbilityRequestDone, app manager service call this interface after ability request done.
