@@ -1137,6 +1137,9 @@ public:
     void RestartResidentProcessDependedOnWeb();
 
     void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
+
+    bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
+
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1492,6 +1495,8 @@ private:
     void SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg);
 
     bool CreateAbilityInfo(const AAFwk::Want &want, AbilityInfo &abilityInfo);
+
+    AAFwk::EventInfo BuildEventInfo(std::shared_ptr<AppRunningRecord> appRecord) const;
 
 private:
     /**
