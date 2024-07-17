@@ -94,21 +94,16 @@ sptr<Rosen::WindowOption> UIServiceExtension::GetWindowOption(const AAFwk::Want 
         if (extensionWindowConfig->subWindowOptions.isModal) {
             option->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_MODAL);
             if (extensionWindowConfig->subWindowOptions.isTopmost) {
-                option.SetWindowTopmost(true);
+                option->SetWindowTopmost(true);
             }
         }
     } else if (extensionWindowConfig->windowAttribute == Rosen::ExtensionWindowAttribute::SYSTEM_WINDOW) {
-        if (Rosen::JS_TO_NATIVE_WINDOW_TYPE_MAP.count(
-            static_cast<Rosen::ApiWindowType>(extensionWindowConfig->systemWindowOptions.windowType)) != 0) {
-            Rosen::WindowType winType = Rosen::WindowType::SYSTEM_WINDOW_BASE;
-            winType = Rosen::JS_TO_NATIVE_WINDOW_TYPE_MAP.at(
-                static_cast<Rosen::ApiWindowType>(extensionWindowConfig->systemWindowOptions.windowType));
-            if (Rosen::WindowHelper::IsSystemWindow(winType)) {
-                option->SetWindowType(winType);
-            } else {
-                return nullptr;
-            }
+        Rosen::WindowType winType;
+        if (Rosen::ParseSystemWindowTypeForApiWindowType(
+            extensionWindowConfig->systemWindowOptions.windowType, winType)) {
+            option->SetWindowType(winType);
         } else {
+            TAG_LOGE(AAFwkTag::UIABILITY, "ParseSystemWindowTypeForApiWindowType error");
             return nullptr;
         }
     }

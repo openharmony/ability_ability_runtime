@@ -280,9 +280,13 @@ void JsUIServiceExtension::OnStart(const AAFwk::Want &want, sptr<AAFwk::SessionI
     auto extensionWindowConfig = std::make_shared<Rosen::ExtensionWindowConfig>();
     OnSceneWillCreated(extensionWindowConfig);
     auto option = GetWindowOption(want, extensionWindowConfig, sessionInfo);
-    sptr<Rosen::Window> mainWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
-    OnSceneDidCreated(mainWindow);
-    context->SetWindow(mainWindow);
+    sptr<Rosen::Window> extensionWindow = Rosen::Window::Create(extensionWindowConfig->windowName, option, context);
+    if (extensionWindow != nullptr) {
+        OnSceneDidCreated(extensionWindow);
+        context->SetWindow(extensionWindow);
+    } else {
+        TAG_LOGE(AAFwkTag::UISERVC_EXT, "extensionWindow is nullptr");
+    }
 #endif
     TAG_LOGD(AAFwkTag::UISERVC_EXT, "ok");
 }
