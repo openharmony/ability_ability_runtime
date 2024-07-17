@@ -2138,6 +2138,10 @@ void AbilityConnectManager::KeepAbilityAlive(const std::shared_ptr<AbilityRecord
             return;
         }
     }
+    if (DelayedSingleton<AppScheduler>::GetInstance()->IsKilledForUpgradeWeb(abilityInfo.bundleName)) {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "bundle is killed for upgrade web");
+        return;
+    }
     if (DelayedSingleton<AppScheduler>::GetInstance()->IsMemorySizeSufficent() ||
         IsLauncher(abilityRecord) || abilityRecord->IsSceneBoard() ||
         AppUtils::GetInstance().IsAllowResidentInExtremeMemory(abilityInfo.bundleName, abilityInfo.name)) {
@@ -2213,7 +2217,7 @@ static bool CheckIsNumString(const std::string &numStr)
 
 void AbilityConnectManager::HandleNotifyAssertFaultDialogDied(const std::shared_ptr<AbilityRecord> &abilityRecord)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER(abilityRecord);
     if (abilityRecord->GetAbilityInfo().name != ABILITY_NAME_ASSERT_FAULT_DIALOG ||
         abilityRecord->GetAbilityInfo().bundleName != BUNDLE_NAME_DIALOG) {
