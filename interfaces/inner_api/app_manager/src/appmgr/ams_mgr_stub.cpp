@@ -190,6 +190,8 @@ int32_t AmsMgrStub::OnRemoteRequestInnerThird(uint32_t code, MessageParcel &data
             return HandleBlockProcessCacheByPids(data, reply);
         case static_cast<uint32_t>(IAmsMgr::Message::IS_KILLED_FOR_UPGRADE_WEB):
             return HandleIsKilledForUpgradeWeb(data, reply);
+        case static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION):
+            return HandleIsKilledForUpgradeWeb(data, reply);
     }
     return AAFwk::ERR_CODE_NOT_EXIST;
 }
@@ -760,6 +762,19 @@ int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParc
     }
 
     auto result = IsKilledForUpgradeWeb(bundleName);
+    if (!reply.WriteBool(result)) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
+        return ERR_INVALID_VALUE;
+    }
+    return NO_ERROR;
+}
+
+int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIExtension(MessageParcel &data, MessageParcel &reply)
+{
+    TAG_LOGD(AAFwkTag::APPMGR, "called");
+    auto pid = data.ReadUint32();
+
+    auto result = IsProcessContainsOnlyUIExtension(pid);
     if (!reply.WriteBool(result)) {
         TAG_LOGE(AAFwkTag::APPMGR, "Fail to write result.");
         return ERR_INVALID_VALUE;

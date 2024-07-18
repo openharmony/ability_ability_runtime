@@ -7151,5 +7151,21 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
     }
     return ExitResidentProcessManager::GetInstance().IsKilledForUpgradeWeb(bundleName);
 }
-}  // namespace AppExecFwk
+bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
+{
+    auto appRecord = GetAppRunningRecordByPid(pid);
+    auto abilityRecordList = appRecord.GetAbilities();
+
+    for (const auto &item : abilityRecordList) 
+    {
+        bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel);
+        if (!isUIAbility)
+        {
+            return false;
+        }
+        
+    }
+    return true;
+}
+} // namespace AppExecFwk
 }  // namespace OHOS
