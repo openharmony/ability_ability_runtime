@@ -29,7 +29,7 @@ int UIExtensionContext::ILLEGAL_REQUEST_CODE(-1);
 ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "Start ability begin, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin, ability:%{public}s", want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility is failed %{public}d", err);
@@ -40,7 +40,7 @@ ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want) const
 ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want, int requestCode) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "Start ability begin, requestCode:%{public}d.", requestCode);
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin, requestCode:%{public}d", requestCode);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, token_, requestCode);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "StartAbility is failed %{public}d", err);
@@ -51,7 +51,7 @@ ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want, int requestCod
 ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::UI_EXT, "Start ability begin, ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin, ability:%{public}s", want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_,
         ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
@@ -62,19 +62,19 @@ ErrCode UIExtensionContext::StartAbility(const AAFwk::Want &want, const AAFwk::S
 
 ErrCode UIExtensionContext::TerminateSelf()
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->TerminateAbility(token_, -1, nullptr);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "TerminateSelf is failed %{public}d", err);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "TerminateSelf end");
     return err;
 }
 
 ErrCode UIExtensionContext::ConnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Connect ability begin, ability:%{public}s.",
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin, ability:%{public}s",
         want.GetElement().GetAbilityName().c_str());
     ErrCode ret =
         ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
@@ -85,19 +85,19 @@ ErrCode UIExtensionContext::ConnectAbility(
 ErrCode UIExtensionContext::DisconnectAbility(
     const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "%{public}s begin.", __func__);
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     ErrCode ret =
         ConnectionManager::GetInstance().DisconnectAbility(token_, want, connectCallback);
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "%{public}s end DisconnectAbility error, ret=%{public}d", __func__, ret);
+        TAG_LOGE(AAFwkTag::UI_EXT, "DisconnectAbility error, ret=%{public}d", ret);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "%{public}s end DisconnectAbility", __func__);
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return ret;
 }
 
 ErrCode UIExtensionContext::StartAbilityForResult(const AAFwk::Want &want, int requestCode, RuntimeTask &&task)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     {
         std::lock_guard<std::mutex> lock(mutexlock_);
         resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
@@ -107,13 +107,13 @@ ErrCode UIExtensionContext::StartAbilityForResult(const AAFwk::Want &want, int r
         TAG_LOGE(AAFwkTag::UI_EXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return err;
 }
 
 void UIExtensionContext::InsertResultCallbackTask(int requestCode, RuntimeTask &&task)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "InsertResultCallbackTask");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     {
         std::lock_guard<std::mutex> lock(mutexlock_);
         resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
@@ -123,7 +123,7 @@ void UIExtensionContext::InsertResultCallbackTask(int requestCode, RuntimeTask &
 ErrCode UIExtensionContext::StartAbilityForResult(
     const AAFwk::Want &want, const AAFwk::StartOptions &startOptions, int requestCode, RuntimeTask &&task)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     {
         std::lock_guard<std::mutex> lock(mutexlock_);
         resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
@@ -133,30 +133,30 @@ ErrCode UIExtensionContext::StartAbilityForResult(
         TAG_LOGE(AAFwkTag::UI_EXT, "ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
     return err;
 }
 
 ErrCode UIExtensionContext::StartAbilityForResultAsCaller(const AAFwk::Want &want, int requestCode, RuntimeTask &&task)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "Called");
     {
         std::lock_guard<std::mutex> lock(mutexlock_);
         resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityForResultAsCaller(want, token_, requestCode);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "The result = %{public}d.", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "The result = %{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "End.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "End");
     return err;
 }
 
 ErrCode UIExtensionContext::StartAbilityForResultAsCaller(
     const AAFwk::Want &want, const AAFwk::StartOptions &startOptions, int requestCode, RuntimeTask &&task)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "Called.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "Called");
     {
         std::lock_guard<std::mutex> lock(mutexlock_);
         resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
@@ -164,16 +164,16 @@ ErrCode UIExtensionContext::StartAbilityForResultAsCaller(
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbilityForResultAsCaller(
         want, startOptions, token_, requestCode);
     if (err != ERR_OK) {
-        TAG_LOGE(AAFwkTag::UI_EXT, "The result = %{public}d.", err);
+        TAG_LOGE(AAFwkTag::UI_EXT, "The result = %{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "End.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "End");
     return err;
 }
 
 ErrCode UIExtensionContext::ReportDrawnCompleted()
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ReportDrawnCompleted(token_);
     if (err != ERR_OK) {
         TAG_LOGE(AAFwkTag::UI_EXT, "ret=%{public}d", err);
@@ -183,7 +183,7 @@ ErrCode UIExtensionContext::ReportDrawnCompleted()
 
 void UIExtensionContext::OnAbilityResult(int requestCode, int resultCode, const AAFwk::Want &resultData)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     std::lock_guard<std::mutex> lock(mutexlock_);
     auto callback = resultCallbacks_.find(requestCode);
     if (callback != resultCallbacks_.end()) {
@@ -192,7 +192,7 @@ void UIExtensionContext::OnAbilityResult(int requestCode, int resultCode, const 
         }
         resultCallbacks_.erase(requestCode);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 AppExecFwk::AbilityType UIExtensionContext::GetAbilityInfoType() const
@@ -208,7 +208,7 @@ AppExecFwk::AbilityType UIExtensionContext::GetAbilityInfoType() const
 
 void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, const AAFwk::Want &resultData)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "begin.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "begin");
     std::lock_guard<std::mutex> lock(mutexlock_);
     auto callback = resultCallbacks_.find(requestCode);
     if (callback != resultCallbacks_.end()) {
@@ -217,7 +217,7 @@ void UIExtensionContext::OnAbilityResultInner(int requestCode, int resultCode, c
         }
         resultCallbacks_.erase(requestCode);
     }
-    TAG_LOGD(AAFwkTag::UI_EXT, "end.");
+    TAG_LOGD(AAFwkTag::UI_EXT, "end");
 }
 
 int UIExtensionContext::GenerateCurRequestCode()
@@ -247,7 +247,7 @@ Ace::UIContent* UIExtensionContext::GetUIContent()
 ErrCode UIExtensionContext::OpenAtomicService(AAFwk::Want& want, const AAFwk::StartOptions &options, int requestCode,
     RuntimeTask &&task)
 {
-    TAG_LOGD(AAFwkTag::UI_EXT, "OpenAtomicService");
+    TAG_LOGD(AAFwkTag::UI_EXT, "called");
     resultCallbacks_.insert(make_pair(requestCode, std::move(task)));
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->OpenAtomicService(want, options, token_, requestCode);
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
