@@ -291,7 +291,7 @@ void ContextImpl::GetAllTempDir(std::vector<std::string> &tempPaths)
     for (const auto &moudleItem: applicationInfo_->moduleInfos) {
         auto moudleTemp = baseDir + CONTEXT_HAPS + CONTEXT_FILE_SEPARATOR + moudleItem.moduleName + CONTEXT_TEMP;
         if (!OHOS::FileExists(moudleTemp)) {
-            TAG_LOGW(AAFwkTag::APPKIT, "moudle[%{public}s] temp path not exists,path is %{public}s",
+            TAG_LOGD(AAFwkTag::APPKIT, "moudle[%{public}s] temp path not exists,path is %{public}s",
                 moudleItem.moduleName.c_str(), moudleTemp.c_str());
             continue;
         }
@@ -912,7 +912,7 @@ void ContextImpl::UpdateResConfig(std::shared_ptr<Global::Resource::ResourceMana
         resConfig->SetMcc(static_cast<uint32_t>(std::stoi(mcc)));
         resConfig->SetMnc(static_cast<uint32_t>(std::stoi(mnc)));
     } catch (...) {
-        TAG_LOGW(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
+        TAG_LOGD(AAFwkTag::APPKIT, "Set mcc,mnc failed mcc:%{public}s mnc:%{public}s", mcc.c_str(), mnc.c_str());
     }
     resourceManager->UpdateResConfig(*resConfig);
 }

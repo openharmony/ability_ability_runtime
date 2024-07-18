@@ -494,12 +494,13 @@ void MainThread::ScheduleForegroundApplication()
     if (!mainHandler_->PostTask(task, "MainThread:ForegroundApplication")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
-
-    if (watchdog_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr");
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
         return;
     }
-    watchdog_->SetBackgroundStatus(false);
+    tmpWatchdog->SetBackgroundStatus(false);
+    tmpWatchdog = nullptr;
 }
 
 /**
@@ -524,11 +525,13 @@ void MainThread::ScheduleBackgroundApplication()
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 
-    if (watchdog_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr");
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
         return;
     }
-    watchdog_->SetBackgroundStatus(true);
+    tmpWatchdog->SetBackgroundStatus(true);
+    tmpWatchdog = nullptr;
 }
 
 /**
@@ -785,8 +788,10 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
     abilityRecord->SetWant(want);
     abilityRecord->SetAbilityRecordId(abilityRecordId);
-    if (watchdog_ != nullptr) {
-        watchdog_->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog != nullptr) {
+        tmpWatchdog->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
+        tmpWatchdog = nullptr;
     }
     FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
     std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
@@ -1337,7 +1342,6 @@ CJUncaughtExceptionInfo MainThread::CreateCjExceptionInfo(const std::string &bun
 void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, const Configuration &config)
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGI(AAFwkTag::APPKIT, "called");
     if (!CheckForHandleLaunchApplication(appLaunchData)) {
         TAG_LOGE(AAFwkTag::APPKIT, "CheckForHandleLaunchApplication failed");
         return;
@@ -1364,7 +1368,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     auto bundleName = appInfo.bundleName;
-    watchdog_->SetBundleInfo(bundleName, appInfo.versionName);
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog != nullptr) {
+        tmpWatchdog->SetBundleInfo(bundleName, appInfo.versionName);
+        tmpWatchdog = nullptr;
+    }
     BundleInfo bundleInfo;
     if (!GetBundleForLaunchApplication(bundleMgrHelper, bundleName, appLaunchData.GetAppIndex(), bundleInfo)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Failed to get bundle info");
@@ -1456,8 +1464,6 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     application_->SetApplicationContext(applicationContext);
 
 #ifdef SUPPORT_SCREEN
-    TAG_LOGI(
-        AAFwkTag::APPKIT, "HandleLaunchApplication cacheDir: %{public}s", applicationContext->GetCacheDir().c_str());
     OHOS::EglSetCacheDir(applicationContext->GetCacheDir());
 #endif
 
@@ -2224,7 +2230,7 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
 void MainThread::HandleForegroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "called.");
+    TAG_LOGI(AAFwkTag::APPKIT, "called.");
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "handleForegroundApplication error!");
         return;
@@ -2691,7 +2697,7 @@ void MainThread::LoadAbilityLibrary(const std::vector<std::string> &libraryPaths
     }
 
     if (fileEntries_.empty()) {
-        TAG_LOGW(AAFwkTag::APPKIT, "No ability library");
+        TAG_LOGD(AAFwkTag::APPKIT, "No ability library");
         return;
     }
 
@@ -2916,13 +2922,15 @@ void MainThread::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::s
 
 void MainThread::CheckMainThreadIsAlive()
 {
-    if (watchdog_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr");
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog == nullptr) {
+        TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
         return;
     }
 
-    watchdog_->SetAppMainThreadState(true);
-    watchdog_->AllowReportEvent();
+    tmpWatchdog->SetAppMainThreadState(true);
+    tmpWatchdog->AllowReportEvent();
+    tmpWatchdog = nullptr;
 }
 #endif  // ABILITY_LIBRARY_LOADER
 
@@ -3285,7 +3293,7 @@ void MainThread::AssertFaultResumeMainThreadDetection()
 void MainThread::HandleInitAssertFaultTask(bool isDebugModule, bool isDebugApp)
 {
     if (!system::GetBoolParameter(PRODUCT_ASSERT_FAULT_DIALOG_ENABLED, false)) {
-        TAG_LOGE(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
+        TAG_LOGD(AAFwkTag::APPKIT, "Unsupport assert fault dialog");
         return;
     }
     if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {

@@ -22,7 +22,6 @@
 #include <native_engine/native_engine.h>
 #include "ui_content.h"
 #include "connection_manager.h"
-#include "hilog_wrapper.h"
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 
@@ -37,7 +36,7 @@ int32_t UIServiceExtensionContext::ILLEGAL_REQUEST_CODE(-1);
 ErrCode UIServiceExtensionContext::StartAbility(const AAFwk::Want &want, const AAFwk::StartOptions &startOptions) const
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "ability:%{public}s.", want.GetElement().GetAbilityName().c_str());
+    TAG_LOGD(AAFwkTag::APPKIT, "ability:%{public}s", want.GetElement().GetAbilityName().c_str());
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, startOptions, token_,
         ILLEGAL_REQUEST_CODE);
     if (err != ERR_OK) {
@@ -75,12 +74,12 @@ ErrCode UIServiceExtensionContext::StartAbilityByType(const std::string &type,
 {
     TAG_LOGD(AAFwkTag::APPKIT, "StartAbilityByType begin.");
     if (uiExtensionCallbacks == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "uiExtensionCallbacks is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "uiExtensionCallbacks is nullptr");
         return ERR_INVALID_VALUE;
     }
     auto uiContent = GetUIContent();
     if (uiContent == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "uiContent is nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "uiContent is nullptr");
         return ERR_INVALID_VALUE;
     }
     wantParam.SetParam(UIEXTENSION_TARGET_TYPE_KEY, AAFwk::String::Box(type));

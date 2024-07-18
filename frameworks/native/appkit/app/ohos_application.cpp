@@ -631,7 +631,6 @@ void OHOSApplication::OnAbilitySaveState(const PacMap &outState)
 void OHOSApplication::SetAppEnv(const std::vector<AppEnvironment>& appEnvironments)
 {
     if (!appEnvironments.size()) {
-        TAG_LOGI(AAFwkTag::APPKIT, "appEnvironments empty");
         return;
     }
 
