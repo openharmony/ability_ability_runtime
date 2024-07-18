@@ -18,7 +18,6 @@
 #include "ability_connection.h"
 #include "ability_manager_client.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 
 namespace OHOS {
@@ -169,6 +168,17 @@ ErrCode ServiceExtensionContext::StartServiceExtensionAbility(const AAFwk::Want 
     return err;
 }
 
+ErrCode ServiceExtensionContext::StartUIServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId) const
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "begin.");
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
+        want, token_, accountId, AppExecFwk::ExtensionAbilityType::UI_SERVICE);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::APPKIT, "ServiceContext::StartServiceExtensionAbility is failed %{public}d", err);
+    }
+    return err;
+}
+
 ErrCode ServiceExtensionContext::StopServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId) const
 {
     TAG_LOGD(AAFwkTag::APPKIT, "%{public}s begin.", __func__);
@@ -239,7 +249,7 @@ AppExecFwk::AbilityType ServiceExtensionContext::GetAbilityInfoType() const
 ErrCode ServiceExtensionContext::PreStartMission(const std::string& bundleName, const std::string& moduleName,
     const std::string& abilityName, const std::string& startTime)
 {
-    TAG_LOGI(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGI(AAFwkTag::APPKIT, "called");
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->PreStartMission(
         bundleName, moduleName, abilityName, startTime);
     if (err != ERR_OK) {

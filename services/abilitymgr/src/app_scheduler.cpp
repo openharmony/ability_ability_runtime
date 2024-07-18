@@ -22,7 +22,6 @@
 #include "appmgr/app_mgr_constants.h"
 #include "hitrace_meter.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 
 namespace OHOS {
@@ -600,6 +599,22 @@ void AppScheduler::AttachedToStatusBar(const sptr<IRemoteObject> &token)
     TAG_LOGI(AAFwkTag::ABILITYMGR, "called.");
     CHECK_POINTER(appMgrClient_);
     appMgrClient_->AttachedToStatusBar(token);
+}
+
+void AppScheduler::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
+{
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "called.");
+    CHECK_POINTER(appMgrClient_);
+    appMgrClient_->BlockProcessCacheByPids(pids);
+}
+
+bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
+    return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
 }
 }  // namespace AAFwk
 }  // namespace OHOS
