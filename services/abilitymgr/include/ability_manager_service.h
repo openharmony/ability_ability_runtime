@@ -49,11 +49,10 @@
 #include "deeplink_reserve/deeplink_reserve_config.h"
 #include "event_report.h"
 #include "free_install_manager.h"
-#include "hilog_wrapper.h"
 #include "iacquire_share_data_callback_interface.h"
 #include "interceptor/ability_interceptor_executer.h"
 #include "iremote_object.h"
-#include "mission_list_manager.h"
+#include "mission_list_manager_interface.h"
 #include "parameter.h"
 #include "pending_want_manager.h"
 #include "permission_verification.h"
@@ -101,6 +100,8 @@ class AbilityManagerService : public SystemAbility,
     DECLARE_DELAYED_SINGLETON(AbilityManagerService)
     DECLEAR_SYSTEM_ABILITY(AbilityManagerService)
 public:
+    static std::shared_ptr<AbilityManagerService> GetPubInstance();
+
     void OnStart() override;
     void OnStop() override;
 
@@ -994,7 +995,8 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
         uint32_t callerTokenId = 0,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isCallByShortcut = false);
 
     int StartAbilityForOptionInner(
         const Want &want,
@@ -1004,7 +1006,8 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE,
         bool isStartAsCaller = false,
         uint32_t specifyTokenId = 0,
-        bool isImplicit = false);
+        bool isImplicit = false,
+        bool isCallByShortcut = false);
 
     int ImplicitStartAbility(
         const Want &want,
@@ -1143,7 +1146,7 @@ public:
 
     virtual int UnregisterAbilityFirstFrameStateObserver(
         const sptr<IAbilityFirstFrameStateObserver> &observer) override;
-    
+
     bool GetAnimationFlag();
 
 #endif
@@ -1703,7 +1706,9 @@ public:
     virtual int32_t TransferAbilityResultForExtension(const sptr<IRemoteObject> &callerToken, int32_t resultCode,
         const Want &want) override;
 
-    std::shared_ptr<MissionListManager> GetMissionListManagerByUserId(int32_t userId);
+    std::shared_ptr<MissionListManagerInterface> GetMissionListManagerByUserId(int32_t userId);
+    std::shared_ptr<MissionListWrap> GetMissionListWrap();
+
     /**
      * Notify ability manager service frozen process.
      *
@@ -1728,7 +1733,7 @@ public:
 
     int32_t StartUIAbilityByPreInstall(const FreeInstallInfo &taskInfo);
 
-    void NotifySCBToHandleException(const std::string& sessionId, int errCode,
+    void NotifySCBToHandleAtomicServiceException(const std::string& sessionId, int errCode,
         const std::string& reason);
 
     // MSG 0 - 20 represents timeout message
@@ -1753,31 +1758,6 @@ public:
     static constexpr uint32_t MIN_DUMP_ARGUMENT_NUM = 2;
     static constexpr uint32_t MAX_WAIT_SYSTEM_UI_NUM = 600;
     static constexpr uint32_t MAX_WAIT_SETTINGS_DATA_NUM = 300;
-
-    enum DumpKey {
-        KEY_DUMP_ALL = 0,
-        KEY_DUMP_STACK_LIST,
-        KEY_DUMP_STACK,
-        KEY_DUMP_MISSION,
-        KEY_DUMP_TOP_ABILITY,
-        KEY_DUMP_WAIT_QUEUE,
-        KEY_DUMP_SERVICE,
-        KEY_DUMP_DATA,
-        KEY_DUMP_FOCUS_ABILITY,
-        KEY_DUMP_WINDOW_MODE,
-        KEY_DUMP_MISSION_LIST,
-        KEY_DUMP_MISSION_INFOS,
-    };
-
-    enum DumpsysKey {
-        KEY_DUMPSYS_ALL = 0,
-        KEY_DUMPSYS_MISSION_LIST,
-        KEY_DUMPSYS_ABILITY,
-        KEY_DUMPSYS_SERVICE,
-        KEY_DUMPSYS_PENDING,
-        KEY_DUMPSYS_PROCESS,
-        KEY_DUMPSYS_DATA,
-    };
 
     enum {
         ABILITY_MOVE_TO_FOREGROUND_CODE = 0,
@@ -1947,8 +1927,8 @@ private:
     std::shared_ptr<AbilityConnectManager> GetConnectManagerByToken(const sptr<IRemoteObject> &token);
     std::shared_ptr<PendingWantManager> GetCurrentPendingWantManager();
     std::shared_ptr<PendingWantManager> GetPendingWantManagerByUserId(int32_t userId);
-    std::unordered_map<int, std::shared_ptr<MissionListManager>> GetMissionListManagers();
-    std::shared_ptr<MissionListManager> GetCurrentMissionListManager();
+    std::unordered_map<int, std::shared_ptr<MissionListManagerInterface>> GetMissionListManagers();
+    std::shared_ptr<MissionListManagerInterface> GetCurrentMissionListManager();
     std::unordered_map<int, std::shared_ptr<UIAbilityLifecycleManager>> GetUIAbilityManagers();
     std::shared_ptr<UIAbilityLifecycleManager> GetCurrentUIAbilityManager();
     std::shared_ptr<UIAbilityLifecycleManager> GetUIAbilityManagerByUserId(int32_t userId);
@@ -1981,6 +1961,8 @@ private:
 
     int CheckStaticCfgPermission(const AppExecFwk::AbilityRequest &abilityRequest, bool isStartAsCaller,
         uint32_t callerTokenId, bool isData = false, bool isSaCall = false, bool isImplicit = false);
+
+    int CheckPermissionForUIService(const Want &want, const AbilityRequest &abilityRequest);
 
     bool GetValidDataAbilityUri(const std::string &abilityInfoUri, std::string &adjustUri);
 
@@ -2062,7 +2044,8 @@ private:
      * @param abilityRequest, abilityRequest.
      * @return Returns whether the caller is allowed to start Ability.
      */
-    int CheckCallAbilityPermission(const AbilityRequest &abilityRequest, uint32_t specifyTokenId = 0);
+    int CheckCallAbilityPermission(const AbilityRequest &abilityRequest, uint32_t specifyTokenId = 0,
+        bool isCallByShortcut = false);
 
     /**
      * Check if Caller is allowed to start Ability(Stage) by call.
@@ -2201,7 +2184,8 @@ private:
     std::shared_ptr<AbilityDebugDeal> ConnectInitAbilityDebugDeal();
 
     int StartUIAbilityForOptionWrap(const Want &want, const StartOptions &options, sptr<IRemoteObject> callerToken,
-        int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false);
+        int32_t userId, int requestCode, uint32_t callerTokenId = 0, bool isImplicit = false,
+        bool isCallByShortcut = false);
 
     int32_t SetBackgroundCall(const AppExecFwk::RunningProcessInfo &processInfo,
         const AbilityRequest &abilityRequest, bool &isBackgroundCall) const;
@@ -2243,8 +2227,6 @@ private:
     sptr<AppExecFwk::IBundleMgr> iBundleManager_;
     std::shared_ptr<AppExecFwk::BundleMgrHelper> bundleMgrHelper_;
     sptr<OHOS::AppExecFwk::IAppMgr> appMgr_ { nullptr };
-    const static std::map<std::string, AbilityManagerService::DumpKey> dumpMap;
-    const static std::map<std::string, AbilityManagerService::DumpsysKey> dumpsysMap;
 
     std::shared_ptr<FreeInstallManager> freeInstallManager_;
 

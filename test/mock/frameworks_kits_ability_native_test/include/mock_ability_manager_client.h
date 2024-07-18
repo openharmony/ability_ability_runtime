@@ -26,11 +26,9 @@
 #include "abs_shared_result_set.h"
 #include "data_ability_predicates.h"
 #include "fa_ability_context.h"
-#include "hilog_wrapper.h"
 #include "iremote_object.h"
 #include "iremote_stub.h"
 #include "values_bucket.h"
-
 #include "want.h"
 
 #define OPENFILENUM (1246)

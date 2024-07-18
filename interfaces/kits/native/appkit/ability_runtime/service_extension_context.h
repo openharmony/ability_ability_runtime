@@ -125,6 +125,8 @@ public:
 
     ErrCode StartServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) const;
 
+    ErrCode StartUIServiceExtensionAbility(const AAFwk::Want &want, int32_t accountId = -1) const;
+
     ErrCode StopServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId = -1) const;
 
     /**

@@ -23,7 +23,6 @@
 #include "dialog_request_callback_impl.h"
 #include "dialog_ui_extension_callback.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "remote_object_wrapper.h"
 #include "request_constants.h"
 #include "session_info.h"
@@ -270,6 +269,18 @@ ErrCode AbilityContextImpl::StartAbilityForResultWithAccount(
     if (err != ERR_OK && err != AAFwk::START_ABILITY_WAITING) {
         TAG_LOGE(AAFwkTag::CONTEXT, "StartAbilityForResultWithAccount. ret=%{public}d", err);
         OnAbilityResultInner(requestCode, err, want);
+    }
+    return err;
+}
+
+ErrCode AbilityContextImpl::StartUIServiceExtensionAbility(const AAFwk::Want& want, int32_t accountId)
+{
+    TAG_LOGI(AAFwkTag::CONTEXT, "name:%{public}s %{public}s, accountId=%{public}d",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str(), accountId);
+    ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->StartExtensionAbility(
+        want, token_, accountId, AppExecFwk::ExtensionAbilityType::UI_SERVICE);
+    if (err != ERR_OK) {
+        TAG_LOGE(AAFwkTag::CONTEXT, "StartUIServiceExtension is failed %{public}d", err);
     }
     return err;
 }
@@ -782,7 +793,7 @@ void AbilityContextImpl::InsertResultCallbackTask(int requestCode, RuntimeTask &
 
 void AbilityContextImpl::RemoveResultCallbackTask(int requestCode)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "Called.");
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
     resultCallbacks_.erase(requestCode);
 }
 
@@ -1030,7 +1041,7 @@ bool AbilityContextImpl::GetRestoreEnabled()
 
 ErrCode AbilityContextImpl::OpenLink(const AAFwk::Want& want, int requestCode)
 {
-    TAG_LOGD(AAFwkTag::CONTEXT, "Called.");
+    TAG_LOGD(AAFwkTag::CONTEXT, "called");
     return AAFwk::AbilityManagerClient::GetInstance()->OpenLink(want, token_, -1, requestCode);
 }
 } // namespace AbilityRuntime

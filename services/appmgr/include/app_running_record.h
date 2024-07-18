@@ -615,11 +615,14 @@ public:
     void SetDebugApp(bool isDebugApp);
     bool IsDebugApp();
     bool IsDebugging() const;
+    void SetErrorInfoEnhance(const bool errorInfoEnhance);
     void SetNativeDebug(bool isNativeDebug);
     void SetPerfCmd(const std::string &perfCmd);
     void SetMultiThread(const bool multiThread);
     void AddRenderRecord(const std::shared_ptr<RenderRecord> &record);
     void RemoveRenderRecord(const std::shared_ptr<RenderRecord> &record);
+    void RemoveRenderPid(pid_t pid);
+    bool ConstainsRenderPid(pid_t renderPid);
     std::shared_ptr<RenderRecord> GetRenderRecordByPid(const pid_t pid);
     std::map<int32_t, std::shared_ptr<RenderRecord>> GetRenderRecordMap();
     void SetStartMsg(const AppSpawnStartMsg &msg);
@@ -674,10 +677,6 @@ public:
     void SetProcessChangeReason(ProcessChangeReason reason);
 
     ProcessChangeReason GetProcessChangeReason() const;
-
-    bool IsUpdateStateFromService();
-
-    void SetUpdateStateFromService(bool isUpdateStateFromService);
 
     ExtensionAbilityType GetExtensionType() const;
     ProcessType GetProcessType() const;
@@ -824,15 +823,10 @@ public:
     {
         return isDependedOnArkWeb_;
     }
-private:
-    /**
-     * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
-     *
-     * @return If an uninitialized data is found return true,Otherwise return false.
-     */
-    bool GetTheModuleInfoNeedToUpdated(const std::string bundleName, HapModuleInfo &info);
 
-    // drive application state changes when ability state changes.
+    void SetProcessCacheBlocked(bool isBlocked);
+    bool GetProcessCacheBlocked();
+
     /**
      * ScheduleForegroundRunning, Notify application to switch to foreground.
      *
@@ -846,6 +840,14 @@ private:
      * @return
      */
     void ScheduleBackgroundRunning();
+
+private:
+    /**
+     * SearchTheModuleInfoNeedToUpdated, Get an uninitialized abilityStage data.
+     *
+     * @return If an uninitialized data is found return true,Otherwise return false.
+     */
+    bool GetTheModuleInfoNeedToUpdated(const std::string bundleName, HapModuleInfo &info);
 
     /**
      * AbilityForeground, Handling the ability process when switching to the foreground.
@@ -957,13 +959,14 @@ private:
     // render record
     std::map<int32_t, std::shared_ptr<RenderRecord>> renderRecordMap_;
     ffrt::mutex renderRecordMapLock_;
+    std::set<pid_t> renderPidSet_; // Contains all render pid added, whether died or not
+    ffrt::mutex renderPidSetLock_;
     AppSpawnStartMsg startMsg_;
     int32_t appIndex_ = 0;
     bool securityFlag_ = false;
     int32_t requestProcCode_ = 0;
     ProcessChangeReason processChangeReason_ = ProcessChangeReason::REASON_NONE;
 
-    bool isUpdateStateFromService_ = false;
     int32_t callerPid_ = -1;
     int32_t callerUid_ = -1;
     int32_t callerTokenId_ = -1;
@@ -977,9 +980,11 @@ private:
 
     bool isRestartApp_ = false; // Only app calling RestartApp can be set to true
     bool isAssertPause_ = false;
+    bool isErrorInfoEnhance_ = false;
     bool isNativeStart_ = false;
     bool isMultiThread_ = false;
     SupportProcessCacheState procCacheSupportState_ = SupportProcessCacheState::UNSPECIFIED;
+    bool processCacheBlocked = false; // temporarily block process cache feature
     sptr<IRemoteObject> browserHost_;
     bool isGPU_ = false;
     pid_t gpuPid_ = 0;
