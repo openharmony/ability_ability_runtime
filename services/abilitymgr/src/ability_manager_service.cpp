@@ -10742,7 +10742,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
             static_cast<int32_t>(abilityInfo.type),
             static_cast<int32_t>(abilityInfo.extensionAbilityType),
             abilityInfo.moduleName.c_str(),
-            abilityInfo.applicationName.c_str();
+            abilityInfo.applicationName.c_str());
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: callerAbilityInfo toString: "
                 "name is: %{public}s, "
                 "bundleName is: %{public}s, "
@@ -10755,7 +10755,7 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
             static_cast<int32_t>(callerAbilityInfo.type),
             static_cast<int32_t>(callerAbilityInfo.extensionAbilityType),
             callerAbilityInfo.moduleName.c_str(),
-            callerAbilityInfo.applicationName.c_str();
+            callerAbilityInfo.applicationName.c_str());
 
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
