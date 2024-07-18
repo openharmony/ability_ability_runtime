@@ -95,7 +95,7 @@ ErrCode ServiceExtensionContext::ReleaseCall(const std::shared_ptr<CallerCallBac
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
     if (localCallContainer_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "localCallContainer_ == nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "localCallContainer_ == nullptr");
         return ERR_INVALID_VALUE;
     }
     return localCallContainer_->ReleaseCall(callback);
@@ -105,7 +105,7 @@ void ServiceExtensionContext::ClearFailedCallConnection(const std::shared_ptr<Ca
 {
     TAG_LOGD(AAFwkTag::APPKIT, "begin");
     if (localCallContainer_ == nullptr) {
-        TAG_LOGE(AAFwkTag::APPKIT, "localCallContainer_ == nullptr.");
+        TAG_LOGE(AAFwkTag::APPKIT, "localCallContainer_ == nullptr");
         return;
     }
     localCallContainer_->ClearFailedCallConnection(callback);

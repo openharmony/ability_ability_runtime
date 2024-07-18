@@ -24,7 +24,6 @@
 #include "errors.h"
 #include "exit_reason.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iability_info_callback.h"
 #include "in_process_call_wrapper.h"
@@ -942,11 +941,12 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,"
-        "windowHeight=%{public}d,windowWidth=%{public}d",
+        "windowHeight=%{public}d,windowWidth=%{public}d,windowMode=%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0));
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord != nullptr && !abilityRecord->GetRestartAppFlag()) {
         auto callerSessionInfo = abilityRecord->GetSessionInfo();

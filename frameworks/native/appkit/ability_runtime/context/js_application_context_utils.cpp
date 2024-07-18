@@ -1061,13 +1061,13 @@ napi_value JsApplicationContextUtils::OnOn(napi_env env, NapiCallbackInfo& info)
 
     if (info.argc != ARGC_TWO) {
         TAG_LOGE(AAFwkTag::APPKIT, "Not enough params");
-        ThrowInvalidParamError(env, "Not enough params");
+        ThrowInvalidParamError(env, "Not enough params.");
         return CreateJsUndefined(env);
     }
 
     if (!CheckTypeForNapiValue(env, info.argv[0], napi_string)) {
         TAG_LOGE(AAFwkTag::APPKIT, "param0 is invalid");
-        ThrowInvalidParamError(env, "Parse param type failed, type must be string");
+        ThrowInvalidParamError(env, "Parse param type failed, type must be string.");
         return CreateJsUndefined(env);
     }
     std::string type;

@@ -103,7 +103,7 @@ std::shared_ptr<AbilityStage> JsAbilityStage::Create(
     const std::unique_ptr<Runtime>& runtime, const AppExecFwk::HapModuleInfo& hapModuleInfo)
 {
     if (runtime == nullptr) {
-        TAG_LOGW(AAFwkTag::APPKIT, "runtime is nullptr.");
+        TAG_LOGW(AAFwkTag::APPKIT, "runtime is nullptr");
         return nullptr;
     }
     auto& jsRuntime = static_cast<JsRuntime&>(*runtime);
