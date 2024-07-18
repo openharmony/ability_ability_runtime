@@ -338,7 +338,7 @@ public:
      */
     virtual bool IsProcessContainsOnlyUIExtension(const pid_t pid) 
     {
-        return fakse;
+        return false;
     }
 
     enum class Message {
