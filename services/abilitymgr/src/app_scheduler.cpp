@@ -616,5 +616,10 @@ bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
     }
     return appMgrClient_->IsKilledForUpgradeWeb(bundleName);
 }
-}  // namespace AAFwk
+bool AppScheduler::IsProcessContainsOnlyUIExtension(const pid_t pid)
+{
+    CHECK_POINTER(appMgrClient_);
+    return appMgrClient_.IsProcessContainsOnlyUIExtension(pid);
+}
+} // namespace AAFwk
 }  // namespace OHOS

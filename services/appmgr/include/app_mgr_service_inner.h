@@ -1140,6 +1140,8 @@ public:
 
     bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
 
+    bool IsProcessContainsOnlyUIExtension(const pid_t pid);
+
 private:
 
     std::string FaultTypeToString(FaultDataType type);

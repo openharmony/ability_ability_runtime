@@ -654,5 +654,13 @@ bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
     }
     return amsMgrServiceInner_->IsKilledForUpgradeWeb(bundleName);
 }
-}  // namespace AppExecFwk
+bool AmsMgrScheduler::IsProcessContainsOnlyUIExtension(const pid_t pid)
+{
+    if (!IsReady()) {
+        TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
+        return false;
+    }
+    return amsMgrServiceInner_->IsProcessContainsOnlyUIExtension(pid);
+}
+} // namespace AppExecFwk
 }  // namespace OHOS
