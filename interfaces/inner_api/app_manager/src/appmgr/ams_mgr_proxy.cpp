@@ -38,10 +38,6 @@ bool AmsMgrProxy::IsProcessContainsOnlyUIExtension(const pid_t pid)
     if (!WriteInterfaceToken(data)) {
         return false;
     }
-    if (!data.WriteRemoteObject(token.GetRefPtr())) {
-        TAG_LOGE(AAFwkTag::APPMGR, "Failed to write token");
-        return false;
-    }
     data.WriteInt32(static_cast<int32_t>(pid));
     int32_t ret =
         SendTransactCmd(static_cast<uint32_t>(IAmsMgr::Message::IS_PROCESS_CONTAINS_ONLY_UI_EXTENSION), data, reply, option);
