@@ -10717,11 +10717,11 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
 {
     std::shared_ptr<AbilityRecord> abilityRecord = Token::GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord == nullptr) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "No matched token pass");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "No matched token pass");
         return false;
     }
     if (abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD < API12) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "API version %{public}d pass",
             abilityRecord->GetApplicationInfo().apiTargetVersion % API_VERSION_MOD);
         return false;
     }
@@ -10763,27 +10763,27 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
 
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");
         return false;
     }
     if (abilityInfo.applicationInfo.uid == IPCSkeleton::GetCallingUid()) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in same bundle Pass");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process is in same bundle Pass");
         return false;
     }
     if (callerAbilityInfo.type != AppExecFwk::AbilityType::PAGE) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Is not UI Ability Pass");
         return false;
     }
     if (abilityRecord->GetAbilityState() != AAFwk::AbilityState::BACKGROUND) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process is not on background Pass");
         return false;
     }
     if (continuousFlag) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process has continuous task Pass");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process has continuous task Pass");
         return false;
     }
     if (IsInWhiteList(callerAbilityInfo.bundleName, abilityInfo.bundleName, abilityInfo.name)) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "Process is in white list Pass");
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process is in white list Pass");
         return false;
     }
     TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension %{public}s.",
