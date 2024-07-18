@@ -479,7 +479,7 @@ bool AppMgrClient::IsProcessContainsOnlyUIExtension(const pid_t pid)
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();
         if (amsService != nullptr) {
-            return amsService->IsProcessContainsOnlyUIExtension(token, state);
+            return amsService->IsProcessContainsOnlyUIExtension(pid);
         }
     }
     return false;
