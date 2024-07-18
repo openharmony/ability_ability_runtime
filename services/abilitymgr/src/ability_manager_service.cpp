@@ -10736,30 +10736,26 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
                 "type is: %{public}d, "
                 "extensionAbilityType is: %{public}d, "
                 "moduleName is: %{public}s, "
-                "applicationName is: %{public}s, "
-                "className is: %{public}s", 
+                "applicationName is: %{public}s", 
             abilityInfo.name.c_str(),
             abilityInfo.bundleName.c_str(),
             static_cast<int32_t>(abilityInfo.type),
             static_cast<int32_t>(abilityInfo.extensionAbilityType),
             abilityInfo.moduleName.c_str(),
-            abilityInfo.applicationName.c_str(),
-            abilityInfo.className.c_str());
+            abilityInfo.applicationName.c_str();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: callerAbilityInfo toString: "
                 "name is: %{public}s, "
                 "bundleName is: %{public}s, "
                 "type is: %{public}d, "
                 "extensionAbilityType is: %{public}d, "
                 "moduleName is: %{public}s, "
-                "applicationName is: %{public}s, "
-                "className is: %{public}s", 
+                "applicationName is: %{public}s", 
             callerAbilityInfo.name.c_str(),
             callerAbilityInfo.bundleName.c_str(),
             static_cast<int32_t>(callerAbilityInfo.type),
             static_cast<int32_t>(callerAbilityInfo.extensionAbilityType),
             callerAbilityInfo.moduleName.c_str(),
-            callerAbilityInfo.applicationName.c_str(),
-            callerAbilityInfo.className.c_str());
+            callerAbilityInfo.applicationName.c_str();
 
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
