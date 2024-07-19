@@ -475,6 +475,7 @@ AppMgrResultCode AppMgrClient::ConnectAppMgrService()
 
 bool AppMgrClient::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in app_mgr_client");
     sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
     if (service != nullptr) {
         sptr<IAmsMgr> amsService = service->GetAmsMgr();

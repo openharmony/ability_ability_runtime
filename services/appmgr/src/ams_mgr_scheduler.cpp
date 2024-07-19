@@ -656,6 +656,7 @@ bool AmsMgrScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 }
 bool AmsMgrScheduler::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in ams_mgr_scheduler.cpp");
     if (!IsReady()) {
         TAG_LOGE(AAFwkTag::APPMGR, "AmsMgrService is not ready.");
         return false;

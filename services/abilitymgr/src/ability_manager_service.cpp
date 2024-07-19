@@ -10756,7 +10756,9 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
             static_cast<int32_t>(callerAbilityInfo.extensionAbilityType),
             callerAbilityInfo.moduleName.c_str(),
             callerAbilityInfo.applicationName.c_str());
-
+    pid_t callerPid = abilityRecord->GetPid();
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: callerPid is: %{public}d", callerPid);
+    DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(callerPid);
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");

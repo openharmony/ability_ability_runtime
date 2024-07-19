@@ -618,6 +618,7 @@ bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 }
 bool AppScheduler::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in app_scheduler");
     if (!appMgrClient_) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
         return false;
