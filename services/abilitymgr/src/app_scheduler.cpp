@@ -622,7 +622,7 @@ bool AppScheduler::IsProcessContainsOnlyUIExtension(const pid_t pid)
         TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
         return false;
     }
-    return appMgrClient_.IsProcessContainsOnlyUIExtension(pid);
+    return appMgrClient_->IsProcessContainsOnlyUIExtension(pid);
 }
 } // namespace AAFwk
 }  // namespace OHOS
