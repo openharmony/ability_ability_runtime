@@ -28,7 +28,6 @@
 #include "ability_util.h"
 #include "global_constant.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
 #include "parameters.h"
@@ -48,7 +47,7 @@ AbilityAutoStartupService::~AbilityAutoStartupService() {}
 
 int32_t AbilityAutoStartupService::RegisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     int32_t code = CheckPermissionForSystem();
     if (code != ERR_OK) {
         return code;
@@ -78,7 +77,7 @@ int32_t AbilityAutoStartupService::RegisterAutoStartupSystemCallback(const sptr<
 
 int32_t AbilityAutoStartupService::UnregisterAutoStartupSystemCallback(const sptr<IRemoteObject> &callback)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     int32_t code = CheckPermissionForSystem();
     if (code != ERR_OK) {
         return code;
@@ -232,7 +231,7 @@ int32_t AbilityAutoStartupService::InnerCancelApplicationAutoStartup(const AutoS
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<AutoStartupInfo> &infoList,
     int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     int32_t code = CheckPermissionForEDM();
     code = code == ERR_OK ? code : CheckPermissionForSystem();
     if (code != ERR_OK) {
@@ -247,7 +246,7 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplications(std::vector<A
 int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermission(
     std::vector<AutoStartupInfo> &infoList, int32_t userId)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     if (!system::GetBoolParameter(PRODUCT_APPBOOT_SETTING_ENABLED, false)) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Product configuration item is disable.");
         return ERR_NOT_SUPPORTED_PRODUCT_TYPE;
@@ -259,7 +258,7 @@ int32_t AbilityAutoStartupService::QueryAllAutoStartupApplicationsWithoutPermiss
 
 int32_t AbilityAutoStartupService::DeleteAutoStartupData(const std::string &bundleName, const int32_t uid)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     return DelayedSingleton<AbilityAutoStartupDataManager>::GetInstance()->DeleteAutoStartupData(bundleName, uid);
 }
 
@@ -336,7 +335,7 @@ void AbilityAutoStartupService::ExecuteCallbacks(bool isCallOn, const AutoStartu
 void AbilityAutoStartupService::SetDeathRecipient(
     const sptr<IRemoteObject> &callback, const sptr<IRemoteObject::DeathRecipient> &deathRecipient)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     if (callback == nullptr || deathRecipient == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "The callerToken or the deathRecipient is empty.");
         return;
@@ -353,7 +352,7 @@ void AbilityAutoStartupService::SetDeathRecipient(
 
 void AbilityAutoStartupService::CleanResource(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     auto object = remote.promote();
     if (object == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "Remote object is nullptr.");
@@ -399,7 +398,7 @@ AbilityAutoStartupService::ClientDeathRecipient::ClientDeathRecipient(
 
 void AbilityAutoStartupService::ClientDeathRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     auto abilityAutoStartupService = weakPtr_.lock();
     if (abilityAutoStartupService == nullptr) {
         TAG_LOGE(AAFwkTag::AUTO_STARTUP, "abilityAutoStartupService is nullptr.");
@@ -435,7 +434,7 @@ bool AbilityAutoStartupService::CheckSelfApplication(const std::string &bundleNa
 bool AbilityAutoStartupService::GetBundleInfo(const std::string &bundleName,
     AppExecFwk::BundleInfo &bundleInfo, int32_t uid, int32_t &userId, int32_t appIndex)
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
 
     if (uid == -1) {
         userId = IPCSkeleton::GetCallingUid() / AppExecFwk::Constants::BASE_USER_RANGE;
@@ -547,7 +546,7 @@ std::string AbilityAutoStartupService::GetExtensionTypeName(AppExecFwk::Extensio
 
 std::shared_ptr<AppExecFwk::BundleMgrClient> AbilityAutoStartupService::GetBundleMgrClient()
 {
-    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "Called.");
+    TAG_LOGD(AAFwkTag::AUTO_STARTUP, "called");
     if (bundleMgrClient_ == nullptr) {
         bundleMgrClient_ = DelayedSingleton<AppExecFwk::BundleMgrClient>::GetInstance();
     }

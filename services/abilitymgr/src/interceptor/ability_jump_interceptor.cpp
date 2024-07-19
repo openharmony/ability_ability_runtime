@@ -19,7 +19,6 @@
 #include "accesstoken_kit.h"
 #include "app_jump_control_rule.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "permission_constants.h"
@@ -161,7 +160,7 @@ bool AbilityJumpInterceptor::CheckIfExemptByBundleName(const std::string &bundle
     }
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId, permission, false);
     if (ret == Security::AccessToken::PermissionState::PERMISSION_DENIED) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "VerifyPermission %{public}d: PERMISSION_DENIED.", appInfo.accessTokenId);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "PERMISSION_DENIED.");
         return false;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR,

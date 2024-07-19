@@ -464,8 +464,7 @@ int MissionListManager::StartAbilityLocked(const std::shared_ptr<AbilityRecord> 
 
     NotifyAbilityToken(targetAbilityRecord->GetToken(), abilityRequest);
 
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartAbilityLocked, abilityRequest.specifyTokenId is %{public}u.",
-        abilityRequest.specifyTokenId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartAbilityLocked, abilityRequest.");
     targetAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
     targetAbilityRecord->SetAbilityForegroundingFlag();
 
@@ -3974,8 +3973,9 @@ bool MissionListManager::UpdateAbilityRecordLaunchReason(
         return true;
     }
 
-    if (abilityRequest.IsContinuation()) {
-        abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
+    auto res = abilityRequest.IsContinuation();
+    if (res.first) {
+        abilityRecord->SetLaunchReason(res.second);
         return true;
     }
 

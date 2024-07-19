@@ -1237,5 +1237,34 @@ void AppMgrClient::KillProcessDependedOnWeb()
     TAG_LOGD(AAFwkTag::APPMGR, "call");
     service->KillProcessDependedOnWeb();
 }
+
+AppMgrResultCode AppMgrClient::BlockProcessCacheByPids(const std::vector<int32_t> &pids)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service != nullptr) {
+        sptr<IAmsMgr> amsService = service->GetAmsMgr();
+        if (amsService != nullptr) {
+            amsService->BlockProcessCacheByPids(pids);
+            return AppMgrResultCode::RESULT_OK;
+        }
+    }
+    return AppMgrResultCode::ERROR_SERVICE_NOT_CONNECTED;
+}
+
+bool AppMgrClient::IsKilledForUpgradeWeb(const std::string &bundleName)
+{
+    sptr<IAppMgr> service = iface_cast<IAppMgr>(mgrHolder_->GetRemoteObject());
+    if (service == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "Service is nullptr.");
+        return false;
+    }
+    sptr<IAmsMgr> amsService = service->GetAmsMgr();
+    if (amsService == nullptr) {
+        TAG_LOGE(AAFwkTag::APPMGR, "amsService is nullptr.");
+        return false;
+    }
+    TAG_LOGD(AAFwkTag::APPMGR, "call");
+    return amsService->IsKilledForUpgradeWeb(bundleName);
+}
 }  // namespace AppExecFwk
 }  // namespace OHOS

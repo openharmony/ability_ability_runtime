@@ -22,7 +22,6 @@
 #include "ability_record.h"
 #include "ability_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "int_wrapper.h"
 #include "modal_system_ui_extension.h"
@@ -35,6 +34,7 @@ namespace AAFwk {
 using OHOS::AppExecFwk::BundleInfo;
 namespace {
 constexpr const char* UIEXTENSION_MODAL_TYPE = "ability.want.params.modalType";
+constexpr const char* SUPPORT_CLOSE_ON_BLUR = "supportCloseOnBlur";
 }
 
 DialogSessionManager &DialogSessionManager::GetInstance()
@@ -233,6 +233,7 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
     if (callerToken == nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
         (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
+        (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
         return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
     }
     auto callerRecord = Token::GetAbilityRecordByToken(callerToken);
@@ -251,6 +252,7 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
     if (ret != ERR_OK || token == nullptr) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
         (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
+        (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
         return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
     }
 
@@ -260,6 +262,7 @@ int DialogSessionManager::CreateModalDialogCommon(const Want &replaceWant, sptr<
     }
     TAG_LOGD(AAFwkTag::ABILITYMGR, "create modal ui extension for system");
     (const_cast<Want &>(replaceWant)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
+    (const_cast<Want &>(replaceWant)).SetParam(SUPPORT_CLOSE_ON_BLUR, true);
     return connection->CreateModalUIExtension(replaceWant) ? ERR_OK : INNER_ERR;
 }
 }  // namespace AAFwk

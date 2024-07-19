@@ -755,15 +755,7 @@ public:
      */
     void NotifyAppStatus(const std::string &bundleName, const std::string &eventData);
 
-    /**
-     * KillProcessByPid, Kill process by PID.
-     *
-     * @param pid_t, the app record pid.
-     * @param reason, the reason why the process is killed, default to "foundation"
-     *
-     * @return ERR_OK, return back success，others fail.
-     */
-    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation");
+    int32_t KillProcessByPid(const pid_t pid, const std::string& reason = "foundation", int32_t uid = -1);
 
     bool GetAppRunningStateByBundleName(const std::string &bundleName);
 
@@ -1143,6 +1135,11 @@ public:
     void KillProcessDependedOnWeb();
 
     void RestartResidentProcessDependedOnWeb();
+
+    void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
+
+    bool IsKilledForUpgradeWeb(const std::string &bundleName) const;
+
 private:
 
     std::string FaultTypeToString(FaultDataType type);
@@ -1294,7 +1291,7 @@ private:
      *
      * @return true, return back existed，others non-existent.
      */
-    bool ProcessExist(pid_t pid);
+    bool ProcessExist(pid_t pid, int32_t uid = -1);
 
     /**
      * CheckAllProcessExist, Determine whether all processes exist .
@@ -1477,8 +1474,6 @@ private:
         const HapModuleInfo &hapModuleInfo, std::shared_ptr<AAFwk::Want> want,
         bool appExistFlag, bool isPreload, sptr<IRemoteObject> token = nullptr);
 
-    int32_t CheckSetProcessCachePermission() const;
-
     int32_t CreatNewStartMsg(const Want &want, const AbilityInfo &abilityInfo,
         const std::shared_ptr<ApplicationInfo> &appInfo, const std::string &processName,
         AppSpawnStartMsg &startMsg);
@@ -1500,6 +1495,8 @@ private:
     void SetAppInfo(const BundleInfo &bundleInfo, AppSpawnStartMsg &startMsg);
 
     bool CreateAbilityInfo(const AAFwk::Want &want, AbilityInfo &abilityInfo);
+
+    AAFwk::EventInfo BuildEventInfo(std::shared_ptr<AppRunningRecord> appRecord) const;
 
 private:
     /**

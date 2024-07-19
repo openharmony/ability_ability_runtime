@@ -24,7 +24,6 @@
 #include "errors.h"
 #include "exit_reason.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "iability_info_callback.h"
 #include "in_process_call_wrapper.h"
@@ -113,7 +112,7 @@ int UIAbilityLifecycleManager::StartUIAbility(AbilityRequest &abilityRequest, sp
         UpdateProcessName(abilityRequest, uiAbilityRecord);
     }
     CHECK_POINTER_AND_RETURN(uiAbilityRecord, ERR_INVALID_VALUE);
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility, specifyTokenId is %{public}u.", abilityRequest.specifyTokenId);
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "StartUIAbility");
     uiAbilityRecord->SetSpecifyTokenId(abilityRequest.specifyTokenId);
 
     if (uiAbilityRecord->GetPendingState() != AbilityState::INITIAL) {
@@ -277,6 +276,13 @@ void UIAbilityLifecycleManager::OnAbilityRequestDone(const sptr<IRemoteObject> &
         std::lock_guard<ffrt::mutex> guard(sessionLock_);
         auto abilityRecord = GetAbilityRecordByToken(token);
         CHECK_POINTER(abilityRecord);
+        if (abilityRecord->IsTerminating()) {
+            TAG_LOGI(AAFwkTag::ABILITYMGR, "ability is on terminating");
+            auto handler = DelayedSingleton<AbilityManagerService>::GetInstance()->GetEventHandler();
+            CHECK_POINTER(handler);
+            handler->RemoveEvent(AbilityManagerService::FOREGROUND_TIMEOUT_MSG, abilityRecord->GetAbilityRecordId());
+            return;
+        }
         std::string element = abilityRecord->GetElementName().GetURI();
         TAG_LOGD(AAFwkTag::ABILITYMGR, "Ability is %{public}s, start to foreground.", element.c_str());
         abilityRecord->ForegroundAbility();
@@ -682,8 +688,9 @@ void UIAbilityLifecycleManager::UpdateAbilityRecordLaunchReason(
         return;
     }
 
-    if (abilityRequest.IsContinuation()) {
-        abilityRecord->SetLaunchReason(LaunchReason::LAUNCHREASON_CONTINUATION);
+    auto res = abilityRequest.IsContinuation();
+    if (res.first) {
+        abilityRecord->SetLaunchReason(res.second);
         return;
     }
 
@@ -935,11 +942,12 @@ int UIAbilityLifecycleManager::NotifySCBPendingActivation(sptr<SessionInfo> &ses
 {
     CHECK_POINTER_AND_RETURN(sessionInfo, ERR_INVALID_VALUE);
     TAG_LOGD(AAFwkTag::ABILITYMGR, "windowLeft=%{public}d,windowTop=%{public}d,"
-        "windowHeight=%{public}d,windowWidth=%{public}d",
+        "windowHeight=%{public}d,windowWidth=%{public}d,windowMode=%{public}d",
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_LEFT, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_TOP, 0),
         (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_HEIGHT, 0),
-        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0));
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_WIDTH, 0),
+        (sessionInfo->want).GetIntParam(Want::PARAM_RESV_WINDOW_MODE, 0));
     auto abilityRecord = GetAbilityRecordByToken(abilityRequest.callerToken);
     if (abilityRecord != nullptr && !abilityRecord->GetRestartAppFlag()) {
         auto callerSessionInfo = abilityRecord->GetSessionInfo();
@@ -1402,7 +1410,7 @@ void UIAbilityLifecycleManager::NotifySCBToHandleException(const std::shared_ptr
     EraseAbilityRecord(abilityRecord);
 }
 
-void UIAbilityLifecycleManager::NotifySCBToHandleException(sptr<SessionInfo> sessionInfo,
+void UIAbilityLifecycleManager::NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo,
     int32_t errorCode, const std::string& errorReason)
 {
     TAG_LOGD(AAFwkTag::ABILITYMGR, "call");
@@ -1413,13 +1421,6 @@ void UIAbilityLifecycleManager::NotifySCBToHandleException(sptr<SessionInfo> ses
     sessionInfo->errorCode = errorCode;
     sessionInfo->errorReason = errorReason;
     session->NotifySessionException(sessionInfo);
-
-    auto abilityRecord = Token::GetAbilityRecordByToken(sessionInfo->callerToken);
-    if (abilityRecord == nullptr) {
-        TAG_LOGW(AAFwkTag::ABILITYMGR, "no such ability record matched token");
-        return;
-    }
-    EraseAbilityRecord(abilityRecord);
 }
 
 void UIAbilityLifecycleManager::HandleLoadTimeout(const std::shared_ptr<AbilityRecord> &abilityRecord)
@@ -2310,6 +2311,7 @@ int32_t UIAbilityLifecycleManager::KillProcessWithPrepareTerminate(const std::ve
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     TAG_LOGI(AAFwkTag::ABILITYMGR, "do prepare terminate.");
     std::vector<int32_t> pidsToKill;
+    IN_PROCESS_CALL_WITHOUT_RET(DelayedSingleton<AppScheduler>::GetInstance()->BlockProcessCacheByPids(pids));
     for (const auto& pid: pids) {
         bool needKillProcess = true;
         std::unordered_set<std::shared_ptr<AbilityRecord>> abilitysToTerminate;
