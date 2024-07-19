@@ -618,7 +618,10 @@ bool AppScheduler::IsKilledForUpgradeWeb(const std::string &bundleName)
 }
 bool AppScheduler::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
-    CHECK_POINTER(appMgrClient_);
+    if (!appMgrClient_) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "appMgrClient is nullptr");
+        return false;
+    }
     return appMgrClient_.IsProcessContainsOnlyUIExtension(pid);
 }
 } // namespace AAFwk
