@@ -55,6 +55,8 @@ struct StartAbilityUtils {
     static int32_t CheckAppProvisionMode(const Want& want, int32_t userId);
     static std::vector<int32_t> GetCloneAppIndexes(const std::string &bundleName, int32_t userId);
 
+    static bool IsCallFromAncoShellOrBroker(const sptr<IRemoteObject> &callerToken);
+
     static thread_local std::shared_ptr<StartAbilityInfo> startAbilityInfo;
     static thread_local std::shared_ptr<StartAbilityInfo> callerAbilityInfo;
     static thread_local bool skipCrowTest;

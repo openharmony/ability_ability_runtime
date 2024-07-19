@@ -19,7 +19,6 @@
 #include "ability_util.h"
 #include "ecological_rule/ability_ecological_rule_mgr_service.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "in_process_call_wrapper.h"
 #include "ipc_skeleton.h"
@@ -56,7 +55,7 @@ ErrCode EcologicalRuleInterceptor::DoProcess(AbilityInterceptorParam param)
     }
     AAFwk::Want newWant = param.want;
     newWant.RemoveAllFd();
-    InitErmsCallerInfo(newWant, callerInfo, param.userId, param.callerToken);
+    InitErmsCallerInfo(newWant, param.abilityInfo, callerInfo, param.userId, param.callerToken);
 
     int ret = IN_PROCESS_CALL(AbilityEcologicalRuleMgrServiceClient::GetInstance()->QueryStartExperience(newWant,
         callerInfo, rule));
@@ -117,7 +116,7 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     }
 
     ErmsCallerInfo callerInfo;
-    InitErmsCallerInfo(want, callerInfo, userId);
+    InitErmsCallerInfo(want, nullptr, callerInfo, userId);
 
     ExperienceRule rule;
     AAFwk::Want newWant = want;
@@ -131,7 +130,8 @@ bool EcologicalRuleInterceptor::DoProcess(Want &want, int32_t userId)
     return rule.resultCode == ERMS_ISALLOW_RESULTCODE;
 }
 
-void EcologicalRuleInterceptor::GetEcologicalTargetInfo(const Want &want, ErmsCallerInfo &callerInfo)
+void EcologicalRuleInterceptor::GetEcologicalTargetInfo(const Want &want,
+    const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo, ErmsCallerInfo &callerInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
     callerInfo.targetLinkFeature = want.GetStringParam("send_to_erms_targetLinkFeature");
@@ -144,6 +144,13 @@ void EcologicalRuleInterceptor::GetEcologicalTargetInfo(const Want &want, ErmsCa
             targetAbilityInfo.applicationInfo.bundleType));
         callerInfo.targetAbilityType = targetAbilityInfo.type;
         callerInfo.targetExtensionAbilityType = targetAbilityInfo.extensionAbilityType;
+    } else if (abilityInfo != nullptr) {
+        callerInfo.targetAppDistType = abilityInfo->applicationInfo.appDistributionType;
+        callerInfo.targetAppProvisionType = abilityInfo->applicationInfo.appProvisionType;
+        callerInfo.targetAppType = GetAppTypeByBundleType(static_cast<int32_t>(
+            abilityInfo->applicationInfo.bundleType));
+        callerInfo.targetAbilityType = abilityInfo->type;
+        callerInfo.targetExtensionAbilityType = abilityInfo->extensionAbilityType;
     }
 }
 
@@ -195,15 +202,16 @@ void EcologicalRuleInterceptor::GetEcologicalCallerInfo(const Want &want, ErmsCa
     }
 }
 
-void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want, ErmsCallerInfo &callerInfo, int32_t userId,
-    const sptr<IRemoteObject> &callerToken)
+void EcologicalRuleInterceptor::InitErmsCallerInfo(const Want &want,
+    const std::shared_ptr<AppExecFwk::AbilityInfo> &abilityInfo,
+    ErmsCallerInfo &callerInfo, int32_t userId, const sptr<IRemoteObject> &callerToken)
 {
     callerInfo.packageName = want.GetStringParam(Want::PARAM_RESV_CALLER_BUNDLE_NAME);
     callerInfo.uid = want.GetIntParam(Want::PARAM_RESV_CALLER_UID, IPCSkeleton::GetCallingUid());
     callerInfo.pid = want.GetIntParam(Want::PARAM_RESV_CALLER_PID, IPCSkeleton::GetCallingPid());
     callerInfo.embedded = want.GetIntParam("send_to_erms_embedded", 0);
     
-    GetEcologicalTargetInfo(want, callerInfo);
+    GetEcologicalTargetInfo(want, abilityInfo, callerInfo);
     GetEcologicalCallerInfo(want, callerInfo, userId, callerToken);
     TAG_LOGI(AAFwkTag::ECOLOGICAL_RULE, "The ERMS's %{public}s", callerInfo.ToString().c_str());
 }

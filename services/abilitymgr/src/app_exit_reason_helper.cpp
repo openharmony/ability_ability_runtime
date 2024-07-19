@@ -26,7 +26,6 @@
 #include "bundle_constants.h"
 #include "bundle_mgr_interface.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager_wrapper.h"
 #include "scene_board_judgement.h"
@@ -161,7 +160,7 @@ int32_t AppExitReasonHelper::RecordProcessExitReason(const int32_t pid, const st
 int32_t AppExitReasonHelper::RecordProcessExtensionExitReason(
     const int32_t pid, const std::string &bundleName, const ExitReason &exitReason)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     CHECK_POINTER_AND_RETURN(subManagersHelper_, ERR_NULL_OBJECT);
     auto connectManager = subManagersHelper_->GetCurrentConnectManager();
     CHECK_POINTER_AND_RETURN(connectManager, ERR_NULL_OBJECT);

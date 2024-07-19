@@ -749,6 +749,9 @@ int AbilityManagerStub::OnRemoteRequestInnerNineteenth(uint32_t code, MessagePar
     if (interfaceCode == AbilityManagerInterfaceCode::PRE_START_MISSION) {
         return PreStartMissionInner(data, reply);
     }
+    if (interfaceCode == AbilityManagerInterfaceCode::OPEN_LINK) {
+        return OpenLinkInner(data, reply);
+    }
     return ERR_CODE_NOT_EXIST;
 }
 
@@ -2701,13 +2704,21 @@ int AbilityManagerStub::FreeInstallAbilityFromRemoteInner(MessageParcel &data, M
 
 int AbilityManagerStub::AddFreeInstallObserverInner(MessageParcel &data, MessageParcel &reply)
 {
+    sptr<IRemoteObject> callerToken = nullptr;
+    if (data.ReadBool()) {
+        callerToken = data.ReadRemoteObject();
+        if (callerToken == nullptr) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "caller token is nullptr.");
+            return ERR_INVALID_VALUE;
+        }
+    }
     sptr<AbilityRuntime::IFreeInstallObserver> observer =
         iface_cast<AbilityRuntime::IFreeInstallObserver>(data.ReadRemoteObject());
     if (observer == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "observer is nullptr");
         return ERR_INVALID_VALUE;
     }
-    int32_t result = AddFreeInstallObserver(observer);
+    int32_t result = AddFreeInstallObserver(callerToken, observer);
     if (!reply.WriteInt32(result)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "reply write failed.");
         return ERR_INVALID_VALUE;
@@ -3088,7 +3099,7 @@ int AbilityManagerStub::SendDialogResultInner(MessageParcel &data, MessageParcel
 
 int AbilityManagerStub::RegisterAbilityFirstFrameStateObserverInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto callback = iface_cast<AppExecFwk::IAbilityFirstFrameStateObserver>(data.ReadRemoteObject());
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Callback is null.");
@@ -3106,7 +3117,7 @@ int AbilityManagerStub::RegisterAbilityFirstFrameStateObserverInner(MessageParce
 
 int AbilityManagerStub::UnregisterAbilityFirstFrameStateObserverInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto callback = iface_cast<AppExecFwk::IAbilityFirstFrameStateObserver>(data.ReadRemoteObject());
     if (callback == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Callback is null.");
@@ -3418,7 +3429,7 @@ int AbilityManagerStub::RegisterSessionHandlerInner(MessageParcel &data, Message
 
 int32_t AbilityManagerStub::RegisterAppDebugListenerInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto appDebugLister = iface_cast<AppExecFwk::IAppDebugListener>(data.ReadRemoteObject());
     if (appDebugLister == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "App debug lister is nullptr.");
@@ -3435,7 +3446,7 @@ int32_t AbilityManagerStub::RegisterAppDebugListenerInner(MessageParcel &data, M
 
 int32_t AbilityManagerStub::UnregisterAppDebugListenerInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto appDebugLister = iface_cast<AppExecFwk::IAppDebugListener>(data.ReadRemoteObject());
     if (appDebugLister == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "App debug lister is nullptr.");
@@ -3517,7 +3528,7 @@ int32_t AbilityManagerStub::ExecuteIntentInner(MessageParcel &data, MessageParce
 
 int AbilityManagerStub::StartAbilityForResultAsCallerInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     std::unique_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "The want is nullptr.");
@@ -3536,7 +3547,7 @@ int AbilityManagerStub::StartAbilityForResultAsCallerInner(MessageParcel &data, 
 
 int AbilityManagerStub::StartAbilityForResultAsCallerForOptionsInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     std::unique_ptr<Want> want(data.ReadParcelable<Want>());
     if (want == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "The want is nullptr.");
@@ -3581,7 +3592,7 @@ int32_t AbilityManagerStub::StartAbilityByInsightIntentInner(MessageParcel &data
 
 int32_t AbilityManagerStub::ExecuteInsightIntentDoneInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     auto token = data.ReadRemoteObject();
     if (token == nullptr) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to get remote object.");
@@ -3669,7 +3680,7 @@ int32_t AbilityManagerStub::NotifyDebugAssertResultInner(MessageParcel &data, Me
 
 int32_t AbilityManagerStub::GetForegroundUIAbilitiesInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     std::vector<AppExecFwk::AbilityStateData> abilityStateDatas;
     int32_t result = GetForegroundUIAbilities(abilityStateDatas);
     if (result != ERR_OK) {
@@ -3933,6 +3944,25 @@ int32_t AbilityManagerStub::PreStartMissionInner(MessageParcel &data, MessagePar
     int32_t result = PreStartMission(bundleName, moduleName, abilityName, startTime);
     reply.WriteInt32(result);
     return NO_ERROR;
+}
+
+int32_t AbilityManagerStub::OpenLinkInner(MessageParcel &data, MessageParcel &reply)
+{
+    sptr<Want> want = data.ReadParcelable<Want>();
+    if (want == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want is nullptr.");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> callerToken = data.ReadRemoteObject();
+    int32_t userId = data.ReadInt32();
+    int requestCode = data.ReadInt32();
+
+    int32_t result = OpenLink(*want, callerToken, userId, requestCode);
+    if (result != NO_ERROR && result != ERR_OPEN_LINK_START_ABILITY_DEFAULT_OK) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "OpenLink failed.");
+    }
+    reply.WriteInt32(result);
+    return result;
 }
 } // namespace AAFwk
 } // namespace OHOS

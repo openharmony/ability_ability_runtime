@@ -24,7 +24,6 @@
 #undef protected
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "mock_ability_connect_callback.h"
 #include "mock_ability_manager_collaborator.h"
 #include "session/host/include/session.h"
@@ -1378,7 +1377,7 @@ HWTEST_F(AbilityManagerClientBranchTest, StartAbilityByCall_002, TestSize.Level1
     Want want;
     EXPECT_EQ(client_->StartAbilityByCall(want, nullptr), ERR_OK);
     client_->EnableRecoverAbility(nullptr);
-    EXPECT_EQ(client_->AddFreeInstallObserver(nullptr), ERR_OK);
+    EXPECT_EQ(client_->AddFreeInstallObserver(nullptr, nullptr), ERR_OK);
 }
 
 /**
