@@ -771,6 +771,7 @@ int32_t AmsMgrStub::HandleIsKilledForUpgradeWeb(MessageParcel &data, MessageParc
 
 int32_t AmsMgrStub::HandleIsProcessContainsOnlyUIExtension(MessageParcel &data, MessageParcel &reply)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in ams_mgr_stub.cpp");
     TAG_LOGD(AAFwkTag::APPMGR, "called");
     auto pid = data.ReadUint32();
 

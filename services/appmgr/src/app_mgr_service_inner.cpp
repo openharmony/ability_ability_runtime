@@ -7153,6 +7153,7 @@ bool AppMgrServiceInner::IsKilledForUpgradeWeb(const std::string &bundleName) co
 }
 bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
 {
+    TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: call IsProcessContainsOnlyUIExtension in app_mgr_service_inner");
     auto appRecord = GetAppRunningRecordByPid(pid);
     auto abilityRecordList = appRecord.GetAbilities();
 
