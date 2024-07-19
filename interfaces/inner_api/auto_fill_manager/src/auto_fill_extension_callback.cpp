@@ -18,7 +18,6 @@
 #include "auto_fill_manager.h"
 #include "auto_fill_manager_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "int_wrapper.h"
 #include "string_wrapper.h"
 #include "view_data.h"
@@ -93,7 +92,7 @@ void AutoFillExtensionCallback::OnError(int32_t errCode, const std::string &name
 
 void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wantParams)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     SetModalUIExtensionProxy(nullptr);
 
     auto oldWindowType = autoFillWindowType_;
@@ -119,7 +118,7 @@ void AutoFillExtensionCallback::HandleReloadInModal(const AAFwk::WantParams &wan
 
 int32_t AutoFillExtensionCallback::ReloadInModal(const AAFwk::WantParams &wantParams)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     std::lock_guard<std::mutex> lock(closeMutex_);
     auto uiContent = GetUIContent();
     if (uiContent == nullptr) {
@@ -154,7 +153,7 @@ int32_t AutoFillExtensionCallback::ReloadInModal(const AAFwk::WantParams &wantPa
 
 void AutoFillExtensionCallback::OnReceive(const AAFwk::WantParams &wantParams)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     int32_t cmdValue = wantParams.GetIntParam(WANT_PARAMS_AUTO_FILL_CMD_KEY, 0);
     if (cmdValue == static_cast<int32_t>(AutoFill::AutoFillCommand::RELOAD_IN_MODAL)) {
         HandleReloadInModal(wantParams);
@@ -169,7 +168,7 @@ void AutoFillExtensionCallback::OnReceive(const AAFwk::WantParams &wantParams)
 
 void AutoFillExtensionCallback::UpdateCustomPopupConfig(const AAFwk::WantParams &wantParams)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     AutoFill::AutoFillCustomConfig autoFillCustomConfig = autoFillCustomConfig_;
     if (wantParams.HasParam(WANT_PARAMS_UPDATE_POPUP_WIDTH) &&
         wantParams.HasParam(WANT_PARAMS_UPDATE_POPUP_HEIGHT)) {
@@ -200,7 +199,7 @@ void AutoFillExtensionCallback::UpdateCustomPopupConfig(const AAFwk::WantParams 
 
 void AutoFillExtensionCallback::onRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy> &modalUIExtensionProxy)
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     if (modalUIExtensionProxy == nullptr) {
         TAG_LOGE(AAFwkTag::AUTOFILLMGR, "Proxy is nullptr.");
         return;
@@ -210,7 +209,7 @@ void AutoFillExtensionCallback::onRemoteReady(const std::shared_ptr<Ace::ModalUI
 
 void AutoFillExtensionCallback::onDestroy()
 {
-    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGD(AAFwkTag::AUTOFILLMGR, "called");
     if (isReloadInModal_) {
         isReloadInModal_ = false;
         return;
@@ -338,7 +337,7 @@ void AutoFillExtensionCallback::UpdateCustomPopupUIExtension(const AbilityBase::
 
 void AutoFillExtensionCallback::SendAutoFillSuccess(const AAFwk::Want &want)
 {
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "called");
     std::lock_guard<std::mutex> lock(requestCallbackMutex_);
     if (fillCallback_ != nullptr) {
         std::string dataStr = want.GetStringParam(WANT_PARAMS_VIEW_DATA_KEY);
@@ -357,7 +356,7 @@ void AutoFillExtensionCallback::SendAutoFillSuccess(const AAFwk::Want &want)
 
 void AutoFillExtensionCallback::SendAutoFillFailed(int32_t errCode, const AAFwk::Want &want)
 {
-    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "Called.");
+    TAG_LOGI(AAFwkTag::AUTOFILLMGR, "called");
     std::lock_guard<std::mutex> lock(requestCallbackMutex_);
     if (fillCallback_ != nullptr) {
         std::string fillContent = want.GetStringParam(WANT_PARAMS_FILL_CONTENT);

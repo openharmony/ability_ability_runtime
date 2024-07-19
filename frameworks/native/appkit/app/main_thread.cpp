@@ -74,6 +74,7 @@
 #ifdef CJ_FRONTEND
 #include "cj_runtime.h"
 #endif
+#include "nlohmann/json.hpp"
 #include "ohos_application.h"
 #include "overlay_module_info.h"
 #include "parameters.h"
@@ -156,7 +157,9 @@ const std::string SIGNAL_HANDLER = "OS_SignalHandler";
 constexpr uint32_t CHECK_MAIN_THREAD_IS_ALIVE = 1;
 
 const std::string OVERLAY_STATE_CHANGED = "usual.event.OVERLAY_STATE_CHANGED";
-
+const std::string JSON_KEY_APP_FONT_SIZE_SCALE = "fontSizeScale";
+const std::string JSON_KEY_APP_FONT_MAX_SCALE = "fontSizeMaxScale";
+const std::string JSON_KEY_APP_CONFIGURATION = "configuration";
 const int32_t TYPE_RESERVE = 1;
 const int32_t TYPE_OTHERS = 2;
 
@@ -495,12 +498,13 @@ void MainThread::ScheduleForegroundApplication()
     if (!mainHandler_->PostTask(task, "MainThread:ForegroundApplication")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
-
-    if (watchdog_ == nullptr) {
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
         return;
     }
-    watchdog_->SetBackgroundStatus(false);
+    tmpWatchdog->SetBackgroundStatus(false);
+    tmpWatchdog = nullptr;
 }
 
 /**
@@ -525,11 +529,13 @@ void MainThread::ScheduleBackgroundApplication()
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
 
-    if (watchdog_ == nullptr) {
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
         return;
     }
-    watchdog_->SetBackgroundStatus(true);
+    tmpWatchdog->SetBackgroundStatus(true);
+    tmpWatchdog = nullptr;
 }
 
 /**
@@ -789,8 +795,10 @@ void MainThread::ScheduleLaunchAbility(const AbilityInfo &info, const sptr<IRemo
     auto abilityRecord = std::make_shared<AbilityLocalRecord>(abilityInfo, token);
     abilityRecord->SetWant(want);
     abilityRecord->SetAbilityRecordId(abilityRecordId);
-    if (watchdog_ != nullptr) {
-        watchdog_->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog != nullptr) {
+        tmpWatchdog->SetBgWorkingThreadStatus(IsBgWorkingThread(info));
+        tmpWatchdog = nullptr;
     }
     FreezeUtil::LifecycleFlow flow = { token, FreezeUtil::TimeoutState::LOAD };
     std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
@@ -1378,7 +1386,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     }
 
     auto bundleName = appInfo.bundleName;
-    watchdog_->SetBundleInfo(bundleName, appInfo.versionName);
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog != nullptr) {
+        tmpWatchdog->SetBundleInfo(bundleName, appInfo.versionName);
+        tmpWatchdog = nullptr;
+    }
     BundleInfo bundleInfo;
     if (!GetBundleForLaunchApplication(bundleMgrHelper, bundleName, appLaunchData.GetAppIndex(), bundleInfo)) {
         TAG_LOGE(AAFwkTag::APPKIT, "Failed to get bundle info.");
@@ -1529,6 +1541,9 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         if (applicationInfo_->appProvisionType == Constants::APP_PROVISION_TYPE_DEBUG) {
             TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Multi-Thread Mode: %{public}d.", appLaunchData.GetMultiThread());
             options.isMultiThread = appLaunchData.GetMultiThread();
+            TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Error-Info-Enhance Mode: %{public}d.",
+                appLaunchData.GetErrorInfoEnhance());
+            options.isErrorInfoEnhance = appLaunchData.GetErrorInfoEnhance();
         }
         options.jitEnabled = appLaunchData.IsJITEnabled();
         AbilityRuntime::ChildProcessManager::GetInstance().SetForkProcessJITEnabled(appLaunchData.IsJITEnabled());
@@ -1744,8 +1759,11 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
         return;
     }
 
+    Configuration appConfig = config;
+    ParseAppConfigurationParams(bundleInfo.applicationInfo.configuration, appConfig);
+
     if (!InitResourceManager(resourceManager, entryHapModuleInfo, bundleInfo.name,
-        config, bundleInfo.applicationInfo)) {
+        appConfig, bundleInfo.applicationInfo)) {
         TAG_LOGE(AAFwkTag::APPKIT, "InitResourceManager failed");
         return;
     }
@@ -1756,7 +1774,7 @@ void MainThread::HandleLaunchApplication(const AppLaunchData &appLaunchData, con
     contextDeal->SetApplicationContext(application_);
     application_->AttachBaseContext(contextDeal);
     application_->SetAbilityRecordMgr(abilityRecordMgr_);
-    application_->SetConfiguration(config);
+    application_->SetConfiguration(appConfig);
     contextImpl->SetConfiguration(application_->GetConfiguration());
 
     applicationImpl_->SetRecordId(appLaunchData.GetRecordId());
@@ -2236,7 +2254,7 @@ void MainThread::HandleCleanAbility(const sptr<IRemoteObject> &token, bool isCac
 void MainThread::HandleForegroundApplication()
 {
     HITRACE_METER_NAME(HITRACE_TAG_APP, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::APPKIT, "called.");
+    TAG_LOGI(AAFwkTag::APPKIT, "called.");
     if ((application_ == nullptr) || (appMgr_ == nullptr)) {
         TAG_LOGE(AAFwkTag::APPKIT, "MainThread::handleForegroundApplication error!");
         return;
@@ -2932,13 +2950,15 @@ void MainThread::ScheduleNewProcessRequest(const AAFwk::Want &want, const std::s
 
 void MainThread::CheckMainThreadIsAlive()
 {
-    if (watchdog_ == nullptr) {
+    auto tmpWatchdog = watchdog_;
+    if (tmpWatchdog == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Watch dog is nullptr.");
         return;
     }
 
-    watchdog_->SetAppMainThreadState(true);
-    watchdog_->AllowReportEvent();
+    tmpWatchdog->SetAppMainThreadState(true);
+    tmpWatchdog->AllowReportEvent();
+    tmpWatchdog = nullptr;
 }
 #endif  // ABILITY_LIBRARY_LOADER
 
@@ -3258,19 +3278,19 @@ int32_t MainThread::ChangeAppGcState(int32_t state)
 
 void MainThread::AttachAppDebug()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     SetAppDebug(AbilityRuntime::AppFreezeState::AppFreezeFlag::ATTACH_DEBUG_MODE, true);
 }
 
 void MainThread::DetachAppDebug()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     SetAppDebug(AbilityRuntime::AppFreezeState::AppFreezeFlag::ATTACH_DEBUG_MODE, false);
 }
 
 bool MainThread::NotifyDeviceDisConnect()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     bool isLastProcess = appMgr_->IsFinalAppProcess();
     ScheduleTerminateApplication(isLastProcess);
     return true;
@@ -3278,7 +3298,7 @@ bool MainThread::NotifyDeviceDisConnect()
 
 void MainThread::AssertFaultPauseMainThreadDetection()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     SetAppDebug(AbilityRuntime::AppFreezeState::AppFreezeFlag::ASSERT_DEBUG_MODE, true);
     if (appMgr_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appMgr is nullptr.");
@@ -3289,7 +3309,7 @@ void MainThread::AssertFaultPauseMainThreadDetection()
 
 void MainThread::AssertFaultResumeMainThreadDetection()
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     SetAppDebug(AbilityRuntime::AppFreezeState::AppFreezeFlag::ASSERT_DEBUG_MODE, false);
     if (appMgr_ == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "appMgr is nullptr.");
@@ -3323,7 +3343,7 @@ void MainThread::HandleInitAssertFaultTask(bool isDebugModule, bool isDebugApp)
 
 void MainThread::SetAppDebug(uint32_t modeFlag, bool isDebug)
 {
-    TAG_LOGD(AAFwkTag::APPKIT, "Called.");
+    TAG_LOGD(AAFwkTag::APPKIT, "called");
     auto state = DelayedSingleton<AbilityRuntime::AppFreezeState>::GetInstance();
     if (state == nullptr) {
         TAG_LOGE(AAFwkTag::APPKIT, "Get app freeze state instance is nullptr.");
@@ -3401,6 +3421,43 @@ void MainThread::ScheduleCacheProcess()
     if (!mainHandler_->PostTask(task, "MainThread:ScheduleCacheProcess")) {
         TAG_LOGE(AAFwkTag::APPKIT, "PostTask task failed");
     }
+}
+
+void MainThread::ParseAppConfigurationParams(const std::string configuration, Configuration &appConfig)
+{
+    TAG_LOGD(AAFwkTag::APPKIT, "start");
+    if (configuration.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "the configuration is empty");
+        return;
+    }
+    nlohmann::json configurationJson = nlohmann::json::parse(configuration, nullptr, false);
+    if (configurationJson.is_discarded()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "json discarded error");
+        return;
+    }
+    if (!configurationJson.contains(JSON_KEY_APP_CONFIGURATION)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "app configuration is not exist");
+        return;
+    }
+    nlohmann::json jsonObject = configurationJson.at(JSON_KEY_APP_CONFIGURATION).get<nlohmann::json>();
+    if (jsonObject.empty()) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "app configuration is null");
+        return;
+    }
+    if (jsonObject.contains(JSON_KEY_APP_FONT_SIZE_SCALE)
+        && jsonObject[JSON_KEY_APP_FONT_SIZE_SCALE].is_string()) {
+        appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_SIZE_SCALE,
+            jsonObject.at(JSON_KEY_APP_FONT_SIZE_SCALE).get<std::string>());
+    }
+    if (jsonObject.contains(JSON_KEY_APP_FONT_MAX_SCALE)
+        && jsonObject[JSON_KEY_APP_FONT_MAX_SCALE].is_string()) {
+        std::string appFontMaxScale = jsonObject.at(JSON_KEY_APP_FONT_MAX_SCALE).get<std::string>();
+        const std::regex INTEGER_REGEX("^[-+]?([0-9]+)([.]([0-9]+))?$");
+        if (std::regex_match(appFontMaxScale, INTEGER_REGEX)) {
+            appConfig.AddItem(AAFwk::GlobalConfigurationKey::APP_FONT_MAX_SCALE, appFontMaxScale);
+        }
+    }
+    TAG_LOGD(AAFwkTag::APPKIT, "configuration_: %{public}s", appConfig.GetName().c_str());
 }
 
 /**
