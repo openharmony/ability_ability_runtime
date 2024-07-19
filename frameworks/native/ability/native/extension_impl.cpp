@@ -22,7 +22,6 @@
 #include "ipc_object_proxy.h"
 #include "extension_context.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ui_extension_utils.h"
 
 
@@ -94,7 +93,7 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
     sptr<AAFwk::SessionInfo> sessionInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "sourceState:%{public}d;targetState:%{public}d;isNewWant:%{public}d",
+    TAG_LOGI(AAFwkTag::EXT, "sourceState:%{public}d;targetState:%{public}d;isNewWant:%{public}d",
         lifecycleState_, targetState.state, targetState.isNewWant);
     if (lifecycleState_ == targetState.state) {
         TAG_LOGE(AAFwkTag::EXT, "Org lifeCycleState equals to Dst lifeCycleState.");
@@ -102,7 +101,6 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
     }
     SetLaunchParam(targetState.launchParam);
     bool ret = true;
-
     switch (targetState.state) {
         case AAFwk::ABILITY_STATE_INITIAL: {
             bool isAsyncCallback = false;
@@ -137,7 +135,6 @@ void ExtensionImpl::HandleExtensionTransaction(const Want &want, const AAFwk::Li
             break;
         }
     }
-
     if (ret && !UIExtensionAbilityExecuteInsightIntent(want)) {
         TAG_LOGD(AAFwkTag::EXT, "call abilityms");
         AAFwk::PacMap restoreData;
@@ -192,7 +189,8 @@ void ExtensionImpl::Start(const Want &want, sptr<AAFwk::SessionInfo> sessionInfo
     }
 
     TAG_LOGD(AAFwkTag::EXT, "ExtensionImpl::Start");
-    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW) {
+    if (extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::WINDOW ||
+        extension_->abilityInfo_->extensionAbilityType == AppExecFwk::ExtensionAbilityType::UI_SERVICE) {
         extension_->OnStart(want, sessionInfo);
     } else {
         extension_->OnStart(want);
@@ -470,7 +468,7 @@ void ExtensionImpl::SendResult(int requestCode, int resultCode, const Want &resu
 
 void ExtensionImpl::SetLaunchParam(const AAFwk::LaunchParam &launchParam)
 {
-    TAG_LOGD(AAFwkTag::EXT, "Called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
     if (extension_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "Extension is nullptr.");
         return;

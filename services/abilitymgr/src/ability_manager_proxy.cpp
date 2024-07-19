@@ -3113,7 +3113,7 @@ int AbilityManagerProxy::SendDialogResult(const Want &want, const std::string &d
 int32_t AbilityManagerProxy::RegisterAbilityFirstFrameStateObserver(
     const sptr<IAbilityFirstFrameStateObserver> &observer, const std::string &targetBundleName)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
@@ -3143,7 +3143,7 @@ int32_t AbilityManagerProxy::RegisterAbilityFirstFrameStateObserver(
 int32_t AbilityManagerProxy::UnregisterAbilityFirstFrameStateObserver(
     const sptr<IAbilityFirstFrameStateObserver> &observer)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
@@ -3884,14 +3884,32 @@ int AbilityManagerProxy::FreeInstallAbilityFromRemote(const Want &want, const sp
     return reply.ReadInt32();
 }
 
-int AbilityManagerProxy::AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
+int AbilityManagerProxy::AddFreeInstallObserver(const sptr<IRemoteObject> &callerToken,
+    const sptr<AbilityRuntime::IFreeInstallObserver> &observer)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
+    if (observer == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "observer is nullptr.");
+        return INNER_ERR;
+    }
+
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "write interface token failed.");
         return INNER_ERR;
+    }
+
+    if (callerToken) {
+        if (!data.WriteBool(true) || !data.WriteRemoteObject(callerToken)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write flag and callerToken.");
+            return INNER_ERR;
+        }
+    } else {
+        if (!data.WriteBool(false)) {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Failed to write flag.");
+            return INNER_ERR;
+        }
     }
 
     if (!data.WriteRemoteObject(observer->AsObject())) {
@@ -4622,7 +4640,7 @@ int AbilityManagerProxy::PrepareTerminateAbilityBySCB(const sptr<SessionInfo> &s
 
 int32_t AbilityManagerProxy::RegisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
@@ -4646,7 +4664,7 @@ int32_t AbilityManagerProxy::RegisterAppDebugListener(sptr<AppExecFwk::IAppDebug
 
 int32_t AbilityManagerProxy::UnregisterAppDebugListener(sptr<AppExecFwk::IAppDebugListener> listener)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
@@ -4670,7 +4688,7 @@ int32_t AbilityManagerProxy::UnregisterAppDebugListener(sptr<AppExecFwk::IAppDeb
 
 int32_t AbilityManagerProxy::AttachAppDebug(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
@@ -4694,7 +4712,7 @@ int32_t AbilityManagerProxy::AttachAppDebug(const std::string &bundleName)
 
 int32_t AbilityManagerProxy::DetachAppDebug(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write interface token failed.");
@@ -4719,7 +4737,7 @@ int32_t AbilityManagerProxy::DetachAppDebug(const std::string &bundleName)
 int32_t AbilityManagerProxy::ExecuteIntent(uint64_t key,  const sptr<IRemoteObject> &callerToken,
     const InsightIntentExecuteParam &param)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -4779,7 +4797,7 @@ bool AbilityManagerProxy::IsAbilityControllerStart(const Want &want)
 int32_t AbilityManagerProxy::ExecuteInsightIntentDone(const sptr<IRemoteObject> &token, uint64_t intentId,
     const InsightIntentExecuteResult &result)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Write remote object failed.");
@@ -4808,7 +4826,7 @@ int32_t AbilityManagerProxy::ExecuteInsightIntentDone(const sptr<IRemoteObject> 
 
 int32_t AbilityManagerProxy::GetForegroundUIAbilities(std::vector<AppExecFwk::AbilityStateData> &list)
 {
-    TAG_LOGD(AAFwkTag::ABILITYMGR, "Called.");
+    TAG_LOGD(AAFwkTag::ABILITYMGR, "called");
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
         return ERR_FLATTEN_OBJECT;
@@ -5370,6 +5388,43 @@ int32_t AbilityManagerProxy::PreStartMission(const std::string& bundleName, cons
         return INNER_ERR;
     }
     auto error = SendRequest(AbilityManagerInterfaceCode::PRE_START_MISSION, data, reply, option);
+    if (error != NO_ERROR) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
+        return error;
+    }
+    return reply.ReadInt32();
+}
+
+ErrCode AbilityManagerProxy::OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
+    int32_t userId, int requestCode)
+{
+    if (callerToken == nullptr) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken is nullptr");
+        return INNER_ERR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!WriteInterfaceToken(data)) {
+        return IPC_PROXY_ERR;
+    }
+    if (!data.WriteParcelable(&want)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "want write failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteRemoteObject(callerToken)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "callerToken write failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(userId)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "userId write failed.");
+        return INNER_ERR;
+    }
+    if (!data.WriteInt32(requestCode)) {
+        TAG_LOGE(AAFwkTag::ABILITYMGR, "requestCode write failed.");
+        return INNER_ERR;
+    }
+    auto error = SendRequest(AbilityManagerInterfaceCode::OPEN_LINK, data, reply, option);
     if (error != NO_ERROR) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Send request error: %{public}d", error);
         return error;

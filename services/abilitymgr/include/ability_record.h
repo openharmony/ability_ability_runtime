@@ -21,6 +21,7 @@
 #include <list>
 #include <memory>
 #include <vector>
+#include <utility>
 #include "cpp/mutex.h"
 #include "cpp/condition_variable.h"
 
@@ -249,13 +250,16 @@ struct AbilityRequest {
     sptr<SessionInfo> sessionInfo;
     uint32_t specifyTokenId = 0;
 
-    bool IsContinuation() const
+    std::pair<bool, LaunchReason> IsContinuation() const
     {
         auto flags = want.GetFlags();
         if ((flags & Want::FLAG_ABILITY_CONTINUATION) == Want::FLAG_ABILITY_CONTINUATION) {
-            return true;
+            return {true, LaunchReason::LAUNCHREASON_CONTINUATION};
         }
-        return false;
+        if ((flags & Want::FLAG_ABILITY_PREPARE_CONTINUATION) == Want::FLAG_ABILITY_PREPARE_CONTINUATION) {
+            return {true, LaunchReason::LAUNCHREASON_PREPARE_CONTINUATION};
+        }
+        return {false, LaunchReason::LAUNCHREASON_UNKNOWN};
     }
 
     bool IsAcquireShareData() const
@@ -622,10 +626,22 @@ public:
     void ConnectAbility();
 
     /**
+     * connect the ability.
+     *
+     */
+    void ConnectUIServiceExtAbility(const Want &want);
+
+    /**
      * disconnect the ability.
      *
      */
     void DisconnectAbility();
+
+    /**
+     * disconnect the ability with want
+     *
+     */
+    void DisconnectUIServiceExtAbility(const Want &want);
 
     /**
      * Command the ability.
@@ -739,6 +755,11 @@ public:
      */
     std::list<std::shared_ptr<ConnectionRecord>> GetConnectingRecordList();
 
+    /**
+     * get the count of In Progress record.
+     *
+     */
+    uint32_t GetInProgressRecordCount();
     /**
      * remove the connect record from list.
      *

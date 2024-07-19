@@ -18,7 +18,6 @@
 
 #include "ability_manager_interface.h"
 #include "auto_startup_info.h"
-#include "hilog_wrapper.h"
 #include "iremote_proxy.h"
 #include "mission_info.h"
 
@@ -886,7 +885,8 @@ public:
      * @param observer the observer of ability free install start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
+    virtual int AddFreeInstallObserver(const sptr<IRemoteObject> &callerToken,
+        const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
 
     /**
      * Called when client complete dump.
@@ -1289,6 +1289,18 @@ public:
      */
     virtual int32_t PreStartMission(const std::string& bundleName, const std::string& moduleName,
         const std::string& abilityName, const std::string& startTime) override;
+
+    /**
+     * Open link of ability and atomic service.
+     *
+     * @param want Ability want.
+     * @param callerToken Caller ability token.
+     * @param userId User ID.
+     * @param requestCode Ability request code.
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    virtual int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE) override;
 
 private:
     template <typename T>

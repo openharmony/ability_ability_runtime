@@ -22,7 +22,6 @@
 #include <iremote_stub.h>
 
 #include "dlp_connection_info.h"
-#include "hilog_wrapper.h"
 #include "iconnection_observer.h"
 
 namespace OHOS {
@@ -341,6 +340,7 @@ private:
         MessageParcel &reply, MessageOption &option);
     int HandleOnRemoteRequestInnerSecond(uint32_t code, MessageParcel &data,
         MessageParcel &reply, MessageOption &option);
+    int32_t OpenLinkInner(MessageParcel &data, MessageParcel &reply);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

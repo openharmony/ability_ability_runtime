@@ -20,7 +20,6 @@
 #include "auto_fill_error.h"
 #include "auto_fill_extension_callback.h"
 #include "extension_ability_info.h"
-#include "hilog_wrapper.h"
 #include "mock_ui_content.h"
 #undef private
 
@@ -235,6 +234,24 @@ HWTEST_F(AutoFillManagerTest, ConvertAutoFillWindowType_0100, TestSize.Level1)
     manager.ConvertAutoFillWindowType(autoFillRequest, isSmartAutoFill, autoFillWindowType);
     EXPECT_EQ(isSmartAutoFill, true);
     EXPECT_EQ(autoFillWindowType, AbilityRuntime::AutoFill::AutoFillWindowType::MODAL_WINDOW);
+}
+
+/*
+ * Feature: AutoFillManager
+ * Function: IsNeedToCreatePopupWindow
+ * SubFunction: NA
+ * FunctionPoints: NA
+ * EnvConditions: NA
+ * CaseDescription: pull up the windowType and extension types.
+ */
+HWTEST_F(AutoFillManagerTest, IsNeedToCreatePopupWindow_0100, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AutoFillManagerTest, IsNeedToCreatePopupWindow_0100, TestSize.Level1";
+    auto &manager = AbilityRuntime::AutoFillManager::GetInstance();
+    bool isPopupAutoFill = false;
+
+    isPopupAutoFill = manager.IsNeedToCreatePopupWindow(AbilityBase::AutoFillType::PERSON_FULL_NAME);
+    EXPECT_EQ(isPopupAutoFill, true);
 }
 } // namespace AppExecFwk
 } // namespace OHOS
