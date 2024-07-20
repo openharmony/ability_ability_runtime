@@ -35,11 +35,11 @@ const int LOAD_SA_TIMEOUT_MS = 4 * 1000;
 int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &quickFixFiles, bool isDebug)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function called.");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "called");
 
     auto quickFixMgr = GetQuickFixMgrProxy();
     if (quickFixMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Get quick fix manager service failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Get quick fix manager service failed");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
@@ -48,7 +48,7 @@ int32_t QuickFixManagerClient::ApplyQuickFix(const std::vector<std::string> &qui
         return QUICK_FIX_CONNECT_FAILED;
     }
 
-    TAG_LOGD(AAFwkTag::QUICKFIX, "hqf file number need to apply: %{public}zu.", quickFixFiles.size());
+    TAG_LOGD(AAFwkTag::QUICKFIX, "hqf file number need to apply: %{public}zu", quickFixFiles.size());
     std::vector<std::string> destFiles;
     auto copyRet = bundleQuickFixMgr->CopyFiles(quickFixFiles, destFiles);
     if (copyRet != 0) {
@@ -64,11 +64,11 @@ int32_t QuickFixManagerClient::GetApplyedQuickFixInfo(const std::string &bundleN
     ApplicationQuickFixInfo &quickFixInfo)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function called.");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "called");
 
     auto quickFixMgr = GetQuickFixMgrProxy();
     if (quickFixMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Get quick fix manager service failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Get quick fix manager service failed");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
@@ -78,21 +78,21 @@ int32_t QuickFixManagerClient::GetApplyedQuickFixInfo(const std::string &bundleN
 sptr<IQuickFixManager> QuickFixManagerClient::GetQuickFixMgrProxy()
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function called.");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "function called");
     auto quickFixMgr = GetQuickFixMgr();
     if (quickFixMgr != nullptr) {
-        TAG_LOGD(AAFwkTag::QUICKFIX, "Quick fix manager has been started.");
+        TAG_LOGD(AAFwkTag::QUICKFIX, "Quick fix manager has been started");
         return quickFixMgr;
     }
 
     if (!LoadQuickFixMgrService()) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Load quick fix manager service failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Load quick fix manager service failed");
         return nullptr;
     }
 
     quickFixMgr = GetQuickFixMgr();
     if (quickFixMgr == nullptr || quickFixMgr->AsObject() == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Failed to get quick fix manager.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Failed to get quick fix manager");
         return nullptr;
     }
 
@@ -107,28 +107,27 @@ sptr<IQuickFixManager> QuickFixManagerClient::GetQuickFixMgrProxy()
     sptr<QfmsDeathRecipient> recipient(new (std::nothrow) QfmsDeathRecipient(onClearProxyCallback));
     quickFixMgr->AsObject()->AddDeathRecipient(recipient);
 
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function finished.");
     return quickFixMgr;
 }
 
 int32_t QuickFixManagerClient::RevokeQuickFix(const std::string &bundleName)
 {
-    TAG_LOGD(AAFwkTag::QUICKFIX, "Function called.");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "called");
 
     auto quickFixMgr = GetQuickFixMgrProxy();
     if (quickFixMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Get quick fix manager service failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Get quick fix manager service failed");
         return QUICK_FIX_CONNECT_FAILED;
     }
 
     auto retval = quickFixMgr->RevokeQuickFix(bundleName);
-    TAG_LOGD(AAFwkTag::QUICKFIX, "Function call end, retval is %{public}d.", retval);
+    TAG_LOGD(AAFwkTag::QUICKFIX, "Function call end, retval is %{public}d", retval);
     return retval;
 }
 
 void QuickFixManagerClient::ClearProxy()
 {
-    TAG_LOGD(AAFwkTag::QUICKFIX, "function called.");
+    TAG_LOGD(AAFwkTag::QUICKFIX, "called");
     std::lock_guard<std::mutex> lock(mutex_);
     quickFixMgr_ = nullptr;
 }
@@ -136,7 +135,7 @@ void QuickFixManagerClient::ClearProxy()
 void QuickFixManagerClient::QfmsDeathRecipient::OnRemoteDied([[maybe_unused]] const wptr<IRemoteObject> &remote)
 {
     if (proxy_ != nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "quick fix manager service died.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "quick fix manager service died");
         proxy_(remote);
     }
 }
@@ -152,19 +151,19 @@ bool QuickFixManagerClient::LoadQuickFixMgrService()
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, "GetSystemAbilityManager");
     auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (systemAbilityMgr == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Failed to get SystemAbilityManager.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Failed to get SystemAbilityManager");
         return false;
     }
 
     sptr<QuickFixLoadCallback> loadCallback = new (std::nothrow) QuickFixLoadCallback();
     if (loadCallback == nullptr) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Create load callback failed.");
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Create load callback failed");
         return false;
     }
 
     auto ret = systemAbilityMgr->LoadSystemAbility(QUICK_FIX_MGR_SERVICE_ID, loadCallback);
     if (ret != 0) {
-        TAG_LOGE(AAFwkTag::QUICKFIX, "Load system ability %{public}d failed with %{public}d.", QUICK_FIX_MGR_SERVICE_ID,
+        TAG_LOGE(AAFwkTag::QUICKFIX, "Load system ability %{public}d failed with %{public}d", QUICK_FIX_MGR_SERVICE_ID,
             ret);
         return false;
     }
@@ -176,7 +175,7 @@ bool QuickFixManagerClient::LoadQuickFixMgrService()
                 return loadSaFinished_;
             });
         if (!waitStatus) {
-            TAG_LOGE(AAFwkTag::QUICKFIX, "Wait for load sa timeout.");
+            TAG_LOGE(AAFwkTag::QUICKFIX, "Wait for load sa timeout");
             return false;
         }
     }
