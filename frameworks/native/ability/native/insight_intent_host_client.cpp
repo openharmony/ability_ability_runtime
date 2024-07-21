@@ -26,7 +26,7 @@ sptr<InsightIntentHostClient> InsightIntentHostClient::GetInstance()
 {
     std::call_once(singletonFlag_, []() {
         instance_ = new (std::nothrow) InsightIntentHostClient();
-    })
+    });
     return instance_;
 }
 
