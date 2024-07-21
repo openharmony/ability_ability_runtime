@@ -252,6 +252,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
         if (abilityRecord->GetWant().GetBoolParam(Want::PARAM_RESV_CALL_TO_FOREGROUND, false)) {
             abilityRecord->SetStartToForeground(true);
             abilityRecord->PostForegroundTimeoutTask();
+            abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
             DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
         } else {
             abilityRecord->SetStartToBackground(true);
@@ -263,6 +264,7 @@ int UIAbilityLifecycleManager::AttachAbilityThread(const sptr<IAbilityScheduler>
         abilityRecord->CallRequest();
     }
     abilityRecord->PostForegroundTimeoutTask();
+    abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
     DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(token);
     return ERR_OK;
 }
@@ -1100,6 +1102,7 @@ void UIAbilityLifecycleManager::CompleteBackground(const std::shared_ptr<Ability
 
     if (abilityRecord->GetPendingState() == AbilityState::FOREGROUND) {
         abilityRecord->PostForegroundTimeoutTask();
+        abilityRecord->SetAbilityState(AbilityState::FOREGROUNDING);
         DelayedSingleton<AppScheduler>::GetInstance()->MoveToForeground(abilityRecord->GetToken());
     } else if (abilityRecord->GetPendingState() == AbilityState::BACKGROUND) {
         TAG_LOGD(AAFwkTag::ABILITYMGR, "not continuous startup.");
