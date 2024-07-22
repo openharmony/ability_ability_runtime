@@ -313,7 +313,7 @@ void FAAbilityThread::AttachInner(const std::shared_ptr<AppExecFwk::OHOSApplicat
     }
     abilityImpl_->Init(application, abilityRecord, currentAbility_, abilityHandler_, token_);
     // 4. ability attach : ipc
-    TAG_LOGD(AAFwkTag::FA, "LoadLifecycle: Attach ability.");
+    TAG_LOGD(AAFwkTag::FA, "LoadLifecycle: Attach ability");
     FreezeUtil::LifecycleFlow flow = { token_, FreezeUtil::TimeoutState::LOAD };
     std::string entry = std::to_string(AbilityRuntime::TimeUtil::SystemTimeMillisecond()) +
         "; AbilityThread::Attach; the load lifecycle.";

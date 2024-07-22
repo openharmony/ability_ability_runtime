@@ -27,18 +27,18 @@ void NAPIDataAbilityObserver::ReleaseJSCallback()
 {
     std::lock_guard<std::mutex> lock(mutex_);
     if (ref_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "NAPIDataAbilityObserver::ReleaseJSCallback, ref_ is null.");
+        TAG_LOGE(AAFwkTag::FA, "ref_ is null");
         return;
     }
 
     if (isCallingback_) {
         needRelease_ = true;
-        TAG_LOGW(AAFwkTag::FA, "%{public}s, ref_ is calling back.", __func__);
+        TAG_LOGW(AAFwkTag::FA, "ref_ is calling back");
         return;
     }
 
     SafeReleaseJSCallback();
-    TAG_LOGI(AAFwkTag::FA, "NAPIDataAbilityObserver::%{public}s, called. end", __func__);
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void NAPIDataAbilityObserver::SafeReleaseJSCallback()
@@ -46,7 +46,7 @@ void NAPIDataAbilityObserver::SafeReleaseJSCallback()
     uv_loop_s* loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, loop == nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "loop == nullptr");
         return;
     }
 
@@ -100,25 +100,25 @@ void NAPIDataAbilityObserver::SafeReleaseJSCallback()
 void NAPIDataAbilityObserver::SetEnv(const napi_env &env)
 {
     env_ = env;
-    TAG_LOGI(AAFwkTag::FA, "NAPIDataAbilityObserver::%{public}s, called. end", __func__);
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void NAPIDataAbilityObserver::SetCallbackRef(const napi_ref &ref)
 {
     ref_ = ref;
-    TAG_LOGI(AAFwkTag::FA, "NAPIDataAbilityObserver::%{public}s, called. end", __func__);
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 static void OnChangeJSThreadWorker(uv_work_t *work, int status)
 {
-    TAG_LOGI(AAFwkTag::FA, "OnChange, uv_queue_work");
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (work == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "OnChange, uv_queue_work input work is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "input work is nullptr");
         return;
     }
     DAHelperOnOffCB *onCB = (DAHelperOnOffCB *)work->data;
     if (onCB == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "OnChange, uv_queue_work onCB is nullptr");
+        TAG_LOGE(AAFwkTag::FA, "onCB is nullptr");
         delete work;
         work = nullptr;
         return;
@@ -132,7 +132,7 @@ static void OnChangeJSThreadWorker(uv_work_t *work, int status)
     onCB = nullptr;
     delete work;
     work = nullptr;
-    TAG_LOGI(AAFwkTag::FA, "OnChange, uv_queue_work. end");
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 void NAPIDataAbilityObserver::CallJsMethod()
@@ -140,7 +140,7 @@ void NAPIDataAbilityObserver::CallJsMethod()
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (ref_ == nullptr || env_ == nullptr) {
-            TAG_LOGW(AAFwkTag::FA, "%{public}s observer is invalid.", __func__);
+            TAG_LOGW(AAFwkTag::FA, "observer is invalid");
             return;
         }
         isCallingback_ = true;
@@ -157,7 +157,7 @@ void NAPIDataAbilityObserver::CallJsMethod()
     {
         std::lock_guard<std::mutex> lock(mutex_);
         if (needRelease_ && ref_ != nullptr) {
-            TAG_LOGI(AAFwkTag::FA, "%{public}s to delete callback.", __func__);
+            TAG_LOGI(AAFwkTag::FA, "to delete callback");
             napi_delete_reference(env_, ref_);
             ref_ = nullptr;
             needRelease_ = false;
@@ -169,13 +169,13 @@ void NAPIDataAbilityObserver::CallJsMethod()
 void NAPIDataAbilityObserver::OnChange()
 {
     if (ref_ == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, OnChange ref is nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "ref is nullptr");
         return;
     }
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(env_, &loop);
     if (loop == nullptr) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, loop is nullptr.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "loop is nullptr");
         return;
     }
 
@@ -198,7 +198,7 @@ void NAPIDataAbilityObserver::OnChange()
             work = nullptr;
         }
     }
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, called. end", __func__);
+    TAG_LOGI(AAFwkTag::FA, "end");
 }
 
 }  // namespace AppExecFwk
