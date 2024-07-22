@@ -501,7 +501,6 @@ void GetFileTypesPromiseCompleteCB(napi_env env, napi_status status, void *data)
 
 napi_value WrapGetFileTypesCB(napi_env env, const DAHelperGetFileTypesCB &getfiletypesCB)
 {
-    TAG_LOGI(AAFwkTag::FA, "called");
     TAG_LOGI(AAFwkTag::FA, "result.size:%{public}zu", getfiletypesCB.result.size());
     for (size_t i = 0; i < getfiletypesCB.result.size(); i++) {
         TAG_LOGI(
