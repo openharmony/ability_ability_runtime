@@ -28,7 +28,7 @@ InsightIntentExecuteCallbackStub::InsightIntentExecuteCallbackStub()
 
 InsightIntentExecuteCallbackStub::~InsightIntentExecuteCallbackStub()
 {
-    TAG_LOGD(AAFwkTag::INTENT, "call");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     requestFuncMap_.clear();
 }
 
@@ -36,7 +36,7 @@ int32_t InsightIntentExecuteCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != IInsightIntentExecuteCallback::GetDescriptor()) {
-        TAG_LOGE(AAFwkTag::INTENT, "InterfaceToken not equal IInsightIntentExecuteCallback's descriptor.");
+        TAG_LOGE(AAFwkTag::INTENT, "InterfaceToken not equal IInsightIntentExecuteCallback's descriptor");
         return ERR_INVALID_STATE;
     }
 
@@ -47,13 +47,13 @@ int32_t InsightIntentExecuteCallbackStub::OnRemoteRequest(
             return (this->*requestFunc)(data, reply);
         }
     }
-    TAG_LOGW(AAFwkTag::INTENT, "default case, need check.");
+    TAG_LOGW(AAFwkTag::INTENT, "default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 int32_t InsightIntentExecuteCallbackStub::OnExecuteDoneInner(MessageParcel &data, MessageParcel &reply)
 {
-    TAG_LOGD(AAFwkTag::INTENT, "call");
+    TAG_LOGD(AAFwkTag::INTENT, "called");
     uint64_t key = data.ReadUint64();
     int32_t resultCode = data.ReadInt32();
     std::shared_ptr<AppExecFwk::InsightIntentExecuteResult> executeResult(
