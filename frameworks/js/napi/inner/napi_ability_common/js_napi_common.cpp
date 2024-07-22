@@ -40,7 +40,7 @@ JsNapiCommon::~JsNapiCommon()
 napi_value JsNapiCommon::HandleJsConnectAbilityError(napi_env env,
     std::shared_ptr<ConnectionCallback> &connectionCallback, const Want &want, int32_t errorVal)
 {
-    TAG_LOGE(AAFwkTag::JSNAPI, "CommonJsConnectAbility failed.");
+    TAG_LOGE(AAFwkTag::JSNAPI, "CommonJsConnectAbility failed");
     // return error code in onFailed async callback
     napi_value callback = nullptr;
     napi_value undefinedVal = nullptr;
@@ -70,7 +70,7 @@ napi_value JsNapiCommon::HandleJsConnectAbilityError(napi_env env,
 napi_value JsNapiCommon::OnFindAbilityConnection(napi_env env, sptr<NAPIAbilityConnection> &abilityConnection,
     std::shared_ptr<ConnectionCallback> &connectionCallback, const Want &want, int64_t id)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "find abilityConnection exist, current callbackSize: %{public}zu.",
+    TAG_LOGI(AAFwkTag::JSNAPI, "find abilityConnection exist, current callbackSize: %{public}zu",
         abilityConnection->GetCallbackSize());
     // Add callback to connection
     abilityConnection->AddConnectionCallback(connectionCallback);
@@ -90,7 +90,7 @@ napi_value JsNapiCommon::OnFindAbilityConnection(napi_env env, sptr<NAPIAbilityC
 
 napi_value JsNapiCommon::JsConnectAbility(napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s is called", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -140,7 +140,7 @@ void JsNapiCommon::SetJsDisConnectAbilityCallback(std::shared_ptr<int32_t> &erro
     execute = [obj = this, value = errorVal, abilityType, abilityConnection] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
@@ -184,7 +184,7 @@ napi_value JsNapiCommon::JsDisConnectAbility(napi_env env, napi_callback_info in
     if (item != connects_.end()) {
         abilityConnection = item->second;
     } else {
-        TAG_LOGE(AAFwkTag::JSNAPI, "there is no ability to disconnect.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "there is no ability to disconnect");
         return CreateJsUndefined(env);
     }
 
@@ -228,7 +228,7 @@ bool JsNapiCommon::CreateConnectionAndConnectAbilityLocked(
 
 sptr<NAPIAbilityConnection> JsNapiCommon::FindConnectionLocked(const Want &want, int64_t &id)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s uri:%{public}s", __func__, want.GetElement().GetURI().c_str());
+    TAG_LOGD(AAFwkTag::JSNAPI, "called uri:%{public}s", want.GetElement().GetURI().c_str());
     std::string deviceId = want.GetElement().GetDeviceID();
     std::string bundleName = want.GetBundle();
     std::string abilityName = want.GetElement().GetAbilityName();
@@ -255,7 +255,7 @@ sptr<NAPIAbilityConnection> JsNapiCommon::FindConnectionLocked(const Want &want,
 
 void JsNapiCommon::RemoveAllCallbacksLocked()
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "RemoveAllCallbacksLocked begin");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     std::lock_guard<std::mutex> lock(g_connectionsLock_);
     for (auto it = connects_.begin(); it != connects_.end();) {
         auto connection = it->second;
@@ -300,12 +300,12 @@ napi_value JsNapiCommon::JsGetContext(napi_env env, const napi_callback_info inf
 
 napi_value JsNapiCommon::JsGetFilesDir(napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetFilesDir called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "JsGetFilesDir input params count error, argc=%{public}zu", argc);
+        TAG_LOGE(AAFwkTag::JSNAPI, "input params count error, argc=%{public}zu", argc);
         return CreateJsUndefined(env);
     }
 
@@ -314,7 +314,7 @@ napi_value JsNapiCommon::JsGetFilesDir(napi_env env, napi_callback_info info, co
     auto execute = [obj = this, dir = filesDir, abilityType, value = errorVal] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsGetFilesDir task execute error, the ability is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
@@ -324,7 +324,7 @@ napi_value JsNapiCommon::JsGetFilesDir(napi_env env, napi_callback_info info, co
         auto context = obj->ability_->GetAbilityContext();
         if (context == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsGetFilesDir task execute error, the abilitycontext is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the abilitycontext is nullptr");
             return;
         }
         dir->name = context->GetFilesDir();
@@ -349,12 +349,12 @@ napi_value JsNapiCommon::JsGetFilesDir(napi_env env, napi_callback_info info, co
 napi_value JsNapiCommon::JsIsUpdatingConfigurations(
     napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsIsUpdatingConfigurations called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "JsIsUpdatingConfigurations input params count error, argc=%{public}zu", argc);
+        TAG_LOGE(AAFwkTag::JSNAPI, "input params count error, argc=%{public}zu", argc);
         return CreateJsUndefined(env);
     }
 
@@ -363,7 +363,7 @@ napi_value JsNapiCommon::JsIsUpdatingConfigurations(
     auto execute = [obj = this, data = config, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsIsUpdatingConfigurations task execute error, the ability is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
@@ -372,7 +372,7 @@ napi_value JsNapiCommon::JsIsUpdatingConfigurations(
         }
         if (data == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsIsUpdatingConfigurations task execute error, param is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, param is nullptr");
             return;
         }
         data->status = obj->ability_->IsUpdatingConfigurations();
@@ -398,12 +398,12 @@ napi_value JsNapiCommon::JsIsUpdatingConfigurations(
 napi_value JsNapiCommon::JsPrintDrawnCompleted(
     napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsPrintDrawnCompleted called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "JsPrintDrawnCompleted input params count error, argc=%{public}zu", argc);
+        TAG_LOGE(AAFwkTag::JSNAPI, "input params count error, argc=%{public}zu", argc);
         return CreateJsUndefined(env);
     }
 
@@ -412,7 +412,7 @@ napi_value JsNapiCommon::JsPrintDrawnCompleted(
     auto execute = [obj = this, data = drawComplete, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsPrintDrawnCompleted task execute error, the ability is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
@@ -421,7 +421,7 @@ napi_value JsNapiCommon::JsPrintDrawnCompleted(
         }
         if (data == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsPrintDrawnCompleted task execute error, data is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, data is nullptr");
             return;
         }
         data->status = obj->ability_->PrintDrawnCompleted();
@@ -446,12 +446,12 @@ napi_value JsNapiCommon::JsPrintDrawnCompleted(
 
 napi_value JsNapiCommon::JsGetCacheDir(napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetCacheDir called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "JsGetCacheDir input params count error, argc=%{public}zu", argc);
+        TAG_LOGE(AAFwkTag::JSNAPI, "input params count error, argc=%{public}zu", argc);
         return CreateJsUndefined(env);
     }
 
@@ -460,7 +460,7 @@ napi_value JsNapiCommon::JsGetCacheDir(napi_env env, napi_callback_info info, co
     auto execute = [obj = this, dir = cacheDir, value = errorVal, abilityType] () {
         if (obj->ability_ == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ACE_ABILITY);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsGetCacheDir task execute error, the ability is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability is nullptr");
             return;
         }
         if (!obj->CheckAbilityType(abilityType)) {
@@ -470,7 +470,7 @@ napi_value JsNapiCommon::JsGetCacheDir(napi_env env, napi_callback_info info, co
         auto context = obj->ability_->GetAbilityContext();
         if (context == nullptr) {
             *value = static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID);
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsGetCacheDir task execute error, the ability context is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "task execute error, the ability context is nullptr");
             return;
         }
         dir->name = context->GetCacheDir();
@@ -497,7 +497,7 @@ napi_value JsNapiCommon::JsGetCacheDir(napi_env env, napi_callback_info info, co
 napi_value JsNapiCommon::JsGetCtxAppType(
     napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetCtxAppType called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -545,7 +545,7 @@ napi_value JsNapiCommon::JsGetCtxAppType(
 napi_value JsNapiCommon::JsGetCtxHapModuleInfo(
     napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetCtxHapModuleInfo called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -577,7 +577,7 @@ napi_value JsNapiCommon::JsGetCtxHapModuleInfo(
     auto complete = [obj = this, info = infoData, value = errorVal]
         (napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
-            TAG_LOGD(AAFwkTag::JSNAPI, "JsHapModuleInfo is null or errorVal is 0.");
+            TAG_LOGD(AAFwkTag::JSNAPI, "JsHapModuleInfo is null or errorVal is 0");
             auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(env, CreateJsError(env, ecode, obj->ConvertErrorCode(ecode)));
             return;
@@ -596,7 +596,7 @@ napi_value JsNapiCommon::JsGetCtxHapModuleInfo(
 napi_value JsNapiCommon::JsGetAppVersionInfo(
     napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetAppVersionInfo called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -647,7 +647,7 @@ napi_value JsNapiCommon::JsGetAppVersionInfo(
 napi_value JsNapiCommon::JsGetCtxAbilityInfo(
     napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetCtxAbilityInfo called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -679,7 +679,7 @@ napi_value JsNapiCommon::JsGetCtxAbilityInfo(
     auto complete = [obj = this, info = infoData, value = errorVal]
         (napi_env env, NapiAsyncTask &task, int32_t status) {
         if (*value != static_cast<int32_t>(NAPI_ERR_NO_ERROR) || info == nullptr) {
-            TAG_LOGD(AAFwkTag::JSNAPI, "errorVal is 0 or JsHapModuleInfo is null.");
+            TAG_LOGD(AAFwkTag::JSNAPI, "errorVal is 0 or JsHapModuleInfo is null");
             auto ecode = info == nullptr ? static_cast<int32_t>(NAPI_ERR_ABILITY_CALL_INVALID) : *value;
             task.Reject(env, CreateJsError(env, ecode, obj->ConvertErrorCode(ecode)));
             return;
@@ -698,7 +698,7 @@ napi_value JsNapiCommon::JsGetCtxAbilityInfo(
 napi_value JsNapiCommon::JsGetOrCreateDistributedDir(
     napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetOrCreateDistributedDir called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -749,7 +749,7 @@ napi_value JsNapiCommon::JsGetOrCreateDistributedDir(
 #ifdef SUPPORT_GRAPHICS
 napi_value JsNapiCommon::JsGetDisplayOrientation(napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "JsGetDisplayOrientation called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -772,7 +772,7 @@ napi_value JsNapiCommon::JsGetDisplayOrientation(napi_env env, napi_callback_inf
         *value = obj->ability_->GetDisplayOrientation();
     };
     auto complete = [value = errorVal] (napi_env env, NapiAsyncTask &task, int32_t status) {
-        TAG_LOGD(AAFwkTag::JSNAPI, "JsGetDisplayOrientation value = %{public}d", *value);
+        TAG_LOGD(AAFwkTag::JSNAPI, "inner call value = %{public}d", *value);
         if (*value == NAPI_ERR_ACE_ABILITY) {
             task.Reject(env, CreateJsError(env, NAPI_ERR_ACE_ABILITY, "ability is nullptr"));
         } else if (*value == NAPI_ERR_ABILITY_TYPE_INVALID) {
@@ -795,7 +795,7 @@ napi_value JsNapiCommon::JsGetDisplayOrientation(napi_env env, napi_callback_inf
 
 napi_value JsNapiCommon::CreateProcessInfo(napi_env env, const std::shared_ptr<JsProcessInfo> &processInfo)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "CreateProcessInfo called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     CHECK_POINTER_AND_RETURN_LOG(processInfo, CreateJsUndefined(env), "input params error");
 
     napi_value objContext = nullptr;
@@ -810,7 +810,7 @@ napi_value JsNapiCommon::CreateProcessInfo(napi_env env, const std::shared_ptr<J
 
 napi_value JsNapiCommon::CreateElementName(napi_env env, const std::shared_ptr<JsElementName> &elementName)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "CreateElementName called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     CHECK_POINTER_AND_RETURN_LOG(elementName, CreateJsUndefined(env), "input params error");
 
     napi_value objContext = nullptr;
@@ -828,7 +828,7 @@ napi_value JsNapiCommon::CreateElementName(napi_env env, const std::shared_ptr<J
 
 napi_value JsNapiCommon::CreateHapModuleInfo(napi_env env, const std::shared_ptr<JsHapModuleInfo> &hapModInfo)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "CreateHapModuleInfo called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     CHECK_POINTER_AND_RETURN_LOG(hapModInfo, CreateJsUndefined(env), "input params error");
     napi_value objContext = nullptr;
     napi_create_object(env, &objContext);
@@ -897,7 +897,7 @@ napi_value JsNapiCommon::CreateModuleInfos(napi_env env, const std::vector<Modul
 
 napi_value JsNapiCommon::CreateAppInfo(napi_env env, const ApplicationInfo &appInfo)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "CreateAppInfo called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value objContext = nullptr;
     napi_create_object(env, &objContext);
     if (objContext == nullptr) {
@@ -905,7 +905,7 @@ napi_value JsNapiCommon::CreateAppInfo(napi_env env, const ApplicationInfo &appI
         return CreateJsUndefined(env);
     }
     if (!CheckTypeForNapiValue(env, objContext, napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "CreateAppInfo, ConvertNativeValueTo object error");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ConvertNativeValueTo object error");
         return CreateJsUndefined(env);
     }
 
@@ -940,15 +940,15 @@ napi_value JsNapiCommon::CreateAppInfo(napi_env env, const std::shared_ptr<JsApp
 
 napi_value JsNapiCommon::CreateAbilityInfo(napi_env env, const AbilityInfo &abilityInfo)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "CreateAbilityInfo called");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value objContext = nullptr;
     napi_create_object(env, &objContext);
     if (objContext == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "CreateAbilityInfo, CreateObject failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "CreateObject failed");
         return CreateJsUndefined(env);
     }
     if (!CheckTypeForNapiValue(env, objContext, napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "CreateAbilityInfo, ConvertNativeValueTo object error");
+        TAG_LOGE(AAFwkTag::JSNAPI, "ConvertNativeValueTo object error");
         return CreateJsUndefined(env);
     }
 
@@ -994,7 +994,7 @@ napi_value JsNapiCommon::CreateAbilityInfo(
 {
     TAG_LOGD(AAFwkTag::JSNAPI, "called");
     if (abilityInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "called");
+        TAG_LOGE(AAFwkTag::JSNAPI, "abilityInfo is nullptr");
         return CreateJsUndefined(env);
     }
 
@@ -1067,12 +1067,12 @@ bool JsNapiCommon::UnwrapVerifyPermissionParams(napi_env env, napi_callback_info
         flagCall = false;
     } else if (argc == ARGS_TWO && !AppExecFwk::IsTypeForNapiValue(env, argv[PARAM1], napi_function)) {
         if (!GetPermissionOptions(env, argv[PARAM1], options)) {
-            TAG_LOGW(AAFwkTag::JSNAPI, "input params string error");
+            TAG_LOGE(AAFwkTag::JSNAPI, "argc is 2, input params string error");
         }
         flagCall = false;
     } else if (argc == ARGS_THREE) {
         if (!GetPermissionOptions(env, argv[PARAM1], options)) {
-            TAG_LOGW(AAFwkTag::JSNAPI, "input params string error");
+            TAG_LOGE(AAFwkTag::JSNAPI, "argc is 3, input params string error");
         }
     }
 
@@ -1138,7 +1138,7 @@ std::string JsNapiCommon::ConvertErrorCode(int32_t errCode)
 
 napi_value JsNapiCommon::JsGetWant(napi_env env, napi_callback_info info, const AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
@@ -1200,7 +1200,7 @@ napi_value JsNapiCommon::CreateWant(napi_env env, const std::shared_ptr<JsWant> 
 
 napi_value JsNapiCommon::JsTerminateAbility(napi_env env, NapiCallbackInfo& info)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     if (info.argc > ARGS_ONE) {
         TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s input params count error, argc=%{public}zu", __func__, info.argc);
         return CreateJsUndefined(env);
@@ -1233,19 +1233,19 @@ napi_value JsNapiCommon::JsTerminateAbility(napi_env env, NapiCallbackInfo& info
  */
 bool UnwrapParamForWant(napi_env env, napi_value args, AbilityType, CallAbilityParam &param)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     bool ret = false;
     napi_valuetype valueType = napi_undefined;
     param.setting = nullptr;
     NAPI_CALL_BASE(env, napi_typeof(env, args, &valueType), false);
     if (valueType != napi_object) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, Wrong argument type.", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type");
         return false;
     }
 
     napi_value jsWant = GetPropertyValueByPropertyName(env, args, "want", napi_object);
     if (jsWant == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, jsWant == nullptr", __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "jsWant == nullptr");
         return false;
     }
 
@@ -1258,12 +1258,12 @@ bool UnwrapParamForWant(napi_env env, napi_value args, AbilityType, CallAbilityP
     if (jsSettingObj != nullptr) {
         param.setting = AbilityStartSetting::GetEmptySetting();
         if (!UnwrapAbilityStartSetting(env, jsSettingObj, *(param.setting))) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s, unwrap abilityStartSetting failed.", __func__);
+            TAG_LOGE(AAFwkTag::JSNAPI, "unwrap abilityStartSetting failed");
         }
-        TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s abilityStartSetting", __func__);
+        TAG_LOGD(AAFwkTag::JSNAPI, "abilityStartSetting");
     }
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "end");
     return ret;
 }
 
@@ -1272,7 +1272,7 @@ void JsNapiCommon::SetJsStartAbilityExecuteCallback(std::shared_ptr<int32_t> &er
 {
     execute = [obj = this, value = errorVal, abilityType, paramObj = param, &observer = freeInstallObserver_] () {
         if (*value != NAPI_ERR_NO_ERROR) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsStartAbility params error!");
+            TAG_LOGE(AAFwkTag::JSNAPI, "JsStartAbility params error");
             return;
         }
 
@@ -1305,10 +1305,10 @@ void JsNapiCommon::SetJsStartAbilityExecuteCallback(std::shared_ptr<int32_t> &er
         }
 #endif
         if (paramObj->setting == nullptr) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "param.setting == nullptr call StartAbility.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "param.setting == nullptr call StartAbility");
             *value = obj->ability_->StartAbility(paramObj->want);
         } else {
-            TAG_LOGI(AAFwkTag::JSNAPI, "param.setting != nullptr call StartAbility.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "param.setting != nullptr call StartAbility");
             *value = obj->ability_->StartAbility(paramObj->want, *(paramObj->setting));
         }
         if ((paramObj->want.GetFlags() & Want::FLAG_INSTALL_ON_DEMAND) == Want::FLAG_INSTALL_ON_DEMAND &&
@@ -1323,7 +1323,7 @@ void JsNapiCommon::SetJsStartAbilityExecuteCallback(std::shared_ptr<int32_t> &er
 
 napi_value JsNapiCommon::JsStartAbility(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     auto errorVal = std::make_shared<int32_t>(static_cast<int32_t>(NAPI_ERR_NO_ERROR));
     auto param = std::make_shared<CallAbilityParam>();
     size_t argc = ARGS_MAX_COUNT;
@@ -1334,7 +1334,7 @@ napi_value JsNapiCommon::JsStartAbility(napi_env env, napi_callback_info info, A
         *errorVal = NAPI_ERR_PARAM_INVALID;
     } else {
         if (!UnwrapParamForWant(env, argv[PARAM0], abilityType, *param)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "call UnwrapParamForWant failed.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "call UnwrapParamForWant failed");
             *errorVal = NAPI_ERR_PARAM_INVALID;
         }
     }
@@ -1372,18 +1372,18 @@ napi_value JsNapiCommon::JsStartAbility(napi_env env, napi_callback_info info, A
 
 napi_value JsNapiCommon::JsGetExternalCacheDir(napi_env env, napi_callback_info info, AbilityType abilityType)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "%{public}s called", __func__);
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value argv[ARGS_MAX_COUNT] = {nullptr};
     napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "%{public}s input params count error, argc=%{public}zu", __func__, argc);
+        TAG_LOGE(AAFwkTag::JSNAPI, "input params count error, argc=%{public}zu", argc);
         return CreateJsUndefined(env);
     }
 
     auto complete = [obj = this, abilityType](napi_env env, NapiAsyncTask &task, int32_t status) {
         if (obj->ability_ == nullptr) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsGetExternalCacheDir ability is nullptr");
+            TAG_LOGE(AAFwkTag::JSNAPI, "ability is nullptr");
             task.RejectWithCustomize(
                 env,
                 CreateJsError(env, NAPI_ERR_ACE_ABILITY, "JsGetExternalCacheDir Failed"),
@@ -1392,7 +1392,7 @@ napi_value JsNapiCommon::JsGetExternalCacheDir(napi_env env, napi_callback_info 
         }
 
         if (!obj->CheckAbilityType(abilityType)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "JsGetExternalCacheDir abilityType is error");
+            TAG_LOGE(AAFwkTag::JSNAPI, "abilityType is error");
             task.Reject(env, CreateJsError(env, NAPI_ERR_ABILITY_TYPE_INVALID, "JsGetExternalCacheDir Failed"));
             return;
         }
@@ -1412,7 +1412,7 @@ void JsNapiCommon::AddFreeInstallObserver(napi_env env, const AAFwk::Want &want,
     napi_value* result)
 {
     // adapter free install async return install and start result
-    TAG_LOGD(AAFwkTag::JSNAPI, "AddFreeInstallObserver start.");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     int ret = 0;
     if (freeInstallObserver_ == nullptr) {
         freeInstallObserver_ = new JsFreeInstallObserver(env);
@@ -1420,9 +1420,9 @@ void JsNapiCommon::AddFreeInstallObserver(napi_env env, const AAFwk::Want &want,
     }
 
     if (ret != ERR_OK) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "AddFreeInstallObserver wrong.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "AddFreeInstallObserver wrong");
     } else {
-        TAG_LOGI(AAFwkTag::JSNAPI, "AddJsObserverObject");
+        TAG_LOGD(AAFwkTag::JSNAPI, "AddJsObserverObject called");
         // build a callback observer with last param
         std::string bundleName = want.GetElement().GetBundleName();
         std::string abilityName = want.GetElement().GetAbilityName();

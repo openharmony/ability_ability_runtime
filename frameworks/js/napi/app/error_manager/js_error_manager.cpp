@@ -142,7 +142,7 @@ public:
 
     static void Finalizer(napi_env env, void* data, void* hint)
     {
-        TAG_LOGI(AAFwkTag::JSNAPI, "JsErrorManager Finalizer is called");
+        TAG_LOGI(AAFwkTag::JSNAPI, "called");
         std::unique_ptr<JsErrorManager>(static_cast<JsErrorManager*>(data));
         ClearReference(env);
     }
@@ -203,14 +203,14 @@ public:
 private:
     napi_value OnOn(napi_env env, const size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::JSNAPI, "called.");
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
         std::string type = ParseParamType(env, argc, argv);
         if (type == ON_OFF_TYPE_SYNC) {
             return OnOnNew(env, argc, argv);
         }
         if (type == ON_OFF_TYPE_SYNC_LOOP) {
             if (!AppExecFwk::EventRunner::IsAppMainThread()) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "LoopObserver can only be set from main thread.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "LoopObserver can only be set from main thread");
                 ThrowInvalidCallerError(env);
                 return CreateJsUndefined(env);
             }
@@ -218,7 +218,7 @@ private:
         }
         if (type == ON_OFF_TYPE_UNHANDLED_REJECTION) {
             if (argc != ARGC_TWO) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "The number of params is invalid.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "The number of params is invalid");
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
@@ -229,9 +229,9 @@ private:
 
     napi_value OnOnOld(napi_env env, const size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::JSNAPI, "called.");
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
         if (argc != ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "The param is invalid, observers need.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "The param is invalid, observers need");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -250,7 +250,7 @@ private:
         }
 
         if (observer_ == nullptr) {
-            TAG_LOGD(AAFwkTag::JSNAPI, "observer_ is null.");
+            TAG_LOGD(AAFwkTag::JSNAPI, "observer_ is nullptr");
             // create observer
             observer_ = std::make_shared<JsErrorObserver>(env);
             AppExecFwk::ApplicationDataManager::GetInstance().AddErrorObserver(observer_);
@@ -283,9 +283,9 @@ private:
 
     napi_value OnOnNew(napi_env env, const size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::JSNAPI, "called.");
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "The param is invalid, observers need.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "The param is invalid, observers need");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -314,14 +314,14 @@ private:
 
     napi_value OnOff(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::JSNAPI, "called.");
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
         std::string type = ParseParamType(env, argc, argv);
         if (type == ON_OFF_TYPE_SYNC) {
             return OnOffNew(env, argc, argv);
         }
         if (type == ON_OFF_TYPE_SYNC_LOOP) {
             if (!AppExecFwk::EventRunner::IsAppMainThread()) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "LoopObserver can only be set from main thread.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "LoopObserver can only be set from main thread");
                 ThrowInvalidCallerError(env);
                 return CreateJsUndefined(env);
             }
@@ -329,7 +329,7 @@ private:
         }
         if (type == ON_OFF_TYPE_UNHANDLED_REJECTION) {
             if (argc != ARGC_TWO && argc != ARGC_ONE) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "The number of params is invalid.");
+                TAG_LOGE(AAFwkTag::JSNAPI, "The number of params is invalid");
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
@@ -340,11 +340,11 @@ private:
 
     napi_value OnOffOld(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::JSNAPI, "called.");
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
         int32_t observerId = -1;
         if (argc != ARGC_TWO && argc != ARGC_THREE) {
             ThrowTooFewParametersError(env);
-            TAG_LOGE(AAFwkTag::JSNAPI, "unregister errorObserver error, not enough params.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "unregister errorObserver error, not enough params");
         } else {
             napi_get_value_int32(env, argv[INDEX_ONE], &observerId);
             TAG_LOGI(AAFwkTag::JSNAPI, "unregister errorObserver called, observer:%{public}d", observerId);
@@ -360,7 +360,7 @@ private:
         NapiAsyncTask::CompleteCallback complete =
             [&observer = observer_, observerId](
                 napi_env env, NapiAsyncTask& task, int32_t status) {
-            TAG_LOGI(AAFwkTag::JSNAPI, "Unregister errorObserver called.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "Unregister errorObserver called");
                 if (observerId == -1) {
                     task.Reject(env, CreateJsError(env, AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
                     return;
@@ -415,10 +415,10 @@ private:
 
     napi_value OnOffNew(napi_env env, size_t argc, napi_value* argv)
     {
-        TAG_LOGD(AAFwkTag::JSNAPI, "called.");
+        TAG_LOGD(AAFwkTag::JSNAPI, "called");
         if (argc < ARGC_TWO) {
             ThrowTooFewParametersError(env);
-            TAG_LOGE(AAFwkTag::JSNAPI, "unregister errorObserver error, not enough params.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "unregister errorObserver error, not enough params");
             return CreateJsUndefined(env);
         }
         int32_t observerId = -1;
@@ -448,7 +448,7 @@ private:
     static void CallJsFunction(napi_env env, napi_value obj, const char* methodName,
         napi_value const* argv, size_t argc)
     {
-        TAG_LOGI(AAFwkTag::JSNAPI, "CallJsFunction begin methodName: %{public}s", methodName);
+        TAG_LOGI(AAFwkTag::JSNAPI, "called");
         if (obj == nullptr) {
             TAG_LOGE(AAFwkTag::JSNAPI, "Failed to get object");
             return;
@@ -469,15 +469,15 @@ private:
         std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
             ([number](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (loopObserver_ == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSNAPI, "loopObserver_ is null.");
+                    TAG_LOGE(AAFwkTag::JSNAPI, "loopObserver_ is nullptr");
                     return;
                 }
                 if (loopObserver_->env == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSNAPI, "env is null.");
+                    TAG_LOGE(AAFwkTag::JSNAPI, "env is nullptr");
                     return;
                 }
                 if (loopObserver_->observerObject == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSNAPI, "observerObject is null.");
+                    TAG_LOGE(AAFwkTag::JSNAPI, "observerObject is nullptr");
                     return;
                 }
                 napi_value jsValue[] = { CreateJsValue(loopObserver_->env, number) };
@@ -495,23 +495,23 @@ private:
     napi_value OnSetLoopWatch(napi_env env, size_t argc, napi_value* argv)
     {
         if (argc != ARGC_THREE) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "OnSetLoopWatch: Not enough params.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "Not enough params");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
         if (!CheckTypeForNapiValue(env, argv[INDEX_ONE], napi_number)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "OnSetLoopWatch: Invalid param");
+            TAG_LOGE(AAFwkTag::JSNAPI, "parse timeout failed");
             ThrowInvalidParamError(env, "Parameter error: Failed to parse timeout, must be a number.");
             return CreateJsUndefined(env);
         }
         if (!CheckTypeForNapiValue(env, argv[INDEX_TWO], napi_object)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "OnSetLoopWatch: Invalid param");
+            TAG_LOGE(AAFwkTag::JSNAPI, "parse observer failed");
             ThrowInvalidParamError(env, "Parameter error: Failed to parse observer, must be a LoopObserver.");
             return CreateJsUndefined(env);
         }
         int64_t number;
         if (!ConvertFromJsNumber(env, argv[INDEX_ONE], number)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "OnSetLoopWatch: Parse timeout failed");
+            TAG_LOGE(AAFwkTag::JSNAPI, "parse timeout failed");
             ThrowInvalidParamError(env, "Parameter error: Failed to parse timeout, must be a number.");
             return CreateJsUndefined(env);
         }
@@ -541,7 +541,7 @@ private:
             loopObserver_ = nullptr;
             TAG_LOGI(AAFwkTag::JSNAPI, "Remove loopObserver success");
         } else {
-            TAG_LOGI(AAFwkTag::JSNAPI, "Unregister loopObserver Called.");
+            TAG_LOGI(AAFwkTag::JSNAPI, "Unregister loopObserver Called");
         }
         return nullptr;
     }
@@ -574,16 +574,16 @@ private:
 
 napi_value JsErrorManagerInit(napi_env env, napi_value exportObj)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "Js error manager Init.");
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     if (env == nullptr || exportObj == nullptr) {
-        TAG_LOGI(AAFwkTag::JSNAPI, "env or exportObj null");
+        TAG_LOGI(AAFwkTag::JSNAPI, "env or exportObj nullptr");
         return nullptr;
     }
     std::unique_ptr<JsErrorManager> jsErrorManager = std::make_unique<JsErrorManager>();
     jsErrorManager->SetRejectionCallback(env);
     napi_wrap(env, exportObj, jsErrorManager.release(), JsErrorManager::Finalizer, nullptr, nullptr);
 
-    TAG_LOGI(AAFwkTag::JSNAPI, "JsErrorManager BindNativeFunction called");
+    TAG_LOGI(AAFwkTag::JSNAPI, "BindNativeFunction called");
     const char *moduleName = "JsErrorManager";
     BindNativeFunction(env, exportObj, "on", moduleName, JsErrorManager::On);
     BindNativeFunction(env, exportObj, "off", moduleName, JsErrorManager::Off);
