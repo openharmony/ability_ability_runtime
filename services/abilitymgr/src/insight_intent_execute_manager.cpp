@@ -93,7 +93,7 @@ int32_t InsightIntentExecuteManager::CheckAndUpdateWant(Want &want, ExecuteMode 
     auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(elementName.GetBundleName(),
         elementName.GetModuleName(), want.GetStringParam(INSIGHT_INTENT_EXECUTE_PARAM_NAME));
     if (srcEntry.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "Insight intent srcEntry invalid.");
+        TAG_LOGE(AAFwkTag::INTENT, "Insight intent srcEntry invalid");
         return ERR_INVALID_VALUE;
     }
     want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
@@ -225,7 +225,7 @@ int32_t InsightIntentExecuteManager::GenerateWant(
     auto srcEntry = AbilityRuntime::InsightIntentUtils::GetSrcEntry(param->bundleName_, param->moduleName_,
         param->insightIntentName_);
     if (srcEntry.empty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "Insight intent srcEntry invalid.");
+        TAG_LOGE(AAFwkTag::INTENT, "Insight intent srcEntry invalid");
         return ERR_INVALID_VALUE;
     }
     want.SetParam(INSIGHT_INTENT_SRC_ENTRY, srcEntry);
