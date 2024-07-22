@@ -41,6 +41,7 @@ public:
     MOCK_METHOD1(AbilityCleaned, void(const sptr<IRemoteObject>& token));
     MOCK_METHOD2(UpdateApplicationInfoInstalled, int(const std::string&, const int uid));
     MOCK_METHOD2(KillApplication, int32_t(const std::string& appName, const bool clearPageStack));
+    MOCK_METHOD3(ForceKillApplication, int32_t(const std::string& appName, const int userId, const int appIndex));
     MOCK_METHOD2(KillApplicationByUid, int(const std::string&, const int uid));
     MOCK_METHOD1(IsBackgroundRunningRestricted, int(const std::string& bundleName));
     MOCK_METHOD1(GetAllRunningProcesses, int(std::vector<RunningProcessInfo>& info));
@@ -95,8 +96,7 @@ public:
     MOCK_METHOD2(IsApplicationRunning, int32_t(const std::string &bundleName, bool &isRunning));
     MOCK_METHOD3(IsAppRunning, int32_t(const std::string &bundleName,
         int32_t appCloneIndex, bool &isRunning));
-    MOCK_METHOD4(StartChildProcess, int32_t(const std::string &srcEntry, pid_t &childPid, int32_t childProcessCount,
-        bool isStartWithNative));
+    MOCK_METHOD2(StartChildProcess, int32_t(pid_t &childPid, const ChildProcessRequest &request));
     MOCK_METHOD1(GetChildProcessInfoForSelf, int32_t(ChildProcessInfo &info));
     MOCK_METHOD1(AttachChildProcess, void(const sptr<IRemoteObject> &childScheduler));
     MOCK_METHOD0(ExitChildProcessSafely, void());
@@ -225,6 +225,11 @@ public:
     }
 
     int code_;
+
+    virtual bool SetAppFreezeFilter(int32_t pid)
+    {
+        return false;
+    }
 
     virtual int32_t ChangeAppGcState(pid_t pid, int32_t state)
     {
