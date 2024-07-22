@@ -22,7 +22,6 @@
 #include "ability_manager_client.h"
 #include "event_handler.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_context_utils.h"
 #include "js_data_struct_converter.h"
 #include "js_error_utils.h"
@@ -64,6 +63,11 @@ void JsEmbeddableUIAbilityContext::Finalizer(napi_env env, void* data, void* hin
 napi_value JsEmbeddableUIAbilityContext::StartAbility(napi_env env, napi_callback_info info)
 {
     GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnStartAbility);
+}
+
+napi_value JsEmbeddableUIAbilityContext::OpenLink(napi_env env, napi_callback_info info)
+{
+    GET_NAPI_INFO_AND_CALL(env, info, JsEmbeddableUIAbilityContext, OnOpenLink);
 }
 
 napi_value JsEmbeddableUIAbilityContext::StartAbilityForResult(napi_env env, napi_callback_info info)
@@ -185,6 +189,17 @@ napi_value JsEmbeddableUIAbilityContext::OnStartAbility(napi_env env, NapiCallba
     }
     CHECK_POINTER_RETURN(env, jsAbilityContext_);
     return jsAbilityContext_->OnStartAbility(env, info);
+}
+
+napi_value JsEmbeddableUIAbilityContext::OnOpenLink(napi_env env, NapiCallbackInfo& info)
+{
+    if (screenMode_ == AAFwk::EMBEDDED_FULL_SCREEN_MODE) {
+        TAG_LOGI(AAFwkTag::UI_EXT, "Start openlink in embedded screen mode.");
+        CHECK_POINTER_RETURN(env, jsUIExtensionContext_);
+        return jsUIExtensionContext_->OnOpenLink(env, info);
+    }
+    CHECK_POINTER_RETURN(env, jsAbilityContext_);
+    return jsAbilityContext_->OnOpenLink(env, info);
 }
 
 napi_value JsEmbeddableUIAbilityContext::OnStartAbilityForResult(napi_env env, NapiCallbackInfo& info)
@@ -524,6 +539,7 @@ napi_value JsEmbeddableUIAbilityContext::CreateJsEmbeddableUIAbilityContext(napi
 
     const char* moduleName = "JsEmbeddableUIAbilityContext";
     BindNativeFunction(env, objValue, "startAbility", moduleName, StartAbility);
+    BindNativeFunction(env, objValue, "openLink", moduleName, OpenLink);
     BindNativeFunction(env, objValue, "startAbilityForResult", moduleName, StartAbilityForResult);
     BindNativeFunction(env, objValue, "connectServiceExtensionAbility", moduleName, ConnectAbility);
     BindNativeFunction(env, objValue, "disconnectServiceExtensionAbility", moduleName, DisconnectAbility);

@@ -19,7 +19,6 @@
 
 #include "data_ability_predicates.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "napi_common_want.h"
 #include "napi_data_ability_helper.h"
 #include "values_bucket.h"
@@ -62,27 +61,36 @@ napi_value UnwrapDataAbilityOperation(
     return result;
 }
 
-napi_value BuildDataAbilityOperation(
-    std::shared_ptr<DataAbilityOperation> &dataAbilityOperation, napi_env env, napi_value param)
+bool ParseUriAndType(napi_env env, napi_value &param, std::shared_ptr<Uri> &uri, int &type)
 {
-    TAG_LOGI(AAFwkTag::FA, "start");
-
     // get uri property
     std::string uriStr("");
     if (!UnwrapStringByPropertyName(env, param, "uri", uriStr)) {
-        TAG_LOGE(AAFwkTag::FA, "uri is not exist");
-        return nullptr;
+        TAG_LOGE(AAFwkTag::FA, "%{public}s, uri is not exist.", __func__);
+        return false;
     }
-    TAG_LOGI(AAFwkTag::FA, "uri:%{public}s", uriStr.c_str());
-    std::shared_ptr<Uri> uri = std::make_shared<Uri>(uriStr);
+    TAG_LOGI(AAFwkTag::FA, "%{public}s, uri:%{public}s", __func__, uriStr.c_str());
+    uri = std::make_shared<Uri>(uriStr);
 
     // get type property
-    int type = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "type", type)) {
-        TAG_LOGE(AAFwkTag::FA, "type:%{public}d is not exist", type);
-        return nullptr;
+        TAG_LOGE(AAFwkTag::FA, "%{public}s, type:%{public}d is not exist.", __func__, type);
+        return false;
     }
     TAG_LOGI(AAFwkTag::FA, "type:%{public}d", type);
+
+    return true;
+}
+
+napi_value BuildDataAbilityOperation(
+    std::shared_ptr<DataAbilityOperation> &dataAbilityOperation, napi_env env, napi_value param)
+{
+    TAG_LOGI(AAFwkTag::FA, "%{public}s start.", __func__);
+    std::shared_ptr<Uri> uri = nullptr;
+    int type = 0;
+    if (!ParseUriAndType(env, param, uri, type)) {
+        return nullptr;
+    }
 
     std::shared_ptr<DataAbilityOperationBuilder> builder = nullptr;
     if (!GetDataAbilityOperationBuilder(builder, type, uri)) {

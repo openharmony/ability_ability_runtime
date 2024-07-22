@@ -21,6 +21,7 @@
 
 #include "ability_debug_response_interface.h"
 #include "ability_info.h"
+#include "ability_manager_client.h"
 #include "app_debug_listener_interface.h"
 #include "application_info.h"
 #include "appmgr/app_mgr_client.h"
@@ -233,6 +234,17 @@ public:
     int KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
+     * ForceKillApplication, force kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    int ForceKillApplication(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+
+    /**
      * kill the application by uid
      *
      * @param bundleName name of bundle.
@@ -252,7 +264,7 @@ public:
 
     void AttachTimeOut(const sptr<IRemoteObject> &token);
 
-    void PrepareTerminate(const sptr<IRemoteObject> &token);
+    void PrepareTerminate(const sptr<IRemoteObject> &token, bool clearMissionFlag = false);
 
     void GetRunningProcessInfoByToken(const sptr<IRemoteObject> &token, AppExecFwk::RunningProcessInfo &info);
 
@@ -432,6 +444,10 @@ public:
      * @param token the token of the abilityRecord that is attached to status bar.
      */
     void AttachedToStatusBar(const sptr<IRemoteObject> &token);
+
+    void BlockProcessCacheByPids(const std::vector<int32_t>& pids);
+
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
 
 protected:
     /**
