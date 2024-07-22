@@ -22,7 +22,6 @@
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "int_wrapper.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -1319,7 +1318,11 @@ bool WrapJsWantParamsArray(napi_env env, napi_value object, const std::string &k
     } else if (AAFwk::Array::IsDoubleArray(ao)) {
         return InnerWrapWantParamsArray<AAFwk::IDouble, AAFwk::Double, double>(
             env, object, key, ao);
+    } else if (AAFwk::Array::IsWantParamsArray(ao)) {
+        TAG_LOGD(AAFwkTag::JSNAPI, "Array type is WantParams");
+        return InnerWrapWantParamsArrayWantParams(env, object, key, ao);
     } else {
+        TAG_LOGE(AAFwkTag::JSNAPI, "Array type unknown");
         return false;
     }
 }
