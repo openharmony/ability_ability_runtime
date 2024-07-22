@@ -52,9 +52,9 @@ napi_value DataAbilityOperationInit(napi_env env, napi_value exports)
 napi_value UnwrapDataAbilityOperation(
     std::shared_ptr<DataAbilityOperation> &dataAbilityOperation, napi_env env, napi_value param)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, Params is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "Params is invalid");
         return nullptr;
     }
 
@@ -65,28 +65,28 @@ napi_value UnwrapDataAbilityOperation(
 napi_value BuildDataAbilityOperation(
     std::shared_ptr<DataAbilityOperation> &dataAbilityOperation, napi_env env, napi_value param)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s start.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "start");
 
     // get uri property
     std::string uriStr("");
     if (!UnwrapStringByPropertyName(env, param, "uri", uriStr)) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, uri is not exist.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "uri is not exist");
         return nullptr;
     }
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, uri:%{public}s", __func__, uriStr.c_str());
+    TAG_LOGI(AAFwkTag::FA, "uri:%{public}s", uriStr.c_str());
     std::shared_ptr<Uri> uri = std::make_shared<Uri>(uriStr);
 
     // get type property
     int type = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "type", type)) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, type:%{public}d is not exist.", __func__, type);
+        TAG_LOGE(AAFwkTag::FA, "type:%{public}d is not exist", type);
         return nullptr;
     }
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, type:%{public}d", __func__, type);
+    TAG_LOGI(AAFwkTag::FA, "type:%{public}d", type);
 
     std::shared_ptr<DataAbilityOperationBuilder> builder = nullptr;
     if (!GetDataAbilityOperationBuilder(builder, type, uri)) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, GetDataAbilityOperationBuilder failed.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "GetDataAbilityOperationBuilder failed");
         return nullptr;
     }
 
@@ -106,7 +106,7 @@ napi_value BuildDataAbilityOperation(
     // get expectedCount property
     int expectedCount = 0;
     UnwrapInt32ByPropertyName(env, param, "expectedCount", expectedCount);
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, expectedCount:%{public}d", __func__, expectedCount);
+    TAG_LOGI(AAFwkTag::FA, "expectedCount:%{public}d", expectedCount);
     if (expectedCount > 0) {
         builder->WithExpectedCount(expectedCount);
     }
@@ -129,19 +129,19 @@ napi_value BuildDataAbilityOperation(
     builder->WithValueBackReferences(backReferences);
 
     if (builder != nullptr) {
-        TAG_LOGI(AAFwkTag::FA, "%{public}s, builder is not nullptr", __func__);
+        TAG_LOGI(AAFwkTag::FA, "builder is not nullptr");
         dataAbilityOperation = builder->Build();
     }
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    TAG_LOGI(AAFwkTag::FA, "%{public}s end.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
 bool GetDataAbilityOperationBuilder(
     std::shared_ptr<DataAbilityOperationBuilder> &builder, const int type, const std::shared_ptr<Uri> &uri)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     switch (type) {
         case DataAbilityOperation::TYPE_INSERT:
             builder = DataAbilityOperation::NewInsertBuilder(uri);
@@ -156,7 +156,7 @@ bool GetDataAbilityOperationBuilder(
             builder = DataAbilityOperation::NewAssertBuilder(uri);
             break;
         default:
-            TAG_LOGE(AAFwkTag::FA, "%{public}s, type:%{public}d is invalid.", __func__, type);
+            TAG_LOGE(AAFwkTag::FA, "type:%{public}d is invalid", type);
             return false;
     }
     return true;
@@ -165,11 +165,11 @@ bool GetDataAbilityOperationBuilder(
 napi_value UnwrapValuesBucket(const std::shared_ptr<NativeRdb::ValuesBucket> &param, napi_env env,
     napi_value valueBucketParam)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
     napi_value result;
 
     if (param == nullptr) {
-        TAG_LOGI(AAFwkTag::FA, "%{public}s input param is nullptr.", __func__);
+        TAG_LOGI(AAFwkTag::FA, "input param is nullptr");
         NAPI_CALL(env, napi_create_int32(env, 0, &result));
         return result;
     }
@@ -182,10 +182,10 @@ napi_value UnwrapValuesBucket(const std::shared_ptr<NativeRdb::ValuesBucket> &pa
 napi_value UnwrapDataAbilityPredicatesBackReferences(
     std::shared_ptr<DataAbilityOperationBuilder> &builder, napi_env env, napi_value predicatesBackReferencesParam)
 {
-    TAG_LOGI(AAFwkTag::FA, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::FA, "called");
 
     if (!IsTypeForNapiValue(env, predicatesBackReferencesParam, napi_object)) {
-        TAG_LOGE(AAFwkTag::FA, "%{public}s, predicatesBackReferencesParam is invalid.", __func__);
+        TAG_LOGE(AAFwkTag::FA, "predicatesBackReferencesParam is invalid");
         return nullptr;
     }
 
@@ -195,7 +195,7 @@ napi_value UnwrapDataAbilityPredicatesBackReferences(
 
     NAPI_CALL(env, napi_get_property_names(env, predicatesBackReferencesParam, &jsProNameList));
     NAPI_CALL(env, napi_get_array_length(env, jsProNameList, &jsProCount));
-    TAG_LOGI(AAFwkTag::FA, "%{public}s, Property size=%{public}d.", __func__, jsProCount);
+    TAG_LOGI(AAFwkTag::FA, "Property size=%{public}d", jsProCount);
 
     napi_value jsProName = nullptr;
     napi_value jsProValue = nullptr;
@@ -203,12 +203,12 @@ napi_value UnwrapDataAbilityPredicatesBackReferences(
         NAPI_CALL(env, napi_get_element(env, jsProNameList, index, &jsProName));
         std::string strProName = UnwrapStringFromJS(env, jsProName);
         int intProName = std::atoi(strProName.c_str());
-        TAG_LOGI(AAFwkTag::FA, "%{public}s, Property name=%{public}d.", __func__, intProName);
+        TAG_LOGI(AAFwkTag::FA, "Property name=%{public}d", intProName);
         NAPI_CALL(env, napi_get_property(env, predicatesBackReferencesParam, jsProName, &jsProValue));
         NAPI_CALL(env, napi_typeof(env, jsProValue, &jsValueType));
         int32_t natValue32 = 0;
         if (napi_get_value_int32(env, jsProValue, &natValue32) == napi_ok) {
-            TAG_LOGI(AAFwkTag::FA, "%{public}s, Property value=%{public}d.", __func__, natValue32);
+            TAG_LOGI(AAFwkTag::FA, "Property value=%{public}d", natValue32);
             builder->WithPredicatesBackReference(intProName, natValue32);
         }
     }
