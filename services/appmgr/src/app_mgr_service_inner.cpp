@@ -7157,14 +7157,14 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
     auto appRecord = GetAppRunningRecordByPid(pid);
     auto abilityRecordList = appRecord.GetAbilities();
 
-    for (const auto &item : abilityRecordList) 
+    for (auto it = abilityRecordList.begin(); it != abilityRecordList.end(); ++it)
     {
+        auto abilityInfo = it->second;
         bool isUIAbility = (abilityInfo->type == AppExecFwk::AbilityType::PAGE && abilityInfo->isStageBasedModel);
         if (!isUIAbility)
         {
             return false;
         }
-        
     }
     return true;
 }
