@@ -30,7 +30,7 @@ napi_value CreateJsWantObject(napi_env env, const AAFwk::Want& want)
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Native object is nullptr.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Native object is nullptr");
         return nullptr;
     }
     napi_set_named_property(env, object, "deviceId", CreateJsValue(env, want.GetOperation().GetDeviceId()));
@@ -49,7 +49,7 @@ napi_value CreateJsAbilityInfo(napi_env env, const AppExecFwk::AbilityInfo& abil
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed");
         return nullptr;
     }
     AppExecFwk::CommonFunc::ConvertAbilityInfo(env, abilityInfo, object);
@@ -61,7 +61,7 @@ napi_value CreateJsApplicationInfo(napi_env env, const AppExecFwk::ApplicationIn
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed");
         return nullptr;
     }
     AppExecFwk::CommonFunc::ConvertApplicationInfo(env, object, applicationInfo);
@@ -73,7 +73,7 @@ napi_value CreateJsLaunchParam(napi_env env, const AAFwk::LaunchParam& launchPar
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Native object is nullptr.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Native object is nullptr");
         return nullptr;
     }
     napi_set_named_property(env, object, "launchReason", CreateJsValue(env, launchParam.launchReason));
@@ -87,7 +87,7 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Native object is nullptr.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Native object is nullptr");
         return nullptr;
     }
 
@@ -95,7 +95,7 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
         configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE)));
     napi_set_named_property(env, object, "colorMode", CreateJsValue(env,
         ConvertColorMode(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE))));
-    
+
     napi_set_named_property(env, object, "time24", CreateJsValue(env,
         ConvertTimeFormat(configuration.GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_HOUR))));
 
@@ -123,11 +123,11 @@ napi_value CreateJsConfiguration(napi_env env, const AppExecFwk::Configuration& 
 
 napi_value CreateJsExtensionAbilityInfo(napi_env env, const AppExecFwk::ExtensionAbilityInfo& info)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "CreateJsExtensionAbilityInfo begin");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed");
         return nullptr;
     }
     AppExecFwk::CommonFunc::ConvertExtensionInfo(env, info, object);
@@ -139,7 +139,7 @@ napi_value CreateJsHapModuleInfo(napi_env env, const AppExecFwk::HapModuleInfo& 
     napi_value object = nullptr;
     napi_create_object(env, &object);
     if (object == nullptr) {
-        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed.");
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Create object failed");
         return nullptr;
     }
     AppExecFwk::CommonFunc::ConvertHapModuleInfo(env, hapModuleInfo, object);
