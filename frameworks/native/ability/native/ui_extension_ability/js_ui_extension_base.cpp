@@ -22,7 +22,6 @@
 #include "ability_manager_client.h"
 #include "configuration_utils.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "insight_intent_executor_info.h"
 #include "insight_intent_executor_mgr.h"
@@ -503,6 +502,7 @@ bool JsUIExtensionBase::HandleSessionCreate(const AAFwk::Want &want, const sptr<
         option->SetWindowType(Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION);
         option->SetWindowSessionType(Rosen::WindowSessionType::EXTENSION_SESSION);
         option->SetParentId(sessionInfo->hostWindowId);
+        option->SetUIExtensionUsage(static_cast<uint32_t>(sessionInfo->uiExtensionUsage));
         auto uiWindow = Rosen::Window::Create(option, context_, sessionInfo->sessionToken);
         if (uiWindow == nullptr) {
             TAG_LOGE(AAFwkTag::UI_EXT, "create ui window error.");
