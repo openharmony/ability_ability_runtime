@@ -26,34 +26,34 @@ using namespace OHOS::AppExecFwk;
 bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecuteParam &executeParam)
 {
     if (!IsTypeForNapiValue(env, param, napi_object)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Params is invalid.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Params is invalid");
         return false;
     }
 
     std::string bundleName {""};
     if (!UnwrapStringByPropertyName(env, param, "bundleName", bundleName)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type bundleName.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type bundleName");
         return false;
     }
     executeParam.bundleName_ = bundleName;
 
     std::string moduleName {""};
     if (!UnwrapStringByPropertyName(env, param, "moduleName", moduleName)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type moduleName.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type moduleName");
         return false;
     }
     executeParam.moduleName_ = moduleName;
 
     std::string abilityName {""};
     if (!UnwrapStringByPropertyName(env, param, "abilityName", abilityName)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type abilityName.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type abilityName");
         return false;
     }
     executeParam.abilityName_ = abilityName;
 
     std::string insightIntentName {""};
     if (!UnwrapStringByPropertyName(env, param, "insightIntentName", insightIntentName)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type insightIntentName.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type insightIntentName");
         return false;
     }
     executeParam.insightIntentName_ = insightIntentName;
@@ -61,7 +61,7 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
     napi_value napiIntentParam = nullptr;
     napi_get_named_property(env, param, "insightIntentParam", &napiIntentParam);
     if (napiIntentParam == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type insightIntentParam.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type insightIntentParam");
         return false;
     }
 
@@ -73,14 +73,14 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
     }
     auto wp = std::make_shared<WantParams>();
     if (!AppExecFwk::UnwrapWantParams(env, napiIntentParam, *wp)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type intentParam.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type intentParam, Unwrap want fail");
         return false;
     }
     executeParam.insightIntentParam_ = wp;
 
     int32_t executeMode = 0;
     if (!UnwrapInt32ByPropertyName(env, param, "executeMode", executeMode)) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type executeMode.");
+        TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument type executeMode");
         return false;
     }
     executeParam.executeMode_ = executeMode;
@@ -89,10 +89,10 @@ bool UnwrapExecuteParam(napi_env env, napi_value param, InsightIntentExecutePara
     if (executeMode == ExecuteMode::UI_ABILITY_FOREGROUND &&
         UnwrapInt32ByPropertyName(env, param, "displayId", displayId)) {
         if (displayId < 0) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument displayId.");
+            TAG_LOGE(AAFwkTag::JSNAPI, "Wrong argument displayId");
             return false;
         }
-        TAG_LOGI(AAFwkTag::JSNAPI, "Get displayId %{public}d.", displayId);
+        TAG_LOGI(AAFwkTag::JSNAPI, "Get displayId %{public}d", displayId);
         executeParam.displayId_ = displayId;
     }
 

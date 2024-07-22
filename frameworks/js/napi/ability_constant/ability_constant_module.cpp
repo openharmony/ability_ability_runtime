@@ -32,7 +32,7 @@ enum class MemoryLevel {
 
 static napi_status SetEnumItem(napi_env env, napi_value object, const char* name, int32_t value)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_status status;
     napi_value itemName;
     napi_value itemValue;
@@ -49,7 +49,7 @@ static napi_status SetEnumItem(napi_env env, napi_value object, const char* name
 
 static napi_value InitLaunchReasonObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -68,7 +68,7 @@ static napi_value InitLaunchReasonObject(napi_env env)
 
 static napi_value InitLastExitReasonObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -88,7 +88,7 @@ static napi_value InitLastExitReasonObject(napi_env env)
 
 static napi_value InitOnContinueResultObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -113,7 +113,7 @@ static napi_value InitContinueStateObject(napi_env env)
 
 static napi_value InitWindowModeObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
@@ -130,7 +130,7 @@ static napi_value InitWindowModeObject(napi_env env)
 // AbilityConstant.OnSaveResult
 static napi_value InitOnSaveResultEnum(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "ALL_AGREE", AppExecFwk::ALL_AGREE));
@@ -146,7 +146,7 @@ static napi_value InitOnSaveResultEnum(napi_env env)
 // AbilityConstant.StateType
 static napi_value InitStateTypeEnum(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
     NAPI_CALL(env, SetEnumItem(env, object, "CONTINUATION", AppExecFwk::CONTINUATION));
@@ -157,7 +157,7 @@ static napi_value InitStateTypeEnum(napi_env env)
 
 static napi_value InitMemoryLevelObject(napi_env env)
 {
-    TAG_LOGD(AAFwkTag::JSNAPI, "start");
+    TAG_LOGD(AAFwkTag::JSNAPI, "called");
     napi_value object;
     NAPI_CALL(env, napi_create_object(env, &object));
 
