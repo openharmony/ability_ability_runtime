@@ -339,7 +339,7 @@ napi_value NAPI_GetExternalCacheDirCommon(napi_env env, napi_callback_info info,
 napi_value NAPI_IsUpdatingConfigurationsWrap(
     napi_env env, napi_callback_info info, AsyncJSCallbackInfo *asyncCallbackInfo)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "enter");
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     size_t argc = ARGS_MAX_COUNT;
     napi_value args[ARGS_MAX_COUNT] = {nullptr};
     napi_value jsthis = nullptr;
@@ -348,7 +348,7 @@ napi_value NAPI_IsUpdatingConfigurationsWrap(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "parameters is invalid");
+        TAG_LOGI(AAFwkTag::JSNAPI, "parameters is invalid");
         return nullptr;
     }
 
