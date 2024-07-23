@@ -28,14 +28,13 @@ int32_t InsightIntentExecuteCallbackStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     if (data.ReadInterfaceToken() != IInsightIntentExecuteCallback::GetDescriptor()) {
-        TAG_LOGE(AAFwkTag::INTENT, "InterfaceToken not equal IInsightIntentExecuteCallback's descriptor");
+        TAG_LOGE(AAFwkTag::INTENT, "InterfaceToken not equal");
         return ERR_INVALID_STATE;
     }
 
     if (code == ON_INSIGHT_INTENT_EXECUTE_DONE) {
         return OnExecuteDoneInner(data, reply);
     }
-    TAG_LOGW(AAFwkTag::INTENT, "default case, need check");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 

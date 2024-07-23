@@ -37,7 +37,7 @@ bool InsightIntentExecutor::Init(const InsightIntentExecutorInfo& intentInfo)
 {
     auto executeParam = intentInfo.executeParam;
     if (executeParam == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Execute param invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "executeParam is nullptr");
         return false;
     }
 

@@ -36,7 +36,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto executeParam = executeInfo.executeParam;
     if (executeParam == nullptr || executeParam->insightIntentParam_ == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Execute param invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "executeParam == nullptr or insightIntentParam_ == nullptr");
         TriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return false;
     }
@@ -44,10 +44,10 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     auto asyncCallback =
         [weak = weak_from_this(), intentId = executeParam->insightIntentId_](InsightIntentExecuteResult result) {
             // erase map when called
-            TAG_LOGD(AAFwkTag::INTENT, "Begin remove executor");
+            TAG_LOGD(AAFwkTag::INTENT, "called");
             auto executorMgr = weak.lock();
             if (executorMgr == nullptr) {
-                TAG_LOGE(AAFwkTag::INTENT, "Executor manager invalid");
+                TAG_LOGE(AAFwkTag::INTENT, "executorMgr == nullptr");
                 return;
             }
             executorMgr->RemoveInsightIntentExecutor(intentId);
@@ -57,7 +57,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
     // Create insight intent executor
     auto intentExecutor = InsightIntentExecutor::Create(runtime);
     if (intentExecutor == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Create insight intent executor failed");
+        TAG_LOGE(AAFwkTag::INTENT, "intentExecutor == nullptr");
         TriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return false;
     }
@@ -67,7 +67,6 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
         TriggerCallbackInner(std::move(callback), static_cast<int32_t>(AbilityErrorCode::ERROR_CODE_INVALID_PARAM));
         return false;
     }
-    TAG_LOGD(AAFwkTag::INTENT, "AddInsightIntentExecutor");
     AddInsightIntentExecutor(executeParam->insightIntentId_, intentExecutor);
 
     bool isAsync = false;
@@ -75,7 +74,7 @@ bool InsightIntentExecutorMgr::ExecuteInsightIntent(Runtime& runtime, const Insi
         executeParam->insightIntentName_, *executeParam->insightIntentParam_, executeInfo.pageLoader,
         std::move(callback), isAsync);
     if (!ret) {
-        TAG_LOGE(AAFwkTag::INTENT, "Execute intent failed");
+        TAG_LOGE(AAFwkTag::INTENT, "Handle Execute intent failed");
         // callback has removed, if execute insight intent failed, call in sub function.
         return false;
     }

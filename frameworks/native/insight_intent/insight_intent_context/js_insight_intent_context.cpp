@@ -88,7 +88,6 @@ napi_value JsInsightIntentContext::OnStartAbility(napi_env env, NapiCallbackInfo
     // create complete task
     NapiAsyncTask::CompleteCallback complete = [innerErrCode](napi_env env, NapiAsyncTask& task, int32_t status) {
         if (*innerErrCode == ERR_OK) {
-            TAG_LOGD(AAFwkTag::INTENT, "StartAbility success");
             task.Resolve(env, CreateJsUndefined(env));
         } else {
             task.Reject(env, CreateJsErrorByNativeErr(env, *innerErrCode));
@@ -128,7 +127,7 @@ bool CheckStartAbilityParam(napi_env env, NapiCallbackInfo& info, AAFwk::Want& w
     // unwrap want
     bool unwrapWantFlag = OHOS::AppExecFwk::UnwrapWant(env, info.argv[0], want);
     if (!unwrapWantFlag) {
-        TAG_LOGE(AAFwkTag::INTENT, "Failed to parse want");
+        TAG_LOGE(AAFwkTag::INTENT, "parse want fail");
         ThrowInvalidParamError(env, "Parameter error: Failed to parse want, must be a Want.");
         return false;
     }
