@@ -38,7 +38,6 @@ void NAPIDataAbilityObserver::ReleaseJSCallback()
     }
 
     SafeReleaseJSCallback();
-    
 }
 
 void NAPIDataAbilityObserver::SafeReleaseJSCallback()
@@ -100,13 +99,11 @@ void NAPIDataAbilityObserver::SafeReleaseJSCallback()
 void NAPIDataAbilityObserver::SetEnv(const napi_env &env)
 {
     env_ = env;
-
 }
 
 void NAPIDataAbilityObserver::SetCallbackRef(const napi_ref &ref)
 {
     ref_ = ref;
-
 }
 
 static void OnChangeJSThreadWorker(uv_work_t *work, int status)
@@ -132,7 +129,6 @@ static void OnChangeJSThreadWorker(uv_work_t *work, int status)
     onCB = nullptr;
     delete work;
     work = nullptr;
-
 }
 
 void NAPIDataAbilityObserver::CallJsMethod()
@@ -198,7 +194,6 @@ void NAPIDataAbilityObserver::OnChange()
             work = nullptr;
         }
     }
-
 }
 
 }  // namespace AppExecFwk
