@@ -968,8 +968,7 @@ bool IsSpecialObject(napi_env env, napi_value param, std::string &strProName, st
         false);
     NAPI_CALL_BASE(env, napi_typeof(env, jsProValue, &jsValueType), false);
     if (jsValueType != jsValueProType) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "value property is invalid, this object is not fd object",
-            __func__);
+        TAG_LOGE(AAFwkTag::JSNAPI, "value property is invalid, this object is not fd object");
         return false;
     }
 

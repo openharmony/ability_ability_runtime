@@ -82,13 +82,13 @@ napi_value NAPI_GetFilesDirWrap(napi_env env, napi_callback_info info, AsyncJSCa
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "params is invalid");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "the first parameter is invalid");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid args[PARAM0]");
             return nullptr;
         }
     }
@@ -116,14 +116,14 @@ napi_value NAPI_GetFilesDirCommon(napi_env env, napi_callback_info info, Ability
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Invoke CreateAsyncJSCallbackInfo failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_GetFilesDirWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
@@ -151,13 +151,13 @@ napi_value NAPI_GetOrCreateDistributedDirWrap(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "parameters is invalid");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "the first parameter is invalid");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid args[PARAM0]");
             return nullptr;
         }
     }
@@ -185,14 +185,14 @@ napi_value NAPI_GetOrCreateDistributedDirCommon(napi_env env, napi_callback_info
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Invoke CreateAsyncJSCallbackInfo failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallback");
         return WrapVoidToJS(env);
     }
 
     asyncCallbackInfo->abilityType = abilityType;
     napi_value ret = NAPI_GetOrCreateDistributedDirWrap(env, info, asyncCallbackInfo);
     if (ret == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "ret == nullptr");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null ret");
         FreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         ret = WrapVoidToJS(env);
     }
@@ -219,13 +219,13 @@ napi_value NAPI_GetCacheDirWrap(napi_env env, napi_callback_info info, AsyncJSCa
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &jsthis, &data));
 
     if (argc > ARGS_ONE) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "arguments is invalid");
+        TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         return nullptr;
     }
 
     if (argc == ARGS_ONE) {
         if (!CreateAsyncCallback(env, args[PARAM0], asyncCallbackInfo)) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "the first argument is invalid");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid args[PARAM0]");
             return nullptr;
         }
     }
@@ -253,7 +253,7 @@ napi_value NAPI_GetCacheDirCommon(napi_env env, napi_callback_info info, Ability
     TAG_LOGI(AAFwkTag::JSNAPI, "called");
     AsyncJSCallbackInfo *asyncCallbackInfo = CreateAsyncJSCallbackInfo(env);
     if (asyncCallbackInfo == nullptr) {
-        TAG_LOGE(AAFwkTag::JSNAPI, "Invoke CreateAsyncJSCallbackInfo failed");
+        TAG_LOGE(AAFwkTag::JSNAPI, "null asyncCallbackInfo");
         return WrapVoidToJS(env);
     }
 
@@ -549,7 +549,6 @@ void GetDisplayOrientationExecuteCallback(napi_env env, void *data)
 
     asyncCallbackInfo->native_data.data_type = NVT_INT32;
     asyncCallbackInfo->native_data.int32_value = asyncCallbackInfo->ability->GetDisplayOrientation();
-
 }
 
 bool UnwrapParamGetDisplayOrientationWrap(napi_env env, size_t argc, napi_value *argv,
@@ -740,7 +739,6 @@ AsyncCallbackInfo *CreateAsyncCallbackInfo(napi_env env)
     asyncCallbackInfo->native_result = false;
     asyncCallbackInfo->errCode = NAPI_ERR_NO_ERROR;
     asyncCallbackInfo->abilityType = AbilityType::UNKNOWN;
-
 
     return asyncCallbackInfo;
 }
