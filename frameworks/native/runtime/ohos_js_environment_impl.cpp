@@ -30,7 +30,7 @@ namespace {
 }
 void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void* work, int status, int priority)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "Enter");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     if (!func || !work) {
         TAG_LOGE(AAFwkTag::JSRUNTIME, "Invalid parameters");
         return;
@@ -63,8 +63,6 @@ void OHOSJsEnvironmentImpl::PostTaskToHandler(void* handler, uv_io_cb func, void
         return;
     }
     g_eventHandler->PostTask(task, prio);
-
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "end");
 }
 OHOSJsEnvironmentImpl::OHOSJsEnvironmentImpl()
 {

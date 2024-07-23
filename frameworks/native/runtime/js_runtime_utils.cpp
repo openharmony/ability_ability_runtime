@@ -263,7 +263,6 @@ void NapiAsyncTask::Resolve(napi_env env, napi_value value)
         napi_delete_reference(env, callbackRef_);
         callbackRef_ = nullptr;
     }
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "end");
 }
 
 void NapiAsyncTask::ResolveWithNoError(napi_env env, napi_value value)
@@ -284,7 +283,6 @@ void NapiAsyncTask::ResolveWithNoError(napi_env env, napi_value value)
         napi_delete_reference(env, callbackRef_);
         callbackRef_ = nullptr;
     }
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "end");
 }
 
 void NapiAsyncTask::Reject(napi_env env, napi_value error)
@@ -324,7 +322,6 @@ void NapiAsyncTask::ResolveWithCustomize(napi_env env, napi_value error, napi_va
         napi_delete_reference(env, callbackRef_);
         callbackRef_ = nullptr;
     }
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "end");
 }
 
 void NapiAsyncTask::RejectWithCustomize(napi_env env, napi_value error, napi_value value)
@@ -345,7 +342,6 @@ void NapiAsyncTask::RejectWithCustomize(napi_env env, napi_value error, napi_val
         napi_delete_reference(env, callbackRef_);
         callbackRef_ = nullptr;
     }
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "end");
 }
 
 void NapiAsyncTask::Execute(napi_env env, void* data)
