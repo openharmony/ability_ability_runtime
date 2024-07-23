@@ -7166,7 +7166,7 @@ bool AppMgrServiceInner::IsProcessContainsOnlyUIExtension(const pid_t pid)
                 "type is: %{public}d, "
                 "isStageBasedModel is: %{public}d, "
                 "isUIAbility is: %{public}d", 
-            abilityInfo.name.c_str(),
+            abilityInfo->name.c_str(),
             static_cast<int32_t>(abilityInfo->type),
             abilityInfo->isStageBasedModel,
             isUIAbility);
