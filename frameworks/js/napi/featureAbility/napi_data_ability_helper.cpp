@@ -201,7 +201,6 @@ napi_value NAPI_Insert(napi_env env, napi_callback_info info)
         insertCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -247,7 +246,6 @@ napi_value InsertWrap(napi_env env, napi_callback_info info, DAHelperInsertCB *i
     } else {
         ret = InsertPromise(env, insertCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -338,7 +336,6 @@ napi_value UnwrapValuesBucket(std::string &value, napi_env env, napi_value args)
 
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
@@ -366,7 +363,6 @@ napi_value NAPI_NotifyChange(napi_env env, napi_callback_info info)
         notifyChangeCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -434,7 +430,6 @@ napi_value NAPI_Register(napi_env env, napi_callback_info info)
         onCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -580,7 +575,6 @@ void RegisterCompleteCB(napi_env env, napi_status status, void *data)
     }
     TAG_LOGI(AAFwkTag::FA, "input params onCB will be release");
     DeleteDAHelperOnOffCB(onCB);
-    TAG_LOGI(AAFwkTag::FA, "main event thread complete over an release invalid onCB");
 }
 
 /**
@@ -607,7 +601,6 @@ napi_value NAPI_UnRegister(napi_env env, napi_callback_info info)
         offCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "called end");
     return ret;
 }
 
@@ -782,7 +775,6 @@ napi_value NAPI_GetType(napi_env env, napi_callback_info info)
         gettypeCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -817,7 +809,6 @@ napi_value GetTypeWrap(napi_env env, napi_callback_info info, DAHelperGetTypeCB 
     } else {
         ret = GetTypePromise(env, gettypeCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -841,7 +832,6 @@ napi_value NAPI_GetFileTypes(napi_env env, napi_callback_info info)
         getfiletypesCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -881,7 +871,7 @@ napi_value GetFileTypesWrap(napi_env env, napi_callback_info info, DAHelperGetFi
     } else {
         ret = GetFileTypesPromise(env, getfiletypesCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -905,7 +895,7 @@ napi_value NAPI_NormalizeUri(napi_env env, napi_callback_info info)
         normalizeuriCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -938,7 +928,7 @@ napi_value NormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperNorma
     } else {
         ret = NormalizeUriPromise(env, normalizeuriCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -962,7 +952,7 @@ napi_value NAPI_DenormalizeUri(napi_env env, napi_callback_info info)
         denormalizeuriCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -995,7 +985,7 @@ napi_value DenormalizeUriWrap(napi_env env, napi_callback_info info, DAHelperDen
     } else {
         ret = DenormalizeUriPromise(env, denormalizeuriCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1033,7 +1023,7 @@ napi_value NAPI_Delete(napi_env env, napi_callback_info info)
         deleteCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1076,7 +1066,7 @@ napi_value DeleteWrap(napi_env env, napi_callback_info info, DAHelperDeleteCB *d
     } else {
         ret = DeletePromise(env, deleteCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1104,7 +1094,7 @@ napi_value NAPI_Update(napi_env env, napi_callback_info info)
         updateCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1149,7 +1139,7 @@ napi_value UpdateWrap(napi_env env, napi_callback_info info, DAHelperUpdateCB *u
     } else {
         ret = UpdatePromise(env, updateCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 void SetPacMapObject(AppExecFwk::PacMap &pacMap, const napi_env &env, std::string keyStr, napi_value value)
@@ -1281,7 +1271,7 @@ napi_value NAPI_Call(napi_env env, napi_callback_info info)
         callCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1313,7 +1303,7 @@ napi_value NAPI_OpenFile(napi_env env, napi_callback_info info)
         openFileCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1360,7 +1350,7 @@ napi_value OpenFileWrap(napi_env env, napi_callback_info info, DAHelperOpenFileC
     } else {
         ret = OpenFilePromise(env, openFileCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1392,7 +1382,7 @@ napi_value NAPI_BatchInsert(napi_env env, napi_callback_info info)
         BatchInsertCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1430,7 +1420,7 @@ bool UnwrapArrayObjectFromJS(napi_env env, napi_value param, std::vector<NativeR
 
         value.push_back(valueBucket);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return true;
 }
 
@@ -1473,7 +1463,7 @@ napi_value BatchInsertWrap(napi_env env, napi_callback_info info, DAHelperBatchI
     } else {
         ret = BatchInsertPromise(env, batchInsertCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1501,7 +1491,7 @@ napi_value NAPI_Query(napi_env env, napi_callback_info info)
         queryCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1573,7 +1563,7 @@ napi_value NAPI_ExecuteBatch(napi_env env, napi_callback_info info)
         executeBatchCB = nullptr;
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 
@@ -1641,7 +1631,7 @@ napi_value ExecuteBatchWrap(napi_env env, napi_callback_info info, DAHelperExecu
     } else {
         ret = ExecuteBatchPromise(env, executeBatchCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+
     return ret;
 }
 

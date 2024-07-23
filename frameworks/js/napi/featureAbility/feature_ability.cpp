@@ -238,7 +238,6 @@ napi_value JsFeatureAbility::OnHasWindowFocus(napi_env env, const NapiCallbackIn
     napi_value lastParam = (info.argc == ARGS_ZERO) ? nullptr : info.argv[PARAM0];
     NapiAsyncTask::ScheduleHighQos("JSFeatureAbility::OnHasWindowFocus",
         env, CreateAsyncTaskWithLastParam(env, lastParam, nullptr, std::move(complete), &result));
-    TAG_LOGD(AAFwkTag::FA, "end");
     return result;
 }
 #endif
@@ -450,7 +449,6 @@ napi_value NAPI_SetResult(napi_env env, napi_callback_info info)
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -481,7 +479,7 @@ napi_value SetResultWrap(napi_env env, napi_callback_info info, AsyncCallbackInf
     } else {
         ret = SetResultPromise(env, asyncCallbackInfo);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -710,7 +708,7 @@ void CallOnAbilityResult(int requestCode, int resultCode, const Want &resultData
             work = nullptr;
         }
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+    TAG_LOGD(AAFwkTag::FA, "end");
 }
 EXTERN_C_END
 
@@ -760,12 +758,11 @@ napi_value UnwrapForResultParam(CallAbilityParam &param, napi_env env, napi_valu
         if (!UnwrapAbilityStartSetting(env, jsSettingObj, *(param.setting))) {
             TAG_LOGE(AAFwkTag::FA, "unwrap abilityStartSetting failed");
         }
-        TAG_LOGI(AAFwkTag::FA, "abilityStartSetting");
+        TAG_LOGD(AAFwkTag::FA, "abilityStartSetting");
     }
 
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
@@ -789,7 +786,6 @@ napi_value UnwrapAbilityResult(CallAbilityParam &param, napi_env env, napi_value
 
     napi_value result;
     NAPI_CALL(env, napi_create_int32(env, 1, &result));
-    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
@@ -829,7 +825,6 @@ napi_value GetWantSyncWrap(napi_env env, napi_callback_info info, AsyncCallbackI
     } else {
         result = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
     return result;
 }
 
@@ -946,7 +941,7 @@ napi_value NAPI_GetDataAbilityHelper(napi_env env, napi_callback_info info)
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -989,7 +984,7 @@ napi_value GetDataAbilityHelperWrap(napi_env env, napi_callback_info info, DataA
     } else {
         ret = GetDataAbilityHelperPromise(env, dataAbilityHelperCB);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -1022,7 +1017,6 @@ napi_value GetDataAbilityHelperAsync(
         napi_qos_user_initiated));
     napi_value result = nullptr;
     NAPI_CALL(env, napi_get_null(env, &result));
-    TAG_LOGI(AAFwkTag::FA, "asyncCallback end");
     return result;
 }
 
@@ -1158,7 +1152,7 @@ napi_value NAPI_FAContinueAbility(napi_env env, napi_callback_info info)
         }
         ret = WrapVoidToJS(env);
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -1203,7 +1197,7 @@ napi_value ContinueAbilityWrap(napi_env env, napi_callback_info info, AsyncCallb
     } else {
         TAG_LOGE(AAFwkTag::FA, "Wrong argument count");
     }
-    TAG_LOGI(AAFwkTag::FA, "end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return ret;
 }
 
@@ -1362,7 +1356,7 @@ napi_value ContinueAbilityPromise(napi_env env, napi_value *args, AsyncCallbackI
         },
         static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     napi_queue_async_work(env, asyncCallbackInfo->asyncWork);
-    TAG_LOGI(AAFwkTag::FA, "promise end");
+    TAG_LOGD(AAFwkTag::FA, "end");
     return promise;
 }
 }  // namespace AppExecFwk
