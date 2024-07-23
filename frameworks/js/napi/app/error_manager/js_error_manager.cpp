@@ -217,7 +217,7 @@ private:
         }
         if (type == ON_OFF_TYPE_UNHANDLED_REJECTION) {
             if (argc != ARGC_TWO) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "The number of params is invalid");
+                TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
@@ -230,7 +230,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
         if (argc != ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "The param is invalid, observers need");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -249,7 +249,7 @@ private:
         }
 
         if (observer_ == nullptr) {
-            TAG_LOGD(AAFwkTag::JSNAPI, "observer_ is nullptr");
+            TAG_LOGD(AAFwkTag::JSNAPI, "null observer_");
             // create observer
             observer_ = std::make_shared<JsErrorObserver>(env);
             AppExecFwk::ApplicationDataManager::GetInstance().AddErrorObserver(observer_);
@@ -284,7 +284,7 @@ private:
     {
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
         if (argc < ARGC_TWO) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "The param is invalid, observers need");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
@@ -328,7 +328,7 @@ private:
         }
         if (type == ON_OFF_TYPE_UNHANDLED_REJECTION) {
             if (argc != ARGC_TWO && argc != ARGC_ONE) {
-                TAG_LOGE(AAFwkTag::JSNAPI, "The number of params is invalid");
+                TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
                 ThrowInvalidNumParametersError(env);
                 return CreateJsUndefined(env);
             }
@@ -343,7 +343,7 @@ private:
         int32_t observerId = -1;
         if (argc != ARGC_TWO && argc != ARGC_THREE) {
             ThrowTooFewParametersError(env);
-            TAG_LOGE(AAFwkTag::JSNAPI, "not enough params");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
         } else {
             napi_get_value_int32(env, argv[INDEX_ONE], &observerId);
             TAG_LOGI(AAFwkTag::JSNAPI, "observer:%{public}d", observerId);
@@ -417,7 +417,7 @@ private:
         TAG_LOGD(AAFwkTag::JSNAPI, "called");
         if (argc < ARGC_TWO) {
             ThrowTooFewParametersError(env);
-            TAG_LOGE(AAFwkTag::JSNAPI, "unregister errorObserver error, not enough params");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
             return CreateJsUndefined(env);
         }
         int32_t observerId = -1;
@@ -449,14 +449,14 @@ private:
     {
         TAG_LOGI(AAFwkTag::JSNAPI, "called");
         if (obj == nullptr) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Failed to get object");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null obj");
             return;
         }
 
         napi_value method = nullptr;
         napi_get_named_property(env, obj, methodName, &method);
         if (method == nullptr) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Failed to get method");
+            TAG_LOGE(AAFwkTag::JSNAPI, "null method");
             return;
         }
         napi_value callResult = nullptr;
@@ -468,15 +468,15 @@ private:
         std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
             ([number](napi_env env, NapiAsyncTask &task, int32_t status) {
                 if (loopObserver_ == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSNAPI, "loopObserver_ is nullptr");
+                    TAG_LOGE(AAFwkTag::JSNAPI, "null loopObserver_");
                     return;
                 }
                 if (loopObserver_->env == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSNAPI, "env is nullptr");
+                    TAG_LOGE(AAFwkTag::JSNAPI, "null env");
                     return;
                 }
                 if (loopObserver_->observerObject == nullptr) {
-                    TAG_LOGE(AAFwkTag::JSNAPI, "observerObject is nullptr");
+                    TAG_LOGE(AAFwkTag::JSNAPI, "null observerObject");
                     return;
                 }
                 napi_value jsValue[] = { CreateJsValue(loopObserver_->env, number) };
@@ -494,7 +494,7 @@ private:
     napi_value OnSetLoopWatch(napi_env env, size_t argc, napi_value* argv)
     {
         if (argc != ARGC_THREE) {
-            TAG_LOGE(AAFwkTag::JSNAPI, "Not enough params");
+            TAG_LOGE(AAFwkTag::JSNAPI, "invalid argc");
             ThrowTooFewParametersError(env);
             return CreateJsUndefined(env);
         }
