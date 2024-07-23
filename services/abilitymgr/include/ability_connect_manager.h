@@ -44,6 +44,7 @@ namespace AAFwk {
 using OHOS::AppExecFwk::AbilityType;
 using UIExtensionAbilityConnectInfo = AbilityRuntime::UIExtensionAbilityConnectInfo;
 using UIExtensionAbilityConnectManager = AbilityRuntime::ExtensionRecordManager;
+using UIExtensionSessionInfo = AbilityRuntime::UIExtensionSessionInfo;
 /**
  * @class AbilityConnectManager
  * AbilityConnectManager provides a facility for managing service ability connection.
@@ -301,6 +302,16 @@ public:
 
     std::shared_ptr<AAFwk::AbilityRecord> GetUIExtensionRootHostInfo(const sptr<IRemoteObject> token);
 
+    /**
+     * @brief Get ui extension session info
+     *
+     * @param token The ability token.
+     * @param uiExtensionSessionInfo The ui extension session info.
+     * @param userId The user id.
+     * @return int32_t Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo);
+
     void CloseAssertDialog(const std::string &assertSessionId);
 
     void SignRestartAppFlag(const std::string &bundleName);
@@ -342,11 +353,10 @@ private:
      * DisconnectAbilityLocked, disconnect session with callback.
      *
      * @param connect, Callback used to notify caller the result of connecting or disconnecting.
-     * @param force, Indicates forcing to disconnect and clear. For example, it is called when the source
-     * dies and the connection has not completed yet.
+     * @param callerDied, bool Indicates if it is caused by the caller's death.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect, bool force);
+    int DisconnectAbilityLocked(const sptr<IAbilityConnection> &connect, bool callerDied);
 
     /**
      * LoadAbility.
@@ -361,6 +371,20 @@ private:
      * @param abilityRecord, the ptr of the ability to connect.
      */
     void ConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
+
+    /**
+     * ConnectAbility.Schedule connect ability
+     *
+     * @param abilityRecord, the ptr of the ability to connect.
+     */
+    void ConnectUIServiceExtAbility(const std::shared_ptr<AbilityRecord> &abilityRecord, const Want &want);
+
+    /**
+     * ConnectAbility.Schedule Resume Connect ability
+     *
+     * @param abilityRecord, the ptr of the ability to connect.
+     */
+    void ResumeConnectAbility(const std::shared_ptr<AbilityRecord> &abilityRecord);
 
     /**
      * CommandAbility. Schedule command ability
@@ -558,7 +582,8 @@ private:
 
 private:
     void TerminateRecord(std::shared_ptr<AbilityRecord> abilityRecord);
-    int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord) const;
+    int DisconnectRecordNormal(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord,
+        bool callerDied) const;
     void DisconnectRecordForce(ConnectListType &list, std::shared_ptr<ConnectionRecord> connectRecord);
     std::shared_ptr<AbilityRecord> GetExtensionByIdFromServiceMap(int32_t abilityRecordId);
     int TerminateAbilityInner(const sptr<IRemoteObject> &token);
@@ -590,19 +615,20 @@ private:
 
     void KeepAbilityAlive(const std::shared_ptr<AbilityRecord> &abilityRecord, int32_t currentUserId);
     void ProcessEliminateAbilityRecord(std::shared_ptr<AbilityRecord> eliminateRecord);
+    std::string GetServiceKey(const std::shared_ptr<AbilityRecord> &service);
 
 private:
     const std::string TASK_ON_CALLBACK_DIED = "OnCallbackDiedTask";
     const std::string TASK_ON_ABILITY_DIED = "OnAbilityDiedTask";
 
-    std::mutex serialMutex_;
+    ffrt::mutex serialMutex_;
 
     std::mutex connectMapMutex_;
     ConnectMapType connectMap_;
 
-    std::mutex serviceMapMutex_;
+    ffrt::mutex serviceMapMutex_;
     ServiceMapType serviceMap_;
-    ServiceMapType terminatingExtensionMap_;
+    std::list<std::shared_ptr<AbilityRecord>> terminatingExtensionList_;
 
     std::mutex recipientMapMutex_;
     RecipientMapType recipientMap_;

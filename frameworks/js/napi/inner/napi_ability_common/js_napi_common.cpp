@@ -1238,7 +1238,7 @@ napi_value JsNapiCommon::JsTerminateAbility(napi_env env, NapiCallbackInfo& info
  */
 bool UnwrapParamForWant(napi_env env, napi_value args, AbilityType, CallAbilityParam &param)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     bool ret = false;
     napi_valuetype valueType = napi_undefined;
     param.setting = nullptr;
@@ -1418,10 +1418,14 @@ void JsNapiCommon::AddFreeInstallObserver(napi_env env, const AAFwk::Want &want,
 {
     // adapter free install async return install and start result
     TAG_LOGD(AAFwkTag::JSNAPI, "AddFreeInstallObserver start.");
+    if (ability_ == nullptr) {
+        TAG_LOGE(AAFwkTag::JSNAPI, "the ability is nullptr");
+        return;
+    }
     int ret = 0;
     if (freeInstallObserver_ == nullptr) {
         freeInstallObserver_ = new JsFreeInstallObserver(env);
-        ret = AAFwk::AbilityManagerClient::GetInstance()->AddFreeInstallObserver(freeInstallObserver_);
+        ret = ability_->AddFreeInstallObserver(freeInstallObserver_);
     }
 
     if (ret != ERR_OK) {
@@ -1600,7 +1604,7 @@ void UvWorkOnAbilityConnectDone(uv_work_t *work, int status)
 
 void NAPIAbilityConnection::HandleOnAbilityConnectDone(ConnectionCallback &callback, int resultCode)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(callback.env, &loop);
     if (loop == nullptr) {
@@ -1721,7 +1725,7 @@ void UvWorkOnAbilityDisconnectDone(uv_work_t *work, int status)
 
 void NAPIAbilityConnection::HandleOnAbilityDisconnectDone(ConnectionCallback &callback, int resultCode)
 {
-    TAG_LOGI(AAFwkTag::JSNAPI, "%{public}s called.", __func__);
+    TAG_LOGI(AAFwkTag::JSNAPI, "called");
     uv_loop_s *loop = nullptr;
     napi_get_uv_event_loop(callback.env, &loop);
     if (loop == nullptr) {

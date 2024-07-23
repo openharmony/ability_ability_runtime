@@ -490,12 +490,11 @@ public:
     /**
      * Start child process, called by ChildProcessManager.
      *
-     * @param srcEntry Child process source file entrance path to be started.
      * @param childPid Created child process pid.
+     * @param request Child process start request params.
      * @return Returns ERR_OK on success, others on failure.
      */
-    int32_t StartChildProcess(const std::string &srcEntry, pid_t &childPid, int32_t childProcessCoun,
-        bool isStartWithDebug) override;
+    int32_t StartChildProcess(pid_t &childPid, const ChildProcessRequest &request) override;
 
     /**
      * Get child process record for self.
@@ -532,18 +531,9 @@ public:
 
     int32_t NotifyMemorySizeStateChanged(bool isMemorySizeSufficent) override;
 
-    int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
-
     void SetAppAssertionPauseState(bool flag) override;
-    /**
-     * Start native child process, callde by ChildProcessManager.
-     * @param libName lib file name to be load in child process
-     * @param childProcessCount current started child process count
-     * @param callback callback for notify start result
-     * @return Returns ERR_OK on success, others on failure.
-     */
-    int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
-        const sptr<IRemoteObject> &callback) override;
+
+    int32_t SetSupportedProcessCacheSelf(bool isSupport) override;
 
     virtual void SaveBrowserChannel(sptr<IRemoteObject> browser) override;
 
@@ -554,6 +544,15 @@ public:
      * @return Returns ERR_OK is test ability, others is not test ability.
      */
     int32_t CheckCallingIsUserTestMode(const pid_t pid, bool &isUserTest) override;
+    /**
+     * Start native child process, callde by ChildProcessManager.
+     * @param libName lib file name to be load in child process
+     * @param childProcessCount current started child process count
+     * @param callback callback for notify start result
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    int32_t StartNativeChildProcess(const std::string &libName, int32_t childProcessCount,
+        const sptr<IRemoteObject> &callback) override;
 
     virtual int32_t NotifyProcessDependedOnWeb() override;
 

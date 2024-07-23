@@ -16,7 +16,6 @@
 #include "app_utils.h"
 #include "json_utils.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "nlohmann/json.hpp"
 #include "parameters.h"
 #ifdef SUPPORT_GRAPHICS
@@ -55,6 +54,10 @@ const std::string LIMIT_MAXIMUM_EXTENSIONS_OF_PER_PROCESS =
 const std::string LIMIT_MAXIMUM_EXTENSIONS_OF_PER_DEVICE =
     "const.sys.abilityms.limit_maximum_extensions_of_per_device";
 const std::string CACHE_EXTENSION_TYPES = "const.sys.abilityms.cache_extension";
+constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN = "/system/etc/start_ability_without_caller_token.json";
+constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_PATH =
+    "/etc/ability_runtime/start_ability_without_caller_token.json";
+constexpr const char* START_ABILITY_WITHOUT_CALLERTOKEN_TITLE = "startAbilityWithoutCallerToken";
 }
 
 AppUtils::~AppUtils() {}
@@ -304,9 +307,54 @@ int32_t AppUtils::GetLimitMaximumExtensionsPerDevice()
 
 std::string AppUtils::GetCacheExtensionTypeList()
 {
-    std::string cacheExtAbilityTypeList = system::GetParameter(CACHE_EXTENSION_TYPES, "3;5;17;260");
+    std::string cacheExtAbilityTypeList = system::GetParameter(CACHE_EXTENSION_TYPES, "260");
     TAG_LOGD(AAFwkTag::DEFAULT, "cacheExtAbilityTypeList is %{public}s", cacheExtAbilityTypeList.c_str());
     return cacheExtAbilityTypeList;
+}
+
+bool AppUtils::IsAllowStartAbilityWithoutCallerToken(const std::string& bundleName, const std::string& abilityName)
+{
+    if (!startAbilityWithoutCallerToken_.isLoaded) {
+        LoadStartAbilityWithoutCallerToken();
+        startAbilityWithoutCallerToken_.isLoaded = true;
+    }
+    TAG_LOGD(AAFwkTag::DEFAULT, "isLoaded: %{public}d", startAbilityWithoutCallerToken_.isLoaded);
+    for (auto &element : startAbilityWithoutCallerToken_.value) {
+        if (bundleName == element.first && abilityName == element.second) {
+            TAG_LOGI(AAFwkTag::DEFAULT, "call");
+            return true;
+        }
+    }
+    return false;
+}
+
+void AppUtils::LoadStartAbilityWithoutCallerToken()
+{
+    nlohmann::json object;
+    if (!JsonUtils::GetInstance().LoadConfiguration(
+        START_ABILITY_WITHOUT_CALLERTOKEN_PATH, object, START_ABILITY_WITHOUT_CALLERTOKEN)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "load start ability without caller token list failed.");
+        return;
+    }
+    if (!object.contains(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE)) {
+        TAG_LOGE(AAFwkTag::DEFAULT, "start ability without caller token config not existed.");
+        return;
+    }
+
+    for (auto &item : object.at(START_ABILITY_WITHOUT_CALLERTOKEN_TITLE).items()) {
+        const nlohmann::json& jsonObject = item.value();
+        if (!jsonObject.contains(BUNDLE_NAME) || !jsonObject.at(BUNDLE_NAME).is_string()) {
+            TAG_LOGE(AAFwkTag::DEFAULT, "failed to load bundleName.");
+            return;
+        }
+        if (!jsonObject.contains(ABILITY_NAME) || !jsonObject.at(ABILITY_NAME).is_string()) {
+            TAG_LOGE(AAFwkTag::DEFAULT, "failed to load abilityName.");
+            return;
+        }
+        std::string bundleName = jsonObject.at(BUNDLE_NAME).get<std::string>();
+        std::string abilityName = jsonObject.at(ABILITY_NAME).get<std::string>();
+        startAbilityWithoutCallerToken_.value.emplace_back(std::make_pair(bundleName, abilityName));
+    }
 }
 }  // namespace AAFwk
 }  // namespace OHOS

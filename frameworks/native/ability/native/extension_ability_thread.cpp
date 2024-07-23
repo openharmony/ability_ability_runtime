@@ -20,7 +20,6 @@
 #include "ability_loader.h"
 #include "ability_manager_client.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "ui_extension_utils.h"
 
@@ -404,7 +403,7 @@ void ExtensionAbilityThread::ScheduleAbilityTransaction(
 
 void ExtensionAbilityThread::ScheduleConnectAbility(const Want &want)
 {
-    TAG_LOGD(AAFwkTag::EXT, "Called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "abilityHandler_ is nullptr.");
         return;
@@ -427,7 +426,7 @@ void ExtensionAbilityThread::ScheduleConnectAbility(const Want &want)
 void ExtensionAbilityThread::ScheduleDisconnectAbility(const Want &want)
 {
     HITRACE_METER_NAME(HITRACE_TAG_ABILITY_MANAGER, __PRETTY_FUNCTION__);
-    TAG_LOGD(AAFwkTag::EXT, "Called.");
+    TAG_LOGD(AAFwkTag::EXT, "called");
     if (abilityHandler_ == nullptr) {
         TAG_LOGE(AAFwkTag::EXT, "abilityHandler_ is nullptr.");
         return;

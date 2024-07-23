@@ -57,8 +57,7 @@ public:
         const sptr<IRemoteObject>& callerToken,
         const sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE,
-        bool isSendDialogResult = false) override;
+        int requestCode = DEFAULT_INVAL_VALUE) override;
     int StartAbilityAsCaller(
         const Want& want,
         const StartOptions& startOptions,
@@ -279,7 +278,8 @@ public:
         return 0;
     }
 
-    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler) override
+    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
+        bool animationEnabled = true) override
     {
         return 0;
     }

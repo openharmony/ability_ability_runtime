@@ -1175,7 +1175,8 @@ HWTEST_F(UIAbilityLifecycleManagerTest, NotifySCBToHandleException_001, TestSize
 {
     auto uiAbilityLifecycleManager = std::make_shared<UIAbilityLifecycleManager>();
     ASSERT_NE(uiAbilityLifecycleManager, nullptr);
-    uiAbilityLifecycleManager->NotifySCBToHandleException(nullptr,
+    std::shared_ptr<AbilityRecord> record = nullptr;
+    uiAbilityLifecycleManager->NotifySCBToHandleException(record,
         static_cast<int32_t>(ErrorLifecycleState::ABILITY_STATE_LOAD_TIMEOUT), "handleLoadTimeout");
     uiAbilityLifecycleManager.reset();
 }
@@ -3870,7 +3871,6 @@ HWTEST_F(UIAbilityLifecycleManagerTest, DispatchBackground_002, TestSize.Level1)
 {
     auto uiAbilityLifecycleManager = std::make_unique<UIAbilityLifecycleManager>();
     EXPECT_NE(uiAbilityLifecycleManager, nullptr);
-    OHOS::DelayedSingleton<AbilityManagerService>::GetInstance()->OnStart();
     std::shared_ptr<AbilityRecord> abilityRecord = nullptr;
     EXPECT_EQ(uiAbilityLifecycleManager->DispatchBackground(abilityRecord), ERR_INVALID_VALUE);
 }

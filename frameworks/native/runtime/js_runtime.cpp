@@ -36,7 +36,6 @@
 #include "file_path_utils.h"
 #include "hdc_register.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -103,6 +102,7 @@ const std::string MODULE_NAME = "moduleName";
 const std::string VERSION = "version";
 const std::string ENTRY_PATH = "entryPath";
 const std::string IS_SO = "isSO";
+constexpr char DEVELOPER_MODE_STATE[] = "const.security.developermode.state";
 const std::string DEPENDENCY_ALIAS = "dependencyAlias";
 
 static auto PermissionCheckFunc = []() {
@@ -247,6 +247,10 @@ std::unique_ptr<JsRuntime> JsRuntime::Create(const Options& options)
 
 void JsRuntime::StartDebugMode(const DebugOption dOption)
 {
+    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
+        return;
+    }
     CHECK_POINTER(jsEnv_);
     if (jsEnv_->GetDebugMode()) {
         TAG_LOGI(AAFwkTag::JSRUNTIME, "Already in debug mode");
@@ -290,6 +294,11 @@ void JsRuntime::StartDebugMode(const DebugOption dOption)
         ConnectServerManager::Get().StartConnectServer(bundleName_, -1, true);
     }
 
+    DebuggerConnectionHandler(isDebugApp, isStartWithDebug);
+}
+
+void JsRuntime::DebuggerConnectionHandler(bool isDebugApp, bool isStartWithDebug)
+{
     ConnectServerManager::Get().StoreInstanceMessage(getproctid(), instanceId_);
     EcmaVM* vm = GetEcmaVm();
     auto dTask = jsEnv_->GetDebuggerPostTask();
@@ -315,7 +324,7 @@ void JsRuntime::InitConsoleModule()
 
 bool JsRuntime::StartDebugger(bool needBreakPoint, uint32_t instanceId)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "StartDebugger called.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     return true;
 }
 
@@ -380,6 +389,10 @@ int32_t JsRuntime::JsperfProfilerCommandParse(const std::string &command, int32_
 
 void JsRuntime::StartProfiler(const DebugOption dOption)
 {
+    if (!system::GetBoolParameter(DEVELOPER_MODE_STATE, false)) {
+        TAG_LOGE(AAFwkTag::JSRUNTIME, "Developer Mode is false.");
+        return;
+    }
     CHECK_POINTER(jsEnv_);
     if (JsRuntime::hasInstance.exchange(true, std::memory_order_relaxed)) {
         instanceId_ = static_cast<uint32_t>(getproctid());
@@ -412,6 +425,12 @@ void JsRuntime::StartProfiler(const DebugOption dOption)
             weak->StartDebugger(option, socketFd, isDebugApp);
         }
     });
+
+    DebuggerConnectionManager(isDebugApp, isStartWithDebug, dOption);
+}
+
+void JsRuntime::DebuggerConnectionManager(bool isDebugApp, bool isStartWithDebug, const DebugOption dOption)
+{
     if (isDebugApp) {
         ConnectServerManager::Get().StartConnectServer(bundleName_, 0, true);
     }
@@ -467,7 +486,7 @@ bool JsRuntime::GetFileBuffer(const std::string& filePath, std::string& fileFull
 
 bool JsRuntime::LoadRepairPatch(const std::string& hqfFile, const std::string& hapPath)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "LoadRepairPatch function called.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     auto vm = GetEcmaVm();
     CHECK_POINTER_AND_RETURN(vm, false);
 
@@ -513,7 +532,7 @@ bool JsRuntime::LoadRepairPatch(const std::string& hqfFile, const std::string& h
 
 bool JsRuntime::UnLoadRepairPatch(const std::string& hqfFile)
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "UnLoadRepairPatch function called.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
     auto vm = GetEcmaVm();
     CHECK_POINTER_AND_RETURN(vm, false);
 
@@ -545,7 +564,7 @@ bool JsRuntime::UnLoadRepairPatch(const std::string& hqfFile)
 
 bool JsRuntime::NotifyHotReloadPage()
 {
-    TAG_LOGD(AAFwkTag::JSRUNTIME, "function called.");
+    TAG_LOGD(AAFwkTag::JSRUNTIME, "called");
 #ifdef SUPPORT_SCREEN
     Ace::HotReloader::HotReload();
 #endif // SUPPORT_SCREEN
@@ -629,6 +648,10 @@ void JsRuntime::PostPreload(const Options& options)
     if (options.isMultiThread) {
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Multi-Thread Mode: %{public}d.", options.isMultiThread);
         panda::JSNApi::SetMultiThreadCheck();
+    }
+    if (options.isErrorInfoEnhance) {
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Error-Info-Enhance Mode: %{public}d.", options.isErrorInfoEnhance);
+        panda::JSNApi::SetErrorInfoEnhance();
     }
     bool profileEnabled = OHOS::system::GetBoolParameter("ark.profile", false);
     postOption.SetEnableProfile(profileEnabled);
@@ -808,6 +831,11 @@ bool JsRuntime::CreateJsEnv(const Options& options)
     if (options.isMultiThread) {
         TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Multi Thread Mode: %{public}d.", options.isMultiThread);
         panda::JSNApi::SetMultiThreadCheck();
+    }
+
+    if (options.isErrorInfoEnhance) {
+        TAG_LOGD(AAFwkTag::JSRUNTIME, "Start Error Info Enhance Mode: %{public}d.", options.isErrorInfoEnhance);
+        panda::JSNApi::SetErrorInfoEnhance();
     }
 
     if (IsUseAbilityRuntime(options)) {
@@ -1187,11 +1215,11 @@ void JsRuntime::RemoveTask(const std::string& name)
     jsEnv_->RemoveTask(name);
 }
 
-void JsRuntime::DumpCpuProfile(bool isPrivate)
+void JsRuntime::DumpCpuProfile()
 {
     auto nativeEngine = GetNativeEnginePointer();
     CHECK_POINTER(nativeEngine);
-    nativeEngine->DumpCpuProfile(true, DumpFormat::JSON, isPrivate, false);
+    nativeEngine->DumpCpuProfile();
 }
 
 void JsRuntime::DumpHeapSnapshot(bool isPrivate)
@@ -1205,7 +1233,14 @@ void JsRuntime::DumpHeapSnapshot(uint32_t tid, bool isFullGC)
 {
     auto vm = GetEcmaVm();
     CHECK_POINTER(vm);
-    DFXJSNApi::DumpHeapSnapshot(vm, 0, true, false, false, isFullGC, tid);
+    panda::ecmascript::DumpSnapShotOption dumpOption;
+    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    dumpOption.isVmMode = true;
+    dumpOption.isPrivate = false;
+    dumpOption.captureNumericValue = false;
+    dumpOption.isFullGC = isFullGC;
+    dumpOption.isSync = false;
+    DFXJSNApi::DumpHeapSnapshot(vm, dumpOption, tid);
 }
 
 void JsRuntime::ForceFullGC(uint32_t tid)
@@ -1446,15 +1481,15 @@ void JsRuntime::InitWorkerModule(const Options& options)
 {
     CHECK_POINTER(jsEnv_);
     std::shared_ptr<JsEnv::WorkerInfo> workerInfo = std::make_shared<JsEnv::WorkerInfo>();
-    workerInfo->codePath = options.codePath;
+    workerInfo->codePath = panda::panda_file::StringPacProtect(options.codePath);
     workerInfo->isDebugVersion = options.isDebugVersion;
     workerInfo->isBundle = options.isBundle;
     workerInfo->packagePathStr = options.packagePathStr;
     workerInfo->assetBasePathStr = options.assetBasePathStr;
-    workerInfo->hapPath = options.hapPath;
-    workerInfo->isStageModel = options.isStageModel;
+    workerInfo->hapPath = panda::panda_file::StringPacProtect(options.hapPath);
+    workerInfo->isStageModel = panda::panda_file::BoolPacProtect(options.isStageModel);
     workerInfo->moduleName = options.moduleName;
-    workerInfo->apiTargetVersion = options.apiTargetVersion;
+    workerInfo->apiTargetVersion = panda::panda_file::DataProtect(static_cast<uintptr_t>(options.apiTargetVersion));
     if (options.isJsFramework) {
         SetJsFramework();
     }
