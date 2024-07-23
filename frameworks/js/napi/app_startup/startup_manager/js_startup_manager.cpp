@@ -17,7 +17,6 @@
 
 #include "ability_runtime_error_util.h"
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "js_startup_config.h"
 #include "js_startup_task_result.h"
 #include "napi/native_api.h"
@@ -65,7 +64,7 @@ napi_value JsStartupManager::RemoveResult(napi_env env, napi_callback_info info)
 
 napi_value JsStartupManager::OnRun(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
         ThrowTooFewParametersError(env);
@@ -106,14 +105,14 @@ napi_value JsStartupManager::OnRun(napi_env env, NapiCallbackInfo &info)
 
 napi_value JsStartupManager::OnRemoveAllResult(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     DelayedSingleton<StartupManager>::GetInstance()->RemoveAllResult();
     return CreateJsUndefined(env);
 }
 
 napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
         ThrowTooFewParametersError(env);
@@ -153,7 +152,7 @@ napi_value JsStartupManager::OnGetResult(napi_env env, NapiCallbackInfo &info)
 
 napi_value JsStartupManager::OnIsInitialized(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
         ThrowTooFewParametersError(env);
@@ -179,7 +178,7 @@ napi_value JsStartupManager::OnIsInitialized(napi_env env, NapiCallbackInfo &inf
 
 napi_value JsStartupManager::OnRemoveResult(napi_env env, NapiCallbackInfo &info)
 {
-    TAG_LOGD(AAFwkTag::STARTUP, "called.");
+    TAG_LOGD(AAFwkTag::STARTUP, "called");
     if (info.argc < ARGC_ONE) {
         TAG_LOGE(AAFwkTag::STARTUP, "the param is invalid.");
         ThrowTooFewParametersError(env);
