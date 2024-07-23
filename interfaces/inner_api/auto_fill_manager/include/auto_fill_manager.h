@@ -68,10 +68,14 @@ public:
     int32_t RequestAutoFill(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
         const std::shared_ptr<IFillRequestCallback> &fillCallback, AutoFill::AutoFillResult &result);
 
+    bool IsNeedToCreatePopupWindow(const AbilityBase::AutoFillType &autoFillType);
+
     int32_t RequestAutoSave(Ace::UIContent *uiContent, const AutoFill::AutoFillRequest &request,
         const std::shared_ptr<ISaveRequestCallback> &saveCallback, AutoFill::AutoFillResult &result);
 
     void UpdateCustomPopupUIExtension(uint32_t autoFillSessionId, const AbilityBase::ViewData &viewData);
+
+    void CloseUIExtension(uint32_t autoFillSessionId);
 
     void HandleTimeOut(uint32_t eventId);
     void SetTimeOutEvent(uint32_t eventId);

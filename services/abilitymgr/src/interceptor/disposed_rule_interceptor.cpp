@@ -15,7 +15,6 @@
 
 #include "interceptor/disposed_rule_interceptor.h"
 
-#include "ability_manager_service.h"
 #include "ability_record.h"
 #include "ability_util.h"
 #include "hilog_tag_wrapper.h"
@@ -61,8 +60,8 @@ ErrCode DisposedRuleInterceptor::DoProcess(AbilityInterceptorParam param)
         }
         SetInterceptInfo(param.want, disposedRule);
         if (disposedRule.componentType == AppExecFwk::ComponentType::UI_ABILITY) {
-            int ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(
-                *disposedRule.want, param.userId, param.requestCode));
+            int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(*disposedRule.want,
+                param.requestCode, param.userId));
             if (ret != ERR_OK) {
                 TAG_LOGE(AAFwkTag::ABILITYMGR, "DisposedRuleInterceptor start ability failed.");
                 return ret;
@@ -108,7 +107,7 @@ bool DisposedRuleInterceptor::CheckControl(const Want &want, int32_t userId,
         auto ret = IN_PROCESS_CALL(appControlMgr->GetAbilityRunningControlRule(bundleName,
             userId, disposedRuleList));
         if (ret != ERR_OK || disposedRuleList.empty()) {
-            HILOG_DEBUG("Get No DisposedRule");
+            TAG_LOGD(AAFwkTag::ABILITYMGR, "Get No DisposedRule");
             return false;
         }
     }
@@ -252,7 +251,7 @@ ErrCode DisposedRuleInterceptor::CreateModalUIExtension(const Want &want, const 
     if (abilityRecord == nullptr) {
         auto systemUIExtension = std::make_shared<OHOS::Rosen::ModalSystemUiExtension>();
         (const_cast<Want &>(want)).SetParam(UIEXTENSION_MODAL_TYPE, 1);
-        return systemUIExtension->CreateModalUIExtension(want) ? ERR_OK : INNER_ERR;
+        return IN_PROCESS_CALL(systemUIExtension->CreateModalUIExtension(want)) ? ERR_OK : INNER_ERR;
     } else {
         return abilityRecord->CreateModalUIExtension(want);
     }

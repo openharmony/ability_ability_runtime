@@ -21,7 +21,6 @@
 #include "string_ex.h"
 #include "ability_manager_errors.h"
 #include "ability_manager_stub.h"
-#include "hilog_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -32,8 +31,8 @@ public:
         int requestCode = DEFAULT_INVAL_VALUE) override;
     MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         int32_t userId, int requestCode));
-    MOCK_METHOD6(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isSendDialogResult));
+    MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
     MOCK_METHOD5(StartAbility, int(const Want& want, const AbilityStartSetting& abilityStartSetting,
         const sptr<IRemoteObject>& callerToken, int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbilityByInsightIntent, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
@@ -182,7 +181,8 @@ public:
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
     int SetMissionIcon(
         const sptr<IRemoteObject>& token, const std::shared_ptr<OHOS::Media::PixelMap>& icon) override;
-    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler);
+    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
+        bool animationEnabled = true);
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 #endif
     MOCK_METHOD2(IsValidMissionIds, int32_t(const std::vector<int32_t>&, std::vector<MissionValidResult>&));
@@ -213,8 +213,8 @@ public:
     int StartAbility(const Want& want, int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = -1) override;
     MOCK_METHOD4(StartAbility, int(const Want& want, const sptr<IRemoteObject>& callerToken,
         int32_t userId, int requestCode));
-    MOCK_METHOD6(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
-        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode, bool isSendDialogResult));
+    MOCK_METHOD5(StartAbilityAsCaller, int(const Want& want, const sptr<IRemoteObject>& callerToken,
+        sptr<IRemoteObject> asCallerSourceToken, int32_t userId, int requestCode));
     MOCK_METHOD5(StartAbility, int(const Want& want, const AbilityStartSetting& abilityStartSetting,
         const sptr<IRemoteObject>& callerToken, int32_t userId, int requestCode));
     MOCK_METHOD4(StartAbilityByInsightIntent, int32_t(const Want& want, const sptr<IRemoteObject>& callerToken,
@@ -363,7 +363,8 @@ public:
     MOCK_METHOD2(SetMissionLabel, int(const sptr<IRemoteObject>& token, const std::string& label));
     int SetMissionIcon(
         const sptr<IRemoteObject>& token, const std::shared_ptr<OHOS::Media::PixelMap>& icon) override;
-    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler);
+    int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
+        bool animationEnabled = true);
     void CompleteFirstFrameDrawing(const sptr<IRemoteObject>& abilityToken) override {}
 #endif
     MOCK_METHOD2(IsValidMissionIds, int32_t(const std::vector<int32_t>&, std::vector<MissionValidResult>&));

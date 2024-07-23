@@ -28,9 +28,6 @@
 #include "isession_handler_interface.h"
 
 namespace OHOS {
-namespace AbilityRuntime {
-class IStatusBarDelegate;
-}
 namespace AAFwk {
 class SessionInfo;
 class StatusBarDelegateManager;
@@ -152,6 +149,9 @@ public:
     void SetRootSceneSession(const sptr<IRemoteObject> &rootSceneSession);
 
     int NotifySCBToStartUIAbility(const AbilityRequest &abilityRequest);
+
+    int NotifySCBToPreStartUIAbility(const AbilityRequest &abilityRequest,
+        sptr<SessionInfo> &sessionInfo);
 
     /**
      * @brief handle time out event
@@ -356,6 +356,9 @@ public:
 
     int32_t GetAbilityStateByPersistentId(int32_t persistentId, bool &state);
 
+    void NotifySCBToHandleAtomicServiceException(sptr<SessionInfo> sessionInfo, int32_t errorCode,
+        const std::string& errorReason);
+
 private:
     int32_t GetPersistentIdByAbilityRequest(const AbilityRequest &abilityRequest, bool &reuse) const;
     int32_t GetReusedSpecifiedPersistentId(const AbilityRequest &abilityRequest, bool &reuse) const;
@@ -378,7 +381,7 @@ private:
         AbilityState state = AbilityState::INITIAL);
     void HandleForegroundTimeout(const std::shared_ptr<AbilityRecord> &ability);
     void NotifySCBToHandleException(const std::shared_ptr<AbilityRecord> &ability, int32_t errorCode,
-        std::string errorReason);
+        const std::string& errorReason);
     void MoveToBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void CompleteBackground(const std::shared_ptr<AbilityRecord> &abilityRecord);
     void PrintTimeOutLog(std::shared_ptr<AbilityRecord> ability, uint32_t msgId, bool isHalf = false);

@@ -16,7 +16,6 @@
 #include "free_install_observer_proxy.h"
 
 #include "hilog_tag_wrapper.h"
-#include "hilog_wrapper.h"
 #include "ipc_types.h"
 
 namespace OHOS {
@@ -64,9 +63,34 @@ void FreeInstallObserverProxy::OnInstallFinished(const std::string &bundleName, 
     }
 }
 
-sptr<IFreeInstallObserver> BuildFreeInstallObserver(sptr<IRemoteObject> remoteObject)
+void FreeInstallObserverProxy::OnInstallFinishedByUrl(const std::string &startTime, const std::string &url,
+    const int &resultCode)
 {
-    return iface_cast<IFreeInstallObserver>(remoteObject);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!WriteInterfaceToken(data)) {
+        return;
+    }
+
+    if (!data.WriteString(startTime) || !data.WriteString(url) ||
+        !data.WriteInt32(resultCode)) {
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "params is wrong");
+        return;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TAG_LOGE(AAFwkTag::FREE_INSTALL, "Remote() is NULL");
+        return;
+    }
+    int32_t ret = remote->SendRequest(
+        IFreeInstallObserver::ON_INSTALL_FINISHED_BY_URL,
+        data, reply, option);
+    if (ret != NO_ERROR) {
+        TAG_LOGW(AAFwkTag::FREE_INSTALL, "SendRequest is failed, error code: %{public}d", ret);
+        return;
+    }
 }
 } // namespace AbilityRuntime
 } // namespace OHOS

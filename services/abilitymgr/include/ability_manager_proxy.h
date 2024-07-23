@@ -18,7 +18,6 @@
 
 #include "ability_manager_interface.h"
 #include "auto_startup_info.h"
-#include "hilog_wrapper.h"
 #include "iremote_proxy.h"
 #include "mission_info.h"
 
@@ -145,8 +144,7 @@ public:
         const sptr<IRemoteObject> &callerToken,
         sptr<IRemoteObject> asCallerSourceToken,
         int32_t userId = DEFAULT_INVAL_VALUE,
-        int requestCode = DEFAULT_INVAL_VALUE,
-        bool isSendDialogResult = false) override;
+        int requestCode = DEFAULT_INVAL_VALUE) override;
 
     /**
      * Starts a new ability using the original caller information.
@@ -720,7 +718,8 @@ public:
     virtual int SetMissionIcon(const sptr<IRemoteObject> &token,
         const std::shared_ptr<OHOS::Media::PixelMap> &icon) override;
 
-    virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler) override;
+    virtual int RegisterWindowManagerServiceHandler(const sptr<IWindowManagerServiceHandler>& handler,
+        bool animationEnabled) override;
 
     virtual void CompleteFirstFrameDrawing(const sptr<IRemoteObject> &abilityToken) override;
 
@@ -729,9 +728,9 @@ public:
     virtual int PrepareTerminateAbility(
         const sptr<IRemoteObject> &token, sptr<IPrepareTerminateCallback> &callback) override;
 
-    virtual int GetDialogSessionInfo(const std::string dialogSessionId, sptr<DialogSessionInfo> &info) override;
+    virtual int GetDialogSessionInfo(const std::string &dialogSessionId, sptr<DialogSessionInfo> &info) override;
 
-    virtual int SendDialogResult(const Want &want, const std::string dialogSessionId, bool isAllow) override;
+    virtual int SendDialogResult(const Want &want, const std::string &dialogSessionId, bool isAllow) override;
 
     virtual int RegisterAbilityFirstFrameStateObserver(const sptr<IAbilityFirstFrameStateObserver> &observer,
         const std::string &targetBundleName) override;
@@ -886,7 +885,8 @@ public:
      * @param observer the observer of ability free install start.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int AddFreeInstallObserver(const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
+    virtual int AddFreeInstallObserver(const sptr<IRemoteObject> &callerToken,
+        const sptr<AbilityRuntime::IFreeInstallObserver> &observer) override;
 
     /**
      * Called when client complete dump.
@@ -906,6 +906,7 @@ public:
         const std::shared_ptr<Media::PixelMap> &pixelMap) override;
 #endif // SUPPORT_SCREEN
     virtual void EnableRecoverAbility(const sptr<IRemoteObject>& token) override;
+    virtual void SubmitSaveRecoveryInfo(const sptr<IRemoteObject>& token) override;
     virtual void ScheduleRecoverAbility(const sptr<IRemoteObject> &token, int32_t reason,
         const Want *want = nullptr) override;
 
@@ -1178,6 +1179,17 @@ public:
         int32_t userId = DEFAULT_INVAL_VALUE) override;
 
     /**
+     * @brief Get ui extension session info
+     *
+     * @param token The ability token.
+     * @param uiExtensionSessionInfo The ui extension session info.
+     * @param userId The user id.
+     * @return int32_t Returns ERR_OK on success, others on failure.
+     */
+    int32_t GetUIExtensionSessionInfo(const sptr<IRemoteObject> token, UIExtensionSessionInfo &uiExtensionSessionInfo,
+        int32_t userId = DEFAULT_INVAL_VALUE) override;
+
+    /**
      * @brief Restart app self.
      * @param want The ability type must be UIAbility.
      * @return Returns ERR_OK on success, others on failure.
@@ -1266,6 +1278,30 @@ public:
      * @param uid, the uid of the frozen process.
      */
     virtual void NotifyFrozenProcessByRSS(const std::vector<int32_t> &pidList, int32_t uid) override;
+
+    /**
+     * Open atomic service window prior to finishing free install.
+     *
+     * @param bundleName, the bundle name of the atomic service.
+     * @param moduleName, the module name of the atomic service.
+     * @param abilityName, the ability name of the atomic service.
+     * @param startTime, the starting time of the free install task.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    virtual int32_t PreStartMission(const std::string& bundleName, const std::string& moduleName,
+        const std::string& abilityName, const std::string& startTime) override;
+
+    /**
+     * Open link of ability and atomic service.
+     *
+     * @param want Ability want.
+     * @param callerToken Caller ability token.
+     * @param userId User ID.
+     * @param requestCode Ability request code.
+     * @return Returns ERR_OK on success, others on failure.
+    */
+    virtual int32_t OpenLink(const Want& want, sptr<IRemoteObject> callerToken,
+        int32_t userId = DEFAULT_INVAL_VALUE, int requestCode = DEFAULT_INVAL_VALUE) override;
 
 private:
     template <typename T>

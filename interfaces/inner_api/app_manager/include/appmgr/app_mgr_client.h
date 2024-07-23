@@ -163,6 +163,17 @@ public:
     virtual AppMgrResultCode KillApplication(const std::string &bundleName, const bool clearPageStack = true);
 
     /**
+     * ForceKillApplication, call ForceKillApplication() through proxy object, force kill the application.
+     *
+     * @param  bundleName, bundle name in Application record.
+     * @param  userId, userId.
+     * @param  appIndex, appIndex.
+     * @return ERR_OK, return back success, others fail.
+     */
+    virtual AppMgrResultCode ForceKillApplication(const std::string &bundleName, const int userId = -1,
+        const int appIndex = 0);
+
+    /**
      * KillApplication, call KillApplication() through proxy object, kill the application.
      *
      * @param  bundleName, bundle name in Application record.
@@ -768,6 +779,22 @@ public:
     int32_t NotifyProcessDependedOnWeb();
 
     void KillProcessDependedOnWeb();
+    
+    /**
+     * Temporarily block the process cache feature.
+     *
+     * @param pids the pids of the processes that should be blocked.
+     */
+    virtual AppMgrResultCode BlockProcessCacheByPids(const std::vector<int32_t> &pids);
+
+    /**
+     * whether killed for upgrade web.
+     *
+     * @param bundleName the bundle name is killed for upgrade web.
+     * @return Returns true is killed for upgrade web, others return false.
+     */
+    bool IsKilledForUpgradeWeb(const std::string &bundleName);
+
 private:
     void SetServiceManager(std::unique_ptr<AppServiceManager> serviceMgr);
     /**

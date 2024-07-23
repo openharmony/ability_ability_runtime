@@ -15,7 +15,6 @@
 
 #include "interceptor/ability_jump_interceptor.h"
 
-#include "ability_manager_service.h"
 #include "ability_util.h"
 #include "accesstoken_kit.h"
 #include "app_jump_control_rule.h"
@@ -75,8 +74,8 @@ ErrCode AbilityJumpInterceptor::DoProcess(AbilityInterceptorParam param)
         Want dialogWant = sysDialogScheduler->GetJumpInterceptorDialogWant(targetWant);
         AbilityUtil::ParseJumpInterceptorWant(dialogWant, controlRule.callerPkg);
         LoadAppLabelInfo(dialogWant, controlRule, param.userId);
-        int ret = IN_PROCESS_CALL(DelayedSingleton<AbilityManagerService>::GetInstance()->StartAbility(dialogWant,
-            param.userId, param.requestCode));
+        int ret = IN_PROCESS_CALL(AbilityManagerClient::GetInstance()->StartAbility(dialogWant,
+            param.requestCode, param.userId));
         if (ret != ERR_OK) {
             TAG_LOGI(AAFwkTag::ABILITYMGR, "appInterceptor Dialog StartAbility error, ret:%{public}d", ret);
             return ret;
@@ -161,7 +160,7 @@ bool AbilityJumpInterceptor::CheckIfExemptByBundleName(const std::string &bundle
     }
     int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(appInfo.accessTokenId, permission, false);
     if (ret == Security::AccessToken::PermissionState::PERMISSION_DENIED) {
-        TAG_LOGD(AAFwkTag::ABILITYMGR, "VerifyPermission %{public}d: PERMISSION_DENIED.", appInfo.accessTokenId);
+        TAG_LOGD(AAFwkTag::ABILITYMGR, "PERMISSION_DENIED.");
         return false;
     }
     TAG_LOGI(AAFwkTag::ABILITYMGR,
