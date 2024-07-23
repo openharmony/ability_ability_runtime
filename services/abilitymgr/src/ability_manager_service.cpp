@@ -8967,6 +8967,17 @@ int AbilityManagerService::CheckCallServiceExtensionPermission(const AbilityRequ
     verificationInfo.visible = abilityRequest.abilityInfo.visible;
     verificationInfo.withContinuousTask = IsBackgroundTaskUid(IPCSkeleton::GetCallingUid());
     verificationInfo.isBackgroundCall = false;
+    if (isParamStartAbilityEnable_)
+    {
+        bool stopContinuousTaskFlag = ShouldPreventStartAbility(abilityRequest);
+        if (stopContinuousTaskFlag)
+        {
+            TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension");
+            return CHECK_PERMISSION_FAILED;
+        }
+        
+    }
+    
     int result = AAFwk::PermissionVerification::GetInstance()->CheckCallServiceExtensionPermission(verificationInfo);
     if (result != ERR_OK) {
         TAG_LOGE(AAFwkTag::ABILITYMGR, "Do not have permission to start ServiceExtension or DataShareExtension");
@@ -10758,7 +10769,12 @@ bool AbilityManagerService::ShouldPreventStartAbility(const AbilityRequest &abil
             callerAbilityInfo.applicationName.c_str());
     pid_t callerPid = abilityRecord->GetPid();
     TAG_LOGI(AAFwkTag::ABILITYMGR, "Bumble_Bee: callerPid is: %{public}d", callerPid);
-    DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(callerPid);
+    
+    if(!DelayedSingleton<AppScheduler>::GetInstance()->IsProcessContainsOnlyUIExtension(callerPid))
+    {
+        TAG_LOGI(AAFwkTag::ABILITYMGR, "Process has other extension except UIAbility, pass");
+        return false;
+    }
     if (abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::DATASHARE &&
         abilityInfo.extensionAbilityType != AppExecFwk::ExtensionAbilityType::SERVICE) {
         TAG_LOGI(AAFwkTag::ABILITYMGR, "Process did not call service or datashare extension Pass");
