@@ -27,7 +27,7 @@ void InsightIntentExecuteCallbackProxy::OnExecuteDone(uint64_t key, int32_t resu
     TAG_LOGD(AAFwkTag::INTENT, "called");
     MessageParcel data;
     if (!data.WriteInterfaceToken(IInsightIntentExecuteCallback::GetDescriptor())) {
-        TAG_LOGE(AAFwkTag::INTENT, "Write interface token failed");
+        TAG_LOGE(AAFwkTag::INTENT, "interface token write failed");
         return;
     }
     if (!data.WriteUint64(key)) {
@@ -35,16 +35,16 @@ void InsightIntentExecuteCallbackProxy::OnExecuteDone(uint64_t key, int32_t resu
         return;
     }
     if (!data.WriteInt32(resultCode)) {
-        TAG_LOGE(AAFwkTag::INTENT, "resultCode write failed");
+        TAG_LOGE(AAFwkTag::INTENT, "resultCode Int32 write failed");
         return;
     }
     if (!data.WriteParcelable(&executeResult)) {
-        TAG_LOGE(AAFwkTag::INTENT, "executeResult write failed");
+        TAG_LOGE(AAFwkTag::INTENT, "executeResult Parcelable write failed");
         return;
     }
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "remote is nullptr");
+        TAG_LOGE(AAFwkTag::INTENT, "remote == nullptr");
         return;
     }
 

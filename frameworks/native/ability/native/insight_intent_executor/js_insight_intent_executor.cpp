@@ -64,26 +64,26 @@ bool JsInsightIntentExecutor::Init(const InsightIntentExecutorInfo& insightInten
     HandleScope handleScope(runtime_);
     jsObj_ = JsInsightIntentExecutor::LoadJsCode(insightIntentInfo, runtime_);
     if (jsObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "LoadJsCode failed");
+        TAG_LOGE(AAFwkTag::INTENT, "jsObj_ is nullptr");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
     auto env = runtime_.GetNapiEnv();
     if (env == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Napi env invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "env == nullptr");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
     auto context = GetContext();
     if (context == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Context invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "Context is nullptr");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
     napi_value contextObj = CreateJsInsightIntentContext(env, context);
     contextObj_ = JsRuntime::LoadSystemModuleByEngine(env, "app.ability.InsightIntentContext", &contextObj, 1);
     if (contextObj_ == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Load system module failed");
+        TAG_LOGE(AAFwkTag::INTENT, "contextObj_ == nullptr");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
@@ -92,7 +92,7 @@ bool JsInsightIntentExecutor::Init(const InsightIntentExecutorInfo& insightInten
     if (!CheckTypeForNapiValue(env, executorNapiVal, napi_object) ||
         !CheckTypeForNapiValue(env, contextNapiVal, napi_object) ||
         napi_set_named_property(env, executorNapiVal, "context", contextNapiVal) != napi_ok) {
-        TAG_LOGE(AAFwkTag::INTENT, "Set property failed");
+        TAG_LOGE(AAFwkTag::INTENT, "Set context property failed");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
 
@@ -118,7 +118,7 @@ bool JsInsightIntentExecutor::HandleExecuteIntent(
     state_ = State::EXECUTING;
 
     if (callback == nullptr || callback->IsEmpty()) {
-        TAG_LOGE(AAFwkTag::INTENT, "HandleExecuteIntent invalid callback");
+        TAG_LOGE(AAFwkTag::INTENT, "callback is nullptr");
         STATE_PATTERN_NAIVE_STATE_SET_AND_RETURN(State::INVALID, false);
     }
     callback_ = std::move(callback);
@@ -167,7 +167,7 @@ std::unique_ptr<NativeReference> JsInsightIntentExecutor::LoadJsCode(
     TAG_LOGD(AAFwkTag::INTENT, "called");
     auto executeParam = info.executeParam;
     if (executeParam == nullptr) {
-        TAG_LOGE(AAFwkTag::INTENT, "Execute param invalid");
+        TAG_LOGE(AAFwkTag::INTENT, "executeParam == nullptr");
         return std::unique_ptr<NativeReference>();
     }
 
@@ -268,7 +268,6 @@ napi_value JsInsightIntentExecutor::ResolveCbCpp(napi_env env, napi_callback_inf
 
 napi_value JsInsightIntentExecutor::RejectCbCpp(napi_env env, napi_callback_info info)
 {
-    TAG_LOGW(AAFwkTag::INTENT, "Error or reject caught");
     void* data = nullptr;
     napi_get_cb_info(env, info, nullptr, nullptr, nullptr, &data);
     auto* callback = static_cast<InsightIntentExecutorAsyncCallback*>(data);
